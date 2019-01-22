@@ -67,8 +67,8 @@ public class FilterResults implements PlugIn {
   private float maxDrift;
   private float minSignal = Float.MAX_VALUE;
   private float maxSignal;
-  private float minSNR = Float.MAX_VALUE;
-  private float maxSNR;
+  private float minSnr = Float.MAX_VALUE;
+  private float maxSnr;
   private double minPrecision = Float.MAX_VALUE;
   private double maxPrecision;
   private double averageWidth;
@@ -81,7 +81,7 @@ public class FilterResults implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -182,11 +182,11 @@ public class FilterResults implements PlugIn {
         }
 
         final float snr = getSnr(result);
-        if (maxSNR < snr) {
-          maxSNR = snr;
+        if (maxSnr < snr) {
+          maxSnr = snr;
         }
-        if (minSNR > snr) {
-          minSNR = snr;
+        if (minSnr > snr) {
+          minSnr = snr;
         }
 
         // for convenience
@@ -237,8 +237,8 @@ public class FilterResults implements PlugIn {
       filterSettings.setMinSignal(minSignal);
     }
 
-    if (filterSettings.getMinSnr() > maxSNR || filterSettings.getMinSnr() < minSNR) {
-      filterSettings.setMinSnr(minSNR);
+    if (filterSettings.getMinSnr() > maxSnr || filterSettings.getMinSnr() < minSnr) {
+      filterSettings.setMinSnr(minSnr);
     }
 
     if (filterSettings.getMaxPrecision() > maxPrecision
@@ -311,10 +311,8 @@ public class FilterResults implements PlugIn {
         }
       }
 
-      if (pp != null) {
-        if (pp.precisions[i] > maxPrecision) {
-          continue;
-        }
+      if (pp != null && pp.precisions[i] > maxPrecision) {
+        continue;
       }
 
       if (wp != null) {
@@ -351,7 +349,7 @@ public class FilterResults implements PlugIn {
 
     gd.addSlider("Max_drift", minDrift, maxDrift, filterSettings.getMaxDrift());
     gd.addSlider("Min_Signal", minSignal, maxSignal, filterSettings.getMinSignal());
-    gd.addSlider("Min_SNR", minSNR, maxSNR, filterSettings.getMinSnr());
+    gd.addSlider("Min_SNR", minSnr, maxSnr, filterSettings.getMinSnr());
     gd.addSlider("Min_Precision", minPrecision, maxPrecision, filterSettings.getMaxPrecision());
 
     // TODO - If calibrated present the widths in nm
@@ -392,10 +390,7 @@ public class FilterResults implements PlugIn {
 
     for (final int id : ImageJUtils.getIdList()) {
       final ImagePlus imp = WindowManager.getImage(id);
-      if (imp == null) {
-        continue;
-      }
-      if (!imp.getProcessor().isBinary()) {
+      if (imp == null || !imp.getProcessor().isBinary()) {
         continue;
       }
       newImageList.add(imp.getTitle());

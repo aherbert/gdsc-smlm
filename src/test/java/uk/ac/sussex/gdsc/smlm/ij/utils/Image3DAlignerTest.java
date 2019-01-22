@@ -91,12 +91,12 @@ public class Image3DAlignerTest {
   }
 
   @Test
-  public void canCorrelatePow2ImageUsingIJImage() {
+  public void canCorrelatePow2ImageUsingImageJImage() {
     canCorrelate(16, 16, 32, true);
   }
 
   @Test
-  public void canCorrelateNonPow2ImageUsingIJImage() {
+  public void canCorrelateNonPow2ImageUsingImageJImage() {
     canCorrelate(15, 17, 29, true);
   }
 
@@ -135,7 +135,6 @@ public class Image3DAlignerTest {
       double cz1, double cx2, double cy2, double cz2, double window, int refinements, double error,
       double tolerance, boolean ijMode) {
     double[] result;
-    Image3D c;
     final Image3D target = createData(maxx, maxy, maxz, cx2, cy2, cz2);
 
     // Utils.display("Ref", reference.getImageStack());
@@ -168,10 +167,10 @@ public class Image3DAlignerTest {
     } else {
       result = a.align(target, refinements, error);
     }
-    c = a.getCorrelation();
+    Image3D correlation = a.getCorrelation();
     if (logger.isLoggable(Level.FINE)) {
       logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
-          c.get(index), java.util.Arrays.toString(result)));
+          correlation.get(index), java.util.Arrays.toString(result)));
     }
 
     for (int i = 0; i < 3; i++) {

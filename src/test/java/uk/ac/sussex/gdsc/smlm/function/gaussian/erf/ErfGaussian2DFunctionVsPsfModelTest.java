@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.smlm.model.GaussianPSFModel;
+import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
@@ -37,16 +37,16 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({"javadoc"})
-public class ErfGaussian2DFunctionVsPSFModelTest {
+public class ErfGaussian2DFunctionVsPsfModelTest {
   private final int width = 10;
   private final int height = 9;
 
   @SeededTest
-  public void computesSameAsPSFModel(RandomSeed seed) {
+  public void computesSameAsPsfModel(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     for (int i = 0; i < 10; i++) {
       //@formatter:off
-      computesSameAsPSFModel(
+      computesSameAsPsfModel(
           nextUniform(rng,50, 100),
           nextUniform(rng,(width-1)/2.0, (width+1)/2.0),
           nextUniform(rng,(height-1)/2.0, (height+1)/2.0),
@@ -56,7 +56,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
     }
   }
 
-  private void computesSameAsPSFModel(double sum, double x0, double x1, double s0, double s1) {
+  private void computesSameAsPsfModel(double sum, double x0, double x1, double s0, double s1) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, width, height,
         GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
     final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -67,7 +67,7 @@ public class ErfGaussian2DFunctionVsPSFModelTest {
     a[Gaussian2DFunction.Y_SD] = s1;
     final double[] o = new StandardValueProcedure().getValues(f, a);
 
-    final GaussianPSFModel m = new GaussianPSFModel(s0, s1);
+    final GaussianPsfModel m = new GaussianPsfModel(s0, s1);
     final double[] e = new double[o.length];
     // Note that the Gaussian2DFunction has 0,0 at the centre of a pixel.
     // The model has 0.5,0.5 at the centre so add an offset.

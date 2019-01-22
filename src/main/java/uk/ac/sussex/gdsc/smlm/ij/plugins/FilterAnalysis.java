@@ -125,6 +125,44 @@ public class FilterAnalysis implements PlugIn {
 
   private final boolean isHeadless;
 
+  private static class FilterScore {
+    Filter filter;
+    double score;
+
+    FilterScore(Filter filter, double score) {
+      update(filter, score);
+    }
+
+    void update(Filter filter, double score) {
+      this.filter = filter;
+      this.score = score;
+    }
+  }
+
+  private static class NamedPlot {
+    String name;
+    String xAxisName;
+    double[] xValues;
+    double[] yValues;
+    double score;
+
+    NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
+      this.name = name;
+      updateValues(xAxisName, xValues, yValues);
+    }
+
+    void updateValues(String xAxisName, double[] xValues, double[] yValues) {
+      this.xAxisName = xAxisName;
+      this.xValues = xValues;
+      this.yValues = yValues;
+      this.score = MathUtils.max(yValues);
+    }
+
+    static int compare(NamedPlot r1, NamedPlot r2) {
+      return Double.compare(r2.score, r1.score);
+    }
+  }
+
   /**
    * Instantiates a new filter analysis.
    */
@@ -134,7 +172,7 @@ public class FilterAnalysis implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (getInputDirectory() == null) {
       return;
@@ -163,7 +201,7 @@ public class FilterAnalysis implements PlugIn {
       filterSets = createFilters();
     }
 
-    if (filterSets == null || filterSets.isEmpty()) {
+    if (filterSets.isEmpty()) {
       IJ.error(TITLE, "No filters specified");
       return;
     }
@@ -189,7 +227,8 @@ public class FilterAnalysis implements PlugIn {
 
     SettingsManager.writeSettings(filterSettings.build());
 
-    return inputDirectory = filterSettings.getFilterAnalysisDirectory();
+    inputDirectory = filterSettings.getFilterAnalysisDirectory();
+    return inputDirectory;
   }
 
   @SuppressWarnings("unchecked")
@@ -333,11 +372,7 @@ public class FilterAnalysis implements PlugIn {
 
     gd.showDialog();
 
-    if (gd.wasCanceled() || !readDialog(gd, fileInput)) {
-      return false;
-    }
-
-    return true;
+    return !gd.wasCanceled() && readDialog(gd, fileInput);
   }
 
   private static boolean readDialog(GenericDialog gd, boolean fileInput) {
@@ -421,16 +456,16 @@ public class FilterAnalysis implements PlugIn {
   private static List<FilterSet> createFilters() {
     IJ.showStatus("Creating filters ...");
     final List<FilterSet> filterSets = new LinkedList<>();
-    addSNRFilters(filterSets);
+    addSnrFilters(filterSets);
     addPrecisionFilters(filterSets);
     addTraceFilters(filterSets);
-    addSNRHysteresisFilters(filterSets);
+    addSnrHysteresisFilters(filterSets);
     addPrecisionHysteresisFilters(filterSets);
     IJ.showStatus("");
     return filterSets;
   }
 
-  private static void addSNRFilters(List<FilterSet> filterSets) {
+  private static void addSnrFilters(List<FilterSet> filterSets) {
     if (!snrFilter) {
       return;
     }
@@ -469,7 +504,7 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
-  private static void addSNRHysteresisFilters(List<FilterSet> filterSets) {
+  private static void addSnrHysteresisFilters(List<FilterSet> filterSets) {
     if (!hysteresisSnrFilter) {
       return;
     }
@@ -548,7 +583,7 @@ public class FilterAnalysis implements PlugIn {
 
     // Display the top N plots
     final int[] list = new int[plots.size()];
-    int i = 0;
+    int index = 0;
     for (final NamedPlot p : plots) {
       final Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
       plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
@@ -557,7 +592,7 @@ public class FilterAnalysis implements PlugIn {
       plot.setColor(Color.BLUE);
       plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
       final PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
-      list[i++] = plotWindow.getImagePlus().getID();
+      list[index++] = plotWindow.getImagePlus().getID();
     }
     WindowOrganiser.tileWindows(list);
   }
@@ -629,12 +664,12 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
-  private static void addSensitivityScore(StringBuilder sb, double s, double s1, double s2,
+  private static void addSensitivityScore(StringBuilder sb, double score, double s1, double s2,
       double dx1, double dx2) {
     // Use absolute in case this is not a local maximum. We are mainly interested in how
     // flat the curve is at this point in relation to parameter changes.
-    final double abs1 = Math.abs(s - s1);
-    final double abs2 = Math.abs(s - s2);
+    final double abs1 = Math.abs(score - s1);
+    final double abs2 = Math.abs(score - s2);
     final double dydx1 = (abs1) / dx1;
     final double dydx2 = (abs2) / dx2;
     final double relativeSensitivity = (abs1 + abs2) * 0.5;
@@ -699,7 +734,7 @@ public class FilterAnalysis implements PlugIn {
       final int total) {
     final double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
     final double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
-    int i = 0;
+    int index = 0;
 
     filterSet.sort();
 
@@ -730,8 +765,8 @@ public class FilterAnalysis implements PlugIn {
       }
 
       if (xValues != null && yValues != null) {
-        xValues[i] = filter.getNumericalValue();
-        yValues[i++] = jaccard;
+        xValues[index] = filter.getNumericalValue();
+        yValues[index++] = jaccard;
       }
     }
 
@@ -779,23 +814,23 @@ public class FilterAnalysis implements PlugIn {
           // If not unique then renumber them and use an arbitrary label
           xAxisName = "Filter";
           for (int ii = 0; ii < xValues.length; ii++) {
-            xValues[ii] = ii + 1;
+            xValues[ii] = ii + 1.0;
           }
         }
 
         final String title = filterSet.getName();
 
         // Check if a previous filter set had the same name, update if necessary
-        NamedPlot p = getNamedPlot(title);
-        if (p == null) {
+        NamedPlot plot = getNamedPlot(title);
+        if (plot == null) {
           plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
         } else {
-          p.updateValues(xAxisName, xValues, yValues);
+          plot.updateValues(xAxisName, xValues, yValues);
         }
 
         if (plots.size() > plotTopN) {
-          Collections.sort(plots);
-          p = plots.remove(plots.size() - 1);
+          Collections.sort(plots, NamedPlot::compare);
+          plots.remove(plots.size() - 1);
         }
       }
     }
@@ -810,16 +845,6 @@ public class FilterAnalysis implements PlugIn {
       }
     }
     return null;
-  }
-
-  private static double getMaximum(double[] values) {
-    double max = values[0];
-    for (int i = 1; i < values.length; i++) {
-      if (values[i] > max) {
-        max = values[i];
-      }
-    }
-    return max;
   }
 
   private ClassificationResult runFilter(Filter filter, List<MemoryPeakResults> resultsList) {
@@ -844,44 +869,5 @@ public class FilterAnalysis implements PlugIn {
       }
     }
     return s;
-  }
-
-  private class FilterScore {
-    Filter filter;
-    double score;
-
-    public FilterScore(Filter filter, double score) {
-      update(filter, score);
-    }
-
-    public void update(Filter filter, double score) {
-      this.filter = filter;
-      this.score = score;
-    }
-  }
-
-  private class NamedPlot implements Comparable<NamedPlot> {
-    String name;
-    String xAxisName;
-    double[] xValues;
-    double[] yValues;
-    double score;
-
-    public NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
-      this.name = name;
-      updateValues(xAxisName, xValues, yValues);
-    }
-
-    public void updateValues(String xAxisName, double[] xValues, double[] yValues) {
-      this.xAxisName = xAxisName;
-      this.xValues = xValues;
-      this.yValues = yValues;
-      this.score = getMaximum(yValues);
-    }
-
-    @Override
-    public int compareTo(NamedPlot o) {
-      return Double.compare(o.score, score);
-    }
   }
 }

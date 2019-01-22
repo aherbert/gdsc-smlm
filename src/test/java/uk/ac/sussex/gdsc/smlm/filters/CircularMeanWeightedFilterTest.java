@@ -29,21 +29,21 @@ public class CircularMeanWeightedFilterTest extends WeightedMeanFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("circularMean", true) {
-      CircularMeanFilter f = new CircularMeanFilter();
+      CircularMeanFilter filter = new CircularMeanFilter();
 
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.convolve(data, width, height, boxSize);
+        filter.convolve(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.convolveInternal(data, width, height, boxSize);
+        filter.convolveInternal(data, width, height, boxSize);
       }
 
       @Override
-      public void setWeights(float[] w, int width, int height) {
-        f.setWeights(w, width, height);
+      public void setWeights(float[] weights, int width, int height) {
+        filter.setWeights(weights, width, height);
       }
     };
   }

@@ -43,53 +43,53 @@ import org.junit.jupiter.api.Assumptions;
  */
 @SuppressWarnings({"javadoc"})
 public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
-  // The following tests ensure that the LVM can fit data without
+  // The following tests ensure that the Lvm can fit data without
   // requiring a bias (i.e. an offset to the background).
-  // In a previous version the LVM fitter was stable only if a bias existed.
+  // In a previous version the Lvm fitter was stable only if a bias existed.
   // The exact source of this instability is unknown as it could be due to
-  // how the data was processed before or after fitting, or within the LVM
+  // how the data was processed before or after fitting, or within the Lvm
   // fitter itself. However the process should be the same without a bias
   // and these tests ensure that is true.
 
   @SeededTest
-  public void fitSingleGaussianLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, false, 0);
   }
 
   @SeededTest
-  public void fitSingleGaussianCLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianCLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, false, 1);
   }
 
   @SeededTest
-  public void fitSingleGaussianDCLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianDcLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, false, 2);
   }
 
   @SeededTest
-  public void fitSingleGaussianBLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianBLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, true, 0);
   }
 
   @SeededTest
-  public void fitSingleGaussianBCLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianBcLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, true, 1);
   }
 
   @SeededTest
-  public void fitSingleGaussianBDCLVMWithoutBias(RandomSeed seed) {
+  public void fitSingleGaussianBdcLvmWithoutBias(RandomSeed seed) {
     fitSingleGaussianWithoutBias(seed, true, 2);
   }
 
   private void fitSingleGaussianWithoutBias(RandomSeed seed, boolean applyBounds, int clamping) {
     final double bias = 100;
 
-    final NonLinearFit solver = getLVM((applyBounds) ? 2 : 1, clamping, false);
-    final NonLinearFit solver2 = getLVM((applyBounds) ? 2 : 1, clamping, false);
+    final NonLinearFit solver = getLvm((applyBounds) ? 2 : 1, clamping, false);
+    final NonLinearFit solver2 = getLvm((applyBounds) ? 2 : 1, clamping, false);
 
-    final String name = getLVMName(applyBounds, clamping, false);
+    final String name = getLvmName(applyBounds, clamping, false);
 
-    final int LOOPS = 5;
+    final int loops = 5;
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
@@ -110,7 +110,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
         solver2.setBounds(lower2, upper2);
       }
 
-      for (int loop = LOOPS; loop-- > 0;) {
+      for (int loop = loops; loop-- > 0;) {
         final double[] data = drawGaussian(expected, rg);
         final double[] data2 = data.clone();
         for (int i = 0; i < data.length; i++) {
@@ -144,167 +144,167 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
     }
   }
 
-  // Standard LVM
+  // Standard Lvm
   @SeededTest
-  public void canFitSingleGaussianLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 0, 0, false);
+  public void canFitSingleGaussianLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 0, 0, false);
   }
 
-  // Bounded/Clamped LVM
+  // Bounded/Clamped Lvm
 
   @SeededTest
-  public void canFitSingleGaussianBLVMNoBounds(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 1, 0, false);
-  }
-
-  @SeededTest
-  public void canFitSingleGaussianBLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 2, 0, false);
+  public void canFitSingleGaussianBLvmNoBounds(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 1, 0, false);
   }
 
   @SeededTest
-  public void canFitSingleGaussianCLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 0, 1, false);
+  public void canFitSingleGaussianBLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 2, 0, false);
   }
 
   @SeededTest
-  public void canFitSingleGaussianDCLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 0, 2, false);
+  public void canFitSingleGaussianCLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 0, 1, false);
   }
 
   @SeededTest
-  public void canFitSingleGaussianBCLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 2, 1, false);
+  public void canFitSingleGaussianDcLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 0, 2, false);
   }
 
   @SeededTest
-  public void canFitSingleGaussianBDCLVM(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 2, 2, false);
-  }
-
-  // MLE LVM
-
-  @SeededTest
-  public void canFitSingleGaussianLVMMLE(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 0, 0, true);
+  public void canFitSingleGaussianBcLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 2, 1, false);
   }
 
   @SeededTest
-  public void canFitSingleGaussianBLVMMLENoBounds(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 1, 0, true);
+  public void canFitSingleGaussianBdcLvm(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 2, 2, false);
+  }
+
+  // Mle Lvm
+
+  @SeededTest
+  public void canFitSingleGaussianLvmMle(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 0, 0, true);
   }
 
   @SeededTest
-  public void canFitSingleGaussianBLVMMLE(RandomSeed seed) {
-    fitSingleGaussianLVM(seed, 2, 0, true);
-  }
-
-  private void fitSingleGaussianLVM(RandomSeed seed, int bounded, int clamping, boolean mle) {
-    canFitSingleGaussian(seed, getLVM(bounded, clamping, mle), bounded == 2);
-  }
-
-  // Is Bounded/Clamped LVM better?
-
-  @SeededTest
-  public void fitSingleGaussianBLVMBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 0, false, false, 0, false);
+  public void canFitSingleGaussianBLvmMleNoBounds(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 1, 0, true);
   }
 
   @SeededTest
-  public void fitSingleGaussianCLVMBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 1, false, false, 0, false);
+  public void canFitSingleGaussianBLvmMle(RandomSeed seed) {
+    fitSingleGaussianLvm(seed, 2, 0, true);
+  }
+
+  private void fitSingleGaussianLvm(RandomSeed seed, int bounded, int clamping, boolean mle) {
+    canFitSingleGaussian(seed, getLvm(bounded, clamping, mle), bounded == 2);
+  }
+
+  // Is Bounded/Clamped Lvm better?
+
+  @SeededTest
+  public void fitSingleGaussianBLvmBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 0, false, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBCLVMBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 1, false, false, 0, false);
+  public void fitSingleGaussianCLvmBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 1, false, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianDCLVMBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 2, false, false, 0, false);
+  public void fitSingleGaussianBcLvmBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 1, false, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBDCLVMBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 2, false, false, 0, false);
+  public void fitSingleGaussianDcLvmBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 2, false, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 0, true, false, 0, false);
+  public void fitSingleGaussianBdcLvmBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 2, false, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 0, true, false, 0, false);
+  public void fitSingleGaussianLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 0, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianCLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 1, true, false, 0, false);
+  public void fitSingleGaussianBLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 0, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBCLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 1, true, false, 0, false);
+  public void fitSingleGaussianCLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 1, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianDCLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 2, true, false, 0, false);
+  public void fitSingleGaussianBcLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 1, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBDCLVMMLEBetterThanLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 2, true, false, 0, false);
+  public void fitSingleGaussianDcLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 2, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBLVMMLEBetterThanLVMMLE(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 0, true, false, 0, true);
+  public void fitSingleGaussianBdcLvmMleBetterThanLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 2, true, false, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianCLVMMLEBetterThanLVMMLE(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 1, true, false, 0, true);
+  public void fitSingleGaussianBLvmMleBetterThanLvmMle(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 0, true, false, 0, true);
   }
 
   @SeededTest
-  public void fitSingleGaussianDCLVMMLEBetterThanLVMMLE(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, false, 2, true, false, 0, true);
+  public void fitSingleGaussianCLvmMleBetterThanLvmMle(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 1, true, false, 0, true);
   }
 
   @SeededTest
-  public void fitSingleGaussianBDCLVMMLEBetterThanLVMMLE(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 2, true, false, 0, true);
+  public void fitSingleGaussianDcLvmMleBetterThanLvmMle(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, false, 2, true, false, 0, true);
   }
 
   @SeededTest
-  public void fitSingleGaussianBLVMMLEBetterThanBLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 0, true, true, 0, false);
+  public void fitSingleGaussianBdcLvmMleBetterThanLvmMle(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 2, true, false, 0, true);
   }
 
   @SeededTest
-  public void fitSingleGaussianBCLVMMLEBetterThanBCLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 1, true, true, 1, false);
+  public void fitSingleGaussianBLvmMleBetterThanBLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 0, true, true, 0, false);
   }
 
   @SeededTest
-  public void fitSingleGaussianBDCLVMMLEBetterThanBDCLVM(RandomSeed seed) {
-    fitSingleGaussianBetterLVM(seed, true, 2, true, true, 2, false);
+  public void fitSingleGaussianBcLvmMleBetterThanBcLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 1, true, true, 1, false);
   }
 
-  private void fitSingleGaussianBetterLVM(RandomSeed seed, boolean bounded2, int clamping2,
+  @SeededTest
+  public void fitSingleGaussianBdcLvmMleBetterThanBdcLvm(RandomSeed seed) {
+    fitSingleGaussianBetterLvm(seed, true, 2, true, true, 2, false);
+  }
+
+  private void fitSingleGaussianBetterLvm(RandomSeed seed, boolean bounded2, int clamping2,
       boolean mle2, boolean bounded, int clamping, boolean mle) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    final NonLinearFit solver = getLVM((bounded) ? 2 : 1, clamping, mle);
-    final NonLinearFit solver2 = getLVM((bounded2) ? 2 : 1, clamping2, mle2);
+    final NonLinearFit solver = getLvm((bounded) ? 2 : 1, clamping, mle);
+    final NonLinearFit solver2 = getLvm((bounded2) ? 2 : 1, clamping2, mle2);
     canFitSingleGaussianBetter(seed, solver, bounded, solver2, bounded2,
-        getLVMName(bounded, clamping, mle), getLVMName(bounded2, clamping2, mle2));
+        getLvmName(bounded, clamping, mle), getLvmName(bounded2, clamping2, mle2));
   }
 
-  private static NonLinearFit getLVM(int bounded, int clamping, boolean mle) {
+  private static NonLinearFit getLvm(int bounded, int clamping, boolean mle) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, flags, null);
     final StoppingCriteria sc = new ErrorStoppingCriteria(5);
     sc.setMaximumIterations(100);
@@ -323,7 +323,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
     return solver;
   }
 
-  private static String getLVMName(boolean bounded, int clamping, boolean mle) {
+  private static String getLvmName(boolean bounded, int clamping, boolean mle) {
     return ((bounded) ? "B" : "") + ((clamping == 0) ? "" : ((clamping == 1) ? "C" : "DC")) + "LVM"
         + ((mle) ? " MLE" : "");
   }
@@ -346,18 +346,18 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
   }
 
   @SeededTest
-  public void canFitAndComputeDeviationsLVM(RandomSeed seed) {
+  public void canFitAndComputeDeviationsLvm(RandomSeed seed) {
     canFitAndComputeDeviations(seed, false);
   }
 
   @SeededTest
-  public void canFitAndComputeDeviationsLVMMLE(RandomSeed seed) {
+  public void canFitAndComputeDeviationsLvmMle(RandomSeed seed) {
     canFitAndComputeDeviations(seed, true);
   }
 
   private void canFitAndComputeDeviations(RandomSeed seed, boolean mle) {
-    final NonLinearFit solver1 = getLVM(0, 0, mle);
-    final NonLinearFit solver2 = getLVM(0, 0, mle);
+    final NonLinearFit solver1 = getLvm(0, 0, mle);
+    final NonLinearFit solver2 = getLvm(0, 0, mle);
     solver1.setStoppingCriteria(new CheatingStoppingCriteria());
     fitAndComputeDeviationsMatch(seed, solver1, solver2, NoiseModel.EMCCD, false);
   }

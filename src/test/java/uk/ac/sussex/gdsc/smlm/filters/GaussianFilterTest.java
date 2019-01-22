@@ -67,9 +67,9 @@ public class GaussianFilterTest {
   }
 
   double[] sigmas = new double[] {12.4, 9.3, 5, 3.2, 2.1, 0.5};
-  int size = 256;
+  static final int size = 256;
 
-  private abstract class GFilter {
+  private abstract static class GFilter {
     boolean internal;
     String name;
 
@@ -85,51 +85,51 @@ public class GaussianFilterTest {
       return name;
     }
 
-    float[] run(float[] d, double sigma) {
+    float[] run(float[] data, double sigma) {
       if (internal) {
-        return filterInternal(d, sigma);
+        return filterInternal(data, sigma);
       }
-      return filter(d, sigma);
+      return filter(data, sigma);
     }
 
-    abstract float[] filter(float[] d, double sigma);
+    abstract float[] filter(float[] data, double sigma);
 
-    abstract float[] filterInternal(float[] d, double sigma);
+    abstract float[] filterInternal(float[] data, double sigma);
 
-    abstract void setWeights(float[] w);
+    abstract void setWeights(float[] weights);
   }
 
-  private class IJFilter extends GFilter {
+  private static class ImageJFilter extends GFilter {
     GaussianBlur gf = new GaussianBlur();
 
-    IJFilter(boolean internal) {
+    ImageJFilter(boolean internal) {
       super(GaussianBlur.class.getSimpleName(), internal);
     }
 
     @Override
-    float[] filter(float[] d, double sigma) {
-      final FloatProcessor fp = new FloatProcessor(size, size, d);
+    float[] filter(float[] data, double sigma) {
+      final FloatProcessor fp = new FloatProcessor(size, size, data);
       gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
-      return d;
+      return data;
     }
 
     @Override
-    float[] filterInternal(float[] d, double sigma) {
-      final FloatProcessor fp = new FloatProcessor(size, size, d);
+    float[] filterInternal(float[] data, double sigma) {
+      final FloatProcessor fp = new FloatProcessor(size, size, data);
       final int border = GaussianFilter.getBorder(sigma);
       final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
       fp.setRoi(roi);
       gf.blurGaussian(fp, sigma, sigma, GaussianFilter.DEFAULT_ACCURACY);
-      return d;
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
+    void setWeights(float[] weights) {
       // Ignored
     }
   }
 
-  private class FloatFilter extends GFilter {
+  private static class FloatFilter extends GFilter {
     GaussianFilter gf = new GaussianFilter();
 
     FloatFilter(boolean internal) {
@@ -137,24 +137,24 @@ public class GaussianFilterTest {
     }
 
     @Override
-    float[] filter(float[] d, double sigma) {
-      gf.convolve(d, size, size, sigma);
-      return d;
+    float[] filter(float[] data, double sigma) {
+      gf.convolve(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    float[] filterInternal(float[] d, double sigma) {
-      gf.convolveInternal(d, size, size, sigma);
-      return d;
+    float[] filterInternal(float[] data, double sigma) {
+      gf.convolveInternal(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
-      gf.setWeights(w, size, size);
+    void setWeights(float[] weights) {
+      gf.setWeights(weights, size, size);
     }
   }
 
-  private class DoubleFilter extends GFilter {
+  private static class DoubleFilter extends GFilter {
     DoubleGaussianFilter gf = new DoubleGaussianFilter();
 
     DoubleFilter(boolean internal) {
@@ -162,56 +162,56 @@ public class GaussianFilterTest {
     }
 
     @Override
-    float[] filter(float[] d, double sigma) {
-      gf.convolve(d, size, size, sigma);
-      return d;
+    float[] filter(float[] data, double sigma) {
+      gf.convolve(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    float[] filterInternal(float[] d, double sigma) {
-      gf.convolveInternal(d, size, size, sigma);
-      return d;
+    float[] filterInternal(float[] data, double sigma) {
+      gf.convolveInternal(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
-      gf.setWeights(w, size, size);
+    void setWeights(float[] weights) {
+      gf.setWeights(weights, size, size);
     }
   }
 
-  private class DPFilter extends GFilter {
+  private static class DpFilter extends GFilter {
     DpGaussianFilter gf = new DpGaussianFilter();
 
-    DPFilter(boolean internal) {
+    DpFilter(boolean internal) {
       super(DpGaussianFilter.class.getSimpleName(), internal);
     }
 
     @Override
-    float[] filter(float[] d, double sigma) {
-      gf.convolve(d, size, size, sigma);
-      return d;
+    float[] filter(float[] data, double sigma) {
+      gf.convolve(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    float[] filterInternal(float[] d, double sigma) {
-      gf.convolveInternal(d, size, size, sigma);
-      return d;
+    float[] filterInternal(float[] data, double sigma) {
+      gf.convolveInternal(data, size, size, sigma);
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
-      gf.setWeights(w, size, size);
+    void setWeights(float[] weights) {
+      gf.setWeights(weights, size, size);
     }
   }
 
   @SeededTest
-  public void floatFilterIsSameAsIJFilter(RandomSeed seed) {
-    filter1IsSameAsFilter2(seed, new FloatFilter(false), new IJFilter(false), false, 1e-2);
+  public void floatFilterIsSameAsImageJFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(false), new ImageJFilter(false), false, 1e-2);
   }
 
   @SeededTest
-  public void floatFilterInternalIsSameAsIJFilter(RandomSeed seed) {
-    filter1IsSameAsFilter2(seed, new FloatFilter(true), new IJFilter(true), false, 1e-2);
+  public void floatFilterInternalIsSameAsImageJFilter(RandomSeed seed) {
+    filter1IsSameAsFilter2(seed, new FloatFilter(true), new ImageJFilter(true), false, 1e-2);
   }
 
   @SeededTest
@@ -226,30 +226,30 @@ public class GaussianFilterTest {
 
   @SeededTest
   public void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed) {
-    filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), false, 1e-2);
+    filter1IsSameAsFilter2(seed, new DpFilter(false), new DoubleFilter(false), false, 1e-2);
   }
 
   @SeededTest
   public void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
-    filter1IsSameAsFilter2(seed, new DPFilter(false), new DoubleFilter(false), true, 1e-2);
+    filter1IsSameAsFilter2(seed, new DpFilter(false), new DoubleFilter(false), true, 1e-2);
   }
 
   private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted,
       double tolerance) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
     final float[] data = createData(rand, size, size);
-    float[] w = null;
+    float[] weights = null;
     if (weighted) {
       final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rand, 57);
 
-      w = new float[data.length];
-      for (int i = 0; i < w.length; i++) {
-        w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
+      weights = new float[data.length];
+      for (int i = 0; i < weights.length; i++) {
+        weights[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
       }
       // w[i] = (float) (1.0 / Math.max(0.01, rand.nextGaussian() * 0.2 + 2));
       // w[i] = 0.5f;
-      f1.setWeights(w);
-      f2.setWeights(w);
+      f1.setWeights(weights);
+      f2.setWeights(weights);
     }
 
     for (final double sigma : sigmas) {
@@ -290,8 +290,8 @@ public class GaussianFilterTest {
     }
 
     @Override
-    public Object getData(int i) {
-      return data[i].clone();
+    public Object getData(int index) {
+      return data[index].clone();
     }
 
     @Override
@@ -316,7 +316,7 @@ public class GaussianFilterTest {
     final TimingService ts = new TimingService();
     for (final double sigma : sigmas) {
       ts.execute(new MyTimingTask(new FloatFilter(false), data, sigma));
-      ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
+      ts.execute(new MyTimingTask(new DpFilter(false), data, sigma));
       ts.execute(new MyTimingTask(new DoubleFilter(false), data, sigma));
     }
     final int size = ts.getSize();
@@ -349,7 +349,7 @@ public class GaussianFilterTest {
     final TimingService ts = new TimingService();
     for (final double sigma : sigmas) {
       ts.execute(new MyTimingTask(new FloatFilter(true), data, sigma));
-      ts.execute(new MyTimingTask(new DPFilter(false), data, sigma));
+      ts.execute(new MyTimingTask(new DpFilter(false), data, sigma));
       ts.execute(new MyTimingTask(new DoubleFilter(true), data, sigma));
     }
     final int size = ts.getSize();

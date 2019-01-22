@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
+import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.ImagePsfModel;
 
@@ -62,6 +62,7 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -76,7 +77,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,7 @@ import java.util.logging.Logger;
  * <p>The input images must be a z-stack of a PSF. These can be produced using the PSFCreator
  * plugin.
  */
-public class PSFDrift implements PlugIn {
+public class PsfDrift implements PlugIn {
   private static final String TITLE = "PSF Drift";
 
   private static String title = "";
@@ -130,7 +130,7 @@ public class PSFDrift implements PlugIn {
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
-  private class Job {
+  private static class Job {
     final int z;
     final double cx;
     final double cy;
@@ -163,9 +163,9 @@ public class PSFDrift implements PlugIn {
     final FitConfiguration fitConfig2;
     final double sx;
     final double sy;
-    final double a;
+    final double pixelPitch;
     final double[][] xy;
-    final int w;
+    final int width;
     final int w2;
     final RandomDataGenerator random;
 
@@ -181,10 +181,10 @@ public class PSFDrift implements PlugIn {
       this.fitConfig2 = fitConfig.clone();
       sx = fitConfig.getInitialXSd();
       sy = fitConfig.getInitialYSd();
-      a = psfSettings.getPixelSize() * scale;
-      xy = PSFDrift.getStartPoints();
-      w = width;
-      w2 = w * w;
+      pixelPitch = psfSettings.getPixelSize() * scale;
+      xy = PsfDrift.getStartPoints();
+      this.width = width;
+      w2 = width * width;
       if (useSampling) {
         random = new RandomDataGenerator(new Well19937c());
       } else {
@@ -208,8 +208,8 @@ public class PSFDrift implements PlugIn {
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -228,9 +228,9 @@ public class PSFDrift implements PlugIn {
       final double[] data = new double[w2];
       if (useSampling) {
         final int p = (int) random.nextPoisson(photons);
-        psf.sample3D(data, w, w, p, cx, cy, job.z);
+        psf.sample3D(data, width, width, p, cx, cy, job.z);
       } else {
-        psf.create3D(data, w, w, photons, cx, cy, job.z, false);
+        psf.create3D(data, width, width, photons, cx, cy, job.z, false);
       }
 
       // Utils.display("Data", data, w, w);
@@ -238,18 +238,19 @@ public class PSFDrift implements PlugIn {
       // Fit the PSF. Do this from different start positions.
 
       // Get the background and signal estimate
-      final double b = (backgroundFitting) ? Gaussian2DFitter.getBackground(data, w, w, 1) : 0;
-      final double signal = BenchmarkFit.getSignal(data, b);
+      final double background =
+          (backgroundFitting) ? Gaussian2DFitter.getBackground(data, width, width, 1) : 0;
+      final double signal = BenchmarkFit.getSignal(data, background);
 
       if (comFitting) {
         // Get centre-of-mass estimate, then subtract the centre that will be added later
-        BenchmarkFit.getCentreOfMass(data, w, w, xy[xy.length - 1]);
+        BenchmarkFit.getCentreOfMass(data, width, width, xy[xy.length - 1]);
         xy[xy.length - 1][0] -= cx;
         xy[xy.length - 1][1] -= cy;
       }
 
       final double[] initialParams = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-      initialParams[Gaussian2DFunction.BACKGROUND] = b;
+      initialParams[Gaussian2DFunction.BACKGROUND] = background;
       initialParams[Gaussian2DFunction.SIGNAL] = signal;
       initialParams[Gaussian2DFunction.X_SD] = sx;
       initialParams[Gaussian2DFunction.Y_SD] = sy;
@@ -260,7 +261,7 @@ public class PSFDrift implements PlugIn {
         final double[] params = initialParams.clone();
         params[Gaussian2DFunction.X_POSITION] = cx + centre[0];
         params[Gaussian2DFunction.Y_POSITION] = cy + centre[1];
-        fitConfig2.initialise(1, w, w, params);
+        fitConfig2.initialise(1, width, width, params);
         final FunctionSolver solver = fitConfig2.getFunctionSolver();
         if (solver.isBounded()) {
           setBounds(solver);
@@ -271,13 +272,14 @@ public class PSFDrift implements PlugIn {
         // Account for 0.5 pixel offset during fitting
         params[Gaussian2DFunction.X_POSITION] += 0.5;
         params[Gaussian2DFunction.Y_POSITION] += 0.5;
-        if (isValid(status, params, w)) {
+        if (isValid(status, params, width)) {
           // XXX Decide what results are needed for analysis
           // Store all the results for later analysis
           // results[resultPosition] = params;
           // Store only the drift
-          results[resultPosition] = new double[] {a * (params[Gaussian2DFunction.X_POSITION] - cx),
-              a * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z};
+          results[resultPosition] =
+              new double[] {pixelPitch * (params[Gaussian2DFunction.X_POSITION] - cx),
+                  pixelPitch * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z};
           // System.out.printf("Fit " + job + ". %f,%f\n", results[resultPosition][0],
           // results[resultPosition][1]);
         } else {
@@ -300,8 +302,8 @@ public class PSFDrift implements PlugIn {
         ub[Gaussian2DFunction.BACKGROUND] = 1;
         lb[Gaussian2DFunction.SIGNAL] = photons * photonLimit;
         ub[Gaussian2DFunction.SIGNAL] = photons * 2;
-        ub[Gaussian2DFunction.X_POSITION] = w;
-        ub[Gaussian2DFunction.Y_POSITION] = w;
+        ub[Gaussian2DFunction.X_POSITION] = width;
+        ub[Gaussian2DFunction.Y_POSITION] = width;
         lb[Gaussian2DFunction.ANGLE] = -Math.PI;
         ub[Gaussian2DFunction.ANGLE] = Math.PI;
         lb[Gaussian2DFunction.Z_POSITION] = Double.NEGATIVE_INFINITY;
@@ -379,10 +381,10 @@ public class PSFDrift implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if ("hwhm".equals(arg)) {
-      showHWHM();
+      showHwhm();
       return;
     }
 
@@ -405,7 +407,7 @@ public class PSFDrift implements PlugIn {
 
     gd.addSlider("Region_size", 2, 20, regionSize);
     gd.addCheckbox("Background_fitting", backgroundFitting);
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
         fitConfig.getFitSolver().ordinal());
     // We need these to set bounds for any bounded fitters
@@ -432,7 +434,7 @@ public class PSFDrift implements PlugIn {
     recallLimit = gd.getNextNumber();
     regionSize = (int) Math.abs(gd.getNextNumber());
     backgroundFitting = gd.getNextBoolean();
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     fitConfig.setMinWidthFactor(gd.getNextNumber());
     fitConfig.setMaxWidthFactor(gd.getNextNumber());
@@ -464,7 +466,7 @@ public class PSFDrift implements PlugIn {
       IJ.error(TITLE, "No PSF image for image: " + title);
       return;
     }
-    psfSettings = getPSFSettings(imp);
+    psfSettings = getPsfSettings(imp);
     if (psfSettings == null) {
       IJ.error(TITLE, "No PSF settings for image: " + title);
       return;
@@ -476,7 +478,7 @@ public class PSFDrift implements PlugIn {
     final FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
         SettingsManager.readCalibration(0), PsfProtosHelper.defaultOneAxisGaussian2DPSF);
     config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
-    if (!PeakFit.configurePSFModel(config)) {
+    if (!PeakFit.configurePsfModel(config)) {
       return;
     }
     if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
@@ -508,7 +510,7 @@ public class PSFDrift implements PlugIn {
 
     // Create robust PSF fitting settings
     final double a = psfSettings.getPixelSize() * scale;
-    final double sa = PSFCalculator.squarePixelAdjustment(
+    final double sa = PsfCalculator.squarePixelAdjustment(
         psfSettings.getPixelSize() * (psfSettings.getFwhm() / Gaussian2DFunction.SD_TO_FWHM_FACTOR),
         a);
     fitConfig.setInitialPeakStdDev(sa / a);
@@ -525,7 +527,7 @@ public class PSFDrift implements PlugIn {
     startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
     endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
 
-    final ImagePsfModel psf = createImagePSF(startSlice, endSlice, scale);
+    final ImagePsfModel psf = createImagePsf(startSlice, endSlice, scale);
 
     final int minz = startSlice - psfSettings.getCentreImage();
     final int maxz = endSlice - psfSettings.getCentreImage();
@@ -685,17 +687,17 @@ public class PSFDrift implements PlugIn {
       final boolean useOldOffset = useOffset && !oldOffset.isEmpty();
       final TurboList<double[]> offset = new TurboList<>();
       final double pitch = psfSettings.getPixelSize();
-      int j = 0;
+      int index = 0;
       for (int i = start, slice = startSlice; i <= end; slice++, i++) {
-        j = findCentre(zPosition[i], smoothx, j);
-        if (j == -1) {
+        index = findCentre(zPosition[i], smoothx, index);
+        if (index == -1) {
           ImageJUtils.log("Failed to find the offset for depth %.2f", zPosition[i]);
           continue;
         }
         // The offset should store the difference to the centre in pixels so divide by the pixel
         // pitch
-        double cx = smoothx[1][j] / pitch;
-        double cy = smoothy[1][j] / pitch;
+        double cx = smoothx[1][index] / pitch;
+        double cy = smoothy[1][index] / pitch;
         if (useOldOffset) {
           final Offset o = oldOffset.get(slice);
           if (o != null) {
@@ -707,43 +709,42 @@ public class PSFDrift implements PlugIn {
       }
       addMissingOffsets(startSlice, endSlice, nSlices, offset);
       final Offset.Builder offsetBuilder = Offset.newBuilder();
-      final ImagePSF.Builder imagePSFBuilder = psfSettings.toBuilder();
+      final ImagePSF.Builder imagePsfBuilder = psfSettings.toBuilder();
       for (final double[] o : offset) {
         final int slice = (int) o[0];
         offsetBuilder.setCx(o[1]);
         offsetBuilder.setCy(o[2]);
-        imagePSFBuilder.putOffsets(slice, offsetBuilder.build());
+        imagePsfBuilder.putOffsets(slice, offsetBuilder.build());
       }
-      imagePSFBuilder.putNotes(TITLE,
+      imagePsfBuilder.putNotes(TITLE,
           String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
-      imp.setProperty("Info", ImagePSFHelper.toString(imagePSFBuilder));
+      imp.setProperty("Info", ImagePsfHelper.toString(imagePsfBuilder));
     }
   }
 
-  private static int findCentre(double d, double[][] smoothx, int i) {
-    while (i < smoothx[0].length) {
-      if (smoothx[0][i] == d) {
-        return i;
+  private static int findCentre(double depth, double[][] smoothx, int index) {
+    while (index < smoothx[0].length) {
+      if (smoothx[0][index] == depth) {
+        return index;
       }
-      i++;
+      index++;
     }
     return -1;
   }
 
-  private static void addMissingOffsets(int startSlice, int endSlice, int nSlices,
+  private static void addMissingOffsets(int startSlice, int endSlice, int slices,
       TurboList<double[]> offset) {
     // Add an offset for the remaining slices
     if (positionsToAverage > 0) {
       double cx = 0;
       double cy = 0;
-      int n = 0;
-      for (int i = 0; n < positionsToAverage && i < offset.size(); i++) {
+      int count = 0;
+      for (int i = 0; count < positionsToAverage && i < offset.size(); i++, count++) {
         cx += offset.get(i)[1];
         cy += offset.get(i)[2];
-        n++;
       }
-      cx /= n;
-      cy /= n;
+      cx /= count;
+      cy /= count;
       double cx2 = 0;
       double cy2 = 0;
       double n2 = 0;
@@ -758,21 +759,10 @@ public class PSFDrift implements PlugIn {
       for (int slice = 1; slice < startSlice; slice++) {
         offset.add(new double[] {slice, cx, cy});
       }
-      for (int slice = endSlice + 1; slice <= nSlices; slice++) {
+      for (int slice = endSlice + 1; slice <= slices; slice++) {
         offset.add(new double[] {slice, cx2, cy2});
       }
-      Collections.sort(offset, new Comparator<double[]>() {
-        @Override
-        public int compare(double[] arg0, double[] arg1) {
-          if (arg0[0] < arg1[0]) {
-            return -1;
-          }
-          if (arg0[0] > arg1[0]) {
-            return 1;
-          }
-          return 0;
-        }
-      });
+      Collections.sort(offset, (a1, a2) -> Double.compare(a1[0], a2[0]));
     }
   }
 
@@ -781,30 +771,30 @@ public class PSFDrift implements PlugIn {
     // Extract non NaN numbers
     double[] newX = new double[x.length];
     double[] newY = new double[x.length];
-    int c = 0;
+    int count = 0;
     for (int i = 0; i < x.length; i++) {
       if (!Double.isNaN(y[i])) {
-        newX[c] = x[i];
-        newY[c] = y[i];
-        c++;
+        newX[count] = x[i];
+        newY[count] = y[i];
+        count++;
       }
     }
-    newX = Arrays.copyOf(newX, c);
-    newY = Arrays.copyOf(newY, c);
+    newX = Arrays.copyOf(newX, count);
+    newY = Arrays.copyOf(newY, count);
 
     title = TITLE + " " + title;
     final Plot2 plot = new Plot2(title, "z (nm)", yLabel);
     final double[] limitsx = MathUtils.limits(x);
     double[] limitsy = new double[2];
     if (se != null) {
-      if (c > 0) {
+      if (count > 0) {
         limitsy = new double[] {newY[0] - se[0], newY[0] + se[0]};
         for (int i = 1; i < newY.length; i++) {
           limitsy[0] = MathUtils.min(limitsy[0], newY[i] - se[i]);
           limitsy[1] = MathUtils.max(limitsy[1], newY[i] + se[i]);
         }
       }
-    } else if (c > 0) {
+    } else if (count > 0) {
       limitsy = MathUtils.limits(newY);
     }
     final double rangex = Math.max(0.05 * (limitsx[1] - limitsx[0]), 0.1);
@@ -862,24 +852,24 @@ public class PSFDrift implements PlugIn {
       double upper, Color color) {
     double[] x2 = new double[x.length];
     double[] y2 = new double[y.length];
-    int c = 0;
+    int count = 0;
     for (int i = 0; i < x.length; i++) {
       if (x[i] >= lower && x[i] <= upper) {
-        x2[c] = x[i];
-        y2[c] = y[i];
-        c++;
+        x2[count] = x[i];
+        y2[count] = y[i];
+        count++;
       }
     }
-    if (c == 0) {
+    if (count == 0) {
       return;
     }
-    x2 = Arrays.copyOf(x2, c);
-    y2 = Arrays.copyOf(y2, c);
+    x2 = Arrays.copyOf(x2, count);
+    y2 = Arrays.copyOf(y2, count);
     plot.setColor(color);
     plot.addPoints(x2, y2, shape);
   }
 
-  private ImagePsfModel createImagePSF(int lower, int upper, double scale) {
+  private ImagePsfModel createImagePsf(int lower, int upper, double scale) {
     final int zCentre = psfSettings.getCentreImage();
 
     final double unitsPerPixel = 1.0 / scale;
@@ -917,7 +907,7 @@ public class PSFDrift implements PlugIn {
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      Logger.getLogger(PSFDrift.class.getName()).log(Level.SEVERE, "Unexpected interruption", ex);
+      Logger.getLogger(PsfDrift.class.getName()).log(Level.SEVERE, "Unexpected interruption", ex);
       Thread.currentThread().interrupt();
     }
   }
@@ -948,17 +938,17 @@ public class PSFDrift implements PlugIn {
     }
     // Add space for centre-of-mass at the end of the array
     if (comFitting) {
-      xy[ii++] = new double[2];
+      xy[ii] = new double[2];
     }
     return xy;
   }
 
   private static int getNumberOfStartPoints() {
-    int n = (offsetFitting) ? 1 : 0;
+    int points = (offsetFitting) ? 1 : 0;
     if (startOffset > 0) {
-      n *= 4;
+      points *= 4;
     }
-    return (comFitting) ? n + 1 : n;
+    return (comFitting) ? points + 1 : points;
   }
 
   private static List<String> createImageList(boolean requireFwhm) {
@@ -974,7 +964,7 @@ public class PSFDrift implements PlugIn {
             // Image must be square and a stack of a single channel
             if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1) {
               // Check if these are PSF images created by the SMLM plugins
-              final ImagePSF psfSettings = getPSFSettings(imp);
+              final ImagePSF psfSettings = getPsfSettings(imp);
               if (psfSettings != null) {
                 if (psfSettings.getCentreImage() <= 0) {
                   ImageJUtils
@@ -1014,15 +1004,15 @@ public class PSFDrift implements PlugIn {
    * @return the PSF settings
    * @see ImagePlus#getProperty(String)
    */
-  public static ImagePSF getPSFSettings(ImagePlus imp) {
+  public static ImagePSF getPsfSettings(ImagePlus imp) {
     final Object info = imp.getProperty("Info");
     if (info != null) {
-      return ImagePSFHelper.fromString(info.toString());
+      return ImagePsfHelper.fromString(info.toString());
     }
     return null;
   }
 
-  private void showHWHM() {
+  private void showHwhm() {
     // Build a list of suitable images
     final List<String> titles = createImageList(false);
 
@@ -1052,14 +1042,14 @@ public class PSFDrift implements PlugIn {
       IJ.error(TITLE, "No PSF image for image: " + title);
       return;
     }
-    psfSettings = getPSFSettings(imp);
+    psfSettings = getPsfSettings(imp);
     if (psfSettings == null) {
       IJ.error(TITLE, "No PSF settings for image: " + title);
       return;
     }
 
     final int size = imp.getStackSize();
-    final ImagePsfModel psf = createImagePSF(1, size, 1);
+    final ImagePsfModel psf = createImagePsf(1, size, 1);
 
     final double[] w0 = psf.getAllHwhm0();
     final double[] w1 = psf.getAllHwhm1();
@@ -1106,29 +1096,29 @@ public class PSFDrift implements PlugIn {
 
     // int newCentre = 0;
     // double minW = Double.POSITIVE_INFINITY;
-    final TDoubleArrayList minWX = new TDoubleArrayList();
-    final TDoubleArrayList minWY = new TDoubleArrayList();
+    final TDoubleArrayList minWx = new TDoubleArrayList();
+    final TDoubleArrayList minWy = new TDoubleArrayList();
     for (int i = 0; i < w0.length; i++) {
-      double w = 0;
+      double weight = 0;
       if (Double.isFinite(w0[i])) {
         if (Double.isFinite(w1[i])) {
-          w = w0[i] * w1[i];
+          weight = w0[i] * w1[i];
         } else {
-          w = w0[i] * w0[i];
+          weight = w0[i] * w0[i];
         }
       } else if (Double.isFinite(w1[i])) {
-        w = w1[i] * w1[i];
+        weight = w1[i] * w1[i];
       }
 
-      if (w != 0) {
-        minWX.add(i + 1);
-        minWY.add(Math.sqrt(w));
+      if (weight != 0) {
+        minWx.add(i + 1);
+        minWy.add(Math.sqrt(weight));
       }
     }
 
     // Smooth the combined line
-    final double[] cx = minWX.toArray();
-    double[] cy = minWY.toArray();
+    final double[] cx = minWx.toArray();
+    double[] cy = minWy.toArray();
     if (smoothing > 0) {
       final LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
       cy = loess.smooth(cx, cy);
@@ -1190,9 +1180,9 @@ public class PSFDrift implements PlugIn {
           b.setCentreImage(dl.centre);
         }
         if (updateHWHM) {
-          b.setFwhm(dl.getFWHM());
+          b.setFwhm(dl.getFwhm());
         }
-        imp.setProperty("Info", ImagePSFHelper.toString(b));
+        imp.setProperty("Info", ImagePsfHelper.toString(b));
       }
     }
   }
@@ -1236,7 +1226,7 @@ public class PSFDrift implements PlugIn {
     }
 
     private void update() {
-      final double fwhm = getFWHM();
+      final double fwhm = getFwhm();
       label.setText(String.format("FWHM = %s px (%s nm)", MathUtils.rounded(fwhm),
           MathUtils.rounded(fwhm * scale)));
 
@@ -1253,7 +1243,7 @@ public class PSFDrift implements PlugIn {
       imp.updateAndDraw();
     }
 
-    public double getFWHM() {
+    double getFwhm() {
       return 2 * cy[centre - offset];
     }
 

@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class PSFModelGradient1FunctionTest {
+public class PsfModelGradient1FunctionTest {
   @Test
   public void canComputeValueAndGradient() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
@@ -61,8 +61,8 @@ public class PSFModelGradient1FunctionTest {
     final double[][] ge = new double[maxx * maxy][];
     final double[][] go = new double[maxx * maxy][];
 
-    final PSFModelGradient1Function psf =
-        new PSFModelGradient1Function(new GaussianPSFModel(zModel), maxx, maxy);
+    final PsfModelGradient1Function psf =
+        new PsfModelGradient1Function(new GaussianPsfModel(zModel), maxx, maxy);
     final ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
     f.setErfFunction(ErfFunction.COMMONS_MATH);
     final double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
@@ -80,13 +80,13 @@ public class PSFModelGradient1FunctionTest {
             final double[] a = new double[] {2.2, in, x0, x1, x2};
             psf.initialise1(a);
             psf.forEach(new Gradient1Procedure() {
-              int i = 0;
+              int index = 0;
 
               @Override
               public void execute(double value, double[] dyDa) {
-                vo[i] = value;
-                go[i] = dyDa.clone();
-                i++;
+                vo[index] = value;
+                go[index] = dyDa.clone();
+                index++;
               }
             });
             a2[Gaussian2DFunction.BACKGROUND] = a[0];
@@ -96,13 +96,13 @@ public class PSFModelGradient1FunctionTest {
             a2[Gaussian2DFunction.Z_POSITION] = a[4];
             f.initialise1(a2);
             f.forEach(new Gradient1Procedure() {
-              int i = 0;
+              int index = 0;
 
               @Override
               public void execute(double value, double[] dyDa) {
-                ve[i] = value;
-                ge[i] = dyDa.clone();
-                i++;
+                ve[index] = value;
+                ge[index] = dyDa.clone();
+                index++;
               }
             });
 

@@ -35,7 +35,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
@@ -57,8 +56,8 @@ import java.util.List;
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
  */
-public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
-  private static String TITLE = "Trace Match Calculator";
+public class TraceMatchCalculator implements PlugIn {
+  private static final String TITLE = "Trace Match Calculator";
 
   private static String inputOption1 = "";
   private static String inputOption2 = "";
@@ -66,7 +65,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   private static double dThreshold = 1;
   private static double beta = 4;
   private static boolean showPairs;
-  private static String[] SORT_OPTIONS = new String[] {"Score", "Time"};
+  private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
   private static int sortIndex = 1;
 
   private static boolean writeHeader = true;
@@ -78,7 +77,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "No localisations in memory");
@@ -162,35 +161,35 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
   }
 
   @SuppressWarnings("null")
-  private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
-      MemoryPeakResults results3, double dThreshold) {
+  private static void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
+      MemoryPeakResults results3, double distanceThreshold) {
     final Pulse[] p1 = extractPulses(results1);
     final Pulse[] p2 = extractPulses(results2);
     final Pulse[] p3 = extractPulses(results3);
 
-    final List<Pulse> TP = null;
-    List<Pulse> FP = null;
-    List<Pulse> FN = null;
+    final List<Pulse> tp = null;
+    List<Pulse> fp = null;
+    List<Pulse> fn = null;
     List<PointPair> pairs = null;
 
-    final List<Pulse> TP2 = null;
-    List<Pulse> FP2 = null;
-    List<Pulse> FN2 = null;
+    final List<Pulse> tp2 = null;
+    List<Pulse> fp2 = null;
+    List<Pulse> fn2 = null;
     List<PointPair> pairs2 = null;
 
     if (showPairs) {
       pairs = new LinkedList<>();
-      FP = new LinkedList<>();
-      FN = new LinkedList<>();
+      fp = new LinkedList<>();
+      fn = new LinkedList<>();
       pairs2 = new LinkedList<>();
-      FP2 = new LinkedList<>();
-      FN2 = new LinkedList<>();
+      fp2 = new LinkedList<>();
+      fn2 = new LinkedList<>();
     }
 
     final MatchResult result =
-        MatchCalculator.analyseResults2D(p1, p2, dThreshold, TP, FP, FN, pairs);
+        MatchCalculator.analyseResults2D(p1, p2, distanceThreshold, tp, fp, fn, pairs);
     final MatchResult result2 =
-        MatchCalculator.analyseResults2D(p1, p3, dThreshold, TP2, FP2, FN2, pairs2);
+        MatchCalculator.analyseResults2D(p1, p3, distanceThreshold, tp2, fp2, fn2, pairs2);
 
     // Create output
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
@@ -198,6 +197,24 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
         resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
       }
       if (showPairs) {
+        CoordinateProvider coordinateProvider = (line) -> {
+          // Extract the startT and x,y coordinates from the first pulse in the line
+          final int[] index = {0, 5, 12};
+          final String[] fields = line.split("\t");
+          for (final int i : index) {
+            if (i < fields.length) {
+              if (fields[i].equals("-")) {
+                continue;
+              }
+              final int startT = Integer.parseInt(fields[i]);
+              final double x = Double.parseDouble(fields[i + 2]);
+              final double y = Double.parseDouble(fields[i + 3]);
+              return new double[] {startT, x, y};
+            }
+          }
+          return null;
+        };
+
         if (p3 == null) {
           // Produce a pairs output
           if (pairsWindow == null || !pairsWindow.isShowing()) {
@@ -206,7 +223,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
             p.y += resultsWindow.getHeight();
             pairsWindow.setLocation(p);
             pairPainter = new ImageRoiPainter(pairsWindow.getTextPanel(),
-                results1.getSource().getOriginal().getName(), this);
+                results1.getSource().getOriginal().getName(), coordinateProvider);
           }
           pairsWindow.getTextPanel().clear();
           pairPainter.setTitle(results1.getSource().getOriginal().getName());
@@ -214,10 +231,10 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
           // Add the unmatched points
           WindowManager.getIDList();
 
-          for (final Coordinate c : FN) {
+          for (final Coordinate c : fn) {
             pairs.add(new PointPair(c, null));
           }
-          for (final Coordinate c : FP) {
+          for (final Coordinate c : fp) {
             pairs.add(new PointPair(null, c));
           }
 
@@ -234,7 +251,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
             p.y += resultsWindow.getHeight();
             triplesWindow.setLocation(p);
             triplePainter = new ImageRoiPainter(triplesWindow.getTextPanel(),
-                results1.getSource().getName(), this);
+                results1.getSource().getName(), coordinateProvider);
           }
           triplesWindow.getTextPanel().clear();
           triplePainter.setTitle(results1.getSource().getOriginal().getName());
@@ -248,7 +265,7 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
             map.put(p, t);
           }
           // Complete the reference set of points
-          for (final Coordinate c : FN) {
+          for (final Coordinate c : fn) {
             final Pulse p = (Pulse) c;
             final Triple t = new Triple(p, null, null);
             triples.add(t);
@@ -256,10 +273,10 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
           }
 
           // Add the unmatched points
-          for (final Coordinate c : FP) {
+          for (final Coordinate c : fp) {
             triples.add(new Triple(null, (Pulse) c, null));
           }
-          for (final Coordinate c : FP2) {
+          for (final Coordinate c : fp2) {
             triples.add(new Triple(null, null, (Pulse) c));
           }
 
@@ -267,9 +284,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
           for (final PointPair pair : pairs2) {
             final Pulse p = (Pulse) pair.getPoint1();
             final Pulse pp = (Pulse) pair.getPoint2();
-            final Triple t = map.get(p);
-            if (t != null) {
-              t.p3 = pp;
+            final Triple triple = map.get(p);
+            if (triple != null) {
+              triple.p3 = pp;
             } else {
               triples.add(new Triple(null, null, pp));
             }
@@ -287,9 +304,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       IJ.log(createResultsHeader());
     }
 
-    addResult(inputOption1, inputOption2, dThreshold, result);
+    addResult(inputOption1, inputOption2, distanceThreshold, result);
     if (p3 != null) {
-      addResult(inputOption1, inputOption3, dThreshold, result2);
+      addResult(inputOption1, inputOption3, distanceThreshold, result2);
     }
   }
 
@@ -299,12 +316,9 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     }
     final Pulse[] pulses = new Pulse[results.size()];
     final Counter i = new Counter();
-    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-      @Override
-      public void executeXyr(float x, float y, PeakResult p) {
-        pulses[i.getAndIncrement()] = new Pulse(x, y, p.getFrame(), p.getEndFrame());
-      }
-    });
+    results.forEach(DistanceUnit.PIXEL,
+        (XyrResultProcedure) (x, y, result) -> pulses[i.getAndIncrement()] =
+            new Pulse(x, y, result.getFrame(), result.getEndFrame()));
     return pulses;
   }
 
@@ -328,11 +342,12 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     return sb.toString();
   }
 
-  private static void addResult(String i1, String i2, double dThrehsold, MatchResult result) {
+  private static void addResult(String i1, String i2, double distanceThrehsold,
+      MatchResult result) {
     final StringBuilder sb = new StringBuilder();
     sb.append(i1).append('\t');
     sb.append(i2).append('\t');
-    sb.append(IJ.d2s(dThrehsold, 2)).append('\t');
+    sb.append(IJ.d2s(distanceThrehsold, 2)).append('\t');
     sb.append(result.getNumberPredicted()).append('\t');
     sb.append(result.getTruePositives()).append('\t');
     sb.append(result.getFalsePositives()).append('\t');
@@ -379,15 +394,15 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     pairsWindow.append(sb.toString());
   }
 
-  private static void addPoint(StringBuilder sb, Pulse p) {
-    if (p == null) {
+  private static void addPoint(StringBuilder sb, Pulse pulse) {
+    if (pulse == null) {
       sb.append("-\t-\t-\t-\t-\t");
     } else {
-      sb.append(p.getStart()).append('\t');
-      sb.append(p.getEnd()).append('\t');
-      sb.append(IJ.d2s(p.getX())).append('\t');
-      sb.append(IJ.d2s(p.getY())).append('\t');
-      sb.append(IJ.d2s(p.getZ())).append('\t');
+      sb.append(pulse.getStart()).append('\t');
+      sb.append(pulse.getEnd()).append('\t');
+      sb.append(IJ.d2s(pulse.getX())).append('\t');
+      sb.append(IJ.d2s(pulse.getY())).append('\t');
+      sb.append(IJ.d2s(pulse.getZ())).append('\t');
     }
   }
 
@@ -413,25 +428,6 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     sb.append("Distance2\t");
     sb.append("Score2\t");
     return sb.toString();
-  }
-
-  @Override
-  public double[] getCoordinates(String line) {
-    // Extract the startT and x,y coordinates from the first pulse in the line
-    final int[] index = {0, 5, 12};
-    final String[] fields = line.split("\t");
-    for (final int i : index) {
-      if (i < fields.length) {
-        if (fields[i].equals("-")) {
-          continue;
-        }
-        final int startT = Integer.valueOf(fields[i]);
-        final double x = Double.valueOf(fields[i + 2]);
-        final double y = Double.valueOf(fields[i + 3]);
-        return new double[] {startT, x, y};
-      }
-    }
-    return null;
   }
 
   private static void addTripleResult(Triple triple) {
@@ -461,46 +457,44 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     }
   }
 
-  private List<? extends PointPair> sort(List<PointPair> pairs) {
-    switch (sortIndex) {
-      case 1: // Sort by time
-        final ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
-        for (final PointPair pair : pairs) {
-          newPairs.add(new TimeComparablePointPair(pair));
-        }
-        Collections.sort(newPairs);
-        return newPairs;
-
-      default:
-        // Already sorted by score
-        return pairs;
+  private static List<? extends PointPair> sort(List<PointPair> pairs) {
+    if (sortIndex == 1) {
+      // Sort by time
+      final ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
+      for (final PointPair pair : pairs) {
+        newPairs.add(new TimeComparablePointPair(pair));
+      }
+      Collections.sort(newPairs, TimeComparablePointPair::compare);
+      return newPairs;
     }
+    // Already sorted by score
+    return pairs;
   }
 
-  private List<? extends Triple> sort(ArrayList<Triple> triples) {
+  private static List<? extends Triple> sort(ArrayList<Triple> triples) {
     if (sortIndex == 1) {
+      // Sort by time
       final List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
       for (final Triple t : triples) {
         sorted.add(new TimeComparableTriple(t));
       }
-      Collections.sort(sorted);
+      Collections.sort(sorted, TimeComparableTriple::compare);
       return sorted;
     }
     final List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
     for (final Triple t : triples) {
       sorted.add(new ScoreComparableTriple(t));
     }
-    Collections.sort(sorted);
+    Collections.sort(sorted, ScoreComparableTriple::compare);
     return sorted;
   }
 
-  private class TimeComparablePointPair extends PointPair
-      implements Comparable<TimeComparablePointPair> {
+  private static class TimeComparablePointPair extends PointPair {
     int startT = Integer.MAX_VALUE;
-    public Pulse p1;
-    public Pulse p2;
+    final Pulse p1;
+    final Pulse p2;
 
-    public TimeComparablePointPair(PointPair pair) {
+    TimeComparablePointPair(PointPair pair) {
       super(pair.getPoint1(), pair.getPoint2());
 
       p1 = (Pulse) pair.getPoint1();
@@ -513,37 +507,36 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    @Override
-    public int compareTo(TimeComparablePointPair o) {
+    static int compare(TimeComparablePointPair r1, TimeComparablePointPair r2) {
       // Significance of points are: p1, p2, p3
       // Sort by the earliest start time of the most significant point.
-      if (startT == o.startT) {
+      if (r1.startT == r2.startT) {
         // Sort using the significant points first.
-        int result = comparePulsesStartT(p1, o.p1);
+        int result = comparePulsesStartT(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesStartT(p2, o.p2);
+        result = comparePulsesStartT(r1.p2, r2.p2);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesEndT(p1, o.p1);
+        result = comparePulsesEndT(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesEndT(p2, o.p2);
+        result = comparePulsesEndT(r1.p2, r2.p2);
         if (result != 0) {
           return result;
         }
 
         // Sort using coords
-        result = comparePulsesCoords(p1, o.p1);
+        result = comparePulsesCoords(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        return comparePulsesCoords(p2, o.p2);
+        return comparePulsesCoords(r1.p2, r2.p2);
       }
-      return startT - o.startT;
+      return r1.startT - r2.startT;
     }
   }
 
@@ -592,29 +585,29 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
     return 0;
   }
 
-  private class Triple {
-    public Pulse p1;
-    public Pulse p2;
-    public Pulse p3;
+  private static class Triple {
+    final Pulse p1;
+    final Pulse p2;
+    Pulse p3;
 
-    public Triple(Pulse p1, Pulse p2, Pulse p3) {
+    Triple(Pulse p1, Pulse p2, Pulse p3) {
       this.p1 = p1;
       this.p2 = p2;
       this.p3 = p3;
     }
 
-    public Triple(Triple t) {
-      this.p1 = t.p1;
-      this.p2 = t.p2;
-      this.p3 = t.p3;
+    Triple(Triple triple) {
+      this.p1 = triple.p1;
+      this.p2 = triple.p2;
+      this.p3 = triple.p3;
     }
   }
 
-  private class TimeComparableTriple extends Triple implements Comparable<TimeComparableTriple> {
+  private static class TimeComparableTriple extends Triple {
     int startT = Integer.MAX_VALUE;
 
-    public TimeComparableTriple(Triple t) {
-      super(t);
+    TimeComparableTriple(Triple triple) {
+      super(triple);
 
       if (p3 != null) {
         startT = p3.getStart();
@@ -627,77 +620,58 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    @Override
-    public int compareTo(TimeComparableTriple o) {
+    static int compare(TimeComparableTriple r1, TimeComparableTriple r2) {
       // Significance of points are: p1, p2, p3
       // Sort by the earliest start time of the most significant point.
-      if (startT == o.startT) {
-        // Sort using the significant points first.
-        // int result = comparePulsesStartT(p1, o.p1);
-        // if (result != 0)
-        // return result;
-        // result = comparePulsesStartT(p2, o.p2);
-        // if (result != 0)
-        // return result;
-        // result = comparePulsesStartT(p3, o.p3);
-        // if (result != 0)
-        // return result;
-        // result = comparePulsesEndT(p1, o.p1);
-        // if (result != 0)
-        // return result;
-        // result = comparePulsesEndT(p2, o.p2);
-        // if (result != 0)
-        // return result;
-        // return comparePulsesEndT(p3, o.p3);
-
+      if (r1.startT == r2.startT) {
         // Make the order the same as for the pairs table
-        int result = comparePulsesStartT(p1, o.p1);
+        int result = comparePulsesStartT(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesStartT(p2, o.p2);
+        result = comparePulsesStartT(r1.p2, r2.p2);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesEndT(p1, o.p1);
+        result = comparePulsesEndT(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesEndT(p2, o.p2);
+        result = comparePulsesEndT(r1.p2, r2.p2);
         if (result != 0) {
           return result;
         }
 
         // Then sort using the third
-        result = comparePulsesStartT(p3, o.p3);
+        result = comparePulsesStartT(r1.p3, r2.p3);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesEndT(p3, o.p3);
+        result = comparePulsesEndT(r1.p3, r2.p3);
         if (result != 0) {
           return result;
         }
 
         // Sort using coords
-        result = comparePulsesCoords(p1, o.p1);
+        result = comparePulsesCoords(r1.p1, r2.p1);
         if (result != 0) {
           return result;
         }
-        result = comparePulsesCoords(p2, o.p2);
+        result = comparePulsesCoords(r1.p2, r2.p2);
         if (result != 0) {
           return result;
         }
-        return comparePulsesCoords(p3, o.p3);
+        return comparePulsesCoords(r1.p3, r2.p3);
       }
-      return startT - o.startT;
+      return r1.startT - r2.startT;
     }
   }
 
-  private class ScoreComparableTriple extends Triple implements Comparable<ScoreComparableTriple> {
+  private static class ScoreComparableTriple extends Triple {
     double score;
 
-    public ScoreComparableTriple(Triple t) {
-      super(t);
+    ScoreComparableTriple(Triple triple) {
+      super(triple);
       if (p1 != null) {
         if (p2 != null) {
           score = p1.score(p2, dThreshold);
@@ -708,12 +682,11 @@ public class TraceMatchCalculator implements PlugIn, CoordinateProvider {
       }
     }
 
-    @Override
-    public int compareTo(ScoreComparableTriple o) {
-      if (score > o.score) {
+    static int compare(ScoreComparableTriple r1, ScoreComparableTriple r2) {
+      if (r1.score > r2.score) {
         return -1;
       }
-      if (score < o.score) {
+      if (r1.score < r2.score) {
         return 1;
       }
       return 0;

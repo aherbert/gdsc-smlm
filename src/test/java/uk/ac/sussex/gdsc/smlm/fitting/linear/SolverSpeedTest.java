@@ -411,7 +411,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveCholeskyLDLTIsFasterThanGaussJordanDouble(RandomSeed seed) {
+  public void solveCholeskyLdlTIsFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -434,7 +434,7 @@ public class SolverSpeedTest {
       t1 = Math.min(t1, System.nanoTime() - start1);
 
       final long start2 = System.nanoTime();
-      solveCholeskyLDLT(adata2, bdata2, iter, solver2);
+      solveCholeskyLdlT(adata2, bdata2, iter, solver2);
       t2 = Math.min(t2, System.nanoTime() - start2);
     }
 
@@ -525,7 +525,7 @@ public class SolverSpeedTest {
     // Check for a positive definite matrix
     if (positiveDifinite) {
       final EjmlLinearSolver solver = new EjmlLinearSolver();
-      return solver.solveCholeskyLDLT(copydouble(alpha), copydouble(beta));
+      return solver.solveCholeskyLdlT(copydouble(alpha), copydouble(beta));
     }
 
     return true;
@@ -634,11 +634,11 @@ public class SolverSpeedTest {
     }
   }
 
-  protected void solveCholeskyLDLT(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
+  protected void solveCholeskyLdlT(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
       EjmlLinearSolver solver) {
     iter = FastMath.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
-      solver.solveCholeskyLDLT(adata.get(i), bdata.get(i));
+      solver.solveCholeskyLdlT(adata.get(i), bdata.get(i));
     }
   }
 

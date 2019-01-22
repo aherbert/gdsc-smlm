@@ -24,11 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -45,7 +46,7 @@ import java.util.Arrays;
  * <p>Out-of-focus regions are computed using a width spreading of the Airy pattern. A true
  * diffraction model for out-of-focus regions is not implemented.
  */
-public class AiryPSFModel extends PsfModel {
+public class AiryPsfModel extends PsfModel {
   private double zeroW0;
   private double zeroW1;
   private double w0;
@@ -57,20 +58,18 @@ public class AiryPSFModel extends PsfModel {
   private int maxSamplesPerDimension = 50;
 
   // Used for the random sampling of the Airy function
-  private static int SAMPLE_RINGS = 4;
-  private static double[] r;
-  private static double[] sum;
+  private static final int SAMPLE_RINGS = 4;
   private static PolynomialSplineFunction spline;
 
   /**
    * The zeros of J1(x) corresponding to the rings of the Airy pattern.
    */
-  public static double[] RINGS = {0, 3.8317, 7.0156, 10.1735, 13.3237, 16.4706};
+  private static final double[] RINGS = {0, 3.8317, 7.0156, 10.1735, 13.3237, 16.4706};
 
   /**
    * The Airy power corresponding to the rings of the Airy pattern.
    */
-  public static double[] POWER;
+  private static final double[] POWER;
 
   static {
     POWER = new double[RINGS.length];
@@ -85,7 +84,7 @@ public class AiryPSFModel extends PsfModel {
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
    */
-  public AiryPSFModel(double w0, double w1) {
+  public AiryPsfModel(double w0, double w1) {
     super();
     this.zeroW0 = w0;
     this.zeroW1 = w1;
@@ -98,7 +97,7 @@ public class AiryPSFModel extends PsfModel {
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
    */
-  public AiryPSFModel(RandomGenerator randomGenerator, double w0, double w1) {
+  public AiryPsfModel(RandomGenerator randomGenerator, double w0, double w1) {
     super(randomGenerator);
     this.zeroW0 = w0;
     this.zeroW1 = w1;
@@ -112,7 +111,7 @@ public class AiryPSFModel extends PsfModel {
    * @param w1 The Airy width for dimension 1
    * @param zDepth the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
    */
-  public AiryPSFModel(RandomGenerator randomGenerator, double w0, double w1, double zDepth) {
+  public AiryPsfModel(RandomGenerator randomGenerator, double w0, double w1, double zDepth) {
     super(randomGenerator);
     this.zeroW0 = w0;
     this.zeroW1 = w1;
@@ -126,7 +125,7 @@ public class AiryPSFModel extends PsfModel {
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
    */
-  public AiryPSFModel(RandomDataGenerator randomDataGenerator, double w0, double w1) {
+  public AiryPsfModel(RandomDataGenerator randomDataGenerator, double w0, double w1) {
     super(randomDataGenerator);
     this.zeroW0 = w0;
     this.zeroW1 = w1;
@@ -140,7 +139,7 @@ public class AiryPSFModel extends PsfModel {
    * @param w1 The Airy width for dimension 1
    * @param zDepth the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
    */
-  public AiryPSFModel(RandomDataGenerator randomDataGenerator, double w0, double w1,
+  public AiryPsfModel(RandomDataGenerator randomDataGenerator, double w0, double w1,
       double zDepth) {
     super(randomDataGenerator);
     this.zeroW0 = w0;
@@ -149,10 +148,25 @@ public class AiryPSFModel extends PsfModel {
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method.
+   * Copy constructor.
+   *
+   * @param source the source
+   * @param rng the random generator
    */
-  private AiryPSFModel() {
-    super();
+  protected AiryPsfModel(AiryPsfModel source, RandomGenerator rng) {
+    super(rng);
+    this.zeroW0 = source.zeroW0;
+    this.zeroW1 = source.zeroW1;
+    this.zDepth = source.zDepth;
+    this.ring = source.ring;
+    this.singlePixelApproximation = source.singlePixelApproximation;
+    this.minSamplesPerDimension = source.minSamplesPerDimension;
+    this.maxSamplesPerDimension = source.maxSamplesPerDimension;
+  }
+
+  @Override
+  public AiryPsfModel copy(RandomGenerator rng) {
+    return new AiryPsfModel(this, rng);
   }
 
   @Override
@@ -594,20 +608,6 @@ public class AiryPSFModel extends PsfModel {
     return w1;
   }
 
-  @Override
-  public AiryPSFModel copy() {
-    final AiryPSFModel model = new AiryPSFModel();
-    model.zeroW0 = zeroW0;
-    model.zeroW1 = zeroW1;
-    model.zDepth = zDepth;
-    model.ring = ring;
-    // model.inputImage = inputImage;
-    model.singlePixelApproximation = singlePixelApproximation;
-    model.minSamplesPerDimension = minSamplesPerDimension;
-    model.maxSamplesPerDimension = maxSamplesPerDimension;
-    return model;
-  }
-
   /**
    * Gets the ring.
    *
@@ -741,12 +741,12 @@ public class AiryPSFModel extends PsfModel {
         // TODO - We could add a simple interpolation here using a spline from AiryPattern.power()
         continue;
       }
-      final double r = spline.value(p);
+      final double radius = spline.value(p);
 
       // Convert to xy using a random vector generator
       final double[] v = vg.nextVector();
-      x[count] = v[0] * r * w0 + x0;
-      y[count] = v[1] * r * w1 + x1;
+      x[count] = v[0] * radius * w0 + x0;
+      y[count] = v[1] * radius * w1 + x1;
       count++;
     }
 
@@ -767,37 +767,32 @@ public class AiryPSFModel extends PsfModel {
     final int minimalIterationCount = 3;
     final int maximalIterationCount = 32;
 
-    final UnivariateIntegrator integrator = new SimpsonIntegrator(relativeAccuracy,
+    final UnivariateIntegrator integrator = new CustomSimpsonIntegrator(relativeAccuracy,
         absoluteAccuracy, minimalIterationCount, maximalIterationCount);
-    final UnivariateFunction f = new UnivariateFunction() {
-      @Override
-      public double value(double x) {
-        // The pattern profile is in one dimension.
-        // Multiply by the perimeter of a circle to convert to 2D volume then normalise by 4 pi
-        // return AiryPattern.intensity(x) * 2 * Math.PI * x / (4 * Math.PI);
-        return AiryPattern.intensity(x) * 0.5 * x;
-      }
-    };
+    // The pattern profile is in one dimension.
+    // Multiply by the perimeter of a circle to convert to 2D volume then normalise by 4 pi
+    // return AiryPattern.intensity(x) * 2 * Math.PI * x / (4 * Math.PI)
+    final UnivariateFunction f = x -> AiryPattern.intensity(x) * 0.5 * x;
 
     // Integrate up to a set number of dark rings
     final int samples = 1000;
     final double step = RINGS[SAMPLE_RINGS] / samples;
     double to = 0;
     double from = 0;
-    r = new double[samples + 1];
-    sum = new double[samples + 1];
+    double[] radius = new double[samples + 1];
+    double[] sum = new double[samples + 1];
     for (int i = 1; i < sum.length; i++) {
       from = to;
-      r[i] = to = step * i;
+      radius[i] = to = step * i;
       sum[i] = integrator.integrate(2000, f, from, to) + sum[i - 1];
     }
 
     if (DoubleEquality.relativeError(sum[samples], POWER[SAMPLE_RINGS]) > 1e-3) {
-      throw new RuntimeException("Failed to create the Airy distribution");
+      throw new ComputationException("Failed to create the Airy distribution");
     }
 
     final SplineInterpolator si = new SplineInterpolator();
-    spline = si.interpolate(sum, r);
+    spline = si.interpolate(sum, radius);
   }
 
   @Override

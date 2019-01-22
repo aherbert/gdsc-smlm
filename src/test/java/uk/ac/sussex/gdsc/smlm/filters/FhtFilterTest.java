@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class FHTFilterTest {
+public class FhtFilterTest {
   @SeededTest
   public void canCorrelate(RandomSeed seed) {
     canFilter(seed, Operation.CORRELATION);
@@ -166,17 +166,17 @@ public class FHTFilterTest {
     }
   }
 
-  private static FloatProcessor createProcessor(int size, int x, int y, int w, int h,
-      UniformRandomProvider r) {
+  private static FloatProcessor createProcessor(int size, int x, int y, int width, int height,
+      UniformRandomProvider rng) {
     final ByteProcessor bp = new ByteProcessor(size, size);
     bp.setColor(255);
-    bp.fillOval(x, y, w, h);
+    bp.fillOval(x, y, width, height);
     final EDM e = new EDM();
     final FloatProcessor fp = e.makeFloatEDM(bp, 0, true);
-    if (r != null) {
+    if (rng != null) {
       final float[] d = (float[]) fp.getPixels();
       for (int i = 0; i < d.length; i++) {
-        d[i] += r.nextFloat() * 0.01;
+        d[i] += rng.nextFloat() * 0.01;
       }
     }
     return fp;

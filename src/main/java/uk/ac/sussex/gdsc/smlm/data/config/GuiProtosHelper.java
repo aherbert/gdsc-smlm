@@ -53,12 +53,12 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.ClusteringMode;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.ImageMode;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.OpticsMode;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.OutlineMode;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.PlotMode;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.OPTICS.SpanningTreeMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.ClusteringMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.ImageMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.OpticsMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.OutlineMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.PlotMode;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.SpanningTreeMode;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 
 import java.io.File;

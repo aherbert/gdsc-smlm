@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.NullAstigmatismZModel;
@@ -38,7 +39,7 @@ import org.apache.commons.math3.special.Erf;
 /**
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation.
  */
-public class GaussianPSFModel extends PsfModel {
+public class GaussianPsfModel extends PsfModel {
   private double s0;
   private double s1;
   private AstigmatismZModel zModel;
@@ -50,7 +51,7 @@ public class GaussianPSFModel extends PsfModel {
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
    */
-  public GaussianPSFModel(double s0, double s1) {
+  public GaussianPsfModel(double s0, double s1) {
     super();
     zModel = new NullAstigmatismZModel(s0, s1);
   }
@@ -60,12 +61,9 @@ public class GaussianPSFModel extends PsfModel {
    *
    * @param zModel the z model
    */
-  public GaussianPSFModel(AstigmatismZModel zModel) {
+  public GaussianPsfModel(AstigmatismZModel zModel) {
     super();
-    if (zModel == null) {
-      throw new IllegalArgumentException("Model must not be null");
-    }
-    this.zModel = zModel;
+    this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
   }
 
   /**
@@ -75,7 +73,7 @@ public class GaussianPSFModel extends PsfModel {
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
    */
-  public GaussianPSFModel(RandomGenerator randomGenerator, double s0, double s1) {
+  public GaussianPsfModel(RandomGenerator randomGenerator, double s0, double s1) {
     super(randomGenerator);
     zModel = new NullAstigmatismZModel(s0, s1);
   }
@@ -86,12 +84,9 @@ public class GaussianPSFModel extends PsfModel {
    * @param randomGenerator the random generator
    * @param zModel the z model
    */
-  public GaussianPSFModel(RandomGenerator randomGenerator, AstigmatismZModel zModel) {
+  public GaussianPsfModel(RandomGenerator randomGenerator, AstigmatismZModel zModel) {
     super(randomGenerator);
-    if (zModel == null) {
-      throw new IllegalArgumentException("Model must not be null");
-    }
-    this.zModel = zModel;
+    this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
   }
 
   /**
@@ -101,7 +96,7 @@ public class GaussianPSFModel extends PsfModel {
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
    */
-  public GaussianPSFModel(RandomDataGenerator randomDataGenerator, double s0, double s1) {
+  public GaussianPsfModel(RandomDataGenerator randomDataGenerator, double s0, double s1) {
     super(randomDataGenerator);
     zModel = new NullAstigmatismZModel(s0, s1);
   }
@@ -112,19 +107,26 @@ public class GaussianPSFModel extends PsfModel {
    * @param randomDataGenerator the random data generator
    * @param zModel the z model
    */
-  public GaussianPSFModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel) {
+  public GaussianPsfModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel) {
     super(randomDataGenerator);
-    if (zModel == null) {
-      throw new IllegalArgumentException("Model must not be null");
-    }
-    this.zModel = zModel;
+    this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
   }
 
   /**
-   * Private constructor used in the {@link #copy()} method.
+   * Copy constructor.
+   *
+   * @param source the source
+   * @param rng the random generator
    */
-  private GaussianPSFModel() {
-    super();
+  protected GaussianPsfModel(GaussianPsfModel source, RandomGenerator rng) {
+    super(rng);
+    this.zModel = source.zModel;
+    this.range = source.range;
+  }
+
+  @Override
+  public GaussianPsfModel copy(RandomGenerator rng) {
+    return new GaussianPsfModel(this,rng);
   }
 
   @Override
@@ -394,13 +396,6 @@ public class GaussianPSFModel extends PsfModel {
   }
 
   @Override
-  public GaussianPSFModel copy() {
-    final GaussianPSFModel model = new GaussianPSFModel();
-    model.zModel = zModel;
-    return model;
-  }
-
-  @Override
   public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
@@ -573,9 +568,7 @@ public class GaussianPSFModel extends PsfModel {
    * @throws IllegalArgumentException If the range is not strictly positive
    */
   public void setRange(double range) {
-    if (!(range > 0)) {
-      throw new IllegalArgumentException("Range must be strictly positive");
-    }
+    ValidationUtils.checkStrictlyPositive(range, "Range");
     this.range = range;
   }
 }

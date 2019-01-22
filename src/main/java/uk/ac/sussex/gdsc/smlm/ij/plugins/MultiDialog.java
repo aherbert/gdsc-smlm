@@ -50,12 +50,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -64,9 +65,13 @@ import java.util.function.Predicate;
 /**
  * Shows a list of all the results sets held in memory, allowing multiple results to be selected.
  */
-public class MultiDialog extends Dialog
-    implements ActionListener, KeyListener, WindowListener, MouseListener, ItemListener {
-  private static final long serialVersionUID = -881270633231897572L;
+public class MultiDialog extends Dialog {
+  private static final long serialVersionUID = 21012019L;
+
+  /**
+   * Maximum number of items to show in the displayed list.
+   */
+  private static final int MAX_SIZE = 30;
 
   private java.util.List<String> selected;
   private boolean selectAll;
@@ -81,6 +86,119 @@ public class MultiDialog extends Dialog
   private final boolean macro;
 
   private final Items items;
+
+  /**
+   * The last index from {@link ItemEvent#getItem()} captured in
+   * {@link ItemListener#itemStateChanged(ItemEvent)}.
+   */
+  protected int lastIndex;
+
+  /**
+   * The modifiers captured in from {@link MouseListener#mouseClicked(MouseEvent)}.
+   */
+  protected int modifiers;
+
+  /**
+   * The last event from {@link ItemEvent#getStateChange()} captured in
+   * {@link ItemListener#itemStateChanged(ItemEvent)}.
+   */
+  protected int lastEvent = -1;
+
+  private LocalActionListener actionListener = new LocalActionListener();
+  private LocalKeyListener keyListener = new LocalKeyListener();
+  private LocalWindowAdpater windowAdpater = new LocalWindowAdpater();
+  private LocalMouseAdpater mouseAdpater = new LocalMouseAdpater();
+  private LocalItemListener itemListener = new LocalItemListener();
+
+  private class LocalActionListener implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent event) {
+      final Object source = event.getSource();
+      if (source == okay || source == cancel) {
+        wasCanceled = source == cancel;
+        dispose();
+      } else if (source == all) {
+        for (int i = 0; i < list.getItemCount(); i++) {
+          list.select(i);
+        }
+      } else if (source == none) {
+        for (int i = 0; i < list.getItemCount(); i++) {
+          list.deselect(i);
+        }
+      }
+    }
+  }
+
+  private class LocalKeyListener extends KeyAdapter {
+    @Override
+    public void keyPressed(KeyEvent event) {
+      final int keyCode = event.getKeyCode();
+      IJ.setKeyDown(keyCode);
+      if (keyCode == KeyEvent.VK_ENTER) {
+        final Object source = event.getSource();
+        if (source == okay || source == cancel || source == list) {
+          wasCanceled = source == cancel;
+          dispose();
+        } else if (source == all) {
+          for (int i = 0; i < list.getItemCount(); i++) {
+            list.select(i);
+          }
+        } else if (source == none) {
+          for (int i = 0; i < list.getItemCount(); i++) {
+            list.deselect(i);
+          }
+        }
+      } else if (keyCode == KeyEvent.VK_ESCAPE) {
+        wasCanceled = true;
+        dispose();
+        IJ.resetEscape();
+      } else if (keyCode == KeyEvent.VK_W
+          && (event.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
+        wasCanceled = true;
+        dispose();
+      }
+    }
+  }
+
+  private class LocalWindowAdpater extends WindowAdapter {
+    @Override
+    public void windowClosing(WindowEvent event) {
+      wasCanceled = true;
+      dispose();
+    }
+  }
+
+  private class LocalMouseAdpater extends MouseAdapter {
+    @Override
+    public void mouseClicked(MouseEvent event) {
+      modifiers = event.getModifiers();
+    }
+  }
+
+  private class LocalItemListener implements ItemListener {
+    @Override
+    public void itemStateChanged(ItemEvent paramItemEvent) {
+      final int index = (Integer) paramItemEvent.getItem();
+      final int event = paramItemEvent.getStateChange();
+
+      // If we have the shift key down, support multiple select/deselect
+      if (event == lastEvent && (modifiers & InputEvent.SHIFT_MASK) != 0
+          && (event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED) && lastIndex != index) {
+        final int top = Math.max(index, lastIndex);
+        final int bottom = Math.min(index, lastIndex);
+        for (int i = bottom + 1; i < top; i++) {
+          if (event == ItemEvent.SELECTED) {
+            list.select(i);
+          } else {
+            list.deselect(i);
+          }
+        }
+      }
+
+      lastEvent = event;
+      lastIndex = index;
+    }
+  }
 
   /**
    * Interface to allow a list of any type to be shown in the MultiDialog.
@@ -184,14 +302,19 @@ public class MultiDialog extends Dialog
    * @param items the items
    */
   public MultiDialog(String title, Items items) {
-    super(WindowManager.getCurrentImage() != null
-        ? (Frame) WindowManager.getCurrentImage().getWindow()
-        : IJ.getInstance() != null ? IJ.getInstance() : new Frame(), title, true);
-    addKeyListener(this);
-    addWindowListener(this);
+    super(getDialogOwner(), title, true);
+    addKeyListener(keyListener);
+    addWindowListener(windowAdpater);
     macroOptions = Macro.getOptions();
     macro = macroOptions != null;
     this.items = items;
+  }
+
+  private static Frame getDialogOwner() {
+    if (WindowManager.getCurrentImage() != null) {
+      return WindowManager.getCurrentImage().getWindow();
+    }
+    return IJ.getInstance();
   }
 
   /**
@@ -230,7 +353,7 @@ public class MultiDialog extends Dialog
       dispose();
     } else {
       add(buildPanel());
-      this.addKeyListener(this);
+      this.addKeyListener(keyListener);
       if (IJ.isMacintosh()) {
         setResizable(false);
       }
@@ -262,7 +385,6 @@ public class MultiDialog extends Dialog
    * @return the component
    */
   protected Component buildResultsList() {
-    final int MAX_SIZE = 30;
     final int size = items.size();
     final int rows = (size < MAX_SIZE) ? size : MAX_SIZE;
     list = new List(rows, true);
@@ -276,9 +398,9 @@ public class MultiDialog extends Dialog
       }
     }
 
-    list.addMouseListener(this);
-    list.addItemListener(this);
-    list.addKeyListener(this);
+    list.addMouseListener(mouseAdpater);
+    list.addItemListener(itemListener);
+    list.addKeyListener(keyListener);
 
     return list;
   }
@@ -292,20 +414,20 @@ public class MultiDialog extends Dialog
     final Panel buttons = new Panel();
     buttons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
     all = new Button("All");
-    all.addActionListener(this);
-    all.addKeyListener(this);
+    all.addActionListener(actionListener);
+    all.addKeyListener(keyListener);
     buttons.add(all);
     none = new Button("None");
-    none.addActionListener(this);
-    none.addKeyListener(this);
+    none.addActionListener(actionListener);
+    none.addKeyListener(keyListener);
     buttons.add(none);
     okay = new Button("OK");
-    okay.addActionListener(this);
-    okay.addKeyListener(this);
+    okay.addActionListener(actionListener);
+    okay.addKeyListener(keyListener);
     buttons.add(okay);
     cancel = new Button("Cancel");
-    cancel.addActionListener(this);
-    cancel.addKeyListener(this);
+    cancel.addActionListener(actionListener);
+    cancel.addKeyListener(keyListener);
     buttons.add(cancel);
     return buttons;
   }
@@ -319,102 +441,45 @@ public class MultiDialog extends Dialog
     return wasCanceled;
   }
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    final Object source = event.getSource();
-    if (source == okay || source == cancel) {
-      wasCanceled = source == cancel;
-      dispose();
-    } else if (source == all) {
-      for (int i = 0; i < list.getItemCount(); i++) {
-        list.select(i);
-      }
-    } else if (source == none) {
-      for (int i = 0; i < list.getItemCount(); i++) {
-        list.deselect(i);
-      }
-    }
-  }
-
-  @Override
-  public void keyTyped(KeyEvent paramKeyEvent) {
-    // Ignore
-  }
-
-  @Override
-  public void keyPressed(KeyEvent event) {
-    final int keyCode = event.getKeyCode();
-    IJ.setKeyDown(keyCode);
-    if (keyCode == KeyEvent.VK_ENTER) {
-      final Object source = event.getSource();
-      if (source == okay || source == cancel || source == list) {
-        wasCanceled = source == cancel;
-        dispose();
-      } else if (source == all) {
-        for (int i = 0; i < list.getItemCount(); i++) {
-          list.select(i);
-        }
-      } else if (source == none) {
-        for (int i = 0; i < list.getItemCount(); i++) {
-          list.deselect(i);
-        }
-      }
-    } else if (keyCode == KeyEvent.VK_ESCAPE) {
-      wasCanceled = true;
-      dispose();
-      IJ.resetEscape();
-    } else if (keyCode == KeyEvent.VK_W
-        && (event.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
-      wasCanceled = true;
-      dispose();
-    }
-  }
-
-  @Override
-  public void keyReleased(KeyEvent paramKeyEvent) {
-    // Ignore
-  }
-
   /**
    * Gets the selected results from the dialog.
    *
    * @return the selected results
    */
-  public ArrayList<String> getSelectedResults() {
-    ArrayList<String> selected;
+  public java.util.List<String> getSelectedResults() {
+    ArrayList<String> selectedResults;
 
     // Get the selected names
     if (macro) {
-      selected = new ArrayList<>();
+      selectedResults = new ArrayList<>();
       String name = getValue("input");
       while (name != null) {
-        selected.add(name);
-        name = getValue("input" + selected.size());
+        selectedResults.add(name);
+        name = getValue("input" + selectedResults.size());
       }
     } else {
       final int[] listIndexes = list.getSelectedIndexes();
-      selected = new ArrayList<>(listIndexes.length);
+      selectedResults = new ArrayList<>(listIndexes.length);
       if (listIndexes.length > 0) {
         for (final int index : listIndexes) {
-          selected.add(items.removeFormatting(list.getItem(index)));
+          selectedResults.add(items.removeFormatting(list.getItem(index)));
         }
       }
     }
 
     // Record as if we use the multiple_inputs option
-    if ((macro && Recorder.record && Recorder.recordInMacros) || Recorder.record) {
-      if (!selected.isEmpty()) {
-        Recorder.recordOption("Input", selected.get(0));
-        if (selected.size() > 1) {
-          Recorder.recordOption("Multiple_inputs");
-          for (int n = 1; n < selected.size(); ++n) {
-            Recorder.recordOption("Input" + n, selected.get(n));
-          }
+    if (((macro && Recorder.record && Recorder.recordInMacros) || Recorder.record)
+        && !selectedResults.isEmpty()) {
+      Recorder.recordOption("Input", selectedResults.get(0));
+      if (selectedResults.size() > 1) {
+        Recorder.recordOption("Multiple_inputs");
+        for (int n = 1; n < selectedResults.size(); ++n) {
+          Recorder.recordOption("Input" + n, selectedResults.get(n));
         }
       }
     }
 
-    return selected;
+    return selectedResults;
   }
 
   /**
@@ -438,119 +503,5 @@ public class MultiDialog extends Dialog
       }
     }
     return theText;
-  }
-
-  @Override
-  public void windowClosing(WindowEvent event) {
-    wasCanceled = true;
-    dispose();
-  }
-
-  //@formatter:off
-  @Override
-  public void windowActivated(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void windowOpened(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void windowClosed(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void windowIconified(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void windowDeiconified(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void windowDeactivated(WindowEvent event)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void mousePressed(MouseEvent paramMouseEvent)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void mouseReleased(MouseEvent paramMouseEvent)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void mouseEntered(MouseEvent paramMouseEvent)
-    {
-    // Ignore
-  }
-
-  @Override
-  public void mouseExited(MouseEvent paramMouseEvent)
-    {
-    // Ignore
-  }
-
-  //@formatter:on
-
-  /**
-   * The last index from {@link ItemEvent#getItem()} captured in
-   * {@link #itemStateChanged(ItemEvent)}.
-   */
-  protected int lastIndex;
-
-  /**
-   * The modifiers captured in from {@link #mouseClicked(MouseEvent)}.
-   */
-  protected int modifiers;
-
-  /**
-   * The last event from {@link ItemEvent#getStateChange()} captured in
-   * {@link #itemStateChanged(ItemEvent)}.
-   */
-  protected int lastEvent = -1;
-
-  @Override
-  public void mouseClicked(MouseEvent paramMouseEvent) {
-    modifiers = paramMouseEvent.getModifiers();
-  }
-
-  @Override
-  public void itemStateChanged(ItemEvent paramItemEvent) {
-    final int index = (Integer) paramItemEvent.getItem();
-    final int event = paramItemEvent.getStateChange();
-
-    // If we have the shift key down, support multiple select/deselect
-    if (event == lastEvent && (modifiers & InputEvent.SHIFT_MASK) != 0
-        && (event == ItemEvent.SELECTED || event == ItemEvent.DESELECTED) && lastIndex != index) {
-      final int top = Math.max(index, lastIndex);
-      final int bottom = Math.min(index, lastIndex);
-      for (int i = bottom + 1; i < top; i++) {
-        if (event == ItemEvent.SELECTED) {
-          list.select(i);
-        } else {
-          list.deselect(i);
-        }
-      }
-    }
-
-    lastEvent = event;
-    lastIndex = index;
   }
 }

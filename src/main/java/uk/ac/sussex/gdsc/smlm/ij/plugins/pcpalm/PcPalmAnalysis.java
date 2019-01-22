@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 
 import com.thoughtworks.xstream.XStream;
@@ -125,7 +125,7 @@ public class PcPalmAnalysis implements PlugInFilter {
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if ("save".equalsIgnoreCase(arg)) {
       return saveResults();
@@ -514,15 +514,17 @@ public class PcPalmAnalysis implements PlugInFilter {
       // A simple solution is to only process molecules within the border but compare them
       // to all molecules within the region. Thus every molecule has a complete circle of the max
       // radius around them to use:
+      // @formatter:off
       // ----------------------
-      // | |
-      // | -------------- |
-      // | | Within | |
-      // | | Border | |
-      // | | | |
-      // | -------------- |
-      // | Region |
+      // |                    |
+      // |   --------------   |
+      // |   |  Within    |   |
+      // |   |  Border    |   |
+      // |   |            |   |
+      // |   --------------   |
+      // |      Region        |
       // ----------------------
+      // @formatter:on
       // If the fraction of points within the correlation distance of the edge is low then this
       // will not make much difference.
 
@@ -531,7 +533,7 @@ public class PcPalmAnalysis implements PlugInFilter {
       final double boundaryMiny = (useBorder) ? miny + correlationDistance : miny;
       final double boundaryMaxy = (useBorder) ? maxy - correlationDistance : maxy;
 
-      int N = 0;
+      int countN = 0;
       if (boundaryMaxx <= boundaryMinx || boundaryMaxy <= boundaryMiny) {
         log("ERROR: 'Use border' option of %s nm is not possible: Width = %s nm, Height = %s nm",
             MathUtils.rounded(correlationDistance, 4), MathUtils.rounded(maxx - minx, 3),
@@ -546,7 +548,7 @@ public class PcPalmAnalysis implements PlugInFilter {
             || m.y > boundaryMaxy)) {
           continue;
         }
-        N++;
+        countN++;
 
         for (int j = molecules.size(); j-- > 0;) {
           if (i == j) {
@@ -560,36 +562,36 @@ public class PcPalmAnalysis implements PlugInFilter {
         }
       }
 
-      double[] r = new double[nBins + 1];
+      double[] radius = new double[nBins + 1];
       for (int i = 0; i <= nBins; i++) {
-        r[i] = i * correlationInterval;
+        radius[i] = i * correlationInterval;
       }
       double[] pcf = new double[nBins];
-      if (N > 0) {
+      if (countN > 0) {
         // Note: Convert nm^2 to um^2
-        final double N_pi = N * Math.PI / 1000000.0;
+        final double npi = countN * Math.PI / 1000000.0;
         for (int i = 0; i < nBins; i++) {
           // Pair-correlation is the count at the given distance divided by N and the area at
           // distance ri:
           // H(r_i) / (N x (pi x (r_i+1)^2 - pi x r_i^2))
-          pcf[i] = H[i] / (N_pi * (r[i + 1] * r[i + 1] - r[i] * r[i]));
+          pcf[i] = H[i] / (npi * (radius[i + 1] * radius[i + 1] - radius[i] * radius[i]));
         }
       }
 
       // The final bin may be empty if the correlation interval was a factor of the correlation
       // distance
       if (pcf[pcf.length - 1] == 0) {
-        r = Arrays.copyOf(r, nBins - 1);
+        radius = Arrays.copyOf(radius, nBins - 1);
         pcf = Arrays.copyOf(pcf, nBins - 1);
       } else {
-        r = Arrays.copyOf(r, nBins);
+        radius = Arrays.copyOf(radius, nBins);
       }
 
-      final double[][] gr = new double[][] {r, pcf, null};
+      final double[][] gr = new double[][] {radius, pcf, null};
 
       final CorrelationResult result = new CorrelationResult(results.size() + 1,
           PcPalmMolecules.results.getSource(), boundaryMinx, boundaryMiny, boundaryMaxx,
-          boundaryMaxy, N, correlationInterval, 0, false, gr, true);
+          boundaryMaxy, countN, correlationInterval, 0, false, gr, true);
       results.add(result);
 
       noPlots = WindowManager.getFrame(spatialPlotTitle) == null;
@@ -620,12 +622,12 @@ public class PcPalmAnalysis implements PlugInFilter {
       }
 
       // Create weight image (including windowing)
-      ImageProcessor w = createWeightImage(im, applyWindow);
+      ImageProcessor wp = createWeightImage(im, applyWindow);
 
       // Store the area of the image in um^2
       weightedAreaInPx = areaInPx = im.getWidth() * im.getHeight();
       if (applyWindow) {
-        weightedAreaInPx *= w.getStatistics().mean;
+        weightedAreaInPx *= wp.getStatistics().mean;
       }
       area = areaInPx * nmPerPixel * nmPerPixel / 1e6;
       weightedArea = weightedAreaInPx * nmPerPixel * nmPerPixel / 1e6;
@@ -642,7 +644,7 @@ public class PcPalmAnalysis implements PlugInFilter {
       final int pad = (int) Math.round(maxRadius);
       log("Analysing up to %.0f nm = %d pixels", maxRadius * nmPerPixel, pad);
       im = padImage(im, pad);
-      w = padImage(w, pad);
+      wp = padImage(wp, pad);
 
       // // Used for debugging
       // {
@@ -658,10 +660,10 @@ public class PcPalmAnalysis implements PlugInFilter {
       double[][] gr;
       try {
         // Use the FFT library as it is multi-threaded. This may not be in the user's path.
-        gr = computeAutoCorrelationCurveFFT(im, w, pad, nmPerPixel, peakDensity);
+        gr = computeAutoCorrelationCurvefft(im, wp, pad, nmPerPixel, peakDensity);
       } catch (final Exception ex) {
         // Default to the ImageJ built-in FHT
-        gr = computeAutoCorrelationCurveFHT(im, w, pad, nmPerPixel, peakDensity);
+        gr = computeAutoCorrelationCurveFht(im, wp, pad, nmPerPixel, peakDensity);
       }
       if (gr == null) {
         return;
@@ -768,11 +770,11 @@ public class PcPalmAnalysis implements PlugInFilter {
   private static ImageProcessor createWeightImage(ImageProcessor im, boolean applyWindow) {
     final float[] data = new float[im.getWidth() * im.getHeight()];
     Arrays.fill(data, 1);
-    ImageProcessor w = new FloatProcessor(im.getWidth(), im.getHeight(), data, null);
+    ImageProcessor wp = new FloatProcessor(im.getWidth(), im.getHeight(), data, null);
     if (applyWindow) {
-      w = applyWindow(w, imageWindow);
+      wp = applyWindow(wp, imageWindow);
     }
-    return w;
+    return wp;
   }
 
   /**
@@ -781,25 +783,25 @@ public class PcPalmAnalysis implements PlugInFilter {
    * at a given radius.
    *
    * @param im the image
-   * @param w the w
+   * @param wp the weighted image
    * @param maxRadius the max radius
    * @param nmPerPixel the nm per pixel
    * @param density the density
    * @return { distances[], gr[], gr_se[] }
    */
-  private static double[][] computeAutoCorrelationCurveFHT(ImageProcessor im, ImageProcessor w,
+  private static double[][] computeAutoCorrelationCurveFht(ImageProcessor im, ImageProcessor wp,
       int maxRadius, double nmPerPixel, double density) {
     log("Creating Hartley transforms");
-    final Fht fht2Im = padToFHT2(im);
-    final Fht fht2W = padToFHT2(w);
+    final Fht fht2Im = padToFht2(im);
+    final Fht fht2W = padToFht2(wp);
     if (fht2Im == null || fht2W == null) {
       error("Unable to perform Hartley transform");
       return null;
     }
 
     log("Performing correlation");
-    final FloatProcessor corrIm = computeAutoCorrelationFHT(fht2Im);
-    final FloatProcessor corrW = computeAutoCorrelationFHT(fht2W);
+    final FloatProcessor corrIm = computeAutoCorrelationFht(fht2Im);
+    final FloatProcessor corrW = computeAutoCorrelationFht(fht2W);
 
     IJ.showProgress(1);
 
@@ -856,17 +858,17 @@ public class PcPalmAnalysis implements PlugInFilter {
    * the image at radii up to the specified length to get the average correlation at a given radius.
    *
    * @param im the image
-   * @param w the w
+   * @param wp the weighted image
    * @param maxRadius the max radius
    * @param nmPerPixel the nm per pixel
    * @param density the density
    * @return { distances[], gr[], gr_se[] }
    */
-  private static double[][] computeAutoCorrelationCurveFFT(ImageProcessor im, ImageProcessor w,
+  private static double[][] computeAutoCorrelationCurvefft(ImageProcessor im, ImageProcessor wp,
       int maxRadius, double nmPerPixel, double density) {
     log("Performing FFT correlation");
-    final FloatProcessor corrIm = computeAutoCorrelationFFT(im);
-    final FloatProcessor corrW = computeAutoCorrelationFFT(w);
+    final FloatProcessor corrIm = computeAutoCorrelationFft(im);
+    final FloatProcessor corrW = computeAutoCorrelationFft(wp);
     if (corrIm == null || corrW == null) {
       error("Unable to perform Fourier transform");
       return null;
@@ -967,11 +969,11 @@ public class PcPalmAnalysis implements PlugInFilter {
    * @param fftIm in frequency domain
    * @return the auto correlation FHT.
    */
-  private static FloatProcessor computeAutoCorrelationFHT(Fht fftIm) {
-    final Fht FHT2 = fftIm.conjugateMultiply(fftIm);
-    FHT2.inverseTransform();
-    FHT2.swapQuadrants();
-    return FHT2;
+  private static FloatProcessor computeAutoCorrelationFht(Fht fftIm) {
+    final Fht fht2 = fftIm.conjugateMultiply(fftIm);
+    fht2.inverseTransform();
+    fht2.swapQuadrants();
+    return fht2;
   }
 
   private static FloatProcessor normaliseCorrelation(FloatProcessor corrIm, FloatProcessor corrW,
@@ -997,14 +999,14 @@ public class PcPalmAnalysis implements PlugInFilter {
    * @param ip the image
    * @return An FHT2 image in the frequency domain
    */
-  private static Fht padToFHT2(ImageProcessor ip) {
+  private static Fht padToFht2(ImageProcessor ip) {
     final FloatProcessor im2 = pad(ip);
     if (im2 == null) {
       return null;
     }
-    final Fht FHT2 = new Fht(im2);
-    FHT2.transform();
-    return FHT2;
+    final Fht fht2 = new Fht(im2);
+    fht2.transform();
+    return fht2;
   }
 
   /**
@@ -1050,14 +1052,14 @@ public class PcPalmAnalysis implements PlugInFilter {
    * @param ip the image
    * @return the auto correlation.
    */
-  private static FloatProcessor computeAutoCorrelationFFT(ImageProcessor ip) {
+  private static FloatProcessor computeAutoCorrelationFft(ImageProcessor ip) {
     final FloatProcessor paddedIp = pad(ip);
     if (paddedIp == null) {
       return null;
     }
     final int size = paddedIp.getWidth();
 
-    final boolean doubleFFT = false;
+    final boolean doubleFft = false;
     final float[] pixels = (float[]) paddedIp.getPixels();
 
     final float[] correlation = new float[size * size];
@@ -1070,7 +1072,7 @@ public class PcPalmAnalysis implements PlugInFilter {
     // Correlation = fft^-1(abs(fft).^2)
     // The absolute value of a complex number z = x + y*i is the value sqrt(x*x+y*y).
 
-    if (doubleFFT) {
+    if (doubleFft) {
       final DoubleFFT_2D fft = new DoubleFFT_2D(size, size);
       final double[] data = new double[size * size * 2];
       for (int i = 0; i < pixels.length; i++) {

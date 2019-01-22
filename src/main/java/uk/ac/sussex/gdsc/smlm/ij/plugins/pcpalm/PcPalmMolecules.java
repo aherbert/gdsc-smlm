@@ -51,7 +51,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 import uk.ac.sussex.gdsc.smlm.model.StandardFluorophoreSequenceModel;
 import uk.ac.sussex.gdsc.smlm.model.UniformDistribution;
@@ -125,12 +125,12 @@ import java.util.List;
  */
 public class PcPalmMolecules implements PlugIn {
   /** The title. */
-  static String TITLE = "PC-PALM Molecules";
+  static final String TITLE = "PC-PALM Molecules";
   private static String inputOption = "";
   private static boolean chooseRoi;
   private static double nmPerPixelLimit;
 
-  private static String[] RUN_MODE =
+  private static final String[] RUN_MODE =
       {"PC-PALM", "Manual Tracing", "In-memory results", "Simulation"};
   private static int runMode;
 
@@ -146,7 +146,7 @@ public class PcPalmMolecules implements PlugIn {
   /** The blinking rate. */
   static double blinkingRate = 2;
   private static double p = 0.6;
-  private static String[] BLINKING_DISTRIBUTION =
+  private static final String[] BLINKING_DISTRIBUTION =
       new String[] {"Poisson", "Geometric", "None", "Binomial"};
   private static int blinkingDistribution;
   private static boolean clearResults;
@@ -163,7 +163,7 @@ public class PcPalmMolecules implements PlugIn {
   private static double simulationSize = 16;
   private static boolean distanceAnalysis;
 
-  private static String[] CLUSTER_SIMULATION =
+  private static final String[] CLUSTER_SIMULATION =
       new String[] {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
   private static int clusterSimulation;
   private static double clusterNumber = 3;
@@ -210,7 +210,7 @@ public class PcPalmMolecules implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // Require some fit results and selected regions
     final boolean resultsAvailable = MemoryPeakResults.countMemorySize() > 0;
@@ -250,7 +250,7 @@ public class PcPalmMolecules implements PlugIn {
     // Different run-modes for generating the set of molecules for analysis
     switch (runMode) {
       case 0:
-        runPCPALM();
+        runPcPalm();
         break;
       case 1:
         runManualTracing();
@@ -490,8 +490,8 @@ public class PcPalmMolecules implements PlugIn {
     return newResults;
   }
 
-  private void runPCPALM() {
-    if (!showPCPALMDialog()) {
+  private void runPcPalm() {
+    if (!showPcPalmDialog()) {
       return;
     }
 
@@ -527,7 +527,7 @@ public class PcPalmMolecules implements PlugIn {
     start = System.currentTimeMillis();
   }
 
-  private static boolean showPCPALMDialog() {
+  private static boolean showPcPalmDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -1260,8 +1260,8 @@ public class PcPalmMolecules implements PlugIn {
             // Generate N random points within a circle of the chosen cluster radius.
             // Locate the centre-of-mass and the average distance to the centre.
             final double[] com = new double[3];
-            int j = 0;
-            while (j < clusterN) {
+            int size = 0;
+            while (size < clusterN) {
               // Generate a random point within a circle uniformly
               // http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
               final double t = 2.0 * Math.PI * randomGenerator.nextDouble();
@@ -1274,22 +1274,22 @@ public class PcPalmMolecules implements PlugIn {
               for (int k = 0; k < 2; k++) {
                 com[k] += xy[k];
               }
-              j++;
+              size++;
             }
             // Add the distance of the points from the centre of the cluster.
             // Note this does not account for the movement due to precision.
-            statsSize.add(j);
-            if (j == 1) {
+            statsSize.add(size);
+            if (size == 1) {
               statsRadius.add(0);
             } else {
               for (int k = 0; k < 2; k++) {
-                com[k] /= j;
+                com[k] /= size;
               }
-              while (j > 0) {
-                final double dx = xyz.get(xyz.size() - j)[0] - com[0];
-                final double dy = xyz.get(xyz.size() - j)[1] - com[1];
+              while (size > 0) {
+                final double dx = xyz.get(xyz.size() - size)[0] - com[0];
+                final double dy = xyz.get(xyz.size() - size)[1] - com[1];
                 statsRadius.add(Math.sqrt(dx * dx + dy * dy));
-                j--;
+                size--;
               }
             }
           }
@@ -1317,9 +1317,9 @@ public class PcPalmMolecules implements PlugIn {
 
     final Statistics statsSigma = new Statistics();
     for (int i = 0; i < xyz.size(); i++) {
-      int nOccurrences = getBlinks(dataGenerator, blinkingRate);
+      int occurrences = getBlinks(dataGenerator, blinkingRate);
       if (blinks != null) {
-        blinks.add(nOccurrences);
+        blinks.add(occurrences);
       }
 
       final int size = molecules.size();
@@ -1327,12 +1327,12 @@ public class PcPalmMolecules implements PlugIn {
       // Get coordinates in nm
       final double[] moleculeXyz = xyz.get(i);
 
-      if (bp != null && nOccurrences > 0) {
+      if (bp != null && occurrences > 0) {
         bp.putPixel((int) Math.round(moleculeXyz[0] / maskScale),
             (int) Math.round(moleculeXyz[1] / maskScale), 255);
       }
 
-      while (nOccurrences-- > 0) {
+      while (occurrences-- > 0) {
         final double[] localisationXy = Arrays.copyOf(moleculeXyz, 2);
         // Add random precision
         if (sigma1D > 0) {
@@ -1566,10 +1566,10 @@ public class PcPalmMolecules implements PlugIn {
       return;
     }
 
-    int n = 0;
+    int count = 0;
     final int[] dx2 = new int[roiRadius * 2 + 1];
     for (int x = minx; x <= maxx; x++) {
-      dx2[n++] = (cx - x) * (cx - x);
+      dx2[count++] = (cx - x) * (cx - x);
     }
 
     if (miny < 0 || maxy >= maskSize) {
@@ -1581,7 +1581,7 @@ public class PcPalmMolecules implements PlugIn {
           break;
         }
         final int limit = r2 - (dy * dy);
-        for (int i = y * maskSize + minx, nn = 0; nn < n; i++, nn++) {
+        for (int i = y * maskSize + minx, nn = 0; nn < count; i++, nn++) {
           if (dx2[nn] <= limit) {
             mask[i] = fill;
           }
@@ -1590,7 +1590,7 @@ public class PcPalmMolecules implements PlugIn {
     } else {
       for (int y = miny, dy = -roiRadius; y <= maxy; y++, dy++) {
         final int limit = r2 - (dy * dy);
-        for (int i = y * maskSize + minx, nn = 0; nn < n; i++, nn++) {
+        for (int i = y * maskSize + minx, nn = 0; nn < count; i++, nn++) {
           if (dx2[nn] <= limit) {
             mask[i] = fill;
           }
@@ -1692,12 +1692,12 @@ public class PcPalmMolecules implements PlugIn {
     }
 
     @Override
-    public void execute(PeakResult r) {
-      if (start > r.getFrame()) {
-        start = r.getFrame();
+    public void execute(PeakResult result) {
+      if (start > result.getFrame()) {
+        start = result.getFrame();
       }
-      if (end < r.getEndFrame()) {
-        end = r.getEndFrame();
+      if (end < result.getEndFrame()) {
+        end = result.getEndFrame();
       }
     }
   }
@@ -1775,7 +1775,7 @@ public class PcPalmMolecules implements PlugIn {
     }
 
     // Find the minimum distance between molecules.
-    double dMin = Double.POSITIVE_INFINITY;
+    double distanceMin = Double.POSITIVE_INFINITY;
 
     IJ.showStatus("Computing minimum distance ...");
     IJ.showProgress(0);
@@ -1786,9 +1786,11 @@ public class PcPalmMolecules implements PlugIn {
 
         for (Molecule m1 = grid[xbin][ybin]; m1 != null; m1 = m1.next) {
           // Build a list of which cells to compare up to a maximum of 4
-          // | 0,0 | 1,0
+          // @formatter:off
+          //      | 0,0 | 1,0
           // ------------+-----
           // -1,1 | 0,1 | 1,1
+          // @formatter:on
 
           int count = 0;
           neighbours[count++] = m1.next;
@@ -1809,8 +1811,8 @@ public class PcPalmMolecules implements PlugIn {
           // Compare to neighbours
           while (count-- > 0) {
             for (Molecule m2 = neighbours[count]; m2 != null; m2 = m2.next) {
-              if (dMin > m1.distance2(m2)) {
-                dMin = m1.distance2(m2);
+              if (distanceMin > m1.distance2(m2)) {
+                distanceMin = m1.distance2(m2);
               }
             }
           }
@@ -1820,7 +1822,7 @@ public class PcPalmMolecules implements PlugIn {
     IJ.showStatus("");
     IJ.showProgress(1);
 
-    nmPerPixel = Math.sqrt(dMin);
+    nmPerPixel = Math.sqrt(distanceMin);
     log("Minimum distance between molecules = %g nm", nmPerPixel);
     if (nmPerPixel == 0 && nmPerPixelLimit == 0) {
       IJ.error(TITLE, "Zero minimum distance between molecules - please enter a nm/pixel limit "

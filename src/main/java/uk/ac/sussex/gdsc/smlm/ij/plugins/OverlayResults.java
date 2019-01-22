@@ -57,6 +57,8 @@ import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Produces a summary table of the results that are stored in memory.
@@ -75,7 +77,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   private int currentIndex;
   private int currentSlice = -1;
 
-  private class Job {
+  private static class Job {
     final int index;
 
     Job(int index) {
@@ -83,23 +85,23 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     }
   }
 
-  private class InBox {
+  private static class InBox {
     private Job job;
 
     synchronized void add(int index) {
       this.job = new Job(index);
-      this.notify();
+      this.notifyAll();
     }
 
     synchronized void close() {
       this.job = null;
-      this.notify();
+      this.notifyAll();
     }
 
     synchronized Job next() {
-      final Job job = this.job;
+      final Job nextJob = this.job;
       this.job = null;
-      return job;
+      return nextJob;
     }
 
     boolean isEmpty() {
@@ -149,7 +151,10 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
           currentIndex = job.index;
           drawOverlay();
         } catch (final InterruptedException ex) {
-          break;
+          running = false;
+          Logger.getLogger(OverlayResults.class.getName()).log(Level.WARNING,
+              "Unexpected intteruption", ex);
+          Thread.currentThread().interrupt();
         }
       }
       clearOldOverlay();
@@ -311,8 +316,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
       if (table != null) {
         table.end();
-        final TextWindow tw = table.getResultsWindow();
-        final TextPanel tp = tw.getTextPanel();
+        final TextPanel tp = table.getResultsWindow().getTextPanel();
         tp.scrollToTop();
 
         // Reselect the same Id
@@ -340,7 +344,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -349,27 +353,27 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
     names = new String[MemoryPeakResults.getResultNames().size() + 1];
     ids = new int[names.length];
-    int c = 0;
-    names[c++] = "(None)";
+    int count = 0;
+    names[count++] = "(None)";
     for (final MemoryPeakResults results : MemoryPeakResults.getAllResults()) {
       if (results.getSource() != null
           && results.getSource().getOriginal() instanceof IJImageSource) {
         final IJImageSource source = (IJImageSource) (results.getSource().getOriginal());
         final ImagePlus imp = WindowManager.getImage(source.getName());
         if (imp != null) {
-          ids[c] = imp.getID();
-          names[c++] = results.getName();
+          ids[count] = imp.getID();
+          names[count++] = results.getName();
         }
       }
     }
-    if (c == 1) {
+    if (count == 1) {
       IJ.error(TITLE, "There are no result images available");
       return;
     }
-    names = Arrays.copyOf(names, c);
+    names = Arrays.copyOf(names, count);
 
-    Thread t = null;
-    Worker w = null;
+    Thread thread = null;
+    Worker worker = null;
     final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
     gd.addMessage("Overlay results on current image frame");
     gd.addChoice("Results", names, (name == null) ? "" : name);
@@ -390,9 +394,10 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
 
       show();
 
-      t = new Thread(w = new Worker());
-      t.setDaemon(true);
-      t.start();
+      worker = new Worker();
+      thread = new Thread(worker);
+      thread.setDaemon(true);
+      thread.start();
     }
     gd.showDialog();
     if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless())) {
@@ -402,15 +407,15 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
       name = gd.getNextChoice();
       showTable = gd.getNextBoolean();
     }
-    if (t != null && w != null) {
-      w.running = false;
+    if (thread != null && worker != null) {
+      worker.running = false;
       inbox.close();
       try {
-        t.join(0);
+        thread.join(0);
       } catch (final InterruptedException ex) {
-        // Ignore
+        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unexpected intteruption", ex);
+        Thread.currentThread().interrupt();
       }
-      t = null;
     }
   }
 

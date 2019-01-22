@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,7 +62,7 @@ import java.util.logging.Logger;
  */
 public class TraceExporter implements PlugIn {
   private static final String TITLE = "Trace Exporter";
-  private static ArrayList<String> selected;
+  private static List<String> selected;
   private static String directory = "";
   private static int minLength = 2;
   private static int maxJump = 1;
@@ -105,7 +106,7 @@ public class TraceExporter implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final MemoryResultsItems items = new MemoryResultsItems(MemoryPeakResults::hasId);
 

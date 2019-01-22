@@ -70,6 +70,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -761,7 +762,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final ConfigurationTemplateSettings.Builder settings =
         SettingsManager.readConfigurationTemplateSettings(0).toBuilder();
@@ -834,7 +835,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       return;
     }
 
-    final ArrayList<String> selected = md.getSelectedResults();
+    final List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       return;
     }
@@ -933,7 +934,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       return;
     }
 
-    final ArrayList<String> selected = md.getSelectedResults();
+    final List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       return;
     }
@@ -986,7 +987,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       return;
     }
 
-    final ArrayList<String> selected = md.getSelectedResults();
+    final List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       // Nothing to do
       return;

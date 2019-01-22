@@ -220,7 +220,7 @@ public class LoadLocalisations implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final LoadLocalisationsSettings.Builder settings =
         SettingsManager.readLoadLocalisationsSettings(0).toBuilder();

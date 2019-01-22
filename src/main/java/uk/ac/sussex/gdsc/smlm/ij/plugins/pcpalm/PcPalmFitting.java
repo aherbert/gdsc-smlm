@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 
@@ -74,7 +74,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -145,7 +144,7 @@ public class PcPalmFitting implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // if (PCPALMAnalysis.results.isEmpty())
     // {
@@ -448,9 +447,9 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private static boolean alreadySelected(ArrayList<CorrelationResult> results,
-      CorrelationResult r) {
+      CorrelationResult result) {
     for (final CorrelationResult r2 : results) {
-      if (r.id == r2.id) {
+      if (result.id == r2.id) {
         return true;
       }
     }
@@ -579,17 +578,17 @@ public class PcPalmFitting implements PlugIn {
       double[] parameters) {
     double[] x = new double[gr[0].length];
     double[] y = new double[x.length];
-    int j = 0;
+    int count = 0;
     for (int i = offset; i < gr[0].length; i++) {
       // Output points that were not fitted
       if (gr[0][i] < randomModel.getX()[0]) {
-        x[j] = gr[0][i];
-        y[j] = model.evaluate(gr[0][i], parameters);
-        j++;
+        x[count] = gr[0][i];
+        y[count] = model.evaluate(gr[0][i], parameters);
+        count++;
       }
     }
-    x = Arrays.copyOf(x, j);
-    y = Arrays.copyOf(y, j);
+    x = Arrays.copyOf(x, count);
+    y = Arrays.copyOf(y, count);
     plot.addPoints(x, y, Plot.CIRCLE);
   }
 
@@ -752,14 +751,11 @@ public class PcPalmFitting implements PlugIn {
         try (Scanner scanner = new Scanner(line)) {
           scanner.useDelimiter("[\t ,]+");
 
-          double r;
-          double g;
+          double radius;
+          double gr;
           try {
-            r = scanner.nextDouble();
-            g = scanner.nextDouble();
-          } catch (final InputMismatchException ex) {
-            IJ.error(TITLE, "Incorrect fields on line " + count);
-            return false;
+            radius = scanner.nextDouble();
+            gr = scanner.nextDouble();
           } catch (final NoSuchElementException ex) {
             IJ.error(TITLE, "Incorrect fields on line " + count);
             return false;
@@ -768,12 +764,10 @@ public class PcPalmFitting implements PlugIn {
           double error = 0;
           try {
             error = scanner.nextDouble();
-          } catch (final InputMismatchException ex) {
-            // Ignore
           } catch (final NoSuchElementException ex) {
             // Ignore
           }
-          data.add(new double[] {r, g, error});
+          data.add(new double[] {radius, gr, error});
         }
 
         // Read the next line
@@ -1117,8 +1111,8 @@ public class PcPalmFitting implements PlugIn {
     return parameters;
   }
 
-  private PointValuePair runBoundedOptimiser(double[] initialSolution, double[] lB, double[] uB,
-      SumOfSquaresModelFunction function) {
+  private PointValuePair runBoundedOptimiser(double[] initialSolution, double[] lowerB,
+      double[] upperB, SumOfSquaresModelFunction function) {
     // Create the functions to optimise
     final ObjectiveFunction objective =
         new ObjectiveFunction(new SumOfSquaresMultivariateFunction(function));
@@ -1138,15 +1132,16 @@ public class PcPalmFitting implements PlugIn {
         final double relativeThreshold = 1e-6;
 
         // Configure maximum step length for each dimension using the bounds
-        final double[] stepLength = new double[lB.length];
+        final double[] stepLength = new double[lowerB.length];
         for (int i = 0; i < stepLength.length; i++) {
-          stepLength[i] = (uB[i] - lB[i]) * 0.3333333;
+          stepLength[i] = (upperB[i] - lowerB[i]) * 0.3333333;
         }
 
         // The GoalType is always minimise so no need to pass this in
         optimum = opt.optimize(maxEvaluations, gradient, objective,
             new InitialGuess((optimum == null) ? initialSolution : optimum.getPointRef()),
-            new SimpleBounds(lB, uB), new BfgsOptimizer.GradientTolerance(relativeThreshold),
+            new SimpleBounds(lowerB, upperB),
+            new BfgsOptimizer.GradientTolerance(relativeThreshold),
             new BfgsOptimizer.StepLength(stepLength));
         if (debug) {
           System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(),
@@ -1169,7 +1164,7 @@ public class PcPalmFitting implements PlugIn {
     // https://www.lri.fr/~hansen/cmaes.m
     // Take the defaults from the Matlab documentation
     final double stopFitness = 0; // Double.NEGATIVE_INFINITY;
-    final boolean isActiveCMA = true;
+    final boolean isActiveCma = true;
     final int diagonalOnly = 0;
     final int checkFeasableCount = 1;
     final RandomGenerator random = new Well44497b(); // Well19937c();
@@ -1177,16 +1172,16 @@ public class PcPalmFitting implements PlugIn {
     final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
     // The sigma determines the search range for the variables. It should be 1/3 of the initial
     // search region.
-    final double[] range = new double[lB.length];
-    for (int i = 0; i < lB.length; i++) {
-      range[i] = (uB[i] - lB[i]) / 3;
+    final double[] range = new double[lowerB.length];
+    for (int i = 0; i < lowerB.length; i++) {
+      range[i] = (upperB[i] - lowerB[i]) / 3;
     }
     final OptimizationData sigma = new CMAESOptimizer.Sigma(range);
     final OptimizationData popSize = new CMAESOptimizer.PopulationSize(
         (int) (4 + Math.floor(3 * Math.log(initialSolution.length))));
-    final SimpleBounds bounds = new SimpleBounds(lB, uB);
+    final SimpleBounds bounds = new SimpleBounds(lowerB, upperB);
 
-    opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCMA, diagonalOnly,
+    opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCma, diagonalOnly,
         checkFeasableCount, random, generateStatistics, checker);
     // Restart the optimiser several times and take the best answer.
     for (int iteration = 0; iteration <= fitRestarts; iteration++) {
@@ -1202,9 +1197,7 @@ public class PcPalmFitting implements PlugIn {
         if (optimum == null || constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException ex) {
-        // Ignore
-      } catch (final TooManyIterationsException ex) {
+      } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1224,9 +1217,7 @@ public class PcPalmFitting implements PlugIn {
         if (constrainedSolution.getValue() < optimum.getValue()) {
           optimum = constrainedSolution;
         }
-      } catch (final TooManyEvaluationsException ex) {
-        // Ignore
-      } catch (final TooManyIterationsException ex) {
+      } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
         // Ignore
       } finally {
         boundedEvaluations += maxEvaluations.getMaxEval();
@@ -1422,19 +1413,19 @@ public class PcPalmFitting implements PlugIn {
   /**
    * Abstract base model function class for common functionality.
    */
-  private abstract class BaseModelFunction extends LoggingOptimiserFunction {
-    public BaseModelFunction(String name) {
+  private abstract static class BaseModelFunction extends LoggingOptimiserFunction {
+    BaseModelFunction(String name) {
       super(name);
     }
 
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param parameters The parameters
      * @return the value
      */
-    public abstract double evaluate(double r, final double[] parameters);
+    abstract double evaluate(double radius, final double[] parameters);
 
     /**
      * Evaluate the jacobian of the correlation function for all data points (see
@@ -1443,7 +1434,7 @@ public class PcPalmFitting implements PlugIn {
      * @param parameters the parameters
      * @return The jacobian
      */
-    public abstract double[][] jacobian(double[] parameters);
+    abstract double[][] jacobian(double[] parameters);
 
     /**
      * Get the value of the function for all data points corresponding to the last call to
@@ -1451,7 +1442,7 @@ public class PcPalmFitting implements PlugIn {
      *
      * @return The corresponding value
      */
-    public abstract double[] getValue();
+    abstract double[] getValue();
   }
 
   /**
@@ -1467,16 +1458,16 @@ public class PcPalmFitting implements PlugIn {
    *
    * <p>p = average protein density
    */
-  private class RandomModelFunction extends BaseModelFunction
+  private static class RandomModelFunction extends BaseModelFunction
       implements MultivariateVectorFunction {
     double[] lastValue;
 
-    public RandomModelFunction() {
+    RandomModelFunction() {
       super("Random Model");
     }
 
     @Override
-    public double[] getValue() {
+    double[] getValue() {
       return lastValue;
     }
 
@@ -1484,7 +1475,7 @@ public class PcPalmFitting implements PlugIn {
     // Use the deprecated API since the new one is not yet documented.
 
     @Override
-    public double[][] jacobian(double[] variables) {
+    double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation
       final double sigma = variables[0];
       final double density = variables[1];
@@ -1556,26 +1547,26 @@ public class PcPalmFitting implements PlugIn {
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param sigma Average precision
      * @param density Average protein density
      * @return the value
      */
-    public double evaluate(double r, final double sigma, final double density) {
+    double evaluate(double radius, final double sigma, final double density) {
       return (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-r * r / (4 * sigma * sigma)) + 1;
+          * FastMath.exp(-radius * radius / (4 * sigma * sigma)) + 1;
     }
 
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param parameters The parameters
      * @return the value
      */
     @Override
-    public double evaluate(double r, final double[] parameters) {
-      return evaluate(r, parameters[0], parameters[1]);
+    double evaluate(double radius, final double[] parameters) {
+      return evaluate(radius, parameters[0], parameters[1]);
     }
 
     @Override
@@ -1612,10 +1603,10 @@ public class PcPalmFitting implements PlugIn {
    * <p>Note: The clustered model described in the PLoS One paper models g(r)protein using the
    * exponential directly, i.e. there is no convolution !!!
    */
-  private abstract class ClusteredModelFunction extends BaseModelFunction {
+  private abstract static class ClusteredModelFunction extends BaseModelFunction {
     double[] lastValue;
 
-    public ClusteredModelFunction() {
+    ClusteredModelFunction() {
       super("Clustered Model");
     }
 
@@ -1724,38 +1715,38 @@ public class PcPalmFitting implements PlugIn {
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param sigma Average precision
      * @param density Average protein density
      * @param range Range of the cluster
      * @param amplitude Amplitude of the cluster
      * @return the value
      */
-    public double evaluate(double r, final double sigma, final double density, final double range,
-        final double amplitude) {
+    public double evaluate(double radius, final double sigma, final double density,
+        final double range, final double amplitude) {
       final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-r * r / (4 * sigma * sigma));
-      final double gr_protein = amplitude * FastMath.exp(-r / range) + 1;
+          * FastMath.exp(-radius * radius / (4 * sigma * sigma));
+      final double gr_protein = amplitude * FastMath.exp(-radius / range) + 1;
       return gr_stoch + gr_protein;
     }
 
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param parameters The parameters
      * @return the value
      */
     @Override
-    public double evaluate(double r, final double[] parameters) {
-      return evaluate(r, parameters[0], parameters[1], parameters[2], parameters[3]);
+    public double evaluate(double radius, final double[] parameters) {
+      return evaluate(radius, parameters[0], parameters[1], parameters[2], parameters[3]);
     }
   }
 
   /**
    * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
    */
-  private class ClusteredModelFunctionGradient extends ClusteredModelFunction
+  private static class ClusteredModelFunctionGradient extends ClusteredModelFunction
       implements MultivariateVectorFunction {
     // Adapted from http://commons.apache.org/proper/commons-math/userguide/optimization.html
     // Use the deprecated API since the new one is not yet documented.
@@ -1771,31 +1762,31 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
-  private class SumOfSquaresModelFunction {
-    BaseModelFunction f;
+  private static class SumOfSquaresModelFunction {
+    BaseModelFunction fun;
     double[] x;
     double[] y;
 
     // Cache the value
     double[] lastParameters;
-    double lastSS;
+    double lastSumSq;
 
-    public SumOfSquaresModelFunction(BaseModelFunction f) {
-      this.f = f;
-      x = f.getX();
-      y = f.getY();
+    SumOfSquaresModelFunction(BaseModelFunction fun) {
+      this.fun = fun;
+      x = fun.getX();
+      y = fun.getY();
     }
 
-    public double evaluate(double[] parameters) {
+    double evaluate(double[] parameters) {
       if (sameVariables(parameters)) {
-        return lastSS;
+        return lastSumSq;
       }
 
       lastParameters = null;
 
       double ss = 0;
       for (int i = x.length; i-- > 0;) {
-        final double dx = f.evaluate(x[i], parameters) - y[i];
+        final double dx = fun.evaluate(x[i], parameters) - y[i];
         ss += dx * dx;
       }
       return ss;
@@ -1825,21 +1816,21 @@ public class PcPalmFitting implements PlugIn {
      * @param parameters the parameters
      * @return the gradient
      */
-    public double[] gradient(double[] parameters) {
+    double[] gradient(double[] parameters) {
       // We can compute the jacobian for all the functions.
       // To get the gradient for the SS we need:
       // f(x) = (g(x) - y)^2
       // f'(x) = 2 * (g(x) - y) * g'(x)
 
-      final double[][] jacobian = f.jacobian(parameters);
-      final double[] gx = f.getValue();
-      lastSS = 0;
+      final double[][] jacobian = fun.jacobian(parameters);
+      final double[] gx = fun.getValue();
+      lastSumSq = 0;
       lastParameters = parameters.clone();
 
       final double[] gradient = new double[parameters.length];
       for (int i = 0; i < x.length; i++) {
         final double dx = gx[i] - y[i];
-        lastSS += dx * dx;
+        lastSumSq += dx * dx;
         final double twodx = 2 * dx;
         for (int j = 0; j < gradient.length; j++) {
           final double g1 = twodx * jacobian[i][j];
@@ -1850,7 +1841,7 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
-  private class SumOfSquaresMultivariateFunction implements MultivariateFunction {
+  private static class SumOfSquaresMultivariateFunction implements MultivariateFunction {
     SumOfSquaresModelFunction function;
 
     public SumOfSquaresMultivariateFunction(SumOfSquaresModelFunction function) {
@@ -1863,7 +1854,8 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
-  private class SumOfSquaresMultivariateVectorFunction implements MultivariateVectorFunction {
+  private static class SumOfSquaresMultivariateVectorFunction
+      implements MultivariateVectorFunction {
     SumOfSquaresModelFunction function;
 
     public SumOfSquaresMultivariateVectorFunction(SumOfSquaresModelFunction function) {
@@ -1897,7 +1889,7 @@ public class PcPalmFitting implements PlugIn {
    *
    * <p>Note: Described in figure 3 of Veatch, et al (2012) Plos One, e31457
    */
-  private abstract class EmulsionModelFunction extends BaseModelFunction {
+  private abstract static class EmulsionModelFunction extends BaseModelFunction {
     double[] lastValue;
 
     public EmulsionModelFunction() {
@@ -2022,7 +2014,7 @@ public class PcPalmFitting implements PlugIn {
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param sigma Average precision
      * @param density Average protein density
      * @param range Average circle radius
@@ -2030,32 +2022,33 @@ public class PcPalmFitting implements PlugIn {
      * @param alpha Measure of the coherence length between circles
      * @return the value
      */
-    public double evaluate(double r, final double sigma, final double density, final double range,
-        final double amplitude, final double alpha) {
+    public double evaluate(double radius, final double sigma, final double density,
+        final double range, final double amplitude, final double alpha) {
       final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-r * r / (4 * sigma * sigma));
+          * FastMath.exp(-radius * radius / (4 * sigma * sigma));
       final double gr_protein =
-          amplitude * FastMath.exp(-r / alpha) * Math.cos(0.5 * Math.PI * r / range) + 1;
+          amplitude * FastMath.exp(-radius / alpha) * Math.cos(0.5 * Math.PI * radius / range) + 1;
       return gr_stoch + gr_protein;
     }
 
     /**
      * Evaluate the correlation function.
      *
-     * @param r The correlation radius
+     * @param radius The correlation radius
      * @param parameters The parameters
      * @return the value
      */
     @Override
-    public double evaluate(double r, final double[] parameters) {
-      return evaluate(r, parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
+    public double evaluate(double radius, final double[] parameters) {
+      return evaluate(radius, parameters[0], parameters[1], parameters[2], parameters[3],
+          parameters[4]);
     }
   }
 
   /**
    * Allow optimisation using Apache Commons Math 3 Gradient Optimiser.
    */
-  private class EmulsionModelFunctionGradient extends EmulsionModelFunction
+  private static class EmulsionModelFunctionGradient extends EmulsionModelFunction
       implements MultivariateVectorFunction {
     @Override
     public double[] value(double[] variables) {
@@ -2088,7 +2081,7 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private static void addResult(String model, String resultColour, boolean valid, double precision,
-      double density, double domainRadius, double domainDensity, double nCluster, double coherence,
+      double density, double domainRadius, double domainDensity, double ncluster, double coherence,
       double ic) {
     final StringBuilder sb = new StringBuilder();
     sb.append(model).append('\t');
@@ -2098,7 +2091,7 @@ public class PcPalmFitting implements PlugIn {
     sb.append(MathUtils.rounded(density * 1e6, 4)).append('\t');
     sb.append(getString(domainRadius)).append('\t');
     sb.append(getString(domainDensity)).append('\t');
-    sb.append(getString(nCluster)).append('\t');
+    sb.append(getString(ncluster)).append('\t');
     sb.append(getString(coherence)).append('\t');
     sb.append(MathUtils.rounded(ic, 4)).append('\t');
     resultsTable.append(sb.toString());

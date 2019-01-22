@@ -66,13 +66,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class SCMOSLikelihoodWrapperTest {
+public class ScmosLikelihoodWrapperTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
   public static void beforeAll() {
-    logger = Logger.getLogger(SCMOSLikelihoodWrapperTest.class.getName());
+    logger = Logger.getLogger(ScmosLikelihoodWrapperTest.class.getName());
     dataCache = new ConcurrentHashMap<>();
   }
 
@@ -137,7 +137,7 @@ public class SCMOSLikelihoodWrapperTest {
   private static float G_SD = 0.2f;
   private static float O = 100f;
 
-  private static class SCMOSLikelihoodWrapperTestData {
+  private static class SCcmosLikelihoodWrapperTestData {
     float[] var;
     float[] gain;
     float[] offset;
@@ -146,7 +146,7 @@ public class SCMOSLikelihoodWrapperTest {
 
   private static Object createData(RandomSeed source) {
     final int n = maxx * maxx;
-    final SCMOSLikelihoodWrapperTestData data = new SCMOSLikelihoodWrapperTestData();
+    final SCcmosLikelihoodWrapperTestData data = new SCcmosLikelihoodWrapperTestData();
     data.var = new float[n];
     data.gain = new float[n];
     data.offset = new float[n];
@@ -186,22 +186,22 @@ public class SCMOSLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void fitNBFixedComputesGradientPerDatum(RandomSeed seed) {
+  public void fitNbFixedComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SeededTest
-  public void fitNBCircleComputesGradientPerDatum(RandomSeed seed) {
+  public void fitNbCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
   }
 
   @SeededTest
-  public void fitNBFreeCircleComputesGradientPerDatum(RandomSeed seed) {
+  public void fitNbFreeCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitNBEllipticalComputesGradientPerDatum(RandomSeed seed) {
+  public void fitNbEllipticalComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
@@ -280,8 +280,8 @@ public class SCMOSLikelihoodWrapperTest {
     int count = 0;
     int total = 0;
 
-    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
+    final SCcmosLikelihoodWrapperTestData testData = (SCcmosLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, ScmosLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.gain;
     final float[] o = testData.offset;
@@ -391,22 +391,22 @@ public class SCMOSLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void fitNBFixedComputesGradient(RandomSeed seed) {
+  public void fitNbFixedComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SeededTest
-  public void fitNBCircleComputesGradient(RandomSeed seed) {
+  public void fitNbCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
   }
 
   @SeededTest
-  public void fitNBFreeCircleComputesGradient(RandomSeed seed) {
+  public void fitNbFreeCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitNBEllipticalComputesGradient(RandomSeed seed) {
+  public void fitNbEllipticalComputesGradient(RandomSeed seed) {
     // The elliptical function gradient evaluation is worse
     final DoubleEquality tmp = eq;
     eq = eqPerDatum;
@@ -490,8 +490,8 @@ public class SCMOSLikelihoodWrapperTest {
     int count = 0;
     int total = 0;
 
-    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
+    final SCcmosLikelihoodWrapperTestData testData = (SCcmosLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, ScmosLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.gain;
     final float[] o = testData.offset;
@@ -841,8 +841,8 @@ public class SCMOSLikelihoodWrapperTest {
     // Simulate sCMOS camera
     nlf.initialise(a);
 
-    final SCMOSLikelihoodWrapperTestData testData = (SCMOSLikelihoodWrapperTestData) dataCache
-        .computeIfAbsent(seed, SCMOSLikelihoodWrapperTest::createData);
+    final SCcmosLikelihoodWrapperTestData testData = (SCcmosLikelihoodWrapperTestData) dataCache
+        .computeIfAbsent(seed, ScmosLikelihoodWrapperTest::createData);
     final float[] var = testData.var;
     final float[] g = testData.gain;
     final float[] o = testData.offset;

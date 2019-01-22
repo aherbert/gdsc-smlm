@@ -100,7 +100,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void isEmCCDThrowsException() {
+  public void isEmCcdThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).isEmCcd();
     });
@@ -218,7 +218,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getEmCCDThrowsExceptionAfterClear() {
+  public void getEmCcdThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setEmCcd(true);

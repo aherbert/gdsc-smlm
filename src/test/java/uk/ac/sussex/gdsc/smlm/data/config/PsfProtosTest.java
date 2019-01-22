@@ -43,10 +43,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class PSFProtosTest {
+public class PsfProtosTest {
   @Test
   public void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException {
-    final Logger logger = Logger.getLogger(PSFProtosTest.class.getName());
+    final Logger logger = Logger.getLogger(PsfProtosTest.class.getName());
     final Level logLevel = Level.FINE;
     final PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
     final PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();

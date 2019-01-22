@@ -1008,7 +1008,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
 
@@ -1116,7 +1116,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Collect options for fitting
     final double sa = getSa();
     fitConfig.setInitialPeakStdDev(MathUtils.round(sa / simulationParameters.pixelPitch));
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
     PeakFit.addFittingOptions(gd, fitEngineConfigurationProvider);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
         fitConfig.getFitSolver().ordinal());
@@ -1188,7 +1188,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     signalFactor = Math.abs(gd.getNextNumber());
     lowerSignalFactor = Math.abs(gd.getNextNumber());
 
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
 
@@ -1306,7 +1306,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       fitConfig.setCameraType(simulationParameters.cameraType);
       fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
     }
-    if (!PeakFit.configurePSFModel(config)) {
+    if (!PeakFit.configurePsfModel(config)) {
       return false;
     }
     if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
@@ -1677,10 +1677,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final double nmPerPixel = simulationParameters.pixelPitch;
     double tp = 0;
     double fp = 0;
-    int failcTP = 0;
-    int failcFP = 0;
-    int cTP = 0;
-    int cFP = 0;
+    int failcTp = 0;
+    int failcFp = 0;
+    int cTp = 0;
+    int cFp = 0;
     int[] singleStatus = new int[FitStatus.values().length];
     int[] multiStatus = new int[singleStatus.length];
     int[] doubletStatus = new int[singleStatus.length];
@@ -1707,9 +1707,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
       for (int i = 0; i < result.fitResult.length; i++) {
         if (result.spots[i].match) {
-          cTP++;
+          cTp++;
         } else {
-          cFP++;
+          cFp++;
         }
         final MultiPathFitResult fitResult = result.fitResult[i];
 
@@ -1723,9 +1723,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
         if (noMatch(fitResult)) {
           if (result.spots[i].match) {
-            failcTP++;
+            failcTp++;
           } else {
-            failcFP++;
+            failcFp++;
           }
         }
 
@@ -1946,28 +1946,28 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Q. Should I add other fit configuration here?
 
     // The fraction of positive and negative candidates that were included
-    add(sb, (100.0 * cTP) / nP);
-    add(sb, (100.0 * cFP) / nN);
+    add(sb, (100.0 * cTp) / nP);
+    add(sb, (100.0 * cFp) / nN);
 
     // Score the fitting results compared to the original simulation.
 
     // Score the candidate selection:
-    add(sb, cTP + cFP);
-    add(sb, cTP);
-    add(sb, cFP);
+    add(sb, cTp + cFp);
+    add(sb, cTp);
+    add(sb, cFp);
     // TP are all candidates that can be matched to a spot
     // FP are all candidates that cannot be matched to a spot
     // FN = The number of missed spots
     FractionClassificationResult m =
-        new FractionClassificationResult(cTP, cFP, 0, simulationParameters.molecules - cTP);
+        new FractionClassificationResult(cTp, cFp, 0, simulationParameters.molecules - cTp);
     add(sb, m.getRecall());
     add(sb, m.getPrecision());
     add(sb, m.getF1Score());
     add(sb, m.getJaccard());
 
     // Score the fitting results:
-    add(sb, failcTP);
-    add(sb, failcFP);
+    add(sb, failcTp);
+    add(sb, failcFp);
 
     // TP are all fit results that can be matched to a spot
     // FP are all fit results that cannot be matched to a spot
@@ -2763,7 +2763,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private double getSa() {
-    final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+    final double sa = PsfCalculator.squarePixelAdjustment(simulationParameters.sd,
         simulationParameters.pixelPitch);
     return sa;
   }

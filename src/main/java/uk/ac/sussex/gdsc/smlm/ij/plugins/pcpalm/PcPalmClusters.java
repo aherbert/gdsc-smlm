@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -87,34 +87,8 @@ import java.util.regex.Pattern;
  * doi:10.1073/pnas.1309676110
  */
 public class PcPalmClusters implements PlugIn {
-  private class HistogramData {
-    float[][] histogram;
-    int frames;
-    double area;
-    String units;
-    public String filename = "";
-
-    public HistogramData(float[][] h, int f, double a, String u) {
-      histogram = h;
-      frames = f;
-      area = a;
-      units = u;
-    }
-
-    public HistogramData(float[][] h) {
-      histogram = h;
-      frames = 0;
-      area = 0;
-      units = "";
-    }
-
-    public boolean isCalibrated() {
-      return frames > 0 && area > 0;
-    }
-  }
-
   /** The title. */
-  static String TITLE = "PC-PALM Clusters";
+  static final String TITLE = "PC-PALM Clusters";
 
   private static int runMode;
   private static double distance = 50;
@@ -134,7 +108,7 @@ public class PcPalmClusters implements PlugIn {
   private static boolean calibrateHistogram;
   private static int frames = 1;
   private static double area = 1;
-  private static String[] UNITS = {"pixels^2", "um^2"};
+  private static final String[] UNITS = {"pixels^2", "um^2"};
   private static String units = UNITS[0];
 
   private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
@@ -142,12 +116,36 @@ public class PcPalmClusters implements PlugIn {
 
   private boolean fileInput;
 
-  private int nMolecules;
+  private int numberOfMolecules;
   private double count;
+
+  private static class HistogramData {
+    float[][] histogram;
+    int frames;
+    double area;
+    String units;
+    String filename = "";
+
+    HistogramData(float[][] histogram, int frames, double area, String units) {
+      this.histogram = histogram;
+      this.frames = frames;
+      this.area = area;
+      this.units = units;
+    }
+
+    HistogramData(float[][] histogram) {
+      this.histogram = histogram;
+      units = "";
+    }
+
+    boolean isCalibrated() {
+      return frames > 0 && area > 0;
+    }
+  }
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (!showDialog()) {
       return;
@@ -233,8 +231,8 @@ public class PcPalmClusters implements PlugIn {
       if (!fileInput) {
         // Calculate the estimated number of clusters from the observed molecules:
         // Actual = (Observed / p-value) / N
-        final double actual = (nMolecules / p) / n;
-        ImageJUtils.log("Estimated number of clusters : (%d / %s) / %d = %s", nMolecules,
+        final double actual = (numberOfMolecules / p) / n;
+        ImageJUtils.log("Estimated number of clusters : (%d / %s) / %d = %s", numberOfMolecules,
             MathUtils.rounded(p), n, MathUtils.rounded(actual));
       }
 
@@ -303,7 +301,7 @@ public class PcPalmClusters implements PlugIn {
       ImageJUtils.log("Aborted");
       return null;
     }
-    nMolecules = molecules.size();
+    numberOfMolecules = molecules.size();
     ImageJUtils.log("Finished : %d total clusters (%s ms)", clusters.size(),
         MathUtils.rounded((System.nanoTime() - s1) / 1e6));
 
@@ -416,13 +414,13 @@ public class PcPalmClusters implements PlugIn {
    * @param filename the filename
    * @return the histogram data
    */
-  private HistogramData loadHistogram(String filename) {
+  private static HistogramData loadHistogram(String filename) {
     int count = 0;
 
     try (BufferedReader input = Files.newBufferedReader(Paths.get(filename))) {
-      int f = 0;
-      double a = 0;
-      String u = "";
+      int frames = 0;
+      double area = 0;
+      String units = "";
 
       String line;
 
@@ -440,13 +438,13 @@ public class PcPalmClusters implements PlugIn {
         }
         final String[] fields = line.split("[\t, ]+");
         if (fields[0].equalsIgnoreCase("frames")) {
-          f = Integer.parseInt(fields[1]);
+          frames = Integer.parseInt(fields[1]);
         }
         if (fields[0].equalsIgnoreCase("area")) {
-          a = Double.parseDouble(fields[1]);
+          area = Double.parseDouble(fields[1]);
         }
         if (fields[0].equalsIgnoreCase("units")) {
-          u = fields[1];
+          units = fields[1];
         }
       }
 
@@ -504,7 +502,7 @@ public class PcPalmClusters implements PlugIn {
           }
         }
       }
-      final HistogramData histogramData = new HistogramData(hist, f, a, u);
+      final HistogramData histogramData = new HistogramData(hist, frames, area, units);
       histogramData.filename = filename;
       return histogramData;
     } catch (final InputMismatchException ex) {
@@ -782,27 +780,28 @@ public class PcPalmClusters implements PlugIn {
     }
 
     // Do fitting for different N
-    double bestSS = Double.POSITIVE_INFINITY;
+    double bestSs = Double.POSITIVE_INFINITY;
     double[] parameters = null;
     int worse = 0;
-    int N = histogram.length - 1;
+    int countN = histogram.length - 1;
     int min = minN;
     final boolean customRange = (minN > 1) || (maxN > 0);
-    if (min > N) {
-      min = N;
+    if (min > countN) {
+      min = countN;
     }
-    if (maxN > 0 && N > maxN) {
-      N = maxN;
+    if (maxN > 0 && countN > maxN) {
+      countN = maxN;
     }
 
-    ImageJUtils.log("Fitting N from %d to %d%s", min, N, (customRange) ? " (custom-range)" : "");
+    ImageJUtils.log("Fitting N from %d to %d%s", min, countN,
+        (customRange) ? " (custom-range)" : "");
 
     // Since varying the N should be done in integer steps do this
     // for n=1,2,3,... until the SS peaks then falls off (is worse then the best
     // score several times in succession)
     final BinomialFitter bf = new BinomialFitter(ImageJPluginLoggerHelper.getLogger(getClass()));
     bf.setMaximumLikelihood(maximumLikelihood);
-    for (int n = min; n <= N; n++) {
+    for (int n = min; n <= countN; n++) {
       final PointValuePair solution = bf.fitBinomial(histogram, mean, n, true);
       if (solution == null) {
         continue;
@@ -813,18 +812,16 @@ public class PcPalmClusters implements PlugIn {
       ImageJUtils.log("Fitted %s : N=%d, p=%s. SS=%g", name, n, MathUtils.rounded(p),
           solution.getValue());
 
-      if (bestSS > solution.getValue()) {
-        bestSS = solution.getValue();
+      if (bestSs > solution.getValue()) {
+        bestSs = solution.getValue();
         parameters = new double[] {n, p};
         worse = 0;
-      } else if (bestSS < Double.POSITIVE_INFINITY) {
-        if (++worse >= 3) {
-          break;
-        }
+      } else if (bestSs < Double.POSITIVE_INFINITY && ++worse >= 3) {
+        break;
       }
 
       if (showCumulativeHistogram) {
-        addToPlot(n, p, title, plot, new Color((float) n / N, 0, 1f - (float) n / N));
+        addToPlot(n, p, title, plot, new Color((float) n / countN, 0, 1f - (float) n / countN));
       }
     }
 
@@ -836,11 +833,11 @@ public class PcPalmClusters implements PlugIn {
     return parameters;
   }
 
-  private static void addToPlot(int n, double p, String title, Plot2 plot, Color color) {
-    final double[] x = new double[n + 1];
-    final double[] y = new double[n + 1];
+  private static void addToPlot(int trials, double pvalue, String title, Plot2 plot, Color color) {
+    final double[] x = new double[trials + 1];
+    final double[] y = new double[trials + 1];
 
-    final BinomialDistribution dist = new BinomialDistribution(n, p);
+    final BinomialDistribution dist = new BinomialDistribution(trials, pvalue);
 
     final int startIndex = 1;
 
@@ -851,7 +848,7 @@ public class PcPalmClusters implements PlugIn {
     }
 
     double cumul = 0;
-    for (int i = startIndex; i <= n; i++) {
+    for (int i = startIndex; i <= trials; i++) {
       cumul += dist.probability(i) / total;
       x[i] = i;
       y[i] = cumul;

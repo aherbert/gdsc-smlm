@@ -253,7 +253,7 @@ public class CameraModelManager implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     String[] options = OPTIONS;
     final CameraModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);

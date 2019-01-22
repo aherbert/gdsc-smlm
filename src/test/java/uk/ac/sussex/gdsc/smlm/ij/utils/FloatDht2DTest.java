@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
-public class FloatDHT2DTest {
+public class FloatDht2DTest {
   static int size = 16;
   static double centre = (size - 1) / 2.0;
 
@@ -62,14 +62,14 @@ public class FloatDHT2DTest {
     return createData(centre, centre);
   }
 
-  private static FloatDht2D createQuadrants(int w, int h) {
-    return new FloatDht2D(createQuadrantsProcessor(w, h));
+  private static FloatDht2D createQuadrants(int width, int height) {
+    return new FloatDht2D(createQuadrantsProcessor(width, height));
   }
 
-  static FloatProcessor createQuadrantsProcessor(int w, int h) {
-    final int w_2 = w / 2;
-    final int stepH2 = h / 2;
-    final FloatProcessor fp = new FloatProcessor(w, h);
+  static FloatProcessor createQuadrantsProcessor(int width, int height) {
+    final int w_2 = width / 2;
+    final int stepH2 = height / 2;
+    final FloatProcessor fp = new FloatProcessor(width, height);
     fill(fp, w_2, 0, w_2, stepH2, 1);
     fill(fp, 0, 0, w_2, stepH2, 2);
     fill(fp, 0, stepH2, w_2, stepH2, 3);
@@ -77,8 +77,8 @@ public class FloatDHT2DTest {
     return fp;
   }
 
-  static void fill(FloatProcessor fp, int x, int y, int w, int h, double value) {
-    fp.setRoi(x, y, w, h);
+  static void fill(FloatProcessor fp, int x, int y, int width, int height, double value) {
+    fp.setRoi(x, y, width, height);
     fp.setValue(value);
     fp.fill();
   }
@@ -139,20 +139,22 @@ public class FloatDHT2DTest {
     Assertions.assertArrayEquals(convolved.getData(), convolved2.getData());
     Assertions.assertArrayEquals(deconvolved.getData(), deconvolved2.getData());
 
-    float[] e = dht.getData();
-    float[] o = deconvolved.getData();
-    for (int i = 0; i < e.length; i++) {
-      Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-6f, 1e-6f));
+    float[] exp = dht.getData();
+    float[] obs = deconvolved.getData();
+    for (int i = 0; i < exp.length; i++) {
+      Assertions
+          .assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(exp[i], obs[i], 1e-6f, 1e-6f));
     }
 
     deconvolved.inverseTransform();
 
     // Test after reverse transform
-    e = pixels;
-    o = deconvolved.getData();
+    exp = pixels;
+    obs = deconvolved.getData();
 
-    for (int i = 0; i < e.length; i++) {
-      Assertions.assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(e[i], o[i], 1e-7f, 1e-7f));
+    for (int i = 0; i < exp.length; i++) {
+      Assertions
+          .assertTrue(FloatEquality.almostEqualRelativeOrAbsolute(exp[i], obs[i], 1e-7f, 1e-7f));
     }
   }
 
@@ -197,7 +199,7 @@ public class FloatDHT2DTest {
   }
 
   @Test
-  public void canConvertToDFT() {
+  public void canConvertToDft() {
     final FloatDht2D dht = createData();
     final float[] input = dht.getData().clone();
     dht.transform();
@@ -231,7 +233,7 @@ public class FloatDHT2DTest {
   }
 
   @Test
-  public void canMatchFHT2() {
+  public void canMatchFht2() {
     final FloatDht2D dht = createData();
     final FloatDht2D dht2 = createData(centre + 1, centre + 1);
 

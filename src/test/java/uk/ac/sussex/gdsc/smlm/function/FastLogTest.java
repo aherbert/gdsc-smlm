@@ -183,12 +183,12 @@ public class FastLogTest {
   }
 
   @Test
-  public void canComputeICSCFastLog_fastLog() {
+  public void canComputeIcscFastLog_fastLog() {
     canComputeLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
-  public void canComputeICSCFastLog_log() {
+  public void canComputeIcscFastLog_log() {
     canComputeLog(new TestLog(icsiLog), true);
   }
 
@@ -258,12 +258,12 @@ public class FastLogTest {
   }
 
   @Test
-  public void canComputeDoubleICSCFast_fastLog() {
+  public void canComputeDoubleIcscFast_fastLog() {
     canComputeDoubleLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
-  public void canComputeDoubleICSCFastLog_log() {
+  public void canComputeDoubleIcscFastLog_log() {
     canComputeDoubleLog(new TestLog(icsiLog), true);
   }
 
@@ -488,7 +488,7 @@ public class FastLogTest {
       return sum / count;
     }
 
-    double getSD() {
+    double getSd() {
       final double sd = ss - (sum * sum) / count;
       if (sd > 0.0) {
         return Math.sqrt(sd / (count - 1));
@@ -498,7 +498,7 @@ public class FastLogTest {
 
     String summary() {
       return String.format("min=%s (%s), max=%s (%s), mean=%s, sd=%g", min, minv, max, maxv,
-          getMean(), getSD());
+          getMean(), getSd());
     }
   }
 

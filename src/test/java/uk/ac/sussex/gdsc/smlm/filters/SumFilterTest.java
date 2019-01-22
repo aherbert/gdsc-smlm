@@ -41,12 +41,12 @@ import org.junit.jupiter.api.Assumptions;
 
 import java.util.ArrayList;
 
-@SuppressWarnings({"deprecation", "javadoc"})
+@SuppressWarnings({"deprecation", "javadoc", "unused"})
 public class SumFilterTest extends AbstractFilterTest {
-  private static int InternalITER3 = 500;
-  private static int InternalITER = 50;
-  private static int ITER3 = 200;
-  private static int ITER = 20;
+  private static final int INTERNAL_ITER3 = 500;
+  private static final int INTERNAL_ITER = 50;
+  private static final int ITER3 = 200;
+  private static final int ITER = 20;
   private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-4, 0);
 
   /**
@@ -212,7 +212,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -291,7 +291,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -371,7 +371,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -474,7 +474,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -501,7 +501,6 @@ public class SumFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : primes) {
@@ -545,7 +544,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -616,7 +615,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -688,7 +687,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -787,7 +786,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -860,7 +859,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -933,7 +932,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = floatCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -1512,7 +1511,6 @@ public class SumFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : primes) {
@@ -2061,7 +2059,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2139,7 +2137,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2217,7 +2215,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2317,7 +2315,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2388,7 +2386,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2459,7 +2457,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2530,7 +2528,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2626,7 +2624,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2697,7 +2695,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -2769,7 +2767,7 @@ public class SumFilterTest extends AbstractFilterTest {
 
     final SumFilter filter = new SumFilter();
 
-    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, InternalITER3);
+    final ArrayList<int[]> dataSet = intCreateSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 

@@ -38,13 +38,13 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class GaussianPSFModelTest {
+public class GaussianPsfModelTest {
   @SuppressWarnings("unused")
   private static Logger logger;
 
   @BeforeAll
   public static void beforeAll() {
-    logger = Logger.getLogger(GaussianPSFModelTest.class.getName());
+    logger = Logger.getLogger(GaussianPsfModelTest.class.getName());
   }
 
   @AfterAll
@@ -73,7 +73,7 @@ public class GaussianPSFModelTest {
     final double[] o2 = new double[maxx * maxy];
     final double[][] g = new double[maxx * maxy][];
 
-    final PsfModel psf = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPsfModel(zModel);
 
     final double c = maxx * 0.5;
     for (int i = -1; i <= 1; i++) {
@@ -136,7 +136,7 @@ public class GaussianPSFModelTest {
     final double[][] g2 = new double[maxx * maxy][3];
     final double[] dx = new double[] {1e-4, 1e-4, 1e-4};
 
-    final PsfModel psf = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPsfModel(zModel);
 
     final double c = maxx * 0.5;
     for (int i = -1; i <= 1; i++) {
@@ -190,8 +190,8 @@ public class GaussianPSFModelTest {
     final double[] o = new double[maxx * maxy];
     final double[] o2 = new double[maxx * maxy];
 
-    final PsfModel psf = new GaussianPSFModel(zModel);
-    final GaussianPSFModel psf2 = new GaussianPSFModel(zModel);
+    final PsfModel psf = new GaussianPsfModel(zModel);
+    final GaussianPsfModel psf2 = new GaussianPsfModel(zModel);
     psf2.setRange(40);
 
     final double c = maxx * 0.5;

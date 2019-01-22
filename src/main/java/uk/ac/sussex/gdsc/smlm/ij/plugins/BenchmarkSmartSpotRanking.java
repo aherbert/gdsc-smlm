@@ -499,7 +499,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
 
@@ -1234,7 +1234,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private double getSa() {
-    return PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+    return PsfCalculator.squarePixelAdjustment(simulationParameters.sd,
         simulationParameters.pixelPitch);
   }
 }

@@ -750,13 +750,13 @@ public class PoissonCalculatorTest {
     }
   }
 
-  private abstract static class PCTimingTask extends BaseTimingTask {
+  private abstract static class PcTimingTask extends BaseTimingTask {
     double[] x;
     double[] mean;
     int ll;
     int llr;
 
-    public PCTimingTask(String name, double[] x, double[] mean, int ll, int llr) {
+    public PcTimingTask(String name, double[] x, double[] mean, int ll, int llr) {
       super(String.format("%s ll=%d llr=%d", name, ll, llr));
       this.x = x;
       this.mean = mean;
@@ -775,8 +775,8 @@ public class PoissonCalculatorTest {
     }
   }
 
-  private static class StaticPCTimingTask extends PCTimingTask {
-    public StaticPCTimingTask(double[] x, double[] mean, int ll, int llr) {
+  private static class StaticPcTimingTask extends PcTimingTask {
+    public StaticPcTimingTask(double[] x, double[] mean, int ll, int llr) {
       super("static", x, mean, ll, llr);
     }
 
@@ -793,8 +793,8 @@ public class PoissonCalculatorTest {
     }
   }
 
-  private static class FastPCTimingTask extends PCTimingTask {
-    public FastPCTimingTask(double[] x, double[] mean, int ll, int llr) {
+  private static class FastPcTimingTask extends PcTimingTask {
+    public FastPcTimingTask(double[] x, double[] mean, int ll, int llr) {
       super("fast", x, mean, ll, llr);
     }
 
@@ -811,10 +811,10 @@ public class PoissonCalculatorTest {
     }
   }
 
-  private static class FastLogPCTimingTask extends PCTimingTask {
+  private static class FastLogPcTimingTask extends PcTimingTask {
     FastLog fastLog = FastLogFactory.getFastLog();
 
-    public FastLogPCTimingTask(double[] x, double[] mean, int ll, int llr) {
+    public FastLogPcTimingTask(double[] x, double[] mean, int ll, int llr) {
       super("fastLog", x, mean, ll, llr);
     }
 
@@ -831,10 +831,10 @@ public class PoissonCalculatorTest {
     }
   }
 
-  private static class InstancePCTimingTask extends PCTimingTask {
+  private static class InstancePcTimingTask extends PcTimingTask {
     int max;
 
-    public InstancePCTimingTask(double[] x, double[] mean, int ll, int llr) {
+    public InstancePcTimingTask(double[] x, double[] mean, int ll, int llr) {
       super("instance", x, mean, ll, llr);
       max = Math.max(llr, ll);
     }
@@ -886,10 +886,10 @@ public class PoissonCalculatorTest {
         if (ll + llr == 0) {
           continue;
         }
-        ts.execute(new StaticPCTimingTask(x, u, ll, llr));
-        ts.execute(new FastPCTimingTask(x, u, ll, llr));
-        ts.execute(new FastLogPCTimingTask(x, u, ll, llr));
-        ts.execute(new InstancePCTimingTask(x, u, ll, llr));
+        ts.execute(new StaticPcTimingTask(x, u, ll, llr));
+        ts.execute(new FastPcTimingTask(x, u, ll, llr));
+        ts.execute(new FastLogPcTimingTask(x, u, ll, llr));
+        ts.execute(new InstancePcTimingTask(x, u, ll, llr));
       }
     }
 

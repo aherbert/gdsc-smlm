@@ -62,6 +62,7 @@ import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
@@ -89,211 +90,7 @@ import java.util.regex.Pattern;
  * <p>See Huang et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
  * localization algorithms. Nature Methods 10, 653-658 (Supplementary Information).
  */
-public class CMOSAnalysis implements PlugIn {
-  private class SimulationWorker implements Runnable {
-    final Ticker ticker;
-    final RandomGenerator rg;
-    final String out;
-    final float[] pixelOffset;
-    final float[] pixelVariance;
-    final float[] pixelGain;
-    final int from;
-    final int to;
-    final int blockSize;
-    final int photons;
-
-    public SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from,
-        int to, int blockSize, int photons) {
-      this.ticker = ticker;
-      rg = new Well19937c(seed);
-      pixelOffset = (float[]) stack.getPixels(1);
-      pixelVariance = (float[]) stack.getPixels(2);
-      pixelGain = (float[]) stack.getPixels(3);
-      this.out = out;
-      this.from = from;
-      this.to = to;
-      this.blockSize = blockSize;
-      this.photons = photons;
-    }
-
-    @Override
-    public void run() {
-      // Avoid the status bar talking to the current image
-      WindowManager.setTempCurrentImage(null);
-
-      // Convert variance to SD
-      final float[] pixelSD = new float[pixelVariance.length];
-      for (int i = 0; i < pixelVariance.length; i++) {
-        pixelSD[i] = (float) Math.sqrt(pixelVariance[i]);
-      }
-
-      final int size = (int) Math.sqrt(pixelVariance.length);
-
-      // Pre-compute a set of Poisson numbers since this is slow
-      int[] poisson = null;
-      if (photons != 0) {
-        // For speed we can precompute a set of random numbers to reuse
-        final RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
-        final PoissonDistribution pd = new PoissonDistribution(rg, photons,
-            PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-        poisson = new int[pixelVariance.length];
-        for (int i = poisson.length; i-- > 0;) {
-          poisson[i] = pd.sample();
-        }
-      }
-
-      // Save image in blocks
-      ImageStack stack = new ImageStack(size, size);
-      int start = from;
-      for (int i = from; i < to; i++) {
-        // Create image
-        final short[] pixels = new short[pixelOffset.length];
-        if (poisson == null) {
-          for (int j = 0; j < pixelOffset.length; j++) {
-            // Fixed offset per pixel plus a variance
-            final double p = pixelOffset[j] + rg.nextGaussian() * pixelSD[j];
-            pixels[j] = clip16bit(p);
-          }
-        } else {
-          for (int j = 0; j < pixelOffset.length; j++) {
-            // Fixed offset per pixel plus a variance plus a
-            // fixed gain multiplied by a Poisson sample of the photons
-            final double p =
-                pixelOffset[j] + rg.nextGaussian() * pixelSD[j] + (poisson[j] * pixelGain[j]);
-            pixels[j] = clip16bit(p);
-          }
-
-          // Rotate Poisson numbers.
-          // Shuffling what we have is faster than generating new values
-          // and we should have enough.
-          MathArrays.shuffle(poisson, rg);
-        }
-
-        // Save image
-        stack.addSlice(null, pixels);
-        if (stack.getSize() == blockSize) {
-          save(stack, start);
-          start = i + 1;
-          stack = new ImageStack(size, size);
-        }
-
-        ticker.tick();
-      }
-      // This should not happen if we control the to-from range correctly
-      if (stack.getSize() != 0) {
-        save(stack, start);
-      }
-    }
-
-    static final short MIN_SHORT = 0;
-    // Require cast since this is out-of-range for a signed short
-    static final short MAX_SHORT = (short) 65335;
-
-    /**
-     * Clip to the range for a 16-bit image.
-     *
-     * @param value the value
-     * @return the clipped value
-     */
-    private short clip16bit(double value) {
-      final int i = (int) Math.round(value);
-      if (i < 0) {
-        return MIN_SHORT;
-      }
-      if (i > 65335) {
-        return MAX_SHORT;
-      }
-      return (short) i;
-    }
-
-    private void save(ImageStack stack, int start) {
-      final ImagePlus imp = new ImagePlus("", stack);
-      final String path = new File(out, String.format("image%06d.tif", start)).getPath();
-      final FileSaver fs = new FileSaver(imp);
-      fs.saveAsTiffStack(path);
-    }
-  }
-
-  private class SubDir implements Comparable<SubDir> {
-    int exposureTime;
-    File path;
-    String name;
-
-    SubDir(int exposureTime, File path, String name) {
-      this.exposureTime = exposureTime;
-      this.path = path;
-      this.name = name;
-    }
-
-    @Override
-    public int compareTo(SubDir o) {
-      return Integer.compare(exposureTime, o.exposureTime);
-    }
-  }
-
-  /**
-   * Used to allow multi-threading of the scoring the filters.
-   */
-  private class ImageWorker implements Runnable {
-    final Ticker ticker;
-    volatile boolean finished;
-    final BlockingQueue<Object> jobs;
-    final ArrayMoment moment;
-    int bitDepth;
-
-    public ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment) {
-      this.ticker = ticker;
-      this.jobs = jobs;
-      this.moment = moment.newInstance();
-    }
-
-    @Override
-    public void run() {
-      try {
-        while (true) {
-          final Object pixels = jobs.take();
-          if (pixels == null) {
-            break;
-          }
-          if (!finished) {
-            // Only run jobs when not finished. This allows the queue to be emptied.
-            run(pixels);
-          }
-        }
-      } catch (final InterruptedException ex) {
-        if (!finished) {
-          // This is not expected
-          System.out.println(ex.toString());
-          throw new RuntimeException(ex);
-        }
-      } finally {
-        // Utils.log("Finished");
-        finished = true;
-      }
-    }
-
-    private void run(Object pixels) {
-      if (ImageJUtils.isInterrupted()) {
-        finished = true;
-        return;
-      }
-      if (bitDepth == 0) {
-        bitDepth = ImageJUtils.getBitDepth(pixels);
-      }
-      // Most likely first
-      if (bitDepth == 16) {
-        moment.addUnsigned((short[]) pixels);
-      } else if (bitDepth == 32) {
-        moment.add((float[]) pixels);
-      } else if (bitDepth == 8) {
-        moment.addUnsigned((byte[]) pixels);
-      } else {
-        throw new IllegalStateException("Unsupported bit depth");
-      }
-      ticker.tick();
-    }
-  }
-
+public class CmosAnalysis implements PlugIn {
   private static final String TITLE = "sCMOS Analysis";
 
   private static String directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
@@ -327,12 +124,10 @@ public class CMOSAnalysis implements PlugIn {
   private static int size = 512;
   private static int frames = 512;
 
-  private boolean extraOptions;
-
   private static int imagejNThreads = Prefs.getThreads();
-  private static int lastNThreads = imagejNThreads;
+  private static int lastNumberOfThreads = imagejNThreads;
 
-  private int nThreads;
+  private int numberOfThreads;
   // The simulated offset, variance and gain
   private ImagePlus simulationImp;
   // The measured offset, variance and gain
@@ -340,18 +135,221 @@ public class CMOSAnalysis implements PlugIn {
   // The sub-directories containing the sCMOS images
   private TurboList<SubDir> subDirs;
 
+  private static class SimulationWorker implements Runnable {
+    static final short MIN_SHORT = 0;
+    // Require cast since this is out-of-range for a signed short
+    static final short MAX_SHORT = (short) 65335;
+
+    final Ticker ticker;
+    final RandomGenerator rg;
+    final String out;
+    final float[] pixelOffset;
+    final float[] pixelVariance;
+    final float[] pixelGain;
+    final int from;
+    final int to;
+    final int blockSize;
+    final int photons;
+
+    public SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from,
+        int to, int blockSize, int photons) {
+      this.ticker = ticker;
+      rg = new Well19937c(seed);
+      pixelOffset = (float[]) stack.getPixels(1);
+      pixelVariance = (float[]) stack.getPixels(2);
+      pixelGain = (float[]) stack.getPixels(3);
+      this.out = out;
+      this.from = from;
+      this.to = to;
+      this.blockSize = blockSize;
+      this.photons = photons;
+    }
+
+    @Override
+    public void run() {
+      // Avoid the status bar talking to the current image
+      WindowManager.setTempCurrentImage(null);
+
+      // Convert variance to SD
+      final float[] pixelSd = new float[pixelVariance.length];
+      for (int i = 0; i < pixelVariance.length; i++) {
+        pixelSd[i] = (float) Math.sqrt(pixelVariance[i]);
+      }
+
+      final int size = (int) Math.sqrt(pixelVariance.length);
+
+      // Pre-compute a set of Poisson numbers since this is slow
+      int[] poisson = null;
+      if (photons != 0) {
+        // For speed we can precompute a set of random numbers to reuse
+        final RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
+        final PoissonDistribution pd = new PoissonDistribution(rg, photons,
+            PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+        poisson = new int[pixelVariance.length];
+        for (int i = poisson.length; i-- > 0;) {
+          poisson[i] = pd.sample();
+        }
+      }
+
+      // Save image in blocks
+      ImageStack stack = new ImageStack(size, size);
+      int start = from;
+      for (int i = from; i < to; i++) {
+        // Create image
+        final short[] pixels = new short[pixelOffset.length];
+        if (poisson == null) {
+          for (int j = 0; j < pixelOffset.length; j++) {
+            // Fixed offset per pixel plus a variance
+            final double p = pixelOffset[j] + rg.nextGaussian() * pixelSd[j];
+            pixels[j] = clip16bit(p);
+          }
+        } else {
+          for (int j = 0; j < pixelOffset.length; j++) {
+            // Fixed offset per pixel plus a variance plus a
+            // fixed gain multiplied by a Poisson sample of the photons
+            final double p =
+                pixelOffset[j] + rg.nextGaussian() * pixelSd[j] + (poisson[j] * pixelGain[j]);
+            pixels[j] = clip16bit(p);
+          }
+
+          // Rotate Poisson numbers.
+          // Shuffling what we have is faster than generating new values
+          // and we should have enough.
+          MathArrays.shuffle(poisson, rg);
+        }
+
+        // Save image
+        stack.addSlice(null, pixels);
+        if (stack.getSize() == blockSize) {
+          save(stack, start);
+          start = i + 1;
+          stack = new ImageStack(size, size);
+        }
+
+        ticker.tick();
+      }
+      // This should not happen if we control the to-from range correctly
+      if (stack.getSize() != 0) {
+        save(stack, start);
+      }
+    }
+
+    /**
+     * Clip to the range for a 16-bit image.
+     *
+     * @param value the value
+     * @return the clipped value
+     */
+    private static short clip16bit(double value) {
+      final int i = (int) Math.round(value);
+      if (i < 0) {
+        return MIN_SHORT;
+      }
+      if (i > 65335) {
+        return MAX_SHORT;
+      }
+      return (short) i;
+    }
+
+    private void save(ImageStack stack, int start) {
+      final ImagePlus imp = new ImagePlus("", stack);
+      final String path = new File(out, String.format("image%06d.tif", start)).getPath();
+      final FileSaver fs = new FileSaver(imp);
+      fs.saveAsTiffStack(path);
+    }
+  }
+
+  private static class SubDir implements Comparable<SubDir> {
+    int exposureTime;
+    File path;
+    String name;
+
+    SubDir(int exposureTime, File path, String name) {
+      this.exposureTime = exposureTime;
+      this.path = path;
+      this.name = name;
+    }
+
+    @Override
+    public int compareTo(SubDir other) {
+      return Integer.compare(exposureTime, other.exposureTime);
+    }
+  }
+
   /**
-   * Gets the last N threads used in the input dialog.
-   *
-   * @return the last N threads
+   * Used to allow multi-threading of the scoring the filters.
    */
-  private static int getLastNThreads() {
+  private static class ImageWorker implements Runnable {
+    final Ticker ticker;
+    volatile boolean finished;
+    final BlockingQueue<Object> jobs;
+    final ArrayMoment moment;
+    int bitDepth;
+
+    public ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment) {
+      this.ticker = ticker;
+      this.jobs = jobs;
+      this.moment = moment.newInstance();
+    }
+
+    @Override
+    public void run() {
+      try {
+        while (true) {
+          final Object pixels = jobs.take();
+          if (pixels == null) {
+            break;
+          }
+          if (!finished) {
+            // Only run jobs when not finished. This allows the queue to be emptied.
+            run(pixels);
+          }
+        }
+      } catch (final InterruptedException ex) {
+        if (!finished) {
+          // This is not expected
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
+        }
+      } finally {
+        finished = true;
+      }
+    }
+
+    private void run(Object pixels) {
+      if (ImageJUtils.isInterrupted()) {
+        finished = true;
+        return;
+      }
+      if (bitDepth == 0) {
+        bitDepth = ImageJUtils.getBitDepth(pixels);
+      }
+      // Most likely first
+      if (bitDepth == 16) {
+        moment.addUnsigned((short[]) pixels);
+      } else if (bitDepth == 32) {
+        moment.add((float[]) pixels);
+      } else if (bitDepth == 8) {
+        moment.addUnsigned((byte[]) pixels);
+      } else {
+        throw new IllegalStateException("Unsupported bit depth");
+      }
+      ticker.tick();
+    }
+  }
+
+  /**
+   * Gets the last number of threads used in the input dialog.
+   *
+   * @return the last number of threads
+   */
+  private static int getLastNumberOfThreads() {
     // See if ImageJ preference were updated
     if (imagejNThreads != Prefs.getThreads()) {
-      lastNThreads = imagejNThreads = Prefs.getThreads();
+      lastNumberOfThreads = imagejNThreads = Prefs.getThreads();
     }
     // Otherwise use the last user input
-    return lastNThreads;
+    return lastNumberOfThreads;
   }
 
   /**
@@ -360,28 +358,28 @@ public class CMOSAnalysis implements PlugIn {
    * @return the threads
    */
   private int getThreads() {
-    if (nThreads == 0) {
-      nThreads = Prefs.getThreads();
+    if (numberOfThreads == 0) {
+      numberOfThreads = Prefs.getThreads();
     }
-    return nThreads;
+    return numberOfThreads;
   }
 
   /**
    * Sets the threads to use for multi-threaded computation.
    *
-   * @param nThreads the new threads
+   * @param numberOfThreads the new threads
    */
-  private void setThreads(int nThreads) {
-    this.nThreads = Math.max(1, nThreads);
+  private void setThreads(int numberOfThreads) {
+    this.numberOfThreads = Math.max(1, numberOfThreads);
     // Save user input
-    lastNThreads = this.nThreads;
+    lastNumberOfThreads = this.numberOfThreads;
   }
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    extraOptions = ImageJUtils.isExtraOptions();
+    final boolean extraOptions = ImageJUtils.isExtraOptions();
     // Avoid the status bar talking to the current image
     WindowManager.setTempCurrentImage(null);
 
@@ -468,16 +466,16 @@ public class CMOSAnalysis implements PlugIn {
 
     // Create thread pool and workers
     final ExecutorService executor = Executors.newFixedThreadPool(getThreads());
-    final TurboList<Future<?>> futures = new TurboList<>(nThreads);
+    final TurboList<Future<?>> futures = new TurboList<>(numberOfThreads);
 
     // Simulate the zero exposure input.
     // Simulate 20 - 200 photon images.
     final int[] photons = new int[] {0, 20, 50, 100, 200};
 
     final int blockSize = 10; // For saving stacks
-    int nPerThread = (int) Math.ceil((double) frames / nThreads);
+    int numberPerThread = (int) Math.ceil((double) frames / numberOfThreads);
     // Convert to fit the block size
-    nPerThread = (int) Math.ceil((double) nPerThread / blockSize) * blockSize;
+    numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
     long seed = start;
 
     ticker = Ticker.createStarted(new ImageJTrackProgress(), photons.length * frames, true);
@@ -491,7 +489,7 @@ public class CMOSAnalysis implements PlugIn {
       }
 
       for (int from = 0; from < frames;) {
-        final int to = Math.min(from + nPerThread, frames);
+        final int to = Math.min(from + numberPerThread, frames);
         futures.add(executor.submit(new SimulationWorker(ticker, seed++, out.getPath(),
             simulationStack, from, to, blockSize, p)));
         from = to;
@@ -524,7 +522,7 @@ public class CMOSAnalysis implements PlugIn {
 
     gd.addMessage("Simulate per-pixel offset, variance and gain of sCMOS images.");
 
-    gd.addNumericField("nThreads", getLastNThreads(), 0);
+    gd.addNumericField("nThreads", getLastNumberOfThreads(), 0);
     gd.addNumericField("Offset (Poisson)", offset, 3);
     gd.addNumericField("Variance (Exponential)", variance, 3);
     gd.addNumericField("Gain (Gaussian)", gain, 3);
@@ -616,7 +614,7 @@ public class CMOSAnalysis implements PlugIn {
         80));
     //@formatter:on
 
-    gd.addNumericField("nThreads", getLastNThreads(), 0);
+    gd.addNumericField("nThreads", getLastNumberOfThreads(), 0);
     gd.addMessage(TextUtils.wrap("A rolling algorithm can handle any size of data but is slower. "
         + "Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.", 80));
     gd.addCheckbox("Rolling_algorithm", rollingAlgorithm);
@@ -965,7 +963,8 @@ public class CMOSAnalysis implements PlugIn {
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -1002,18 +1001,18 @@ public class CMOSAnalysis implements PlugIn {
 
     // Mann-Whitney U is valid for any distribution, e.g. variance
     final MannWhitneyUTest test = new MannWhitneyUTest();
-    double p = test.mannWhitneyUTest(x, y);
-    result.append(" : Mann-Whitney U p=").append(MathUtils.rounded(p)).append(' ')
-        .append(((p < 0.05) ? "reject" : "accept"));
+    double pvalue = test.mannWhitneyUTest(x, y);
+    result.append(" : Mann-Whitney U p=").append(MathUtils.rounded(pvalue)).append(' ')
+        .append(((pvalue < 0.05) ? "reject" : "accept"));
 
     if (slice != 2) {
       // T-Test is valid for approximately Normal distributions, e.g. offset and gain
-      p = TestUtils.tTest(x, y);
-      result.append(" : T-Test p=").append(MathUtils.rounded(p)).append(' ')
-          .append(((p < 0.05) ? "reject" : "accept"));
-      p = TestUtils.pairedTTest(x, y);
-      result.append(" : Paired T-Test p=").append(MathUtils.rounded(p)).append(' ')
-          .append(((p < 0.05) ? "reject" : "accept"));
+      pvalue = TestUtils.tTest(x, y);
+      result.append(" : T-Test p=").append(MathUtils.rounded(pvalue)).append(' ')
+          .append(((pvalue < 0.05) ? "reject" : "accept"));
+      pvalue = TestUtils.pairedTTest(x, y);
+      result.append(" : Paired T-Test p=").append(MathUtils.rounded(pvalue)).append(' ')
+          .append(((pvalue < 0.05) ? "reject" : "accept"));
     }
 
     ImageJUtils.log(result.toString());

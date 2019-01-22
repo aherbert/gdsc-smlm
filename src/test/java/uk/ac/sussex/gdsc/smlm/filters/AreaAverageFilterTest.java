@@ -41,7 +41,7 @@ import java.util.ArrayList;
 @SuppressWarnings({"deprecation", "javadoc"})
 public class AreaAverageFilterTest extends AbstractFilterTest {
   private static final int ITER = 100;
-  private static final int InternalITER = 300;
+  private static final int INTERNAL_ITER = 300;
 
   @SeededTest
   public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed) {
@@ -49,7 +49,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
 
     final AreaAverageFilter filter = new AreaAverageFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -208,7 +208,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
     final AreaAverageFilter filter = new AreaAverageFilter();
     final AverageFilter filter2 = new AverageFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 

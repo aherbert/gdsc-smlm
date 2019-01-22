@@ -35,25 +35,25 @@ public class CoordinateStoreTest {
 
   @Test
   public void canCreateStore() {
-    CoordinateStore s;
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, -1, -1);
-    Assertions.assertTrue(s instanceof NullCoordinateStore);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 0, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.2, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 0.5, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore1);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore1);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 1.5, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore);
-    s = CoordinateStoreFactory.create(1, 2, 10, 11, 2, -1);
-    Assertions.assertTrue(s instanceof GridCoordinateStore);
+    CoordinateStore store;
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, -1, -1);
+    Assertions.assertTrue(store instanceof NullCoordinateStore);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 0, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 0.2, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 0.5, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore1);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 1, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore1);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 1.5, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore);
+    store = CoordinateStoreFactory.create(1, 2, 10, 11, 2, -1);
+    Assertions.assertTrue(store instanceof GridCoordinateStore);
   }
 
   @Test
-  public void canDetectXYDuplicates() {
+  public void canDetectXyDuplicates() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -91,7 +91,7 @@ public class CoordinateStoreTest {
     final double z = 1.1;
     final double[] resolution = {0.3, 0.5, 1.5};
 
-    CoordinateStore s;
+    CoordinateStore store;
     Supplier<String> msg;
 
     for (int i = 0; i < resolution.length; i++) {
@@ -99,33 +99,33 @@ public class CoordinateStoreTest {
 
       // No 3D
       final double zResolution_1 = -1;
-      s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution_1);
-      s.add(x, y, z);
+      store = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution_1);
+      store.add(x, y, z);
 
       msg = () -> resolution[ii] + "," + zResolution_1;
-      Assertions.assertTrue(s.contains(x, y, z), msg);
+      Assertions.assertTrue(store.contains(x, y, z), msg);
 
       // 3D exact match
       final double zResolution0 = 0;
-      s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution0);
-      s.add(x, y, z);
+      store = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution0);
+      store.add(x, y, z);
 
       msg = () -> resolution[ii] + "," + zResolution0;
-      Assertions.assertTrue(s.contains(x, y, z), msg);
-      Assertions.assertFalse(s.contains(x, y, z + 0.01), msg);
-      Assertions.assertFalse(s.contains(x, y, z - 0.01), msg);
+      Assertions.assertTrue(store.contains(x, y, z), msg);
+      Assertions.assertFalse(store.contains(x, y, z + 0.01), msg);
+      Assertions.assertFalse(store.contains(x, y, z - 0.01), msg);
 
       // 3D match within z-resolution
       final double zResolution1 = 1;
-      s = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution1);
-      s.add(x, y, z);
+      store = CoordinateStoreFactory.create(1, 2, 10, 11, resolution[i], zResolution1);
+      store.add(x, y, z);
 
       msg = () -> resolution[ii] + "," + zResolution1;
-      Assertions.assertTrue(s.contains(x, y, z), msg);
-      Assertions.assertTrue(s.contains(x, y, z + zResolution1), msg);
-      Assertions.assertTrue(s.contains(x, y, z - zResolution1), msg);
-      Assertions.assertFalse(s.contains(x, y, z + zResolution1 * 1.01), msg);
-      Assertions.assertFalse(s.contains(x, y, z - zResolution1 * 1.01), msg);
+      Assertions.assertTrue(store.contains(x, y, z), msg);
+      Assertions.assertTrue(store.contains(x, y, z + zResolution1), msg);
+      Assertions.assertTrue(store.contains(x, y, z - zResolution1), msg);
+      Assertions.assertFalse(store.contains(x, y, z + zResolution1 * 1.01), msg);
+      Assertions.assertFalse(store.contains(x, y, z - zResolution1 * 1.01), msg);
     }
   }
 
@@ -242,9 +242,9 @@ public class CoordinateStoreTest {
     Assertions.assertFalse(addAndFind(s, s.getMinX(), s.getMinY() + s.getHeight() + 1, 0));
   }
 
-  private static boolean addAndFind(GridCoordinateStore s, double x, double y, double z) {
-    s.safeAdd(x, y, z);
-    return s.contains(x, y, z);
+  private static boolean addAndFind(GridCoordinateStore store, double x, double y, double z) {
+    store.safeAdd(x, y, z);
+    return store.contains(x, y, z);
   }
 
   @Test
@@ -261,7 +261,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canChangeXYResolution() {
+  public void canChangeXyResolution() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -291,7 +291,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canChangeXYResolutionOnFixedStore() {
+  public void canChangeXyResolutionOnFixedStore() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -321,7 +321,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotChangeToBadXYResolutionOnFixedStore() {
+  public void cannotChangeToBadXyResolutionOnFixedStore() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
       s.changeXyResolution(1.1);

@@ -88,7 +88,7 @@ public class About implements PlugIn, MacroExtension {
   @SuppressWarnings("unused")
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (arg.equals("about")) {
       showAbout();
@@ -117,9 +117,9 @@ public class About implements PlugIn, MacroExtension {
               + "plugins change.",
           ConfigureOption.INSTALL, ConfigureOption.EDIT, ConfigureOption.REMOVE);
       // If install/remove was successful then reload the GDSC SMLM Panel if it is showing.
-      if (result != -1 && SMLMTools.isFrameVisible()) {
-        SMLMTools.closeFrame();
-        new SMLMTools();
+      if (result != -1 && SmlmTools.isFrameVisible()) {
+        SmlmTools.closeFrame();
+        new SmlmTools();
       }
       return;
     }

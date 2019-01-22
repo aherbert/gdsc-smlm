@@ -59,12 +59,12 @@ public class PeakResultHelperTest {
 
     final double[] photons = {0, 1, 2, 4, 10, 50, 100};
 
-    for (final boolean emCCD : new boolean[] {false, true}) {
+    for (final boolean emCcd : new boolean[] {false, true}) {
       for (final double p : photons) {
         final double b = p * gain;
-        final double n = PeakResultHelper.localBackgroundToNoise(b, gain, emCCD);
-        final double b2 = PeakResultHelper.noiseToLocalBackground(n, gain, emCCD);
-        Assertions.assertEquals(b, b2, 1e-6, () -> emCCD + " " + p);
+        final double n = PeakResultHelper.localBackgroundToNoise(b, gain, emCcd);
+        final double b2 = PeakResultHelper.noiseToLocalBackground(n, gain, emCcd);
+        Assertions.assertEquals(b, b2, 1e-6, () -> emCcd + " " + p);
       }
     }
   }

@@ -43,10 +43,10 @@ import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class BlockSumFilterTest extends AbstractFilterTest {
-  private final int InternalITER3 = 500;
-  private final int InternalITER = 50;
-  private final int ITER3 = 200;
-  private final int ITER = 20;
+  private static final int INTERNAL_ITER3 = 500;
+  private static final int INTERNAL_ITER = 50;
+  private static final int ITER3 = 200;
+  private static final int ITER = 20;
 
   /**
    * Do a simple and stupid sum filter.
@@ -122,12 +122,12 @@ public class BlockSumFilterTest extends AbstractFilterTest {
    * Do a simple and stupid sum filter with weights.
    *
    * @param data the data
-   * @param w the weights
+   * @param weights the weights
    * @param maxx the maxx
    * @param maxy the maxy
    * @param boxSize the box size
    */
-  public static void weightedSum(float[] data, float[] w, int maxx, int maxy, float boxSize) {
+  public static void weightedSum(float[] data, float[] weights, int maxx, int maxy, float boxSize) {
     if (boxSize <= 0) {
       return;
     }
@@ -164,7 +164,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
               xxx = maxx - 1;
             }
             final int index = yyy * maxx + xxx;
-            final double w2 = w[index] * weight[yy] * weight[xx];
+            final double w2 = weights[index] * weight[yy] * weight[xx];
             sum += data[index] * w2;
             sumw += w2;
           }
@@ -184,11 +184,11 @@ public class BlockSumFilterTest extends AbstractFilterTest {
       super(name, isInterpolated);
     }
 
-    BlockSumFilter f = new BlockSumFilter();
+    BlockSumFilter filter = new BlockSumFilter();
 
     @Override
-    public void setWeights(float[] w, int width, int height) {
-      f.setWeights(w, width, height);
+    public void setWeights(float[] weights, int width, int height) {
+      filter.setWeights(weights, width, height);
     }
   }
 
@@ -210,13 +210,13 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     }
   }
 
-  private static void weightedSumIsCorrect(float[] data, float[] w, int width, int height,
+  private static void weightedSumIsCorrect(float[] data, float[] weights, int width, int height,
       float boxSize, boolean internal, BlockSumDataFilter filter) {
     final float[] data1 = data.clone();
     final float[] data2 = data.clone();
     final FloatEquality eq = new FloatEquality(1e-3f, 1e-10f);
 
-    weightedSum(data1, w, width, height, boxSize);
+    weightedSum(data1, weights, width, height, boxSize);
 
     //// Check the weights do not alter the image sum
     // double u1 = uk.ac.sussex.gdsc.core.utils.Maths.sum(sum(data.clone(), width, height,
@@ -245,7 +245,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
       for (final int height : primes) {
         final float[] data = createData(rg, width, height);
 
-        filter.f.setWeights(null, 0, 0);
+        filter.filter.setWeights(null, 0, 0);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             sumIsCorrect(data, width, height, boxSize, internal, filter);
@@ -259,7 +259,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
         // Uniform weights
         final float[] w = new float[width * height];
         Arrays.fill(w, 1);
-        filter.f.setWeights(w, width, height);
+        filter.filter.setWeights(w, width, height);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             weightedSumIsCorrect(data, w, width, height, boxSize, internal, filter);
@@ -275,7 +275,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
           w[i] = (float) (1.0 / Math.max(0.01, ed.sample()));
         }
 
-        filter.f.setWeights(w, width, height);
+        filter.filter.setWeights(w, width, height);
         for (final float boxSize : boxSizes) {
           for (final boolean internal : checkInternal) {
             weightedSumIsCorrect(data, w, width, height, boxSize, internal, filter);
@@ -294,12 +294,12 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter filter = new BlockSumDataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, boxSize);
+        filter.blockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, boxSize);
+        filter.blockFilterInternal(data, width, height, boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -310,12 +310,12 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter filter = new BlockSumDataFilter("stripedBlock", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, boxSize);
+        filter.stripedBlockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -326,12 +326,12 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     checkIsCorrect(seed, filter);
@@ -421,7 +421,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
       int[] testBoxSizes) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
+    ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -438,7 +438,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     }
 
     for (final float boxSize : boxSizes) {
-      final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+      final int iter = (boxSize == 1) ? INTERNAL_ITER3 : INTERNAL_ITER;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           dataSet = getSpeedData(seed, iter);
@@ -457,7 +457,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     long fastTotal = 0;
     int index = 0;
     for (final float boxSize : boxSizes) {
-      final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+      final int iter = (boxSize == 1) ? INTERNAL_ITER3 : INTERNAL_ITER;
       long boxSlowTotal = 0;
       long boxFastTotal = 0;
       for (final int width : speedPrimes) {
@@ -497,23 +497,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, (int) boxSize);
+        filter.blockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, (int) boxSize);
+        filter.blockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, (int) boxSize);
+        filter.stripedBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -527,23 +527,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, boxSize);
+        filter.blockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, boxSize);
+        filter.blockFilterInternal(data, width, height, boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, boxSize);
+        filter.stripedBlockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, boxSize);
       }
     };
 
@@ -557,23 +557,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.blockFilter(data, width, height, (int) boxSize);
+        filter.blockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.blockFilterInternal(data, width, height, (int) boxSize);
+        filter.blockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -587,23 +587,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter(data, width, height, (int) boxSize);
+        filter.stripedBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
     };
 
@@ -617,23 +617,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock3x3", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3(data, width, height);
+        filter.stripedBlockFilter3x3(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3Internal(data, width, height);
+        filter.stripedBlockFilter3x3Internal(data, width, height);
       }
     };
 
@@ -648,23 +648,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock3x3", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3(data, width, height, boxSize);
+        filter.stripedBlockFilter3x3(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter3x3Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter3x3Internal(data, width, height, boxSize);
       }
     };
 
@@ -679,23 +679,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock5x5", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5(data, width, height);
+        filter.stripedBlockFilter5x5(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5Internal(data, width, height);
+        filter.stripedBlockFilter5x5Internal(data, width, height);
       }
     };
 
@@ -710,23 +710,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock5x5", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5(data, width, height, boxSize);
+        filter.stripedBlockFilter5x5(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter5x5Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter5x5Internal(data, width, height, boxSize);
       }
     };
 
@@ -741,23 +741,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, (int) boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock7x7", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7(data, width, height);
+        filter.stripedBlockFilter7x7(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7Internal(data, width, height);
+        filter.stripedBlockFilter7x7Internal(data, width, height);
       }
     };
 
@@ -772,23 +772,23 @@ public class BlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter slow = new BlockSumDataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxN(data, width, height, boxSize);
+        filter.stripedBlockFilterNxN(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilterNxNInternal(data, width, height, boxSize);
+        filter.stripedBlockFilterNxNInternal(data, width, height, boxSize);
       }
     };
     final BlockSumDataFilter fast = new BlockSumDataFilter("stripedBlock7x7", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7(data, width, height, boxSize);
+        filter.stripedBlockFilter7x7(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.stripedBlockFilter7x7Internal(data, width, height, boxSize);
+        filter.stripedBlockFilter7x7Internal(data, width, height, boxSize);
       }
     };
 

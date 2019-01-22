@@ -84,7 +84,7 @@ public class DarkTimeAnalysis implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // Require some fit results and selected regions
     if (MemoryPeakResults.isMemoryEmpty()) {

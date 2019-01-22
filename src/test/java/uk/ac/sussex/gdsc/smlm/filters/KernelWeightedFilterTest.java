@@ -30,11 +30,11 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest {
   DataFilter createDataFilter() {
     // Do not support non-integer box sizes
     return new DataFilter("kernel", false, 3) {
-      float[] w;
+      float[] weights;
       int width;
       int height;
-      KernelFilter f;
-      int k = 0;
+      KernelFilter filter;
+      int kernelWidth = 0;
 
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -44,37 +44,37 @@ public class KernelWeightedFilterTest extends WeightedKernelFilterTest {
           return;
         }
         updateKernelFilter(k);
-        f.convolve(data, width, height);
+        filter.convolve(data, width, height);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        final int k = (int) boxSize;
+        final int kernelWidth = (int) boxSize;
         // Only do odd box sizes
-        if ((k & 1) != 1) {
+        if ((kernelWidth & 1) != 1) {
           return;
         }
-        updateKernelFilter(k);
-        f.convolve(data, width, height, k / 2);
+        updateKernelFilter(kernelWidth);
+        filter.convolve(data, width, height, kernelWidth / 2);
       }
 
-      private void updateKernelFilter(int k) {
-        if (this.k != k || f == null) {
-          f = createKernelFilter(k);
+      private void updateKernelFilter(int kernelWidth) {
+        if (this.kernelWidth != kernelWidth || filter == null) {
+          filter = createKernelFilter(kernelWidth);
         }
-        if (w != null) {
-          f.setWeights(w, this.width, this.height);
+        if (weights != null) {
+          filter.setWeights(weights, this.width, this.height);
         }
       }
 
-      private KernelFilter createKernelFilter(int k) {
-        final KernelFilter f = new KernelFilter(KernelFilterTest.createKernel(k, k), k, k);
-        return f;
+      private KernelFilter createKernelFilter(int kernelWidth) {
+        return new KernelFilter(KernelFilterTest.createKernel(kernelWidth, kernelWidth),
+            kernelWidth, kernelWidth);
       }
 
       @Override
-      public void setWeights(float[] w, int width, int height) {
-        this.w = w;
+      public void setWeights(float[] weights, int width, int height) {
+        this.weights = weights;
         this.width = width;
         this.height = height;
       }

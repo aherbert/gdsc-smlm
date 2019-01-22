@@ -57,7 +57,7 @@ import java.util.HashMap;
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
  * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
  */
-public class SMLMTools extends PlugInFrame {
+public class SmlmTools extends PlugInFrame {
   private static final long serialVersionUID = -5457127382849923056L;
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   private static final String OPT_LOCATION = "SMLM_Plugins.location";
@@ -80,7 +80,7 @@ public class SMLMTools extends PlugInFrame {
    * <p>Create a frame showing all the available plugins within the user
    * [ImageJ]/plugins/smlm.config file or the default /uk/ac/sussex/gdsc/smlm/plugins.config file.
    */
-  public SMLMTools() {
+  public SmlmTools() {
     super(TITLE);
 
     // Only allow one instance to run
@@ -142,7 +142,7 @@ public class SMLMTools extends PlugInFrame {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // Do nothing. The frame has been created and the buttons run the plugins.
   }
@@ -294,7 +294,7 @@ public class SMLMTools extends PlugInFrame {
    */
   public static InputStream getPluginsConfig() {
     // Get the embedded config in the jar file
-    final Class<SMLMTools> resourceClass = SMLMTools.class;
+    final Class<SmlmTools> resourceClass = SmlmTools.class;
     final InputStream readmeStream =
         resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
     return readmeStream;

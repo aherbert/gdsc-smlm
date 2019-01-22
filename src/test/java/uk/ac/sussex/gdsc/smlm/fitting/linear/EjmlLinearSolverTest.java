@@ -56,12 +56,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class EJMLLinearSolverTest {
+public class EjmlLinearSolverTest {
   private static Logger logger;
 
   @BeforeAll
   public static void beforeAll() {
-    logger = Logger.getLogger(EJMLLinearSolverTest.class.getName());
+    logger = Logger.getLogger(EjmlLinearSolverTest.class.getName());
   }
 
   @AfterAll
@@ -360,6 +360,10 @@ public class EJMLLinearSolverTest {
   }
   //@formatter:on
 
+  // Allow matrix name A and vector names b & x for equation A x = b
+  // @CHECKSTYLE.OFF: MemberName
+  // @CHECKSTYLE.OFF: ParameterName
+
   private abstract class SolverTimingTask extends BaseTimingTask {
     DenseMatrix64F[] a;
     DenseMatrix64F[] b;
@@ -453,7 +457,7 @@ public class EJMLLinearSolverTest {
 
     @Override
     boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
-      return solver.solveCholeskyLDLT(a, b);
+      return solver.solveCholeskyLdlT(a, b);
     }
   }
 
@@ -537,13 +541,13 @@ public class EJMLLinearSolverTest {
               final double[] p = new double[] {background, signal1, 0, cx1, cy1, w1, w1};
               f0.initialise(p);
               f0.forEach(new ValueProcedure() {
-                int i = 0;
+                int index = 0;
 
                 @Override
                 public void execute(double value) {
                   // Poisson data
                   pd.setMeanUnsafe(value);
-                  y[i++] = pd.sample();
+                  y[index++] = pd.sample();
                 }
               });
               final double[][] alpha = new double[np][np];
@@ -838,13 +842,13 @@ public class EJMLLinearSolverTest {
               final double[] p = new double[] {background, signal1, 0, cx1, cy1, w1, w1};
               f0.initialise(p);
               f0.forEach(new ValueProcedure() {
-                int i = 0;
+                int index = 0;
 
                 @Override
                 public void execute(double value) {
                   // Poisson data
                   pd.setMeanUnsafe(value);
-                  y[i++] = pd.sample();
+                  y[index++] = pd.sample();
                 }
               });
               final double[][] alpha = new double[np][np];

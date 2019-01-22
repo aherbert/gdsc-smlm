@@ -548,7 +548,7 @@ public class BenchmarkFit implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if ("analysis".equals(arg)) {
       if (benchmarkResults.isEmpty()) {
@@ -611,7 +611,7 @@ public class BenchmarkFit implements PlugIn {
     }
 
     gd.addSlider("Region_size", 2, 20, regionSize);
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
         fitConfig.getFitSolver().ordinal());
     gd.addChoice("Origin_XY", ORIGIN_XY, originXY, new OptionListener<Integer>() {
@@ -769,7 +769,7 @@ public class BenchmarkFit implements PlugIn {
     }
 
     regionSize = (int) Math.abs(gd.getNextNumber());
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     originXY = gd.getNextChoiceIndex();
     originZ = gd.getNextChoiceIndex();
@@ -783,7 +783,7 @@ public class BenchmarkFit implements PlugIn {
     gd.collectOptions();
 
     // Do this before the call to is3D()
-    if (!PeakFit.configurePSFModel(config)) {
+    if (!PeakFit.configurePsfModel(config)) {
       return false;
     }
 
@@ -847,7 +847,7 @@ public class BenchmarkFit implements PlugIn {
   }
 
   private double getSa() {
-    return PSFCalculator.squarePixelAdjustment(benchmarkParameters.sd,
+    return PsfCalculator.squarePixelAdjustment(benchmarkParameters.sd,
         benchmarkParameters.pixelPitch) / benchmarkParameters.pixelPitch;
   }
 

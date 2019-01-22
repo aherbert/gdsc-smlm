@@ -33,7 +33,6 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.DiscreteInverseCumulativeProbabilityFunction;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.junit.jupiter.api.AfterAll;
@@ -57,10 +56,10 @@ public class BinomialFitterTest {
     logger = null;
   }
 
-  int[] N = new int[] {2, 3, 4, 6};
-  double[] P = new double[] {0.3, 0.5, 0.7};
-  int TRIALS = 10;
-  int FAILURES = (int) (0.3 * TRIALS);
+  static final int[] N = new int[] {2, 3, 4, 6};
+  static final double[] P = new double[] {0.3, 0.5, 0.7};
+  static final int TRIALS = 10;
+  static final int FAILURES = (int) (0.3 * TRIALS);
 
   // Note: This test is slow so only one test is run by default.
 
@@ -185,30 +184,33 @@ public class BinomialFitterTest {
   }
 
   @SeededTest
-  public void sameFitBinomialWithKnownNUsing_LSE_Or_MLE(RandomSeed seed) {
+  public void sameFitBinomialWithKnownNUsingLseOrMle(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final boolean zeroTruncated = false;
     for (final int n : N) {
       for (final double p : P) {
-        fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
+        fitBinomialUsingLseOrMle(rg, n, p, zeroTruncated, n, n);
       }
     }
   }
 
   @SeededTest
-  public void sameFitZeroTruncatedBinomialWithKnownNUsing_LSE_Or_MLE(RandomSeed seed) {
+  public void sameFitZeroTruncatedBinomialWithKnownNUsingLseOrMle(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final boolean zeroTruncated = true;
     for (final int n : N) {
       for (final double p : P) {
-        fitBinomialUsing_LSE_Or_MLE(rg, n, p, zeroTruncated, n, n);
+        fitBinomialUsingLseOrMle(rg, n, p, zeroTruncated, n, n);
       }
     }
   }
 
-  private void fitBinomial(UniformRandomProvider rg, int n, double p, boolean zeroTruncated,
+  // Allow n and p for parameter names
+  // @CHECKSTYLE.OFF: ParameterName
+
+  private static void fitBinomial(UniformRandomProvider rg, int n, double p, boolean zeroTruncated,
       boolean maximumLikelihood, int minN, int maxN) {
     final BinomialFitter bf = new BinomialFitter(null);
     // BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
@@ -234,7 +236,7 @@ public class BinomialFitterTest {
         FunctionUtils.getSupplier("Too many failures (n=%d, p=%f): %d", n, p, fail));
   }
 
-  private void fitBinomialUsing_LSE_Or_MLE(UniformRandomProvider rg, int n, double p,
+  private static void fitBinomialUsingLseOrMle(UniformRandomProvider rg, int n, double p,
       boolean zeroTruncated, int minN, int maxN) {
     final BinomialFitter bf = new BinomialFitter(null);
     // BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
@@ -245,14 +247,14 @@ public class BinomialFitterTest {
     for (int i = 0; i < TRIALS; i++) {
       final int[] data = createData(rg, n, p, false);
       bf.setMaximumLikelihood(false);
-      final double[] fitLSE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+      final double[] fitLse = bf.fitBinomial(data, minN, maxN, zeroTruncated);
       bf.setMaximumLikelihood(true);
-      final double[] fitMLE = bf.fitBinomial(data, minN, maxN, zeroTruncated);
+      final double[] fitMle = bf.fitBinomial(data, minN, maxN, zeroTruncated);
 
-      final int n1 = (int) fitLSE[0];
-      final double p1 = fitLSE[1];
-      final int n2 = (int) fitMLE[0];
-      final double p2 = fitMLE[1];
+      final int n1 = (int) fitLse[0];
+      final double p1 = fitLse[1];
+      final int n2 = (int) fitMle[0];
+      final double p2 = fitMle[1];
 
       logger.info(FunctionUtils.getSupplier("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)", n1, p1,
           n2, p2));
@@ -279,12 +281,7 @@ public class BinomialFitterTest {
       boolean zeroTruncated) {
     final BinomialDistribution bd = new BinomialDistribution(null, n, p);
     final DiscreteSampler sampler =
-        new InverseTransformDiscreteSampler(rg, new DiscreteInverseCumulativeProbabilityFunction() {
-          @Override
-          public int inverseCumulativeProbability(double p) {
-            return bd.inverseCumulativeProbability(p);
-          }
-        });
+        new InverseTransformDiscreteSampler(rg, pvalue -> bd.inverseCumulativeProbability(pvalue));
 
     final int[] data = new int[2000];
     if (zeroTruncated) {

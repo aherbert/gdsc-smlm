@@ -440,7 +440,7 @@ public class CubicSplineManager implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final CubicSplineSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
     if (settings.getCubicSplineResourcesCount() == 0) {

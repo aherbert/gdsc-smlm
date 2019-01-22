@@ -96,6 +96,11 @@ public class CameraModelAnalysis
   private static final String TITLE = "Camera Model Analysis";
   private static final KolmogorovSmirnovTest kolmogorovSmirnovTest = new KolmogorovSmirnovTest();
 
+  /** The lower limit on the cumulative probability. */
+  private static final double LOWER = 1e-6;
+  /** The upper limit on the cumulative probability. */
+  private static final double UPPER = 1 - LOWER;
+
   private CameraModelAnalysisSettings.Builder settings;
 
   private boolean extraOptions;
@@ -233,7 +238,7 @@ public class CameraModelAnalysis
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
     extraOptions = ImageJUtils.isExtraOptions();
     return NO_IMAGE_REQUIRED;
   }
@@ -428,9 +433,9 @@ public class CameraModelAnalysis
     // distribution.
     // E.g. If p<0.05 then the null hypothesis is rejected and the data do not match the
     // distribution.
-    double p = Double.NaN;
+    double pvalue = Double.NaN;
     try {
-      p = 1d - kolmogorovSmirnovTest.cdf(distance, n);
+      pvalue = 1d - kolmogorovSmirnovTest.cdf(distance, n);
     } catch (final Exception ex) {
       // Ignore
     }
@@ -452,7 +457,7 @@ public class CameraModelAnalysis
     plot.setColor(Color.black);
     plot.addLegend("CDF\nModel");
     plot.addLabel(0, 0, String.format("Distance=%s @ %.0f (Mean=%s) : p=%s",
-        MathUtils.rounded(distance), value, MathUtils.rounded(area), MathUtils.rounded(p)));
+        MathUtils.rounded(distance), value, MathUtils.rounded(area), MathUtils.rounded(pvalue)));
     ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT, wo);
 
     // Show the histogram
@@ -562,23 +567,19 @@ public class CameraModelAnalysis
    */
   private static IntHistogram simulateHistogram(CameraModelAnalysisSettings settings,
       CachedRandomGenerator random) {
-    IntHistogram h;
     switch (settings.getMode()) {
       // EM-CCD
       case 1:
-        h = simulatePoissonGammaGaussian(settings, random);
-        break;
+        return simulatePoissonGammaGaussian(settings, random);
 
       // CCD or sCMOS
       case 2:
       case 0:
-        h = simulatePoissonGaussian(settings, random);
-        break;
+        return simulatePoissonGaussian(settings, random);
 
       default:
         throw new IllegalStateException();
     }
-    return h;
   }
 
   /**
@@ -713,11 +714,11 @@ public class CameraModelAnalysis
     final int min = limits[0];
     final int max = limits[1];
 
-    final int[] h = new int[max - min + 1];
+    final int[] hist = new int[max - min + 1];
     for (int i = count; i-- > 0;) {
-      h[sample[i] - min]++;
+      hist[sample[i] - min]++;
     }
-    return new IntHistogram(h, min);
+    return new IntHistogram(hist, min);
   }
 
   /**
@@ -727,8 +728,6 @@ public class CameraModelAnalysis
    * @return The histogram
    */
   private static double[][] convolveHistogram(CameraModelAnalysisSettings settings) {
-    final double LOWER = 1e-6;
-    final double UPPER = 1 - LOWER;
 
     // Find the range of the Poisson
     final PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
@@ -937,26 +936,26 @@ public class CameraModelAnalysis
     }
 
     double zero = 0;
-    double[] g = list.toArray();
+    double[] pg = list.toArray();
 
     // Sample Gaussian
     if (noise > 0) {
       step /= upsample;
-      g = list.toArray();
+      pg = list.toArray();
 
       // Convolve with Gaussian kernel
       final double[] kernel = GaussianKernel.makeGaussianKernel(Math.abs(noise) / step, 6, true);
 
       if (upsample != 1) {
         // Use scaled convolution. This is faster that zero filling distribution g.
-        g = Convolution.convolve(kernel, g, upsample);
+        pg = Convolution.convolve(kernel, pg, upsample);
       } else if (dirac > 0.01) {
         // The Poisson-Gamma may be stepped at low mean causing wrap artifacts in the FFT.
         // This is a problem if most of the probability is in the Dirac.
         // Otherwise it can be ignored and the FFT version is OK.
-        g = Convolution.convolve(kernel, g);
+        pg = Convolution.convolve(kernel, pg);
       } else {
-        g = Convolution.convolveFast(kernel, g);
+        pg = Convolution.convolveFast(kernel, pg);
       }
 
       // The convolution will have created a larger array so we must adjust the offset for this
@@ -967,7 +966,7 @@ public class CameraModelAnalysis
       if (dirac != 0) {
         // We only need to convolve the Gaussian at c=0
         for (int i = 0; i < kernel.length; i++) {
-          g[i] += kernel[i] * dirac;
+          pg[i] += kernel[i] * dirac;
         }
       }
 
@@ -979,13 +978,13 @@ public class CameraModelAnalysis
         ImageJUtils.display(title, plot);
 
         title = name + "-Gaussian";
-        plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, zero, step), g);
+        plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(pg.length, zero, step), pg);
         ImageJUtils.display(title, plot);
       }
 
-      zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1.0);
+      zero = downSampleCdfToPmf(settings, list, step, zero, pg, 1.0);
 
-      g = list.toArray();
+      pg = list.toArray();
       zero = (int) Math.floor(zero);
       step = 1.0;
 
@@ -994,8 +993,8 @@ public class CameraModelAnalysis
       // Sample to 1.0 pixel step interval.
       if (settings.getMode() == MODE_EM_CCD) {
         // Poisson-Gamma PDF
-        zero = downSampleCDFtoPMF(settings, list, step, zero, g, 1 - dirac);
-        g = list.toArray();
+        zero = downSampleCdfToPmf(settings, list, step, zero, pg, 1 - dirac);
+        pg = list.toArray();
         zero = (int) Math.floor(zero);
 
         // Add the dirac delta function.
@@ -1003,29 +1002,29 @@ public class CameraModelAnalysis
           // Note: zero is the start of the x-axis. This value should be -1.
           assert (int) zero == -1;
           // Use as an offset to find the actual zero.
-          g[-(int) zero] += dirac;
+          pg[-(int) zero] += dirac;
         }
       } else {
         // Poisson PMF
 
         // Simple non-interpolated expansion.
         // This should be used when there is no Gaussian convolution.
-        final double[] pd = g;
+        final double[] pd = pg;
         list.resetQuick();
 
         // Account for rounding.
         final Round round = getRound(settings);
 
         final int maxc = round.round(pd.length * step + 1);
-        g = new double[maxc];
+        pg = new double[maxc];
         for (int n = pd.length; n-- > 0;) {
-          g[round.round(n * step)] += pd[n];
+          pg[round.round(n * step)] += pd[n];
         }
 
-        if (g[0] != 0) {
+        if (pg[0] != 0) {
           list.add(0);
-          list.add(g);
-          g = list.toArray();
+          list.add(pg);
+          pg = list.toArray();
           zero--;
         }
       }
@@ -1036,23 +1035,23 @@ public class CameraModelAnalysis
       list.setQuick(0, list.getQuick(0) + dirac);
     }
 
-    return new double[][] {SimpleArrayUtils.newArray(g.length, zero, step), g};
+    return new double[][] {SimpleArrayUtils.newArray(pg.length, zero, step), pg};
   }
 
-  private static double downSampleCDFtoPMF(CameraModelAnalysisSettings settings,
-      TDoubleArrayList list, double step, double zero, double[] g, double sum) {
+  private static double downSampleCdfToPmf(CameraModelAnalysisSettings settings,
+      TDoubleArrayList list, double step, double zero, double[] pg, double sum) {
     // Down-sample to 1.0 pixel step interval.
 
     // Build cumulative distribution.
     double lowerSum = 0;
-    for (int i = 0; i < g.length; i++) {
-      lowerSum += g[i];
-      g[i] = lowerSum;
+    for (int i = 0; i < pg.length; i++) {
+      lowerSum += pg[i];
+      pg[i] = lowerSum;
     }
-    for (int i = 0; i < g.length; i++) {
-      g[i] *= sum / lowerSum;
+    for (int i = 0; i < pg.length; i++) {
+      pg[i] *= sum / lowerSum;
     }
-    g[g.length - 1] = sum;
+    pg[pg.length - 1] = sum;
 
     final double offset = (settings.getRoundDown()) ? 0 : -0.5;
 
@@ -1072,7 +1071,7 @@ public class CameraModelAnalysis
     // for (int i = padSize; i-- > 0;)
     // list.add(1);
     // double[] pd = list.toArray();
-    final double[] pd = g;
+    final double[] pd = pg;
 
     list.resetQuick();
 
@@ -1241,17 +1240,17 @@ public class CameraModelAnalysis
 
   private static class CachingUnivariateFunction implements UnivariateFunction {
     final LikelihoodFunction fun;
-    final double p;
+    final double theta;
     final TDoubleArrayList list = new TDoubleArrayList();
 
-    public CachingUnivariateFunction(LikelihoodFunction fun, double p) {
+    public CachingUnivariateFunction(LikelihoodFunction fun, double theta) {
       this.fun = fun;
-      this.p = p;
+      this.theta = theta;
     }
 
     @Override
     public double value(double x) {
-      final double v = fun.likelihood(x, p);
+      final double v = fun.likelihood(x, theta);
       list.add(x);
       list.add(v);
       return v;
@@ -1350,7 +1349,7 @@ public class CameraModelAnalysis
 
       // Use Simpson's integration with n=4 to get the integral of the probability
       // over the range of each count.
-      int n = 4;
+      final int n = 4;
       final int n_2 = n / 2;
       final double h = 1.0 / n;
 
@@ -1359,27 +1358,25 @@ public class CameraModelAnalysis
 
       // Compute the extra function points
       final double[] f = new double[y.length * n + 1];
-      {
-        int i = f.length;
+      int index = f.length;
 
-        final int mod;
-        if (settings.getRoundDown()) {
-          // Do this final value outside the loop as y[i/n] does not exists
-          mod = 0;
-          i--;
-          f[i] = fun.likelihood(start + i * h, e);
+      final int mod;
+      if (settings.getRoundDown()) {
+        // Do this final value outside the loop as y[index/n] does not exists
+        mod = 0;
+        index--;
+        f[index] = fun.likelihood(start + index * h, e);
+      } else {
+        // Used when computing for rounding up/down
+        mod = n_2;
+        start -= n_2 * h;
+      }
+
+      while (index-- > 0) {
+        if (index % n == mod) {
+          f[index] = y[index / n];
         } else {
-          // Used when computing for rounding up/down
-          mod = n_2;
-          start -= n_2 * h;
-        }
-
-        while (i-- > 0) {
-          if (i % n == mod) {
-            f[i] = y[i / n];
-          } else {
-            f[i] = fun.likelihood(start + i * h, e);
-          }
+          f[index] = fun.likelihood(start + index * h, e);
         }
       }
 
@@ -1399,16 +1396,16 @@ public class CameraModelAnalysis
       for (int i = 0; i < y.length; i++) {
         final int a = i * n;
         final int b = a + n;
-        double s = f[a] + f[b];
+        sum = f[a] + f[b];
         for (int j = i2.length; j-- > 0;) {
-          s += 2 * f[a + i2[j]];
+          sum += 2 * f[a + i2[j]];
         }
         for (int j = i4.length; j-- > 0;) {
-          s += 4 * f[a + i4[j]];
+          sum += 4 * f[a + i4[j]];
         }
-        s *= h / 3;
+        sum *= h / 3;
         // System.out.printf("y[%d] = %f => %f\n", i, y[i], s);
-        y[i] = s;
+        y[i] = sum;
       }
 
       // Fix Poisson-Gamma ...
@@ -1443,9 +1440,9 @@ public class CameraModelAnalysis
                 // as the first two values in the cache.
                 final double[] g = uf.list.toArray();
                 final double dx = (g[3] - g[1]) / in.getN();
-                n = 1 + 2 * ((int) in.getN());
+                final int total = 1 + 2 * ((int) in.getN());
                 sum = 0;
-                for (int j = 4; j < n; j += 2) {
+                for (int j = 4; j < total; j += 2) {
                   sum += g[j];
                 }
                 y[i] = (g[0] + g[2] + 2 * sum) / dx;

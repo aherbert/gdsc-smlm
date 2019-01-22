@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Stores details of a simulated localisation. Contains details of the amount of signal that occurs
  * due to overlap with neighbour PSFs.
  */
-public class PSFSpot extends BasePoint {
+public class PsfSpot extends BasePoint {
   /** The time. */
   public final int t;
 
@@ -59,7 +59,7 @@ public class PSFSpot extends BasePoint {
    * @param y the y
    * @param peakResult the peak result
    */
-  public PSFSpot(int t, float x, float y, PeakResult peakResult) {
+  public PsfSpot(int t, float x, float y, PeakResult peakResult) {
     super(x, y);
     this.t = t;
     this.peakResult = peakResult;

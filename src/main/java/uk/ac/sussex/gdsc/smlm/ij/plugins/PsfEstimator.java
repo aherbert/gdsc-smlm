@@ -59,6 +59,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
@@ -67,12 +68,23 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Iteratively fits local maxima using a 2D Gaussian until the PSF converges.
  */
-public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
+public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static final String TITLE = "PSF Estimator";
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+
+  private static final int TRY_AGAIN = 0;
+  private static final int COMPLETE = 1;
+  private static final int INSUFFICIENT_PEAKS = 2;
+  private static final int ABORTED = 3;
+  private static final int EXCEPTION = 4;
+  private static final int BAD_ESTIMATE = 5;
+
   private static TextWindow resultsWindow;
 
   private double initialPeakStdDev0 = 1;
@@ -94,8 +106,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   private FitEngineConfiguration config;
   private PSFEstimatorSettings.Builder settings;
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-
   private ImagePlus imp;
 
   // Required for the significance tests
@@ -108,14 +118,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   private final DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
   private final boolean[] ignore = new boolean[3];
 
-  /**
-   * Instantiates a new PSF estimator.
-   */
-  public PSFEstimator() {}
-
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
     if (imp == null) {
@@ -193,7 +198,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
 
     PeakFit.addCameraOptions(gd, fitConfig);
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
     final PeakFit.SimpleFitEngineConfigurationProvider provider =
         new PeakFit.SimpleFitEngineConfigurationProvider(config);
     PeakFit.addDataFilterOptions(gd, provider);
@@ -236,7 +241,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
@@ -253,7 +258,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     settings.setHistogramBins((int) gd.getNextNumber());
 
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
     config.setSearch(gd.getNextNumber());
@@ -377,7 +382,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   public void run(ImageProcessor ip) {
     int result;
     while (true) {
-      result = estimatePSF();
+      result = estimatePsf();
       if (settings.getIterate() && result == TRY_AGAIN) {
         continue;
       }
@@ -394,14 +399,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     }
   }
 
-  private static final int TRY_AGAIN = 0;
-  private static final int COMPLETE = 1;
-  private static final int INSUFFICIENT_PEAKS = 2;
-  private static final int ABORTED = 3;
-  private static final int EXCEPTION = 4;
-  private static final int BAD_ESTIMATE = 5;
-
-  private int estimatePSF() {
+  private int estimatePsf() {
     log("Estimating PSF ... Press escape to abort");
 
     final PeakFit fitter = createFitter();
@@ -453,7 +451,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
 
         if ((ignore[ANGLE] || identical[ANGLE] || identical[XY]) && (ignore[X] || identical[X])
             && (ignore[Y] || identical[Y])) {
-          tryAgain = checkAngleSignificance() || checkXYSignificance(identical);
+          tryAgain = checkAngleSignificance() || checkXySignificance(identical);
 
           // Update recommended values. Only use if significant
           params[X] = sampleNew[X].getMean();
@@ -480,7 +478,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
           return ABORTED;
         }
       } catch (final Exception ex) {
-        ex.printStackTrace();
+        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error while estimating the PSF",
+            ex);
         return EXCEPTION;
       }
     }
@@ -541,7 +540,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return tryAgain;
   }
 
-  private boolean checkXYSignificance(boolean[] identical) {
+  private boolean checkXySignificance(boolean[] identical) {
     boolean tryAgain = false;
     if (identical[XY]) {
       log("NOTE: X-width and Y-width are not significantly different: %g ~ %g => "
@@ -552,12 +551,12 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return tryAgain;
   }
 
-  private void getP(int i, double[] p, boolean[] identical) {
-    getP(sampleNew[i], sampleOld[i], i, p, identical);
+  private void getP(int index, double[] pvalue, boolean[] identical) {
+    getP(sampleNew[index], sampleOld[index], index, pvalue, identical);
   }
 
-  private void getP(StatisticalSummary sample1, StatisticalSummary sample2, int i, double[] p,
-      boolean[] identical) {
+  private void getP(StatisticalSummary sample1, StatisticalSummary sample2, int index,
+      double[] pvalue, boolean[] identical) {
     if (sample1.getN() < 2) {
       return;
     }
@@ -566,12 +565,12 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     // hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
     // that the mean paired difference is not equal to 0. For a one-sided test, divide the returned
     // value by 2
-    p[i] = TestUtils.tTest(sample1, sample2);
-    identical[i] = (p[i] > settings.getPValue());
+    pvalue[index] = TestUtils.tTest(sample1, sample2);
+    identical[index] = (pvalue[index] > settings.getPValue());
   }
 
-  private void getPairedP(DescriptiveStatistics sample1, DescriptiveStatistics sample2, int i,
-      double[] p, boolean[] identical) {
+  private void getPairedP(DescriptiveStatistics sample1, DescriptiveStatistics sample2, int index,
+      double[] pvalue, boolean[] identical) {
     if (sample1.getN() < 2) {
       return;
     }
@@ -580,8 +579,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     // hypothesis that the mean of the paired differences is 0 in favor of the two-sided alternative
     // that the mean paired difference is not equal to 0. For a one-sided test, divide the returned
     // value by 2
-    p[i] = TestUtils.pairedTTest(sample1.getValues(), sample2.getValues());
-    identical[i] = (p[i] > settings.getPValue());
+    pvalue[index] = TestUtils.pairedTTest(sample1.getValues(), sample2.getValues());
+    identical[index] = (pvalue[index] > settings.getPValue());
   }
 
   private boolean calculateStatistics(PeakFit fitter, double[] params, double[] paramsDev) {
@@ -624,9 +623,9 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     IJ.showStatus("Fitting ...");
 
     // Use multi-threaded code for speed
-    int i;
-    for (i = 0; i < slices.length; i++) {
-      final int slice = slices[i];
+    int sliceIndex;
+    for (sliceIndex = 0; sliceIndex < slices.length; sliceIndex++) {
+      final int slice = slices[sliceIndex];
       // debug(" Processing slice = %d\n", slice);
       IJ.showProgress(size(), settings.getNumberOfPeaks());
 
@@ -652,7 +651,8 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
       try {
         Thread.sleep(50);
       } catch (final InterruptedException ex) {
-        break;
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException("Unexpected interruption", ex);
       }
     }
     // End now if we have enough samples
@@ -663,7 +663,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     // This count will be an over-estimate given that the provider is ahead of the consumer
     // in this multi-threaded system
-    debug("  Processed %d/%d slices (%d peaks)", i, slices.length, size());
+    debug("  Processed %d/%d slices (%d peaks)", sliceIndex, slices.length, size());
 
     setParams(ANGLE, params, paramsDev, sampleNew[ANGLE]);
     setParams(X, params, paramsDev, sampleNew[X]);
@@ -693,11 +693,11 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
     return true;
   }
 
-  private static void setParams(int i, double[] params, double[] paramsDev,
+  private static void setParams(int index, double[] params, double[] paramsDev,
       DescriptiveStatistics sample) {
     if (sample.getN() > 0) {
-      params[i] = sample.getMean();
-      paramsDev[i] = sample.getStandardDeviation();
+      params[index] = sample.getMean();
+      paramsDev[index] = sample.getStandardDeviation();
     }
   }
 
@@ -708,8 +708,7 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private PeakFit createFitter() {
-    final PeakFit fitter = new PeakFit(config, null);
-    return fitter;
+    return new PeakFit(config, null);
   }
 
   /**
@@ -739,15 +738,15 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private boolean addToResultTable(int iteration, int n, double[] params, double[] paramsDev,
-      double[] p) {
+      double[] pvalue) {
     final StringBuilder sb = new StringBuilder();
     sb.append(iteration).append('\t').append(n).append('\t');
     for (int i = 0; i < 3; i++) {
       sb.append(params[i]).append('\t');
       sb.append(paramsDev[i]).append('\t');
-      sb.append(p[i]).append('\t');
+      sb.append(pvalue[i]).append('\t');
     }
-    sb.append(p[XY]).append('\t');
+    sb.append(pvalue[XY]).append('\t');
     resultsWindow.append(sb.toString());
 
     if (params[X] > imp.getWidth() || params[Y] > imp.getWidth()) {
@@ -790,7 +789,6 @@ public class PSFEstimator implements PlugInFilter, ThreadSafePeakResults {
         // Assume fitting a 2D Gaussian
         sampleNew[ANGLE].addValue(params[Gaussian2DFunction.ANGLE]);
       }
-      // if (!ignore[X])
       sampleNew[X].addValue(params[PeakResult.X]);
       if (!ignore[Y]) {
         sampleNew[Y].addValue(params[PeakResult.Y]);

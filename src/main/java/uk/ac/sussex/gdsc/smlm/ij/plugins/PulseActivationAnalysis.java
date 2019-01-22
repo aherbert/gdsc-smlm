@@ -385,7 +385,7 @@ public class PulseActivationAnalysis
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     switch (isSimulation()) {
       case -1:

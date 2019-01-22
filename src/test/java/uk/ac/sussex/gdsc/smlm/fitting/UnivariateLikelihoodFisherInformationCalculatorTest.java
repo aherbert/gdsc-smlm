@@ -120,9 +120,9 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
     final FisherInformationMatrix I = calc.compute(params);
     final double[] o = I.getMatrix().data;
 
-    final boolean emCCD = model == Model.HALF_POISSON;
+    final boolean emCcd = model == Model.HALF_POISSON;
 
-    if (emCCD) {
+    if (emCcd) {
       // Assumes half the poisson fisher information
       SimpleArrayUtils.multiply(e, 0.5);
     }
@@ -137,7 +137,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
       final double s = params[Gaussian2DFunction.X_SD] * a;
       final double N = params[Gaussian2DFunction.SIGNAL];
       final double b2 = params[Gaussian2DFunction.BACKGROUND];
-      double var = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, emCCD);
+      double var = Gaussian2DPeakResultHelper.getMLVarianceX(a, s, N, b2, emCcd);
 
       // Convert expected variance to pixels
       var /= (a * a);

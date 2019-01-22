@@ -23,12 +23,12 @@
  * #L%
  */
 
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SMLMTools;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmTools;
 
 import ij.plugin.PlugIn;
 
 /**
- * Default ImageJ plugin (no Java package) to run the {@link SMLMTools} plugin.
+ * Default ImageJ plugin (no Java package) to run the {@link SmlmTools} plugin.
  *
  * <p>This class allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven
  * output directory will be target/classes. Create a symbolic link to that directory from the
@@ -54,6 +54,6 @@ public class Smlm_PlugIn implements PlugIn {
   @Override
   public void run(String arg) {
     // Create the SMLM Tools plugin.
-    new SMLMTools();
+    new SmlmTools();
   }
 }

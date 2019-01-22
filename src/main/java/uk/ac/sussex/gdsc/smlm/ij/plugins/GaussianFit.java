@@ -109,9 +109,28 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
   private ImageJTablePeakResults results;
 
+  private static class PsfTypeLoader {
+    private static final PSFType[] psfTypeValues;
+    private static final String[] psfTypeNames;
+
+    static {
+      //@formatter:off
+      final EnumSet<PSFType> set = EnumSet.of(
+          PSFType.ONE_AXIS_GAUSSIAN_2D,
+          PSFType.TWO_AXIS_GAUSSIAN_2D,
+          PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+      //@formatter:on
+      psfTypeValues = set.toArray(new PSFType[set.size()]);
+      psfTypeNames = new String[psfTypeValues.length];
+      for (int i = 0; i < psfTypeValues.length; i++) {
+        psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);
+      }
+    }
+  }
+
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       IJ.noImage();
@@ -133,46 +152,23 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return FLAGS;
   }
 
-  private static PSFType[] psfTypeValues;
-
   /**
    * Gets the PSF type values.
    *
    * @return the PSF type values
    */
-  public static PSFType[] getPSFTypeValues() {
-    if (psfTypeValues == null) {
-      initPSFType();
-    }
-    return psfTypeValues;
+  public static PSFType[] getPsfTypeValues() {
+    return PsfTypeLoader.psfTypeValues;
   }
 
-  private static String[] psfTypeNames;
 
   /**
    * Gets the PSF type names.
    *
    * @return the PSF type names
    */
-  public static String[] getPSFTypeNames() {
-    if (psfTypeNames == null) {
-      initPSFType();
-    }
-    return psfTypeNames;
-  }
-
-  private static void initPSFType() {
-    //@formatter:off
-    final EnumSet<PSFType> d = EnumSet.of(
-        PSFType.ONE_AXIS_GAUSSIAN_2D,
-        PSFType.TWO_AXIS_GAUSSIAN_2D,
-        PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
-    //@formatter:on
-    psfTypeValues = d.toArray(new PSFType[d.size()]);
-    psfTypeNames = new String[psfTypeValues.length];
-    for (int i = 0; i < psfTypeValues.length; i++) {
-      psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);
-    }
+  public static String[] getPsfTypeNames() {
+    return PsfTypeLoader.psfTypeNames;
   }
 
   @Override
@@ -208,7 +204,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     gd.addSlider("Border", 0, 15, border);
 
     gd.addMessage("--- Gaussian fitting ---");
-    gd.addChoice("PSF", getPSFTypeNames(), PsfProtosHelper.getName(getPSFType()));
+    gd.addChoice("PSF", getPsfTypeNames(), PsfProtosHelper.getName(getPsfType()));
     gd.addCheckbox("Fit_background", fitBackground);
     gd.addNumericField("Max_iterations", maxIterations, 0);
     gd.addNumericField("Relative_threshold", relativeThreshold, -3);
@@ -254,16 +250,16 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     // 8/16 bit greyscale image. Set upper limit to the height of the 99% percentile.
     final int limit = (int) (99.0 * ip.getPixelCount() / 100.0);
     int count = 0;
-    int i = 0;
-    while (i < data.length) {
-      count += data[i];
+    int index = 0;
+    while (index < data.length) {
+      count += data[index];
       if (count > limit) {
         break;
       }
-      i++;
+      index++;
     }
 
-    limits[1] = i;
+    limits[1] = index;
 
     return limits;
   }
@@ -379,11 +375,11 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       final int nMaxima = maxIndices.length;
       final float[] xpoints = new float[nMaxima];
       final float[] ypoints = new float[nMaxima];
-      int n = 0;
+      int count = 0;
       for (final int index : maxIndices) {
-        xpoints[n] = 0.5f + bounds.x + index % width;
-        ypoints[n] = 0.5f + bounds.y + index / width;
-        n++;
+        xpoints[count] = 0.5f + bounds.x + index % width;
+        ypoints[count] = 0.5f + bounds.y + index / width;
+        count++;
       }
 
       setOverlay(nMaxima, xpoints, ypoints);
@@ -399,12 +395,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   /**
    * Show the points as an overlay.
    *
-   * @param nMaxima the number of maxima
-   * @param xpoints the xpoints
-   * @param ypoints the ypoints
+   * @param npoints the number of points
+   * @param xpoints the x points
+   * @param ypoints the y points
    */
-  private void setOverlay(int nMaxima, float[] xpoints, float[] ypoints) {
-    final PointRoi roi = new PointRoi(xpoints, ypoints, nMaxima);
+  private void setOverlay(int npoints, float[] xpoints, float[] ypoints) {
+    final PointRoi roi = new PointRoi(xpoints, ypoints, npoints);
 
     final Color strokeColor = Color.yellow;
     final Color fillColor = Color.green;
@@ -478,7 +474,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     cw.setDistanceUnit(DistanceUnit.PIXEL);
     cw.setAngleUnit(AngleUnit.RADIAN);
     results.setCalibration(cw.getCalibration());
-    results.setPsf(PsfProtosHelper.getDefaultPsf(getPSFType()));
+    results.setPsf(PsfProtosHelper.getDefaultPsf(getPsfType()));
     results.setShowFittingData(true);
     results.setAngleUnit(AngleUnit.DEGREE);
     results.begin();
@@ -507,9 +503,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       if (params != null) {
         // Copy all the valid parameters into a new array
         final double[] validParams = new double[params.length];
-        int c = 0;
+        int count = 0;
         int validPeaks = 0;
-        validParams[c++] = params[0];
+        validParams[count++] = params[0];
 
         final double[] initialParams = convertParameters(fitResult.getInitialParameters());
         final double[] paramsDev = convertParameters(fitResult.getParameterDeviations());
@@ -517,7 +513,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
         final float[] xpoints = new float[maxIndices.length];
         final float[] ypoints = new float[maxIndices.length];
-        int nMaxima = 0;
+        int npoints = 0;
 
         for (int i = 1, n = 0; i < params.length;
             i += Gaussian2DFunction.PARAMETERS_PER_PEAK, n++) {
@@ -534,25 +530,25 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
             // Copy the valid parameters
             validPeaks++;
             for (int ii = i, j = 0; j < Gaussian2DFunction.PARAMETERS_PER_PEAK; ii++, j++) {
-              validParams[c++] = params[ii];
+              validParams[count++] = params[ii];
             }
           }
 
           final double[] peakParams = extractParams(params, i);
           final double[] peakParamsDev = extractParams(paramsDev, i);
 
-          addResult(bounds, regionBounds, peakParams, peakParamsDev, nMaxima, x, y,
+          addResult(bounds, regionBounds, peakParams, peakParamsDev, npoints, x, y,
               data[maxIndices[n]]);
 
           // Add fit result to the overlay - Coords are updated with the region offsets in addResult
           final double xf = peakParams[Gaussian2DFunction.X_POSITION];
           final double yf = peakParams[Gaussian2DFunction.Y_POSITION];
-          xpoints[nMaxima] = (float) xf;
-          ypoints[nMaxima] = (float) yf;
-          nMaxima++;
+          xpoints[npoints] = (float) xf;
+          ypoints[npoints] = (float) yf;
+          npoints++;
         }
 
-        setOverlay(nMaxima, xpoints, ypoints);
+        setOverlay(npoints, xpoints, ypoints);
 
         // Draw the fit
         if (showFit && validPeaks != 0) {
@@ -582,7 +578,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
         IJ.log("Individual fit");
       }
 
-      int nMaxima = 0;
+      int npoints = 0;
       final float[] xpoints = new float[maxIndices.length];
       final float[] ypoints = new float[maxIndices.length];
 
@@ -621,17 +617,17 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
           // Add fit result to the overlay - Coords are updated with the region offsets in addResult
           final double xf = peakParams[Gaussian2DFunction.X_POSITION];
           final double yf = peakParams[Gaussian2DFunction.Y_POSITION];
-          xpoints[nMaxima] = (float) xf;
-          ypoints[nMaxima] = (float) yf;
-          nMaxima++;
+          xpoints[npoints] = (float) xf;
+          ypoints[npoints] = (float) yf;
+          npoints++;
         } else if (isLogProgress()) {
           IJ.log("Failed to fit peak " + (n + 1) + getReason(fitResult));
         }
       }
 
       // Update the overlay
-      if (nMaxima > 0) {
-        setOverlay(nMaxima, xpoints, ypoints);
+      if (npoints > 0) {
+        setOverlay(npoints, xpoints, ypoints);
       } else {
         imp.setOverlay(null);
       }
@@ -853,7 +849,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering) {
     final FitConfiguration config = new FitConfiguration();
     config.setFitSolver(FitSolver.LVM_LSE);
-    config.setPsf(PsfProtosHelper.getDefaultPsf(getPSFType()));
+    config.setPsf(PsfProtosHelper.getDefaultPsf(getPsfType()));
     config.setMaxIterations(getMaxIterations());
     config.setRelativeThreshold(relativeThreshold);
     config.setAbsoluteThreshold(absoluteThreshold);
@@ -1191,9 +1187,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    *
    * @return the PSF type
    */
-  public PSFType getPSFType() {
-    if (fitFunction >= 0 && fitFunction < getPSFTypeValues().length) {
-      return getPSFTypeValues()[fitFunction];
+  public PSFType getPsfType() {
+    if (fitFunction >= 0 && fitFunction < getPsfTypeValues().length) {
+      return getPsfTypeValues()[fitFunction];
     }
     return PSFType.ONE_AXIS_GAUSSIAN_2D;
   }

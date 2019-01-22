@@ -190,7 +190,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private Rectangle bounds;
   private CreateData.SimulationParameters simulationParameters;
 
-  private static TIntObjectHashMap<PSFSpot[]> actualCoordinates;
+  private static TIntObjectHashMap<PsfSpot[]> actualCoordinates;
   private static int lastId = -1;
   // private static boolean lastRelativeDistances = false;
 
@@ -523,7 +523,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final ScoredSpot[] spots;
 
     /** The actual. */
-    final PSFSpot[] actual;
+    final PsfSpot[] actual;
 
     /** The actual assignment. */
     final boolean[] actualAssignment;
@@ -538,7 +538,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param actualAssignment the actual assignment
      */
     public FilterResult(int frame, FractionClassificationResult result, ScoredSpot[] spots,
-        PSFSpot[] actual, boolean[] actualAssignment) {
+        PsfSpot[] actual, boolean[] actualAssignment) {
       this.frame = frame;
       this.result = result;
       this.spots = spots;
@@ -554,7 +554,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates;
-    final TIntObjectHashMap<PSFSpot[]> coordinates;
+    final TIntObjectHashMap<PsfSpot[]> coordinates;
 
     public OverlapWorker(BlockingQueue<Integer> jobs,
         TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates) {
@@ -593,7 +593,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       showProgress();
 
       // Extract the data
-      final PSFSpot[] actual = getCoordinates(originalCoordinates, frame);
+      final PsfSpot[] actual = getCoordinates(originalCoordinates, frame);
       coordinates.put(frame, actual);
 
       if (actual.length == 0) {
@@ -609,7 +609,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       final double[] sa = new double[actual.length];
       final double[] sa2 = new double[actual.length];
       for (int i = 0; i < actual.length; i++) {
-        sa[i] = PSFCalculator.squarePixelAdjustment(
+        sa[i] = PsfCalculator.squarePixelAdjustment(
             calculator.getStandardDeviation(actual[i].peakResult.getParameters()), 1);
         sa2[i] = 2 * sa[i];
       }
@@ -679,14 +679,14 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param t the t
      * @return The array list
      */
-    public PSFSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t) {
+    public PsfSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, Integer t) {
       final ArrayList<Coordinate> list1 = coords.get(t);
       if (list1 != null) {
-        final PSFSpot[] list2 = new PSFSpot[list1.size()];
+        final PsfSpot[] list2 = new PsfSpot[list1.size()];
         int i = 0;
         for (final Coordinate c : list1) {
           final PeakResultPoint p = (PeakResultPoint) c;
-          final PSFSpot spot = new PSFSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+          final PsfSpot spot = new PsfSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
           list2[i++] = spot;
 
           // Compute the amplitude.
@@ -695,7 +695,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
         return list2;
       }
-      return new PSFSpot[0];
+      return new PsfSpot[0];
     }
   }
 
@@ -790,9 +790,9 @@ public class BenchmarkSpotFilter implements PlugIn {
       // }
 
       // Score the spots that are matches
-      PSFSpot[] actual = actualCoordinates.get(frame);
+      PsfSpot[] actual = actualCoordinates.get(frame);
       if (actual == null) {
-        actual = new PSFSpot[0];
+        actual = new PsfSpot[0];
       }
 
       // We do not remove results at the border from analysis.
@@ -811,7 +811,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         // The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
         final RampedScore weighting = new RampedScore(0, analysisBorder);
         for (int i = 0; i < actual.length; i++) {
-          final PSFSpot c = actual[i];
+          final PsfSpot c = actual[i];
           actualWeight[i] =
               getWeight(c.getX(), c.getY(), analysisBorder, xlimit, ylimit, weighting);
           actualLength += actualWeight[i];
@@ -828,7 +828,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         // option for hard border to match the old scoring.
         // Create smaller arrays using only those with a weighting of 1.
         if (hardBorder) {
-          final PSFSpot[] actual2 = new PSFSpot[actual.length];
+          final PsfSpot[] actual2 = new PsfSpot[actual.length];
           int j = 0;
           for (int i = 0; i < actual.length; i++) {
             if (actualWeight[i] == 1) {
@@ -1095,7 +1095,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       return (dx == 0 && dy == 0) ? 1 : weighting.score(dx) * weighting.score(dy);
     }
 
-    private double getIntensity(final PSFSpot p) {
+    private double getIntensity(final PsfSpot p) {
       // Use the amplitude as all spot filters currently estimate the height, not the total signal
       // final double intensity = calculator.getAmplitude(p.peakResult.getParameters());
       // return intensity;
@@ -1123,7 +1123,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
     batchMode = "batch".equals(arg);
@@ -1727,7 +1727,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   private double getSa() {
-    final double sa = PSFCalculator.squarePixelAdjustment(simulationParameters.sd,
+    final double sa = PsfCalculator.squarePixelAdjustment(simulationParameters.sd,
         simulationParameters.pixelPitch);
     return sa;
   }
@@ -1831,8 +1831,8 @@ public class BenchmarkSpotFilter implements PlugIn {
 
       // For testing
       final SimpleRegression regression = new SimpleRegression(false);
-      for (final PSFSpot[] spots : actualCoordinates.valueCollection()) {
-        for (final PSFSpot spot : spots) {
+      for (final PsfSpot[] spots : actualCoordinates.valueCollection()) {
+        for (final PsfSpot spot : spots) {
           regression.addData(spot.amplitude,
               calculator.getAmplitude(spot.peakResult.getParameters()));
         }
@@ -2312,7 +2312,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
         if (showFN) {
           // We need the FN ...
-          final PSFSpot[] actual = result.actual;
+          final PsfSpot[] actual = result.actual;
           final boolean[] actualAssignment = result.actualAssignment;
           // nn += actual.length;
           final float[] nx = new float[actual.length];

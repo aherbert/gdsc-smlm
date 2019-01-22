@@ -740,7 +740,7 @@ public class BenchmarkFilterAnalysis
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     simulationParameters = CreateData.simulationParameters;
     if (simulationParameters == null) {

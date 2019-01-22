@@ -64,7 +64,7 @@ public class KernelFilterTest {
     logger = null;
   }
 
-  int size = 256;
+  static final int size = 256;
   int[] borders = {0, 1, 2, 3, 5, 10};
 
   static float[] createKernel(int kw, int kh) {
@@ -87,7 +87,7 @@ public class KernelFilterTest {
     return k;
   }
 
-  private abstract class FilterWrapper {
+  private abstract static class FilterWrapper {
     final float[] kernel;
     final int kw;
     final int kh;
@@ -104,12 +104,12 @@ public class KernelFilterTest {
       return name;
     }
 
-    abstract float[] filter(float[] d, int border);
+    abstract float[] filter(float[] data, int border);
 
-    abstract void setWeights(float[] w);
+    abstract void setWeights(float[] weights);
   }
 
-  private class ConvolverWrapper extends FilterWrapper {
+  private static class ConvolverWrapper extends FilterWrapper {
     Convolver kf = new Convolver();
 
     ConvolverWrapper(float[] kernel, int kw, int kh) {
@@ -117,23 +117,23 @@ public class KernelFilterTest {
     }
 
     @Override
-    float[] filter(float[] d, int border) {
-      final FloatProcessor fp = new FloatProcessor(size, size, d);
+    float[] filter(float[] data, int border) {
+      final FloatProcessor fp = new FloatProcessor(size, size, data);
       if (border > 0) {
         final Rectangle roi = new Rectangle(border, border, size - 2 * border, size - 2 * border);
         fp.setRoi(roi);
       }
       kf.convolveFloat(fp, kernel, kw, kh);
-      return d;
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
+    void setWeights(float[] weights) {
       // Ignored
     }
   }
 
-  private class KernelFilterWrapper extends FilterWrapper {
+  private static class KernelFilterWrapper extends FilterWrapper {
     KernelFilter kf = new KernelFilter(kernel, kw, kh);
 
     KernelFilterWrapper(float[] kernel, int kw, int kh) {
@@ -141,18 +141,18 @@ public class KernelFilterTest {
     }
 
     @Override
-    float[] filter(float[] d, int border) {
-      kf.convolve(d, size, size, border);
-      return d;
+    float[] filter(float[] data, int border) {
+      kf.convolve(data, size, size, border);
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
-      kf.setWeights(w, size, size);
+    void setWeights(float[] weights) {
+      kf.setWeights(weights, size, size);
     }
   }
 
-  private class ZeroKernelFilterWrapper extends FilterWrapper {
+  private static class ZeroKernelFilterWrapper extends FilterWrapper {
     ZeroKernelFilter kf = new ZeroKernelFilter(kernel, kw, kh);
 
     ZeroKernelFilterWrapper(float[] kernel, int kw, int kh) {
@@ -160,14 +160,14 @@ public class KernelFilterTest {
     }
 
     @Override
-    float[] filter(float[] d, int border) {
-      kf.convolve(d, size, size, border);
-      return d;
+    float[] filter(float[] data, int border) {
+      kf.convolve(data, size, size, border);
+      return data;
     }
 
     @Override
-    void setWeights(float[] w) {
-      kf.setWeights(w, size, size);
+    void setWeights(float[] weights) {
+      kf.setWeights(weights, size, size);
     }
   }
 
@@ -186,7 +186,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void kernelFilterIsSameAsIJFilter(RandomSeed seed) {
+  public void kernelFilterIsSameAsImageJFilter(RandomSeed seed) {
     final int kw = 5;
     final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
@@ -195,7 +195,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void zeroKernelFilterIsSameAsIJFilter(RandomSeed seed) {
+  public void zeroKernelFilterIsSameAsImageJFilter(RandomSeed seed) {
     final int kw = 5;
     final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
@@ -214,8 +214,8 @@ public class KernelFilterTest {
     }
   }
 
-  private void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, float[] data, int border,
-      int testBorder, double tolerance) {
+  private static void filter1IsSameAsFilter2(FilterWrapper f1, FilterWrapper f2, float[] data,
+      int border, int testBorder, double tolerance) {
     final float[] e = data.clone();
     f2.filter(e, border);
     final float[] o = data.clone();
@@ -264,8 +264,8 @@ public class KernelFilterTest {
     }
 
     @Override
-    public Object getData(int i) {
-      return data[i].clone();
+    public Object getData(int index) {
+      return data[index].clone();
     }
 
     @Override
@@ -276,12 +276,12 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void floatFilterIsFasterThanIJFilter(RandomSeed seed) {
-    floatFilterIsFasterThanIJFilter(seed, 5);
-    floatFilterIsFasterThanIJFilter(seed, 11);
+  public void floatFilterIsFasterThanImageJFilter(RandomSeed seed) {
+    floatFilterIsFasterThanImageJFilter(seed, 5);
+    floatFilterIsFasterThanImageJFilter(seed, 11);
   }
 
-  private void floatFilterIsFasterThanIJFilter(RandomSeed seed, int k) {
+  private void floatFilterIsFasterThanImageJFilter(RandomSeed seed, int kw) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
 
@@ -290,12 +290,12 @@ public class KernelFilterTest {
       data[i] = createData(rg, size, size);
     }
 
-    final float[] kernel = createKernel(k, k);
+    final float[] kernel = createKernel(kw, kw);
     for (final int border : borders) {
       final TimingService ts = new TimingService();
-      ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, k, k), data, border));
-      ts.execute(new MyTimingTask(new KernelFilterWrapper(kernel, k, k), data, border));
-      ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, k, k), data, border));
+      ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, kw, kw), data, border));
+      ts.execute(new MyTimingTask(new KernelFilterWrapper(kernel, kw, kw), data, border));
+      ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, kw, kw), data, border));
       final int size = ts.getSize();
       ts.repeat();
       if (logger.isLoggable(Level.INFO)) {

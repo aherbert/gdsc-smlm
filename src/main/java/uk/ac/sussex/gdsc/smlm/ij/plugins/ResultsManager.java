@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileSettings;
@@ -59,7 +60,6 @@ import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.FixedPeakResultList;
 import uk.ac.sussex.gdsc.smlm.results.MalkFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
@@ -84,8 +84,6 @@ import java.awt.EventQueue;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -95,13 +93,37 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
 /**
  * Opens peaks results and displays/converts them.
  */
 public class ResultsManager implements PlugIn {
+
+  private static final String TITLE = "Peak Results Manager";
+
+  /** The input file. */
+  static final String INPUT_FILE = "File";
+
+  /** The input memory. */
+  static final String INPUT_MEMORY = "Memory";
+
+  /** The input none. */
+  static final String INPUT_NONE = "[None]";
+
+  private static String inputOption = "";
+  private static String inputFilename = Prefs.get(Constants.inputFilename, "");
+
+  private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
+  private boolean extraOptions;
+
+  private boolean fileInput;
+
+  private static double inputNmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
+  private static double inputGain = Prefs.get(Constants.inputGain, 1);
+  private static double inputExposureTime = Prefs.get(Constants.inputExposureTime, 0);
+  private static List<String> selected;
+
   /**
    * The input source.
    */
@@ -145,34 +167,10 @@ public class ResultsManager implements PlugIn {
     public abstract String getName();
   }
 
-  private static String TITLE = "Peak Results Manager";
-
-  /** The input file. */
-  static String INPUT_FILE = "File";
-
-  /** The input memory. */
-  static String INPUT_MEMORY = "Memory";
-
-  /** The input none. */
-  static String INPUT_NONE = "[None]";
-
-  private static String inputOption = "";
-  private static String inputFilename = Prefs.get(Constants.inputFilename, "");
-
-  private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
-  private boolean extraOptions;
-
-  private boolean fileInput;
-
-  private static double input_nmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
-  private static double input_gain = Prefs.get(Constants.inputGain, 1);
-  private static double input_exposureTime = Prefs.get(Constants.inputExposureTime, 0);
-  private static ArrayList<String> selected;
-
   @Override
   public void run(String arg) {
     extraOptions = ImageJUtils.isExtraOptions();
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if ("load".equals(arg)) {
       batchLoad();
@@ -331,21 +329,18 @@ public class ResultsManager implements PlugIn {
     final int batchSize = Math.max(100, totalProgress / 10);
     final FixedPeakResultList batch = new FixedPeakResultList(batchSize);
     IJ.showProgress(0);
-    results.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult result) {
-        batch.add(result);
-        if (batch.size == batchSize) {
-          if (IJ.escapePressed()) {
-            batch.clear();
-            return true;
-          }
-          output.addAll(batch.results);
+    results.forEach((PeakResultProcedureX) result -> {
+      batch.add(result);
+      if (batch.size == batchSize) {
+        if (IJ.escapePressed()) {
           batch.clear();
-          IJ.showProgress(progress.incrementAndGet(batchSize), totalProgress);
+          return true;
         }
-        return false;
+        output.addAll(batch.results);
+        batch.clear();
+        IJ.showProgress(progress.incrementAndGet(batchSize), totalProgress);
       }
+      return false;
     });
 
     // Will be empty if interrupted
@@ -459,12 +454,12 @@ public class ResultsManager implements PlugIn {
 
   private void addFileResults(PeakResultsList resultsList, boolean showDeviations,
       boolean showEndFrame, boolean showId) {
-    final ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
-    if (!TextUtils.isNullOrEmpty(resultsSettings.getResultsFilename())) {
+    final ResultsFileSettings resultsFileSettings = this.resultsSettings.getResultsFileSettings();
+    if (!TextUtils.isNullOrEmpty(resultsFileSettings.getResultsFilename())) {
       // Remove extension
       final String resultsFilename =
-          ImageJUtils.replaceExtension(resultsSettings.getResultsFilename(),
-              ResultsProtosHelper.getExtension(resultsSettings.getFileFormat()));
+          ImageJUtils.replaceExtension(resultsFileSettings.getResultsFilename(),
+              ResultsProtosHelper.getExtension(resultsFileSettings.getFileFormat()));
 
       if (fileInput && inputFilename.equals(resultsFilename)) {
         IJ.log(TITLE + ": Input and output files are the same, skipping output ...");
@@ -485,8 +480,8 @@ public class ResultsManager implements PlugIn {
         }
       }
 
-      addFileResults(resultsList, resultsSettings, resultsFilename, showDeviations, showEndFrame,
-          showId);
+      addFileResults(resultsList, resultsFileSettings, resultsFilename, showDeviations,
+          showEndFrame, showId);
     }
   }
 
@@ -508,11 +503,11 @@ public class ResultsManager implements PlugIn {
       final File file = new File(resultsFilename);
       final File parent = file.getParentFile();
       if (parent != null && parent.exists()) {
-        PeakResults r;
+        PeakResults results;
         switch (resultsSettings.getFileFormat()) {
           case BINARY:
-            r = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame, showId,
-                resultsSettings.getShowPrecision());
+            results = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame,
+                showId, resultsSettings.getShowPrecision());
             break;
           case TEXT:
             final TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations,
@@ -521,20 +516,20 @@ public class ResultsManager implements PlugIn {
             f.setIntensityUnit(resultsSettings.getIntensityUnit());
             f.setAngleUnit(resultsSettings.getAngleUnit());
             f.setComputePrecision(true);
-            r = f;
+            results = f;
             break;
           case MALK:
-            r = new MalkFilePeakResults(resultsFilename);
+            results = new MalkFilePeakResults(resultsFilename);
             break;
           case TSF:
-            r = new TsfPeakResultsWriter(resultsFilename);
+            results = new TsfPeakResultsWriter(resultsFilename);
             break;
           default:
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                 "Unsupported file format: " + resultsSettings.getFileFormat());
         }
-        resultsList.addOutput(r);
-        return r;
+        resultsList.addOutput(results);
+        return results;
       }
     }
     return null;
@@ -564,16 +559,13 @@ public class ResultsManager implements PlugIn {
     // Hide the in-memory settings if the input is not a file
     if (ImageJUtils.isShowGenericDialog()) {
       final Label saveLabel = gd.getLastLabel();
-      final ItemListener listener = new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent event) {
-          final boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
-          if (enable != messageLabel.isVisible()) {
-            messageLabel.setVisible(enable);
-            saveCheckbox.setVisible(enable);
-            saveLabel.setVisible(enable);
-            gd.pack();
-          }
+      final ItemListener listener = event -> {
+        final boolean enable = INPUT_FILE.equals(inputChoice.getSelectedItem());
+        if (enable != messageLabel.isVisible()) {
+          messageLabel.setVisible(enable);
+          saveCheckbox.setVisible(enable);
+          saveLabel.setVisible(enable);
+          gd.pack();
         }
       };
 
@@ -667,8 +659,7 @@ public class ResultsManager implements PlugIn {
             @Override
             public boolean collectOptions(Integer field) {
               tableSettings.setResultsTableFormatValue(field);
-              final boolean result = collectOptions(false);
-              return result;
+              return collectOptions(false);
             }
 
             @Override
@@ -709,11 +700,11 @@ public class ResultsManager implements PlugIn {
     } else {
       gd.addCheckbox("Show_results_table", tableSettings.getShowTable(),
           new OptionListener<Boolean>() {
+
             @Override
             public boolean collectOptions(Boolean field) {
               tableSettings.setShowTable(field);
-              final boolean result = collectOptions(false);
-              return result;
+              return collectOptions(false);
             }
 
             @Override
@@ -750,6 +741,7 @@ public class ResultsManager implements PlugIn {
               tableSettings.setRoundingPrecision((int) egd.getNextNumber());
               return true;
             }
+
           });
     }
   }
@@ -784,8 +776,7 @@ public class ResultsManager implements PlugIn {
           @Override
           public boolean collectOptions(Integer field) {
             imageSettings.setImageTypeValue(field);
-            final boolean result = collectOptions(false);
-            return result;
+            return collectOptions(false);
           }
 
           @Override
@@ -851,8 +842,7 @@ public class ResultsManager implements PlugIn {
           @Override
           public boolean collectOptions(Integer field) {
             fileSettings.setFileFormatValue(field);
-            final boolean result = collectOptions(false);
-            return result;
+            return collectOptions(false);
           }
 
           @Override
@@ -990,7 +980,7 @@ public class ResultsManager implements PlugIn {
    */
   @SuppressWarnings("unused")
   public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
-      String inputOption, ArrayList<String> source, boolean fileInput) {
+      String inputOption, List<String> source, boolean fileInput) {
     final String[] options = source.toArray(new String[source.size()]);
     // Find the option
     inputOption = removeFormatting(inputOption);
@@ -1005,8 +995,8 @@ public class ResultsManager implements PlugIn {
     }
     final Choice c = gd.addAndGetChoice(inputName, options, options[optionIndex]);
     if (fileInput) {
-      final TextField tf = gd.addFilenameField("Input_file", inputFilename);
-      final JButton b = gd.getLastOptionButton();
+      // final TextField tf = gd.addFilenameField("Input_file", inputFilename)
+      // final JButton b = gd.getLastOptionButton()
 
       // Add a listener to the choice to enable the file input field.
       // Currently we hide the filename field and pack the dialog.
@@ -1015,17 +1005,14 @@ public class ResultsManager implements PlugIn {
       if (ImageJUtils.isShowGenericDialog()) {
         final Label l = gd.getLastLabel();
         final Panel p = gd.getLastPanel();
-        final ItemListener listener = new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent event) {
-            final boolean enable = INPUT_FILE.equals(c.getSelectedItem());
-            if (enable != l.isVisible()) {
-              l.setVisible(enable);
-              p.setVisible(enable);
-              // tf.setVisible(enable);
-              // b.setVisible(enable);
-              gd.pack();
-            }
+        final ItemListener listener = event -> {
+          final boolean enable = INPUT_FILE.equals(c.getSelectedItem());
+          if (enable != l.isVisible()) {
+            l.setVisible(enable);
+            p.setVisible(enable);
+            // tf.setVisible(enable);
+            // b.setVisible(enable);
+            gd.pack();
           }
         };
 
@@ -1105,7 +1092,7 @@ public class ResultsManager implements PlugIn {
           }
           break;
         case MEMORY_CLUSTERED:
-          if (!hasID(memoryResults)) {
+          if (!hasId(memoryResults)) {
             return;
           }
           break;
@@ -1142,12 +1129,8 @@ public class ResultsManager implements PlugIn {
    * @return True if at least one result spanning frames
    */
   public static boolean isMultiFrame(MemoryPeakResults memoryResults) {
-    return memoryResults.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult r) {
-        return r.getFrame() < r.getEndFrame();
-      }
-    });
+    return memoryResults
+        .forEach((PeakResultProcedureX) result -> result.getFrame() < result.getEndFrame());
   }
 
   /**
@@ -1156,13 +1139,8 @@ public class ResultsManager implements PlugIn {
    * @param memoryResults the memory results
    * @return True if any results have IDs above zero
    */
-  public static boolean hasID(MemoryPeakResults memoryResults) {
-    return memoryResults.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult r) {
-        return r.getId() > 0;
-      }
-    });
+  public static boolean hasId(MemoryPeakResults memoryResults) {
+    return memoryResults.forEach((PeakResultProcedureX) result -> result.getId() > 0);
   }
 
   /**
@@ -1171,13 +1149,8 @@ public class ResultsManager implements PlugIn {
    * @param memoryResults the memory results
    * @return True if all results have IDs above zero
    */
-  public static boolean isID(MemoryPeakResults memoryResults) {
-    return !memoryResults.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult r) {
-        return r.getId() <= 0;
-      }
-    });
+  public static boolean isId(MemoryPeakResults memoryResults) {
+    return memoryResults.forEach((PeakResultProcedureX) result -> result.getId() <= 0);
   }
 
   /**
@@ -1187,12 +1160,8 @@ public class ResultsManager implements PlugIn {
    * @return True if all are an ExtendedPeakResult
    */
   public static boolean isExtended(MemoryPeakResults memoryResults) {
-    return !memoryResults.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult r) {
-        return !(r instanceof ExtendedPeakResult);
-      }
-    });
+    return memoryResults
+        .forEach((PeakResultProcedureX) result -> !(result instanceof ExtendedPeakResult));
   }
 
   /**
@@ -1304,10 +1273,8 @@ public class ResultsManager implements PlugIn {
         return results;
       }
 
-      if (checkCalibration) {
-        if (!checkCalibration(results, reader)) {
-          return null;
-        }
+      if (checkCalibration && !checkCalibration(results, reader)) {
+        return null;
       }
       if (distanceUnit != null && results.getDistanceUnit() != distanceUnit) {
         ImageJUtils.log("Incorrect distance unit: " + results.getDistanceUnit());
@@ -1406,9 +1373,11 @@ public class ResultsManager implements PlugIn {
   /**
    * Check the calibration of the results exists, if not then prompt for it with a dialog.
    *
+   * <p>The calibration is rechecked after the dialog is shown.
+   *
    * @param results The results
    * @param reader Used to determine the file type
-   * @return True if OK; false if calibration dialog cancelled
+   * @return True if OK; false if calibration is missing
    */
   private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader) {
     // Check for Calibration
@@ -1419,38 +1388,7 @@ public class ResultsManager implements PlugIn {
       msg = "uncalibrated";
     }
 
-    // Only check for essential calibration settings (i.e. not readNoise, bias, emCCD,
-    // amplification)
-    boolean missing = false;
-    if (!calibration.hasNmPerPixel()) {
-      missing = true;
-      calibration.setNmPerPixel(input_nmPerPixel);
-    }
-    if (!calibration.hasExposureTime()) {
-      missing = true;
-      calibration.setExposureTime(input_exposureTime);
-    }
-    if (!calibration.hasDistanceUnit()) {
-      missing = true;
-    }
-    if (!calibration.hasIntensityUnit()) {
-      missing = true;
-    }
-
-    switch (calibration.getCameraType()) {
-      case CCD:
-      case EMCCD:
-        // Count-per-photon is required for CCD camera types
-        missing |= !calibration.hasCountPerPhoton();
-        calibration.setCountPerPhoton(input_gain);
-        break;
-      case SCMOS:
-        break;
-      case CAMERA_TYPE_NA:
-      case UNRECOGNIZED:
-      default:
-        missing = true;
-    }
+    boolean missing = isEssentialCalibrationMissing(calibration);
 
     if (missing) {
       final Rectangle2D.Float dataBounds = results.getDataBounds(null);
@@ -1480,33 +1418,67 @@ public class ResultsManager implements PlugIn {
 
       gd.collectOptions();
 
-      // Validate
-      switch (calibration.getCameraType()) {
-        case CCD:
-        case EMCCD:
-          break;
-        case SCMOS:
-          calibration.clearGlobalCameraSettings();
-          break;
-        case CAMERA_TYPE_NA:
-        case UNRECOGNIZED:
-        default:
-          missing = true;
+      if (calibration.getCameraType() == CameraType.SCMOS) {
+        calibration.clearGlobalCameraSettings();
       }
 
+      missing = isEssentialCalibrationMissing(calibration);
+
       // Save for next time ...
-      input_nmPerPixel = calibration.getNmPerPixel();
-      input_exposureTime = calibration.getExposureTime();
-      Prefs.set(Constants.inputNmPerPixel, input_nmPerPixel);
-      Prefs.set(Constants.inputExposureTime, input_exposureTime);
+      inputNmPerPixel = calibration.getNmPerPixel();
+      inputExposureTime = calibration.getExposureTime();
+      Prefs.set(Constants.inputNmPerPixel, inputNmPerPixel);
+      Prefs.set(Constants.inputExposureTime, inputExposureTime);
       if (calibration.isCcdCamera()) {
-        input_gain = calibration.getCountPerPhoton();
-        Prefs.set(Constants.inputGain, input_gain);
+        inputGain = calibration.getCountPerPhoton();
+        Prefs.set(Constants.inputGain, inputGain);
       }
 
       results.setCalibration(calibration.getCalibration());
     }
-    return true;
+
+    // Only OK if nothing is missing
+    return !missing;
+  }
+
+  /**
+   * Check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification).
+   *
+   * @param calibration the calibration
+   * @return true, if calibration is missing
+   */
+  private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration) {
+    boolean missing = false;
+    if (!calibration.hasNmPerPixel()) {
+      missing = true;
+      calibration.setNmPerPixel(inputNmPerPixel);
+    }
+    if (!calibration.hasExposureTime()) {
+      missing = true;
+      calibration.setExposureTime(inputExposureTime);
+    }
+    if (!calibration.hasDistanceUnit()) {
+      missing = true;
+    }
+    if (!calibration.hasIntensityUnit()) {
+      missing = true;
+    }
+
+    switch (calibration.getCameraType()) {
+      case CCD:
+      case EMCCD:
+        // Count-per-photon is required for CCD camera types
+        missing |= !calibration.hasCountPerPhoton();
+        calibration.setCountPerPhoton(inputGain);
+        break;
+      case SCMOS:
+        break;
+      case CAMERA_TYPE_NA:
+      case UNRECOGNIZED:
+      default:
+        missing = true;
+    }
+    return missing;
   }
 
   /**
@@ -1556,30 +1528,27 @@ public class ResultsManager implements PlugIn {
     Java2.setSystemLookAndFeel();
     // run JFileChooser in a separate thread to avoid possible thread deadlocks
     try {
-      EventQueue.invokeAndWait(new Runnable() {
-        @Override
-        public void run() {
-          final JFileChooser fc = new JFileChooser();
-          fc.setMultiSelectionEnabled(true);
-          File dir = null;
-          final String sdir = OpenDialog.getDefaultDirectory();
-          if (sdir != null) {
-            dir = new File(sdir);
-          }
-          if (dir != null) {
-            fc.setCurrentDirectory(dir);
-          }
-          final int returnVal = fc.showOpenDialog(IJ.getInstance());
-          if (returnVal != JFileChooser.APPROVE_OPTION) {
-            return;
-          }
-          omFiles = fc.getSelectedFiles();
-          if (omFiles.length == 0) { // getSelectedFiles does not work on some JVMs
-            omFiles = new File[1];
-            omFiles[0] = fc.getSelectedFile();
-          }
-          omDirectory = fc.getCurrentDirectory().getPath() + File.separator;
+      EventQueue.invokeAndWait(() -> {
+        final JFileChooser fc = new JFileChooser();
+        fc.setMultiSelectionEnabled(true);
+        File dir = null;
+        final String sdir = OpenDialog.getDefaultDirectory();
+        if (sdir != null) {
+          dir = new File(sdir);
         }
+        if (dir != null) {
+          fc.setCurrentDirectory(dir);
+        }
+        final int returnVal = fc.showOpenDialog(IJ.getInstance());
+        if (returnVal != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        omFiles = fc.getSelectedFiles();
+        if (omFiles.length == 0) { // getSelectedFiles does not work on some JVMs
+          omFiles = new File[1];
+          omFiles[0] = fc.getSelectedFile();
+        }
+        omDirectory = fc.getCurrentDirectory().getPath() + File.separator;
       });
     } catch (final Exception ex) {
       // Ignore
@@ -1661,14 +1630,14 @@ public class ResultsManager implements PlugIn {
       IJ.error(TITLE, "No output file format");
       return;
     }
-    int c = 0;
+    int count = 0;
     for (final String name : selected) {
       final MemoryPeakResults r = MemoryPeakResults.getResults(name);
       if (r != null && save(resultsFileSettings, r)) {
-        c++;
+        count++;
       }
     }
-    IJ.showStatus("Saved " + TextUtils.pleural(c, "dataset"));
+    IJ.showStatus("Saved " + TextUtils.pleural(count, "dataset"));
   }
 
   private static boolean save(ResultsFileSettings resultsSettings, MemoryPeakResults source) {
@@ -1682,11 +1651,11 @@ public class ResultsManager implements PlugIn {
     } catch (final IOException ex) {
       return false;
     }
-    PeakResults r;
+    PeakResults results;
     switch (resultsSettings.getFileFormat()) {
       case BINARY:
-        r = new BinaryFilePeakResults(resultsFilename, source.hasDeviations(), source.hasEndFrame(),
-            source.hasId(), resultsSettings.getShowPrecision());
+        results = new BinaryFilePeakResults(resultsFilename, source.hasDeviations(),
+            source.hasEndFrame(), source.hasId(), resultsSettings.getShowPrecision());
         break;
       case TEXT:
         final TextFilePeakResults f =
@@ -1696,21 +1665,22 @@ public class ResultsManager implements PlugIn {
         f.setIntensityUnit(resultsSettings.getIntensityUnit());
         f.setAngleUnit(resultsSettings.getAngleUnit());
         f.setComputePrecision(true);
-        r = f;
+        results = f;
         break;
       case MALK:
-        r = new MalkFilePeakResults(resultsFilename);
+        results = new MalkFilePeakResults(resultsFilename);
         break;
       case TSF:
-        r = new TsfPeakResultsWriter(resultsFilename);
+        results = new TsfPeakResultsWriter(resultsFilename);
         break;
       default:
-        throw new RuntimeException("Unsupported file format: " + resultsSettings.getFileFormat());
+        throw new IllegalArgumentException(
+            "Unsupported file format: " + resultsSettings.getFileFormat());
     }
-    r.copySettings(source);
-    r.begin();
-    r.addAll(source.toArray());
-    r.end();
+    results.copySettings(source);
+    results.begin();
+    results.addAll(source.toArray());
+    results.end();
     ImageJUtils.log("Saved %s to %s", source.getName(), resultsFilename);
     return true;
   }

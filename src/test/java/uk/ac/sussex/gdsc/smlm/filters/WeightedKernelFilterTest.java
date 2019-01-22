@@ -96,7 +96,7 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest {
   }
 
   private static void testfilterPerformsWeightedFiltering(DataFilter filter, int width, int height,
-      float[] data, float[] w, int boxSize, float offset, boolean internal,
+      float[] data, float[] weights, int boxSize, float offset, boolean internal,
       FloatFloatBiPredicate equality) throws AssertionError {
     // The kernel filter f(x) should compute:
     // sum(vi * wi * ki) / sum(ki * wi)
@@ -106,17 +106,17 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest {
     // f(vi * wi) / f(wi)
 
     filter.setWeights(null, width, height);
-    final float[] fWi = filter(w, width, height, boxSize - offset, internal, filter);
+    final float[] fWi = filter(weights, width, height, boxSize - offset, internal, filter);
     final float[] e = data.clone();
     for (int i = 0; i < e.length; i++) {
-      e[i] = data[i] * w[i];
+      e[i] = data[i] * weights[i];
     }
     final float[] fViWi = filter(e, width, height, boxSize - offset, internal, filter);
     for (int i = 0; i < e.length; i++) {
       e[i] = fViWi[i] / fWi[i];
     }
 
-    filter.setWeights(w, width, height);
+    filter.setWeights(weights, width, height);
     final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
     TestAssertions.assertArrayTest(e, o, equality,

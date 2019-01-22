@@ -42,8 +42,8 @@ import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class BlockMeanFilterTest extends AbstractFilterTest {
-  private static final int InternalITER3 = 500;
-  private static final int InternalITER = 50;
+  private static final int INTERNAL_ITER3 = 500;
+  private static final int INTERNAL_ITER = 50;
   private static final int ITER3 = 200;
   private static final int ITER = 20;
 
@@ -426,7 +426,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
       BlockMeanDataFilter slow, int[] testBoxSizes) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
+    ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -443,7 +443,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     }
 
     for (final float boxSize : boxSizes) {
-      final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+      final int iter = (boxSize == 1) ? INTERNAL_ITER3 : INTERNAL_ITER;
       for (final int width : speedPrimes) {
         for (final int height : speedPrimes) {
           dataSet = getSpeedData(seed, iter);
@@ -462,7 +462,7 @@ public class BlockMeanFilterTest extends AbstractFilterTest {
     long fastTotal = 0;
     int index = 0;
     for (final float boxSize : boxSizes) {
-      final int iter = (boxSize == 1) ? InternalITER3 : InternalITER;
+      final int iter = (boxSize == 1) ? INTERNAL_ITER3 : INTERNAL_ITER;
       long boxSlowTotal = 0;
       long boxFastTotal = 0;
       for (final int width : speedPrimes) {

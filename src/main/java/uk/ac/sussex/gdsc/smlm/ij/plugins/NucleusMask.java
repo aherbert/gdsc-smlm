@@ -63,7 +63,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (!showDialog()) {
       return;

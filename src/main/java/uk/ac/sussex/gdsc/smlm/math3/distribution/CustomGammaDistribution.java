@@ -41,7 +41,9 @@ import org.apache.commons.math3.util.FastMath;
  * @see <a href="http://en.wikipedia.org/wiki/Gamma_distribution">Gamma distribution (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/GammaDistribution.html">Gamma distribution
  *      (MathWorld)</a>
+ * @deprecated Superseded by commons-rng package
  */
+@Deprecated
 public class CustomGammaDistribution extends AbstractRealDistribution {
   /**
    * Default inverse cumulative probability accuracy.
@@ -395,6 +397,7 @@ public class CustomGammaDistribution extends AbstractRealDistribution {
    *
    * @return random value sampled from the Gamma(shape, scale) distribution
    */
+  // @CHECKSTYLE.OFF
   @Override
   public double sample() {
     if (shape < 1) {

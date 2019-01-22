@@ -29,21 +29,21 @@ public class RollingBlockMeanWeightedFilterTest extends WeightedMeanFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("rollingBlockMean", false) {
-      BlockMeanFilter f = new BlockMeanFilter();
+      BlockMeanFilter filter = new BlockMeanFilter();
 
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilter(data, width, height, (int) boxSize);
+        filter.rollingBlockFilter(data, width, height, (int) boxSize);
       }
 
       @Override
       public void filterInternal(float[] data, int width, int height, float boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, (int) boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, (int) boxSize);
       }
 
       @Override
-      public void setWeights(float[] w, int width, int height) {
-        f.setWeights(w, width, height);
+      public void setWeights(float[] weights, int width, int height) {
+        filter.setWeights(weights, width, height);
       }
     };
   }

@@ -282,7 +282,7 @@ public class SpotAnalysis extends PlugInFrame
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (WindowManager.getImageCount() == 0) {
       IJ.showMessage(PLUGIN_TITLE, "No images opened.");

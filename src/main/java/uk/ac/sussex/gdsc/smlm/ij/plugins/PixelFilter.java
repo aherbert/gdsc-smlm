@@ -44,20 +44,20 @@ import java.awt.Label;
  */
 public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Pixel Filter";
-  private final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS;
+  private static final int FLAGS = DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS;
 
   private static int radius = 1;
   private static double error = 3;
 
   private PlugInFilterRunner pfr;
-  private double[] cachedS;
-  private double[] cachedSS;
+  private double[] cachedRollingSum;
+  private double[] cachedRollingSumSq;
   private boolean preview;
   private Label label;
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       IJ.noImage();
@@ -71,16 +71,16 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     // Compute rolling sums
     final FloatProcessor fp = ip.toFloat(0, null);
     final float[] data = (float[]) ip.toFloat(0, null).getPixels();
-    double[] s = null;
-    double[] ss = null;
-    if (preview && cachedS != null) {
-      s = cachedS;
-      ss = cachedSS;
+    double[] rollingSum = null;
+    double[] rollingSumSq = null;
+    if (preview && cachedRollingSum != null) {
+      rollingSum = cachedRollingSum;
+      rollingSumSq = cachedRollingSumSq;
     }
-    if (s == null || ss == null) {
-      s = new double[ip.getPixelCount()];
-      ss = new double[s.length];
-      calculateRollingSums(fp, s, ss);
+    if (rollingSum == null || rollingSumSq == null) {
+      rollingSum = new double[ip.getPixelCount()];
+      rollingSumSq = new double[rollingSum.length];
+      calculateRollingSums(fp, rollingSum, rollingSumSq);
     }
 
     int count = 0;
@@ -110,27 +110,27 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
 
         // + s(u+N-1,v+N-1)
         int index = maxV * maxx + maxU;
-        sum += s[index];
-        sumSquares += ss[index];
+        sum += rollingSum[index];
+        sumSquares += rollingSumSq[index];
 
         if (minU >= 0) {
           // - s(u-1,v+N-1)
           index = maxV * maxx + minU;
-          sum -= s[index];
-          sumSquares -= ss[index];
+          sum -= rollingSum[index];
+          sumSquares -= rollingSumSq[index];
         }
         int minV = y - radius - 1;
         if (minV >= 0) {
           // - s(u+N-1,v-1)
           index = minV * maxx + maxU;
-          sum -= s[index];
-          sumSquares -= ss[index];
+          sum -= rollingSum[index];
+          sumSquares -= rollingSumSq[index];
 
           if (minU >= 0) {
             // + s(u-1,v-1)
             index = minV * maxx + minU;
-            sum += s[index];
-            sumSquares += ss[index];
+            sum += rollingSum[index];
+            sumSquares += rollingSumSq[index];
           }
         }
 
@@ -194,8 +194,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
       }
     }
     if (preview) {
-      cachedS = s;
-      cachedSS = ss;
+      cachedRollingSum = rollingSum;
+      cachedRollingSumSq = rollingSumSq;
       label.setText("Replaced " + count);
     } else if (pfr != null && count > 0) {
       IJ.log(String.format("Slice %d : Replaced %d pixels", pfr.getSliceNumber(), count));
@@ -226,17 +226,17 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     // Remaining rows:
     // sum = rolling sum of row + sum of row above
     for (int y = 1; y < maxy; y++) {
-      int i = y * maxx;
+      int index = y * maxx;
       cs = 0;
       css = 0;
 
       // Remaining columns
-      for (int x = 0; x < maxx; x++, i++) {
-        cs += data[i];
-        css += data[i] * data[i];
+      for (int x = 0; x < maxx; x++, index++) {
+        cs += data[index];
+        css += data[index] * data[index];
 
-        sum[i] = sum[i - maxx] + cs;
-        sumSq[i] = sumSq[i - maxx] + css;
+        sum[index] = sum[index - maxx] + cs;
+        sumSq[index] = sumSq[index - maxx] + css;
       }
     }
   }
@@ -267,7 +267,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     }
 
     preview = false;
-    cachedS = cachedSS = null;
+    cachedRollingSum = cachedRollingSumSq = null;
     label = null;
     return IJ.setupDialog(imp, FLAGS);
   }

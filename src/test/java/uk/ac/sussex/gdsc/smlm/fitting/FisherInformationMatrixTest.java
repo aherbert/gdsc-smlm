@@ -65,36 +65,36 @@ public class FisherInformationMatrixTest {
   private final Level level = Level.FINE;
 
   @SeededTest
-  public void canComputeCRLB(RandomSeed seed) {
+  public void canComputeCrlb(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      testComputeCRLB(rg, n, 0, true);
+      testComputeCrlb(rg, n, 0, true);
     }
   }
 
   @SeededTest
-  public void canComputeCRLBWithZeros(RandomSeed seed) {
+  public void canComputeCrlbWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 2; n < 10; n++) {
-      testComputeCRLB(rg, n, 1, true);
-      testComputeCRLB(rg, n, n / 2, true);
+      testComputeCrlb(rg, n, 1, true);
+      testComputeCrlb(rg, n, n / 2, true);
     }
   }
 
   @SeededTest
-  public void canComputeCRLBWithReciprocal(RandomSeed seed) {
+  public void canComputeCrlbWithReciprocal(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 1; n < 10; n++) {
-      testComputeCRLB(rg, n, 0, false);
+      testComputeCrlb(rg, n, 0, false);
     }
   }
 
   @SeededTest
-  public void canComputeCRLBWithReciprocalWithZeros(RandomSeed seed) {
+  public void canComputeCrlbWithReciprocalWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     for (int n = 2; n < 10; n++) {
-      testComputeCRLB(rg, n, 1, false);
-      testComputeCRLB(rg, n, n / 2, false);
+      testComputeCrlb(rg, n, 1, false);
+      testComputeCrlb(rg, n, n / 2, false);
     }
   }
 
@@ -119,37 +119,40 @@ public class FisherInformationMatrixTest {
     }
   }
 
-  private double[] testComputeCRLB(UniformRandomProvider rg, int n, int k, boolean invert) {
-    final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, k);
+  private double[] testComputeCrlb(UniformRandomProvider rg, int columns, int zeroColumns,
+      boolean invert) {
+    final FisherInformationMatrix m = createFisherInformationMatrix(rg, columns, zeroColumns);
 
-    // Invert for CRLB
+    // Invert for Crlb
     final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
     if (logger.isLoggable(level)) {
-      logger.log(level, FunctionUtils.getSupplier("n=%d, k=%d : %s", n, k, Arrays.toString(crlb)));
+      logger.log(level, FunctionUtils.getSupplier("columns=%d, zeroColumns=%d : %s", columns,
+          zeroColumns, Arrays.toString(crlb)));
     }
-    Assertions.assertNotNull(crlb, () -> String.format("CRLB failed: n=%d, k=%d", n, k));
+    Assertions.assertNotNull(crlb,
+        () -> String.format("Crlb failed: columns=%d, zeroColumns=%d", columns, zeroColumns));
     return crlb;
   }
 
   private static FisherInformationMatrix createFisherInformationMatrix(UniformRandomProvider rg,
-      int n, int k) {
+      int columns, int zeroColumns) {
     final int maxx = 10;
     final int size = maxx * maxx;
 
     // Use a real Gaussian function here to compute the Fisher information.
     // The matrix may be sensitive to the type of equation used.
-    int npeaks = 1;
-    Gaussian2DFunction fun = createFunction(maxx, npeaks);
-    while (fun.getNumberOfGradients() < n) {
-      npeaks++;
-      fun = createFunction(maxx, npeaks);
+    int npeazeroColumnss = 1;
+    Gaussian2DFunction fun = createFunction(maxx, npeazeroColumnss);
+    while (fun.getNumberOfGradients() < columns) {
+      npeazeroColumnss++;
+      fun = createFunction(maxx, npeazeroColumnss);
     }
 
-    final double[] a = new double[1 + npeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK];
+    final double[] a = new double[1 + npeazeroColumnss * Gaussian2DFunction.PARAMETERS_PER_PEAK];
     a[Gaussian2DFunction.BACKGROUND] = nextUniform(rg, 1, 5);
-    for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+    for (int i = 0, j = 0; i < npeazeroColumnss; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
       a[j + Gaussian2DFunction.SIGNAL] = nextUniform(rg, 100, 300);
-      // Non-overlapping peaks otherwise the CRLB are poor
+      // Non-overlapping peazeroColumnss otherwise the Crlb are poor
       a[j + Gaussian2DFunction.X_POSITION] = nextUniform(rg, 2 + i * 2, 4 + i * 2);
       a[j + Gaussian2DFunction.Y_POSITION] = nextUniform(rg, 2 + i * 2, 4 + i * 2);
       a[j + Gaussian2DFunction.X_SD] = nextUniform(rg, 1.5, 2);
@@ -162,23 +165,23 @@ public class FisherInformationMatrixTest {
     double[][] matrixI = calc.fisherInformationMatrix(size, a, fun);
 
     // Reduce to the desired size
-    matrixI = Arrays.copyOf(matrixI, n);
-    for (int i = 0; i < n; i++) {
-      matrixI[i] = Arrays.copyOf(matrixI[i], n);
+    matrixI = Arrays.copyOf(matrixI, columns);
+    for (int i = 0; i < columns; i++) {
+      matrixI[i] = Arrays.copyOf(matrixI[i], columns);
     }
 
     // Zero selected columns
-    if (k > 0) {
-      final int[] zero = RandomUtils.sample(k, n, rg);
+    if (zeroColumns > 0) {
+      final int[] zero = RandomUtils.sample(zeroColumns, columns, rg);
       for (final int i : zero) {
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < columns; j++) {
           matrixI[i][j] = matrixI[j][i] = 0;
         }
       }
     }
 
-    // TestLog.fine(logger,"n=%d, k=%d", n, k);
-    // for (int i = 0; i < n; i++)
+    // TestLog.fine(logger,"columns=%d, zeroColumns=%d", columns, zeroColumns);
+    // for (int i = 0; i < columns; i++)
     // TestLog.fine(logger,Arrays.toString(I[i]));
 
     // Create matrix
@@ -232,7 +235,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void computeWithSubsetReducesTheCRLB(RandomSeed seed) {
+  public void computeWithSubsetReducesTheCrlb(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final Gaussian2DFunction f = createFunction(10, 1);
     final int perPeak = f.getGradientParametersPerPeak();

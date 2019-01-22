@@ -37,7 +37,7 @@ public class BinaryDisplay implements PlugInFilter {
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       return DONE;

@@ -276,7 +276,7 @@ public class EjmlLinearSolver {
    * @param b the vector b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholeskyLDLT(DenseMatrix64F A, DenseMatrix64F b) {
+  public boolean solveCholeskyLdlT(DenseMatrix64F A, DenseMatrix64F b) {
     createSolver(A.numCols);
     return solveEquation(getCholeskyLdlTSolver(), A, b);
   }
@@ -1098,8 +1098,8 @@ public class EjmlLinearSolver {
    * @param b the b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholeskyLDLT(double[][] a, double[] b) {
-    return solveCholeskyLDLT(toA(a), toB(b));
+  public boolean solveCholeskyLdlT(double[][] a, double[] b) {
+    return solveCholeskyLdlT(toA(a), toB(b));
   }
 
   /**
@@ -1213,7 +1213,7 @@ public class EjmlLinearSolver {
    * @param a the matrix a
    * @return False if the matrix is singular (no solution)
    */
-  public boolean invertCholeskyLDLT(double[][] a) {
+  public boolean invertCholeskyLdlT(double[][] a) {
     final DenseMatrix64F A = toA(a);
     if (!invertCholeskyLdlT(A)) {
       return false;
@@ -1333,8 +1333,8 @@ public class EjmlLinearSolver {
    * @param b the b
    * @return False if the equation is singular (no solution)
    */
-  public boolean solveCholeskyLDLT(double[] a, double[] b) {
-    return solveCholeskyLDLT(toA(a, b.length), toB(b));
+  public boolean solveCholeskyLdlT(double[] a, double[] b) {
+    return solveCholeskyLdlT(toA(a, b.length), toB(b));
   }
 
   /**

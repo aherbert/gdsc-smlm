@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Provide methods to track code usage within ImageJ.
  */
-public class SMLMUsageTracker implements PlugIn {
+public class SmlmUsageTracker implements PlugIn {
   private static final String TITLE = "SMLM Usage Tracker";
 
   /** A flag used when the dialog is shown. */
@@ -47,7 +47,7 @@ public class SMLMUsageTracker implements PlugIn {
     // This ensures all GDSC loggers redirect from the console to the ImageJ log window.
     // This is here to ensure all GDSC plugins that use this tracking class set-up logging
     // redirection.
-    ImageJPluginLoggerHelper.getLogger(SMLMUsageTracker.class.getName());
+    ImageJPluginLoggerHelper.getLogger(SmlmUsageTracker.class.getName());
   }
 
   /**
@@ -91,7 +91,7 @@ public class SMLMUsageTracker implements PlugIn {
 
     static {
       final HashMap<String, String[]> localMap = new HashMap<>();
-      ImageJAnalyticsUtils.buildPluginMap(localMap, SMLMTools.getPluginsConfig(),
+      ImageJAnalyticsUtils.buildPluginMap(localMap, SmlmTools.getPluginsConfig(),
           StandardCharsets.UTF_8);
       map = localMap;
     }

@@ -40,16 +40,16 @@ import org.junit.jupiter.api.Assumptions;
 
 import java.util.ArrayList;
 
-@SuppressWarnings({"javadoc"})
+@SuppressWarnings({"javadoc", "unused"})
 public class MedianFilterTest extends AbstractFilterTest {
-  private static int InternalITER3 = 200;
-  private static int InternalITER = 20;
+  private static int INTERNAL_ITER3 = 200;
+  private static int INTERNAL_ITER = 20;
   private static int ITER3 = 100;
   private static int ITER = 10;
   private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-3, 0);
 
-  private static void floatArrayEquals(float[] data1, float[] data2,
-      @SuppressWarnings("unused") int boxSize, String format, Object... args) {
+  private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format,
+      Object... args) {
     try {
       // TestAssertions.assertArrayTest(data1, data2, TestHelper.almostEqualFloats(boxSize, 0) *
       // boxSize * 1e-3);
@@ -117,7 +117,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
     final MedianFilter filter = new MedianFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -219,7 +219,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
     final MedianFilter filter = new MedianFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -246,7 +246,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {
@@ -288,7 +287,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
     final MedianFilter filter = new MedianFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -315,7 +314,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {
@@ -381,7 +379,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
     final MedianFilter filter = new MedianFilter();
 
-    final ArrayList<float[]> dataSet = getSpeedData(seed, InternalITER3);
+    final ArrayList<float[]> dataSet = getSpeedData(seed, INTERNAL_ITER3);
 
     final ArrayList<Long> fastTimes = new ArrayList<>();
 
@@ -408,7 +406,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {
@@ -753,7 +750,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {
@@ -845,7 +841,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {
@@ -914,7 +909,6 @@ public class MedianFilterTest extends AbstractFilterTest {
     long slowTotal = 0;
     long fastTotal = 0;
     int index = 0;
-    @SuppressWarnings("unused")
     long boxSlowTotal = 0;
     long boxFastTotal = 0;
     for (final int width : speedPrimes) {

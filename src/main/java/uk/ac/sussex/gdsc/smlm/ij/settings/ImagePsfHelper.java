@@ -27,12 +27,16 @@ package uk.ac.sussex.gdsc.smlm.ij.settings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSFOrBuilder;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Contain helper functions for the ImagePOSF class.
  */
-public class ImagePSFHelper {
+public final class ImagePsfHelper {
+
+  /** No public constructor. */
+  private ImagePsfHelper() {}
+
   /**
    * Convert the ImagePSF to a string.
    *
@@ -84,7 +88,7 @@ public class ImagePSFHelper {
    * @return the image PSF
    */
   public static ImagePSF create(int centreImage, double pixelSize, double pixelDepth,
-      int imageCount, double fwhm, HashMap<String, String> notes) {
+      int imageCount, double fwhm, Map<String, String> notes) {
     final ImagePSF.Builder builder = ImagePSF.newBuilder();
     builder.setCentreImage(centreImage);
     builder.setPixelSize(pixelSize);

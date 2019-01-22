@@ -91,16 +91,16 @@ public class IntBlockSumFilterTest extends AbstractFilterTest {
       super(name, isInterpolated);
     }
 
-    IntBlockSumFilter f = new IntBlockSumFilter();
+    IntBlockSumFilter filter = new IntBlockSumFilter();
 
     @Override
     public void filter(int[] data, int width, int height, int boxSize) {
-      f.rollingBlockFilter(data, width, height, boxSize);
+      filter.rollingBlockFilter(data, width, height, boxSize);
     }
 
     @Override
     public void filterInternal(int[] data, int width, int height, int boxSize) {
-      f.rollingBlockFilterInternal(data, width, height, boxSize);
+      filter.rollingBlockFilterInternal(data, width, height, boxSize);
     }
 
     @Override
@@ -147,12 +147,12 @@ public class IntBlockSumFilterTest extends AbstractFilterTest {
     final BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false) {
       @Override
       public void filter(int[] data, int width, int height, int boxSize) {
-        f.rollingBlockFilter(data, width, height, boxSize);
+        filter.rollingBlockFilter(data, width, height, boxSize);
       }
 
       @Override
       public void filterInternal(int[] data, int width, int height, int boxSize) {
-        f.rollingBlockFilterInternal(data, width, height, boxSize);
+        filter.rollingBlockFilterInternal(data, width, height, boxSize);
       }
     };
     checkIsCorrect(seed, filter);

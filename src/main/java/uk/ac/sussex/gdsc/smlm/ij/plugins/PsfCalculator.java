@@ -52,7 +52,7 @@ import java.awt.TextField;
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
  */
-public class PSFCalculator implements PlugIn, DialogListener {
+public class PsfCalculator implements PlugIn, DialogListener {
   private static final String TITLE = "PSF Calculator";
   /**
    * This is the factor (f) for scaling an Airy width to a Gaussian approximation. The Gaussian PSF
@@ -77,7 +77,7 @@ public class PSFCalculator implements PlugIn, DialogListener {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final PSFCalculatorSettings settings = SettingsManager.readPsfCalculatorSettings(0);
 

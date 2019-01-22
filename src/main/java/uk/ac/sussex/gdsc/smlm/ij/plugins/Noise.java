@@ -69,7 +69,7 @@ import java.util.List;
 public class Noise implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Noise Estimator";
   private List<double[]> results;
-  private final int FLAGS =
+  private static final int FLAGS =
       DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
   private PlugInFilterRunner pfr;
   private ImagePlus imp;
@@ -90,7 +90,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
       showResults();
       return DONE;
     }
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       IJ.noImage();
@@ -138,7 +138,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
       gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
       gd.addSlider("Lowest_radius", 1, 15, lowestPixelsRange);
 
-      // gd.addPreviewCheckbox(pfr);
       gd.addDialogListener(this);
       gd.addMessage("Click OK to compute noise table using all methods");
       gd.showDialog();
@@ -273,7 +272,6 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     plot.setLimits(a[0], a[1], b1[0] - 0.05 * range, b1[1] + 0.05 * range);
     plot.setColor(Color.blue);
     plot.addPoints(xValues, yValues1, Plot.LINE);
-    // plot.draw();
     String label = String.format("%s (Blue) = %s", trim(method1.getName()),
         MathUtils.rounded(Statistics.create(yValues1).getMean()));
     if (twoMethods) {
@@ -298,8 +296,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
   public void run(ImageProcessor ip) {
     // Perform all methods and add to the results
     final double[] result = new double[NoiseEstimator.Method.values().length + 1];
-    int i = 0;
-    result[i++] = (pfr == null) ? 1 : pfr.getSliceNumber();
+    int index = 0;
+    result[index++] = (pfr == null) ? 1 : pfr.getSliceNumber();
     final Rectangle bounds = ip.getRoi();
     final float[] buffer =
         ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
@@ -307,7 +305,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
     ne.setPreserveResiduals(true);
     for (final NoiseEstimator.Method m : NoiseEstimator.Method.values()) {
-      result[i++] = ne.getNoise(m);
+      result[index++] = ne.getNoise(m);
     }
     results.add(result);
   }
@@ -318,13 +316,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
   }
 
   private void showResults() {
-    Collections.sort(results, new Comparator<double[]>() {
-      @Override
-      public int compare(double[] o1, double[] o2) {
-        // Sort on slice number
-        return (o1[0] < o2[0]) ? -1 : 1;
-      }
-    });
+    // Sort on slice number
+    Collections.sort(results, (o1, o2) -> Double.compare(o1[0], o2[0]));
 
     // Slow when there are lots of results ... Could change the output options in the future
     final TextWindow tw = new TextWindow(imp.getTitle() + " Noise", createHeader(), "", 800, 400);

@@ -58,12 +58,12 @@ import java.util.logging.Logger;
  * Test the IJImagePeakResults functionality.
  */
 @SuppressWarnings({"javadoc"})
-public class IJImagePeakResultsTest {
+public class ImageJImagePeakResultsTest {
   private static Logger logger;
 
   @BeforeAll
   public static void beforeAll() {
-    logger = Logger.getLogger(IJImagePeakResultsTest.class.getName());
+    logger = Logger.getLogger(ImageJImagePeakResultsTest.class.getName());
   }
 
   @AfterAll
@@ -287,7 +287,7 @@ public class IJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInXYAtPixelEdge() {
+  public void canInterpolateDownInXyAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -304,7 +304,7 @@ public class IJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInXYAtPixelEdge() {
+  public void canInterpolateUpInXyAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -321,7 +321,7 @@ public class IJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInXY() {
+  public void canInterpolateDownInXy() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -338,7 +338,7 @@ public class IJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInXY() {
+  public void canInterpolateUpInXy() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);

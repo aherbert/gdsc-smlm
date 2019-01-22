@@ -416,7 +416,7 @@ public class Fire implements PlugIn {
   @Override
   public void run(String arg) {
     extraOptions = ImageJUtils.isExtraOptions();
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // Require some fit results and selected regions
     final int size = MemoryPeakResults.countMemorySize();

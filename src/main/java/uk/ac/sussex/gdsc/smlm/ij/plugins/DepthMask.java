@@ -37,15 +37,17 @@ import ij.plugin.PlugIn;
  * This plugin creates a mask image stack using an XY and XZ mask image.
  */
 public class DepthMask implements PlugIn {
+  /** The on-value for a byte mask. */
+  private static final byte ON = (byte) 255;
   private static final String TITLE = "Depth Mask";
 
-  private static String titleXY = "";
-  private static String titleXZ = "";
-  private static String titleYZ = "";
+  private static String titleXy = "";
+  private static String titleXz = "";
+  private static String titleYz = "";
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (!showDialog()) {
       return;
@@ -61,9 +63,9 @@ public class DepthMask implements PlugIn {
     gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 
     final String[] maskList = ImageJUtils.getImageList(ImageJUtils.SINGLE);
-    gd.addChoice("Mask_XY", maskList, titleXY);
-    gd.addChoice("Mask_XZ", maskList, titleXZ);
-    gd.addChoice("Mask_YZ", maskList, titleYZ);
+    gd.addChoice("Mask_XY", maskList, titleXy);
+    gd.addChoice("Mask_XZ", maskList, titleXz);
+    gd.addChoice("Mask_YZ", maskList, titleYz);
 
     gd.showDialog();
 
@@ -71,51 +73,51 @@ public class DepthMask implements PlugIn {
       return false;
     }
 
-    titleXY = gd.getNextChoice();
-    titleXZ = gd.getNextChoice();
-    titleYZ = gd.getNextChoice();
+    titleXy = gd.getNextChoice();
+    titleXz = gd.getNextChoice();
+    titleYz = gd.getNextChoice();
 
     return true;
   }
 
   private static void createMask() {
-    final ImagePlus impXY = WindowManager.getImage(titleXY);
-    final ImagePlus impXZ = WindowManager.getImage(titleXZ);
-    final ImagePlus impYZ = WindowManager.getImage(titleYZ);
-    if (impXY == null) {
+    final ImagePlus impXy = WindowManager.getImage(titleXy);
+    final ImagePlus impXz = WindowManager.getImage(titleXz);
+    final ImagePlus impYz = WindowManager.getImage(titleYz);
+    if (impXy == null) {
       IJ.error(TITLE, "No XY mask");
       return;
     }
-    if (impXZ == null) {
+    if (impXz == null) {
       IJ.error(TITLE, "No XZ mask");
       return;
     }
-    if (impYZ == null) {
+    if (impYz == null) {
       IJ.error(TITLE, "No YZ mask");
       return;
     }
-    if (impXY.getWidth() != impXZ.getWidth()) {
+    if (impXy.getWidth() != impXz.getWidth()) {
       IJ.error(TITLE, "XY mask width does not match XZ mask width");
       return;
     }
-    if (impXY.getHeight() != impYZ.getWidth()) {
+    if (impXy.getHeight() != impYz.getWidth()) {
       IJ.error(TITLE, "XY mask height does not match YZ mask width");
       return;
     }
-    if (impXZ.getHeight() != impYZ.getHeight()) {
+    if (impXz.getHeight() != impYz.getHeight()) {
       IJ.error(TITLE, "XZ mask height does not match YZ mask height");
       return;
     }
 
-    final int maxx = impXY.getWidth();
-    final int maxy = impXY.getHeight();
-    final int maxz = impXZ.getHeight();
+    final int maxx = impXy.getWidth();
+    final int maxy = impXy.getHeight();
+    final int maxz = impXz.getHeight();
     final ImageStack stack = new ImageStack(maxx, maxy, maxz);
-    final byte[] maskXY = getMask(impXY);
-    final byte[] maskXZ = getMask(impXZ);
-    final byte[] maskYZ = getMask(impYZ);
+    final byte[] maskXy = getMask(impXy);
+    final byte[] maskXz = getMask(impXz);
+    final byte[] maskYz = getMask(impYz);
     for (int z = 0; z < maxz; z++) {
-      final byte[] mask = maskXY.clone();
+      final byte[] mask = maskXy.clone();
 
       //// Simple method
       // for (int y = 0, i = 0; y < maxy; y++, i++)
@@ -128,7 +130,7 @@ public class DepthMask implements PlugIn {
       // }
 
       for (int x = 0, i = maxx * z; x < maxx; x++, i++) {
-        if (maskXZ[i] == 0) {
+        if (maskXz[i] == 0) {
           // Blank all the (x,y) for this X
           for (int y = 0, xy = x; y < maxy; y++, xy += maxx) {
             mask[xy] = 0;
@@ -137,7 +139,7 @@ public class DepthMask implements PlugIn {
       }
 
       for (int y = 0, i = maxy * z; y < maxy; y++, i++) {
-        if (maskYZ[i] == 0) {
+        if (maskYz[i] == 0) {
           // Blank all the (x,y) for this Y
           for (int x = 0, xy = y * maxx; x < maxx; x++, xy++) {
             mask[xy] = 0;
@@ -150,10 +152,9 @@ public class DepthMask implements PlugIn {
     ImageJUtils.display(TITLE, stack);
   }
 
-  private static byte[] getMask(ImagePlus impXY) {
-    final byte[] mask = (byte[]) impXY.getProcessor().convertToByte(false).getPixels();
+  private static byte[] getMask(ImagePlus impXy) {
+    final byte[] mask = (byte[]) impXy.getProcessor().convertToByte(false).getPixels();
     // Make binary
-    final byte ON = (byte) 255;
     for (int i = 0; i < mask.length; i++) {
       if (mask[i] != 0) {
         mask[i] = ON;

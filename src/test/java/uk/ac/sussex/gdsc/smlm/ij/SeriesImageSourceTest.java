@@ -54,26 +54,26 @@ public class SeriesImageSourceTest {
   int depth = 7;
 
   @Test
-  public void canReadBigTIFFSequentiallyLE() throws IOException {
-    canReadBigTIFFSequentially(false, true);
+  public void canReadBigTiffSequentiallyLe() throws IOException {
+    canReadBigTiffSequentially(false, true);
   }
 
   @Test
-  public void canReadBigTIFFSequentiallyInMemoryLE() throws IOException {
-    canReadBigTIFFSequentially(true, true);
+  public void canReadBigTiffSequentiallyInMemoryLe() throws IOException {
+    canReadBigTiffSequentially(true, true);
   }
 
   @SeededTest
-  public void canReadBigTIFFSequentiallyBE() throws IOException {
-    canReadBigTIFFSequentially(false, false);
+  public void canReadBigTiffSequentiallyBe() throws IOException {
+    canReadBigTiffSequentially(false, false);
   }
 
   @SeededTest
-  public void canReadBigTIFFSequentiallyInMemoryBE() throws IOException {
-    canReadBigTIFFSequentially(true, false);
+  public void canReadBigTiffSequentiallyInMemoryBe() throws IOException {
+    canReadBigTiffSequentially(true, false);
   }
 
-  private void canReadBigTIFFSequentially(boolean inMemory, boolean intelByteOrder)
+  private void canReadBigTiffSequentially(boolean inMemory, boolean intelByteOrder)
       throws IOException {
     final int n = 2;
     final String[] filenames = createFilenames(n);
@@ -99,26 +99,26 @@ public class SeriesImageSourceTest {
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentiallyLE(RandomSeed seed) throws IOException {
-    canReadBigTIFFNonSequentially(seed, false, true);
+  public void canReadBigTiffNonSequentiallyLe(RandomSeed seed) throws IOException {
+    canReadBigTiffNonSequentially(seed, false, true);
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentiallyInMemoryLE(RandomSeed seed) throws IOException {
-    canReadBigTIFFNonSequentially(seed, true, true);
+  public void canReadBigTiffNonSequentiallyInMemoryLe(RandomSeed seed) throws IOException {
+    canReadBigTiffNonSequentially(seed, true, true);
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentiallyBE(RandomSeed seed) throws IOException {
-    canReadBigTIFFNonSequentially(seed, false, false);
+  public void canReadBigTiffNonSequentiallyBe(RandomSeed seed) throws IOException {
+    canReadBigTiffNonSequentially(seed, false, false);
   }
 
   @SeededTest
-  public void canReadBigTIFFNonSequentiallyInMemoryBE(RandomSeed seed) throws IOException {
-    canReadBigTIFFNonSequentially(seed, true, false);
+  public void canReadBigTiffNonSequentiallyInMemoryBe(RandomSeed seed) throws IOException {
+    canReadBigTiffNonSequentially(seed, true, false);
   }
 
-  private void canReadBigTIFFNonSequentially(RandomSeed seed, boolean inMemory,
+  private void canReadBigTiffNonSequentially(RandomSeed seed, boolean inMemory,
       boolean intelByteOrder) throws IOException {
     final int n = 2;
     final String[] filenames = createFilenames(n);

@@ -75,7 +75,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       IJ.noImage();

@@ -61,45 +61,45 @@ import java.io.RandomAccessFile;
 @SuppressWarnings({"javadoc"})
 public class ResultsManagerTest {
   @SeededTest
-  public void writeTSFMatchesRead(RandomSeed seed) {
+  public void writeTsfMatchesRead(RandomSeed seed) {
     // This is redundant
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    checkWriteTSFMatchesRead(seed, 1, 1, 1, 1);
+    checkWriteTsfMatchesRead(seed, 1, 1, 1, 1);
   }
 
   @SeededTest
-  public void writeTSFMatchesReadWithChannels(RandomSeed seed) {
+  public void writeTsfMatchesReadWithChannels(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    checkWriteTSFMatchesRead(seed, 2, 1, 1, 1);
+    checkWriteTsfMatchesRead(seed, 2, 1, 1, 1);
   }
 
   @SeededTest
-  public void writeTSFMatchesReadWithSlices(RandomSeed seed) {
+  public void writeTsfMatchesReadWithSlices(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    checkWriteTSFMatchesRead(seed, 1, 2, 1, 1);
+    checkWriteTsfMatchesRead(seed, 1, 2, 1, 1);
   }
 
   @SeededTest
-  public void writeTSFMatchesReadWithPositions(RandomSeed seed) {
+  public void writeTsfMatchesReadWithPositions(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    checkWriteTSFMatchesRead(seed, 1, 1, 2, 1);
+    checkWriteTsfMatchesRead(seed, 1, 1, 2, 1);
   }
 
   @SeededTest
-  public void writeTSFMatchesReadWithTypes(RandomSeed seed) {
+  public void writeTsfMatchesReadWithTypes(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
-    checkWriteTSFMatchesRead(seed, 1, 1, 1, 2);
+    checkWriteTsfMatchesRead(seed, 1, 1, 1, 2);
   }
 
   @SeededTest
-  public void writeTSFMatchesReadWithCombinations(RandomSeed seed) {
+  public void writeTsfMatchesReadWithCombinations(RandomSeed seed) {
     // This takes longer
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    checkWriteTSFMatchesRead(seed, 2, 2, 2, 2);
+    checkWriteTsfMatchesRead(seed, 2, 2, 2, 2);
   }
 
   @SuppressWarnings("null")
-  private static void checkWriteTSFMatchesRead(RandomSeed seed, int channels, int slices,
+  private static void checkWriteTsfMatchesRead(RandomSeed seed, int channels, int slices,
       int positions, int types) {
     Assumptions.assumeFalse(java.awt.GraphicsEnvironment.isHeadless());
 
@@ -113,7 +113,7 @@ public class ResultsManagerTest {
       Assertions.fail(ex.getMessage());
     }
 
-    // Write the offsets used in the TSF format
+    // Write the offsets used in the Tsf format
     try {
       @SuppressWarnings("resource")
       final DataOutputStream dos = new DataOutputStream(out);

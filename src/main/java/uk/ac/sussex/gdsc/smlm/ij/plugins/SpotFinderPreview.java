@@ -25,10 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -72,7 +71,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageRoi;
 import ij.gui.Overlay;
@@ -94,7 +92,6 @@ import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
@@ -102,8 +99,7 @@ import java.util.Vector;
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay.
  */
-public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, ImageListener,
-    ItemListener, FitConfigurationProvider, OptionCollectedListener {
+public class SpotFinderPreview implements ExtendedPlugInFilter {
   private static final String TITLE = "Spot Finder Preview";
 
   private static DataFilterMethod defaultDataFilterMethod;
@@ -115,10 +111,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     defaultSmooth = c.getDataFilterParameterValue(0);
   }
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
-  private Overlay o;
+  private Overlay overlay;
   private ImagePlus imp;
   private boolean preview;
   private Label label;
@@ -137,7 +133,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   // All the fields that will be updated when reloading the configuration file
   private Choice textCameraModelName;
-  private Choice textPSF;
+  private Choice textPsf;
   private Choice textDataFilterType;
   private Choice textDataFilterMethod;
   private TextField textSmooth;
@@ -155,9 +151,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
   private final SpotFilterHelper spotFilterHelper = new SpotFilterHelper();
 
+  private Calibration lastCalibration;
+  private FitEngineSettings lastFitEngineSettings;
+  private PSF lastPsf;
+
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (imp == null) {
       IJ.noImage();
@@ -170,12 +170,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
-    this.o = imp.getOverlay();
+    this.overlay = imp.getOverlay();
     this.imp = imp;
 
     // The image is locked by the PlugInFilterRunner so unlock it to allow scroll.
@@ -197,7 +197,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     final String[] models = CameraModelManager.listCameraModels(true);
     gd.addChoice("Camera_model_name", models, fitConfig.getCameraModelName());
 
-    PeakFit.addPSFOptions(gd, this);
+    PeakFit.addPsfOptions(gd, (FitConfigurationProvider) () -> fitConfig);
     final PeakFit.SimpleFitEngineConfigurationProvider provider =
         new PeakFit.SimpleFitEngineConfigurationProvider(config);
     PeakFit.addDataFilterOptions(gd, provider);
@@ -253,11 +253,27 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
       }
     }
 
+    ImageListener imageListener = null;
+
     if (ImageJUtils.isShowGenericDialog()) {
       // Listen for changes in the dialog options
-      gd.addOptionCollectedListener(this);
+      gd.addOptionCollectedListener(event -> {
+        // Just run on the current processor
+        if (preview) {
+          run(imp.getProcessor());
+        }
+      });
       // Listen for changes to an image
-      ImagePlus.addImageListener(this);
+      imageListener = new ImageAdapter() {
+        @Override
+        public void imageUpdated(ImagePlus imp) {
+          if (SpotFinderPreview.this.imp.getID() == imp.getID() && preview
+              && imp.getCurrentSlice() != currentSlice && filter != null) {
+            run(imp.getProcessor(), filter);
+          }
+        }
+      };
+      ImagePlus.addImageListener(imageListener);
 
       // Support template settings
       final Vector<TextField> numerics = gd.getNumericFields();
@@ -269,10 +285,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
       final Choice textTemplate = ch.next();
       textTemplate.removeItemListener(gd);
       textTemplate.removeKeyListener(gd);
-      textTemplate.addItemListener(this);
+      textTemplate.addItemListener(this::itemStateChanged);
 
       textCameraModelName = ch.next();
-      textPSF = ch.next();
+      textPsf = ch.next();
       textDataFilterType = ch.next();
       textDataFilterMethod = ch.next();
       textSmooth = nu.next();
@@ -283,29 +299,26 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     }
 
     gd.addPreviewCheckbox(pfr);
-    gd.addDialogListener(this);
+    gd.addDialogListener(this::dialogItemChanged);
     gd.setOKLabel("Save");
     gd.setCancelLabel("Close");
     gd.showDialog();
 
-    if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless())) {
-      ImagePlus.removeImageListener(this);
+    if (imageListener != null) {
+      ImagePlus.removeImageListener(imageListener);
     }
 
-    if (!gd.wasCanceled()) {
-      if (!SettingsManager.writeSettings(config, SettingsManager.FLAG_SILENT)) {
-        IJ.error(TITLE, "Failed to save settings");
-      }
+    if (!gd.wasCanceled() && !SettingsManager.writeSettings(config, SettingsManager.FLAG_SILENT)) {
+      IJ.error(TITLE, "Failed to save settings");
     }
 
     // Reset
-    imp.setOverlay(o);
+    imp.setOverlay(overlay);
 
     return DONE;
   }
 
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+  private boolean dialogItemChanged(GenericDialog gd, @SuppressWarnings("unused") AWTEvent event) {
     if (refreshing) {
       return false;
     }
@@ -319,7 +332,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     // model = new FakePerPixelCameraModel(0, 1, 1);
     // fitConfig.setCameraModel(model);
 
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
 
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -344,11 +357,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     final boolean result = !gd.invalidNumber();
     if (!preview) {
       setLabel("");
-      this.imp.setOverlay(o);
+      this.imp.setOverlay(overlay);
     }
     // For astigmatism PSF.
     // TODO - See if this is slowing the preview down. If so only do if the PSF type changes.
-    if (!PeakFit.configurePSFModel(config, PeakFit.FLAG_NO_SAVE)) {
+    if (!PeakFit.configurePsfModel(config, PeakFit.FLAG_NO_SAVE)) {
       return false;
     }
     return result;
@@ -360,10 +373,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     }
     label.setText(message);
   }
-
-  private Calibration lastCalibration;
-  private FitEngineSettings lastFitEngineSettings;
-  private PSF lastPSF;
 
   @Override
   public void run(ImageProcessor ip) {
@@ -402,7 +411,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     }
 
     if (newCameraModel || !fitEngineSettings.equals(lastFitEngineSettings)
-        || !psf.equals(lastPSF)) {
+        || !psf.equals(lastPsf)) {
       // Configure a jury filter
       if (config.getDataFilterType() == DataFilterType.JURY) {
         if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE)) {
@@ -415,7 +424,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
         filter = config.createSpotFilter();
       } catch (final Exception ex) {
         filter = null;
-        this.imp.setOverlay(o);
+        this.imp.setOverlay(overlay);
         throw new RuntimeException(ex); // Required for ImageJ to disable the preview
         // Utils.log("ERROR: " + ex.getMessage());
         // return;
@@ -425,7 +434,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
 
     lastCalibration = calibration;
     lastFitEngineSettings = fitEngineSettings;
-    lastPSF = psf;
+    lastPsf = psf;
 
     // This code can probably be removed since the crop is done above.
     if (fitConfig.getCameraTypeValue() == CameraType.SCMOS_VALUE) {
@@ -637,30 +646,30 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
         if (showTP) {
           final float[] x = new float[matches];
           final float[] y = new float[x.length];
-          int n = 0;
+          int count = 0;
           for (int i = 0; i < matchScore.length; i++) {
             if (matchScore[i] != 0) {
               final BasePoint p = (BasePoint) predicted[i];
-              x[n] = p.getX() + 0.5f;
-              y[n] = p.getY() + 0.5f;
-              n++;
+              x[count] = p.getX() + 0.5f;
+              y[count] = p.getY() + 0.5f;
+              count++;
             }
           }
-          addRoi(0, o, x, y, n, Color.green);
+          addRoi(0, o, x, y, count, Color.green);
         }
         if (showFP) {
           final float[] x = new float[nPredicted - matches];
           final float[] y = new float[x.length];
-          int n = 0;
+          int count = 0;
           for (int i = 0; i < matchScore.length; i++) {
             if (matchScore[i] == 0) {
               final BasePoint p = (BasePoint) predicted[i];
-              x[n] = p.getX() + 0.5f;
-              y[n] = p.getY() + 0.5f;
-              n++;
+              x[count] = p.getX() + 0.5f;
+              y[count] = p.getY() + 0.5f;
+              count++;
             }
           }
-          addRoi(0, o, x, y, n, Color.red);
+          addRoi(0, o, x, y, count, Color.red);
         }
       }
     } else {
@@ -737,28 +746,29 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
    * Adds the roi to the overlay as a circle.
    *
    * @param frame the frame
-   * @param o the overlay
+   * @param overlay the overlay
    * @param x the x coordinates
    * @param y the y coordinates
-   * @param n the number of points
+   * @param npoints the number of points
    * @param colour the colour
    * @see PointRoi#setPosition(int)
    * @see PointRoi#setFillColor(Color)
    * @see PointRoi#setStrokeColor(Color)
    */
-  public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour) {
+  public static void addRoi(int frame, Overlay overlay, float[] x, float[] y, int npoints,
+      Color colour) {
     // Add as a circle
-    addRoi(frame, o, x, y, n, colour, 3);
+    addRoi(frame, overlay, x, y, npoints, colour, 3);
   }
 
   /**
    * Adds the roi to the overlay.
    *
    * @param frame the frame
-   * @param o the overlay
+   * @param overlay the overlay
    * @param x the x coordinates
    * @param y the y coordinates
-   * @param n the number of points
+   * @param npoints the number of points
    * @param colour the colour
    * @param pointType the point type
    * @see PointRoi#setPosition(int)
@@ -766,19 +776,19 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
    * @see PointRoi#setFillColor(Color)
    * @see PointRoi#setStrokeColor(Color)
    */
-  public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour,
-      int pointType) {
-    addRoi(frame, o, x, y, n, colour, pointType, 0);
+  public static void addRoi(int frame, Overlay overlay, float[] x, float[] y, int npoints,
+      Color colour, int pointType) {
+    addRoi(frame, overlay, x, y, npoints, colour, pointType, 0);
   }
 
   /**
    * Adds the roi to the overlay.
    *
    * @param frame the frame
-   * @param o the overlay
+   * @param overlay the overlay
    * @param x the x coordinates
    * @param y the y coordinates
-   * @param n the number of points
+   * @param npoints the number of points
    * @param colour the colour
    * @param pointType the point type
    * @param size the size
@@ -788,12 +798,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
    * @see PointRoi#setStrokeColor(Color)
    * @see PointRoi#setSize(int)
    */
-  public static void addRoi(int frame, Overlay o, float[] x, float[] y, int n, Color colour,
-      int pointType, int size) {
-    if (n == 0) {
+  public static void addRoi(int frame, Overlay overlay, float[] x, float[] y, int npoints,
+      Color colour, int pointType, int size) {
+    if (npoints == 0) {
       return;
     }
-    final PointRoi roi = new PointRoi(x, y, n);
+    final PointRoi roi = new PointRoi(x, y, npoints);
     roi.setPointType(pointType);
     roi.setFillColor(colour);
     roi.setStrokeColor(colour);
@@ -803,7 +813,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     if (size != 0) {
       roi.setSize(size);
     }
-    o.add(roi);
+    overlay.add(roi);
   }
 
   @Override
@@ -811,32 +821,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     // Nothing to do
   }
 
-  @Override
-  public void imageOpened(ImagePlus imp) {
-    // Ignore
-  }
-
-  @Override
-  public void imageClosed(ImagePlus imp) {
-    // Ignore
-  }
-
-  @Override
-  public void imageUpdated(ImagePlus imp) {
-    if (this.imp.getID() == imp.getID() && preview) {
-      if (imp.getCurrentSlice() != currentSlice && filter != null) {
-        run(imp.getProcessor(), filter);
-      }
-    }
-  }
-
-  @Override
-  public void itemStateChanged(ItemEvent event) {
+  private void itemStateChanged(ItemEvent event) {
     if (event.getSource() instanceof Choice) {
       // Update the settings from the template
       final Choice choice = (Choice) event.getSource();
       final String templateName = choice.getSelectedItem();
-      // System.out.println("Update to " + templateName);
 
       // Get the configuration template
       final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
@@ -859,7 +848,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
         }
 
         refreshing = false;
-        // dialogItemChanged(gd, null);
       }
     }
   }
@@ -872,7 +860,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     // Do not use set() as we support merging a partial PSF
     fitConfig.mergePsf(psf);
 
-    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
+    textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**
@@ -906,18 +894,5 @@ public class SpotFinderPreview implements ExtendedPlugInFilter, DialogListener, 
     }
     textSearch.setText("" + config.getSearch());
     textBorder.setText("" + config.getBorder());
-  }
-
-  @Override
-  public FitConfiguration getFitConfiguration() {
-    return fitConfig;
-  }
-
-  @Override
-  public void optionCollected(OptionCollectedEvent event) {
-    // Just run on the current processor
-    if (preview) {
-      run(imp.getProcessor());
-    }
   }
 }

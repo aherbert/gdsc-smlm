@@ -454,7 +454,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (ImageJUtils.isExtraOptions() && !cache.isEmpty()) {
       plotFromCache();

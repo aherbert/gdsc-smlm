@@ -68,12 +68,12 @@ public class SpotFilterHelperTest {
     final int width = 64;
     final int height = 64;
     final int size = width * height;
-    int n = 1; // Don't test simple case of no neighbours
+    int boxSize = 1; // Don't test simple case of no neighbours
     final SpotFilterHelper h = new SpotFilterHelper();
-    while (n < size / 4) {
-      n *= 2;
+    while (boxSize < size / 4) {
+      boxSize *= 2;
       for (int loop = 0; loop < 5; loop++) {
-        final Spot[] spots = createData(rg, width, height, n);
+        final Spot[] spots = createData(rg, width, height, boxSize);
         for (final int box : new int[] {1, 2, 3, 4, 5}) {
           final int[] e = countNeighbours(spots, width, height, box);
           final int[] count = h.countNeighbours(spots, box);

@@ -53,7 +53,7 @@ public class NeighbourAnalysis implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "No localisations in memory");

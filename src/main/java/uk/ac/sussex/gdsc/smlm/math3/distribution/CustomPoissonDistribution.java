@@ -61,8 +61,11 @@ import org.apache.commons.math3.util.MathUtils;
  *      (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/CustomPoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
+ * @deprecated Superseded by commons-rng package
  */
+@Deprecated
 public class CustomPoissonDistribution extends AbstractIntegerDistribution {
+  // @CHECKSTYLE.OFF
   /**
    * Default maximum number of iterations for cumulative probability calculations.
    *

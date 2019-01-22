@@ -29,13 +29,13 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 @SuppressWarnings({"javadoc"})
 public class DoubleImage2DTest extends Image2DTest {
   @Override
-  protected DoubleImage2D createData(int w, int h) {
-    final double[] data = SimpleArrayUtils.newArray(w * h, 1.0, 1.0);
-    return new DoubleImage2D(w, h, data);
+  protected DoubleImage2D createData(int width, int height) {
+    final double[] data = SimpleArrayUtils.newArray(width * height, 1.0, 1.0);
+    return new DoubleImage2D(width, height, data);
   }
 
   @Override
-  protected DoubleImage2D createEmptyData(int w, int h) {
-    return new DoubleImage2D(w, h);
+  protected DoubleImage2D createEmptyData(int width, int height) {
+    return new DoubleImage2D(width, height);
   }
 }

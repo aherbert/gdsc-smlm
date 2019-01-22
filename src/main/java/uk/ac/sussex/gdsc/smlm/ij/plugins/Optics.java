@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.clustering.optics.ClusteringResult;
 import uk.ac.sussex.gdsc.core.clustering.optics.DbscanResult;
 import uk.ac.sussex.gdsc.core.clustering.optics.OpticsCluster;
@@ -131,7 +132,58 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Kriegel, and Jorg Sander. Optics: ordering points to identify the clustering structure. In ACM
  * Sigmod Record, volume 28, pages 49–60. ACM, 1999.
  */
-public class OPTICS implements PlugIn {
+public class Optics implements PlugIn {
+  private static final String TITLE_OPTICS = "OPTICS";
+  private static final String TITLE_DBSCAN = "DBSCAN";
+
+  private static LUT clusterLut;
+  private static LUT valueLut;
+  private static LUT clusterDepthLut;
+  private static LUT clusterOrderLut;
+  private static LUT loopLut;
+
+  static {
+    valueLut = LutHelper.createLut(LutColour.FIRE);
+
+    // Need to be able to see all colours against white (plot) or black (image) background
+    final LUT fireGlow = LutHelper.createLut(LutColour.FIRE_GLOW, true);
+    // Clusters are scrambled so use a LUT with colours that are visible easily visible on
+    // black/white.
+    // Note: The colours returned by LUTHelper.getColorModel() can be close to black.
+    clusterLut = LutHelper.createLut(LutColour.PIMP_LIGHT, true);
+    clusterDepthLut = fireGlow;
+    clusterOrderLut = fireGlow;
+
+    // This is only used on the image so can include white
+    loopLut = LutHelper.createLut(LutColour.FIRE_LIGHT, true);
+  }
+
+  private Object[] imageModeArray;
+  private Object[] outlineModeArray;
+
+  // Stack to handle events that selected certain clusters
+  private Workflow<ClusterSelectedEvent, int[]> eventWorkflow;
+  // The worker that will relay all the selected clusters
+  private ClusterSelectedWorker clusterSelectedWorker;
+
+  private String pluginTitle;
+
+  private OpticsSettings.Builder inputSettings;
+
+  private boolean extraOptions;
+  private boolean preview;
+  private boolean debug;
+
+  // Stack to which the work is first added
+  private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
+
+  private static final AtomicInteger workerId = new AtomicInteger();
+
+  private static byte logged;
+  private static final byte LOG_DBSCAN = 0x01;
+  private static final byte LOG_OPTICS = 0x02;
+  private static final byte LOG_LOOP = 0x04;
+
   /**
    * Options for displaying the clustering image.
    */
@@ -729,31 +781,6 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private static final String TITLE_OPTICS = "OPTICS";
-  private static final String TITLE_DBSCAN = "DBSCAN";
-
-  private static LUT clusterLut;
-  private static LUT valueLut;
-  private static LUT clusterDepthLut;
-  private static LUT clusterOrderLut;
-  private static LUT loopLut;
-
-  static {
-    valueLut = LutHelper.createLut(LutColour.FIRE);
-
-    // Need to be able to see all colours against white (plot) or black (image) background
-    final LUT fireGlow = LutHelper.createLut(LutColour.FIRE_GLOW, true);
-    // Clusters are scrambled so use a LUT with colours that are visible easily visible on
-    // black/white.
-    // Note: The colours returned by LUTHelper.getColorModel() can be close to black.
-    clusterLut = LutHelper.createLut(LutColour.PIMP_LIGHT, true);
-    clusterDepthLut = fireGlow;
-    clusterOrderLut = fireGlow;
-
-    // This is only used on the image so can include white
-    loopLut = LutHelper.createLut(LutColour.FIRE_LIGHT, true);
-  }
-
   /**
    * Event generated in the GUI when clusters are selected.
    */
@@ -857,24 +884,6 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  // Stack to handle events that selected certain clusters
-  private Workflow<ClusterSelectedEvent, int[]> eventWorkflow;
-  // The worker that will relay all the selected clusters
-  private ClusterSelectedWorker clusterSelectedWorker;
-
-  private String pluginTitle;
-
-  private OpticsSettings.Builder inputSettings;
-
-  private boolean extraOptions;
-  private boolean preview;
-  private boolean debug;
-
-  // Stack to which the work is first added
-  private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
-
-  private static final AtomicInteger workerId = new AtomicInteger();
-
   private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, Settings> {
     final int id;
 
@@ -925,35 +934,48 @@ public class OPTICS implements PlugIn {
    * synchronised blocks around the clustering result.
    */
   private static class CachedClusteringResult {
-    // To allow detection of stale cached data
-    static int ID;
+    // Id field allows detection of stale cached data
+    private static final AtomicInteger latestId = new AtomicInteger();
+
     final int id;
 
-    final boolean isOPTICS;
+    final boolean isOptics;
     final ClusteringResult clusteringResult;
 
     // All data that any worker may want to access.
     // This only need be computed once for each new clustering result.
+    // The use of double-checked locking is done with volatile members that are
+    // read from main memory.
+
+    /** The clusters. */
+    volatile int[] clusters;
     int max;
-    int[] clusters;
     int[] topClusters;
-    double[] profile;
-    int[] order;
-    int[] predecessor;
-    List<OpticsCluster> allClusters;
-    Rectangle2D[] bounds;
+    /** The OPTICS profile. */
+    volatile double[] profile;
+    /** The OPTICS order. */
+    volatile int[] order;
+    /** The OPTICS predecessor. */
+    volatile int[] predecessor;
+    /** The list of OPTICS clusters. */
+    volatile List<OpticsCluster> allClusters;
+    /** The cluster bounds. */
+    volatile Rectangle2D[] bounds;
+    /** The cluster convex hulls. */
     ConvexHull[] hulls;
-    int[] size;
+    /** The size of the clusters for each cluster Id. */
+    volatile int[] size;
+    /** The level of the clusters for each cluster Id. */
     int[] level;
+    /** The cluster Ids when last computing the cluster parents. */
+    int[] lastClusterIds;
+    /** The cluster parents (can be cached for a set of cluster Ids). */
+    int[] parents;
 
     CachedClusteringResult(ClusteringResult clusteringResult) {
-      id = ++ID;
+      id = latestId.incrementAndGet();
       this.clusteringResult = clusteringResult;
-      if (clusteringResult != null) {
-        isOPTICS = clusteringResult instanceof OpticsResult;
-      } else {
-        isOPTICS = false;
-      }
+      isOptics = clusteringResult instanceof OpticsResult;
     }
 
     /**
@@ -967,7 +989,7 @@ public class OPTICS implements PlugIn {
      * @return true, if is current
      */
     boolean isCurrent() {
-      return id == ID;
+      return id == latestId.get();
     }
 
     /**
@@ -975,8 +997,8 @@ public class OPTICS implements PlugIn {
      *
      * @return the OPTICS result
      */
-    OpticsResult getOPTICSResult() {
-      return (isOPTICS) ? (OpticsResult) clusteringResult : null;
+    OpticsResult getOpticsResult() {
+      return (isOptics) ? (OpticsResult) clusteringResult : null;
     }
 
     /**
@@ -984,8 +1006,8 @@ public class OPTICS implements PlugIn {
      *
      * @return the DBSCAN result
      */
-    DbscanResult getDBSCANResult() {
-      return (isOPTICS) ? null : (DbscanResult) clusteringResult;
+    DbscanResult getDbscanResult() {
+      return (isOptics) ? null : (DbscanResult) clusteringResult;
     }
 
     /**
@@ -998,18 +1020,21 @@ public class OPTICS implements PlugIn {
     }
 
     int[] getClusters() {
-      if (clusters == null) {
+      int[] localClusters = clusters;
+      if (localClusters == null) {
         synchronized (clusteringResult) {
-          if (clusters == null) {
-            clusters = clusteringResult.getClusters();
-            max = MathUtils.max(clusters);
-            if (isOPTICS) {
+          localClusters = clusters;
+          if (localClusters == null) {
+            localClusters = clusteringResult.getClusters();
+            max = MathUtils.max(localClusters);
+            if (isOptics) {
               topClusters = ((OpticsResult) clusteringResult).getTopLevelClusters(false);
             }
+            clusters = localClusters;
           }
         }
       }
-      return clusters;
+      return localClusters;
     }
 
     int getMaxClusterId() {
@@ -1017,64 +1042,87 @@ public class OPTICS implements PlugIn {
       return max;
     }
 
+    @Nullable
     int[] getTopClusters() {
-      if (isOPTICS) {
-        getClusters();
+      if (!isOptics) {
+        return null;
       }
+      getClusters();
       return topClusters;
     }
 
+    @Nullable
     double[] getProfile(double nmPerPixel) {
-      if (isOPTICS && profile == null) {
+      if (!isOptics) {
+        return null;
+      }
+      double[] localProfile = profile;
+      if (localProfile == null) {
         synchronized (clusteringResult) {
-          // Check it has not already been created by another thread
-          if (profile == null) {
-            profile = ((OpticsResult) clusteringResult).getReachabilityDistanceProfile(true);
+          localProfile = profile;
+          if (localProfile == null) {
+            localProfile = ((OpticsResult) clusteringResult).getReachabilityDistanceProfile(true);
             if (nmPerPixel != 1) {
-              for (int i = 0; i < profile.length; i++) {
-                profile[i] *= nmPerPixel;
+              for (int i = 0; i < localProfile.length; i++) {
+                localProfile[i] *= nmPerPixel;
               }
             }
+            profile = localProfile;
           }
         }
       }
-      return profile;
+      return localProfile;
     }
 
+    @Nullable
     int[] getOrder() {
-      if (isOPTICS && order == null) {
+      if (!isOptics) {
+        return null;
+      }
+      int[] localOrder = order;
+      if (localOrder == null) {
         synchronized (clusteringResult) {
-          // Check it has not already been created by another thread
-          if (order == null) {
-            order = ((OpticsResult) clusteringResult).getOrder();
+          localOrder = order;
+          if (localOrder == null) {
+            order = localOrder = ((OpticsResult) clusteringResult).getOrder();
           }
         }
       }
-      return order;
+      return localOrder;
     }
 
+    @Nullable
     int[] getPredecessor() {
-      if (isOPTICS && predecessor == null) {
+      if (!isOptics) {
+        return null;
+      }
+      int[] localPredecessor = predecessor;
+      if (localPredecessor == null) {
         synchronized (clusteringResult) {
-          // Check it has not already been created by another thread
-          if (predecessor == null) {
-            predecessor = ((OpticsResult) clusteringResult).getPredecessor();
+          localPredecessor = predecessor;
+          if (localPredecessor == null) {
+            predecessor = localPredecessor = ((OpticsResult) clusteringResult).getPredecessor();
           }
         }
       }
-      return predecessor;
+      return localPredecessor;
     }
 
+    @Nullable
     List<OpticsCluster> getAllClusters() {
-      if (isOPTICS && allClusters == null) {
+      if (!isOptics) {
+        return null;
+      }
+      List<OpticsCluster> localAllClusters = allClusters;
+      if (allClusters == null) {
         synchronized (clusteringResult) {
-          // Check it has not already been created by another thread
-          if (allClusters == null) {
-            allClusters = ((OpticsResult) clusteringResult).getAllClusters();
+          localAllClusters = allClusters;
+          if (localAllClusters == null) {
+            allClusters = localAllClusters = ((OpticsResult) clusteringResult).getAllClusters();
           }
         }
       }
-      return allClusters;
+      return localAllClusters;
     }
 
     /**
@@ -1084,21 +1132,23 @@ public class OPTICS implements PlugIn {
      * @return the bounds
      */
     Rectangle2D[] getBounds() {
+      Rectangle2D[] localBounds = bounds;
       if (bounds == null) {
         synchronized (clusteringResult) {
-          // Check it has not already been created by another thread
-          if (bounds == null) {
+          localBounds = bounds;
+          if (localBounds == null) {
             clusteringResult.computeConvexHulls();
-            bounds = new Rectangle2D[getMaxClusterId() + 1];
+            localBounds = new Rectangle2D[getMaxClusterId() + 1];
             hulls = new ConvexHull[bounds.length];
             for (int c = 1; c <= max; c++) {
-              bounds[c] = clusteringResult.getBounds(c);
+              localBounds[c] = clusteringResult.getBounds(c);
               hulls[c] = clusteringResult.getConvexHull(c);
             }
+            bounds = localBounds;
           }
         }
       }
-      return bounds;
+      return localBounds;
     }
 
     /**
@@ -1113,24 +1163,27 @@ public class OPTICS implements PlugIn {
     }
 
     int[] getSize() {
-      if (size == null) {
+      int[] localSize = size;
+      if (localSize == null) {
         synchronized (clusteringResult) {
           // Check it has not already been created by another thread
-          if (size == null) {
-            size = new int[getMaxClusterId() + 1];
-            level = new int[size.length];
-            if (isOPTICS) {
+          localSize = size;
+          if (localSize == null) {
+            localSize = new int[getMaxClusterId() + 1];
+            level = new int[localSize.length];
+            if (isOptics) {
               // We need to account for hierarchical clusters
               for (final OpticsCluster c : getAllClusters()) {
                 level[c.getClusterId()] = c.getLevel();
-                size[c.getClusterId()] = c.size();
+                localSize[c.getClusterId()] = c.size();
               }
             } else {
               // Flat clustering (i.e. no levels)
               for (int i = 0; i < clusters.length; i++) {
-                size[clusters[i]]++;
+                localSize[clusters[i]]++;
               }
             }
+            size = localSize;
           }
         }
       }
@@ -1142,9 +1195,6 @@ public class OPTICS implements PlugIn {
       return level;
     }
 
-    int[] lastClusterIds;
-    int[] parents;
-
     public synchronized int[] getParents(int[] clusterIds) {
       // This can be cached if the ids are the same
       if (Arrays.equals(lastClusterIds, clusterIds)) {
@@ -1153,7 +1203,8 @@ public class OPTICS implements PlugIn {
 
       lastClusterIds = clusterIds;
       synchronized (clusteringResult) {
-        return parents = clusteringResult.getParents(clusterIds);
+        parents = clusteringResult.getParents(clusterIds);
+        return parents;
       }
     }
   }
@@ -1288,7 +1339,7 @@ public class OPTICS implements PlugIn {
       CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       // It may be invalid if cancelled.
       if (clusteringResult.isValid()) {
-        final OpticsResult opticsResult = clusteringResult.getOPTICSResult();
+        final OpticsResult opticsResult = clusteringResult.getOpticsResult();
 
         int clusterCount = 0;
         synchronized (opticsResult) {
@@ -1466,7 +1517,6 @@ public class OPTICS implements PlugIn {
     public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
       final Settings resultList = work.b;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
-      // OPTICSManager opticsManager = (OPTICSManager) resultList.get(1);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (clusteringResult.isValid()) {
         final int[] clusters = clusteringResult.getClusters();
@@ -1479,11 +1529,8 @@ public class OPTICS implements PlugIn {
           traces[i].setId(i);
         }
         final Counter counter = new Counter();
-        results.forEach(new PeakResultProcedure() {
-          @Override
-          public void execute(PeakResult result) {
-            traces[clusters[counter.getAndIncrement()]].add(result);
-          }
+        results.forEach((PeakResultProcedure) result -> {
+          traces[clusters[counter.getAndIncrement()]].add(result);
         });
         TraceMolecules.saveResults(results, traces, pluginTitle);
       }
@@ -1503,10 +1550,8 @@ public class OPTICS implements PlugIn {
       if (current.getPlotMode() != previous.getPlotMode()) {
         return false;
       }
-      if (lastCanvas != null) {
-        if (!lastCanvas.isValid()) {
-          return false;
-        }
+      if (lastCanvas != null && !lastCanvas.isValid()) {
+        return false;
       }
       return true;
     }
@@ -1565,8 +1610,8 @@ public class OPTICS implements PlugIn {
           final Percentile p = new Percentile();
           p.setData(profile);
           double max;
-          final boolean useIQR = true;
-          if (useIQR) {
+          final boolean useIqr = true;
+          if (useIqr) {
             final double lq = p.evaluate(25);
             final double uq = p.evaluate(75);
             max = (uq - lq) * 2 + uq;
@@ -1633,12 +1678,7 @@ public class OPTICS implements PlugIn {
             mapper = new LutHelper.DefaultLutMapper(0, 255);
           } else {
             // Do all clusters so rank by level
-            Collections.sort(clusters, new Comparator<OpticsCluster>() {
-              @Override
-              public int compare(OpticsCluster o1, OpticsCluster o2) {
-                return o1.getLevel() - o2.getLevel();
-              }
-            });
+            Collections.sort(clusters, (o1, o2) -> Integer.compare(o1.getLevel(), o2.getLevel()));
 
             final boolean useLevel = mode.isColourProfileByDepth();
             if (useLevel) {
@@ -1723,7 +1763,7 @@ public class OPTICS implements PlugIn {
             }
           } else {
             // Ensure that the distance is valid
-            distance = clusteringResult.getOPTICSResult().getGeneratingDistance() * nmPerPixel;
+            distance = clusteringResult.getOpticsResult().getGeneratingDistance() * nmPerPixel;
             if (settings.getClusteringDistance() > 0) {
               distance = Math.min(settings.getClusteringDistance(), distance);
             }
@@ -1832,7 +1872,7 @@ public class OPTICS implements PlugIn {
             end = (int) endX;
           }
           // Ignore the hierarchy as we only want to find the parent clusters
-          return clusteringResult.getOPTICSResult().getClustersFromOrder(start, end, false);
+          return clusteringResult.getOpticsResult().getClustersFromOrder(start, end, false);
         }
       });
     }
@@ -1922,13 +1962,13 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private class OrderProvider {
+  private static class OrderProvider {
     int getOrder(int index) {
       return index;
     }
   }
 
-  private class RealOrderProvider extends OrderProvider {
+  private static class RealOrderProvider extends OrderProvider {
     final int[] order;
 
     RealOrderProvider(int[] order) {
@@ -1944,16 +1984,16 @@ public class OPTICS implements PlugIn {
   /**
    * Map the input value as an index to an output value.
    */
-  public class ValueLUTMapper extends LutHelper.NullLutMapper {
+  private static class ValueLutMapper extends LutHelper.NullLutMapper {
     /** The values. */
-    float[] values;
+    final float[] values;
 
     /**
      * Instantiates a new value LUT mapper.
      *
      * @param values the values
      */
-    public ValueLUTMapper(float[] values) {
+    ValueLutMapper(float[] values) {
       this.values = values;
     }
 
@@ -2116,7 +2156,7 @@ public class OPTICS implements PlugIn {
             float[] map = null; // Used to map clusters to a display value
             int[] order = null;
 
-            if (clusteringResult.isOPTICS) {
+            if (clusteringResult.isOptics) {
               if (mode == ImageMode.CLUSTER_ORDER) {
                 order = clusteringResult.getOrder();
               } else if (mode == ImageMode.CLUSTER_DEPTH) {
@@ -2142,11 +2182,11 @@ public class OPTICS implements PlugIn {
                   break;
                 case CLUSTER_DEPTH:
                   lut = clusterDepthLut;
-                  mapper = new ValueLUTMapper(map);
+                  mapper = new ValueLutMapper(map);
                   break;
                 case LOOP:
                   lut = loopLut;
-                  mapper = new ValueLUTMapper(loop);
+                  mapper = new ValueLutMapper(loop);
                   break;
                 default:
                   throw new NotImplementedException();
@@ -2196,7 +2236,7 @@ public class OPTICS implements PlugIn {
 
             LUT lut = clusterLut;
 
-            if (clusteringResult.isOPTICS) {
+            if (clusteringResult.isOptics) {
               if (outlineMode.isColourByDepth()) {
                 lut = clusterDepthLut;
                 final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
@@ -2234,7 +2274,7 @@ public class OPTICS implements PlugIn {
           overlay = outline;
         }
 
-        if (clusteringResult.isOPTICS
+        if (clusteringResult.isOptics
             && SpanningTreeMode.get(settings.getSpanningTreeMode()).isSpanningTree()) {
           if (spanningTree == null) {
             lastSpanningTreeMode = settings.getSpanningTreeMode();
@@ -3173,7 +3213,7 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private class KNNWorker extends BaseWorker {
+  private class KnnWorker extends BaseWorker {
     double[] profile;
 
     @Override
@@ -3316,7 +3356,7 @@ public class OPTICS implements PlugIn {
     return profile[n];
   }
 
-  private class DBSCANWorker extends BaseWorker {
+  private class DbscanWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
       if (current.getMinPoints() != previous.getMinPoints()) {
@@ -3373,7 +3413,7 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private class DBSCANClusterWorker extends BaseWorker {
+  private class DbscanClusterWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
       if (current.getCore() != previous.getCore()) {
@@ -3391,7 +3431,7 @@ public class OPTICS implements PlugIn {
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       // It may be null if cancelled.
       if (clusteringResult.isValid()) {
-        final DbscanResult dbscanResult = clusteringResult.getDBSCANResult();
+        final DbscanResult dbscanResult = clusteringResult.getDbscanResult();
         synchronized (dbscanResult) {
           dbscanResult.extractClusters(settings.getCore());
         }
@@ -3400,522 +3440,6 @@ public class OPTICS implements PlugIn {
             new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
       }
       return work;
-    }
-  }
-
-  @Override
-  public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-
-    if (MemoryPeakResults.isMemoryEmpty()) {
-      IJ.error(pluginTitle, "No localisations in memory");
-      return;
-    }
-
-    extraOptions = ImageJUtils.isExtraOptions();
-
-    inputSettings = SettingsManager.readOpticsSettings(0).toBuilder();
-
-    IJ.showStatus("");
-
-    if ("dbscan".equals(arg)) {
-      runDBSCAN();
-    } else {
-      runOPTICS();
-    }
-
-    IJ.showStatus(pluginTitle + " finished");
-
-    // Update the settings
-    SettingsManager.writeSettings(inputSettings.build());
-  }
-
-  private void runDBSCAN() {
-    pluginTitle = TITLE_DBSCAN;
-
-    createEventWorkflow();
-
-    // Create the workflow
-    workflow.add(new InputWorker());
-    workflow.add(new KNNWorker());
-    workflow.add(new DBSCANWorker());
-    final int previous = workflow.add(new DBSCANClusterWorker());
-    // The following can operate in parallel
-    workflow.add(new ResultsWorker(), previous);
-    workflow.add(new RandIndexWorker(), previous);
-    workflow.add(new MemoryResultsWorker(), previous);
-    workflow.add(new ImageResultsWorker(), previous);
-    workflow.add(new TableResultsWorker(), previous);
-    workflow.add(new ClusterSelectedTableWorker(), previous);
-
-    workflow.start();
-
-    final boolean cancelled = !showDialog(true);
-
-    shutdownWorkflows(cancelled);
-  }
-
-  private void createEventWorkflow() {
-    eventWorkflow = new Workflow<>();
-    eventWorkflow.add(new ClusterSelectedEventWorker());
-    eventWorkflow.add(clusterSelectedWorker = new ClusterSelectedWorker());
-    eventWorkflow.start();
-  }
-
-  private void shutdownWorkflows(boolean cancelled) {
-    workflow.shutdown(cancelled);
-    eventWorkflow.shutdown(cancelled);
-  }
-
-  private void runOPTICS() {
-    pluginTitle = TITLE_OPTICS;
-
-    createEventWorkflow();
-
-    // Create the workflow
-    workflow.add(new InputWorker());
-    workflow.add(new OpticsWorker());
-    final int previous = workflow.add(new OpticsClusterWorker());
-    // The following can operate in parallel
-    workflow.add(new ResultsWorker(), previous);
-    workflow.add(new RandIndexWorker(), previous);
-    workflow.add(new MemoryResultsWorker(), previous);
-    workflow.add(new ReachabilityResultsWorker(), previous);
-    workflow.add(new ImageResultsWorker(), previous);
-    workflow.add(new TableResultsWorker(), previous);
-    workflow.add(new ClusterSelectedTableWorker(), previous);
-
-    workflow.start();
-
-    final boolean cancelled = !showDialog(false);
-
-    shutdownWorkflows(cancelled);
-  }
-
-  /**
-   * Gets the nm per pixel.
-   *
-   * @param results the results
-   * @return the nm per pixel
-   */
-  public double getNmPerPixel(MemoryPeakResults results) {
-    if (results.hasCalibration() && results.getCalibrationReader().hasNmPerPixel()) {
-      return results.getCalibrationReader().getNmPerPixel();
-    }
-    return 1;
-  }
-
-  private Object[] imageModeArray;
-  private Object[] outlineModeArray;
-
-  private boolean showDialog(boolean isDBSCAN) {
-    logReferences(isDBSCAN);
-
-    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
-    gd.addHelp(About.HELP_URL);
-
-    ResultsManager.addInput(gd, inputSettings.getInputOption(), InputSource.MEMORY);
-
-    // globalSettings = SettingsManager.loadSettings();
-    // settings = globalSettings.getClusteringSettings();
-
-    if (isDBSCAN) {
-      gd.addMessage("--- Nearest-Neighbour Analysis ---");
-    } else {
-      gd.addMessage("--- " + pluginTitle + " ---");
-    }
-    gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
-    if (isDBSCAN) {
-      // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
-      // profile
-      gd.addSlider("Noise (%)", 0, 50, inputSettings.getFractionNoise() * 100);
-      gd.addNumericField("Samples", inputSettings.getSamples(), 0);
-      gd.addSlider("Sample_fraction (%)", 0, 15, inputSettings.getSampleFraction() * 100);
-    } else {
-      final String[] opticsModes = SettingsManager.getNames((Object[]) OpticsMode.values());
-      gd.addChoice("OPTICS_mode", opticsModes, inputSettings.getOpticsMode(),
-          new OptionListener<Integer>() {
-            @Override
-            public boolean collectOptions(Integer value) {
-              inputSettings.setOpticsMode(value);
-              final boolean result = collectOptions(false);
-              return result;
-            }
-
-            @Override
-            public boolean collectOptions() {
-              return collectOptions(true);
-            }
-
-            private boolean collectOptions(boolean silent) {
-              final OpticsMode mode = OpticsMode.get(inputSettings.getOpticsMode());
-              final ExtendedGenericDialog egd =
-                  new ExtendedGenericDialog(mode.toString() + " options");
-              final OpticsSettings oldSettings = inputSettings.build();
-              if (mode == OpticsMode.FAST_OPTICS) {
-                egd.addMessage(TextUtils
-                    .wrap("The number of splits to compute (if below 1 it will be auto-computed "
-                        + "using the size of the data)", 80));
-                egd.addNumericField("Number_of_splits", inputSettings.getNumberOfSplitSets(), 0);
-                if (extraOptions) {
-                  egd.addCheckbox("Random_vectors", inputSettings.getUseRandomVectors());
-                  egd.addCheckbox("Approx_sets", inputSettings.getSaveApproximateSets());
-                  final String[] sampleModes =
-                      SettingsManager.getNames((Object[]) SampleMode.values());
-                  egd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode());
-                }
-                egd.setSilent(silent);
-                egd.showDialog(true, gd);
-                if (egd.wasCanceled()) {
-                  return false;
-                }
-                inputSettings.setNumberOfSplitSets((int) Math.abs(egd.getNextNumber()));
-                if (extraOptions) {
-                  inputSettings.setUseRandomVectors(egd.getNextBoolean());
-                  inputSettings.setSaveApproximateSets(egd.getNextBoolean());
-                  inputSettings.setSampleMode(egd.getNextChoiceIndex());
-                }
-              } else {
-                // OPTICS
-                egd.addNumericField("Generating_distance", inputSettings.getGeneratingDistance(), 2,
-                    6, "nm");
-                egd.showDialog(true, gd);
-                if (egd.wasCanceled()) {
-                  return false;
-                }
-                inputSettings.setGeneratingDistance(Math.abs(egd.getNextNumber()));
-              }
-              // Return true if new settings
-              return !inputSettings.build().equals(oldSettings);
-            }
-          });
-    }
-    gd.addMessage("--- Clustering ---");
-    if (isDBSCAN) {
-      gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 2, 6, "nm");
-      gd.addCheckbox("Core_points", inputSettings.getCore());
-    } else {
-      final String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
-      gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode(),
-          new OptionListener<Integer>() {
-
-            @Override
-            public boolean collectOptions(Integer value) {
-              inputSettings.setClusteringMode(value);
-              final boolean result = collectOptions(false);
-              return result;
-            }
-
-            @Override
-            public boolean collectOptions() {
-              return collectOptions(true);
-            }
-
-            private boolean collectOptions(boolean silent) {
-              final ClusteringMode mode = ClusteringMode.get(inputSettings.getClusteringMode());
-              final ExtendedGenericDialog egd =
-                  new ExtendedGenericDialog(mode.toString() + " options");
-              final OpticsSettings oldSettings = inputSettings.build();
-              if (mode == ClusteringMode.XI) {
-                egd.addMessage("Xi controls the change in reachability (profile steepness) to "
-                    + "define a cluster");
-                egd.addNumericField("Xi", inputSettings.getXi(), 4);
-                egd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
-                egd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4, 10, "nm");
-                egd.addNumericField("Lower_limit", inputSettings.getLowerLimit(), 4, 10, "nm");
-                egd.setSilent(silent);
-                egd.showDialog(true, gd);
-                if (egd.wasCanceled()) {
-                  return false;
-                }
-                inputSettings.setXi(Math.abs(egd.getNextNumber()));
-                inputSettings.setTopLevel(egd.getNextBoolean());
-                inputSettings.setUpperLimit(Math.abs(egd.getNextNumber()));
-                inputSettings.setLowerLimit(Math.abs(egd.getNextNumber()));
-              } else {
-                // DBSCAN
-                egd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
-                egd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4,
-                    10, "nm");
-                egd.addCheckbox("Core_points", inputSettings.getCore());
-                egd.setSilent(silent);
-                egd.showDialog(true, gd);
-                if (egd.wasCanceled()) {
-                  return false;
-                }
-                inputSettings.setClusteringDistance(Math.abs(egd.getNextNumber()));
-                inputSettings.setCore(egd.getNextBoolean());
-              }
-              // Return true if new settings
-              return !inputSettings.build().equals(oldSettings);
-            }
-          });
-    }
-    gd.addMessage("--- Table ---");
-    gd.addCheckbox("Show_table", inputSettings.getShowTable(), new OptionListener<Boolean>() {
-      @Override
-      public boolean collectOptions(Boolean value) {
-        inputSettings.setShowTable(value);
-        final boolean result = collectOptions(false);
-        return result;
-      }
-
-      @Override
-      public boolean collectOptions() {
-        return collectOptions(true);
-      }
-
-      private boolean collectOptions(boolean silent) {
-        if (!inputSettings.getShowTable()) {
-          return false;
-        }
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Table options");
-        final OpticsSettings oldSettings = inputSettings.build();
-        final String[] modes = SettingsManager.getNames((Object[]) TableSortMode.values());
-        egd.addChoice("Table_sort_mode", modes, inputSettings.getTableSortMode());
-        egd.addCheckbox("Table_reverse_sort", inputSettings.getTableReverseSort());
-        egd.setSilent(silent);
-        egd.showDialog(true, gd);
-        if (egd.wasCanceled()) {
-          return false;
-        }
-        inputSettings.setTableSortMode(egd.getNextChoiceIndex());
-        inputSettings.setTableReverseSort(egd.getNextBoolean());
-        // Return true if new settings
-        return !inputSettings.build().equals(oldSettings);
-      }
-    });
-
-    gd.addMessage("--- Image ---");
-    gd.addSlider("Image_scale", 0, 15, inputSettings.getImageScale());
-    final TreeSet<ImageMode> imageModeSet = new TreeSet<>();
-    imageModeSet.addAll(Arrays.asList(ImageMode.values()));
-    if (isDBSCAN) {
-      imageModeSet.remove(ImageMode.CLUSTER_DEPTH);
-      imageModeSet.remove(ImageMode.CLUSTER_ORDER);
-    }
-    imageModeArray = imageModeSet.toArray();
-    final String[] imageModes = SettingsManager.getNames(imageModeArray);
-    gd.addChoice("Image_mode", imageModes, ImageMode.get(inputSettings.getImageMode()).toString(),
-        new OptionListener<Integer>() {
-          @Override
-          public boolean collectOptions(Integer value) {
-            inputSettings.setImageMode(((ImageMode) imageModeArray[value]).ordinal());
-            final boolean result = collectOptions(false);
-            return result;
-          }
-
-          @Override
-          public boolean collectOptions() {
-            return collectOptions(true);
-          }
-
-          private boolean collectOptions(boolean silent) {
-            final ImageMode mode = ImageMode.get(inputSettings.getImageMode());
-            final ExtendedGenericDialog egd =
-                new ExtendedGenericDialog(mode.toString() + " options");
-            if (mode.canBeWeighted()) {
-              egd.addCheckbox("Weighted", inputSettings.getWeighted());
-              egd.addCheckbox("Equalised", inputSettings.getEqualised());
-            }
-            if (mode == ImageMode.LOOP && extraOptions) {
-              egd.addNumericField("LoOP_lambda", inputSettings.getLambda(), 4);
-            }
-            if (!egd.hasFields()) {
-              return false;
-            }
-            egd.setSilent(silent);
-            egd.showDialog(true, gd);
-            if (egd.wasCanceled()) {
-              return false;
-            }
-            final OpticsSettings oldSettings = inputSettings.build();
-            if (mode.canBeWeighted()) {
-              inputSettings.setWeighted(egd.getNextBoolean());
-              inputSettings.setEqualised(egd.getNextBoolean());
-            }
-            if (mode == ImageMode.LOOP && extraOptions) {
-              inputSettings.setLambda(Math.abs(gd.getNextNumber()));
-            }
-            // Return true if new settings
-            return !inputSettings.build().equals(oldSettings);
-          }
-        });
-
-    final TreeSet<OutlineMode> outlineModeSet = new TreeSet<>();
-    outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
-    if (isDBSCAN) {
-      outlineModeSet.remove(OutlineMode.COLOURED_BY_DEPTH);
-    }
-    outlineModeArray = outlineModeSet.toArray();
-    final String[] outlineModes = SettingsManager.getNames(outlineModeArray);
-    gd.addChoice("Outline", outlineModes,
-        OutlineMode.get(inputSettings.getOutlineMode()).toString());
-
-    if (!isDBSCAN) {
-      final String[] spanningTreeModes =
-          SettingsManager.getNames((Object[]) SpanningTreeMode.values());
-      gd.addChoice("Spanning_tree", spanningTreeModes, inputSettings.getSpanningTreeMode());
-
-      gd.addMessage("--- Reachability Plot ---");
-      final String[] plotModes = SettingsManager.getNames((Object[]) PlotMode.values());
-      gd.addChoice("Plot_mode", plotModes, inputSettings.getPlotMode());
-    }
-
-    // Everything is done within the dialog listener
-    final BaseDialogListener listener =
-        (isDBSCAN) ? new DBSCANDialogListener(gd) : new OPTICSDialogListener(gd);
-    gd.addDialogListener(listener);
-    gd.addOptionCollectedListener(listener);
-
-    // Start disabled so the user can choose settings to update
-    if (ImageJUtils.isShowGenericDialog()) {
-      gd.addCheckbox("Preview", false, listener);
-    } else {
-      gd.addCheckbox("Preview", false);
-    }
-
-    if (extraOptions) {
-      gd.addCheckbox("Debug", false);
-    }
-
-    gd.showDialog();
-
-    if (gd.wasCanceled()) {
-      return false;
-    }
-
-    // The dialog was OK'd so run if work was staged in the workflow.
-    if (workflow.isStaged()) {
-      workflow.runStaged();
-    }
-
-    // Record the options for macros since the NonBlocking dialog does not
-    if (Recorder.record) {
-      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinPoints()));
-      if (isDBSCAN) {
-        // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
-        // profile
-        Recorder.recordOption("Noise", Double.toString(inputSettings.getFractionNoise() * 100));
-        Recorder.recordOption("Samples", Double.toString(inputSettings.getSamples()));
-        Recorder.recordOption("Sample_fraction",
-            Double.toString(inputSettings.getSampleFraction() * 100));
-        Recorder.recordOption("Clustering_distance",
-            Double.toString(inputSettings.getClusteringDistance()));
-      } else {
-        Recorder.recordOption("OPTICS_mode",
-            OpticsMode.get(inputSettings.getOpticsMode()).toString());
-        Recorder.recordOption("Number_of_splits",
-            Integer.toString(inputSettings.getNumberOfSplitSets()));
-        if (extraOptions) {
-          if (inputSettings.getUseRandomVectors()) {
-            Recorder.recordOption("Random_vectors");
-          }
-          if (inputSettings.getSaveApproximateSets()) {
-            Recorder.recordOption("Approx_sets");
-          }
-          Recorder.recordOption("Sample_mode",
-              SampleMode.forOrdinal(inputSettings.getSampleMode()).toString());
-        }
-        Recorder.recordOption("Generating_distance",
-            Double.toString(inputSettings.getGeneratingDistance()));
-      }
-      if (isDBSCAN) {
-        if (inputSettings.getCore()) {
-          Recorder.recordOption("Core_points");
-        }
-      } else {
-        Recorder.recordOption("Clustering_mode",
-            ClusteringMode.get(inputSettings.getClusteringMode()).toString());
-        Recorder.recordOption("Xi", Double.toString(inputSettings.getXi()));
-        if (inputSettings.getTopLevel()) {
-          Recorder.recordOption("Top_clusters");
-        }
-        Recorder.recordOption("Upper_limit", Double.toString(inputSettings.getUpperLimit()));
-        Recorder.recordOption("Lower_limit", Double.toString(inputSettings.getLowerLimit()));
-        Recorder.recordOption("Clustering_distance",
-            Double.toString(inputSettings.getClusteringDistance()));
-        if (inputSettings.getCore()) {
-          Recorder.recordOption("Core_points");
-        }
-      }
-      if (inputSettings.getShowTable()) {
-        Recorder.recordOption("Show_table");
-        Recorder.recordOption("Table_sort_mode",
-            TableSortMode.get(inputSettings.getTableSortMode()).toString());
-        if (inputSettings.getTableReverseSort()) {
-          Recorder.recordOption("Table_reverse_sort");
-        }
-      }
-
-      Recorder.recordOption("Image_scale", Double.toString(inputSettings.getImageScale()));
-      Recorder.recordOption("Image_mode", ImageMode.get(inputSettings.getImageMode()).toString());
-
-      if (inputSettings.getWeighted()) {
-        Recorder.recordOption("Weighted");
-      }
-      if (inputSettings.getEqualised()) {
-        Recorder.recordOption("Equalised");
-      }
-      if (extraOptions) {
-        Recorder.recordOption("LoOP_lambda", Double.toString(inputSettings.getLambda()));
-      }
-      Recorder.recordOption("Outline", OutlineMode.get(inputSettings.getOutlineMode()).toString());
-
-      if (!isDBSCAN) {
-        Recorder.recordOption("Spanning_tree",
-            SpanningTreeMode.get(inputSettings.getSpanningTreeMode()).toString());
-        Recorder.recordOption("Plot_mode", PlotMode.get(inputSettings.getPlotMode()).toString());
-      }
-
-      if (debug) {
-        Recorder.recordOption("Debug");
-      }
-    }
-
-    return true;
-  }
-
-  private static byte logged;
-  private static final byte LOG_DBSCAN = 0x01;
-  private static final byte LOG_OPTICS = 0x02;
-  private static final byte LOG_LOOP = 0x04;
-
-  private static void logReferences(boolean isDBSCAN) {
-    final int width = 80;
-    final StringBuilder sb = new StringBuilder();
-    if (isDBSCAN && (logged & LOG_DBSCAN) != LOG_DBSCAN) {
-      logged |= LOG_DBSCAN;
-      sb.append("DBSCAN: ");
-      sb.append(TextUtils
-          .wrap("Ester, et al (1996). 'A density-based algorithm for discovering clusters in large "
-              + "spatial databases with noise'. Proceedings of the Second International Conference "
-              + "on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.", width))
-          .append('\n');
-    } else if ((logged & LOG_OPTICS) != LOG_OPTICS) {
-      logged |= LOG_OPTICS;
-      sb.append("OPTICS: ");
-      sb.append(TextUtils.wrap(
-          "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: "
-              + "Data Mining and Knowledge Discovery. 1 (3): 231–240.",
-          width)).append('\n');
-      sb.append("FastOPTICS: ");
-      sb.append(TextUtils
-          .wrap("Schneider, et al (2013). 'Fast parameterless density-based clustering via random "
-              + "projections'. 22nd ACM International Conference on Information and Knowledge "
-              + "Management(CIKM). ACM. pp. 861-866.", width))
-          .append('\n');
-    }
-    if ((logged & LOG_LOOP) != LOG_LOOP) {
-      logged |= LOG_LOOP;
-      sb.append("LoOP: ");
-      sb.append(TextUtils.wrap(
-          "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
-              + "Conference on Information and knowledge management(CIKM). ACM. pp. 1649-1652.",
-          width)).append('\n');
-    }
-    if (sb.length() > 0) {
-      IJ.log(sb.toString());
     }
   }
 
@@ -4055,8 +3579,8 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private class OPTICSDialogListener extends BaseDialogListener {
-    OPTICSDialogListener(GenericDialog gd) {
+  private class OpticsDialogListener extends BaseDialogListener {
+    OpticsDialogListener(GenericDialog gd) {
       super(gd);
     }
 
@@ -4100,8 +3624,8 @@ public class OPTICS implements PlugIn {
     }
   }
 
-  private class DBSCANDialogListener extends BaseDialogListener {
-    DBSCANDialogListener(GenericDialog gd) {
+  private class DbscanDialogListener extends BaseDialogListener {
+    DbscanDialogListener(GenericDialog gd) {
       super(gd);
     }
 
@@ -4130,6 +3654,511 @@ public class OPTICS implements PlugIn {
       ((ExtendedGenericDialog) gd).collectOptions(); // For macros
 
       return true;
+    }
+  }
+
+  @Override
+  public void run(String arg) {
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
+
+    if (MemoryPeakResults.isMemoryEmpty()) {
+      IJ.error(pluginTitle, "No localisations in memory");
+      return;
+    }
+
+    extraOptions = ImageJUtils.isExtraOptions();
+
+    inputSettings = SettingsManager.readOpticsSettings(0).toBuilder();
+
+    IJ.showStatus("");
+
+    if ("dbscan".equals(arg)) {
+      runDbscan();
+    } else {
+      runOptics();
+    }
+
+    IJ.showStatus(pluginTitle + " finished");
+
+    // Update the settings
+    SettingsManager.writeSettings(inputSettings.build());
+  }
+
+  private void runDbscan() {
+    pluginTitle = TITLE_DBSCAN;
+
+    createEventWorkflow();
+
+    // Create the workflow
+    workflow.add(new InputWorker());
+    workflow.add(new KnnWorker());
+    workflow.add(new DbscanWorker());
+    final int previous = workflow.add(new DbscanClusterWorker());
+    // The following can operate in parallel
+    workflow.add(new ResultsWorker(), previous);
+    workflow.add(new RandIndexWorker(), previous);
+    workflow.add(new MemoryResultsWorker(), previous);
+    workflow.add(new ImageResultsWorker(), previous);
+    workflow.add(new TableResultsWorker(), previous);
+    workflow.add(new ClusterSelectedTableWorker(), previous);
+
+    workflow.start();
+
+    final boolean cancelled = !showDialog(true);
+
+    shutdownWorkflows(cancelled);
+  }
+
+  private void createEventWorkflow() {
+    eventWorkflow = new Workflow<>();
+    eventWorkflow.add(new ClusterSelectedEventWorker());
+    eventWorkflow.add(clusterSelectedWorker = new ClusterSelectedWorker());
+    eventWorkflow.start();
+  }
+
+  private void shutdownWorkflows(boolean cancelled) {
+    workflow.shutdown(cancelled);
+    eventWorkflow.shutdown(cancelled);
+  }
+
+  private void runOptics() {
+    pluginTitle = TITLE_OPTICS;
+
+    createEventWorkflow();
+
+    // Create the workflow
+    workflow.add(new InputWorker());
+    workflow.add(new OpticsWorker());
+    final int previous = workflow.add(new OpticsClusterWorker());
+    // The following can operate in parallel
+    workflow.add(new ResultsWorker(), previous);
+    workflow.add(new RandIndexWorker(), previous);
+    workflow.add(new MemoryResultsWorker(), previous);
+    workflow.add(new ReachabilityResultsWorker(), previous);
+    workflow.add(new ImageResultsWorker(), previous);
+    workflow.add(new TableResultsWorker(), previous);
+    workflow.add(new ClusterSelectedTableWorker(), previous);
+
+    workflow.start();
+
+    final boolean cancelled = !showDialog(false);
+
+    shutdownWorkflows(cancelled);
+  }
+
+  /**
+   * Gets the nm per pixel.
+   *
+   * @param results the results
+   * @return the nm per pixel
+   */
+  public double getNmPerPixel(MemoryPeakResults results) {
+    if (results.hasCalibration() && results.getCalibrationReader().hasNmPerPixel()) {
+      return results.getCalibrationReader().getNmPerPixel();
+    }
+    return 1;
+  }
+
+  private boolean showDialog(boolean isDbscan) {
+    logReferences(isDbscan);
+
+    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
+    gd.addHelp(About.HELP_URL);
+
+    ResultsManager.addInput(gd, inputSettings.getInputOption(), InputSource.MEMORY);
+
+    // globalSettings = SettingsManager.loadSettings();
+    // settings = globalSettings.getClusteringSettings();
+
+    if (isDbscan) {
+      gd.addMessage("--- Nearest-Neighbour Analysis ---");
+    } else {
+      gd.addMessage("--- " + pluginTitle + " ---");
+    }
+    gd.addNumericField("Min_points", inputSettings.getMinPoints(), 0);
+    if (isDbscan) {
+      // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
+      // profile
+      gd.addSlider("Noise (%)", 0, 50, inputSettings.getFractionNoise() * 100);
+      gd.addNumericField("Samples", inputSettings.getSamples(), 0);
+      gd.addSlider("Sample_fraction (%)", 0, 15, inputSettings.getSampleFraction() * 100);
+    } else {
+      final String[] opticsModes = SettingsManager.getNames((Object[]) OpticsMode.values());
+      gd.addChoice("OPTICS_mode", opticsModes, inputSettings.getOpticsMode(),
+          new OptionListener<Integer>() {
+            @Override
+            public boolean collectOptions(Integer value) {
+              inputSettings.setOpticsMode(value);
+              final boolean result = collectOptions(false);
+              return result;
+            }
+
+            @Override
+            public boolean collectOptions() {
+              return collectOptions(true);
+            }
+
+            private boolean collectOptions(boolean silent) {
+              final OpticsMode mode = OpticsMode.get(inputSettings.getOpticsMode());
+              final ExtendedGenericDialog egd =
+                  new ExtendedGenericDialog(mode.toString() + " options");
+              final OpticsSettings oldSettings = inputSettings.build();
+              if (mode == OpticsMode.FAST_OPTICS) {
+                egd.addMessage(TextUtils
+                    .wrap("The number of splits to compute (if below 1 it will be auto-computed "
+                        + "using the size of the data)", 80));
+                egd.addNumericField("Number_of_splits", inputSettings.getNumberOfSplitSets(), 0);
+                if (extraOptions) {
+                  egd.addCheckbox("Random_vectors", inputSettings.getUseRandomVectors());
+                  egd.addCheckbox("Approx_sets", inputSettings.getSaveApproximateSets());
+                  final String[] sampleModes =
+                      SettingsManager.getNames((Object[]) SampleMode.values());
+                  egd.addChoice("Sample_mode", sampleModes, inputSettings.getSampleMode());
+                }
+                egd.setSilent(silent);
+                egd.showDialog(true, gd);
+                if (egd.wasCanceled()) {
+                  return false;
+                }
+                inputSettings.setNumberOfSplitSets((int) Math.abs(egd.getNextNumber()));
+                if (extraOptions) {
+                  inputSettings.setUseRandomVectors(egd.getNextBoolean());
+                  inputSettings.setSaveApproximateSets(egd.getNextBoolean());
+                  inputSettings.setSampleMode(egd.getNextChoiceIndex());
+                }
+              } else {
+                // OPTICS
+                egd.addNumericField("Generating_distance", inputSettings.getGeneratingDistance(), 2,
+                    6, "nm");
+                egd.showDialog(true, gd);
+                if (egd.wasCanceled()) {
+                  return false;
+                }
+                inputSettings.setGeneratingDistance(Math.abs(egd.getNextNumber()));
+              }
+              // Return true if new settings
+              return !inputSettings.build().equals(oldSettings);
+            }
+          });
+    }
+    gd.addMessage("--- Clustering ---");
+    if (isDbscan) {
+      gd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 2, 6, "nm");
+      gd.addCheckbox("Core_points", inputSettings.getCore());
+    } else {
+      final String[] clusteringModes = SettingsManager.getNames((Object[]) ClusteringMode.values());
+      gd.addChoice("Clustering_mode", clusteringModes, inputSettings.getClusteringMode(),
+          new OptionListener<Integer>() {
+
+            @Override
+            public boolean collectOptions(Integer value) {
+              inputSettings.setClusteringMode(value);
+              return collectOptions(false);
+            }
+
+            @Override
+            public boolean collectOptions() {
+              return collectOptions(true);
+            }
+
+            private boolean collectOptions(boolean silent) {
+              final ClusteringMode mode = ClusteringMode.get(inputSettings.getClusteringMode());
+              final ExtendedGenericDialog egd =
+                  new ExtendedGenericDialog(mode.toString() + " options");
+              final OpticsSettings oldSettings = inputSettings.build();
+              if (mode == ClusteringMode.XI) {
+                egd.addMessage("Xi controls the change in reachability (profile steepness) to "
+                    + "define a cluster");
+                egd.addNumericField("Xi", inputSettings.getXi(), 4);
+                egd.addCheckbox("Top_clusters", inputSettings.getTopLevel());
+                egd.addNumericField("Upper_limit", inputSettings.getUpperLimit(), 4, 10, "nm");
+                egd.addNumericField("Lower_limit", inputSettings.getLowerLimit(), 4, 10, "nm");
+                egd.setSilent(silent);
+                egd.showDialog(true, gd);
+                if (egd.wasCanceled()) {
+                  return false;
+                }
+                inputSettings.setXi(Math.abs(egd.getNextNumber()));
+                inputSettings.setTopLevel(egd.getNextBoolean());
+                inputSettings.setUpperLimit(Math.abs(egd.getNextNumber()));
+                inputSettings.setLowerLimit(Math.abs(egd.getNextNumber()));
+              } else {
+                // DBSCAN
+                egd.addMessage(ClusteringMode.DBSCAN.toString() + " options:");
+                egd.addNumericField("Clustering_distance", inputSettings.getClusteringDistance(), 4,
+                    10, "nm");
+                egd.addCheckbox("Core_points", inputSettings.getCore());
+                egd.setSilent(silent);
+                egd.showDialog(true, gd);
+                if (egd.wasCanceled()) {
+                  return false;
+                }
+                inputSettings.setClusteringDistance(Math.abs(egd.getNextNumber()));
+                inputSettings.setCore(egd.getNextBoolean());
+              }
+              // Return true if new settings
+              return !inputSettings.build().equals(oldSettings);
+            }
+          });
+    }
+    gd.addMessage("--- Table ---");
+    gd.addCheckbox("Show_table", inputSettings.getShowTable(), new OptionListener<Boolean>() {
+      @Override
+      public boolean collectOptions(Boolean value) {
+        inputSettings.setShowTable(value);
+        return collectOptions(false);
+      }
+
+      @Override
+      public boolean collectOptions() {
+        return collectOptions(true);
+      }
+
+      private boolean collectOptions(boolean silent) {
+        if (!inputSettings.getShowTable()) {
+          return false;
+        }
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Table options");
+        final OpticsSettings oldSettings = inputSettings.build();
+        final String[] modes = SettingsManager.getNames((Object[]) TableSortMode.values());
+        egd.addChoice("Table_sort_mode", modes, inputSettings.getTableSortMode());
+        egd.addCheckbox("Table_reverse_sort", inputSettings.getTableReverseSort());
+        egd.setSilent(silent);
+        egd.showDialog(true, gd);
+        if (egd.wasCanceled()) {
+          return false;
+        }
+        inputSettings.setTableSortMode(egd.getNextChoiceIndex());
+        inputSettings.setTableReverseSort(egd.getNextBoolean());
+        // Return true if new settings
+        return !inputSettings.build().equals(oldSettings);
+      }
+    });
+
+    gd.addMessage("--- Image ---");
+    gd.addSlider("Image_scale", 0, 15, inputSettings.getImageScale());
+    final TreeSet<ImageMode> imageModeSet = new TreeSet<>();
+    imageModeSet.addAll(Arrays.asList(ImageMode.values()));
+    if (isDbscan) {
+      imageModeSet.remove(ImageMode.CLUSTER_DEPTH);
+      imageModeSet.remove(ImageMode.CLUSTER_ORDER);
+    }
+    imageModeArray = imageModeSet.toArray();
+    final String[] imageModes = SettingsManager.getNames(imageModeArray);
+    gd.addChoice("Image_mode", imageModes, ImageMode.get(inputSettings.getImageMode()).toString(),
+        new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            inputSettings.setImageMode(((ImageMode) imageModeArray[value]).ordinal());
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final ImageMode mode = ImageMode.get(inputSettings.getImageMode());
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog(mode.toString() + " options");
+            if (mode.canBeWeighted()) {
+              egd.addCheckbox("Weighted", inputSettings.getWeighted());
+              egd.addCheckbox("Equalised", inputSettings.getEqualised());
+            }
+            if (mode == ImageMode.LOOP && extraOptions) {
+              egd.addNumericField("LoOP_lambda", inputSettings.getLambda(), 4);
+            }
+            if (!egd.hasFields()) {
+              return false;
+            }
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+            final OpticsSettings oldSettings = inputSettings.build();
+            if (mode.canBeWeighted()) {
+              inputSettings.setWeighted(egd.getNextBoolean());
+              inputSettings.setEqualised(egd.getNextBoolean());
+            }
+            if (mode == ImageMode.LOOP && extraOptions) {
+              inputSettings.setLambda(Math.abs(gd.getNextNumber()));
+            }
+            // Return true if new settings
+            return !inputSettings.build().equals(oldSettings);
+          }
+        });
+
+    final TreeSet<OutlineMode> outlineModeSet = new TreeSet<>();
+    outlineModeSet.addAll(Arrays.asList(OutlineMode.values()));
+    if (isDbscan) {
+      outlineModeSet.remove(OutlineMode.COLOURED_BY_DEPTH);
+    }
+    outlineModeArray = outlineModeSet.toArray();
+    final String[] outlineModes = SettingsManager.getNames(outlineModeArray);
+    gd.addChoice("Outline", outlineModes,
+        OutlineMode.get(inputSettings.getOutlineMode()).toString());
+
+    if (!isDbscan) {
+      final String[] spanningTreeModes =
+          SettingsManager.getNames((Object[]) SpanningTreeMode.values());
+      gd.addChoice("Spanning_tree", spanningTreeModes, inputSettings.getSpanningTreeMode());
+
+      gd.addMessage("--- Reachability Plot ---");
+      final String[] plotModes = SettingsManager.getNames((Object[]) PlotMode.values());
+      gd.addChoice("Plot_mode", plotModes, inputSettings.getPlotMode());
+    }
+
+    // Everything is done within the dialog listener
+    final BaseDialogListener listener =
+        (isDbscan) ? new DbscanDialogListener(gd) : new OpticsDialogListener(gd);
+    gd.addDialogListener(listener);
+    gd.addOptionCollectedListener(listener);
+
+    // Start disabled so the user can choose settings to update
+    if (ImageJUtils.isShowGenericDialog()) {
+      gd.addCheckbox("Preview", false, listener);
+    } else {
+      gd.addCheckbox("Preview", false);
+    }
+
+    if (extraOptions) {
+      gd.addCheckbox("Debug", false);
+    }
+
+    gd.showDialog();
+
+    if (gd.wasCanceled()) {
+      return false;
+    }
+
+    // The dialog was OK'd so run if work was staged in the workflow.
+    if (workflow.isStaged()) {
+      workflow.runStaged();
+    }
+
+    // Record the options for macros since the NonBlocking dialog does not
+    if (Recorder.record) {
+      Recorder.recordOption("Min_points", Integer.toString(inputSettings.getMinPoints()));
+      if (isDbscan) {
+        // Add fields to auto-compute the clustering distance from the K-nearest neighbour distance
+        // profile
+        Recorder.recordOption("Noise", Double.toString(inputSettings.getFractionNoise() * 100));
+        Recorder.recordOption("Samples", Double.toString(inputSettings.getSamples()));
+        Recorder.recordOption("Sample_fraction",
+            Double.toString(inputSettings.getSampleFraction() * 100));
+        Recorder.recordOption("Clustering_distance",
+            Double.toString(inputSettings.getClusteringDistance()));
+      } else {
+        Recorder.recordOption("OPTICS_mode",
+            OpticsMode.get(inputSettings.getOpticsMode()).toString());
+        Recorder.recordOption("Number_of_splits",
+            Integer.toString(inputSettings.getNumberOfSplitSets()));
+        if (extraOptions) {
+          if (inputSettings.getUseRandomVectors()) {
+            Recorder.recordOption("Random_vectors");
+          }
+          if (inputSettings.getSaveApproximateSets()) {
+            Recorder.recordOption("Approx_sets");
+          }
+          Recorder.recordOption("Sample_mode",
+              SampleMode.forOrdinal(inputSettings.getSampleMode()).toString());
+        }
+        Recorder.recordOption("Generating_distance",
+            Double.toString(inputSettings.getGeneratingDistance()));
+      }
+      if (isDbscan) {
+        if (inputSettings.getCore()) {
+          Recorder.recordOption("Core_points");
+        }
+      } else {
+        Recorder.recordOption("Clustering_mode",
+            ClusteringMode.get(inputSettings.getClusteringMode()).toString());
+        Recorder.recordOption("Xi", Double.toString(inputSettings.getXi()));
+        if (inputSettings.getTopLevel()) {
+          Recorder.recordOption("Top_clusters");
+        }
+        Recorder.recordOption("Upper_limit", Double.toString(inputSettings.getUpperLimit()));
+        Recorder.recordOption("Lower_limit", Double.toString(inputSettings.getLowerLimit()));
+        Recorder.recordOption("Clustering_distance",
+            Double.toString(inputSettings.getClusteringDistance()));
+        if (inputSettings.getCore()) {
+          Recorder.recordOption("Core_points");
+        }
+      }
+      if (inputSettings.getShowTable()) {
+        Recorder.recordOption("Show_table");
+        Recorder.recordOption("Table_sort_mode",
+            TableSortMode.get(inputSettings.getTableSortMode()).toString());
+        if (inputSettings.getTableReverseSort()) {
+          Recorder.recordOption("Table_reverse_sort");
+        }
+      }
+
+      Recorder.recordOption("Image_scale", Double.toString(inputSettings.getImageScale()));
+      Recorder.recordOption("Image_mode", ImageMode.get(inputSettings.getImageMode()).toString());
+
+      if (inputSettings.getWeighted()) {
+        Recorder.recordOption("Weighted");
+      }
+      if (inputSettings.getEqualised()) {
+        Recorder.recordOption("Equalised");
+      }
+      if (extraOptions) {
+        Recorder.recordOption("LoOP_lambda", Double.toString(inputSettings.getLambda()));
+      }
+      Recorder.recordOption("Outline", OutlineMode.get(inputSettings.getOutlineMode()).toString());
+
+      if (!isDbscan) {
+        Recorder.recordOption("Spanning_tree",
+            SpanningTreeMode.get(inputSettings.getSpanningTreeMode()).toString());
+        Recorder.recordOption("Plot_mode", PlotMode.get(inputSettings.getPlotMode()).toString());
+      }
+
+      if (debug) {
+        Recorder.recordOption("Debug");
+      }
+    }
+
+    return true;
+  }
+
+  private static void logReferences(boolean isDbscan) {
+    final int width = 80;
+    final StringBuilder sb = new StringBuilder();
+    if (isDbscan && (logged & LOG_DBSCAN) != LOG_DBSCAN) {
+      logged |= LOG_DBSCAN;
+      sb.append("DBSCAN: ");
+      sb.append(TextUtils
+          .wrap("Ester, et al (1996). 'A density-based algorithm for discovering clusters in large "
+              + "spatial databases with noise'. Proceedings of the Second International Conference "
+              + "on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.", width))
+          .append('\n');
+    } else if ((logged & LOG_OPTICS) != LOG_OPTICS) {
+      logged |= LOG_OPTICS;
+      sb.append("OPTICS: ");
+      sb.append(TextUtils.wrap(
+          "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: "
+              + "Data Mining and Knowledge Discovery. 1 (3): 231–240.",
+          width)).append('\n');
+      sb.append("FastOPTICS: ");
+      sb.append(TextUtils
+          .wrap("Schneider, et al (2013). 'Fast parameterless density-based clustering via random "
+              + "projections'. 22nd ACM International Conference on Information and Knowledge "
+              + "Management(CIKM). ACM. pp. 861-866.", width))
+          .append('\n');
+    }
+    if ((logged & LOG_LOOP) != LOG_LOOP) {
+      logged |= LOG_LOOP;
+      sb.append("LoOP: ");
+      sb.append(TextUtils.wrap(
+          "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
+              + "Conference on Information and knowledge management(CIKM). ACM. pp. 1649-1652.",
+          width)).append('\n');
+    }
+    if (sb.length() > 0) {
+      IJ.log(sb.toString());
     }
   }
 }

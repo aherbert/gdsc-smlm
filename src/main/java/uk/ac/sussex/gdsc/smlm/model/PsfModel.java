@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -37,7 +38,7 @@ import java.util.Arrays;
  * Contains methods for generating models of a Point Spread Function.
  */
 public abstract class PsfModel {
-  /** The rand.om data generator */
+  /** The random data generator. */
   protected RandomDataGenerator rand;
   private double[] psf;
   private int x0min;
@@ -413,10 +414,13 @@ public abstract class PsfModel {
   /**
    * Produce a shallow copy of this object. This shares the pre-computed PSF data but will allow the
    * copy to store its own version of the most recently created PSF.
+   * 
+   * <p>Upon initialisation the copy will not have a most recently created PSF.
    *
+   * @param rng the rng
    * @return A shallow copy of this object
    */
-  public abstract PsfModel copy();
+  public abstract PsfModel copy(RandomGenerator rng);
 
   /**
    * Sample a PSF function on the provided data.
@@ -656,9 +660,7 @@ public abstract class PsfModel {
    * @param randomGenerator the new random generator
    */
   public void setRandomGenerator(RandomGenerator randomGenerator) {
-    if (randomGenerator == null) {
-      throw new IllegalArgumentException("Random generator was null");
-    }
+    ValidationUtils.checkNotNull(randomGenerator, "Random generator was null");
     rand = new RandomDataGenerator(randomGenerator);
   }
 
@@ -668,10 +670,7 @@ public abstract class PsfModel {
    * @param randomDataGenerator the new random generator
    */
   public void setRandomGenerator(RandomDataGenerator randomDataGenerator) {
-    if (randomDataGenerator == null) {
-      throw new IllegalArgumentException("Random generator was null");
-    }
-    rand = randomDataGenerator;
+    rand = ValidationUtils.checkNotNull(randomDataGenerator, "Random generator was null");
   }
 
   /**
@@ -711,7 +710,7 @@ public abstract class PsfModel {
     if (height < 1) {
       throw new IllegalArgumentException("Height cannot be less than 1");
     }
-    if ((double) width * height > Integer.MAX_VALUE) {
+    if ((long) width * height > Integer.MAX_VALUE) {
       throw new IllegalArgumentException("width*height is too large");
     }
   }

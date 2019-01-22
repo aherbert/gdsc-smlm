@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -97,7 +98,7 @@ import java.util.regex.Pattern;
  * ROI manager or by aligning N consecutive frames with the overall image.
  */
 public class DriftCalculator implements PlugIn {
-  private static String TITLE = "Drift Calculator";
+  private static final String TITLE = "Drift Calculator";
 
   private static String driftFilename = "";
   private static final String SUB_IMAGE_ALIGNMENT = "Localisation Sub-Images";
@@ -105,7 +106,7 @@ public class DriftCalculator implements PlugIn {
   private static final String STACK_ALIGNMENT = "Reference Stack Alignment";
   private static final String MARKED_ROIS = "Marked ROIs";
   private static String method = "";
-  private static String[] UPDATE_METHODS =
+  private static final String[] UPDATE_METHODS =
       new String[] {"None", "Update", "New dataset", "New truncated dataset"};
   private static int updateMethod;
 
@@ -123,7 +124,7 @@ public class DriftCalculator implements PlugIn {
   // Parameters to control the image alignment algorithm
   private static int frames = 2000;
   private static int minimimLocalisations = 50;
-  private static String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
+  private static final String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
   private static String reconstructionSize = SIZES[1];
   private static String stackTitle = "";
   private static int startFrame = 1;
@@ -144,27 +145,22 @@ public class DriftCalculator implements PlugIn {
 
   // Used to multi-thread the image alignment
   private ExecutorService threadPool;
-  private int progressCounter;
-  private int totalCounter;
-
-  private synchronized void incrementProgress() {
-    tracker.progress(++progressCounter, totalCounter);
-  }
 
   /**
    * Align images to the reference initialised in the given aligner.
    */
   private class ImageAligner implements Runnable {
-    AlignImagesFft aligner;
-    ImageProcessor[] ip;
-    int[] time;
-    Rectangle alignBounds;
-    List<double[]> alignments;
-    int from;
-    int to;
+    final AlignImagesFft aligner;
+    final ImageProcessor[] ip;
+    final int[] time;
+    final Rectangle alignBounds;
+    final List<double[]> alignments;
+    final int from;
+    final int to;
+    final Ticker ticker;
 
-    public ImageAligner(AlignImagesFft aligner, ImageProcessor[] ip, int[] time,
-        Rectangle alignBounds, List<double[]> alignments, int from, int to) {
+    ImageAligner(AlignImagesFft aligner, ImageProcessor[] ip, int[] time, Rectangle alignBounds,
+        List<double[]> alignments, int from, int to, Ticker ticker) {
       this.aligner = aligner;
       this.ip = ip;
       this.time = time;
@@ -172,12 +168,12 @@ public class DriftCalculator implements PlugIn {
       this.alignments = alignments;
       this.from = from;
       this.to = to;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
       for (int i = from; i < to && i < ip.length; i++) {
-        incrementProgress();
         // Window method is ignored since the image processor is already an FHT image
         double[] result = aligner.align(ip[i], WindowMethod.TUKEY, alignBounds, subPixelMethod);
         // Create a result for failures
@@ -187,6 +183,7 @@ public class DriftCalculator implements PlugIn {
         // Store the time point with the result
         result[2] = time[i];
         alignments.add(result);
+        ticker.tick();
       }
     }
   }
@@ -194,33 +191,35 @@ public class DriftCalculator implements PlugIn {
   /**
    * Duplicate and translate images.
    */
-  private class ImageTranslator implements Runnable {
-    ImageProcessor[] images;
-    ImageProcessor[] ip;
-    double[] dx;
-    double[] dy;
-    int from;
-    int to;
+  private static class ImageTranslator implements Runnable {
+    final ImageProcessor[] images;
+    final ImageProcessor[] ip;
+    final double[] dx;
+    final double[] dy;
+    final int from;
+    final int to;
+    final Ticker ticker;
 
-    public ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double[] dx, double[] dy,
-        int from, int to) {
+    ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double[] dx, double[] dy,
+        int from, int to, Ticker ticker) {
       this.images = images;
       this.ip = ip;
       this.dx = dx;
       this.dy = dy;
       this.from = from;
       this.to = to;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
       for (int i = from; i < to && i < ip.length; i++) {
-        incrementProgress();
         ip[i] = images[i].duplicate();
         if (dx[i] != 0 || dy[i] != 0) {
           ip[i].setInterpolationMethod(interpolationMethod);
           ip[i].translate(dx[i], dy[i]);
         }
+        ticker.tick();
       }
     }
   }
@@ -228,17 +227,18 @@ public class DriftCalculator implements PlugIn {
   /**
    * Creates an image reconstruction from the provided localisations.
    */
-  private class ImageBuilder implements Runnable {
-    List<Localisation> localisations;
-    ImageProcessor[] images;
-    int image;
-    Rectangle bounds;
-    float scale;
-    double[] dx;
-    double[] dy;
+  private static class ImageBuilder implements Runnable {
+    final List<Localisation> localisations;
+    final ImageProcessor[] images;
+    final int image;
+    final Rectangle bounds;
+    final float scale;
+    final double[] dx;
+    final double[] dy;
+    final Ticker ticker;
 
-    public ImageBuilder(List<Localisation> localisations, ImageProcessor[] images, int image,
-        Rectangle bounds, float scale, double[] dx, double[] dy) {
+    ImageBuilder(List<Localisation> localisations, ImageProcessor[] images, int image,
+        Rectangle bounds, float scale, double[] dx, double[] dy, Ticker ticker) {
       this.localisations = localisations;
       this.images = images;
       this.image = image;
@@ -246,54 +246,101 @@ public class DriftCalculator implements PlugIn {
       this.scale = scale;
       this.dx = dx;
       this.dy = dy;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
-      incrementProgress();
       final ImageJImagePeakResults blockImage = newImage(bounds, scale);
       for (final Localisation r : localisations) {
         blockImage.add(r.time, (float) (r.x + dx[r.time]), (float) (r.y + dy[r.time]), r.signal);
       }
       images[image] = getImage(blockImage);
+      ticker.tick();
     }
   }
 
   /**
    * Prepare the slices in a stack for image correlation.
    */
-  private class ImageFHTInitialiser implements Runnable {
-    ImageStack stack;
-    ImageProcessor[] images;
-    AlignImagesFft aligner;
-    FHT[] fhtImages;
-    int from;
-    int to;
+  private class ImageFhtInitialiser implements Runnable {
+    final ImageStack stack;
+    final ImageProcessor[] images;
+    final AlignImagesFft aligner;
+    final FHT[] fhtImages;
+    final int from;
+    final int to;
+    final Ticker ticker;
 
-    public ImageFHTInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
-        FHT[] fhtImages, int from, int to) {
+    public ImageFhtInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
+        FHT[] fhtImages, int from, int to, final Ticker ticker) {
       this.stack = stack;
       this.images = images;
       this.aligner = aligner;
       this.fhtImages = fhtImages;
       this.from = from;
       this.to = to;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
       for (int i = from; i < to && i < images.length; i++) {
-        incrementProgress();
         images[i] = stack.getProcessor(i + 1);
         AlignImagesFft.applyWindowSeparable(images[i], WindowMethod.TUKEY);
         fhtImages[i] = aligner.transformTarget(images[i], WindowMethod.NONE);
+        ticker.tick();
       }
+    }
+  }
+
+  /**
+   * Used to precalculate the localisation signal and store it with T,X,Y values with double
+   * precision.
+   */
+  private static class Spot {
+    final int time;
+    final double x;
+    final double y;
+    final double signal;
+
+    Spot(int time, double x, double y, double signal) {
+      this.time = time;
+      this.x = x;
+      this.y = y;
+      this.signal = signal;
+    }
+
+    static int compare(Spot r1, Spot r2) {
+      // Sort in time order
+      if (r1.time == r2.time) {
+        // ... then signal
+        return Double.compare(r2.signal, r1.signal);
+      }
+      return (r1.time < r2.time) ? -1 : 1;
+    }
+  }
+
+  /**
+   * Used to precalculate the localisation signal and store it with T,X,Y values.
+   */
+  private static class Localisation {
+    final int time;
+    final float x;
+    final float y;
+    final float signal;
+
+    Localisation(int time, float x, float y, float signal) {
+      this.time = time;
+      this.x = x;
+      this.y = y;
+      this.signal = signal;
     }
   }
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     // Require some fit results and selected regions
     if (MemoryPeakResults.isMemoryEmpty()) {
@@ -816,17 +863,14 @@ public class DriftCalculator implements PlugIn {
     final float maxy = bounds.y + bounds.height;
 
     // Find spots within the ROI
-    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-      @Override
-      public void executeXyr(float x, float y, PeakResult result) {
-        if (x > minx && x < maxx && y > miny && y < maxy) {
-          list.add(new Spot(result.getFrame(), x, y, result.getIntensity()));
-        }
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
+      if (x > minx && x < maxx && y > miny && y < maxy) {
+        list.add(new Spot(result.getFrame(), x, y, result.getIntensity()));
       }
     });
 
     // For each frame pick the strongest spot
-    Collections.sort(list);
+    Collections.sort(list, Spot::compare);
 
     final TurboList<Spot> newList = new TurboList<>(list.size());
 
@@ -1339,12 +1383,11 @@ public class DriftCalculator implements PlugIn {
     final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    progressCounter = 0;
-    totalCounter = images.length * 2;
+    Ticker ticker = Ticker.createStarted(tracker, images.length * 2, true);
 
     for (int i = 0; i < images.length; i++) {
-      futures.add(
-          threadPool.submit(new ImageBuilder(blocks.get(i), images, i, bounds, scale, dx, dy)));
+      futures.add(threadPool
+          .submit(new ImageBuilder(blocks.get(i), images, i, bounds, scale, dx, dy, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
@@ -1364,7 +1407,7 @@ public class DriftCalculator implements PlugIn {
     }
 
     return calculateDrift(blockT, scale, dx, dy, originalDriftTimePoints, smoothing, iterations,
-        images, allIp, true);
+        images, allIp, true, ticker);
   }
 
   /**
@@ -1381,11 +1424,13 @@ public class DriftCalculator implements PlugIn {
    * @param reference The reference image
    * @param includeCurrentDrift Set to true if the input images already have the current drift
    *        applied. The new drift will be added to the current drift.
+   * @param ticker the ticker
    * @return the change in the drift
    */
   private double calculateDrift(int[] imageT, float scale, double[] dx, double[] dy,
       double[] originalDriftTimePoints, double smoothing, int iterations,
-      final ImageProcessor[] images, FloatProcessor reference, boolean includeCurrentDrift) {
+      final ImageProcessor[] images, FloatProcessor reference, boolean includeCurrentDrift,
+      Ticker ticker) {
     // Align
     tracker.status("Aligning images");
     final AlignImagesFft aligner = new AlignImagesFft();
@@ -1400,7 +1445,7 @@ public class DriftCalculator implements PlugIn {
     final int imagesPerThread = getImagesPerThread(images);
     for (int i = 0; i < images.length; i += imagesPerThread) {
       futures.add(threadPool.submit(new ImageAligner(aligner, images, imageT, alignBounds,
-          alignments, i, i + imagesPerThread)));
+          alignments, i, i + imagesPerThread, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
     tracker.progress(1);
@@ -1520,8 +1565,7 @@ public class DriftCalculator implements PlugIn {
     final FHT[] fhtImages = new FHT[stack.getSize()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    progressCounter = 0;
-    totalCounter = images.length;
+    Ticker ticker = Ticker.createStarted(tracker, images.length, true);
 
     final int imagesPerThread = getImagesPerThread(images);
     final AlignImagesFft aligner = new AlignImagesFft();
@@ -1530,8 +1574,8 @@ public class DriftCalculator implements PlugIn {
     // actually be used for alignment, it is a reference for the FHT size
     aligner.initialiseReference(referenceIp, WindowMethod.NONE, false);
     for (int i = 0; i < images.length; i += imagesPerThread) {
-      futures.add(threadPool.submit(
-          new ImageFHTInitialiser(stack, images, aligner, fhtImages, i, i + imagesPerThread)));
+      futures.add(threadPool.submit(new ImageFhtInitialiser(stack, images, aligner, fhtImages, i,
+          i + imagesPerThread, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
     tracker.progress(1);
@@ -1605,16 +1649,15 @@ public class DriftCalculator implements PlugIn {
   private double calculateDriftUsingImageStack(FloatProcessor reference, ImageProcessor[] images,
       FHT[] fhtImages, int[] blockT, double[] dx, double[] dy, double[] originalDriftTimePoints,
       double smoothing, int iterations) {
-    progressCounter = 0;
-    totalCounter = images.length;
+    Ticker ticker = Ticker.createStarted(tracker, images.length, true);
 
     if (reference == null) {
       // Construct images using the current drift
       tracker.status("Constructing reference image");
 
-      // Built an image using the current drift
+      // Build an image using the current drift
       final List<Future<?>> futures = new LinkedList<>();
-      totalCounter = images.length * 2;
+      ticker = Ticker.createStarted(tracker, images.length * 2, true);
 
       final ImageProcessor[] blockIp = new ImageProcessor[images.length];
       final double[] threadDx = new double[images.length];
@@ -1626,8 +1669,8 @@ public class DriftCalculator implements PlugIn {
 
       final int imagesPerThread = getImagesPerThread(images);
       for (int i = 0; i < images.length; i += imagesPerThread) {
-        futures.add(threadPool.submit(
-            new ImageTranslator(images, blockIp, threadDx, threadDy, i, i + imagesPerThread)));
+        futures.add(threadPool.submit(new ImageTranslator(images, blockIp, threadDx, threadDy, i,
+            i + imagesPerThread, ticker)));
       }
       ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
@@ -1642,51 +1685,6 @@ public class DriftCalculator implements PlugIn {
     AlignImagesFft.applyWindowSeparable(reference, WindowMethod.TUKEY);
 
     return calculateDrift(blockT, 1f, dx, dy, originalDriftTimePoints, smoothing, iterations,
-        fhtImages, reference, false);
-  }
-
-  /**
-   * Used to precalculate the localisation signal and store it with T,X,Y values with double
-   * precision.
-   */
-  private static class Spot implements Comparable<Spot> {
-    final int time;
-    final double x;
-    final double y;
-    final double signal;
-
-    Spot(int time, double x, double y, double signal) {
-      this.time = time;
-      this.x = x;
-      this.y = y;
-      this.signal = signal;
-    }
-
-    @Override
-    public int compareTo(Spot that) {
-      // Sort in time order
-      if (this.time == that.time) {
-        // ... then signal
-        return Double.compare(that.signal, this.signal);
-      }
-      return (this.time < that.time) ? -1 : 1;
-    }
-  }
-
-  /**
-   * Used to precalculate the localisation signal and store it with T,X,Y values.
-   */
-  private static class Localisation {
-    final int time;
-    final float x;
-    final float y;
-    final float signal;
-
-    Localisation(int time, float x, float y, float signal) {
-      this.time = time;
-      this.x = x;
-      this.y = y;
-      this.signal = signal;
-    }
+        fhtImages, reference, false, ticker);
   }
 }

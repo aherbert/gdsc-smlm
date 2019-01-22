@@ -222,7 +222,7 @@ public class MeanVarianceTest implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (ImageJUtils.isExtraOptions()) {
       final ImagePlus imp = WindowManager.getCurrentImage();

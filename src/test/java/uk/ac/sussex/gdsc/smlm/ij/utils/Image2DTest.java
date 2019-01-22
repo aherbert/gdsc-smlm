@@ -31,9 +31,9 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
 public abstract class Image2DTest {
-  protected abstract Image2D createData(int w, int h);
+  protected abstract Image2D createData(int width, int height);
 
-  protected abstract Image2D createEmptyData(int w, int h);
+  protected abstract Image2D createEmptyData(int width, int height);
 
   @Test
   public void canCrop() {
@@ -42,27 +42,27 @@ public abstract class Image2DTest {
     canCrop(0, 0, 1, 2);
   }
 
-  private void canCrop(int x, int y, int w, int h) {
-    final Image2D image = createData(x + w + 1, y + h + 1);
+  private void canCrop(int x, int y, int width, int height) {
+    final Image2D image = createData(x + width + 1, y + height + 1);
     final ImageProcessor stack = image.getImageProcessor();
 
-    final Image2D croppedData = image.crop(x, y, w, h);
-    Assertions.assertEquals(croppedData.getWidth(), w);
-    Assertions.assertEquals(croppedData.getHeight(), h);
+    final Image2D croppedData = image.crop(x, y, width, height);
+    Assertions.assertEquals(croppedData.getWidth(), width);
+    Assertions.assertEquals(croppedData.getHeight(), height);
 
-    final Image2D croppedData2 = FloatImage2D.crop(stack, x, y, w, h, null);
+    final Image2D croppedData2 = FloatImage2D.crop(stack, x, y, width, height, null);
     assertEquals(croppedData, croppedData2);
 
-    final ImageProcessor croppedStack = image.cropToProcessor(x, y, w, h);
-    Assertions.assertEquals(croppedStack.getWidth(), w);
-    Assertions.assertEquals(croppedStack.getHeight(), h);
+    final ImageProcessor croppedStack = image.cropToProcessor(x, y, width, height);
+    Assertions.assertEquals(croppedStack.getWidth(), width);
+    Assertions.assertEquals(croppedStack.getHeight(), height);
 
     assertEquals(croppedData, new FloatImage2D(croppedStack));
 
     // Test it is the correct region
     ImageProcessor fp = image.getImageProcessor();
 
-    fp.setRoi(x, y, w, h);
+    fp.setRoi(x, y, width, height);
     fp = fp.crop();
     final float[] e = (float[]) fp.getPixels();
 
@@ -83,31 +83,31 @@ public abstract class Image2DTest {
     canInsert(0, 0, 1, 1);
   }
 
-  private void canInsert(int x, int y, int w, int h) {
+  private void canInsert(int x, int y, int width, int height) {
     // This test assumes that copy and crop work!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createData(x + w + pad, y + h + pad);
+      final Image2D image = createData(x + width + pad, y + height + pad);
       final Image2D image2 = image.copy();
       final Image2D image3 = image.copy();
 
-      final Image2D blank = createEmptyData(w, h);
+      final Image2D blank = createEmptyData(width, height);
 
       image.insert(x, y, blank);
 
-      Image2D croppedData = image.crop(x, y, w, h);
+      Image2D croppedData = image.crop(x, y, width, height);
 
       assertEquals(croppedData, blank);
 
       final ImageProcessor blankStack = blank.getImageProcessor();
       image2.insert(x, y, blankStack);
 
-      croppedData = image2.crop(x, y, w, h);
+      croppedData = image2.crop(x, y, width, height);
 
       assertEquals(croppedData, blank);
 
       image3.insert(x, y, blankStack);
 
-      croppedData = image3.crop(x, y, w, h);
+      croppedData = image3.crop(x, y, width, height);
 
       assertEquals(croppedData, blank);
     }
@@ -127,16 +127,16 @@ public abstract class Image2DTest {
     canFindMin(0, 0, 1, 1);
   }
 
-  private void canFindMin(int x, int y, int w, int h) {
+  private void canFindMin(int x, int y, int width, int height) {
     // This test assumes that crop works!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createData(x + w + pad, y + h + pad);
+      final Image2D image = createData(x + width + pad, y + height + pad);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
       final int i = findMinIndex(croppedData);
       final int[] xy = croppedData.getXy(i);
 
-      final int j = image.findMinIndex(x, y, w, h);
+      final int j = image.findMinIndex(x, y, width, height);
       final int[] xy2 = image.getXy(j);
 
       Assertions.assertEquals(xy[0] + x, xy2[0]);
@@ -158,16 +158,16 @@ public abstract class Image2DTest {
     canFindMax(0, 0, 1, 1);
   }
 
-  private void canFindMax(int x, int y, int w, int h) {
+  private void canFindMax(int x, int y, int width, int height) {
     // This test assumes that crop works!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createData(x + w + pad, y + h + pad);
+      final Image2D image = createData(x + width + pad, y + height + pad);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
       final int i = findMaxIndex(croppedData);
       final int[] xy = croppedData.getXy(i);
 
-      final int j = image.findMaxIndex(x, y, w, h);
+      final int j = image.findMaxIndex(x, y, width, height);
       final int[] xy2 = image.getXy(j);
 
       Assertions.assertEquals(xy[0] + x, xy2[0]);
@@ -194,14 +194,14 @@ public abstract class Image2DTest {
     canComputeSum(0, 0, 1, 1);
   }
 
-  private void canComputeSum(int x, int y, int w, int h) {
+  private void canComputeSum(int x, int y, int width, int height) {
     // This test assumes that crop works!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createData(x + w + pad, y + h + pad);
+      final Image2D image = createData(x + width + pad, y + height + pad);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
       final double e = sum(croppedData);
-      final double o = image.computeSum(x, y, w, h);
+      final double o = image.computeSum(x, y, width, height);
 
       Assertions.assertEquals(o, e);
     }
@@ -209,12 +209,12 @@ public abstract class Image2DTest {
 
   @Test
   public void canComputeRollingSumTable() {
-    final int w = 2;
-    final int h = 3;
-    final Image2D image = createData(w, h);
+    final int width = 2;
+    final int height = 3;
+    final Image2D image = createData(width, height);
     final double[] table = image.computeRollingSumTable(null);
-    for (int hh = 1, i = 0; hh <= h; hh++) {
-      for (int ww = 1; ww <= w; ww++) {
+    for (int hh = 1, i = 0; hh <= height; hh++) {
+      for (int ww = 1; ww <= width; ww++) {
         final double e = image.computeSum(0, 0, ww, hh);
         final double o = table[i++];
         Assertions.assertEquals(e, o, 1e-3);
@@ -243,28 +243,28 @@ public abstract class Image2DTest {
     canComputeSumUsingTable(0, 0, 1, 1);
   }
 
-  private void canComputeSumUsingTable(int x, int y, int w, int h) {
+  private void canComputeSumUsingTable(int x, int y, int width, int height) {
     // This test assumes that crop works!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createData(x + w + pad, y + h + pad);
+      final Image2D image = createData(x + width + pad, y + height + pad);
       final double[] table = image.computeRollingSumTable(null);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
       final double e = sum(croppedData);
 
-      testComputeSum(e, image, table, x, y, w, h);
+      testComputeSum(e, image, table, x, y, width, height);
     }
   }
 
-  private static void testComputeSum(double e, Image2D image, double[] table, int x, int y, int w,
-      int h) {
-    final double o = image.computeSum(table, x, y, w, h);
-    final double o2 = image.computeSumFast(table, x, y, w, h);
+  private static void testComputeSum(double exp, Image2D image, double[] table, int x, int y,
+      int width, int height) {
+    final double o1 = image.computeSum(table, x, y, width, height);
+    final double o2 = image.computeSumFast(table, x, y, width, height);
 
     // This may be different due to floating point error
     // but we are adding integers so it should be OK
-    Assertions.assertEquals(e, o);
-    Assertions.assertEquals(e, o2);
+    Assertions.assertEquals(exp, o1);
+    Assertions.assertEquals(exp, o2);
   }
 
   @Test
@@ -274,20 +274,20 @@ public abstract class Image2DTest {
     canFill(0, 0, 1, 1);
   }
 
-  private void canFill(int x, int y, int w, int h) {
+  private void canFill(int x, int y, int width, int height) {
     // This test assumes that copy, crop and insert work!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createEmptyData(x + w + pad, y + h + pad);
+      final Image2D image = createEmptyData(x + width + pad, y + height + pad);
       image.fill(1);
-      image.fill(x, y, w, h, 2);
+      image.fill(x, y, width, height, 2);
 
-      final Image2D image2 = createEmptyData(x + w + pad, y + h + pad);
+      final Image2D image2 = createEmptyData(x + width + pad, y + height + pad);
       image2.fill(1);
-      final Image2D blank = createEmptyData(w, h);
+      final Image2D blank = createEmptyData(width, height);
       blank.fill(2);
       image2.insert(x, y, blank);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
 
       assertEquals(croppedData, blank);
 
@@ -302,21 +302,21 @@ public abstract class Image2DTest {
     canFillOutside(0, 0, 1, 1);
   }
 
-  private void canFillOutside(int x, int y, int w, int h) {
+  private void canFillOutside(int x, int y, int width, int height) {
     // This test assumes that copy, crop and insert work!
     for (final int pad : new int[] {0, 1}) {
-      final Image2D image = createEmptyData(x + w + pad, y + h + pad);
+      final Image2D image = createEmptyData(x + width + pad, y + height + pad);
       image.fill(1);
-      image.fillOutside(x, y, w, h, 2);
+      image.fillOutside(x, y, width, height, 2);
 
-      final Image2D image2 = createEmptyData(x + w + pad, y + h + pad);
+      final Image2D image2 = createEmptyData(x + width + pad, y + height + pad);
       image2.fill(2);
 
-      final Image2D blank = createEmptyData(w, h);
+      final Image2D blank = createEmptyData(width, height);
       blank.fill(1);
       image2.insert(x, y, blank);
 
-      final Image2D croppedData = image.crop(x, y, w, h);
+      final Image2D croppedData = image.crop(x, y, width, height);
 
       assertEquals(croppedData, blank);
 
@@ -324,10 +324,10 @@ public abstract class Image2DTest {
     }
   }
 
-  private static void assertEquals(Image2D a, Image2D b) {
-    for (int i = a.getDataLength(); i-- > 0;) {
-      if (a.get(i) != b.get(i)) {
-        Assertions.assertEquals(a.get(i), b.get(i), "Not equal @ " + i);
+  private static void assertEquals(Image2D i1, Image2D i2) {
+    for (int i = i1.getDataLength(); i-- > 0;) {
+      if (i1.get(i) != i2.get(i)) {
+        Assertions.assertEquals(i1.get(i), i2.get(i), "Not equal @ " + i);
       }
     }
   }

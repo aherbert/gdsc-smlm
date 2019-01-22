@@ -35,8 +35,8 @@ import org.opentest4j.AssertionFailedError;
  */
 @SuppressWarnings({"javadoc"})
 public class ToleranceCheckerTest {
-  double NONE = ToleranceChecker.IGNORE_TOLERANCE;
-  int IGNORE = ToleranceChecker.IGNORE_MAX_ITERATIONS;
+  static final double NONE = ToleranceChecker.IGNORE_TOLERANCE;
+  static final int IGNORE = ToleranceChecker.IGNORE_MAX_ITERATIONS;
 
   @Test
   public void throwsIfCannotConverge() {
@@ -130,18 +130,18 @@ public class ToleranceCheckerTest {
     final ToleranceChecker tc = new ToleranceChecker(minimiseValue, relativeValue, absoluteValue,
         relativeParameters, absoluteParameters, maxIterations);
 
-    double v = 10;
-    double v2 = 1 + v;
-    double p = 20;
-    double[] p2 = new double[] {1 + p};
+    double value = 10;
+    double v2 = 1 + value;
+    double param = 20;
+    double[] p2 = new double[] {1 + param};
     for (int i = 0; i < 20; i++) {
       final double v1 = v2;
       final double[] p1 = p2;
-      v *= 0.5;
-      p *= 0.5;
-      v2 = v1 + dir * v;
+      value *= 0.5;
+      param *= 0.5;
+      v2 = v1 + dir * value;
       // logger.fine(FunctionUtils.getSupplier("v2 = %f", v2);
-      p2 = new double[] {p1[0] + dir * p};
+      p2 = new double[] {p1[0] + dir * param};
       final int observed = tc.converged(v1, p1, v2, p2);
       if (observed != 0) {
         Assertions.assertEquals(expected, observed);

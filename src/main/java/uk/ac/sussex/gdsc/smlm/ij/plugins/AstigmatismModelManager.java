@@ -60,7 +60,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.model.GaussianPSFModel;
+import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -284,7 +284,7 @@ public class AstigmatismModelManager implements PlugIn {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     String[] options = OPTIONS;
     final AstigmatismModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
@@ -521,7 +521,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addNumericField("Calibration (nm/px)", calibration.getNmPerPixel(), 2);
     // gd.addNumericField("Exposure_time (ms)", calibration.getExposureTime(), 2);
 
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
 
     final FitEngineConfigurationProvider provider =
         new PeakFit.SimpleFitEngineConfigurationProvider(config);
@@ -557,7 +557,7 @@ public class AstigmatismModelManager implements PlugIn {
     calibration.setNmPerPixel(gd.getNextNumber());
     calibration.setExposureTime(100); // Arbitrary
     fitConfig.setCalibration(calibration.getCalibration());
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     pluginSettings.setLogFitProgress(gd.getNextBoolean());
@@ -1512,7 +1512,7 @@ public class AstigmatismModelManager implements PlugIn {
     double z;
     int width;
     double cx;
-    GaussianPSFModel psf;
+    GaussianPsfModel psf;
     Plot plot;
 
     private double lastZ = -1;
@@ -1525,7 +1525,7 @@ public class AstigmatismModelManager implements PlugIn {
       this.range = range;
       this.width = width;
       cx = width * 0.5;
-      psf = new GaussianPSFModel(zmodel);
+      psf = new GaussianPsfModel(zmodel);
       this.plot = plot;
     }
 

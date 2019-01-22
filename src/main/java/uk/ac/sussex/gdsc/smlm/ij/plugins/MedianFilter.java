@@ -24,7 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -54,7 +56,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MedianFilter implements PlugInFilter {
   private static final String TITLE = "Median Filter";
-  private final int FLAGS = DOES_8G | DOES_16 | DOES_32;
+  private static final int FLAGS = DOES_8G | DOES_16 | DOES_32;
 
   private static int radius = 50;
   private static int interval = 12;
@@ -63,140 +65,6 @@ public class MedianFilter implements PlugInFilter {
   private static float bias = 500;
 
   private ImagePlus imp;
-  private int counter;
-  private int size;
-
-  @Override
-  public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
-
-    if (imp == null) {
-      IJ.noImage();
-      return DONE;
-    }
-    this.imp = imp;
-    return showDialog();
-  }
-
-  @Override
-  public void run(ImageProcessor ip) {
-    final long start = System.nanoTime();
-
-    final ImageStack stack = imp.getImageStack();
-
-    final int width = stack.getWidth();
-    final int height = stack.getHeight();
-    size = width * height;
-    final float[][] imageStack = new float[stack.getSize()][];
-    final float[] mean = new float[imageStack.length];
-
-    // Get the mean for each frame and normalise the data using the mean
-    final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
-    List<Future<?>> futures = new LinkedList<>();
-
-    counter = 0;
-    IJ.showStatus("Calculating means...");
-    for (int n = 1; n <= stack.getSize(); n++) {
-      futures.add(threadPool.submit(new ImageNormaliser(stack, imageStack, mean, n)));
-    }
-
-    // Finish processing data
-    ConcurrencyUtils.waitForCompletionUnchecked(futures);
-
-    futures = new LinkedList<>();
-
-    counter = 0;
-    IJ.showStatus("Calculating medians...");
-    for (int i = 0; i < size; i += blockSize) {
-      futures.add(threadPool
-          .submit(new ImageGenerator(imageStack, mean, i, FastMath.min(i + blockSize, size))));
-    }
-
-    // Finish processing data
-    ConcurrencyUtils.waitForCompletionUnchecked(futures);
-
-    if (ImageJUtils.isInterrupted()) {
-      return;
-    }
-
-    if (subtract) {
-      counter = 0;
-      IJ.showStatus("Subtracting medians...");
-      for (int n = 1; n <= stack.getSize(); n++) {
-        futures.add(threadPool.submit(new ImageFilter(stack, imageStack, n)));
-      }
-
-      // Finish processing data
-      ConcurrencyUtils.waitForCompletionUnchecked(futures);
-    }
-
-    // Update the image
-    final ImageStack outputStack =
-        new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
-    for (int n = 1; n <= stack.getSize(); n++) {
-      outputStack.setPixels(imageStack[n - 1], n);
-    }
-
-    imp.setStack(outputStack);
-    imp.updateAndDraw();
-
-    IJ.showTime(imp, TimeUnit.NANOSECONDS.toMillis(start), "Completed");
-    final long nanoseconds = System.nanoTime() - start;
-    ImageJUtils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius,
-        interval, blockSize, TextUtils.millisToString(nanoseconds),
-        TextUtils.nanosToString(Math.round(nanoseconds / (double) imp.getStackSize())));
-  }
-
-  private int showDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
-
-    gd.addMessage("Compute the median using a rolling window at set intervals.\n"
-        + "Blocks of pixels are processed on separate threads.");
-
-    gd.addSlider("Radius", 10, 100, radius);
-    gd.addSlider("Interval", 10, 30, interval);
-    gd.addSlider("Block_size", 1, 32, blockSize);
-    gd.addCheckbox("Subtract", subtract);
-    gd.addSlider("Bias", 0, 1000, bias);
-
-    gd.showDialog();
-
-    if (gd.wasCanceled()) {
-      return DONE;
-    }
-
-    radius = (int) Math.abs(gd.getNextNumber());
-    interval = (int) Math.abs(gd.getNextNumber());
-    blockSize = (int) Math.abs(gd.getNextNumber());
-    if (blockSize < 1) {
-      blockSize = 1;
-    }
-    subtract = gd.getNextBoolean();
-    bias = (float) Math.abs(gd.getNextNumber());
-
-    if (gd.invalidNumber() || interval < 1 || radius < 1) {
-      return DONE;
-    }
-
-    // Check the window size is smaller than the stack size
-    if (imp.getStackSize() < 2 * radius + 1) {
-      IJ.error(TITLE, "The window size is larger than the stack size.\n"
-          + "This is equal to a z-stack median projection.");
-      return DONE;
-    }
-
-    return FLAGS;
-  }
-
-  private synchronized void showProgress() {
-    IJ.showProgress(counter, size);
-    counter += blockSize;
-  }
-
-  private synchronized void showProgressSingle() {
-    IJ.showProgress(counter++, size);
-  }
 
   /**
    * Extract the data for a specified slice, calculate the mean and then normalise by the mean.
@@ -204,33 +72,35 @@ public class MedianFilter implements PlugInFilter {
    * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
    * that are manipulated should have synchronized methods.
    */
-  private class ImageNormaliser implements Runnable {
+  private static class ImageNormaliser implements Runnable {
     final ImageStack inputStack;
     final float[][] imageStack;
     final float[] mean;
-    final int n;
+    final int slice;
+    final Ticker ticker;
 
-    public ImageNormaliser(ImageStack inputStack, float[][] imageStack, float[] mean, int n) {
+    public ImageNormaliser(ImageStack inputStack, float[][] imageStack, float[] mean, int slice,
+        Ticker ticker) {
       this.inputStack = inputStack;
       this.imageStack = imageStack;
       this.mean = mean;
-      this.n = n;
+      this.slice = slice;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
-      showProgressSingle();
-
       final float[] data =
-          imageStack[n - 1] = ImageJImageConverter.getData(inputStack.getProcessor(n));
+          imageStack[slice - 1] = ImageJImageConverter.getData(inputStack.getProcessor(slice));
       double sum = 0;
       for (final float f : data) {
         sum += f;
       }
-      final float av = mean[n - 1] = (float) (sum / data.length);
+      final float av = mean[slice - 1] = (float) (sum / data.length);
       for (int i = 0; i < data.length; i++) {
         data[i] /= av;
       }
+      ticker.tick();
     }
   }
 
@@ -242,17 +112,19 @@ public class MedianFilter implements PlugInFilter {
    * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
    * that are manipulated should have synchronized methods.
    */
-  private class ImageGenerator implements Runnable {
+  private static class ImageGenerator implements Runnable {
     final float[][] imageStack;
     final float[] mean;
     final int start;
     final int end;
+    final Ticker ticker;
 
-    public ImageGenerator(float[][] imageStack, float[] mean, int start, int end) {
+    public ImageGenerator(float[][] imageStack, float[] mean, int start, int end, Ticker ticker) {
       this.imageStack = imageStack;
       this.mean = mean;
       this.start = start;
       this.end = end;
+      this.ticker = ticker;
     }
 
     @Override
@@ -260,7 +132,6 @@ public class MedianFilter implements PlugInFilter {
       if (IJ.escapePressed()) {
         return;
       }
-      showProgress();
 
       // For each pixel extract the time line of pixel data
       final int nSlices = imageStack.length;
@@ -269,8 +140,8 @@ public class MedianFilter implements PlugInFilter {
       if (nPixels == 1) {
         if (interval == 1) {
           // The rolling window operates effectively in linear time so use this with an interval of
-          // 1.
-          // There is no need for interpolation and the data can be written directly to the output.
+          // 1. There is no need for interpolation and the data can be written directly to the
+          // output.
           final int window = 2 * radius + 1;
           final float[] data = new float[window];
           for (int slice = 0; slice < window; slice++) {
@@ -318,9 +189,9 @@ public class MedianFilter implements PlugInFilter {
 
           // Interpolate
           for (int slice = 0; slice < nSlices; slice += interval) {
-            final int end = FastMath.min(slice + interval, nSlices - 1);
-            final float increment = (data[end] - data[slice]) / (end - slice);
-            for (int s = slice + 1, i = 1; s < end; s++, i++) {
+            final int endSlice = FastMath.min(slice + interval, nSlices - 1);
+            final float increment = (data[endSlice] - data[slice]) / (endSlice - slice);
+            for (int s = slice + 1, i = 1; s < endSlice; s++, i++) {
               data[s] = data[slice] + increment * i;
             }
           }
@@ -403,11 +274,11 @@ public class MedianFilter implements PlugInFilter {
         // Interpolate
         final float[] increment = new float[nPixels];
         for (int slice = 0; slice < nSlices; slice += interval) {
-          final int end = FastMath.min(slice + interval, nSlices - 1);
+          final int endSlice = FastMath.min(slice + interval, nSlices - 1);
           for (int pixel = 0; pixel < nPixels; pixel++) {
-            increment[pixel] = (data[pixel][end] - data[pixel][slice]) / (end - slice);
+            increment[pixel] = (data[pixel][endSlice] - data[pixel][slice]) / (endSlice - slice);
           }
-          for (int s = slice + 1, i = 1; s < end; s++, i++) {
+          for (int s = slice + 1, i = 1; s < endSlice; s++, i++) {
             for (int pixel = 0; pixel < nPixels; pixel++) {
               data[pixel][s] = data[pixel][slice] + increment[pixel] * i;
             }
@@ -422,6 +293,8 @@ public class MedianFilter implements PlugInFilter {
           }
         }
       }
+
+      ticker.tick(nPixels);
     }
   }
 
@@ -434,24 +307,149 @@ public class MedianFilter implements PlugInFilter {
   private class ImageFilter implements Runnable {
     final ImageStack inputStack;
     final float[][] imageStack;
-    final int n;
+    final int slice;
+    final Ticker ticker;
 
-    public ImageFilter(ImageStack inputStack, float[][] imageStack, int n) {
+    public ImageFilter(ImageStack inputStack, float[][] imageStack, int slice, Ticker ticker) {
       this.inputStack = inputStack;
       this.imageStack = imageStack;
-      this.n = n;
+      this.slice = slice;
+      this.ticker = ticker;
     }
 
     @Override
     public void run() {
-      showProgressSingle();
-
-      final float[] data = ImageJImageConverter.getData(inputStack.getProcessor(n));
-      final float[] filter = imageStack[n - 1];
+      final float[] data = ImageJImageConverter.getData(inputStack.getProcessor(slice));
+      final float[] filter = imageStack[slice - 1];
       final float b = bias;
       for (int i = 0; i < data.length; i++) {
         filter[i] = data[i] - filter[i] + b;
       }
+      ticker.tick();
     }
+  }
+
+  @Override
+  public int setup(String arg, ImagePlus imp) {
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
+
+    if (imp == null) {
+      IJ.noImage();
+      return DONE;
+    }
+    this.imp = imp;
+    return showDialog(this);
+  }
+
+  @Override
+  public void run(ImageProcessor ip) {
+    final long start = System.nanoTime();
+
+    final ImageJTrackProgress trackProgress = new ImageJTrackProgress();
+    final ImageStack stack = imp.getImageStack();
+
+    final int width = stack.getWidth();
+    final int height = stack.getHeight();
+    final float[][] imageStack = new float[stack.getSize()][];
+    final float[] mean = new float[imageStack.length];
+
+    // Get the mean for each frame and normalise the data using the mean
+    final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+    List<Future<?>> futures = new LinkedList<>();
+
+    Ticker ticker = Ticker.createStarted(trackProgress, stack.getSize(), true);
+    IJ.showStatus("Calculating means...");
+    for (int n = 1; n <= stack.getSize(); n++) {
+      futures.add(threadPool.submit(new ImageNormaliser(stack, imageStack, mean, n, ticker)));
+    }
+
+    // Finish processing data
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
+
+    futures = new LinkedList<>();
+
+    final int size = width * height;
+    ticker = Ticker.createStarted(trackProgress, size, true);
+    IJ.showStatus("Calculating medians...");
+    for (int i = 0; i < size; i += blockSize) {
+      futures.add(threadPool.submit(
+          new ImageGenerator(imageStack, mean, i, FastMath.min(i + blockSize, size), ticker)));
+    }
+
+    // Finish processing data
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
+
+    if (ImageJUtils.isInterrupted()) {
+      return;
+    }
+
+    if (subtract) {
+      IJ.showStatus("Subtracting medians...");
+      ticker = Ticker.createStarted(trackProgress, stack.getSize(), true);
+      for (int n = 1; n <= stack.getSize(); n++) {
+        futures.add(threadPool.submit(new ImageFilter(stack, imageStack, n, ticker)));
+      }
+
+      // Finish processing data
+      ConcurrencyUtils.waitForCompletionUnchecked(futures);
+    }
+
+    // Update the image
+    final ImageStack outputStack =
+        new ImageStack(stack.getWidth(), stack.getHeight(), stack.getSize());
+    for (int n = 1; n <= stack.getSize(); n++) {
+      outputStack.setPixels(imageStack[n - 1], n);
+    }
+
+    imp.setStack(outputStack);
+    imp.updateAndDraw();
+
+    IJ.showTime(imp, TimeUnit.NANOSECONDS.toMillis(start), "Completed");
+    final long nanoseconds = System.nanoTime() - start;
+    ImageJUtils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius,
+        interval, blockSize, TextUtils.millisToString(nanoseconds),
+        TextUtils.nanosToString(Math.round(nanoseconds / (double) imp.getStackSize())));
+  }
+
+  private static int showDialog(MedianFilter plugin) {
+    final GenericDialog gd = new GenericDialog(TITLE);
+    gd.addHelp(About.HELP_URL);
+
+    gd.addMessage("Compute the median using a rolling window at set intervals.\n"
+        + "Blocks of pixels are processed on separate threads.");
+
+    gd.addSlider("Radius", 10, 100, radius);
+    gd.addSlider("Interval", 10, 30, interval);
+    gd.addSlider("Block_size", 1, 32, blockSize);
+    gd.addCheckbox("Subtract", subtract);
+    gd.addSlider("Bias", 0, 1000, bias);
+
+    gd.showDialog();
+
+    if (gd.wasCanceled()) {
+      return DONE;
+    }
+
+    radius = (int) Math.abs(gd.getNextNumber());
+    interval = (int) Math.abs(gd.getNextNumber());
+    blockSize = (int) Math.abs(gd.getNextNumber());
+    if (blockSize < 1) {
+      blockSize = 1;
+    }
+    subtract = gd.getNextBoolean();
+    bias = (float) Math.abs(gd.getNextNumber());
+
+    if (gd.invalidNumber() || interval < 1 || radius < 1) {
+      return DONE;
+    }
+
+    // Check the window size is smaller than the stack size
+    if (plugin.imp.getStackSize() < 2 * radius + 1) {
+      IJ.error(TITLE, "The window size is larger than the stack size.\n"
+          + "This is equal to a z-stack median projection.");
+      return DONE;
+    }
+
+    return FLAGS;
   }
 }

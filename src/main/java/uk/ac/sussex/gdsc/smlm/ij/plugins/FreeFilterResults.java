@@ -74,7 +74,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (MemoryPeakResults.isMemoryEmpty()) {
       // Ask user if they want to show the demo filters

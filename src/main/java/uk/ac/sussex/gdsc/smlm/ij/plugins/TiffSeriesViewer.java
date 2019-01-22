@@ -82,7 +82,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Mode", MODE, inputMode, new OptionListener<Integer>() {

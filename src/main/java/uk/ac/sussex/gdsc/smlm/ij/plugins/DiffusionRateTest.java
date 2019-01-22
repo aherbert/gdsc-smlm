@@ -79,7 +79,6 @@ import java.util.Arrays;
 /**
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
  * plugin so that the diffusion should be equivalent.
- *
  */
 public class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
@@ -93,25 +92,27 @@ public class DiffusionRateTest implements PlugIn {
   /** The last simulated dataset. */
   static String[] lastSimulatedDataset = new String[2];
 
-  /**
-   * Checks if the named dataset was the last simulated dataset.
-   *
-   * @param name the name
-   * @return true, if is simulated
-   */
-  static boolean isSimulated(String name) {
-    for (final String name2 : lastSimulatedDataset) {
-      if (name.equals(name2)) {
-        return true;
-      }
-    }
-    return false;
-  }
+  private CreateDataSettings.Builder settings;
+  private static boolean useConfinement;
+  private static int confinementAttempts = 5;
+  private static int fitN = 20;
+  private static boolean showDiffusionExample;
+  private static double magnification = 5;
+  private static int aggregateSteps = 10;
+  private static int msdAnalysisSteps;
+  private static double precision;
+  private int myAggregateSteps;
+  private int myMsdAnalysisSteps;
+  private boolean extraOptions;
+  private double conversionFactor;
+  private double myPrecision;
+
+  private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   /**
    * Used to aggregate points into results.
    */
-  public class Point {
+  public static class Point {
     /** The id. */
     public int id;
     /** The x. */
@@ -145,50 +146,48 @@ public class DiffusionRateTest implements PlugIn {
     /**
      * Distance 2.
      *
-     * @param p the p
+     * @param point the point
      * @return the double
      */
-    public double distance2(Point p) {
-      final double dx = x - p.x;
-      final double dy = y - p.y;
+    public double distance2(Point point) {
+      final double dx = x - point.x;
+      final double dy = y - point.y;
       return dx * dx + dy * dy;
     }
 
     /**
      * Distance 2.
      *
-     * @param p the p
+     * @param point the point
      * @param error the error
      * @param rand the rand
      * @return the double
      */
-    public double distance2(Point p, double error, RandomGenerator rand) {
-      final double dx = (x + rand.nextGaussian() * error) - (p.x + rand.nextGaussian() * error);
-      final double dy = (y + rand.nextGaussian() * error) - (p.y + rand.nextGaussian() * error);
+    public double distance2(Point point, double error, RandomGenerator rand) {
+      final double dx = (x + rand.nextGaussian() * error) - (point.x + rand.nextGaussian() * error);
+      final double dy = (y + rand.nextGaussian() * error) - (point.y + rand.nextGaussian() * error);
       return dx * dx + dy * dy;
     }
   }
 
-  private CreateDataSettings.Builder settings;
-  private static boolean useConfinement;
-  private static int confinementAttempts = 5;
-  private static int fitN = 20;
-  private static boolean showDiffusionExample;
-  private static double magnification = 5;
-  private static int aggregateSteps = 10;
-  private static int msdAnalysisSteps;
-  private static double precision;
-  private int myAggregateSteps;
-  private int myMsdAnalysisSteps;
-  private boolean extraOptions;
-  private double conversionFactor;
-  private double myPrecision;
-
-  private final WindowOrganiser windowOrganiser = new WindowOrganiser();
+  /**
+   * Checks if the named dataset was the last simulated dataset.
+   *
+   * @param name the name
+   * @return true, if is simulated
+   */
+  static boolean isSimulated(String name) {
+    for (final String name2 : lastSimulatedDataset) {
+      if (name.equals(name2)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if (IJ.controlKeyDown()) {
       simpleTest();
@@ -457,22 +456,22 @@ public class DiffusionRateTest implements PlugIn {
       // For 2D diffusion: d^2 = 4D
       // where: d^2 = mean-square displacement
 
-      double D = best2D[1] / 4.0;
-      final String msg = "2D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec ("
+      double diffCoeff = best2D[1] / 4.0;
+      final String msg = "2D Diffusion rate = " + MathUtils.rounded(diffCoeff, 4) + " um^2 / sec ("
           + TextUtils.nanosToString(nanoseconds) + ")";
       IJ.showStatus(msg);
       ImageJUtils.log(msg);
 
-      D = best3D[1] / 6.0;
-      ImageJUtils.log("3D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec ("
+      diffCoeff = best3D[1] / 6.0;
+      ImageJUtils.log("3D Diffusion rate = " + MathUtils.rounded(diffCoeff, 4) + " um^2 / sec ("
           + TextUtils.nanosToString(nanoseconds) + ")");
     } else {
       fitted2D = fitted3D = null;
     }
 
     // Create plots
-    plotMSD(totalSteps, xValues, yValues2D, lower2D, upper2D, fitted2D, 2);
-    plotMSD(totalSteps, xValues, yValues3D, lower3D, upper3D, fitted3D, 3);
+    plotMsd(totalSteps, xValues, yValues2D, lower2D, upper2D, fitted2D, 2);
+    plotMsd(totalSteps, xValues, yValues3D, lower3D, upper3D, fitted3D, 3);
 
     plotJumpDistances(TITLE, jumpDistances2D, 2, 1);
     plotJumpDistances(TITLE, jumpDistances3D, 3, 1);
@@ -502,9 +501,8 @@ public class DiffusionRateTest implements PlugIn {
    * @param fitted the fitted line
    * @param dimensions the number of dimensions for the jumps
    */
-  private void plotMSD(int totalSteps, double[] xValues, double[] yValues, double[] lower,
+  private void plotMsd(int totalSteps, double[] xValues, double[] yValues, double[] lower,
       double[] upper, PolynomialFunction fitted, int dimensions) {
-    // TODO Auto-generated method stub
     final String title = TITLE + " " + dimensions + "D";
     final Plot2 plot =
         new Plot2(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues);
@@ -863,21 +861,21 @@ public class DiffusionRateTest implements PlugIn {
     }
 
     // Allow dimensions to be changed for testing
-    double l = 0;
+    double length = 0;
     final double[] v = new double[3];
     final int size = 3;
-    final int dim = 3; // Normalise over a different size
-    while (l == 0) {
+    final int dim = 3; // Potentially normalise over a different size
+    while (length == 0) {
       for (int i = 0; i < size; i++) {
         v[i] = rg.nextGaussian();
       }
       for (int i = 0; i < dim; i++) {
-        l += v[i] * v[i];
+        length += v[i] * v[i];
       }
     }
-    l = Math.sqrt(l);
+    length = Math.sqrt(length);
     for (int i = 0; i < size; i++) {
-      v[i] /= l;
+      v[i] /= length;
     }
     return v;
   }
@@ -1002,7 +1000,7 @@ public class DiffusionRateTest implements PlugIn {
     lastSimulatedDataset[1] = results.getName();
     int id = 0;
     int peak = 1;
-    int n = 0;
+    int number = 0;
     double cx = 0;
     double cy = 0;
     // Get the mean square distance
@@ -1011,23 +1009,24 @@ public class DiffusionRateTest implements PlugIn {
     PeakResult last = null;
     for (final Point result : points) {
       final boolean newId = result.id != id;
-      if (n >= myAggregateSteps || newId) {
-        if (n != 0) {
-          double[] xyz = new double[] {cx / n, cy / n};
+      if (number >= myAggregateSteps || newId) {
+        if (number != 0) {
+          double[] xyz = new double[] {cx / number, cy / number};
           if (addError) {
             xyz = addError(xyz, precisionInPixels, random);
           }
-          final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
+          final float[] params =
+              PeakResult.createParams(0, number, (float) xyz[0], (float) xyz[1], 0);
           final float noise = 0.1f;
           final PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X],
-              (int) params[PeakResult.Y], n, 0, noise, 0, params, null, peak, id);
+              (int) params[PeakResult.Y], number, 0, noise, 0, params, null, peak, id);
           results.add(r);
           if (last != null) {
             sum += last.distance2(r);
             count++;
           }
           last = r;
-          n = 0;
+          number = 0;
           cx = cy = 0;
           peak++;
         }
@@ -1037,21 +1036,21 @@ public class DiffusionRateTest implements PlugIn {
           id = result.id;
         }
       }
-      n++;
+      number++;
       cx += result.x;
       cy += result.y;
     }
 
     // Final peak
-    if (n != 0) {
-      double[] xyz = new double[] {cx / n, cy / n};
+    if (number != 0) {
+      double[] xyz = new double[] {cx / number, cy / number};
       if (addError) {
         xyz = addError(xyz, precisionInPixels, random);
       }
-      final float[] params = PeakResult.createParams(0, n, (float) xyz[0], (float) xyz[1], 0);
+      final float[] params = PeakResult.createParams(0, number, (float) xyz[0], (float) xyz[1], 0);
       final float noise = 0.1f;
       final PeakResult r = new ExtendedPeakResult(peak, (int) params[PeakResult.X],
-          (int) params[PeakResult.Y], n, 0, noise, 0, params, null, peak, id);
+          (int) params[PeakResult.Y], number, 0, noise, 0, params, null, peak, id);
       results.add(r);
       if (last != null) {
         sum += last.distance2(r);

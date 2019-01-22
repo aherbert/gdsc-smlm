@@ -67,7 +67,7 @@ public class PoissonGammaFunctionTest {
   static double[] photons = {0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000};
 
   @Test
-  public void cumulativeProbabilityIsOneWithPMF() {
+  public void cumulativeProbabilityIsOneWithPmf() {
     for (final double g : gain) {
       for (final double p : photons) {
         cumulativeProbabilityIsOne(g, p, false);
@@ -76,7 +76,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithPDF() {
+  public void cumulativeProbabilityIsOneWithPdf() {
     for (final double g : gain) {
       for (final double p : photons) {
         cumulativeProbabilityIsOne(g, p, true);

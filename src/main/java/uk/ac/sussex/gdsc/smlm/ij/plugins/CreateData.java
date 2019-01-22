@@ -79,18 +79,18 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
-import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePSFHelper;
+import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.model.ActivationEnergyImageModel;
-import uk.ac.sussex.gdsc.smlm.model.AiryPSFModel;
 import uk.ac.sussex.gdsc.smlm.model.AiryPattern;
+import uk.ac.sussex.gdsc.smlm.model.AiryPsfModel;
 import uk.ac.sussex.gdsc.smlm.model.CompoundMoleculeModel;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
 import uk.ac.sussex.gdsc.smlm.model.FixedLifetimeImageModel;
 import uk.ac.sussex.gdsc.smlm.model.FluorophoreSequenceModel;
-import uk.ac.sussex.gdsc.smlm.model.GaussianPSFModel;
+import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
 import uk.ac.sussex.gdsc.smlm.model.GridDistribution;
 import uk.ac.sussex.gdsc.smlm.model.ImageModel;
 import uk.ac.sussex.gdsc.smlm.model.ImagePsfModel;
@@ -99,7 +99,7 @@ import uk.ac.sussex.gdsc.smlm.model.LocalisationModelSet;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution3D;
 import uk.ac.sussex.gdsc.smlm.model.MoleculeModel;
-import uk.ac.sussex.gdsc.smlm.model.PSFModelGradient1Function;
+import uk.ac.sussex.gdsc.smlm.model.PsfModelGradient1Function;
 import uk.ac.sussex.gdsc.smlm.model.PsfModel;
 import uk.ac.sussex.gdsc.smlm.model.RadialFalloffIllumination;
 import uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory;
@@ -688,7 +688,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
     simpleMode = (arg != null && arg.contains("simple"));
@@ -1042,13 +1042,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
     double sd0;
     double sd1;
-    if (psf instanceof GaussianPSFModel) {
-      sd0 = ((GaussianPSFModel) psf).getS0(xyz[2]);
-      sd1 = ((GaussianPSFModel) psf).getS1(xyz[2]);
-    } else if (psf instanceof AiryPSFModel) {
+    if (psf instanceof GaussianPsfModel) {
+      sd0 = ((GaussianPsfModel) psf).getS0(xyz[2]);
+      sd1 = ((GaussianPsfModel) psf).getS1(xyz[2]);
+    } else if (psf instanceof AiryPsfModel) {
       psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
-      sd0 = ((AiryPSFModel) psf).getW0() * AiryPattern.FACTOR;
-      sd1 = ((AiryPSFModel) psf).getW1() * AiryPattern.FACTOR;
+      sd0 = ((AiryPsfModel) psf).getW0() * AiryPattern.FACTOR;
+      sd1 = ((AiryPsfModel) psf).getW1() * AiryPattern.FACTOR;
     } else if (psf instanceof ImagePsfModel) {
       psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
       sd0 = ((ImagePsfModel) psf).getHwhm0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
@@ -1066,7 +1066,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     ImageJUtils.log("Z = %s nm : %s px", MathUtils.rounded(xyz[2] * a),
         MathUtils.rounded(xyz[2], 6));
     ImageJUtils.log("Width (s) = %s nm : %s px", MathUtils.rounded(sd), MathUtils.rounded(sd / a));
-    final double sa = PSFCalculator.squarePixelAdjustment(sd, a);
+    final double sa = PsfCalculator.squarePixelAdjustment(sd, a);
     ImageJUtils.log("Adjusted Width (sa) = %s nm : %s px", MathUtils.rounded(sa),
         MathUtils.rounded(sa / a));
     ImageJUtils.log("Signal (N) = %s - %s photons",
@@ -1128,7 +1128,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         MathUtils.rounded(upperN));
 
     // Wrap to a function
-    final PSFModelGradient1Function f = new PSFModelGradient1Function(psf, size, size);
+    final PsfModelGradient1Function f = new PsfModelGradient1Function(psf, size, size);
 
     // Set parameters
     final double[] params = new double[5];
@@ -1540,7 +1540,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         hwhm = getAstigmatismHwhm();
       } else {
         final double sd = (settings.getEnterWidth()) ? settings.getPsfSd()
-            : PSFCalculator.calculateStdDev(settings.getWavelength(),
+            : PsfCalculator.calculateStdDev(settings.getWavelength(),
                 settings.getNumericalAperture());
 
         hwhm = Gaussian2DFunction.SD_TO_HWHM_FACTOR * sd / settings.getPixelPitch();
@@ -1618,7 +1618,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       IJ.error(TITLE, "Unable to create the PSF model from image: " + settings.getPsfImageName());
       return -1;
     }
-    final ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
+    final ImagePSF psfSettings = ImagePsfHelper.fromString(imp.getProperty("Info").toString());
     if (psfSettings == null) {
       IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
       return -1;
@@ -2194,7 +2194,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       if (l.getTime() != lastT) {
         lastT = l.getTime();
         futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, index,
-            lastT, createPsfModel(psfModel), syncResults, stack, poissonNoise,
+            lastT, copyPsfModel(psfModel), syncResults, stack, poissonNoise,
             new RandomDataGenerator(createRandomGenerator()))));
       }
       index++;
@@ -2387,7 +2387,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       return null;
     }
     try {
-      final ImagePSF psfSettings = ImagePSFHelper.fromString(imp.getProperty("Info").toString());
+      final ImagePSF psfSettings = ImagePsfHelper.fromString(imp.getProperty("Info").toString());
       if (psfSettings == null) {
         throw new IllegalStateException("Unknown PSF settings for image: " + imp.getTitle());
       }
@@ -2549,7 +2549,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         // Convert for simulation in pixels
         astigmatismModel = AstigmatismModelManager.convert(astigmatismModel, DistanceUnit.PIXEL,
             DistanceUnit.PIXEL);
-        return new GaussianPSFModel(AstigmatismModelManager.create(astigmatismModel));
+        return new GaussianPsfModel(AstigmatismModelManager.create(astigmatismModel));
       } catch (final ConversionException ex) {
         // Wrap so this can be caught as the same type
         throw new IllegalArgumentException(ex);
@@ -2563,14 +2563,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       final double gamma = 0;
       final HoltzerAstigmatismZModel zModel =
           HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
-      final GaussianPSFModel m = new GaussianPSFModel(createRandomGenerator(), zModel);
+      final GaussianPsfModel m = new GaussianPsfModel(createRandomGenerator(), zModel);
       // m.setRange(10);
       return m;
     }
 
     // Default to Airy pattern
-    final double width = getPsfSd() / PSFCalculator.AIRY_TO_GAUSSIAN;
-    final AiryPSFModel m = new AiryPSFModel(createRandomGenerator(), width, width, d);
+    final double width = getPsfSd() / PsfCalculator.AIRY_TO_GAUSSIAN;
+    final AiryPsfModel m = new AiryPsfModel(createRandomGenerator(), width, width, d);
     m.setRing(2);
     return m;
   }
@@ -2585,11 +2585,8 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     return createPsfModel(localisationSets);
   }
 
-  private PsfModel createPsfModel(PsfModel psfModel) {
-    final PsfModel copy = psfModel.copy();
-    copy.setRandomGenerator(createRandomGenerator());
-    return copy;
-
+  private PsfModel copyPsfModel(PsfModel psfModel) {
+    return psfModel.copy(createRandomGenerator());
   }
 
   private synchronized void showProgress() {
@@ -2852,12 +2849,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
           // Note: The width estimate does not account for diffusion
           float sx;
           float sy;
-          if (psfModel instanceof GaussianPSFModel) {
-            final GaussianPSFModel m = (GaussianPSFModel) psfModel;
+          if (psfModel instanceof GaussianPsfModel) {
+            final GaussianPsfModel m = (GaussianPsfModel) psfModel;
             sx = (float) m.getS0();
             sy = (float) m.getS1();
-          } else if (psfModel instanceof AiryPSFModel) {
-            final AiryPSFModel m = (AiryPSFModel) psfModel;
+          } else if (psfModel instanceof AiryPsfModel) {
+            final AiryPsfModel m = (AiryPsfModel) psfModel;
             sx = (float) (m.getW0() * AiryPattern.FACTOR);
             sy = (float) (m.getW1() * AiryPattern.FACTOR);
           } else if (psfModel instanceof ImagePsfModel) {
@@ -3596,7 +3593,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     double sd = getPsfSd();
     sb.append(MathUtils.rounded(sd, 4)).append('\t');
     sd *= settings.getPixelPitch();
-    final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.getPixelPitch())
+    final double sa = PsfCalculator.squarePixelAdjustment(sd, settings.getPixelPitch())
         / settings.getPixelPitch();
     sb.append(MathUtils.rounded(sa, 4)).append('\t');
     // Width not valid for the Image PSF.
@@ -4606,7 +4603,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
    */
   private void addPsfOptions(final ExtendedGenericDialog gd) {
     gd.addMessage("--- PSF Model ---");
-    final List<String> imageNames = PSFCombiner.createImageList();
+    final List<String> imageNames = PsfCombiner.createImageList();
     final TurboList<String> availableModels = new TurboList<>();
     availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
     availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);

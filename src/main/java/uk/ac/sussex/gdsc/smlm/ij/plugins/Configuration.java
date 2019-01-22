@@ -71,7 +71,7 @@ public class Configuration
   private Choice textCameraType;
   private TextField textNmPerPixel;
   private TextField textExposure;
-  private Choice textPSF;
+  private Choice textPsf;
   private Choice textDataFilterType;
   private Choice textDataFilterMethod;
   private TextField textSmooth;
@@ -96,7 +96,7 @@ public class Configuration
 
   @Override
   public void run(String arg) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     showDialog(true);
   }
@@ -136,7 +136,7 @@ public class Configuration
     gd.addNumericField("Exposure_time (ms)", calibrationReader.getExposureTime(), 2);
 
     gd.addMessage("--- Gaussian parameters ---");
-    PeakFit.addPSFOptions(gd, fitConfig);
+    PeakFit.addPsfOptions(gd, fitConfig);
 
     gd.addMessage("--- Maxima identification ---");
     final FitEngineConfigurationProvider provider = this;
@@ -188,7 +188,7 @@ public class Configuration
       textCameraType = ch.next();
       textNmPerPixel = nu.next();
       textExposure = nu.next();
-      textPSF = ch.next();
+      textPsf = ch.next();
       textDataFilterType = ch.next();
       textDataFilterMethod = ch.next();
       textSmooth = nu.next();
@@ -237,7 +237,7 @@ public class Configuration
     calibrationWriter.setNmPerPixel(gd.getNextNumber());
     calibrationWriter.setExposureTime(gd.getNextNumber());
     fitConfig.setCalibration(calibrationWriter.getCalibration());
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
     config.setSearch(gd.getNextNumber());
@@ -301,7 +301,7 @@ public class Configuration
     }
 
     final int flags = PeakFit.FLAG_NO_SAVE;
-    if (!PeakFit.configurePSFModel(config, flags)) {
+    if (!PeakFit.configurePsfModel(config, flags)) {
       return false;
     }
     if (!PeakFit.configureResultsFilter(config, flags)) {
@@ -460,7 +460,7 @@ public class Configuration
     // Do not use set() as we support merging a partial PSF
     fitConfig.mergePsf(psf);
 
-    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
+    textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**

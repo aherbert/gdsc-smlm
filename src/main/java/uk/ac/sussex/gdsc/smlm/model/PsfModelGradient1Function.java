@@ -34,13 +34,13 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 /**
  * A wrapper around a PSF Model for the Gradient1Function interface.
  */
-public class PSFModelGradient1Function implements Gradient1Function, NamedFunction {
+public class PsfModelGradient1Function implements Gradient1Function, NamedFunction {
   private static final int[] gradientIndices = SimpleArrayUtils.natural(5);
   private final PsfModel psf;
   private final int width;
   private final int height;
 
-  private double[] a;
+  private double[] params;
 
   /**
    * Instantiates a new PSF model gradient 1 function.
@@ -49,7 +49,7 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
    * @param width the width
    * @param height the height
    */
-  public PSFModelGradient1Function(PsfModel psf, int width, int height) {
+  public PsfModelGradient1Function(PsfModel psf, int width, int height) {
     if (psf == null) {
       throw new NullPointerException("PSF is null");
     }
@@ -78,18 +78,18 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
    * <p>The parameters must be [background,intensity,x,y,z]
    */
   @Override
-  public void initialise0(double[] a) {
-    this.a = a;
+  public void initialise0(double[] params) {
+    this.params = params;
   }
 
   @Override
   public void forEach(ValueProcedure procedure) {
     final double[] v = new double[size()];
-    final double c = a[0];
-    final double m = a[1];
-    final double x0 = a[2];
-    final double x1 = a[3];
-    final double x2 = a[4];
+    final double c = params[0];
+    final double m = params[1];
+    final double x0 = params[2];
+    final double x1 = params[3];
+    final double x2 = params[4];
     if (!psf.getValue(width, height, x0, x1, x2, v)) {
       throw new ComputationException("Unable to compute value");
     }
@@ -102,11 +102,11 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
   public void forEach(Gradient1Procedure procedure) {
     final double[] v = new double[size()];
     final double[][] g = new double[v.length][];
-    final double c = a[0];
-    final double m = a[1];
-    final double x0 = a[2];
-    final double x1 = a[3];
-    final double x2 = a[4];
+    final double c = params[0];
+    final double m = params[1];
+    final double x0 = params[2];
+    final double x1 = params[3];
+    final double x2 = params[4];
     if (!psf.getValueAndGradient(width, height, x0, x1, x2, v, g)) {
       throw new ComputationException("Unable to compute value and gradient");
     }
@@ -127,8 +127,8 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
    * <p>The parameters must be [background,intensity,x,y,z]
    */
   @Override
-  public void initialise(double[] a) {
-    initialise0(a);
+  public void initialise(double[] params) {
+    initialise0(params);
   }
 
   @Override
@@ -147,8 +147,8 @@ public class PSFModelGradient1Function implements Gradient1Function, NamedFuncti
    * <p>The parameters must be [background,intensity,x,y,z]
    */
   @Override
-  public void initialise1(double[] a) {
-    initialise0(a);
+  public void initialise1(double[] params) {
+    initialise0(params);
   }
 
   @Override

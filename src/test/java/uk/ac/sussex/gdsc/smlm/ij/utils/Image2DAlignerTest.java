@@ -80,17 +80,17 @@ public class Image2DAlignerTest {
   }
 
   @Test
-  public void canCorrelateSquareImageUsingIJImage() {
+  public void canCorrelateSquareImageUsingImageJImage() {
     canCorrelate(16, 16, true);
   }
 
   @Test
-  public void canCorrelateNonSquareImageUsingIJImage() {
+  public void canCorrelateNonSquareImageUsingImageJImage() {
     canCorrelate(16, 32, true);
   }
 
   @Test
-  public void canCorrelateNonPow2ImageUsingIJImage() {
+  public void canCorrelateNonPow2ImageUsingImageJImage() {
     canCorrelate(17, 29, true);
   }
 
@@ -119,7 +119,6 @@ public class Image2DAlignerTest {
   private static void canCorrelate(Image2DAligner a, int maxx, int maxy, double cx1, double cy1,
       double cx2, double cy2, double window, int refinements, double tolerance, boolean ijMode) {
     double[] result;
-    Image2D c;
     final Image2D target = createData(maxx, maxy, cx2, cy2);
 
     // Utils.display("Ref", reference.getImageProcessor());
@@ -151,10 +150,10 @@ public class Image2DAlignerTest {
     } else {
       result = a.align(target, refinements);
     }
-    c = a.getCorrelation();
+    Image2D correlation = a.getCorrelation();
     if (logger.isLoggable(Level.FINE)) {
       logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
-          c.get(index), java.util.Arrays.toString(result)));
+          correlation.get(index), java.util.Arrays.toString(result)));
     }
 
     for (int i = 0; i < 2; i++) {

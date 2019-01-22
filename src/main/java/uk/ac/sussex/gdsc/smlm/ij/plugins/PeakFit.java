@@ -101,7 +101,7 @@ import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -151,7 +151,14 @@ import java.util.regex.Pattern;
 public class PeakFit implements PlugInFilter, ItemListener {
   private static final String TITLE = "PeakFit";
 
-  private static int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+  /** Flag to indicate that additional options can be configured. */
+  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+  /** Flag to indicate that the calibration should not be configured. */
+  public static final int FLAG_IGNORE_CALIBRATION = 0x00000002;
+  /** Flag to indicate that configuration should not be saved. */
+  public static final int FLAG_NO_SAVE = 0x00000004;
+
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private int pluginFlags;
   private int singleFrame;
   private ImagePlus imp;
@@ -206,7 +213,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private Choice textCameraType;
   private TextField textNmPerPixel;
   private TextField textExposure;
-  private Choice textPSF;
+  private Choice textPsf;
   private Choice textDataFilterType;
   private Choice textDataFilterMethod;
   private TextField textSmooth;
@@ -239,6 +246,29 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private TextField textResultsDirectory;
   private Choice textFileFormat;
   private Checkbox textResultsInMemory;
+
+  /**
+   * Lazy load the {@link PSFType} values and names.
+   */
+  private static class PsfTypeLoader {
+    private static final PSFType[] psfTypeValues;
+    private static final String[] psfTypeNames;
+
+    static {
+      //@formatter:off
+      final EnumSet<PSFType> d = EnumSet.of(
+          PSFType.ONE_AXIS_GAUSSIAN_2D,
+          PSFType.TWO_AXIS_GAUSSIAN_2D,
+          PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
+          PSFType.ASTIGMATIC_GAUSSIAN_2D);
+      //@formatter:on
+      psfTypeValues = d.toArray(new PSFType[d.size()]);
+      psfTypeNames = new String[psfTypeValues.length];
+      for (int i = 0; i < psfTypeValues.length; i++) {
+        psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);
+      }
+    }
+  }
 
   /**
    * Instantiates a new peak fit.
@@ -275,7 +305,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    SMLMUsageTracker.recordPlugin(this.getClass(), arg);
+    SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     pluginFlags = FLAGS;
     extraOptions = ImageJUtils.isExtraOptions();
@@ -709,47 +739,22 @@ public class PeakFit implements PlugInFilter, ItemListener {
     return true;
   }
 
-  private static PSFType[] _PSFTypeValues;
-
   /**
    * Gets the PSF type values.
    *
    * @return the PSF type values
    */
-  public static PSFType[] getPSFTypeValues() {
-    if (_PSFTypeValues == null) {
-      initPSFType();
-    }
-    return _PSFTypeValues;
+  public static PSFType[] getPsfTypeValues() {
+    return PsfTypeLoader.psfTypeValues;
   }
-
-  private static String[] _PSFTypeNames;
 
   /**
    * Gets the PSF type names.
    *
    * @return the PSF type names
    */
-  public static String[] getPSFTypeNames() {
-    if (_PSFTypeNames == null) {
-      initPSFType();
-    }
-    return _PSFTypeNames;
-  }
-
-  private static void initPSFType() {
-    //@formatter:off
-    final EnumSet<PSFType> d = EnumSet.of(
-        PSFType.ONE_AXIS_GAUSSIAN_2D,
-        PSFType.TWO_AXIS_GAUSSIAN_2D,
-        PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
-        PSFType.ASTIGMATIC_GAUSSIAN_2D);
-    //@formatter:on
-    _PSFTypeValues = d.toArray(new PSFType[d.size()]);
-    _PSFTypeNames = new String[_PSFTypeValues.length];
-    for (int i = 0; i < _PSFTypeValues.length; i++) {
-      _PSFTypeNames[i] = PsfProtosHelper.getName(_PSFTypeValues[i]);
-    }
+  public static String[] getPsfTypeNames() {
+    return PsfTypeLoader.psfTypeNames;
   }
 
   private int showDialog(ImagePlus imp) {
@@ -809,7 +814,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
           }
         };
 
-    addPSFOptions(gd, fitConfigurationProvider);
+    addPsfOptions(gd, fitConfigurationProvider);
     addDataFilterOptions(gd, fitEngineConfigurationProvider);
     addSearchOptions(gd, fitEngineConfigurationProvider);
     addBorderOptions(gd, fitEngineConfigurationProvider);
@@ -898,7 +903,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       if (isCrop) {
         cb.next();
       }
-      textPSF = ch.next();
+      textPsf = ch.next();
       textDataFilterType = ch.next();
       textDataFilterMethod = ch.next();
       textSmooth = nu.next();
@@ -1265,20 +1270,20 @@ public class PeakFit implements PlugInFilter, ItemListener {
   public static class SimpleFitEngineConfigurationProvider
       implements FitEngineConfigurationProvider {
     /** The fit engine configuration. */
-    FitEngineConfiguration c;
+    private final FitEngineConfiguration config;
 
     /**
      * Instantiates a new simple fit engine configuration provider.
      *
-     * @param c the configuration
+     * @param config the configuration
      */
-    SimpleFitEngineConfigurationProvider(FitEngineConfiguration c) {
-      this.c = c;
+    SimpleFitEngineConfigurationProvider(FitEngineConfiguration config) {
+      this.config = config;
     }
 
     @Override
     public FitEngineConfiguration getFitEngineConfiguration() {
-      return c;
+      return config;
     }
   }
 
@@ -1287,20 +1292,20 @@ public class PeakFit implements PlugInFilter, ItemListener {
    */
   public static class SimpleFitConfigurationProvider implements FitConfigurationProvider {
     /** The configuration. */
-    FitConfiguration c;
+    private final FitConfiguration fitConfig;
 
     /**
      * Instantiates a new simple fit configuration provider.
      *
-     * @param c the configuration
+     * @param fitConfig the configuration
      */
-    SimpleFitConfigurationProvider(FitConfiguration c) {
-      this.c = c;
+    SimpleFitConfigurationProvider(FitConfiguration fitConfig) {
+      this.fitConfig = fitConfig;
     }
 
     @Override
     public FitConfiguration getFitConfiguration() {
-      return c;
+      return fitConfig;
     }
   }
 
@@ -1308,36 +1313,35 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * Adds the PSF options.
    *
    * <p>Note that if an astigmatic PSF is selected then the model must be created with
-   * {@link #configurePSFModel(FitEngineConfiguration, int)}.
+   * {@link #configurePsfModel(FitEngineConfiguration, int)}.
    *
    * @param gd the dialog
    * @param fitConfiguration the fit configuration
    */
-  public static void addPSFOptions(final ExtendedGenericDialog gd,
+  public static void addPsfOptions(final ExtendedGenericDialog gd,
       final FitConfiguration fitConfiguration) {
-    addPSFOptions(gd, new SimpleFitConfigurationProvider(fitConfiguration));
+    addPsfOptions(gd, new SimpleFitConfigurationProvider(fitConfiguration));
   }
 
   /**
    * Adds the PSF options.
    *
    * <p>Note that if an astigmatic PSF is selected then the model must be created with
-   * {@link #configurePSFModel(FitEngineConfiguration, int)}.
+   * {@link #configurePsfModel(FitEngineConfiguration, int)}.
    *
    * @param gd the dialog
    * @param fitConfigurationProvider the fit configuration provider
    */
-  public static void addPSFOptions(final ExtendedGenericDialog gd,
+  public static void addPsfOptions(final ExtendedGenericDialog gd,
       final FitConfigurationProvider fitConfigurationProvider) {
     final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-    gd.addChoice("PSF", getPSFTypeNames(), PsfProtosHelper.getName(fitConfig.getPsfType()),
+    gd.addChoice("PSF", getPsfTypeNames(), PsfProtosHelper.getName(fitConfig.getPsfType()),
         new OptionListener<Integer>() {
           @Override
           public boolean collectOptions(Integer field) {
             final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-            fitConfig.setPsfType(PeakFit.getPSFTypeValues()[field]);
-            final boolean result = collectOptions(false);
-            return result;
+            fitConfig.setPsfType(PeakFit.getPsfTypeValues()[field]);
+            return collectOptions(false);
           }
 
           @Override
@@ -2038,7 +2042,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
         @Override
         public void actionPerformed(ActionEvent event) {
           // Run the PSF Calculator
-          final PSFCalculator calculator = new PSFCalculator();
+          final PsfCalculator calculator = new PsfCalculator();
           calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
           calculatorSettings.setMagnification(1);
           calculatorSettings.setBeamExpander(1);
@@ -2151,7 +2155,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
     }
 
-    fitConfig.setPsfType(PeakFit.getPSFTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     // Note: The absolute flag is set in extra options
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 0);
@@ -2284,7 +2288,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     // If precision filtering then we need the camera bias
     if (!maximaIdentification) {
-      if (!configurePSFModel(config, flags)) {
+      if (!configurePsfModel(config, flags)) {
         return false;
       }
 
@@ -2356,8 +2360,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @param config the config
    * @return true, if successful
    */
-  public static boolean configurePSFModel(FitEngineConfiguration config) {
-    return configurePSFModel(config, FLAG_NO_SAVE);
+  public static boolean configurePsfModel(FitEngineConfiguration config) {
+    return configurePsfModel(config, FLAG_NO_SAVE);
   }
 
   /**
@@ -2369,7 +2373,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @param flags the flags
    * @return true, if successful
    */
-  public static boolean configurePSFModel(FitEngineConfiguration config, int flags) {
+  public static boolean configurePsfModel(FitEngineConfiguration config, int flags) {
     final FitConfiguration fitConfig = config.getFitConfiguration();
     if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
       return true;
@@ -2512,7 +2516,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     xml = gd.getNextText();
     final Filter f = Filter.fromXml(xml);
-    if (f == null || !(f instanceof DirectFilter)) {
+    if (!(f instanceof DirectFilter)) {
       return false;
     }
 
@@ -2542,19 +2546,19 @@ public class PeakFit implements PlugInFilter, ItemListener {
    */
   public static boolean configureDataFilter(final FitEngineConfiguration config, int flags) {
     int numberOfFilters = 1;
-    int n;
+    int filterCount;
     switch (config.getDataFilterType()) {
       case JURY:
-        n = Integer.MAX_VALUE;
+        filterCount = Integer.MAX_VALUE;
         break;
 
       case DIFFERENCE:
-        n = 2;
+        filterCount = 2;
         break;
 
       case SINGLE:
       default:
-        n = 1;
+        filterCount = 1;
     }
 
     final String[] filterNames = SettingsManager.getDataFilterMethodNames();
@@ -2566,20 +2570,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
       throw new IllegalStateException("No primary filter is configured");
     }
 
-    final FitEngineConfigurationProvider fitEngineConfigurationProvider =
-        new FitEngineConfigurationProvider() {
-          @Override
-          public FitEngineConfiguration getFitEngineConfiguration() {
-            return config;
-          }
-        };
+    final FitEngineConfigurationProvider fitEngineConfigurationProvider = () -> config;
 
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < filterCount; i++) {
       final int filter = i + 1;
       final int ii = i;
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-      if (filter == n) {
+      if (filter == filterCount) {
         // This is maximum filter count so no continue option
         gd.addMessage(String.format("Configure the %s filter.",
             FitProtosHelper.getName(config.getDataFilterType())));
@@ -2678,13 +2676,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     return true;
   }
 
-  /** Flag to indicate that additional options can be configured. */
-  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
-  /** Flag to indicate that the calibration should not be configured. */
-  public static final int FLAG_IGNORE_CALIBRATION = 0x00000002;
-  /** Flag to indicate that configuration should not be saved. */
-  public static final int FLAG_NO_SAVE = 0x00000004;
-
   /**
    * Show a dialog to configure the fit solver. The updated settings are saved to the settings file.
    * An error message is shown if the dialog is cancelled or the configuration is invalid.
@@ -2712,11 +2703,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final FitSolver fitSolver = fitConfig.getFitSolver();
 
-    final boolean isLVM = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
+    final boolean isLvm = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
         || fitSolver == FitSolver.LVM_MLE;
-    final boolean isFastMLE =
+    final boolean isFastMml =
         fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
-    final boolean isSteppingFunctionSolver = isLVM || isFastMLE;
+    final boolean isSteppingFunctionSolver = isLvm || isFastMml;
 
     if (fitSolver == FitSolver.MLE) {
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -2795,10 +2786,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
       gd.addStringField("Parameter_absolute_threshold",
           MathUtils.rounded(fitConfig.getParameterAbsoluteThreshold()));
       gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
-      if (isLVM) {
+      if (isLvm) {
         gd.addNumericField("Lambda", fitConfig.getLambda(), 4);
       }
-      if (isFastMLE) {
+      if (isFastMml) {
         gd.addCheckbox("Fixed_iterations", fitConfig.isFixedIterations());
         // This works because the proto configuration enum matches the named enum
         final String[] lineSearchNames = SettingsManager
@@ -2865,10 +2856,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
       fitConfig.setParameterRelativeThreshold(getThresholdNumber(gd));
       fitConfig.setParameterAbsoluteThreshold(getThresholdNumber(gd));
       fitConfig.setMaxIterations((int) gd.getNextNumber());
-      if (isLVM) {
+      if (isLvm) {
         fitConfig.setLambda(gd.getNextNumber());
       }
-      if (isFastMLE) {
+      if (isFastMml) {
         fitConfig.setFixedIterations(gd.getNextBoolean());
         fitConfig.setLineSearchMethod(gd.getNextChoiceIndex());
       }
@@ -2919,7 +2910,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       try {
-        if (isLVM) {
+        if (isLvm) {
           Parameters.isAboveZero("Lambda", fitConfig.getLambda());
         }
         // This call will check if the configuration is OK (including convergence criteria)
@@ -3357,18 +3348,15 @@ public class PeakFit implements PlugInFilter, ItemListener {
       final int size = results.size();
       final Counter j = new Counter(size);
       final ImagePlus finalImp = imp;
-      results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-        @Override
-        public void executeXyr(float x, float y, PeakResult r) {
-          final PointRoi roi = new PointRoi(x, y);
-          final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
-          roi.setStrokeColor(c);
-          roi.setFillColor(c);
-          if (finalImp.getStackSize() > 1) {
-            roi.setPosition(singleFrame);
-          }
-          o.add(roi);
+      results.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
+        final PointRoi roi = new PointRoi(x, y);
+        final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
+        roi.setStrokeColor(c);
+        roi.setFillColor(c);
+        if (finalImp.getStackSize() > 1) {
+          roi.setPosition(singleFrame);
         }
+        o.add(roi);
       });
       imp.setOverlay(o);
       imp.getWindow().toFront();
@@ -3582,31 +3570,26 @@ public class PeakFit implements PlugInFilter, ItemListener {
     runTime = System.nanoTime();
     final ArrayList<PeakResult> sliceCandidates = new ArrayList<>();
     final FrameCounter counter = new FrameCounter(results.getFirstFrame());
-    results.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult r) {
-        if (counter.advance(r.getFrame())) {
-          if (escapePressed()) {
-            return true;
-          }
-          final int slice = counter.previousFrame();
-          if (slice % step == 0) {
-            if (ImageJUtils.showStatus("Slice: " + slice + " / " + totalFrames)) {
-              IJ.showProgress(slice, totalFrames);
-            }
-          }
-
-          // Process results
-          if (!processResults(engine, sliceCandidates, slice)) {
-            return true;
-          }
-
-          sliceCandidates.clear();
+    results.forEach((PeakResultProcedureX) result -> {
+      if (counter.advance(result.getFrame())) {
+        if (escapePressed()) {
+          return true;
         }
-        sliceCandidates.add(r);
+        final int slice = counter.previousFrame();
+        if (slice % step == 0 && ImageJUtils.showStatus("Slice: " + slice + " / " + totalFrames)) {
+          IJ.showProgress(slice, totalFrames);
+        }
 
-        return false;
+        // Process results
+        if (!processResults(engine, sliceCandidates, slice)) {
+          return true;
+        }
+
+        sliceCandidates.clear();
       }
+      sliceCandidates.add(result);
+
+      return false;
     });
 
     // Process final results
@@ -3727,7 +3710,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // Do not use set() as we support merging a partial PSF
     fitConfig.mergePsf(psf);
 
-    textPSF.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
+    textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
   }
 
   /**

@@ -56,12 +56,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
-public class FRCTest {
+public class FrcTest {
   private static Logger logger;
 
   @BeforeAll
   public static void beforeAll() {
-    logger = Logger.getLogger(FRCTest.class.getName());
+    logger = Logger.getLogger(FrcTest.class.getName());
   }
 
   @AfterAll
@@ -123,19 +123,19 @@ public class FRCTest {
     final float[] dataB2 = (float[]) fft2[1].getPixels();
 
     final float[] numeratorE = new float[dataA1.length];
-    final float[] absFFT1E = new float[dataA1.length];
-    final float[] absFFT2E = new float[dataA1.length];
+    final float[] absFft1E = new float[dataA1.length];
+    final float[] absFft2E = new float[dataA1.length];
 
-    Frc.compute(numeratorE, absFFT1E, absFFT2E, dataA1, dataB1, dataA2, dataB2);
+    Frc.compute(numeratorE, absFft1E, absFft2E, dataA1, dataB1, dataA2, dataB2);
 
     Assertions.assertTrue(checkSymmetry(numeratorE, size), "numeratorE");
-    Assertions.assertTrue(checkSymmetry(absFFT1E, size), "absFFT1E");
-    Assertions.assertTrue(checkSymmetry(absFFT2E, size), "absFFT2E");
+    Assertions.assertTrue(checkSymmetry(absFft1E, size), "absFft1E");
+    Assertions.assertTrue(checkSymmetry(absFft2E, size), "absFft2E");
 
     final float[] numeratorA = new float[dataA1.length];
-    final float[] absFFT1A = new float[dataA1.length];
-    final float[] absFFT2A = new float[dataA1.length];
-    Frc.computeMirrored(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
+    final float[] absFft1A = new float[dataA1.length];
+    final float[] absFft2A = new float[dataA1.length];
+    Frc.computeMirrored(size, numeratorA, absFft1A, absFft2A, dataA1, dataB1, dataA2, dataB2);
 
     // for (int y=0, i=0; y<size; y++)
     // for (int x=0; x<size; x++, i++)
@@ -145,17 +145,17 @@ public class FRCTest {
     // }
 
     Assertions.assertArrayEquals(numeratorE, numeratorA, "numerator");
-    Assertions.assertArrayEquals(absFFT1E, absFFT1A, "absFFT1");
-    Assertions.assertArrayEquals(absFFT2E, absFFT2A, "absFFT2");
+    Assertions.assertArrayEquals(absFft1E, absFft1A, "absFft1");
+    Assertions.assertArrayEquals(absFft2E, absFft2A, "absFft2");
 
-    Frc.computeMirroredFast(size, numeratorA, absFFT1A, absFFT2A, dataA1, dataB1, dataA2, dataB2);
+    Frc.computeMirroredFast(size, numeratorA, absFft1A, absFft2A, dataA1, dataB1, dataA2, dataB2);
 
     // Check this.
     for (int y = 1; y < size; y++) {
       for (int x = 1, i = y * size + 1; x < size; x++, i++) {
         Assertions.assertEquals(numeratorE[i], numeratorA[i], "numerator");
-        Assertions.assertEquals(absFFT1E[i], absFFT1A[i], "absFFT1");
-        Assertions.assertEquals(absFFT2E[i], absFFT2A[i], "absFFT2");
+        Assertions.assertEquals(absFft1E[i], absFft1A[i], "absFft1");
+        Assertions.assertEquals(absFft2E[i], absFft2A[i], "absFft2");
       }
     }
   }
@@ -306,28 +306,28 @@ public class FRCTest {
     final float[] dataB2 = (float[]) fft2[1].getPixels();
 
     final float[] numerator = new float[dataA1.length];
-    final float[] absFFT1 = new float[dataA1.length];
-    final float[] absFFT2 = new float[dataA1.length];
+    final float[] absFft1 = new float[dataA1.length];
+    final float[] absFft2 = new float[dataA1.length];
 
     final TimingService ts = new TimingService(10);
     ts.execute(new MyTimingTask("compute") {
       @Override
       public Object run(Object data) {
-        Frc.compute(numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.compute(numerator, absFft1, absFft2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });
     ts.execute(new MyTimingTask("computeMirrored") {
       @Override
       public Object run(Object data) {
-        Frc.computeMirrored(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.computeMirrored(N, numerator, absFft1, absFft2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });
     ts.execute(new MyTimingTask("computeMirroredFast") {
       @Override
       public Object run(Object data) {
-        Frc.computeMirroredFast(N, numerator, absFFT1, absFFT2, dataA1, dataB1, dataA2, dataB2);
+        Frc.computeMirroredFast(N, numerator, absFft1, absFft2, dataA1, dataB1, dataA2, dataB2);
         return null;
       }
     });

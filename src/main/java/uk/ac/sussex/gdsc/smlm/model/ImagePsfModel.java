@@ -132,9 +132,10 @@ public class ImagePsfModel extends PsfModel {
    * Copy constructor.
    *
    * @param source the source
+   * @param rng the random generator
    */
-  private ImagePsfModel(ImagePsfModel source) {
-    super();
+  private ImagePsfModel(ImagePsfModel source, RandomGenerator rng) {
+    super(rng);
     this.sumImage = source.sumImage;
     this.cumulativeImage = source.cumulativeImage;
     this.psfWidth = source.psfWidth;
@@ -144,6 +145,11 @@ public class ImagePsfModel extends PsfModel {
     this.unitsPerSlice = source.unitsPerSlice;
     this.hwhm0 = source.hwhm0;
     this.hwhm1 = source.hwhm1;
+  }
+
+  @Override
+  public ImagePsfModel copy(RandomGenerator rng) {
+    return new ImagePsfModel(this, rng);
   }
 
   private void init(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice,
@@ -705,11 +711,6 @@ public class ImagePsfModel extends PsfModel {
       x = max;
     }
     return x;
-  }
-
-  @Override
-  public ImagePsfModel copy() {
-    return new ImagePsfModel(this);
   }
 
   @Override
