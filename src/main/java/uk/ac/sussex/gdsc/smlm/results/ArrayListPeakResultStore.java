@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.JdkRandomAdaptor;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import org.apache.commons.math3.random.RandomAdaptor;
@@ -219,8 +219,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
-    Collections.shuffle(results,
-        RandomAdaptor.createAdaptor(new RandomGeneratorAdapter(randomSource)));
+    Collections.shuffle(results, new JdkRandomAdaptor(randomSource));
   }
 
   @Override
