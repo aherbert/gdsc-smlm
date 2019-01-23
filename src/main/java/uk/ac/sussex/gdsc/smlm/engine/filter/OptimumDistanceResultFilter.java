@@ -52,11 +52,11 @@ public class OptimumDistanceResultFilter extends ResultFilter {
    * Instantiates a new optimum distance result filter.
    *
    * @param filter the filter
-   * @param d the d
-   * @param nMaxima the n maxima
+   * @param distance the distance
+   * @param numberOfMaxima the number of maxima
    */
-  public OptimumDistanceResultFilter(List<float[]> filter, float d, int nMaxima) {
-    super(filter, d, nMaxima);
+  public OptimumDistanceResultFilter(List<float[]> filter, float distance, int numberOfMaxima) {
+    super(filter, distance, numberOfMaxima);
     bestFitResults = new FitResult[filter.size()];
     bestIndices = new int[filter.size()];
     bestD2 = new float[filter.size()];
@@ -67,25 +67,25 @@ public class OptimumDistanceResultFilter extends ResultFilter {
 
   @Override
   public void filter(FitResult fitResult, int maxIndex, PeakResult... results) {
-    for (final PeakResult r : results) {
-      if (r == null) {
+    for (final PeakResult result : results) {
+      if (result == null) {
         continue;
       }
       for (int i = 0; i < filter.size(); i++) {
         final float[] coord = filter.get(i);
-        final float dx = r.getXPosition() - coord[0];
-        final float dy = r.getYPosition() - coord[1];
+        final float dx = result.getXPosition() - coord[0];
+        final float dy = result.getYPosition() - coord[1];
         // Only check if within the distance threshold
         if (dx * dx + dy * dy < d2) {
           // Then filter by signal strength
-          final float s = r.getIntensity();
+          final float s = result.getIntensity();
           if (s < bestSignal[i]) {
             continue;
           }
           bestFitResults[i] = fitResult;
           bestIndices[i] = maxIndex;
           bestSignal[i] = s;
-          bestPeakResults[i] = r;
+          bestPeakResults[i] = result;
         }
       }
     }

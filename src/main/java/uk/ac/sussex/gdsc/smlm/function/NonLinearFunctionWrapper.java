@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   private final NonLinearFunction fun;
   private final double[] params;
-  private final int n;
+  private final int dataSize;
   private final int[] gradientIndices;
 
   /**
@@ -43,12 +43,12 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
    *
    * @param fun The function
    * @param params The parameters
-   * @param n The number of data points to evaluate
+   * @param dataSize The number of data points to evaluate
    */
-  public NonLinearFunctionWrapper(NonLinearFunction fun, double[] params, int n) {
+  public NonLinearFunctionWrapper(NonLinearFunction fun, double[] params, int dataSize) {
     this.fun = fun;
     this.params = params.clone();
-    this.n = n;
+    this.dataSize = dataSize;
     // This wrapper will evaluate all the indices that are not fixed
     gradientIndices = SimpleArrayUtils.natural(fun.getNumberOfGradients());
   }
@@ -105,7 +105,7 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   @Override
   public double[] computeValues(double[] variables) {
     initialise(variables);
-    final double[] values = new double[n];
+    final double[] values = new double[dataSize];
     for (int i = 0; i < values.length; i++) {
       // Assume linear X from 0..N
       values[i] = fun.eval(i);
@@ -117,9 +117,9 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   public double[][] computeJacobian(double[] variables) {
     initialise(variables);
 
-    final double[][] jacobian = new double[n][];
+    final double[][] jacobian = new double[dataSize][];
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < dataSize; ++i) {
       // Assume linear X from 0..N
       final double[] dyda = new double[variables.length];
       fun.eval(i, dyda);
@@ -138,10 +138,10 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
   public Pair<double[], double[][]> computeValuesAndJacobian(double[] variables) {
     initialise(variables);
 
-    final double[][] jacobian = new double[n][];
-    final double[] values = new double[n];
+    final double[][] jacobian = new double[dataSize][];
+    final double[] values = new double[dataSize];
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < dataSize; ++i) {
       // Assume linear X from 0..N
       final double[] dyda = new double[variables.length];
       values[i] = fun.eval(i, dyda);

@@ -1928,11 +1928,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     // Check parameters
     try {
-      Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+      ParameterUtils.isAboveZero("nm per pixel", calibration.getNmPerPixel());
       // We allow bias to be zero
-      Parameters.isAboveZero("Gain", calibration.getCountPerPhoton());
-      Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
-      Parameters.isAboveZero("Initial SD", fitConfig.getInitialXSd());
+      ParameterUtils.isAboveZero("Gain", calibration.getCountPerPhoton());
+      ParameterUtils.isAboveZero("Exposure time", calibration.getExposureTime());
+      ParameterUtils.isAboveZero("Initial SD", fitConfig.getInitialXSd());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -2226,36 +2226,38 @@ public class PeakFit implements PlugInFilter, ItemListener {
       // No check on camera calibration. This is left to the FitConfiguration to
       // error if the settings are incorrect
 
-      Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-      Parameters.isAboveZero("Exposure time", calibration.getExposureTime());
+      ParameterUtils.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+      ParameterUtils.isAboveZero("Exposure time", calibration.getExposureTime());
       if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
-        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+        ParameterUtils.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
         if (fitConfig.getPsf().getParametersCount() > 1) {
-          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
+          ParameterUtils.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
         }
       }
-      Parameters.isAboveZero("Search_width", config.getSearch());
-      Parameters.isAboveZero("Fitting_width", config.getFitting());
-      Parameters.isPositive("Integrate frames", integrateFrames);
+      ParameterUtils.isAboveZero("Search_width", config.getSearch());
+      ParameterUtils.isAboveZero("Fitting_width", config.getFitting());
+      ParameterUtils.isPositive("Integrate frames", integrateFrames);
       if (!maximaIdentification) {
         // This can be negative to disable, i.e. fit everything
         // Parameters.isPositive("Failures limit", config.getFailuresLimit());
-        Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
-        Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
-        Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
+        ParameterUtils.isPositive("Neighbour height threshold",
+            config.getNeighbourHeightThreshold());
+        ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
+        ParameterUtils.isPositive("Duplicate distance", config.getDuplicateDistance());
 
         if (!fitConfig.isSmartFilter()) {
-          Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-          Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-          Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
+          ParameterUtils.isPositive("Coordinate Shift factor",
+              fitConfig.getCoordinateShiftFactor());
+          ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
+          ParameterUtils.isPositive("Min photons", fitConfig.getMinPhotons());
         }
         if (extraOptions) {
-          Parameters.isPositive("Noise", fitConfig.getNoise());
+          ParameterUtils.isPositive("Noise", fitConfig.getNoise());
         }
         if (!fitConfig.isSmartFilter()) {
-          Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-          Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
-          Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+          ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+          ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
+          ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
           if (fitConfig.getPrecisionThreshold() > 0) {
             if (fitConfig.getPrecisionMethod() == PrecisionMethod.PRECISION_METHOD_NA) {
               throw new IllegalArgumentException("Precision filter requires a precision method");
@@ -2273,11 +2275,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
       if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION
           || imageSettings
               .getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
-        Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
+        ParameterUtils.isAboveZero("Image precision", imageSettings.getAveragePrecision());
       }
-      Parameters.isAboveZero("Image scale", imageSettings.getScale());
+      ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
       if (extraOptions) {
-        Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
+        ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -2763,10 +2765,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       try {
-        Parameters.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
-        Parameters.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
-        Parameters.isAboveZero("Max iterations", fitConfig.getMaxIterations());
-        Parameters.isAboveZero("Max function evaluations", fitConfig.getMaxFunctionEvaluations());
+        ParameterUtils.isAboveZero("Relative threshold", fitConfig.getRelativeThreshold());
+        ParameterUtils.isAboveZero("Absolute threshold", fitConfig.getAbsoluteThreshold());
+        ParameterUtils.isAboveZero("Max iterations", fitConfig.getMaxIterations());
+        ParameterUtils.isAboveZero("Max function evaluations",
+            fitConfig.getMaxFunctionEvaluations());
         fitConfig.getFunctionSolver();
       } catch (final IllegalArgumentException | IllegalStateException ex) {
         IJ.error(TITLE, ex.getMessage());
@@ -2911,7 +2914,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
       try {
         if (isLvm) {
-          Parameters.isAboveZero("Lambda", fitConfig.getLambda());
+          ParameterUtils.isAboveZero("Lambda", fitConfig.getLambda());
         }
         // This call will check if the configuration is OK (including convergence criteria)
         fitConfig.getFunctionSolver();

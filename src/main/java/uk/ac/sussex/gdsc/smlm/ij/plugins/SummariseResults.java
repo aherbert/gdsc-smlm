@@ -54,15 +54,19 @@ import ij.text.TextWindow;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /**
  * Produces a summary table of the results that are stored in memory.
  */
-public class SummariseResults implements PlugIn, MouseListener {
+public class SummariseResults implements PlugIn {
   private static final String TITLE = "Summarise Results";
   private static final String[] REMOVE_OUTLIERS = {"None", "1.5x IQR", "Top 2%"};
+  private static final int NO = -1;
+  private static final int UNKNOWN = 0;
+  private static final int YES = 1;
+  private int removeNullResults = UNKNOWN;
 
   private static TextWindow summary;
   private int histgramBins;
@@ -80,11 +84,11 @@ public class SummariseResults implements PlugIn, MouseListener {
 
     createSummaryTable();
     final StringBuilder sb = new StringBuilder();
-    int i = 0;
+    int count = 0;
     final int nextFlush = 9;
     for (final MemoryPeakResults result : MemoryPeakResults.getAllResults()) {
       addSummary(sb, result);
-      if (++i == nextFlush) {
+      if (++count == nextFlush) {
         summary.append(sb.toString());
         sb.setLength(0);
       }
@@ -117,16 +121,19 @@ public class SummariseResults implements PlugIn, MouseListener {
       summary = new TextWindow("Peak Results Summary", sb.toString(), "", 800, 300);
       summary.setVisible(true);
 
-      summary.getTextPanel().addMouseListener(this);
+      summary.getTextPanel().addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent event) {
+          if (event.getClickCount() > 1) {
+            showStatistics();
+            event.consume();
+          }
+        }
+      });
     }
     // This could be optional but at current there is no dialog and it seems unnecessary
     clearSummaryTable();
   }
-
-  private static int NO = -1;
-  private static int UNKNOWN;
-  private static int YES = 1;
-  private int removeNullResults = UNKNOWN;
 
   private void addSummary(StringBuilder sb, MemoryPeakResults result) {
     final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
@@ -254,14 +261,6 @@ public class SummariseResults implements PlugIn, MouseListener {
     sb.append("\n");
   }
 
-  @Override
-  public void mouseClicked(MouseEvent event) {
-    if (event.getClickCount() > 1) {
-      showStatistics();
-      event.consume();
-    }
-  }
-
   private void showStatistics() {
     final TextPanel textPanel = summary.getTextPanel();
     final int selectedIndex = textPanel.getSelectionStart();
@@ -280,12 +279,7 @@ public class SummariseResults implements PlugIn, MouseListener {
     }
 
     // Do this is a thread so the click-event does not block
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        showStatistics(result);
-      }
-    }).run();
+    new Thread(() -> showStatistics(result)).start();
   }
 
   private void showStatistics(MemoryPeakResults result) {
@@ -349,12 +343,9 @@ public class SummariseResults implements PlugIn, MouseListener {
       if (settings.getPlotNoise()) {
         final Counter counter = new Counter();
         final float[] noise = new float[result.size()];
-        result.forEach(new PeakResultProcedure() {
-          @Override
-          public void execute(PeakResult peakResult) {
-            final int i = counter.getAndIncrement();
-            noise[i] = peakResult.getNoise();
-          }
+        result.forEach((PeakResultProcedure) peakResult -> {
+          final int i = counter.getAndIncrement();
+          noise[i] = peakResult.getNoise();
         });
         plot(wo, "Noise", noise);
       }
@@ -381,12 +372,7 @@ public class SummariseResults implements PlugIn, MouseListener {
 
   private void plot(WindowOrganiser wo, String title, MemoryPeakResults result, final int index) {
     final StoredDataStatistics data = new StoredDataStatistics(result.size());
-    result.forEach(new PeakResultProcedure() {
-      @Override
-      public void execute(PeakResult peakResult) {
-        data.add(peakResult.getParameter(index));
-      }
-    });
+    result.forEach((PeakResultProcedure) peakResult -> data.add(peakResult.getParameter(index)));
     plot(wo, title, data);
   }
 
@@ -397,25 +383,5 @@ public class SummariseResults implements PlugIn, MouseListener {
   private void plot(WindowOrganiser wo, String title, StoredDataStatistics data) {
     new HistogramPlotBuilder(TITLE, data, title).setRemoveOutliersOption(removeOutliers)
         .setNumberOfBins(histgramBins).show(wo);
-  }
-
-  @Override
-  public void mousePressed(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseReleased(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseEntered(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseExited(MouseEvent event) {
-    // Ignore
   }
 }

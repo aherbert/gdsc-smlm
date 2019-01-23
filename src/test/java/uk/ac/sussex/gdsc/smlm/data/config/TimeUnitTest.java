@@ -48,14 +48,14 @@ public class TimeUnitTest {
 
   private static void check(double msPerFrame, ExpectedUnit<TimeUnit>... expectedUnits) {
     final int n = expectedUnits.length;
-    TypeConverter<TimeUnit> c;
+    TypeConverter<TimeUnit> conv;
     for (int i = 0; i < n; i++) {
-      final TimeUnit u1 = expectedUnits[i].u;
+      final TimeUnit u1 = expectedUnits[i].unit;
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
-        final TimeUnit u2 = expectedUnits[j].u;
-        c = UnitConverterUtils.createConverter(u1, u2, msPerFrame);
-        final double o = c.convert(v1);
+        final TimeUnit u2 = expectedUnits[j].unit;
+        conv = UnitConverterUtils.createConverter(u1, u2, msPerFrame);
+        final double o = conv.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
     }

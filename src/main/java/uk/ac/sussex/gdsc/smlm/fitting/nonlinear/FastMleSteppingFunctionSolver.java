@@ -114,7 +114,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
    * The per observation variances. This is not null if fitting using the method of Huang, et al
    * (2015).
    */
-  protected double[] w;
+  protected double[] obsVariances;
   /**
    * The gradient function used by the procedure. This may be wrapped to add the per observation
    * variances if fitting using the method of Huang, et al (2015).
@@ -124,7 +124,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
   protected FastMleGradient2Procedure gradientProcedure;
 
   /** The old parameters (a). */
-  protected double[] aOld;
+  protected double[] oldA;
 
   /** The search direction. */
   protected double[] searchDirection;
@@ -186,12 +186,12 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
     // Huang, et al. (2015) by simply adding the variances to the target data.
 
     final int n = y.length;
-    w = getWeights(n);
-    if (w != null) {
+    obsVariances = getWeights(n);
+    if (obsVariances != null) {
       final double[] x = new double[n];
       for (int i = 0; i < n; i++) {
         // Also ensure the input y is positive
-        x[i] = (y[i] > 0) ? y[i] + w[i] : w[i];
+        x[i] = (y[i] > 0) ? y[i] + obsVariances[i] : obsVariances[i];
       }
       return x;
     }
@@ -208,8 +208,8 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
     // We can handle per-observation variances as detailed in
     // Huang, et al. (2015) by simply adding the variances to the computed value.
     f2 = (Gradient2Function) function;
-    if (w != null) {
-      f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
+    if (obsVariances != null) {
+      f2 = OffsetGradient2Function.wrapGradient2Function(f2, obsVariances);
     }
     return FastMleGradient2ProcedureUtils.create(y, f2);
   }
@@ -221,13 +221,13 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
       if (firstEvaluation) {
         // For the first evaluation we store the old value and initialise
         firstEvaluation = false;
-        aOld = a.clone();
+        oldA = a.clone();
         searchDirection = new double[a.length];
       } else {
         // All subsequent calls to computeFitValue() must check the search direction
         for (int i = 0; i < searchDirection.length; i++) {
           // Configure the search direction with the full Newton step
-          searchDirection[i] = a[i] - aOld[i];
+          searchDirection[i] = a[i] - oldA[i];
         }
 
         final double[] gradient = gradientProcedure.d1;
@@ -248,7 +248,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
                 final double slopeComponent = gradient[i] * searchDirection[gradientIndices[i]];
                 if (slopeComponent < 0) {
                   // Ignore this component
-                  a[gradientIndices[i]] = aOld[gradientIndices[i]];
+                  a[gradientIndices[i]] = oldA[gradientIndices[i]];
                 } else {
                   slope += slopeComponent;
                 }
@@ -271,15 +271,16 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
                 indices[i] = i;
               }
               SortUtils.sortIndices(indices, slopeComponents, false);
-              int j = 0;
-              while (slope <= 0 && j < slopeComponents.length && slopeComponents[indices[j]] <= 0) {
-                final int i = indices[j];
+              int count = 0;
+              while (slope <= 0 && count < slopeComponents.length
+                  && slopeComponents[indices[count]] <= 0) {
+                final int i = indices[count];
                 // Ignore this component
                 slope -= slopeComponents[i];
-                a[gradientIndices[i]] = aOld[gradientIndices[i]];
-                j++;
+                a[gradientIndices[i]] = oldA[gradientIndices[i]];
+                count++;
               }
-              if (j == slopeComponents.length) {
+              if (count == slopeComponents.length) {
                 // No move so just set converged
                 tc.setConverged();
                 return ll;
@@ -378,11 +379,11 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
    */
   private void copyFunctionValue(double[] fx) {
     final double[] u = gradientProcedure.u;
-    if (w != null) {
+    if (obsVariances != null) {
       // The function was wrapped to add the per-observation variances
       // to the computed value, these must be subtracted to get the actual value
       for (int i = 0, n = u.length; i < n; i++) {
-        fx[i] = u[i] - w[i];
+        fx[i] = u[i] - obsVariances[i];
       }
     } else {
       System.arraycopy(u, 0, fx, 0, u.length);
@@ -402,8 +403,8 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
       f2 = new Gradient2FunctionValueStore(f2, fx);
     }
     // Add the weights if necessary
-    if (w != null) {
-      f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
+    if (obsVariances != null) {
+      f2 = OffsetGradient2Function.wrapGradient2Function(f2, obsVariances);
     }
     // The fisher information is that for a Poisson process
     final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(f2);
@@ -418,10 +419,10 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
    * Initialise and run the procedure using the fitted parameters. Provided to allow the
    * backtracking sub-class to initialise the function for gradients.
    *
-   * @param p the procedure
+   * @param procedure the procedure
    */
-  protected void initialiseAndRun(PoissonGradientProcedure p) {
-    p.computeFisherInformation(null); // Assume preinitialised function
+  protected void initialiseAndRun(PoissonGradientProcedure procedure) {
+    procedure.computeFisherInformation(null); // Assume preinitialised function
   }
 
   @Override
@@ -435,8 +436,8 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
     // The fisher information is that for a Poisson process.
     // We must wrap the gradient function if weights are present.
     Gradient1Function f1 = (Gradient1Function) function;
-    if (w != null) {
-      f1 = OffsetGradient1Function.wrapGradient1Function(f1, w);
+    if (obsVariances != null) {
+      f1 = OffsetGradient1Function.wrapGradient1Function(f1, obsVariances);
     }
     final PoissonGradientProcedure p = PoissonGradientProcedureUtils.create(f1);
     p.computeFisherInformation(a);

@@ -73,13 +73,13 @@ public class TraceManagerTest {
 
     final float[] params = createParams(rand);
     final Trace trace = new Trace();
-    int t = 0;
+    int time = 0;
     for (int i = 0; i < 5; i++) {
-      trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+      trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
     }
-    t++;
+    time++;
     for (int i = 0; i < 5; i++) {
-      trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+      trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
     }
 
     runTracing(rand, 0, 2, trace);
@@ -92,25 +92,25 @@ public class TraceManagerTest {
 
     final float[] params = createParams(rand);
     final Trace trace = new Trace();
-    int t = 0;
+    int time = 0;
     for (int i = 0; i < 5; i++) {
       move(rand, params, distance);
-      trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+      trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
     }
-    t++;
+    time++;
     for (int i = 0; i < 5; i++) {
       move(rand, params, distance);
-      trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+      trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
     }
 
     runTracing(rand, distance, 2, trace);
   }
 
-  private static void runTracing(final UniformRandomProvider rnd, double d, int t,
+  private static void runTracing(final UniformRandomProvider rnd, double distance, int time,
       Trace... expected) {
     final MemoryPeakResults results = toPeakResults(rnd, expected);
     final TraceManager tm = new TraceManager(results);
-    final int n = tm.traceMolecules(d, t);
+    final int n = tm.traceMolecules(distance, time);
     Assertions.assertEquals(expected.length, n, "Incorrect number of traces");
 
     final Trace[] actual = tm.getTraces();
@@ -143,16 +143,16 @@ public class TraceManagerTest {
     final Trace[] expected = new Trace[molecules];
     for (int j = 0; j < expected.length; j++) {
       final float[] params = createParams(rand);
-      int t = 1 + rand.nextInt(200);
+      int time = 1 + rand.nextInt(200);
       final Trace trace = new Trace();
       final int pulses = 1 + rand.nextInt(maxPulses);
       for (int p = 0; p < pulses; p++) {
         final int length = 1 + rand.nextInt(maxOnTime);
         for (int i = 0; i < length; i++) {
           move(rand, params, distance);
-          trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+          trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
         }
-        t += 1 + rand.nextInt(maxOffTime);
+        time += 1 + rand.nextInt(maxOffTime);
       }
       expected[j] = trace;
     }
@@ -188,7 +188,7 @@ public class TraceManagerTest {
       final int x = positions[j] % n;
       final int y = positions[j] / n;
       final float[] params = Gaussian2DPeakResultHelper.createOneAxisParams(0, 1, x, y, 0, 1);
-      int t = 1 + rand.nextInt(200);
+      int time = 1 + rand.nextInt(200);
       final Trace trace = new Trace();
       final int pulses = 1 + rand.nextInt(maxPulses);
       for (int p = 0; p < pulses; p++) {
@@ -197,9 +197,9 @@ public class TraceManagerTest {
           final int[] offset = offsets[rand.nextInt(4)];
           params[Gaussian2DFunction.X_POSITION] = x + offset[0];
           params[Gaussian2DFunction.Y_POSITION] = y + offset[1];
-          trace.add(new PeakResult(t++, 0, 0, 0, 0, 0, 0, params, null));
+          trace.add(new PeakResult(time++, 0, 0, 0, 0, 0, 0, params, null));
         }
-        t += 1 + rand.nextInt(maxOffTime);
+        time += 1 + rand.nextInt(maxOffTime);
       }
       expected[j] = trace;
     }

@@ -73,10 +73,10 @@ public interface Dimension {
   /**
    * Checks if the value is at (or beyond) the lower/upper bounds of the current dimension range.
    *
-   * @param v the value
+   * @param value the value
    * @return true, if is at bounds
    */
-  boolean isAtBounds(double v);
+  boolean isAtBounds(double value);
 
   /**
    * Creates a new dimension with the given bounds. The current min/max and other settings should be

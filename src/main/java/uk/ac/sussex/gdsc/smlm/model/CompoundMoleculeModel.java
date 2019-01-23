@@ -41,9 +41,6 @@ public class CompoundMoleculeModel extends MoleculeModel {
   /** The constant to convert degrees to radians: <code>180.0 / Math.PI</code>. */
   static final double DEGREES_TO_RADIANS = 180.0 / Math.PI;
 
-  /** Define the Z-axis. */
-  public static final double[] Z_AXIS = new double[] {0, 0, 1};
-
   private int label;
 
   /**
@@ -161,8 +158,6 @@ public class CompoundMoleculeModel extends MoleculeModel {
       }
       if (m.mass <= 0 || Double.isNaN(m.mass)) {
         invalidMass++;
-        // throw new IllegalArgumentException("Input list contains molecules with invalid mass: " +
-        // m.mass);
       }
     }
 
@@ -377,24 +372,18 @@ public class CompoundMoleculeModel extends MoleculeModel {
     final double cost = Math.cos(angle);
     final double sint = Math.sin(angle);
 
-    final double[] r = new double[9];
+    final double[] rotmat = new double[9];
     /* Set the rotation matrix */
-    r[0] = u2 + ((v2 + w2) * cost);
-    r[1] = uv - uv * cost - w * sint;
-    r[2] = uw - uw * cost + v * sint;
-    r[3] = uv - uv * cost + w * sint;
-    r[4] = v2 + ((u2 + w2) * cost);
-    r[5] = vw - vw * cost - u * sint;
-    r[6] = -1.0 * (uw * (-1.0 + cost)) - v * sint;
-    r[7] = -1.0 * (vw * (-1.0 + cost)) + u * sint;
-    r[8] = w2 + ((u2 + v2) * cost);
-    /*
-     * r[0] = u2 + ((v2 + w2)*cost); r[3] = uv - uv*cost - w*sint; r[6] = uw - uw*cost + v*sint;
-     * r[1] = uv - uv*cost + w*sint; r[4] = v2 + ((u2 + w2)*cost); r[7] = vw - vw*cost - u*sint;
-     * r[2] = -1.0*(uw*(-1.0 + cost)) - v*sint; r[5] = -1.0*(vw*(-1.0 + cost)) + u*sint; r[8] = w2 +
-     * ((u2 + v2)*cost);
-     */
-    return r;
+    rotmat[0] = u2 + ((v2 + w2) * cost);
+    rotmat[1] = uv - uv * cost - w * sint;
+    rotmat[2] = uw - uw * cost + v * sint;
+    rotmat[3] = uv - uv * cost + w * sint;
+    rotmat[4] = v2 + ((u2 + w2) * cost);
+    rotmat[5] = vw - vw * cost - u * sint;
+    rotmat[6] = -1.0 * (uw * (-1.0 + cost)) - v * sint;
+    rotmat[7] = -1.0 * (vw * (-1.0 + cost)) + u * sint;
+    rotmat[8] = w2 + ((u2 + v2) * cost);
+    return rotmat;
   }
 
   /**

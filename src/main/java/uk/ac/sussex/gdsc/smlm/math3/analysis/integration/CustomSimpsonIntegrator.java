@@ -25,11 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
-import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.util.FastMath;
 
 /**
@@ -45,7 +43,9 @@ import org.apache.commons.math3.util.FastMath;
  * @since 1.2
  */
 public class CustomSimpsonIntegrator extends SimpsonIntegrator {
+  // @CHECKSTYLE.OFF: MemeberName
   private long n;
+  // @CHECKSTYLE.ON: MemeberName
   private double lastSum;
 
   /** Maximal number of iterations for Simpson. */
@@ -67,8 +67,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
   public CustomSimpsonIntegrator(final double relativeAccuracy, final double absoluteAccuracy,
-      final int minimalIterationCount, final int maximalIterationCount)
-      throws NotStrictlyPositiveException, NumberIsTooSmallException, NumberIsTooLargeException {
+      final int minimalIterationCount, final int maximalIterationCount) {
     super(relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
     if (maximalIterationCount > SIMPSON_MAX_ITERATIONS_COUNT) {
       throw new NumberIsTooLargeException(maximalIterationCount, SIMPSON_MAX_ITERATIONS_COUNT,
@@ -89,8 +88,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    * @exception NumberIsTooLargeException if maximal number of iterations is greater than
    *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
-  public CustomSimpsonIntegrator(final int minimalIterationCount, final int maximalIterationCount)
-      throws NotStrictlyPositiveException, NumberIsTooSmallException, NumberIsTooLargeException {
+  public CustomSimpsonIntegrator(final int minimalIterationCount, final int maximalIterationCount) {
     super(minimalIterationCount, maximalIterationCount);
     if (maximalIterationCount > SIMPSON_MAX_ITERATIONS_COUNT) {
       throw new NumberIsTooLargeException(maximalIterationCount, SIMPSON_MAX_ITERATIONS_COUNT,
@@ -108,27 +106,13 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
   }
 
   @Override
-  protected double doIntegrate() throws TooManyEvaluationsException, MaxCountExceededException {
+  protected double doIntegrate() {
     // This is a modification from the base SimpsonIntegrator.
     // That only computed a single iteration if getMinimalIterationCount() == 1.
 
     // Simpson's rule requires at least two trapezoid stages.
     // So we set the first sum using two trapezoid stages.
     final TrapezoidIntegratorCopy qtrap = new TrapezoidIntegratorCopy();
-
-    // if (getMinimalIterationCount() == 1)
-    // {
-    // n = 2L;
-    // // There is a bug in the standard CustomSimpsonIntegrator where the
-    // // n=1 stage is computed before the n=0 stage due to inlining of the
-    // // return. This is not valid as the n=1 stage uses the value from the
-    // // n=0 stage.
-    // //return (4 * qtrap.stage(this, 1) - qtrap.stage(this, 0)) / 3.0;
-    // double s0 = qtrap.stage(this, 0);
-    // double s1 = qtrap.stage(this, 1);
-    // lastSum = (4 * s1 - s0) / 3.0;
-    // return lastSum;
-    // }
 
     final double s0 = qtrap.stage(this, 0);
     double oldt = qtrap.stage(this, 1);
@@ -166,7 +150,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
   }
 
   @Override
-  public double computeObjectiveValue(double point) throws TooManyEvaluationsException {
+  public double computeObjectiveValue(double point) {
     return super.computeObjectiveValue(point);
   }
 

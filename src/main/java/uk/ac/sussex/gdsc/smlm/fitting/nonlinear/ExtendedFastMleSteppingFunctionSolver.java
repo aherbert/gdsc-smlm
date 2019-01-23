@@ -142,16 +142,16 @@ public class ExtendedFastMleSteppingFunctionSolver extends FastMleSteppingFuncti
     // Huang, et al. (2015) by simply adding the variances to the computed value.
     f2 = (Gradient2Function) function;
     if (solver != null) {
-      if (w != null) {
+      if (obsVariances != null) {
         f2 = OffsetExtendedGradient2Function
-            .wrapExtendedGradient2Function((ExtendedGradient2Function) function, w);
+            .wrapExtendedGradient2Function((ExtendedGradient2Function) function, obsVariances);
       }
       jacobian = new double[f2.size()];
       return jacobianGradientProcedure =
           new FastMleJacobianGradient2Procedure(y, (ExtendedGradient2Function) f2);
     }
-    if (w != null) {
-      f2 = OffsetGradient2Function.wrapGradient2Function(f2, w);
+    if (obsVariances != null) {
+      f2 = OffsetGradient2Function.wrapGradient2Function(f2, obsVariances);
     }
     return FastMleGradient2ProcedureUtils.create(y, f2);
   }

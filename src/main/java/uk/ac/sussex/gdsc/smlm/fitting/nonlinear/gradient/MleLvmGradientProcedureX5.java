@@ -47,7 +47,7 @@ public class MleLvmGradientProcedureX5 extends MleLvmGradientProcedure {
    */
   public MleLvmGradientProcedureX5(final double[] y, final Gradient1Function func) {
     super(y, func);
-    if (n != 5) {
+    if (numberOfGradients != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");
     }
   }

@@ -801,11 +801,11 @@ public class Fire implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+      ParameterUtils.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
       if (single && spuriousCorrelationCorrection) {
-        Parameters.isAboveZero("Q-value", qvalue);
-        Parameters.isAboveZero("Precision Mean", mean);
-        Parameters.isAboveZero("Precision Sigma", sigma);
+        ParameterUtils.isAboveZero("Q-value", qvalue);
+        ParameterUtils.isAboveZero("Precision Mean", mean);
+        ParameterUtils.isAboveZero("Precision Sigma", sigma);
         // Set these for use in FIRE computation
         setCorrectionParameters(qvalue, mean, sigma);
       }
@@ -1992,12 +1992,12 @@ public class Fire implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+      ParameterUtils.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
       if (precisionMethod == PrecisionMethod.FIXED) {
-        Parameters.isAboveZero("Precision Mean", mean);
-        Parameters.isAboveZero("Precision Sigma", sigma);
+        ParameterUtils.isAboveZero("Precision Mean", mean);
+        ParameterUtils.isAboveZero("Precision Sigma", sigma);
       }
-      Parameters.isAbove("MaxQ", maxQ, minQ);
+      ParameterUtils.isAbove("MaxQ", maxQ, minQ);
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
       return false;
@@ -2686,7 +2686,7 @@ public class Fire implements PlugIn {
     @Override
     public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work) {
       // Plot the histogram
-      histogram.plot(work.a.mean, work.a.sigma, wo);
+      histogram.plot(work.item1.mean, work.item1.sigma, wo);
       return work;
     }
   }
@@ -2710,7 +2710,7 @@ public class Fire implements PlugIn {
     @Override
     public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work) {
       // Compute Q and then plot the scaled FRC numerator
-      final WorkSettings settings = work.a;
+      final WorkSettings settings = work.item1;
       qplot.plot(settings.mean, settings.sigma, settings.qvalue, wo);
       return work;
     }

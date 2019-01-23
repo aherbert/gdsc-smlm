@@ -224,7 +224,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     limits = source.limits;
     tinyLimits = source.tinyLimits;
     noGaussian = source.noGaussian;
-    gaussianKernel = source.gaussianKernel.clone();
+    gaussianKernel = source.gaussianKernel.copy();
     relativeAccuracy = source.relativeAccuracy;
     maxIterations = source.maxIterations;
   }

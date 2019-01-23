@@ -2560,29 +2560,29 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // final int flags = GaussianFunctionFactory.freeze(fitConfig.getFunctionFlags(),
         // fitConfig.getAstigmatismZModel(), frozenParams);
 
-        int n = 0;
+        int resultIndex = 0;
         for (int i = 0; i < resultDoubletMulti.results.length; i++) {
           final PreprocessedPeakResult r = resultDoubletMulti.results[i];
-          results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId(),
-              initialParams, params, paramDevs,
+          results[resultIndex] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(),
+              r.getId(), initialParams, params, paramDevs,
               // getLocalBackground(n, npeaks, frozenParams, flags,
               // precomputedFittedNeighboursMulti),
               validationData, (r.isExistingResult()) ? ResultType.EXISTING
                   : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
-          n++;
+          resultIndex++;
         }
         // Ignore the first result (this was removed and fit as the doublet)
         for (int i = 1; i < resultMulti.results.length; i++) {
           final PreprocessedPeakResult r = resultMulti.results[i];
           // Increment the ID by one since the position in the parameters array is moved to
           // accommodate 2 preceding peaks and not 1
-          results[n] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(), r.getId() + 1,
-              initialParams, params, paramDevs,
+          results[resultIndex] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(),
+              r.getId() + 1, initialParams, params, paramDevs,
               // getLocalBackground(n, npeaks, frozenParams, flags,
               // precomputedFittedNeighboursMulti),
               validationData, (r.isExistingResult()) ? ResultType.EXISTING
                   : (r.isNewResult()) ? ResultType.NEW : ResultType.CANDIDATE);
-          n++;
+          resultIndex++;
         }
 
         final int adjust = (fitConfig.isBackgroundFitting()) ? 1 : 0;

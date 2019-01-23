@@ -27,11 +27,13 @@ package uk.ac.sussex.gdsc.smlm.ga;
 /**
  * Defines the fitness of a chromosome.
  *
+ * <p>Note: this class has a natural ordering that is inconsistent with equals.
+ *
  * @param <T> the generic type
  */
 public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>> {
   /** The comparable object. */
-  final T t;
+  final T object;
 
   /** The score. */
   final double score;
@@ -39,22 +41,22 @@ public class Fitness<T extends Comparable<T>> implements Comparable<Fitness<T>> 
   /**
    * Instantiates a new fitness.
    *
-   * @param t the comparable object
+   * @param object the comparable object
    * @param score the score
    */
-  public Fitness(T t, double score) {
-    this.t = t;
+  public Fitness(T object, double score) {
+    this.object = object;
     this.score = score;
   }
 
   @Override
-  public int compareTo(Fitness<T> o) {
-    if (t == null) {
+  public int compareTo(Fitness<T> other) {
+    if (object == null) {
       return 1;
     }
-    if (o.t == null) {
+    if (other.object == null) {
       return -1;
     }
-    return t.compareTo(o.t);
+    return object.compareTo(other.object);
   }
 }

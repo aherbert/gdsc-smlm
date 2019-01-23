@@ -25,11 +25,12 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 import org.ejml.data.DenseMatrix64F;
 
 /**
- * Compute the inertia tensor for a 3D object.
+ * Compute the inertia tensor for a 2D object.
  *
  * @author Alex Herbert
  */
@@ -41,20 +42,20 @@ public class Tensor2D {
   private final double[][] eigenVectors;
 
   /**
-   * Instantiates a new tensor 3D.
+   * Instantiates a new tensor 2D.
    *
    * @param data the data (packed in YX order)
-   * @param w the width
-   * @param h the height
+   * @param width the width
+   * @param height the height
    */
-  public Tensor2D(float[] data, int w, int h) {
+  public Tensor2D(float[] data, int width, int height) {
     // Compute centre-of-mass
     double cx = 0;
     double cy = 0;
     double sumXy = 0;
-    for (int y = 0, j = 0; y < h; y++) {
+    for (int y = 0, j = 0; y < height; y++) {
       double sumX = 0;
-      for (int x = 0; x < w; x++) {
+      for (int x = 0; x < width; x++) {
         final float f = data[j++];
         sumX += f;
         cx += f * x;
@@ -62,6 +63,7 @@ public class Tensor2D {
       sumXy += sumX;
       cy += sumX * y;
     }
+    ValidationUtils.checkArgument(sumXy != 0, "Sum is zero");
     cx = cx / sumXy;
     cy = cy / sumXy;
     com = new double[] {cx, cy};
@@ -69,24 +71,24 @@ public class Tensor2D {
     // Compute tensor
     // https://en.wikipedia.org/wiki/Moment_of_inertia#Inertia_tensor
     tensor = new DenseMatrix64F(2, 2);
-    for (int y = 0, j = 0; y < h; y++) {
+    for (int y = 0, j = 0; y < height; y++) {
       final double dy = y - cy;
       final double dy2 = dy * dy;
       double summ = 0;
       double summdx = 0;
-      for (int x = 0; x < w; x++) {
+      for (int x = 0; x < width; x++) {
         final double m = data[j++];
         final double dx = x - cx;
         final double dx2 = dx * dx;
 
-        // tensor[0][0] += m * dy2;
-        // tensor[0][1] -= m * dx * dy;
-        // tensor[1][1] += m * dx2;
+        // tensor[0][0] += m * dy2
+        // tensor[0][1] -= m * dx * dy
+        // tensor[1][1] += m * dx2
 
         summ += m;
         summdx += m * dx;
-        // tensor.data[0] += m * dy2;
-        // tensor.data[1] -= m * dx * dy;
+        // tensor.data[0] += m * dy2
+        // tensor.data[1] -= m * dx * dy
         tensor.data[3] += m * dx2;
       }
       tensor.data[0] += summ * dy2;
@@ -129,28 +131,10 @@ public class Tensor2D {
     } else {
       // b==0, c==0
       eigenVectors[0][0] = 1;
-      // eigenVectors[0][1] = 0;
-      // eigenVectors[1][0] = 0;
+      // eigenVectors[0][1] = 0
+      // eigenVectors[1][0] = 0
       eigenVectors[1][1] = 1;
     }
-
-    //// EJML
-    // EigenDecomposition<DenseMatrix64F> decomp = DecompositionFactory.eig(2, true, true);
-    //
-    // if (!decomp.decompose(tensor))
-    // {
-    // eigenValues = null;
-    // eigenVectors = null;
-    // return;
-    // }
-    //
-    // eigenValues = new double[2];
-    // eigenVectors = new double[2][];
-    // for (int i = 0; i < 2; i++)
-    // {
-    // eigenValues[i] = decomp.getEigenvalue(i).real;
-    // eigenVectors[i] = decomp.getEigenVector(i).data;
-    // }
 
     // Sort
     if (eigenValues[1] > eigenValues[0]) {
@@ -193,7 +177,7 @@ public class Tensor2D {
   }
 
   /**
-   * Checks for a succesfull Eigen decomposition.
+   * Checks for a successful Eigen decomposition.
    *
    * @return true, if successful
    */

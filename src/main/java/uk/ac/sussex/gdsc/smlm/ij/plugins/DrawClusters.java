@@ -138,22 +138,22 @@ public class DrawClusters implements PlugIn {
     if (imp == null) {
       // Create a default image using 100 pixels as the longest edge
       final double maxD = (bounds.width > bounds.height) ? bounds.width : bounds.height;
-      int w;
-      int h;
+      int width;
+      int height;
       if (maxD == 0) {
         // Note that imageSize can be zero (for auto sizing)
-        w = h = (imageSize == 0) ? 20 : imageSize;
+        width = height = (imageSize == 0) ? 20 : imageSize;
       } else if (imageSize == 0) {
         // Note that imageSize can be zero (for auto sizing)
-        w = bounds.width;
-        h = bounds.height;
+        width = bounds.width;
+        height = bounds.height;
       } else {
-        w = (int) (imageSize * bounds.width / maxD);
-        h = (int) (imageSize * bounds.height / maxD);
+        width = (int) (imageSize * bounds.width / maxD);
+        height = (int) (imageSize * bounds.height / maxD);
       }
-      final ByteProcessor bp = new ByteProcessor(w, h);
+      final ByteProcessor bp = new ByteProcessor(width, height);
       if (isUseStackPosition) {
-        final ImageStack stack = new ImageStack(w, h, maxFrame);
+        final ImageStack stack = new ImageStack(width, height, maxFrame);
         for (int i = 1; i <= maxFrame; i++) {
           stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
         }
@@ -186,18 +186,18 @@ public class DrawClusters implements PlugIn {
       final int npoints = trace.size();
       final float[] xpoints = new float[npoints];
       final float[] ypoints = new float[npoints];
-      int j = 0;
+      int ii = 0;
       if (frames != null) {
         frames[i] = new int[npoints];
       }
       for (int k = 0; k < trace.size(); k++) {
         final PeakResult result = trace.get(k);
-        xpoints[j] = (result.getXPosition() - bounds.x) * xScale;
-        ypoints[j] = (result.getYPosition() - bounds.y) * yScale;
+        xpoints[ii] = (result.getXPosition() - bounds.x) * xScale;
+        ypoints[ii] = (result.getYPosition() - bounds.y) * yScale;
         if (frames != null) {
-          frames[i][j] = result.getFrame();
+          frames[i][ii] = result.getFrame();
         }
-        j++;
+        ii++;
       }
       Roi roi;
       if (myDrawLines) {
@@ -328,12 +328,12 @@ public class DrawClusters implements PlugIn {
     return true;
   }
 
-  private static void addToOverlay(Overlay o, Roi roi, boolean isHyperStack, int frame) {
+  private static void addToOverlay(Overlay overlay, Roi roi, boolean isHyperStack, int frame) {
     if (isHyperStack) {
       roi.setPosition(0, 0, frame);
     } else {
       roi.setPosition(frame);
     }
-    o.add(roi);
+    overlay.add(roi);
   }
 }

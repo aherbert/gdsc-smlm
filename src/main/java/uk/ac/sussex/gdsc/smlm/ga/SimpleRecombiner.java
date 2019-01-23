@@ -69,20 +69,20 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
    */
   @Override
   public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2) {
-    int nChildren = 1;
+    int childCount = 1;
     if (meanChildren > 0) {
-      nChildren = Math.max(1, (int) random.nextPoisson(meanChildren));
+      childCount = Math.max(1, (int) random.nextPoisson(meanChildren));
     }
 
     @SuppressWarnings("unchecked")
-    final Chromosome<T>[] children = new Chromosome[nChildren];
+    final Chromosome<T>[] children = new Chromosome[childCount];
     int count = 0;
     final double[] s1 = chromosome1.sequence();
     final double[] s2 = chromosome2.sequence();
-    while (count < nChildren) {
+    while (count < childCount) {
       final ChromosomePair<T> pair = recombine(chromosome1, chromosome2, s1, s2);
       children[count++] = pair.c1;
-      if (count == nChildren) {
+      if (count == childCount) {
         break;
       }
       children[count++] = pair.c2;
@@ -93,9 +93,9 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 
   private ChromosomePair<T> recombine(Chromosome<T> chromosome1, Chromosome<T> chromosome2,
       double[] s1, double[] s2) {
-    int nCrossovers = 1;
+    int crossoverCount = 1;
     if (fraction > 0) {
-      nCrossovers = Math.max(1, (int) random.nextPoisson(fraction * chromosome1.length()));
+      crossoverCount = Math.max(1, (int) random.nextPoisson(fraction * chromosome1.length()));
     }
 
     // Randomly select positions using a partial Fischer-Yates shuffle
@@ -105,7 +105,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
     }
 
     final RandomGenerator ran = random.getRandomGenerator();
-    for (int i = positions.length, n = nCrossovers; i-- > 1 && n-- > 0;) {
+    for (int i = positions.length, n = crossoverCount; i-- > 1 && n-- > 0;) {
       final int j = (ran.nextInt(i + 1));
       final int tmp = positions[i];
       positions[i] = positions[j];
@@ -114,9 +114,9 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
 
     // Reverse the array because the end is random
     SimpleArrayUtils.reverse(positions);
-    positions = Arrays.copyOf(positions, nCrossovers);
+    positions = Arrays.copyOf(positions, crossoverCount);
     // Get the positions in order
-    if (nCrossovers != 1) {
+    if (crossoverCount != 1) {
       Arrays.sort(positions);
     }
 
@@ -132,7 +132,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
         s2 = tmp;
         nextSwap++;
         // Avoid index out of bounds
-        if (nextSwap == nCrossovers) {
+        if (nextSwap == crossoverCount) {
           nextSwap--;
         }
       }

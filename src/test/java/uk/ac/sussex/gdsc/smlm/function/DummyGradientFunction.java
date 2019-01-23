@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 @SuppressWarnings({"javadoc"})
 public class DummyGradientFunction implements Gradient1Function, Gradient2Function {
-  int n;
+  int numberOfGradients;
 
-  public DummyGradientFunction(int n) {
-    this.n = n;
+  public DummyGradientFunction(int numberOfGradients) {
+    this.numberOfGradients = numberOfGradients;
   }
 
   @Override
@@ -38,17 +38,17 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
   }
 
   @Override
-  public void initialise0(double[] a) {
+  public void initialise0(double[] params) {
     // Ignore
   }
 
   @Override
-  public void initialise1(double[] a) {
+  public void initialise1(double[] params) {
     // Ignore
   }
 
   @Override
-  public void initialise2(double[] a) {
+  public void initialise2(double[] params) {
     // Ignore
   }
 
@@ -59,7 +59,7 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
 
   @Override
   public int getNumberOfGradients() {
-    return n;
+    return numberOfGradients;
   }
 
   @Override
@@ -78,7 +78,7 @@ public class DummyGradientFunction implements Gradient1Function, Gradient2Functi
   }
 
   @Override
-  public void initialise(double[] a) {
+  public void initialise(double[] params) {
     // Ignore
   }
 }

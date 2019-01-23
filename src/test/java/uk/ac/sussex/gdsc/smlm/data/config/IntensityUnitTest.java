@@ -57,14 +57,14 @@ public class IntensityUnitTest {
   private static void check(double offset, double countPerPhoton,
       ExpectedUnit<IntensityUnit>... expectedUnits) {
     final int n = expectedUnits.length;
-    TypeConverter<IntensityUnit> c;
+    TypeConverter<IntensityUnit> conv;
     for (int i = 0; i < n; i++) {
-      final IntensityUnit u1 = expectedUnits[i].u;
+      final IntensityUnit u1 = expectedUnits[i].unit;
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
-        final IntensityUnit u2 = expectedUnits[j].u;
-        c = UnitConverterUtils.createConverter(u1, u2, offset, countPerPhoton);
-        final double o = c.convert(v1);
+        final IntensityUnit u2 = expectedUnits[j].unit;
+        conv = UnitConverterUtils.createConverter(u1, u2, offset, countPerPhoton);
+        final double o = conv.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
     }
@@ -72,14 +72,14 @@ public class IntensityUnitTest {
 
   private static void check(double countPerPhoton, ExpectedUnit<IntensityUnit>... expectedUnits) {
     final int n = expectedUnits.length;
-    TypeConverter<IntensityUnit> c;
+    TypeConverter<IntensityUnit> conv;
     for (int i = 0; i < n; i++) {
-      final IntensityUnit u1 = expectedUnits[i].u;
+      final IntensityUnit u1 = expectedUnits[i].unit;
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
-        final IntensityUnit u2 = expectedUnits[j].u;
-        c = UnitConverterUtils.createConverter(u1, u2, countPerPhoton);
-        final double o = c.convert(v1);
+        final IntensityUnit u2 = expectedUnits[j].unit;
+        conv = UnitConverterUtils.createConverter(u1, u2, countPerPhoton);
+        final double o = conv.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
     }

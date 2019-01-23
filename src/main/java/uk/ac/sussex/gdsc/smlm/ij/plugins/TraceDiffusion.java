@@ -912,8 +912,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
-      Parameters.isAbove("Min trace length", settings.getMinimumTraceLength(), 1);
+      ParameterUtils.isAboveZero("Distance threshold", settings.getDistanceThreshold());
+      ParameterUtils.isAbove("Min trace length", settings.getMinimumTraceLength(), 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -1090,11 +1090,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // Check arguments
     try {
       // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
-      Parameters.isAbove("Fit length", settings.getFitLength(), 1);
-      Parameters.isAboveZero("Jump distance", settings.getJumpDistance());
-      Parameters.isEqualOrAbove("Maximum N", maxN, myMinN);
+      ParameterUtils.isAbove("Fit length", settings.getFitLength(), 1);
+      ParameterUtils.isAboveZero("Jump distance", settings.getJumpDistance());
+      ParameterUtils.isEqualOrAbove("Maximum N", maxN, myMinN);
       if (settings.getMle()) {
-        Parameters.isAboveZero("Significance level", significanceLevel);
+        ParameterUtils.isAboveZero("Significance level", significanceLevel);
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());

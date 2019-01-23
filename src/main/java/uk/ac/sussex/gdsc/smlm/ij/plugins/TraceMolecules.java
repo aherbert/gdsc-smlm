@@ -760,10 +760,10 @@ public class TraceMolecules implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
-      Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
-      Parameters.isPositive("Pulse interval", settings.getPulseInterval());
-      Parameters.isPositive("Pulse window", settings.getPulseWindow());
+      ParameterUtils.isAboveZero("Distance threshold", settings.getDistanceThreshold());
+      ParameterUtils.isAboveZero("Time threshold", settings.getTimeThreshold());
+      ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
+      ParameterUtils.isPositive("Pulse window", settings.getPulseWindow());
       // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
@@ -862,13 +862,13 @@ public class TraceMolecules implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Distance threshold", settings.getDistanceThreshold());
+      ParameterUtils.isAboveZero("Distance threshold", settings.getDistanceThreshold());
       final ClusteringAlgorithm clusteringAlgorithm =
           getClusteringAlgorithm(settings.getClusteringAlgorithm());
       if (clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY
           || clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY) {
-        Parameters.isAboveZero("Time threshold", settings.getTimeThreshold());
-        Parameters.isPositive("Pulse interval", settings.getPulseInterval());
+        ParameterUtils.isAboveZero("Time threshold", settings.getTimeThreshold());
+        ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
       }
       // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
     } catch (final IllegalArgumentException ex) {

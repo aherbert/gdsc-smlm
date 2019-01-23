@@ -47,7 +47,7 @@ public class MleLvmGradientProcedure4 extends MleLvmGradientProcedure {
    */
   public MleLvmGradientProcedure4(final double[] y, final Gradient1Function func) {
     super(y, func);
-    if (n != 4) {
+    if (numberOfGradients != 4) {
       throw new IllegalArgumentException("Function must compute 4 gradients");
     }
   }

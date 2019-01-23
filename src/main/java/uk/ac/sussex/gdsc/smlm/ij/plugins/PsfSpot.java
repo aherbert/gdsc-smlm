@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PsfSpot extends BasePoint {
   /** The time. */
-  public final int t;
+  public final int time;
 
   /** The peak result. */
   public final PeakResult peakResult;
@@ -54,14 +54,14 @@ public class PsfSpot extends BasePoint {
   /**
    * Instantiates a new PSF spot.
    *
-   * @param t the time
+   * @param time the time
    * @param x the x
    * @param y the y
    * @param peakResult the peak result
    */
-  public PsfSpot(int t, float x, float y, PeakResult peakResult) {
+  public PsfSpot(int time, float x, float y, PeakResult peakResult) {
     super(x, y);
-    this.t = t;
+    this.time = time;
     this.peakResult = peakResult;
   }
 
@@ -71,6 +71,6 @@ public class PsfSpot extends BasePoint {
    * @return the time
    */
   public int getTime() {
-    return t;
+    return time;
   }
 }

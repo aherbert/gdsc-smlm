@@ -48,7 +48,7 @@ public class PoissonGammaGaussianConvolutionFunction
   /**
    * The on-chip gain multiplication factor.
    */
-  final double g;
+  final double gain;
 
   private final double var;
   private final double sd;
@@ -72,7 +72,7 @@ public class PoissonGammaGaussianConvolutionFunction
     }
     alpha = Math.abs(alpha);
 
-    this.g = 1.0 / alpha;
+    this.gain = 1.0 / alpha;
     if (isVariance) {
       sd = Math.sqrt(variance);
       this.var = variance;
@@ -145,7 +145,7 @@ public class PoissonGammaGaussianConvolutionFunction
     return computeP(x, mu, max, min);
   }
 
-  private double computeP(final double o, final double e, double max, double min) {
+  private double computeP(final double x, final double mu, double max, double min) {
     final int cmax = (int) Math.ceil(max);
     final int cmin = (int) Math.floor(min);
 
@@ -153,9 +153,9 @@ public class PoissonGammaGaussianConvolutionFunction
       // Edge case with no range
       return FastMath.exp(
           // Poisson-Gamma
-          PoissonGammaFunction.logPoissonGamma(cmin, e, g)
+          PoissonGammaFunction.logPoissonGamma(cmin, mu, gain)
               // Gaussian
-              - (MathUtils.pow2(cmin - o) / twoVar) + logNormalisationGaussian);
+              - (MathUtils.pow2(cmin - x) / twoVar) + logNormalisationGaussian);
     }
 
     double pvalue = 0;
@@ -197,9 +197,9 @@ public class PoissonGammaGaussianConvolutionFunction
     for (int c = cmin; c <= cmax; c++) {
       pvalue += FastMath.exp(
           // Poisson-Gamma
-          PoissonGammaFunction.logPoissonGamma(c, e, g)
+          PoissonGammaFunction.logPoissonGamma(c, mu, gain)
               // Gaussian
-              - (MathUtils.pow2(c - o) / twoVar) + logNormalisationGaussian);
+              - (MathUtils.pow2(c - x) / twoVar) + logNormalisationGaussian);
     }
 
     // }

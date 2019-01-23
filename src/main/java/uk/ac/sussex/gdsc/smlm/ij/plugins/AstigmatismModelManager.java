@@ -439,7 +439,7 @@ public class AstigmatismModelManager implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isPositive("nm/slice", pluginSettings.getNmPerSlice());
+      ParameterUtils.isPositive("nm/slice", pluginSettings.getNmPerSlice());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -574,20 +574,20 @@ public class AstigmatismModelManager implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("nm per pixel", calibration.getNmPerPixel());
-      Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+      ParameterUtils.isAboveZero("nm per pixel", calibration.getNmPerPixel());
+      ParameterUtils.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
       if (fitConfig.getPsf().getParametersCount() > 1) {
-        Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
+        ParameterUtils.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
       }
-      Parameters.isAboveZero("Fitting_width", config.getFitting());
+      ParameterUtils.isAboveZero("Fitting_width", config.getFitting());
 
       if (!fitConfig.isSmartFilter()) {
-        Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-        Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-        Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
-        Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-        Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
-        Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+        ParameterUtils.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+        ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
+        ParameterUtils.isPositive("Min photons", fitConfig.getMinPhotons());
+        ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+        ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
+        ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -1012,16 +1012,16 @@ public class AstigmatismModelManager implements PlugIn {
    * @param s0 the width in the focal plane
    * @param z the z
    * @param oneOverD2 one over the depth of focus squared (1/d^2)
-   * @param a Empirical constant A for the astigmatism of the PSF
-   * @param b Empirical constant B for the astigmatism of the PSF
+   * @param ca Empirical constant A for the astigmatism of the PSF
+   * @param cb Empirical constant B for the astigmatism of the PSF
    * @return the standard deviation
    */
-  public static double getS(double s0, double z, double oneOverD2, double a, double b) {
+  public static double getS(double s0, double z, double oneOverD2, double ca, double cb) {
     final double z2 = z * z;
     final double z3 = z2 * z;
     final double z4 = z2 * z2;
     // Eq. 17a
-    return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
+    return s0 * Math.sqrt(1 + oneOverD2 * (z2 + ca * z3 + cb * z4));
   }
 
   private class AstigmatismVectorFunction implements MultivariateVectorFunction {

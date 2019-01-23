@@ -447,16 +447,17 @@ public class DriftCalculator implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isPositive("Max iterations", maxIterations);
-      Parameters.isAboveZero("Relative error", relativeError);
-      Parameters.isPositive("Smoothing", smoothing);
+      ParameterUtils.isPositive("Max iterations", maxIterations);
+      ParameterUtils.isAboveZero("Relative error", relativeError);
+      ParameterUtils.isPositive("Smoothing", smoothing);
       if (limitSmoothing) {
-        Parameters.isEqualOrAbove("Min smoothing points", minSmoothingPoints, 3);
-        Parameters.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, 3);
-        Parameters.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, minSmoothingPoints);
+        ParameterUtils.isEqualOrAbove("Min smoothing points", minSmoothingPoints, 3);
+        ParameterUtils.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, 3);
+        ParameterUtils.isEqualOrAbove("Max smoothing points", maxSmoothingPoints,
+            minSmoothingPoints);
       }
-      Parameters.isEqualOrBelow("Smoothing", smoothing, 1);
-      Parameters.isPositive("Smoothing iterations", iterations);
+      ParameterUtils.isEqualOrBelow("Smoothing", smoothing, 1);
+      ParameterUtils.isPositive("Smoothing iterations", iterations);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -486,7 +487,7 @@ public class DriftCalculator implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Frames", frames);
+      ParameterUtils.isAboveZero("Frames", frames);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -519,8 +520,8 @@ public class DriftCalculator implements PlugIn {
     interpolationMethod = gd.getNextChoiceIndex();
 
     try {
-      Parameters.isAboveZero("Start frame", startFrame);
-      Parameters.isAboveZero("Frame spacing", frameSpacing);
+      ParameterUtils.isAboveZero("Start frame", startFrame);
+      ParameterUtils.isAboveZero("Frame spacing", frameSpacing);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return null;

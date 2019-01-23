@@ -99,8 +99,8 @@ import uk.ac.sussex.gdsc.smlm.model.LocalisationModelSet;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution3D;
 import uk.ac.sussex.gdsc.smlm.model.MoleculeModel;
-import uk.ac.sussex.gdsc.smlm.model.PsfModelGradient1Function;
 import uk.ac.sussex.gdsc.smlm.model.PsfModel;
+import uk.ac.sussex.gdsc.smlm.model.PsfModelGradient1Function;
 import uk.ac.sussex.gdsc.smlm.model.RadialFalloffIllumination;
 import uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory;
 import uk.ac.sussex.gdsc.smlm.model.SpatialDistribution;
@@ -4337,23 +4337,23 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Pixel Pitch", settings.getPixelPitch());
-      Parameters.isAboveZero("Size", settings.getSize());
+      ParameterUtils.isAboveZero("Pixel Pitch", settings.getPixelPitch());
+      ParameterUtils.isAboveZero("Size", settings.getSize());
       if (!benchmarkMode && !settings.getFixedDepth()) {
-        Parameters.isPositive("Depth", settings.getDepth());
+        ParameterUtils.isPositive("Depth", settings.getDepth());
       }
-      Parameters.isPositive("Background", settings.getBackground());
-      Parameters.isAboveZero("Particles", settings.getParticles());
+      ParameterUtils.isPositive("Background", settings.getBackground());
+      ParameterUtils.isAboveZero("Particles", settings.getParticles());
       if (simpleMode) {
-        Parameters.isAboveZero("Density", settings.getDensity());
+        ParameterUtils.isAboveZero("Density", settings.getDensity());
       }
-      Parameters.isAboveZero("Min Photons", settings.getPhotonsPerSecond());
+      ParameterUtils.isAboveZero("Min Photons", settings.getPhotonsPerSecond());
       if (settings.getPhotonsPerSecondMaximum() < settings.getPhotonsPerSecond()) {
         settings.setPhotonsPerSecondMaximum(settings.getPhotonsPerSecond());
       }
-      Parameters.isPositive("Histogram bins", settings.getHistogramBins());
+      ParameterUtils.isPositive("Histogram bins", settings.getHistogramBins());
       if (simpleMode) {
-        Parameters.isPositive("Density radius", settings.getDensityRadius());
+        ParameterUtils.isPositive("Density radius", settings.getDensityRadius());
       }
 
       validateCameraOptions();
@@ -4452,13 +4452,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final boolean isCcd = CalibrationProtosHelper.isCcdCameraType(cameraType);
     if (isCcd) {
       if (cameraType == CameraType.EMCCD) {
-        Parameters.isPositive("EM gain", settings.getEmGain());
+        ParameterUtils.isPositive("EM gain", settings.getEmGain());
       }
-      Parameters.isPositive("Camera gain", settings.getCameraGain());
-      Parameters.isPositive("Read noise", settings.getReadNoise());
+      ParameterUtils.isPositive("Camera gain", settings.getCameraGain());
+      ParameterUtils.isPositive("Read noise", settings.getReadNoise());
       final double noiseRange = settings.getReadNoise() * settings.getCameraGain() * 4;
-      Parameters.isEqualOrAbove("Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ",
-          settings.getBias(), noiseRange);
+      ParameterUtils.isEqualOrAbove(
+          "Bias must prevent clipping the read noise (@ +/- 4 StdDev) so ", settings.getBias(),
+          noiseRange);
 
       cameraModel = createCcdCameraModel();
     } else if (cameraType == CameraType.SCMOS) {
@@ -4694,13 +4695,13 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       psfModelType =
           (settings.getPsfModel().equals(PSF_MODELS[PSF_MODEL_GAUSSIAN])) ? PSF_MODEL_GAUSSIAN
               : PSF_MODEL_AIRY;
-      Parameters.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
+      ParameterUtils.isAboveZero("Depth-of-focus", settings.getDepthOfFocus());
       if (settings.getEnterWidth()) {
-        Parameters.isAboveZero("PSF SD", settings.getPsfSd());
+        ParameterUtils.isAboveZero("PSF SD", settings.getPsfSd());
       } else {
-        Parameters.isAboveZero("Wavelength", settings.getWavelength());
-        Parameters.isAboveZero("NA", settings.getNumericalAperture());
-        Parameters.isBelow("NA", settings.getNumericalAperture(), 2);
+        ParameterUtils.isAboveZero("Wavelength", settings.getWavelength());
+        ParameterUtils.isAboveZero("NA", settings.getNumericalAperture());
+        ParameterUtils.isBelow("NA", settings.getNumericalAperture(), 2);
       }
     }
   }
@@ -4901,35 +4902,35 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Pixel Pitch", settings.getPixelPitch());
-      Parameters.isAboveZero("Size", settings.getSize());
+      ParameterUtils.isAboveZero("Pixel Pitch", settings.getPixelPitch());
+      ParameterUtils.isAboveZero("Size", settings.getSize());
       if (!settings.getFixedDepth()) {
-        Parameters.isPositive("Depth", settings.getDepth());
+        ParameterUtils.isPositive("Depth", settings.getDepth());
       }
       if (!trackMode) {
-        Parameters.isAboveZero("Seconds", settings.getSeconds());
+        ParameterUtils.isAboveZero("Seconds", settings.getSeconds());
       }
-      Parameters.isAboveZero("Exposure time", settings.getExposureTime());
-      Parameters.isAboveZero("Steps per second", settings.getStepsPerSecond());
-      Parameters.isPositive("Background", settings.getBackground());
-      Parameters.isAboveZero("Particles", settings.getParticles());
-      Parameters.isAboveZero("Photons", settings.getPhotonsPerSecond());
-      Parameters.isPositive("Diffusion rate", settings.getDiffusionRate());
-      Parameters.isPositive("Fixed fraction", settings.getFixedFraction());
-      Parameters.isPositive("Pulse interval", settings.getPulseInterval());
-      Parameters.isAboveZero("Pulse ratio", settings.getPulseRatio());
-      Parameters.isAboveZero("tOn", settings.getTOn());
+      ParameterUtils.isAboveZero("Exposure time", settings.getExposureTime());
+      ParameterUtils.isAboveZero("Steps per second", settings.getStepsPerSecond());
+      ParameterUtils.isPositive("Background", settings.getBackground());
+      ParameterUtils.isAboveZero("Particles", settings.getParticles());
+      ParameterUtils.isAboveZero("Photons", settings.getPhotonsPerSecond());
+      ParameterUtils.isPositive("Diffusion rate", settings.getDiffusionRate());
+      ParameterUtils.isPositive("Fixed fraction", settings.getFixedFraction());
+      ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
+      ParameterUtils.isAboveZero("Pulse ratio", settings.getPulseRatio());
+      ParameterUtils.isAboveZero("tOn", settings.getTOn());
       if (!trackMode) {
-        Parameters.isAboveZero("tOff Short", settings.getTOffShort());
-        Parameters.isAboveZero("tOff Long", settings.getTOffLong());
-        Parameters.isPositive("n-Blinks Short", settings.getNBlinksShort());
-        Parameters.isPositive("n-Blinks Long", settings.getNBlinksLong());
+        ParameterUtils.isAboveZero("tOff Short", settings.getTOffShort());
+        ParameterUtils.isAboveZero("tOff Long", settings.getTOffLong());
+        ParameterUtils.isPositive("n-Blinks Short", settings.getNBlinksShort());
+        ParameterUtils.isPositive("n-Blinks Long", settings.getNBlinksLong());
       }
-      Parameters.isPositive("Min photons", settings.getMinPhotons());
-      Parameters.isPositive("Min SNR t1", settings.getMinSnrT1());
-      Parameters.isPositive("Min SNR tN", settings.getMinSnrTN());
-      Parameters.isPositive("Histogram bins", settings.getHistogramBins());
-      Parameters.isPositive("Density radius", settings.getDensityRadius());
+      ParameterUtils.isPositive("Min photons", settings.getMinPhotons());
+      ParameterUtils.isPositive("Min SNR t1", settings.getMinSnrT1());
+      ParameterUtils.isPositive("Min SNR tN", settings.getMinSnrTN());
+      ParameterUtils.isPositive("Histogram bins", settings.getHistogramBins());
+      ParameterUtils.isPositive("Density radius", settings.getDensityRadius());
 
       validateCameraOptions();
       validatePsfOptions();
@@ -4984,12 +4985,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
       // Check arguments
       try {
-        Parameters.isAboveZero("Cell size", settings.getCellSize());
-        Parameters.isPositive("p-binary", settings.getProbabilityBinary());
-        Parameters.isEqualOrBelow("p-binary", settings.getProbabilityBinary(), 1);
-        Parameters.isPositive("Min binary distance", settings.getMinBinaryDistance());
-        Parameters.isPositive("Max binary distance", settings.getMaxBinaryDistance());
-        Parameters.isEqualOrBelow("Min binary distance", settings.getMinBinaryDistance(),
+        ParameterUtils.isAboveZero("Cell size", settings.getCellSize());
+        ParameterUtils.isPositive("p-binary", settings.getProbabilityBinary());
+        ParameterUtils.isEqualOrBelow("p-binary", settings.getProbabilityBinary(), 1);
+        ParameterUtils.isPositive("Min binary distance", settings.getMinBinaryDistance());
+        ParameterUtils.isPositive("Max binary distance", settings.getMaxBinaryDistance());
+        ParameterUtils.isEqualOrBelow("Min binary distance", settings.getMinBinaryDistance(),
             settings.getMaxBinaryDistance());
       } catch (final IllegalArgumentException ex) {
         IJ.error(TITLE, ex.getMessage());
@@ -5102,11 +5103,11 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         }
       } else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution())) {
         settings.setPhotonShape(Math.abs(gd.getNextNumber()));
-        Parameters.isAbove("Photon shape", settings.getPhotonShape(), 0);
+        ParameterUtils.isAbove("Photon shape", settings.getPhotonShape(), 0);
       } else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.getPhotonDistribution())) {
         settings.setCorrelation(gd.getNextNumber());
-        Parameters.isEqualOrBelow("Correlation", settings.getCorrelation(), 1);
-        Parameters.isEqualOrAbove("Correlation", settings.getCorrelation(), -1);
+        ParameterUtils.isEqualOrBelow("Correlation", settings.getCorrelation(), 1);
+        ParameterUtils.isEqualOrAbove("Correlation", settings.getCorrelation(), -1);
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -5728,17 +5729,17 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     // Validate settings
     Rectangle modelBounds = null;
     try {
-      Parameters.isAboveZero("Gaussian SD", sd);
-      Parameters.isAboveZero("Pixel pitch", cal.getNmPerPixel());
-      Parameters.isPositive("Background", background);
+      ParameterUtils.isAboveZero("Gaussian SD", sd);
+      ParameterUtils.isAboveZero("Pixel pitch", cal.getNmPerPixel());
+      ParameterUtils.isPositive("Background", background);
 
-      Parameters.isAboveZero("Quantum efficiency", cal.getQuantumEfficiency());
-      Parameters.isEqualOrBelow("Quantum efficiency", cal.getQuantumEfficiency(), 1);
+      ParameterUtils.isAboveZero("Quantum efficiency", cal.getQuantumEfficiency());
+      ParameterUtils.isEqualOrBelow("Quantum efficiency", cal.getQuantumEfficiency(), 1);
 
       if (cal.isCcdCamera()) {
-        Parameters.isAboveZero("Total gain", cal.getCountPerPhoton());
-        Parameters.isPositive("Read noise", cal.getReadNoise());
-        Parameters.isPositive("Bias", cal.getBias());
+        ParameterUtils.isAboveZero("Total gain", cal.getCountPerPhoton());
+        ParameterUtils.isPositive("Read noise", cal.getReadNoise());
+        ParameterUtils.isPositive("Bias", cal.getBias());
       } else if (cal.isScmos()) {
         // Load the model
         cameraModel = CameraModelManager.load(cal.getCameraModelName());

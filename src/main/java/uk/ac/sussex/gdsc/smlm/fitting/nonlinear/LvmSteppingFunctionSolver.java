@@ -146,7 +146,7 @@ public abstract class LvmSteppingFunctionSolver extends SteppingFunctionSolver {
 
     // Set up the current best Hessian matrix and gradient parameter
     lambda = initialLambda;
-    final int n = gradientProcedure.n;
+    final int n = gradientProcedure.numberOfGradients;
     alpha = null;
     beta = null;
     walpha = new double[n * n];
@@ -202,7 +202,7 @@ public abstract class LvmSteppingFunctionSolver extends SteppingFunctionSolver {
     // beta = Gradient vector
     // We want to solve: A x = b to find the update x
 
-    final int n = gradientProcedure.n;
+    final int n = gradientProcedure.numberOfGradients;
     System.arraycopy(beta, 0, step, 0, n);
     System.arraycopy(alpha, 0, walpha, 0, alpha.length);
     final double scale = (1.0 + lambda);

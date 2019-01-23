@@ -29,7 +29,12 @@ import javax.swing.ListSelectionModel;
 /**
  * A helper class for the ListSelectionModel.
  */
-public class ListSelectionModelHelper {
+public final class ListSelectionModelHelper {
+  /**
+   * No public constructor.
+   */
+  private ListSelectionModelHelper() {}
+
   /**
    * Gets the selected indices from the selection model.
    *
@@ -47,14 +52,14 @@ public class ListSelectionModelHelper {
     }
 
     final int[] rvTmp = new int[1 + (iMax - iMin)];
-    int n = 0;
+    int count = 0;
     for (int i = iMin; i <= iMax; i++) {
       if (sm.isSelectedIndex(i)) {
-        rvTmp[n++] = i;
+        rvTmp[count++] = i;
       }
     }
-    final int[] rv = new int[n];
-    System.arraycopy(rvTmp, 0, rv, 0, n);
+    final int[] rv = new int[count];
+    System.arraycopy(rvTmp, 0, rv, 0, count);
     return rv;
   }
 

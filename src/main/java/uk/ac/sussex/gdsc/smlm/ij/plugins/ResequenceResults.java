@@ -103,9 +103,9 @@ public class ResequenceResults implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Start", start);
-      Parameters.isAboveZero("Block", block);
-      Parameters.isPositive("Skip", skip);
+      ParameterUtils.isAboveZero("Start", start);
+      ParameterUtils.isAboveZero("Block", block);
+      ParameterUtils.isPositive("Skip", skip);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -124,38 +124,37 @@ public class ResequenceResults implements PlugIn {
     }
 
     @Override
-    public void execute(PeakResult r) {
-      int t = 1; // The current frame in the results
+    public void execute(PeakResult result) {
+      int time = 1; // The current frame in the results
       int mapped = start; // The mapped frame in the results
-      int b = 1; // The current block size
+      int blockSize = 1; // The current block size
 
       boolean print = (tracker != null);
 
-      if (t != r.getFrame()) {
+      if (time != result.getFrame()) {
         // Update the mapped position
-        while (t < r.getFrame()) {
+        while (time < result.getFrame()) {
           // Move to the next position
           mapped++;
 
           // Check if this move will make the current block too large
-          if (++b > block) {
+          if (++blockSize > block) {
             // Skip
             mapped += skip;
-            b = 1;
+            blockSize = 1;
           }
 
-          t++;
+          time++;
         }
 
-        t = r.getFrame();
+        time = result.getFrame();
         print = (tracker != null);
       }
 
-      r.setFrame(mapped);
+      result.setFrame(mapped);
 
       if (print) {
-        print = false;
-        tracker.log("Map %d -> %d", t, mapped);
+        tracker.log("Map %d -> %d", time, mapped);
       }
     }
   }

@@ -76,10 +76,10 @@ public class BlockMeanFilter extends BlockFilter {
   /**
    * Get the value squared.
    *
-   * @param f the value
+   * @param value the value
    * @return the value squared
    */
-  private static float pow2(float f) {
-    return f * f;
+  private static float pow2(float value) {
+    return value * value;
   }
 }

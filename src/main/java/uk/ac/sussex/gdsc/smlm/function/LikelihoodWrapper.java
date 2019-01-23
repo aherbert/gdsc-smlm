@@ -38,16 +38,16 @@ public abstract class LikelihoodWrapper {
   protected final NonLinearFunction function;
 
   /** The parameters. */
-  protected final double[] a;
+  protected final double[] parameters;
 
   /** The observed values. */
   protected final double[] data;
 
   /** The number of observed values. */
-  protected final int n;
+  protected final int dataSize;
 
   /** The number of variables. */
-  protected final int nVariables;
+  protected final int numberOfVariables;
 
   private double lastScore;
   private double[] lastVariables;
@@ -60,16 +60,17 @@ public abstract class LikelihoodWrapper {
    * gradient).
    *
    * @param function The function to be used to calculated the expected values
-   * @param a The initial parameters for the function
-   * @param k The observed values
-   * @param n The number of observed values
+   * @param parameters The initial parameters for the function
+   * @param data The observed values
+   * @param dataSize The number of observed values
    */
-  public LikelihoodWrapper(NonLinearFunction function, double[] a, double[] k, int n) {
+  public LikelihoodWrapper(NonLinearFunction function, double[] parameters, double[] data,
+      int dataSize) {
     this.function = function;
-    this.a = Arrays.copyOf(a, a.length);
-    this.data = k;
-    this.n = n;
-    nVariables = function.gradientIndices().length;
+    this.parameters = Arrays.copyOf(parameters, parameters.length);
+    this.data = data;
+    this.dataSize = dataSize;
+    numberOfVariables = function.gradientIndices().length;
   }
 
   /**
@@ -80,9 +81,9 @@ public abstract class LikelihoodWrapper {
   protected void initialiseFunction(double[] variables) {
     final int[] gradientIndices = function.gradientIndices();
     for (int i = 0; i < gradientIndices.length; i++) {
-      a[gradientIndices[i]] = variables[i];
+      parameters[gradientIndices[i]] = variables[i];
     }
-    function.initialise(a);
+    function.initialise(parameters);
   }
 
   /**
@@ -248,14 +249,14 @@ public abstract class LikelihoodWrapper {
   public double[][] fisherInformation(final double[] variables) {
     initialiseFunction(variables);
 
-    final double[] duda = new double[nVariables];
+    final double[] duda = new double[numberOfVariables];
 
-    final double[][] I = new double[nVariables][nVariables];
+    final double[][] I = new double[numberOfVariables][numberOfVariables];
 
-    for (int k = 0; k < n; k++) {
+    for (int k = 0; k < dataSize; k++) {
       final double uk = function.eval(k, duda);
       final double yk = 1 / uk;
-      for (int i = 0; i < nVariables; i++) {
+      for (int i = 0; i < numberOfVariables; i++) {
         final double du_dai = yk * duda[i];
         for (int j = 0; j <= i; j++) {
           I[i][j] += du_dai * duda[j];
@@ -264,8 +265,8 @@ public abstract class LikelihoodWrapper {
     }
 
     // Generate symmetric matrix
-    for (int i = 0; i < nVariables - 1; i++) {
-      for (int j = i + 1; j < nVariables; j++) {
+    for (int i = 0; i < numberOfVariables - 1; i++) {
+      for (int j = i + 1; j < numberOfVariables; j++) {
         if (Double.isNaN(I[j][i])) {
           throw new DataException("Invalid gradients");
         }

@@ -910,31 +910,31 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   }
 
   @Override
-  public void initialise(double[] a) {
-    initialise(a, 0);
+  public void initialise(double[] parameters) {
+    initialise(parameters, 0);
   }
 
   /**
    * Initialise.
    *
-   * @param a the a
+   * @param parameters the parameters
    * @param order the order
    */
-  protected abstract void initialise(double[] a, int order);
+  protected abstract void initialise(double[] parameters, int order);
 
   @Override
-  public void initialise0(double[] a) {
-    initialise(a, 0);
+  public void initialise0(double[] parameters) {
+    initialise(parameters, 0);
   }
 
   @Override
-  public void initialise1(double[] a) {
-    initialise(a, 1);
+  public void initialise1(double[] parameters) {
+    initialise(parameters, 1);
   }
 
   @Override
-  public void initialise2(double[] a) {
-    initialise(a, 2);
+  public void initialise2(double[] parameters) {
+    initialise(parameters, 2);
   }
 
   /**

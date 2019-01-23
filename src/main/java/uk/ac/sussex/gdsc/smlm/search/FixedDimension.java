@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 /**
  * Specify the dimensions for a search.
  */
-public class FixedDimension implements Cloneable, Dimension {
+public class FixedDimension implements Dimension {
   /** The minimum of the range. */
   public final double min;
 
@@ -87,19 +87,19 @@ public class FixedDimension implements Cloneable, Dimension {
    * @param upper the current upper bound of the range (will be clipped to min/max)
    */
   public FixedDimension(double min, double max, double minIncrement, double lower, double upper) {
-    if (isInvalid(min)) {
+    if (!Double.isFinite(min)) {
       throw new IllegalArgumentException("Min is not a valid number: " + min);
     }
-    if (isInvalid(max)) {
+    if (!Double.isFinite(max)) {
       throw new IllegalArgumentException("Max is not a valid number: " + max);
     }
-    if (isInvalid(lower)) {
+    if (!Double.isFinite(lower)) {
       throw new IllegalArgumentException("Lower is not a valid number: " + lower);
     }
-    if (isInvalid(upper)) {
+    if (!Double.isFinite(upper)) {
       throw new IllegalArgumentException("Upper is not a valid number: " + upper);
     }
-    if (isInvalid(minIncrement)) {
+    if (!Double.isFinite(minIncrement)) {
       throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
     }
     if (max < min) {
@@ -131,6 +131,29 @@ public class FixedDimension implements Cloneable, Dimension {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected FixedDimension(FixedDimension source) {
+    this.min = source.min;
+    this.max = source.max;
+    this.lower = source.lower;
+    this.upper = source.upper;
+    this.minIncrement = source.minIncrement;
+    this.active = source.active;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public FixedDimension copy() {
+    return new FixedDimension(this);
+  }
+
+  /**
    * Creates a new fixed dimension, respecting the current min/max and the increment settings. If
    * the current search dimension is not active then an inactive dimension is returned centred
    * between the lower and upper bounds.
@@ -156,19 +179,15 @@ public class FixedDimension implements Cloneable, Dimension {
   /**
    * Creates a new search dimension, respecting the current settings.
    *
-   * @param nIncrement the number of increments to use around the centre
+   * @param numberOfIncrements the number of increments to use around the centre
    * @return the search dimension
    */
-  public SearchDimension create(int nIncrement) {
-    if (nIncrement <= 0) {
+  public SearchDimension create(int numberOfIncrements) {
+    if (numberOfIncrements <= 0) {
       // Compute the maximum number of increments to cover the range from the centre
-      nIncrement = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
+      numberOfIncrements = (int) Math.ceil(Math.ceil((max - min) / minIncrement) / 2);
     }
-    return new SearchDimension(min, max, minIncrement, nIncrement, getLower(), getUpper());
-  }
-
-  private static boolean isInvalid(double d) {
-    return Double.isNaN(d) || Double.isInfinite(d);
+    return new SearchDimension(min, max, minIncrement, numberOfIncrements, getLower(), getUpper());
   }
 
   /**
@@ -227,17 +246,8 @@ public class FixedDimension implements Cloneable, Dimension {
   }
 
   @Override
-  public boolean isAtBounds(double v) {
-    return (v <= lower || v >= upper);
-  }
-
-  @Override
-  public FixedDimension clone() {
-    try {
-      return (FixedDimension) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
+  public boolean isAtBounds(double value) {
+    return (value <= lower || value >= upper);
   }
 
   @Override

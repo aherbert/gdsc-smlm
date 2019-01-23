@@ -48,7 +48,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
   /**
    * The number of gradients.
    */
-  public final int n;
+  public final int numberOfGradients;
 
   /**
    * The scaled gradient vector of the function's partial first derivatives with respect to the
@@ -72,8 +72,8 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
   public LvmGradientProcedure(final double[] y, final Gradient1Function func) {
     this.y = y;
     this.func = func;
-    this.n = func.getNumberOfGradients();
-    beta = new double[n];
+    this.numberOfGradients = func.getNumberOfGradients();
+    beta = new double[numberOfGradients];
   }
 
   /**
@@ -96,8 +96,8 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
       this.y = y;
     }
     this.func = func;
-    this.n = func.getNumberOfGradients();
-    beta = new double[n];
+    this.numberOfGradients = func.getNumberOfGradients();
+    beta = new double[numberOfGradients];
   }
 
   /**
@@ -163,7 +163,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the alpha
    */
   public double[][] getAlphaMatrix() {
-    final double[][] a = new double[n][n];
+    final double[][] a = new double[numberOfGradients][numberOfGradients];
     getAlphaMatrix(a);
     return a;
   }
@@ -181,7 +181,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the alpha
    */
   public double[] getAlphaLinear() {
-    final double[] a = new double[n * n];
+    final double[] a = new double[numberOfGradients * numberOfGradients];
     getAlphaLinear(a);
     return a;
   }
@@ -199,7 +199,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @param beta the beta
    */
   public void getBeta(double[] beta) {
-    System.arraycopy(this.beta, 0, beta, 0, n);
+    System.arraycopy(this.beta, 0, beta, 0, numberOfGradients);
   }
 
   /**
@@ -218,7 +218,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the row/column format
    */
   protected double[][] toMatrix(double[] data) {
-    return toMatrix(data, new double[n][n]);
+    return toMatrix(data, new double[numberOfGradients][numberOfGradients]);
   }
 
   /**
@@ -229,8 +229,8 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the row/column format
    */
   protected double[][] toMatrix(double[] data, double[][] out) {
-    for (int i = 0, pos = 0; i < n; i++, pos += n) {
-      System.arraycopy(data, pos, out[i], 0, n);
+    for (int i = 0, pos = 0; i < numberOfGradients; i++, pos += numberOfGradients) {
+      System.arraycopy(data, pos, out[i], 0, numberOfGradients);
     }
     return out;
   }
@@ -242,7 +242,7 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the linear data
    */
   protected double[] toLinear(double[][] data) {
-    return toLinear(data, new double[n * n]);
+    return toLinear(data, new double[numberOfGradients * numberOfGradients]);
   }
 
   /**
@@ -253,8 +253,8 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
    * @return the linear data
    */
   protected double[] toLinear(double[][] data, double[] out) {
-    for (int i = 0, pos = 0; i < n; i++, pos += n) {
-      System.arraycopy(data[i], 0, out, pos, n);
+    for (int i = 0, pos = 0; i < numberOfGradients; i++, pos += numberOfGradients) {
+      System.arraycopy(data[i], 0, out, pos, numberOfGradients);
     }
     return out;
   }

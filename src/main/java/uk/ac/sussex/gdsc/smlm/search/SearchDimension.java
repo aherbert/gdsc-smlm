@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.search;
 
+import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import java.util.Arrays;
 /**
  * Specify the dimensions for a search.
  */
-public class SearchDimension implements Cloneable, Dimension {
+public class SearchDimension implements Dimension {
   /** The minimum of the range. */
   public final double min;
 
@@ -97,19 +98,19 @@ public class SearchDimension implements Cloneable, Dimension {
    */
   public SearchDimension(double min, double max, double minIncrement, int increments, double lower,
       double upper) {
-    if (isInvalid(min)) {
+    if (!Double.isFinite(min)) {
       throw new IllegalArgumentException("Min is not a valid number: " + min);
     }
-    if (isInvalid(max)) {
+    if (!Double.isFinite(max)) {
       throw new IllegalArgumentException("Max is not a valid number: " + max);
     }
-    if (isInvalid(lower)) {
+    if (!Double.isFinite(lower)) {
       throw new IllegalArgumentException("Lower is not a valid number: " + lower);
     }
-    if (isInvalid(upper)) {
+    if (!Double.isFinite(upper)) {
       throw new IllegalArgumentException("Upper is not a valid number: " + upper);
     }
-    if (isInvalid(minIncrement)) {
+    if (!Double.isFinite(minIncrement)) {
       throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
     }
     if (max < min) {
@@ -139,6 +140,33 @@ public class SearchDimension implements Cloneable, Dimension {
 
     setCentre((upper + lower) / 2);
     setIncrement((upper - lower) / (2 * increments));
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected SearchDimension(SearchDimension source) {
+    this.min = source.min;
+    this.max = source.max;
+    this.minIncrement = source.minIncrement;
+    this.increments = source.increments;
+    this.active = source.active;
+    this.centre = source.centre;
+    this.increment = source.increment;
+    this.reduceFactor = source.reduceFactor;
+    this.values = source.values;
+    this.pad = source.pad;
+  }
+
+  /**
+   * Create a copy.
+   *
+   * @return the copy
+   */
+  public SearchDimension copy() {
+    return new SearchDimension(this);
   }
 
   /**
@@ -173,16 +201,6 @@ public class SearchDimension implements Cloneable, Dimension {
    */
   public SearchDimension create(int increments) {
     return new SearchDimension(min, max, minIncrement, increments, getLower(), getUpper());
-  }
-
-  /**
-   * Checks if an invalid number (NaN or infinite).
-   *
-   * @param value the value
-   * @return true, if is invalid
-   */
-  private static boolean isInvalid(double value) {
-    return Double.isNaN(value) || Double.isInfinite(value);
   }
 
   /**
@@ -296,7 +314,8 @@ public class SearchDimension implements Cloneable, Dimension {
     }
 
     if (!active) {
-      return values = new double[] {centre};
+      values = new double[] {centre};
+      return values;
     }
 
     values = new double[getMaxLength()];
@@ -338,12 +357,6 @@ public class SearchDimension implements Cloneable, Dimension {
       }
       values[size++] = value;
     }
-
-    // double[] check = values.clone();
-    // Arrays.sort(check);
-    // for (int i=0; i<check.length; i++)
-    // if (check[i] != values[i])
-    // throw new RuntimeException("Not sorted");
 
     // Check for duplicates if at the limits
     if (size != values.length) {
@@ -437,15 +450,6 @@ public class SearchDimension implements Cloneable, Dimension {
     return active && increment != minIncrement && reduceFactor < 1;
   }
 
-  @Override
-  public SearchDimension clone() {
-    try {
-      return (SearchDimension) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
-  }
-
   /**
    * Checks if padding the values in the opposite direction when the range overlaps the min/max.
    *
@@ -522,7 +526,7 @@ public class SearchDimension implements Cloneable, Dimension {
 
     // Check
     if (values[size - 1] != upper) {
-      throw new RuntimeException("enumeration is invalid");
+      throw new ComputationException("enumeration is invalid");
     }
 
     return (size != values.length) ? Arrays.copyOf(values, size) : values;

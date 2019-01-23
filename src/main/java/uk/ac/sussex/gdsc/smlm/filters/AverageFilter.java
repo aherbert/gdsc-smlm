@@ -266,18 +266,18 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
   public void stripedBlockAverageInternal(float[] data, final int maxx, final int maxy,
-      final float w) {
-    if (w <= 1) {
-      stripedBlockAverage3x3Internal(data, maxx, maxy, w);
-    } else if (w <= 2) {
-      stripedBlockAverage5x5Internal(data, maxx, maxy, w);
-    } else if (w <= 3) {
-      stripedBlockAverage7x7Internal(data, maxx, maxy, w);
+      final float weight) {
+    if (weight <= 1) {
+      stripedBlockAverage3x3Internal(data, maxx, maxy, weight);
+    } else if (weight <= 2) {
+      stripedBlockAverage5x5Internal(data, maxx, maxy, weight);
+    } else if (weight <= 3) {
+      stripedBlockAverage7x7Internal(data, maxx, maxy, weight);
     } else {
-      stripedBlockAverageNxNInternal(data, maxx, maxy, w);
+      stripedBlockAverageNxNInternal(data, maxx, maxy, weight);
     }
   }
 
@@ -346,12 +346,12 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
   public void stripedBlockAverageNxNInternal(float[] data, final int maxx, final int maxy,
-      final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+      final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -371,9 +371,9 @@ public class AverageFilter {
 
     final float[] newData = floatBuffer(data.length);
 
-    final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+    final float divisor = (float) (1.0 / ((2 * weight + 1) * (2 * weight + 1)));
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -465,17 +465,17 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
   public void stripedBlockAverage3x3Internal(float[] data, final int maxx, final int maxy,
-      final float w) {
+      final float weight) {
     if (maxx < 3 || maxy < 3) {
       return;
     }
 
     final float[] newData = floatBuffer(data.length);
 
-    final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
+    final float divisor = (float) (1.0 / (1 + 4 * weight * (1 + weight)));
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -487,7 +487,7 @@ public class AverageFilter {
       int index = y * maxx;
       int index2 = maxy + y;
       for (int x = 0; x <= maxx - 3; x++, index++) {
-        newData[index2] = w * (data[index] + data[index + 2]) + data[index + 1];
+        newData[index2] = weight * (data[index] + data[index + 2]) + data[index + 1];
         index2 += maxy;
       }
     }
@@ -498,7 +498,8 @@ public class AverageFilter {
       int index = x * maxy;
       int index2 = x + maxx;
       for (int y = 0; y <= maxy - 3; y++, index++) {
-        data[index2] = (w * (newData[index] + newData[index + 2]) + newData[index + 1]) * divisor;
+        data[index2] =
+            (weight * (newData[index] + newData[index + 2]) + newData[index + 1]) * divisor;
         index2 += maxx;
       }
     }
@@ -566,17 +567,17 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 1 and 2)
+   * @param weight The weight (should be between 1 and 2)
    */
   public void stripedBlockAverage5x5Internal(float[] data, final int maxx, final int maxy,
-      final float w) {
+      final float weight) {
     if (maxx < 5 || maxy < 5) {
       return;
     }
 
     final float[] newData = floatBuffer(data.length);
 
-    final float w1 = (w < 2) ? w - (int) w : 1;
+    final float w1 = (weight < 2) ? weight - (int) weight : 1;
     final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
 
     // NOTE:
@@ -670,17 +671,17 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 1 and 2)
+   * @param weight The weight (should be between 1 and 2)
    */
   public void stripedBlockAverage7x7Internal(float[] data, final int maxx, final int maxy,
-      final float w) {
+      final float weight) {
     if (maxx < 7 || maxy < 7) {
       return;
     }
 
     final float[] newData = floatBuffer(data.length);
 
-    final float w1 = (w < 3) ? w - (int) w : 1;
+    final float w1 = (weight < 3) ? weight - (int) weight : 1;
     final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
 
     // NOTE:
@@ -744,13 +745,14 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockAverageInternal(float[] data, final int maxx, final int maxy, final float w) {
-    if (w < 1) {
-      blockAverage3x3Internal(data, maxx, maxy, w);
+  public void blockAverageInternal(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    if (weight < 1) {
+      blockAverage3x3Internal(data, maxx, maxy, weight);
     } else {
-      blockAverageNxNInternal(data, maxx, maxy, w);
+      blockAverageNxNInternal(data, maxx, maxy, weight);
     }
   }
 
@@ -824,11 +826,12 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockAverageNxNInternal(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  public void blockAverageNxNInternal(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -868,26 +871,26 @@ public class AverageFilter {
     }
 
     // Edges
-    int j = 0;
+    int offsetIndex = 0;
     final int size = 2 * ((2 * xwidth - 1) + (2 * ywidth - 1));
     final int[] xoffset1 = new int[size];
     final int[] yoffset1 = new int[size];
     final int[] offset1 = new int[size];
     for (int y = -ywidth + 1; y < ywidth; y++) {
-      yoffset1[j] = yoffset1[j + 1] = y;
-      xoffset1[j] = -xwidth;
-      xoffset1[j + 1] = xwidth;
-      offset1[j] = maxx * y - xwidth;
-      offset1[j + 1] = maxx * y + xwidth;
-      j += 2;
+      yoffset1[offsetIndex] = yoffset1[offsetIndex + 1] = y;
+      xoffset1[offsetIndex] = -xwidth;
+      xoffset1[offsetIndex + 1] = xwidth;
+      offset1[offsetIndex] = maxx * y - xwidth;
+      offset1[offsetIndex + 1] = maxx * y + xwidth;
+      offsetIndex += 2;
     }
     for (int x = -xwidth + 1; x < xwidth; x++) {
-      xoffset1[j] = xoffset1[j + 1] = x;
-      yoffset1[j] = -ywidth;
-      yoffset1[j + 1] = ywidth;
-      offset1[j] = maxx * -ywidth + x;
-      offset1[j + 1] = maxx * ywidth + x;
-      j += 2;
+      xoffset1[offsetIndex] = xoffset1[offsetIndex + 1] = x;
+      yoffset1[offsetIndex] = -ywidth;
+      yoffset1[offsetIndex + 1] = ywidth;
+      offset1[offsetIndex] = maxx * -ywidth + x;
+      offset1[offsetIndex + 1] = maxx * ywidth + x;
+      offsetIndex += 2;
     }
 
     // Corners
@@ -898,9 +901,9 @@ public class AverageFilter {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
     }
 
-    final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+    final float divisor = (float) (1.0 / ((2 * weight + 1) * (2 * weight + 1)));
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
     final float w2 = w1 * w1;
     for (int y = n1; y < ylimit; y++) {
       int index = y * maxx + n1;
@@ -983,13 +986,14 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  public void blockAverage3x3Internal(float[] data, final int maxx, final int maxy, final float w) {
+  public void blockAverage3x3Internal(float[] data, final int maxx, final int maxy,
+      final float weight) {
     final float[] newData = floatBuffer(data.length);
 
-    final float w2 = w * w;
-    final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w2));
+    final float w2 = weight * weight;
+    final float divisor = (float) (1.0 / (1 + 4 * weight + 4 * w2));
 
     for (int y = 1; y < maxy - 1; y++) {
       int index0 = (y - 1) * maxx + 1;
@@ -1002,7 +1006,7 @@ public class AverageFilter {
         final float sum2 =
             data[index0 - 1] + data[index0 + 1] + data[index2 - 1] + data[index2 + 1];
 
-        newData[index1] = (data[index1] + sum1 * w + sum2 * w2) * divisor;
+        newData[index1] = (data[index1] + sum1 * weight + sum2 * w2) * divisor;
         index0++;
         index1++;
         index2++;
@@ -1264,17 +1268,18 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void stripedBlockAverage(float[] data, final int maxx, final int maxy, final float w) {
-    if (w <= 1) {
-      stripedBlockAverage3x3(data, maxx, maxy, w);
-    } else if (w <= 2) {
-      stripedBlockAverage5x5(data, maxx, maxy, w);
-    } else if (w <= 3) {
-      stripedBlockAverage7x7(data, maxx, maxy, w);
+  public void stripedBlockAverage(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    if (weight <= 1) {
+      stripedBlockAverage3x3(data, maxx, maxy, weight);
+    } else if (weight <= 2) {
+      stripedBlockAverage5x5(data, maxx, maxy, weight);
+    } else if (weight <= 3) {
+      stripedBlockAverage7x7(data, maxx, maxy, weight);
     } else {
-      stripedBlockAverageNxN(data, maxx, maxy, w);
+      stripedBlockAverageNxN(data, maxx, maxy, weight);
     }
   }
 
@@ -1363,11 +1368,12 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void stripedBlockAverageNxN(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  public void stripedBlockAverageNxN(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -1379,9 +1385,9 @@ public class AverageFilter {
 
     final float[] newData = floatBuffer(data.length);
 
-    final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+    final float divisor = (float) (1.0 / ((2 * weight + 1) * (2 * weight + 1)));
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1513,13 +1519,14 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  public void stripedBlockAverage3x3(float[] data, final int maxx, final int maxy, final float w) {
+  public void stripedBlockAverage3x3(float[] data, final int maxx, final int maxy,
+      final float weight) {
     final float[] newData = floatBuffer(data.length);
 
     // final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w * w));
-    final float divisor = (float) (1.0 / (1 + 4 * w * (1 + w)));
+    final float divisor = (float) (1.0 / (1 + 4 * weight * (1 + weight)));
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1540,7 +1547,7 @@ public class AverageFilter {
       for (int x = 0; x < width; x++) {
         // Sum strips
         // Store result in transpose
-        outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+        outData[centreIndex] = weight * (row[x] + row[x + 2]) + row[x + 1];
         centreIndex += height;
       }
     }
@@ -1560,7 +1567,7 @@ public class AverageFilter {
       for (int x = 0; x < width; x++) {
         // Sum strips
         // Store result in transpose
-        outData[centreIndex] = (w * (row[x] + row[x + 2]) + row[x + 1]) * divisor;
+        outData[centreIndex] = (weight * (row[x] + row[x + 2]) + row[x + 1]) * divisor;
         centreIndex += height;
       }
     }
@@ -1637,12 +1644,13 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 1 and 2)
+   * @param weight The weight (should be between 1 and 2)
    */
-  public void stripedBlockAverage5x5(float[] data, final int maxx, final int maxy, final float w) {
+  public void stripedBlockAverage5x5(float[] data, final int maxx, final int maxy,
+      final float weight) {
     final float[] newData = floatBuffer(data.length);
 
-    final float w1 = (w < 2) ? w - (int) w : 1;
+    final float w1 = (weight < 2) ? weight - (int) weight : 1;
     final float divisor = (float) (1.0 / (9 + 12 * w1 + 4 * w1 * w1));
 
     // NOTE:
@@ -1764,12 +1772,13 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 2 and 3)
+   * @param weight The weight (should be between 2 and 3)
    */
-  public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy, final float w) {
+  public void stripedBlockAverage7x7(float[] data, final int maxx, final int maxy,
+      final float weight) {
     final float[] newData = floatBuffer(data.length);
 
-    final float w1 = (w < 3) ? w - (int) w : 1;
+    final float w1 = (weight < 3) ? weight - (int) weight : 1;
     final float divisor = (float) (1.0 / (25 + 20 * w1 + 4 * w1 * w1));
 
     // NOTE:
@@ -1901,13 +1910,13 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockAverage(float[] data, final int maxx, final int maxy, final float w) {
-    if (w < 1) {
-      blockAverage3x3(data, maxx, maxy, w);
+  public void blockAverage(float[] data, final int maxx, final int maxy, final float weight) {
+    if (weight < 1) {
+      blockAverage3x3(data, maxx, maxy, weight);
     } else {
-      blockAverageNxN(data, maxx, maxy, w);
+      blockAverageNxN(data, maxx, maxy, weight);
     }
   }
 
@@ -1996,11 +2005,11 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockAverageNxN(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  public void blockAverageNxN(float[] data, final int maxx, final int maxy, final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -2032,26 +2041,26 @@ public class AverageFilter {
     }
 
     // Edges
-    int j = 0;
+    int offsetIndex = 0;
     final int size = 2 * ((2 * xwidth - 1) + (2 * ywidth - 1));
     final int[] xoffset1 = new int[size];
     final int[] yoffset1 = new int[size];
     final int[] offset1 = new int[size];
     for (int y = -ywidth + 1; y < ywidth; y++) {
-      yoffset1[j] = yoffset1[j + 1] = y;
-      xoffset1[j] = -xwidth;
-      xoffset1[j + 1] = xwidth;
-      offset1[j] = maxx * y - xwidth;
-      offset1[j + 1] = maxx * y + xwidth;
-      j += 2;
+      yoffset1[offsetIndex] = yoffset1[offsetIndex + 1] = y;
+      xoffset1[offsetIndex] = -xwidth;
+      xoffset1[offsetIndex + 1] = xwidth;
+      offset1[offsetIndex] = maxx * y - xwidth;
+      offset1[offsetIndex + 1] = maxx * y + xwidth;
+      offsetIndex += 2;
     }
     for (int x = -xwidth + 1; x < xwidth; x++) {
-      xoffset1[j] = xoffset1[j + 1] = x;
-      yoffset1[j] = -ywidth;
-      yoffset1[j + 1] = ywidth;
-      offset1[j] = maxx * -ywidth + x;
-      offset1[j + 1] = maxx * ywidth + x;
-      j += 2;
+      xoffset1[offsetIndex] = xoffset1[offsetIndex + 1] = x;
+      yoffset1[offsetIndex] = -ywidth;
+      yoffset1[offsetIndex + 1] = ywidth;
+      offset1[offsetIndex] = maxx * -ywidth + x;
+      offset1[offsetIndex + 1] = maxx * ywidth + x;
+      offsetIndex += 2;
     }
 
     // Corners
@@ -2062,9 +2071,9 @@ public class AverageFilter {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
     }
 
-    final float divisor = (float) (1.0 / ((2 * w + 1) * (2 * w + 1)));
+    final float divisor = (float) (1.0 / ((2 * weight + 1) * (2 * weight + 1)));
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
     final float w2 = w1 * w1;
     int index = 0;
     for (int y = 0; y < maxy; y++) {
@@ -2236,9 +2245,9 @@ public class AverageFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  public void blockAverage3x3(float[] data, final int maxx, final int maxy, final float w) {
+  public void blockAverage3x3(float[] data, final int maxx, final int maxy, final float weight) {
     final float[] newData = floatBuffer(data.length);
 
     // Boundary control
@@ -2252,8 +2261,8 @@ public class AverageFilter {
     final int[] xoffset2 = new int[] {-1, -1, 1, 1};
     final int[] yoffset2 = new int[] {-1, 1, -1, 1};
 
-    final float w2 = w * w;
-    final float divisor = (float) (1.0 / (1 + 4 * w + 4 * w2));
+    final float w2 = weight * weight;
+    final float divisor = (float) (1.0 / (1 + 4 * weight + 4 * w2));
 
     for (int y = 0; y < maxy; y++) {
       int index0 = (y - 1) * maxx;
@@ -2307,7 +2316,7 @@ public class AverageFilter {
             sum2 += data[xx + yy * maxx];
           }
         }
-        newData[index1] = (data[index1] + sum1 * w + sum2 * w2) * divisor;
+        newData[index1] = (data[index1] + sum1 * weight + sum2 * w2) * divisor;
 
         index0++;
         index1++;

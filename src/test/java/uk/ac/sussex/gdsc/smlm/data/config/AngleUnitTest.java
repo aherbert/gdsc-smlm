@@ -47,14 +47,14 @@ public class AngleUnitTest {
 
   private static void check(ExpectedUnit<AngleUnit>... expectedUnits) {
     final int n = expectedUnits.length;
-    TypeConverter<AngleUnit> c;
+    TypeConverter<AngleUnit> conv;
     for (int i = 0; i < n; i++) {
-      final AngleUnit u1 = expectedUnits[i].u;
+      final AngleUnit u1 = expectedUnits[i].unit;
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
-        final AngleUnit u2 = expectedUnits[j].u;
-        c = UnitConverterUtils.createConverter(u1, u2);
-        final double o = c.convert(v1);
+        final AngleUnit u2 = expectedUnits[j].unit;
+        conv = UnitConverterUtils.createConverter(u1, u2);
+        final double o = conv.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
     }

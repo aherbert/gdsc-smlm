@@ -29,14 +29,14 @@ import java.util.Arrays;
 /**
  * Contains a discrete-time model for the position and intensity of a localisation.
  */
-public class LocalisationModel implements Comparable<LocalisationModel> {
+public class LocalisationModel {
   private double[] xyz;
   private int id;
   private int time;
   private double intensity;
   private int state;
-  private LocalisationModel previous;
-  private LocalisationModel next;
+  private LocalisationModel previousModel;
+  private LocalisationModel nextModel;
   private double[] data;
   private int label;
 
@@ -121,8 +121,8 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
     this.time = time;
     this.intensity = intensity;
     this.state = state;
-    this.previous = previous;
-    this.next = next;
+    this.previousModel = previous;
+    this.nextModel = next;
   }
 
   /**
@@ -206,12 +206,18 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
     this.intensity = intensity;
   }
 
-  @Override
-  public int compareTo(LocalisationModel o) {
-    if (time == o.time) {
-      return Double.compare(o.intensity, intensity);
+  /**
+   * Compare by time (ascending) then by intensity (descending).
+   *
+   * @param o1 the o 1
+   * @param o2 the o 2
+   * @return the comparison result (-1, 0, or 1)
+   */
+  public static int compare(LocalisationModel o1, LocalisationModel o2) {
+    if (o1.time == o2.time) {
+      return Double.compare(o2.intensity, o1.intensity);
     }
-    return (time < o.time) ? -1 : 1;
+    return (o1.time < o2.time) ? -1 : 1;
   }
 
   /**
@@ -256,7 +262,7 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
    * @return the previous
    */
   public LocalisationModel getPrevious() {
-    return previous;
+    return previousModel;
   }
 
   /**
@@ -265,9 +271,9 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
    * @param previous the previous to set
    */
   public void setPrevious(LocalisationModel previous) {
-    this.previous = previous;
+    this.previousModel = previous;
     if (previous != null) {
-      previous.next = this;
+      previous.nextModel = this;
     }
   }
 
@@ -277,7 +283,7 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
    * @return the next
    */
   public LocalisationModel getNext() {
-    return next;
+    return nextModel;
   }
 
   /**
@@ -286,9 +292,9 @@ public class LocalisationModel implements Comparable<LocalisationModel> {
    * @param next the next to set
    */
   public void setNext(LocalisationModel next) {
-    this.next = next;
+    this.nextModel = next;
     if (next != null) {
-      next.previous = this;
+      next.previousModel = this;
     }
   }
 

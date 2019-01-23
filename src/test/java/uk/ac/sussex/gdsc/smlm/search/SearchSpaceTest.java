@@ -127,7 +127,7 @@ public class SearchSpaceTest {
     Assertions.assertTrue(v1.length == v3.length);
   }
 
-  private static SearchDimension[] createDimensions(SearchDimension... d) {
-    return d;
+  private static SearchDimension[] createDimensions(SearchDimension... dimensions) {
+    return dimensions;
   }
 }

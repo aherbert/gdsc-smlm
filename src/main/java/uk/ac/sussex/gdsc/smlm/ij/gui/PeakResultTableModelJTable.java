@@ -122,27 +122,27 @@ public class PeakResultTableModelJTable extends JTable {
       }
 
       final PeakResult[] rvTmp = new PeakResult[1 + (iMax - iMin)];
-      int n = 0;
+      int count = 0;
 
       final RowSorter<?> sorter = getRowSorter();
       if (sorter != null) {
         for (int i = iMin; i <= iMax; i++) {
           if (selectionModel.isSelectedIndex(i)) {
-            rvTmp[n++] = model.get(sorter.convertRowIndexToModel(i));
+            rvTmp[count++] = model.get(sorter.convertRowIndexToModel(i));
           }
         }
       } else {
         for (int i = iMin; i <= iMax; i++) {
           if (selectionModel.isSelectedIndex(i)) {
-            rvTmp[n++] = model.get(i);
+            rvTmp[count++] = model.get(i);
           }
         }
       }
-      if (n == rvTmp.length) {
+      if (count == rvTmp.length) {
         return rvTmp;
       }
-      final PeakResult[] rv = new PeakResult[n];
-      System.arraycopy(rvTmp, 0, rv, 0, n);
+      final PeakResult[] rv = new PeakResult[count];
+      System.arraycopy(rvTmp, 0, rv, 0, count);
       return rv;
     }
     return new PeakResult[0];

@@ -611,9 +611,9 @@ public class DensityImage implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Radius", radius);
-      Parameters.isAboveZero("Image scale", imageScale);
-      Parameters.isAboveZero("Resolution", resolution);
+      ParameterUtils.isAboveZero("Radius", radius);
+      ParameterUtils.isAboveZero("Image scale", imageScale);
+      ParameterUtils.isAboveZero("Resolution", resolution);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

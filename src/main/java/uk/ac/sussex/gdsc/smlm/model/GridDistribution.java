@@ -43,15 +43,15 @@ public class GridDistribution implements SpatialDistribution {
   private final RandomDataGenerator dataGenerator;
   private final int size;
   private final int cellSize;
-  private final double pBinary;
+  private final double probBinary;
   private final double minBinaryDistance;
   private final double maxBinaryDistance;
   private final double min;
   private final double depth;
 
   private int cell = -1;
-  private final int nCellsPerRow;
-  private final int nCells;
+  private final int cellsPerRow;
+  private final int totalCells;
   private double[] previous;
 
   /**
@@ -60,12 +60,12 @@ public class GridDistribution implements SpatialDistribution {
    * @param size the size
    * @param depth the depth
    * @param cellSize the cell size
-   * @param pBinary the probability of a binary spot
+   * @param probBinary the probability of a binary spot
    * @param binaryDistance the probability of a binary spot distance
    */
-  public GridDistribution(int size, double depth, int cellSize, double pBinary,
+  public GridDistribution(int size, double depth, int cellSize, double probBinary,
       double binaryDistance) {
-    this(size, depth, cellSize, pBinary, 0, binaryDistance, null);
+    this(size, depth, cellSize, probBinary, 0, binaryDistance, null);
   }
 
   /**
@@ -74,13 +74,13 @@ public class GridDistribution implements SpatialDistribution {
    * @param size the size
    * @param depth the depth
    * @param cellSize the cell size
-   * @param pBinary the probability of a binary spot
+   * @param probBinary the probability of a binary spot
    * @param minBinaryDistance the min binary distance
    * @param maxBinaryDistance the max binary distance
    */
-  public GridDistribution(int size, double depth, int cellSize, double pBinary,
+  public GridDistribution(int size, double depth, int cellSize, double probBinary,
       double minBinaryDistance, double maxBinaryDistance) {
-    this(size, depth, cellSize, pBinary, minBinaryDistance, maxBinaryDistance, null);
+    this(size, depth, cellSize, probBinary, minBinaryDistance, maxBinaryDistance, null);
   }
 
   /**
@@ -89,12 +89,12 @@ public class GridDistribution implements SpatialDistribution {
    * @param size the size
    * @param depth the depth
    * @param cellSize the cell size
-   * @param pBinary the probability of a binary spot
+   * @param probBinary the probability of a binary spot
    * @param minBinaryDistance the min binary distance
    * @param maxBinaryDistance the max binary distance
    * @param randomGenerator the random generator
    */
-  public GridDistribution(int size, double depth, int cellSize, double pBinary,
+  public GridDistribution(int size, double depth, int cellSize, double probBinary,
       double minBinaryDistance, double maxBinaryDistance, RandomGenerator randomGenerator) {
     if (size < 1) {
       throw new IllegalArgumentException("Size must be above zero");
@@ -102,7 +102,7 @@ public class GridDistribution implements SpatialDistribution {
     if (size < cellSize) {
       throw new IllegalArgumentException("Size must be >= cell size");
     }
-    if (pBinary < 0 || pBinary > 1) {
+    if (probBinary < 0 || probBinary > 1) {
       throw new IllegalArgumentException("Probability must be between 0 and 1");
     }
     if (maxBinaryDistance < 0) {
@@ -121,47 +121,45 @@ public class GridDistribution implements SpatialDistribution {
     this.min = -depth / 2;
     this.depth = depth;
     this.cellSize = cellSize;
-    this.pBinary = pBinary;
+    this.probBinary = probBinary;
     this.minBinaryDistance = minBinaryDistance;
     this.maxBinaryDistance = maxBinaryDistance;
 
-    nCellsPerRow = size / cellSize;
-    nCells = nCellsPerRow * nCellsPerRow;
+    cellsPerRow = size / cellSize;
+    totalCells = cellsPerRow * cellsPerRow;
   }
 
   @Override
   public double[] next() {
-    if (previous != null) {
-      // See if a binary localisation should be created near the previous spot
-      if (randomGenerator.nextDouble() < pBinary) {
-        final double[] xyz = Arrays.copyOf(previous, 3);
+    // See if a binary localisation should be created near the previous spot
+    if (previous != null && randomGenerator.nextDouble() < probBinary) {
+      final double[] xyz = Arrays.copyOf(previous, 3);
 
-        // Create a random unit vector
-        double x = dataGenerator.nextGaussian(0, 1);
-        double y = dataGenerator.nextGaussian(0, 1);
-        double z = dataGenerator.nextGaussian(0, 1);
-        final double length = Math.sqrt(x * x + y * y + z * z);
-        if (length != 0) {
-          // Shift by a random distance
-          final double distance = (maxBinaryDistance == minBinaryDistance) ? maxBinaryDistance
-              : dataGenerator.nextUniform(minBinaryDistance, maxBinaryDistance, true);
-          final double d = distance / length;
-          x *= d;
-          y *= d;
-          z *= d;
-        }
-        xyz[0] += x;
-        xyz[1] += y;
-        xyz[2] += z;
-        previous = null;
-        return xyz;
+      // Create a random unit vector
+      double x = dataGenerator.nextGaussian(0, 1);
+      double y = dataGenerator.nextGaussian(0, 1);
+      double z = dataGenerator.nextGaussian(0, 1);
+      final double length = Math.sqrt(x * x + y * y + z * z);
+      if (length != 0) {
+        // Shift by a random distance
+        final double distance = (maxBinaryDistance == minBinaryDistance) ? maxBinaryDistance
+            : dataGenerator.nextUniform(minBinaryDistance, maxBinaryDistance, true);
+        final double d = distance / length;
+        x *= d;
+        y *= d;
+        z *= d;
       }
+      xyz[0] += x;
+      xyz[1] += y;
+      xyz[2] += z;
+      previous = null;
+      return xyz;
     }
     previous = null;
     // See if any more localisations will fit in the grid
-    if (++cell < nCells) {
-      final int cellx = cell % nCellsPerRow;
-      final int celly = cell / nCellsPerRow;
+    if (++cell < totalCells) {
+      final int cellx = cell % cellsPerRow;
+      final int celly = cell / cellsPerRow;
 
       previous = new double[3];
       // Ensure the centre of the distribution is [0,0,0]

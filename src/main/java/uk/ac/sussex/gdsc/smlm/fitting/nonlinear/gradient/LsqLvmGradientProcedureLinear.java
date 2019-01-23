@@ -51,7 +51,7 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
   public LsqLvmGradientProcedureLinear(final double[] y, final double[] baseline,
       final Gradient1Function func) {
     super(y, baseline, func);
-    alpha = new double[n * n];
+    alpha = new double[numberOfGradients * numberOfGradients];
   }
 
   @Override
@@ -65,9 +65,9 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
     // - the scaled gradient vector of the function's partial first derivatives with respect to the
     // parameters
 
-    for (int i = 0, index = 0; i < n; i++, index += i) {
+    for (int i = 0, index = 0; i < numberOfGradients; i++, index += i) {
       final double wgt = dyDa[i];
-      for (int k = i; k < n; k++) {
+      for (int k = i; k < numberOfGradients; k++) {
         // System.out.printf("alpha[%d] += dyDa[%d] * dyDa[%d];\n", index, i, k);
         alpha[index++] += wgt * dyDa[k];
       }
@@ -80,9 +80,9 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
 
   @Override
   protected void initialiseGradient() {
-    for (int i = 0, index = 0; i < n; i++, index += i) {
+    for (int i = 0, index = 0; i < numberOfGradients; i++, index += i) {
       beta[i] = 0;
-      for (int k = i; k < n; k++) {
+      for (int k = i; k < numberOfGradients; k++) {
         // System.out.printf("alpha[%d] = 0;\n", index);
         alpha[index++] = 0;
       }
@@ -94,8 +94,9 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
   protected void finishGradient() {
     // Generate symmetric matrix
     // Adapted from org.ejml.alg.dense.misc.TransposeAlgs.square()
-    for (int i = 0, index = 1; i < n; i++, index += i + 1) {
-      for (int k = i + 1, indexOther = (i + 1) * n + i; k < n; k++, index++, indexOther += n) {
+    for (int i = 0, index = 1; i < numberOfGradients; i++, index += i + 1) {
+      for (int k = i + 1, indexOther = (i + 1) * numberOfGradients + i; k < numberOfGradients;
+          k++, index++, indexOther += numberOfGradients) {
         // System.out.printf("alpha[%d] = alpha[%d];\n", indexOther, index);
         alpha[indexOther] = alpha[index];
       }
@@ -104,11 +105,11 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
 
   @Override
   protected boolean checkGradients() {
-    for (int i = 0, index = 0; i < n; i++, index += i) {
+    for (int i = 0, index = 0; i < numberOfGradients; i++, index += i) {
       if (Double.isNaN(beta[i])) {
         return true;
       }
-      for (int k = i; k < n; k++) {
+      for (int k = i; k < numberOfGradients; k++) {
         if (Double.isNaN(alpha[index++])) {
           return true;
         }

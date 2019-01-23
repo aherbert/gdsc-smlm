@@ -47,7 +47,7 @@ public class Workflow<S, R> {
     public final Pair<S, R> work;
 
     Work(long time, Pair<S, R> work) {
-      if (work.a == null) {
+      if (work.item1 == null) {
         throw new NullPointerException("Settings cannot be null");
       }
       this.timeout = time;
@@ -59,11 +59,11 @@ public class Workflow<S, R> {
     }
 
     S getSettings() {
-      return work.a;
+      return work.item1;
     }
 
     R getResults() {
-      return work.b;
+      return work.item2;
     }
   }
 

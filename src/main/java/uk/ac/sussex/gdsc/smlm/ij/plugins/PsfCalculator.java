@@ -207,13 +207,13 @@ public class PsfCalculator implements PlugIn, DialogListener {
     // Check arguments
     try {
       if (widthNmText != null) {
-        Parameters.isAboveZero("Pixel pitch", settings.getPixelPitch());
-        Parameters.isAboveZero("Magnification", settings.getMagnification());
-        Parameters.isEqualOrAbove("Beam expander", settings.getBeamExpander(), 1);
+        ParameterUtils.isAboveZero("Pixel pitch", settings.getPixelPitch());
+        ParameterUtils.isAboveZero("Magnification", settings.getMagnification());
+        ParameterUtils.isEqualOrAbove("Beam expander", settings.getBeamExpander(), 1);
       }
-      Parameters.isAboveZero("Wavelength", settings.getWavelength());
-      Parameters.isAboveZero("Numerical aperture", settings.getNumericalAperture());
-      Parameters.isAboveZero("Proportionality factor", settings.getProportionalityFactor());
+      ParameterUtils.isAboveZero("Wavelength", settings.getWavelength());
+      ParameterUtils.isAboveZero("Numerical aperture", settings.getNumericalAperture());
+      ParameterUtils.isAboveZero("Proportionality factor", settings.getProportionalityFactor());
     } catch (final IllegalArgumentException ex) {
       // Q. Is logging the error necessary given that we will be in a live update preview?
       // IJ.log(ex.getMessage());

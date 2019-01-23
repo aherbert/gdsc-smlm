@@ -60,24 +60,24 @@ public class ChiSquaredDistributionTableTest {
   @SeededTest
   public void canComputeProbability() {
     for (final int df : new int[] {5, 10}) {
-      double o;
-      double e;
+      double obs;
+      double exp;
       double chi = 0;
       final ChiSquaredDistribution d = new ChiSquaredDistribution(null, df);
 
-      o = ChiSquaredDistributionTable.computePValue(chi, df);
-      e = d.cumulativeProbability(chi);
-      Assertions.assertEquals(e, o, 1e-10);
+      obs = ChiSquaredDistributionTable.computePValue(chi, df);
+      exp = d.cumulativeProbability(chi);
+      Assertions.assertEquals(exp, obs, 1e-10);
 
       chi = 1;
       for (int i = 0; i < 10; i++, chi *= 2) {
-        o = ChiSquaredDistributionTable.computePValue(chi, df);
-        e = d.cumulativeProbability(chi);
-        Assertions.assertEquals(e, o, 1e-10);
+        obs = ChiSquaredDistributionTable.computePValue(chi, df);
+        exp = d.cumulativeProbability(chi);
+        Assertions.assertEquals(exp, obs, 1e-10);
 
-        o = ChiSquaredDistributionTable.computeQValue(chi, df);
-        e = 1 - e;
-        Assertions.assertEquals(e, o, 1e-10);
+        obs = ChiSquaredDistributionTable.computeQValue(chi, df);
+        exp = 1 - exp;
+        Assertions.assertEquals(exp, obs, 1e-10);
       }
     }
   }

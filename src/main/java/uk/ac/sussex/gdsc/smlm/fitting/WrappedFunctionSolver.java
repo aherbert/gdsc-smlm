@@ -52,8 +52,9 @@ public class WrappedFunctionSolver implements FunctionSolver {
   }
 
   @Override
-  public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev) {
-    return solver.fit(y, f, a, aDev);
+  public FitStatus fit(double[] data, double[] fx, double[] parameters,
+      double[] parameterVariances) {
+    return solver.fit(data, fx, parameters, parameterVariances);
   }
 
   @Override
@@ -117,17 +118,18 @@ public class WrappedFunctionSolver implements FunctionSolver {
   }
 
   @Override
-  public boolean evaluate(double[] y, double[] f, double[] a) {
-    return solver.evaluate(y, f, a);
+  public boolean evaluate(double[] data, double[] fx, double[] parameters) {
+    return solver.evaluate(data, fx, parameters);
   }
 
   @Override
-  public boolean computeDeviations(double[] y, double[] a, double[] aDev) {
-    return solver.computeDeviations(y, a, aDev);
+  public boolean computeDeviations(double[] data, double[] parameters,
+      double[] parameterVariances) {
+    return solver.computeDeviations(data, parameters, parameterVariances);
   }
 
   @Override
-  public String getName(int i) {
-    return solver.getName(i);
+  public String getName(int index) {
+    return solver.getName(index);
   }
 }

@@ -161,7 +161,7 @@ public class InterpolatedPoissonFunctionTest {
     final double o = mu;
 
     final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, false);
-    double p = 0;
+    double pvalue = 0;
 
     final TDoubleArrayList values = new TDoubleArrayList();
 
@@ -178,15 +178,15 @@ public class InterpolatedPoissonFunctionTest {
     for (int x = min; x <= max; x++) {
       final double pp = f.likelihood(x, o);
       // TestLog.fine(logger,"x=%d, p=%f", x, pp);
-      p += pp;
+      pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
         maxp = pp;
         maxc = x;
       }
     }
-    if (p > 1.01) {
-      Assertions.fail("P > 1: " + p);
+    if (pvalue > 1.01) {
+      Assertions.fail("P > 1: " + pvalue);
     }
 
     // We have most of the probability density.
@@ -198,13 +198,13 @@ public class InterpolatedPoissonFunctionTest {
         min = x;
         final double pp = f.likelihood(x, o);
         // TestLog.fine(logger,"x=%d, p=%f", x, pp);
-        p += pp;
+        pvalue += pp;
         values.add(pp);
         if (maxp < pp) {
           maxp = pp;
           maxc = x;
         }
-        if (pp == 0 || pp / p < changeTolerance) {
+        if (pp == 0 || pp / pvalue < changeTolerance) {
           break;
         }
       }
@@ -214,13 +214,13 @@ public class InterpolatedPoissonFunctionTest {
       max = x;
       final double pp = f.likelihood(x, o);
       // TestLog.fine(logger,"x=%d, p=%f", x, pp);
-      p += pp;
+      pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
         maxp = pp;
         maxc = x;
       }
-      if (pp == 0 || pp / p < changeTolerance) {
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
@@ -245,8 +245,8 @@ public class InterpolatedPoissonFunctionTest {
 
     logger
         .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d",
-            gain, mu, o, p, minx, maxp, maxc, maxx));
-    Assertions.assertEquals(1, p, 0.02, () -> String.format("g=%f, mu=%f", gain, mu));
+            gain, mu, o, pvalue, minx, maxp, maxc, maxx));
+    Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("g=%f, mu=%f", gain, mu));
     return new int[] {minx, maxx};
   }
 
@@ -277,18 +277,19 @@ public class InterpolatedPoissonFunctionTest {
     final double o = mu;
 
     final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, true);
-    double p = 0;
+    double pvalue = 0;
     final SimpsonIntegrator in = new SimpsonIntegrator(3, 30);
 
     try {
-      p = in.integrate(Integer.MAX_VALUE, new UnivariateFunction() {
+      pvalue = in.integrate(Integer.MAX_VALUE, new UnivariateFunction() {
         @Override
         public double value(double x) {
           return f.likelihood(x, o);
         }
       }, min, max);
 
-      logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f", gain, mu, o, p));
+      logger
+          .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f", gain, mu, o, pvalue));
       // Assertions.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
     } catch (final TooManyEvaluationsException ex) {
       // double inc = max / 20000.0;

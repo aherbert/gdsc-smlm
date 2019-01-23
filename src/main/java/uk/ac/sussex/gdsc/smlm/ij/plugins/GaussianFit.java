@@ -296,18 +296,18 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
     // Check arguments
     try {
-      Parameters.isPositive("Smoothing", smooth);
-      Parameters.isAboveZero("Box size", boxSize);
-      Parameters.isPositive("Peak height", peakHeight);
-      Parameters.isPositive("Fraction above background", fractionAboveBackground);
-      Parameters.isPositive("Peak width", peakWidth);
-      Parameters.isPositive("Top N", topN);
-      Parameters.isPositive("Border", border);
-      Parameters.isAboveZero("Relative threshold", relativeThreshold);
-      Parameters.isAboveZero("Absolute threshold", absoluteThreshold);
-      Parameters.isAboveZero("Max iterations", maxIterations);
-      Parameters.isAboveZero("Single region size", singleRegionSize);
-      Parameters.isPositive("Initial peak StdDev", initialPeakStdDev);
+      ParameterUtils.isPositive("Smoothing", smooth);
+      ParameterUtils.isAboveZero("Box size", boxSize);
+      ParameterUtils.isPositive("Peak height", peakHeight);
+      ParameterUtils.isPositive("Fraction above background", fractionAboveBackground);
+      ParameterUtils.isPositive("Peak width", peakWidth);
+      ParameterUtils.isPositive("Top N", topN);
+      ParameterUtils.isPositive("Border", border);
+      ParameterUtils.isAboveZero("Relative threshold", relativeThreshold);
+      ParameterUtils.isAboveZero("Absolute threshold", absoluteThreshold);
+      ParameterUtils.isAboveZero("Max iterations", maxIterations);
+      ParameterUtils.isAboveZero("Single region size", singleRegionSize);
+      ParameterUtils.isPositive("Initial peak StdDev", initialPeakStdDev);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

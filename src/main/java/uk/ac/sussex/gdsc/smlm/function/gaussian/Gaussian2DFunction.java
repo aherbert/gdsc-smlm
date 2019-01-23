@@ -447,7 +447,7 @@ public abstract class Gaussian2DFunction
 
   @Override
   public double[][] computeJacobian(double[] variables) {
-    return computeValuesAndJacobian(variables).b;
+    return computeValuesAndJacobian(variables).item2;
   }
 
   @Override

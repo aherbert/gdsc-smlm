@@ -101,9 +101,9 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Field width", settings.getFieldWidth());
-      Parameters.isAboveZero("Pixel width", settings.getNmPerPixel());
-      Parameters.isAboveZero("Pixel depth", settings.getNmPerSlice());
+      ParameterUtils.isAboveZero("Field width", settings.getFieldWidth());
+      ParameterUtils.isAboveZero("Pixel width", settings.getNmPerPixel());
+      ParameterUtils.isAboveZero("Pixel depth", settings.getNmPerSlice());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -130,7 +130,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
       settings.setDiameter(gd.getNextNumber());
 
       try {
-        Parameters.isAboveZero("Diameter", settings.getDiameter());
+        ParameterUtils.isAboveZero("Diameter", settings.getDiameter());
       } catch (final IllegalArgumentException ex) {
         IJ.error(TITLE, ex.getMessage());
         return false;

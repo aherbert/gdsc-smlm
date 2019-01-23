@@ -45,6 +45,8 @@ import java.util.List;
  * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
 public abstract class ImageModel {
+  /** Define the Z-axis. */
+  private static final double[] Z_AXIS = new double[] {0, 0, 1};
   /** Average on-state time. */
   protected double onTime;
   /** Average off-state time for the first dark state. */
@@ -197,26 +199,23 @@ public abstract class ImageModel {
     // Sum the fractions
     double total = 0;
     for (final CompoundMoleculeModel c : compounds) {
-      // System.out.printf("Compound fraction %f\n", c.getFraction());
       total += c.getFraction();
       c.centre();
     }
 
     final ArrayList<CompoundMoleculeModel> molecules = new ArrayList<>(particles);
-    // int[] count = new int[compounds.size()];
     for (int i = 1; i <= particles; i++) {
       // Get the next random compound
-      double d = random.nextDouble() * total;
+      double fraction = random.nextDouble() * total;
       for (int j = 0; j < compounds.size(); j++) {
         final CompoundMoleculeModel c = compounds.get(j);
-        d -= c.getFraction();
-        if (d <= 0) {
+        fraction -= c.getFraction();
+        if (fraction <= 0) {
           final double[] xyz = distribution.next();
           if (xyz == null || xyz.length < 3) {
             return molecules;
           }
 
-          // count[j]++;
           final CompoundMoleculeModel m =
               new CompoundMoleculeModel(i, xyz, copyMolecules(c), false);
           m.setLabel(j);
@@ -226,54 +225,53 @@ public abstract class ImageModel {
             rotate(m);
           }
           molecules.add(m);
-          // System.out.printf("XYZ = %f,%f,%f\n", m.getX(), m.getY(), m.getZ());
           break;
         }
       }
     }
-    // for (int j = 0; j < count.length; j++)
-    // System.out.printf("Compound %d = %d\n", j + 1, count[j]);
     return molecules;
   }
 
-  private static List<MoleculeModel> copyMolecules(CompoundMoleculeModel c) {
-    int n = c.getSize();
-    final List<MoleculeModel> list = new ArrayList<>(n);
-    while (n-- > 0) {
-      final MoleculeModel m = c.getMolecule(n);
-      list.add(new MoleculeModel(n + 1, m.getMass(), Arrays.copyOf(m.getCoordinates(), 3)));
+  private static List<MoleculeModel> copyMolecules(CompoundMoleculeModel compound) {
+    int count = compound.getSize();
+    final List<MoleculeModel> list = new ArrayList<>(count);
+    while (count-- > 0) {
+      final MoleculeModel molecule = compound.getMolecule(count);
+      list.add(new MoleculeModel(count + 1, molecule.getMass(),
+          Arrays.copyOf(molecule.getCoordinates(), 3)));
     }
     return list;
   }
 
-  private void diffuse(CompoundMoleculeModel m, final double diffusionRate, final double[] axis) {
-    final double z = m.xyz[2];
-    switch (m.getDiffusionType()) {
+  private void diffuse(CompoundMoleculeModel model, final double diffusionRate,
+      final double[] axis) {
+    final double z = model.xyz[2];
+    switch (model.getDiffusionType()) {
       case GRID_WALK:
-        m.walk(diffusionRate, random);
+        model.walk(diffusionRate, random);
         break;
 
       case LINEAR_WALK:
-        m.slide(diffusionRate, axis, random);
+        model.slide(diffusionRate, axis, random);
         break;
 
       case RANDOM_WALK:
-        m.move(diffusionRate, random);
+        model.move(diffusionRate, random);
         break;
 
       default:
-        throw new RuntimeException("Unsupported diffusion type: " + m.getDiffusionType());
+        throw new IllegalStateException("Unsupported diffusion type: " + model.getDiffusionType());
     }
     if (diffusion2D) {
-      m.xyz[2] = z;
+      model.xyz[2] = z;
     }
   }
 
-  private void rotate(CompoundMoleculeModel m) {
+  private void rotate(CompoundMoleculeModel model) {
     if (rotation2D) {
-      m.rotateRandomAngle(CompoundMoleculeModel.Z_AXIS, 180, random);
+      model.rotateRandomAngle(Z_AXIS, 180, random);
     } else {
-      m.rotateRandom(180, random);
+      model.rotateRandom(180, random);
     }
   }
 
@@ -293,7 +291,7 @@ public abstract class ImageModel {
    * @param frames the frames
    * @return the fluorophores
    */
-  public List<? extends FluorophoreSequenceModel>
+  public List<FluorophoreSequenceModel>
       createFluorophores(List<CompoundMoleculeModel> molecules, int frames) {
     frameLimit = frames;
     final ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
@@ -305,14 +303,15 @@ public abstract class ImageModel {
         // Molecule Id is ignored since we renumber the sorted collection at the end
         final double[] xyz = c.getRelativeCoordinates(n);
         final double tAct = createActivationTime(xyz);
-        FluorophoreSequenceModel f = null;
+        FluorophoreSequenceModel flouro = null;
         if (frames == 0 || tAct < frames) {
-          f = createFluorophore(0, xyz, tAct);
+          flouro = createFluorophore(0, xyz, tAct);
         }
-        if (f != null && f.getCoordinates() != null && f.getEndTime() > f.getStartTime()) {
-          f.setLabel(c.getLabel());
-          list.add(f);
-          fluorophores.add(f);
+        if (flouro != null && flouro.getCoordinates() != null
+            && flouro.getEndTime() > flouro.getStartTime()) {
+          flouro.setLabel(c.getLabel());
+          list.add(flouro);
+          fluorophores.add(flouro);
         } else {
           // If we remove the molecule from the compound then the rotation will not be around
           // the true COM but the new COM of the reduced size compound. Keep these molecules
@@ -346,7 +345,7 @@ public abstract class ImageModel {
       }
     }
     // Sort by time
-    Collections.sort(list);
+    Collections.sort(list, FluorophoreSequenceModel::compare);
     // Renumber
     int id = 1;
     for (final FluorophoreSequenceModel f : list) {
@@ -370,10 +369,12 @@ public abstract class ImageModel {
    *
    * @param id the id
    * @param xyz the xyz
-   * @param tAct the activation time (generated using {@link #createActivationTime(double[])})
+   * @param activationTime the activation time (generated using
+   *        {@link #createActivationTime(double[])})
    * @return a fluorophore
    */
-  protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz, double tAct);
+  protected abstract FluorophoreSequenceModel createFluorophore(int id, double[] xyz,
+      double activationTime);
 
   /**
    * Add to the list but link up the continuous pulses with previous/next pointers.
@@ -524,18 +525,18 @@ public abstract class ImageModel {
     // Check the correlation bounds.
     // Correlation for photons per frame verses total on time should be negative.
     // Correlation for total photons verses total on time should be positive.
-    double r;
+    double boundedCorrelation;
     if (photonBudgetPerFrame) {
-      r = (correlation < -1) ? -1 : (correlation > 0) ? 0 : correlation;
+      boundedCorrelation = MathUtils.clip(-1, 0, correlation);
     } else {
-      r = (correlation < 0) ? 0 : (correlation > 1) ? 1 : correlation;
+      boundedCorrelation = MathUtils.clip(0, 1, correlation);
     }
 
     // Create a photon budget for each fluorophore
     final double[] photons = new double[nMolecules];
 
     // Generate a second set of on times using the desired correlation
-    if (r != 0) {
+    if (boundedCorrelation != 0) {
       // Observations on real data show:
       // - there is a weak positive correlation between total photons and time
       // - There is a weak negative correlation between photons per frame and total on-time
@@ -543,11 +544,6 @@ public abstract class ImageModel {
       // How to generate a random correlation:
       // http://www.uvm.edu/~dhowell/StatPages/More_Stuff/CorrGen.html
       // http://stats.stackexchange.com/questions/13382/how-to-define-a-distribution-such-that-draws-from-it-correlate-with-a-draw-from
-
-      // Used for debugging the correlation
-      // StoredDataStatistics onTime = new StoredDataStatistics();
-      // StoredDataStatistics allPhotons = new StoredDataStatistics();
-      // PearsonsCorrelation c = new PearsonsCorrelation();
 
       // Create a second set of fluorophores. This is used to generate the correlated photon data
       final List<FluorophoreSequenceModel> fluorophores2 = new ArrayList<>();
@@ -558,19 +554,18 @@ public abstract class ImageModel {
         }
       }
 
-      final double a = Math.sqrt(1 - r * r);
+      final double a = Math.sqrt(1 - boundedCorrelation * boundedCorrelation);
 
       // Q - How to generate a negative correlation?
       // Generate a positive correlation then invert the data and shift to the same range
-      final boolean invert = (r < 0);
-      r = Math.abs(r);
+      final boolean invert = (boundedCorrelation < 0);
+      boundedCorrelation = Math.abs(boundedCorrelation);
 
       StoredDataStatistics correlatedOnTime = new StoredDataStatistics();
       for (int i = 0; i < nMolecules; i++) {
         final double X = getTotalOnTime(fluorophores.get(i));
         final double Z = getTotalOnTime(fluorophores2.get(i));
-        // onTime.add(X);
-        correlatedOnTime.add((r * X + a * Z) / (r + a));
+        correlatedOnTime.add((boundedCorrelation * X + a * Z) / (boundedCorrelation + a));
       }
 
       if (invert) {
@@ -592,19 +587,8 @@ public abstract class ImageModel {
       for (int i = 0; i < nMolecules; i++) {
         // Generate photons using the correlated on time data
         final double p = photonBudget * correlatedOnTimes[i] / averageTotalTOn;
-
-        // final double X = getTotalOnTime(fluorophores.get(i));
-        // double p = (X > 0) ? photonBudget * correlatedOnTimes[i] / X : 0;
-        // double p = (X > 0) ? randomGenerator.nextGamma(photonBudget, correlatedOnTimes[i] / X) :
-        // 0;
-        // double p = randomGenerator.nextGamma(photonBudget, correlatedOnTimes[i] / X);
-        // allPhotons.add(p);
-
         photons[i] = p;
       }
-
-      // System.out.printf("t = %f, p = %f, R = %f\n", averageTotalTOn, allPhotons.getMean(),
-      // c.correlation(onTime.getValues(), allPhotons.getValues()));
 
     } else if (photonDistribution != null) {
       // Sample from the provided distribution. Do not over-write the class level distribution
@@ -642,8 +626,8 @@ public abstract class ImageModel {
     return localisations;
   }
 
-  private static double getTotalOnTime(FluorophoreSequenceModel f) {
-    return MathUtils.sum(f.getOnTimes());
+  private static double getTotalOnTime(FluorophoreSequenceModel flouro) {
+    return MathUtils.sum(flouro.getOnTimes());
   }
 
   /**
@@ -791,23 +775,18 @@ public abstract class ImageModel {
           // This only works because the coordinates are a reference
           final double[] xyz = compound.getCoordinates();
           final double[] originalXyz = Arrays.copyOf(xyz, 3);
-          boolean stationary = true;
-          for (int n = confinementAttempts; n-- > 0 && stationary;) {
+          for (int n = confinementAttempts; n-- > 0;) {
             diffuse(compound, diffusionRate, axis);
             if (!confinementDistribution.isWithin(compound.getCoordinates())) {
-              // fail++;
               // Reset position
               for (int j = 0; j < 3; j++) {
                 xyz[j] = originalXyz[j];
               }
             } else {
-              // pass++;
               // The move was allowed
-              stationary = false;
               break;
             }
           }
-          // if (stationary) System.out.printf("Failed to move %s\n", Arrays.toString(xyz));
         } else {
           diffuse(compound, diffusionRate, axis);
         }
@@ -817,7 +796,6 @@ public abstract class ImageModel {
         rotate(compound);
       }
     }
-    // System.out.printf("Pass = %d, fail = %d\n", pass, fail);
 
     for (int i = 0; i < nFluorophores; i++) {
       linkLocalisations(localisations, models[i]);

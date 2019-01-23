@@ -35,14 +35,14 @@ import java.util.Arrays;
 /**
  * Store a Gaussian kernel for use in convolution.
  */
-public class GaussianKernel implements Cloneable {
+public class GaussianKernel {
   /** The maximum size of half the Gaussian kernel. */
   public static final int HALF_WIDTH_LIMIT = 1 << 28;
 
   private static final double ONE_OVER_ROOT_2_PI = 1.0 / Math.sqrt(2 * Math.PI);
 
   /** The standard deviation. */
-  public final double s;
+  public final double sd;
 
   private final double var2;
 
@@ -53,20 +53,41 @@ public class GaussianKernel implements Cloneable {
   /**
    * Instantiates a new gaussian kernel.
    *
-   * @param s The standard deviation
+   * @param sd The standard deviation
    */
-  public GaussianKernel(double s) {
+  public GaussianKernel(double sd) {
     // Check not infinite or NaN
-    if (!(s > 0 && s < Double.MAX_VALUE)) {
+    if (!(sd > 0 && sd < Double.MAX_VALUE)) {
       throw new IllegalArgumentException("Standard deviation must be positive");
     }
-    this.s = s;
+    this.sd = sd;
     currentScale = 1;
     halfKernel = new TDoubleArrayList();
     // Initialise the first value exp(-0)
     halfKernel.add(1);
     // Precompute exponential scaling factor
-    var2 = -(s * s * 2);
+    var2 = -(sd * sd * 2);
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected GaussianKernel(GaussianKernel source) {
+    this.sd = source.sd;
+    this.var2 = source.var2;
+    currentScale = source.currentScale;
+    halfKernel = new TDoubleArrayList(source.halfKernel);
+  }
+
+  /**
+   * Get a copy.
+   *
+   * @return the copy
+   */
+  public GaussianKernel copy() {
+    return new GaussianKernel(this);
   }
 
   /**
@@ -91,7 +112,7 @@ public class GaussianKernel implements Cloneable {
    * @return the normalisation
    */
   public double getNormalisation() {
-    return ONE_OVER_ROOT_2_PI / s;
+    return ONE_OVER_ROOT_2_PI / sd;
   }
 
   /**
@@ -134,23 +155,22 @@ public class GaussianKernel implements Cloneable {
       range = 38;
     }
 
-    final int kRadius = getGaussianHalfWidth(s * scale, range) + 1;
+    final int kradius = getGaussianHalfWidth(sd * scale, range) + 1;
     increaseScale(scale);
-    increaseKernel(kRadius);
-    // increaseKernel(scale, kRadius);
+    increaseKernel(kradius);
 
     // Create kernel
     // Note: The stored values in the halfKernel are always non-zero.
-    final double[] kernel = new double[2 * kRadius - 1];
+    final double[] kernel = new double[2 * kradius - 1];
     kernel[0] = 1;
     if (currentScale == scale) {
-      for (int i = 1, size = Math.min(kRadius, halfKernel.size()); i < size; i++) {
+      for (int i = 1, size = Math.min(kradius, halfKernel.size()); i < size; i++) {
         kernel[i] = halfKernel.getQuick(i);
       }
     } else {
       final double step = 1.0 / scale;
       final int sample = currentScale / scale;
-      for (int i = 1, j = sample; i < kRadius; i++, j += sample) {
+      for (int i = 1, j = sample; i < kradius; i++, j += sample) {
         // In case sampling requires a different end point in the kernel
         // check the size
         if (j < halfKernel.size()) {
@@ -165,7 +185,7 @@ public class GaussianKernel implements Cloneable {
       }
     }
 
-    return buildKernel(kernel, kRadius, edgeCorrection);
+    return buildKernel(kernel, kradius, edgeCorrection);
   }
 
   /**
@@ -203,7 +223,7 @@ public class GaussianKernel implements Cloneable {
 
     // Check if the current half-kernel would be too large if expanded to the range
     if ((double) currentScale * scale * range > HALF_WIDTH_LIMIT) {
-      return makeErfGaussianKernel(s / scale, range);
+      return makeErfGaussianKernel(sd / scale, range);
     }
 
     final int sample = currentScale * scale;
@@ -211,18 +231,18 @@ public class GaussianKernel implements Cloneable {
     // Expand the kernel to cover the range at the current scale.
     // Note: This can lead to inefficiency if the kernel has been upscaled
     // (i.e. the current scale is above 1).
-    int kRadius = getGaussianHalfWidth(sample, range) + 1;
-    increaseKernel(kRadius);
+    int kradius = getGaussianHalfWidth(sample, range) + 1;
+    increaseKernel(kradius);
 
     // Now get the radius of the downscaled kernel
-    kRadius = getGaussianHalfWidth(s / scale, range) + 1;
+    kradius = getGaussianHalfWidth(sd / scale, range) + 1;
 
     // Create kernel
     // Note: The stored values in the halfKernel are always non-zero.
-    final double[] kernel = new double[2 * kRadius - 1];
+    final double[] kernel = new double[2 * kradius - 1];
     kernel[0] = 1;
     final double step = scale;
-    for (int i = 1, j = sample; i < kRadius; i++, j += sample) {
+    for (int i = 1, j = sample; i < kradius; i++, j += sample) {
       // In case sampling requires a different end point in the kernel
       // check the size
       if (j < halfKernel.size()) {
@@ -236,7 +256,7 @@ public class GaussianKernel implements Cloneable {
       }
     }
 
-    return buildKernel(kernel, kRadius, edgeCorrection);
+    return buildKernel(kernel, kradius, edgeCorrection);
   }
 
   /**
@@ -260,12 +280,12 @@ public class GaussianKernel implements Cloneable {
       currentScale = scale;
 
       final double[] g = halfKernel.toArray();
-      final int kRadius = g.length;
+      final int kradius = g.length;
       final double step = 1.0 / currentScale;
       halfKernel.resetQuick();
       halfKernel.add(1);
 
-      for (int i = 1, j = 0; i < kRadius; i++, j += upsample) {
+      for (int i = 1, j = 0; i < kradius; i++, j += upsample) {
         for (int k = 1; k < upsample; k++) {
           halfKernel.add(FastMath.exp(MathUtils.pow2((j + k) * step) / var2));
         }
@@ -274,10 +294,10 @@ public class GaussianKernel implements Cloneable {
     }
   }
 
-  private void increaseKernel(int kRadius) {
-    if (halfKernel.size() < kRadius) {
+  private void increaseKernel(int kradius) {
+    if (halfKernel.size() < kradius) {
       final double step = 1.0 / currentScale;
-      for (int i = halfKernel.size(); i < kRadius; i++) {
+      for (int i = halfKernel.size(); i < kradius; i++) {
         final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
         if (v == 0) {
           break;
@@ -288,16 +308,16 @@ public class GaussianKernel implements Cloneable {
   }
 
   @SuppressWarnings("unused")
-  private void increaseKernel(int scale, int kRadius) {
+  private void increaseKernel(int scale, int kradius) {
     if (currentScale < scale) {
       currentScale = scale;
       halfKernel.resetQuick();
       halfKernel.add(1);
     }
 
-    if (halfKernel.size() < kRadius) {
+    if (halfKernel.size() < kradius) {
       final double step = 1.0 / currentScale;
-      for (int i = halfKernel.size(); i < kRadius; i++) {
+      for (int i = halfKernel.size(); i < kradius; i++) {
         final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
         if (v == 0) {
           break;
@@ -307,51 +327,48 @@ public class GaussianKernel implements Cloneable {
     }
   }
 
-  private static double[] buildKernel(double[] kernel, int kRadius, boolean edgeCorrection) {
+  private static double[] buildKernel(double[] kernel, int kradius, boolean edgeCorrection) {
     // Clip in the event that zeros occurred during computation
-    if (kernel[kRadius - 1] == 0) {
-      while (kernel[--kRadius] == 0) {
+    if (kernel[kradius - 1] == 0) {
+      while (kernel[--kradius] == 0) {
         /* decrement */
       }
-      if (kRadius == 1) {
+      if (kradius == 1) {
         return new double[] {1};
       }
-      kernel = Arrays.copyOf(kernel, 2 * kRadius - 1);
+      kernel = Arrays.copyOf(kernel, 2 * kradius - 1);
     }
 
     // Edge correction
-    if (edgeCorrection && kRadius > 3) {
+    if (edgeCorrection && kradius > 3) {
       double sqrtSlope = Double.MAX_VALUE;
-      int r = kRadius;
-      while (r > kRadius / 2) {
-        r--;
-        final double a = Math.sqrt(kernel[r]) / (kRadius - r);
+      int radius = kradius;
+      while (radius > kradius / 2) {
+        radius--;
+        final double a = Math.sqrt(kernel[radius]) / (kradius - radius);
         if (a < sqrtSlope) {
           sqrtSlope = a;
         } else {
           break;
         }
       }
-      // System.out.printf("Edge correction: s=%.3f, kRadius=%d, r=%d, sqrtSlope=%f\n", sigma,
-      // kRadius, r,
-      // sqrtSlope);
-      for (int r1 = r + 2; r1 < kRadius; r1++) {
-        kernel[r1] = ((kRadius - r1) * (kRadius - r1) * sqrtSlope * sqrtSlope);
+      for (int r1 = radius + 2; r1 < kradius; r1++) {
+        kernel[r1] = ((kradius - r1) * (kradius - r1) * sqrtSlope * sqrtSlope);
       }
     }
 
     // Normalise
     double sum = kernel[0];
-    for (int i = 1; i < kRadius; i++) {
+    for (int i = 1; i < kradius; i++) {
       sum += 2 * kernel[i];
     }
-    for (int i = 0; i < kRadius; i++) {
+    for (int i = 0; i < kradius; i++) {
       kernel[i] /= sum;
     }
 
     // Create symmetrical
-    System.arraycopy(kernel, 0, kernel, kRadius - 1, kRadius);
-    for (int i = kRadius, j = i - 2; i < kernel.length; i++, j--) {
+    System.arraycopy(kernel, 0, kernel, kradius - 1, kradius);
+    for (int i = kradius, j = i - 2; i < kernel.length; i++, j--) {
       kernel[j] = kernel[i];
     }
     return kernel;
@@ -379,12 +396,12 @@ public class GaussianKernel implements Cloneable {
     }
 
     // Build half the kernel into the full kernel array. This is duplicated later.
-    final int kRadius = getGaussianHalfWidth(sigma, range) + 1;
-    final double[] kernel = new double[2 * kRadius - 1];
+    final int kradius = getGaussianHalfWidth(sigma, range) + 1;
+    final double[] kernel = new double[2 * kradius - 1];
 
     kernel[0] = 1;
     final double s2 = sigma * sigma;
-    for (int i = 1; i < kRadius; i++) {
+    for (int i = 1; i < kradius; i++) {
       // Gaussian function
       kernel[i] = FastMath.exp(-0.5 * i * i / s2);
       if (kernel[i] == 0) {
@@ -392,7 +409,7 @@ public class GaussianKernel implements Cloneable {
       }
     }
 
-    return buildKernel(kernel, kRadius, edgeCorrection);
+    return buildKernel(kernel, kradius, edgeCorrection);
   }
 
   /**
@@ -413,10 +430,10 @@ public class GaussianKernel implements Cloneable {
     }
 
     // Build half the kernel into the full kernel array. This is duplicated later.
-    final int kRadius = getGaussianHalfWidth(sigma, range) + 1;
-    final double[] kernel = new double[2 * kRadius - 1];
+    final int kradius = getGaussianHalfWidth(sigma, range) + 1;
+    final double[] kernel = new double[2 * kradius - 1];
 
-    if (kRadius == 1) {
+    if (kradius == 1) {
       kernel[0] = 1;
       return kernel;
     }
@@ -425,7 +442,7 @@ public class GaussianKernel implements Cloneable {
     final double sqrt_var_by_2 = Math.sqrt(sigma * sigma * 2);
 
     double upper = org.apache.commons.math3.special.Erf.erf(-0.5 / sqrt_var_by_2);
-    for (int i = 0; i < kRadius; i++) {
+    for (int i = 0; i < kradius; i++) {
       final double lower = upper;
       upper = org.apache.commons.math3.special.Erf.erf((i + 0.5) / sqrt_var_by_2);
       kernel[i] = (upper - lower) * 0.5;
@@ -434,17 +451,6 @@ public class GaussianKernel implements Cloneable {
       }
     }
 
-    return buildKernel(kernel, kRadius, false);
-  }
-
-  @Override
-  public GaussianKernel clone() {
-    try {
-      final GaussianKernel k = (GaussianKernel) super.clone();
-      k.halfKernel = new TDoubleArrayList(this.halfKernel);
-      return k;
-    } catch (final CloneNotSupportedException ex) {
-      return new GaussianKernel(s);
-    }
+    return buildKernel(kernel, kradius, false);
   }
 }

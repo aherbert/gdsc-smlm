@@ -47,17 +47,13 @@ public class CubicSplineCalculator {
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);
     }
-    int c = 0;
-    // int c2 = 0;
+    int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
-          final double[] t = CustomTricubicFunction.computePowerTable(s[i], s[j], s[k]);
-          System.arraycopy(t, 0, A.data, c, 64);
-          c += 64;
-          // for (int x = 0; x < 64; x++)
-          // A.set(c2, x, t[x]);
-          // c2++;
+          final double[] pt = CustomTricubicFunction.computePowerTable(s[i], s[j], s[k]);
+          System.arraycopy(pt, 0, A.data, count, 64);
+          count += 64;
         }
       }
     }
@@ -84,17 +80,17 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(double[][][] value) {
-    final DenseMatrix64F B = new DenseMatrix64F(64, 1);
-    int c = 0;
+    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
+    int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
-          B.data[c++] = value[i][j][k];
+          matrix.data[count++] = value[i][j][k];
         }
       }
     }
-    solver.solve(B, B);
-    return B.data;
+    solver.solve(matrix, matrix);
+    return matrix.data;
   }
 
   /**
@@ -105,17 +101,17 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(TrivalueProvider value) {
-    final DenseMatrix64F B = new DenseMatrix64F(64, 1);
-    int c = 0;
+    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
+    int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
-          B.data[c++] = value.get(i, j, k);
+          matrix.data[count++] = value.get(i, j, k);
         }
       }
     }
-    solver.solve(B, B);
-    return B.data;
+    solver.solve(matrix, matrix);
+    return matrix.data;
   }
 
   /**
@@ -126,9 +122,9 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(double[] value) {
-    final DenseMatrix64F B = DenseMatrix64F.wrap(64, 1, value);
-    solver.solve(B, B);
-    return B.data;
+    final DenseMatrix64F matrix = DenseMatrix64F.wrap(64, 1, value);
+    solver.solve(matrix, matrix);
+    return matrix.data;
   }
 
   /**
@@ -139,11 +135,11 @@ public class CubicSplineCalculator {
    * @return the coefficients (or null if computation failed)
    */
   public double[] compute(float[] value) {
-    final DenseMatrix64F B = new DenseMatrix64F(64, 1);
+    final DenseMatrix64F matrix = new DenseMatrix64F(64, 1);
     for (int i = 0; i < 64; i++) {
-      B.data[i] = value[i];
+      matrix.data[i] = value[i];
     }
-    solver.solve(B, B);
-    return B.data;
+    solver.solve(matrix, matrix);
+    return matrix.data;
   }
 }

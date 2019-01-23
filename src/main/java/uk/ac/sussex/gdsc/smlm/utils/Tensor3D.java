@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.EigenDecomposition;
@@ -69,6 +71,7 @@ public class Tensor3D {
       cz += sumXy * z;
       sumXyz += sumXy;
     }
+    ValidationUtils.checkArgument(sumXyz != 0, "Sum is zero");
     cx = cx / sumXyz;
     cy = cy / sumXyz;
     cz = cz / sumXyz;
@@ -92,22 +95,22 @@ public class Tensor3D {
           final double dx = x - cx;
           final double dx2 = dx * dx;
 
-          // tensor[0][0] += m * (dy2 + dz2);
-          // tensor[0][1] -= m * dx * dy;
-          // tensor[0][2] -= m * dx * dz;
-          // tensor[1][1] += m * (dx2 + dz2);
-          // tensor[1][2] -= m * dy * dz;
-          // tensor[2][2] += m * (dx2 + dy2);
+          // tensor[0][0] += m * (dy2 + dz2)
+          // tensor[0][1] -= m * dx * dy
+          // tensor[0][2] -= m * dx * dz
+          // tensor[1][1] += m * (dx2 + dz2)
+          // tensor[1][2] -= m * dy * dz
+          // tensor[2][2] += m * (dx2 + dy2)
 
           summ += m;
           summdx += m * dx;
           summdx2 += m * dx2;
-          // tensor.data[0] += m * (dy2 + dz2);
-          // tensor.data[1] -= m * dx * dy;
-          // tensor.data[2] -= m * dx * dz;
-          // tensor.data[4] += m * (dx2 + dz2);
-          // tensor.data[5] -= m * dy * dz;
-          // tensor.data[8] += m * (dx2 + dy2);
+          // tensor.data[0] += m * (dy2 + dz2)
+          // tensor.data[1] -= m * dx * dy
+          // tensor.data[2] -= m * dx * dz
+          // tensor.data[4] += m * (dx2 + dz2)
+          // tensor.data[5] -= m * dy * dz
+          // tensor.data[8] += m * (dx2 + dy2)
         }
         tensor.data[0] += summ * (dy2 + dz2);
         tensor.data[1] -= summdx * dy;
@@ -119,9 +122,9 @@ public class Tensor3D {
     }
 
     // Inertia tensor is symmetric
-    // tensor[1][0] = tensor[0][1];
-    // tensor[2][0] = tensor[0][2];
-    // tensor[2][1] = tensor[1][2];
+    // tensor[1][0] = tensor[0][1]
+    // tensor[2][0] = tensor[0][2]
+    // tensor[2][1] = tensor[1][2]
     tensor.data[3] = tensor.data[1];
     tensor.data[6] = tensor.data[2];
     tensor.data[7] = tensor.data[5];
@@ -153,7 +156,6 @@ public class Tensor3D {
    * @param vectors Vectors
    */
   private static void sort3xN(double[] wgts, double[][] vectors) {
-
     for (int i = 3; i-- > 0;) {
       int target = i;
       double max = wgts[i];

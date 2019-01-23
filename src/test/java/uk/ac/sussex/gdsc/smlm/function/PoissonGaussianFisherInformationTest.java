@@ -53,53 +53,56 @@ public class PoissonGaussianFisherInformationTest {
   public void canComputeFisherInformation() {
     // org.junit.Assumptions.assumeTrue(false);
 
-    // double u;
-    //// u = Math.pow(10, -300);
-    //// u = 1.0 / Math.nextDown(Double.MAX_VALUE); // Smallest p with a non-infinite Fisher
+    // double mean;
+    //// mean = Math.pow(10, -300);
+    //// mean = 1.0 / Math.nextDown(Double.MAX_VALUE); // Smallest p with a non-infinite Fisher
     // information
-    // u = 1e-100;
-    // PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(0.20);
-    // f.setMeanThreshold(Double.MAX_VALUE);
-    // double I = f.getPoissonGaussianI(u);
-    // double lower = f.getPoissonGaussianApproximationI(u);
-    // double upper = PoissonFisherInformation.getPoissonI(u);
-    // logger.fine(FunctionUtils.getSupplier("s=%g u=%g I=%s (%s - %s) alpha=%s", f.s, u, I, lower,
+    // mean = 1e-100;
+    // PoissonGaussianFisherInformation func = new PoissonGaussianFisherInformation(0.20);
+    // func.setMeanThreshold(Double.MAX_VALUE);
+    // double I = func.getPoissonGaussianI(mean);
+    // double lower = func.getPoissonGaussianApproximationI(mean);
+    // double upper = PoissonFisherInformation.getPoissonI(mean);
+    // logger.fine(FunctionUtils.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
+    // I, lower,
     // upper, I / upper);
     // if (true)
     // return;
 
     for (int i = 0; i < 4; i++) {
-      final double s = (1 << i) * 0.25;
-      canComputeFisherInformation(s);
+      final double sd = (1 << i) * 0.25;
+      canComputeFisherInformation(sd);
     }
   }
 
-  private static void canComputeFisherInformation(double s) {
-    canComputeFisherInformation(new PoissonGaussianFisherInformation(s));
+  private static void canComputeFisherInformation(double sd) {
+    canComputeFisherInformation(new PoissonGaussianFisherInformation(sd));
   }
 
-  private static void canComputeFisherInformation(PoissonGaussianFisherInformation f) {
-    f.setMeanThreshold(Double.MAX_VALUE);
+  private static void canComputeFisherInformation(PoissonGaussianFisherInformation func) {
+    func.setMeanThreshold(Double.MAX_VALUE);
     // Do not evaluate at very high mean. The switch to the approximation will occur
     // and the approximation is good.
     for (int exp = -20; exp < 6; exp++) {
-      canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
+      canComputeFisherInformation(func, Math.pow(10, exp * 0.5));
     }
   }
 
-  private static void canComputeFisherInformation(PoissonGaussianFisherInformation f, double u) {
-    final double I = f.getPoissonGaussianI(u);
-    double lower = f.getPoissonGaussianApproximationI(u);
-    double upper = PoissonFisherInformation.getPoissonI(u);
-    // logger.fine(FunctionUtils.getSupplier("s=%g u=%g I=%s (%s - %s) alpha=%s", f.s, u, I, lower,
+  private static void canComputeFisherInformation(PoissonGaussianFisherInformation func,
+      double mean) {
+    final double I = func.getPoissonGaussianI(mean);
+    double lower = func.getPoissonGaussianApproximationI(mean);
+    double upper = PoissonFisherInformation.getPoissonI(mean);
+    // logger.fine(FunctionUtils.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
+    // I, lower,
     // upper, I / upper);
     // Allow a tolerance on the approximation at high mean.
     // The function does not compute the sum to infinity and so can underestimate
     // the value.
-    if (u >= 10) {
+    if (mean >= 10) {
       lower *= 0.99;
     }
-    if (u >= 10) {
+    if (mean >= 10) {
       upper *= 1.01;
     }
     Assertions.assertTrue(I <= upper, "Not less than Poisson information");
@@ -112,7 +115,7 @@ public class PoissonGaussianFisherInformationTest {
     // org.junit.Assumptions.assumeTrue(false);
 
     // Lowest value where the reciprocal is not infinity.
-    double u = Double.longBitsToDouble(0x4000000000001L);
+    double mean = Double.longBitsToDouble(0x4000000000001L);
 
     // Binary search for the min value
     final boolean doSearch = false;
@@ -126,8 +129,8 @@ public class PoissonGaussianFisherInformationTest {
         // 1/Upper is not infinty
         // Test mid-point
         final long mid = (upper + lower) / 2;
-        u = Double.longBitsToDouble(mid);
-        if (1 / u == Double.POSITIVE_INFINITY) {
+        mean = Double.longBitsToDouble(mid);
+        if (1 / mean == Double.POSITIVE_INFINITY) {
           lower = mid;
         } else {
           // Mid point
@@ -135,23 +138,24 @@ public class PoissonGaussianFisherInformationTest {
         }
       }
 
-      u = Double.longBitsToDouble(upper);
-      logger.info(FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), u));
+      mean = Double.longBitsToDouble(upper);
+      logger.info(FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), mean));
     }
 
-    Assertions.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-    Assertions.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
+    Assertions.assertTrue(1.0 / mean != Double.POSITIVE_INFINITY);
+    Assertions.assertTrue(1.0 / Math.nextDown(mean) == Double.POSITIVE_INFINITY);
 
     for (int i = 0; i < 4; i++) {
       final double s = (1 << i) * 0.25;
-      final PoissonGaussianFisherInformation f = new PoissonGaussianFisherInformation(s);
-      final double I = f.getPoissonGaussianI(u);
-      final double I2 = f.getPoissonGaussianI(1e-100);
-      final double lower = f.getPoissonGaussianApproximationI(u);
-      final double upper = PoissonFisherInformation.getPoissonI(u);
+      final PoissonGaussianFisherInformation func = new PoissonGaussianFisherInformation(s);
+      final double I = func.getPoissonGaussianI(mean);
+      final double I2 = func.getPoissonGaussianI(1e-100);
+      final double lower = func.getPoissonGaussianApproximationI(mean);
+      final double upper = PoissonFisherInformation.getPoissonI(mean);
       final double alpha = I / upper;
-      logger.log(TestLogUtils.getRecord(Level.INFO,
-          "s=%g u=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", f.sd, u, I, I2, lower, upper, alpha));
+      logger.log(
+          TestLogUtils.getRecord(Level.INFO, "s=%g mean=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s",
+              func.sd, mean, I, I2, lower, upper, alpha));
       Assertions.assertTrue(I > lower);
       Assertions.assertTrue(I < upper);
 

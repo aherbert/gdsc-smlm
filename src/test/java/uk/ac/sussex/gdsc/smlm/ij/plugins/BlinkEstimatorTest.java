@@ -89,8 +89,8 @@ public class BlinkEstimatorTest {
 
   final double relativeError = 0.2;
   final double minPhotons = 20;
-  final double pDelete = 0;
-  final double pAdd = 0;
+  final double probabilityDelete = 0;
+  final double probabilityAdd = 0;
 
   static final int LOW = 0;
   static final int MEDIUM = 1;
@@ -98,9 +98,9 @@ public class BlinkEstimatorTest {
 
   static final int MIN_FITTED_POINTS = 5;
   static final int MAX_FITTED_POINTS = 15;
-  double[] nBlinks = {0.5, 1.5, 4};
-  double[] tOn = {1.5, 3, 8};
-  double[] tOff = {2.5, 5, 10};
+  double[] blinkingRate = {0.5, 1.5, 4};
+  double[] ton = {1.5, 3, 8};
+  double[] toff = {2.5, 5, 10};
 
   // If true then test against the real population statistics.
   // If false then test against the sampled statistics (i.e. using integer frames).
@@ -113,8 +113,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[MEDIUM], tOff[MEDIUM],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[MEDIUM],
+        toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -123,8 +123,8 @@ public class BlinkEstimatorTest {
           RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[MEDIUM],
-        tOff[MEDIUM], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[MEDIUM],
+        toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -132,8 +132,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[MEDIUM],
-        tOff[MEDIUM], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[MEDIUM],
+        toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -141,8 +141,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[HIGH], tOff[HIGH],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[HIGH],
+        toff[HIGH], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -150,8 +150,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[HIGH], tOff[HIGH],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[HIGH],
+        toff[HIGH], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -159,8 +159,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[HIGH], tOff[HIGH],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[HIGH],
+        toff[HIGH], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -168,7 +168,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[LOW], tOn[LOW], tOff[LOW],
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -177,8 +177,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[MEDIUM], tOn[LOW], tOff[LOW],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[LOW],
+        toff[LOW], particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -186,7 +186,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), nBlinks[HIGH], tOn[LOW], tOff[LOW],
+    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -203,10 +203,10 @@ public class BlinkEstimatorTest {
       final int[] count = new int[MAX_FITTED_POINTS + 1];
       int tests = 0;
       for (int run = 0; run < 3; run++) {
-        for (final double n : nBlinks) {
-          for (int i = 0; i < tOn.length; i++) {
+        for (final double n : blinkingRate) {
+          for (int i = 0; i < ton.length; i++) {
             tests++;
-            final TIntHashSet ok = estimateBlinking(rg, n, tOn[i], tOff[i], particles,
+            final TIntHashSet ok = estimateBlinking(rg, n, ton[i], toff[i], particles,
                 fixedFraction, timeAtLowerBound, false);
             ok.forEach(new TIntProcedure() {
               @Override
@@ -232,8 +232,8 @@ public class BlinkEstimatorTest {
     }
   }
 
-  private TIntHashSet estimateBlinking(UniformRandomProvider rg, double nBlinks, double tOn,
-      double tOff, int particles, double fixedFraction, boolean timeAtLowerBound,
+  private TIntHashSet estimateBlinking(UniformRandomProvider rg, double blinkingRate, double ton,
+      double toff, int particles, double fixedFraction, boolean timeAtLowerBound,
       boolean doAssert) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
 
@@ -242,7 +242,7 @@ public class BlinkEstimatorTest {
     final double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
     final ImageModel imageModel =
-        new ActivationEnergyImageModel(eAct, activationIllumination, tOn, 0, tOff, 0, nBlinks);
+        new ActivationEnergyImageModel(eAct, activationIllumination, ton, 0, toff, 0, blinkingRate);
     imageModel.setRandomGenerator(new RandomGeneratorAdapter(rg));
 
     final double[] max = new double[] {256, 256, 32};
@@ -305,7 +305,7 @@ public class BlinkEstimatorTest {
     final float z = 0;
     for (final LocalisationModel l : localisations) {
       // Remove by intensity threshold and optionally at random.
-      if (l.getIntensity() < minPhotons || rg.nextDouble() < pDelete) {
+      if (l.getIntensity() < minPhotons || rg.nextDouble() < probabilityDelete) {
         continue;
       }
       final int frame = l.getTime();
@@ -320,7 +320,7 @@ public class BlinkEstimatorTest {
     // Add random localisations
     // Intensity doesn't matter at the moment for tracing
     intensity = (float) photons;
-    for (int i = (int) (localisations.size() * pAdd); i-- > 0;) {
+    for (int i = (int) (localisations.size() * probabilityAdd); i-- > 0;) {
       final int frame = 1 + rg.nextInt(totalSteps);
       final float x = (float) (rg.nextDouble() * max[0]);
       final float y = (float) (rg.nextDouble() * max[1]);
@@ -348,7 +348,7 @@ public class BlinkEstimatorTest {
 
     logger.info(
         FunctionUtils.getSupplier("N = %d (%d), N-blinks = %f, tOn = %f, tOff = %f, Fixed = %f",
-            fluorophores.size(), localisations.size(), nBlinks, tOn, tOff, fixedFraction));
+            fluorophores.size(), localisations.size(), blinkingRate, ton, toff, fixedFraction));
     logger.info(FunctionUtils.getSupplier(
         "Actual N-blinks = %f (%f), tOn = %f (%f), tOff = %f (%f), 95%% = %f, max = %f",
         statsNBlinks.getMean(), statsSampledNBlinks.getMean(), statsTOn.getMean(),
@@ -358,7 +358,7 @@ public class BlinkEstimatorTest {
     logger.info("-=-=--=-");
 
     final BlinkEstimator be = new BlinkEstimator();
-    be.maxDarkTime = (int) (tOff * 10);
+    be.maxDarkTime = (int) (toff * 10);
     be.msPerFrame = msPerFrame;
     be.relativeDistance = false;
     final double d = ImageModel.getRandomMoveDistance(diffusionRate);
@@ -372,33 +372,33 @@ public class BlinkEstimatorTest {
 
     final int nMolecules = fluorophores.size();
     if (usePopulationStatistics) {
-      nBlinks = statsNBlinks.getMean();
-      tOff = statsTOff.getMean();
+      blinkingRate = statsNBlinks.getMean();
+      toff = statsTOff.getMean();
     } else {
-      nBlinks = statsSampledNBlinks.getMean();
-      tOff = statsSampledTOff.getMean();
+      blinkingRate = statsSampledNBlinks.getMean();
+      toff = statsSampledTOff.getMean();
     }
 
     // See if any fitting regime gets a correct answer
     final TIntHashSet ok = new TIntHashSet();
-    for (int nFittedPoints = MIN_FITTED_POINTS; nFittedPoints <= MAX_FITTED_POINTS;
-        nFittedPoints++) {
-      be.nFittedPoints = nFittedPoints;
+    for (int numberOfFittedPoints = MIN_FITTED_POINTS; numberOfFittedPoints <= MAX_FITTED_POINTS;
+        numberOfFittedPoints++) {
+      be.numberOfFittedPoints = numberOfFittedPoints;
       be.computeBlinkingRate(results, true);
 
       final double moleculesError = DoubleEquality.relativeError(nMolecules, be.getNMolecules());
-      final double blinksError = DoubleEquality.relativeError(nBlinks, be.getNBlinks());
-      final double offError = DoubleEquality.relativeError(tOff * msPerFrame, be.getTOff());
+      final double blinksError = DoubleEquality.relativeError(blinkingRate, be.getNBlinks());
+      final double offError = DoubleEquality.relativeError(toff * msPerFrame, be.getTOff());
       logger.info(FunctionUtils.getSupplier("Error %d: N = %f, blinks = %f, tOff = %f : %f",
-          nFittedPoints, moleculesError, blinksError, offError,
+          numberOfFittedPoints, moleculesError, blinksError, offError,
           (moleculesError + blinksError + offError) / 3));
 
       if (moleculesError < relativeError && blinksError < relativeError
           && offError < relativeError) {
-        ok.add(nFittedPoints);
+        ok.add(numberOfFittedPoints);
         logger.info("-=-=--=-");
-        logger
-            .info(FunctionUtils.getSupplier("*** Correct at %d fitted points ***", nFittedPoints));
+        logger.info(
+            FunctionUtils.getSupplier("*** Correct at %d fitted points ***", numberOfFittedPoints));
         if (doAssert) {
           break;
         }
@@ -414,7 +414,7 @@ public class BlinkEstimatorTest {
       Assertions.assertFalse(ok.isEmpty());
     }
 
-    // Assertions.assertEquals("Invalid N-blinks", nBlinks, be.getNBlinks(), nBlinks *
+    // Assertions.assertEquals("Invalid N-blinks", blinkingRate, be.getNBlinks(), blinkingRate *
     // relativeError);
     // Assertions.assertEquals("Invalid N-molecules", fluorophores.size(), be.getNMolecules(),
     // fluorophores.size() * relativeError);

@@ -259,10 +259,10 @@ public class PeakResultStoreTest {
     assertEquals(list, size, store);
   }
 
-  private static PeakResult create(UniformRandomProvider r) {
-    return new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(), r.nextDouble(),
-        r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(), r.nextFloat(),
-            r.nextFloat(), r.nextFloat(), r.nextFloat()),
+  private static PeakResult create(UniformRandomProvider rng) {
+    return new PeakResult(rng.nextInt(), rng.nextInt(), rng.nextInt(), rng.nextFloat(),
+        rng.nextDouble(), rng.nextFloat(), rng.nextFloat(), PeakResult.createParams(rng.nextFloat(),
+            rng.nextFloat(), rng.nextFloat(), rng.nextFloat(), rng.nextFloat()),
         null);
   }
 

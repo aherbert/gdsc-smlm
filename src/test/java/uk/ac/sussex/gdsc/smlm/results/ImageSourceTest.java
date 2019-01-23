@@ -43,64 +43,65 @@ import java.util.List;
 public class ImageSourceTest {
   @Test
   public void canConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
-    final MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
-    Assertions.assertEquals(w, source.getWidth());
-    Assertions.assertEquals(h, source.getHeight());
+    final MemoryImageSource source =
+        new MemoryImageSource(width, height, createData(width, height, n));
+    Assertions.assertEquals(width, source.getWidth());
+    Assertions.assertEquals(height, source.getHeight());
     Assertions.assertEquals(n, source.getFrames());
   }
 
   @Test
   public void nullDataThrowsConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final float[][] data = null;
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new MemoryImageSource(w, h, data);
+      new MemoryImageSource(width, height, data);
     });
   }
 
   @Test
   public void nullArrayDataThrowsConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     data[2] = null;
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new MemoryImageSource(w, h, data);
+      new MemoryImageSource(width, height, data);
     });
   }
 
   @Test
   public void invalidLengthArrayDataThrowsConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
-    data[2] = new float[w * h + 1];
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
+    data[2] = new float[width * height + 1];
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new MemoryImageSource(w, h, data);
+      new MemoryImageSource(width, height, data);
     });
   }
 
   @Test
   public void invalidWidthThrowsConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     int ok = 0;
-    new MemoryImageSource(w, h, data);
-    if (canConstruct(w + 1, h, data)) {
+    new MemoryImageSource(width, height, data);
+    if (canConstruct(width + 1, height, data)) {
       ok++;
     }
-    if (canConstruct(w - 1, h, data)) {
+    if (canConstruct(width - 1, height, data)) {
       ok++;
     }
-    if (canConstruct(-1, h, data)) {
+    if (canConstruct(-1, height, data)) {
       ok++;
     }
-    if (canConstruct(0, h, data)) {
+    if (canConstruct(0, height, data)) {
       ok++;
     }
     Assertions.assertEquals(0, ok);
@@ -108,29 +109,29 @@ public class ImageSourceTest {
 
   @Test
   public void invalidHeightThrowsConstructMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     int ok = 0;
-    new MemoryImageSource(w, h, data);
-    if (canConstruct(w, h + 1, data)) {
+    new MemoryImageSource(width, height, data);
+    if (canConstruct(width, height + 1, data)) {
       ok++;
     }
-    if (canConstruct(w, h - 1, data)) {
+    if (canConstruct(width, height - 1, data)) {
       ok++;
     }
-    if (canConstruct(w, -1, data)) {
+    if (canConstruct(width, -1, data)) {
       ok++;
     }
-    if (canConstruct(w, 0, data)) {
+    if (canConstruct(width, 0, data)) {
       ok++;
     }
     Assertions.assertEquals(0, ok);
   }
 
-  private static boolean canConstruct(int w, int h, float[][] data) {
+  private static boolean canConstruct(int width, int height, float[][] data) {
     try {
-      new MemoryImageSource(w, h, data);
+      new MemoryImageSource(width, height, data);
       return true;
     } catch (final RuntimeException ex) {
       return false;
@@ -139,25 +140,25 @@ public class ImageSourceTest {
 
   @Test
   public void memoryImageSourceCanReturnDataWithNext() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
-    final MemoryImageSource source = new MemoryImageSource(w, h, data);
-    int i = 0;
-    float[] d = null;
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
+    final MemoryImageSource source = new MemoryImageSource(width, height, data);
+    int index = 0;
+    float[] next = null;
     Assertions.assertTrue(source.open());
-    while ((d = source.next()) != null) {
-      Assertions.assertArrayEquals(data[i++], d);
+    while ((next = source.next()) != null) {
+      Assertions.assertArrayEquals(data[index++], next);
     }
-    Assertions.assertEquals(i, data.length);
+    Assertions.assertEquals(index, data.length);
   }
 
   @SeededTest
   public void memoryImageSourceCanReturnDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
-    final MemoryImageSource source = new MemoryImageSource(w, h, data);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
+    final MemoryImageSource source = new MemoryImageSource(width, height, data);
 
     final int[] frames = new int[data.length];
     for (int i = 0; i < data.length; i++) {
@@ -178,29 +179,29 @@ public class ImageSourceTest {
 
   @Test
   public void memoryImageSourceCanReturnCroppedDataWithNext() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
-    final float[][] data = createData(w, h, 15);
-    final MemoryImageSource source = new MemoryImageSource(w, h, data);
-    int i = 0;
-    float[] d = null;
+    final float[][] data = createData(width, height, 15);
+    final MemoryImageSource source = new MemoryImageSource(width, height, data);
+    int index = 0;
+    float[] next = null;
     Assertions.assertTrue(source.open());
-    while ((d = source.next(bounds)) != null) {
-      Assertions.assertEquals(bounds.width * bounds.height, d.length);
-      Assertions.assertArrayEquals(crop(data[i], w, bounds), d);
-      i++;
+    while ((next = source.next(bounds)) != null) {
+      Assertions.assertEquals(bounds.width * bounds.height, next.length);
+      Assertions.assertArrayEquals(crop(data[index], width, bounds), next);
+      index++;
     }
-    Assertions.assertEquals(i, data.length);
+    Assertions.assertEquals(index, data.length);
   }
 
   @SeededTest
   public void memoryImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
-    final float[][] data = createData(w, h, 15);
-    final MemoryImageSource source = new MemoryImageSource(w, h, data);
+    final float[][] data = createData(width, height, 15);
+    final MemoryImageSource source = new MemoryImageSource(width, height, data);
 
     final int[] frames = new int[data.length];
     for (int i = 0; i < data.length; i++) {
@@ -213,9 +214,9 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       final int frame = frames[i];
       Assertions.assertTrue(source.isValid(frame));
-      final float[] d = source.get(frame, bounds);
-      Assertions.assertEquals(bounds.width * bounds.height, d.length);
-      Assertions.assertArrayEquals(crop(data[frame - 1], w, bounds), d);
+      final float[] next = source.get(frame, bounds);
+      Assertions.assertEquals(bounds.width * bounds.height, next.length);
+      Assertions.assertArrayEquals(crop(data[frame - 1], width, bounds), next);
     }
     Assertions.assertFalse(source.isValid(0));
     Assertions.assertFalse(source.isValid(data.length + 1));
@@ -223,10 +224,10 @@ public class ImageSourceTest {
 
   @Test
   public void memoryImageSourceThrowsWithInvalidBounds() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
-    final MemoryImageSource source = new MemoryImageSource(w, h, data);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
+    final MemoryImageSource source = new MemoryImageSource(width, height, data);
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       source.next(new Rectangle(-1, 0, 1, 1));
     });
@@ -234,16 +235,17 @@ public class ImageSourceTest {
 
   @Test
   public void canConstructInterlacedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int start = 4;
     final int size = 2;
     final int skip = 1;
-    final MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource source =
+        new MemoryImageSource(width, height, createData(width, height, n));
     final InterlacedImageSource iSource = new InterlacedImageSource(source, start, size, skip);
-    Assertions.assertEquals(w, iSource.getWidth());
-    Assertions.assertEquals(h, iSource.getHeight());
+    Assertions.assertEquals(width, iSource.getWidth());
+    Assertions.assertEquals(height, iSource.getHeight());
     Assertions.assertEquals(12 * 2 / 3, iSource.getFrames());
     Assertions.assertEquals(start, iSource.getStart());
     Assertions.assertEquals(size, iSource.getSize());
@@ -262,13 +264,13 @@ public class ImageSourceTest {
 
   @Test
   public void invalidStartThrowsConstructInterlacedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int start = 0;
     final int size = 2;
     final int skip = 1;
-    final MemoryImageSource m = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource m = new MemoryImageSource(width, height, createData(width, height, n));
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new InterlacedImageSource(m, start, size, skip);
     });
@@ -276,13 +278,13 @@ public class ImageSourceTest {
 
   @Test
   public void invalidSizeThrowsConstructInterlacedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int start = 4;
     final int size = 0;
     final int skip = 1;
-    final MemoryImageSource m = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource m = new MemoryImageSource(width, height, createData(width, height, n));
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new InterlacedImageSource(m, start, size, skip);
     });
@@ -290,13 +292,13 @@ public class ImageSourceTest {
 
   @Test
   public void invalidSkipThrowsConstructInterlacedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int start = 4;
     final int size = 2;
     final int skip = -1;
-    final MemoryImageSource m = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource m = new MemoryImageSource(width, height, createData(width, height, n));
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new InterlacedImageSource(m, start, size, skip);
     });
@@ -304,41 +306,41 @@ public class ImageSourceTest {
 
   @Test
   public void interlacedImageSourceCanReturnDataWithNext() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source =
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip);
 
     Assertions.assertTrue(source.open());
 
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
-    int i = 0;
-    float[] d = null;
-    while ((d = source.next()) != null) {
+    int index = 0;
+    float[] next = null;
+    while ((next = source.next()) != null) {
       final int startFrame = source.getStartFrameNumber();
       final int endFrame = source.getEndFrameNumber();
       Assertions.assertEquals(startFrame, endFrame, "Start and end frames do not match");
-      Assertions.assertEquals(expected[i], startFrame);
-      Assertions.assertArrayEquals(data[startFrame - 1], d);
-      i++;
+      Assertions.assertEquals(expected[index], startFrame);
+      Assertions.assertArrayEquals(data[startFrame - 1], next);
+      index++;
     }
-    Assertions.assertEquals(i, source.getFrames());
+    Assertions.assertEquals(index, source.getFrames());
   }
 
   @SeededTest
   public void interlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source =
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip);
 
     final int[] frames = new int[data.length];
     for (int i = 0; i < data.length; i++) {
@@ -365,44 +367,44 @@ public class ImageSourceTest {
 
   @Test
   public void interlacedImageSourceCanReturnCroppedDataWithNext() {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
     final ImageSource source =
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip);
 
     Assertions.assertTrue(source.open());
 
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
-    int i = 0;
-    float[] d = null;
-    while ((d = source.next(bounds)) != null) {
+    int index = 0;
+    float[] next = null;
+    while ((next = source.next(bounds)) != null) {
       final int startFrame = source.getStartFrameNumber();
       final int endFrame = source.getEndFrameNumber();
       Assertions.assertEquals(startFrame, endFrame, "Start and end frames do not match");
-      Assertions.assertEquals(expected[i], startFrame);
-      Assertions.assertEquals(bounds.width * bounds.height, d.length);
-      Assertions.assertArrayEquals(crop(data[startFrame - 1], w, bounds), d);
-      i++;
+      Assertions.assertEquals(expected[index], startFrame);
+      Assertions.assertEquals(bounds.width * bounds.height, next.length);
+      Assertions.assertArrayEquals(crop(data[startFrame - 1], width, bounds), next);
+      index++;
     }
-    Assertions.assertEquals(i, source.getFrames());
+    Assertions.assertEquals(index, source.getFrames());
   }
 
   @SeededTest
   public void interlacedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
-    final float[][] data = createData(w, h, 15);
+    final int width = 5;
+    final int height = 3;
+    final float[][] data = createData(width, height, 15);
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
     final ImageSource source =
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip);
 
     final int[] frames = new int[data.length];
     for (int i = 0; i < data.length; i++) {
@@ -416,12 +418,12 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       final int frame = frames[i];
       Assertions.assertTrue(source.isValid(frame));
-      final float[] d = source.get(frame, bounds);
+      final float[] next = source.get(frame, bounds);
       if (isExpected(frame, expected)) {
-        Assertions.assertEquals(bounds.width * bounds.height, d.length);
-        Assertions.assertArrayEquals(crop(data[frame - 1], w, bounds), d);
+        Assertions.assertEquals(bounds.width * bounds.height, next.length);
+        Assertions.assertArrayEquals(crop(data[frame - 1], width, bounds), next);
       } else {
-        Assertions.assertNull(d);
+        Assertions.assertNull(next);
       }
     }
     Assertions.assertFalse(source.isValid(0));
@@ -430,14 +432,15 @@ public class ImageSourceTest {
 
   @Test
   public void canConstructAggregatedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int aggregate = 3;
-    final MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource source =
+        new MemoryImageSource(width, height, createData(width, height, n));
     final AggregatedImageSource iSource = new AggregatedImageSource(source, aggregate);
-    Assertions.assertEquals(w, iSource.getWidth());
-    Assertions.assertEquals(h, iSource.getHeight());
+    Assertions.assertEquals(width, iSource.getWidth());
+    Assertions.assertEquals(height, iSource.getHeight());
     Assertions.assertEquals(n / aggregate, iSource.getFrames());
     Assertions.assertEquals(aggregate, iSource.getAggregate());
   }
@@ -452,11 +455,11 @@ public class ImageSourceTest {
 
   @Test
   public void invalidAggregateThrowsConstructAggregatedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final int aggregate = 1;
-    final MemoryImageSource m = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource m = new MemoryImageSource(width, height, createData(width, height, n));
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new AggregatedImageSource(m, aggregate);
     });
@@ -464,37 +467,37 @@ public class ImageSourceTest {
 
   @Test
   public void aggregatedImageSourceCanReturnDataWithNext() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int aggregate = 3;
-    final float[][] data = createData(w, h, 15);
+    final float[][] data = createData(width, height, 15);
     final ImageSource source =
-        new AggregatedImageSource(new MemoryImageSource(w, h, data), aggregate);
+        new AggregatedImageSource(new MemoryImageSource(width, height, data), aggregate);
 
     Assertions.assertTrue(source.open());
 
-    int i = 1;
+    int index = 1;
     int ii = 0;
-    float[] d = null;
-    while ((d = source.next()) != null) {
+    float[] next = null;
+    while ((next = source.next()) != null) {
       ii++;
-      Assertions.assertEquals(i, source.getStartFrameNumber());
-      Assertions.assertEquals(i + 2, source.getEndFrameNumber());
-      final float[] all = combine(data[i - 1], data[i], data[i + 1]);
-      Assertions.assertArrayEquals(all, d);
-      i += 3;
+      Assertions.assertEquals(index, source.getStartFrameNumber());
+      Assertions.assertEquals(index + 2, source.getEndFrameNumber());
+      final float[] all = combine(data[index - 1], data[index], data[index + 1]);
+      Assertions.assertArrayEquals(all, next);
+      index += 3;
     }
     Assertions.assertEquals(ii, source.getFrames());
   }
 
   @SeededTest
   public void aggregatedImageSourceCanReturnDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int aggregate = 3;
-    final float[][] data = createData(w, h, 15);
+    final float[][] data = createData(width, height, 15);
     final ImageSource source =
-        new AggregatedImageSource(new MemoryImageSource(w, h, data), aggregate);
+        new AggregatedImageSource(new MemoryImageSource(width, height, data), aggregate);
 
     final int[] frames = new int[data.length / 3];
     for (int i = 0, frame = 1; i < frames.length; i++, frame += 3) {
@@ -519,40 +522,40 @@ public class ImageSourceTest {
 
   @Test
   public void aggregatedImageSourceCanReturnCroppedDataWithNext() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int aggregate = 3;
-    final float[][] data = createData(w, h, 15);
+    final float[][] data = createData(width, height, 15);
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
     final ImageSource source =
-        new AggregatedImageSource(new MemoryImageSource(w, h, data), aggregate);
+        new AggregatedImageSource(new MemoryImageSource(width, height, data), aggregate);
 
     Assertions.assertTrue(source.open());
 
-    int i = 1;
+    int index = 1;
     int ii = 0;
-    float[] d = null;
-    while ((d = source.next(bounds)) != null) {
+    float[] next = null;
+    while ((next = source.next(bounds)) != null) {
       ii++;
-      Assertions.assertEquals(i, source.getStartFrameNumber());
-      Assertions.assertEquals(i + 2, source.getEndFrameNumber());
-      final float[] all = combine(crop(data[i - 1], w, bounds), crop(data[i], w, bounds),
-          crop(data[i + 1], w, bounds));
-      Assertions.assertArrayEquals(all, d);
-      i += 3;
+      Assertions.assertEquals(index, source.getStartFrameNumber());
+      Assertions.assertEquals(index + 2, source.getEndFrameNumber());
+      final float[] all = combine(crop(data[index - 1], width, bounds),
+          crop(data[index], width, bounds), crop(data[index + 1], width, bounds));
+      Assertions.assertArrayEquals(all, next);
+      index += 3;
     }
     Assertions.assertEquals(ii, source.getFrames());
   }
 
   @SeededTest
   public void aggregatedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int aggregate = 3;
-    final float[][] data = createData(w, h, 15);
+    final float[][] data = createData(width, height, 15);
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
     final ImageSource source =
-        new AggregatedImageSource(new MemoryImageSource(w, h, data), aggregate);
+        new AggregatedImageSource(new MemoryImageSource(width, height, data), aggregate);
 
     final int[] frames = new int[data.length / 3];
     for (int i = 0, frame = 1; i < frames.length; i++, frame += 3) {
@@ -568,8 +571,8 @@ public class ImageSourceTest {
       final float[] d = source.get(frame, bounds);
       Assertions.assertEquals(frame, source.getStartFrameNumber());
       Assertions.assertEquals(frame + 2, source.getEndFrameNumber());
-      final float[] all = combine(crop(data[frame - 1], w, bounds), crop(data[frame], w, bounds),
-          crop(data[frame + 1], w, bounds));
+      final float[] all = combine(crop(data[frame - 1], width, bounds),
+          crop(data[frame], width, bounds), crop(data[frame + 1], width, bounds));
       Assertions.assertArrayEquals(all, d, () -> "Invalid frame data " + frame);
     }
     Assertions.assertFalse(source.isValid(0));
@@ -578,19 +581,19 @@ public class ImageSourceTest {
 
   @Test
   public void canConstructAggregatedInterlacedImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
-    final float[][] data = createData(w, h, n);
+    final float[][] data = createData(width, height, n);
     final int aggregate = 3;
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source =
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip);
     final AggregatedImageSource iSource = new AggregatedImageSource(source, aggregate);
-    Assertions.assertEquals(w, iSource.getWidth());
-    Assertions.assertEquals(h, iSource.getHeight());
+    Assertions.assertEquals(width, iSource.getWidth());
+    Assertions.assertEquals(height, iSource.getHeight());
     Assertions.assertEquals(12 * 2 / 3, source.getFrames());
     Assertions.assertEquals((int) Math.ceil((double) source.getFrames() / aggregate),
         iSource.getFrames());
@@ -599,16 +602,16 @@ public class ImageSourceTest {
 
   @Test
   public void constructInterlacedAggregatedImageSourceThrows() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
-    final float[][] data = createData(w, h, n);
+    final float[][] data = createData(width, height, n);
     final int aggregate = 3;
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source =
-        new AggregatedImageSource(new MemoryImageSource(w, h, data), aggregate);
+        new AggregatedImageSource(new MemoryImageSource(width, height, data), aggregate);
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new InterlacedImageSource(source, start, size, skip);
     });
@@ -616,16 +619,17 @@ public class ImageSourceTest {
 
   @Test
   public void aggregatedInterlacedImageSourceCanReturnDataWithNext() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
-    final float[][] data = createData(w, h, n);
+    final float[][] data = createData(width, height, n);
     final int aggregate = 3;
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source = new AggregatedImageSource(
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip), aggregate);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip),
+        aggregate);
 
     Assertions.assertTrue(source.open());
 
@@ -662,16 +666,17 @@ public class ImageSourceTest {
 
   @SeededTest
   public void aggregatedInterlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
-    final float[][] data = createData(w, h, n);
+    final float[][] data = createData(width, height, n);
     final int aggregate = 3;
     final int start = 4;
     final int size = 2;
     final int skip = 1;
     final ImageSource source = new AggregatedImageSource(
-        new InterlacedImageSource(new MemoryImageSource(w, h, data), start, size, skip), aggregate);
+        new InterlacedImageSource(new MemoryImageSource(width, height, data), start, size, skip),
+        aggregate);
 
     // Set the expected frames returned by the interlacing
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
@@ -687,9 +692,9 @@ public class ImageSourceTest {
     Assertions.assertTrue(source.open());
     for (int i = 0; i < frames.length; i++) {
       // Get the range for the data
-      int e = frames[i];
-      final int endE = FastMath.min(e + 2, expected.length - 1);
-      final int startFrame = expected[e];
+      int startE = frames[i];
+      final int endE = FastMath.min(startE + 2, expected.length - 1);
+      final int startFrame = expected[startE];
       final int endFrame = expected[endE];
 
       // Get the data
@@ -701,8 +706,8 @@ public class ImageSourceTest {
 
       // Check the data is collated correctly
       final float[] all = new float[data[0].length];
-      for (; e <= endE; e++) {
-        final int frame = expected[e] - 1;
+      for (; startE <= endE; startE++) {
+        final int frame = expected[startE] - 1;
         for (int j = 0; j < all.length; j++) {
           all[j] += data[frame][j];
         }
@@ -725,12 +730,13 @@ public class ImageSourceTest {
 
   @Test
   public void canSerialiseMemoryImageSource() {
-    final int w = 5;
-    final int h = 3;
+    final int width = 5;
+    final int height = 3;
     final int n = 15;
     final String name = "canSerialiseMemoryImageSource";
 
-    final MemoryImageSource source = new MemoryImageSource(w, h, createData(w, h, n));
+    final MemoryImageSource source =
+        new MemoryImageSource(width, height, createData(width, height, n));
     source.setName(name);
     source.setFreeMemoryOnClose(true);
 
@@ -739,8 +745,8 @@ public class ImageSourceTest {
 
     final MemoryImageSource source2 = (MemoryImageSource) ImageSource.fromXml(xml);
 
-    Assertions.assertEquals(w, source2.getWidth());
-    Assertions.assertEquals(h, source2.getHeight());
+    Assertions.assertEquals(width, source2.getWidth());
+    Assertions.assertEquals(height, source2.getHeight());
     Assertions.assertEquals(n, source2.getFrames());
     Assertions.assertEquals(name, source2.getName());
     Assertions.assertEquals(true, source2.isFreeMemoryOnClose());
@@ -756,17 +762,17 @@ public class ImageSourceTest {
    * Create data using the specified dimensions and the number of frames. Each frame will have a
    * different base number and each index will be unique in the frame.
    *
-   * @param w width
-   * @param h height
+   * @param width width
+   * @param height height
    * @param n The number of frames
    * @return The data
    */
-  private static float[][] createData(int w, int h, int n) {
+  private static float[][] createData(int width, int height, int n) {
     final List<float[]> data = new ArrayList<>(n);
-    float f = 1;
+    float base = 1;
     for (int i = 0; i < n; i++) {
-      data.add(createData(w, h, f));
-      f *= 2;
+      data.add(createData(width, height, base));
+      base *= 2;
     }
     return data.toArray(new float[0][0]);
   }
@@ -775,14 +781,14 @@ public class ImageSourceTest {
    * Create data using the specified dimensions and the base number. Each index will be unique in
    * the frame.
    *
-   * @param w width
-   * @param h height
-   * @param f the base number
+   * @param width width
+   * @param height height
+   * @param base the base number
    * @return The data
    */
-  private static float[] createData(int w, int h, float f) {
-    final float[] data = new float[w * h];
-    Arrays.fill(data, f);
+  private static float[] createData(int width, int height, float base) {
+    final float[] data = new float[width * height];
+    Arrays.fill(data, base);
     for (int i = 0; i < data.length; i++) {
       data[i] += (double) i / data.length;
     }
@@ -827,14 +833,14 @@ public class ImageSourceTest {
   /**
    * Sum all the input arrays.
    *
-   * @param f the arrays
+   * @param arrays the arrays
    * @return The summed array
    */
-  private static float[] combine(float[]... f) {
-    final float[] all = Arrays.copyOf(f[0], f[0].length);
-    for (int i = 1; i < f.length; i++) {
+  private static float[] combine(float[]... arrays) {
+    final float[] all = Arrays.copyOf(arrays[0], arrays[0].length);
+    for (int i = 1; i < arrays.length; i++) {
       for (int j = 0; j < all.length; j++) {
-        all[j] += f[i][j];
+        all[j] += arrays[i][j];
       }
     }
     return all;

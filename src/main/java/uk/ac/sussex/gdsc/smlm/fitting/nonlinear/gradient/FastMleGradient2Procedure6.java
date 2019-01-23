@@ -44,7 +44,7 @@ public class FastMleGradient2Procedure6 extends FastMleGradient2Procedure {
    */
   public FastMleGradient2Procedure6(final double[] x, final Gradient2Function func) {
     super(x, func);
-    if (n != 6) {
+    if (numberOfGradients != 6) {
       throw new IllegalArgumentException("Function must compute 6 gradients");
     }
   }

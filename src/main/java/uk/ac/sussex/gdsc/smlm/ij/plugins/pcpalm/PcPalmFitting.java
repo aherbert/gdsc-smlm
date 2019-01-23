@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
@@ -237,10 +237,10 @@ public class PcPalmFitting implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAbove("Correlation distance", correlationDistance, 1);
-      Parameters.isAbove("Estimated precision", estimatedPrecision, 0);
-      Parameters.isAbove("Blinking_rate", blinkingRate, 0);
-      Parameters.isAbove("gr random threshold", gr_protein_threshold, 1);
+      ParameterUtils.isAbove("Correlation distance", correlationDistance, 1);
+      ParameterUtils.isAbove("Estimated precision", estimatedPrecision, 0);
+      ParameterUtils.isAbove("Blinking_rate", blinkingRate, 0);
+      ParameterUtils.isAbove("gr random threshold", gr_protein_threshold, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -343,9 +343,9 @@ public class PcPalmFitting implements PlugIn {
     for (int i = 0; i < results.size(); i++) {
       final CorrelationResult r = results.get(i);
       // If the PC-PALM Analysis has been done on too few molecules then the g(r) curve will be bad
-      if (r.n < 10) {
+      if (r.uniquePoints < 10) {
         header();
-        log("Excluding dataset ID %d - Too few unique points (%f)", r.id, r.n);
+        log("Excluding dataset ID %d - Too few unique points (%f)", r.id, r.uniquePoints);
         continue;
       }
       // If the PC-PALM Analysis has a g(r) curve all below 1 then it is not valid

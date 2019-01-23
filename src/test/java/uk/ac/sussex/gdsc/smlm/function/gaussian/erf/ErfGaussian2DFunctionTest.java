@@ -71,19 +71,19 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
   @Test
   public void factoryDefaultsToErfGaussian2DFunction() {
-    Gaussian2DFunction f;
+    Gaussian2DFunction f1;
     Gaussian2DFunction f2;
 
     final int flags2 = BitFlagUtils.unset(flags, GaussianFunctionFactory.FIT_ERF);
 
     if (this.f2 != null) {
-      f = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
+      f1 = GaussianFunctionFactory.create2D(2, maxx, maxy, flags, zModel);
       f2 = GaussianFunctionFactory.create2D(2, maxx, maxy, flags2, zModel);
-      Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
+      Assertions.assertTrue(f1.getClass() == f2.getClass(), "Incorrect function2");
     } else {
-      f = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
+      f1 = GaussianFunctionFactory.create2D(1, maxx, maxy, flags, zModel);
       f2 = GaussianFunctionFactory.create2D(1, maxx, maxy, flags2, zModel);
-      Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function1");
+      Assertions.assertTrue(f1.getClass() == f2.getClass(), "Incorrect function1");
     }
   }
 
@@ -144,7 +144,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     final int gradientIndex = findGradientIndex(f1, targetParameter);
     final double[] dyda = new double[f1.getNumberOfGradients()];
     final double[] dyda2 = new double[dyda.length];
-    double[] a;
+    double[] params;
 
     // Test fitting of second derivatives
     final ErfGaussian2DFunction f1a =
@@ -161,22 +161,23 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
-                  f1.initialise2(a);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  f1.initialise2(params);
 
                   // Numerically solve gradient.
                   // Calculate the step size h to be an exact numerical representation
-                  final double xx = a[targetParameter];
+                  final double xx = params[targetParameter];
 
                   // Get h to minimise roundoff error
                   final double h = Precision.representableDelta(xx, stepH);
 
                   // Evaluate at (x+h) and (x-h)
-                  a[targetParameter] = xx + h;
-                  f1a.initialise1(a.clone());
+                  params[targetParameter] = xx + h;
+                  f1a.initialise1(params.clone());
 
-                  a[targetParameter] = xx - h;
-                  f1b.initialise1(a.clone());
+                  params[targetParameter] = xx - h;
+                  f1b.initialise1(params.clone());
 
                   for (final int x : testx) {
                     for (final int y : testy) {
@@ -294,7 +295,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     final int gradientIndex = findGradientIndex(f2, targetParameter);
     final double[] dyda = new double[f2.getNumberOfGradients()];
     final double[] dyda2 = new double[dyda.length];
-    double[] a;
+    double[] params;
 
     // Test fitting of second derivatives
     final ErfGaussian2DFunction f2a =
@@ -318,23 +319,23 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                         for (final double cz2 : testcz2) {
                           for (final double[] w2 : testw2) {
                             for (final double angle2 : testangle2) {
-                              a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1],
-                                  angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
-                              f2.initialise2(a);
+                              params = createParameters(background, signal1, cx1, cy1, cz1, w1[0],
+                                  w1[1], angle1, signal2, cx2, cy2, cz2, w2[0], w2[1], angle2);
+                              f2.initialise2(params);
 
                               // Numerically solve gradient.
                               // Calculate the step size h to be an exact numerical representation
-                              final double xx = a[targetParameter];
+                              final double xx = params[targetParameter];
 
                               // Get h to minimise roundoff error
                               final double h = Precision.representableDelta(xx, stepH);
 
                               // Evaluate at (x+h) and (x-h)
-                              a[targetParameter] = xx + h;
-                              f2a.initialise1(a.clone());
+                              params[targetParameter] = xx + h;
+                              f2a.initialise1(params.clone());
 
-                              a[targetParameter] = xx - h;
-                              f2b.initialise1(a.clone());
+                              params[targetParameter] = xx - h;
+                              f2b.initialise1(params.clone());
 
                               for (final int x : testx) {
                                 for (final int y : testy) {
@@ -385,24 +386,24 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   private class FunctionTimingTask extends BaseTimingTask {
-    Gaussian2DFunction f;
+    Gaussian2DFunction f1;
     ErfGaussian2DFunction f2;
     double[][] x;
     int order;
     final double[] dyda;
     final double[] d2yda2;
-    final int n = f1.size();
+    final int size = f1.size();
 
-    public FunctionTimingTask(Gaussian2DFunction f, double[][] x, int order) {
-      super(f.getClass().getSimpleName() + " " + order + " eval");
-      this.f = f;
+    public FunctionTimingTask(Gaussian2DFunction f1, double[][] x, int order) {
+      super(f1.getClass().getSimpleName() + " " + order + " eval");
+      this.f1 = f1;
       if (order == 2) {
-        f2 = (ErfGaussian2DFunction) f;
+        f2 = (ErfGaussian2DFunction) f1;
       }
       this.x = x;
       this.order = order;
-      dyda = new double[f.getNumberOfGradients()];
-      d2yda2 = new double[f.getNumberOfGradients()];
+      dyda = new double[f1.getNumberOfGradients()];
+      d2yda2 = new double[f1.getNumberOfGradients()];
     }
 
     @Override
@@ -411,37 +412,37 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
 
     @Override
     public Object run(Object data) {
-      double s = 0;
-      f = f.copy();
+      double sum = 0;
+      f1 = f1.copy();
       if (order == 0) {
         for (int i = 0; i < x.length; i++) {
-          f.initialise0(x[i]);
-          for (int j = 0; j < n; j++) {
-            s += f.eval(j);
+          f1.initialise0(x[i]);
+          for (int j = 0; j < size; j++) {
+            sum += f1.eval(j);
           }
         }
       } else if (order == 1) {
         for (int i = 0; i < x.length; i++) {
-          f.initialise1(x[i]);
-          for (int j = 0; j < n; j++) {
-            s += f.eval(j, dyda);
+          f1.initialise1(x[i]);
+          for (int j = 0; j < size; j++) {
+            sum += f1.eval(j, dyda);
           }
         }
       } else {
         for (int i = 0; i < x.length; i++) {
           f2.initialise2(x[i]);
-          for (int j = 0; j < n; j++) {
-            s += f2.eval2(j, dyda, d2yda2);
+          for (int j = 0; j < size; j++) {
+            sum += f2.eval2(j, dyda, d2yda2);
           }
         }
       }
-      return s;
+      return sum;
     }
   }
 
@@ -456,7 +457,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
     final boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
-    final TurboList<double[]> params = new TurboList<>();
+    final TurboList<double[]> params1 = new TurboList<>();
     final TurboList<double[]> params2 = new TurboList<>();
     for (final double background : testbackground) {
       // Peak 1
@@ -466,16 +467,18 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  double[] a =
+                  double[] params =
                       createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
-                  params.add(a);
+                  params1.add(params);
                   if (zDepth) {
                     // Change to a standard free circular function
-                    a = a.clone();
-                    a[Gaussian2DFunction.X_SD] *= zModel.getSx(a[Gaussian2DFunction.Z_POSITION]);
-                    a[Gaussian2DFunction.Y_SD] *= zModel.getSy(a[Gaussian2DFunction.Z_POSITION]);
-                    a[Gaussian2DFunction.Z_POSITION] = 0;
-                    params2.add(a);
+                    params = params.clone();
+                    params[Gaussian2DFunction.X_SD] *=
+                        zModel.getSx(params[Gaussian2DFunction.Z_POSITION]);
+                    params[Gaussian2DFunction.Y_SD] *=
+                        zModel.getSy(params[Gaussian2DFunction.Z_POSITION]);
+                    params[Gaussian2DFunction.Z_POSITION] = 0;
+                    params2.add(params);
                   }
                 }
               }
@@ -484,7 +487,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
         }
       }
     }
-    final double[][] x = params.toArray(new double[params.size()][]);
+    final double[][] x = params1.toArray(new double[params1.size()][]);
     final double[][] x2 = (zDepth) ? params2.toArray(new double[params2.size()][]) : x;
 
     final int runs = 10000 / x.length;
@@ -546,56 +549,58 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
                   // Use procedures
                   f1.forEach(new ValueProcedure() {
-                    int i = 0;
+                    int index = 0;
 
                     @Override
                     public void execute(double value) {
-                      Assertions.assertEquals(values[i], value, 1e-10, "Value ValueProcedure");
-                      i++;
+                      Assertions.assertEquals(values[index], value, 1e-10, "Value ValueProcedure");
+                      index++;
                     }
                   });
 
                   f1.forEach(new Gradient1Procedure() {
-                    int i = 0;
+                    int index = 0;
 
                     @Override
                     public void execute(double value, double[] dyDa) {
-                      Assertions.assertEquals(values[i], value, 1e-10, "Value Gradient1Procedure");
-                      Assertions.assertArrayEquals(jacobian[i], dyDa, 1e-10,
+                      Assertions.assertEquals(values[index], value, 1e-10,
+                          "Value Gradient1Procedure");
+                      Assertions.assertArrayEquals(jacobian[index], dyDa, 1e-10,
                           "du_da Gradient1Procedure");
-                      i++;
+                      index++;
                     }
                   });
 
                   f1.forEach(new Gradient2Procedure() {
-                    int i = 0;
+                    int index = 0;
 
                     @Override
                     public void execute(double value, double[] dyDa, double[] d2yDa2) {
-                      Assertions.assertEquals(values[i], value, 1e-10, "Value Gradient2Procedure");
-                      Assertions.assertArrayEquals(jacobian[i], dyDa, 1e-10,
+                      Assertions.assertEquals(values[index], value, 1e-10,
+                          "Value Gradient2Procedure");
+                      Assertions.assertArrayEquals(jacobian[index], dyDa, 1e-10,
                           "du_da Gradient2Procedure");
-                      Assertions.assertArrayEquals(jacobian2[i], d2yDa2, 1e-10,
+                      Assertions.assertArrayEquals(jacobian2[index], d2yDa2, 1e-10,
                           "d2u_da2 Gradient2Procedure");
-                      i++;
+                      index++;
                     }
                   });
 
                   f1.forEach(new ExtendedGradient2Procedure() {
-                    int i = 0;
+                    int index = 0;
 
                     @Override
                     public void executeExtended(double value, double[] dyDa, double[] d2yDaDb) {
-                      Assertions.assertEquals(values[i], value, 1e-10,
+                      Assertions.assertEquals(values[index], value, 1e-10,
                           "Value ExtendedGradient2Procedure");
-                      Assertions.assertArrayEquals(jacobian[i], dyDa, 1e-10,
+                      Assertions.assertArrayEquals(jacobian[index], dyDa, 1e-10,
                           "du_da ExtendedGradient2Procedure");
                       for (int j = 0, k = 0; j < d2u_da2.length; j++, k += d2u_da2.length + 1) {
                         d2u_da2[j] = d2yDaDb[k];
                       }
-                      Assertions.assertArrayEquals(jacobian2[i], d2u_da2, 1e-10,
+                      Assertions.assertArrayEquals(jacobian2[index], d2u_da2, 1e-10,
                           "d2u_da2 Gradient2Procedure");
-                      i++;
+                      index++;
                     }
                   });
                 }
@@ -656,28 +661,28 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                   }
 
                   f1.forEach(new ExtendedGradient2Procedure() {
-                    int i = -1;
+                    int index = -1;
                     final double[] duDa = new double[f1.getNumberOfGradients()];
                     final double[] duDb = new double[f1.getNumberOfGradients()];
 
                     @Override
                     public void executeExtended(double value, double[] dyDa, double[] d2yDaDb) {
-                      i++;
+                      index++;
                       final DenseMatrix64F m = DenseMatrix64F.wrap(nparams, nparams, d2yDaDb);
                       for (int j = 0; j < nparams; j++) {
                         // Evaluate the function +/- delta for parameter j
-                        fHigh[j].eval(i, duDa);
-                        fLow[j].eval(i, duDb);
+                        fHigh[j].eval(index, duDa);
+                        fLow[j].eval(index, duDb);
                         // Check the gradient with respect to parameter k
                         for (int k = 0; k < nparams; k++) {
                           final double gradient = (duDa[k] - duDb[k]) / delta[j];
                           final boolean ok =
                               eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
                           if (!ok) {
-                            logger.log(TestLogUtils.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f", i,
-                                j, k, gradient, m.get(j, k)));
-                            Assertions.fail(String.format("%d [%d,%d] %f != %f", i, j, k, gradient,
-                                m.get(j, k)));
+                            logger.log(TestLogUtils.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
+                                index, j, k, gradient, m.get(j, k)));
+                            Assertions.fail(String.format("%d [%d,%d] %f != %f", index, j, k,
+                                gradient, m.get(j, k)));
                           }
                         }
                       }
@@ -740,63 +745,65 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
                               // Use procedures
                               f2.forEach(new ValueProcedure() {
-                                int i = 0;
+                                int index = 0;
 
                                 @Override
                                 public void execute(double value) {
-                                  Assertions.assertEquals(values[i], value, 1e-10,
+                                  Assertions.assertEquals(values[index], value, 1e-10,
                                       "Value ValueProcedure");
-                                  i++;
+                                  index++;
                                 }
                               });
 
                               f2.forEach(new Gradient1Procedure() {
-                                int i = 0;
+                                int index = 0;
 
                                 @Override
                                 public void execute(double value, double[] dyDa) {
-                                  Assertions.assertEquals(values[i], value, 1e-10,
+                                  Assertions.assertEquals(values[index], value, 1e-10,
                                       "Value Gradient1Procedure");
-                                  Assertions.assertArrayEquals(jacobian[i], dyDa, 1e-10,
+                                  Assertions.assertArrayEquals(jacobian[index], dyDa, 1e-10,
                                       "du_da Gradient1Procedure");
-                                  i++;
+                                  index++;
                                 }
                               });
 
                               f2.forEach(new Gradient2Procedure() {
-                                int i = 0;
+                                int index = 0;
 
                                 @Override
                                 public void execute(double value, double[] dyDa, double[] d2yDa2) {
-                                  Assertions.assertEquals(values[i], value, 1e-10,
+                                  Assertions.assertEquals(values[index], value, 1e-10,
                                       "Value Gradient2Procedure");
-                                  Assertions.assertArrayEquals(jacobian[i], dyDa, 1e-10,
+                                  Assertions.assertArrayEquals(jacobian[index], dyDa, 1e-10,
                                       "du_da Gradient2Procedure");
-                                  Assertions.assertArrayEquals(jacobian2[i], d2yDa2, 1e-10,
+                                  Assertions.assertArrayEquals(jacobian2[index], d2yDa2, 1e-10,
                                       "d2u_da2 Gradient2Procedure");
-                                  i++;
+                                  index++;
                                 }
                               });
 
                               f2.forEach(new ExtendedGradient2Procedure() {
-                                int i = 0;
+                                int index = 0;
 
                                 @Override
                                 public void executeExtended(double value, double[] dyDa,
                                     double[] d2yDaDb) {
                                   Assertions.assertEquals(
 
-                                      values[i], value, 1e-10, "Value ExtendedGradient2Procedure");
+                                      values[index], value, 1e-10,
+                                      "Value ExtendedGradient2Procedure");
                                   Assertions.assertArrayEquals(
 
-                                      jacobian[i], dyDa, 1e-10, "du_da ExtendedGradient2Procedure");
+                                      jacobian[index], dyDa, 1e-10,
+                                      "du_da ExtendedGradient2Procedure");
                                   for (int j = 0, k = 0; j < d2u_da2.length;
                                       j++, k += d2u_da2.length + 1) {
                                     d2u_da2[j] = d2yDaDb[k];
                                   }
-                                  Assertions.assertArrayEquals(jacobian2[i], d2u_da2, 1e-10,
+                                  Assertions.assertArrayEquals(jacobian2[index], d2u_da2, 1e-10,
                                       "d2u_da2 Gradient2Procedure");
-                                  i++;
+                                  index++;
                                 }
                               });
                             }
@@ -1028,7 +1035,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
 
@@ -1096,7 +1103,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   @Test
   public void functionCanComputeIntegral() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
-    double[] a;
+    double[] params;
     for (final double background : testbackground) {
       // Peak 1
       for (final double signal1 : testsignal1) {
@@ -1105,9 +1112,10 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
             for (final double cz1 : testcz1) {
               for (final double[] w1 : testw1) {
                 for (final double angle1 : testangle1) {
-                  a = createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
-                  final double e = new IntegralValueProcedure().getIntegral(f1, a);
-                  final double o = f1.integral(a);
+                  params =
+                      createParameters(background, signal1, cx1, cy1, cz1, w1[0], w1[1], angle1);
+                  final double e = new IntegralValueProcedure().getIntegral(f1, params);
+                  final double o = f1.integral(params);
                   TestAssertions.assertTest(e, o, predicate);
                 }
               }

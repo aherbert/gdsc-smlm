@@ -37,7 +37,7 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
   private static final int[] gradientIndices = new int[] {0, 1, 2, 3, 4};
 
   /** The single target spline. */
-  private final TargetSpline t;
+  private final TargetSpline targetSpline;
 
   /**
    * The working spline for the current evaluation. This is null if the point is outside the target
@@ -56,7 +56,8 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
    */
   public SingleCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy) {
     super(splineData, maxx, maxy);
-    t = (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
+    targetSpline =
+        (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
   }
 
   /**
@@ -75,7 +76,8 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
   public SingleCubicSplineFunction(CubicSplineData splineData, int maxx, int maxy, double cx,
       double cy, double cz, int scale) {
     super(splineData, maxx, maxy, cx, cy, cz, scale);
-    t = (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
+    targetSpline =
+        (splines[0][0].isSinglePrecision()) ? new FloatTargetSpline() : new DoubleTargetSpline();
   }
 
   @Override
@@ -94,10 +96,11 @@ public class SingleCubicSplineFunction extends CubicSplineFunction {
   }
 
   @Override
-  protected void initialise(double[] a, int order) {
-    tb = a[PeakResult.BACKGROUND];
-    working = (t.initialise(0, a[PeakResult.INTENSITY], a[PeakResult.X], a[PeakResult.Y],
-        a[PeakResult.Z], order)) ? t : null;
+  protected void initialise(double[] parameters, int order) {
+    tb = parameters[PeakResult.BACKGROUND];
+    working =
+        (targetSpline.initialise(0, parameters[PeakResult.INTENSITY], parameters[PeakResult.X],
+            parameters[PeakResult.Y], parameters[PeakResult.Z], order)) ? targetSpline : null;
   }
 
   @Override

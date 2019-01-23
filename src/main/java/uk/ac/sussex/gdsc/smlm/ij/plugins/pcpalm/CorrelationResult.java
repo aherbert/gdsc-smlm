@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 /**
  * Used to store the correlation (g(r)) result for the PC-PALM analysis.
  */
-public class CorrelationResult implements Comparable<CorrelationResult> {
+public class CorrelationResult {
   /** The id. */
   public int id;
 
@@ -55,7 +55,7 @@ public class CorrelationResult implements Comparable<CorrelationResult> {
   public double peakDensity;
 
   /** The number of unique points. */
-  public double n;
+  public double uniquePoints;
 
   /**
    * Set to true if pixels in the image have a 1/0 value. Otherwise it is assumed the image has
@@ -95,7 +95,7 @@ public class CorrelationResult implements Comparable<CorrelationResult> {
     this.miny = miny;
     this.maxx = maxx;
     this.maxy = maxy;
-    this.n = uniquePoints;
+    this.uniquePoints = uniquePoints;
     this.nmPerPixel = nmPerPixel;
     this.peakDensity = peakDensity;
     this.binaryImage = binaryImage;
@@ -103,8 +103,14 @@ public class CorrelationResult implements Comparable<CorrelationResult> {
     this.spatialDomain = spatialDomain;
   }
 
-  @Override
-  public int compareTo(CorrelationResult o) {
-    return Integer.compare(id, o.id);
+  /**
+   * Compare the results using the Id.
+   *
+   * @param r1 the first result
+   * @param r2 the second result
+   * @return the comparison (-1, 0, or 1)
+   */
+  public static int compare(CorrelationResult r1, CorrelationResult r2) {
+    return Integer.compare(r1.id, r2.id);
   }
 }

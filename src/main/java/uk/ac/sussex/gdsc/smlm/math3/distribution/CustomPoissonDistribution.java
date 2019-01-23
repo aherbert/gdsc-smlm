@@ -59,7 +59,7 @@ import org.apache.commons.math3.util.MathUtils;
  *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
- * @see <a href="http://mathworld.wolfram.com/CustomPoissonDistribution.html">Poisson distribution
+ * @see <a href="http://mathworld.wolfram.com/PoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
  * @deprecated Superseded by commons-rng package
  */

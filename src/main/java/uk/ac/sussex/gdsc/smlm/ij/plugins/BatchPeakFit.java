@@ -170,11 +170,11 @@ public class BatchPeakFit implements PlugIn {
    * document to the xmlSettings.
    *
    * @param parameters The list of parameters
-   * @param i Parameter to process
+   * @param index Parameter to process
    * @param doc The XML document containing all the current parameters
    * @param xmlSettings A list of XML parameter settings
    */
-  private void setParameters(ArrayList<ParameterSettings> parameters, int i, Document doc,
+  private void setParameters(ArrayList<ParameterSettings> parameters, int index, Document doc,
       ArrayList<String> xmlSettings) {
     // For all the fields within Calibration, PSF, FitEngineSettings
     // print out the field name and default value. The FitEngineSettings has to
@@ -186,8 +186,8 @@ public class BatchPeakFit implements PlugIn {
     // FieldDescriptor fd = d.findFieldByNumber(0);
     // fd.
 
-    if (i < parameters.size()) {
-      final ParameterSettings param = parameters.get(i);
+    if (index < parameters.size()) {
+      final ParameterSettings param = parameters.get(index);
       final NodeList nodes = doc.getElementsByTagName(param.name);
       if (nodes.getLength() == 1) {
         // For each value, set the parameter and move to the next
@@ -195,11 +195,11 @@ public class BatchPeakFit implements PlugIn {
         for (final String value : values) {
           final Node node = nodes.item(0);
           node.setTextContent(value);
-          setParameters(parameters, i + 1, doc, xmlSettings);
+          setParameters(parameters, index + 1, doc, xmlSettings);
         }
       } else {
         // Just move to the next parameter
-        setParameters(parameters, i + 1, doc, xmlSettings);
+        setParameters(parameters, index + 1, doc, xmlSettings);
       }
     } else {
       // Add the final XML to the parameters to run

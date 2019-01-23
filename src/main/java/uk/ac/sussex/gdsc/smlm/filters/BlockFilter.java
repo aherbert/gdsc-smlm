@@ -293,25 +293,26 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 2w+1 size block around each point. Only pixels with a full block
    * are processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
   public void stripedBlockFilterInternal(float[] data, final int maxx, final int maxy,
-      final float w) {
-    if (w <= 1) {
-      stripedBlockFilter3x3Internal(data, maxx, maxy, w);
-    } else if (w <= 2) {
-      stripedBlockFilter5x5Internal(data, maxx, maxy, w);
-    } else if (w <= 3) {
-      stripedBlockFilter7x7Internal(data, maxx, maxy, w);
+      final float weight) {
+    if (weight <= 1) {
+      stripedBlockFilter3x3Internal(data, maxx, maxy, weight);
+    } else if (weight <= 2) {
+      stripedBlockFilter5x5Internal(data, maxx, maxy, weight);
+    } else if (weight <= 3) {
+      stripedBlockFilter7x7Internal(data, maxx, maxy, weight);
     } else {
-      stripedBlockFilterNxNInternal(data, maxx, maxy, w);
+      stripedBlockFilterNxNInternal(data, maxx, maxy, weight);
     }
   }
 
@@ -370,18 +371,20 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 2w+1 size block around each point. Only pixels with a full block
    * are processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  void stripedBlockFilterNxNInternal(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  void stripedBlockFilterNxNInternal(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -399,9 +402,9 @@ public abstract class BlockFilter extends BaseWeightedFilter {
 
     final int blockSize = 2 * n1;
 
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -486,21 +489,23 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 3x3 size block around each point. Only pixels with a full block are
    * processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, weight*weight], [weight, 1, weight], [weight*weight, weight,
+   * weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  void stripedBlockFilter3x3Internal(float[] data, final int maxx, final int maxy, final float w) {
+  void stripedBlockFilter3x3Internal(float[] data, final int maxx, final int maxy,
+      final float weight) {
     if (maxx < 3 || maxy < 3) {
       return;
     }
 
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -512,7 +517,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       int index = y * maxx;
       int index2 = maxy + y;
       for (int x = 0; x <= maxx - 3; x++, index++) {
-        buffer[index2] = w * (wdata[index] + wdata[index + 2]) + wdata[index + 1];
+        buffer[index2] = weight * (wdata[index] + wdata[index + 2]) + wdata[index + 1];
         index2 += maxy;
       }
     }
@@ -524,7 +529,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       int index2 = x + maxx;
       for (int y = 0; y <= maxy - 3; y++, index++) {
         data[index2] = normaliser
-            .normalise(w * (buffer[index] + buffer[index + 2]) + buffer[index + 1], index2);
+            .normalise(weight * (buffer[index] + buffer[index + 2]) + buffer[index + 1], index2);
         index2 += maxx;
       }
     }
@@ -580,23 +585,25 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 5x5 size block around each point. Only pixels with a full block are
    * processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 1 and 2)
+   * @param weight The weight (should be between 1 and 2)
    */
-  void stripedBlockFilter5x5Internal(float[] data, final int maxx, final int maxy, final float w) {
+  void stripedBlockFilter5x5Internal(float[] data, final int maxx, final int maxy,
+      final float weight) {
     if (maxx < 5 || maxy < 5) {
       return;
     }
 
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
-    final float w1 = (w < 2) ? w - (int) w : 1;
+    final float w1 = (weight < 2) ? weight - (int) weight : 1;
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -678,23 +685,25 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 7x7 size block around each point. Only pixels with a full block are
    * processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 2 and 3)
+   * @param weight The weight (should be between 2 and 3)
    */
-  void stripedBlockFilter7x7Internal(float[] data, final int maxx, final int maxy, final float w) {
+  void stripedBlockFilter7x7Internal(float[] data, final int maxx, final int maxy,
+      final float weight) {
     if (maxx < 7 || maxy < 7) {
       return;
     }
 
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
-    final float w1 = (w < 3) ? w - (int) w : 1;
+    final float w1 = (weight < 3) ? weight - (int) weight : 1;
 
     // NOTE:
     // To increase speed when sweeping the arrays:
@@ -750,20 +759,22 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 2w+1 size block around each point. Only pixels with a full block
    * are processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockFilterInternal(float[] data, final int maxx, final int maxy, final float w) {
-    if (w < 1) {
-      blockFilter3x3Internal(data, maxx, maxy, w);
+  public void blockFilterInternal(float[] data, final int maxx, final int maxy,
+      final float weight) {
+    if (weight < 1) {
+      blockFilter3x3Internal(data, maxx, maxy, weight);
     } else {
-      blockFilterNxNInternal(data, maxx, maxy, w);
+      blockFilterNxNInternal(data, maxx, maxy, weight);
     }
   }
 
@@ -822,18 +833,19 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the filter within a 2w+1 size block around each point. Only pixels with a full block
    * are processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  void blockFilterNxNInternal(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  void blockFilterNxNInternal(float[] data, final int maxx, final int maxy, final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -849,7 +861,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       return;
     }
 
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
     // Boundary control
     final int xwidth = n1;
@@ -873,26 +885,26 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     }
 
     // Edges
-    int j = 0;
+    int offsetIndex = 0;
     final int size = 2 * ((2 * xwidth - 1) + (2 * ywidth - 1));
     final int[] xoffset1 = new int[size];
     final int[] yoffset1 = new int[size];
     final int[] offset1 = new int[size];
     for (int y = -ywidth + 1; y < ywidth; y++) {
-      yoffset1[j] = yoffset1[j + 1] = y;
-      xoffset1[j] = -xwidth;
-      xoffset1[j + 1] = xwidth;
-      offset1[j] = maxx * y - xwidth;
-      offset1[j + 1] = maxx * y + xwidth;
-      j += 2;
+      yoffset1[offsetIndex] = yoffset1[offsetIndex + 1] = y;
+      xoffset1[offsetIndex] = -xwidth;
+      xoffset1[offsetIndex + 1] = xwidth;
+      offset1[offsetIndex] = maxx * y - xwidth;
+      offset1[offsetIndex + 1] = maxx * y + xwidth;
+      offsetIndex += 2;
     }
     for (int x = -xwidth + 1; x < xwidth; x++) {
-      xoffset1[j] = xoffset1[j + 1] = x;
-      yoffset1[j] = -ywidth;
-      yoffset1[j + 1] = ywidth;
-      offset1[j] = maxx * -ywidth + x;
-      offset1[j + 1] = maxx * ywidth + x;
-      j += 2;
+      xoffset1[offsetIndex] = xoffset1[offsetIndex + 1] = x;
+      yoffset1[offsetIndex] = -ywidth;
+      yoffset1[offsetIndex + 1] = ywidth;
+      offset1[offsetIndex] = maxx * -ywidth + x;
+      offset1[offsetIndex + 1] = maxx * ywidth + x;
+      offsetIndex += 2;
     }
 
     // Corners
@@ -903,7 +915,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
     }
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
     final float w2 = w1 * w1;
     for (int y = n1; y < ylimit; y++) {
       int index = y * maxx + n1;
@@ -970,19 +982,20 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * Compute the weighted filter within a 3x3 size block around each point. Only pixels with a full
    * block are processed. Pixels within border regions are unchanged.
    *
-   * <p>Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, weight*weight], [weight, 1, weight], [weight*weight, weight,
+   * weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  void blockFilter3x3Internal(float[] data, final int maxx, final int maxy, final float w) {
-    final float[] wdata = initialise(data, maxx, maxy, w, true);
+  void blockFilter3x3Internal(float[] data, final int maxx, final int maxy, final float weight) {
+    final float[] wdata = initialise(data, maxx, maxy, weight, true);
 
-    final float w2 = w * w;
+    final float w2 = weight * weight;
 
     for (int y = 1; y < maxy - 1; y++) {
       int index0 = (y - 1) * maxx + 1;
@@ -995,7 +1008,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
         final double sum2 =
             wdata[index0 - 1] + wdata[index0 + 1] + wdata[index2 - 1] + wdata[index2 + 1];
 
-        buffer[index1] = (float) (wdata[index1] + sum1 * w + sum2 * w2);
+        buffer[index1] = (float) (wdata[index1] + sum1 * weight + sum2 * w2);
         index0++;
         index1++;
         index2++;
@@ -1238,24 +1251,25 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 2w+1 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void stripedBlockFilter(float[] data, final int maxx, final int maxy, final float w) {
-    if (w <= 1) {
-      stripedBlockFilter3x3(data, maxx, maxy, w);
-    } else if (w <= 2) {
-      stripedBlockFilter5x5(data, maxx, maxy, w);
-    } else if (w <= 3) {
-      stripedBlockFilter7x7(data, maxx, maxy, w);
+  public void stripedBlockFilter(float[] data, final int maxx, final int maxy, final float weight) {
+    if (weight <= 1) {
+      stripedBlockFilter3x3(data, maxx, maxy, weight);
+    } else if (weight <= 2) {
+      stripedBlockFilter5x5(data, maxx, maxy, weight);
+    } else if (weight <= 3) {
+      stripedBlockFilter7x7(data, maxx, maxy, weight);
     } else {
-      stripedBlockFilterNxN(data, maxx, maxy, w);
+      stripedBlockFilterNxN(data, maxx, maxy, weight);
     }
   }
 
@@ -1334,18 +1348,19 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 2w+1 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  void stripedBlockFilterNxN(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  void stripedBlockFilterNxN(float[] data, final int maxx, final int maxy, final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -1355,9 +1370,9 @@ public abstract class BlockFilter extends BaseWeightedFilter {
 
     final int blockSize = 2 * n1;
 
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1480,17 +1495,18 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 3x3 size block around each point.
    *
-   * <p>Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, weight*weight], [weight, 1, weight], [weight*weight, weight,
+   * weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  void stripedBlockFilter3x3(float[] data, final int maxx, final int maxy, final float w) {
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+  void stripedBlockFilter3x3(float[] data, final int maxx, final int maxy, final float weight) {
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1511,7 +1527,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       for (int x = 0; x < width; x++) {
         // Sum strips
         // Store result in transpose
-        outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+        outData[centreIndex] = weight * (row[x] + row[x + 2]) + row[x + 1];
         centreIndex += height;
       }
     }
@@ -1532,7 +1548,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
         // Sum strips
         // Store result in transpose
         outData[centreIndex] =
-            normaliser.normalise(w * (row[x] + row[x + 2]) + row[x + 1], centreIndex);
+            normaliser.normalise(weight * (row[x] + row[x + 2]) + row[x + 1], centreIndex);
         centreIndex += height;
       }
     }
@@ -1599,19 +1615,20 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 5x5 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 1 and 2)
+   * @param weight The weight (should be between 1 and 2)
    */
-  void stripedBlockFilter5x5(float[] data, final int maxx, final int maxy, final float w) {
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+  void stripedBlockFilter5x5(float[] data, final int maxx, final int maxy, final float weight) {
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
-    final float w1 = (w < 2) ? w - (int) w : 1;
+    final float w1 = (weight < 2) ? weight - (int) weight : 1;
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1722,19 +1739,20 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 7x7 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight (should be between 2 and 3)
+   * @param weight The weight (should be between 2 and 3)
    */
-  void stripedBlockFilter7x7(float[] data, final int maxx, final int maxy, final float w) {
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+  void stripedBlockFilter7x7(float[] data, final int maxx, final int maxy, final float weight) {
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
-    final float w1 = (w < 3) ? w - (int) w : 1;
+    final float w1 = (weight < 3) ? weight - (int) weight : 1;
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -1857,20 +1875,21 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 2w+1 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void blockFilter(float[] data, final int maxx, final int maxy, final float w) {
-    if (w < 1) {
-      blockFilter3x3(data, maxx, maxy, w);
+  public void blockFilter(float[] data, final int maxx, final int maxy, final float weight) {
+    if (weight < 1) {
+      blockFilter3x3(data, maxx, maxy, weight);
     } else {
-      blockFilterNxN(data, maxx, maxy, w);
+      blockFilterNxN(data, maxx, maxy, weight);
     }
   }
 
@@ -1949,18 +1968,19 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the filter within a 2w+1 size block around each point.
    *
-   * <p>Uses a [[w*w, w, ..., w, w*w], [w, 1, ..., 1, w], [w*w, w, ..., w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, ..., weight, weight*weight], [weight, 1, ..., 1, weight],
+   * [weight*weight, weight, ..., weight, weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  void blockFilterNxN(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  void blockFilterNxN(float[] data, final int maxx, final int maxy, final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -1968,7 +1988,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       return;
     }
 
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
     // Boundary control
     final int xwidth = FastMath.min(n1, maxx - 1);
@@ -1992,26 +2012,26 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     }
 
     // Edges
-    int j = 0;
+    int offsetIndex = 0;
     final int size = 2 * ((2 * xwidth - 1) + (2 * ywidth - 1));
     final int[] xoffset1 = new int[size];
     final int[] yoffset1 = new int[size];
     final int[] offset1 = new int[size];
     for (int y = -ywidth + 1; y < ywidth; y++) {
-      yoffset1[j] = yoffset1[j + 1] = y;
-      xoffset1[j] = -xwidth;
-      xoffset1[j + 1] = xwidth;
-      offset1[j] = maxx * y - xwidth;
-      offset1[j + 1] = maxx * y + xwidth;
-      j += 2;
+      yoffset1[offsetIndex] = yoffset1[offsetIndex + 1] = y;
+      xoffset1[offsetIndex] = -xwidth;
+      xoffset1[offsetIndex + 1] = xwidth;
+      offset1[offsetIndex] = maxx * y - xwidth;
+      offset1[offsetIndex + 1] = maxx * y + xwidth;
+      offsetIndex += 2;
     }
     for (int x = -xwidth + 1; x < xwidth; x++) {
-      xoffset1[j] = xoffset1[j + 1] = x;
-      yoffset1[j] = -ywidth;
-      yoffset1[j + 1] = ywidth;
-      offset1[j] = maxx * -ywidth + x;
-      offset1[j + 1] = maxx * ywidth + x;
-      j += 2;
+      xoffset1[offsetIndex] = xoffset1[offsetIndex + 1] = x;
+      yoffset1[offsetIndex] = -ywidth;
+      yoffset1[offsetIndex + 1] = ywidth;
+      offset1[offsetIndex] = maxx * -ywidth + x;
+      offset1[offsetIndex + 1] = maxx * ywidth + x;
+      offsetIndex += 2;
     }
 
     // Corners
@@ -2022,7 +2042,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
     }
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
     final float w2 = w1 * w1;
     int index = 0;
     for (int y = 0; y < maxy; y++) {
@@ -2185,17 +2205,18 @@ public abstract class BlockFilter extends BaseWeightedFilter {
   /**
    * Compute the weighted filter within a 3x3 size block around each point.
    *
-   * <p>Uses a [[w*w, w, w*w], [w, 1, w], [w*w, w, w*w]] convolution kernel.
+   * <p>Uses a [[weight*weight, weight, weight*weight], [weight, 1, weight], [weight*weight, weight,
+   * weight*weight]] convolution kernel.
    *
    * <p>Note: the input data is destructively modified.
    *
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  void blockFilter3x3(float[] data, final int maxx, final int maxy, final float w) {
-    final float[] wdata = initialise(data, maxx, maxy, w, false);
+  void blockFilter3x3(float[] data, final int maxx, final int maxy, final float weight) {
+    final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
     // Boundary control
     final int xlimit = maxx - 1;
@@ -2208,7 +2229,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     final int[] xoffset2 = new int[] {-1, -1, 1, 1};
     final int[] yoffset2 = new int[] {-1, 1, -1, 1};
 
-    final float w2 = w * w;
+    final float w2 = weight * weight;
 
     for (int y = 0; y < maxy; y++) {
       int index0 = (y - 1) * maxx;
@@ -2262,7 +2283,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
             sum2 += wdata[xx + yy * maxx];
           }
         }
-        buffer[index1] = (float) (wdata[index1] + sum1 * w + sum2 * w2);
+        buffer[index1] = (float) (wdata[index1] + sum1 * weight + sum2 * w2);
 
         index0++;
         index1++;

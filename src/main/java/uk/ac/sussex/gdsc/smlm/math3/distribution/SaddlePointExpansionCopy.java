@@ -22,30 +22,18 @@ import org.apache.commons.math3.util.MathUtils;
 //@formatter:off
 
 /**
- *
-*
-* <p>
- * <strong>Note:</strong> This class has been directly copied from
- * {@code org.apache.commons.math3.distribution} for use in the {@link CustomPoissonDistribution}.
- *
-*
-* <p>
- *
-*
-* <p>
+ * <p>
  * Utility class used by various distributions to accurately compute their
  * respective probability mass functions. The implementation for this class is
  * based on the Catherine Loader's <a target="_blank"
  * href="http://www.herine.net/stat/software/dbinom.html">dbinom</a> routines.
  * </p>
  *
-*
-* <p>
+ * <p>
  * This class is not intended to be called directly.
  * </p>
  *
-*
-* <p>
+ * <p>
  * References:
  * <ol>
  * <li>Catherine Loader (2000). "Fast and Accurate Computation of Binomial
@@ -55,7 +43,11 @@ import org.apache.commons.math3.util.MathUtils;
  * </ol>
  * </p>
  *
- * @since 2.1
+ * <p>
+ * <strong>Note:</strong> This class has been copied from
+ * {@code org.apache.commons.math3.distribution} for use in the {@link FastPoissonDistribution}.
+ * A copy is required since the original version is package private.
+ * </p>
  */
 final class SaddlePointExpansionCopy {
 
@@ -106,8 +98,7 @@ final class SaddlePointExpansionCopy {
     /**
      * Compute the error of Stirling's series at the given value.
      *
-*
-* <p>
+     * <p>
      * References:
      * <ol>
      * <li>Eric W. Weisstein. "Stirling's Series." From MathWorld--A Wolfram Web
@@ -118,7 +109,7 @@ final class SaddlePointExpansionCopy {
      * </p>
      *
      * @param z the value.
-     * @return the Striling's series error.
+     * @return the Stirling's series error.
      */
     static double getStirlingError(double z) {
         double ret;
@@ -145,8 +136,7 @@ final class SaddlePointExpansionCopy {
     /**
      * A part of the deviance portion of the saddle point approximation.
      *
-*
-* <p>
+     * <p>
      * References:
      * <ol>
      * <li>Catherine Loader (2000). "Fast and Accurate Computation of Binomial

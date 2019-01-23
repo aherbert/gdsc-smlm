@@ -24,17 +24,30 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import java.io.PrintStream;
+
 /**
  * Allow the position of executing code to be reported.
  */
-public class CodeReporter {
+public final class CodeReporterUtils {
   /**
-   * Print the classname, methodname and line number from the throwable.
-   *
-   * @param t the throwable
+   * No public constructor.
    */
-  public static void debug(Throwable t) {
-    final StackTraceElement e = t.getStackTrace()[0];
-    System.err.printf("%s:%s:%d\n", e.getClassName(), e.getMethodName(), e.getLineNumber());
+  private CodeReporterUtils() {}
+
+  /**
+   * Print the class name, method name and line number from the first element of the throwable's
+   * stack trace to the output.
+   *
+   * @param throwable the throwable
+   * @param out the out
+   * @see Throwable#getStackTrace()
+   * @see StackTraceElement#getClassName()
+   * @see StackTraceElement#getMethodName()
+   * @see StackTraceElement#getLineNumber()
+   */
+  public static void report(Throwable throwable, PrintStream out) {
+    final StackTraceElement e = throwable.getStackTrace()[0];
+    out.printf("%s:%s:%d%n", e.getClassName(), e.getMethodName(), e.getLineNumber());
   }
 }

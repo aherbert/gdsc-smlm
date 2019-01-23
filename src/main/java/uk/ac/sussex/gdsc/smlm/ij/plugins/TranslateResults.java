@@ -85,32 +85,29 @@ public class TranslateResults implements PlugIn {
       return;
     }
 
-    TypeConverter<DistanceUnit> c;
+    TypeConverter<DistanceUnit> converter;
     try {
-      c = results.getDistanceConverter(settings.getDistanceUnit());
+      converter = results.getDistanceConverter(settings.getDistanceUnit());
     } catch (final DataException ex) {
       IJ.error(TITLE, "Unit conversion error: " + ex.getMessage());
       return;
     }
 
-    final float x = (float) c.convertBack(settings.getDx());
-    final float y = (float) c.convertBack(settings.getDy());
-    final float z = (float) c.convertBack(settings.getDz());
+    final float x = (float) converter.convertBack(settings.getDx());
+    final float y = (float) converter.convertBack(settings.getDy());
+    final float z = (float) converter.convertBack(settings.getDz());
 
     // Reset the 2D bounds
     if (x != 0 || y != 0) {
       results.setBounds(null);
     }
 
-    results.forEach(new PeakResultProcedure() {
-      @Override
-      public void execute(PeakResult peakResult) {
-        // Requires a direct reference!
-        final float[] params = peakResult.getParameters();
-        params[PeakResult.X] += x;
-        params[PeakResult.Y] += y;
-        params[PeakResult.Z] += z;
-      }
+    results.forEach((PeakResultProcedure) peakResult -> {
+      // Requires a direct reference!
+      final float[] params = peakResult.getParameters();
+      params[PeakResult.X] += x;
+      params[PeakResult.Y] += y;
+      params[PeakResult.Z] += z;
     });
   }
 }

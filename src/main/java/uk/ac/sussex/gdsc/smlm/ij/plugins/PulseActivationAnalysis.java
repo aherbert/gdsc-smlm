@@ -38,6 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -99,6 +100,8 @@ import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed
@@ -159,7 +162,7 @@ public class PulseActivationAnalysis
     return rdg;
   }
 
-  private static int[] sim_nMolecules = {1000, 1000, 1000};
+  private static int[] sim_numberOfMolecules = {1000, 1000, 1000};
   private static SimulationDistribution[] sim_distribution =
       {SimulationDistribution.CIRCLE, SimulationDistribution.LINE, SimulationDistribution.POINT};
   private static double[] sim_precision = {15, 15, 15}; // nm
@@ -637,8 +640,8 @@ public class PulseActivationAnalysis
         MathUtils.rounded((double) count / numberOfFrames));
   }
 
-  private static int getChannel(PeakResult p) {
-    return getChannel(p.getFrame());
+  private static int getChannel(PeakResult result) {
+    return getChannel(result.getFrame());
   }
 
   private static int getChannel(int frame) {
@@ -779,23 +782,23 @@ public class PulseActivationAnalysis
    * activated by a pulse from channel M is activated by a pulse from channel N. A value less than 1
    * is expected (otherwise the fluorophore is not being specifically activated by channel M).
    *
-   * @param D1 the observed density in channel 1
-   * @param D2 the observed density in channel 2
-   * @param C21 the crosstalk from channel 2 into channel 1
-   * @param C12 the crosstalk from channel 1 into channel 2
+   * @param od1 the observed density in channel 1
+   * @param od2 the observed density in channel 2
+   * @param c21 the crosstalk from channel 2 into channel 1
+   * @param c12 the crosstalk from channel 1 into channel 2
    * @return the actual densities [d1, d2]
    */
-  public static double[] unmix(double D1, double D2, double C21, double C12) {
+  public static double[] unmix(double od1, double od2, double c21, double c12) {
     // Solve the equations:
-    // D1 = d1 + C21 * d2
-    // D2 = d2 + C12 * d1
+    // od1 = d1 + c21 * d2
+    // od2 = d2 + c12 * d1
     // This is done by direct substitution
-    final double d1 = (D1 - C21 * D2) / (1 - C12 * C21);
-    final double d2 = D2 - C12 * d1;
-    // Assuming D1 and D2 are positive and C12 and C21 are
+    final double d1 = (od1 - c21 * od2) / (1 - c12 * c21);
+    final double d2 = od2 - c12 * d1;
+    // Assuming od1 and od2 are positive and c12 and c21 are
     // between 0 and 1 then we do not need to check the bounds.
-    // d1 = Maths.clip(0, D1, d1);
-    // d2 = Maths.clip(0, D2, d2);
+    // d1 = Maths.clip(0, od1, d1);
+    // d2 = Maths.clip(0, od2, d2);
     return new double[] {d1, d2};
   }
 
@@ -806,34 +809,36 @@ public class PulseActivationAnalysis
    * activated by a pulse from channel M is activated by a pulse from channel N. A value less than 1
    * is expected (otherwise the fluorophore is not being specifically activated by channel M).
    *
-   * @param D1 the observed density in channel 1
-   * @param D2 the observed density in channel 2
-   * @param D3 the observed density in channel 3
-   * @param C21 the crosstalk from channel 2 into channel 1
-   * @param C31 the crosstalk from channel 3 into channel 1
-   * @param C12 the crosstalk from channel 1 into channel 2
-   * @param C32 the crosstalk from channel 3 into channel 2
-   * @param C13 the crosstalk from channel 1 into channel 3
-   * @param C23 the crosstalk from channel 2 into channel 3
+   * @param od1 the observed density in channel 1
+   * @param od2 the observed density in channel 2
+   * @param od3 the observed density in channel 3
+   * @param c21 the crosstalk from channel 2 into channel 1
+   * @param c31 the crosstalk from channel 3 into channel 1
+   * @param c12 the crosstalk from channel 1 into channel 2
+   * @param c32 the crosstalk from channel 3 into channel 2
+   * @param c13 the crosstalk from channel 1 into channel 3
+   * @param c23 the crosstalk from channel 2 into channel 3
    * @return the actual densities [d1, d2, d3]
    */
-  public static double[] unmix(double D1, double D2, double D3, double C21, double C31, double C12,
-      double C32, double C13, double C23) {
+  public static double[] unmix(double od1, double od2, double od3, double c21, double c31,
+      double c12, double c32, double c13, double c23) {
     // Solve the linear equations: A * X = B
-    // D1 = d1 + C21 * d2 + C31 * d3
-    // D2 = d2 + C12 * d1 + C32 * d3
-    // D3 = d3 + C13 * d1 + C23 * d2
+    // od1 = d1 + c21 * d2 + c31 * d3
+    // od2 = d2 + c12 * d1 + c32 * d3
+    // od3 = d3 + c13 * d1 + c23 * d2
 
     // Use matrix inversion so that: X = A^-1 * B
+    // @CHECKSTYLE.OFF: LocalVariableName
     double a = 1;
-    double b = C21;
-    double c = C31;
-    double d = C12;
+    double b = c21;
+    double c = c31;
+    double d = c12;
     double e = 1;
-    double f = C32;
-    double g = C13;
-    double h = C23;
+    double f = c32;
+    double g = c13;
+    double h = c23;
     double i = 1;
+    // @CHECKSTYLE.ON: LocalVariableName
 
     final double A = (e * i - f * h);
     final double B = -(d * i - f * g);
@@ -845,7 +850,7 @@ public class PulseActivationAnalysis
 
     if (!Double.isFinite(det_recip)) {
       // Failed so reset to the observed densities
-      return new double[] {D1, D2, D3};
+      return new double[] {od1, od2, od3};
     }
 
     final double D = -(b * i - c * h);
@@ -866,9 +871,9 @@ public class PulseActivationAnalysis
     i = det_recip * I;
 
     final double[] x = new double[3];
-    x[0] = a * D1 + b * D2 + c * D3;
-    x[1] = d * D1 + e * D2 + f * D3;
-    x[2] = g * D1 + h * D2 + i * D3;
+    x[0] = a * od1 + b * od2 + c * od3;
+    x[1] = d * od1 + e * od2 + f * od3;
+    x[2] = g * od1 + h * od2 + i * od3;
 
     // Use matrix decomposition
     // // Note: The linear solver uses LU decomposition.
@@ -876,23 +881,23 @@ public class PulseActivationAnalysis
     // final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(3);
     // final DenseMatrix64F A = new DenseMatrix64F(3, 3);
     // A.set(0, 1);
-    // A.set(1, C21);
-    // A.set(2, C31);
-    // A.set(3, C12);
+    // A.set(1, c21);
+    // A.set(2, c31);
+    // A.set(3, c12);
     // A.set(4, 1);
-    // A.set(5, C32);
-    // A.set(6, C13);
-    // A.set(7, C23);
+    // A.set(5, c32);
+    // A.set(6, c13);
+    // A.set(7, c23);
     // A.set(8, 1);
     // final DenseMatrix64F B = new DenseMatrix64F(3, 1);
-    // B.set(0, D1);
-    // B.set(1, D2);
-    // B.set(2, D3);
+    // B.set(0, od1);
+    // B.set(1, od2);
+    // B.set(2, od3);
     //
     // if (!linearSolver.setA(A))
     // {
     // // Failed so reset to the observed densities
-    // return new double[] { D1, D2, D3 };
+    // return new double[] { od1, od2, od3 };
     // }
     //
     // // Input B is not modified to so we can re-use for output X
@@ -901,9 +906,9 @@ public class PulseActivationAnalysis
     // final double[] x = B.getData();
 
     // Due to floating-point error in the decomposition we check the bounds
-    x[0] = MathUtils.clip(0, D1, x[0]);
-    x[1] = MathUtils.clip(0, D2, x[1]);
-    x[2] = MathUtils.clip(0, D3, x[2]);
+    x[0] = MathUtils.clip(0, od1, x[0]);
+    x[1] = MathUtils.clip(0, od2, x[1]);
+    x[2] = MathUtils.clip(0, od3, x[2]);
 
     return x;
   }
@@ -1013,7 +1018,7 @@ public class PulseActivationAnalysis
 
       @Override
       public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work) {
-        PulseActivationAnalysis.this.runAnalysis(work.a);
+        PulseActivationAnalysis.this.runAnalysis(work.item1);
         return work;
       }
     });
@@ -1251,25 +1256,25 @@ public class PulseActivationAnalysis
 
   private static void validateCrosstalk(int index) {
     final String name = "Crosstalk " + ctNames[index];
-    Parameters.isPositive(name, ct[index]);
-    Parameters.isBelow(name, ct[index], 0.5);
+    ParameterUtils.isPositive(name, ct[index]);
+    ParameterUtils.isBelow(name, ct[index], 0.5);
   }
 
   private static void validateCrosstalk(int index1, int index2) {
     validateCrosstalk(index1);
     validateCrosstalk(index2);
-    Parameters.isBelow("Crosstalk " + ctNames[index1] + " + " + ctNames[index2],
+    ParameterUtils.isBelow("Crosstalk " + ctNames[index1] + " + " + ctNames[index2],
         ct[index1] + ct[index2], 0.5);
   }
 
-  private static void validatePercentage(String name, double d) {
-    Parameters.isPositive(name, d);
-    Parameters.isEqualOrBelow(name, d, 100);
+  private static void validatePercentage(String name, double percentage) {
+    ParameterUtils.isPositive(name, percentage);
+    ParameterUtils.isEqualOrBelow(name, percentage, 100);
   }
 
   private DensityCounter dc;
   private int[][] density;
-  private int nThreads;
+  private int numberOfThreads;
   private ExecutorService executor;
   private TurboList<Future<?>> futures;
   private RunSettings lastRunSettings;
@@ -1322,7 +1327,8 @@ public class PulseActivationAnalysis
 
         final int[] newChannel = new int[specificActivations.length];
 
-        final int nPerThread = (int) Math.ceil((double) specificActivations.length / nThreads);
+        final int nPerThread =
+            (int) Math.ceil((double) specificActivations.length / numberOfThreads);
         for (int from = 0; from < specificActivations.length;) {
           final int to = Math.min(from + nPerThread, specificActivations.length);
           futures.add(executor
@@ -1358,7 +1364,8 @@ public class PulseActivationAnalysis
 
         final int[] newChannel = new int[nonSpecificActivations.length];
 
-        final int nPerThread = (int) Math.ceil((double) nonSpecificActivations.length / nThreads);
+        final int nPerThread =
+            (int) Math.ceil((double) nonSpecificActivations.length / numberOfThreads);
         for (int from = 0; from < nonSpecificActivations.length;) {
           final int to = Math.min(from + nPerThread, nonSpecificActivations.length);
           futures.add(executor
@@ -1480,30 +1487,30 @@ public class PulseActivationAnalysis
       autoThreshold /= 2;
     }
     final int threshold = stats.pixelCount / autoThreshold;
-    int i = -1;
+    int index = -1;
     boolean found = false;
     int count;
     do {
-      i++;
-      count = histogram[i];
+      index++;
+      count = histogram[index];
       if (count > limit) {
         count = 0;
       }
       found = count > threshold;
     }
-    while (!found && i < 255);
-    final int hmin = i;
-    i = 256;
+    while (!found && index < 255);
+    final int hmin = index;
+    index = 256;
     do {
-      i--;
-      count = histogram[i];
+      index--;
+      count = histogram[index];
       if (count > limit) {
         count = 0;
       }
       found = count > threshold;
     }
-    while (!found && i > 0);
-    final int hmax = i;
+    while (!found && index > 0);
+    final int hmax = index;
     if (hmax >= hmin) {
       double min = stats.histMin + hmin * stats.binSize;
       double max = stats.histMin + hmax * stats.binSize;
@@ -1514,7 +1521,6 @@ public class PulseActivationAnalysis
       imp.setDisplayRange(min, max);
     } else {
       reset(imp);
-      return;
     }
   }
 
@@ -1535,9 +1541,9 @@ public class PulseActivationAnalysis
 
   private void createThreadPool() {
     if (executor == null) {
-      nThreads = Prefs.getThreads();
-      executor = Executors.newFixedThreadPool(nThreads);
-      futures = new TurboList<>(nThreads);
+      numberOfThreads = Prefs.getThreads();
+      executor = Executors.newFixedThreadPool(numberOfThreads);
+      futures = new TurboList<>(numberOfThreads);
     }
   }
 
@@ -1550,16 +1556,8 @@ public class PulseActivationAnalysis
   }
 
   private void waitToFinish() {
-    // Wait for all to finish
-    for (int t = futures.size(); t-- > 0;) {
-      try {
-        // The future .get() method will block until completed
-        futures.get(t).get();
-      } catch (final Exception ex) {
-        // This should not happen.
-        ex.printStackTrace();
-      }
-    }
+    ConcurrencyUtils.waitForCompletionUnchecked(futures, ex -> Logger
+        .getLogger(getClass().getName()).log(Level.SEVERE, "Failed to finish analysis", ex));
     futures.clear();
   }
 
@@ -1569,7 +1567,7 @@ public class PulseActivationAnalysis
     final int to;
     RandomGenerator random;
     int[] assignedChannel = new int[channels];
-    double[] p = new double[channels];
+    double[] probability = new double[channels];
 
     public UnmixWorker(int[] newChannel, int from, int to, long seed) {
       this.newChannel = newChannel;
@@ -1581,10 +1579,10 @@ public class PulseActivationAnalysis
     int weightedRandomSelection(double cutoff) {
       double sum = 0;
       for (int j = channels; j-- > 0;) {
-        if (p[j] > cutoff) {
-          sum += p[j];
+        if (probability[j] > cutoff) {
+          sum += probability[j];
         } else {
-          p[j] = 0;
+          probability[j] = 0;
         }
       }
       if (sum == 0) {
@@ -1594,7 +1592,7 @@ public class PulseActivationAnalysis
       final double sum2 = sum * random.nextDouble();
       sum = 0;
       for (int j = channels; j-- > 0;) {
-        sum += p[j];
+        sum += probability[j];
         if (sum >= sum2) {
           return j + 1;
         }
@@ -1607,11 +1605,11 @@ public class PulseActivationAnalysis
       double max = cutoff;
       int size = 0;
       for (int j = channels; j-- > 0;) {
-        if (p[j] > max) {
+        if (probability[j] > max) {
           size = 1;
-          max = p[j];
+          max = probability[j];
           assignedChannel[0] = j;
-        } else if (p[j] == max) {
+        } else if (probability[j] == max) {
           // Equal so store all for a random pick
           assignedChannel[size++] = j;
         }
@@ -1643,12 +1641,12 @@ public class PulseActivationAnalysis
     public void run() {
       for (int i = from; i < to; i++) {
         // Observed density
-        final int[] D = density[i];
+        final int[] obsDen = density[i];
 
         // Compute the number of neighbours.
         int neighbours = 0;
         for (int j = 1; j <= channels; j++) {
-          neighbours += D[j];
+          neighbours += obsDen[j];
         }
 
         // Do not unmix if there are not enough neighbours.
@@ -1660,14 +1658,15 @@ public class PulseActivationAnalysis
         }
 
         // Current channel (1-indexed)
-        int c = specificActivations[i].channel;
+        int ch = specificActivations[i].channel;
 
         // Compute the true local densities
-        double[] d;
+        double[] den;
         if (channels == 2) {
-          d = unmix(D[1], D[2], ct[C12], ct[C12]);
+          den = unmix(obsDen[1], obsDen[2], ct[C12], ct[C12]);
         } else {
-          d = unmix(D[1], D[2], D[3], ct[C21], ct[C31], ct[C12], ct[C32], ct[C13], ct[C23]);
+          den = unmix(obsDen[1], obsDen[2], obsDen[3], ct[C21], ct[C31], ct[C12], ct[C32], ct[C13],
+              ct[C23]);
         }
 
         // Apply crosstalk correction
@@ -1675,11 +1674,11 @@ public class PulseActivationAnalysis
           // Compute the probability it is correct:
           // This is a measure of how much crosstalk effected the observed density.
           // (This is taken from Bates et al, 2007)
-          final double pc = d[c - 1] / D[c];
+          final double pc = den[ch - 1] / obsDen[ch];
 
           // Remove it if below the subtraction threshold
-          if (pc < runSettings.specificCorrectionCutoff[c - 1]) {
-            c = 0;
+          if (pc < runSettings.specificCorrectionCutoff[ch - 1]) {
+            ch = 0;
           }
         } else {
           // Compute the probability of each channel as:
@@ -1690,22 +1689,22 @@ public class PulseActivationAnalysis
           // This value is a simple probability using the local density in each channel.
           double sum = 0;
           for (int j = channels; j-- > 0;) {
-            sum += d[j];
+            sum += den[j];
           }
           // Note that since this is a specific activation we can assume the molecule will be
           // self-counted within the radius and that d will never be zero in every channel
           for (int j = channels; j-- > 0;) {
-            p[j] = d[j] / sum;
+            probability[j] = den[j] / sum;
           }
 
           if (runSettings.specificCorrection == Correction.WEIGHTED_RANDOM) {
-            c = weightedRandomSelection(runSettings.specificCorrectionCutoff[c - 1]);
+            ch = weightedRandomSelection(runSettings.specificCorrectionCutoff[ch - 1]);
           } else {
-            c = mostLikelySelection(runSettings.specificCorrectionCutoff[c - 1]);
+            ch = mostLikelySelection(runSettings.specificCorrectionCutoff[ch - 1]);
           }
         }
 
-        newChannel[i] = c;
+        newChannel[i] = ch;
       }
     }
   }
@@ -1731,7 +1730,7 @@ public class PulseActivationAnalysis
       // using a weighted random selection
 
       for (int i = from; i < to; i++) {
-        int c = 0;
+        int ch = 0;
 
         // Assume the observed density is the true local density
         // (i.e. cross talk correction of specific activations is perfect)
@@ -1747,26 +1746,26 @@ public class PulseActivationAnalysis
         // Do not unmix if there are not enough neighbours.
         if (sum >= runSettings.minNeighbours) {
           for (int j = channels; j-- > 0;) {
-            p[j] = d[j + 1] / sum;
+            probability[j] = d[j + 1] / sum;
           }
 
           if (runSettings.nonSpecificCorrection == Correction.WEIGHTED_RANDOM) {
-            c = weightedRandomSelection(runSettings.nonSpecificCorrectionCutoff);
+            ch = weightedRandomSelection(runSettings.nonSpecificCorrectionCutoff);
           } else {
-            c = mostLikelySelection(runSettings.nonSpecificCorrectionCutoff);
+            ch = mostLikelySelection(runSettings.nonSpecificCorrectionCutoff);
           }
         }
 
-        newChannel[i] = c;
+        newChannel[i] = ch;
       }
     }
   }
 
-  private PeakResultsList createOutput(int c) {
+  private PeakResultsList createOutput(int channel) {
     final PeakResultsList output = new PeakResultsList();
     output.copySettings(results);
     if (channels > 1) {
-      output.setName(results.getName() + " " + title + " C" + c);
+      output.setName(results.getName() + " " + title + " C" + channel);
     } else {
       output.setName(results.getName() + " " + title);
     }
@@ -1904,45 +1903,45 @@ public class PulseActivationAnalysis
         "Simulation complete: " + TextUtils.millisToString(System.currentTimeMillis() - start));
   }
 
-  private float[][] simulateMolecules(RandomDataGenerator rdg, int c) {
-    int n = sim_nMolecules[c];
+  private float[][] simulateMolecules(RandomDataGenerator rdg, int channel) {
+    final int n = sim_numberOfMolecules[channel];
     final float[][] molecules = new float[n][];
     if (n == 0) {
       return molecules;
     }
 
     // Draw the shapes
-    final Shape[] shapes = createShapes(rdg, c);
+    final Shape[] shapes = createShapes(rdg, channel);
 
     // Sample positions from within the shapes
     final boolean canSample = shapes[0].canSample();
     final RandomGenerator rand = rdg.getRandomGenerator();
-    while (n-- > 0) {
+    int count = 0;
+    while (count < n) {
       float[] coords;
       if (canSample) {
         final int next = rand.nextInt(shapes.length);
         coords = shapes[next].sample(rand);
       } else {
-        coords = shapes[n % shapes.length].getPosition();
+        coords = shapes[count % shapes.length].getPosition();
       }
 
       // Avoid out-of-bounds positions
       if (outOfBounds(coords[0]) || outOfBounds(coords[1])) {
-        n++;
-      } else {
-        molecules[n] = coords;
+        continue;
       }
+      molecules[count++] = coords;
     }
     return molecules;
   }
 
-  private Shape[] createShapes(RandomDataGenerator rdg, int c) {
+  private Shape[] createShapes(RandomDataGenerator rdg, int channel) {
     final RandomGenerator rand = rdg.getRandomGenerator();
     Shape[] shapes;
     final double min = sim_size / 20;
     final double max = sim_size / 10;
     final double range = max - min;
-    switch (sim_distribution[c]) {
+    switch (sim_distribution[channel]) {
       case CIRCLE:
         shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
@@ -1967,7 +1966,7 @@ public class PulseActivationAnalysis
 
       case POINT:
       default:
-        shapes = new Shape[sim_nMolecules[c]];
+        shapes = new Shape[sim_numberOfMolecules[channel]];
         for (int i = 0; i < shapes.length; i++) {
           final float x = nextCoordinate(rand);
           final float y = nextCoordinate(rand);
@@ -1985,9 +1984,9 @@ public class PulseActivationAnalysis
     return value < 0 || value > sim_size;
   }
 
-  private void simulateActivations(RandomDataGenerator rdg, float[][][] molecules, int c,
+  private void simulateActivations(RandomDataGenerator rdg, float[][][] molecules, int channel,
       MemoryPeakResults[] results) {
-    final int n = molecules[c].length;
+    final int n = molecules[channel].length;
     if (n == 0) {
       return;
     }
@@ -2007,7 +2006,7 @@ public class PulseActivationAnalysis
     int index2;
     int c1;
     int c2;
-    switch (c) {
+    switch (channel) {
       case 0:
         index1 = C12;
         index2 = C13;
@@ -2032,7 +2031,7 @@ public class PulseActivationAnalysis
     p0[c2] *= ct[index2];
 
     // Assume 10 frames after each channel pulse => 30 frames per cycle
-    final double precision = sim_precision[c] / sim_nmPerPixel;
+    final double precision = sim_precision[channel] / sim_nmPerPixel;
 
     final RandomGenerator rand = rdg.getRandomGenerator();
     final BinomialDistribution[] bd = new BinomialDistribution[4];
@@ -2054,36 +2053,39 @@ public class PulseActivationAnalysis
     final int[] count = new int[3];
 
     for (int i = 0, t = 1; i < sim_cycles; i++, t += 30) {
-      count[0] += simulateActivations(rdg, bd[0], molecules[c], results[c], t, precision);
-      count[1] += simulateActivations(rdg, bd[1], molecules[c], results[c], t + 10, precision);
-      count[2] += simulateActivations(rdg, bd[2], molecules[c], results[c], t + 20, precision);
+      count[0] +=
+          simulateActivations(rdg, bd[0], molecules[channel], results[channel], t, precision);
+      count[1] +=
+          simulateActivations(rdg, bd[1], molecules[channel], results[channel], t + 10, precision);
+      count[2] +=
+          simulateActivations(rdg, bd[2], molecules[channel], results[channel], t + 20, precision);
       // Add non-specific activations
       if (bd[3] != null) {
         for (final int t2 : frames) {
-          simulateActivations(rdg, bd[3], molecules[c], results[c], t2, precision);
+          simulateActivations(rdg, bd[3], molecules[channel], results[channel], t2, precision);
         }
       }
     }
 
     // Report simulated cross talk
-    final double[] crosstalk = computeCrosstalk(count, c);
+    final double[] crosstalk = computeCrosstalk(count, channel);
     ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1],
         MathUtils.rounded(ct[index1]), MathUtils.rounded(crosstalk[c1]), ctNames[index2],
         MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
   }
 
   private int simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd,
-      float[][] molecules, MemoryPeakResults results, int t, double precision) {
+      float[][] molecules, MemoryPeakResults results, int time, double precision) {
     if (bd == null) {
       return 0;
     }
-    final int n = molecules.length;
-    int k = bd.sample();
+    final int size = molecules.length;
+    int numberOfSamples = bd.sample();
     // Sample
     final RandomGenerator rand = rdg.getRandomGenerator();
-    final int[] sample = RandomUtils.sample(k, n, rand);
-    while (k-- > 0) {
-      final float[] xy = molecules[sample[k]];
+    final int[] samples = RandomUtils.sample(numberOfSamples, size, rand);
+    for (int index : samples) {
+      final float[] xy = molecules[index];
       float x;
       float y;
       do {
@@ -2095,23 +2097,23 @@ public class PulseActivationAnalysis
       }
       while (outOfBounds(y));
 
-      results.add(createResult(t, x, y));
+      results.add(createResult(time, x, y));
     }
-    return sample.length;
+    return samples.length;
   }
 
-  private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int n,
-      double p) {
-    if (p == 0) {
+  private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int trials,
+      double pvalue) {
+    if (pvalue == 0) {
       return null;
     }
-    return new BinomialDistribution(rand, n, p);
+    return new BinomialDistribution(rand, trials, pvalue);
   }
 
-  private IdPeakResult createResult(int t, float x, float y) {
+  private IdPeakResult createResult(int time, float x, float y) {
     // We add them as if tracing is perfect. So each peak result has a new ID.
     // This allows the output of the simulation to be used directly by the pulse analysis code.
-    final IdPeakResult r = new IdPeakResult(t, x, y, 1, ++nextPeakResultId);
+    final IdPeakResult r = new IdPeakResult(time, x, y, 1, ++nextPeakResultId);
     r.setNoise(1); // So it appears calibrated
     return r;
   }
@@ -2133,7 +2135,7 @@ public class PulseActivationAnalysis
     // Three channel
     for (int c = 0; c < 3; c++) {
       final String ch = "_C" + (c + 1);
-      gd.addNumericField("Molcules" + ch, sim_nMolecules[c], 0);
+      gd.addNumericField("Molcules" + ch, sim_numberOfMolecules[c], 0);
       gd.addChoice("Distribution" + ch, distribution, distribution[sim_distribution[c].ordinal()]);
       gd.addNumericField("Precision_" + ch, sim_precision[c], 3);
       gd.addNumericField("Crosstalk_" + ctNames[2 * c], ct[2 * c], 3);
@@ -2147,8 +2149,8 @@ public class PulseActivationAnalysis
 
     int count = 0;
     for (int c = 0; c < 3; c++) {
-      sim_nMolecules[c] = (int) Math.abs(gd.getNextNumber());
-      if (sim_nMolecules[c] > 0) {
+      sim_numberOfMolecules[c] = (int) Math.abs(gd.getNextNumber());
+      if (sim_numberOfMolecules[c] > 0) {
         count++;
       }
       sim_distribution[c] = distributionValues[gd.getNextChoiceIndex()];
@@ -2167,7 +2169,7 @@ public class PulseActivationAnalysis
 
     try {
       for (int i = 0; i < ct.length; i += 2) {
-        if (sim_nMolecules[i / 2] > 0) {
+        if (sim_numberOfMolecules[i / 2] > 0) {
           validateCrosstalk(i, i + 1);
         }
       }
@@ -2245,13 +2247,11 @@ public class PulseActivationAnalysis
     }
 
     // This results in a change of shape depending on where the roi is positioned
-    // int w = (int) Math.ceil(r.getMaxX()) - x;
-    // int h = (int) Math.ceil(r.getMaxY()) - y;
-    int w = (int) Math.ceil(r.getWidth());
-    int h = (int) Math.ceil(r.getHeight());
-    w *= magnification;
-    h *= magnification;
-    final ImageProcessor ip = new ByteProcessor(w, h);
+    int width = (int) Math.ceil(r.getWidth());
+    int height = (int) Math.ceil(r.getHeight());
+    width *= magnification;
+    height *= magnification;
+    final ImageProcessor ip = new ByteProcessor(width, height);
 
     final String title = imp.getTitle() + " Loop " + number;
     imp = WindowManager.getImage(title);
@@ -2277,12 +2277,12 @@ public class PulseActivationAnalysis
     }
   }
 
-  private static void add(Overlay o, float x, float y, Color color) {
-    final PointRoi p = new PointRoi(x, y);
-    p.setStrokeColor(color);
-    p.setFillColor(color);
-    p.setPointType(1); // PointRoi.CROSSHAIR);
-    p.setSize(1); // PointRoi.TINY);
-    o.add(p);
+  private static void add(Overlay overlay, float x, float y, Color color) {
+    final PointRoi roi = new PointRoi(x, y);
+    roi.setStrokeColor(color);
+    roi.setFillColor(color);
+    roi.setPointType(1); // PointRoi.CROSSHAIR);
+    roi.setSize(1); // PointRoi.TINY);
+    overlay.add(roi);
   }
 }

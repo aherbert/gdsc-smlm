@@ -58,13 +58,14 @@ public class CustomGammaDistributionTest {
     logger = null;
   }
 
-  private abstract class MyTimingTask extends BaseTimingTask {
+  private abstract static class MyTimingTask extends BaseTimingTask {
+    static final int MAX_SHAPE = 1000;
+    static final int SAMPLES = 10;
+
     RandomSeed seed;
-    UniformRandomProvider r;
+    UniformRandomProvider rng;
     double shape = 0.5;
     double scale = 300;
-    int n = 1000;
-    int m = 10;
 
     public MyTimingTask(String name, RandomSeed seed) {
       super(name);
@@ -77,24 +78,24 @@ public class CustomGammaDistributionTest {
     }
 
     @Override
-    public Object getData(int i) {
-      r = RngUtils.create(seed.getSeedAsLong());
+    public Object getData(int index) {
+      rng = RngUtils.create(seed.getSeedAsLong());
       shape = 0.5;
       return null;
     }
   }
 
-  private class StaticTimingTask extends MyTimingTask {
+  private static class StaticTimingTask extends MyTimingTask {
     public StaticTimingTask(RandomSeed seed) {
       super("RandomDataGenerator", seed);
     }
 
     @Override
     public Object run(Object data) {
-      final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
-      final double[] e = new double[n * m];
-      for (int i = 0, k = 0; i < n; i++) {
-        for (int j = 0; j < m; j++, k++) {
+      final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(rng));
+      final double[] e = new double[MAX_SHAPE * SAMPLES];
+      for (int i = 0, k = 0; i < MAX_SHAPE; i++) {
+        for (int j = 0; j < SAMPLES; j++, k++) {
           e[k] = rdg.nextGamma(shape, scale);
         }
         shape += 1;
@@ -103,7 +104,7 @@ public class CustomGammaDistributionTest {
     }
   }
 
-  private class InstanceTimingTask extends MyTimingTask {
+  private static class InstanceTimingTask extends MyTimingTask {
     public InstanceTimingTask(RandomSeed seed) {
       super("Instance", seed);
     }
@@ -111,11 +112,11 @@ public class CustomGammaDistributionTest {
     @Override
     public Object run(Object data) {
       final CustomGammaDistribution dist =
-          new CustomGammaDistribution(new RandomGeneratorAdapter(r), 1, scale);
-      final double[] e = new double[n * m];
-      for (int i = 0, k = 0; i < n; i++) {
+          new CustomGammaDistribution(new RandomGeneratorAdapter(rng), 1, scale);
+      final double[] e = new double[MAX_SHAPE * SAMPLES];
+      for (int i = 0, k = 0; i < MAX_SHAPE; i++) {
         dist.setShape(shape);
-        for (int j = 0; j < m; j++, k++) {
+        for (int j = 0; j < SAMPLES; j++, k++) {
           e[k] = dist.sample();
         }
         shape += 1;

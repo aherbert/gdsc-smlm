@@ -66,13 +66,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
-import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -92,6 +90,16 @@ import java.util.regex.Pattern;
 public class FailCountManager implements PlugIn {
   private static final String TITLE = "Fail Count Manager";
 
+  private static int maxCounters = 200000;
+
+  private static final String[] OPTIONS =
+      SettingsManager.getNames((Object[]) FailCountOption.values());
+
+  private static TurboList<FailCountData> failCountData = new TurboList<>(1);
+  private static TextWindow resultsWindow;
+
+  private FailCountManagerSettings.Builder settings;
+
   //@formatter:off
   private enum FailCountOption implements NamedObject
   {
@@ -106,15 +114,14 @@ public class FailCountManager implements PlugIn {
     ANALYSE_DATA { @Override
     public String getName() { return "Analyse Data"; } },
     ;
+    //@formatter:on
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static FailCountOption forOrdinal(int ordinal)
-    {
+    public static FailCountOption forOrdinal(int ordinal) {
       final FailCountOption[] values = FailCountOption.values();
       if (ordinal < 0 || ordinal >= values.length) {
         ordinal = 0;
@@ -123,16 +130,12 @@ public class FailCountManager implements PlugIn {
     }
   }
 
-  //@formatter:on
-  private static final String[] OPTIONS =
-      SettingsManager.getNames((Object[]) FailCountOption.values());
-
   /**
    * Hold the fail count data for a single sequential analysis routine.
    */
   private static class FailCountData {
     /** The id of the data. */
-    public final int id;
+    final int id;
 
     /** The results (pass./fail). */
     private final boolean[] results;
@@ -153,12 +156,12 @@ public class FailCountManager implements PlugIn {
     private float targetPassCount;
     private double maxScore;
 
-    public FailCountData(int id, boolean[] results) {
+    FailCountData(int id, boolean[] results) {
       this.id = id;
       this.results = results;
     }
 
-    public int getMaxConsecutiveFailCount() {
+    int getMaxConsecutiveFailCount() {
       if (maxConsFailCount == -1) {
         int consFail = 0;
         int max = 0;
@@ -177,16 +180,16 @@ public class FailCountManager implements PlugIn {
       return maxConsFailCount;
     }
 
-    public int getPassCount() {
+    int getPassCount() {
       createData();
       return (int) passCount[passCount.length - 1];
     }
 
-    public int getFailCount() {
+    int getFailCount() {
       return results.length - getPassCount();
     }
 
-    public void createData() {
+    void createData() {
       if (candidate == null) {
         initialiseData();
       }
@@ -219,7 +222,7 @@ public class FailCountManager implements PlugIn {
       }
     }
 
-    public float[] getRollingFailCount(int rollingWindow) {
+    float[] getRollingFailCount(int rollingWindow) {
       final BooleanRollingArray c = new BooleanRollingArray(rollingWindow);
       final int size = results.length;
       final float[] failCount = new float[size];
@@ -230,7 +233,7 @@ public class FailCountManager implements PlugIn {
       return failCount;
     }
 
-    public float[] getWeightedFailCount(int passWeight, int failWeight) {
+    float[] getWeightedFailCount(int passWeight, int failWeight) {
       final WeightedFailCounter c =
           WeightedFailCounter.create(Integer.MAX_VALUE, failWeight, passWeight);
       final int size = results.length;
@@ -242,7 +245,7 @@ public class FailCountManager implements PlugIn {
       return failCount;
     }
 
-    public float[] getResettingFailCount(double resetFraction) {
+    float[] getResettingFailCount(double resetFraction) {
       final ResettingFailCounter c = ResettingFailCounter.create(Integer.MAX_VALUE, resetFraction);
       final int size = results.length;
       final float[] failCount = new float[size];
@@ -253,7 +256,7 @@ public class FailCountManager implements PlugIn {
       return failCount;
     }
 
-    public void initialiseAnalysis(double targetPassFraction) {
+    void initialiseAnalysis(double targetPassFraction) {
       initialiseData();
       targetPassCount = Math.round(passCount[passCount.length - 1] * targetPassFraction);
       final int size = results.length;
@@ -267,24 +270,24 @@ public class FailCountManager implements PlugIn {
       maxScore = score(size);
     }
 
-    public double score(FailCounter counter) {
+    double score(FailCounter counter) {
       final int size = results.length;
-      int i = 0;
-      while (i < size) {
-        if (results[i]) {
+      int index = 0;
+      while (index < size) {
+        if (results[index]) {
           counter.pass();
         } else {
           counter.fail();
         }
-        i++;
+        index++;
         if (!counter.isOk()) {
-          return score(i);
+          return score(index);
         }
       }
       return maxScore;
     }
 
-    public double score(int n) {
+    double score(int n) {
       if (n == target) {
         return 0; // Perfect
       }
@@ -325,10 +328,145 @@ public class FailCountManager implements PlugIn {
     }
   }
 
-  private static TurboList<FailCountData> failCountData = new TurboList<>(1);
-  private static TextWindow resultsWindow;
+  private enum CounterStatus {
+    CONTINUE, ANALYSE, RETURN;
+  }
 
-  private FailCountManagerSettings.Builder settings;
+  private static class PlotData {
+    final int item;
+    final int rollingWindow;
+    final int passWeight;
+    final int failWeight;
+    final double resetFraction;
+    final boolean fixedXAxis;
+
+    PlotData(int item, boolean fixedXAxis, int rollingWindow, int passWeight, int failWeight,
+        double resetFraction) {
+      this.item = item;
+      this.fixedXAxis = fixedXAxis;
+      this.rollingWindow = rollingWindow;
+      this.passWeight = passWeight;
+      this.failWeight = failWeight;
+      this.resetFraction = resetFraction;
+    }
+
+    /**
+     * Test if this equals the other object.
+     *
+     * @param that the other object
+     * @return true, if successful
+     */
+    public boolean equals(PlotData that) {
+      //@formatter:off
+      return that != null &&
+          this.item == that.item &&
+          this.fixedXAxis == that.fixedXAxis &&
+          this.rollingWindow == that.rollingWindow &&
+          this.passWeight == that.passWeight &&
+          this.failWeight == that.failWeight &&
+          this.resetFraction == that.resetFraction
+          ;
+      //@formatter:on
+    }
+
+    /**
+     * Checks if is a new item.
+     *
+     * @param that the other object
+     * @return true, if is new item
+     */
+    public boolean isNewItem(PlotData that) {
+      if (that == null) {
+        return true;
+      }
+      return this.item != that.item;
+    }
+  }
+
+  private static class PlotWorker implements Runnable {
+    final ConcurrentMonoStack<PlotData> stack;
+    final TurboList<FailCountData> failCountData;
+    PlotData lastPlotData;
+    int maxSize;
+
+    PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData) {
+      this.stack = stack;
+      this.failCountData = failCountData;
+      for (int i = 0; i < failCountData.size(); i++) {
+        maxSize = Math.max(maxSize, failCountData.getf(i).results.length);
+      }
+    }
+
+    @Override
+    public void run() {
+      // while (!Thread.interrupted())
+      while (true) {
+        try {
+          final PlotData plotData = stack.pop();
+          if (plotData == null) {
+            break;
+          }
+          if (plotData.equals(lastPlotData)) {
+            continue;
+          }
+          run(plotData);
+          lastPlotData = plotData;
+        } catch (final InterruptedException ex) {
+          // Thread.currentThread().interrupt();
+          break;
+        }
+      }
+    }
+
+    private void run(PlotData plotData) {
+      final boolean isNew =
+          plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
+      final int item = plotData.item - 1; // 0-based index
+      if (item < 0 || item >= failCountData.size()) {
+        return;
+      }
+      final FailCountData data = failCountData.get(item);
+
+      data.createData();
+      final WindowOrganiser wo = new WindowOrganiser();
+      if (isNew) {
+        display(wo, "Pass Count", data.candidate, data.passCount, plotData.fixedXAxis);
+        display(wo, "Pass Rate", data.candidate, data.passRate, plotData.fixedXAxis);
+        display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount,
+            plotData.fixedXAxis);
+      }
+
+      // Only rebuild if changed
+      if (isNew || plotData.rollingWindow != lastPlotData.rollingWindow) {
+        display(wo, "Rolling Fail Count", data.candidate,
+            data.getRollingFailCount(plotData.rollingWindow), plotData.fixedXAxis);
+      }
+      if (isNew || plotData.passWeight != lastPlotData.passWeight
+          || plotData.failWeight != lastPlotData.failWeight) {
+        display(wo, "Weighted Fail Count", data.candidate,
+            data.getWeightedFailCount(plotData.passWeight, plotData.failWeight),
+            plotData.fixedXAxis);
+      }
+      if (isNew || plotData.resetFraction != lastPlotData.resetFraction) {
+        display(wo, "Resetting Fail Count", data.candidate,
+            data.getResettingFailCount(plotData.resetFraction), plotData.fixedXAxis);
+      }
+
+      wo.tile();
+    }
+
+    private void display(WindowOrganiser wo, String string, float[] x, float[] y,
+        boolean fixedXAxis) {
+      final String title = TITLE + " " + string;
+      final Plot plot = new Plot(title, "Candidate", string);
+      final double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
+      final double maxy = MathUtils.max(y);
+      plot.setLimits(x[0], maxx, 0, maxy * 1.05);
+      plot.addPoints(x, y, Plot.LINE);
+      plot.addLabel(0, 0, "Max = " + maxy);
+      ImageJUtils.display(title, plot, 0, wo);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -479,7 +617,7 @@ public class FailCountManager implements PlugIn {
     settings.setFailCountLimit((int) gd.getNextNumber());
     settings.setSaveAfterFitting(gd.getNextBoolean());
     try {
-      Parameters.isAboveZero("Max frames", settings.getMaxFrames());
+      ParameterUtils.isAboveZero("Max frames", settings.getMaxFrames());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -566,9 +704,7 @@ public class FailCountManager implements PlugIn {
 
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(countData.size(), "sequence"));
       FailCountManager.failCountData = countData;
-    } catch (final NumberFormatException ex) {
-      IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
-    } catch (final IOException ex) {
+    } catch (final NumberFormatException | IOException ex) {
       IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
     }
   }
@@ -649,142 +785,6 @@ public class FailCountManager implements PlugIn {
     }
   }
 
-  private static class PlotData {
-    final int item;
-    final int rollingWindow;
-    final int passWeight;
-    final int failWeight;
-    final double resetFraction;
-    final boolean fixedXAxis;
-
-    PlotData(int item, boolean fixedXAxis, int rollingWindow, int passWeight, int failWeight,
-        double resetFraction) {
-      this.item = item;
-      this.fixedXAxis = fixedXAxis;
-      this.rollingWindow = rollingWindow;
-      this.passWeight = passWeight;
-      this.failWeight = failWeight;
-      this.resetFraction = resetFraction;
-    }
-
-    /**
-     * Test if this equals the other object.
-     *
-     * @param that the other object
-     * @return true, if successful
-     */
-    public boolean equals(PlotData that) {
-      //@formatter:off
-      return that != null &&
-          this.item == that.item &&
-          this.fixedXAxis == that.fixedXAxis &&
-          this.rollingWindow == that.rollingWindow &&
-          this.passWeight == that.passWeight &&
-          this.failWeight == that.failWeight &&
-          this.resetFraction == that.resetFraction
-          ;
-      //@formatter:on
-    }
-
-    /**
-     * Checks if is a new item.
-     *
-     * @param that the other object
-     * @return true, if is new item
-     */
-    public boolean isNewItem(PlotData that) {
-      if (that == null) {
-        return true;
-      }
-      return this.item != that.item;
-    }
-  }
-
-  private class PlotWorker implements Runnable {
-    final ConcurrentMonoStack<PlotData> stack;
-    final TurboList<FailCountData> failCountData;
-    PlotData lastPlotData;
-    int maxSize;
-
-    PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData) {
-      this.stack = stack;
-      this.failCountData = failCountData;
-      for (int i = 0; i < failCountData.size(); i++) {
-        maxSize = Math.max(maxSize, failCountData.getf(i).results.length);
-      }
-    }
-
-    @Override
-    public void run() {
-      // while (!Thread.interrupted())
-      while (true) {
-        try {
-          final PlotData plotData = stack.pop();
-          if (plotData == null) {
-            break;
-          }
-          if (plotData.equals(lastPlotData)) {
-            continue;
-          }
-          run(plotData);
-          lastPlotData = plotData;
-        } catch (final InterruptedException ex) {
-          // Thread.currentThread().interrupt();
-          break;
-        }
-      }
-    }
-
-    private void run(PlotData plotData) {
-      final boolean isNew =
-          plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
-      final int item = plotData.item - 1; // 0-based index
-      if (item < 0 || item >= failCountData.size()) {
-        return;
-      }
-      final FailCountData data = failCountData.get(item);
-
-      data.createData();
-      final WindowOrganiser wo = new WindowOrganiser();
-      if (isNew) {
-        display(wo, "Pass Count", data.candidate, data.passCount, plotData.fixedXAxis);
-        display(wo, "Pass Rate", data.candidate, data.passRate, plotData.fixedXAxis);
-        display(wo, "Consecutive Fail Count", data.candidate, data.consFailCount,
-            plotData.fixedXAxis);
-      }
-
-      // Only rebuild if changed
-      if (isNew || plotData.rollingWindow != lastPlotData.rollingWindow) {
-        display(wo, "Rolling Fail Count", data.candidate,
-            data.getRollingFailCount(plotData.rollingWindow), plotData.fixedXAxis);
-      }
-      if (isNew || plotData.passWeight != lastPlotData.passWeight
-          || plotData.failWeight != lastPlotData.failWeight) {
-        display(wo, "Weighted Fail Count", data.candidate,
-            data.getWeightedFailCount(plotData.passWeight, plotData.failWeight),
-            plotData.fixedXAxis);
-      }
-      if (isNew || plotData.resetFraction != lastPlotData.resetFraction) {
-        display(wo, "Resetting Fail Count", data.candidate,
-            data.getResettingFailCount(plotData.resetFraction), plotData.fixedXAxis);
-      }
-
-      wo.tile();
-    }
-
-    private void display(WindowOrganiser wo, String string, float[] x, float[] y,
-        boolean fixedXAxis) {
-      final String title = TITLE + " " + string;
-      final Plot plot = new Plot(title, "Candidate", string);
-      final double maxx = (fixedXAxis) ? maxSize : x[x.length - 1];
-      final double maxy = MathUtils.max(y);
-      plot.setLimits(x[0], maxx, 0, maxy * 1.05);
-      plot.addPoints(x, y, Plot.LINE);
-      plot.addLabel(0, 0, "Max = " + maxy);
-      ImageJUtils.display(title, plot, 0, wo);
-    }
-  }
-
   /**
    * Show an interactive plot of the fail count data.
    */
@@ -811,24 +811,21 @@ public class FailCountManager implements PlugIn {
     gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
     gd.addMessage("Resetting Fail Count");
     gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
-    gd.addDialogListener(new DialogListener() {
-      @Override
-      public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-        final int item = (int) gd.getNextNumber();
-        final boolean fixedXAxis = gd.getNextBoolean();
-        final int rollingWindow = (int) gd.getNextNumber();
-        final int passWeight = (int) gd.getNextNumber();
-        final int failWeight = (int) gd.getNextNumber();
-        final double resetFraction = gd.getNextNumber();
-        settings.setPlotItem(item);
-        settings.setPlotRollingWindow(rollingWindow);
-        settings.setPlotPassWeight(passWeight);
-        settings.setPlotFailWeight(failWeight);
-        settings.setPlotResetFraction(resetFraction);
-        stack.insert(
-            new PlotData(item, fixedXAxis, rollingWindow, passWeight, failWeight, resetFraction));
-        return true;
-      }
+    gd.addDialogListener((gd2, event) -> {
+      final int item = (int) gd2.getNextNumber();
+      final boolean fixedXAxis = gd2.getNextBoolean();
+      final int rollingWindow = (int) gd2.getNextNumber();
+      final int passWeight = (int) gd2.getNextNumber();
+      final int failWeight = (int) gd2.getNextNumber();
+      final double resetFraction = gd2.getNextNumber();
+      settings.setPlotItem(item);
+      settings.setPlotRollingWindow(rollingWindow);
+      settings.setPlotPassWeight(passWeight);
+      settings.setPlotFailWeight(failWeight);
+      settings.setPlotResetFraction(resetFraction);
+      stack.insert(
+          new PlotData(item, fixedXAxis, rollingWindow, passWeight, failWeight, resetFraction));
+      return true;
     });
 
     gd.hideCancelButton();
@@ -989,43 +986,40 @@ public class FailCountManager implements PlugIn {
     IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
     for (int i = 0; i < failCountData.size(); i++) {
       final FailCountData data = failCountData.getf(i);
-      futures.add(executor.submit(new Runnable() {
-        @Override
-        public void run() {
-          if (IJ.escapePressed()) {
-            return;
-          }
-
-          // TODO - Ideally this plugin should be run on benchmark data with ground truth.
-          // The target could be to ensure all all the correct results are fit
-          // and false positives are excluded from incrementing the pass counter.
-          // This could be done by saving the results from a benchmarking scoring
-          // plugin to memory as the current dataset.
-          data.initialiseAnalysis(targetPassFraction);
-
-          // Score in blocks and then do a synchronized write to the combined score
-          final Thread t = Thread.currentThread();
-          final double[] s = new double[8192];
-          int i = 0;
-          while (i < counters.size()) {
-            if (t.isInterrupted()) {
-              break;
-            }
-            final int block = Math.min(8192, counters.size() - i);
-            for (int j = 0; j < block; j++) {
-              final FailCounter counter = counters.getf(i + j).newCounter();
-              s[j] = data.score(counter);
-            }
-            // Write to the combined score
-            synchronized (score) {
-              for (int j = 0; j < block; j++) {
-                score[i + j] += s[j];
-              }
-            }
-            i += block;
-          }
-          ticker.tick();
+      futures.add(executor.submit(() -> {
+        if (IJ.escapePressed()) {
+          return;
         }
+
+        // TODO - Ideally this plugin should be run on benchmark data with ground truth.
+        // The target could be to ensure all all the correct results are fit
+        // and false positives are excluded from incrementing the pass counter.
+        // This could be done by saving the results from a benchmarking scoring
+        // plugin to memory as the current dataset.
+        data.initialiseAnalysis(targetPassFraction);
+
+        // Score in blocks and then do a synchronized write to the combined score
+        final Thread t = Thread.currentThread();
+        final double[] s = new double[8192];
+        int index = 0;
+        while (index < counters.size()) {
+          if (t.isInterrupted()) {
+            break;
+          }
+          final int block = Math.min(8192, counters.size() - index);
+          for (int j = 0; j < block; j++) {
+            final FailCounter counter = counters.getf(index + j).newCounter();
+            s[j] = data.score(counter);
+          }
+          // Write to the combined score
+          synchronized (score) {
+            for (int j = 0; j < block; j++) {
+              score[index + j] += s[j];
+            }
+          }
+          index += block;
+        }
+        ticker.tick();
       }));
     }
 
@@ -1085,17 +1079,11 @@ public class FailCountManager implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int b) {
+  private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int value) {
     final int n = counters.size() - type.size();
-    ImageJUtils.log("Type %d = %d", b, n);
-    type.fill(type.size(), counters.size(), (byte) b);
+    ImageJUtils.log("Type %d = %d", value, n);
+    type.fill(type.size(), counters.size(), (byte) value);
   }
-
-  private static enum CounterStatus {
-    CONTINUE, ANALYSE, RETURN;
-  }
-
-  private static int maxCounters = 200000;
 
   private static CounterStatus checkCounters(TurboList<FailCounter> counters) {
     if (counters.size() > maxCounters) {
@@ -1192,10 +1180,10 @@ public class FailCountManager implements PlugIn {
     settings.setPassRateCounterMaxPassRate(gd.getNextNumber());
     settings.setPassRateCounterIncPassRate(gd.getNextNumber());
     try {
-      Parameters.isAboveZero("Target pass fraction", settings.getTargetPassFraction());
-      Parameters.isAboveZero("Resetting counter inc pass decrement",
+      ParameterUtils.isAboveZero("Target pass fraction", settings.getTargetPassFraction());
+      ParameterUtils.isAboveZero("Resetting counter inc pass decrement",
           settings.getResettingCounterIncResetFraction());
-      Parameters.isAboveZero("Pass rate counter inc pass rate",
+      ParameterUtils.isAboveZero("Pass rate counter inc pass rate",
           settings.getPassRateCounterIncPassRate());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());

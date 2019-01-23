@@ -304,7 +304,7 @@ public class PsfCreator implements PlugInFilter {
 
     // Check arguments
     try {
-      Parameters.isAbove("Radius", settings.getRadius(), 2);
+      ParameterUtils.isAbove("Radius", settings.getRadius(), 2);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return DONE;
@@ -451,16 +451,16 @@ public class PsfCreator implements PlugInFilter {
 
     // Check arguments
     try {
-      Parameters.isPositive("nm/slice", settings.getNmPerSlice());
-      Parameters.isAbove("Amplitude fraction", settings.getAmplitudeFraction(), 0.01);
-      Parameters.isBelow("Amplitude fraction", settings.getAmplitudeFraction(), 0.9);
-      Parameters.isPositive("Start background frames", settings.getStartBackgroundFrames());
-      Parameters.isPositive("End background frames", settings.getEndBackgroundFrames());
-      Parameters.isAbove("Total background frames",
+      ParameterUtils.isPositive("nm/slice", settings.getNmPerSlice());
+      ParameterUtils.isAbove("Amplitude fraction", settings.getAmplitudeFraction(), 0.01);
+      ParameterUtils.isBelow("Amplitude fraction", settings.getAmplitudeFraction(), 0.9);
+      ParameterUtils.isPositive("Start background frames", settings.getStartBackgroundFrames());
+      ParameterUtils.isPositive("End background frames", settings.getEndBackgroundFrames());
+      ParameterUtils.isAbove("Total background frames",
           settings.getStartBackgroundFrames() + settings.getEndBackgroundFrames(), 1);
-      Parameters.isAbove("Magnification", settings.getMagnification(), 1);
-      Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
-      Parameters.isBelow("Smoothing", settings.getSmoothing(), 1);
+      ParameterUtils.isAbove("Magnification", settings.getMagnification(), 1);
+      ParameterUtils.isAbove("Smoothing", settings.getSmoothing(), 0);
+      ParameterUtils.isBelow("Smoothing", settings.getSmoothing(), 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -4276,18 +4276,18 @@ public class PsfCreator implements PlugInFilter {
 
     // Check arguments
     try {
-      Parameters.isPositive("nm/pixel", nmPerPixel);
-      Parameters.isPositive("nm/slice", settings.getNmPerSlice());
+      ParameterUtils.isPositive("nm/pixel", nmPerPixel);
+      ParameterUtils.isPositive("nm/slice", settings.getNmPerSlice());
       // Since we do a local background estimation for each extracted PSF then we
       // do not need the bias for non sCMOS cameras.
       // if (!cw.isSCMOS())
       // Parameters.isAboveZero("Bias", cw.getBias());
-      Parameters.isEqualOrAbove("Projection magnification", settings.getAlignmentMagnification(),
-          1);
-      Parameters.isEqualOrAbove("Max iterations", settings.getMaxIterations(), 1);
-      Parameters.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
-      Parameters.isAbove("Smoothing", settings.getSmoothing(), 0);
-      Parameters.isBelow("Smoothing", settings.getSmoothing(), 1);
+      ParameterUtils.isEqualOrAbove("Projection magnification",
+          settings.getAlignmentMagnification(), 1);
+      ParameterUtils.isEqualOrAbove("Max iterations", settings.getMaxIterations(), 1);
+      ParameterUtils.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
+      ParameterUtils.isAbove("Smoothing", settings.getSmoothing(), 0);
+      ParameterUtils.isBelow("Smoothing", settings.getSmoothing(), 1);
     } catch (IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

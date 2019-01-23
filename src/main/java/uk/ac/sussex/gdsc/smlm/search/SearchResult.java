@@ -27,6 +27,8 @@ package uk.ac.sussex.gdsc.smlm.search;
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
  *
+ * <p>Note: this class has a natural ordering that is inconsistent with equals.
+ *
  * @param <T> the generic type
  */
 public class SearchResult<T extends Comparable<T>> implements Comparable<SearchResult<T>> {
@@ -50,12 +52,17 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
     this.score = score;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Note: this class has a natural ordering that is inconsistent with equals.
+   */
   @Override
-  public int compareTo(SearchResult<T> o) {
-    if (o == null) {
+  public int compareTo(SearchResult<T> other) {
+    if (other == null) {
       return -1;
     }
-    return getScore().compareTo(o.getScore());
+    return getScore().compareTo(other.getScore());
   }
 
   /**

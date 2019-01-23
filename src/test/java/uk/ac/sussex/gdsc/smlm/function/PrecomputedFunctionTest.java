@@ -39,20 +39,20 @@ public class PrecomputedFunctionTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final int size = 100;
     final double[] v = new PseudoRandomGenerator(size, r).getSequence();
-    final ValueFunction f = new PrecomputedValueFunction(v);
-    final double[] vo = evaluateValueFunction(f);
+    final ValueFunction func = new PrecomputedValueFunction(v);
+    final double[] vo = evaluateValueFunction(func);
     Assertions.assertArrayEquals(v, vo, "values");
   }
 
-  private static double[] evaluateValueFunction(ValueFunction f) {
-    final double[] v = new double[f.size()];
-    f.initialise0(null);
-    f.forEach(new ValueProcedure() {
-      int i = 0;
+  private static double[] evaluateValueFunction(ValueFunction func) {
+    final double[] v = new double[func.size()];
+    func.initialise0(null);
+    func.forEach(new ValueProcedure() {
+      int index = 0;
 
       @Override
       public void execute(double value) {
-        v[i++] = value;
+        v[index++] = value;
       }
     });
     return v;
@@ -68,24 +68,24 @@ public class PrecomputedFunctionTest {
     for (int i = 0; i < g1.length; i++) {
       g1[i] = new PseudoRandomGenerator(n, r).getSequence();
     }
-    final Gradient1Function f = new PrecomputedGradient1Function(v, g1);
+    final Gradient1Function func = new PrecomputedGradient1Function(v, g1);
     final double[][] g1o = new double[size][];
-    final double[] vo = evaluateGradient1Function(f, g1o);
+    final double[] vo = evaluateGradient1Function(func, g1o);
     Assertions.assertArrayEquals(v, vo, "values");
     Assertions.assertArrayEquals(g1, g1o, "g1");
   }
 
-  private static double[] evaluateGradient1Function(Gradient1Function f, final double[][] g1) {
-    final double[] v = new double[f.size()];
-    f.initialise1(null);
-    f.forEach(new Gradient1Procedure() {
-      int i = 0;
+  private static double[] evaluateGradient1Function(Gradient1Function func, final double[][] g1) {
+    final double[] v = new double[func.size()];
+    func.initialise1(null);
+    func.forEach(new Gradient1Procedure() {
+      int index = 0;
 
       @Override
       public void execute(double value, double[] dyDa) {
-        v[i] = value;
-        g1[i] = dyDa;
-        i++;
+        v[index] = value;
+        g1[index] = dyDa;
+        index++;
       }
     });
     return v;
@@ -103,28 +103,28 @@ public class PrecomputedFunctionTest {
       g1[i] = new PseudoRandomGenerator(n, r).getSequence();
       g2[i] = new PseudoRandomGenerator(n, r).getSequence();
     }
-    final Gradient2Function f = new PrecomputedGradient2Function(v, g1, g2);
+    final Gradient2Function func = new PrecomputedGradient2Function(v, g1, g2);
     final double[][] g1o = new double[size][];
     final double[][] g2o = new double[size][];
-    final double[] vo = evaluateGradient2Function(f, g1o, g2o);
+    final double[] vo = evaluateGradient2Function(func, g1o, g2o);
     Assertions.assertArrayEquals(v, vo, "values");
     Assertions.assertArrayEquals(g1, g1o, "g1");
     Assertions.assertArrayEquals(g2, g2o, "g2");
   }
 
-  private static double[] evaluateGradient2Function(Gradient2Function f, final double[][] g1,
+  private static double[] evaluateGradient2Function(Gradient2Function func, final double[][] g1,
       final double[][] g2) {
-    final double[] v = new double[f.size()];
-    f.initialise2(null);
-    f.forEach(new Gradient2Procedure() {
-      int i = 0;
+    final double[] v = new double[func.size()];
+    func.initialise2(null);
+    func.forEach(new Gradient2Procedure() {
+      int index = 0;
 
       @Override
       public void execute(double value, double[] dyDa, double[] d2yDa2) {
-        v[i] = value;
-        g1[i] = dyDa;
-        g2[i] = d2yDa2;
-        i++;
+        v[index] = value;
+        g1[index] = dyDa;
+        g2[index] = d2yDa2;
+        index++;
       }
     });
     return v;

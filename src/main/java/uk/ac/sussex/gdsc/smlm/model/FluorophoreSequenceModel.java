@@ -34,8 +34,7 @@ import java.util.List;
  * <p>Based on the work of Coltharp et al (2012) Accurate Construction of photoactivated
  * localization microscopy images for quantitative measurements. PLOS One 7, Issue 12, pp 1-15
  */
-public abstract class FluorophoreSequenceModel extends MoleculeModel
-    implements Comparable<FluorophoreSequenceModel> {
+public abstract class FluorophoreSequenceModel extends MoleculeModel {
   /**
    * Instantiates a new fluorophore sequence model.
    *
@@ -147,12 +146,12 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
   /**
    * Order by time ascending.
    *
-   * @param o The other fluorophore
-   * @return -1,0,1
+   * @param o1 the first model
+   * @param o2 The second model
+   * @return The comparison result -1, 0, or 1
    */
-  @Override
-  public int compareTo(FluorophoreSequenceModel o) {
-    return Double.compare(getStartTime(), o.getStartTime());
+  public static int compare(FluorophoreSequenceModel o1, FluorophoreSequenceModel o2) {
+    return Double.compare(o1.getStartTime(), o2.getStartTime());
   }
 
   /**
@@ -198,40 +197,40 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
     // Process all blinks. Join together blinks with an off-time that would not be noticed,
     // i.e. where the molecule was on in consecutive frames.
     final int[] onTimes = new int[blinks + 1];
-    int n = 0;
-    int tStart = (int) burstSequence[0];
+    int count = 0;
+    int tstart = (int) burstSequence[0];
     for (int i = 0; i < blinks; i++) {
       final int end1 = end(burstSequence[i * 2 + 1]);
       final int start2 = start(burstSequence[(i + 1) * 2]);
 
       if (start2 - end1 > 0) {
-        onTimes[n++] = end1 - tStart;
-        tStart = start2;
+        onTimes[count++] = end1 - tstart;
+        tstart = start2;
       }
     }
-    onTimes[n++] = end(getEndTime()) - tStart;
+    onTimes[count++] = end(getEndTime()) - tstart;
 
-    return Arrays.copyOf(onTimes, n);
+    return Arrays.copyOf(onTimes, count);
   }
 
   /**
    * Convert the start time to an integer.
    *
-   * @param t the time
+   * @param time the time
    * @return the integer start time
    */
-  private static int start(double t) {
-    return (int) t;
+  private static int start(double time) {
+    return (int) time;
   }
 
   /**
    * Convert the end time to an integer.
    *
-   * @param t the time
+   * @param time the time
    * @return the integer end time
    */
-  private static int end(double t) {
-    return (int) (Math.ceil(t));
+  private static int end(double time) {
+    return (int) (Math.ceil(time));
   }
 
   /**
@@ -247,17 +246,17 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
     // Process all blinks. Join together blinks with an off-time that would not be noticed,
     // i.e. where the molecule was on in consecutive frames.
     final int[] offTimes = new int[blinks];
-    int n = 0;
+    int count = 0;
     for (int i = 0; i < blinks; i++) {
       final int end1 = end(burstSequence[i * 2 + 1]);
       final int start2 = start(burstSequence[(i + 1) * 2]);
 
       if (start2 - end1 > 0) {
-        offTimes[n++] = start2 - end1;
+        offTimes[count++] = start2 - end1;
       }
     }
 
-    return Arrays.copyOf(offTimes, n);
+    return Arrays.copyOf(offTimes, count);
   }
 
   /**
@@ -269,18 +268,18 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel
     final int sequenceStartT = (int) getStartTime();
     final int sequenceEndT = (int) getEndTime();
 
-    int n = 0;
+    int count = 0;
     final int[] onFrames = new int[sequenceEndT - sequenceStartT + 1];
     for (int i = 0; i <= blinks; i++) {
       final int on = (int) (burstSequence[i * 2]);
       final int off = (int) (burstSequence[i * 2 + 1]);
 
       for (int t = on; t <= off; t++) {
-        onFrames[n++] = t;
+        onFrames[count++] = t;
       }
     }
 
-    return Arrays.copyOf(onFrames, n);
+    return Arrays.copyOf(onFrames, count);
   }
 
   /**

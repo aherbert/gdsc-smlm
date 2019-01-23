@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.SkewNormalFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -398,13 +398,13 @@ public class PcPalmMolecules implements PlugIn {
     // Check arguments
     try {
       if (!resultsAvailable) {
-        Parameters.isAboveZero("Molecules", nMolecules);
-        Parameters.isAboveZero("Simulation size", simulationSize);
-        Parameters.isEqualOrAbove("Blinking rate", blinkingRate, 1);
-        Parameters.isEqualOrAbove("Cluster number", clusterNumber, 1);
+        ParameterUtils.isAboveZero("Molecules", nMolecules);
+        ParameterUtils.isAboveZero("Simulation size", simulationSize);
+        ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
+        ParameterUtils.isEqualOrAbove("Cluster number", clusterNumber, 1);
       }
-      Parameters.isAbove("Image scale", lowResolutionImageSize, 1);
-      Parameters.isAboveZero("ROI size", roiSizeInUm);
+      ParameterUtils.isAbove("Image scale", lowResolutionImageSize, 1);
+      ParameterUtils.isAboveZero("ROI size", roiSizeInUm);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -556,8 +556,8 @@ public class PcPalmMolecules implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAbove("Histogram bins", histogramBins, 1);
-      Parameters.isEqualOrAbove("Blinking rate", blinkingRate, 1);
+      ParameterUtils.isAbove("Histogram bins", histogramBins, 1);
+      ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -979,8 +979,8 @@ public class PcPalmMolecules implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Distance threshold", dThreshold);
-      Parameters.isAboveZero("Time threshold", tThreshold);
+      ParameterUtils.isAboveZero("Distance threshold", dThreshold);
+      ParameterUtils.isAboveZero("Time threshold", tThreshold);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -1656,10 +1656,10 @@ public class PcPalmMolecules implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Molecules", nMolecules);
-      Parameters.isAboveZero("Simulation size", simulationSize);
-      Parameters.isEqualOrAbove("Blinking rate", blinkingRate, 1);
-      Parameters.isEqualOrAbove("Cluster number", clusterNumber, 1);
+      ParameterUtils.isAboveZero("Molecules", nMolecules);
+      ParameterUtils.isAboveZero("Simulation size", simulationSize);
+      ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
+      ParameterUtils.isEqualOrAbove("Cluster number", clusterNumber, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

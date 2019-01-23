@@ -56,6 +56,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -75,20 +76,20 @@ public class LoadLocalisations implements PlugIn {
     set.remove(TimeUnit.UNRECOGNIZED);
     tUnits = new String[set.size()];
     tUnitValues = new TimeUnit[set.size()];
-    int i = 0;
+    int index = 0;
     for (final TimeUnit t : set) {
-      tUnits[i] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
-      tUnitValues[i] = t;
-      i++;
+      tUnits[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
+      tUnitValues[index] = t;
+      index++;
     }
   }
 
   /**
    * The localisation.
    */
-  public static class Localisation {
+  private static class Localisation {
     /** The time. */
-    int t;
+    int time;
     /** The id. */
     int id;
     /** The x. */
@@ -108,7 +109,7 @@ public class LoadLocalisations implements PlugIn {
   }
 
   /**
-   * A list of {@link Localisation} objects.
+   * A list of localisation objects.
    */
   public static class LocalisationList extends ArrayList<Localisation> {
     private static final long serialVersionUID = 6616011992365324247L;
@@ -157,22 +158,22 @@ public class LoadLocalisations implements PlugIn {
 
       if (size() > 0) {
         // Guess the PSF type from the first localisation
-        Localisation l = get(0);
+        Localisation loc = get(0);
         PSFType psfType = PSFType.CUSTOM;
-        if (l.sx != -1) {
+        if (loc.sx != -1) {
           psfType = PSFType.ONE_AXIS_GAUSSIAN_2D;
-          if (l.sy != -1) {
+          if (loc.sy != -1) {
             psfType = PSFType.TWO_AXIS_GAUSSIAN_2D;
           }
         }
         results.setPsf(PsfHelper.create(psfType));
 
         for (int i = 0; i < size(); i++) {
-          l = get(i);
-          final float intensity = (l.intensity <= 0) ? 1 : (float) (l.intensity);
-          final float x = (l.x);
-          final float y = (l.y);
-          final float z = (l.z);
+          loc = get(i);
+          final float intensity = (loc.intensity <= 0) ? 1 : (float) (loc.intensity);
+          final float x = (loc.x);
+          final float y = (loc.y);
+          final float z = (loc.z);
 
           float[] params;
           switch (psfType) {
@@ -180,21 +181,22 @@ public class LoadLocalisations implements PlugIn {
               params = PeakResult.createParams(0, intensity, x, y, z);
               break;
             case ONE_AXIS_GAUSSIAN_2D:
-              params = Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z, l.sx);
+              params =
+                  Gaussian2DPeakResultHelper.createOneAxisParams(0, intensity, x, y, z, loc.sx);
               break;
             case TWO_AXIS_GAUSSIAN_2D:
-              params =
-                  Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, l.sx, l.sy);
+              params = Gaussian2DPeakResultHelper.createTwoAxisParams(0, intensity, x, y, z, loc.sx,
+                  loc.sy);
               break;
             default:
               throw new NotImplementedException("Unsupported PSF type: " + psfType);
           }
           final AttributePeakResult peakResult =
-              new AttributePeakResult(l.t, (int) x, (int) y, 0, 0, 0, 0, params, null);
-          peakResult.setId(l.id);
-          if (l.precision > 0) {
+              new AttributePeakResult(loc.time, (int) x, (int) y, 0, 0, 0, 0, params, null);
+          peakResult.setId(loc.id);
+          if (loc.precision > 0) {
             // Convert to nm
-            peakResult.setPrecision(distanceConverter.convert(l.precision));
+            peakResult.setPrecision(distanceConverter.convert(loc.precision));
           }
           results.add(peakResult);
         }
@@ -213,6 +215,26 @@ public class LoadLocalisations implements PlugIn {
         }
       }
       return false;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+      if (this == object) {
+        return true;
+      }
+      if (object == null) {
+        return false;
+      }
+      if (getClass() != object.getClass()) {
+        return false;
+      }
+      final LocalisationList list = (LocalisationList) object;
+      return super.equals(object) && Objects.equals(calibration, list.calibration);
+    }
+
+    @Override
+    public int hashCode() {
+      return super.hashCode() * 31 + Objects.hashCode(calibration);
     }
   }
 
@@ -313,7 +335,7 @@ public class LoadLocalisations implements PlugIn {
         final Localisation l = new Localisation();
         try {
           if (it >= 0) {
-            l.t = Integer.parseInt(fields[it]);
+            l.time = Integer.parseInt(fields[it]);
           }
           if (iid >= 0) {
             l.id = Integer.parseInt(fields[iid]);
@@ -337,11 +359,7 @@ public class LoadLocalisations implements PlugIn {
           }
 
           localisations.add(l);
-        } catch (final NumberFormatException ex) {
-          if (errors++ == 0) {
-            ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
-          }
-        } catch (final IndexOutOfBoundsException ex) {
+        } catch (final NumberFormatException | IndexOutOfBoundsException ex) {
           if (errors++ == 0) {
             ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
           }
@@ -426,18 +444,16 @@ public class LoadLocalisations implements PlugIn {
       columns[i] = (int) gd.getNextNumber();
     }
 
-    {
-      int i = 0;
-      settings.setFieldI(columns[i++]);
-      settings.setFieldId(columns[i++]);
-      settings.setFieldX(columns[i++]);
-      settings.setFieldY(columns[i++]);
-      settings.setFieldZ(columns[i++]);
-      settings.setFieldI(columns[i++]);
-      settings.setFieldSx(columns[i++]);
-      settings.setFieldSy(columns[i++]);
-      settings.setFieldPrecision(columns[i++]);
-    }
+    int index = 0;
+    settings.setFieldI(columns[index++]);
+    settings.setFieldId(columns[index++]);
+    settings.setFieldX(columns[index++]);
+    settings.setFieldY(columns[index++]);
+    settings.setFieldZ(columns[index++]);
+    settings.setFieldI(columns[index++]);
+    settings.setFieldSx(columns[index++]);
+    settings.setFieldSy(columns[index++]);
+    settings.setFieldPrecision(columns[index]);
 
     cw.setPrecisionMethod(PrecisionMethod.forNumber(gd.getNextChoiceIndex()));
 

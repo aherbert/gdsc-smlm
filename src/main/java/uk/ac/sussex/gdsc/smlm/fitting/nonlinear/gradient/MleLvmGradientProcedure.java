@@ -69,7 +69,7 @@ public class MleLvmGradientProcedure extends LsqLvmGradientProcedure {
         value += (fi - xi - xi * Math.log(fi / xi));
         final double xi_fi2 = xi / fi / fi;
         final double e = 1 - (xi / fi);
-        for (int k = 0, i = 0; k < n; k++) {
+        for (int k = 0, i = 0; k < numberOfGradients; k++) {
           beta[k] -= e * dfiDa[k];
           final double wgt = dfiDa[k] * xi_fi2;
           for (int l = 0; l <= k; l++) {
@@ -78,7 +78,7 @@ public class MleLvmGradientProcedure extends LsqLvmGradientProcedure {
         }
       } else {
         value += fi;
-        for (int k = 0; k < n; k++) {
+        for (int k = 0; k < numberOfGradients; k++) {
           beta[k] -= dfiDa[k];
         }
       }

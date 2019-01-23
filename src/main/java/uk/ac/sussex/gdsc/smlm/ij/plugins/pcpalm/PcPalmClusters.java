@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
@@ -665,11 +665,11 @@ public class PcPalmClusters implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Min N", minN);
+      ParameterUtils.isAboveZero("Min N", minN);
       if (!fileInput) {
-        Parameters.isAboveZero("Distance", distance);
-        Parameters.isAboveZero("Frames", frames);
-        Parameters.isAboveZero("Area", area);
+        ParameterUtils.isAboveZero("Distance", distance);
+        ParameterUtils.isAboveZero("Frames", frames);
+        ParameterUtils.isAboveZero("Area", area);
       }
     } catch (final IllegalArgumentException ex) {
       error(ex.getMessage());

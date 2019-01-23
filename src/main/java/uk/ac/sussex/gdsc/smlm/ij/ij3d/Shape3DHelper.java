@@ -794,9 +794,9 @@ public class Shape3DHelper {
       // E.g. the icosahedron gets extra indexes to normals that are 0,0,0.
       final Pair<Point3f[], int[]> p = createIndexedObject(coords);
 
-      final Point3f[] iCoords = p.a;
+      final Point3f[] iCoords = p.item1;
       gi.setCoordinates(iCoords);
-      gi.setCoordinateIndices(p.b);
+      gi.setCoordinateIndices(p.item2);
 
       // Normals are just the vector from 0,0,0 to the vertex
       final Vector3f[] normals = new Vector3f[iCoords.length];

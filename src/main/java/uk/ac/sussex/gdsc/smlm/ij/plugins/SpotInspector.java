@@ -66,7 +66,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -92,6 +91,24 @@ public class SpotInspector implements PlugIn, MouseListener {
 
   private static int currentId;
   private int id;
+
+  private static class PeakResultRank {
+    int rank;
+    PeakResult peakResult;
+    float score;
+    float originalScore;
+
+    public PeakResultRank(PeakResult result, float score, float original) {
+      peakResult = result;
+      this.score = score;
+      originalScore = original;
+    }
+
+    static int compare(PeakResultRank o1, PeakResultRank o2) {
+      // High is better
+      return Double.compare(o2.score, o1.score);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -173,14 +190,11 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
 
     final Counter c = new Counter();
-    results.forEach(new PeakResultProcedure() {
-      @Override
-      public void execute(PeakResult r) {
-        final float[] score = getScore(r, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
-        rankedResults.add(new PeakResultRank(r, score[0], score[1]));
-      }
+    results.forEach((PeakResultProcedure) result -> {
+      final float[] score = getScore(result, c.getAndIncrement(), pp, sp, wp, hp, stdDevMax);
+      rankedResults.add(new PeakResultRank(result, score[0], score[1]));
     });
-    Collections.sort(rankedResults);
+    Collections.sort(rankedResults, PeakResultRank::compare);
 
     // Prepare results table
     final ImageJTablePeakResults table = new ImageJTablePeakResults(false, results.getName(), true);
@@ -209,9 +223,9 @@ public class SpotInspector implements PlugIn, MouseListener {
     textPanel.addMouseListener(this);
 
     // Add results to the table
-    int n = 0;
+    int count = 0;
     for (final PeakResultRank rank : rankedResults) {
-      rank.rank = n++;
+      rank.rank = count++;
       table.add(rank.peakResult);
     }
     table.end();
@@ -265,18 +279,8 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // To assist the extraction of data from the image source, process them in time order to allow
     // frame caching. Then set the appropriate slice in the result stack
-    Collections.sort(rankedResults, new Comparator<PeakResultRank>() {
-      @Override
-      public int compare(PeakResultRank o1, PeakResultRank o2) {
-        if (o1.peakResult.getFrame() < o2.peakResult.getFrame()) {
-          return -1;
-        }
-        if (o1.peakResult.getFrame() > o2.peakResult.getFrame()) {
-          return 1;
-        }
-        return 0;
-      }
-    });
+    Collections.sort(rankedResults,
+        (o1, o2) -> Integer.compare(o1.peakResult.getFrame(), o2.peakResult.getFrame()));
 
     for (final PeakResultRank rank : rankedResults) {
       final PeakResult r = rank.peakResult;
@@ -367,7 +371,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
   }
 
-  private static float[] getScore(PeakResult r, int i, PrecisionResultProcedure pp,
+  private static float[] getScore(PeakResult result, int index, PrecisionResultProcedure pp,
       StandardResultProcedure sp, WidthResultProcedure wp, HeightResultProcedure hp,
       float stdDevMax) {
     // Return score so high is better
@@ -376,40 +380,41 @@ public class SpotInspector implements PlugIn, MouseListener {
     switch (sortOrderIndex) {
       case 9: // Shift
         // We do not have the original centroid so use the original X/Y
-        score = FastMath.max(sp.x[i] - r.getOrigX() + 0.5f, sp.y[i] - r.getOrigY() + 0.5f);
+        score = FastMath.max(sp.x[index] - result.getOrigX() + 0.5f,
+            sp.y[index] - result.getOrigY() + 0.5f);
         negative = true;
         break;
       case 8: // Width factor
-        score = getFactor(FastMath.max(wp.wx[i], wp.wy[i]), stdDevMax);
+        score = getFactor(FastMath.max(wp.wx[index], wp.wy[index]), stdDevMax);
         negative = true;
         break;
       case 7:
-        score = wp.wy[i];
+        score = wp.wy[index];
         negative = true;
         break;
       case 6:
-        score = wp.wx[i];
+        score = wp.wx[index];
         negative = true;
         break;
       case 5: // Original value
-        score = r.getOrigValue();
+        score = result.getOrigValue();
         break;
       case 4: // Error
-        score = (float) r.getError();
+        score = (float) result.getError();
         negative = true;
         break;
       case 3: // Signal
-        score = (r.getIntensity());
+        score = (result.getIntensity());
         break;
       case 2: // Amplitude
-        score = hp.heights[i];
+        score = hp.heights[index];
         break;
       case 1: // Precision
-        score = (float) pp.precisions[i];
+        score = (float) pp.precisions[index];
         negative = true;
         break;
       default: // SNR
-        score = r.getIntensity() / r.getNoise();
+        score = result.getIntensity() / result.getNoise();
     }
     return new float[] {(negative) ? -score : score, score};
   }
@@ -441,36 +446,17 @@ public class SpotInspector implements PlugIn, MouseListener {
   }
 
   /**
-   * Get the relative change factor between f and g.
+   * Get the relative change factor between v1 and v2.
    *
-   * @param f the f
-   * @param g the g
+   * @param v1 the first value
+   * @param v2 the second value
    * @return the factor
    */
-  private static float getFactor(float f, float g) {
-    if (f > g) {
-      return f / g;
+  private static float getFactor(float v1, float v2) {
+    if (v1 > v2) {
+      return v1 / v2;
     }
-    return g / f;
-  }
-
-  private class PeakResultRank implements Comparable<PeakResultRank> {
-    int rank;
-    PeakResult peakResult;
-    float score;
-    float originalScore;
-
-    public PeakResultRank(PeakResult r, float s, float original) {
-      peakResult = r;
-      score = s;
-      originalScore = original;
-    }
-
-    @Override
-    public int compareTo(PeakResultRank o) {
-      // High is better
-      return Double.compare(o.score, score);
-    }
+    return v2 / v1;
   }
 
   private static boolean showDialog() {
@@ -504,8 +490,8 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Radius", radius);
-      Parameters.isAbove("Histogram bins", histogramBins, 1);
+      ParameterUtils.isAboveZero("Radius", radius);
+      ParameterUtils.isAbove("Histogram bins", histogramBins, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

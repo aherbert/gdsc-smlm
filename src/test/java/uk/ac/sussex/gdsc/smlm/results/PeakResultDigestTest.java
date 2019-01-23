@@ -169,34 +169,35 @@ public class PeakResultDigestTest {
     }
   }
 
-  private static PeakResult[] createResults(UniformRandomProvider r, int size, int n,
+  private static PeakResult[] createResults(UniformRandomProvider rng, int size, int np,
       boolean withDeviations, boolean withId, boolean withEndFrame, boolean withPrecision) {
     final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
     while (size-- > 0) {
-      final float[] params = createParams(n, r);
-      final float[] paramsDev = (withDeviations) ? createParams(n, r) : null;
-      final AttributePeakResult p = new AttributePeakResult(r.nextInt(), r.nextInt(), r.nextInt(),
-          r.nextFloat(), r.nextDouble(), r.nextFloat(), r.nextFloat(), params, paramsDev);
+      final float[] params = createParams(np, rng);
+      final float[] paramsDev = (withDeviations) ? createParams(np, rng) : null;
+      final AttributePeakResult p =
+          new AttributePeakResult(rng.nextInt(), rng.nextInt(), rng.nextInt(), rng.nextFloat(),
+              rng.nextDouble(), rng.nextFloat(), rng.nextFloat(), params, paramsDev);
       if (withId) {
-        p.setId(r.nextInt());
+        p.setId(rng.nextInt());
       }
       if (withEndFrame) {
-        // p.setEndFrame(p.getFrame() + 1 + r.nextInt(5));
-        p.setEndFrame(r.nextInt());
+        // p.setEndFrame(p.getFrame() + 1 + rng.nextInt(5));
+        p.setEndFrame(rng.nextInt());
       }
       if (withPrecision) {
-        p.setPrecision(r.nextDouble());
+        p.setPrecision(rng.nextDouble());
       }
       store.add(p);
     }
     return store.toArray();
   }
 
-  private static float[] createParams(int n, UniformRandomProvider r) {
-    final float[] p = new float[n];
-    while (n-- > 0) {
-      p[n] = r.nextFloat();
+  private static float[] createParams(int np, UniformRandomProvider rng) {
+    final float[] params = new float[np];
+    while (np-- > 0) {
+      params[np] = rng.nextFloat();
     }
-    return p;
+    return params;
   }
 }

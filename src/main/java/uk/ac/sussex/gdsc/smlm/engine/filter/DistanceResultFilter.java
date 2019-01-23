@@ -43,29 +43,29 @@ public class DistanceResultFilter extends ResultFilter {
    * Instantiates a new distance result filter.
    *
    * @param filter the filter
-   * @param d the d
-   * @param nMaxima the n maxima
+   * @param distance the distance
+   * @param numberOfMaxima the number of maxima
    */
-  public DistanceResultFilter(List<float[]> filter, float d, int nMaxima) {
-    super(filter, d, nMaxima);
-    filteredFitResults = new FitResult[nMaxima];
-    filteredIndices = new int[nMaxima];
-    peakResults = new ArrayList<>(nMaxima);
+  public DistanceResultFilter(List<float[]> filter, float distance, int numberOfMaxima) {
+    super(filter, distance, numberOfMaxima);
+    filteredFitResults = new FitResult[numberOfMaxima];
+    filteredIndices = new int[numberOfMaxima];
+    peakResults = new ArrayList<>(numberOfMaxima);
   }
 
   @Override
   public void filter(FitResult fitResult, int maxIndex, PeakResult... results) {
     boolean found = false;
-    for (final PeakResult r : results) {
-      if (r == null) {
+    for (final PeakResult result : results) {
+      if (result == null) {
         continue;
       }
       for (final float[] coord : filter) {
-        final float dx = r.getXPosition() - coord[0];
-        final float dy = r.getYPosition() - coord[1];
+        final float dx = result.getXPosition() - coord[0];
+        final float dy = result.getYPosition() - coord[1];
         if (dx * dx + dy * dy < d2) {
           found = true;
-          peakResults.add(r);
+          peakResults.add(result);
           break;
         }
       }

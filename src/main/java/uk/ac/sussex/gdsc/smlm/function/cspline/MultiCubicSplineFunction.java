@@ -37,13 +37,13 @@ import java.util.Arrays;
  */
 public class MultiCubicSplineFunction extends CubicSplineFunction {
   /** The number of splines to draw. */
-  private int n = 1;
+  private int numberOfSplines = 1;
 
   /** The gradient indices, This can be cached for the same n. */
   private int[] gradientIndices;
 
   /** The n target splines. This is cached to re-use memory */
-  private TargetSpline[] t = new TargetSpline[0];
+  private TargetSpline[] targetSplines = new TargetSpline[0];
 
   /**
    * The working splines for the current evaluation.
@@ -51,10 +51,10 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
   private TargetSpline[] working;
 
   /**
-   * The number of working splines. This is <=n depending on whether the spline is within the target
-   * region for each point.
+   * The number of working splines. This is <=numberOfSplines depending on whether the spline is
+   * within the target region for each point.
    */
-  private int w;
+  private int workingCount;
 
   /**
    * The working splines for the current evaluation of the current y-index.
@@ -65,7 +65,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
    * The number of working splines for the current y-index. This is <=w depending on whether the
    * working spline is within the target region for Y..
    */
-  private int wY;
+  private int workingCountY;
 
   /**
    * Instantiates a new cubic spline function.
@@ -100,7 +100,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
 
   @Override
   public int getN() {
-    return n;
+    return numberOfSplines;
   }
 
   /**
@@ -113,10 +113,10 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     if (n < 1) {
       throw new IllegalArgumentException();
     }
-    if (n != this.n) {
+    if (n != this.numberOfSplines) {
       gradientIndices = null;
     }
-    this.n = n;
+    this.numberOfSplines = n;
   }
 
   @Override
@@ -129,59 +129,59 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
 
   @Override
   public int getNumberOfGradients() {
-    return 1 + 4 * n;
+    return 1 + 4 * numberOfSplines;
   }
 
   @Override
-  protected void initialise(double[] a, int order) {
-    tb = a[PeakResult.BACKGROUND];
+  protected void initialise(double[] parameters, int order) {
+    tb = parameters[PeakResult.BACKGROUND];
     // Ensure we have enough room
-    if (t.length < n) {
-      int index = t.length;
-      t = Arrays.copyOf(t, n); // Preserve memory space
+    if (targetSplines.length < numberOfSplines) {
+      int index = targetSplines.length;
+      targetSplines = Arrays.copyOf(targetSplines, numberOfSplines); // Preserve memory space
       final boolean sp = splines[0][0].isSinglePrecision();
-      while (index < n) {
-        t[index++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
+      while (index < numberOfSplines) {
+        targetSplines[index++] = (sp) ? new FloatTargetSpline() : new DoubleTargetSpline();
       }
-      working = new TargetSpline[n];
-      workingY = new TargetSpline[n];
+      working = new TargetSpline[numberOfSplines];
+      workingY = new TargetSpline[numberOfSplines];
     }
     // Convert the target parameters to spline offset tables
-    w = 0;
-    for (int i = 0, j = PeakResult.INTENSITY; i < n; i++) {
-      final double tI = a[j++];
-      final double tX = a[j++];
-      final double tY = a[j++];
-      final double tZ = a[j++];
-      if (t[i].initialise(i, tI, tX, tY, tZ, order)) {
-        working[w++] = t[i];
+    workingCount = 0;
+    for (int i = 0, j = PeakResult.INTENSITY; i < numberOfSplines; i++) {
+      final double tI = parameters[j++];
+      final double tX = parameters[j++];
+      final double tY = parameters[j++];
+      final double tZ = parameters[j++];
+      if (targetSplines[i].initialise(i, tI, tX, tY, tZ, order)) {
+        working[workingCount++] = targetSplines[i];
       }
     }
   }
 
   @Override
   public void forEach(ValueProcedure procedure) {
-    for (int n = 0; n < w; n++) {
+    for (int n = 0; n < workingCount; n++) {
       working[n].reset();
     }
 
     for (int y = 0; y < maxy; y++) {
       // Get the working targets for this Y
-      wY = 0;
-      for (int n = 0; n < w; n++) {
+      workingCountY = 0;
+      for (int n = 0; n < workingCount; n++) {
         if (working[n].isNextYActive()) {
-          workingY[wY++] = working[n];
+          workingY[workingCountY++] = working[n];
         }
       }
 
-      if (wY == 0) {
+      if (workingCountY == 0) {
         for (int x = 0; x < maxx; x++) {
           procedure.execute(tb);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
           double intensity = tb;
-          for (int n = 0; n < wY; n++) {
+          for (int n = 0; n < workingCountY; n++) {
             intensity += workingY[n].value(x);
           }
           procedure.execute(intensity);
@@ -195,27 +195,27 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     final double[] duda = new double[getNumberOfGradients()];
     duda[0] = 1.0;
 
-    for (int n = 0; n < w; n++) {
+    for (int n = 0; n < workingCount; n++) {
       working[n].reset();
     }
 
     for (int y = 0; y < maxy; y++) {
       // Get the working targets for this Y
-      wY = 0;
-      for (int n = 0; n < w; n++) {
+      workingCountY = 0;
+      for (int n = 0; n < workingCount; n++) {
         if (working[n].isNextYActive(duda)) {
-          workingY[wY++] = working[n];
+          workingY[workingCountY++] = working[n];
         }
       }
 
-      if (wY == 0) {
+      if (workingCountY == 0) {
         for (int x = 0; x < maxx; x++) {
           procedure.execute(tb, duda);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
           double intensity = tb;
-          for (int n = 0; n < wY; n++) {
+          for (int n = 0; n < workingCountY; n++) {
             intensity += workingY[n].value(x, duda);
           }
           procedure.execute(intensity, duda);
@@ -230,27 +230,27 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     final double[] d2uda2 = new double[getNumberOfGradients()];
     duda[0] = 1.0;
 
-    for (int n = 0; n < w; n++) {
+    for (int n = 0; n < workingCount; n++) {
       working[n].reset();
     }
 
     for (int y = 0; y < maxy; y++) {
       // Get the working targets for this Y
-      wY = 0;
-      for (int n = 0; n < w; n++) {
+      workingCountY = 0;
+      for (int n = 0; n < workingCount; n++) {
         if (working[n].isNextYActive(duda, d2uda2)) {
-          workingY[wY++] = working[n];
+          workingY[workingCountY++] = working[n];
         }
       }
 
-      if (wY == 0) {
+      if (workingCountY == 0) {
         for (int x = 0; x < maxx; x++) {
           procedure.execute(tb, duda, d2uda2);
         }
       } else {
         for (int x = 0; x < maxx; x++) {
           double intensity = tb;
-          for (int n = 0; n < wY; n++) {
+          for (int n = 0; n < workingCountY; n++) {
             intensity += workingY[n].value(x, duda, d2uda2);
           }
           procedure.execute(intensity, duda, d2uda2);
@@ -272,7 +272,7 @@ public class MultiCubicSplineFunction extends CubicSplineFunction {
     }
 
     final int peak = getPeak(parameterIndex);
-    for (int n = 0; n < w; n++) {
+    for (int n = 0; n < workingCount; n++) {
       if (working[n].id == peak) {
         return working[n].isNodeBoundary(dimension - 1);
       }

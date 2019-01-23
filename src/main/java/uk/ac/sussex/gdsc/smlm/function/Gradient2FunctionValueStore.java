@@ -37,64 +37,64 @@ public class Gradient2FunctionValueStore extends ValueFunctionStore
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public Gradient2FunctionValueStore(ValueFunction f) {
-    super(f);
+  public Gradient2FunctionValueStore(ValueFunction function) {
+    super(function);
   }
 
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public Gradient2FunctionValueStore(Gradient1Function f) {
-    super(f);
-    this.f1 = f;
+  public Gradient2FunctionValueStore(Gradient1Function function) {
+    super(function);
+    this.f1 = function;
   }
 
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    */
-  public Gradient2FunctionValueStore(Gradient2Function f) {
-    super(f);
-    this.f1 = f;
-    this.f2 = f;
+  public Gradient2FunctionValueStore(Gradient2Function function) {
+    super(function);
+    this.f1 = function;
+    this.f2 = function;
   }
 
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    */
-  public Gradient2FunctionValueStore(ValueFunction f, double[] values) {
-    super(f, values);
+  public Gradient2FunctionValueStore(ValueFunction function, double[] values) {
+    super(function, values);
   }
 
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    */
-  public Gradient2FunctionValueStore(Gradient1Function f, double[] values) {
-    super(f, values);
-    this.f1 = f;
+  public Gradient2FunctionValueStore(Gradient1Function function, double[] values) {
+    super(function, values);
+    this.f1 = function;
   }
 
   /**
    * Instantiates a new gradient 2 function store.
    *
-   * @param f the f
+   * @param function the function
    * @param values the values
    */
-  public Gradient2FunctionValueStore(Gradient2Function f, double[] values) {
-    super(f, values);
-    this.f1 = f;
-    this.f2 = f;
+  public Gradient2FunctionValueStore(Gradient2Function function, double[] values) {
+    super(function, values);
+    this.f1 = function;
+    this.f2 = function;
   }
 
   @Override

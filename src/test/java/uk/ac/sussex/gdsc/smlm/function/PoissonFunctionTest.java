@@ -74,7 +74,7 @@ public class PoissonFunctionTest {
     final double o = mu;
 
     final PoissonFunction f = new PoissonFunction(1.0 / gain);
-    double p = 0;
+    double pvalue = 0;
 
     final TDoubleArrayList values = new TDoubleArrayList();
 
@@ -91,15 +91,15 @@ public class PoissonFunctionTest {
     for (int x = min; x <= max; x++) {
       final double pp = f.likelihood(x, o);
       // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
-      p += pp;
+      pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
         maxp = pp;
         maxc = x;
       }
     }
-    if (p > 1.01) {
-      Assertions.fail("P > 1: " + p);
+    if (pvalue > 1.01) {
+      Assertions.fail("P > 1: " + pvalue);
     }
 
     // We have most of the probability density.
@@ -111,13 +111,13 @@ public class PoissonFunctionTest {
         min = x;
         final double pp = f.likelihood(x, o);
         // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
-        p += pp;
+        pvalue += pp;
         values.add(pp);
         if (maxp < pp) {
           maxp = pp;
           maxc = x;
         }
-        if (pp == 0 || pp / p < changeTolerance) {
+        if (pp == 0 || pp / pvalue < changeTolerance) {
           break;
         }
       }
@@ -127,13 +127,13 @@ public class PoissonFunctionTest {
       max = x;
       final double pp = f.likelihood(x, o);
       // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
-      p += pp;
+      pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
         maxp = pp;
         maxc = x;
       }
-      if (pp == 0 || pp / p < changeTolerance) {
+      if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
       }
     }
@@ -158,7 +158,7 @@ public class PoissonFunctionTest {
 
     logger
         .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d",
-            gain, mu, o, p, minx, maxp, maxc, maxx));
+            gain, mu, o, pvalue, minx, maxp, maxc, maxx));
     return new int[] {minx, maxx};
   }
 

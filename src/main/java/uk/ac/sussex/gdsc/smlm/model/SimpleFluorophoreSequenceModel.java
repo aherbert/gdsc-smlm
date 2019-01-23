@@ -33,14 +33,15 @@ public class SimpleFluorophoreSequenceModel extends FluorophoreSequenceModel {
    *
    * @param id The identifier
    * @param xyz The [x,y,z] coordinates
-   * @param tAct The time the fluorophore turned on
-   * @param tOn The time the fluorophore was on
+   * @param activationTime The time the fluorophore turned on
+   * @param onTime The time the fluorophore was on
    */
-  public SimpleFluorophoreSequenceModel(int id, double[] xyz, double tAct, double tOn) {
+  public SimpleFluorophoreSequenceModel(int id, double[] xyz, double activationTime,
+      double onTime) {
     super(id, xyz);
-    if (tOn < 0) {
-      tOn = 0;
+    if (onTime < 0) {
+      onTime = 0;
     }
-    setBurstSequence(new double[] {tAct, tAct + tOn});
+    setBurstSequence(new double[] {activationTime, activationTime + onTime});
   }
 }

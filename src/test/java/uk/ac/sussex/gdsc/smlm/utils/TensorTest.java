@@ -68,22 +68,23 @@ public class TensorTest {
     Assertions.assertTrue(t.hasDecomposition());
     final double[] com = t.getCentreOfMass();
     Assertions.assertArrayEquals(new double[] {1, 1, 0}, com);
-    final double[] v = t.getEigenValues();
-    final double[][] vv = t.getEigenVectors();
-    print(com, v, vv);
-    for (int i = 1; i < v.length; i++) {
-      Assertions.assertTrue(v[i - 1] >= v[i]);
+    final double[] values = t.getEigenValues();
+    final double[][] vectors = t.getEigenVectors();
+    print(com, values, vectors);
+    for (int i = 1; i < values.length; i++) {
+      Assertions.assertTrue(values[i - 1] >= values[i]);
     }
   }
 
-  private static void print(double[] com, double[] v, double[][] vv) {
+  private static void print(double[] com, double[] values, double[][] vectors) {
     if (logger.isLoggable(Level.INFO)) {
       final StringBuilder sb = new StringBuilder();
       final String newLine = System.getProperty("line.separator");
       sb.append(String.format("%scom = %s", newLine, Arrays.toString(com)));
-      for (int i = 0; i < v.length; i++) {
-        sb.append(String.format("%s[%d] %f = %s  %.2f", newLine, i, v[i],
-            java.util.Arrays.toString(vv[i]), 180.0 * Math.atan2(vv[i][1], vv[i][0]) / Math.PI));
+      for (int i = 0; i < values.length; i++) {
+        sb.append(String.format("%s[%d] %f = %s  %.2f", newLine, i, values[i],
+            java.util.Arrays.toString(vectors[i]),
+            180.0 * Math.atan2(vectors[i][1], vectors[i][0]) / Math.PI));
       }
       logger.info(sb.toString());
     }

@@ -294,26 +294,26 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Initial SD0", initialPeakStdDev0);
-      Parameters.isAboveZero("Initial SD1", initialPeakStdDev1);
-      Parameters.isPositive("Initial angle", initialPeakAngle);
-      Parameters.isPositive("Number of peaks", settings.getNumberOfPeaks());
-      Parameters.isAboveZero("P-value", settings.getPValue());
-      Parameters.isEqualOrBelow("P-value", settings.getPValue(), 0.5);
+      ParameterUtils.isAboveZero("Initial SD0", initialPeakStdDev0);
+      ParameterUtils.isAboveZero("Initial SD1", initialPeakStdDev1);
+      ParameterUtils.isPositive("Initial angle", initialPeakAngle);
+      ParameterUtils.isPositive("Number of peaks", settings.getNumberOfPeaks());
+      ParameterUtils.isAboveZero("P-value", settings.getPValue());
+      ParameterUtils.isEqualOrBelow("P-value", settings.getPValue(), 0.5);
       if (settings.getShowHistograms()) {
-        Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
+        ParameterUtils.isAboveZero("Histogram bins", settings.getHistogramBins());
       }
-      Parameters.isAboveZero("Search width", config.getSearch());
-      Parameters.isAboveZero("Fitting width", config.getFitting());
+      ParameterUtils.isAboveZero("Search width", config.getSearch());
+      ParameterUtils.isAboveZero("Fitting width", config.getFitting());
       // Can be negative to disable
       // Parameters.isPositive("Failures limit", config.getFailuresLimit());
-      Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
-      Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
-      Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-      Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-      Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
-      Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-      Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
+      ParameterUtils.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
+      ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
+      ParameterUtils.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+      ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
+      ParameterUtils.isPositive("Min photons", fitConfig.getMinPhotons());
+      ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+      ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

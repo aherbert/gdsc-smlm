@@ -599,11 +599,11 @@ public class ResultsManager implements PlugIn {
       if (imageSettings.getImageType() == ResultsImageType.DRAW_INTENSITY_AVERAGE_PRECISION
           || imageSettings
               .getImageType() == ResultsImageType.DRAW_LOCALISATIONS_AVERAGE_PRECISION) {
-        Parameters.isAboveZero("Image precision", imageSettings.getAveragePrecision());
+        ParameterUtils.isAboveZero("Image precision", imageSettings.getAveragePrecision());
       }
-      Parameters.isAboveZero("Image scale", imageSettings.getScale());
+      ParameterUtils.isAboveZero("Image scale", imageSettings.getScale());
       if (extraOptions) {
-        Parameters.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
+        ParameterUtils.isPositive("Image rolling window", imageSettings.getRollingWindowSize());
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());

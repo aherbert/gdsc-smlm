@@ -66,12 +66,12 @@ public class FixedNonLinearFunction implements NonLinearFunction {
   }
 
   @Override
-  public double evalw(int x, double[] dyda, double[] w) {
+  public double evalw(int x, double[] dyda, double[] weight) {
     return values[x];
   }
 
   @Override
-  public double evalw(int x, double[] w) {
+  public double evalw(int x, double[] weight) {
     return values[x];
   }
 

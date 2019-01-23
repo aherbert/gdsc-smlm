@@ -54,25 +54,25 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
   /**
    * Check the gradient has the correct length for the function values.
    *
-   * @param g the gradient
+   * @param gradient the gradient
    * @return the number of gradients
    */
-  protected int checkGradient(double[][] g) {
-    if (g == null) {
+  protected int checkGradient(double[][] gradient) {
+    if (gradient == null) {
       throw new IllegalArgumentException("Gradient is null");
     }
-    if (g.length != values.length) {
+    if (gradient.length != values.length) {
       throw new IllegalArgumentException("Gradient is not same size as values");
     }
-    if (g.length == 0) {
+    if (gradient.length == 0) {
       return 0;
     }
-    if (g[0] == null) {
+    if (gradient[0] == null) {
       throw new IllegalArgumentException("Gradient[0][] is null");
     }
-    final int n = g[0].length;
-    for (int i = 1; i < g.length; i++) {
-      if (g[i] == null || g[i].length != n) {
+    final int n = gradient[0].length;
+    for (int i = 1; i < gradient.length; i++) {
+      if (gradient[i] == null || gradient[i].length != n) {
         throw new IllegalArgumentException("Gradient[" + i + "][] is incorrect size");
       }
     }

@@ -39,38 +39,38 @@ import org.junit.jupiter.api.Test;
 public class CubicSplineCalculatorTest {
   @Test
   public void canComputeCoefficientsForDistanceFunction() {
-    final double[] e = new double[64];
-    int c = 0;
+    final double[] exp = new double[64];
+    int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
-          e[c++] = Math.sqrt(i * i + j * j + k * k);
+          exp[count++] = Math.sqrt(i * i + j * j + k * k);
         }
       }
     }
-    final CustomTricubicFunction f = CustomTricubicFunction.create(e);
+    final CustomTricubicFunction f = CustomTricubicFunction.create(exp);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);
     }
     final double[][][] value = new double[4][4][4];
     final double[] b = new double[64];
-    c = 0;
+    count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
           value[i][j][k] = f.value(s[i], s[j], s[k]);
-          b[c++] = value[i][j][k];
+          b[count++] = value[i][j][k];
         }
       }
     }
 
     final CubicSplineCalculator calc = new CubicSplineCalculator();
-    double[] o = calc.compute(value);
-    Assertions.assertArrayEquals(e, o, 1e-6);
+    double[] obs = calc.compute(value);
+    Assertions.assertArrayEquals(exp, obs, 1e-6);
 
-    o = calc.compute(b);
-    Assertions.assertArrayEquals(e, o, 1e-6);
+    obs = calc.compute(b);
+    Assertions.assertArrayEquals(exp, obs, 1e-6);
   }
 
   @Test
@@ -88,47 +88,47 @@ public class CubicSplineCalculatorTest {
     final CustomTricubicInterpolatingFunction f1 =
         new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval);
 
-    final double[] e = f1.getCoefficients(1, 1, 1);
+    final double[] exp = f1.getCoefficients(1, 1, 1);
 
-    final CustomTricubicFunction f = CustomTricubicFunction.create(e);
+    final CustomTricubicFunction f = CustomTricubicFunction.create(exp);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);
     }
     final double[][][] value = new double[4][4][4];
     final double[] b = new double[64];
-    int c = 0;
+    int count = 0;
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
           value[i][j][k] = f.value(s[i], s[j], s[k]);
-          b[c++] = value[i][j][k];
+          b[count++] = value[i][j][k];
         }
       }
     }
 
     final CubicSplineCalculator calc = new CubicSplineCalculator();
-    double[] o = calc.compute(value);
-    Assertions.assertArrayEquals(e, o, 1e-6);
+    double[] obs = calc.compute(value);
+    Assertions.assertArrayEquals(exp, obs, 1e-6);
 
-    o = calc.compute(b);
-    Assertions.assertArrayEquals(e, o, 1e-6);
+    obs = calc.compute(b);
+    Assertions.assertArrayEquals(exp, obs, 1e-6);
   }
 
-  double[][][] createData(int x, int y, int z, UniformRandomProvider r) {
+  double[][][] createData(int x, int y, int z, UniformRandomProvider rng) {
     final double[][][] fval = new double[x][y][z];
     // Create a 2D Gaussian
-    double s = 1.0;
+    double sd = 1.0;
     double cx = x / 2.0;
     double cy = y / 2.0;
-    if (r != null) {
-      s += r.nextDouble() - 0.5;
-      cx += r.nextDouble() - 0.5;
-      cy += r.nextDouble() - 0.5;
+    if (rng != null) {
+      sd += rng.nextDouble() - 0.5;
+      cx += rng.nextDouble() - 0.5;
+      cy += rng.nextDouble() - 0.5;
     }
     final double[] otherx = new double[x];
     for (int zz = 0; zz < z; zz++) {
-      final double s2 = 2 * s * s;
+      final double s2 = 2 * sd * sd;
       for (int xx = 0; xx < x; xx++) {
         otherx[xx] = MathUtils.pow2(xx - cx) / s2;
       }
@@ -139,7 +139,7 @@ public class CubicSplineCalculatorTest {
         }
       }
       // Move Gaussian
-      s += 0.1;
+      sd += 0.1;
       cx += 0.1;
       cy -= 0.05;
     }

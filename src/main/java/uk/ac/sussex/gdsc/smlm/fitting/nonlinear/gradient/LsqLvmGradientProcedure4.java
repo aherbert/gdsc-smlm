@@ -46,7 +46,7 @@ public class LsqLvmGradientProcedure4 extends LsqLvmGradientProcedure {
    */
   public LsqLvmGradientProcedure4(final double[] y, final Gradient1Function func) {
     super(y, func);
-    if (n != 4) {
+    if (numberOfGradients != 4) {
       throw new IllegalArgumentException("Function must compute 4 gradients");
     }
   }
@@ -61,7 +61,7 @@ public class LsqLvmGradientProcedure4 extends LsqLvmGradientProcedure {
   public LsqLvmGradientProcedure4(final double[] y, final double[] baseline,
       final Gradient1Function func) {
     super(y, baseline, func);
-    if (n != 4) {
+    if (numberOfGradients != 4) {
       throw new IllegalArgumentException("Function must compute 4 gradients");
     }
   }

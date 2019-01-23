@@ -73,6 +73,8 @@ import java.util.regex.Pattern;
 public class SpotFit implements PlugIn {
   private static final String TITLE = "Spot Fit";
 
+  private static SpotFitPluginTool toolInstance;
+
   /**
    * All the work for this plugin is done with the plugin tool. It handles mouse click events from
    * an image.
@@ -84,7 +86,7 @@ public class SpotFit implements PlugIn {
     private boolean active = true;
     private boolean logging;
 
-    private final BlockMeanFilter f = new BlockMeanFilter();
+    private final BlockMeanFilter filter = new BlockMeanFilter();
     private final FitConfiguration config;
     private SimplePeakResultValidationData validationData;
     private final Gaussian2DFitter gf;
@@ -261,7 +263,7 @@ public class SpotFit implements PlugIn {
       final float[] data =
           new ImageConverter().getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
       // Smooth
-      f.blockFilter(data, bounds.width, bounds.height, 1);
+      filter.blockFilter(data, bounds.width, bounds.height, 1);
       int index = 0;
       // Find maxima
       for (int i = 1; i < data.length; i++) {
@@ -402,9 +404,9 @@ public class SpotFit implements PlugIn {
 
     private void addOverlay(ImagePlus imp, int channel, int slice, int frame, FitResult fitResult) {
       final double[] params = fitResult.getParameters();
-      Overlay o = imp.getOverlay();
-      if (o == null) {
-        o = new Overlay();
+      Overlay overlay = imp.getOverlay();
+      if (overlay == null) {
+        overlay = new Overlay();
       }
       final PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION],
           params[Gaussian2DFunction.Y_POSITION]);
@@ -414,8 +416,8 @@ public class SpotFit implements PlugIn {
       } else if (settings.getAttachToSlice()) {
         roi.setPosition(imp.getCurrentSlice());
       }
-      o.add(roi);
-      imp.setOverlay(o);
+      overlay.add(roi);
+      imp.setOverlay(overlay);
     }
 
     private void removeSpots(ImagePlus imp, int channel, int slice, int frame, int x, int y,
@@ -429,11 +431,11 @@ public class SpotFit implements PlugIn {
       final boolean isDisplayedHyperStack = imp.isDisplayedHyperStack();
 
       // Remove all the overlay components
-      Overlay o = imp.getOverlay();
-      if (o != null) {
-        final Roi[] rois = o.toArray();
-        final int size = o.size();
-        o = new Overlay();
+      Overlay overlay = imp.getOverlay();
+      if (overlay != null) {
+        final Roi[] rois = overlay.toArray();
+        final int size = overlay.size();
+        overlay = new Overlay();
         for (int i = 0; i < rois.length; i++) {
           if (rois[i] instanceof PointRoi) {
             final PointRoi roi = (PointRoi) rois[i];
@@ -450,13 +452,13 @@ public class SpotFit implements PlugIn {
               }
             }
           }
-          o.add(rois[i]);
+          overlay.add(rois[i]);
         }
-        if (o.size() != size) {
-          if (o.size() == 0) {
+        if (overlay.size() != size) {
+          if (overlay.size() == 0) {
             imp.setOverlay(null);
           } else {
-            imp.setOverlay(o);
+            imp.setOverlay(overlay);
           }
         }
       }
@@ -504,8 +506,6 @@ public class SpotFit implements PlugIn {
       }
     }
   }
-
-  private static SpotFitPluginTool toolInstance;
 
   /**
    * Initialise the spot fit tool. This is to allow support for calling within macro toolsets.

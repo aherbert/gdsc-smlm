@@ -86,7 +86,7 @@ public class ImageBackground implements PlugInFilter {
 
     // Check arguments
     try {
-      Parameters.isPositive("Bias", bias);
+      ParameterUtils.isPositive("Bias", bias);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return DONE;

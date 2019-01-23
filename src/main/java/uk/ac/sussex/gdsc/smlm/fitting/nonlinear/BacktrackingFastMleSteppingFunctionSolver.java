@@ -135,7 +135,7 @@ public class BacktrackingFastMleSteppingFunctionSolver extends FastMleSteppingFu
       ll = gradientProcedure.computePseudoLogLikelihood();
 
       searchDirection = new double[a.length];
-      aOld = a.clone();
+      oldA = a.clone();
 
       return ll;
     }
@@ -144,14 +144,14 @@ public class BacktrackingFastMleSteppingFunctionSolver extends FastMleSteppingFu
     // backtracking if the value does not improve with the full Newton step.
     for (int i = 0; i < searchDirection.length; i++) {
       // Configure the search direction with the full Newton step
-      searchDirection[i] = a[i] - aOld[i];
+      searchDirection[i] = a[i] - oldA[i];
     }
 
-    aOld = lineSearch.lineSearch(aOld, ll, gradientProcedure.d1, searchDirection);
+    oldA = lineSearch.lineSearch(oldA, ll, gradientProcedure.d1, searchDirection);
     ll = lineSearch.functionValue;
 
     // Update the parameters to reflect any backtracking
-    System.arraycopy(aOld, 0, a, 0, a.length);
+    System.arraycopy(oldA, 0, a, 0, a.length);
 
     return ll;
   }
@@ -162,7 +162,7 @@ public class BacktrackingFastMleSteppingFunctionSolver extends FastMleSteppingFu
       // After backtracking we must compute the derivatives.
       // Note we leave it to here (and not after the line search) so it
       // can be skipped if convergence is achieved.
-      computeGradients(aOld);
+      computeGradients(oldA);
     }
     super.computeStep(step);
   }
@@ -195,7 +195,7 @@ public class BacktrackingFastMleSteppingFunctionSolver extends FastMleSteppingFu
     // If backtracking was done then initialisation has only been done for the value.
     // Reinitialise using the current optimum.
 
-    procedure.computeFisherInformation(aOld); // Use current optimum
+    procedure.computeFisherInformation(oldA); // Use current optimum
   }
 
   /**

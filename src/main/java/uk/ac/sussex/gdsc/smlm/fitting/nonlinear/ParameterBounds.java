@@ -119,23 +119,23 @@ public class ParameterBounds {
    * <p>See Stetson PB (1987) DAOPHOT: A compute program for crowded-field stellar photometry. Publ
    * Astrom Soc Pac 99:191-222. pp207-208
    *
-   * @param u the update parameter
-   * @param k the parameter index
+   * @param update the update parameter
+   * @param parameterIndex the parameter index
    * @return the clamping value
    */
-  private double clamp(double u, int k) {
-    if (u == 0) {
+  private double clamp(double update, int parameterIndex) {
+    if (update == 0) {
       // Nothing to clamp
       return 1.0;
     }
 
-    double ck = clamp[k];
+    double ck = clamp[parameterIndex];
     if (dynamicClamp) {
       // If the sign has changed then reduce the clamp factor
-      final int newDir = (u > 0) ? 1 : -1;
+      final int newDir = (update > 0) ? 1 : -1;
 
       // This addition overcomes the issue when the direction vector is new (i.e. zero filled)
-      if (newDir + dir[k] == 0) {
+      if (newDir + dir[parameterIndex] == 0) {
         // Note: By reducing the size of the clamping factor we are restricting the movement
         ck *= 0.5;
       }
@@ -144,7 +144,7 @@ public class ParameterBounds {
     }
 
     // Denominator for clamping function
-    return 1 + (Math.abs(u) / ck);
+    return 1 + (Math.abs(update) / ck);
   }
 
   /**

@@ -267,29 +267,29 @@ public class Configuration
 
     // Check arguments
     try {
-      Parameters.isAboveZero("nm per pixel", calibrationWriter.getNmPerPixel());
-      Parameters.isAboveZero("Exposure time", calibrationWriter.getExposureTime());
+      ParameterUtils.isAboveZero("nm per pixel", calibrationWriter.getNmPerPixel());
+      ParameterUtils.isAboveZero("Exposure time", calibrationWriter.getExposureTime());
       if (fitConfig.getPsfTypeValue() != PSFType.ASTIGMATIC_GAUSSIAN_2D_VALUE) {
-        Parameters.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
+        ParameterUtils.isAboveZero("Initial SD0", fitConfig.getInitialXSd());
         if (fitConfig.getPsf().getParametersCount() > 1) {
-          Parameters.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
+          ParameterUtils.isAboveZero("Initial SD1", fitConfig.getInitialYSd());
         }
       }
-      Parameters.isAboveZero("Search_width", config.getSearch());
-      Parameters.isAboveZero("Fitting_width", config.getFitting());
+      ParameterUtils.isAboveZero("Search_width", config.getSearch());
+      ParameterUtils.isAboveZero("Fitting_width", config.getFitting());
       // Can be negative to disable
       // Parameters.isPositive("Failures limit", config.getFailuresLimit());
-      Parameters.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
-      Parameters.isPositive("Residuals threshold", config.getResidualsThreshold());
-      Parameters.isPositive("Duplicate distance", config.getDuplicateDistance());
+      ParameterUtils.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
+      ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
+      ParameterUtils.isPositive("Duplicate distance", config.getDuplicateDistance());
 
       if (!fitConfig.isSmartFilter()) {
-        Parameters.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
-        Parameters.isPositive("Signal strength", fitConfig.getSignalStrength());
-        Parameters.isPositive("Min photons", fitConfig.getMinPhotons());
-        Parameters.isPositive("Min width factor", fitConfig.getMinWidthFactor());
-        Parameters.isPositive("Width factor", fitConfig.getMaxWidthFactor());
-        Parameters.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
+        ParameterUtils.isPositive("Coordinate Shift factor", fitConfig.getCoordinateShiftFactor());
+        ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
+        ParameterUtils.isPositive("Min photons", fitConfig.getMinPhotons());
+        ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
+        ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
+        ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());

@@ -544,12 +544,12 @@ public class CmosAnalysis implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Offset", offset);
-      Parameters.isAboveZero("Variance", variance);
-      Parameters.isAboveZero("Gain", gain);
-      Parameters.isAboveZero("Gain SD", gainSD);
-      Parameters.isAboveZero("Size", size);
-      Parameters.isAboveZero("Frames", frames);
+      ParameterUtils.isAboveZero("Offset", offset);
+      ParameterUtils.isAboveZero("Variance", variance);
+      ParameterUtils.isAboveZero("Gain", gain);
+      ParameterUtils.isAboveZero("Gain SD", gainSD);
+      ParameterUtils.isAboveZero("Size", size);
+      ParameterUtils.isAboveZero("Frames", frames);
     } catch (final IllegalArgumentException ex) {
       ImageJUtils.log(TITLE + ": " + ex.getMessage());
       return false;

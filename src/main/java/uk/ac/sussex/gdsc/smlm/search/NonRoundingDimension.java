@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.search;
 
 /**
- * Null implementation of the Dimension interface that does not perform rounding.
+ * Null implementation of the {@link Dimension} interface that does not perform rounding.
  */
 class NonRoundingDimension implements Dimension {
   @Override
@@ -59,7 +59,7 @@ class NonRoundingDimension implements Dimension {
   }
 
   @Override
-  public boolean isAtBounds(double v) {
+  public boolean isAtBounds(double value) {
     return false;
   }
 

@@ -26,11 +26,17 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 
 @SuppressWarnings({"javadoc"})
 public class ExpectedUnit<T> {
-  final T u;
+  final T unit;
   final double value;
 
-  public ExpectedUnit(T u, double value) {
-    this.u = u;
+  /**
+   * Instantiates a new expected unit.
+   *
+   * @param unit the unit
+   * @param value the value
+   */
+  public ExpectedUnit(T unit, double value) {
+    this.unit = unit;
     this.value = value;
   }
 }

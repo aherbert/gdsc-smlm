@@ -67,6 +67,7 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.awt.AWTEvent;
@@ -176,8 +177,9 @@ public class PsfDrift implements PlugIn {
 
     public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width,
         FitConfiguration fitConfig) {
+      RandomGenerator rng = new Well19937c();
       this.jobs = jobs;
-      this.psf = psf.copy();
+      this.psf = psf.copy(rng);
       this.fitConfig2 = fitConfig.clone();
       sx = fitConfig.getInitialXSd();
       sy = fitConfig.getInitialYSd();
@@ -186,7 +188,7 @@ public class PsfDrift implements PlugIn {
       this.width = width;
       w2 = width * width;
       if (useSampling) {
-        random = new RandomDataGenerator(new Well19937c());
+        random = new RandomDataGenerator(rng);
       } else {
         random = null;
       }

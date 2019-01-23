@@ -33,18 +33,18 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class Pair<A, B> {
   /** First item of the pair. */
-  public final A a;
+  public final A item1;
   /** Second item of the pair. */
-  public final B b;
+  public final B item2;
 
   /**
    * Instantiates a new pair.
    *
-   * @param a the first item of the pair
-   * @param b the second item of the pair
+   * @param item1 the first item of the pair
+   * @param item2 the second item of the pair
    */
-  public Pair(A a, B b) {
-    this.a = a;
-    this.b = b;
+  public Pair(A item1, B item2) {
+    this.item1 = item1;
+    this.item2 = item2;
   }
 }

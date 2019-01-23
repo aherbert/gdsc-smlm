@@ -37,14 +37,14 @@ public class IntegralValueProcedure implements ValueProcedure {
   /**
    * Gets the integral.
    *
-   * @param f the function
-   * @param a the function coefficients
+   * @param function the function
+   * @param parameters the function coefficients
    * @return the integral
    */
-  public double getIntegral(ValueFunction f, double[] a) {
+  public double getIntegral(ValueFunction function, double[] parameters) {
     integral = 0;
-    f.initialise0(a);
-    f.forEach(this);
+    function.initialise0(parameters);
+    function.forEach(this);
     return integral;
   }
 

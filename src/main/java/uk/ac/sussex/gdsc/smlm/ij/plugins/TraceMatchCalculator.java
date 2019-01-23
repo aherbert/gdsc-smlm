@@ -150,8 +150,8 @@ public class TraceMatchCalculator implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Distance threshold", dThreshold);
-      Parameters.isPositive("Beta", beta);
+      ParameterUtils.isAboveZero("Distance threshold", dThreshold);
+      ParameterUtils.isPositive("Beta", beta);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

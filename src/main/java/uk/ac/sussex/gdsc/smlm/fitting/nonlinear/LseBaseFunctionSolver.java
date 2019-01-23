@@ -130,6 +130,9 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
     return getResidualSumOfSquares() / (getNumberOfFittedPoints() - getNumberOfFittedParameters());
   }
 
+  // Allow I and E as they have special meaning in the formula.
+  // @CHECKSTYLE.OFF: ParameterName
+
   /**
    * Compute the covariance matrix of the parameters of the function assuming a least squares fit of
    * a Poisson process.
@@ -166,13 +169,13 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
     final double[][] covar = new double[n][n];
     for (int a = 0; a < n; a++) {
       for (int b = 0; b < n; b++) {
-        double v = 0;
+        double var = 0;
         for (int ap = 0; ap < n; ap++) {
           for (int bp = 0; bp < n; bp++) {
-            v += I[a][ap] * E[ap][bp] * I[bp][b];
+            var += I[a][ap] * E[ap][bp] * I[bp][b];
           }
         }
-        covar[a][b] = v;
+        covar[a][b] = var;
       }
     }
 
@@ -215,13 +218,13 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
     final double[] covar = new double[n];
     for (int a = 0; a < n; a++) {
       // Note: b==a as we only do the diagonal
-      double v = 0;
+      double var = 0;
       for (int ap = 0; ap < n; ap++) {
         for (int bp = 0; bp < n; bp++) {
-          v += I[a][ap] * E[ap][bp] * I[bp][a];
+          var += I[a][ap] * E[ap][bp] * I[bp][a];
         }
       }
-      covar[a] = v;
+      covar[a] = var;
     }
 
     return covar;

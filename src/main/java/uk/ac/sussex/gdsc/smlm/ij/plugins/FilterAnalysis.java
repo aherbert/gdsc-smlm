@@ -422,29 +422,29 @@ public class FilterAnalysis implements PlugIn {
     // Check arguments
     try {
       if (!fileInput) {
-        Parameters.isPositive("Min SNR", minSnr);
-        Parameters.isAboveZero("Max SNR", maxSnr);
-        Parameters.isPositive("Min width", minWidth);
-        Parameters.isAboveZero("Max width", maxWidth);
-        Parameters.isAboveZero("Increment width", incWidth);
-        Parameters.isPositive("Min precision", minPrecision);
-        Parameters.isAboveZero("Max precision", maxPrecision);
-        Parameters.isPositive("Min Distance", minDistance);
-        Parameters.isAboveZero("Max Distance", maxDistance);
-        Parameters.isAboveZero("Increment Distance", incDistance);
-        Parameters.isPositive("Min Time", minTime);
-        Parameters.isAboveZero("Max Time", maxTime);
-        Parameters.isAboveZero("Increment Time", incTime);
-        Parameters.isPositive("Min Snr Gap", minSnrGap);
-        Parameters.isAboveZero("Max Snr Gap", maxSnrGap);
-        Parameters.isAboveZero("Increment Snr Gap", incSnrGap);
-        Parameters.isPositive("Min Precision Gap", minPrecisionGap);
-        Parameters.isAboveZero("Max Precision Gap", maxPrecisionGap);
-        Parameters.isAboveZero("Increment Precision Gap", incPrecisionGap);
+        ParameterUtils.isPositive("Min SNR", minSnr);
+        ParameterUtils.isAboveZero("Max SNR", maxSnr);
+        ParameterUtils.isPositive("Min width", minWidth);
+        ParameterUtils.isAboveZero("Max width", maxWidth);
+        ParameterUtils.isAboveZero("Increment width", incWidth);
+        ParameterUtils.isPositive("Min precision", minPrecision);
+        ParameterUtils.isAboveZero("Max precision", maxPrecision);
+        ParameterUtils.isPositive("Min Distance", minDistance);
+        ParameterUtils.isAboveZero("Max Distance", maxDistance);
+        ParameterUtils.isAboveZero("Increment Distance", incDistance);
+        ParameterUtils.isPositive("Min Time", minTime);
+        ParameterUtils.isAboveZero("Max Time", maxTime);
+        ParameterUtils.isAboveZero("Increment Time", incTime);
+        ParameterUtils.isPositive("Min Snr Gap", minSnrGap);
+        ParameterUtils.isAboveZero("Max Snr Gap", maxSnrGap);
+        ParameterUtils.isAboveZero("Increment Snr Gap", incSnrGap);
+        ParameterUtils.isPositive("Min Precision Gap", minPrecisionGap);
+        ParameterUtils.isAboveZero("Max Precision Gap", maxPrecisionGap);
+        ParameterUtils.isAboveZero("Increment Precision Gap", incPrecisionGap);
       }
 
-      Parameters.isAboveZero("Delta", delta);
-      Parameters.isBelow("Delta", delta, 1);
+      ParameterUtils.isAboveZero("Delta", delta);
+      ParameterUtils.isBelow("Delta", delta, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

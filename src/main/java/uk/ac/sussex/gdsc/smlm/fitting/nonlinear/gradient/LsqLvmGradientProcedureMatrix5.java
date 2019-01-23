@@ -48,7 +48,7 @@ public class LsqLvmGradientProcedureMatrix5 extends LsqLvmGradientProcedureMatri
   public LsqLvmGradientProcedureMatrix5(final double[] y, final double[] baseline,
       final Gradient1Function func) {
     super(y, baseline, func);
-    if (n != 5) {
+    if (numberOfGradients != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");
     }
   }

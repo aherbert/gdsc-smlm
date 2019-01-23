@@ -86,7 +86,7 @@ public class WLsqLvmGradientProcedure extends LsqLvmGradientProcedure {
     // - the scaled gradient vector of the function's partial first derivatives with respect to the
     // parameters
 
-    for (int j = 0, i = 0; j < n; j++) {
+    for (int j = 0, i = 0; j < numberOfGradients; j++) {
       final double dw = dyDa[j] * weight;
 
       for (int k = 0; k <= j; k++) {

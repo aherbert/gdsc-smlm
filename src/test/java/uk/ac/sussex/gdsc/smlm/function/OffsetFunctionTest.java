@@ -61,15 +61,15 @@ public class OffsetFunctionTest {
     }
   }
 
-  private static double[] evaluateValueFunction(ValueFunction f, double[] p) {
-    f.initialise0(p);
-    final double[] v = new double[f.size()];
-    f.forEach(new ValueProcedure() {
-      int i = 0;
+  private static double[] evaluateValueFunction(ValueFunction func, double[] params) {
+    func.initialise0(params);
+    final double[] v = new double[func.size()];
+    func.forEach(new ValueProcedure() {
+      int index = 0;
 
       @Override
       public void execute(double value) {
-        v[i++] = value;
+        v[index++] = value;
       }
     });
     return v;
@@ -106,16 +106,16 @@ public class OffsetFunctionTest {
     Assertions.assertArrayEquals(d0, d2, "d2");
   }
 
-  private static double[] evaluateGradient1Function(Gradient1Function f, double[] p,
+  private static double[] evaluateGradient1Function(Gradient1Function func, double[] params,
       final double[] dyda) {
-    f.initialise0(p);
-    final double[] v = new double[f.size()];
-    f.forEach(new Gradient1Procedure() {
-      int i = 0;
+    func.initialise0(params);
+    final double[] v = new double[func.size()];
+    func.forEach(new Gradient1Procedure() {
+      int index = 0;
 
       @Override
       public void execute(double value, double[] dyDa) {
-        v[i++] = value;
+        v[index++] = value;
         for (int j = 0; j < dyDa.length; j++) {
           dyda[j] += dyDa[j];
         }
@@ -160,16 +160,16 @@ public class OffsetFunctionTest {
     Assertions.assertArrayEquals(d20, d22, "d22");
   }
 
-  private static double[] evaluateGradient2Function(Gradient2Function f, double[] p,
+  private static double[] evaluateGradient2Function(Gradient2Function func, double[] params,
       final double[] dyda, final double[] d2yda2) {
-    f.initialise0(p);
-    final double[] v = new double[f.size()];
-    f.forEach(new Gradient2Procedure() {
-      int i = 0;
+    func.initialise0(params);
+    final double[] v = new double[func.size()];
+    func.forEach(new Gradient2Procedure() {
+      int index = 0;
 
       @Override
       public void execute(double value, double[] dyDa, double[] d2yDa2) {
-        v[i++] = value;
+        v[index++] = value;
         for (int j = 0; j < dyDa.length; j++) {
           dyda[j] += dyDa[j];
           d2yda2[j] += d2yDa2[j];

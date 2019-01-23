@@ -71,7 +71,7 @@ public class ZeroKernelFilter extends KernelFilter {
       final boolean edgeY = y < vc || y >= yedge;
       for (int x = x1, c = x1 + y * width; x < x2; x++) {
         double sum = 0.0;
-        int i = 0;
+        int ki = 0;
         // Determine if at the edge
         if (edgeY || x < uc || x >= xedge) {
           for (int v = -vc; v <= vc; v++) {
@@ -79,7 +79,7 @@ public class ZeroKernelFilter extends KernelFilter {
             int yIndex = y + v;
             if (yIndex < 0 || yIndex >= height) {
               // Nothing to convolve so skip forward
-              i += kw;
+              ki += kw;
               continue;
             }
             yIndex *= width;
@@ -87,14 +87,14 @@ public class ZeroKernelFilter extends KernelFilter {
             for (int u = -uc; u <= uc; u++) {
               // if (i >= kernel.length) // work around for JIT compiler bug on Linux
               // IJ.log("kernel index error: " + i);
-              sum += getPixel(x + u, yIndex, in, width) * kernel[i++];
+              sum += getPixel(x + u, yIndex, in, width) * kernel[ki++];
             }
           }
         } else {
           // Internal
           for (int v = -vc; v <= vc; v++) {
             for (int u = -uc, offset = x - uc + (y + v) * width; u++ <= uc;) {
-              sum += in[offset++] * kernel[i++];
+              sum += in[offset++] * kernel[ki++];
             }
           }
         }

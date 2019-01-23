@@ -60,15 +60,17 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver {
   }
 
   @Override
-  public FitStatus fit(double[] y, double[] f, double[] a, double[] aDev) {
+  public FitStatus fit(double[] data, double[] fx, double[] parameters,
+      double[] parameterVariances) {
     // Do not break the view that the solver has on the data
-    final double[] f2 = (f == null) ? null : new double[f.length];
-    final double[] a2 = cloneAndScaleParameters(a, upScale);
-    final double[] aDev2 = (aDev == null) ? null : new double[aDev.length];
-    final FitStatus result = solver.fit(y, f2, a2, aDev2);
-    scaleFunctionValue(f2, f, downScale);
-    scaleParameters(a2, a, downScale);
-    scaleDeviations(aDev2, aDev, downScale);
+    final double[] f2 = (fx == null) ? null : new double[fx.length];
+    final double[] a2 = cloneAndScaleParameters(parameters, upScale);
+    final double[] aDev2 =
+        (parameterVariances == null) ? null : new double[parameterVariances.length];
+    final FitStatus result = solver.fit(data, f2, a2, aDev2);
+    scaleFunctionValue(f2, fx, downScale);
+    scaleParameters(a2, parameters, downScale);
+    scaleDeviations(aDev2, parameterVariances, downScale);
     return result;
   }
 
@@ -95,26 +97,27 @@ public class ScaledFunctionSolver extends WrappedFunctionSolver {
   }
 
   @Override
-  public boolean evaluate(double[] y, double[] f, double[] a) {
+  public boolean evaluate(double[] data, double[] fx, double[] parameters) {
     // Do not break the view that the solver has on the data
-    final double[] f2 = (f == null) ? null : new double[f.length];
-    final double[] a2 = cloneAndScaleParameters(a, upScale);
-    final boolean result = solver.evaluate(y, f2, a2);
+    final double[] f2 = (fx == null) ? null : new double[fx.length];
+    final double[] a2 = cloneAndScaleParameters(parameters, upScale);
+    final boolean result = solver.evaluate(data, f2, a2);
     if (result) {
-      scaleFunctionValue(f2, f, downScale);
-      scaleParameters(a2, a, downScale);
+      scaleFunctionValue(f2, fx, downScale);
+      scaleParameters(a2, parameters, downScale);
     }
     return result;
   }
 
   @Override
-  public boolean computeDeviations(double[] y, double[] a, double[] aDev) {
+  public boolean computeDeviations(double[] data, double[] parameters,
+      double[] parameterVariances) {
     // Do not break the view that the solver has on the data
-    final double[] a2 = cloneAndScaleParameters(a, upScale);
-    final double[] aDev2 = new double[aDev.length]; // Assume aDev is not null
-    final boolean result = solver.computeDeviations(y, a2, aDev2);
+    final double[] a2 = cloneAndScaleParameters(parameters, upScale);
+    final double[] aDev2 = new double[parameterVariances.length]; // Assume aDev is not null
+    final boolean result = solver.computeDeviations(data, a2, aDev2);
     if (result) {
-      scaleDeviations(aDev2, aDev, downScale);
+      scaleDeviations(aDev2, parameterVariances, downScale);
     }
     return result;
   }

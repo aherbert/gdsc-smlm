@@ -33,53 +33,53 @@ import org.junit.jupiter.api.Test;
 public class CounterTest {
   @Test
   public void canIncrementAndGet() {
-    Counter c = new Counter();
-    Assertions.assertEquals(1, c.incrementAndGet());
-    Assertions.assertEquals(2, c.incrementAndGet());
-    Assertions.assertEquals(3, c.incrementAndGet());
+    Counter counter = new Counter();
+    Assertions.assertEquals(1, counter.incrementAndGet());
+    Assertions.assertEquals(2, counter.incrementAndGet());
+    Assertions.assertEquals(3, counter.incrementAndGet());
 
-    c = new Counter();
-    Assertions.assertEquals(10, c.incrementAndGet(10));
-    Assertions.assertEquals(20, c.incrementAndGet(10));
-    Assertions.assertEquals(30, c.incrementAndGet(10));
+    counter = new Counter();
+    Assertions.assertEquals(10, counter.incrementAndGet(10));
+    Assertions.assertEquals(20, counter.incrementAndGet(10));
+    Assertions.assertEquals(30, counter.incrementAndGet(10));
   }
 
   @Test
   public void canGetAndIncrement() {
-    Counter c = new Counter();
-    Assertions.assertEquals(0, c.getAndIncrement());
-    Assertions.assertEquals(1, c.getAndIncrement());
-    Assertions.assertEquals(2, c.getAndIncrement());
+    Counter counter = new Counter();
+    Assertions.assertEquals(0, counter.getAndIncrement());
+    Assertions.assertEquals(1, counter.getAndIncrement());
+    Assertions.assertEquals(2, counter.getAndIncrement());
 
-    c = new Counter();
-    Assertions.assertEquals(0, c.getAndIncrement(10));
-    Assertions.assertEquals(10, c.getAndIncrement(10));
-    Assertions.assertEquals(20, c.getAndIncrement(10));
+    counter = new Counter();
+    Assertions.assertEquals(0, counter.getAndIncrement(10));
+    Assertions.assertEquals(10, counter.getAndIncrement(10));
+    Assertions.assertEquals(20, counter.getAndIncrement(10));
   }
 
   @Test
   public void canDecrementAndGet() {
-    Counter c = new Counter();
-    Assertions.assertEquals(-1, c.decrementAndGet());
-    Assertions.assertEquals(-2, c.decrementAndGet());
-    Assertions.assertEquals(-3, c.decrementAndGet());
+    Counter counter = new Counter();
+    Assertions.assertEquals(-1, counter.decrementAndGet());
+    Assertions.assertEquals(-2, counter.decrementAndGet());
+    Assertions.assertEquals(-3, counter.decrementAndGet());
 
-    c = new Counter();
-    Assertions.assertEquals(-10, c.decrementAndGet(10));
-    Assertions.assertEquals(-20, c.decrementAndGet(10));
-    Assertions.assertEquals(-30, c.decrementAndGet(10));
+    counter = new Counter();
+    Assertions.assertEquals(-10, counter.decrementAndGet(10));
+    Assertions.assertEquals(-20, counter.decrementAndGet(10));
+    Assertions.assertEquals(-30, counter.decrementAndGet(10));
   }
 
   @Test
   public void canGetAndDecrement() {
-    Counter c = new Counter();
-    Assertions.assertEquals(0, c.getAndDecrement());
-    Assertions.assertEquals(-1, c.getAndDecrement());
-    Assertions.assertEquals(-2, c.getAndDecrement());
+    Counter counter = new Counter();
+    Assertions.assertEquals(0, counter.getAndDecrement());
+    Assertions.assertEquals(-1, counter.getAndDecrement());
+    Assertions.assertEquals(-2, counter.getAndDecrement());
 
-    c = new Counter();
-    Assertions.assertEquals(0, c.getAndDecrement(10));
-    Assertions.assertEquals(-10, c.getAndDecrement(10));
-    Assertions.assertEquals(-20, c.getAndDecrement(10));
+    counter = new Counter();
+    Assertions.assertEquals(0, counter.getAndDecrement(10));
+    Assertions.assertEquals(-10, counter.getAndDecrement(10));
+    Assertions.assertEquals(-20, counter.getAndDecrement(10));
   }
 }

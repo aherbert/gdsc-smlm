@@ -80,8 +80,8 @@ public class BoundedNonLinearFit extends NonLinearFit {
   }
 
   @Override
-  protected boolean solve(double[] a, final int m) {
-    if (super.solve(a, m)) {
+  protected boolean solve(double[] a, final int np) {
+    if (super.solve(a, np)) {
       return true;
     }
 
@@ -102,15 +102,15 @@ public class BoundedNonLinearFit extends NonLinearFit {
   }
 
   @Override
-  protected void updateFitParameters(double[] a, int[] gradientIndices, int m, double[] da,
+  protected void updateFitParameters(double[] a, int[] gradientIndices, int np, double[] da,
       double[] ap) {
     bounds.applyBounds(a, da, ap);
   }
 
   @Override
-  protected void accepted(double[] a, double[] ap, int m) {
+  protected void accepted(double[] a, double[] ap, int np) {
     bounds.accepted(a, ap);
-    super.accepted(a, ap, m);
+    super.accepted(a, ap, np);
   }
 
   @Override

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
@@ -55,6 +56,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -158,10 +161,10 @@ public class CreateFilters implements PlugIn, ItemListener {
           inc = new BigDecimal(match.group(4));
 
           if (min.compareTo(max) > 0 || inc.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token);
+            throw new DataException("Invalid 'min:max:increment' attribute: " + token);
           }
         } catch (final NumberFormatException ex) {
-          throw new RuntimeException("Invalid 'min:max:increment' attribute: " + token, ex);
+          throw new DataException("Invalid 'min:max:increment' attribute: " + token, ex);
         }
         final String suffix = "\"" + match.group(5);
 
@@ -201,7 +204,7 @@ public class CreateFilters implements PlugIn, ItemListener {
       }
     }
 
-    if (out.size() > 0) {
+    if (!out.isEmpty()) {
       sw.write("<FilterSet name=\"");
       sw.write(getName(out.get(0)));
       sw.write("\"><filters class=\"linked-list\">");
@@ -301,17 +304,16 @@ public class CreateFilters implements PlugIn, ItemListener {
 
     comment("Single filters");
     IJ.log("");
-    demo(new SnrFilter(10), new String[] {"10:20:1"});
-    demo(new PrecisionFilter(30), new String[] {"30:50:2"});
+    demo(new SnrFilter(10), "10:20:1");
+    demo(new PrecisionFilter(30), "30:50:2");
     IJ.log("");
 
     comment("Combined filters");
     IJ.log("");
-    demo(new AndFilter(new SnrFilter(10), new WidthFilter(2)),
-        new String[] {"10:20:1", "1.5:2.5:0.2"});
+    demo(new AndFilter(new SnrFilter(10), new WidthFilter(2)), "10:20:1", "1.5:2.5:0.2");
     demo(
         new OrFilter(new PrecisionFilter(30), new AndFilter(new SnrFilter(10), new WidthFilter(2))),
-        new String[] {"30:40:2", "10:20:1", "1.5:2.5:0.2"});
+        "30:40:2", "10:20:1", "1.5:2.5:0.2");
     IJ.log("");
   }
 
@@ -328,11 +330,9 @@ public class CreateFilters implements PlugIn, ItemListener {
         saxParser.parse(new InputSource(new StringReader(xml)),
             new AttributeSubstitutionHandler(sb, attributeSubstitutions));
       } catch (final Exception ex) {
-        ex.printStackTrace();
+        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to log filter", ex);
+        return;
       }
-
-      // IJ.log(xml);
-      // IJ.log(sb.toString());
       xml = sb.toString();
     }
     IJ.log(uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(xml));
@@ -354,8 +354,9 @@ public class CreateFilters implements PlugIn, ItemListener {
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) {
-      sb.append("<").append(qName);
+    public void startElement(String uri, String localName, String qualifiedName,
+        Attributes attributes) {
+      sb.append("<").append(qualifiedName);
       for (int attribute = 0; attribute < attributes.getLength(); attribute++) {
         sb.append(" ");
         final String name = attributes.getQName(attribute);
@@ -373,8 +374,8 @@ public class CreateFilters implements PlugIn, ItemListener {
     }
 
     @Override
-    public void endElement(String uri, String localName, String qName) {
-      sb.append("</").append(qName).append(">");
+    public void endElement(String uri, String localName, String qualifiedName) {
+      sb.append("</").append(qualifiedName).append(">");
     }
   }
 

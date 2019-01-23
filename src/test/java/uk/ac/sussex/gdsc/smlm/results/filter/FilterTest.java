@@ -106,9 +106,9 @@ public class FilterTest {
 
     ts.execute(new BaseTimingTask("MultiFilter") {
       @Override
-      public Object getData(int i) {
-        return new MultiFilter[] {(MultiFilter) f1.create(data[i][0]),
-            (MultiFilter) f1.create(data[i][1])};
+      public Object getData(int index) {
+        return new MultiFilter[] {(MultiFilter) f1.create(data[index][0]),
+            (MultiFilter) f1.create(data[index][1])};
       }
 
       @Override
@@ -127,9 +127,9 @@ public class FilterTest {
 
     ts.execute(new BaseTimingTask("MultiFilter direct") {
       @Override
-      public Object getData(int i) {
-        return new MultiFilter[] {(MultiFilter) f1.create(data[i][0]),
-            (MultiFilter) f1.create(data[i][1])};
+      public Object getData(int index) {
+        return new MultiFilter[] {(MultiFilter) f1.create(data[index][0]),
+            (MultiFilter) f1.create(data[index][1])};
       }
 
       @Override
@@ -148,9 +148,9 @@ public class FilterTest {
 
     ts.execute(new BaseTimingTask("MultiFilter2") {
       @Override
-      public Object getData(int i) {
-        return new MultiFilter2[] {(MultiFilter2) f2.create(data[i][0]),
-            (MultiFilter2) f2.create(data[i][1])};
+      public Object getData(int index) {
+        return new MultiFilter2[] {(MultiFilter2) f2.create(data[index][0]),
+            (MultiFilter2) f2.create(data[index][1])};
       }
 
       @Override
@@ -169,9 +169,9 @@ public class FilterTest {
 
     ts.execute(new BaseTimingTask("MultiFilter2 direct") {
       @Override
-      public Object getData(int i) {
-        return new MultiFilter2[] {(MultiFilter2) f2.create(data[i][0]),
-            (MultiFilter2) f2.create(data[i][1])};
+      public Object getData(int index) {
+        return new MultiFilter2[] {(MultiFilter2) f2.create(data[index][0]),
+            (MultiFilter2) f2.create(data[index][1])};
       }
 
       @Override
@@ -203,28 +203,27 @@ public class FilterTest {
     }
   }
 
-  private static double[] random(int n, UniformRandomProvider r) {
-    final double[] p = new double[n];
-    while (n-- > 0) {
-      p[n] = r.nextInt(3);
+  private static double[] random(int np, UniformRandomProvider rng) {
+    final double[] params = new double[np];
+    while (np-- > 0) {
+      params[np] = rng.nextInt(3);
     }
-    return p;
+    return params;
   }
 
   @SeededTest
   public void canSerialiseMultiFilter(RandomSeed seed) {
     // Check the XStream serialisation supports inheritance
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
-    testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
-    testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
-    testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), UniformRandomProvider);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
+    testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
+    testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
   }
 
-  private static void testSerialisation(MultiFilter f,
-      UniformRandomProvider UniformRandomProvider) {
+  private static void testSerialisation(MultiFilter filter, UniformRandomProvider rng) {
     for (int i = 10; i-- > 0;) {
       final MultiFilter f1 =
-          (MultiFilter) f.create(random(f.getNumberOfParameters(), UniformRandomProvider));
+          (MultiFilter) filter.create(random(filter.getNumberOfParameters(), rng));
       final String xml = f1.toXml();
       logger.log(TestLogUtils.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
       final MultiFilter f2 = (MultiFilter) Filter.fromXml(xml);

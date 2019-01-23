@@ -236,7 +236,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     upperMeanThreshold = source.upperMeanThreshold;
     use38 = source.use38;
     noGaussian = source.noGaussian;
-    gaussianKernel = source.gaussianKernel.clone();
+    gaussianKernel = source.gaussianKernel.copy();
     relativeAccuracy = source.relativeAccuracy;
     maxIterations = source.maxIterations;
     lastG = source.lastG;

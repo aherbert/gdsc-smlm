@@ -98,36 +98,36 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
    * parameters with gradient indices should be passed in to the functions to obtain the value (and
    * gradient).
    *
-   * @param f The function to be used to calculated the expected values
-   * @param a The initial parameters for the function
-   * @param k The observed values
-   * @param n The number of observed values
+   * @param function The function to be used to calculated the expected values
+   * @param parameters The initial parameters for the function
+   * @param data The observed values
+   * @param dataSize The number of observed values
    * @param alpha Inverse gain of the EMCCD chip
    * @throws IllegalArgumentException if the input observed values are not integers
    */
-  public PoissonLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n,
-      double alpha) {
-    super(f, a, k, n);
+  public PoissonLikelihoodWrapper(NonLinearFunction function, double[] parameters, double[] data,
+      int dataSize, double alpha) {
+    super(function, parameters, data, dataSize);
     this.alpha = Math.abs(alpha);
     logAlpha = Math.log(alpha);
 
     // Initialise the factorial table to the correct size
-    integerData = (alpha == 1) && initialiseFactorial(k);
+    integerData = (alpha == 1) && initialiseFactorial(data);
     // Pre-compute the sum over the data
     double sum = 0;
     if (integerData) {
-      for (final double d : k) {
+      for (final double d : data) {
         sum += LogFactorial.logF((int) d);
       }
     } else {
       // Pre-apply gain
-      for (int i = 0; i < n; i++) {
-        k[i] *= this.alpha;
-        sum += LogFactorial.logF(k[i]);
+      for (int i = 0; i < dataSize; i++) {
+        data[i] *= this.alpha;
+        sum += LogFactorial.logF(data[i]);
       }
 
       // We subtract this as we are computing the negative log likelihood
-      sum -= n * logAlpha;
+      sum -= dataSize * logAlpha;
     }
     sumLogFactorialK = sum;
   }
@@ -137,14 +137,14 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     // Compute the negative log-likelihood to be minimised
     // f(x) = l(x) - k * ln(l(x)) + log(k!)
     double ll = 0;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < dataSize; i++) {
       // Function now computes expected poisson mean without gain
-      double l = function.eval(i); // * alpha;
+      double lx = function.eval(i); // * alpha;
 
       // Check for zero and return the worst likelihood score
-      if (l <= 0) {
+      if (lx <= 0) {
         if (allowNegativeExpectedValues) {
-          l = Double.MIN_VALUE;
+          lx = Double.MIN_VALUE;
         } else {
           // Since ln(0) -> -Infinity
           return Double.POSITIVE_INFINITY;
@@ -152,7 +152,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
       }
 
       final double k = data[i];
-      ll += l - k * Math.log(l);
+      ll += lx - k * Math.log(lx);
     }
     return ll + sumLogFactorialK;
   }
@@ -169,128 +169,129 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     // f'(x) = l'(x) * (1 - k/l(x))
 
     double ll = 0;
-    for (int j = 0; j < nVariables; j++) {
+    for (int j = 0; j < numberOfVariables; j++) {
       gradient[j] = 0;
     }
-    final double[] dl_da = new double[nVariables];
-    for (int i = 0; i < n; i++) {
+    final double[] dlda = new double[numberOfVariables];
+    for (int i = 0; i < dataSize; i++) {
       // Function now computes expected poisson mean without gain
-      double l = function.eval(i, dl_da); // * alpha;
+      double lx = function.eval(i, dlda); // * alpha;
 
       final double k = data[i];
 
       // Check for zero and return the worst likelihood score
-      if (l <= 0) {
+      if (lx <= 0) {
         if (allowNegativeExpectedValues) {
-          l = Double.MIN_VALUE;
+          lx = Double.MIN_VALUE;
         } else {
           // Since ln(0) -> -Infinity
           return Double.POSITIVE_INFINITY;
         }
       }
-      ll += l - k * Math.log(l);
+      ll += lx - k * Math.log(lx);
 
       // Continue to work out the gradient since this does not involve logs.
       // Note: if l==0 then we get divide by zero and a NaN value.
       // Function now computes expected poisson mean without gain
-      final double factor = (1 - k / l); // * alpha;
+      final double factor = (1 - k / lx); // * alpha;
       for (int j = 0; j < gradient.length; j++) {
         // gradient[j] += dl_da[j] - (dl_da[j] * k / l);
         // gradient[j] += dl_da[j] * (1 - k / l);
-        gradient[j] += dl_da[j] * factor;
+        gradient[j] += dlda[j] * factor;
       }
     }
     return ll + sumLogFactorialK;
   }
 
   @Override
-  public double computeLikelihood(int i) {
+  public double computeLikelihood(int index) {
     // Function now computes expected poisson mean without gain
-    double l = function.eval(i); // * alpha;
+    double lx = function.eval(index); // * alpha;
 
     // Check for zero and return the worst likelihood score
-    if (l <= 0) {
+    if (lx <= 0) {
       if (allowNegativeExpectedValues) {
-        l = Double.MIN_VALUE;
+        lx = Double.MIN_VALUE;
       } else {
         // Since ln(0) -> -Infinity
         return Double.POSITIVE_INFINITY;
       }
     }
 
-    final double k = data[i];
+    final double k = data[index];
     // Function now computes expected poisson mean without gain
-    return l - k * Math.log(l) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
+    return lx - k * Math.log(lx) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
         - logAlpha;
   }
 
   @Override
-  public double computeLikelihood(double[] gradient, int i) {
-    for (int j = 0; j < nVariables; j++) {
+  public double computeLikelihood(double[] gradient, int index) {
+    for (int j = 0; j < numberOfVariables; j++) {
       gradient[j] = 0;
     }
-    final double[] dl_da = new double[nVariables];
+    final double[] dlda = new double[numberOfVariables];
     // Function now computes expected poisson mean without gain
-    double l = function.eval(i, dl_da); // * alpha;
+    double lx = function.eval(index, dlda); // * alpha;
 
     // Check for zero and return the worst likelihood score
-    if (l <= 0) {
+    if (lx <= 0) {
       if (allowNegativeExpectedValues) {
-        l = Double.MIN_VALUE;
+        lx = Double.MIN_VALUE;
       } else {
         // Since ln(0) -> -Infinity
         return Double.POSITIVE_INFINITY;
       }
     }
 
-    final double k = data[i];
+    final double k = data[index];
     // Function now computes expected poisson mean without gain
-    final double factor = (1 - k / l); // * alpha;
+    final double factor = (1 - k / lx); // * alpha;
     for (int j = 0; j < gradient.length; j++) {
       // gradient[j] = dl_da[j] - (dl_da[j] * k / l);
       // gradient[j] = dl_da[j] * (1 - k / l);
-      gradient[j] = dl_da[j] * factor;
+      gradient[j] = dlda[j] * factor;
     }
 
     // Function now computes expected poisson mean without gain
     // The probability = p * alpha
     // Log(probability) = log(p) + log(alpha)
 
-    return l - k * Math.log(l) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
+    return lx - k * Math.log(lx) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
         - logAlpha;
   }
 
-  private static double logFactorial(double k) {
-    if (k <= 1) {
+  private static double logFactorial(double value) {
+    if (value <= 1) {
       return 0;
     }
-    return Gamma.logGamma(k + 1);
+    return Gamma.logGamma(value + 1);
   }
 
   /**
    * Compute the negative log likelihood.
    *
-   * @param l the mean of the Poisson distribution (lambda)
-   * @param k the observed count
+   * @param mean the mean of the Poisson distribution (lambda)
+   * @param count the observed count
    * @return the negative log likelihood
    */
-  public static double negativeLogLikelihood(double l, double k) {
-    final boolean integerData = (int) k == k;
+  public static double negativeLogLikelihood(double mean, double count) {
+    final boolean integerData = (int) count == count;
     if (integerData) {
-      LogFactorial.increaseTableMaxN((int) k);
+      LogFactorial.increaseTableMaxN((int) count);
     }
-    return l - k * Math.log(l) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k));
+    return mean - count * Math.log(mean)
+        + ((integerData) ? LogFactorial.logF((int) count) : logFactorial(count));
   }
 
   /**
    * Compute the likelihood.
    *
-   * @param l the mean of the Poisson distribution (lambda)
-   * @param k the observed count
+   * @param mean the mean of the Poisson distribution (lambda)
+   * @param count the observed count
    * @return the likelihood
    */
-  public static double likelihood(double l, double k) {
-    final double nll = negativeLogLikelihood(l, k);
+  public static double likelihood(double mean, double count) {
+    final double nll = negativeLogLikelihood(mean, count);
     return FastMath.exp(-nll);
   }
 

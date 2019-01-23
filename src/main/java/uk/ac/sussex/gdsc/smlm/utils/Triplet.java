@@ -34,22 +34,22 @@ package uk.ac.sussex.gdsc.smlm.utils;
  */
 public class Triplet<A, B, C> {
   /** First item of the triplet. */
-  public final A a;
+  public final A item1;
   /** Second item of the triplet. */
-  public final B b;
+  public final B item2;
   /** Third item of the triplet. */
-  public final C c;
+  public final C item3;
 
   /**
    * Instantiates a new triplet.
    *
-   * @param a the first item of the triplet
-   * @param b the second item of the triplet
-   * @param c the third item of the triplet
+   * @param item1 the first item of the triplet
+   * @param item2 the second item of the triplet
+   * @param item3 the third item of the triplet
    */
-  public Triplet(A a, B b, C c) {
-    this.a = a;
-    this.b = b;
-    this.c = c;
+  public Triplet(A item1, B item2, C item3) {
+    this.item1 = item1;
+    this.item2 = item2;
+    this.item3 = item3;
   }
 }

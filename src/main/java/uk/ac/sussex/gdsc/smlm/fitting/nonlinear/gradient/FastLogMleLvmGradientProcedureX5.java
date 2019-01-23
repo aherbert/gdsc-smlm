@@ -49,7 +49,7 @@ public class FastLogMleLvmGradientProcedureX5 extends FastLogMleLvmGradientProce
   public FastLogMleLvmGradientProcedureX5(final double[] y, final Gradient1Function func,
       FastLog fastLog) {
     super(y, func, fastLog);
-    if (n != 5) {
+    if (numberOfGradients != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");
     }
   }

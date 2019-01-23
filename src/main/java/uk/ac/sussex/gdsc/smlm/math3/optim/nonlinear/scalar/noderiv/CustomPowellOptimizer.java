@@ -207,6 +207,9 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     this(rel, abs, lineRel, lineAbs, null, false);
   }
 
+  // @CHECKSTYLE.OFF: LocalVariableName
+  // @CHECKSTYLE.OFF: ParameterName
+
   @Override
   protected PointValuePair doOptimize() {
     final GoalType goal = getGoalType();
@@ -219,44 +222,34 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
 
     final ConvergenceChecker<PointValuePair> checker = getConvergenceChecker();
 
-    // int resets = 0;
-
-    // PointValuePair solution = null;
-    // PointValuePair finalSolution = null;
-    // int solutionIter = 0, solutionEval = 0;
-    // double startValue = 0;
-
-    // try
-    // {
     double[] x = guess;
     // Ensure the point is within bounds
     applyBounds(x);
-    double fVal = computeObjectiveValue(x);
-    // startValue = fVal;
+    double functionValue = computeObjectiveValue(x);
     double[] x1 = x.clone();
     while (true) {
       incrementIterationCount();
 
-      final double fX = fVal;
+      final double fX = functionValue;
       double fX2 = 0;
       double delta = 0;
       int bigInd = 0;
 
       for (int i = 0; i < n; i++) {
-        fX2 = fVal;
+        fX2 = functionValue;
 
         final UnivariatePointValuePair optimum = line.search(x, direc[i]);
-        fVal = optimum.getValue();
+        functionValue = optimum.getValue();
         x = newPoint(x, direc[i], optimum.getPoint());
 
-        if ((fX2 - fVal) > delta) {
-          delta = fX2 - fVal;
+        if ((fX2 - functionValue) > delta) {
+          delta = fX2 - functionValue;
           bigInd = i;
         }
       }
 
       final PointValuePair previous = new PointValuePair(x1, fX, false);
-      final PointValuePair current = new PointValuePair(x, fVal, false);
+      final PointValuePair current = new PointValuePair(x, functionValue, false);
       boolean stop = false;
       if (positionChecker != null) {
         // Check for convergence on the position
@@ -265,12 +258,12 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
       if (!stop) {
         // Check if we have improved from an impossible position
         if (Double.isInfinite(fX) || Double.isNaN(fX)) {
-          if (Double.isInfinite(fVal) || Double.isNaN(fVal)) {
+          if (Double.isInfinite(functionValue) || Double.isNaN(functionValue)) {
             // Nowhere to go
             stop = true;
           }
         } else {
-          stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, fVal, relativeThreshold,
+          stop = DoubleEquality.almostEqualRelativeOrAbsolute(fX, functionValue, relativeThreshold,
               absoluteThreshold);
         }
       }
@@ -285,26 +278,14 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
         if (basisConvergence && nonBasis) {
           // Reset to the basis vectors and continue
           reset = true;
-          // resets++;
         } else {
-          // System.out.printf("Resets = %d\n", resets);
           final PointValuePair answer;
           if (goal == GoalType.MINIMIZE) {
-            answer = (fVal < fX) ? current : previous;
+            answer = (functionValue < fX) ? current : previous;
           } else {
-            answer = (fVal > fX) ? current : previous;
+            answer = (functionValue > fX) ? current : previous;
           }
           return answer;
-
-          // XXX Debugging
-          // Continue the algorithm to see how far it goes
-          // if (solution == null)
-          // {
-          // solution = answer;
-          // solutionIter = getIterations();
-          // solutionEval = getEvaluations();
-          // }
-          // finalSolution = answer;
         }
       }
 
@@ -330,17 +311,16 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
         // 1. The decrease along the average direction was not due to any single direction's
         // decrease
         // 2. There is a substantial second derivative along the average direction and we are close
-        // to
-        // it minimum
-        double t = 2 * (fX + fX2 - 2 * fVal);
-        double temp = fX - fVal - delta;
+        // to it minimum
+        double t = 2 * (fX + fX2 - 2 * functionValue);
+        double temp = fX - functionValue - delta;
         t *= temp * temp;
         temp = fX - fX2;
         t -= delta * temp * temp;
 
         if (t < 0.0) {
           final UnivariatePointValuePair optimum = line.search(x, d);
-          fVal = optimum.getValue();
+          functionValue = optimum.getValue();
           if (reset) {
             x = newPoint(x, d, optimum.getPoint());
             continue;
@@ -356,19 +336,6 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
         }
       }
     }
-    // }
-    // catch (RuntimeException e)
-    // {
-    // if (solution != null)
-    // {
-    // System.out.printf("Start %f : Initial %f (%d,%d) : Final %f (%d,%d) : %f\n", startValue,
-    // solution.getValue(), solutionIter, solutionEval, finalSolution.getValue(), getIterations(),
-    // getEvaluations(), DoubleEquality.relativeError(finalSolution.getValue(),
-    // solution.getValue()));
-    // return finalSolution;
-    // }
-    // throw e;
-    // }
   }
 
   private double[][] createBasisVectors(final int n) {
@@ -520,11 +487,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     for (final OptimizationData data : optData) {
       if (data instanceof PositionChecker) {
         positionChecker = (PositionChecker) data;
-        continue;
-      }
-      if (data instanceof BasisStep) {
+      } else if (data instanceof BasisStep) {
         basis = ((BasisStep) data).getStep();
-        continue;
       }
     }
 

@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.FastPoissonDistribution;
 
 import org.apache.commons.math3.special.Gamma;
 
@@ -41,7 +41,7 @@ import org.apache.commons.math3.special.Gamma;
  * have no probability from the scaled Poisson PMF.
  */
 public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
-  private final CustomPoissonDistribution pd;
+  private final FastPoissonDistribution pd;
 
   /**
    * The inverse of the on-chip gain multiplication factor.
@@ -62,7 +62,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
   public PoissonFunction(double alpha) {
     this.alpha = Math.abs(alpha);
     expand = (alpha < 1);
-    pd = new CustomPoissonDistribution(null, 1);
+    pd = new FastPoissonDistribution(1);
   }
 
   /**
@@ -126,7 +126,7 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
   }
 
   private static int getX(double observed) {
-    // XXX: Change to throw an exception if o is not an integer?
+    // XXX: Change to throw an exception if observed is not an integer?
     return (int) Math.round(observed);
   }
 

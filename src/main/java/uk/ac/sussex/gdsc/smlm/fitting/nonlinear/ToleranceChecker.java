@@ -175,16 +175,16 @@ public class ToleranceChecker {
   /**
    * Check if all the pairs of values are equal.
    *
-   * @param p Previous
-   * @param c Current
+   * @param prev Previous
+   * @param curr Current
    * @param relative relative tolerance threshold (set to negative to ignore)
    * @param absolute absolute tolerance threshold (set to negative to ignore)
    * @return True if equal
    */
-  public static boolean areEqual(final double[] p, final double[] c, double absolute,
+  public static boolean areEqual(final double[] prev, final double[] curr, double absolute,
       double relative) {
-    for (int i = 0; i < p.length; ++i) {
-      if (!areEqual(p[i], c[i], absolute, relative)) {
+    for (int i = 0; i < prev.length; ++i) {
+      if (!areEqual(prev[i], curr[i], absolute, relative)) {
         return false;
       }
     }
@@ -194,24 +194,25 @@ public class ToleranceChecker {
   /**
    * Check if the pair of values are equal.
    *
-   * @param p Previous
-   * @param c Current
+   * @param prev Previous
+   * @param curr Current
    * @param relative relative tolerance threshold (set to negative to ignore)
    * @param absolute absolute tolerance threshold (set to negative to ignore)
    * @return True if equal
    */
-  public static boolean areEqual(final double p, final double c, double absolute, double relative) {
-    final double difference = Math.abs(p - c);
+  public static boolean areEqual(final double prev, final double curr, double absolute,
+      double relative) {
+    final double difference = Math.abs(prev - curr);
     if (difference <= absolute) {
       return true;
     }
-    final double size = max(Math.abs(p), Math.abs(c));
+    final double size = max(Math.abs(prev), Math.abs(curr));
     return (difference <= size * relative);
   }
 
-  private static double max(final double a, final double b) {
+  private static double max(final double v1, final double v2) {
     // Ignore NaN
-    return (a > b) ? a : b;
+    return (v1 > v2) ? v1 : v2;
   }
 
   /**

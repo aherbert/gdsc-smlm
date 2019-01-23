@@ -51,7 +51,7 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
   public LsqLvmGradientProcedureMatrix(final double[] y, final double[] baseline,
       final Gradient1Function func) {
     super(y, baseline, func);
-    alpha = new double[n][n];
+    alpha = new double[numberOfGradients][numberOfGradients];
   }
 
   @Override
@@ -65,7 +65,7 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
     // - the scaled gradient vector of the function's partial first derivatives with respect to the
     // parameters
 
-    for (int j = 0; j < n; j++) {
+    for (int j = 0; j < numberOfGradients; j++) {
       final double wgt = dyDa[j];
 
       for (int k = 0; k <= j; k++) {
@@ -80,7 +80,7 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
 
   @Override
   protected void initialiseGradient() {
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < numberOfGradients; i++) {
       beta[i] = 0;
       for (int j = 0; j <= i; j++) {
         alpha[i][j] = 0;
@@ -91,8 +91,8 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
   @Override
   protected void finishGradient() {
     // Generate symmetric matrix
-    for (int i = 0; i < n - 1; i++) {
-      for (int j = i + 1; j < n; j++) {
+    for (int i = 0; i < numberOfGradients - 1; i++) {
+      for (int j = i + 1; j < numberOfGradients; j++) {
         alpha[i][j] = alpha[j][i];
       }
     }
@@ -100,7 +100,7 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
 
   @Override
   protected boolean checkGradients() {
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < numberOfGradients; i++) {
       if (Double.isNaN(beta[i])) {
         return true;
       }
@@ -120,8 +120,8 @@ public class LsqLvmGradientProcedureMatrix extends BaseLsqLvmGradientProcedure {
 
   @Override
   public void getAlphaMatrix(double[][] alpha) {
-    for (int i = 0; i < n; i++) {
-      System.arraycopy(this.alpha, 0, alpha, 0, n);
+    for (int i = 0; i < numberOfGradients; i++) {
+      System.arraycopy(this.alpha, 0, alpha, 0, numberOfGradients);
     }
   }
 

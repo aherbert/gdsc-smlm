@@ -64,8 +64,9 @@ public class PoissonGammaGaussianFisherInformationTest {
     }
   }
 
-  private static void canFindMaximumAndUpperLimit(double m) {
-    final PoissonGammaGaussianFisherInformation f = new PoissonGammaGaussianFisherInformation(m, 1);
+  private static void canFindMaximumAndUpperLimit(double gain) {
+    final PoissonGammaGaussianFisherInformation f =
+        new PoissonGammaGaussianFisherInformation(gain, 1);
     f.setMeanThreshold(Double.POSITIVE_INFINITY);
 
     // Due to a limited convolution (for an infinite range)
@@ -80,12 +81,12 @@ public class PoissonGammaGaussianFisherInformationTest {
     }
   }
 
-  private static void canFindMaximumAndUpperLimit(PoissonGammaGaussianFisherInformation f,
-      double u) {
-    final double[] max = f.findMaximum(u, 1e-6);
-    final double[] upper = f.findUpperLimit(u, max, 1e-6);
-    logger.fine(FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", f.gain, u,
-        max[0], max[1], max[2], upper[0], upper[1], upper[2]));
+  private static void canFindMaximumAndUpperLimit(PoissonGammaGaussianFisherInformation func,
+      double mean) {
+    final double[] max = func.findMaximum(mean, 1e-6);
+    final double[] upper = func.findUpperLimit(mean, max, 1e-6);
+    logger.fine(FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", func.gain,
+        mean, max[0], max[1], max[2], upper[0], upper[1], upper[2]));
   }
 
   @Test
@@ -113,12 +114,12 @@ public class PoissonGammaGaussianFisherInformationTest {
     }
   }
 
-  private static void canComputeFisherInformation(double m, double s) {
-    canComputeFisherInformation(new PoissonGammaGaussianFisherInformation(m, s));
+  private static void canComputeFisherInformation(double gain, double sd) {
+    canComputeFisherInformation(new PoissonGammaGaussianFisherInformation(gain, sd));
   }
 
-  private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f) {
-    f.setMeanThreshold(Double.POSITIVE_INFINITY);
+  private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation func) {
+    func.setMeanThreshold(Double.POSITIVE_INFINITY);
 
     // Due to a limited convolution (for an infinite range)
     // the class works up to mean of about 300. Above that the approximation using
@@ -131,19 +132,19 @@ public class PoissonGammaGaussianFisherInformationTest {
     // exp == 4 => p = 100
     for (int exp = -8; exp <= 4; exp++) {
       // System.out.println(Math.pow(10, exp * 0.5));
-      canComputeFisherInformation(f, Math.pow(10, exp * 0.5));
+      canComputeFisherInformation(func, Math.pow(10, exp * 0.5));
     }
   }
 
-  private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation f,
-      double u) {
-    final double I = f.getPoissonGammaGaussianI(u);
-    final double upper = PoissonFisherInformation.getPoissonI(u);
+  private static void canComputeFisherInformation(PoissonGammaGaussianFisherInformation func,
+      double mean) {
+    final double I = func.getPoissonGammaGaussianI(mean);
+    final double upper = PoissonFisherInformation.getPoissonI(mean);
     // logger.fine(FunctionUtils.getSupplier("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.m, f.s,
     // u, I, upper, I / upper);
     Assertions.assertTrue(I <= upper, "Not less than Poisson information");
     // This is true at higher mean
-    if (u > 10) {
+    if (mean > 10) {
       Assertions.assertTrue(I >= 0.4999 * upper, "Not above half the Poisson information");
     }
   }
@@ -211,7 +212,7 @@ public class PoissonGammaGaussianFisherInformationTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // Lowest value where the reciprocal is not infinity.
-    double u = Double.longBitsToDouble(0x4000000000001L);
+    double mean = Double.longBitsToDouble(0x4000000000001L);
 
     // Binary search for the min value
     final boolean doSearch = false;
@@ -225,8 +226,8 @@ public class PoissonGammaGaussianFisherInformationTest {
         // 1/Upper is not infinity
         // Test mid-point
         final long mid = (upper + lower) / 2;
-        u = Double.longBitsToDouble(mid);
-        if (1 / u == Double.POSITIVE_INFINITY) {
+        mean = Double.longBitsToDouble(mid);
+        if (1 / mean == Double.POSITIVE_INFINITY) {
           lower = mid;
         } else {
           // Mid point
@@ -234,17 +235,17 @@ public class PoissonGammaGaussianFisherInformationTest {
         }
       }
 
-      u = Double.longBitsToDouble(upper);
-      logger.info(FunctionUtils.getSupplier("(upper = 0x%s = %s", Long.toHexString(upper), u));
+      mean = Double.longBitsToDouble(upper);
+      logger.info(FunctionUtils.getSupplier("(upper = 0x%s = %s", Long.toHexString(upper), mean));
     }
 
-    Assertions.assertTrue(1.0 / u != Double.POSITIVE_INFINITY);
-    Assertions.assertTrue(1.0 / Math.nextDown(u) == Double.POSITIVE_INFINITY);
+    Assertions.assertTrue(1.0 / mean != Double.POSITIVE_INFINITY);
+    Assertions.assertTrue(1.0 / Math.nextDown(mean) == Double.POSITIVE_INFINITY);
 
-    computeFisherInformationWithMean(u);
+    computeFisherInformationWithMean(mean);
   }
 
-  private static void computeFisherInformationWithMean(double u) {
+  private static void computeFisherInformationWithMean(double mean) {
     final double[] M = {20, 500};
     final double[] S = {3, 13};
 
@@ -252,11 +253,11 @@ public class PoissonGammaGaussianFisherInformationTest {
       for (final double s : S) {
         final PoissonGammaGaussianFisherInformation f =
             new PoissonGammaGaussianFisherInformation(m, s);
-        final double I = f.getPoissonGammaGaussianI(u);
-        final double upper = PoissonFisherInformation.getPoissonI(u);
+        final double I = f.getPoissonGammaGaussianI(mean);
+        final double upper = PoissonFisherInformation.getPoissonI(mean);
         final double alpha = I / upper;
         logger.log(TestLogUtils.getRecord(Level.FINE, "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s",
-            f.gain, f.sd, u, I, upper, alpha));
+            f.gain, f.sd, mean, I, upper, alpha));
         Assertions.assertTrue(I < upper,
             () -> String.format("Fisher information (%s) is not below upper limit: %s", I, upper));
         Assertions.assertTrue(alpha > 0, "Alpha is not above zero");

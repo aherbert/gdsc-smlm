@@ -164,7 +164,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
    * @return the SCMOS likelihood wrapper
    */
   public ScmosLikelihoodWrapper build(NonLinearFunction func, double[] a) {
-    return new ScmosLikelihoodWrapper(func, a, x, n, varG2, logG, logNormalisation);
+    return new ScmosLikelihoodWrapper(func, a, x, dataSize, varG2, logG, logNormalisation);
   }
 
   /**
@@ -224,7 +224,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     // Compute the negative log-likelihood to be minimised:
     // (ui+vari/gi^2) - x * ln(ui+vari/gi^2) + ln(gamma(x+1))
     double ll = 0;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < dataSize; i++) {
       double ui = function.eval(i);
 
       if (ui < 0) {
@@ -259,11 +259,11 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     // f'(x) = l'(x) * (1 - k/l(x))
 
     double ll = 0;
-    for (int j = 0; j < nVariables; j++) {
+    for (int j = 0; j < numberOfVariables; j++) {
       gradient[j] = 0;
     }
-    final double[] dlda = new double[nVariables];
-    for (int i = 0; i < n; i++) {
+    final double[] dlda = new double[numberOfVariables];
+    for (int i = 0; i < dataSize; i++) {
       double ui = function.eval(i, dlda);
 
       if (ui < 0) {
@@ -306,10 +306,10 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
 
   @Override
   public double computeLikelihood(double[] gradient, int index) {
-    for (int j = 0; j < nVariables; j++) {
+    for (int j = 0; j < numberOfVariables; j++) {
       gradient[j] = 0;
     }
-    final double[] dlda = new double[nVariables];
+    final double[] dlda = new double[numberOfVariables];
 
     double ui = function.eval(index, dlda);
 
@@ -348,7 +348,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
   public double computeObservedLikelihood() {
     if (Double.isNaN(observedLikelihood)) {
       double ll = 0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < dataSize; i++) {
         // We need to input the observed value as the expected value.
         // So we need (k-o)/g as the expected value. We did not store this so
         // compute it by subtracting varG2 from x.
@@ -409,7 +409,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
    */
   public double computeQValue(double ll) {
     final double llr = computeLogLikelihoodRatio(ll);
-    final int degreesOfFreedom = x.length - nVariables;
+    final int degreesOfFreedom = x.length - numberOfVariables;
     return ChiSquaredDistributionTable.computeQValue(llr, degreesOfFreedom);
   }
 
@@ -483,14 +483,14 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
   public double[][] fisherInformation(final double[] variables) {
     initialiseFunction(variables);
 
-    final double[] du_da = new double[nVariables];
+    final double[] du_da = new double[numberOfVariables];
 
-    final double[][] I = new double[nVariables][nVariables];
+    final double[][] I = new double[numberOfVariables][numberOfVariables];
 
-    for (int k = 0; k < n; k++) {
+    for (int k = 0; k < dataSize; k++) {
       final double uk = function.eval(k, du_da);
       final double yk = 1 / (uk + varG2[k]);
-      for (int i = 0; i < nVariables; i++) {
+      for (int i = 0; i < numberOfVariables; i++) {
         final double du_dai = yk * du_da[i];
         for (int j = 0; j <= i; j++) {
           I[i][j] += du_dai * du_da[j];
@@ -499,8 +499,8 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     }
 
     // Generate symmetric matrix
-    for (int i = 0; i < nVariables - 1; i++) {
-      for (int j = i + 1; j < nVariables; j++) {
+    for (int i = 0; i < numberOfVariables - 1; i++) {
+      for (int j = i + 1; j < numberOfVariables; j++) {
         I[i][j] = I[j][i];
       }
     }

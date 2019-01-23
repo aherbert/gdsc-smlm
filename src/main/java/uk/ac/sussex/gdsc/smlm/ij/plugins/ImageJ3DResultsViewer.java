@@ -579,8 +579,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     void addSelectionModel(
         Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet) {
-      this.peakResultTableModel = triplet.a;
-      this.listSelectionModel = triplet.b;
+      this.peakResultTableModel = triplet.item1;
+      this.listSelectionModel = triplet.item2;
       listSelectionModel.addListSelectionListener(this);
       updateSelection();
     }
@@ -1274,7 +1274,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       triplet = new Triplet<>(new PeakResultTableModel(results, false,
           // Note the settings do not matter until the table is set live
           resultsTableSettings.build()), new DefaultListSelectionModel(), null);
-      triplet.a.setCheckDuplicates(true);
+      triplet.item1.setCheckDuplicates(true);
       resultsTables.put(data.digest, triplet);
     }
 
@@ -1976,7 +1976,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
 
         // Only process content added from localisations
-        final Content c = pair.a;
+        final Content c = pair.item1;
         if (!(c.getUserData() instanceof ResultsMetaData)) {
           univ.select(c); // Do the same as the mouseClicked in Image3DUniverse
           return;
@@ -2004,7 +2004,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           final int countPerLocalisation = vertexCount / results.size();
 
           // Determine the localisation
-          final int vertexIndex = pair.b.getVertexIndices()[0];
+          final int vertexIndex = pair.item2.getVertexIndices()[0];
           index = vertexIndex / countPerLocalisation;
           // System.out.printf("n=%d [%d] %s %s\n", nPerLocalisation, index,
           // Arrays.toString(pair.b.getVertexIndices()), pair.b.getIntersectionPoint());
@@ -2012,9 +2012,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
           // ItemGeometryNode node = (ItemGeometryNode) content.getContent();
           // ItemGroup g = node.getItemGroup();
           // All shapes have the index as the user data
-          final Object o = pair.b.getGeometry().getUserData();
+          final Object o = pair.item2.getGeometry().getUserData();
           if (o instanceof Integer) {
-            index = (Integer) pair.b.getGeometry().getUserData();
+            index = (Integer) pair.item2.getGeometry().getUserData();
           }
         }
         if (index == -1) {
@@ -2115,7 +2115,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // This may be displayed in a window.
     final Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
         resultsTables.get(data.digest);
-    final PeakResultTableModelFrame table = t.c;
+    final PeakResultTableModelFrame table = t.item3;
     if (table != null && table.isVisible()) {
       return table;
     }
@@ -2133,7 +2133,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
         resultsTables.get(data.digest);
 
-    PeakResultTableModelFrame table = triplet.c;
+    PeakResultTableModelFrame table = triplet.item3;
     if (table != null) {
       if (table.isVisible()) {
         return table;
@@ -2144,7 +2144,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // No table or not visible so create a new one
-    table = new PeakResultTableModelFrame(triplet.a, triplet.b);
+    table = new PeakResultTableModelFrame(triplet.item1, triplet.item2);
     table.setTitle(TITLE + " " + results.getName());
     table.setReadOnly(false);
     // Ensure cleanup
@@ -2155,14 +2155,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
       public void windowClosed(WindowEvent event) {
         // We must unmap the selection since we use the selection model
         // across all active views of the same dataset.
-        final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.b);
+        final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.item2);
         finalTable.convertRowIndexToModel(indices);
         finalTable.cleanUp(); // Remove listeners
-        ListSelectionModelHelper.setSelectedIndices(triplet.b, indices);
+        ListSelectionModelHelper.setSelectedIndices(triplet.item2, indices);
       }
     });
     table.setVisible(true);
-    resultsTables.put(data.digest, new Triplet<>(triplet.a, triplet.b, table));
+    resultsTables.put(data.digest, new Triplet<>(triplet.item1, triplet.item2, table));
 
     return table;
   }
@@ -3213,7 +3213,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (resultsTableSettings.getUpdateExistingTables()) {
         final ResultsTableSettings ts = resultsTableSettings.build();
         for (final Triplet<PeakResultTableModel, ?, ?> t : resultsTables.values()) {
-          t.a.setTableSettings(ts);
+          t.item1.setTableSettings(ts);
         }
       }
 

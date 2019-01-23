@@ -55,8 +55,8 @@ public class FunctionHelperTest {
 
   private static double sum(double[] values, int top) {
     double sum = 0;
-    int n = 0;
-    for (int i = values.length; i-- > 0 && n < top; n++) {
+    int count = 0;
+    for (int i = values.length; i-- > 0 && count < top; count++) {
       sum += values[i];
     }
     return sum;

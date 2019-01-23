@@ -46,14 +46,14 @@ public abstract class BaseFailCounter implements FailCounter {
   protected abstract String generateDescription();
 
   /**
-   * Check the number is positive.
+   * Check the count is positive.
    *
-   * @param c the number
+   * @param count the count
    * @throws IllegalStateException if not positive
    */
-  protected static void checkPositive(int c) throws IllegalStateException {
-    if (c < 0) {
-      throw new IllegalStateException("Negative count: " + c);
+  protected static void checkPositive(int count) {
+    if (count < 0) {
+      throw new IllegalStateException("Negative count: " + count);
     }
   }
 

@@ -124,23 +124,23 @@ public class CubicSplineData {
   }
 
   private static interface SplineWriter {
-    void write(DataOutput out, CustomTricubicFunction f) throws IOException;
+    void write(DataOutput out, CustomTricubicFunction function) throws IOException;
   }
 
   private static class FloatSplineWriter implements SplineWriter {
     @Override
-    public void write(DataOutput out, CustomTricubicFunction f) throws IOException {
+    public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
       for (int i = 0; i < 64; i++) {
-        out.writeFloat(f.getf(i));
+        out.writeFloat(function.getf(i));
       }
     }
   }
 
   private static class DoubleSplineWriter implements SplineWriter {
     @Override
-    public void write(DataOutput out, CustomTricubicFunction f) throws IOException {
+    public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
       for (int i = 0; i < 64; i++) {
-        out.writeDouble(f.get(i));
+        out.writeDouble(function.get(i));
       }
     }
   }
@@ -302,12 +302,12 @@ public class CubicSplineData {
    * <p>The procedure setValue(int,int,int,double) method will be executed in ZYX order.
    *
    * @param n the number of samples per spline node
-   * @param p the procedure
+   * @param procedure the procedure
    * @param progress the progress
    * @throws IllegalArgumentException If the number of sample is not positive
    */
-  public void sample(int n, TrivalueProcedure p, ImageJTrackProgress progress) {
-    sample(n, n, n, p, progress);
+  public void sample(int n, TrivalueProcedure procedure, ImageJTrackProgress progress) {
+    sample(n, n, n, procedure, progress);
   }
 
   /**

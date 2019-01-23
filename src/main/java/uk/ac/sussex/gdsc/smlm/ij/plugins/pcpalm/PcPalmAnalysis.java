@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.Parameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 
@@ -58,9 +58,11 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -237,14 +239,12 @@ public class PcPalmAnalysis implements PlugInFilter {
         final XStream xs = new XStream(new DomDriver());
         XStream.setupDefaultSecurity(xs); // to be removed after 1.5
         xs.allowTypes(new Class[] {CorrelationResult.class});
-        if (fileList[i].isFile()) {
-          if (loadResult(xs, fileList[i].getPath())) {
-            count++;
-          }
+        if (fileList[i].isFile() && loadResult(xs, fileList[i].getPath())) {
+          count++;
         }
       }
       if (count > 0) {
-        Collections.sort(results);
+        Collections.sort(results, CorrelationResult::compare);
       }
       log("Loaded %d results", count);
     }
@@ -252,7 +252,7 @@ public class PcPalmAnalysis implements PlugInFilter {
   }
 
   private static boolean loadResult(XStream xs, String path) {
-    try (FileInputStream fs = new FileInputStream(path)) {
+    try (InputStream fs = Files.newInputStream(Paths.get(path))) {
       CorrelationResult result = (CorrelationResult) xs.fromXML(fs);
       // Replace a result with the same id
       for (int i = 0; i < results.size(); i++) {
@@ -267,12 +267,6 @@ public class PcPalmAnalysis implements PlugInFilter {
         results.add(result);
       }
       return true;
-    } catch (final ClassCastException ex) {
-      // ex.printStackTrace();
-      IJ.log("Failed to load correlation result from file: " + path);
-    } catch (final XStreamException ex) {
-      // ex.printStackTrace();
-      IJ.log("Failed to load correlation result from file: " + path);
     } catch (final Exception ex) {
       IJ.log("Failed to load correlation result from file: " + path);
     }
@@ -342,11 +336,11 @@ public class PcPalmAnalysis implements PlugInFilter {
     // Check arguments
     try {
       if (!spatialDomain) {
-        Parameters.isAbove("Correlation distance", correlationDistance, 1);
-        Parameters.isEqualOrAbove("Blinking_rate", blinkingRate, 1);
-        Parameters.isAboveZero("nm per pixel", nmPerPixel);
+        ParameterUtils.isAbove("Correlation distance", correlationDistance, 1);
+        ParameterUtils.isEqualOrAbove("Blinking_rate", blinkingRate, 1);
+        ParameterUtils.isAboveZero("nm per pixel", nmPerPixel);
       } else {
-        Parameters.isAboveZero("Correlation interval", correlationInterval);
+        ParameterUtils.isAboveZero("Correlation interval", correlationInterval);
       }
     } catch (final IllegalArgumentException ex) {
       error(ex.getMessage());
@@ -367,6 +361,7 @@ public class PcPalmAnalysis implements PlugInFilter {
    * @param imp the image
    * @return the array list
    */
+  @SuppressWarnings("null")
   ArrayList<Molecule> cropToRoi(ImagePlus imp) {
     croppedArea = PcPalmMolecules.area;
     if (PcPalmMolecules.molecules == null || PcPalmMolecules.molecules.isEmpty()) {
@@ -387,21 +382,16 @@ public class PcPalmAnalysis implements PlugInFilter {
       return PcPalmMolecules.molecules;
     }
 
-    // To avoid null pointer warnings
-    if (imp == null) {
-      throw new NullPointerException("image is null");
-    }
-
-    final int w = imp.getWidth();
-    final int h = imp.getHeight();
+    final int width = imp.getWidth();
+    final int height = imp.getHeight();
 
     final Rectangle bounds = roi.getBounds();
 
     // Construct relative coordinates
-    minx = PcPalmMolecules.minx + pcw * ((double) bounds.x / w);
-    miny = PcPalmMolecules.miny + pch * ((double) bounds.y / h);
-    maxx = PcPalmMolecules.minx + pcw * ((double) (bounds.x + bounds.width) / w);
-    maxy = PcPalmMolecules.miny + pch * ((double) (bounds.y + bounds.height) / h);
+    minx = PcPalmMolecules.minx + pcw * ((double) bounds.x / width);
+    miny = PcPalmMolecules.miny + pch * ((double) bounds.y / height);
+    maxx = PcPalmMolecules.minx + pcw * ((double) (bounds.x + bounds.width) / width);
+    maxy = PcPalmMolecules.miny + pch * ((double) (bounds.y + bounds.height) / height);
 
     final double roix = maxx - minx;
     final double roiy = maxy - miny;

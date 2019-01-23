@@ -215,24 +215,24 @@ public abstract class CubicSplineFunctionTest {
 
     Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
 
-    int p = 0;
+    int count = 0;
     if (cf.evaluatesBackground()) {
-      Assertions.assertEquals(0, gradientIndices[p++], "Background");
+      Assertions.assertEquals(0, gradientIndices[count++], "Background");
     }
     for (int peak = 1, i = 1; peak <= npeaks;
         peak++, i += CubicSplineFunction.PARAMETERS_PER_PEAK) {
       final int ii = i;
       if (cf.evaluatesSignal()) {
-        Assertions.assertEquals(i, gradientIndices[p++], () -> CubicSplineFunction.getName(ii));
+        Assertions.assertEquals(i, gradientIndices[count++], () -> CubicSplineFunction.getName(ii));
       }
       if (cf.evaluatesPosition()) {
-        Assertions.assertEquals(i + 1, gradientIndices[p++],
+        Assertions.assertEquals(i + 1, gradientIndices[count++],
             () -> CubicSplineFunction.getName(ii + 1));
-        Assertions.assertEquals(i + 2, gradientIndices[p++],
+        Assertions.assertEquals(i + 2, gradientIndices[count++],
             () -> CubicSplineFunction.getName(ii + 2));
       }
       if (cf.evaluatesZ()) {
-        Assertions.assertEquals(i + 3, gradientIndices[p++],
+        Assertions.assertEquals(i + 3, gradientIndices[count++],
             () -> CubicSplineFunction.getName(ii + 3));
       }
     }
@@ -240,16 +240,16 @@ public abstract class CubicSplineFunctionTest {
 
   @Test
   public void factoryCreatesCorrectFunction() {
-    CubicSplineFunction f;
+    CubicSplineFunction func;
 
     if (f2 != null) {
-      f = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz,
-          2, 2);
-      Assertions.assertTrue(f.getClass() == f2.getClass(), "Incorrect function2");
+      func = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy,
+          cz, 2, 2);
+      Assertions.assertTrue(func.getClass() == f2.getClass(), "Incorrect function2");
     } else {
-      f = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz,
-          2, 1);
-      Assertions.assertTrue(f.getClass() == f1.getClass(), "Incorrect function1");
+      func = CubicSplineFunctionFactory.createCubicSplineFunction(splineData, maxx, maxy, cx, cy,
+          cz, 2, 1);
+      Assertions.assertTrue(func.getClass() == f1.getClass(), "Incorrect function1");
     }
   }
 
@@ -380,10 +380,10 @@ public abstract class CubicSplineFunctionTest {
     });
   }
 
-  protected int findGradientIndex(CubicSplineFunction f, int targetParameter) {
-    final int i = f.findGradientIndex(targetParameter);
-    Assertions.assertTrue(i >= 0, "Cannot find gradient index");
-    return i;
+  protected int findGradientIndex(CubicSplineFunction func, int targetParameter) {
+    final int index = func.findGradientIndex(targetParameter);
+    Assertions.assertTrue(index >= 0, "Cannot find gradient index");
+    return index;
   }
 
   @Test
@@ -812,11 +812,11 @@ public abstract class CubicSplineFunctionTest {
     Gradient2Function f2;
     double[][] x;
     int order;
-    double s;
+    double sd;
 
-    public FunctionTimingTask(Gradient1Function f, double[][] x, int order) {
-      super(f.getClass().getSimpleName() + " " + order);
-      this.f1 = f;
+    public FunctionTimingTask(Gradient1Function func, double[][] x, int order) {
+      super(func.getClass().getSimpleName() + " " + order);
+      this.f1 = func;
       if (order > 1) {
         throw new IllegalArgumentException("Gradient1Function for order>1");
       }
@@ -824,18 +824,18 @@ public abstract class CubicSplineFunctionTest {
       this.order = order;
     }
 
-    public FunctionTimingTask(Gradient2Function f, double[][] x, int order) {
-      super(f.getClass().getSimpleName() + " " + order);
-      this.f1 = f;
-      this.f2 = f;
+    public FunctionTimingTask(Gradient2Function func, double[][] x, int order) {
+      super(func.getClass().getSimpleName() + " " + order);
+      this.f1 = func;
+      this.f2 = func;
       this.x = x;
       this.order = order;
     }
 
-    public FunctionTimingTask(Gradient2Function f, double[][] x, int order, String suffix) {
-      super(f.getClass().getSimpleName() + " " + order + suffix);
-      this.f1 = f;
-      this.f2 = f;
+    public FunctionTimingTask(Gradient2Function func, double[][] x, int order, String suffix) {
+      super(func.getClass().getSimpleName() + " " + order + suffix);
+      this.f1 = func;
+      this.f2 = func;
       this.x = x;
       this.order = order;
     }
@@ -846,13 +846,13 @@ public abstract class CubicSplineFunctionTest {
     }
 
     @Override
-    public Object getData(int i) {
+    public Object getData(int index) {
       return null;
     }
 
     @Override
     public Object run(Object data) {
-      s = 0;
+      sd = 0;
       // f = f.copy();
       if (order == 0) {
         for (int i = 0; i < x.length; i++) {
@@ -870,22 +870,22 @@ public abstract class CubicSplineFunctionTest {
           f2.forEach((Gradient2Procedure) this);
         }
       }
-      return s;
+      return sd;
     }
 
     @Override
     public void execute(double value) {
-      s += value;
+      sd += value;
     }
 
     @Override
     public void execute(double value, double[] dyDa) {
-      s += value;
+      sd += value;
     }
 
     @Override
     public void execute(double value, double[] dyDa, double[] d2yDa2) {
-      s += value;
+      sd += value;
     }
   }
 

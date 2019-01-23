@@ -57,22 +57,22 @@ public class CustomPoissonDistributionTest {
     logger = null;
   }
 
-  private abstract class MyTimingTask extends BaseTimingTask {
+  private abstract static class MyTimingTask extends BaseTimingTask {
+    static final int SAMPLES = 10;
     RandomSeed seed;
-    UniformRandomProvider r;
+    UniformRandomProvider rng;
     double mean;
     double min;
-    int n;
-    int m = 10;
+    int numberOfMeans;
 
     public MyTimingTask(String name, RandomSeed seed, double min, double max) {
       super(String.format("%s %.1f - %.1f", name, min, max));
       this.seed = seed;
       this.min = min;
       mean = min;
-      n = 0;
+      numberOfMeans = 0;
       while (mean < max) {
-        n++;
+        numberOfMeans++;
         mean += 1;
       }
     }
@@ -83,24 +83,24 @@ public class CustomPoissonDistributionTest {
     }
 
     @Override
-    public Object getData(int i) {
-      r = RngUtils.create(seed.getSeedAsLong());
+    public Object getData(int index) {
+      rng = RngUtils.create(seed.getSeedAsLong());
       mean = min;
       return null;
     }
   }
 
-  private class StaticTimingTask extends MyTimingTask {
+  private static class StaticTimingTask extends MyTimingTask {
     public StaticTimingTask(RandomSeed seed, double min, double max) {
       super("RandomDataGenerator", seed, min, max);
     }
 
     @Override
     public Object run(Object data) {
-      final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(r));
-      final long[] e = new long[n * m];
-      for (int i = 0, k = 0; i < n; i++) {
-        for (int j = 0; j < m; j++, k++) {
+      final RandomDataGenerator rdg = new RandomDataGenerator(new RandomGeneratorAdapter(rng));
+      final long[] e = new long[numberOfMeans * SAMPLES];
+      for (int i = 0, k = 0; i < numberOfMeans; i++) {
+        for (int j = 0; j < SAMPLES; j++, k++) {
           e[k] = rdg.nextPoisson(mean);
         }
         mean += 1;
@@ -109,7 +109,7 @@ public class CustomPoissonDistributionTest {
     }
   }
 
-  private class InstanceTimingTask extends MyTimingTask {
+  private static class InstanceTimingTask extends MyTimingTask {
     public InstanceTimingTask(RandomSeed seed, double min, double max) {
       super("CustomPoissonDistribution", seed, min, max);
     }
@@ -117,11 +117,11 @@ public class CustomPoissonDistributionTest {
     @Override
     public Object run(Object data) {
       final CustomPoissonDistribution dist =
-          new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-      final long[] e = new long[n * m];
-      for (int i = 0, k = 0; i < n; i++) {
+          new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
+      final long[] e = new long[numberOfMeans * SAMPLES];
+      for (int i = 0, k = 0; i < numberOfMeans; i++) {
         dist.setMean(mean);
-        for (int j = 0; j < m; j++, k++) {
+        for (int j = 0; j < SAMPLES; j++, k++) {
           e[k] = dist.sample();
         }
         mean += 1;

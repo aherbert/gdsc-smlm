@@ -1971,9 +1971,9 @@ public class BenchmarkFilterAnalysis
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Delta", delta);
-      Parameters.isBelow("Delta", delta, 1);
-      Parameters.isAboveZero("Upper match distance", upperMatchDistance);
+      ParameterUtils.isAboveZero("Delta", delta);
+      ParameterUtils.isBelow("Delta", delta, 1);
+      ParameterUtils.isAboveZero("Upper match distance", upperMatchDistance);
       if (partialMatchDistance > upperMatchDistance) {
         partialMatchDistance = upperMatchDistance;
       }
@@ -1981,16 +1981,18 @@ public class BenchmarkFilterAnalysis
         partialSignalFactor = upperSignalFactor;
       }
       if (showOptimiseParams) {
-        Parameters.isEqualOrBelow("Fail count", failCount, maxFailCount);
-        Parameters.isEqualOrAbove("Fail count", failCount, minFailCount);
+        ParameterUtils.isEqualOrBelow("Fail count", failCount, maxFailCount);
+        ParameterUtils.isEqualOrAbove("Fail count", failCount, minFailCount);
         if (BenchmarkSpotFit.computeDoublets) {
-          Parameters.isEqualOrBelow("Residuals threshold", sResidualsThreshold,
+          ParameterUtils.isEqualOrBelow("Residuals threshold", sResidualsThreshold,
               maxResidualsThreshold);
-          Parameters.isEqualOrAbove("Residuals threshold", sResidualsThreshold,
+          ParameterUtils.isEqualOrAbove("Residuals threshold", sResidualsThreshold,
               minResidualsThreshold);
         }
-        Parameters.isEqualOrBelow("Duplicate distance", duplicateDistance, maxDuplicateDistance);
-        Parameters.isEqualOrAbove("Duplicate distance", duplicateDistance, minDuplicateDistance);
+        ParameterUtils.isEqualOrBelow("Duplicate distance", duplicateDistance,
+            maxDuplicateDistance);
+        ParameterUtils.isEqualOrAbove("Duplicate distance", duplicateDistance,
+            minDuplicateDistance);
       }
       // Parameters.isEqualOrBelow("Partial match distance", partialMatchDistance,
       // upperMatchDistance);
@@ -2130,8 +2132,8 @@ public class BenchmarkFilterAnalysis
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Delta", delta);
-      Parameters.isBelow("Delta", delta, 1);
+      ParameterUtils.isAboveZero("Delta", delta);
+      ParameterUtils.isBelow("Delta", delta, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -2259,8 +2261,8 @@ public class BenchmarkFilterAnalysis
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Delta", delta);
-      Parameters.isBelow("Delta", delta, 1);
+      ParameterUtils.isAboveZero("Delta", delta);
+      ParameterUtils.isBelow("Delta", delta, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

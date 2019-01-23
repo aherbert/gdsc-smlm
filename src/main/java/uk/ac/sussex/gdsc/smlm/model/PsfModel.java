@@ -414,10 +414,10 @@ public abstract class PsfModel {
   /**
    * Produce a shallow copy of this object. This shares the pre-computed PSF data but will allow the
    * copy to store its own version of the most recently created PSF.
-   * 
+   *
    * <p>Upon initialisation the copy will not have a most recently created PSF.
    *
-   * @param rng the rng
+   * @param rng the random generator
    * @return A shallow copy of this object
    */
   public abstract PsfModel copy(RandomGenerator rng);

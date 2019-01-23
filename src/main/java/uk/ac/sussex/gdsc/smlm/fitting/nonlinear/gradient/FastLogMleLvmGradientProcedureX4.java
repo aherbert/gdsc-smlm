@@ -49,7 +49,7 @@ public class FastLogMleLvmGradientProcedureX4 extends FastLogMleLvmGradientProce
   public FastLogMleLvmGradientProcedureX4(final double[] y, final Gradient1Function func,
       FastLog fastLog) {
     super(y, func, fastLog);
-    if (n != 4) {
+    if (numberOfGradients != 4) {
       throw new IllegalArgumentException("Function must compute 4 gradients");
     }
   }

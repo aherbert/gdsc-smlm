@@ -49,7 +49,7 @@ public class WLsqLvmGradientProcedure5 extends WLsqLvmGradientProcedure {
   public WLsqLvmGradientProcedure5(final double[] y, final double[] var,
       final Gradient1Function func) {
     super(y, var, func);
-    if (n != 5) {
+    if (numberOfGradients != 5) {
       throw new IllegalArgumentException("Function must compute 5 gradients");
     }
   }

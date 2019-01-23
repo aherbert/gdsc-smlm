@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results.count;
 
+import java.util.Objects;
+
 /**
  * Combine the result of two fail counters.
  */
@@ -40,29 +42,26 @@ public abstract class CombinedFailCounter extends BaseFailCounter {
    * @param c2 the second counter
    */
   public CombinedFailCounter(FailCounter c1, FailCounter c2) {
-    if (c1 == null || c2 == null) {
-      throw new NullPointerException();
-    }
-    this.c1 = c1;
-    this.c2 = c2;
+    this.c1 = Objects.requireNonNull(c1, "Counter 1");
+    this.c2 = Objects.requireNonNull(c2, "Counter 2");
   }
 
   @Override
   protected String generateDescription() {
     final StringBuilder sb = new StringBuilder();
-    add(sb, c1);
+    addDescription(sb, c1);
     sb.append(" ").append(getOperator()).append(" ");
-    add(sb, c2);
+    addDescription(sb, c2);
     return sb.toString();
   }
 
-  private static void add(StringBuilder sb, FailCounter c) {
-    if (c instanceof CombinedFailCounter) {
+  private static void addDescription(StringBuilder sb, FailCounter counter) {
+    if (counter instanceof CombinedFailCounter) {
       sb.append("(");
-      sb.append(c.getDescription());
+      sb.append(counter.getDescription());
       sb.append(")");
     } else {
-      sb.append(c.getDescription());
+      sb.append(counter.getDescription());
     }
   }
 

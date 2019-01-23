@@ -51,7 +51,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  * chosen observed value.
  */
 public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper {
-  private final PoissonGammaGaussianFunction p;
+  private final PoissonGammaGaussianFunction pgg;
 
   /**
    * Initialise the function.
@@ -60,33 +60,33 @@ public class PoissonGammaGaussianLikelihoodWrapper extends LikelihoodWrapper {
    * parameters with gradient indices should be passed in to the functions to obtain the value (and
    * gradient).
    *
-   * @param f The function to be used to calculated the expected values (if modelling EMCCD data
-   *        this should evaluate the value without the bias)
-   * @param a The initial parameters for the function
-   * @param k The observed values (if using EMCCD data the bias should be subtracted)
-   * @param n The number of observed values
+   * @param function The function to be used to calculated the expected values (if modelling EMCCD
+   *        data this should evaluate the value without the bias)
+   * @param parameters The initial parameters for the function
+   * @param data The observed values (if using EMCCD data the bias should be subtracted)
+   * @param dataSize The number of observed values
    * @param alpha Inverse gain of the EMCCD chip
-   * @param s The Gaussian standard deviation at readout
+   * @param sd The Gaussian standard deviation at readout
    */
-  public PoissonGammaGaussianLikelihoodWrapper(NonLinearFunction f, double[] a, double[] k, int n,
-      double alpha, double s) {
-    super(f, a, k, n);
-    p = new PoissonGammaGaussianFunction(alpha, s);
+  public PoissonGammaGaussianLikelihoodWrapper(NonLinearFunction function, double[] parameters,
+      double[] data, int dataSize, double alpha, double sd) {
+    super(function, parameters, data, dataSize);
+    pgg = new PoissonGammaGaussianFunction(alpha, sd);
   }
 
   @Override
   public double computeLikelihood() {
     // Compute the negative log-likelihood
     double ll = 0;
-    for (int i = 0; i < n; i++) {
-      ll -= p.logLikelihood(data[i], function.eval(i));
+    for (int i = 0; i < dataSize; i++) {
+      ll -= pgg.logLikelihood(data[i], function.eval(i));
     }
     return ll;
   }
 
   @Override
-  public double computeLikelihood(int i) {
-    return -p.logLikelihood(data[i], function.eval(i));
+  public double computeLikelihood(int index) {
+    return -pgg.logLikelihood(data[index], function.eval(index));
   }
 
   @Override

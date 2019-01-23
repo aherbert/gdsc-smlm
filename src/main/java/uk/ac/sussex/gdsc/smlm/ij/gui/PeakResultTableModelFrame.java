@@ -440,18 +440,18 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
         Arrays.sort(list, FramePeakResultComparator.INSTANCE);
         final TFloatArrayList ox = new TFloatArrayList(list.length);
         final TFloatArrayList oy = new TFloatArrayList(list.length);
-        int t = list[0].getFrame() - 1;
+        int frame = list[0].getFrame() - 1;
         for (int i = 0; i < list.length; i++) {
-          if (t != list[i].getFrame()) {
+          if (frame != list[i].getFrame()) {
             if (ox.size() > 0) {
               final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
               roi.setPointType(3);
-              roi.setPosition(t);
+              roi.setPosition(frame);
               ox.resetQuick();
               oy.resetQuick();
               o.add(roi);
             }
-            t = list[i].getFrame();
+            frame = list[i].getFrame();
           }
           ox.add(converter.convert(list[i].getXPosition()));
           oy.add(converter.convert(list[i].getYPosition()));
@@ -459,7 +459,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
         if (ox.size() > 0) {
           final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
           roi.setPointType(3);
-          roi.setPosition(t);
+          roi.setPosition(frame);
           o.add(roi);
         }
       }

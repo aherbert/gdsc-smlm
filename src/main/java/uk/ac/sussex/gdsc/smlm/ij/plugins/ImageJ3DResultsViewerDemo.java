@@ -134,31 +134,31 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
       float y = 0;
       final float space = 2.5f;
 
-      Appearance a = null;
+      Appearance app = null;
       for (int d = 0; d < 4; d++) {
         final List<Point3f> points = customnode.MeshMaker.createIcosahedron(d, 1f);
         final Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
         final int v = points.size();
         final int t = v / 3;
         System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d\n", d, v, t,
-            p.a.length, v / (double) p.a.length, p.b.length);
+            p.item1.length, v / (double) p.item1.length, p.item2.length);
 
         CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
             new Point3f[] {new Point3f(x, y, 0)}, null, null, 0);
 
-        a = mesh.getAppearance();
+        app = mesh.getAppearance();
         univ.addCustomMesh(mesh, x + "," + y + "," + t);
 
         final float y2 = y + space;
-        mesh = new ItemIndexedTriangleMesh(p.a, p.b, new Point3f[] {new Point3f(x, y2, 0)}, null,
-            null, 0);
+        mesh = new ItemIndexedTriangleMesh(p.item1, p.item2, new Point3f[] {new Point3f(x, y2, 0)},
+            null, null, 0);
         univ.addCustomMesh(mesh, x + "," + y2 + "," + t);
 
         x += space;
       }
 
       // Avoid null pointer warnings
-      if (a == null) {
+      if (app == null) {
         throw new NullPointerException();
       }
 
@@ -167,9 +167,9 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
 
       x = 0;
       y += 2 * space;
-      a = (Appearance) a.cloneNodeComponent(true);
+      app = (Appearance) app.cloneNodeComponent(true);
       // a.getColoringAttributes().setColor(0, 1, 0);
-      a.getMaterial().setDiffuseColor(0, 1, 0);
+      app.getMaterial().setDiffuseColor(0, 1, 0);
       for (int d = 4; d < 50; d += 4) {
         // This is a triangle strip array so is more space efficient
         final Sphere s = new Sphere(1, Primitive.GENERATE_NORMALS, d);
@@ -177,7 +177,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), t);
 
         final ItemGeometryGroup g = new ItemGeometryGroup(new Point3f[] {new Point3f(x, y, 0)},
-            (GeometryArray) s.getShape().getGeometry(), a, null, null, null);
+            (GeometryArray) s.getShape().getGeometry(), app, null, null, null);
         final String name = x + "," + y + "," + t;
         final CustomContent content = new CustomContent(name, true);
         content.getCurrent().display(new ItemGroupNode(g));

@@ -48,7 +48,7 @@ public class AstigmatismModelManagerTest {
     }
   }
 
-  private static void canConvertModel(DistanceUnit zDistanceUnit, DistanceUnit sDistanceUnit) {
+  private static void canConvertModel(DistanceUnit zDistanceUnit, DistanceUnit sdDistanceUnit) {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;
@@ -78,7 +78,7 @@ public class AstigmatismModelManagerTest {
 
     final AstigmatismModel model1 = builder.build();
     final AstigmatismModel model2 =
-        AstigmatismModelManager.convert(model1, zDistanceUnit, sDistanceUnit);
+        AstigmatismModelManager.convert(model1, zDistanceUnit, sdDistanceUnit);
 
     final AstigmatismZModel m1 = AstigmatismModelManager.create(model1);
     final AstigmatismZModel m2 = AstigmatismModelManager.create(model2);
@@ -86,7 +86,7 @@ public class AstigmatismModelManagerTest {
     final TypeConverter<DistanceUnit> zc =
         UnitConverterUtils.createConverter(DistanceUnit.UM, zDistanceUnit, nmPerPixel);
     final TypeConverter<DistanceUnit> sc =
-        UnitConverterUtils.createConverter(DistanceUnit.PIXEL, sDistanceUnit, nmPerPixel);
+        UnitConverterUtils.createConverter(DistanceUnit.PIXEL, sdDistanceUnit, nmPerPixel);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
     for (double z = -0.5; z <= 0.5; z += 0.1) {

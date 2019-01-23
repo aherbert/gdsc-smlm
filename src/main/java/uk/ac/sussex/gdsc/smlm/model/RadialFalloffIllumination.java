@@ -79,10 +79,10 @@ public class RadialFalloffIllumination implements SpatialIllumination {
   }
 
   @Override
-  public double[] getPulsedPhotons(double[] xyz, int t) {
+  public double[] getPulsedPhotons(double[] xyz, int time) {
     final double intensity = getIntensity(xyz);
     if (pulseInterval > 1) {
-      return new double[] {(t % pulseInterval == 1) ? pulsePhotons * intensity : 0,
+      return new double[] {(time % pulseInterval == 1) ? pulsePhotons * intensity : 0,
           photons * intensity};
     }
     return new double[] {0, photons * intensity};
@@ -100,8 +100,7 @@ public class RadialFalloffIllumination implements SpatialIllumination {
     // http://en.wikipedia.org/wiki/List_of_integrals_of_rational_functions#Integrands_of_the_form_xm_.2F_.28a_x2_.2B_b_x_.2B_c.29n
     //
     // f(x) = 1 / (ax^2 + bx + c)
-    // F(x) = 2/sqrt(4ac - b^2) arctan((2ax + b) / sqrt(4ac - b^2)) + C (for
-    // 4ac - b^2 > 0)
+    // F(x) = 2/sqrt(4ac - b^2) arctan((2ax + b) / sqrt(4ac - b^2)) + C (for 4ac - b^2 > 0)
     //
     // For a = 1 / R^2, b = 0, c = 1
     // Simplifies:
@@ -111,7 +110,7 @@ public class RadialFalloffIllumination implements SpatialIllumination {
     // Solving for r=R - r=0:
     // Sum = R arctan(1) - R arctan(0)
     // = R arctan(1)
-    // => Average = R arctan(1) / R = arctan(1) = Math.Pi / 4;
+    // => Average = R arctan(1) / R = arctan(1) = Math.Pi / 4
     if (pulseInterval > 1) {
       return (photons + pulsePhotons / pulseInterval) * (Math.PI / 4);
     }

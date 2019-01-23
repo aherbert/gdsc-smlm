@@ -51,7 +51,7 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
    */
   public LsqLvmGradientProcedure(final double[] y, final Gradient1Function func) {
     super(y, null, func);
-    alpha = new double[n * (n + 1) / 2];
+    alpha = new double[numberOfGradients * (numberOfGradients + 1) / 2];
   }
 
   /**
@@ -64,7 +64,7 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
   public LsqLvmGradientProcedure(final double[] y, final double[] baseline,
       final Gradient1Function func) {
     super(y, baseline, func);
-    alpha = new double[n * (n + 1) / 2];
+    alpha = new double[numberOfGradients * (numberOfGradients + 1) / 2];
   }
 
   @Override
@@ -78,7 +78,7 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
     // - the scaled gradient vector of the function's partial first derivatives with respect to the
     // parameters
 
-    for (int j = 0, i = 0; j < n; j++) {
+    for (int j = 0, i = 0; j < numberOfGradients; j++) {
       final double wgt = dyDa[j];
 
       for (int k = 0; k <= j; k++) {
@@ -120,11 +120,11 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
 
   @Override
   public void getAlphaMatrix(double[][] alpha) {
-    GradientProcedureHelper.getMatrix(this.alpha, alpha, n);
+    GradientProcedureHelper.getMatrix(this.alpha, alpha, numberOfGradients);
   }
 
   @Override
   public void getAlphaLinear(double[] alpha) {
-    GradientProcedureHelper.getMatrix(this.alpha, alpha, n);
+    GradientProcedureHelper.getMatrix(this.alpha, alpha, numberOfGradients);
   }
 }

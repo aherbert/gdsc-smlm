@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.search;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
@@ -41,7 +42,7 @@ public class SearchSpace {
   private static NonRoundingDimension nonRoundingDimension = new NonRoundingDimension();
 
   private int iteration;
-  private double[][] searchSpace;
+  private double[][] currentSearchSpace;
   private double[][] seed;
 
   private double[][] scoredSearchSpace;
@@ -51,6 +52,8 @@ public class SearchSpace {
 
   // This introduces a dependency on another uk.ac.sussex.gdsc.smlm package
   private TrackProgress tracker;
+
+  private RefinementMode searchMode = RefinementMode.SINGLE_DIMENSION;
 
   /**
    * The refinement mode for the range search.
@@ -74,25 +77,6 @@ public class SearchSpace {
      * performed once and then the range is reduced.
      */
     MULTI_DIMENSION
-  }
-
-  private RefinementMode searchMode = RefinementMode.SINGLE_DIMENSION;
-
-  /**
-   * Clone the search dimensions.
-   *
-   * @param dimensions the search dimensions
-   * @return the clone
-   */
-  public static SearchDimension[] clone(SearchDimension[] dimensions) {
-    if (dimensions == null) {
-      return null;
-    }
-    final SearchDimension[] dimensions2 = new SearchDimension[dimensions.length];
-    for (int i = 0; i < dimensions.length; i++) {
-      dimensions2[i] = dimensions[i].clone();
-    }
-    return dimensions2;
   }
 
   /**
@@ -121,12 +105,8 @@ public class SearchSpace {
   public <T extends Comparable<T>> SearchResult<T> search(SearchDimension[] dimensions,
       ScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker,
       RefinementMode refinementMode) {
-    if (dimensions == null || dimensions.length == 0) {
-      throw new IllegalArgumentException("Dimensions must not be empty");
-    }
-    if (scoreFunction == null) {
-      throw new IllegalArgumentException("Score function is null");
-    }
+    ValidationUtils.checkArrayLength(dimensions, "Dimensions");
+    ValidationUtils.checkNotNull(scoreFunction, "Score function is null");
 
     reset();
 
@@ -170,7 +150,7 @@ public class SearchSpace {
   private void reset() {
     iteration = 0;
     sb.setLength(0);
-    searchSpace = null;
+    currentSearchSpace = null;
     scoredSearchSpace = null;
     scoredSearchSpaceHash.clear();
     coveredSpace.clear();
@@ -187,12 +167,8 @@ public class SearchSpace {
    */
   public <T extends Comparable<T>> SearchResult<T> findOptimum(SearchDimension[] dimensions,
       ScoreFunction<T> scoreFunction) {
-    if (dimensions == null || dimensions.length == 0) {
-      throw new IllegalArgumentException("Dimensions must not be empty");
-    }
-    if (scoreFunction == null) {
-      throw new IllegalArgumentException("Score function is null");
-    }
+    ValidationUtils.checkArrayLength(dimensions, "Dimensions");
+    ValidationUtils.checkNotNull(scoreFunction, "Score function is null");
 
     reset();
 
@@ -218,18 +194,18 @@ public class SearchSpace {
 
     start("Find Optimum");
 
-    scoredSearchSpace = searchSpace;
+    scoredSearchSpace = currentSearchSpace;
     scoredSearchSpaceHash.clear();
 
     if (!coveredSpace.isEmpty()) {
       // Check we do not recompute scores
-      scoredSearchSpace = new double[searchSpace.length][];
-      scoredSearchSpaceHash.ensureCapacity(searchSpace.length);
+      scoredSearchSpace = new double[currentSearchSpace.length][];
+      scoredSearchSpaceHash.ensureCapacity(currentSearchSpace.length);
       int size = 0;
-      for (int i = 0; i < searchSpace.length; i++) {
-        final String hash = generateHashString(searchSpace[i]);
+      for (int i = 0; i < currentSearchSpace.length; i++) {
+        final String hash = generateHashString(currentSearchSpace[i]);
         if (!coveredSpace.contains(hash)) {
-          scoredSearchSpace[size++] = searchSpace[i];
+          scoredSearchSpace[size++] = currentSearchSpace[i];
           scoredSearchSpaceHash.add(hash);
         }
       }
@@ -267,7 +243,7 @@ public class SearchSpace {
 
     start("Find Seed Optimum");
 
-    scoredSearchSpace = searchSpace;
+    scoredSearchSpace = currentSearchSpace;
     scoredSearchSpaceHash.clear();
 
     final SearchResult<T> optimum = scoreFunction.findOptimum(scoredSearchSpace);
@@ -325,7 +301,7 @@ public class SearchSpace {
       }
     }
 
-    searchSpace = seed;
+    currentSearchSpace = seed;
     return true;
 
   }
@@ -356,15 +332,15 @@ public class SearchSpace {
       SearchResult<T> current) {
     start("Create Search Space");
     if (searchMode == RefinementMode.SINGLE_DIMENSION && current != null) {
-      searchSpace = createRefineSpace(dimensions, current.getPoint());
+      currentSearchSpace = createRefineSpace(dimensions, current.getPoint());
     } else if (searchMode == RefinementMode.MULTI_DIMENSION && current != null) {
-      searchSpace = createBoundedSearchSpace(dimensions, current.getPoint());
+      currentSearchSpace = createBoundedSearchSpace(dimensions, current.getPoint());
     } else {
       // Enumerate
-      searchSpace = createSearchSpace(dimensions);
+      currentSearchSpace = createSearchSpace(dimensions);
     }
     end();
-    return searchSpace != null;
+    return currentSearchSpace != null;
   }
 
   /**
@@ -801,7 +777,7 @@ public class SearchSpace {
    * @return the search space
    */
   public double[][] getSearchSpace() {
-    return searchSpace;
+    return currentSearchSpace;
   }
 
   /**
@@ -827,21 +803,12 @@ public class SearchSpace {
   public <T extends Comparable<T>> SearchResult<T> enrichmentSearch(Dimension[] dimensions,
       FullScoreFunction<T> scoreFunction, ConvergenceChecker<T> checker, int samples,
       double fraction, double padding) {
-    if (dimensions == null || dimensions.length == 0) {
-      throw new IllegalArgumentException("Dimensions must not be empty");
-    }
-    if (scoreFunction == null) {
-      throw new IllegalArgumentException("Score function is null");
-    }
-    if (fraction <= 0 || fraction >= 1) {
-      throw new IllegalArgumentException("Fraction must be between 0 and 1");
-    }
-    if (samples < 1) {
-      throw new IllegalArgumentException("Samples must be strictly positive");
-    }
-    if (padding < 0) {
-      throw new IllegalArgumentException("Padding must be positive");
-    }
+    ValidationUtils.checkArrayLength(dimensions, "Dimensions");
+    ValidationUtils.checkNotNull(scoreFunction, "Score function is null");
+    ValidationUtils.checkArgument(fraction <= 0 || fraction >= 1,
+        "Fraction must be between 0 and 1: %f", fraction);
+    ValidationUtils.checkStrictlyPositive(samples, "Samples");
+    ValidationUtils.checkPositive(padding, "Padding");
 
     reset();
 
@@ -910,17 +877,17 @@ public class SearchSpace {
     }
 
     // Pad search space with more samples
-    final int remaining = samples - searchSpace.length;
+    final int remaining = samples - currentSearchSpace.length;
     if (remaining > 0) {
       final double[][] sample = sample(dimensions, remaining, generator);
-      final ArrayList<double[]> merged = new ArrayList<>(sample.length + searchSpace.length);
-      merged.addAll(Arrays.asList(searchSpace));
+      final ArrayList<double[]> merged = new ArrayList<>(sample.length + currentSearchSpace.length);
+      merged.addAll(Arrays.asList(currentSearchSpace));
       merged.addAll(Arrays.asList(sample));
-      searchSpace = merged.toArray(new double[merged.size()][]);
+      currentSearchSpace = merged.toArray(new double[merged.size()][]);
     }
 
     // Score
-    final SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+    final SearchResult<T>[] scores = scoreFunction.score(currentSearchSpace);
 
     // Get the top fraction
     final int size = (int) Math.ceil(samples * fraction);
@@ -942,10 +909,10 @@ public class SearchSpace {
   private <T extends Comparable<T>> SearchResult<T>[] score(Dimension[] dimensions,
       FullScoreFunction<T> scoreFunction, int samples, double fraction,
       HaltonSequenceGenerator[] generator) {
-    searchSpace = sample(dimensions, samples, generator);
+    currentSearchSpace = sample(dimensions, samples, generator);
 
     // Score
-    final SearchResult<T>[] scores = scoreFunction.score(searchSpace);
+    final SearchResult<T>[] scores = scoreFunction.score(currentSearchSpace);
 
     // Get the top fraction
     final int size = (int) Math.ceil(scores.length * fraction);

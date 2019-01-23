@@ -204,10 +204,10 @@ public class ResultsMatchCalculator implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isPositive("Distance threshold", distanceThreshold);
-      Parameters.isPositive("Increments", increments);
-      Parameters.isAboveZero("Delta", delta);
-      Parameters.isPositive("Beta", beta);
+      ParameterUtils.isPositive("Distance threshold", distanceThreshold);
+      ParameterUtils.isPositive("Increments", increments);
+      ParameterUtils.isAboveZero("Delta", delta);
+      ParameterUtils.isPositive("Beta", beta);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

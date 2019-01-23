@@ -534,8 +534,8 @@ public class GaussianPsfModel extends PsfModel {
     final int i1 = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
     final int i2 = f.findGradientIndex(Gaussian2DFunction.Z_POSITION);
     final Pair<double[], double[][]> pair = f.computeValuesAndJacobian(p);
-    final double[] v = pair.a;
-    final double[][] j = pair.b;
+    final double[] v = pair.item1;
+    final double[][] j = pair.item2;
     for (int y = 0; y < x1range; y++) {
       // Locate the insert location
       int indexTo = (y + x1min) * width + x0min;

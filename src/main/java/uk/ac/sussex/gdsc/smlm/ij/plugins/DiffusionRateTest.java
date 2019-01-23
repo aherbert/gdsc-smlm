@@ -827,14 +827,14 @@ public class DiffusionRateTest implements PlugIn {
 
     // Check arguments
     try {
-      Parameters.isAboveZero("Pixel Pitch", settings.getPixelPitch());
-      Parameters.isAboveZero("Seconds", settings.getSeconds());
-      Parameters.isAboveZero("Steps per second", settings.getStepsPerSecond());
-      Parameters.isAboveZero("Particles", settings.getParticles());
-      Parameters.isPositive("Diffusion rate", settings.getDiffusionRate());
-      Parameters.isAboveZero("Magnification", magnification);
-      Parameters.isAboveZero("Confinement attempts", confinementAttempts);
-      Parameters.isAboveZero("Fit N", fitN);
+      ParameterUtils.isAboveZero("Pixel Pitch", settings.getPixelPitch());
+      ParameterUtils.isAboveZero("Seconds", settings.getSeconds());
+      ParameterUtils.isAboveZero("Steps per second", settings.getStepsPerSecond());
+      ParameterUtils.isAboveZero("Particles", settings.getParticles());
+      ParameterUtils.isPositive("Diffusion rate", settings.getDiffusionRate());
+      ParameterUtils.isAboveZero("Magnification", magnification);
+      ParameterUtils.isAboveZero("Confinement attempts", confinementAttempts);
+      ParameterUtils.isAboveZero("Fit N", fitN);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;

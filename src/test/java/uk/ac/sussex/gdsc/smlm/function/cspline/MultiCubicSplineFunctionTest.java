@@ -30,12 +30,12 @@ public class MultiCubicSplineFunctionTest extends CubicSplineFunctionTest {
   protected void init() {
     f1 = new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
     f1f = new MultiCubicSplineFunction(splineDataFloat, maxx, maxy, cx, cy, cz, scale);
-    MultiCubicSplineFunction f =
+    MultiCubicSplineFunction func =
         new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);
-    f.setN(2);
-    f2 = f;
-    f = new MultiCubicSplineFunction(splineDataFloat, maxx, maxy, cx, cy, cz, scale);
-    f.setN(2);
-    f2f = f;
+    func.setN(2);
+    f2 = func;
+    func = new MultiCubicSplineFunction(splineDataFloat, maxx, maxy, cx, cy, cz, scale);
+    func.setN(2);
+    f2f = func;
   }
 }

@@ -696,13 +696,13 @@ public class SumFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void stripedBlockSum(float[] data, final int maxx, final int maxy, final float w) {
-    if (w <= 1) {
-      stripedBlockSum3x3(data, maxx, maxy, w);
+  public void stripedBlockSum(float[] data, final int maxx, final int maxy, final float weight) {
+    if (weight <= 1) {
+      stripedBlockSum3x3(data, maxx, maxy, weight);
     } else {
-      stripedBlockSumNxN(data, maxx, maxy, w);
+      stripedBlockSumNxN(data, maxx, maxy, weight);
     }
   }
 
@@ -783,11 +783,11 @@ public class SumFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The block size
+   * @param weight The block size
    */
-  public void stripedBlockSumNxN(float[] data, final int maxx, final int maxy, final float w) {
-    final int n = (int) w;
-    final int n1 = (n == w) ? n : n + 1;
+  public void stripedBlockSumNxN(float[] data, final int maxx, final int maxy, final float weight) {
+    final int n = (int) weight;
+    final int n1 = (n == weight) ? n : n + 1;
 
     if (n == n1) {
       // There is no edge
@@ -799,7 +799,7 @@ public class SumFilter {
 
     final float[] newData = floatBuffer(data.length);
 
-    final float w1 = w - n;
+    final float w1 = weight - n;
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -924,9 +924,9 @@ public class SumFilter {
    * @param data The input/output data (packed in YX order)
    * @param maxx The width of the data
    * @param maxy The height of the data
-   * @param w The weight
+   * @param weight The weight
    */
-  public void stripedBlockSum3x3(float[] data, final int maxx, final int maxy, final float w) {
+  public void stripedBlockSum3x3(float[] data, final int maxx, final int maxy, final float weight) {
     final float[] newData = floatBuffer(data.length);
 
     // NOTE:
@@ -948,7 +948,7 @@ public class SumFilter {
       for (int x = 0; x < width; x++) {
         // Sum strips
         // Store result in transpose
-        outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+        outData[centreIndex] = weight * (row[x] + row[x + 2]) + row[x + 1];
         centreIndex += height;
       }
     }
@@ -968,7 +968,7 @@ public class SumFilter {
       for (int x = 0; x < width; x++) {
         // Sum strips
         // Store result in transpose
-        outData[centreIndex] = w * (row[x] + row[x + 2]) + row[x + 1];
+        outData[centreIndex] = weight * (row[x] + row[x + 2]) + row[x + 1];
         centreIndex += height;
       }
     }
@@ -1049,14 +1049,14 @@ public class SumFilter {
     final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
     final int[] xoffset = new int[offset.length];
     final int[] yoffset = new int[offset.length];
-    int d = 0;
+    int offsetIndex = 0;
     for (int y = -ywidth; y <= ywidth; y++) {
       for (int x = -xwidth; x <= xwidth; x++) {
         if (x != 0 || y != 0) {
-          offset[d] = maxx * y + x;
-          xoffset[d] = x;
-          yoffset[d] = y;
-          d++;
+          offset[offsetIndex] = maxx * y + x;
+          xoffset[offsetIndex] = x;
+          yoffset[offsetIndex] = y;
+          offsetIndex++;
         }
       }
     }
@@ -1071,14 +1071,14 @@ public class SumFilter {
 
         // Sweep neighbourhood
         if (isInnerXy) {
-          for (d = offset.length; d-- > 0;) {
-            sum += data[index + offset[d]];
+          for (offsetIndex = offset.length; offsetIndex-- > 0;) {
+            sum += data[index + offset[offsetIndex]];
           }
         } else {
-          for (d = offset.length; d-- > 0;) {
+          for (offsetIndex = offset.length; offsetIndex-- > 0;) {
             // Get the pixel with boundary checking
-            int yy = y + yoffset[d];
-            int xx = x + xoffset[d];
+            int yy = y + yoffset[offsetIndex];
+            int xx = x + xoffset[offsetIndex];
             if (xx <= 0) {
               xx = 0;
             } else if (xx >= maxx) {
@@ -1122,14 +1122,14 @@ public class SumFilter {
     final int[] offset = new int[(2 * xwidth + 1) * (2 * ywidth + 1) - 1];
     final int[] xoffset = new int[offset.length];
     final int[] yoffset = new int[offset.length];
-    int d = 0;
+    int offsetIndex = 0;
     for (int y = -ywidth; y <= ywidth; y++) {
       for (int x = -xwidth; x <= xwidth; x++) {
         if (x != 0 || y != 0) {
-          offset[d] = maxx * y + x;
-          xoffset[d] = x;
-          yoffset[d] = y;
-          d++;
+          offset[offsetIndex] = maxx * y + x;
+          xoffset[offsetIndex] = x;
+          yoffset[offsetIndex] = y;
+          offsetIndex++;
         }
       }
     }
@@ -1151,10 +1151,10 @@ public class SumFilter {
         } else {
           float sum = data[index1];
 
-          for (d = offset.length; d-- > 0;) {
+          for (offsetIndex = offset.length; offsetIndex-- > 0;) {
             // Get the pixel with boundary checking
-            int yy = y + yoffset[d];
-            int xx = x + xoffset[d];
+            int yy = y + yoffset[offsetIndex];
+            int xx = x + xoffset[offsetIndex];
             if (xx <= 0) {
               xx = 0;
             } else if (xx >= maxx) {

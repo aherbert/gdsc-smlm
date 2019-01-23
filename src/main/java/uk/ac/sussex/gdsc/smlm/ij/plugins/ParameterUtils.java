@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Utility methods for checking parameters.
  */
-public class Parameters {
+public final class ParameterUtils {
   /**
    * Define the requirements for the parameter.
    */
@@ -43,6 +43,9 @@ public class Parameters {
      */
     POSITIVE
   }
+
+  /** No public constructor. */
+  private ParameterUtils() {}
 
   /**
    * Check if the named parameter value is greater than zero.
@@ -133,7 +136,7 @@ public class Parameters {
    * @param value the value
    * @param requirements the requirements
    */
-  public static void isValid(String name, double value, EnumSet<Requirement> requirements) {
+  public static void isValid(String name, double value, Set<Requirement> requirements) {
     if (requirements.contains(Requirement.ABOVE_ZERO)) {
       isAboveZero(name, value);
     }

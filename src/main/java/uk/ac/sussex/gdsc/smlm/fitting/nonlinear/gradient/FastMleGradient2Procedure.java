@@ -51,7 +51,7 @@ public class FastMleGradient2Procedure
   /**
    * The number of gradients.
    */
-  public final int n;
+  public final int numberOfGradients;
   /**
    * The first derivative of the Poisson log likelihood with respect to each parameter.
    */
@@ -61,6 +61,9 @@ public class FastMleGradient2Procedure
    */
   public final double[] d2;
 
+  // Names u and k match the uk nomenclature of Smith, et al.
+  // @CHECKSTYLE.OFF: MemberName
+
   /** Counter. */
   protected int k;
 
@@ -69,6 +72,8 @@ public class FastMleGradient2Procedure
    * {@link #computeFirstDerivative(double[])}, {@link #computeSecondDerivative(double[])}
    */
   public final double[] u;
+
+  // @CHECKSTYLE.ON: MemberName
 
   /**
    * Instantiates a new procedure.
@@ -81,9 +86,9 @@ public class FastMleGradient2Procedure
     this.x = x;
     this.u = new double[x.length];
     this.func = func;
-    this.n = func.getNumberOfGradients();
-    d1 = new double[n];
-    d2 = new double[n];
+    this.numberOfGradients = func.getNumberOfGradients();
+    d1 = new double[numberOfGradients];
+    d2 = new double[numberOfGradients];
   }
 
   /**
@@ -152,14 +157,14 @@ public class FastMleGradient2Procedure
     u[k] = uk;
     final double xk = x[k++];
     if (xk == 0) {
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfGradients; i++) {
         d1[i] -= dukDt[i];
         d2[i] -= d2ukDt2[i];
       }
     } else {
       final double xk_uk_minus1 = xk / uk - 1.0;
       final double xk_uk2 = xk / (uk * uk);
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfGradients; i++) {
         d1[i] += dukDt[i] * xk_uk_minus1;
         d2[i] += d2ukDt2[i] * xk_uk_minus1 - dukDt[i] * dukDt[i] * xk_uk2;
       }
@@ -176,12 +181,12 @@ public class FastMleGradient2Procedure
     u[k] = uk;
     final double xk = x[k++];
     if (xk == 0) {
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfGradients; i++) {
         d1[i] -= dukDt[i];
       }
     } else {
       final double xk_uk_minus1 = xk / uk - 1.0;
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < numberOfGradients; i++) {
         d1[i] += dukDt[i] * xk_uk_minus1;
       }
     }
@@ -297,7 +302,7 @@ public class FastMleGradient2Procedure
    * @return True if the last update calculation produced gradients with NaN values.
    */
   public boolean isNaNGradients() {
-    for (int i = n; i-- > 0;) {
+    for (int i = numberOfGradients; i-- > 0;) {
       if (Double.isNaN(d1[i])) {
         return true;
       }

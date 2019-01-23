@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 
@@ -177,37 +178,13 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
-   * Bit mask to isolate the exponent field of a <code>double</code>.
-   */
-  private static final long EXP_BIT_MASK = 0x7FF0000000000000L;
-
-  /**
-   * The number of logical bits in the significand of a <code>double</code> number, including the
-   * implicit bit.
-   */
-  private static final int SIGNIFICAND_WIDTH = 53;
-
-  /**
-   * Bias used in representing a <code>double</code> exponent.
-   */
-  private static final int EXP_BIAS = 1023;
-
-  /**
    * Returns unbiased exponent of a <code>double</code>.
    *
-   * @param d the double
+   * @param value the double
    * @return the exponent
    */
-  public static int getExponent(double d) {
-    // Copied from java.lang.StrictMath.getExponent(double d)
-    // This is only available in Java 1.6
-
-    /*
-     * Bitwise convert d to long, mask out exponent bits, shift to the right and then subtract out
-     * double's bias adjust to get true exponent value.
-     */
-    return (int) (((Double.doubleToRawLongBits(d) & EXP_BIT_MASK) >> (SIGNIFICAND_WIDTH - 1))
-        - EXP_BIAS);
+  public static int getExponent(double value) {
+    return NumberUtils.getSignedExponent(value);
   }
 
   /**

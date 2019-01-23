@@ -41,16 +41,28 @@ import java.util.Iterator;
  */
 @SuppressWarnings({"javadoc"})
 public class PulseActivationAnalysisTest {
+  // @CHECKSTYLE.OFF: ParameterName
+
   @SeededTest
   public void canLinearlyUnmix2Channels(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    for (int n = 0; n <= 2; n++) {
-      for (int m = 0; m <= 2; m++) {
+    for (int n = 1; n <= 2; n++) {
+      for (int m = 1; m <= 2; m++) {
         canLinearlyUnmix2Channels(r, n, m);
       }
     }
   }
 
+  /**
+   * Check if can linearly unmix 2 channels.
+   *
+   * <p>Randomly creates density data for each channel and then crosstalk between them. Only some of
+   * the density and cross talk are sampled to test unmixing random combinations.
+   *
+   * @param rng the random generator
+   * @param n the number of channels that are selected to have density
+   * @param m the number of crosstalk values that are selected from the total
+   */
   private static void canLinearlyUnmix2Channels(UniformRandomProvider rng, int n, int m) {
     try {
       for (int loop = 0; loop < 10; loop++) {
@@ -87,39 +99,49 @@ public class PulseActivationAnalysisTest {
     }
   }
 
-  private static void canLinearlyUnmix2Channels(double d1, double d2, double C21, double C12) {
+  private static void canLinearlyUnmix2Channels(double d1, double d2, double c21, double c12) {
     // Solving:
-    // D1 = d1 + C21 * d2
-    // D2 = d2 + C12 * d1
+    // D1 = d1 + c21 * d2
+    // D2 = d2 + c12 * d1
 
-    final double D1 = d1 + C21 * d2;
-    final double D2 = d2 + C12 * d1;
+    final double D1 = d1 + c21 * d2;
+    final double D2 = d2 + c12 * d1;
 
-    final double[] d = PulseActivationAnalysis.unmix(D1, D2, C21, C12);
+    final double[] d = PulseActivationAnalysis.unmix(D1, D2, c21, c12);
 
     Assertions.assertEquals(d1, d[0], delta(d1), "d1");
     Assertions.assertEquals(d2, d[1], delta(d2), "d2");
   }
 
-  private static double delta(double d) {
-    d *= 1e-10;
+  private static double delta(double value) {
+    value *= 1e-10;
     // Set a limit where we are close enough. This mainly applies when d is zero.
-    if (d < 1e-8) {
+    if (value < 1e-8) {
       return 1e-8;
     }
-    return d;
+    return value;
   }
 
   @SeededTest
   public void canLinearlyUnmix3Channels(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    for (int n = 0; n <= 3; n++) {
-      for (int m = 0; m <= 6; m++) {
+    for (int n = 1; n <= 3; n++) {
+      for (int m = 1; m <= 6; m++) {
         canLinearlyUnmix3Channels(r, n, m);
       }
     }
   }
 
+  /**
+   * Check if can linearly unmix 3 channels.
+   *
+   * <p>Randomly creates density data for each channel and then crosstalk between them. Only some of
+   * the density and cross talk are sampled to test unmixing random combinations.
+   *
+   * @param rng the random generator
+   * @param n the number of channels that are selected to have density
+   * @param m the number of crosstalk values that are selected from the total
+   */
   private static void canLinearlyUnmix3Channels(UniformRandomProvider rng, int n, int m) {
     try {
       for (int loop = 0; loop < 10; loop++) {
@@ -157,18 +179,18 @@ public class PulseActivationAnalysisTest {
     }
   }
 
-  private static void canLinearlyUnmix3Channels(double d1, double d2, double d3, double C21,
-      double C31, double C12, double C32, double C13, double C23) {
+  private static void canLinearlyUnmix3Channels(double d1, double d2, double d3, double c21,
+      double c31, double c12, double c32, double c13, double c23) {
     // Solving:
-    // D1 = d1 + C21 * d2 + C31 * d3
-    // D2 = d2 + C12 * d1 + C32 * d3
-    // D3 = d3 + C13 * d1 + C23 * d2
+    // D1 = d1 + c21 * d2 + c31 * d3
+    // D2 = d2 + c12 * d1 + c32 * d3
+    // D3 = d3 + c13 * d1 + c23 * d2
 
-    final double D1 = d1 + C21 * d2 + C31 * d3;
-    final double D2 = d2 + C12 * d1 + C32 * d3;
-    final double D3 = d3 + C13 * d1 + C23 * d2;
+    final double D1 = d1 + c21 * d2 + c31 * d3;
+    final double D2 = d2 + c12 * d1 + c32 * d3;
+    final double D3 = d3 + c13 * d1 + c23 * d2;
 
-    final double[] d = PulseActivationAnalysis.unmix(D1, D2, D3, C21, C31, C12, C32, C13, C23);
+    final double[] d = PulseActivationAnalysis.unmix(D1, D2, D3, c21, c31, c12, c32, c13, c23);
 
     Assertions.assertEquals(d1, d[0], delta(d1), "d1");
     Assertions.assertEquals(d2, d[1], delta(d2), "d2");

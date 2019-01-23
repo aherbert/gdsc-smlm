@@ -48,14 +48,14 @@ public class DistanceUnitTest {
 
   private static void check(double nmPerPixel, ExpectedUnit<DistanceUnit>... expectedUnits) {
     final int n = expectedUnits.length;
-    TypeConverter<DistanceUnit> c;
+    TypeConverter<DistanceUnit> conv;
     for (int i = 0; i < n; i++) {
-      final DistanceUnit u1 = expectedUnits[i].u;
+      final DistanceUnit u1 = expectedUnits[i].unit;
       final double v1 = expectedUnits[i].value;
       for (int j = 0; j < n; j++) {
-        final DistanceUnit u2 = expectedUnits[j].u;
-        c = UnitConverterUtils.createConverter(u1, u2, nmPerPixel);
-        final double o = c.convert(v1);
+        final DistanceUnit u2 = expectedUnits[j].unit;
+        conv = UnitConverterUtils.createConverter(u1, u2, nmPerPixel);
+        final double o = conv.convert(v1);
         Assertions.assertEquals(expectedUnits[j].value, o, 1e-5, () -> u1 + " to " + u2);
       }
     }

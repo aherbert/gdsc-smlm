@@ -39,25 +39,25 @@ import org.junit.jupiter.api.Assertions;
 public class CalibrationWriterTest {
   @SeededTest
   public void canWrite(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     for (int i = 0; i < 100; i++) {
-      canWrite(r);
+      canWrite(rng);
     }
   }
 
-  private static void canWrite(UniformRandomProvider r) {
-    final double qe = r.nextDouble();
-    final double bias = 1 + r.nextDouble();
-    final double exposureTime = 1 + r.nextDouble();
-    final double gain = 1 + r.nextDouble();
-    final double nmPerPixel = 1 + r.nextDouble();
-    final double readNoise = 1 + r.nextDouble();
-    final AngleUnit angleUnit = AngleUnit.values()[r.nextInt(AngleUnit.values().length - 1)];
-    final CameraType cameraType = CameraType.values()[r.nextInt(CameraType.values().length - 1)];
+  private static void canWrite(UniformRandomProvider rng) {
+    final double qe = rng.nextDouble();
+    final double bias = 1 + rng.nextDouble();
+    final double exposureTime = 1 + rng.nextDouble();
+    final double gain = 1 + rng.nextDouble();
+    final double nmPerPixel = 1 + rng.nextDouble();
+    final double readNoise = 1 + rng.nextDouble();
+    final AngleUnit angleUnit = AngleUnit.values()[rng.nextInt(AngleUnit.values().length - 1)];
+    final CameraType cameraType = CameraType.values()[rng.nextInt(CameraType.values().length - 1)];
     final DistanceUnit distanceUnit =
-        DistanceUnit.values()[r.nextInt(DistanceUnit.values().length - 1)];
+        DistanceUnit.values()[rng.nextInt(DistanceUnit.values().length - 1)];
     final IntensityUnit intensityUnit =
-        IntensityUnit.values()[r.nextInt(IntensityUnit.values().length - 1)];
+        IntensityUnit.values()[rng.nextInt(IntensityUnit.values().length - 1)];
 
     final CalibrationWriter writer = new CalibrationWriter();
 

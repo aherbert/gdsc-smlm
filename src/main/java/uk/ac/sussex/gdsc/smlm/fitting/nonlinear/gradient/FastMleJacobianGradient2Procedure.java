@@ -61,7 +61,7 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
    */
   public FastMleJacobianGradient2Procedure(final double[] x, final ExtendedGradient2Function func) {
     super(x, func);
-    jacobian = new double[n * (n + 1) / 2];
+    jacobian = new double[numberOfGradients * (numberOfGradients + 1) / 2];
     this.exfunc = func;
   }
 
@@ -76,7 +76,7 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
     resetExtended2();
     exfunc.initialiseExtended2(a);
     exfunc.forEach((ExtendedGradient2Procedure) this);
-    for (int i = 0, index = 0; i < n; i++, index += i + 1) {
+    for (int i = 0, index = 0; i < numberOfGradients; i++, index += i + 1) {
       d2[i] = jacobian[index];
     }
   }
@@ -96,10 +96,10 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
 
     final double xk_uk_minus1 = xk / uk - 1.0;
     final double xk_uk2 = xk / (uk * uk);
-    for (int i = 0, index = 0; i < n; i++) {
+    for (int i = 0, index = 0; i < numberOfGradients; i++) {
       d1[i] += dukDt[i] * xk_uk_minus1;
 
-      for (int j = 0, k = i * n; j <= i; j++, index++, k++) {
+      for (int j = 0, k = i * numberOfGradients; j <= i; j++, index++, k++) {
         // This requires the partial second derivative with respect to i and j
         jacobian[index] += d2ukDtDs[k] * xk_uk_minus1 - dukDt[i] * dukDt[j] * xk_uk2;
       }
@@ -108,7 +108,7 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
 
   @Override
   public boolean isNaNGradients() {
-    for (int i = n; i-- > 0;) {
+    for (int i = numberOfGradients; i-- > 0;) {
       if (Double.isNaN(d1[i])) {
         return true;
       }
@@ -127,8 +127,8 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
    * @return the Jacobian
    */
   public double[] getJacobianLinear() {
-    final double[] jacobianMatrix = new double[n * n];
-    GradientProcedureHelper.getMatrix(this.jacobian, jacobianMatrix, n);
+    final double[] jacobianMatrix = new double[numberOfGradients * numberOfGradients];
+    GradientProcedureHelper.getMatrix(this.jacobian, jacobianMatrix, numberOfGradients);
     return jacobianMatrix;
   }
 
@@ -138,6 +138,6 @@ public class FastMleJacobianGradient2Procedure extends FastMleGradient2Procedure
    * @param jacobian the Jacobian
    */
   public void getJacobianLinear(double[] jacobian) {
-    GradientProcedureHelper.getMatrix(this.jacobian, jacobian, n);
+    GradientProcedureHelper.getMatrix(this.jacobian, jacobian, numberOfGradients);
   }
 }
