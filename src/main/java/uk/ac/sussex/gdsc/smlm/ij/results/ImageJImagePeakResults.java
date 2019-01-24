@@ -27,8 +27,6 @@ package uk.ac.sussex.gdsc.smlm.ij.results;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
 import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
-import uk.ac.sussex.gdsc.core.ij.process.InfinityMappedFloatProcessor;
-import uk.ac.sussex.gdsc.core.ij.process.MappedFloatProcessor;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -43,6 +41,8 @@ import ij.measure.Calibration;
 import ij.plugin.LutLoader;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import ij.process.InfinityMappedFloatProcessor;
+import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
 
 import java.awt.Rectangle;
