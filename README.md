@@ -137,24 +137,11 @@ See [LICENSE](LICENSE.txt)
 
 # About #
 
-###### Repository name ######
-GDSC SMLM ImageJ Plugins
-
 ###### Owner(s) ######
 Alex Herbert
 
 ###### Institution ######
-Genome Damage and Stability Centre, University of Sussex
+[Genome Damage and Stability Centre, University of Sussex](http://www.sussex.ac.uk/gdsc/)
 
 ###### URL ######
-http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins
-
-###### Email ######
-a.herbert@sussex.ac.uk
-
-###### Description ######
-The GDSC Single Molecule Light Microscopy (SMLM) plugins provide various tools
-for single molecule localisation analysis. This includes PALM, STORM and other
-single molecule microscopy methods. 
-
-Read the [SMLM User Manual](SMLM.odt) for full details.
+[GDSC SMLM ImageJ plugins](http://www.sussex.ac.uk/gdsc/intranet/microscopy/UserSupport/AnalysisProtocol/imagej/smlm_plugins/)
