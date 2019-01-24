@@ -3,13 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.scijava</groupId>
-    <artifactId>pom-scijava</artifactId>
-    <version>22.2.0</version>
-    <relativePath />
+    <groupId>uk.ac.sussex.gdsc</groupId>
+    <artifactId>gdsc-ij-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../gdsc-ij-parent</relativePath>
   </parent>
 
-  <groupId>uk.ac.sussex.gdsc</groupId>
   <artifactId>gdsc_smlm</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -87,45 +86,20 @@ Software for single molecule localisation microscopy (SMLM)
   </contributors>
 
   <properties>
-    <maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
-    <build.date>${maven.build.timestamp}</build.date>
     <license.licenseName>gpl_v3</license.licenseName>
     <license.copyrightOwners>Alex Herbert</license.copyrightOwners>
-    <!-- Versions -->
-    <gdsc.analytics.version>1.0.1</gdsc.analytics.version>
-    <gdsc.test.version>1.0-SNAPSHOT</gdsc.test.version>
+
+    <!-- Dependency versions -->
     <gdsc.core.version>2.0-SNAPSHOT</gdsc.core.version>
-    <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
-    <org.junit.platform.version>1.2.0</org.junit.platform.version>
-    <org.opentest4j.version>1.1.0</org.opentest4j.version>
-    <commons.rng.version>1.1</commons.rng.version>
-    <org.jacoco.version>0.8.1</org.jacoco.version>
-    <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
-    <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
-    <spotbugs.version>3.1.6</spotbugs.version>
-    <checkstyle.version>8.13</checkstyle.version>
-    <pmd.version>6.7.0</pmd.version>
     <xstream.version>1.4.10</xstream.version>
     <ejml.version>0.24</ejml.version>
-    <protobuf.version>3.6.1</protobuf.version>
     <JTransforms.version>3.1</JTransforms.version>
-    <!-- Maven plugins -->
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-changes-plugin.version>2.12.1</maven-changes-plugin.version>
-    <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
-    <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version>
-    <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
-    <maven-pmd-plugin.version>3.10.0</maven-pmd-plugin.version>
-    <maven-jxr-plugin.version>2.5</maven-jxr-plugin.version>
-    <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
-    <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
-    <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
+    <protobuf.version>3.6.1</protobuf.version>
+
+    <!-- Other maven plugin versions -->
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <os-maven-plugin.version>1.6.0</os-maven-plugin.version>
+
   </properties>
 
   <dependencies>
@@ -153,23 +127,6 @@ Software for single molecule localisation microscopy (SMLM)
       <version>${ejml.version}</version>
     </dependency>
     <dependency>
-      <groupId>net.imagej</groupId>
-      <artifactId>ij</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-rng-sampling</artifactId>
-      <version>${commons.rng.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.github.wendykierp</groupId>
       <artifactId>JTransforms</artifactId>
       <version>${JTransforms.version}</version>
@@ -185,45 +142,58 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>protobuf-java-util</artifactId>
       <version>${protobuf.version}</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/net.sf.trove4j/trove4j -->
+
+    <!-- Managed dependencies -->
+    <dependency>
+      <groupId>net.imagej</groupId>
+      <artifactId>ij</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-rng-sampling</artifactId>
+    </dependency>
     <dependency>
       <groupId>net.sf.trove4j</groupId>
       <artifactId>trove4j</artifactId>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/sc.fiji/3D_Viewer -->
     <dependency>
       <groupId>sc.fiji</groupId>
       <artifactId>3D_Viewer</artifactId>
       <!-- For testing <version>4.0.3-SNAPSHOT</version> -->
     </dependency>
+
+    <!-- TESTING -->
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>
       <artifactId>gdsc-test-api</artifactId>
-      <version>1.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>
       <artifactId>gdsc-test-utils</artifactId>
-      <version>${gdsc.test.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>
       <artifactId>gdsc-test-junit5</artifactId>
-      <version>${gdsc.test.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>uk.ac.sussex.gdsc</groupId>
       <artifactId>gdsc-test-rng</artifactId>
-      <version>${gdsc.test.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${org.junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -240,23 +210,6 @@ Software for single molecule localisation microscopy (SMLM)
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>imagej.releases</id>
-      <url>http://maven.imagej.net/content/repositories/releases</url>
-    </repository>
-    <repository>
-      <id>snapshots-repo</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <build>
     <extensions>
       <extension>
@@ -268,18 +221,6 @@ Software for single molecule localisation microscopy (SMLM)
     </extensions>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>${maven-project-info-reports-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>${maven-site-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven-surefire-plugin.version}</version>
-        </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
@@ -293,45 +234,6 @@ Software for single molecule localisation microscopy (SMLM)
               </manifest>
             </archive>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>buildnumber-maven-plugin</artifactId>
-          <configuration>
-            <getRevisionOnlyOnce>false</getRevisionOnlyOnce>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${maven-checkstyle-plugin.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>com.puppycrawl.tools</groupId>
-              <artifactId>checkstyle</artifactId>
-              <version>${checkstyle.version}</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-        <plugin>
-          <artifactId>maven-pmd-plugin</artifactId>
-          <version>${maven-pmd-plugin.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-core</artifactId>
-              <version>${pmd.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>net.sourceforge.pmd</groupId>
-              <artifactId>pmd-java</artifactId>
-              <version>${pmd.version}</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>${nexus-staging-maven-plugin.version}</version>
         </plugin>
 
         <!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT <plugin> <artifactId>maven-enforcer-plugin</artifactId> 
@@ -373,31 +275,6 @@ Software for single molecule localisation microscopy (SMLM)
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <!-- Set JUL Formatting -->
-            <java.util.logging.SimpleFormatter.format><![CDATA[%4$-7s %2$s %5$s%6$s%n]]></java.util.logging.SimpleFormatter.format>
-          </systemPropertyVariables>
-          <!-- Ensure the JaCoCo settings are preserved in argLine when ImageJ settings are added -->
-          <argLine>@{argLine} -Xms512m -Dapple.awt.UIElement="true"</argLine>
-          <!-- Fix for OpenJDK 8 now validating class-path attributes in Jar manifests. See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=912333#63 -->
-          <useSystemClassLoader>false</useSystemClassLoader>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${org.junit.platform.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${org.junit.jupiter.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <executions>
           <execution>
@@ -407,11 +284,6 @@ Software for single molecule localisation microscopy (SMLM)
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <links>
-            <link>http://commons.apache.org/proper/commons-math/javadocs/api-${commons-math3.version}/</link>
-          </links>
-        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -446,7 +318,6 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${org.jacoco.version}</version>
         <configuration>
           <excludes>
             <!-- Auto generated code -->
@@ -459,12 +330,6 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <configLocation>${basedir}/src/main/resources/checkstyle/checkstyle.xml</configLocation>
-          <encoding>UTF-8</encoding>
-          <consoleOutput>false</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <linkXRef>true</linkXRef>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <excludes>**\/*Protos.java</excludes>
         </configuration>
         <executions>
@@ -480,38 +345,8 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
         <configuration>
-          <targetJdk>${maven.compiler.target}</targetJdk>
           <!-- Ignore lower levels for now -->
           <minimumPriority>3</minimumPriority>
-          <skipEmptyReport>false</skipEmptyReport>
-          <analysisCache>true</analysisCache>
-          <rulesets>
-            <ruleset>${basedir}/src/main/resources/pmd/pmd-ruleset.xml</ruleset>
-          </rulesets>
-          <failOnViolation>false</failOnViolation>
-          <printFailingErrors>false</printFailingErrors>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>${spotbugs.version}</version>
-        <configuration>
-          <failOnError>false</failOnError>
-          <threshold>Normal</threshold>
-          <effort>Default</effort>
-          <excludeFilterFile>${basedir}/src/main/resources/spotbugs/spotbugs-exclude-filter.xml</excludeFilterFile>
-        </configuration>
-      </plugin>
-      <!-- use of mvn release:prepeare release perform should use the nexus release profile -->
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <useReleaseProfile>false</useReleaseProfile>
-          <releaseProfiles>release</releaseProfiles>
-          <goals>deploy</goals>
-          <!-- <goals>deploy nexus-staging:release</goals> -->
         </configuration>
       </plugin>
     </plugins>
@@ -531,108 +366,7 @@ Software for single molecule localisation microscopy (SMLM)
 
   <profiles>
     <profile>
-      <id>snapshot-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>${build-helper-maven-plugin.version}</version>
-            <executions>
-              <execution>
-                <!-- Fail if not a SNAPSHOT -->
-                <id>is-snapshot</id>
-                <phase>validate</phase>
-                <goals>
-                  <goal>regex-property</goal>
-                </goals>
-                <configuration>
-                  <name>is.snapshot.version</name>
-                  <value>${project.version}</value>
-                  <regex>^.*-SNAPSHOT$</regex>
-                  <failIfNoMatch>true</failIfNoMatch>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-              <!-- Not required for snapshot -->
-              <skipStaging>true</skipStaging>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>release</id>
-      <properties>
-        <gpg.executable>gpg</gpg.executable>
-        <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.2</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <!-- The staged repo must be inspected and then released -->
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>eclipse</id>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${org.junit.jupiter.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${org.junit.platform.version}</version>
-            <scope>test</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>org.junit.platform</groupId>
-          <artifactId>junit-platform-launcher</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter-engine</artifactId>
-        </dependency>
-      </dependencies>
+      <id>eclipse-sources</id>
       <build>
         <plugins>
           <plugin>
@@ -655,80 +389,6 @@ Software for single molecule localisation microscopy (SMLM)
           </plugin>
         </plugins>
       </build>
-    </profile>
-    <profile>
-      <id>coveralls</id>
-      <build>
-        <plugins>
-          <!-- Submit coverage -->
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>${coveralls-maven-plugin.version}</version>
-            <configuration>
-              <!-- The buildhelper.maven.plugin sets the property 'timestamp' to an epochSeconds -->
-              <!-- format. This is used by coveralls to parse the maven timestamp. -->
-              <timestampFormat>EpochMillis</timestampFormat>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>jacoco</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${org.jacoco.version}</version>
-            <executions>
-              <execution>
-                <id>default-prepare-agent</id>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>default-report</id>
-                <goals>
-                  <goal>report</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>default-check</id>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-                <configuration>
-                  <rules>
-                    <!-- implementation is needed only for Maven 2 -->
-                    <rule implementation="org.jacoco.maven.RuleConfiguration">
-                      <element>BUNDLE</element>
-                      <limits>
-                        <!-- implementation is needed only for Maven 2 -->
-                        <limit implementation="org.jacoco.report.check.Limit">
-                          <counter>COMPLEXITY</counter>
-                          <value>COVEREDRATIO</value>
-                          <minimum>0.60</minimum>
-                        </limit>
-                      </limits>
-                    </rule>
-                  </rules>
-                  <haltOnFailure>false</haltOnFailure>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>fast</id>
-      <properties>
-        <skipTests>true</skipTests>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-      </properties>
     </profile>
   </profiles>
 
