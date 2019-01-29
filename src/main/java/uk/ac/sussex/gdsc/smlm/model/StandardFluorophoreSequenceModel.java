@@ -24,6 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.utils.rng.GeometricSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.GeometricSampler.GeometricDiscreteInverseCumulativeProbabilityFunction;
+
 import gnu.trove.list.array.TDoubleArrayList;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -195,11 +198,11 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
   }
 
   private static int nextGeometric(RandomDataGenerator rand, double mean) {
-    // Use a geometric distribution by sampling the floor from the exponential.
-    // Geometric distribution where k { 0, 1, 2, ... } is number of failures before success.
-    // See: http://en.wikipedia.org/wiki/Geometric_distribution#Related_distributions
-    // mean = (1-p) / p
-    final double p = 1 / (1 + mean);
-    return (int) Math.floor(Math.log(rand.nextUniform(0, 1, true)) / Math.log(1 - p));
+    // Use methods from the GeometricSampler
+    final double probabilityOfSuccess = GeometricSampler.getProbabilityOfSuccess(mean);
+    final GeometricDiscreteInverseCumulativeProbabilityFunction fun =
+        new GeometricDiscreteInverseCumulativeProbabilityFunction(probabilityOfSuccess);
+    final double cumulativeProbability = rand.getRandomGenerator().nextDouble();
+    return fun.inverseCumulativeProbability(cumulativeProbability);
   }
 }
