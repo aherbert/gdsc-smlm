@@ -34,12 +34,11 @@ import org.junit.jupiter.api.Test;
 public class AngleUnitTest {
   @Test
   public void canConvert() {
-    final double degToRad = Math.PI / 180.0;
     for (int a = -360; a <= 360; a++) {
       //@formatter:off
       check(
         new ExpectedUnit<>(AngleUnit.DEGREE, a),
-        new ExpectedUnit<>(AngleUnit.RADIAN, a * degToRad)
+        new ExpectedUnit<>(AngleUnit.RADIAN, Math.toRadians(a))
       );
       //@formatter:on
     }

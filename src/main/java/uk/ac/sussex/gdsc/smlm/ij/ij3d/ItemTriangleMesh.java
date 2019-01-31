@@ -442,7 +442,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     final GeometryInfo gi = new GeometryInfo(ta);
     final NormalGenerator ng = new NormalGenerator();
     if (creaseAngle >= 0 && creaseAngle <= 180) {
-      ng.setCreaseAngle(creaseAngle * Math.PI / 180.0);
+      ng.setCreaseAngle(Math.toRadians(creaseAngle));
     }
     ng.generateNormals(gi);
     final Vector3f[] n = gi.getNormals();

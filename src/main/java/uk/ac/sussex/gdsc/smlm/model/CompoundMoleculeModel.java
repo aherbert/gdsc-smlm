@@ -38,9 +38,6 @@ import java.util.List;
  * molecule can be retrieved using the {@link #getCoordinates(int)} method;
  */
 public class CompoundMoleculeModel extends MoleculeModel {
-  /** The constant to convert degrees to radians: <code>180.0 / Math.PI</code>. */
-  static final double DEGREES_TO_RADIANS = 180.0 / Math.PI;
-
   private int label;
 
   /**
@@ -368,9 +365,9 @@ public class CompoundMoleculeModel extends MoleculeModel {
     final double uw = u * w;
     final double vw = v * w;
 
-    angle /= DEGREES_TO_RADIANS;
-    final double cost = Math.cos(angle);
-    final double sint = Math.sin(angle);
+    final double radians = Math.toRadians(angle);
+    final double cost = Math.cos(radians);
+    final double sint = Math.sin(radians);
 
     final double[] rotmat = new double[9];
     /* Set the rotation matrix */
