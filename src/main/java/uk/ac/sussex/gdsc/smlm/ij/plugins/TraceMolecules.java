@@ -35,6 +35,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -481,12 +482,12 @@ public class TraceMolecules implements PlugIn {
       if (filename.matches(regex)) {
         filename = filename.replaceAll(regex, "." + (id) + ".");
       } else {
-        filename = ImageJUtils.replaceExtension(filename, id + ".xls");
+        filename = FileUtils.replaceExtension(filename, id + ".xls");
       }
     }
     filename = ImageJUtils.getFilename(title, filename);
     if (filename != null) {
-      filename = ImageJUtils.replaceExtension(filename, "xls");
+      filename = FileUtils.replaceExtension(filename, "xls");
 
       final boolean showDeviations = sourceResults.hasDeviations();
       // Assume that are results are from a single frame but store the trace ID

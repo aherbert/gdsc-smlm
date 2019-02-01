@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -122,7 +123,7 @@ public class CameraModelManager implements PlugIn {
 
   private static String getName(String filename) {
     final File file = new File(filename);
-    final String name = ImageJUtils.removeExtension(file.getName());
+    final String name = FileUtils.removeExtension(file.getName());
     return name;
   }
 

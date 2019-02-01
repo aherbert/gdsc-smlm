@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -545,7 +546,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       StoredDataStatistics dstarPerMolecule, StoredDataStatistics dstarPerMoleculeAdjacent) {
     distancesFilename = ImageJUtils.getFilename("Trace_Distances_File", distancesFilename);
     if (distancesFilename != null) {
-      distancesFilename = ImageJUtils.replaceExtension(distancesFilename, "xls");
+      distancesFilename = FileUtils.replaceExtension(distancesFilename, "xls");
 
       try (BufferedWriter out = Files.newBufferedWriter(Paths.get(distancesFilename))) {
         final double[] msd = msdPerMolecule.getValues();

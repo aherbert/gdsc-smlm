@@ -35,6 +35,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
@@ -3787,7 +3788,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
     if (chooser.getFileName() != null) {
       settings.setImageFilename(chooser.getDirectory() + chooser.getFileName());
-      settings.setImageFilename(ImageJUtils.replaceExtension(settings.getImageFilename(), "tiff"));
+      settings.setImageFilename(FileUtils.replaceExtension(settings.getImageFilename(), "tiff"));
 
       final FileSaver fs = new FileSaver(imp);
       boolean ok;
@@ -3814,7 +3815,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     if (chooser.getFileName() != null) {
       settings.setImageResultsFilename(chooser.getDirectory() + chooser.getFileName());
       settings.setImageResultsFilename(
-          ImageJUtils.replaceExtension(settings.getImageResultsFilename(), "xls"));
+          FileUtils.replaceExtension(settings.getImageResultsFilename(), "xls"));
 
       final TextFilePeakResults r =
           new TextFilePeakResults(settings.getImageResultsFilename(), false);
@@ -3998,7 +3999,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     if (chooser.getFileName() != null) {
       settings.setFluorophoresFilename(chooser.getDirectory() + chooser.getFileName());
       settings.setFluorophoresFilename(
-          ImageJUtils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
+          FileUtils.replaceExtension(settings.getFluorophoresFilename(), "xls"));
 
       try (BufferedWriter output =
           Files.newBufferedWriter(Paths.get(settings.getFluorophoresFilename()))) {
@@ -4061,7 +4062,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     final OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
     if (chooser.getFileName() != null) {
       settings.setLocalisationsFilename(
-          ImageJUtils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
+          FileUtils.replaceExtension(chooser.getDirectory() + chooser.getFileName(), "xls"));
       SettingsManager.writeSettings(settings.build());
 
       try (BufferedWriter output =

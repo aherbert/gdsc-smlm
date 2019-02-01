@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -327,9 +328,9 @@ public class Configuration
         notes = gd.getNextText();
 
         if (filename != null) {
-          templateFilename = ImageJUtils.replaceExtension(filename, ".txt");
+          templateFilename = FileUtils.replaceExtension(filename, ".txt");
           final File file = new File(templateFilename);
-          final String name = ImageJUtils.removeExtension(file.getName());
+          final String name = FileUtils.removeExtension(file.getName());
           final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
           settings.addNotes(notes);
           settings.setCalibration(fitConfig.getCalibration());

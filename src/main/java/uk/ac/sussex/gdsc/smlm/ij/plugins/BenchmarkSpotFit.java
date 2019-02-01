@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.utils.Correlator;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.Settings;
@@ -2175,7 +2176,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         return;
       }
       // Remove extension to store the filename
-      filename = ImageJUtils.replaceExtension(filename, ".xml");
+      filename = FileUtils.replaceExtension(filename, ".xml");
       filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
       // Create a filter set using the ranges
@@ -2200,7 +2201,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       filters.add(mf.create(lower));
       filters.add(mf.create(upper));
       filters.add(mf.create(max));
-      saveFilters(ImageJUtils.replaceExtension(filename, ".4.xml"), filters);
+      saveFilters(FileUtils.replaceExtension(filename, ".4.xml"), filters);
     }
   }
 

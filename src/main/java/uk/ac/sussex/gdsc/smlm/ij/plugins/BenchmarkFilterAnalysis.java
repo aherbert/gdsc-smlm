@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.Settings;
@@ -4846,7 +4847,7 @@ public class BenchmarkFilterAnalysis
     filename = ImageJUtils.getFilename(title, filename);
     // Use XML extension
     if (filename != null) {
-      filename = ImageJUtils.replaceExtension(filename, ".xml");
+      filename = FileUtils.replaceExtension(filename, ".xml");
     }
     return filename;
   }
@@ -5070,7 +5071,7 @@ public class BenchmarkFilterAnalysis
       }
 
       final ImagePlus example = out[0];
-      filename = ImageJUtils.replaceExtension(filename, ".tif");
+      filename = FileUtils.replaceExtension(filename, ".tif");
       IJ.save(example, filename);
     }
   }

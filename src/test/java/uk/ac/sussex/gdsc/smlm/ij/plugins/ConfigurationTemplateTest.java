@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -163,7 +163,7 @@ public class ConfigurationTemplateTest {
     IJ.save(imp, tmpFile.getPath());
 
     final String name = "canLoadTemplateImageFromFile";
-    final File file = new File(ImageJUtils.replaceExtension(tmpFile.getPath(), ".xml"));
+    final File file = new File(FileUtils.replaceExtension(tmpFile.getPath(), ".xml"));
     ConfigurationTemplate.saveTemplate(name, TemplateSettings.getDefaultInstance(), file);
 
     Assertions.assertEquals(1, ConfigurationTemplate.getTemplateNamesWithImage().length);

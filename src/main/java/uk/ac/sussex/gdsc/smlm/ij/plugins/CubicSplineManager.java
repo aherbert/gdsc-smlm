@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -311,7 +312,7 @@ public class CubicSplineManager implements PlugIn {
 
   private static String getName(String filename) {
     final File file = new File(filename);
-    return ImageJUtils.removeExtension(file.getName());
+    return FileUtils.removeExtension(file.getName());
   }
 
   private static void saveResource(CubicSplinePsf psfModel, String filename, String name) {

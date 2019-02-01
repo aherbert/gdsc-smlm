@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
@@ -633,7 +634,7 @@ public class PcPalmFitting implements PlugIn {
     }
     outputFilename = ImageJUtils.getFilename("Output_Correlation_File", outputFilename);
     if (outputFilename != null) {
-      outputFilename = ImageJUtils.replaceExtension(outputFilename, "xls");
+      outputFilename = FileUtils.replaceExtension(outputFilename, "xls");
 
       try (BufferedWriter output = Files.newBufferedWriter(Paths.get(outputFilename))) {
         writeHeader(output, HEADER_PEAK_DENSITY, Double.toString(previous_peakDensity));

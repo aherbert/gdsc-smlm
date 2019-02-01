@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -1186,7 +1187,7 @@ public class DriftCalculator implements PlugIn {
       return false;
     }
     driftFilename = chooser.getDirectory() + chooser.getFileName();
-    ImageJUtils.replaceExtension(driftFilename, "tsv");
+    FileUtils.replaceExtension(driftFilename, "tsv");
     return true;
   }
 

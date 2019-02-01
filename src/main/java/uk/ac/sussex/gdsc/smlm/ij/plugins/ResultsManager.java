@@ -29,6 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
@@ -458,7 +459,7 @@ public class ResultsManager implements PlugIn {
     if (!TextUtils.isNullOrEmpty(resultsFileSettings.getResultsFilename())) {
       // Remove extension
       final String resultsFilename =
-          ImageJUtils.replaceExtension(resultsFileSettings.getResultsFilename(),
+          FileUtils.replaceExtension(resultsFileSettings.getResultsFilename(),
               ResultsProtosHelper.getExtension(resultsFileSettings.getFileFormat()));
 
       if (fileInput && inputFilename.equals(resultsFilename)) {

@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -205,7 +206,7 @@ public class PcPalmClusters implements PlugIn {
         // Automatically save
         if (autoSave) {
           final String newFilename =
-              ImageJUtils.replaceExtension(histogramData.filename, ".noise.tsv");
+              FileUtils.replaceExtension(histogramData.filename, ".noise.tsv");
           if (saveHistogram(histogramData, newFilename)) {
             ImageJUtils.log("Saved noise-subtracted histogram to " + newFilename);
           }
@@ -381,7 +382,7 @@ public class PcPalmClusters implements PlugIn {
 
     final float[][] hist = histogramData.histogram;
 
-    filename = ImageJUtils.replaceExtension(filename, "tsv");
+    filename = FileUtils.replaceExtension(filename, "tsv");
     try (BufferedWriter output = Files.newBufferedWriter(Paths.get(filename))) {
       if (histogramData.isCalibrated()) {
         output.write(String.format("Frames  %d", histogramData.frames));

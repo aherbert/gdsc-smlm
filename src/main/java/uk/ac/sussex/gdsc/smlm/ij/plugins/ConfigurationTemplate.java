@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
@@ -165,7 +166,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       if (!TextUtils.isNullOrEmpty(tifPath)) {
         this.tifPath = tifPath;
       } else if (file != null) {
-        tifPath = ImageJUtils.replaceExtension(file.getPath(), ".tif");
+        tifPath = FileUtils.replaceExtension(file.getPath(), ".tif");
         if (new File(tifPath).exists()) {
           this.tifPath = tifPath;
         }
@@ -235,7 +236,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       ImagePlus imp = null;
       try (InputStream inputStream = resourceClass.getResourceAsStream(tifPath)) {
         if (inputStream != null) {
-          imp = opener.openTiff(inputStream, ImageJUtils.removeExtension(tifFile.getName()));
+          imp = opener.openTiff(inputStream, FileUtils.removeExtension(tifFile.getName()));
         }
       } catch (final IOException ex) {
         // Ignore
@@ -501,7 +502,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         }
 
         // Create a simple name
-        final String name = ImageJUtils.removeExtension(line);
+        final String name = FileUtils.removeExtension(line);
 
         // Check if an example TIF file exists for the template
         String tifPath = templateDir + name + ".tif";
@@ -950,7 +951,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       final File file = new File(newDirectory, path);
       if (SettingsManager.fromJson(file, builder, 0)) {
         count++;
-        final String name = ImageJUtils.removeExtension(file.getName());
+        final String name = FileUtils.removeExtension(file.getName());
         // Assume the Tif image will be detected automatically
         addTemplate(name, builder.build(), TemplateType.CUSTOM, file, null);
       }

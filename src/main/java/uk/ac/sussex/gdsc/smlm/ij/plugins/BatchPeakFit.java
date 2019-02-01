@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
@@ -384,7 +385,7 @@ public class BatchPeakFit implements PlugIn {
             final OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
             if (chooser.getFileName() != null) {
               String newFilename = chooser.getDirectory() + chooser.getFileName();
-              newFilename = ImageJUtils.replaceExtension(newFilename, ".xml");
+              newFilename = FileUtils.replaceExtension(newFilename, ".xml");
               try (FileOutputStream fs = new FileOutputStream(newFilename)) {
                 xs.toXML(batchSettings, fs);
               }
