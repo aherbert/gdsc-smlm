@@ -191,7 +191,7 @@ public class PeakResultsReader {
           guessFormat(line);
         }
       } catch (final IOException ex) {
-        // ignore
+        logError(ex);
       }
     }
     return header;
@@ -1044,7 +1044,7 @@ public class PeakResultsReader {
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      logError(ex);
     }
     return results;
   }
@@ -1755,7 +1755,7 @@ public class PeakResultsReader {
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      logError(ex);
     }
 
     return results;
@@ -2069,45 +2069,44 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
     results.setName(FileUtils.getName(filename));
 
-    try (FileInputStream fis = new FileInputStream(filename)) {
-      try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-        @SuppressWarnings("resource")
-        final FileChannel channel = fis.getChannel();
+    try (FileInputStream fis = new FileInputStream(filename);
+        BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
+      @SuppressWarnings("resource")
+      final FileChannel channel = fis.getChannel();
 
-        String line;
-        int errors = 0;
+      String line;
+      int errors = 0;
 
-        // Skip the header
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty()) {
-            continue;
+      // Skip the header
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty()) {
+          continue;
+        }
+        if (line.charAt(0) != '#') {
+          // This is the first record
+          if (!addRapidStormResult(results, line)) {
+            errors = 1;
           }
-          if (line.charAt(0) != '#') {
-            // This is the first record
-            if (!addRapidStormResult(results, line)) {
-              errors = 1;
-            }
-            break;
-          }
+          break;
+        }
+      }
+
+      int counter = 0;
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty() || line.charAt(0) == '#') {
+          continue;
         }
 
-        int counter = 0;
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty() || line.charAt(0) == '#') {
-            continue;
-          }
+        if (!addRapidStormResult(results, line) && ++errors >= 10) {
+          break;
+        }
 
-          if (!addRapidStormResult(results, line) && ++errors >= 10) {
-            break;
-          }
-
-          if (++counter % 512 == 0) {
-            showProgress(channel);
-          }
+        if (++counter % 512 == 0) {
+          showProgress(channel);
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      logError(ex);
     }
     return results;
   }
@@ -2168,34 +2167,33 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
     results.setName(FileUtils.getName(filename));
 
-    try (FileInputStream fis = new FileInputStream(filename)) {
-      try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-        @SuppressWarnings("resource")
-        final FileChannel channel = fis.getChannel();
+    try (FileInputStream fis = new FileInputStream(filename);
+        BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
+      @SuppressWarnings("resource")
+      final FileChannel channel = fis.getChannel();
 
-        String line;
-        int errors = 0;
+      String line;
+      int errors = 0;
 
-        // Skip the single line header
-        input.readLine();
+      // Skip the single line header
+      input.readLine();
 
-        int counter = 0;
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty()) {
-            continue;
-          }
+      int counter = 0;
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty()) {
+          continue;
+        }
 
-          if (!addNStormResult(results, line) && ++errors >= 10) {
-            break;
-          }
+        if (!addNStormResult(results, line) && ++errors >= 10) {
+          break;
+        }
 
-          if (++counter % 512 == 0) {
-            showProgress(channel);
-          }
+        if (++counter % 512 == 0) {
+          showProgress(channel);
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      logError(ex);
     }
 
     // The following relationship holds when length == 1:
@@ -2362,46 +2360,45 @@ public class PeakResultsReader {
       results.setName(FileUtils.getName(filename));
     }
 
-    try (FileInputStream fis = new FileInputStream(filename)) {
-      try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-        @SuppressWarnings("resource")
-        final FileChannel channel = fis.getChannel();
+    try (FileInputStream fis = new FileInputStream(filename);
+        BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
+      @SuppressWarnings("resource")
+      final FileChannel channel = fis.getChannel();
 
-        String line;
-        int errors = 0;
+      String line;
+      int errors = 0;
 
-        // Skip the header
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty()) {
-            continue;
-          }
-
-          if (line.charAt(0) != '#') {
-            // This is the first record
-            if (!addMalkResult(results, line)) {
-              errors = 1;
-            }
-            break;
-          }
+      // Skip the header
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty()) {
+          continue;
         }
 
-        int counter = 0;
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty() || line.charAt(0) == '#') {
-            continue;
+        if (line.charAt(0) != '#') {
+          // This is the first record
+          if (!addMalkResult(results, line)) {
+            errors = 1;
           }
+          break;
+        }
+      }
 
-          if (!addMalkResult(results, line) && ++errors >= 10) {
-            break;
-          }
+      int counter = 0;
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty() || line.charAt(0) == '#') {
+          continue;
+        }
 
-          if (++counter % 512 == 0) {
-            showProgress(channel);
-          }
+        if (!addMalkResult(results, line) && ++errors >= 10) {
+          break;
+        }
+
+        if (++counter % 512 == 0) {
+          showProgress(channel);
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      logError(ex);
     }
 
     // Set default calibration for MALK format.
@@ -2560,5 +2557,10 @@ public class PeakResultsReader {
    */
   public void setOptions(ResultOption[] options) {
     this.options = options;
+  }
+
+  private static void logError(Exception ex) {
+    Logger.getLogger(PeakResultsReader.class.getName()).log(Level.WARNING, "Error reading file",
+        ex);
   }
 }
