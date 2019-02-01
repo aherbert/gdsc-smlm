@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
@@ -50,7 +51,6 @@ import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -1708,7 +1708,7 @@ public class PeakResultsReader {
 
   private MemoryPeakResults readTable() {
     final MemoryPeakResults results = createResults();
-    results.setName(new File(filename).getName());
+    results.setName(FileUtils.getName(filename));
 
     try (FileInputStream fis = new FileInputStream(filename);
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
@@ -2067,7 +2067,7 @@ public class PeakResultsReader {
 
   private MemoryPeakResults readRapidStorm() {
     final MemoryPeakResults results = createResults();
-    results.setName(new File(filename).getName());
+    results.setName(FileUtils.getName(filename));
 
     try (FileInputStream fis = new FileInputStream(filename)) {
       try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
@@ -2166,7 +2166,7 @@ public class PeakResultsReader {
 
   private MemoryPeakResults readNStorm() {
     final MemoryPeakResults results = createResults();
-    results.setName(new File(filename).getName());
+    results.setName(FileUtils.getName(filename));
 
     try (FileInputStream fis = new FileInputStream(filename)) {
       try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
@@ -2359,7 +2359,7 @@ public class PeakResultsReader {
   private MemoryPeakResults readMalk() {
     final MemoryPeakResults results = createResults();
     if (TextUtils.isNullOrEmpty(name)) {
-      results.setName(new File(filename).getName());
+      results.setName(FileUtils.getName(filename));
     }
 
     try (FileInputStream fis = new FileInputStream(filename)) {

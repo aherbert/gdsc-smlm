@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -47,7 +48,6 @@ import com.google.protobuf.util.JsonFormat.Parser;
 import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -473,7 +473,7 @@ public class TsfPeakResultsReader {
     if (spotList.hasName()) {
       name = spotList.getName();
     } else {
-      name = new File(filename).getName();
+      name = FileUtils.getName(filename);
     }
     // Append these if not using the defaults
     if (channel != 1 || slice != 0 || position != 0 || fluorophoreType != 1) {

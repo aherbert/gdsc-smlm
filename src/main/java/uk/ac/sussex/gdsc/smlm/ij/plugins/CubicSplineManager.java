@@ -311,8 +311,7 @@ public class CubicSplineManager implements PlugIn {
   }
 
   private static String getName(String filename) {
-    final File file = new File(filename);
-    return FileUtils.removeExtension(file.getName());
+    return FileUtils.removeExtension(FileUtils.getName(filename));
   }
 
   private static void saveResource(CubicSplinePsf psfModel, String filename, String name) {

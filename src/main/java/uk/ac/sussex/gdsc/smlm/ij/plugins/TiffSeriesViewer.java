@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
@@ -219,8 +220,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       }
       source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
     } else {
-      final File file = new File(inputFile);
-      source = new SeriesImageSource(file.getName(), new String[] {inputFile});
+      source = new SeriesImageSource(FileUtils.getName(inputFile), new String[] {inputFile});
     }
 
     source.setBufferLimit(0); // No memory buffer

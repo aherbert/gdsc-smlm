@@ -98,7 +98,6 @@ public class CameraModelManager implements PlugIn {
     }
 
     // Try to save to file
-    // filename = Utils.replaceExtension(filename, ".tif");
     final String name = getName(filename);
 
     final ImageStack stack = new ImageStack(cameraModel.getWidth(), cameraModel.getHeight());
@@ -122,9 +121,7 @@ public class CameraModelManager implements PlugIn {
   }
 
   private static String getName(String filename) {
-    final File file = new File(filename);
-    final String name = FileUtils.removeExtension(file.getName());
-    return name;
+    return FileUtils.removeExtension(FileUtils.getName(filename));
   }
 
   private static void saveResource(PerPixelCameraModel cameraModel, String filename, String name) {
