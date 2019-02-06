@@ -53,7 +53,7 @@ public class About implements PlugIn, MacroExtension {
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   /** The help url for the SMLM plugins. */
   public static final String HELP_URL =
-      "http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins";
+      "http://www.sussex.ac.uk/gdsc/intranet/microscopy/UserSupport/AnalysisProtocol/imagej/smlm_plugins";
   private static final String YEAR = "2019";
 
   /**
