@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.Settings;
+import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -1489,7 +1489,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private static Settings lastReadResultsSettings;
+  private static SettingsList lastReadResultsSettings;
   private static double lastDuplicateDistance = -1;
   private static boolean lastDuplicateDistanceAbsolute;
 
@@ -1510,7 +1510,7 @@ public class BenchmarkFilterAnalysis
       actualCoordinates = getCoordinates(results);
     }
 
-    final Settings settings = new Settings(partialMatchDistance, upperMatchDistance,
+    final SettingsList settings = new SettingsList(partialMatchDistance, upperMatchDistance,
         partialSignalFactor, upperSignalFactor);
     final boolean equalScoreSettings = settings.equals(lastReadResultsSettings);
 
@@ -2276,8 +2276,8 @@ public class BenchmarkFilterAnalysis
     return true;
   }
 
-  private static Settings lastAnalyseSettings;
-  private static Settings lastAnalyseParametersSettings;
+  private static SettingsList lastAnalyseSettings;
+  private static SettingsList lastAnalyseParametersSettings;
 
   /**
    * Run different filtering methods on a set of labelled peak results outputting performance
@@ -2352,7 +2352,7 @@ public class BenchmarkFilterAnalysis
         // The delta effects the step size for the Genetic Algorithm
         evolveSetting *= delta;
       }
-      final Settings settings = new Settings(filterSets, resultsList, failCount, residualsThreshold,
+      final SettingsList settings = new SettingsList(filterSets, resultsList, failCount, residualsThreshold,
           duplicateDistance, duplicateDistanceAbsolute, plotTopN, summaryDepth, criteriaIndex,
           criteriaLimit, scoreIndex, evolveSetting);
 
@@ -2423,7 +2423,7 @@ public class BenchmarkFilterAnalysis
       if (BenchmarkSpotFit.computeDoublets) {
         min = max = 0;
       }
-      final Settings settings = new Settings(optimum, resultsList, failCount, minFailCount,
+      final SettingsList settings = new SettingsList(optimum, resultsList, failCount, minFailCount,
           maxFailCount, residualsThreshold, min, max, duplicateDistance, duplicateDistanceAbsolute,
           minDuplicateDistance, maxDuplicateDistance, summaryDepth, criteriaIndex, criteriaLimit,
           scoreIndex, searchParam);

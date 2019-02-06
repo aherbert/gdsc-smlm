@@ -144,7 +144,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     }
 
     this.imp = imp;
-    if (arg.equals("final")) {
+    if ("final".equals(arg)) {
       runFinal(imp.getProcessor());
       return DONE;
     }

@@ -90,17 +90,17 @@ public class About implements PlugIn, MacroExtension {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    if (arg.equals("about")) {
+    if ("about".equals(arg)) {
       showAbout();
       return;
     }
 
-    if (arg.equals("uninstall")) {
+    if ("uninstall".equals(arg)) {
       showUninstallDialog();
       return;
     }
 
-    if (arg.equals("toolset")) {
+    if ("toolset".equals(arg)) {
       installResource("/macros/toolsets/SMLM Tools.txt", "macros",
           "toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset",
           "Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the "
@@ -109,7 +109,7 @@ public class About implements PlugIn, MacroExtension {
       return;
     }
 
-    if (arg.equals("config")) {
+    if ("config".equals(arg)) {
       final int result = installResource("/uk/ac/sussex/gdsc/smlm/plugins.config", "plugins",
           "smlm.config", "SMLM Tools Configuration",
           "The configuration file is used to specify which plugins to display on the SMLM Tools "
@@ -124,7 +124,7 @@ public class About implements PlugIn, MacroExtension {
       return;
     }
 
-    if (arg.equals("ext")) {
+    if ("ext".equals(arg)) {
       setupExtensions();
       return;
     }

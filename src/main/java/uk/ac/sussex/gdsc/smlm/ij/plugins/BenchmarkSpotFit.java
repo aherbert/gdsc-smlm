@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.Settings;
+import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -404,7 +404,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /** The last filter id. */
   static int lastFilterId = -1;
 
-  private static Settings lastSettings;
+  private static SettingsList lastSettings;
 
   // Allow other plugins to access the results
 
@@ -1348,7 +1348,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
     final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
-    final Settings settings = new Settings(BenchmarkSpotFilter.filterResult.id, fractionPositives,
+    final SettingsList settings = new SettingsList(BenchmarkSpotFilter.filterResult.id, fractionPositives,
         fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
     if (refresh || !settings.equals(lastSettings)) {
       filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults, width);

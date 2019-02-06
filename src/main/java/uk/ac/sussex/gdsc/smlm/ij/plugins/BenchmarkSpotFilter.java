@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.Settings;
+import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -174,7 +174,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private long time;
 
   // Cache batch results
-  private static Settings batchSettings;
+  private static SettingsList batchSettings;
   private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<>();
 
   private static int id = 1;
@@ -1695,7 +1695,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     if (batchMode) {
       // Clear the cached results if the setting changed
-      final Settings settings = new Settings(simulationParameters.id, filterRelativeDistances,
+      final SettingsList settings = new SettingsList(simulationParameters.id, filterRelativeDistances,
           // search, maxSearch, // Ignore search distance for smart caching
           border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod,
           upperDistance, lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);

@@ -68,7 +68,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    if (arg.equals("final")) {
+    if ("final".equals(arg)) {
       // imp.resetDisplayRange();
       imp.updateAndDraw();
 

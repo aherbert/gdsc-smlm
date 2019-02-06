@@ -53,7 +53,7 @@ import uk.ac.sussex.gdsc.core.match.RandIndex;
 import uk.ac.sussex.gdsc.core.match.Resequencer;
 import uk.ac.sussex.gdsc.core.utils.ConvexHull;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Settings;
+import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -175,7 +175,7 @@ public class Optics implements PlugIn {
   private boolean debug;
 
   // Stack to which the work is first added
-  private final Workflow<OpticsSettings, Settings> workflow = new Workflow<>();
+  private final Workflow<OpticsSettings, SettingsList> workflow = new Workflow<>();
 
   private static final AtomicInteger workerId = new AtomicInteger();
 
@@ -884,7 +884,7 @@ public class Optics implements PlugIn {
     }
   }
 
-  private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, Settings> {
+  private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, SettingsList> {
     final int id;
 
     BaseWorker() {
@@ -897,7 +897,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public boolean equalResults(Settings current, Settings previous) {
+    public boolean equalResults(SettingsList current, SettingsList previous) {
       if (current == null) {
         return previous == null;
       }
@@ -913,10 +913,10 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       // The first item should be the memory peak results
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       // Convert results to coordinates
       final StandardResultProcedure p = new StandardResultProcedure(results, DistanceUnit.PIXEL);
@@ -925,7 +925,7 @@ public class Optics implements PlugIn {
       final OpticsManager opticsManager = new OpticsManager(p.x, p.y, bounds);
       opticsManager.setTracker(new ImageJTrackProgress());
       opticsManager.addOptions(Option.CACHE);
-      return new Pair<>(settings, new Settings(results, opticsManager));
+      return new Pair<>(settings, new SettingsList(results, opticsManager));
     }
   }
 
@@ -1242,9 +1242,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
 
       // The first item should be the memory peak results
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
@@ -1295,7 +1295,7 @@ public class Optics implements PlugIn {
       }
       // It may be null if cancelled. However return null Work will close down the next thread
       return new Pair<>(settings,
-          new Settings(results, opticsManager, new CachedClusteringResult(opticsResult)));
+          new SettingsList(results, opticsManager, new CachedClusteringResult(opticsResult)));
     }
   }
 
@@ -1330,9 +1330,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
 
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
@@ -1393,7 +1393,7 @@ public class Optics implements PlugIn {
 
         // We created a new clustering so create a new WorkerResult
         clusteringResult = new CachedClusteringResult(opticsResult);
-        return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult));
+        return new Pair<>(settings, new SettingsList(results, opticsManager, clusteringResult));
       }
       return work;
     }
@@ -1408,8 +1408,8 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
-      final Settings resultList = work.item2;
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
+      final SettingsList resultList = work.item2;
       // The result is in position 2.
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid()) {
@@ -1445,8 +1445,8 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
-      final Settings resultList = work.item2;
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
+      final SettingsList resultList = work.item2;
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid()) {
         return work;
@@ -1514,8 +1514,8 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
-      final Settings resultList = work.item2;
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (clusteringResult.isValid()) {
@@ -1563,9 +1563,9 @@ public class Optics implements PlugIn {
 
     @SuppressWarnings("null")
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid()) {
         return work;
@@ -2099,16 +2099,16 @@ public class Optics implements PlugIn {
 
     @SuppressWarnings("null")
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
 
       if (!clusteringResult.isValid()) {
         clearCache(true);
-        return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult, image));
+        return new Pair<>(settings, new SettingsList(results, opticsManager, clusteringResult, image));
       }
 
       final ImageMode mode = ImageMode.get(settings.getImageMode());
@@ -2388,7 +2388,7 @@ public class Optics implements PlugIn {
         imp.setOverlay(overlay);
       }
 
-      return new Pair<>(settings, new Settings(results, opticsManager, clusteringResult, image));
+      return new Pair<>(settings, new SettingsList(results, opticsManager, clusteringResult, image));
     }
 
     private Roi createRoi(ConvexHull hull, boolean forcePolygon) {
@@ -2894,9 +2894,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid() || !settings.getShowTable()) {
@@ -3107,9 +3107,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       // OpticsSettings settings = work.s;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults newResults = (MemoryPeakResults) resultList.get(0);
       clusteringResult = (CachedClusteringResult) resultList.get(2);
 
@@ -3245,9 +3245,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       // The first item should be the memory peak results
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       // The second item should be the OPTICS manager
@@ -3370,9 +3370,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       // The first item should be the memory peak results
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       // The second item should be the OPTICS manager
@@ -3409,7 +3409,7 @@ public class Optics implements PlugIn {
       }
       // It may be null if cancelled. However return null Work will close down the next thread
       return new Pair<>(settings,
-          new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
+          new SettingsList(results, opticsManager, new CachedClusteringResult(dbscanResult)));
     }
   }
 
@@ -3423,9 +3423,9 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    public Pair<OpticsSettings, Settings> doWork(Pair<OpticsSettings, Settings> work) {
+    public Pair<OpticsSettings, SettingsList> doWork(Pair<OpticsSettings, SettingsList> work) {
       final OpticsSettings settings = work.item1;
-      final Settings resultList = work.item2;
+      final SettingsList resultList = work.item2;
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
@@ -3437,7 +3437,7 @@ public class Optics implements PlugIn {
         }
         // We created a new clustering
         return new Pair<>(settings,
-            new Settings(results, opticsManager, new CachedClusteringResult(dbscanResult)));
+            new SettingsList(results, opticsManager, new CachedClusteringResult(dbscanResult)));
       }
       return work;
     }
@@ -3512,7 +3512,7 @@ public class Optics implements PlugIn {
     private void createWork(boolean delay) {
       // Clone so that the workflow has it's own unique reference
       final OpticsSettings settings = inputSettings.build();
-      final Settings baseResults = new Settings(results);
+      final SettingsList baseResults = new SettingsList(results);
       if (preview) {
         // Run the settings
         if (debug) {

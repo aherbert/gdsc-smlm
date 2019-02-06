@@ -43,7 +43,7 @@ public class BinaryDisplay implements PlugInFilter {
       return DONE;
     }
 
-    if (arg.equals("reset")) {
+    if ("reset".equals(arg)) {
       final ImageProcessor ip = imp.getProcessor();
       ip.reset();
       imp.setProcessor(ip);
