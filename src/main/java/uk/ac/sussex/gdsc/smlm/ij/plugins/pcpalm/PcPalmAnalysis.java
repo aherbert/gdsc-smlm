@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
