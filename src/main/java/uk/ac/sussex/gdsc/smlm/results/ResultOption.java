@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.NotNull;
+
 /**
  * Contains the options to set before reading the results.
  */
@@ -31,6 +33,7 @@ public class ResultOption {
   /**
    * An empty immutable {@code ResultOption} array.
    */
+  @NotNull
   public static final ResultOption[] EMPTY_ARRAY = new ResultOption[0];
 
   /** The id. */

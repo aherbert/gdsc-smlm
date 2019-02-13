@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -682,7 +683,8 @@ public class TsfPeakResultsReader {
    *
    * @return the options
    */
-  public ResultOption[] getOptions() {
+  @SuppressWarnings("null")
+  public @NotNull ResultOption[] getOptions() {
     if (!isMulti()) {
       return ResultOption.EMPTY_ARRAY;
     }

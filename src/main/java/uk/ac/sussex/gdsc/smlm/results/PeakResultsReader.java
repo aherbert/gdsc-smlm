@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -2564,7 +2565,7 @@ public class PeakResultsReader {
    *
    * @return the options
    */
-  public ResultOption[] getOptions() {
+  public @NotNull ResultOption[] getOptions() {
     getHeader();
     if (header == null || format == null) {
       return ResultOption.EMPTY_ARRAY;

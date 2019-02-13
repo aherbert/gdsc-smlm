@@ -184,69 +184,7 @@ public class ResultsManager implements PlugIn {
     }
 
     if (arg != null && arg.startsWith("clear")) {
-      if (MemoryPeakResults.isMemoryEmpty()) {
-        IJ.error(TITLE, "There are no fitting results in memory");
-        IJ.showStatus("");
-        return;
-      }
-
-      Collection<MemoryPeakResults> allResults;
-      boolean removeAll = false;
-      if (arg.contains("multi")) {
-        final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
-        md.addSelected(selected);
-        md.showDialog();
-        if (md.wasCancelled()) {
-          return;
-        }
-        selected = md.getSelectedResults();
-        if (selected.isEmpty()) {
-          return;
-        }
-        allResults = new ArrayList<>(selected.size());
-        for (final String name : selected) {
-          final MemoryPeakResults r = MemoryPeakResults.getResults(name);
-          if (r != null) {
-            allResults.add(r);
-          }
-        }
-      } else {
-        removeAll = true;
-        allResults = MemoryPeakResults.getAllResults();
-      }
-      if (allResults.isEmpty()) {
-        return;
-      }
-
-      long memorySize = 0;
-      int size = 0;
-      for (final MemoryPeakResults results : allResults) {
-        memorySize += MemoryPeakResults.estimateMemorySize(results);
-        size += results.size();
-      }
-      final String memory = TextUtils.bytesToString(memorySize);
-      final String count = TextUtils.pleural(size, "result");
-      final String sets = TextUtils.pleural(allResults.size(), "set");
-
-      final GenericDialog gd = new GenericDialog(TITLE);
-
-      gd.addMessage(
-          String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
-      gd.showDialog();
-      if (gd.wasCanceled()) {
-        return;
-      }
-
-      if (removeAll) {
-        MemoryPeakResults.clearMemory();
-      } else {
-        for (final MemoryPeakResults results : allResults) {
-          MemoryPeakResults.removeResults(results.getName());
-        }
-      }
-
-      SummariseResults.clearSummaryTable();
-      ImageJUtils.log("Cleared %s (%s, %s)", count, sets, memory);
+      runClearMemory(arg);
       return;
     }
 
@@ -290,9 +228,6 @@ public class ResultsManager implements PlugIn {
     final PeakResultsList outputList = new PeakResultsList();
 
     outputList.copySettings(results);
-    // String title = results.getSource();
-    // if (title == null || title.length() == 0)
-    // output.setSource(TITLE);
 
     final int tableFormat = resultsSettings.getResultsTableSettings().getResultsTableFormatValue();
     if (tableFormat == ResultsTableFormat.IMAGEJ_VALUE) {
@@ -358,6 +293,72 @@ public class ResultsManager implements PlugIn {
       IJ.showStatus(
           String.format("A %d/%s", output.size(), TextUtils.pleural(results.size(), "result")));
     }
+  }
+
+  private static void runClearMemory(String arg) {
+    if (MemoryPeakResults.isMemoryEmpty()) {
+      IJ.error(TITLE, "There are no fitting results in memory");
+      IJ.showStatus("");
+      return;
+    }
+
+    Collection<MemoryPeakResults> allResults;
+    boolean removeAll = false;
+    if (arg.contains("multi")) {
+      final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
+      md.addSelected(selected);
+      md.showDialog();
+      if (md.wasCancelled()) {
+        return;
+      }
+      selected = md.getSelectedResults();
+      if (selected.isEmpty()) {
+        return;
+      }
+      allResults = new ArrayList<>(selected.size());
+      for (final String name : selected) {
+        final MemoryPeakResults r = MemoryPeakResults.getResults(name);
+        if (r != null) {
+          allResults.add(r);
+        }
+      }
+    } else {
+      removeAll = true;
+      allResults = MemoryPeakResults.getAllResults();
+    }
+    if (allResults.isEmpty()) {
+      return;
+    }
+
+    long memorySize = 0;
+    int size = 0;
+    for (final MemoryPeakResults results : allResults) {
+      memorySize += MemoryPeakResults.estimateMemorySize(results);
+      size += results.size();
+    }
+    final String memory = TextUtils.bytesToString(memorySize);
+    final String count = TextUtils.pleural(size, "result");
+    final String sets = TextUtils.pleural(allResults.size(), "set");
+
+    final GenericDialog gd = new GenericDialog(TITLE);
+
+    gd.addMessage(
+        String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+
+    if (removeAll) {
+      MemoryPeakResults.clearMemory();
+    } else {
+      for (final MemoryPeakResults results : allResults) {
+        MemoryPeakResults.removeResults(results.getName());
+      }
+    }
+
+    SummariseResults.clearSummaryTable();
+    ImageJUtils.log("Cleared %s (%s, %s)", count, sets, memory);
   }
 
   private static boolean canShowDeviations(MemoryPeakResults results) {
@@ -790,7 +791,7 @@ public class ResultsManager implements PlugIn {
             if (resultsImage.getNumber() <= 0) {
               return false;
             }
-            final boolean extraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
+            final boolean isExtraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
             final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
             if (requireWeighted.contains(resultsImage)) {
               egd.addCheckbox("Weighted", imageSettings.getWeighted());
@@ -800,7 +801,7 @@ public class ResultsManager implements PlugIn {
               egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
             }
             egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
-            if (extraOptions) {
+            if (isExtraOptions) {
               egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
             }
             egd.setSilent(silent);
@@ -816,7 +817,7 @@ public class ResultsManager implements PlugIn {
               imageSettings.setAveragePrecision(egd.getNextNumber());
             }
             imageSettings.setScale(egd.getNextNumber());
-            if (extraOptions) {
+            if (isExtraOptions) {
               imageSettings.setRollingWindowSize((int) egd.getNextNumber());
             }
             return true;
@@ -954,7 +955,7 @@ public class ResultsManager implements PlugIn {
    */
   public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption,
       InputSource... inputs) {
-    final ArrayList<String> source = new ArrayList<>(3);
+    final ArrayList<String> source = new ArrayList<>();
     boolean fileInput = false;
     for (final InputSource input : inputs) {
       ResultsManager.addInputSource(source, input);
@@ -979,7 +980,6 @@ public class ResultsManager implements PlugIn {
    * @param source the source
    * @param fileInput the file input
    */
-  @SuppressWarnings("unused")
   public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
       String inputOption, List<String> source, boolean fileInput) {
     final String[] options = source.toArray(new String[source.size()]);
@@ -994,10 +994,9 @@ public class ResultsManager implements PlugIn {
         break;
       }
     }
-    final Choice c = gd.addAndGetChoice(inputName, options, options[optionIndex]);
+    final Choice choice = gd.addAndGetChoice(inputName, options, options[optionIndex]);
     if (fileInput) {
-      // final TextField tf = gd.addFilenameField("Input_file", inputFilename)
-      // final JButton b = gd.getLastOptionButton()
+      gd.addFilenameField("Input_file", inputFilename);
 
       // Add a listener to the choice to enable the file input field.
       // Currently we hide the filename field and pack the dialog.
@@ -1007,12 +1006,10 @@ public class ResultsManager implements PlugIn {
         final Label l = gd.getLastLabel();
         final Panel p = gd.getLastPanel();
         final ItemListener listener = event -> {
-          final boolean enable = INPUT_FILE.equals(c.getSelectedItem());
+          final boolean enable = INPUT_FILE.equals(choice.getSelectedItem());
           if (enable != l.isVisible()) {
             l.setVisible(enable);
             p.setVisible(enable);
-            // tf.setVisible(enable);
-            // b.setVisible(enable);
             gd.pack();
           }
         };
@@ -1020,7 +1017,7 @@ public class ResultsManager implements PlugIn {
         // Run once to set up
         listener.itemStateChanged(null);
 
-        c.addItemListener(listener);
+        choice.addItemListener(listener);
       }
     }
   }
@@ -1247,20 +1244,18 @@ public class ResultsManager implements PlugIn {
       reader = new PeakResultsReader(inputFilename);
       IJ.showStatus("Reading " + reader.getFormat() + " results file ...");
       final ResultOption[] options = reader.getOptions();
-      if (options != null) {
+      if (options.length != 0) {
         collectOptions(reader, options);
       }
       reader.setTracker(new ImageJTrackProgress());
       results = reader.getResults();
       reader.getTracker().progress(1.0);
 
-      if (results != null && results.size() > 0) {
-        // If the name contains a .tif suffix then create an image source
-        if (results.getName() != null && results.getName().contains(".tif")
-            && results.getSource() == null) {
-          final int index = results.getName().indexOf(".tif");
-          results.setSource(new IJImageSource(results.getName().substring(0, index)));
-        }
+      // If the name contains a .tif suffix then create an image source
+      if (results != null && results.size() > 0 && results.getName() != null
+          && results.getName().contains(".tif") && results.getSource() == null) {
+        final int index = results.getName().indexOf(".tif");
+        results.setSource(new IJImageSource(results.getName().substring(0, index)));
       }
     } else {
       results = loadMemoryResults(inputOption);
