@@ -66,6 +66,7 @@ import java.util.regex.Pattern;
  * Reads the fit results from file.
  */
 public class PeakResultsReader {
+
   private static Logger logger = Logger.getLogger(PeakResultsReader.class.getName());
 
   // Set up to read two-axis (and theta) Gaussian 2D data into the current format
@@ -136,6 +137,57 @@ public class PeakResultsReader {
   private boolean readPrecision;
   private boolean readSource;
   private int smlmVersion = 4; // Assume the current
+
+  /**
+   * Interface to report progress on reading a file.
+   */
+  private interface ProgressReporter {
+    /**
+     * Show the progress.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    void showProgress() throws IOException;
+  }
+
+  private static class NullProgressReporter implements ProgressReporter {
+    static final NullProgressReporter INSTANCE = new NullProgressReporter();
+
+    private NullProgressReporter() {}
+
+    @Override
+    public void showProgress() {
+      // Do nothing
+    }
+  }
+
+  /**
+   * Report progress reading an input stream using the associated {@link FileChannel}.
+   */
+  private static class FileProgressReporter implements ProgressReporter {
+    final FileChannel channel;
+    final long size;
+    final TrackProgress tracker;
+    int counter;
+
+    FileProgressReporter(FileInputStream input, TrackProgress tracker) throws IOException {
+      channel = input.getChannel();
+      size = channel.size();
+      this.tracker = tracker;
+    }
+
+    @Override
+    public void showProgress() throws IOException {
+      // Only report periodically
+      if (++counter % 512 == 0) {
+        if (tracker.isEnded()) {
+          // Throw an IOException and it will be caught and ignored by all the file reading methods
+          throw new IOException("File read was cancelled");
+        }
+        tracker.progress(channel.position(), size);
+      }
+    }
+  }
 
   /**
    * Instantiates a new peak results reader.
@@ -784,8 +836,7 @@ public class PeakResultsReader {
         // Seek to the start of the binary data by just reading the header again
         BinaryFilePeakResults.readHeader(input);
 
-        @SuppressWarnings("resource")
-        final FileChannel channel = fis.getChannel();
+        final ProgressReporter reporter = createProgressReporter(fis);
 
         // Format: [i]i[i]iifdf + n*f [+ n*f]
         // where [] are optional and n is the number of fields
@@ -805,7 +856,6 @@ public class PeakResultsReader {
         }
         final byte[] buffer = new byte[length];
 
-        int counter = 0;
         final boolean convert = smlmVersion == 1;
         // Halted by the EOFException
         while (true) {
@@ -849,9 +899,7 @@ public class PeakResultsReader {
                 params, paramsStdDev, endPeak, id));
           }
 
-          if (++counter % 512 == 0) {
-            showProgress(channel);
-          }
+          reporter.showProgress();
         }
       }
     } catch (final EOFException ex) {
@@ -967,14 +1015,12 @@ public class PeakResultsReader {
     return Double.longBitsToDouble(readLong(buffer));
   }
 
-  private void showProgress(FileChannel channel) throws IOException {
-    if (tracker != null) {
-      tracker.progress(channel.position(), channel.size());
-      if (tracker.isEnded()) {
-        // Throw an IOException and it will be caught and ignored by all the file reading methods
-        throw new IOException("File read was cancelled");
-      }
+  private ProgressReporter createProgressReporter(FileInputStream fis) throws IOException {
+    TrackProgress trackProgress = tracker;
+    if (trackProgress != null) {
+      return new FileProgressReporter(fis, trackProgress);
     }
+    return NullProgressReporter.INSTANCE;
   }
 
   private float[] readData(byte[] buffer, float[] params) {
@@ -1005,8 +1051,7 @@ public class PeakResultsReader {
 
     try (FileInputStream fis = new FileInputStream(filename)) {
       try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-        @SuppressWarnings("resource")
-        final FileChannel channel = fis.getChannel();
+        final ProgressReporter reporter = createProgressReporter(fis);
 
         String line;
         int errors = 0;
@@ -1028,7 +1073,6 @@ public class PeakResultsReader {
           }
         }
 
-        int counter = 0;
         while ((line = input.readLine()) != null) {
           if (line.isEmpty() || line.charAt(0) == '#') {
             continue;
@@ -1038,9 +1082,7 @@ public class PeakResultsReader {
             break;
           }
 
-          if (++counter % 512 == 0) {
-            showProgress(channel);
-          }
+          reporter.showProgress();
         }
       }
     } catch (final IOException ex) {
@@ -1737,10 +1779,8 @@ public class PeakResultsReader {
         return null;
       }
 
-      @SuppressWarnings("resource")
-      final FileChannel channel = fis.getChannel();
+      final ProgressReporter reporter = createProgressReporter(fis);
 
-      int counter = 0;
       while ((line = input.readLine()) != null) {
         if (line.isEmpty()) {
           continue;
@@ -1750,9 +1790,7 @@ public class PeakResultsReader {
           break;
         }
 
-        if (++counter % 512 == 0) {
-          showProgress(channel);
-        }
+        reporter.showProgress();
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -2071,8 +2109,7 @@ public class PeakResultsReader {
 
     try (FileInputStream fis = new FileInputStream(filename);
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      @SuppressWarnings("resource")
-      final FileChannel channel = fis.getChannel();
+      final ProgressReporter reporter = createProgressReporter(fis);
 
       String line;
       int errors = 0;
@@ -2091,7 +2128,6 @@ public class PeakResultsReader {
         }
       }
 
-      int counter = 0;
       while ((line = input.readLine()) != null) {
         if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
@@ -2101,9 +2137,7 @@ public class PeakResultsReader {
           break;
         }
 
-        if (++counter % 512 == 0) {
-          showProgress(channel);
-        }
+        reporter.showProgress();
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -2169,8 +2203,7 @@ public class PeakResultsReader {
 
     try (FileInputStream fis = new FileInputStream(filename);
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      @SuppressWarnings("resource")
-      final FileChannel channel = fis.getChannel();
+      final ProgressReporter reporter = createProgressReporter(fis);
 
       String line;
       int errors = 0;
@@ -2178,7 +2211,6 @@ public class PeakResultsReader {
       // Skip the single line header
       input.readLine();
 
-      int counter = 0;
       while ((line = input.readLine()) != null) {
         if (line.isEmpty()) {
           continue;
@@ -2188,9 +2220,7 @@ public class PeakResultsReader {
           break;
         }
 
-        if (++counter % 512 == 0) {
-          showProgress(channel);
-        }
+        reporter.showProgress();
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -2362,8 +2392,7 @@ public class PeakResultsReader {
 
     try (FileInputStream fis = new FileInputStream(filename);
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      @SuppressWarnings("resource")
-      final FileChannel channel = fis.getChannel();
+      final ProgressReporter reporter = createProgressReporter(fis);
 
       String line;
       int errors = 0;
@@ -2383,7 +2412,6 @@ public class PeakResultsReader {
         }
       }
 
-      int counter = 0;
       while ((line = input.readLine()) != null) {
         if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
@@ -2393,9 +2421,7 @@ public class PeakResultsReader {
           break;
         }
 
-        if (++counter % 512 == 0) {
-          showProgress(channel);
-        }
+        reporter.showProgress();
       }
     } catch (final IOException ex) {
       logError(ex);
