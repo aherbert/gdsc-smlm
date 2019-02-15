@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
+import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -498,7 +499,8 @@ public abstract class ImageSource {
       XStream.setupDefaultSecurity(xs); // to be removed after 1.5
       xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
       xs.autodetectAnnotations(true);
-      return (ImageSource) xs.fromXML(xml);
+      // Support package gdsc.smlm renamed to uk.ac.sussex.gdsc.smlm
+      return (ImageSource) xs.fromXML(XStreamUtils.updateGdscPackageName(xml));
     } catch (final Exception ex) {
       Logger.getLogger(ImageSource.class.getName()).log(Level.SEVERE,
           "Failed to deserialise from XML", ex);

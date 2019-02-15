@@ -461,9 +461,10 @@ public class PeakResultsReader {
             if (calibrationString.startsWith("<")) {
               // Convert the XML back
               try {
+                // Support package gdsc.smlm renamed to uk.ac.sussex.gdsc.smlm
                 final uk.ac.sussex.gdsc.smlm.results.Calibration cal =
                     (uk.ac.sussex.gdsc.smlm.results.Calibration) XStreamUtils
-                        .fromXml(calibrationString);
+                        .fromXml(XStreamUtils.updateGdscPackageName(calibrationString));
                 cal.validate();
 
                 // Convert to a calibration helper

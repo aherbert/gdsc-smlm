@@ -28,11 +28,17 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import java.util.regex.Pattern;
+
 /**
  * Provide XML utilities using XStream.
  */
 public class XStreamUtils {
   private static XStream xs;
+
+  private static class PatternLoader {
+    static final Pattern PACKAGE_PATTERN = Pattern.compile("(</?)gdsc.smlm");
+  }
 
   /**
    * Convert an object to XML.
@@ -76,5 +82,21 @@ public class XStreamUtils {
       XStream.setupDefaultSecurity(xs); // to be removed after 1.5
       xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
     }
+  }
+
+  /**
+   * Update any XML elements using the old {@code <gdsc.smlm.*>} package name to the new
+   * {@code <uk.ac.sussex.gdsc.smlm.*>} package name.
+   *
+   * @param xml the xml
+   * @return the updated xml
+   */
+  public static String updateGdscPackageName(String xml) {
+    // Fix for reading old versions:
+    // Support package gdsc.smlm renamed to uk.ac.sussex.gdsc.smlm
+    if (xml.contains("<gdsc.smlm")) {
+      return PatternLoader.PACKAGE_PATTERN.matcher(xml).replaceAll("$1uk.ac.sussex.gdsc.smlm");
+    }
+    return xml;
   }
 }
