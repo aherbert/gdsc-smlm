@@ -406,7 +406,7 @@ public class LoadLocalisations implements PlugIn {
         cw.getIntensityUnitValue());
 
     gd.addMessage("Define the fields:");
-    gd.addNumericField("T", settings.getFieldT(), 0);
+    gd.addNumericField("Frame", settings.getFieldT(), 0);
     gd.addNumericField("ID", settings.getFieldId(), 0);
     gd.addNumericField("X", settings.getFieldX(), 0);
     gd.addNumericField("Y", settings.getFieldY(), 0);
@@ -445,7 +445,7 @@ public class LoadLocalisations implements PlugIn {
     }
 
     int index = 0;
-    settings.setFieldI(columns[index++]);
+    settings.setFieldT(columns[index++]);
     settings.setFieldId(columns[index++]);
     settings.setFieldX(columns[index++]);
     settings.setFieldY(columns[index++]);
