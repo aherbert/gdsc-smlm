@@ -15,7 +15,7 @@ Contains routines for:
 - Super-resolution image reconstruction
 - Fourier Image Resolution
  
-Copyright (C) 2011-2018 Alex Herbert
+Copyright (C) 2011-2019 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
  
