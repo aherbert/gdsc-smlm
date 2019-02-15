@@ -14,9 +14,9 @@ Contains routines for:
 - OPTICS/DBSCAN clustering
 - Super-resolution image reconstruction
 - Fourier Image Resolution
- 
+
 Copyright (C) 2011-2019 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
- 
-http://www.sussex.ac.uk/gdsc/intranet/microscopy/imagej/smlm_plugins
+
+http://www.sussex.ac.uk/gdsc/intranet/microscopy/UserSupport/AnalysisProtocol/imagej/smlm_plugins
