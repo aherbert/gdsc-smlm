@@ -98,9 +98,7 @@ public final class CalibrationHelper {
       TimeUnit toTimeUnit) {
     if (calibration != null && toTimeUnit != null && calibration.hasTimeCalibration()) {
       final TimeCalibrationOrBuilder timeCalibration = calibration.getTimeCalibrationOrBuilder();
-      // Assume time is in frames
-      final TimeUnit timeUnit = TimeUnit.FRAME; // timeCalibration.getTimeUnit()
-      return UnitConverterUtils.createConverter(timeUnit, toTimeUnit,
+      return UnitConverterUtils.createConverter(timeCalibration.getTimeUnit(), toTimeUnit,
           timeCalibration.getExposureTime());
     }
     throw new ConversionException();
@@ -172,7 +170,7 @@ public final class CalibrationHelper {
   }
 
   /**
-   * Gets an time converter to update values.
+   * Gets a time converter to update values.
    *
    * <p>If the calibration is already in the given units or conversion is not possible then an
    * identity converter will be returned.
@@ -187,7 +185,7 @@ public final class CalibrationHelper {
       return getTimeConverter(calibration, toTimeUnit);
     } catch (final ConversionException ex) {
       // Calibration is assumed to be in frames
-      return new IdentityTypeConverter<>(TimeUnit.FRAME);
+      return new IdentityTypeConverter<>(null);
     }
   }
 

@@ -100,7 +100,7 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an time converter to update values.
+   * Gets a time converter to update values.
    *
    * <p>If the conversion is not possible then an exception is thrown.
    *
@@ -152,7 +152,7 @@ public class CalibrationReader {
   }
 
   /**
-   * Gets an time converter to update values.
+   * Gets a time converter to update values.
    *
    * <p>If the calibration is already in the given units or conversion is not possible then an
    * identity converter will be returned.
