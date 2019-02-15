@@ -12,30 +12,30 @@ option java_outer_classname = "UnitProtos";
 
 // Unit for measuring distance
 enum DistanceUnit {
-	DISTANCE_UNIT_NA = 0; // Not available
-	PIXEL = 1; // Camera pixel units
-	UM = 2; // Micrometer units
-	NM = 3; // Nanometer units
+  DISTANCE_UNIT_NA = 0; // Not available
+  PIXEL = 1; // Camera pixel units
+  UM = 2; // Micrometer units
+  NM = 3; // Nanometer units
 }
 
 // Unit for measuring intensity
 enum IntensityUnit {
-	INTENSITY_UNIT_NA = 0; // Not available
-	PHOTON = 1; // Photon units
-	COUNT = 2; // Camera count units
+  INTENSITY_UNIT_NA = 0; // Not available
+  PHOTON = 1; // Photon units
+  COUNT = 2; // Camera count units
 }
 
 // Unit for measuring angle
 enum AngleUnit {
-	ANGLE_UNIT_NA = 0; // Not available
-	RADIAN = 1; // Radian units
-	DEGREE = 2; // Degree units
+  ANGLE_UNIT_NA = 0; // Not available
+  RADIAN = 1; // Radian units
+  DEGREE = 2; // Degree units
 }
 
 // Unit for measuring time
 enum TimeUnit {
-	TIME_UNIT_NA = 0; // Not available
-	FRAME = 1; // Frame units
-	SECOND = 2; // Second units
-	MILLISECOND = 3; // Millisecond units
+  TIME_UNIT_NA = 0; // Not available
+  FRAME = 1; // Frame units
+  SECOND = 2; // Second units
+  MILLISECOND = 3; // Millisecond units
 }

@@ -12,9 +12,9 @@ syntax = "proto2";
 // microscopy).  This data format is used to convey information about
 // such spots and the results and methodolgy of fitting
 // Authors: Nico Stuurman (nico.stuurman at ucsf.edu), 2011-2013
-//          Steve Wolter (swolter at sdf.org), 2014
+//     Steve Wolter (swolter at sdf.org), 2014
 // Contributions by Nico Stuurman are copyright Regents of the University of
-//                   California
+//       California
 // Jan. 2017, added fields suggested by Alex Herbert
 // License: BSD 2-Clause License
 package TSF;
@@ -23,250 +23,250 @@ option java_package = "uk.ac.sussex.gdsc.smlm.tsf";
 option java_outer_classname = "TSFProtos";
 
 enum FitMode {
-   ONEAXIS = 0;
-   TWOAXIS = 1;
-   TWOAXISANDTHETA = 2;
+  ONEAXIS = 0;
+  TWOAXIS = 1;
+  TWOAXISANDTHETA = 2;
 }
 
 enum ThetaUnits {
-   DEGREES = 0;
-   RADIANS = 1;
+  DEGREES = 0;
+  RADIANS = 1;
 }
 
 enum IntensityUnits {
-   COUNTS = 0;
-   PHOTONS = 1;
+  COUNTS = 0;
+  PHOTONS = 1;
 }
 
 enum LocationUnits {
-   NM = 0;
-   UM = 1;
-   PIXELS = 2;
+  NM = 0;
+  UM = 1;
+  PIXELS = 2;
 }
 
 // The following enums are an extension added to support the units in the GDSC SMLM software
 
 // The camera type
 enum CameraType {
-   CCD = 0;
-   EMCCD = 1;
-   SCMOS = 2;
+  CCD = 0;
+  EMCCD = 1;
+  SCMOS = 2;
 }
 
 message FluorophoreType {
-   required int32 id = 1; // Key for Spot.fluorophore_type.
-   optional string description = 2;
-   optional bool is_fiducial = 3;
+  required int32 id = 1; // Key for Spot.fluorophore_type.
+  optional string description = 2;
+  optional bool is_fiducial = 3;
 }
 
 // ROI in pixels, should be consistent with nr pixels given in SpotList
 message ROI {
-   required int32 x = 1;
-   required int32 y = 2;
-   required int32 x_width = 3;
-   required int32 y_width = 4;
+  required int32 x = 1;
+  required int32 y = 2;
+  required int32 x_width = 3;
+  required int32 y_width = 4;
 }
 
 message SpotList {
-   // UID for the application that generated these data
-   // Request a UID from nico at cmp.ucsf.edu or use 1
-   required int32 application_id = 1 [default = 1];
+  // UID for the application that generated these data
+  // Request a UID from nico at cmp.ucsf.edu or use 1
+  required int32 application_id = 1 [default = 1];
 
-   optional string name = 2; // name identifying the original dataset
-   optional string filepath = 3; // path to the image data used to generate these spot data
-   optional int64 uid = 4; // Unique ID, can be used by application to link to original data
-   optional int32 nr_pixels_x = 5; // nr pixels in x of original data
-   optional int32 nr_pixels_y = 6; // nr pixels in y of original data
-   optional float pixel_size = 7; // pixel size in nanometer
-   optional int64 nr_spots = 8; // number of spots in this data set
-   optional int32 box_size = 17; // size (in pixels) of rectangular box used in Gaussian fitting
-   optional int32 nr_channels = 18; // Nr of channels in the original data set
-   optional int32 nr_frames = 19; // Nr of frames in the original data set
-   optional int32 nr_slices = 20; // Nr of slices in the original data set
-   optional int32 nr_pos = 21; // Nr of positions in the original data set
+  optional string name = 2; // name identifying the original dataset
+  optional string filepath = 3; // path to the image data used to generate these spot data
+  optional int64 uid = 4; // Unique ID, can be used by application to link to original data
+  optional int32 nr_pixels_x = 5; // nr pixels in x of original data
+  optional int32 nr_pixels_y = 6; // nr pixels in y of original data
+  optional float pixel_size = 7; // pixel size in nanometer
+  optional int64 nr_spots = 8; // number of spots in this data set
+  optional int32 box_size = 17; // size (in pixels) of rectangular box used in Gaussian fitting
+  optional int32 nr_channels = 18; // Nr of channels in the original data set
+  optional int32 nr_frames = 19; // Nr of frames in the original data set
+  optional int32 nr_slices = 20; // Nr of slices in the original data set
+  optional int32 nr_pos = 21; // Nr of positions in the original data set
 
-   // Fluorophore type characterizations. If you use the fluorophore type field,
-   // you must add a FluorophoreType message for each used id.
-   repeated FluorophoreType fluorophore_types = 26;
+  // Fluorophore type characterizations. If you use the fluorophore type field,
+  // you must add a FluorophoreType message for each used id.
+  repeated FluorophoreType fluorophore_types = 26;
 
-   // If units will always be the same for all spots, then use these units tags,
-   // otherwise use the unit tags with each spot
-   optional LocationUnits location_units = 22;
-   optional IntensityUnits intensity_units = 23;
-   optional ThetaUnits theta_units = 27;
+  // If units will always be the same for all spots, then use these units tags,
+  // otherwise use the unit tags with each spot
+  optional LocationUnits location_units = 22;
+  optional IntensityUnits intensity_units = 23;
+  optional ThetaUnits theta_units = 27;
 
-   // If fitmode  will always be the same for all spots, then use this fitmode
-   // otherwise use the fitmode with each spot
-   optional FitMode fit_mode = 24;
+  // If fitmode  will always be the same for all spots, then use this fitmode
+  // otherwise use the fitmode with each spot
+  optional FitMode fit_mode = 24;
 
-   // flag indicating whether this is a sequence of spot data in consecutive
-   // time frames thought to originate from the same entity
-   optional bool is_track = 25 [default = false];
+  // flag indicating whether this is a sequence of spot data in consecutive
+  // time frames thought to originate from the same entity
+  optional bool is_track = 25 [default = false];
 
-   // The electron conversion factor (camera gain), defined as
-   // # of electrons per pixel / # of counts per pixel
-   // The ecf can be different for different channels (which can
-   // happen when separate cameras are used for separate channels),
-   // therefore provide the ecf for each channel in the channel order
-   repeated double ecf = 28;
+  // The electron conversion factor (camera gain), defined as
+  // # of electrons per pixel / # of counts per pixel
+  // The ecf can be different for different channels (which can
+  // happen when separate cameras are used for separate channels),
+  // therefore provide the ecf for each channel in the channel order
+  repeated double ecf = 28;
 
-   // The quantum efficiency can be used to calculate the number
-   // of photons that hit the sensor, rather than the number of
-   // electrons that were derived from them
-   // Since this number is wavelength dependent, provide the QE
-   // for each fluorophore type (in the fluorophore type order)
-   // See the description of the field channel in the Spot message below
-   repeated double qe = 30;
+  // The quantum efficiency can be used to calculate the number
+  // of photons that hit the sensor, rather than the number of
+  // electrons that were derived from them
+  // Since this number is wavelength dependent, provide the QE
+  // for each fluorophore type (in the fluorophore type order)
+  // See the description of the field channel in the Spot message below
+  repeated double qe = 30;
 
-   optional ROI roi = 29;
+  optional ROI roi = 29;
 
-   // GDSC SMLM ...
+  // GDSC SMLM ...
 
-   reserved 1507, 1508;
-   reserved "em_ccd", "amplification";
+  reserved 1507, 1508;
+  reserved "em_ccd", "amplification";
 
-   // Source of the results (can be a serialised object)
-   optional string source = 1501;
+  // Source of the results (can be a serialised object)
+  optional string source = 1501;
 
-   // Configuration used for fitting (can be a serialised object)
-   optional string configuration = 1502;
+  // Configuration used for fitting (can be a serialised object)
+  optional string configuration = 1502;
 
-   // Calibration. This is for a single channel, i.e. camera.
+  // Calibration. This is for a single channel, i.e. camera.
 
-   // The system gain to convert counts to photons (units=count/photon)
-   optional double gain = 1503;
-   // The exposure time for a single frame (units=millisecond)
-   optional double exposure_time = 1504;
-   // The camera read noise for a pixel (units=count)
-   optional double read_noise = 1505;
-   // The camera bias (units=counts)
-   optional double bias = 1506;
-   // The camera type
-   optional CameraType camera_type = 1509;
+  // The system gain to convert counts to photons (units=count/photon)
+  optional double gain = 1503;
+  // The exposure time for a single frame (units=millisecond)
+  optional double exposure_time = 1504;
+  // The camera read noise for a pixel (units=count)
+  optional double read_noise = 1505;
+  // The camera bias (units=counts)
+  optional double bias = 1506;
+  // The camera type
+  optional CameraType camera_type = 1509;
 
-   optional string PSF = 1510; // PSF used for fitting (can be a serialised object)
+  optional string PSF = 1510; // PSF used for fitting (can be a serialised object)
 
-   // These ids can be used in your own .proto derived from this one
-   extensions 1700 to 2047;
+  // These ids can be used in your own .proto derived from this one
+  extensions 1700 to 2047;
 }
 
 message Spot {
-   // Identifier for a physical molecule. Multiple localizations will be considered
-   // to be generated by the same molecule if they share the same molecule ID.
-   // Typically, a molecule generates up to one localization per frame.
-   // If you don't implement tracking, assign a different molecule ID to
-   // each localization.
-   // The difference between molecules and clusters is that a cluster is a group
-   // of physical molecules, e.g. a raft on a membrane. When you are tracking to
-   // link your localizations, you're looking at a molecule, and when you're
-   // thresholding on the nearest neighbor distance, it's typically a cluster.
-   // If you are using both cluster and molecule, localizations with the same
-   // molecule ID should have the same cluster ID.
-   // Molecule IDs must be globally unique across clusters.
-   required int32 molecule = 1;
-   // Identifier for an input channel. Input channels represent different optical
-   // paths, often with different spectral characteristics. For example, in a
-   // biplane setup, you'd have two channels, one for each camera. Channels are
-   // 1-based.
-   // Please note that channels and fluorophore type are subtly different: channel
-   // gives the *physical* excitation path (camera 1 or camera 2), while fluorophore
-   // type gives the *fluorophore's* type (Cy5, Cy3, Tetraspeck). For example, for
-   // biplane single-color 3D, you'd set the channel field if you emit separate
-   // localizations for both channels, but never the type field. For biplane
-   // two-color experiments, you'd set both channel and type if you fit in both
-   // channels independently, and only types if your fitter combines information
-   // for both channels. For spectrally separated measurements, channel and type
-   // are usually identical, but for spectral unmixing, they may differ.
-   required int32 channel = 2;
-   // Frame number (image number). The frames of each channel are numbered
-   // sequentially, starting from 1.
-   required int32 frame = 3;
-   // Z slice. If you are taking a series of images at different axial offsets,
-   // you can tag the localizations from each respective slice with this 1-based
-   // field. Please apply the offset between slices before saving to a TSF file:
-   // z=100 with slice=1 is considered same position as z=100 with slice=2.
-   optional int32 slice = 4;
-   // Lateral position. If you are taking images at multiple x/y stage positions,
-   // you can tag the localizations from each position with this 1-based field.
-   // Positions are 1-based. Please apply the offset between positions before
-   // saving the TSF file:
-   // x=100 with pos=1 is considered same position as x=100 with pos=2.
-   optional int32 pos = 5;
-   // Fluorophore type. The number is 1-based. Please compare the note for
-   // channel for the distinction between type and channel.
-   optional int32 fluorophore_type = 19;
-   // The identifier of the cluster that the localization belongs to, 1-based.
-   // A cluster is a logical group of multiple physical molecules. Typical
-   // examples are membrane rafts,
-   optional int32 cluster = 20;
+  // Identifier for a physical molecule. Multiple localizations will be considered
+  // to be generated by the same molecule if they share the same molecule ID.
+  // Typically, a molecule generates up to one localization per frame.
+  // If you don't implement tracking, assign a different molecule ID to
+  // each localization.
+  // The difference between molecules and clusters is that a cluster is a group
+  // of physical molecules, e.g. a raft on a membrane. When you are tracking to
+  // link your localizations, you're looking at a molecule, and when you're
+  // thresholding on the nearest neighbor distance, it's typically a cluster.
+  // If you are using both cluster and molecule, localizations with the same
+  // molecule ID should have the same cluster ID.
+  // Molecule IDs must be globally unique across clusters.
+  required int32 molecule = 1;
+  // Identifier for an input channel. Input channels represent different optical
+  // paths, often with different spectral characteristics. For example, in a
+  // biplane setup, you'd have two channels, one for each camera. Channels are
+  // 1-based.
+  // Please note that channels and fluorophore type are subtly different: channel
+  // gives the *physical* excitation path (camera 1 or camera 2), while fluorophore
+  // type gives the *fluorophore's* type (Cy5, Cy3, Tetraspeck). For example, for
+  // biplane single-color 3D, you'd set the channel field if you emit separate
+  // localizations for both channels, but never the type field. For biplane
+  // two-color experiments, you'd set both channel and type if you fit in both
+  // channels independently, and only types if your fitter combines information
+  // for both channels. For spectrally separated measurements, channel and type
+  // are usually identical, but for spectral unmixing, they may differ.
+  required int32 channel = 2;
+  // Frame number (image number). The frames of each channel are numbered
+  // sequentially, starting from 1.
+  required int32 frame = 3;
+  // Z slice. If you are taking a series of images at different axial offsets,
+  // you can tag the localizations from each respective slice with this 1-based
+  // field. Please apply the offset between slices before saving to a TSF file:
+  // z=100 with slice=1 is considered same position as z=100 with slice=2.
+  optional int32 slice = 4;
+  // Lateral position. If you are taking images at multiple x/y stage positions,
+  // you can tag the localizations from each position with this 1-based field.
+  // Positions are 1-based. Please apply the offset between positions before
+  // saving the TSF file:
+  // x=100 with pos=1 is considered same position as x=100 with pos=2.
+  optional int32 pos = 5;
+  // Fluorophore type. The number is 1-based. Please compare the note for
+  // channel for the distinction between type and channel.
+  optional int32 fluorophore_type = 19;
+  // The identifier of the cluster that the localization belongs to, 1-based.
+  // A cluster is a logical group of multiple physical molecules. Typical
+  // examples are membrane rafts,
+  optional int32 cluster = 20;
 
-   // xyz coordinates of the spot in location_units
-   // after fitting and optional correction
-   optional LocationUnits location_units = 17;
-   required float x = 7;
-   required float y = 8;
-   optional float z = 9;
+  // xyz coordinates of the spot in location_units
+  // after fitting and optional correction
+  optional LocationUnits location_units = 17;
+  required float x = 7;
+  required float y = 8;
+  optional float z = 9;
 
-   // Intensity values
+  // Intensity values
 
-   // Use intensity_units only if different from SpotList
-   // integrated spot density. This can either be determined from a fit or
-   // using any other methods.  This number should be corrected for background
-   optional IntensityUnits intensity_units = 18;
-   required float intensity = 10; // integrated spot density
-   // Background around the spot.
-   // This can be determined through a fit or other methods
-   // This number should not include the camera bias, i.e. it should be linearly
-   // proportional to the number of photons in the background
-   optional float background = 11;
+  // Use intensity_units only if different from SpotList
+  // integrated spot density. This can either be determined from a fit or
+  // using any other methods.  This number should be corrected for background
+  optional IntensityUnits intensity_units = 18;
+  required float intensity = 10; // integrated spot density
+  // Background around the spot.
+  // This can be determined through a fit or other methods
+  // This number should not include the camera bias, i.e. it should be linearly
+  // proportional to the number of photons in the background
+  optional float background = 11;
 
-   // Peak shape parameters
+  // Peak shape parameters
 
-   // Peak width at half height in location units
-   // for asymmetric peaks, calculate the width as the square root of the
-   // product of the widths of the long and short axes
-   optional float width = 12;
-   // Shape of the peak: width of the long axis
-   // divided by width of the short axis
-   optional float a = 13;
-   // Rotation of asymmetric peak, only used
-   // when fitmode == TWOAXISANDTHETA
-   optional float theta = 14;
+  // Peak width at half height in location units
+  // for asymmetric peaks, calculate the width as the square root of the
+  // product of the widths of the long and short axes
+  optional float width = 12;
+  // Shape of the peak: width of the long axis
+  // divided by width of the short axis
+  optional float a = 13;
+  // Rotation of asymmetric peak, only used
+  // when fitmode == TWOAXISANDTHETA
+  optional float theta = 14;
 
-   // Original xyz coordinates from fitting before correction
-   optional float x_original = 101;
-   optional float y_original = 102;
-   optional float z_original = 103;
+  // Original xyz coordinates from fitting before correction
+  optional float x_original = 101;
+  optional float y_original = 102;
+  optional float z_original = 103;
 
-   // localization precision
-   optional float x_precision = 104;
-   optional float y_precision = 105;
-   optional float z_precision = 106;
+  // localization precision
+  optional float x_precision = 104;
+  optional float y_precision = 105;
+  optional float z_precision = 106;
 
-   // position in the original image (in pixels) used for fitting
-   optional int32 x_position = 107;
-   optional int32 y_position = 108;
+  // position in the original image (in pixels) used for fitting
+  optional int32 x_position = 107;
+  optional int32 y_position = 108;
 
-   // GDSC SMLM ...
+  // GDSC SMLM ...
 
-   // Additional spot data
-   optional double error = 1500; // Fit error
-   optional float noise = 1501; // Local noise estimate
-   optional int32 end_frame = 1503; // The end frame (if the spot represents an
-      // average across multiple frames)
-   optional float original_value = 1504; // The original pixel value at the
-      // fitting origin (x_position,y_position)
-   repeated float param_std_devs = 1505; // The estimated standard deviations of
-      // each of the fitted parameters. The GDSC SMLM code uses a fixed array of
-      // size 7 for fitted parameters:
-      // [Background,Signal,Theta,X,Y,X-width,Y-width].
-      // Parameters that are not fit will have zero in the array.
-   optional float mean_intensity = 1506; // The mean intensity of the spot. This
-      // can be the peak spot intensity in the PSF which is simple to compute.
-      // It can be the integrated intensity over the main region of the spot
-      // divided by the area. E.g. This may be
-      // the intensity within the region with a value greater than half-maxima.
+  // Additional spot data
+  optional double error = 1500; // Fit error
+  optional float noise = 1501; // Local noise estimate
+  optional int32 end_frame = 1503; // The end frame (if the spot represents an
+  // average across multiple frames)
+  optional float original_value = 1504; // The original pixel value at the
+  // fitting origin (x_position,y_position)
+  repeated float param_std_devs = 1505; // The estimated standard deviations of
+  // each of the fitted parameters. The GDSC SMLM code uses a fixed array of
+  // size 7 for fitted parameters:
+  // [Background,Signal,Theta,X,Y,X-width,Y-width].
+  // Parameters that are not fit will have zero in the array.
+  optional float mean_intensity = 1506; // The mean intensity of the spot. This
+  // can be the peak spot intensity in the PSF which is simple to compute.
+  // It can be the integrated intensity over the main region of the spot
+  // divided by the area. E.g. This may be
+  // the intensity within the region with a value greater than half-maxima.
 
-   // These ids can be used in your own .proto derived from this one
-   extensions 1700 to 2047;
+  // These ids can be used in your own .proto derived from this one
+  extensions 1700 to 2047;
 }

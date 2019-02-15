@@ -10,19 +10,19 @@ option java_outer_classname = "MoleculeProtos";
 // Repeated fields use a non-pleural name for clarity in the Message.toString() method
 
 message Atom {
-	double mass = 1;
-	double x = 2;
-	double y = 3;
-	double z = 4;
+  double mass = 1;
+  double x = 2;
+  double y = 3;
+  double z = 4;
 }
 
 message Molecule {
-	double fraction = 1;
-	double diffusion_rate = 2;
-	string diffusion_type = 3;
-	repeated Atom atom = 4;
+  double fraction = 1;
+  double diffusion_rate = 2;
+  string diffusion_type = 3;
+  repeated Atom atom = 4;
 }
 
 message Mixture {
-	repeated Molecule molecule = 1;
+  repeated Molecule molecule = 1;
 }
