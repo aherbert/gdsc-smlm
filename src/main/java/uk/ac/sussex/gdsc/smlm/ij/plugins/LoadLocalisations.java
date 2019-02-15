@@ -67,11 +67,11 @@ public class LoadLocalisations implements PlugIn {
   // Q. Is this required?
 
   // Time units for the exposure time cannot be in frames as this makes no sense
-  private static EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
   private static String[] tUnits;
   private static TimeUnit[] tUnitValues;
 
   static {
+    final EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
     set.remove(TimeUnit.FRAME);
     set.remove(TimeUnit.UNRECOGNIZED);
     tUnits = new String[set.size()];
