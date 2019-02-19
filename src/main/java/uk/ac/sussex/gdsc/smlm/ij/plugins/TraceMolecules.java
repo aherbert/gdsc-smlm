@@ -148,7 +148,7 @@ public class TraceMolecules implements PlugIn {
 
   private ClusteringSettings.Builder settings;
   private MemoryPeakResults results;
-  // Store exposure time in seconds
+  /** Store exposure time in seconds. */
   private double exposureTime;
 
   // Used for the plotting
@@ -338,8 +338,8 @@ public class TraceMolecules implements PlugIn {
     if (settings.getTimeUnit() == TimeUnit.FRAME) {
       limit = settings.getPulseInterval();
     } else {
-      final TypeConverter<TimeUnit> convert =
-          UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
+      final TypeConverter<TimeUnit> convert = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+          settings.getTimeUnit(), getExposureTimeInMilliSeconds());
       limit = convert.convert(pulseInterval);
     }
 
@@ -385,8 +385,8 @@ public class TraceMolecules implements PlugIn {
     for (final Cluster cluster : clusters) {
       final Trace trace = new Trace();
       trace.setId(index + 1);
-      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null;
-          point = point.getNext()) {
+      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null; point =
+          point.getNext()) {
         // The point Id was the position in the original results array
         trace.add(results.get(point.getId()));
       }
@@ -511,7 +511,7 @@ public class TraceMolecules implements PlugIn {
 
   private String createSettingsComment() {
     return String.format(
-        "Molecule tracing : distance-threshold = %f : time-threshold = %f (%d frames)",
+        "Molecule tracing : distance-threshold = %f nm : time-threshold = %f s (%d frames)",
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
   }
 
@@ -563,14 +563,14 @@ public class TraceMolecules implements PlugIn {
         outputName.equals("Cluster") ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
             : getTraceMode(settings.getTraceMode()))
         .append('\t');
-    sb.append(MathUtils.rounded(exposureTime * 1000, 3)).append('\t');
+    sb.append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t');
     sb.append(MathUtils.rounded(distanceThreshold, 3)).append('\t');
     sb.append(MathUtils.rounded(timeThreshold, 3));
     if (settings.getSplitPulses()) {
       sb.append(" *");
     }
     sb.append('\t');
-    sb.append(convertSecondsTotFrames(timeThreshold)).append('\t');
+    sb.append(convertSecondsToFrames(timeThreshold)).append('\t');
     sb.append(traces.length).append('\t');
     sb.append(filtered).append('\t');
     sb.append(singles).append('\t');
@@ -954,13 +954,13 @@ public class TraceMolecules implements PlugIn {
     settings.setDistanceThreshold(best[0]);
 
     // The optimiser works using frames so convert back to the correct units
-    final TypeConverter<TimeUnit> convert =
-        UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
+    final TypeConverter<TimeUnit> convert = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+        settings.getTimeUnit(), getExposureTimeInMilliSeconds());
     settings.setTimeThreshold(convert.convert(best[1]));
 
-    IJ.log(
-        String.format("Optimal fractional difference @ D-threshold=%g, T-threshold=%f (%d frames)",
-            settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
+    IJ.log(String.format(
+        "Optimal fractional difference @ D-threshold=%g nm, T-threshold=%f s (%d frames)",
+        settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
     SettingsManager.writeSettings(settings.build());
   }
 
@@ -1035,7 +1035,7 @@ public class TraceMolecules implements PlugIn {
     return true;
   }
 
-  private int convertSecondsTotFrames(double timeInSeconds) {
+  private int convertSecondsToFrames(double timeInSeconds) {
     return (int) Math.round(timeInSeconds / exposureTime);
   }
 
@@ -1048,8 +1048,13 @@ public class TraceMolecules implements PlugIn {
   }
 
   private double timeThresholdIn(TimeUnit timeUnit) {
-    return UnitConverterUtils.createConverter(settings.getTimeUnit(), timeUnit, exposureTime)
+    return UnitConverterUtils
+        .createConverter(settings.getTimeUnit(), timeUnit, getExposureTimeInMilliSeconds())
         .convert(settings.getTimeThreshold());
+  }
+
+  private double getExposureTimeInMilliSeconds() {
+    return exposureTime * 1000;
   }
 
   /**
@@ -1236,8 +1241,8 @@ public class TraceMolecules implements PlugIn {
     double minD = Double.MAX_VALUE;
     final double maxTimeThresholdInFrames = settings.getMaxTimeThreshold();
     // The optimiser works using frames so convert back to the correct units
-    final TypeConverter<TimeUnit> convert =
-        UnitConverterUtils.createConverter(TimeUnit.FRAME, settings.getTimeUnit(), exposureTime);
+    final TypeConverter<TimeUnit> convert = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+        settings.getTimeUnit(), getExposureTimeInMilliSeconds());
 
     for (final double[] point : zeroCrossingPoints) {
       final double dx = point[0] / maxTimeThresholdInFrames;
