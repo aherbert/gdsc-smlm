@@ -60,7 +60,7 @@ import java.util.List;
  * Compares the coordinates in two sets of results and computes the match statistics.
  */
 public class ResultsMatchCalculator implements PlugIn {
-  private static String TITLE = "Results Match Calculator";
+  private static final String TITLE = "Results Match Calculator";
 
   private static String inputOption1 = "";
   private static String inputOption2 = "";
