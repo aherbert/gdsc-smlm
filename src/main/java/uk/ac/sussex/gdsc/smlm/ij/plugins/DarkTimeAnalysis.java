@@ -56,7 +56,7 @@ import java.util.List;
  * cumulative histogram.
  */
 public class DarkTimeAnalysis implements PlugIn {
-  private static String TITLE = "Dark-time Analysis";
+  private static final String TITLE = "Dark-time Analysis";
 
   private static String[] METHOD;
   private static ClusteringAlgorithm[] algorithms =

@@ -62,7 +62,7 @@ import java.util.List;
  * Produces an image on localisation using their density.
  */
 public class DensityImage implements PlugIn {
-  private static String TITLE = "Density Image";
+  private static final String TITLE = "Density Image";
   private static String inputOption = "";
   private static float radius = 1.5f;
   private static boolean chooseRoi;

@@ -62,7 +62,7 @@ import java.util.ArrayList;
  * Microscopy: Unravelling the Effect of Photoblinking. PLoS ONE 6, e22678.
  */
 public class BlinkEstimator implements PlugIn {
-  private static String TITLE = "Blink Estimator";
+  private static final String TITLE = "Blink Estimator";
 
   private static String inputOption = "";
   private static int maxDarkTimeSetting = 80;
