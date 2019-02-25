@@ -45,7 +45,6 @@ import java.awt.Color;
  * <p>The provider should provide [slice,x,y] coordinates for the image ROI.
  */
 public class ImageRoiPainter extends TextPanelMouseListener {
-  private final TextPanel textPanel;
   private String title;
   private CoordinateProvider coordProvider;
 
@@ -58,12 +57,8 @@ public class ImageRoiPainter extends TextPanelMouseListener {
    */
   public ImageRoiPainter(TextPanel textPanel, String title, CoordinateProvider coordProvider) {
     super(textPanel);
-
-    // Check if the image is displayed
     this.title = title;
-    this.textPanel = textPanel;
     this.coordProvider = coordProvider;
-    textPanel.addMouseListener(this);
   }
 
   /**
