@@ -36,6 +36,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Roi;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
@@ -44,32 +45,77 @@ import ij.process.ImageProcessor;
 
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Smooths the selected rectangular ROI using a mean filter.
  */
 public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Smooth Image";
-  private static final String[] filterNames;
   private static final DataFilterMethod[] filters;
+  private static final String[] filterNames;
 
   static {
     filters = SettingsManager.getDataFilterMethodValues();
     filterNames = SettingsManager.getDataFilterMethodNames();
   }
 
-  private static int filter1;
-  private static double smooth1 = 1;
-  private static boolean differenceFilter;
-  private static int filter2;
-  private static double smooth2 = 3;
+  private static final int FLAGS =
+      DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    int filter1;
+    double smooth1 = 1;
+    boolean differenceFilter;
+    int filter2;
+    double smooth2 = 3;
+
+    Settings() {
+      // Do nothing
+    }
+
+    Settings(Settings source) {
+      this.filter1 = source.filter1;
+      this.smooth1 = source.smooth1;
+      this.differenceFilter = source.differenceFilter;
+      this.filter2 = source.filter2;
+      this.smooth2 = source.smooth2;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public int setup(String arg, ImagePlus imp) {
     if ("final".equals(arg)) {
-      // imp.resetDisplayRange();
       imp.updateAndDraw();
 
       return DONE;
@@ -88,7 +134,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   @Override
@@ -97,15 +143,16 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     // throws away the snap shot. The pixel data for the previous slice is then fixed
     // with the preview. So we can only support a single slice.
 
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
+    settings = Settings.load();
     gd.addMessage("Smooth image:");
-    gd.addChoice("Spot_filter", filterNames, filterNames[filter1]);
-    gd.addSlider("Smoothing", 0, 4.5, smooth1);
-    gd.addCheckbox("Difference_filter", differenceFilter);
-    gd.addChoice("Spot_filter2", filterNames, filterNames[filter2]);
-    gd.addSlider("Smoothing2", 1.5, 6, smooth2);
+    gd.addChoice("Spot_filter", filterNames, filterNames[settings.filter1]);
+    gd.addSlider("Smoothing", 0, 4.5, settings.smooth1);
+    gd.addCheckbox("Difference_filter", settings.differenceFilter);
+    gd.addChoice("Spot_filter2", filterNames, filterNames[settings.filter2]);
+    gd.addSlider("Smoothing2", 1.5, 6, settings.smooth2);
 
     gd.addPreviewCheckbox(pfr);
     gd.addDialogListener(this);
@@ -115,18 +162,19 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
-    return IJ.setupDialog(imp, flags);
+    return IJ.setupDialog(imp, FLAGS);
   }
 
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    filter1 = gd.getNextChoiceIndex();
-    smooth1 = gd.getNextNumber();
-    differenceFilter = gd.getNextBoolean();
-    if (differenceFilter) {
-      filter2 = gd.getNextChoiceIndex();
-      smooth2 = gd.getNextNumber();
+    settings.filter1 = gd.getNextChoiceIndex();
+    settings.smooth1 = gd.getNextNumber();
+    settings.differenceFilter = gd.getNextBoolean();
+    if (settings.differenceFilter) {
+      settings.filter2 = gd.getNextChoiceIndex();
+      settings.smooth2 = gd.getNextNumber();
     }
+    settings.save();
     return !gd.invalidNumber();
   }
 
@@ -144,22 +192,20 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     final int height = fp.getHeight();
     data = filter.preprocessData(data, width, height);
 
-    // System.out.println(filter.getDescription());
 
     fp = new FloatProcessor(width, height, data);
     ip.insert(fp, bounds.x, bounds.y);
-    // ip.resetMinAndMax();
     ip.setMinAndMax(fp.getMin(), fp.getMax());
   }
 
-  private static MaximaSpotFilter createSpotFilter() {
+  private MaximaSpotFilter createSpotFilter() {
     final int search = 1;
     final int border = 0;
-    final DataProcessor processor0 =
-        FitEngineConfiguration.createDataProcessor(border, filters[filter1], smooth1);
-    if (differenceFilter) {
-      final DataProcessor processor1 =
-          FitEngineConfiguration.createDataProcessor(border, filters[filter2], smooth2);
+    final DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border,
+        filters[settings.filter1], settings.smooth1);
+    if (settings.differenceFilter) {
+      final DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border,
+          filters[settings.filter2], settings.smooth2);
       return new DifferenceSpotFilter(search, border, processor0, processor1);
     }
     return new SingleSpotFilter(search, border, processor0);
