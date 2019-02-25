@@ -65,9 +65,9 @@ enum LineSearchMethod
 {
   // Do nothing to handle the incorrect orientation. The default solver action is taken.
   // This may cause the search to take an invalid move or it may error.
-  NONE = 0;  
+  NONE = 0;
   // Ignore any search direction that is in the opposite direction to the first derivative gradient.
-  IGNORE = 1;  
+  IGNORE = 1;
   // Progressively ignore any search direction that is in the opposite direction to the
   // first derivative gradient. Do this in order of the magnitude of the error.
   PARTIAL_IGNORE = 2;
@@ -116,7 +116,7 @@ message FitSolverSettings {
   bool disable_background_fitting = 2;
   // Set to true to disable signal intensity fitting
   bool disable_signal_fitting = 3;
-  
+
   // The type of fit solver
   FitSolver fit_solver = 4;
   // Set to true to use a fixed number of iterations during fitting
@@ -132,10 +132,10 @@ message FitSolverSettings {
   double parameter_relative_threshold = 9;
   // The absolute threshold for convergence on the function parameters. Set to negative to disable.
   double parameter_absolute_threshold = 10;
-  
+
   // The initial lambda parameter for the Levenberg-Marquardt algorithm
   double lambda = 11;
-  
+
   // The search method to use for the configurable maximum likelihood estimator
   SearchMethod search_method = 12;
   // Set to true to use the function gradient during line minimisation, i.e. find the
@@ -152,7 +152,7 @@ message FitSolverSettings {
   bool use_dynamic_clamping = 17;
   // The initial clamp values for each of the PSF parameters.
   repeated double clamp_values = 18;
-    
+
   // The line search method to use for the Fast MLE estimator
   LineSearchMethod line_search_method = 19;
 }
@@ -189,13 +189,13 @@ message FilterSettings {
   // The maximum z-depth
   double max_z = 13;
 }
-  
+
 // Define the settings for fitting. These settings are used to fit a PSF to an
 // extracted region from the input data and validate the fit.
 message FitSettings {
   // The fit solver settings
   FitSolverSettings fit_solver_settings = 1;
-  
+
   // The filter settings
   FilterSettings filter_settings = 2;
 }
@@ -277,12 +277,12 @@ enum NoiseEstimatorMethod {
 message FitEngineSettings {
   // The fit settings
   FitSettings fit_settings = 1;
-  
+
   // the method for estimating noise in the entire frame
   NoiseEstimatorMethod noise_method = 2;
-  
+
   // The data filter settings
-  DataFilterSettings data_filter_settings = 3;  
+  DataFilterSettings data_filter_settings = 3;
 
   // The square radius to use to identify local maxima (candidates)
   RelativeParameter search = 4;
@@ -290,7 +290,7 @@ message FitEngineSettings {
   RelativeParameter border = 5;
   // The square radius to use for fitting around each candidate
   RelativeParameter fitting = 6;
-  
+
   // Set to true to include neighbours during fitting
   bool include_neighbours = 7;
   // The height threshold for including neighbours expressed relative to the current candidate
@@ -299,11 +299,11 @@ message FitEngineSettings {
   double residuals_threshold = 9;
   // The distance to categorise localisations as duplicates and ignore them.
   RelativeParameter duplicate_distance = 10;
-  
+
   // The number of consecutive failures to allow before stopping fitting of the remaining candidates.
   // Set to negative to disable.
   int32 failures_limit = 11;
-  
+
   // The pass rate (range 0-1) to continue fitting. If the fraction of accepted fits falls below
   // this threshold then stop fitting of the remaining candidates. Set to zero to disable.
   double pass_rate = 12;

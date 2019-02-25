@@ -34,7 +34,7 @@ message IntensityCalibration {
   // count units (Counts) to photons.
   double count_per_photon = 2;
 }
-  
+
 // Define the calibration for angles
 message AngleCalibration {
   // The angle units, e.g. for a rotated point spread function.
@@ -57,7 +57,7 @@ message CameraCalibration {
 
   // The camera type.
   CameraType camera_type = 1;
-  
+
   // The camera Gaussian read noise (in Counts).
   double read_noise = 2;
 
@@ -67,7 +67,7 @@ message CameraCalibration {
   // The camera model name. This should contain all the information required to
   // load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
   string camera_model_name = 5;
-  
+
   // Define the quantum efficiency (QE in electron/photon) of the microscope camera.
   // Note that the camera noise model assumes that photons are converted to counts by
   // a process that is not perfect (i.e. it has noise). The underlying process is
@@ -95,16 +95,16 @@ message Calibration {
 
   // The time calibration.
   TimeCalibration time_calibration = 2;
-  
+
   // The intensity calibration
   IntensityCalibration intensity_calibration = 3;
-  
+
   // The angle calibration.
   AngleCalibration angle_calibration = 4;
-  
+
   // The camera calibration.
   CameraCalibration camera_calibration = 5;
-  
+
   // The result data calibration.
   ResultDataCalibration result_data_calibration = 6;
 }

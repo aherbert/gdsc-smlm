@@ -51,7 +51,7 @@ message AstigmatismModel
   // Note that a positive gamma puts the focal plane for the X-dimension above the
   // z-centre (positive Z) and the focal plane for the Y-dimension below the z-centre
   // (negative Z). If gamma is negative then the orientation of the focal planes of X
-  // and Y are reversed.  
+  // and Y are reversed.
   double gamma = 1;
   // Depth-of-focus. This is the z-distance where the width is enlarged by
   // a factor of sqrt(2) compared to the width in the focal plane.
@@ -83,12 +83,12 @@ message AstigmatismModelSettings
 // Define the Point Spread Function (PSF)
 message PSF {
   PSFType psf_type = 1; // The PSF type
-  
+
   // The names of the PSF parameters. The results are stored using the standard parameters of
   // [background, intensity, x, y, z]. Any additional parameters can be stored in the results
   // parameters array. The names of the non-standard parameters, in order, can be defined here.
   repeated PSFParameter parameters = 2;
-  
+
   // The PSF model name. This should contain all the information required to
   // load the model, e.g. in the case of a astigmatic Gaussian 2D PSF.
   string model_name = 3;

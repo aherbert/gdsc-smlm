@@ -16,16 +16,16 @@ import "psf.proto";
 message TemplateSettings {
   // Any notes describing the template
   repeated string notes = 1;
-  
+
   // The calibration
   Calibration calibration = 2;
-  
+
   // The fit engine settings
   FitEngineSettings fit_engine_settings = 3;
-  
+
   // The results settings
   ResultsSettings results_settings = 4;
-  
+
   // The Point Spread Function (PSF)
   PSF psf = 5;
 }
