@@ -163,10 +163,10 @@ import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Checkbox;
 import java.awt.Rectangle;
@@ -751,7 +751,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         // Ensure we have 50% of the frames with a spot.
         nextN = new int[settings.getParticles() * 2];
         Arrays.fill(nextN, 0, settings.getParticles(), 1);
-        RandomUtils.shuffle(nextN, new Well19937c());
+        RandomUtils.shuffle(nextN, RandomSource.create(RandomSource.SPLIT_MIX_64));
 
         // Only put spots in the central part of the image
         final double border = settings.getSize() / 4.0;

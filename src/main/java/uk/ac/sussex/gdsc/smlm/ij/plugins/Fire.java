@@ -110,10 +110,10 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
@@ -1484,7 +1484,8 @@ public class Fire implements PlugIn {
     if (sampleDecay) {
       // Random sample of precision values from the distribution is used to
       // construct the decay curve
-      final int[] sample = RandomUtils.sample(10000, precision.getN(), new Well19937c());
+      final int[] sample = RandomUtils.sample(10000, precision.getN(),
+          RandomSource.create(RandomSource.SPLIT_MIX_64));
 
       final double four_pi2 = 4 * Math.PI * Math.PI;
       final double[] pre = new double[q.length];

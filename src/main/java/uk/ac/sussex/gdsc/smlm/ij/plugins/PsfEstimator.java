@@ -60,11 +60,11 @@ import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TestUtils;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Rectangle;
 import java.util.Collection;
@@ -618,7 +618,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     for (int i = 0; i < slices.length; i++) {
       slices[i] = i + 1;
     }
-    RandomUtils.shuffle(slices, new Well19937c());
+    RandomUtils.shuffle(slices, RandomSource.create(RandomSource.SPLIT_MIX_64));
 
     IJ.showStatus("Fitting ...");
 
@@ -626,7 +626,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     int sliceIndex;
     for (sliceIndex = 0; sliceIndex < slices.length; sliceIndex++) {
       final int slice = slices[sliceIndex];
-      // debug(" Processing slice = %d\n", slice);
       IJ.showProgress(size(), settings.getNumberOfPeaks());
 
       final ImageProcessor ip = stack.getProcessor(slice);

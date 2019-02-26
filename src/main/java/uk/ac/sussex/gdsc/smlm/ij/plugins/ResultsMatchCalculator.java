@@ -24,20 +24,27 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -46,7 +53,7 @@ import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
 import ij.IJ;
-import ij.io.OpenDialog;
+import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
@@ -55,41 +62,104 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.
  */
 public class ResultsMatchCalculator implements PlugIn {
-  private static String TITLE = "Results Match Calculator";
+  private static final String TITLE = "Results Match Calculator";
 
-  private static String inputOption1 = "";
-  private static String inputOption2 = "";
-  private static double distanceThreshold = 0.5;
-  private static int increments = 5;
-  private static double delta = 0.1;
-  private static double beta = 4;
-  private static boolean showTable = true;
-  private static boolean showPairs;
-  private static boolean saveClassifications;
-  private static String classificationsFile = "";
-  private static boolean idAnalysis;
+  /** The plugin settings. */
+  private Settings settings;
 
-  private static boolean writeHeader = true;
-  private static TextWindow resultsWindow;
-  private static TextWindow pairsWindow;
-  private static ImageRoiPainter pairPainter;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> pairsWindowRef = new AtomicReference<>();
 
-  private final Rounder rounder = RounderUtils.create(4);
+  /** The write header flag used in headless mode to ensure the header is only written once. */
+  private static AtomicBoolean writeHeader = new AtomicBoolean(true);
+
+  /** Used to draw ROIs on an image when a line is clicked in the results table. */
+  private static AtomicReference<ImageRoiPainter> pairPainterRef = new AtomicReference<>();
+
+  /** The rounder for the text output. */
+  private static final Rounder rounder = RounderUtils.create(4);
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption1 = "";
+    String inputOption2 = "";
+    double distanceThreshold = 0.5;
+    int increments = 5;
+    double delta = 0.1;
+    double beta = 4;
+    boolean showTable = true;
+    boolean showPairs;
+    boolean saveClassifications;
+    String classificationsFile = "";
+    boolean idAnalysis;
+    boolean savePairs;
+    String pairsDirectory = "";
+
+    Settings() {
+      // Do nothing
+    }
+
+    Settings(Settings source) {
+      this.inputOption1 = source.inputOption1;
+      this.inputOption2 = source.inputOption2;
+      this.distanceThreshold = source.distanceThreshold;
+      this.increments = source.increments;
+      this.delta = source.delta;
+      this.beta = source.beta;
+      this.showTable = source.showTable;
+      this.showPairs = source.showPairs;
+      this.saveClassifications = source.saveClassifications;
+      this.classificationsFile = source.classificationsFile;
+      this.idAnalysis = source.idAnalysis;
+      this.savePairs = source.savePairs;
+      this.pairsDirectory = source.pairsDirectory;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /**
    * A point that holds a reference to a PeakResult.
    */
   public static class PeakResultPoint extends BasePoint {
     /** The time. */
-    int time;
+    final int time;
 
     /** The peak result. */
-    PeakResult peakResult;
+    final PeakResult peakResult;
 
     /**
      * Instantiates a new peak result point.
@@ -123,6 +193,22 @@ public class ResultsMatchCalculator implements PlugIn {
     public PeakResult getPeakResult() {
       return peakResult;
     }
+
+    @Override
+    public boolean equals(Object object) {
+      if (super.equals(object)) {
+        // Super-class ensures the class is the same.
+        // Compare new fields.
+        final PeakResultPoint other = (PeakResultPoint) object;
+        return time == other.time && peakResult == other.peakResult;
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(new int[] {super.hashCode(), time, Objects.hashCode(peakResult)});
+    }
   }
 
   @Override
@@ -140,9 +226,9 @@ public class ResultsMatchCalculator implements PlugIn {
 
     // Load the results
     final MemoryPeakResults results1 =
-        ResultsManager.loadInputResults(inputOption1, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
     final MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(inputOption2, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     IJ.showStatus("");
     if (results1 == null || results1.size() == 0) {
       IJ.error(TITLE, "No results 1 could be loaded");
@@ -158,27 +244,29 @@ public class ResultsMatchCalculator implements PlugIn {
     }
 
     final long start = System.nanoTime();
-    runCompareCoordinates(results1, results2, distanceThreshold, increments, delta);
-    final double seconds = (System.nanoTime() - start) / 1000000000.0;
+    runCompareCoordinates(results1, results2);
+    final long nanoseconds = System.nanoTime() - start;
 
-    IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
+    IJ.showStatus(String.format("%s = %s", TITLE, TextUtils.nanosToString(nanoseconds)));
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
+    settings = Settings.load();
     gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
-    ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY);
-    ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY);
-    gd.addNumericField("Distance", distanceThreshold, 2);
+    ResultsManager.addInput(gd, "Results1", settings.inputOption1, InputSource.MEMORY);
+    ResultsManager.addInput(gd, "Results2", settings.inputOption2, InputSource.MEMORY);
+    gd.addNumericField("Distance", settings.distanceThreshold, 2);
 
-    gd.addSlider("Increments", 0, 10, increments);
-    gd.addNumericField("Delta", delta, 2);
-    gd.addNumericField("Beta", beta, 2);
-    gd.addCheckbox("Show_table", showTable);
-    gd.addCheckbox("Show_pairs", showPairs);
-    gd.addCheckbox("Save_classifications", saveClassifications);
-    gd.addCheckbox("Id_analysis", idAnalysis);
+    gd.addSlider("Increments", 0, 10, settings.increments);
+    gd.addNumericField("Delta", settings.delta, 2);
+    gd.addNumericField("Beta", settings.beta, 2);
+    gd.addCheckbox("Show_table", settings.showTable);
+    gd.addCheckbox("Show_pairs", settings.showPairs);
+    gd.addCheckbox("Save_classifications", settings.saveClassifications);
+    gd.addCheckbox("Id_analysis", settings.idAnalysis);
+    gd.addCheckbox("Save_pairs", settings.savePairs);
 
     gd.showDialog();
 
@@ -186,28 +274,30 @@ public class ResultsMatchCalculator implements PlugIn {
       return false;
     }
 
-    inputOption1 = gd.getNextChoice();
-    inputOption2 = gd.getNextChoice();
-    distanceThreshold = gd.getNextNumber();
-    increments = (int) gd.getNextNumber();
-    delta = gd.getNextNumber();
-    beta = gd.getNextNumber();
-    showTable = gd.getNextBoolean();
-    showPairs = gd.getNextBoolean();
-    saveClassifications = gd.getNextBoolean();
-    idAnalysis = gd.getNextBoolean();
+    settings.inputOption1 = gd.getNextChoice();
+    settings.inputOption2 = gd.getNextChoice();
+    settings.distanceThreshold = gd.getNextNumber();
+    settings.increments = (int) gd.getNextNumber();
+    settings.delta = gd.getNextNumber();
+    settings.beta = gd.getNextNumber();
+    settings.showTable = gd.getNextBoolean();
+    settings.showPairs = gd.getNextBoolean();
+    settings.saveClassifications = gd.getNextBoolean();
+    settings.idAnalysis = gd.getNextBoolean();
+    settings.savePairs = gd.getNextBoolean();
+    settings.save();
 
-    if (!(showTable || showPairs || saveClassifications)) {
+    if (!(settings.showTable || settings.showPairs || settings.saveClassifications)) {
       IJ.error(TITLE, "No outputs specified");
       return false;
     }
 
     // Check arguments
     try {
-      ParameterUtils.isPositive("Distance threshold", distanceThreshold);
-      ParameterUtils.isPositive("Increments", increments);
-      ParameterUtils.isAboveZero("Delta", delta);
-      ParameterUtils.isPositive("Beta", beta);
+      ParameterUtils.isPositive("Distance threshold", settings.distanceThreshold);
+      ParameterUtils.isPositive("Increments", settings.increments);
+      ParameterUtils.isAboveZero("Delta", settings.delta);
+      ParameterUtils.isPositive("Beta", settings.beta);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -217,16 +307,15 @@ public class ResultsMatchCalculator implements PlugIn {
   }
 
   @SuppressWarnings("null")
-  private void runCompareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
-      double maxDistanceThreshold, int increments, double delta) {
-    final boolean requirePairs = showPairs || saveClassifications;
+  private void runCompareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2) {
+    final boolean requirePairs = settings.showPairs || settings.saveClassifications;
 
     final TextFilePeakResults fileResults = createFilePeakResults(results2);
 
     final List<PointPair> allMatches = new LinkedList<>();
     final List<PointPair> pairs = (requirePairs) ? new LinkedList<>() : null;
 
-    final double maxDistance = maxDistanceThreshold + increments * delta;
+    final double maxDistance = settings.distanceThreshold + settings.increments * settings.delta;
 
     // Divide the results into time points
     final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
@@ -256,7 +345,7 @@ public class ResultsMatchCalculator implements PlugIn {
       n2 += predicted.length;
 
       allMatches.addAll(matches);
-      if (showPairs) {
+      if (settings.showPairs) {
         pairs.addAll(matches);
         for (final Coordinate c : fn) {
           pairs.add(new PointPair(c, null));
@@ -286,107 +375,89 @@ public class ResultsMatchCalculator implements PlugIn {
       fileResults.end();
     }
 
-    // XXX : DEBUGGING : Output for signal correlation and fitting analysis
-    /*
-     * try { OutputStreamWriter o = new OutputStreamWriter(new
-     * FileOutputStream("/tmp/ResultsMatchCalculator.txt")); FilePeakResults r1 = new
-     * FilePeakResults("/tmp/" + results1.getName() + ".txt", false); FilePeakResults r2 = new
-     * FilePeakResults("/tmp/" + results2.getName() + ".txt", false); r1.begin(); r2.begin();
-     * //OutputStreamWriter o2 = new OutputStreamWriter(new
-     * FileOutputStream("/tmp/"+results1.getName()+".txt")); //OutputStreamWriter o3 = new
-     * OutputStreamWriter(new FileOutputStream("/tmp/"+results2.getName()+".txt")); for (PointPair
-     * pair : allMatches) { PeakResult p1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
-     * PeakResult p2 = ((PeakResultPoint) pair.getPoint2()).peakResult; r1.add(p1); r2.add(p2);
-     * o.write(Float.toString(p1.getSignal())); o.write('\t');
-     * o.write(Float.toString(p2.getSignal())); o.write('\n'); } o.close(); r1.end(); r2.end(); }
-     * catch (Exception ex) { e.printStackTrace(); }
-     */
+    final boolean doIdAnalysis1 = settings.idAnalysis && haveIds(results1);
+    final boolean doIdAnalysis2 = settings.idAnalysis && haveIds(results2);
 
-    final boolean doIdAnalysis1 = (idAnalysis) ? haveIds(results1) : false;
-    final boolean doIdAnalysis2 = (idAnalysis) ? haveIds(results2) : false;
-    final boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
+    // Create output.
+    // This supports headless mode with just the results table
+    // or graphical mode with a results table and pairs window.
+    final boolean headless = java.awt.GraphicsEnvironment.isHeadless();
 
-    // Create output
-    if (!java.awt.GraphicsEnvironment.isHeadless()) {
-      final String header = createResultsHeader(doIdAnalysis);
-      ImageJUtils.refreshHeadings(resultsWindow, header, true);
-
-      if (showTable && (resultsWindow == null || !resultsWindow.isShowing())) {
-        resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
-      }
-      if (showPairs) {
-        if (pairsWindow == null || !pairsWindow.isShowing()) {
-          pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
-          if (resultsWindow != null) {
-            final Point p = resultsWindow.getLocation();
-            p.y += resultsWindow.getHeight();
-            pairsWindow.setLocation(p);
-          }
-          pairPainter = new ImageRoiPainter(pairsWindow.getTextPanel(), "", line -> {
-            // Extract the startT and x,y coordinates from the first pulse in the line
-            final int[] index = {1, 4};
-            final String[] fields = line.split("\t");
-            final int startT = Integer.parseInt(fields[0]);
-            for (final int i : index) {
-              if (i < fields.length) {
-                if (fields[i].equals("-")) {
-                  continue;
-                }
-                final double x = Double.parseDouble(fields[i]);
-                final double y = Double.parseDouble(fields[i + 1]);
-                return new double[] {startT, x, y};
-              }
-            }
-            return null;
-          });
-        }
-        pairsWindow.getTextPanel().clear();
-        String title = "Results 1";
-        if (results1.getSource() != null
-            && results1.getSource().getOriginal().getName().length() > 0) {
-          title = results1.getSource().getOriginal().getName();
-        }
-        pairPainter.setTitle(title);
-        IJ.showStatus("Writing pairs table");
-        IJ.showProgress(0);
-        int count = 0;
-        final int total = pairs.size();
-        final int step = ImageJUtils.getProgressInterval(total);
-        final ArrayList<String> list = new ArrayList<>(total);
-        boolean flush = true;
-        for (final PointPair pair : pairs) {
-
-          if (++count % step == 0) {
-            IJ.showProgress(count, total);
-          }
-          list.add(addPairResult(pair));
-          if (flush && count == 9) {
-            pairsWindow.getTextPanel().append(list);
-            list.clear();
-            flush = false;
-          }
-        }
-        pairsWindow.getTextPanel().append(list);
-        IJ.showProgress(1);
-      }
-    } else if (writeHeader && showTable) {
-      writeHeader = false;
-      IJ.log(createResultsHeader(idAnalysis));
+    TextWindow resultsWindow = null;
+    if (!headless) {
+      resultsWindow =
+          (settings.showTable) ? createResultsWindow(doIdAnalysis1 || doIdAnalysis2) : null;
+      showPairs(results1, pairs, resultsWindow);
     }
 
-    if (!showTable) {
+    showResults(results1, results2, allMatches, n1, n2, doIdAnalysis1, doIdAnalysis2,
+        resultsWindow);
+
+    savePairs(results1, results2, allMatches);
+  }
+
+  /**
+   * Show the match pairs in a results table.
+   *
+   * <p>Adds an ROI painter for the original image source of results set 1 (if it is visible) to the
+   * table.
+   *
+   * @param results1 the first set of results
+   * @param pairs the pairs
+   * @param resultsWindow the results window
+   */
+  private void showPairs(MemoryPeakResults results1, final List<PointPair> pairs,
+      final TextWindow resultsWindow) {
+    if (!settings.showPairs) {
       return;
+    }
+    final TextWindow pairsWindow = createPairsWindow(resultsWindow);
+    pairsWindow.getTextPanel().clear();
+    createPairPainter(pairsWindow, results1.getSource());
+    IJ.showStatus("Writing pairs table");
+    final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), pairs.size(), false);
+    try (final BufferedTextWindow bw = new BufferedTextWindow(pairsWindow)) {
+      final StringBuilder sb = new StringBuilder();
+      for (final PointPair pair : pairs) {
+        bw.append(addPairResult(sb, pair));
+        ticker.tick();
+      }
+    }
+    IJ.showProgress(1);
+  }
+
+  @SuppressWarnings("null")
+  private void showResults(MemoryPeakResults results1, MemoryPeakResults results2,
+      final List<PointPair> allMatches, int n1, int n2, final boolean doIdAnalysis1,
+      final boolean doIdAnalysis2, TextWindow resultsWindow) {
+    if (!settings.showTable) {
+      return;
+    }
+
+    // Output the results
+    Consumer<String> output;
+    if (resultsWindow != null) {
+      output = resultsWindow::append;
+    } else {
+      // Headless mode
+      output = IJ::log;
+      if (writeHeader.get()) {
+        writeHeader.set(false);
+        IJ.log(createResultsHeader(settings.idAnalysis));
+      }
     }
 
     // We have the results for the largest distance.
     // Now reduce the distance threshold and recalculate the results
-    final double[] distanceThresholds = getDistances(maxDistanceThreshold, increments, delta);
+    final double[] distanceThresholds =
+        getDistances(settings.distanceThreshold, settings.increments, settings.delta);
     final double[] pairDistances = getPairDistances(allMatches);
     // Re-use storage for the ID analysis
     TIntHashSet id1 = null;
     TIntHashSet id2 = null;
     TIntHashSet matchId1 = null;
     TIntHashSet matchId2 = null;
+    final boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
     if (doIdAnalysis) {
       if (doIdAnalysis1) {
         id1 = getIds(results1);
@@ -397,6 +468,7 @@ public class ResultsMatchCalculator implements PlugIn {
         matchId2 = new TIntHashSet(id2.size());
       }
     }
+    final StringBuilder sb = new StringBuilder();
     for (final double distanceThreshold : distanceThresholds) {
       double rms = 0;
       int tp2 = 0;
@@ -445,33 +517,42 @@ public class ResultsMatchCalculator implements PlugIn {
         }
       }
 
-      addResult(inputOption1, inputOption2, distanceThreshold, result, idResult1, idResult2);
-    }
-  }
+      addResult(sb, settings.inputOption1, settings.inputOption2, distanceThreshold, result,
+          idResult1, idResult2);
 
-  @SuppressWarnings("unused")
-  private static boolean haveIds(MemoryPeakResults results1, MemoryPeakResults results2) {
-    return haveIds(results1) && haveIds(results2);
+      output.accept(sb.toString());
+    }
   }
 
   private static boolean haveIds(MemoryPeakResults results) {
     return results.hasId();
   }
 
-  private static TextFilePeakResults createFilePeakResults(MemoryPeakResults results2) {
-    if (!saveClassifications) {
+  private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2) {
+    if (!settings.saveClassifications) {
       return null;
     }
-    final String[] path = ImageJUtils.decodePath(classificationsFile);
-    final OpenDialog chooser = new OpenDialog("Classifications_File", path[0], path[1]);
-    if (chooser.getFileName() != null) {
-      classificationsFile = chooser.getDirectory() + chooser.getFileName();
-      final TextFilePeakResults r = new TextFilePeakResults(classificationsFile, false, false);
+    final String filename =
+        ImageJUtils.getFilename("Classifications_File", settings.classificationsFile);
+    if (filename != null) {
+      settings.classificationsFile = filename;
+      settings.save();
+      final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
       r.copySettings(results2);
       r.begin();
       return r;
     }
     return null;
+  }
+
+  private static TextFilePeakResults createFilePeakResults(String directory,
+      MemoryPeakResults results, double distanceLow, double distanceHigh) {
+    final String filename = directory + String.format("%s_%s_%s", results.getName(),
+        rounder.toString(distanceLow), rounder.toString(distanceHigh));
+    final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
+    r.copySettings(results);
+    r.begin();
+    return r;
   }
 
   /**
@@ -578,26 +659,31 @@ public class ResultsMatchCalculator implements PlugIn {
     return set;
   }
 
-  /**
-   * Merge the time points from the two sets into a single sorted list of unique time points.
-   *
-   * @param actualPoints the actual points
-   * @param predictedPoints the predicted points
-   * @return the timepoints
-   */
-  @SuppressWarnings("unused")
-  private static int[] getTimepoints(List<PeakResult> actualPoints,
-      List<PeakResult> predictedPoints) {
-    final TIntHashSet set = new TIntHashSet();
-    for (final PeakResult r : actualPoints) {
-      set.add(r.getFrame());
+  private static TextWindow createResultsWindow(boolean doIdAnalysis) {
+    TextWindow resultsWindow = resultsWindowRef.get();
+    final String header = createResultsHeader(doIdAnalysis);
+    if (resultsWindow == null || !resultsWindow.isShowing()) {
+      resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
+      resultsWindowRef.set(resultsWindow);
+    } else {
+      ImageJUtils.refreshHeadings(resultsWindow, header, true);
     }
-    for (final PeakResult r : predictedPoints) {
-      set.add(r.getFrame());
+    return resultsWindow;
+  }
+
+  private static TextWindow createPairsWindow(TextWindow resultsWindow) {
+    TextWindow pairsWindow = pairsWindowRef.get();
+    if (pairsWindow == null || !pairsWindow.isShowing()) {
+      pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
+      // Position relative to results window
+      if (resultsWindow != null) {
+        final Point p = resultsWindow.getLocation();
+        p.y += resultsWindow.getHeight();
+        pairsWindow.setLocation(p);
+      }
+      pairsWindowRef.set(pairsWindow);
     }
-    final int[] t = set.toArray();
-    Arrays.sort(t);
-    return t;
+    return pairsWindow;
   }
 
   private static String createResultsHeader(boolean idAnalysis) {
@@ -628,9 +714,9 @@ public class ResultsMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private void addResult(String i1, String i2, double distanceThrehsold, MatchResult result,
-      MatchResult idResult1, MatchResult idResult2) {
-    final StringBuilder sb = new StringBuilder();
+  private void addResult(StringBuilder sb, String i1, String i2, double distanceThrehsold,
+      MatchResult result, MatchResult idResult1, MatchResult idResult2) {
+    sb.setLength(0);
     sb.append(i1).append('\t');
     sb.append(i2).append('\t');
     sb.append(rounder.round(distanceThrehsold)).append('\t');
@@ -645,7 +731,7 @@ public class ResultsMatchCalculator implements PlugIn {
     sb.append(rounder.round(result.getFScore(0.5))).append('\t');
     sb.append(rounder.round(result.getFScore(1.0))).append('\t');
     sb.append(rounder.round(result.getFScore(2.0))).append('\t');
-    sb.append(rounder.round(result.getFScore(beta)));
+    sb.append(rounder.round(result.getFScore(settings.beta)));
     if (idResult1 != null) {
       sb.append('\t').append(idResult1.getNumberPredicted());
       sb.append('\t').append(idResult1.getTruePositives());
@@ -659,12 +745,6 @@ public class ResultsMatchCalculator implements PlugIn {
       sb.append('\t').append(rounder.round(idResult2.getRecall()));
     } else if (idResult1 != null) {
       sb.append("\t-\t-\t-");
-    }
-
-    if (java.awt.GraphicsEnvironment.isHeadless()) {
-      IJ.log(sb.toString());
-    } else {
-      resultsWindow.append(sb.toString());
     }
   }
 
@@ -681,8 +761,8 @@ public class ResultsMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private String addPairResult(PointPair pair) {
-    final StringBuilder sb = new StringBuilder();
+  private static String addPairResult(StringBuilder sb, PointPair pair) {
+    sb.setLength(0);
     final PeakResultPoint p1 = (PeakResultPoint) pair.getPoint1();
     final PeakResultPoint p2 = (PeakResultPoint) pair.getPoint2();
     final int t = (p1 != null) ? p1.getTime() : p2.getTime();
@@ -698,7 +778,7 @@ public class ResultsMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private void addPoint(StringBuilder sb, PeakResultPoint result) {
+  private static void addPoint(StringBuilder sb, PeakResultPoint result) {
     if (result == null) {
       sb.append("-\t-\t-\t");
     } else {
@@ -706,6 +786,47 @@ public class ResultsMatchCalculator implements PlugIn {
       sb.append(rounder.round(result.getY())).append('\t');
       sb.append(rounder.round(result.getZ())).append('\t');
     }
+  }
+
+  private static void createPairPainter(TextWindow pairsWindow, ImageSource source) {
+    // Find if the image is open
+    if (source != null && TextUtils.isNotEmpty(source.getOriginal().getName())) {
+      final String title = source.getOriginal().getName();
+
+      if (WindowManager.getImage(title) == null) {
+        return;
+      }
+
+      // Create the pair painter if necessary
+      ImageRoiPainter painter = pairPainterRef.get();
+      if (painter == null) {
+        painter = new ImageRoiPainter(null, null, ResultsMatchCalculator::getRoiCoordinates);
+        pairPainterRef.set(painter);
+      }
+
+      // Update the painter
+      painter.setTextPanel(pairsWindow.getTextPanel());
+      painter.setTitle(title);
+    }
+  }
+
+  @Nullable
+  private static double[] getRoiCoordinates(String line) {
+    // Extract the startT and x,y coordinates from the first available point in the pair
+    final int[] index = {1, 4};
+    final String[] fields = line.split("\t");
+    final int startT = Integer.parseInt(fields[0]);
+    for (final int i : index) {
+      if (i < fields.length) {
+        if (fields[i].equals("-")) {
+          continue;
+        }
+        final double x = Double.parseDouble(fields[i]);
+        final double y = Double.parseDouble(fields[i + 1]);
+        return new double[] {startT, x, y};
+      }
+    }
+    return null;
   }
 
   private static TIntHashSet getIds(MemoryPeakResults results) {
@@ -729,6 +850,63 @@ public class ResultsMatchCalculator implements PlugIn {
       d[index++] = pair.getXyDistanceSquared();
     }
     return d;
+  }
+
+  private void savePairs(MemoryPeakResults results1, MemoryPeakResults results2,
+      List<PointPair> allMatches) {
+    if (!settings.savePairs) {
+      return;
+    }
+
+    // Get the directory
+    final String directory = ImageJUtils.getDirectory("Pairs_directory", settings.pairsDirectory);
+    if (directory == null) {
+      return;
+    }
+    settings.pairsDirectory = directory;
+    settings.save();
+
+    final double[] distanceThresholds =
+        getDistances(settings.distanceThreshold, settings.increments, settings.delta);
+    // Create output files for each distance band
+    final PeakResults[] output1 = new PeakResults[distanceThresholds.length];
+    final PeakResults[] output2 = new PeakResults[distanceThresholds.length];
+    double high = 0;
+    for (int i = 0; i < distanceThresholds.length; i++) {
+      final double low = high;
+      high = distanceThresholds[i];
+      output1[i] = createFilePeakResults(directory, results1, low, high);
+      output2[i] = createFilePeakResults(directory, results2, low, high);
+    }
+
+    // Square the thresholds
+    SimpleArrayUtils.apply(distanceThresholds, v -> v * v);
+    final double[] pairDistances = getPairDistances(allMatches);
+    int index = 0;
+    for (final PointPair pair : allMatches) {
+      final int insert = search(distanceThresholds, pairDistances[index++]);
+      if (insert != -1) {
+        final PeakResult r1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
+        final PeakResult r2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
+        output1[insert].add(r1);
+        output2[insert].add(r2);
+      }
+    }
+
+    for (int i = 0; i < output1.length; i++) {
+      output1[i].end();
+      output2[i].end();
+    }
+  }
+
+  private static int search(double[] distanceThresholds, double distanceSquared) {
+    for (int i = 0; i < distanceThresholds.length; i++) {
+      if (distanceSquared <= distanceThresholds[i]) {
+        return i;
+      }
+    }
+    // This should not happen since all pairs should be under the max distance threshold
+    return -1;
   }
 
   /**

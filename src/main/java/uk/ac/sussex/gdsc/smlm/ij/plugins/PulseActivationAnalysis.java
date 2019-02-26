@@ -34,6 +34,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListen
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -81,10 +82,14 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.UnitSphereSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
@@ -153,13 +158,13 @@ public class PulseActivationAnalysis
   private static double nonSpecificCorrectionCutoff = 50;
 
   // Simulation settings
-  private RandomDataGenerator rdg;
+  private UniformRandomProvider rng;
 
-  private RandomDataGenerator getRandomDataGenerator() {
-    if (rdg == null) {
-      rdg = new RandomDataGenerator(new Well19937c());
+  private UniformRandomProvider getUniformRandomProvider() {
+    if (rng == null) {
+      rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
     }
-    return rdg;
+    return rng;
   }
 
   private static int[] sim_numberOfMolecules = {1000, 1000, 1000};
@@ -265,7 +270,7 @@ public class PulseActivationAnalysis
       return new float[] {x, y};
     }
 
-    abstract float[] sample(RandomGenerator rand);
+    abstract float[] sample(UniformRandomProvider rng);
   }
 
   private class Point extends Shape {
@@ -287,7 +292,7 @@ public class PulseActivationAnalysis
     }
 
     @Override
-    float[] sample(RandomGenerator rand) {
+    float[] sample(UniformRandomProvider rng) {
       throw new NotImplementedException();
     }
   }
@@ -315,8 +320,8 @@ public class PulseActivationAnalysis
     }
 
     @Override
-    float[] sample(RandomGenerator rand) {
-      final float p = (float) (-radius + rand.nextDouble() * length);
+    float[] sample(UniformRandomProvider rng) {
+      final float p = (float) (-radius + rng.nextDouble() * length);
       return new float[] {sina * p + x, cosa * p + y};
     }
   }
@@ -330,8 +335,8 @@ public class PulseActivationAnalysis
     }
 
     @Override
-    float[] sample(RandomGenerator rand) {
-      final double[] v = new UnitSphereRandomVectorGenerator(2, rand).nextVector();
+    float[] sample(UniformRandomProvider rng) {
+      final double[] v = new UnitSphereSampler(2, rng).nextVector();
       return new float[] {(float) (v[0] * radius + x), (float) (v[1] * radius + y)};
     }
   }
@@ -1838,7 +1843,7 @@ public class PulseActivationAnalysis
     }
 
     final long start = System.currentTimeMillis();
-    final RandomDataGenerator rdg = getRandomDataGenerator();
+    final UniformRandomProvider rng = getUniformRandomProvider();
 
     // Draw the molecule positions
     ImageJUtils.showStatus("Simulating molecules ...");
@@ -1847,7 +1852,7 @@ public class PulseActivationAnalysis
     final Calibration calibration = CalibrationHelper.create(sim_nmPerPixel, 1, 100);
     final Rectangle bounds = new Rectangle(0, 0, sim_size, sim_size);
     for (int c = 0; c < 3; c++) {
-      molecules[c] = simulateMolecules(rdg, c);
+      molecules[c] = simulateMolecules(rng, c);
 
       // Create a dataset to store the activations
       final MemoryPeakResults r = new MemoryPeakResults();
@@ -1860,7 +1865,7 @@ public class PulseActivationAnalysis
     // Simulate activation
     ImageJUtils.showStatus("Simulating activations ...");
     for (int c = 0; c < 3; c++) {
-      simulateActivations(rdg, molecules, c, results);
+      simulateActivations(rng, molecules, c, results);
     }
 
     // Combine
@@ -1903,7 +1908,7 @@ public class PulseActivationAnalysis
         "Simulation complete: " + TextUtils.millisToString(System.currentTimeMillis() - start));
   }
 
-  private float[][] simulateMolecules(RandomDataGenerator rdg, int channel) {
+  private float[][] simulateMolecules(UniformRandomProvider rng, int channel) {
     final int n = sim_numberOfMolecules[channel];
     final float[][] molecules = new float[n][];
     if (n == 0) {
@@ -1911,17 +1916,16 @@ public class PulseActivationAnalysis
     }
 
     // Draw the shapes
-    final Shape[] shapes = createShapes(rdg, channel);
+    final Shape[] shapes = createShapes(rng, channel);
 
     // Sample positions from within the shapes
     final boolean canSample = shapes[0].canSample();
-    final RandomGenerator rand = rdg.getRandomGenerator();
     int count = 0;
     while (count < n) {
       float[] coords;
       if (canSample) {
-        final int next = rand.nextInt(shapes.length);
-        coords = shapes[next].sample(rand);
+        final int next = rng.nextInt(shapes.length);
+        coords = shapes[next].sample(rng);
       } else {
         coords = shapes[count % shapes.length].getPosition();
       }
@@ -1935,8 +1939,7 @@ public class PulseActivationAnalysis
     return molecules;
   }
 
-  private Shape[] createShapes(RandomDataGenerator rdg, int channel) {
-    final RandomGenerator rand = rdg.getRandomGenerator();
+  private Shape[] createShapes(UniformRandomProvider rng, int channel) {
     Shape[] shapes;
     final double min = sim_size / 20;
     final double max = sim_size / 10;
@@ -1945,9 +1948,9 @@ public class PulseActivationAnalysis
       case CIRCLE:
         shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
-          final float x = nextCoordinate(rand);
-          final float y = nextCoordinate(rand);
-          final double radius = rand.nextDouble() * range + min;
+          final float x = nextCoordinate(rng);
+          final float y = nextCoordinate(rng);
+          final double radius = rng.nextDouble() * range + min;
           shapes[i] = new Circle(x, y, radius);
         }
         break;
@@ -1955,10 +1958,10 @@ public class PulseActivationAnalysis
       case LINE:
         shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
-          final float x = nextCoordinate(rand);
-          final float y = nextCoordinate(rand);
-          final double angle = rand.nextDouble() * Math.PI;
-          final double radius = rand.nextDouble() * range + min;
+          final float x = nextCoordinate(rng);
+          final float y = nextCoordinate(rng);
+          final double angle = rng.nextDouble() * Math.PI;
+          final double radius = rng.nextDouble() * range + min;
           shapes[i] = new Line(x, y, angle, radius);
         }
 
@@ -1968,23 +1971,23 @@ public class PulseActivationAnalysis
       default:
         shapes = new Shape[sim_numberOfMolecules[channel]];
         for (int i = 0; i < shapes.length; i++) {
-          final float x = nextCoordinate(rand);
-          final float y = nextCoordinate(rand);
+          final float x = nextCoordinate(rng);
+          final float y = nextCoordinate(rng);
           shapes[i] = new Point(x, y);
         }
     }
     return shapes;
   }
 
-  private static float nextCoordinate(RandomGenerator rand) {
-    return (float) rand.nextDouble() * sim_size;
+  private static float nextCoordinate(UniformRandomProvider rng) {
+    return (float) rng.nextDouble() * sim_size;
   }
 
   private static boolean outOfBounds(float value) {
     return value < 0 || value > sim_size;
   }
 
-  private void simulateActivations(RandomDataGenerator rdg, float[][][] molecules, int channel,
+  private void simulateActivations(UniformRandomProvider rng, float[][][] molecules, int channel,
       MemoryPeakResults[] results) {
     final int n = molecules[channel].length;
     if (n == 0) {
@@ -2033,8 +2036,8 @@ public class PulseActivationAnalysis
     // Assume 10 frames after each channel pulse => 30 frames per cycle
     final double precision = sim_precision[channel] / sim_nmPerPixel;
 
-    final RandomGenerator rand = rdg.getRandomGenerator();
     final BinomialDistribution[] bd = new BinomialDistribution[4];
+    final RandomGenerator rand = new RandomGeneratorAdapter(rng);
     for (int i = 0; i < 3; i++) {
       bd[i] = createBinomialDistribution(rand, n, p0[i]);
     }
@@ -2054,15 +2057,15 @@ public class PulseActivationAnalysis
 
     for (int i = 0, t = 1; i < sim_cycles; i++, t += 30) {
       count[0] +=
-          simulateActivations(rdg, bd[0], molecules[channel], results[channel], t, precision);
+          simulateActivations(rng, bd[0], molecules[channel], results[channel], t, precision);
       count[1] +=
-          simulateActivations(rdg, bd[1], molecules[channel], results[channel], t + 10, precision);
+          simulateActivations(rng, bd[1], molecules[channel], results[channel], t + 10, precision);
       count[2] +=
-          simulateActivations(rdg, bd[2], molecules[channel], results[channel], t + 20, precision);
+          simulateActivations(rng, bd[2], molecules[channel], results[channel], t + 20, precision);
       // Add non-specific activations
       if (bd[3] != null) {
         for (final int t2 : frames) {
-          simulateActivations(rdg, bd[3], molecules[channel], results[channel], t2, precision);
+          simulateActivations(rng, bd[3], molecules[channel], results[channel], t2, precision);
         }
       }
     }
@@ -2074,7 +2077,7 @@ public class PulseActivationAnalysis
         MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
   }
 
-  private int simulateActivations(RandomDataGenerator rdg, BinomialDistribution bd,
+  private int simulateActivations(UniformRandomProvider rng, BinomialDistribution bd,
       float[][] molecules, MemoryPeakResults results, int time, double precision) {
     if (bd == null) {
       return 0;
@@ -2082,18 +2085,18 @@ public class PulseActivationAnalysis
     final int size = molecules.length;
     int numberOfSamples = bd.sample();
     // Sample
-    final RandomGenerator rand = rdg.getRandomGenerator();
-    final int[] samples = RandomUtils.sample(numberOfSamples, size, rand);
+    final NormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
+    final int[] samples = RandomUtils.sample(numberOfSamples, size, rng);
     for (int index : samples) {
       final float[] xy = molecules[index];
       float x;
       float y;
       do {
-        x = (float) (xy[0] + rand.nextGaussian() * precision);
+        x = (float) (xy[0] + gauss.sample() * precision);
       }
       while (outOfBounds(x));
       do {
-        y = (float) (xy[1] + rand.nextGaussian() * precision);
+        y = (float) (xy[1] + gauss.sample() * precision);
       }
       while (outOfBounds(y));
 
@@ -2126,9 +2129,11 @@ public class PulseActivationAnalysis
 
     // Random crosstalk if not set
     if (MathUtils.max(ct) == 0) {
-      final RandomDataGenerator rdg = getRandomDataGenerator();
+      // Have some crosstalk
+      final ContinuousUniformSampler sampler =
+          new ContinuousUniformSampler(getUniformRandomProvider(), 0.05, 0.15);
       for (int i = 0; i < ct.length; i++) {
-        ct[i] = rdg.nextUniform(0.05, 0.15); // Have some crosstalk
+        ct[i] = sampler.sample();
       }
     }
 
