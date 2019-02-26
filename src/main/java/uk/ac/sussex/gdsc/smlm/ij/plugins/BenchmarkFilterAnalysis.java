@@ -2352,9 +2352,9 @@ public class BenchmarkFilterAnalysis
         // The delta effects the step size for the Genetic Algorithm
         evolveSetting *= delta;
       }
-      final SettingsList settings = new SettingsList(filterSets, resultsList, failCount, residualsThreshold,
-          duplicateDistance, duplicateDistanceAbsolute, plotTopN, summaryDepth, criteriaIndex,
-          criteriaLimit, scoreIndex, evolveSetting);
+      final SettingsList settings = new SettingsList(filterSets, resultsList, failCount,
+          residualsThreshold, duplicateDistance, duplicateDistanceAbsolute, plotTopN, summaryDepth,
+          criteriaIndex, criteriaLimit, scoreIndex, evolveSetting);
 
       final boolean equalSettings = settings.equals(lastAnalyseSettings);
 

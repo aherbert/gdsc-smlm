@@ -1695,10 +1695,11 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     if (batchMode) {
       // Clear the cached results if the setting changed
-      final SettingsList settings = new SettingsList(simulationParameters.id, filterRelativeDistances,
-          // search, maxSearch, // Ignore search distance for smart caching
-          border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod,
-          upperDistance, lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
+      final SettingsList settings =
+          new SettingsList(simulationParameters.id, filterRelativeDistances,
+              // search, maxSearch, // Ignore search distance for smart caching
+              border, scoreRelativeDistances, sAnalysisBorder, hardBorder, matchingMethod,
+              upperDistance, lowerDistance, upperSignalFactor, lowerSignalFactor, recallFraction);
       if (!settings.equals(batchSettings)) {
         cachedBatchResults.clear();
       }

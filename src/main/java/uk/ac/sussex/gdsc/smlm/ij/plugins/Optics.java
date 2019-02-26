@@ -2108,7 +2108,8 @@ public class Optics implements PlugIn {
 
       if (!clusteringResult.isValid()) {
         clearCache(true);
-        return new Pair<>(settings, new SettingsList(results, opticsManager, clusteringResult, image));
+        return new Pair<>(settings,
+            new SettingsList(results, opticsManager, clusteringResult, image));
       }
 
       final ImageMode mode = ImageMode.get(settings.getImageMode());
@@ -2388,7 +2389,8 @@ public class Optics implements PlugIn {
         imp.setOverlay(overlay);
       }
 
-      return new Pair<>(settings, new SettingsList(results, opticsManager, clusteringResult, image));
+      return new Pair<>(settings,
+          new SettingsList(results, opticsManager, clusteringResult, image));
     }
 
     private Roi createRoi(ConvexHull hull, boolean forcePolygon) {

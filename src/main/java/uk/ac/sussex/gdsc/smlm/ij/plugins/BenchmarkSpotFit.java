@@ -1348,8 +1348,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
     final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
-    final SettingsList settings = new SettingsList(BenchmarkSpotFilter.filterResult.id, fractionPositives,
-        fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
+    final SettingsList settings = new SettingsList(BenchmarkSpotFilter.filterResult.id,
+        fractionPositives, fractionNegativesAfterAllPositives, negativesAfterAllPositives, width);
     if (refresh || !settings.equals(lastSettings)) {
       filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults, width);
       lastSettings = settings;
