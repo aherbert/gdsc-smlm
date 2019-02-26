@@ -34,6 +34,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({"javadoc"})
@@ -47,11 +48,11 @@ public class ErfGaussian2DFunctionVsPsfModelTest {
     for (int i = 0; i < 10; i++) {
       //@formatter:off
       computesSameAsPsfModel(
-          nextUniform(rng,50, 100),
-          nextUniform(rng,(width-1)/2.0, (width+1)/2.0),
-          nextUniform(rng,(height-1)/2.0, (height+1)/2.0),
-          nextUniform(rng,0.5, 2),
-          nextUniform(rng,0.5, 2));
+          nextUniform(rng, 50, 100),
+          nextUniform(rng, (width-1)/2.0, (width+1)/2.0),
+          nextUniform(rng, (height-1)/2.0, (height+1)/2.0),
+          nextUniform(rng, 0.5, 2),
+          nextUniform(rng, 0.5, 2));
       //@formatter:on
     }
   }
@@ -92,6 +93,6 @@ public class ErfGaussian2DFunctionVsPsfModelTest {
   }
 
   private static double nextUniform(UniformRandomProvider rng, double min, double max) {
-    return uk.ac.sussex.gdsc.core.utils.rng.RngUtils.nextDouble(rng, min, max);
+    return new ContinuousUniformSampler(rng, min, max).sample();
   }
 }
