@@ -260,7 +260,7 @@ public class TraceLengthAnalysis implements PlugIn {
     // Find the index in the MSD array
     int index = Arrays.binarySearch(msds, lastMsdThreshold);
     if (index < 0) {
-      index = -index - 1;
+      index = -(index + 1);
     }
     lastIndex = index;
 
