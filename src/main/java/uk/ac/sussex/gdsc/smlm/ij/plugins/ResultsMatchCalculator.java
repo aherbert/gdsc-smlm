@@ -74,9 +74,6 @@ import java.util.stream.Stream;
 public class ResultsMatchCalculator implements PlugIn {
   private static final String TITLE = "Results Match Calculator";
 
-  /** The plugin settings. */
-  private Settings settings;
-
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
   private static AtomicReference<TextWindow> pairsWindowRef = new AtomicReference<>();
 
@@ -88,6 +85,9 @@ public class ResultsMatchCalculator implements PlugIn {
 
   /** The rounder for the text output. */
   private static final Rounder rounder = RounderUtils.create(4);
+
+  /** The plugin settings. */
+  private Settings settings;
 
   /**
    * Specify the method used to convert a {@link PeakResult} into coordinates for matching.
@@ -165,7 +165,6 @@ public class ResultsMatchCalculator implements PlugIn {
     }
   }
 
-
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
@@ -232,7 +231,6 @@ public class ResultsMatchCalculator implements PlugIn {
       lastSettings.set(this);
     }
   }
-
 
   /**
    * A point that holds a reference to a PeakResult.
