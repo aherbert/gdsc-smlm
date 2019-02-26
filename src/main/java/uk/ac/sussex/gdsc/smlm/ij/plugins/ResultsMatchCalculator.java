@@ -66,6 +66,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.
@@ -89,6 +90,83 @@ public class ResultsMatchCalculator implements PlugIn {
   private static final Rounder rounder = RounderUtils.create(4);
 
   /**
+   * Specify the method used to convert a {@link PeakResult} into coordinates for matching.
+   */
+  public enum CoordinateMethod {
+    /**
+     * Create coordinates in each frame from the {@link PeakResult}.
+     */
+    ALL("All"),
+    /**
+     * Create coordinates in the first frame from the {@link PeakResult}.
+     */
+    FIRST_FRAME("First frame"),
+    /**
+     * Create coordinates in the last frame from the {@link PeakResult}.
+     */
+    LAST_FRAME("Last frame");
+
+    private static final CoordinateMethod[] values = CoordinateMethod.values();
+
+    /** The description. */
+    private final String description;
+
+    private CoordinateMethod(String description) {
+      this.description = description;
+    }
+
+    /**
+     * Gets the description.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+      return description;
+    }
+
+    /**
+     * Get the method from the description.
+     *
+     * @param description the description
+     * @return the coordinate method (or null)
+     */
+    public static CoordinateMethod fromDescription(String description) {
+      return fromDescription(description, null);
+    }
+
+    /**
+     * Get the method from the description.
+     *
+     * @param description the description
+     * @param defaultValue the default value
+     * @return the coordinate method
+     */
+    public static CoordinateMethod fromDescription(String description,
+        CoordinateMethod defaultValue) {
+      for (CoordinateMethod value : values) {
+        if (value.description.equals(description)) {
+          return value;
+        }
+      }
+      return defaultValue;
+    }
+  }
+
+  /**
+   * Lazy load the description for the dialog.
+   */
+  private static class CoordinateMethodDescriptions {
+    /** The descriptions. */
+    static final String[] descriptions;
+
+    static {
+      descriptions =
+          Stream.of(CoordinateMethod.values()).map(m -> m.getDescription()).toArray(String[]::new);
+    }
+  }
+
+
+  /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
@@ -98,6 +176,8 @@ public class ResultsMatchCalculator implements PlugIn {
 
     String inputOption1 = "";
     String inputOption2 = "";
+    CoordinateMethod coordinateMethod1 = CoordinateMethod.ALL;
+    CoordinateMethod coordinateMethod2 = CoordinateMethod.ALL;
     double distanceThreshold = 0.5;
     int increments = 5;
     double delta = 0.1;
@@ -117,6 +197,8 @@ public class ResultsMatchCalculator implements PlugIn {
     Settings(Settings source) {
       this.inputOption1 = source.inputOption1;
       this.inputOption2 = source.inputOption2;
+      this.coordinateMethod1 = source.coordinateMethod1;
+      this.coordinateMethod2 = source.coordinateMethod2;
       this.distanceThreshold = source.distanceThreshold;
       this.increments = source.increments;
       this.delta = source.delta;
@@ -150,6 +232,7 @@ public class ResultsMatchCalculator implements PlugIn {
       lastSettings.set(this);
     }
   }
+
 
   /**
    * A point that holds a reference to a PeakResult.
@@ -209,6 +292,7 @@ public class ResultsMatchCalculator implements PlugIn {
     public int hashCode() {
       return Arrays.hashCode(new int[] {super.hashCode(), time, Objects.hashCode(peakResult)});
     }
+
   }
 
   @Override
@@ -257,6 +341,10 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
     ResultsManager.addInput(gd, "Results1", settings.inputOption1, InputSource.MEMORY);
     ResultsManager.addInput(gd, "Results2", settings.inputOption2, InputSource.MEMORY);
+    gd.addChoice("Coordinate_method1", CoordinateMethodDescriptions.descriptions,
+        settings.coordinateMethod1.getDescription());
+    gd.addChoice("Coordinate_method2", CoordinateMethodDescriptions.descriptions,
+        settings.coordinateMethod2.getDescription());
     gd.addNumericField("Distance", settings.distanceThreshold, 2);
 
     gd.addSlider("Increments", 0, 10, settings.increments);
@@ -276,6 +364,10 @@ public class ResultsMatchCalculator implements PlugIn {
 
     settings.inputOption1 = gd.getNextChoice();
     settings.inputOption2 = gd.getNextChoice();
+    settings.coordinateMethod1 =
+        CoordinateMethod.fromDescription(gd.getNextChoice(), CoordinateMethod.ALL);
+    settings.coordinateMethod2 =
+        CoordinateMethod.fromDescription(gd.getNextChoice(), CoordinateMethod.ALL);
     settings.distanceThreshold = gd.getNextNumber();
     settings.increments = (int) gd.getNextNumber();
     settings.delta = gd.getNextNumber();
@@ -318,8 +410,10 @@ public class ResultsMatchCalculator implements PlugIn {
     final double maxDistance = settings.distanceThreshold + settings.increments * settings.delta;
 
     // Divide the results into time points
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
-    final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
+    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates =
+        getCoordinates(results1, settings.coordinateMethod1);
+    final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates =
+        getCoordinates(results2, settings.coordinateMethod2);
 
     int n1 = 0;
     int n2 = 0;
@@ -562,8 +656,21 @@ public class ResultsMatchCalculator implements PlugIn {
    * @return the coordinates
    */
   public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results) {
-    return getCoordinates(results, false);
+    return getCoordinates(results, CoordinateMethod.ALL, false);
   }
+
+  /**
+   * Build a map between the peak id (time point) and a list of coordinates.
+   *
+   * @param results the results
+   * @param coordinateMethod the coordinate method
+   * @return the coordinates
+   */
+  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+      CoordinateMethod coordinateMethod) {
+    return getCoordinates(results, coordinateMethod, false);
+  }
+
 
   /**
    * Build a map between the peak id (time point) and a list of coordinates.
@@ -574,6 +681,19 @@ public class ResultsMatchCalculator implements PlugIn {
    */
   public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
       final boolean integerCoordinates) {
+    return getCoordinates(results, CoordinateMethod.ALL, integerCoordinates);
+  }
+
+  /**
+   * Build a map between the peak id (time point) and a list of coordinates.
+   *
+   * @param results the results
+   * @param coordinateMethod the coordinate method
+   * @param integerCoordinates True if the values should be rounded down to integers
+   * @return the coordinates
+   */
+  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+      CoordinateMethod coordinateMethod, final boolean integerCoordinates) {
     final TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
@@ -603,8 +723,10 @@ public class ResultsMatchCalculator implements PlugIn {
           y = result.getYPosition();
           z = result.getZPosition();
         }
-        for (int t = result.getFrame() - minT, i = result.getEndFrame() - result.getFrame() + 1;
-            i-- > 0; t++) {
+
+        final int startFrame = getStartFrame(result, coordinateMethod);
+        final int endFrame = getEndFrame(result, coordinateMethod);
+        for (int t = startFrame - minT, i = endFrame - startFrame + 1; i-- > 0; t++) {
           tmpCoords.get(t).add(new PeakResultPoint(t + minT, x, y, z, result));
         }
       });
@@ -632,6 +754,20 @@ public class ResultsMatchCalculator implements PlugIn {
       return tmp.toArray(new Coordinate[tmp.size()]);
     }
     return new Coordinate[0];
+  }
+
+  private static int getStartFrame(PeakResult result, CoordinateMethod coordinateMethod) {
+    if (coordinateMethod == CoordinateMethod.LAST_FRAME) {
+      return result.getEndFrame();
+    }
+    return result.getFrame();
+  }
+
+  private static int getEndFrame(PeakResult result, CoordinateMethod coordinateMethod) {
+    if (coordinateMethod == CoordinateMethod.FIRST_FRAME) {
+      return result.getFrame();
+    }
+    return result.getEndFrame();
   }
 
   /**
