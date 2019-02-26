@@ -441,10 +441,12 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     if (trace.size() > 0) {
       final float[] centroid = trace.getCentroid();
       writeResult(0,
-          String.format("#Trace %f %f (+/-%f) n=%d, b=%d, on=%f, off=%f, signal= %f%n",
+          String.format(
+              "#Trace %f %f (+/-%f) start=%d, end=%d, n=%d, b=%d, on=%f, off=%f, signal= %f%n",
               converters[PeakResult.X].convert(centroid[0]),
               converters[PeakResult.X].convert(centroid[1]),
-              converters[PeakResult.X].convert(trace.getStandardDeviation()), trace.size(),
+              converters[PeakResult.X].convert(trace.getStandardDeviation()),
+              trace.getHead().getFrame(), trace.getTail().getEndFrame(), trace.size(),
               trace.getBlinks(), trace.getOnTime(), trace.getOffTime(),
               converters[PeakResult.INTENSITY].convert(trace.getSignal())));
       addAll(trace);
