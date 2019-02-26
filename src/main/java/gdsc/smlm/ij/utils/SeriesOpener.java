@@ -20,7 +20,7 @@ import java.awt.event.TextEvent;
 import java.io.File;
 import java.util.Arrays;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -152,9 +152,9 @@ public class SeriesOpener
 		//System.out.printf("Opening %s %s\n", path, filename);
 		Opener opener = new Opener();
 		opener.setSilentMode(true);
-		Utils.setShowProgress(false);
+		ImageJUtils.setShowProgress(false);
 		ImagePlus imp = opener.openImage(path, filename);
-		Utils.setShowProgress(true);
+		ImageJUtils.setShowProgress(true);
 		if (imp != null)
 		{
 			// Initialise dimensions using first image 

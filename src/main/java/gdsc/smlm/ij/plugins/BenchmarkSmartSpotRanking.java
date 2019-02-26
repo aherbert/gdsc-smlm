@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
@@ -256,7 +256,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -495,7 +495,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
@@ -656,7 +656,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 	{
 		if (++progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
@@ -707,7 +707,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		// Process the frames
 		totalProgress = filterCandidates.size();
-		stepProgress = Utils.getProgressInterval(totalProgress);
+		stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int i : filterCandidates.keySet())
 		{
@@ -735,7 +735,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 
 		IJ.showProgress(1);
 
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			IJ.showStatus("Aborted");
 			return;
@@ -1020,7 +1020,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn
 				add(sb, compactBins);
 			add(sb, s.getMean());
 			add(sb, s.getStandardDeviation());
-			add(sb, Utils.timeToString(time / 1e6));
+			add(sb, ImageJUtils.timeToString(time / 1e6));
 
 			// TP are all accepted candidates that can be matched to a spot
 			// FP are all accepted candidates that cannot be matched to a spot

@@ -26,7 +26,7 @@ import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.BinaryFilePeakResults;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ExtendedPeakResult;
@@ -424,7 +424,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		gd.addCheckbox("Results_in_memory (file input only)", resultsSettings.resultsInMemory);
 
 		// Dialog to allow double click to select files using a file chooser
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			text1 = (TextField) gd.getStringFields().get(0);
 			text2 = (TextField) gd.getStringFields().get(1);
@@ -916,7 +916,7 @@ public class ResultsManager implements PlugIn, MouseListener
 		if (e.getClickCount() > 1) // Double-click
 		{
 			TextField text = (e.getSource() == text1) ? text1 : text2;
-			String[] path = Utils.decodePath(text.getText());
+			String[] path = ImageJUtils.decodePath(text.getText());
 			OpenDialog chooser = new OpenDialog("Coordinate file", path[0], path[1]);
 			if (chooser.getFileName() != null)
 			{

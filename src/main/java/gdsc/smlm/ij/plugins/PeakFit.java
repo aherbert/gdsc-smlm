@@ -28,7 +28,7 @@ import javax.swing.JFileChooser;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJLogger;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.logging.Logger;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -90,7 +90,7 @@ import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
 import gdsc.smlm.results.PeakResultsList;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -248,7 +248,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		plugin_flags = FLAGS;
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 
 		maximaIdentification = (arg != null && arg.contains("spot"));
 		fitMaxima = (arg != null && arg.contains("maxima"));
@@ -586,7 +586,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		//	cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
 		//}
 		results.setCalibration(cal);
-		results.setConfiguration(XmlUtils.toXML(config));
+		results.setConfiguration(XStreamXmlUtils.toXML(config));
 
 		addMemoryResults(results, false);
 		addImageResults(results);
@@ -603,7 +603,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				if (r instanceof IJImagePeakResults)
 				{
 					ImagePlus i = ((IJImagePeakResults) r).getImagePlus();
-					Utils.log("Super-resolution image title = " + i.getTitle());
+					ImageJUtils.log("Super-resolution image title = " + i.getTitle());
 					WindowManager.toFront(i.getWindow());
 				}
 			}
@@ -649,8 +649,8 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			results.end();
 
-			String textTime = Utils.timeToString(time / 1000000.0);
-			String textRunTime = Utils.timeToString(runTime / 1000000.0);
+			String textTime = ImageJUtils.timeToString(time / 1000000.0);
+			String textRunTime = ImageJUtils.timeToString(runTime / 1000000.0);
 
 			int size = getSize();
 			String message = String.format("%s. Fitting Time = %s. Run time = %s", TextUtils.pleural(size, "localisation"),
@@ -870,7 +870,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		}
 
 		// Add a mouse listener to the config file field
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
@@ -1074,7 +1074,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 	private void log(String format, Object... args)
 	{
 		if (!silent)
-			Utils.log(format, args);
+			ImageJUtils.log(format, args);
 	}
 
 	private int showSimpleDialog(final String filename)
@@ -1145,10 +1145,10 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		IJ.log("-=-=-=-");
 		IJ.log("Peak Fit");
 		IJ.log("-=-=-=-");
-		Utils.log("Pixel pitch = %s", MathUtils.rounded(calibration.nmPerPixel, 4));
-		Utils.log("Exposure Time = %s", MathUtils.rounded(calibration.exposureTime, 4));
-		Utils.log("Gain = %s", MathUtils.rounded(calibration.gain, 4));
-		Utils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
+		ImageJUtils.log("Pixel pitch = %s", MathUtils.rounded(calibration.nmPerPixel, 4));
+		ImageJUtils.log("Exposure Time = %s", MathUtils.rounded(calibration.exposureTime, 4));
+		ImageJUtils.log("Gain = %s", MathUtils.rounded(calibration.gain, 4));
+		ImageJUtils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0(), 4));
 
 		// Save
 		settings.setFitEngineConfiguration(config);
@@ -1297,7 +1297,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Add ability to run the PSF Calculator to get the width
 		gd.addCheckbox("Run_PSF_calculator", false);
 		gd.addNumericField("Gaussian_SD", fitConfig.getInitialPeakStdDev0(), 3);
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);
@@ -2043,7 +2043,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 
-		final int step = Utils.getProgressInterval(totalFrames);
+		final int step = ImageJUtils.getProgressInterval(totalFrames);
 
 		runTime = System.nanoTime();
 		boolean shutdown = false;
@@ -2057,7 +2057,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 
 			if (++slice % step == 0)
 			{
-				if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+				if (ImageJUtils.showStatus("Slice: " + slice + " / " + totalFrames))
 					IJ.showProgress(slice, totalFrames);
 			}
 
@@ -2088,7 +2088,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		runTime = System.nanoTime() - runTime;
 
 		if (showProcessedFrames)
-			Utils.display("Processed frames", stack);
+			ImageJUtils.display("Processed frames", stack);
 
 		showResults();
 
@@ -2221,12 +2221,12 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			IJ.log("-=-=-=-");
 			IJ.log("Peak Fit");
 			IJ.log("-=-=-=-");
-			Utils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0()),
+			ImageJUtils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialPeakStdDev0()),
 					MathUtils.rounded(fitConfig.getInitialPeakStdDev1()));
 			SpotFilter spotFilter = engine.getSpotFilter();
 			IJ.log("Spot Filter = " + spotFilter.getDescription());
 			int w = 2 * engine.getFitting() + 1;
-			Utils.log("Fit window = %d x %d", w, w);
+			ImageJUtils.log("Fit window = %d x %d", w, w);
 			IJ.log("Coordinate shift = " + MathUtils.rounded(config.getFitConfiguration().getCoordinateShift()));
 			IJ.log("Signal strength = " + MathUtils.rounded(fitConfig.getSignalStrength()));
 			if (extraOptions)
@@ -2288,7 +2288,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		// Use the FitEngine to allow multi-threading.
 		FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
 
-		final int step = Utils.getProgressInterval(totalFrames);
+		final int step = ImageJUtils.getProgressInterval(totalFrames);
 
 		runTime = System.nanoTime();
 		boolean shutdown = false;
@@ -2307,7 +2307,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 				}
 				if (slice % step == 0)
 				{
-					if (Utils.showStatus("Slice: " + slice + " / " + totalFrames))
+					if (ImageJUtils.showStatus("Slice: " + slice + " / " + totalFrames))
 						IJ.showProgress(slice, totalFrames);
 				}
 
@@ -2419,7 +2419,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 		{
 			if (e.getSource() == textConfigFile)
 			{
-				String newFilename = Utils.getFilename("Config_File", textConfigFile.getText());
+				String newFilename = ImageJUtils.getFilename("Config_File", textConfigFile.getText());
 				if (newFilename != null)
 				{
 					textConfigFile.setText(newFilename);
@@ -2427,7 +2427,7 @@ public class PeakFit implements PlugInFilter, MouseListener, TextListener, ItemL
 			}
 			else if (e.getSource() == textResultsDirectory)
 			{
-				String directory = Utils.getDirectory("Results_dir", textResultsDirectory.getText());
+				String directory = ImageJUtils.getDirectory("Results_dir", textResultsDirectory.getText());
 				if (directory != null)
 					textResultsDirectory.setText(directory);
 			}

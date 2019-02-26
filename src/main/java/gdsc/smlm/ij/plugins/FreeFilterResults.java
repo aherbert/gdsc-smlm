@@ -1,6 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
@@ -29,7 +31,7 @@ import gdsc.smlm.results.filter.SignalFilter;
 import gdsc.smlm.results.filter.TraceFilter;
 import gdsc.smlm.results.filter.WidthFilter;
 import gdsc.smlm.results.filter.WidthFilter2;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -136,7 +138,7 @@ public class FreeFilterResults implements PlugIn, ItemListener
 		gd.addTextAreas(text, null, 20, 80);
 		gd.addCheckbox("Show_demo_filters", false);
 
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
 			cb.addItemListener(this);

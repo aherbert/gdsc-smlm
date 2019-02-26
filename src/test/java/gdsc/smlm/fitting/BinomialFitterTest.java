@@ -159,7 +159,7 @@ public class BinomialFitterTest
 
 	private void fitBinomial(int n, double p, boolean zeroTruncated, boolean maximumLikelihood, int minN, int maxN)
 	{
-		BinomialFitter bf = new BinomialFitter(null);
+		BinomialFitter bf = new BinomialFitter();
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 		bf.setMaximumLikelihood(maximumLikelihood);
 
@@ -192,7 +192,7 @@ public class BinomialFitterTest
 
 	private void fitBinomialUsing_LSE_Or_MLE(int n, double p, boolean zeroTruncated, int minN, int maxN)
 	{
-		BinomialFitter bf = new BinomialFitter(null);
+		BinomialFitter bf = new BinomialFitter();
 		//BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 
 		log("Fitting (n=%d, p=%f)\n", n, p);

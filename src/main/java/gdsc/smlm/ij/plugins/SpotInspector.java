@@ -18,12 +18,12 @@ import gdsc.smlm.fitting.FitConfiguration;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.results.IJTablePeakResults;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -289,7 +289,7 @@ public class SpotInspector implements PlugIn, MouseListener
 
 		source.close();
 
-		ImagePlus imp = Utils.display(TITLE, spots);
+		ImagePlus imp = ImageJUtils.display(TITLE, spots);
 		imp.setRoi((PointRoi) null);
 
 		// Make bigger		
@@ -302,7 +302,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		// Standard deviation is only needed for the width filtering
 		if (sortOrderIndex != 8)
 			return 0;
-		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
+		FitEngineConfiguration config = (FitEngineConfiguration) XStreamXmlUtils.fromXML(results.getConfiguration());
 		if (config == null || config.getFitConfiguration() == null)
 		{
 			return -1;
@@ -322,7 +322,7 @@ public class SpotInspector implements PlugIn, MouseListener
 			Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
 			plot.setLimits(1, xValues.length, yMin, yMax);
 
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 		}
 	}
 
@@ -331,7 +331,7 @@ public class SpotInspector implements PlugIn, MouseListener
 		if (plotHistogram)
 		{
 			String title = TITLE + " Histogram";
-			Utils.showHistogram(title, new StoredDataStatistics(data), SORT_ORDER[sortOrderIndex], 0,
+			ImageJUtils.showHistogram(title, new StoredDataStatistics(data), SORT_ORDER[sortOrderIndex], 0,
 					(removeOutliers) ? 1 : 0, histogramBins);
 		}
 	}

@@ -21,7 +21,7 @@ import gdsc.smlm.ij.settings.BatchRun;
 import gdsc.smlm.ij.settings.BatchSettings;
 import gdsc.smlm.ij.settings.ParameterSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -325,7 +325,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 					peakFit.run(imp, false);
 
 					IJ.log(String.format("%s : %s : Size %d : Time = %s", imageFilename, settingsFilename,
-							peakFit.getSize(), Utils.timeToString(peakFit.getTime())));
+							peakFit.getSize(), ImageJUtils.timeToString(peakFit.getTime())));
 				}
 				catch (Exception e)
 				{
@@ -406,7 +406,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		gd.addStringField("Config_filename", configFilename);
 		gd.addCheckbox("Create_config_file", false);
 
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			configFilenameText = (TextField) gd.getStringFields().get(0);
 			configFilenameText.setColumns(30);
@@ -467,7 +467,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 				}
 
 				// Save the settings file
-				String[] path = Utils.decodePath(configFilenameText.getText());
+				String[] path = ImageJUtils.decodePath(configFilenameText.getText());
 				OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
 				if (chooser.getFileName() != null)
 				{
@@ -525,7 +525,7 @@ public class BatchPeakFit implements PlugIn, ItemListener, MouseListener
 		{
 			if (e.getSource() == configFilenameText)
 			{
-				String[] path = Utils.decodePath(configFilenameText.getText());
+				String[] path = ImageJUtils.decodePath(configFilenameText.getText());
 				OpenDialog chooser = new OpenDialog("Settings_file", path[0], path[1]);
 				if (chooser.getFileName() != null)
 				{

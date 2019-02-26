@@ -10,7 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.ij.utils.SeriesOpener;
 import gdsc.smlm.results.ImageSource;
@@ -182,7 +182,7 @@ public class SeriesImageSource extends ImageSource
 					// Open the image
 					Opener opener = new Opener();
 					opener.setSilentMode(true);
-					Utils.setShowProgress(false);
+					ImageJUtils.setShowProgress(false);
 					if (logProgress)
 					{
 						long time = System.currentTimeMillis();
@@ -203,7 +203,7 @@ public class SeriesImageSource extends ImageSource
 						//System.out.println(id + ": Opening " + images.get(currentImage));
 						imp = opener.openImage(images.get(currentImage));
 					}
-					Utils.setShowProgress(true);
+					ImageJUtils.setShowProgress(true);
 
 					//System.out.println(id + ": Opened " + images.get(currentImage));
 

@@ -14,7 +14,7 @@ import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.apache.commons.math3.util.MathArrays;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -216,7 +216,7 @@ public class MeanVarianceTest implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
-		if (Utils.isExtraOptions())
+		if (ImageJUtils.isExtraOptions())
 		{
 			ImagePlus imp = WindowManager.getCurrentImage();
 			if (imp.getStackSize() > 1)
@@ -412,7 +412,7 @@ public class MeanVarianceTest implements PlugIn
 		if (singleImage)
 		{
 			StoredDataStatistics stats = (StoredDataStatistics) gainStats;
-			Utils.log(TITLE);
+			ImageJUtils.log(TITLE);
 			if (emMode)
 			{
 				double[] values = stats.getValues();
@@ -426,13 +426,13 @@ public class MeanVarianceTest implements PlugIn
 				String title = TITLE + " Gain vs Frame";
 				Plot2 plot = new Plot2(title, "Slice", "Gain", SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0),
 						stats.getValues());
-				PlotWindow pw = Utils.display(title, plot);
+				PlotWindow pw = ImageJUtils.display(title, plot);
 
 				// Show a histogram
 				String label = String.format("Mean = %s, Median = %s", MathUtils.rounded(stats.getMean()),
 						MathUtils.rounded(stats.getMedian()));
-				int id = Utils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
-				if (Utils.isNewWindow())
+				int id = ImageJUtils.showHistogram(TITLE, stats, "Gain", 0, 1, 100, true, label);
+				if (ImageJUtils.isNewWindow())
 				{
 					Point point = pw.getLocation();
 					point.x = pw.getLocation().x;
@@ -441,21 +441,21 @@ public class MeanVarianceTest implements PlugIn
 				}
 			}
 
-			Utils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
+			ImageJUtils.log("Single-image mode: %s camera", (emMode) ? "EM-CCD" : "Standard");
 			final double gain = stats.getMedian();
 
 			if (emMode)
 			{
 				final double totalGain = gain;
 				final double emGain = totalGain / cameraGain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
-				Utils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
+				ImageJUtils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
+				ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+				ImageJUtils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
 			}
 			else
 			{
 				cameraGain = gain;
-				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
+				ImageJUtils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(cameraGain, 4));
 			}
 		}
 		else
@@ -494,37 +494,37 @@ public class MeanVarianceTest implements PlugIn
 				plot.setColor(Color.red);
 				plot.addPoints(new double[] { mean[0], mean[mean.length - 1] }, new double[] { fitted.value(mean[0]),
 						fitted.value(mean[mean.length - 1]) }, Plot2.LINE);
-				Utils.display(title, plot);
+				ImageJUtils.display(title, plot);
 			}
 
 			final double avBiasNoise = Math.sqrt(noiseStats.getMean());
 
-			Utils.log(TITLE);
-			Utils.log("  Directory = %s", inputDirectory);
-			Utils.log("  Bias = %s +/- %s (ADU)", MathUtils.rounded(bias, 4), MathUtils.rounded(avBiasNoise, 4));
-			Utils.log("  Variance = %s + %s * mean", MathUtils.rounded(best[0], 4), MathUtils.rounded(best[1], 4));
+			ImageJUtils.log(TITLE);
+			ImageJUtils.log("  Directory = %s", inputDirectory);
+			ImageJUtils.log("  Bias = %s +/- %s (ADU)", MathUtils.rounded(bias, 4), MathUtils.rounded(avBiasNoise, 4));
+			ImageJUtils.log("  Variance = %s + %s * mean", MathUtils.rounded(best[0], 4), MathUtils.rounded(best[1], 4));
 			if (emMode)
 			{
 				final double emGain = best[1] / (2 * cameraGain);
 
 				// Noise is standard deviation of the bias image divided by the total gain (in ADU/e-)
 				final double totalGain = emGain * cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(avBiasNoise / totalGain, 4),
+				ImageJUtils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(avBiasNoise / totalGain, 4),
 						MathUtils.rounded(avBiasNoise, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
-				Utils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
-				Utils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
+				ImageJUtils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
+				ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
+				ImageJUtils.log("  Total Gain = %s (ADU/e-)", MathUtils.rounded(totalGain, 4));
 			}
 			else
 			{
 				// Noise is standard deviation of the bias image divided by the gain (in ADU/e-)
 				cameraGain = best[1];
 				final double readNoise = avBiasNoise / cameraGain;
-				Utils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(readNoise, 4),
+				ImageJUtils.log("  Read Noise = %s (e-) [%s (ADU)]", MathUtils.rounded(readNoise, 4),
 						MathUtils.rounded(readNoise * cameraGain, 4));
 
-				Utils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
+				ImageJUtils.log("  Gain = 1 / %s (ADU/e-)", MathUtils.rounded(1 / cameraGain, 4));
 			}
 		}
 		IJ.showStatus("");
@@ -555,7 +555,7 @@ public class MeanVarianceTest implements PlugIn
 			}
 			catch (IllegalArgumentException e)
 			{
-				Utils.log(e.getMessage());
+				ImageJUtils.log(e.getMessage());
 			}
 			c++;
 			imp.close();
@@ -589,7 +589,7 @@ public class MeanVarianceTest implements PlugIn
 			}
 			catch (IllegalArgumentException e)
 			{
-				Utils.log(e.getMessage());
+				ImageJUtils.log(e.getMessage());
 			}
 		}
 		IJ.showProgress(1);

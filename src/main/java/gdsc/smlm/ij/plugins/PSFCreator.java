@@ -23,12 +23,12 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
@@ -58,7 +58,7 @@ import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -280,9 +280,9 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		// try a different smoothing method.
 
 		// For each spot
-		Utils.log(TITLE + ": " + imp.getTitle());
-		Utils.log("Finding spot locations...");
-		Utils.log("  %d spot%s without neighbours within %dpx", spots.length, ((spots.length == 1) ? "" : "s"),
+		ImageJUtils.log(TITLE + ": " + imp.getTitle());
+		ImageJUtils.log("Finding spot locations...");
+		ImageJUtils.log("  %d spot%s without neighbours within %dpx", spots.length, ((spots.length == 1) ? "" : "s"),
 				(boxRadius * 2));
 		StoredDataStatistics averageSd = new StoredDataStatistics();
 		StoredDataStatistics averageA = new StoredDataStatistics();
@@ -302,7 +302,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 			if (results.size() < 5)
 			{
-				Utils.log("  Spot %d: Not enough fit results %d", n, results.size());
+				ImageJUtils.log("  Spot %d: Not enough fit results %d", n, results.size());
 				continue;
 			}
 
@@ -383,7 +383,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 			if (ignoreSpot(n, z, a, smoothA, xCoord, yCoord, sd, newZ, smoothX, smoothY, smoothSd, cx, cy, cz, csd))
 			{
-				Utils.log("  Spot %d was ignored", n);
+				ImageJUtils.log("  Spot %d was ignored", n);
 				continue;
 			}
 
@@ -392,7 +392,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			cz = (int) newZ[maximumIndex];
 			csd = smoothSd[maximumIndex];
 			ca = smoothA[maximumIndex + start];
-			Utils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd, ca);
+			ImageJUtils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd, ca);
 			centres.add(new double[] { cx, cy, cz, csd, n });
 		}
 
@@ -402,14 +402,14 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			imp.setOverlay(null);
 
 			// Hide the amplitude and spot plots
-			Utils.hide(TITLE_AMPLITUDE);
-			Utils.hide(TITLE_PSF_PARAMETERS);
+			ImageJUtils.hide(TITLE_AMPLITUDE);
+			ImageJUtils.hide(TITLE_PSF_PARAMETERS);
 		}
 
 		if (centres.isEmpty())
 		{
 			String msg = "No suitable spots could be identified centres";
-			Utils.log(msg);
+			ImageJUtils.log(msg);
 			IJ.error(TITLE, msg);
 			return;
 		}
@@ -455,7 +455,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			final float b = getBackground(n, spot);
 			if (!subtractBackgroundAndWindow(spot, b, regionBounds.width, regionBounds.height, centre, loess))
 			{
-				Utils.log("  Spot %d was ignored", n);
+				ImageJUtils.log("  Spot %d was ignored", n);
 				continue;
 			}
 
@@ -471,7 +471,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		if (interactiveMode)
 		{
-			Utils.hide(TITLE_INTENSITY);
+			ImageJUtils.hide(TITLE_INTENSITY);
 		}
 
 		IJ.showProgress(1);
@@ -485,12 +485,12 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			return;
 
 		final double avSd = getAverage(averageSd, averageA, 2);
-		Utils.log("  Average background = %.2f, Av. SD = %s px", stats.getMean(), MathUtils.rounded(avSd, 4));
+		ImageJUtils.log("  Average background = %.2f, Av. SD = %s px", stats.getMean(), MathUtils.rounded(avSd, 4));
 
 		normalise(psf, maxz, avSd * magnification, false);
 		IJ.showProgress(1);
 
-		psfImp = Utils.display("PSF", psf);
+		psfImp = ImageJUtils.display("PSF", psf);
 		psfImp.setSlice(maxz);
 		psfImp.resetDisplayRange();
 		psfImp.updateAndDraw();
@@ -520,7 +520,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		plot.setColor(Color.blue);
 		plot.addPoints(slice, com[1], Plot.DOT);
 		plot.addPoints(slice, loess.smooth(slice, com[1]), Plot.LINE);
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 
 		// TODO - Redraw the PSF with drift correction applied. 
 		// This means that the final image should have no drift.
@@ -529,10 +529,10 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		// Add Image properties containing the PSF details
 		final double fwhm = getFWHM(psf, maxz);
-		psfImp.setProperty("Info", XmlUtils.toXML(
+		psfImp.setProperty("Info", XStreamXmlUtils.toXML(
 				new PSFSettings(maxz, nmPerPixel / magnification, nmPerSlice, stats.getN(), fwhm, createNote())));
 
-		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
+		ImageJUtils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, PSF SD = %s nm, FWHM = %s px\n",
 				psfImp.getTitle(), maxz, MathUtils.rounded(nmPerPixel / magnification, 3), MathUtils.rounded(nmPerSlice, 3),
 				stats.getN(), MathUtils.rounded(fittedSd * nmPerPixel, 4), MathUtils.rounded(fwhm));
 
@@ -774,7 +774,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			plot.addLabel(0, 0, String.format("Amplitude = %s (%sx). z = %s nm", MathUtils.rounded(amplitude),
 					MathUtils.rounded(amplitude / maxAmplitude), MathUtils.rounded((slice - zCentre) * nmPerSlice)));
 
-			amplitudeWindow = Utils.display(TITLE_AMPLITUDE, plot);
+			amplitudeWindow = ImageJUtils.display(TITLE_AMPLITUDE, plot);
 		}
 
 		// Show plot of width, X centre, Y centre
@@ -815,7 +815,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			// Check if the window will need to be aligned
 			boolean alignWindows = (WindowManager.getFrame(TITLE_PSF_PARAMETERS) == null);
 
-			PlotWindow psfWindow = Utils.display(TITLE_PSF_PARAMETERS, plot);
+			PlotWindow psfWindow = ImageJUtils.display(TITLE_PSF_PARAMETERS, plot);
 
 			if (alignWindows && psfWindow != null && amplitudeWindow != null)
 			{
@@ -861,7 +861,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			last.add(spot[j]);
 		}
 		float av = (float) ((first.getSum() + last.getSum()) / (first.getN() + last.getN()));
-		Utils.log("  Spot %d Background: First %d = %.2f, Last %d = %.2f, av = %.2f", n, startBackgroundFrames,
+		ImageJUtils.log("  Spot %d Background: First %d = %.2f, Last %d = %.2f, av = %.2f", n, startBackgroundFrames,
 				first.getMean(), endBackgroundFrames, last.getMean(), av);
 		return av;
 	}
@@ -973,8 +973,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		if (interactiveMode)
 		{
-			Utils.hide(TITLE_AMPLITUDE);
-			Utils.hide(TITLE_PSF_PARAMETERS);
+			ImageJUtils.hide(TITLE_AMPLITUDE);
+			ImageJUtils.hide(TITLE_PSF_PARAMETERS);
 
 			final int n = (int) centre[4];
 
@@ -987,7 +987,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			plot.drawLine(centre[2], limits[0], centre[2], limits[1]);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, "Spot " + n);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 
 			GenericDialog gd = new GenericDialog(TITLE);
 			gd.enableYesNoCancel();
@@ -1050,7 +1050,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 			{
 				public void run()
 				{
-					if (Utils.isInterrupted())
+					if (ImageJUtils.isInterrupted())
 						return;
 
 					incrementProgress(increment);
@@ -1122,13 +1122,13 @@ public class PSFCreator implements PlugInFilter, ItemListener
 				}
 			}));
 
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 				break;
 		}
 
-		Utils.waitForCompletion(futures);
+		ImageJUtils.waitForCompletion(futures);
 
-		return !Utils.isInterrupted();
+		return !ImageJUtils.isInterrupted();
 	}
 
 	private static double[] calculateCenterOfMass(FloatProcessor fp)
@@ -1390,7 +1390,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		if (radius < 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1()))
 		{
 			radius = 5 * FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
-			Utils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", MathUtils.rounded(radius));
+			ImageJUtils.log("Radius is less than 5 * PSF standard deviation, increasing to %s", MathUtils.rounded(radius));
 		}
 		boxRadius = (int) Math.ceil(radius);
 	}
@@ -1506,8 +1506,8 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		// is not appropriate for a normalised PSF. 
 		if (fitConfig.getFitSolver() == FitSolver.MLE)
 		{
-			Utils.log("  Maximum Likelihood Estimation (MLE) is not appropriate for final PSF fitting.");
-			Utils.log("  Switching to Least Square Estimation");
+			ImageJUtils.log("  Maximum Likelihood Estimation (MLE) is not appropriate for final PSF fitting.");
+			ImageJUtils.log("  Switching to Least Square Estimation");
 			fitConfig.setFitSolver(FitSolver.LVM);
 			if (interactiveMode)
 			{
@@ -1534,7 +1534,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 		if (results.size() < 5)
 		{
-			Utils.log("  Final PSF: Not enough fit results %d", results.size());
+			ImageJUtils.log("  Final PSF: Not enough fit results %d", results.size());
 			return 0;
 		}
 
@@ -1913,7 +1913,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		plot.setColor(Color.green);
 		plot.drawLine(slice, signalLimits[0], slice, signalLimits[1]);
 		plot.setColor(Color.blue);
-		PlotWindow plotWindow = Utils.display(signalTitle, plot);
+		PlotWindow plotWindow = ImageJUtils.display(signalTitle, plot);
 
 		if (alignWindows && plotWindow != null)
 		{
@@ -2009,7 +2009,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 
 			// Sort
 			int[] indices = SimpleArrayUtils.newArray(d.length, 0, 1);
-			Sort.sort(indices, d, true);
+			SortUtils.sort(indices, d, true);
 
 			// The sort is made in descending order so invert
 			SimpleArrayUtils.reverse(indices);
@@ -2089,7 +2089,7 @@ public class PSFCreator implements PlugInFilter, ItemListener
 		plot.setColor(Color.green);
 		plot.drawLine(distanceThreshold, 0, distanceThreshold, maxCumulativeSignal);
 		plot.setColor(Color.blue);
-		PlotWindow plotWindow = Utils.display(title, plot);
+		PlotWindow plotWindow = ImageJUtils.display(title, plot);
 
 		if (alignWindows && plotWindow != null)
 		{

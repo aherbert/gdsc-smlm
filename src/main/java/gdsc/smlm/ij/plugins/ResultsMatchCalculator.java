@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
@@ -276,7 +276,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 		if (!java.awt.GraphicsEnvironment.isHeadless())
 		{
 			String header = createResultsHeader(doIdAnalysis);
-			Utils.refreshHeadings(resultsWindow, header, true);
+			ImageJUtils.refreshHeadings(resultsWindow, header, true);
 
 			if (showTable && (resultsWindow == null || !resultsWindow.isShowing()))
 			{
@@ -304,7 +304,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 				IJ.showProgress(0);
 				int c = 0;
 				final int total = pairs.size();
-				final int step = Utils.getProgressInterval(total);
+				final int step = ImageJUtils.getProgressInterval(total);
 				final ArrayList<String> list = new ArrayList<String>(total);
 				boolean flush = true;
 				for (PointPair pair : pairs)
@@ -410,7 +410,7 @@ public class ResultsMatchCalculator implements PlugIn, CoordinateProvider
 	{
 		if (!saveClassifications)
 			return null;
-		String[] path = Utils.decodePath(classificationsFile);
+		String[] path = ImageJUtils.decodePath(classificationsFile);
 		OpenDialog chooser = new OpenDialog("Classifications_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{

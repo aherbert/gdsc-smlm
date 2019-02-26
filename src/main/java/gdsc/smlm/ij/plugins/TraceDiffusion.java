@@ -21,7 +21,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJLogger;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -142,7 +142,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		jumpDistanceParameters = null;
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 		if (MemoryPeakResults.countMemorySize() == 0)
 		{
 			IJ.error(TITLE, "No localisations in memory");
@@ -165,7 +165,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (allResults.isEmpty()) // Sense check
 			return;
 
-		Utils.log(TITLE + "...");
+		ImageJUtils.log(TITLE + "...");
 
 		// This optionally collects additional datasets then gets the traces:
 		// - Trace each single dataset (and store in memory)
@@ -433,8 +433,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 	private void display(String title, Plot2 plot)
 	{
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
 	}
 
@@ -448,9 +448,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		if (saveRawData)
 			saveStatistics(stats, title, title, rounded);
 
-		int id = Utils.showHistogram(TITLE, stats, title, 0, (settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0,
+		int id = ImageJUtils.showHistogram(TITLE, stats, title, 0, (settings.removeOutliers || alwaysRemoveOutliers) ? 1 : 0,
 				settings.histogramBins);
-		if (Utils.isNewWindow())
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = id;
 	}
 
@@ -532,10 +532,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			StoredDataStatistics msdPerMoleculeAdjacent, StoredDataStatistics dStarPerMolecule,
 			StoredDataStatistics dStarPerMoleculeAdjacent)
 	{
-		distancesFilename = Utils.getFilename("Trace_Distances_File", distancesFilename);
+		distancesFilename = ImageJUtils.getFilename("Trace_Distances_File", distancesFilename);
 		if (distancesFilename != null)
 		{
-			distancesFilename = Utils.replaceExtension(distancesFilename, "xls");
+			distancesFilename = ImageJUtils.replaceExtension(distancesFilename, "xls");
 
 			BufferedWriter out = null;
 			try
@@ -594,7 +594,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private void saveMSD(double[] x, double[] y, double[] se)
 	{
 		if (!directoryChosen)
-			rawDataDirectory = Utils.getDirectory("Data_directory", rawDataDirectory);
+			rawDataDirectory = ImageJUtils.getDirectory("Data_directory", rawDataDirectory);
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
@@ -638,7 +638,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 	private void saveStatistics(StoredDataStatistics stats, String title, String label, boolean rounded)
 	{
 		if (!directoryChosen)
-			rawDataDirectory = Utils.getDirectory("Data_directory", rawDataDirectory);
+			rawDataDirectory = ImageJUtils.getDirectory("Data_directory", rawDataDirectory);
 		directoryChosen = true;
 		if (rawDataDirectory == null)
 			return;
@@ -718,7 +718,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 		}
 
-		Utils.log("Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)", name,
+		ImageJUtils.log("Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)", name,
 				TextUtils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
 		return Arrays.copyOf(traces, count);
 	}
@@ -1021,7 +1021,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 
 		if (additionalDatasets > 0)
 		{
-			Utils.log("Multiple inputs provide %d traces", allTraces.size());
+			ImageJUtils.log("Multiple inputs provide %d traces", allTraces.size());
 
 			MemoryPeakResults tracedResults = TraceManager.toPeakResults(all, results.getCalibration(), true);
 			tracedResults.copySettings(results);
@@ -1232,17 +1232,17 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			double gradient = lvmSolution.getPoint().getEntry(0);
 			D = gradient / 4;
 
-			Utils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
+			ImageJUtils.log("Linear fit (%d points) : Gradient = %s, D = %s um^2/s, SS = %s, IC = %s (%d evaluations)",
 					function.getY().length, MathUtils.rounded(gradient, 4), MathUtils.rounded(D, 4), MathUtils.rounded(ss),
 					MathUtils.rounded(ic), lvmSolution.getEvaluations());
 		}
 		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit : Too many iterations (%s)", e.getMessage());
+			ImageJUtils.log("Failed to fit : Too many iterations (%s)", e.getMessage());
 		}
 		catch (ConvergenceException e)
 		{
-			Utils.log("Failed to fit : %s", e.getMessage());
+			ImageJUtils.log("Failed to fit : %s", e.getMessage());
 		}
 
 		// Fit with intercept.
@@ -1285,7 +1285,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			if (ic2 < ic || debugFitting)
 			{
 				// Convert fitted precision in um to nm
-				Utils.log(
+				ImageJUtils.log(
 						"Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 						function.getY().length, MathUtils.rounded(gradient, 4), MathUtils.rounded(intercept2, 4),
 						MathUtils.rounded(gradient / 4, 4), MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss),
@@ -1301,11 +1301,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		}
 		catch (TooManyIterationsException e)
 		{
-			Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
+			ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 		}
 		catch (ConvergenceException e)
 		{
-			Utils.log("Failed to fit with intercept : %s", e.getMessage());
+			ImageJUtils.log("Failed to fit with intercept : %s", e.getMessage());
 		}
 
 		if (settings.msdCorrection)
@@ -1367,7 +1367,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 				if (ic2 < ic || debugFitting)
 				{
 					// Convert fitted precision in um to nm
-					Utils.log(
+					ImageJUtils.log(
 							"Linear fit with MSD corrected intercept (%d points) : Gradient = %s, Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
 							function.getY().length, MathUtils.rounded(gradient, 4), MathUtils.rounded(intercept2, 4),
 							MathUtils.rounded(gradient / 4, 4), MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss),
@@ -1383,11 +1383,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 			}
 			catch (TooManyIterationsException e)
 			{
-				Utils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
+				ImageJUtils.log("Failed to fit with intercept : Too many iterations (%s)", e.getMessage());
 			}
 			catch (ConvergenceException e)
 			{
-				Utils.log("Failed to fit with intercept : %s", e.getMessage());
+				ImageJUtils.log("Failed to fit with intercept : %s", e.getMessage());
 			}
 		}
 
@@ -1416,11 +1416,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		double r = settings.distanceThreshold / 1000;
 		double msd = 4 * d * t;
 		double p = 1 - FastMath.exp(-r * r / msd);
-		Utils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
+		ImageJUtils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
 				settings.distanceThreshold, MathUtils.rounded(d), MathUtils.rounded(p));
 		if (p < 0.95)
 		{
-			Utils.log("WARNING *** The tracing distance may not be large enough! ***");
+			ImageJUtils.log("WARNING *** The tracing distance may not be large enough! ***");
 		}
 	}
 
@@ -1695,7 +1695,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger
 		// Q. Should it be normalised to the frame length. If not then the beta will be invariant on 
 		// jump distance length
 		beta = meanDistance / precision;
-		Utils.log(
+		ImageJUtils.log(
 				"Jump Distance analysis : N = %d, Time = %d frames (%s seconds). MSD = %s um^2/jump, Mean Distance = %s nm/jump, Precision = %s nm, Beta = %s",
 				jumpDistances.getN(), settings.jumpDistance, MathUtils.rounded(settings.jumpDistance * exposureTime, 4),
 				MathUtils.rounded(msd, 4), MathUtils.rounded(meanDistance, 4), MathUtils.rounded(precision, 4),

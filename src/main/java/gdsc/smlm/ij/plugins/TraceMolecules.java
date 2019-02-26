@@ -33,7 +33,7 @@ import gdsc.smlm.ij.settings.ClusteringSettings;
 import gdsc.smlm.ij.settings.ClusteringSettings.OptimiserPlot;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Cluster.CentroidMethod;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.ImageSource;
@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -166,7 +166,7 @@ public class TraceMolecules implements PlugIn
 			IJ.error(TITLE, "No localisations in memory");
 			return;
 		}
-		altKeyDown = Utils.isExtraOptions();
+		altKeyDown = ImageJUtils.isExtraOptions();
 
 		Trace[] traces = null;
 		int totalFiltered = 0;
@@ -197,7 +197,7 @@ public class TraceMolecules implements PlugIn
 
 			if (clusters == null)
 			{
-				Utils.log("Aborted");
+				ImageJUtils.log("Aborted");
 				return;
 			}
 
@@ -411,12 +411,12 @@ public class TraceMolecules implements PlugIn
 			if (filename.matches(regex))
 				filename.replaceAll(regex, "." + (id) + ".");
 			else
-				Utils.replaceExtension(filename, id + ".xls");
+				ImageJUtils.replaceExtension(filename, id + ".xls");
 		}
-		filename = Utils.getFilename(title, filename);
+		filename = ImageJUtils.getFilename(title, filename);
 		if (filename != null)
 		{
-			filename = Utils.replaceExtension(filename, "xls");
+			filename = ImageJUtils.replaceExtension(filename, "xls");
 
 			boolean showDeviations = (traces.length > 0 && traces[0].getHead().paramsStdDev != null);
 			// Assume that are results are from a single frame but store the trace ID
@@ -531,10 +531,10 @@ public class TraceMolecules implements PlugIn
 			{
 				if (displayHistograms[i])
 				{
-					idList[count++] = Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
+					idList[count++] = ImageJUtils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
 							(integerDisplay[i]) ? 1 : 0, (settings.removeOutliers || alwaysRemoveOutliers[i]) ? 2 : 0,
 							settings.histogramBins);
-					requireRetile = requireRetile || Utils.isNewWindow();
+					requireRetile = requireRetile || ImageJUtils.isNewWindow();
 				}
 			}
 
@@ -588,7 +588,7 @@ public class TraceMolecules implements PlugIn
 	{
 		// Get the directory
 		IJ.showStatus("Saving trace data");
-		String directory = Utils.getDirectory("Trace_data_directory", settings.traceDataDirectory);
+		String directory = ImageJUtils.getDirectory("Trace_data_directory", settings.traceDataDirectory);
 		if (directory != null)
 		{
 			settings.traceDataDirectory = directory;
@@ -1573,7 +1573,7 @@ public class TraceMolecules implements PlugIn
 			return;
 		if (!source.open())
 			return;
-		FitEngineConfiguration config = (FitEngineConfiguration) XmlUtils.fromXML(results.getConfiguration());
+		FitEngineConfiguration config = (FitEngineConfiguration) XStreamXmlUtils.fromXML(results.getConfiguration());
 		if (config == null)
 			return;
 
@@ -1865,7 +1865,7 @@ public class TraceMolecules implements PlugIn
 						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
 						float[] centre = trace.getCentroid();
 						float[] offset = job.getFitParameters().getOffset();
-						Utils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
+						ImageJUtils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
 								offset[0], centre[1] - offset[1]), slices);
 
 						switch (s)
@@ -1910,7 +1910,7 @@ public class TraceMolecules implements PlugIn
 						buildCombinedImage(source, trace, fitWidth, bounds, noise, true);
 						float[] centre = trace.getCentroid();
 						float[] offset = job.getFitParameters().getOffset();
-						Utils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
+						ImageJUtils.display(String.format("Trace %d (n=%d) : x=%f,y=%f", id, trace.size(), centre[0] -
 								offset[0], centre[1] - offset[1]), slices);
 					}
 				}

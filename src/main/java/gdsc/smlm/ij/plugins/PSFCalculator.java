@@ -18,7 +18,7 @@ import gdsc.smlm.function.gaussian.GaussianFunction;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFCalculatorSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.model.AiryPattern;
 import ij.IJ;
 import ij.gui.DialogListener;
@@ -449,7 +449,7 @@ public class PSFCalculator implements PlugIn, DialogListener
 		p.drawLine(-sd, 0, -sd, sdHeight);
 		p.drawLine(sd, 0, sd, sdHeight);
 		p.setColor(Color.BLUE);
-		Utils.display(title, p);
+		ImageJUtils.display(title, p);
 	}
 
 	/**

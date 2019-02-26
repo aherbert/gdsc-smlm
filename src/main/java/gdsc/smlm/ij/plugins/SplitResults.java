@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import gdsc.smlm.ij.utils.ObjectAnalyzer;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -52,7 +52,7 @@ public class SplitResults implements PlugIn
 			IJ.error(TITLE, "There are no fitting results in memory");
 			return;
 		}
-		String[] items = Utils.getImageList(Utils.GREY_8_16);
+		String[] items = ImageJUtils.getImageList(ImageJUtils.GREY_8_16);
 		if (items.length == 0)
 		{
 			IJ.error(TITLE, "There are no suitable mask images");
@@ -124,7 +124,7 @@ public class SplitResults implements PlugIn
 					maxy);
 			for (int i = 0; i < mask.length; i++)
 				objectIp.set(i, mask[i]);
-			ImagePlus imp = Utils.display(objectMask + " Objects", objectIp);
+			ImagePlus imp = ImageJUtils.display(objectMask + " Objects", objectIp);
 			imp.setDisplayRange(0, maxObject);
 			imp.updateAndDraw();
 		}
@@ -132,7 +132,7 @@ public class SplitResults implements PlugIn
 		// Process the results mapping them to their objects
 		int i = 0;
 		final int size = results.size();
-		final int step = Utils.getProgressInterval(size);
+		final int step = ImageJUtils.getProgressInterval(size);
 		for (PeakResult result : results.getResults())
 		{
 			if (++i % step == 0)

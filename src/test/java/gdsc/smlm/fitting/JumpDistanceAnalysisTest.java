@@ -1,6 +1,5 @@
 package gdsc.smlm.fitting;
 
-import uk.ac.sussex.gdsc.core.logging.Logger;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
@@ -321,9 +320,7 @@ public class JumpDistanceAnalysisTest
 
 		JumpDistanceAnalysis.sort(d, f);
 		double[] jumpDistances = createData(samples, d, f);
-		Logger logger = null;
-		//logger = new gdsc.smlm.utils.logging.ConsoleLogger();
-		JumpDistanceAnalysis jd = new JumpDistanceAnalysis(logger);
+		JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
 		jd.setFitRestarts(3);
 		double[][] fit;
 		if (n == 0)

@@ -14,8 +14,8 @@ package gdsc.smlm.ij.plugins;
  *---------------------------------------------------------------------------*/
 
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -157,10 +157,10 @@ public class DrawClusters implements PlugIn
 				ImageStack stack = new ImageStack(w, h, maxFrame);
 				for (int i = 1; i <= maxFrame; i++)
 					stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
-				imp = Utils.display(TITLE, stack);
+				imp = ImageJUtils.display(TITLE, stack);
 			}
 			else
-				imp = Utils.display(TITLE, bp);
+				imp = ImageJUtils.display(TITLE, bp);
 
 			// Enlarge
 			ImageWindow iw = imp.getWindow();
@@ -242,7 +242,7 @@ public class DrawClusters implements PlugIn
 		}
 
 		if (sort > 0)
-			Sort.sort(indices, values);
+			SortUtils.sort(indices, values);
 
 		// Draw the traces as ROIs on an overlay
 		Overlay o = new Overlay();

@@ -21,7 +21,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -90,7 +90,7 @@ public class EMGainAnalysis implements PlugInFilter
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 
 		if ("pmf".equals(arg))
 		{
@@ -122,12 +122,12 @@ public class EMGainAnalysis implements PlugInFilter
 				bounds = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
 			else
 				bounds = roi.getBounds();
-			Utils.log("Analysing %s [x=%d,y=%d,width=%d,height=%d]", imp.getTitle(), bounds.x, bounds.y, bounds.width,
+			ImageJUtils.log("Analysing %s [x=%d,y=%d,width=%d,height=%d]", imp.getTitle(), bounds.x, bounds.y, bounds.width,
 					bounds.height);
 		}
-		Utils.log("Histogram contains %d pixels", size);
+		ImageJUtils.log("Histogram contains %d pixels", size);
 		if (size < MINIMUM_PIXELS)
-			Utils.log("WARNING : Recommend at least %d pixels (%sx more)", MINIMUM_PIXELS,
+			ImageJUtils.log("WARNING : Recommend at least %d pixels (%sx more)", MINIMUM_PIXELS,
 					MathUtils.rounded((double) MINIMUM_PIXELS / size));
 
 		fit(h);
@@ -169,7 +169,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 		// Debug this
 		double[] x = SimpleArrayUtils.newArray(g.length, 0, 1.0);
-		Utils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
+		ImageJUtils.display(TITLE + " PDF", new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
 
 		// Get cumulative probability
 		double sum = 0;
@@ -316,7 +316,7 @@ public class EMGainAnalysis implements PlugInFilter
 		plot.setLimits(limits[0], limits[1], 0, yMax);
 		plot.setColor(Color.black);
 		plot.addPoints(x, y, Plot2.DOT);
-		Utils.display(TITLE, plot);
+		ImageJUtils.display(TITLE, plot);
 
 		// Estimate remaining parameters. 
 		// Assuming a gamma_distribution(shape,scale) then mean = shape * scale
@@ -332,10 +332,10 @@ public class EMGainAnalysis implements PlugInFilter
 		double photons = mean / gain;
 
 		if (simulate)
-			Utils.log("Simulated bias=%d, gain=%s, noise=%s, photons=%s", (int) _bias, MathUtils.rounded(_gain),
+			ImageJUtils.log("Simulated bias=%d, gain=%s, noise=%s, photons=%s", (int) _bias, MathUtils.rounded(_gain),
 					MathUtils.rounded(_noise), MathUtils.rounded(_photons));
 
-		Utils.log("Estimate bias=%d, gain=%s, noise=%s, photons=%s", (int) bias, MathUtils.rounded(gain),
+		ImageJUtils.log("Estimate bias=%d, gain=%s, noise=%s, photons=%s", (int) bias, MathUtils.rounded(gain),
 				MathUtils.rounded(noise), MathUtils.rounded(photons));
 
 		final int max = (int) x[x.length - 1];
@@ -343,7 +343,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 		plot.setColor(Color.blue);
 		plot.addPoints(x, g, Plot2.LINE);
-		Utils.display(TITLE, plot);
+		ImageJUtils.display(TITLE, plot);
 
 		// Perform a fit
 		CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
@@ -422,7 +422,7 @@ public class EMGainAnalysis implements PlugInFilter
 
 		if (solution == null)
 		{
-			Utils.log("Failed to fit the distribution");
+			ImageJUtils.log("Failed to fit the distribution");
 			return;
 		}
 
@@ -433,11 +433,11 @@ public class EMGainAnalysis implements PlugInFilter
 		bias = (int) Math.round(point[3]);
 		String label = String.format("Fitted bias=%d, gain=%s, noise=%s, photons=%s", (int) bias, MathUtils.rounded(gain),
 				MathUtils.rounded(noise), MathUtils.rounded(photons));
-		Utils.log(label);
+		ImageJUtils.log(label);
 
 		if (simulate)
 		{
-			Utils.log("Relative Error bias=%s, gain=%s, noise=%s, photons=%s",
+			ImageJUtils.log("Relative Error bias=%s, gain=%s, noise=%s, photons=%s",
 					MathUtils.rounded(relativeError(bias, _bias)), MathUtils.rounded(relativeError(gain, _gain)),
 					MathUtils.rounded(relativeError(noise, _noise)), MathUtils.rounded(relativeError(photons, _photons)));
 		}
@@ -475,7 +475,7 @@ public class EMGainAnalysis implements PlugInFilter
 			plot.addPoints(x, f, Plot2.LINE);
 		}
 
-		Utils.display(TITLE, plot);
+		ImageJUtils.display(TITLE, plot);
 	}
 
 	private double relativeError(double a, double b)
@@ -494,7 +494,7 @@ public class EMGainAnalysis implements PlugInFilter
 			public double value(double[] point)
 			{
 				IJ.showProgress(++eval, maxEval);
-				if (Utils.isInterrupted())
+				if (ImageJUtils.isInterrupted())
 					throw new TooManyEvaluationsException(maxEval);
 				// Compute the sum of squares between the two functions
 				double photons = point[0];
@@ -896,7 +896,7 @@ public class EMGainAnalysis implements PlugInFilter
 		plot.drawLine(_photons * _gain, 0, _photons * _gain, yMax);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, label);
-		PlotWindow win1 = Utils.display("PMF", plot);
+		PlotWindow win1 = ImageJUtils.display("PMF", plot);
 
 		// Plot the difference between the actual and approximation
 		double[] delta = new double[f.length];
@@ -919,9 +919,9 @@ public class EMGainAnalysis implements PlugInFilter
 		plot2.drawLine(_photons * _gain, limits[0], _photons * _gain, limits[1]);
 		plot2.setColor(Color.black);
 		plot2.addLabel(0, 0, label + ((offset == 0) ? "" : ", expected = " + MathUtils.rounded(expected / _gain)));
-		PlotWindow win2 = Utils.display("PMF delta", plot2);
+		PlotWindow win2 = ImageJUtils.display("PMF delta", plot2);
 
-		if (Utils.isNewWindow())
+		if (ImageJUtils.isNewWindow())
 		{
 			Point p2 = win2.getLocation();
 			p2.y += win1.getHeight();

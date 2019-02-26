@@ -30,14 +30,14 @@ import gdsc.smlm.ij.settings.PSFEstimatorSettings;
 import gdsc.smlm.ij.settings.ResultsSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.AggregatedImageSource;
 import gdsc.smlm.results.Calibration;
 import gdsc.smlm.results.ImageSource;
 import gdsc.smlm.results.InterlacedImageSource;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.PeakResults;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import ij.IJ;
 import ij.ImagePlus;
@@ -116,7 +116,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 		
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 		if (imp == null)
 		{
 			IJ.noImage();
@@ -451,7 +451,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		addToResultTable(iteration++, 0, params, params_dev, p);
 
 		if (!calculateStatistics(fitter, params, params_dev))
-			return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
+			return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
 		if (!addToResultTable(iteration++, size(), params, params_dev, p))
 			return BAD_ESTIMATE;
@@ -461,7 +461,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		do
 		{
 			if (!calculateStatistics(fitter, params, params_dev))
-				return (Utils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
+				return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
 
 			try
 			{
@@ -656,7 +656,7 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 		int[] slices = new int[stack.getSize()];
 		for (int i = 0; i < slices.length; i++)
 			slices[i] = i + 1;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(slices);
 
 		IJ.showStatus("Fitting ...");
@@ -674,13 +674,13 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 			FitJob job = new FitJob(slice, ImageConverter.getData(ip), roi);
 			engine.run(job);
 
-			if (sampleSizeReached() || Utils.isInterrupted())
+			if (sampleSizeReached() || ImageJUtils.isInterrupted())
 			{
 				break;
 			}
 		}
 
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			IJ.showProgress(1);
 			engine.end(true);
@@ -724,9 +724,9 @@ public class PSFEstimator implements PlugInFilter, PeakResults
 				if (sampleNew[ii].getN() == 0)
 					continue;
 				StoredDataStatistics stats = new StoredDataStatistics(sampleNew[ii].getValues());
-				idList[count++] = Utils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
+				idList[count++] = ImageJUtils.showHistogram(TITLE, stats, NAMES[ii], 0, 0, settings.histogramBins, "Mean = " +
 						MathUtils.rounded(stats.getMean()) + ". Median = " + MathUtils.rounded(sampleNew[ii].getPercentile(50)));
-				requireRetile = requireRetile || Utils.isNewWindow();
+				requireRetile = requireRetile || ImageJUtils.isNewWindow();
 			}
 			if (requireRetile && count > 0)
 			{

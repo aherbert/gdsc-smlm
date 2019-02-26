@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJAnalyticsTracker;
+import uk.ac.sussex.gdsc.core.ij.ImageJAnalyticsUtils;
 import gdsc.smlm.Version;
 import ij.plugin.PlugIn;
 
@@ -41,12 +41,12 @@ public class SMLMUsageTracker implements PlugIn
 	public static void recordPlugin(@SuppressWarnings("rawtypes") Class clazz, String argument)
 	{
 		initialiseTracker();
-		if (ImageJAnalyticsTracker.isDisabled())
+		if (ImageJAnalyticsUtils.isDisabled())
 			return;
 
 		initialiseMap();
 
-		final String[] pair = map.get(ImageJAnalyticsTracker.getKey(clazz.getName(), argument));
+		final String[] pair = map.get(ImageJAnalyticsUtils.getKey(clazz.getName(), argument));
 		if (pair == null)
 		{
 			recordPlugin(clazz.getName().replace('.', '/'), argument);
@@ -76,7 +76,7 @@ public class SMLMUsageTracker implements PlugIn
 
 	private static void trackPageView(String pageUrl, String pageTitle)
 	{
-		ImageJAnalyticsTracker.pageview(pageUrl, pageTitle);
+		ImageJAnalyticsUtils.pageview(pageUrl, pageTitle);
 	}
 
 	/**
@@ -96,12 +96,12 @@ public class SMLMUsageTracker implements PlugIn
 			trackerInitialised = true;
 			
 			// Initialise analytics
-			ImageJAnalyticsTracker.initialise();
+			ImageJAnalyticsUtils.initialise();
 			// Record the version of the GDSC SMLM plugins
-			ImageJAnalyticsTracker.addCustomDimension(7, Version.getVersion());
+			ImageJAnalyticsUtils.addCustomDimension(7, Version.getVersion());
 			// Prompt the user to opt-in/out of analytics if the status is unknown
-			if (ImageJAnalyticsTracker.unknownStatus())
-				ImageJAnalyticsTracker.showDialog(TITLE, true);
+			if (ImageJAnalyticsUtils.unknownStatus())
+				ImageJAnalyticsUtils.showDialog(TITLE, true);
 			//ImageJAnalyticsTracker.logPreferences(false);
 		}
 	}
@@ -121,7 +121,7 @@ public class SMLMUsageTracker implements PlugIn
 				return;
 
 			mapInitialised = true;
-			ImageJAnalyticsTracker.buildPluginMap(map, SMLMTools.getPluginsConfig(), StandardCharsets.UTF_8);
+			ImageJAnalyticsUtils.buildPluginMap(map, SMLMTools.getPluginsConfig(), StandardCharsets.UTF_8);
 		}
 	}
 
@@ -133,6 +133,6 @@ public class SMLMUsageTracker implements PlugIn
 	public void run(String arg)
 	{
 		recordPlugin(this.getClass(), arg);
-		ImageJAnalyticsTracker.showDialog(TITLE, false);
+		ImageJAnalyticsUtils.showDialog(TITLE, false);
 	}
 }

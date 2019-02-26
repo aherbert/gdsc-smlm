@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -201,7 +201,7 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener
 		{
 			if (!error[currentIndex])
 			{
-				Utils.log("%s Error: %s for results '%s'", TITLE, msg, name);
+				ImageJUtils.log("%s Error: %s for results '%s'", TITLE, msg, name);
 				label.setText("Error: " + msg + ". Restart this plugin to refresh.");
 			}
 			error[currentIndex] = true;

@@ -13,7 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.settings.CreateDataSettings;
@@ -76,7 +76,7 @@ public class LoadLocalisations implements PlugIn
 		GlobalSettings globalSettings = SettingsManager.loadSettings();
 		CreateDataSettings settings = globalSettings.getCreateDataSettings();
 
-		String[] path = Utils.decodePath(settings.localisationsFilename);
+		String[] path = ImageJUtils.decodePath(settings.localisationsFilename);
 		OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
 		if (chooser.getFileName() == null)
 			return;
@@ -125,9 +125,9 @@ public class LoadLocalisations implements PlugIn
 
 		IJ.showStatus(String.format("Loaded %d localisations", results.size()));
 		if (limitZ)
-			Utils.log("Loaded %d localisations, z between %.2f - %.2f", results.size(), minz, maxz);
+			ImageJUtils.log("Loaded %d localisations, z between %.2f - %.2f", results.size(), minz, maxz);
 		else
-			Utils.log("Loaded %d localisations", results.size());
+			ImageJUtils.log("Loaded %d localisations", results.size());
 	}
 
 	private boolean getZDepth(List<Localisation> localisations)
@@ -223,12 +223,12 @@ public class LoadLocalisations implements PlugIn
 				catch (NumberFormatException e)
 				{
 					if (errors++ == 0)
-						Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+						ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
 				}
 				catch (IndexOutOfBoundsException e)
 				{
 					if (errors++ == 0)
-						Utils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
+						ImageJUtils.log("%s error on record %d: %s", TITLE, count, e.getMessage());
 				}
 			}
 		}
@@ -248,7 +248,7 @@ public class LoadLocalisations implements PlugIn
 				// Ignore
 			}
 			if (errors != 0)
-				Utils.log("%s has %d / %d error lines", TITLE, errors, count);
+				ImageJUtils.log("%s has %d / %d error lines", TITLE, errors, count);
 		}
 
 		return localisations;

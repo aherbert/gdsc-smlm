@@ -1,8 +1,8 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.settings.Constants;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import gdsc.smlm.utils.XmlUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import gdsc.smlm.results.PeakResultsReader;
 import ij.IJ;
 import ij.Prefs;
@@ -85,10 +85,10 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	{
 		if (data == null)
 			return;
-		String text = (data instanceof String) ? (String) data : XmlUtils.toXML(data);
+		String text = (data instanceof String) ? (String) data : XStreamXmlUtils.toXML(data);
 		if (text.startsWith("<"))
-			text = XmlUtils.prettyPrintXml(text);
-		Utils.log("%s: %s", title, text);
+			text = XStreamXmlUtils.prettyPrintXml(text);
+		ImageJUtils.log("%s: %s", title, text);
 	}
 
 	/*
@@ -100,7 +100,7 @@ public class ShowResultsHeader implements PlugIn, MouseListener
 	{
 		if (e.getClickCount() > 1) // Double-click
 		{
-			String newFilename = Utils.getFilename("Config_File", textConfigFile.getText());
+			String newFilename = ImageJUtils.getFilename("Config_File", textConfigFile.getText());
 			if (newFilename != null)
 			{
 				textConfigFile.setText(newFilename);

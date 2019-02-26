@@ -48,10 +48,10 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -113,7 +113,7 @@ import gdsc.smlm.results.ExtendedPeakResult;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -459,7 +459,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			}
 			sum /= molecules;
 			sum2 /= molecules;
-			Utils.log(
+			ImageJUtils.log(
 					"Created %d frames, %d molecules. Simulated signal %s : average %s. Simulated background %s : average %s",
 					frames, molecules, MathUtils.rounded(signal), MathUtils.rounded(sum / gain), MathUtils.rounded(b),
 					MathUtils.rounded(sum2 / gain));
@@ -506,7 +506,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 		simpleMode = (arg != null && arg.contains("simple"));
 		benchmarkMode = (arg != null && arg.contains("benchmark"));
 		spotMode = (arg != null && arg.contains("spot"));
@@ -558,7 +558,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				// Ensure we have 50% of the frames with a spot.
 				nextN = new int[settings.particles * 2];
 				Arrays.fill(nextN, 0, settings.particles, 1);
-				Random rand = new Random();
+				RandomUtils rand = new RandomUtils();
 				rand.shuffle(nextN);
 
 				// Only put spots in the central part of the image
@@ -871,32 +871,32 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		double lowerN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecond, b2, emCCD);
 		double upperN = getPrecisionN(settings.pixelPitch, sd, settings.photonsPerSecondMaximum, b2, emCCD);
 		//final double b = Math.sqrt(b2);
-		Utils.log(TITLE + " Benchmark");
+		ImageJUtils.log(TITLE + " Benchmark");
 		double[] xyz = dist.next().clone();
 		double offset = settings.size * 0.5;
 		for (int i = 0; i < 2; i++)
 			xyz[i] += offset;
-		Utils.log("X = %s nm : %s px", MathUtils.rounded(xyz[0] * settings.pixelPitch), MathUtils.rounded(xyz[0], 6));
-		Utils.log("Y = %s nm : %s px", MathUtils.rounded(xyz[1] * settings.pixelPitch), MathUtils.rounded(xyz[1], 6));
-		Utils.log("Width (s) = %s nm : %s px", MathUtils.rounded(sd), MathUtils.rounded(sd / settings.pixelPitch));
+		ImageJUtils.log("X = %s nm : %s px", MathUtils.rounded(xyz[0] * settings.pixelPitch), MathUtils.rounded(xyz[0], 6));
+		ImageJUtils.log("Y = %s nm : %s px", MathUtils.rounded(xyz[1] * settings.pixelPitch), MathUtils.rounded(xyz[1], 6));
+		ImageJUtils.log("Width (s) = %s nm : %s px", MathUtils.rounded(sd), MathUtils.rounded(sd / settings.pixelPitch));
 		final double sa = PSFCalculator.squarePixelAdjustment(sd, settings.pixelPitch);
-		Utils.log("Adjusted Width (sa) = %s nm : %s px", MathUtils.rounded(sa), MathUtils.rounded(sa / settings.pixelPitch));
-		Utils.log("Signal (N) = %s - %s photons : %s - %s ADUs", MathUtils.rounded(settings.photonsPerSecond),
+		ImageJUtils.log("Adjusted Width (sa) = %s nm : %s px", MathUtils.rounded(sa), MathUtils.rounded(sa / settings.pixelPitch));
+		ImageJUtils.log("Signal (N) = %s - %s photons : %s - %s ADUs", MathUtils.rounded(settings.photonsPerSecond),
 				MathUtils.rounded(settings.photonsPerSecondMaximum), MathUtils.rounded(settings.photonsPerSecond * totalGain),
 				MathUtils.rounded(settings.photonsPerSecondMaximum * totalGain));
 		final double noiseInADUs = Math.sqrt(readVarianceInADUs + backgroundVarianceInADUs);
-		Utils.log("Pixel noise = %s photons : %s ADUs", MathUtils.rounded(noiseInADUs / totalGain),
+		ImageJUtils.log("Pixel noise = %s photons : %s ADUs", MathUtils.rounded(noiseInADUs / totalGain),
 				MathUtils.rounded(noiseInADUs));
-		Utils.log(
+		ImageJUtils.log(
 				"Expected background variance pre EM-gain (b^2) = %s photons^2 (%s ADUs^2) " +
 						"[includes read variance converted to photons]",
 				MathUtils.rounded(b2), MathUtils.rounded(b2 * totalGain * totalGain));
-		Utils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerP), MathUtils.rounded(upperP),
+		ImageJUtils.log("Localisation precision (LSE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerP), MathUtils.rounded(upperP),
 				MathUtils.rounded(lowerP / settings.pixelPitch), MathUtils.rounded(upperP / settings.pixelPitch));
-		Utils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerMLP),
+		ImageJUtils.log("Localisation precision (MLE): %s - %s nm : %s - %s px", MathUtils.rounded(lowerMLP),
 				MathUtils.rounded(upperMLP), MathUtils.rounded(lowerMLP / settings.pixelPitch),
 				MathUtils.rounded(upperMLP / settings.pixelPitch));
-		Utils.log("Signal precision: %s - %s photons : %s - %s ADUs", MathUtils.rounded(lowerN), MathUtils.rounded(upperN),
+		ImageJUtils.log("Signal precision: %s - %s photons : %s - %s ADUs", MathUtils.rounded(lowerN), MathUtils.rounded(upperN),
 				MathUtils.rounded(lowerN * totalGain), MathUtils.rounded(upperN * totalGain));
 
 		// Store the benchmark settings when not using variable photons
@@ -912,7 +912,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		else
 		{
-			Utils.log(
+			ImageJUtils.log(
 					"Warning: Benchmark settings are only stored in memory when the number of photons is fixed. Min %s != Max %s",
 					MathUtils.rounded(settings.photonsPerSecond), MathUtils.rounded(settings.photonsPerSecondMaximum));
 		}
@@ -1267,7 +1267,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			IJ.error(TITLE, "Unable to create the PSF model from image: " + settings.psfImageName);
 			return -1;
 		}
-		Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
+		Object o = XStreamXmlUtils.fromXML(imp.getProperty("Info").toString());
 		if (!(o != null && o instanceof PSFSettings))
 		{
 			IJ.error(TITLE, "Unknown PSF settings for image: " + imp.getTitle());
@@ -1398,7 +1398,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.photonDistribution))
 		{
 			// Get the distribution file
-			String filename = Utils.getFilename("Photon_distribution", settings.photonDistributionFile);
+			String filename = ImageJUtils.getFilename("Photon_distribution", settings.photonDistributionFile);
 			if (filename != null)
 			{
 				settings.photonDistributionFile = filename;
@@ -1453,7 +1453,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					// Ignore
 				}
 			}
-			Utils.log("Failed to load custom photon distribution from file: %s. Default to fixed.",
+			ImageJUtils.log("Failed to load custom photon distribution from file: %s. Default to fixed.",
 					settings.photonDistributionFile);
 		}
 		else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.photonDistribution))
@@ -1802,7 +1802,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		int lastT = -1;
 		for (LocalisationModelSet l : localisationSets)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 				break;
 			if (l.getTime() != lastT)
 			{
@@ -1814,9 +1814,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			i++;
 		}
 		// Finish processing data
-		Utils.waitForCompletion(futures);
+		ImageJUtils.waitForCompletion(futures);
 		futures.clear();
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			IJ.showProgress(1);
 			return null;
@@ -1825,7 +1825,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		// Do all the frames that had no localisations
 		for (int t = 1; t <= maxT; t++)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 				break;
 			if (stack.getPixels(t) == null)
 			{
@@ -1835,10 +1835,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Finish
-		Utils.waitForCompletion(futures);
+		ImageJUtils.waitForCompletion(futures);
 		threadPool.shutdown();
 		IJ.showProgress(1);
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			return null;
 		}
@@ -1851,14 +1851,14 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		futures = null;
 
 		if (photonsRemoved.get() > 0)
-			Utils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
+			ImageJUtils.log("Removed %d localisations with less than %.1f rendered photons", photonsRemoved.get(),
 					settings.minPhotons);
 		if (t1Removed.get() > 0)
-			Utils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(), settings.minSNRt1);
+			ImageJUtils.log("Removed %d localisations with no neighbours @ SNR %.2f", t1Removed.get(), settings.minSNRt1);
 		if (tNRemoved.get() > 0)
-			Utils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(), settings.minSNRtN);
+			ImageJUtils.log("Removed %d localisations with valid neighbours @ SNR %.2f", tNRemoved.get(), settings.minSNRtN);
 		if (photonStats.getN() > 0)
-			Utils.log("Average photons rendered = %s +/- %s", MathUtils.rounded(photonStats.getMean()),
+			ImageJUtils.log("Average photons rendered = %s +/- %s", MathUtils.rounded(photonStats.getMean()),
 					MathUtils.rounded(photonStats.getStandardDeviation()));
 
 		//System.out.printf("rawPhotons = %f\n", rawPhotons.getMean());
@@ -1920,7 +1920,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 
 		// Show image
-		ImagePlus imp = Utils.display(CREATE_DATA_IMAGE_TITLE, newStack);
+		ImagePlus imp = ImageJUtils.display(CREATE_DATA_IMAGE_TITLE, newStack);
 
 		ij.measure.Calibration cal = new ij.measure.Calibration();
 		String unit = "nm";
@@ -1980,7 +1980,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		}
 		try
 		{
-			Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
+			Object o = XStreamXmlUtils.fromXML(imp.getProperty("Info").toString());
 			if (!(o != null && o instanceof PSFSettings))
 				throw new RuntimeException("Unknown PSF settings for image: " + imp.getTitle());
 			PSFSettings psfSettings = (PSFSettings) o;
@@ -2156,7 +2156,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		 */
 		public void run()
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 				return;
 
 			final double psfSD = getPsfSD();
@@ -2195,7 +2195,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 				float[] data = new float[settings.size * settings.size];
 				for (LocalisationModelSet localisationSet : subset)
 				{
-					if (Utils.isInterrupted())
+					if (ImageJUtils.isInterrupted())
 						return;
 
 					if (localisationSet.size() == 0)
@@ -2602,7 +2602,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		fitConfig.setInitialPeakStdDev0(psfWidth);
 		fitConfig.setInitialPeakStdDev1(psfWidth);
 		FitEngineConfiguration config = new FitEngineConfiguration(fitConfig);
-		return XmlUtils.toXML(config);
+		return XStreamXmlUtils.toXML(config);
 	}
 
 	private float[] backgroundPixels = null;
@@ -2997,7 +2997,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 					t = r.peak;
 				}
 				runDensityCalculation(threadPool, futures, coords, densityStats, radius, bounds, allDensity, allIndex);
-				Utils.waitForCompletion(futures);
+				ImageJUtils.waitForCompletion(futures);
 				threadPool.shutdownNow();
 				threadPool = null;
 				IJ.showProgress(1);
@@ -3064,10 +3064,10 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			{
 				if (chosenHistograms[i])
 				{
-					wo.add(Utils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
+					wo.add(ImageJUtils.showHistogram(TITLE, (StoredDataStatistics) stats[i], NAMES[i],
 							(integerDisplay[i]) ? 1 : 0, (settings.removeOutliers || alwaysRemoveOutliers[i]) ? 2 : 0,
 							settings.histogramBins * ((integerDisplay[i]) ? 100 : 1)));
-					requireRetile = requireRetile || Utils.isNewWindow();
+					requireRetile = requireRetile || ImageJUtils.isNewWindow();
 				}
 			}
 
@@ -3260,12 +3260,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (!settings.saveImage)
 			return;
-		String[] path = Utils.decodePath(settings.imageFilename);
+		String[] path = ImageJUtils.decodePath(settings.imageFilename);
 		OpenDialog chooser = new OpenDialog("Image_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.imageFilename = chooser.getDirectory() + chooser.getFileName();
-			settings.imageFilename = Utils.replaceExtension(settings.imageFilename, "tiff");
+			settings.imageFilename = ImageJUtils.replaceExtension(settings.imageFilename, "tiff");
 
 			FileSaver fs = new FileSaver(imp);
 			boolean ok;
@@ -3285,12 +3285,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 	{
 		if (!settings.saveImageResults)
 			return;
-		String[] path = Utils.decodePath(settings.imageResultsFilename);
+		String[] path = ImageJUtils.decodePath(settings.imageResultsFilename);
 		OpenDialog chooser = new OpenDialog("Image_Results_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.imageResultsFilename = chooser.getDirectory() + chooser.getFileName();
-			settings.imageResultsFilename = Utils.replaceExtension(settings.imageResultsFilename, "xls");
+			settings.imageResultsFilename = ImageJUtils.replaceExtension(settings.imageResultsFilename, "xls");
 
 			FilePeakResults r = new FilePeakResults(settings.imageResultsFilename, false);
 			r.copySettings(results);
@@ -3446,12 +3446,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		if (!settings.saveFluorophores || fluorophores == null)
 			return;
 
-		String[] path = Utils.decodePath(settings.fluorophoresFilename);
+		String[] path = ImageJUtils.decodePath(settings.fluorophoresFilename);
 		OpenDialog chooser = new OpenDialog("Fluorophores_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.fluorophoresFilename = chooser.getDirectory() + chooser.getFileName();
-			settings.fluorophoresFilename = Utils.replaceExtension(settings.fluorophoresFilename, "xls");
+			settings.fluorophoresFilename = ImageJUtils.replaceExtension(settings.fluorophoresFilename, "xls");
 
 			BufferedWriter output = null;
 			try
@@ -3527,12 +3527,12 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 		//				return (o1.getZ() == o2.getZ()) ? 0 : (o1.getZ() == 0) ? -1 : 1;
 		//			}});
 
-		String[] path = Utils.decodePath(settings.localisationsFilename);
+		String[] path = ImageJUtils.decodePath(settings.localisationsFilename);
 		OpenDialog chooser = new OpenDialog("Localisations_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
 			settings.localisationsFilename = chooser.getDirectory() + chooser.getFileName();
-			settings.localisationsFilename = Utils.replaceExtension(settings.localisationsFilename, "xls");
+			settings.localisationsFilename = ImageJUtils.replaceExtension(settings.localisationsFilename, "xls");
 
 			BufferedWriter output = null;
 			try
@@ -4428,7 +4428,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory
 			gd.addCheckbox("Enable_2D_rotation", settings.rotate2D);
 			gd.addCheckbox("Show_example_compounds", false);
 
-			if (Utils.isShowGenericDialog())
+			if (ImageJUtils.isShowGenericDialog())
 			{
 				@SuppressWarnings("rawtypes")
 				Vector v = gd.getCheckboxes();

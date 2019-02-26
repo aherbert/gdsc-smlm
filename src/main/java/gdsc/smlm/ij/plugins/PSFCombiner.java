@@ -15,8 +15,8 @@ package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.utils.ImageConverter;
-import gdsc.smlm.utils.XmlUtils;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -133,7 +133,7 @@ public class PSFCombiner implements PlugIn
 		Object info = imp.getProperty("Info");
 		if (info != null)
 		{
-			Object o = XmlUtils.fromXML(info.toString());
+			Object o = XStreamXmlUtils.fromXML(info.toString());
 			return (o != null && o instanceof PSFSettings);
 		}
 		return false;
@@ -252,16 +252,16 @@ public class PSFCombiner implements PlugIn
 		IJ.showProgress(1);
 		IJ.showStatus("");
 
-		ImagePlus imp = Utils.display("Combined PSF", stack);
+		ImagePlus imp = ImageJUtils.display("Combined PSF", stack);
 		imp.setSlice(1 + shift);
 		imp.resetDisplayRange();
 		imp.updateAndDraw();
 
 		final double fwhm = getFWHM();
 		imp.setProperty("Info",
-				XmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
+				XStreamXmlUtils.toXML(new PSFSettings(imp.getSlice(), nmPerPixel, nmPerSlice, totalImages, fwhm)));
 
-		Utils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
+		ImageJUtils.log("%s : z-centre = %d, nm/Pixel = %s, nm/Slice = %s, %d images, FWHM = %s\n", imp.getTitle(),
 				imp.getSlice(), MathUtils.rounded(nmPerPixel), MathUtils.rounded(nmPerSlice), totalImages, MathUtils.rounded(fwhm));
 	}
 
@@ -312,7 +312,7 @@ public class PSFCombiner implements PlugIn
 			if (imp == null)
 				throw new RuntimeException("No image with title: " + title);
 
-			Object o = XmlUtils.fromXML(imp.getProperty("Info").toString());
+			Object o = XStreamXmlUtils.fromXML(imp.getProperty("Info").toString());
 			if (!(o != null && o instanceof PSFSettings))
 				throw new RuntimeException("Unknown PSF settings for image: " + title);
 			this.psfSettings = (PSFSettings) o;

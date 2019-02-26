@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.FilePeakResults;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.Trace;
@@ -68,7 +68,7 @@ public class NeighbourAnalysis implements PlugIn
 
 	private void saveTraces(Trace[] traces)
 	{
-		String[] path = Utils.decodePath(filename);
+		String[] path = ImageJUtils.decodePath(filename);
 		OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{

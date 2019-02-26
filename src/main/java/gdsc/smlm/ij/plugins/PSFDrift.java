@@ -27,9 +27,9 @@ import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.PSFOffset;
 import gdsc.smlm.ij.settings.PSFSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.model.ImagePSFModel;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import ij.IJ;
@@ -511,7 +511,7 @@ public class PSFDrift implements PlugIn
 		// Check region size using the image PSF
 		double newPsfWidth = (double) imp.getWidth() / scale;
 		if (Math.ceil(newPsfWidth) > w)
-			Utils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
+			ImageJUtils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w, newPsfWidth);
 
 		// Create robust PSF fitting settings
 		final double a = psfSettings.nmPerPixel * scale;
@@ -562,8 +562,8 @@ public class PSFDrift implements PlugIn
 		}
 
 		// Fit 
-		Utils.showStatus("Fitting ...");
-		final int step = Utils.getProgressInterval(total);
+		ImageJUtils.showStatus("Fitting ...");
+		final int step = ImageJUtils.getProgressInterval(total);
 		outer: for (int z = minz, i = 0; z <= maxz; z++)
 		{
 			for (int x = 0; x < grid.length; x++)
@@ -582,7 +582,7 @@ public class PSFDrift implements PlugIn
 		}
 
 		// If escaped pressed then do not need to stop the workers, just return
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			IJ.showProgress(1);
 			return;
@@ -705,7 +705,7 @@ public class PSFDrift implements PlugIn
 				j = findCentre(zPosition[i], smoothx, j);
 				if (j == -1)
 				{
-					Utils.log("Failed to find the offset for depth %.2f", zPosition[i]);
+					ImageJUtils.log("Failed to find the offset for depth %.2f", zPosition[i]);
 					continue;
 				}
 				// The offset should store the difference to the centre in pixels so divide by the pixel pitch
@@ -723,7 +723,7 @@ public class PSFDrift implements PlugIn
 			psfSettings.offset = offset.toArray(new PSFOffset[offset.size()]);
 			psfSettings.addNote(TITLE,
 					String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
-			imp.setProperty("Info", XmlUtils.toXML(psfSettings));
+			imp.setProperty("Info", XStreamXmlUtils.toXML(psfSettings));
 		}
 	}
 
@@ -864,8 +864,8 @@ public class PSFDrift implements PlugIn
 			plot.setColor(Color.magenta);
 			plot.drawLine(limitsx[0] - rangex, recallLimit, limitsx[1] + rangex, recallLimit);
 		}
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = pw.getImagePlus().getID();
 
 		return new double[][] { newX, newY };
@@ -1011,22 +1011,22 @@ public class PSFDrift implements PlugIn
 							{
 								if (psfSettings.zCentre <= 0)
 								{
-									Utils.log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
+									ImageJUtils.log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
 									continue;
 								}
 								if (psfSettings.nmPerPixel <= 0)
 								{
-									Utils.log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
+									ImageJUtils.log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
 									continue;
 								}
 								if (psfSettings.nmPerSlice <= 0)
 								{
-									Utils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
+									ImageJUtils.log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
 									continue;
 								}
 								if (psfSettings.fwhm <= 0)
 								{
-									Utils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
+									ImageJUtils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
 									continue;
 								}
 
@@ -1045,7 +1045,7 @@ public class PSFDrift implements PlugIn
 		Object info = imp.getProperty("Info");
 		if (info != null)
 		{
-			Object o = XmlUtils.fromXML(info.toString());
+			Object o = XStreamXmlUtils.fromXML(info.toString());
 			if (o != null && o instanceof PSFSettings)
 			{
 				return (PSFSettings) o;
@@ -1107,6 +1107,6 @@ public class PSFDrift implements PlugIn
 		plot.addPoints(slice, w1, Plot.LINE);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "X=red; Y=blue");
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 	}
 }

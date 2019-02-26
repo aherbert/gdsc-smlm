@@ -42,7 +42,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
@@ -545,7 +545,7 @@ public class PCPALMFitting implements PlugIn
 			plot.setColor(color);
 			plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
 			addNonFittedPoints(plot, gr, randomModel, parameters);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 			if (saveCorrelationCurve)
 				curves.add(extractCurve(gr, randomModel, parameters));
 		}
@@ -566,7 +566,7 @@ public class PCPALMFitting implements PlugIn
 				plot.setColor(color);
 				plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
 				addNonFittedPoints(plot, gr, clusteredModel, parameters);
-				Utils.display(title, plot);
+				ImageJUtils.display(title, plot);
 				if (saveCorrelationCurve)
 					curves.add(extractCurve(gr, clusteredModel, parameters));
 			}
@@ -584,7 +584,7 @@ public class PCPALMFitting implements PlugIn
 				plot.setColor(color);
 				plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
 				addNonFittedPoints(plot, gr, emulsionModel, parameters);
-				Utils.display(title, plot);
+				ImageJUtils.display(title, plot);
 				if (saveCorrelationCurve)
 					curves.add(extractCurve(gr, emulsionModel, parameters));
 			}
@@ -656,10 +656,10 @@ public class PCPALMFitting implements PlugIn
 	{
 		if (!saveCorrelationCurve)
 			return;
-		outputFilename = Utils.getFilename("Output_Correlation_File", outputFilename);
+		outputFilename = ImageJUtils.getFilename("Output_Correlation_File", outputFilename);
 		if (outputFilename != null)
 		{
-			outputFilename = Utils.replaceExtension(outputFilename, "xls");
+			outputFilename = ImageJUtils.replaceExtension(outputFilename, "xls");
 
 			BufferedWriter output = null;
 			try
@@ -720,7 +720,7 @@ public class PCPALMFitting implements PlugIn
 	 */
 	private boolean loadCorrelationCurve()
 	{
-		inputFilename = Utils.getFilename("Input_Correlation_File", inputFilename);
+		inputFilename = ImageJUtils.getFilename("Input_Correlation_File", inputFilename);
 		if (inputFilename == null)
 			return false;
 

@@ -12,7 +12,7 @@ import org.junit.internal.ArrayComparisonFailure;
 
 public class MedianFilterTest
 {
-	private uk.ac.sussex.gdsc.core.utils.Random rand;
+	private uk.ac.sussex.gdsc.core.utils.RandomUtils rand;
 
 	private boolean debug = false;
 	private int InternalITER3 = 200;
@@ -49,7 +49,7 @@ public class MedianFilterTest
 	private void floatCompareBlockMedianNxNInternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
 			int height, int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -73,7 +73,7 @@ public class MedianFilterTest
 	private void floatCompareBlockMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -94,7 +94,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-300519);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -187,7 +187,7 @@ public class MedianFilterTest
 	private void floatCompareBlockMedian3x3InternalAndBlockMedianNxNInternal(MedianFilter filter, int width,
 			int height) throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -202,7 +202,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -267,7 +267,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -341,7 +341,7 @@ public class MedianFilterTest
 	private void floatCompareRollingMedian3x3InternalAndRollingMedianNxNInternal(MedianFilter filter,
 			int width, int height) throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -356,7 +356,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -444,7 +444,7 @@ public class MedianFilterTest
 	private void floatCompareBlockMedianNxNAndRollingMedianNxN(MedianFilter filter, int width, int height,
 			int boxSize) throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051976);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051976);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -459,7 +459,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-300519);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -533,7 +533,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-300519);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -607,7 +607,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-300519);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-300519);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -689,7 +689,7 @@ public class MedianFilterTest
 	private void floatCompareBlockMedian3x3AndBlockMedianNxN(MedianFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -704,7 +704,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -776,7 +776,7 @@ public class MedianFilterTest
 	private void floatCompareRollingMedian3x3AndRollingMedianNxN(MedianFilter filter, int width, int height)
 			throws ArrayComparisonFailure
 	{
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 		float[] data1 = floatCreateData(width, height);
 		float[] data2 = floatClone(data1);
 
@@ -791,7 +791,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 
@@ -855,7 +855,7 @@ public class MedianFilterTest
 	{
 		org.junit.Assume.assumeTrue(TestSettings.RUN_SPEED_TESTS);
 
-		rand = new uk.ac.sussex.gdsc.core.utils.Random(-30051977);
+		rand = new uk.ac.sussex.gdsc.core.utils.RandomUtils(-30051977);
 
 		MedianFilter filter = new MedianFilter();
 

@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
@@ -187,11 +187,11 @@ public class YeastMask implements PlugIn
 		{
 			// TODO - Remove this laziness since we should really just do a 2D image
 			int centre = stack.getSize() / 2;
-			imp = Utils.display(TITLE, stack.getProcessor(centre));
+			imp = ImageJUtils.display(TITLE, stack.getProcessor(centre));
 		}
 		else
 		{
-			imp = Utils.display(TITLE, stack);
+			imp = ImageJUtils.display(TITLE, stack);
 		}
 
 		// Calibrate

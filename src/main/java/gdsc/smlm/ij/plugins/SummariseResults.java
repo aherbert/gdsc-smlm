@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import java.awt.Rectangle;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -129,7 +129,7 @@ public class SummariseResults implements PlugIn
 		int maxT = getMaxT(result);
 		sb.append("\t").append(maxT);
 		final double exposureTime = (result.getCalibration() != null) ? result.getCalibration().exposureTime : 0;
-		sb.append("\t").append(Utils.timeToString(maxT * exposureTime));
+		sb.append("\t").append(ImageJUtils.timeToString(maxT * exposureTime));
 		if (size > 0)
 		{
 			boolean includeDeviations = result.getResults().get(0).paramsStdDev != null;

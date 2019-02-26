@@ -8,7 +8,7 @@ import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**

@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.DoubleRollingArray;
@@ -159,7 +159,7 @@ public class DiffusionRateTest implements PlugIn
 			return;
 		}
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 
 		if (!showDialog())
 			return;
@@ -177,12 +177,12 @@ public class DiffusionRateTest implements PlugIn
 		final double precisionInPixels = myPrecision / settings.pixelPitch;
 		final boolean addError = myPrecision != 0;
 
-		Utils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", MathUtils.rounded(settings.diffusionRate, 4),
+		ImageJUtils.log(TITLE + " : D = %s um^2/sec, Precision = %s nm", MathUtils.rounded(settings.diffusionRate, 4),
 				MathUtils.rounded(myPrecision, 4));
-		Utils.log("Mean-displacement per dimension = %s nm/sec",
+		ImageJUtils.log("Mean-displacement per dimension = %s nm/sec",
 				MathUtils.rounded(1e3 * ImageModel.getRandomMoveDistance(settings.diffusionRate), 4));
 		if (extraOptions)
-			Utils.log("Step size = %s, precision = %s",
+			ImageJUtils.log("Step size = %s, precision = %s",
 					MathUtils.rounded(ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)),
 					MathUtils.rounded(precisionInPixels));
 
@@ -191,7 +191,7 @@ public class DiffusionRateTest implements PlugIn
 				// Q. What should this be? At the moment just do 1D diffusion on a random vector
 				? ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)
 				: ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
-		Utils.log("Simulation step-size = %s nm", MathUtils.rounded(settings.pixelPitch * diffusionSigma, 4));
+		ImageJUtils.log("Simulation step-size = %s nm", MathUtils.rounded(settings.pixelPitch * diffusionSigma, 4));
 
 		// Move the molecules and get the diffusion rate
 		IJ.showStatus("Simulating ...");
@@ -234,7 +234,7 @@ public class DiffusionRateTest implements PlugIn
 			if (i % 16 == 0)
 			{
 				IJ.showProgress(i, settings.particles);
-				if (Utils.isInterrupted())
+				if (ImageJUtils.isInterrupted())
 					return;
 			}
 
@@ -354,7 +354,7 @@ public class DiffusionRateTest implements PlugIn
 				(results.getCalibration().exposureTime / 1000);
 		final double msd3D = (jumpDistances3D.getMean() / conversionFactor) /
 				(results.getCalibration().exposureTime / 1000);
-		Utils.log(
+		ImageJUtils.log(
 				"Raw data D=%s um^2/s, Precision = %s nm, N=%d, step=%s s, mean2D=%s um^2, MSD 2D = %s um^2/s, mean3D=%s um^2, MSD 3D = %s um^2/s",
 				MathUtils.rounded(settings.diffusionRate), MathUtils.rounded(myPrecision), jumpDistances2D.getN(),
 				MathUtils.rounded(results.getCalibration().exposureTime / 1000),
@@ -429,13 +429,13 @@ public class DiffusionRateTest implements PlugIn
 			// where: d^2 = mean-square displacement
 
 			double D = best2D[1] / 4.0;
-			String msg = "2D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) +
+			String msg = "2D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + ImageJUtils.timeToString(time) +
 					")";
 			IJ.showStatus(msg);
-			Utils.log(msg);
+			ImageJUtils.log(msg);
 
 			D = best3D[1] / 6.0;
-			Utils.log("3D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + Utils.timeToString(time) + ")");
+			ImageJUtils.log("3D Diffusion rate = " + MathUtils.rounded(D, 4) + " um^2 / sec (" + ImageJUtils.timeToString(time) + ")");
 		}
 		else
 		{
@@ -458,7 +458,7 @@ public class DiffusionRateTest implements PlugIn
 			new WindowOrganiser().tileWindows(idList);
 
 		if (useConfinement)
-			Utils.log("3D asymptote distance = %s nm (expected %.2f)",
+			ImageJUtils.log("3D asymptote distance = %s nm (expected %.2f)",
 					MathUtils.rounded(asymptote.getMean() * settings.pixelPitch, 4), 3 * settings.confinementRadius / 4);
 	}
 
@@ -500,8 +500,8 @@ public class DiffusionRateTest implements PlugIn
 		}
 		plot.setColor(Color.black);
 
-		PlotWindow pw1 = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw1 = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = pw1.getImagePlus().getID();
 	}
 
@@ -556,8 +556,8 @@ public class DiffusionRateTest implements PlugIn
 			}
 		}
 		Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
-		PlotWindow pw2 = Utils.display(title2, jdPlot);
-		if (Utils.isNewWindow())
+		PlotWindow pw2 = ImageJUtils.display(title2, jdPlot);
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = pw2.getImagePlus().getID();
 
 		// This is the Chi-squared distribution: The sum of the squares of k independent
@@ -584,15 +584,15 @@ public class DiffusionRateTest implements PlugIn
 
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
-		Utils.display(title2, jdPlot);
+		ImageJUtils.display(title2, jdPlot);
 
 		// Histogram
 		// ---------
 		title2 = title + " Jump " + dimensions + "D";
 		jumpDistances = new StoredDataStatistics(values);
-		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
+		int plotId = ImageJUtils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
 				Math.max(20, values.length / 1000));
-		if (Utils.isNewWindow())
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = plotId;
 
 		// Recompute the expected function
@@ -600,18 +600,18 @@ public class DiffusionRateTest implements PlugIn
 			y[i] = dist.density(x[i]);
 
 		// Scale to have the same area
-		if (Utils.xValues.length > 1)
+		if (Utils.ImageJUtils.length > 1)
 		{
-			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area1 = jumpDistances.getN() * (ImageJUtils.xValues[1] - ImageJUtils.xValues[0]);
 			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scale = area1 / area2;
 			for (int i = 0; i < y.length; i++)
 				y[i] *= scale;
 		}
-		jdPlot = Utils.plot;
+		jdPlot = ImageJUtils.plot;
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
-		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
+		ImageJUtils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
 	}
 
 	/**
@@ -833,7 +833,7 @@ public class DiffusionRateTest implements PlugIn
 		plot.setColor(Color.blue);
 		plot.addPoints(xValues, yUm, Plot2.LINE);
 
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 
 		// Scale up and draw 2D position
 		for (int j = 0; j < totalSteps; j++)
@@ -878,7 +878,7 @@ public class DiffusionRateTest implements PlugIn
 		// Draw the final position
 		ip.putPixel((int) round(x[totalSteps - 1]), (int) round(y[totalSteps - 1]), 255);
 
-		ImagePlus imp = Utils.display(TITLE + " example", ip);
+		ImagePlus imp = ImageJUtils.display(TITLE + " example", ip);
 
 		// Apply the fire lookup table
 		WindowManager.setTempCurrentImage(imp);
@@ -996,7 +996,7 @@ public class DiffusionRateTest implements PlugIn
 		// MSD in pixels^2 / frame
 		double msd = sum / count;
 		// Convert to um^2/second
-		Utils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
+		ImageJUtils.log("Aggregated data D=%s um^2/s, Precision=%s nm, N=%d, step=%s s, mean=%s um^2, MSD = %s um^2/s",
 				MathUtils.rounded(settings.diffusionRate), MathUtils.rounded(myPrecision), count,
 				MathUtils.rounded(results.getCalibration().exposureTime / 1000), MathUtils.rounded(msd / conversionFactor),
 				MathUtils.rounded((msd / conversionFactor) / (results.getCalibration().exposureTime / 1000)));
@@ -1072,7 +1072,7 @@ public class DiffusionRateTest implements PlugIn
 
 		final int totalSteps = (int) Math.ceil(settings.seconds * settings.stepsPerSecond - aggregateSteps);
 		final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
-		final int interval = Utils.getProgressInterval(limit);
+		final int interval = ImageJUtils.getProgressInterval(limit);
 		final ArrayList<String> results = new ArrayList<String>(totalSteps);
 		for (int step = 1; step <= myMsdAnalysisSteps; step++)
 		{
@@ -1296,8 +1296,8 @@ public class DiffusionRateTest implements PlugIn
 		String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
 		double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
 		Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0], jdHistogram[1]);
-		PlotWindow pw2 = Utils.display(title2, jdPlot);
-		if (Utils.isNewWindow())
+		PlotWindow pw2 = ImageJUtils.display(title2, jdPlot);
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = pw2.getImagePlus().getID();
 
 		// Plot the expected function
@@ -1323,14 +1323,14 @@ public class DiffusionRateTest implements PlugIn
 
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
-		Utils.display(title2, jdPlot);
+		ImageJUtils.display(title2, jdPlot);
 
 		// Histogram
 		// ---------
 		title2 = title + " Jump " + dimensions + "D";
-		int plotId = Utils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
+		int plotId = ImageJUtils.showHistogram(title2, jumpDistances, "Distance (um^2)", 0, 0,
 				Math.max(20, values.length / 1000));
-		if (Utils.isNewWindow())
+		if (ImageJUtils.isNewWindow())
 			idList[idCount++] = plotId;
 
 		// Recompute the expected function
@@ -1338,18 +1338,18 @@ public class DiffusionRateTest implements PlugIn
 			y[i] = dist.density(x[i]);
 
 		// Scale to have the same area
-		if (Utils.xValues.length > 1)
+		if (Utils.ImageJUtils.length > 1)
 		{
-			final double area1 = jumpDistances.getN() * (Utils.xValues[1] - Utils.xValues[0]);
+			final double area1 = jumpDistances.getN() * (ImageJUtils.xValues[1] - ImageJUtils.xValues[0]);
 			final double area2 = dist.cumulativeProbability(x[x.length - 1]);
 			final double scaleFactor = area1 / area2;
 			for (int i = 0; i < y.length; i++)
 				y[i] *= scaleFactor;
 		}
-		jdPlot = Utils.plot;
+		jdPlot = ImageJUtils.plot;
 		jdPlot.setColor(Color.red);
 		jdPlot.addPoints(x, y, Plot.LINE);
-		Utils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
+		ImageJUtils.display(WindowManager.getImage(plotId).getTitle(), jdPlot);
 	}
 
 	private void save(StoredDataStatistics storedDataStatistics, int dimensions, String prefix)

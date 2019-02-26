@@ -1,6 +1,6 @@
 package gdsc.smlm.results;
 
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 
 /*----------------------------------------------------------------------------- 
  * GDSC SMLM Software
@@ -112,7 +112,7 @@ public class FilePeakResults extends AbstractPeakResults
 		if (bounds != null)
 			sb.append(String.format("#Bounds x%d y%d w%d h%d\n", bounds.x, bounds.y, bounds.width, bounds.height));
 		if (calibration != null)
-			sb.append(String.format("#Calibration %s\n", singleLine(XmlUtils.toXML(calibration))));
+			sb.append(String.format("#Calibration %s\n", singleLine(XStreamXmlUtils.toXML(calibration))));
 		if (configuration != null && configuration.length() > 0)
 			sb.append(String.format("#Configuration %s\n", singleLine(configuration)));
 

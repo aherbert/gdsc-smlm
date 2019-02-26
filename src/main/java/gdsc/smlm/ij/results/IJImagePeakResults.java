@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.results;
 
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.results.PeakResult;
 import ij.ImagePlus;
@@ -169,7 +169,7 @@ public class IJImagePeakResults extends IJAbstractPeakResults
 		if (bounds != null)
 			sb.append("Bounds: ").append(getBoundsString()).append("\n");
 		if (calibration != null)
-			sb.append("Calibration:\n").append(XmlUtils.toXML(calibration)).append("\n");
+			sb.append("Calibration:\n").append(XStreamXmlUtils.toXML(calibration)).append("\n");
 		if (configuration != null)
 			sb.append("Configuration:\n").append(configuration).append("\n");
 		return (sb.length() > 0) ? sb.toString() : null;

@@ -15,7 +15,7 @@ package gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import gdsc.smlm.ij.plugins.ResultsManager.InputSource;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -92,7 +92,7 @@ public class DarkTimeAnalysis implements PlugIn
 			return;
 		}
 		msPerFrame = results.getCalibration().exposureTime;
-		Utils.log("%s: %d localisations", TITLE, results.size());
+		ImageJUtils.log("%s: %d localisations", TITLE, results.size());
 
 		if (results.size() == 0)
 		{
@@ -224,14 +224,14 @@ public class DarkTimeAnalysis implements PlugIn
 
 		String title = "Cumulative Dark-time";
 		Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 
 		// Report percentile
 		for (int i = 0; i < y.length; i++)
 		{
 			if (y[i] >= percentile)
 			{
-				Utils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, MathUtils.rounded(x[i]),
+				ImageJUtils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile, MathUtils.rounded(x[i]),
 						MathUtils.rounded(x[i] / 1000));
 				break;
 			}
@@ -250,7 +250,7 @@ public class DarkTimeAnalysis implements PlugIn
 				xValues[i] *= msPerFrame;
 			
 			// Ensure the bin width is never less than 1
-			Utils.showHistogram("Dark-time", new StoredDataStatistics(xValues), "Time (ms)", 1, 0, nBins);
+			ImageJUtils.showHistogram("Dark-time", new StoredDataStatistics(xValues), "Time (ms)", 1, 0, nBins);
 		}
 	}
 }

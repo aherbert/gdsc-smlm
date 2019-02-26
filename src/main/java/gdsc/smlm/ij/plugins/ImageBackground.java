@@ -13,7 +13,7 @@ package gdsc.smlm.ij.plugins;
  * (at your option) any later version.
  *---------------------------------------------------------------------------*/
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -105,14 +105,14 @@ public class ImageBackground implements PlugInFilter
 		ImageProcessor background = applyBlur(median);
 		subtractBias(background);
 
-		Utils.display("Background", background);
+		ImageJUtils.display("Background", background);
 		
 		// Q. Is there a better way to do the thresholding for foreground pixels. 
 		// Ideally we want to outline cell shapes. 
 		ImageProcessor mask = median.convertToByte(true);
 		mask.autoThreshold();
 		
-		Utils.display("Mask", mask);
+		ImageJUtils.display("Mask", mask);
 	}
 
 	private ImageProcessor getProjection()

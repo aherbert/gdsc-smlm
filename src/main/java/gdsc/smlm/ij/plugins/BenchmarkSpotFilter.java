@@ -15,7 +15,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.AucCalculator;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -437,7 +437,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -660,7 +660,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -1004,7 +1004,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 		batchMode = "batch".equals(arg);
 
 		simulationParameters = CreateData.simulationParameters;
@@ -1075,7 +1075,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			IJ.showProgress(1);
 			IJ.showStatus("");
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 				return;
 
 			// Analysis options
@@ -1168,9 +1168,9 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.addLegend(null);
 		if (name.contains("Time"))
 			plot.setAxisYLog(true);
-		PlotWindow pw = Utils.display(title, plot);
+		PlotWindow pw = ImageJUtils.display(title, plot);
 		plot.setLimitsToFit(true); // Seems to only work after drawing
-		if (Utils.isNewWindow())
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw);
 	}
 
@@ -1461,7 +1461,7 @@ public class BenchmarkSpotFilter implements PlugIn
 	private void setupProgress(int total, String prefix)
 	{
 		totalProgress = total;
-		stepProgress = Utils.getProgressInterval(totalProgress);
+		stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 		progressPrefix = prefix;
 		progress = 0;
 	}
@@ -1474,7 +1474,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		if (++progress % stepProgress == 0)
 		{
 			//if (Utils.showStatus(String.format("%s: %d / %d", progressPrefix, progress, totalProgress)))
-			if (Utils.showStatus(progressPrefix))
+			if (ImageJUtils.showStatus(progressPrefix))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
@@ -1486,7 +1486,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 	private BenchmarkFilterResult run(FitEngineConfiguration config, boolean relativeDistances, boolean batchSummary)
 	{
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 			return null;
 
 		MaximaSpotFilter spotFilter = config.createSpotFilter(relativeDistances);
@@ -1525,7 +1525,7 @@ public class BenchmarkSpotFilter implements PlugIn
 
 			// Process the frames
 			totalProgress = coordinates.size();
-			stepProgress = Utils.getProgressInterval(totalProgress);
+			stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 			progress = 0;
 			for (int frame : coordinates.keySet())
 			{
@@ -1613,7 +1613,7 @@ public class BenchmarkSpotFilter implements PlugIn
 		}
 		threads.clear();
 
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 			return null;
 
 		if (!batchMode)
@@ -1699,8 +1699,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		StoredDataStatistics stats = filterResult.stats;
 
 		String xTitle = "Failures";
-		final int id = Utils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
-		if (Utils.isNewWindow())
+		final int id = ImageJUtils.showHistogram(TITLE, stats, xTitle, 1, 0, 0);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(id);
 
 		String title = TITLE + " " + xTitle + " Cumulative";
@@ -1711,8 +1711,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
 		plot.setColor(Color.blue);
 		plot.addPoints(h[0], h[1], Plot2.BAR);
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw);
 	}
 
@@ -2086,8 +2086,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
 
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw);
 
 		title = TITLE + " Precision-Recall";
@@ -2100,8 +2100,8 @@ public class BenchmarkSpotFilter implements PlugIn
 		plot.drawLine(r[r.length - 1], p[r.length - 1], r[r.length - 1], 0);
 		plot.setColor(Color.black);
 		plot.addLabel(0, 0, "AUC = " + MathUtils.rounded(auc) + ", AUC2 = " + MathUtils.rounded(auc2));
-		PlotWindow pw2 = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw2 = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw2);
 
 		title = TITLE + " Intensity";
@@ -2117,8 +2117,8 @@ public class BenchmarkSpotFilter implements PlugIn
 			plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
 		else
 			plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
-		PlotWindow pw3 = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw3 = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw3);
 	}
 

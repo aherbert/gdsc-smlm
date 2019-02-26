@@ -1,8 +1,8 @@
 package gdsc.smlm.function;
 
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 
-import uk.ac.sussex.gdsc.core.utils.NotImplementedException;
+import java.util.Arrays;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood
@@ -206,7 +206,7 @@ public abstract class LikelihoodWrapper
 
 	/**
 	 * Specify if the likelihood function can compute gradients. If false then the calls to the likelihood functions to
-	 * compute the gradient will throw a {@link gdsc.core.utils.NotImplementedException }
+	 * compute the gradient will throw a {@link uk.ac.sussex.gdsc.core.data.core.utils.NotImplementedException }
 	 * 
 	 * @return True if the likelihood function can compute gradients
 	 */

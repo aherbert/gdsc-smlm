@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.core.logging.NullLogger;
  *---------------------------------------------------------------------------*/
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second to calculate the
@@ -1108,7 +1108,7 @@ public class JumpDistanceAnalysis
 		{
 			indices[i] = i;
 		}
-		Sort.sort(indices, d);
+		SortUtils.sort(indices, d);
 		double[] d2 = Arrays.copyOf(d, d.length);
 		double[] f2 = Arrays.copyOf(f, f.length);
 		for (int i = 0; i < f.length; i++)

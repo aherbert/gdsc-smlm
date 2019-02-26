@@ -1,6 +1,6 @@
 package gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -40,7 +40,7 @@ public class DepthMask implements PlugIn
 
 		gd.addMessage("Create a mask stack using XY and XZ mask images");
 
-		String[] maskList = Utils.getImageList(Utils.SINGLE);
+		String[] maskList = ImageJUtils.getImageList(ImageJUtils.SINGLE);
 		gd.addChoice("Mask_XY", maskList, titleXY);
 		gd.addChoice("Mask_XZ", maskList, titleXZ);
 
@@ -96,7 +96,7 @@ public class DepthMask implements PlugIn
 			}
 			stack.setPixels(mask, z + 1);
 		}
-		Utils.display(TITLE, stack);
+		ImageJUtils.display(TITLE, stack);
 	}
 
 	private byte[] getMask(ImagePlus impXY)

@@ -1,7 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import ij.IJ;
@@ -194,7 +194,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener
 		}
 		plot.addLabel(0, 0, label);
 
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 
 		IJ.showStatus("");
 	}

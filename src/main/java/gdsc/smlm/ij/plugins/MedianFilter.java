@@ -1,7 +1,7 @@
 package gdsc.smlm.ij.plugins;
 
 import gdsc.smlm.ij.utils.ImageConverter;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
 import ij.IJ;
@@ -93,7 +93,7 @@ public class MedianFilter implements PlugInFilter
 		}
 
 		// Finish processing data
-		Utils.waitForCompletion(futures);
+		ImageJUtils.waitForCompletion(futures);
 
 		futures = new LinkedList<Future<?>>();
 
@@ -105,9 +105,9 @@ public class MedianFilter implements PlugInFilter
 		}
 
 		// Finish processing data
-		Utils.waitForCompletion(futures);
+		ImageJUtils.waitForCompletion(futures);
 
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 			return;
 
 		if (subtract)
@@ -120,7 +120,7 @@ public class MedianFilter implements PlugInFilter
 			}
 
 			// Finish processing data
-			Utils.waitForCompletion(futures);
+			ImageJUtils.waitForCompletion(futures);
 		}
 
 		// Update the image
@@ -135,8 +135,8 @@ public class MedianFilter implements PlugInFilter
 
 		IJ.showTime(imp, start, "Completed");
 		long milliseconds = System.currentTimeMillis() - start;
-		Utils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
-				Utils.timeToString(milliseconds), Utils.timeToString((double) milliseconds / imp.getStackSize()));
+		ImageJUtils.log(TITLE + " : Radius %d, Interval %d, Block size %d = %s, %s / frame", radius, interval, blockSize,
+				ImageJUtils.timeToString(milliseconds), ImageJUtils.timeToString((double) milliseconds / imp.getStackSize()));
 	}
 
 	private int showDialog()

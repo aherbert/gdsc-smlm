@@ -16,9 +16,9 @@ package gdsc.smlm.ij.plugins;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import gdsc.smlm.results.filter.AndFilter;
 import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.OrFilter;
@@ -137,7 +137,7 @@ public class CreateFilters implements PlugIn, ItemListener
 			TransformerException
 	{
 		// Get entire element as a string
-		String xmlString = XmlUtils.getString(node, false);
+		String xmlString = XStreamXmlUtils.getString(node, false);
 
 		ArrayList<StringBuilder> out = new ArrayList<StringBuilder>();
 
@@ -238,7 +238,7 @@ public class CreateFilters implements PlugIn, ItemListener
 	{
 		// Save the output to file
 		IJ.showStatus("Saving filters");
-		String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+		String filename = ImageJUtils.getFilename("Filter_File", filterSettings.filterSetFilename);
 		if (filename != null)
 		{
 			OutputStreamWriter out = null;
@@ -251,7 +251,7 @@ public class CreateFilters implements PlugIn, ItemListener
 
 				FileOutputStream fos = new FileOutputStream(filterSettings.filterSetFilename);
 				out = new OutputStreamWriter(fos, "UTF-8");
-				out.write(XmlUtils.prettyPrintXml(sw.toString()));
+				out.write(XStreamXmlUtils.prettyPrintXml(sw.toString()));
 				SettingsManager.saveSettings(gs);
 				IJ.showStatus(total + " filters: " + filterSettings.filterSetFilename);
 			}
@@ -291,7 +291,7 @@ public class CreateFilters implements PlugIn, ItemListener
 		gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
 		gd.addCheckbox("Show_demo_filters", false);
 
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Checkbox cb = (Checkbox) gd.getCheckboxes().get(1);
 			cb.addItemListener(this);
@@ -371,7 +371,7 @@ public class CreateFilters implements PlugIn, ItemListener
 				e.printStackTrace();
 			}
 
-			IJ.log(XmlUtils.prettyPrintXml(sb.toString()));
+			IJ.log(XStreamXmlUtils.prettyPrintXml(sb.toString()));
 		}
 		else
 		{

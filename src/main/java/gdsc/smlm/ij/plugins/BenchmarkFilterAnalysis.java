@@ -35,7 +35,7 @@ import gdsc.smlm.ij.plugins.BenchmarkSpotFit.SpotMatch;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -48,10 +48,10 @@ import gdsc.smlm.results.filter.Filter;
 import gdsc.smlm.results.filter.FilterSet;
 import gdsc.smlm.results.filter.IMultiFilter;
 import gdsc.smlm.results.filter.XStreamWrapper;
-import gdsc.smlm.utils.XmlUtils;
+import gdsc.smlm.utils.XStreamXmlUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import ij.IJ;
@@ -289,7 +289,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
 
         analyse(resultsList, filterSets);
 
-        String timeString = Utils.timeToString(totalTime);
+        String timeString = ImageJUtils.timeToString(totalTime);
         // TODO - Decide where to write this.
         IJ.log("Filter analysis time : " + timeString);
         IJ.showStatus("Finished : " + timeString);
@@ -300,7 +300,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         GlobalSettings gs = SettingsManager.loadSettings();
         FilterSettings filterSettings = gs.getFilterSettings();
 
-        String filename = Utils.getFilename("Filter_File", filterSettings.filterSetFilename);
+        String filename = ImageJUtils.getFilename("Filter_File", filterSettings.filterSetFilename);
         if (filename != null) {
             IJ.showStatus("Reading filters ...");
             filterSettings.filterSetFilename = filename;
@@ -536,7 +536,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         IJ.showStatus("");
 
         filterList = filterList2;
-        Utils.log("Expanded input to %d filters in %s", countFilters(filterList),
+        ImageJUtils.log("Expanded input to %d filters in %s", countFilters(filterList),
                 TextUtils.pleural(filterList.size(), "set"));
     }
 
@@ -699,7 +699,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
             cal.readNoise = simulationParameters.readNoise;
             r.setCalibration(cal);
             // Set the configuration used for fitting
-            r.setConfiguration(XmlUtils.toXML(BenchmarkSpotFit.fitConfig));
+            r.setConfiguration(XStreamXmlUtils.toXML(BenchmarkSpotFit.fitConfig));
 
             for (Entry<Integer, FilterCandidates> entry : BenchmarkSpotFit.fitResults.entrySet()) {
                 final int peak = entry.getKey().intValue();
@@ -718,7 +718,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
                             score[i] = fitResult.getParameters()[Gaussian2DFunction.SIGNAL];
                         }
                     }
-                    Sort.sort(indices, score);
+                    SortUtils.sort(indices, score);
                 }
 
                 int failCount = 0;
@@ -1061,7 +1061,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         IJ.showProgress(1);
         IJ.showStatus("");
 
-        if (Utils.isInterrupted())
+        if (ImageJUtils.isInterrupted())
             return;
 
         if (bestFilter.isEmpty()) {
@@ -1192,7 +1192,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
             plot.draw();
             plot.setColor(Color.BLUE);
             plot.addPoints(p.xValues, p.yValues, Plot2.CROSS);
-            PlotWindow plotWindow = Utils.display(p.name, plot);
+            PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
             list[i++] = plotWindow.getImagePlus().getID();
         }
         new WindowOrganiser().tileWindows(list);
@@ -1502,7 +1502,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
             for (Filter filter : filterSet.getFilters()) {
                 if (count2++ % 16 == 0) {
                     progress(count2, total);
-                    if (Utils.isInterrupted())
+                    if (ImageJUtils.isInterrupted())
                         return -1;
                 }
 
@@ -1618,7 +1618,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
                     for (Filter filter : newSet.getFilters()) {
                         if (stepCount++ % 16 == 0) {
                             progress(stepCount, stepTotal);
-                            if (Utils.isInterrupted())
+                            if (ImageJUtils.isInterrupted())
                                 return -1;
                         }
 
@@ -1705,7 +1705,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         for (Filter filter : filterSet.getFilters()) {
             if (i % 16 == 0) {
                 IJ.showProgress(totalProgress + i * stepSize);
-                if (Utils.isInterrupted())
+                if (ImageJUtils.isInterrupted())
                     return -1;
             }
 
@@ -1822,12 +1822,12 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
                 if (sb.length() > 0) {
                     atLimit = true;
                     if (criteriaPassed) {
-                        Utils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
+                        ImageJUtils.log("Warning: Top filter (%s @ %s|%s) [%s] at the limit of the expanded range%s",
                                 maxFilter.getName(), MathUtils.rounded((invertScore) ? -max[SCORE] : max[SCORE]),
                                 MathUtils.rounded((invertCriteria) ? -minCriteria : minCriteria),
                                 limitFailCount + limitRange, sb.toString());
                     } else {
-                        Utils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
+                        ImageJUtils.log("Warning: Top filter (%s @ -|%s) [%s] at the limit of the expanded range%s",
                                 maxFilter.getName(),
                                 MathUtils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]),
                                 limitFailCount + limitRange, sb.toString());
@@ -1839,7 +1839,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         // We may have no filters that pass the criteria
         String type = maxFilter.getType();
         if (!criteriaPassed) {
-            Utils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
+            ImageJUtils.log("Warning: Filter does not pass the criteria: %s : Best = %s using %s", type,
                     MathUtils.rounded((invertCriteria) ? -max[CRITERIA] : max[CRITERIA]), maxFilter.getName());
             return 0;
         }
@@ -2253,10 +2253,10 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
     }
 
     static String getFilename(String title, String filename) {
-        filename = Utils.getFilename(title, filename);
+        filename = ImageJUtils.getFilename(title, filename);
         // Use XML extension
         if (filename != null)
-            filename = Utils.replaceExtension(filename, ".xml");
+            filename = ImageJUtils.replaceExtension(filename, ".xml");
         return filename;
     }
 
@@ -2268,7 +2268,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
             FileOutputStream fos = new FileOutputStream(filename);
             out = new OutputStreamWriter(fos, "UTF-8");
             // Use the instance so we can catch the exception
-            out.write(XmlUtils.prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
+            out.write(XStreamXmlUtils.prettyPrintXml(XStreamWrapper.getInstance().toXML(list)));
         } catch (Exception e) {
             IJ.log("Unable to save the filter sets to file: " + e.getMessage());
         } finally {
@@ -2386,8 +2386,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         double[] limits = { -range, range };
 
         final int bins = Math.max(10, simulationParameters.molecules / 100);
-        double[][] h1 = Utils.calcHistogram(depths, limits[0], limits[1], bins);
-        double[][] h2 = Utils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
+        double[][] h1 = ImageJUtils.calcHistogram(depths, limits[0], limits[1], bins);
+        double[][] h2 = ImageJUtils.calcHistogram(depthFitStats.getValues(), limits[0], limits[1], bins);
 
         // To get the number of TP at each depth will require that the filter is run
         // manually to get the results that pass.
@@ -2404,7 +2404,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         depths2 = Arrays.copyOf(depths2, count);
 
         // Build a histogram using the same limits
-        double[][] h3 = Utils.calcHistogram(depths2, limits[0], limits[1], bins);
+        double[][] h3 = ImageJUtils.calcHistogram(depths2, limits[0], limits[1], bins);
 
         // Convert pixel depth to nm
         for (int i = 0; i < h1[0].length; i++)
@@ -2424,8 +2424,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         plot1.setColor(Color.red);
         plot1.addPoints(h1[0], h3[1], Plot2.BAR);
         plot1.setColor(Color.magenta);
-        PlotWindow pw1 = Utils.display(title1, plot1);
-        if (Utils.isNewWindow())
+        PlotWindow pw1 = ImageJUtils.display(title1, plot1);
+        if (ImageJUtils.isNewWindow())
             wo.add(pw1);
 
         // Interpolate
@@ -2503,8 +2503,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
                     getSplineValue(spline3, spline3b, halfSummaryDepth - halfBinWidth)
                             / getSplineValue(spline1, spline1b, halfSummaryDepth - halfBinWidth));
         }
-        PlotWindow pw2 = Utils.display(title2, plot2);
-        if (Utils.isNewWindow())
+        PlotWindow pw2 = ImageJUtils.display(title2, plot2);
+        if (ImageJUtils.isNewWindow())
             wo.add(pw2);
 
         return results;
@@ -2534,8 +2534,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
                 simulationParameters.a * BenchmarkSpotFit.distanceInPixels * upperMatchDistance / 100.0 };
 
         final int bins = Math.max(10, simulationParameters.molecules / 100);
-        double[][] h1 = Utils.calcHistogram(signal, limits1[0], limits1[1], bins);
-        double[][] h2 = Utils.calcHistogram(distance, limits2[0], limits2[1], bins);
+        double[][] h1 = ImageJUtils.calcHistogram(signal, limits1[0], limits1[1], bins);
+        double[][] h2 = ImageJUtils.calcHistogram(distance, limits2[0], limits2[1], bins);
 
         // Run the filter manually to get the results that pass.
         if (results == null)
@@ -2556,8 +2556,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         distance2 = Arrays.copyOf(distance2, count);
 
         // Build a histogram using the same limits
-        double[][] h1b = Utils.calcHistogram(signal2, limits1[0], limits1[1], bins);
-        double[][] h2b = Utils.calcHistogram(distance2, limits2[0], limits2[1], bins);
+        double[][] h1b = ImageJUtils.calcHistogram(signal2, limits1[0], limits1[1], bins);
+        double[][] h2b = ImageJUtils.calcHistogram(distance2, limits2[0], limits2[1], bins);
 
         // Draw distance histogram first
         String title2 = TITLE + " Distance Histogram";
@@ -2570,8 +2570,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         plot2.addPoints(h2[0], h2[1], Plot2.BAR);
         plot2.setColor(Color.red);
         plot2.addPoints(h2b[0], h2b[1], Plot2.BAR);
-        PlotWindow pw2 = Utils.display(title2, plot2);
-        if (Utils.isNewWindow())
+        PlotWindow pw2 = ImageJUtils.display(title2, plot2);
+        if (ImageJUtils.isNewWindow())
             wo.add(pw2);
 
         // Draw signal factor histogram
@@ -2585,8 +2585,8 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
         plot1.addPoints(h1[0], h1[1], Plot2.BAR);
         plot1.setColor(Color.red);
         plot1.addPoints(h1b[0], h1b[1], Plot2.BAR);
-        PlotWindow pw1 = Utils.display(title1, plot1);
-        if (Utils.isNewWindow())
+        PlotWindow pw1 = ImageJUtils.display(title1, plot1);
+        if (ImageJUtils.isNewWindow())
             wo.add(pw1);
     }
 
@@ -2701,7 +2701,7 @@ public class BenchmarkFilterAnalysis implements PlugIn, FitnessFunction, TrackPr
             if (convergedCount >= 0 && count > convergedCount)
                 return true;
             if (IJ.escapePressed()) {
-                Utils.log("STOPPED " + ga_statusPrefix);
+                ImageJUtils.log("STOPPED " + ga_statusPrefix);
                 IJ.resetEscape(); // Allow the plugin to continue processing
                 return true;
             }

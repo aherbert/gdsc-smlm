@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_2D;
 import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -164,7 +164,7 @@ public class PCPALMAnalysis implements PlugInFilter
 	 */
 	private boolean getDirectory()
 	{
-		resultsDirectory = Utils.getDirectory("Results_directory", resultsDirectory);
+		resultsDirectory = ImageJUtils.getDirectory("Results_directory", resultsDirectory);
 		return resultsDirectory != null;
 	}
 
@@ -773,7 +773,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		plot.setLimits(0, x[x.length - 1], MathUtils.min(y) * 0.95, MathUtils.max(y) * 1.05);
 		plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
 		
-		Utils.display(plotTitle, plot);
+		ImageJUtils.display(plotTitle, plot);
 
 		if (showErrorBars && !barChart)
 		{
@@ -783,7 +783,7 @@ public class PCPALMAnalysis implements PlugInFilter
 				double sd = gr[2][i + offset];
 				plot.drawLine(x[i], y[i] - sd, x[i], y[i] + sd);
 			}
-			Utils.display(plotTitle, plot);
+			ImageJUtils.display(plotTitle, plot);
 		}
 		
 		return plot;
@@ -1025,7 +1025,7 @@ public class PCPALMAnalysis implements PlugInFilter
 		correlation.setRoi(crop);
 		ImageProcessor ip = correlation.crop();
 		ip.resetMinAndMax();
-		Utils.display(title, ip);
+		ImageJUtils.display(title, ip);
 	}
 
 	/**

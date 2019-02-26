@@ -22,7 +22,7 @@ import gdsc.smlm.fitting.FitSolver;
 import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.Calibration;
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
@@ -163,7 +163,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		gd.addNumericField("Precision_threshold", fitConfig.getPrecisionThreshold(), 2);
 
 		// Add a mouse listener to the config file field
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Vector<TextField> texts = (Vector<TextField>) gd.getStringFields();
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
@@ -332,7 +332,7 @@ public class Configuration implements PlugIn, MouseListener, TextListener
 		{
 			if (e.getSource() == textConfigFile)
 			{
-				String[] path = Utils.decodePath(textConfigFile.getText());
+				String[] path = ImageJUtils.decodePath(textConfigFile.getText());
 				OpenDialog chooser = new OpenDialog("Configuration_File", path[0], path[1]);
 				if (chooser.getFileName() != null)
 				{

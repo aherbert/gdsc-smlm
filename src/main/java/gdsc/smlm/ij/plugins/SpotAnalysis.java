@@ -21,7 +21,7 @@ import gdsc.smlm.fitting.Gaussian2DFitter;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import gdsc.smlm.ij.IJImageSource;
 import gdsc.smlm.ij.utils.ImageROIPainter;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import gdsc.smlm.results.Trace;
@@ -700,7 +700,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
 			List<Future<?>> futures = new LinkedList<Future<?>>();
 
-			Utils.setShowProgress(false);
+			ImageJUtils.setShowProgress(false);
 			blurCount = 0;
 			// TODO - See if this is faster if processing multiple slices in each worker
 			int slices = 5;
@@ -710,9 +710,9 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 			}
 
 			IJ.showStatus("Calculating blur ... Finishing");
-			Utils.waitForCompletion(futures);
+			ImageJUtils.waitForCompletion(futures);
 			threadPool.shutdown();
-			Utils.setShowProgress(false);
+			ImageJUtils.setShowProgress(false);
 			IJ.showStatus("Calculating blur ... Drawing");
 
 			ImageStack blurSpot = new ImageStack(bounds.width, bounds.height, nSlices);
@@ -781,8 +781,8 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 
 	private ImagePlus showSpot(String title, ImageStack spot)
 	{
-		ImagePlus imp = Utils.display(title, spot);
-		if (Utils.isNewWindow() || imp.getWindow().getCanvas().getMagnification() == 1)
+		ImagePlus imp = ImageJUtils.display(title, spot);
+		if (ImageJUtils.isNewWindow() || imp.getWindow().getCanvas().getMagnification() == 1)
 		{
 			for (int i = 9; i-- > 0;)
 				imp.getWindow().getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
@@ -930,7 +930,7 @@ public class SpotAnalysis extends PlugInFrame implements ActionListener, ItemLis
 		plot.addPoints(new double[] { rawImp.getCurrentSlice(), rawImp.getCurrentSlice() }, limits, Plot2.LINE);
 
 		plot.setColor(Color.blue);
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 	}
 
 	@SuppressWarnings("unchecked")

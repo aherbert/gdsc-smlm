@@ -31,7 +31,9 @@ import java.util.regex.Pattern;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
-import gdsc.smlm.utils.XmlUtils;
+import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+
+import gdsc.smlm.utils.XStreamXmlUtils;
 import gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
@@ -332,7 +334,7 @@ public class PeakResultsReader
 					if (xml != null && xml.length() > 0 && xml.startsWith("<"))
 					{
 						// Convert the XML back
-						calibration = (Calibration) XmlUtils.fromXML(xml);
+						calibration = (Calibration) XStreamXmlUtils.fromXML(xml);
 					}
 				}
 			}

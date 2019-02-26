@@ -18,7 +18,7 @@ import gdsc.smlm.ij.gui.LegacyGenericDialog;
 import gdsc.smlm.ij.settings.FilterSettings;
 import gdsc.smlm.ij.settings.GlobalSettings;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import gdsc.smlm.results.MemoryPeakResults;
@@ -194,7 +194,7 @@ public class FilterAnalysis implements PlugIn
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
+		String[] path = ImageJUtils.decodePath(filterSettings.filterSetFilename);
 		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
@@ -242,7 +242,7 @@ public class FilterAnalysis implements PlugIn
 		GlobalSettings gs = SettingsManager.loadSettings();
 		FilterSettings filterSettings = gs.getFilterSettings();
 
-		String[] path = Utils.decodePath(filterSettings.filterSetFilename);
+		String[] path = ImageJUtils.decodePath(filterSettings.filterSetFilename);
 		OpenDialog chooser = new OpenDialog("Filter_File", path[0], path[1]);
 		if (chooser.getFileName() != null)
 		{
@@ -659,7 +659,7 @@ public class FilterAnalysis implements PlugIn
 			plot.draw();
 			plot.setColor(Color.BLUE);
 			plot.addPoints(p.xValues, p.yValues, Plot2.CROSS);
-			PlotWindow plotWindow = Utils.display(p.name, plot);
+			PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
 			list[i++] = plotWindow.getImagePlus().getID();
 		}
 		new WindowOrganiser().tileWindows(list);

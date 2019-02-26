@@ -51,7 +51,7 @@ import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -616,7 +616,7 @@ public class PCPALMMolecules implements PlugIn
 			if (Double.isNaN(lower) || Double.isNaN(upper))
 			{
 				if (logFitParameters)
-					Utils.log("Error computing IQR: %f - %f", lower, upper);
+					ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
 			}
 			else
 			{
@@ -626,7 +626,7 @@ public class PCPALMMolecules implements PlugIn
 				yMax = FastMath.min(upper + iqr, stats.getMax());
 
 				if (logFitParameters)
-					Utils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
+					ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(), stats.getMax(), yMin,
 							yMax);
 			}
 		}
@@ -637,10 +637,10 @@ public class PCPALMMolecules implements PlugIn
 			yMax = stats.getMax();
 
 			if (logFitParameters)
-				Utils.log("  Data range: %f - %f", yMin, yMax);
+				ImageJUtils.log("  Data range: %f - %f", yMin, yMax);
 		}
 
-		float[][] hist = Utils.calcHistogram(data, yMin, yMax, histogramBins);
+		float[][] hist = ImageJUtils.calcHistogram(data, yMin, yMax, histogramBins);
 
 		Plot2 plot = null;
 		if (title != null)
@@ -655,7 +655,7 @@ public class PCPALMMolecules implements PlugIn
 						MathUtils.max(yValues) * 1.05);
 			}
 			plot.addPoints(xValues, yValues, Plot2.BAR);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 		}
 
 		// Extract non-zero data
@@ -674,7 +674,7 @@ public class PCPALMMolecules implements PlugIn
 		y = Arrays.copyOf(y, count);
 
 		// Sense check to fitted data. Get mean and SD of histogram
-		double[] stats2 = Utils.getHistogramStatistics(x, y);
+		double[] stats2 = ImageJUtils.getHistogramStatistics(x, y);
 		double mean = stats2[0];
 		if (logFitParameters)
 			log("  Initial Statistics: %f +/- %f", stats2[0], stats2[1]);
@@ -742,7 +742,7 @@ public class PCPALMMolecules implements PlugIn
 			addToPlot(plot, x, skewParameters, Plot2.LINE);
 
 			plot.setColor(Color.black);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 		}
 
 		// Return the average precision from the fitted curve
@@ -1256,7 +1256,7 @@ public class PCPALMMolecules implements PlugIn
 					for (int i = 0; i < mask.length; i++)
 						if (mask[i] != 0)
 							bp.set(i, 128);
-					Utils.display(maskTitle, bp);
+					ImageJUtils.display(maskTitle, bp);
 				}
 			}
 
@@ -1435,7 +1435,7 @@ public class PCPALMMolecules implements PlugIn
 		results.end();
 
 		if (bp != null)
-			Utils.display(maskTitle, bp);
+			ImageJUtils.display(maskTitle, bp);
 
 		// Used for debugging
 		//System.out.printf("  * Molecules = %d (%d activated)\n", xyz.size(), count);
@@ -1498,7 +1498,7 @@ public class PCPALMMolecules implements PlugIn
 		if (integerBins)
 		{
 			// The histogram is not need for the return statement
-			Utils.showHistogram(title, stats, label, 1, 0, 0);
+			ImageJUtils.showHistogram(title, stats, label, 1, 0, 0);
 		}
 		else
 		{
@@ -1511,7 +1511,7 @@ public class PCPALMMolecules implements PlugIn
 
 			// Plot
 			plot = new Plot2(title, label, "Frequency", xValues, yValues);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 		}
 
 		return hist;
@@ -1559,7 +1559,7 @@ public class PCPALMMolecules implements PlugIn
 			plot.setColor(Color.blue);
 			plot.addPoints(interIdHist[0], interIdHist[1], Plot2.LINE);
 			plot.setColor(Color.black);
-			Utils.display(title, plot);
+			ImageJUtils.display(title, plot);
 		}
 		else
 		{
@@ -1794,8 +1794,8 @@ public class PCPALMMolecules implements PlugIn
 		final double xBinSize = (maxx - minx) / gridSize;
 		final double yBinSize = (maxy - miny) / gridSize;
 		final int nXBins = 1 + (int) ((maxx - minx) / xBinSize);
-		final int nYBins = 1 + (int) ((maxy - miny) / yBinSize);
-		Molecule[][] grid = new Molecule[nXBins][nYBins];
+		final int nybins = 1 + (int) ((maxy - miny) / yBinSize);
+		Molecule[][] grid = new Molecule[nXBins][nybins];
 		for (Molecule m : molecules)
 		{
 			final int xBin = (int) ((m.x - minx) / xBinSize);
@@ -1811,7 +1811,7 @@ public class PCPALMMolecules implements PlugIn
 		IJ.showStatus("Computing minimum distance ...");
 		IJ.showProgress(0);
 		Molecule[] neighbours = new Molecule[5];
-		for (int yBin = 0, currentIndex = 0, finalIndex = nXBins * nYBins; yBin < nYBins; yBin++)
+		for (int yBin = 0, currentIndex = 0, finalIndex = nXBins * nybins; yBin < nybins; yBin++)
 		{
 			for (int xBin = 0; xBin < nXBins; xBin++)
 			{
@@ -1827,7 +1827,7 @@ public class PCPALMMolecules implements PlugIn
 					int count = 0;
 					neighbours[count++] = m1.next;
 
-					if (yBin < nYBins - 1)
+					if (yBin < nybins - 1)
 					{
 						neighbours[count++] = grid[xBin][yBin + 1];
 						if (xBin > 0)
@@ -1836,7 +1836,7 @@ public class PCPALMMolecules implements PlugIn
 					if (xBin < nXBins - 1)
 					{
 						neighbours[count++] = grid[xBin + 1][yBin];
-						if (yBin < nYBins - 1)
+						if (yBin < nybins - 1)
 							neighbours[count++] = grid[xBin + 1][yBin + 1];
 					}
 
@@ -1979,7 +1979,7 @@ public class PCPALMMolecules implements PlugIn
 
 	static ImagePlus displayImage(String title, ImageProcessor ip, double nmPerPixel)
 	{
-		ImagePlus imp = Utils.display(title, ip);
+		ImagePlus imp = ImageJUtils.display(title, ip);
 		Calibration cal = new Calibration();
 		cal.setUnit("um");
 		cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
@@ -2137,7 +2137,7 @@ public class PCPALMMolecules implements PlugIn
 	 */
 	private static void log(String format, Object... args)
 	{
-		Utils.log(format, args);
+		ImageJUtils.log(format, args);
 	}
 
 	/**

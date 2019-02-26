@@ -17,8 +17,8 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
@@ -79,7 +79,7 @@ public class ImageROIPainter implements MouseListener
 
 			addRoi(imp, slice, new PointRoi(x, y));
 
-			Utils.adjustSourceRect(imp, 0, (int) x, (int) y);
+			ImageJUtils.adjustSourceRect(imp, 0, (int) x, (int) y);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class ImageROIPainter implements MouseListener
 		for (int i = 0; i < points; i++)
 			indices[i] = i;
 
-		Sort.sort(indices, slice);
+		SortUtils.sort(indices, slice);
 
 		Overlay o = new Overlay();
 

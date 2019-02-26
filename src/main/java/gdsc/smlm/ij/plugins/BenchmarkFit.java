@@ -12,7 +12,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -204,7 +204,7 @@ public class BenchmarkFit implements PlugIn
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -641,7 +641,7 @@ public class BenchmarkFit implements PlugIn
 	{
 		if (++progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
@@ -665,7 +665,7 @@ public class BenchmarkFit implements PlugIn
 			// Check if it is incorrect by only 1 pixel
 			if (region.width <= imp.getWidth() + 1 && region.height <= imp.getHeight() + 1)
 			{
-				Utils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
+				ImageJUtils.log("Adjusting region %s to fit within image bounds (%dx%d)", region.toString(), imp.getWidth(),
 						imp.getHeight());
 				region = new Rectangle(0, 0, imp.getWidth(), imp.getHeight());
 			}
@@ -711,7 +711,7 @@ public class BenchmarkFit implements PlugIn
 
 		// Fit the frames
 		totalProgress = totalFrames;
-		stepProgress = Utils.getProgressInterval(totalProgress);
+		stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int i = 0; i < totalFrames; i++)
 		{
@@ -742,7 +742,7 @@ public class BenchmarkFit implements PlugIn
 		threads.clear();
 
 		if (comFitting)
-			Utils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
+			ImageJUtils.log(TITLE + ": CoM within start offset = %d / %d (%s%%)", comValid.intValue(), totalFrames,
 					MathUtils.rounded((100.0 * comValid.intValue()) / totalFrames));
 
 		IJ.showProgress(1);
@@ -785,10 +785,10 @@ public class BenchmarkFit implements PlugIn
 					for (int j = 0; j < tmp.length; j++)
 						tmp[j] *= convert[i];
 					StoredDataStatistics tmpStats = new StoredDataStatistics(tmp);
-					idList[count++] = Utils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
+					idList[count++] = ImageJUtils.showHistogram(TITLE, tmpStats, NAMES[i], 0, 0, histogramBins,
 							String.format("%s +/- %s", MathUtils.rounded(tmpStats.getMean()),
 									MathUtils.rounded(tmpStats.getStandardDeviation())));
-					requireRetile = requireRetile || Utils.isNewWindow();
+					requireRetile = requireRetile || ImageJUtils.isNewWindow();
 				}
 			}
 
@@ -801,7 +801,7 @@ public class BenchmarkFit implements PlugIn
 
 		if (saveRawData)
 		{
-			String dir = Utils.getDirectory("Data_directory", rawDataDirectory);
+			String dir = ImageJUtils.getDirectory("Data_directory", rawDataDirectory);
 			if (dir != null)
 				saveData(stats, dir);
 		}

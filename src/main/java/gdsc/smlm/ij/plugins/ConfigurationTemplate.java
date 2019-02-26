@@ -5,7 +5,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.engine.DataFilter;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.fitting.FitConfiguration;
@@ -245,7 +245,7 @@ public class ConfigurationTemplate implements PlugIn
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
 		// Allow the user to specify a configuration directory
-		String newDirectory = Utils.getDirectory("Template_directory", configurationDirectory);
+		String newDirectory = ImageJUtils.getDirectory("Template_directory", configurationDirectory);
 
 		if (newDirectory == null)
 			return;
@@ -283,7 +283,7 @@ public class ConfigurationTemplate implements PlugIn
 			{
 				count++;
 				File file = new File(path);
-				String name = Utils.removeExtension(file.getName());
+				String name = ImageJUtils.removeExtension(file.getName());
 				addTemplate(name, settings, true, file);
 			}
 		}

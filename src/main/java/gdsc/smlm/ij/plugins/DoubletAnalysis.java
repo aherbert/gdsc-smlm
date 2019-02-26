@@ -38,7 +38,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJLogger;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.logging.Logger;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -511,7 +511,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -1599,7 +1599,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		gd.addChoice("Matching", MATCHING, MATCHING[matching]);
 
 		// Add a mouse listener to the config file field
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Choice> choices = (Vector<Choice>) gd.getChoices();
@@ -1782,7 +1782,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 	{
 		if (++progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
@@ -1826,7 +1826,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// Fit the frames
 		long runTime = System.nanoTime();
 		totalProgress = actualCoordinates.size();
-		stepProgress = Utils.getProgressInterval(totalProgress);
+		stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int frame : actualCoordinates.keySet())
 		{
@@ -1955,8 +1955,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		double max = MathUtils.max(histogram);
 		plot.setLimits(0, histogram.length, 0, max * 1.05);
 		plot.addPoints(SimpleArrayUtils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
-		PlotWindow pw = Utils.display(labels[0], plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(labels[0], plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
 	}
 
@@ -2209,7 +2209,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		sb.append(bestJaccard);
 		addJaccardScores(sb);
 
-		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		sb.append("\t").append(ImageJUtils.timeToString(runTime / 1000000.0));
 
 		summaryTable.append(sb.toString());
 	}
@@ -2390,8 +2390,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 
 	private void display(String title, Plot plot)
 	{
-		PlotWindow pw = Utils.display(title, plot);
-		if (Utils.isNewWindow())
+		PlotWindow pw = ImageJUtils.display(title, plot);
+		if (ImageJUtils.isNewWindow())
 			windowOrganiser.add(pw.getImagePlus().getID());
 	}
 
@@ -3103,7 +3103,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener
 		// TODO - Add support for updating a template with a residuals threshold, e.g. from the BenchmarkFilterAnalysis plugin
 
 		// Add a mouse listener to the config file field
-		if (Utils.isShowGenericDialog())
+		if (ImageJUtils.isShowGenericDialog())
 		{
 			Vector<TextField> numerics = (Vector<TextField>) gd.getNumericFields();
 			Vector<Checkbox> checkboxes = (Vector<Checkbox>) gd.getCheckboxes();

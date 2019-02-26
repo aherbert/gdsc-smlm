@@ -22,7 +22,7 @@ import gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import gdsc.smlm.ij.results.ResultsImage;
 import gdsc.smlm.ij.results.ResultsMode;
 import gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import gdsc.smlm.results.MemoryPeakResults;
 import gdsc.smlm.results.PeakResult;
 import ij.IJ;
@@ -391,7 +391,7 @@ public class FIRE implements PlugIn
 			plot.addPoints(xValues, yValuesNotSmooth, Plot2.LINE);
 		}
 
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 	}
 
 	private void showFrcTimeEvolution(String name, double fireNumber, ThresholdMethod method)
@@ -458,7 +458,7 @@ public class FIRE implements PlugIn
 		plot.setLimits(xValues[0], xValues[xValues.length - 1], yMin, yMax);
 		plot.addPoints(xValues, yValues, 1);
 
-		Utils.display(title, plot);
+		ImageJUtils.display(title, plot);
 	}
 
 	/**

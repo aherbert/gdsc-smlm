@@ -9,7 +9,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uk.ac.sussex.gdsc.core.utils.Random;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 
 public class ImageSourceTest
 {
@@ -133,7 +133,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		Assert.assertTrue(source.open());
@@ -179,7 +179,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		Assert.assertTrue(source.open());
@@ -313,7 +313,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
@@ -377,7 +377,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length];
 		for (int i = 0; i < data.length; i++)
 			frames[i] = i + 1;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		int[] expected = new int[] { 4, 5, 7, 8, 10, 11, 13, 14 };
@@ -469,7 +469,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		Assert.assertTrue(source.open());
@@ -527,7 +527,7 @@ public class ImageSourceTest
 		int[] frames = new int[data.length / 3];
 		for (int i = 0, frame = 1; i < frames.length; i++, frame += 3)
 			frames[i] = frame;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		Assert.assertTrue(source.open());
@@ -649,7 +649,7 @@ public class ImageSourceTest
 		int[] frames = new int[source.getFrames()];
 		for (int i = 0, ii = 0; ii < expected.length; i++, ii += 3)
 			frames[i] = ii;
-		Random rand = new Random();
+		RandomUtils rand = new RandomUtils();
 		rand.shuffle(frames);
 
 		Assert.assertTrue(source.open());

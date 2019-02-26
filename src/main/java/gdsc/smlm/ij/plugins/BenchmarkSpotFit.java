@@ -33,7 +33,7 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.match.Assignment;
 import uk.ac.sussex.gdsc.core.match.AssignmentComparator;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator.Method;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import gdsc.smlm.engine.FitEngineConfiguration;
 import gdsc.smlm.engine.FitParameters;
@@ -501,7 +501,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		private void run(int frame)
 		{
-			if (Utils.isInterrupted())
+			if (ImageJUtils.isInterrupted())
 			{
 				finished = true;
 				return;
@@ -755,7 +755,7 @@ public class BenchmarkSpotFit implements PlugIn
 	{
 		SMLMUsageTracker.recordPlugin(this.getClass(), arg);
 
-		extraOptions = Utils.isExtraOptions();
+		extraOptions = ImageJUtils.isExtraOptions();
 
 		simulationParameters = CreateData.simulationParameters;
 		if (simulationParameters == null)
@@ -920,7 +920,7 @@ public class BenchmarkSpotFit implements PlugIn
 	{
 		if (++progress % stepProgress == 0)
 		{
-			if (Utils.showStatus("Frame: " + progress + " / " + totalProgress))
+			if (ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress))
 				IJ.showProgress(progress, totalProgress);
 		}
 	}
@@ -977,7 +977,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// Fit the frames
 		long runTime = System.nanoTime();
 		totalProgress = stack.getSize();
-		stepProgress = Utils.getProgressInterval(totalProgress);
+		stepProgress = ImageJUtils.getProgressInterval(totalProgress);
 		progress = 0;
 		for (int i = 1; i <= totalProgress; i++)
 		{
@@ -1006,7 +1006,7 @@ public class BenchmarkSpotFit implements PlugIn
 		IJ.showProgress(1);
 		runTime = System.nanoTime() - runTime;
 
-		if (Utils.isInterrupted())
+		if (ImageJUtils.isInterrupted())
 		{
 			IJ.showStatus("Aborted");
 			return;
@@ -1422,8 +1422,8 @@ public class BenchmarkSpotFit implements PlugIn
 
 		String label = String.format("Recall = %s. n = %d. Median = %s nm. SD = %s nm", MathUtils.rounded(m.getRecall()),
 				distanceStats.getN(), MathUtils.rounded(median), MathUtils.rounded(distanceStats.getStandardDeviation()));
-		int id = Utils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 0, label);
-		if (Utils.isNewWindow())
+		int id = ImageJUtils.showHistogram(TITLE, distanceStats, "Match Distance (nm)", 0, 0, 0, label);
+		if (ImageJUtils.isNewWindow())
 			wo.add(id);
 
 		median = depthStats.getMedian();
@@ -1432,7 +1432,7 @@ public class BenchmarkSpotFit implements PlugIn
 		// Sort by spot intensity and produce correlation
 		int[] indices = SimpleArrayUtils.newArray(i1.length, 0, 1);
 		if (showCorrelation)
-			Sort.sort(indices, is, rankByIntensity);
+			SortUtils.sort(indices, is, rankByIntensity);
 		double[] r = (showCorrelation) ? new double[i1.length] : null;
 		double[] sr = (showCorrelation) ? new double[i1.length] : null;
 		double[] rank = (showCorrelation) ? new double[i1.length] : null;
@@ -1483,8 +1483,8 @@ public class BenchmarkSpotFit implements PlugIn
 				plot.drawLine(limits1[0], limits1[0] * slope, limits1[1], limits1[1] * slope);
 			else
 				plot.drawLine(limits2[0] / slope, limits2[0], limits2[1] / slope, limits2[1]);
-			PlotWindow pw = Utils.display(title, plot);
-			if (Utils.isNewWindow())
+			PlotWindow pw = ImageJUtils.display(title, plot);
+			if (ImageJUtils.isNewWindow())
 				wo.add(pw);
 
 			title = TITLE + " Correlation";
@@ -1499,8 +1499,8 @@ public class BenchmarkSpotFit implements PlugIn
 			plot.addPoints(rank, sr, Plot.LINE);
 			plot.setColor(Color.black);
 			plot.addLabel(0, 0, label);
-			pw = Utils.display(title, plot);
-			if (Utils.isNewWindow())
+			pw = ImageJUtils.display(title, plot);
+			if (ImageJUtils.isNewWindow())
 				wo.add(pw);
 		}
 
@@ -1509,8 +1509,8 @@ public class BenchmarkSpotFit implements PlugIn
 		add(sb, slope);
 
 		label = String.format("n = %d. Median = %s nm", depthStats.getN(), MathUtils.rounded(median));
-		id = Utils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
-		if (Utils.isNewWindow())
+		id = ImageJUtils.showHistogram(TITLE, depthStats, "Match Depth (nm)", 0, 1, 0, label);
+		if (ImageJUtils.isNewWindow())
 			wo.add(id);
 
 		// Plot histograms of the stats on the same window
@@ -1553,7 +1553,7 @@ public class BenchmarkSpotFit implements PlugIn
 
 		wo.tile();
 
-		sb.append("\t").append(Utils.timeToString(runTime / 1000000.0));
+		sb.append("\t").append(ImageJUtils.timeToString(runTime / 1000000.0));
 		
 		summaryTable.append(sb.toString());
 
@@ -1562,10 +1562,10 @@ public class BenchmarkSpotFit implements PlugIn
 			GlobalSettings gs = SettingsManager.loadSettings();
 			FilterSettings filterSettings = gs.getFilterSettings();
 
-			String filename = Utils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
+			String filename = ImageJUtils.getFilename("Filter_range_file", filterSettings.filterSetFilename);
 			if (filename == null)
 				return;
-			filename = Utils.replaceExtension(filename, ".xml");
+			filename = ImageJUtils.replaceExtension(filename, ".xml");
 			filterSettings.filterSetFilename = filename;
 			// Create a filter set using the ranges
 			ArrayList<Filter> filters = new ArrayList<Filter>(3);
@@ -1640,7 +1640,7 @@ public class BenchmarkSpotFit implements PlugIn
 		{
 			median = d.getPercentile(50);
 			String label = String.format("n = %d. Median = %s nm", s1.getN(), MathUtils.rounded(median));
-			int id = Utils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
+			int id = ImageJUtils.showHistogram(TITLE, s1, xLabel, filterCriteria[i].minBinWidth,
 					(filterCriteria[i].restrictRange) ? 1 : 0, 0, label);
 			if (id == 0)
 			{
@@ -1648,14 +1648,14 @@ public class BenchmarkSpotFit implements PlugIn
 				return new double[2];
 			}
 
-			if (Utils.isNewWindow())
+			if (ImageJUtils.isNewWindow())
 				wo.add(id);
 
 			title = WindowManager.getImage(id).getTitle();
 
 			// Reverse engineer the histogram settings
-			plot = Utils.plot;
-			double[] xValues = Utils.xValues;
+			plot = ImageJUtils.plot;
+			double[] xValues = ImageJUtils.xValues;
 			int bins = xValues.length;
 			double yMin = xValues[0];
 			double binSize = xValues[1] - xValues[0];
@@ -1664,26 +1664,26 @@ public class BenchmarkSpotFit implements PlugIn
 			if (s2.getN() > 0)
 			{
 				double[] values = s2.getValues();
-				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+				double[][] hist = ImageJUtils.calcHistogram(values, yMin, yMax, bins);
 
 				if (hist[0].length > 0)
 				{
 					plot.setColor(Color.red);
 					plot.addPoints(hist[0], hist[1], Plot2.BAR);
-					Utils.display(title, plot);
+					ImageJUtils.display(title, plot);
 				}
 			}
 
 			if (s3.getN() > 0)
 			{
 				double[] values = s3.getValues();
-				double[][] hist = Utils.calcHistogram(values, yMin, yMax, bins);
+				double[][] hist = ImageJUtils.calcHistogram(values, yMin, yMax, bins);
 
 				if (hist[0].length > 0)
 				{
 					plot.setColor(Color.blue);
 					plot.addPoints(hist[0], hist[1], Plot2.BAR);
-					Utils.display(title, plot);
+					ImageJUtils.display(title, plot);
 				}
 			}
 		}
@@ -1795,8 +1795,8 @@ public class BenchmarkSpotFit implements PlugIn
 				plot.setColor(Color.black);
 				plot.addLabel(0, 0, label);
 			}
-			PlotWindow pw = Utils.display(title, plot);
-			if (Utils.isNewWindow())
+			PlotWindow pw = ImageJUtils.display(title, plot);
+			if (ImageJUtils.isNewWindow())
 				wo.add(pw.getImagePlus().getID());
 		}
 

@@ -28,9 +28,9 @@ import gdsc.smlm.ij.settings.Constants;
 import gdsc.smlm.ij.settings.SettingsManager;
 import gdsc.smlm.ij.utils.ImageConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJLogger;
-import uk.ac.sussex.gdsc.core.ij.Utils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils; import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils; import uk.ac.sussex.gdsc.core.utils.TextUtils; import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
-import uk.ac.sussex.gdsc.core.utils.Sort;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import gdsc.smlm.results.PeakResults;
 import ij.IJ;
 import ij.ImagePlus;
@@ -390,7 +390,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 
 		if (topN > 0 && maxIndices.length > topN)
 		{
-			maxIndices = Sort.sort(maxIndices, data);
+			maxIndices = SortUtils.sort(maxIndices, data);
 			maxIndices = Arrays.copyOf(maxIndices, topN);
 		}
 
@@ -470,7 +470,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 			else
 				filter.stripedBlockAverage(smoothData, width, height, (float) smooth);
 		}
-		Sort.sort(maxIndices, smoothData);
+		SortUtils.sort(maxIndices, smoothData);
 
 		// Show the candidate peaks
 		if (maxIndices.length > 0)
@@ -587,7 +587,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener
 					// Insert into a full size image
 					FloatProcessor fp2 = new FloatProcessor(ip.getWidth(), ip.getHeight());
 					fp2.insert(fp, bounds.x, bounds.y);
-					Utils.display(TITLE, fp2);
+					ImageJUtils.display(TITLE, fp2);
 				}
 			}
 			else
