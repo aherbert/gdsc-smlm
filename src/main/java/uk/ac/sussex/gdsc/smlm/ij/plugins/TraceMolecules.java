@@ -82,7 +82,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,12 +93,10 @@ import java.util.logging.Logger;
  */
 
 public class TraceMolecules implements PlugIn {
-  private String pluginTitle = "Trace or Cluster Molecules";
-  private String outputName;
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
 
-  private static String header;
-  private static TextWindow summaryTable;
+  private static final AtomicReference<TextWindow> summaryTable = new AtomicReference<>();
+  private static final AtomicBoolean logHeader = new AtomicBoolean(true);
 
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "Blinks",
       "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)", "Dwell time (s)"};
@@ -126,8 +126,13 @@ public class TraceMolecules implements PlugIn {
     alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
   }
 
+  private String pluginTitle = "Trace or Cluster Molecules";
+  /** The output name set using either "Cluster" or "Trace" depending on the run mode. */
+  private String outputName;
+
   /** The plugin settings. */
   private Settings pluginSettings;
+  /** The clustering settings. */
   private ClusteringSettings.Builder settings;
   private MemoryPeakResults results;
   /** Store exposure time in seconds. */
@@ -366,7 +371,8 @@ public class TraceMolecules implements PlugIn {
       saveTraces(traces);
     }
 
-    summarise(traces, totalFiltered, settings.getDistanceThreshold(), timeThresholdInSeconds());
+    summarise(createSummaryTable(), traces, totalFiltered, settings.getDistanceThreshold(),
+        timeThresholdInSeconds());
 
     IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
         tracedResults.size(), totalFiltered));
@@ -569,12 +575,9 @@ public class TraceMolecules implements PlugIn {
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames());
   }
 
-  private void summarise(Trace[] traces, int filtered, double distanceThreshold,
-      double timeThreshold) {
+  private void summarise(Consumer<String> output, Trace[] traces, int filtered,
+      double distanceThreshold, double timeThreshold) {
     IJ.showStatus("Calculating summary ...");
-
-    // Create summary table
-    createSummaryTable();
 
     final Statistics[] stats = new Statistics[NAMES.length];
     for (int i = 0; i < stats.length; i++) {
@@ -638,7 +641,7 @@ public class TraceMolecules implements PlugIn {
       IJ.log(sb.toString());
       return;
     }
-    summaryTable.append(sb.toString());
+    output.accept(sb.toString());
 
     if (settings.getShowHistograms()) {
       IJ.showStatus("Calculating histograms ...");
@@ -666,16 +669,20 @@ public class TraceMolecules implements PlugIn {
     IJ.showStatus("");
   }
 
-  private void createSummaryTable() {
+  private Consumer<String> createSummaryTable() {
     if (java.awt.GraphicsEnvironment.isHeadless()) {
-      if (header == null) {
-        header = createHeader();
-        IJ.log(header);
+      if (logHeader.compareAndSet(true, false)) {
+        IJ.log(createHeader());
       }
-    } else if (summaryTable == null || !summaryTable.isVisible()) {
-      summaryTable = new TextWindow(pluginTitle + " Data Summary", createHeader(), "", 800, 300);
-      summaryTable.setVisible(true);
+      return IJ::log;
     }
+    TextWindow window = summaryTable.get();
+    if (window == null || !window.isVisible()) {
+      window = new TextWindow(pluginTitle + " Data Summary", createHeader(), "", 800, 300);
+      window.setVisible(true);
+      summaryTable.set(window);
+    }
+    return window::append;
   }
 
   private static String createHeader() {
@@ -1155,7 +1162,7 @@ public class TraceMolecules implements PlugIn {
         final int n = manager.traceMolecules(d, t);
         resultsList.add(new double[] {d, t, n, getBlinkingRate(manager.getTraces())});
         if (debugMode) {
-          summarise(manager.getTraces(), manager.getTotalFiltered(), d, t);
+          summarise(IJ::log, manager.getTraces(), manager.getTotalFiltered(), d, t);
         }
       }
     }
@@ -1500,7 +1507,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   private FloatProcessor createNnPlot(List<double[]> results, int width, int height) {
-    final FloatProcessor fp = new FloatProcessor(width, height);
+    final FloatProcessor ip = new FloatProcessor(width, height);
 
     // Create lookup table that map the tested threshold values to a position in the image
     final int[] xLookup = createLookup(timeThresholds, settings.getMinTimeThreshold(), width);
@@ -1518,12 +1525,12 @@ public class TraceMolecules implements PlugIn {
         final int y1 = yLookup[y];
         final int y2 = yLookup[y + 1];
         final double[] result = results.get(i);
-        fp.setValue(Math.abs(result[2]));
-        fp.setRoi(x1, y1, x2 - x1, y2 - y1);
-        fp.fill();
+        ip.setValue(Math.abs(result[2]));
+        ip.setRoi(x1, y1, x2 - x1, y2 - y1);
+        ip.fill();
       }
     }
-    return fp;
+    return ip;
   }
 
   private static int[] createLookup(int[] values, int min, int scale) {
