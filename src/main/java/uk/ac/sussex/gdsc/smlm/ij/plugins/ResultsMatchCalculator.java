@@ -53,6 +53,7 @@ import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
@@ -173,6 +174,24 @@ public class ResultsMatchCalculator implements PlugIn {
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
 
+    // @formatter:off
+    private static final String KEY_INPUT_OPTION1 = "gdsc.smlm.resultsmatchcalculator.inputOption1";
+    private static final String KEY_INPUT_OPTION2 = "gdsc.smlm.resultsmatchcalculator.inputOption2";
+    private static final String KEY_COORD_METHOD1 = "gdsc.smlm.resultsmatchcalculator.coordinateMethod1";
+    private static final String KEY_COORD_METHOD2 = "gdsc.smlm.resultsmatchcalculator.coordinateMethod2";
+    private static final String KEY_DISTANCE_THRESHOLD = "gdsc.smlm.resultsmatchcalculator.distanceThreshold";
+    private static final String KEY_INCREMENTS = "gdsc.smlm.resultsmatchcalculator.increments";
+    private static final String KEY_DELTA = "gdsc.smlm.resultsmatchcalculator.delta";
+    private static final String KEY_BETA = "gdsc.smlm.resultsmatchcalculator.beta";
+    private static final String KEY_SHOW_TABLE = "gdsc.smlm.resultsmatchcalculator.showTable";
+    private static final String KEY_SHOW_PAIRS = "gdsc.smlm.resultsmatchcalculator.showPairs";
+    private static final String KEY_SAVE_CLASS = "gdsc.smlm.resultsmatchcalculator.saveClassifications";
+    private static final String KEY_CLASS_FILE = "gdsc.smlm.resultsmatchcalculator.classificationsFile";
+    private static final String KEY_ID_ANALYSIS = "gdsc.smlm.resultsmatchcalculator.idAnalysis";
+    private static final String KEY_SAVE_PAIRS = "gdsc.smlm.resultsmatchcalculator.savePairs";
+    private static final String KEY_PAIRS_DIR = "gdsc.smlm.resultsmatchcalculator.pairsDirectory";
+    // @formatter:on
+
     String inputOption1 = "";
     String inputOption2 = "";
     CoordinateMethod coordinateMethod1 = CoordinateMethod.ALL;
@@ -190,7 +209,23 @@ public class ResultsMatchCalculator implements PlugIn {
     String pairsDirectory = "";
 
     Settings() {
-      // Do nothing
+      inputOption1 = Prefs.get(KEY_INPUT_OPTION1, "");
+      inputOption2 = Prefs.get(KEY_INPUT_OPTION2, "");
+      coordinateMethod1 = CoordinateMethod
+          .fromDescription(Prefs.get(KEY_COORD_METHOD1, CoordinateMethod.ALL.getDescription()));
+      coordinateMethod2 = CoordinateMethod
+          .fromDescription(Prefs.get(KEY_COORD_METHOD2, CoordinateMethod.ALL.getDescription()));
+      distanceThreshold = Prefs.get(KEY_DISTANCE_THRESHOLD, 0.5);
+      increments = Prefs.getInt(KEY_INCREMENTS, 5);
+      delta = Prefs.get(KEY_DELTA, 0.1);
+      beta = Prefs.get(KEY_BETA, 4);
+      showTable = Prefs.get(KEY_SHOW_TABLE, true);
+      showPairs = Prefs.get(KEY_SHOW_PAIRS, false);
+      saveClassifications = Prefs.get(KEY_SAVE_CLASS, false);
+      classificationsFile = Prefs.get(KEY_CLASS_FILE, "");
+      idAnalysis = Prefs.get(KEY_ID_ANALYSIS, false);
+      savePairs = Prefs.get(KEY_SAVE_PAIRS, false);
+      pairsDirectory = Prefs.get(KEY_PAIRS_DIR, "");
     }
 
     Settings(Settings source) {
@@ -229,6 +264,21 @@ public class ResultsMatchCalculator implements PlugIn {
      */
     void save() {
       lastSettings.set(this);
+      Prefs.set(KEY_INPUT_OPTION1, inputOption1);
+      Prefs.set(KEY_INPUT_OPTION2, inputOption2);
+      Prefs.set(KEY_COORD_METHOD1, coordinateMethod1.getDescription());
+      Prefs.set(KEY_COORD_METHOD2, coordinateMethod2.getDescription());
+      Prefs.set(KEY_DISTANCE_THRESHOLD, distanceThreshold);
+      increments = Prefs.getInt(KEY_INCREMENTS, 5);
+      Prefs.set(KEY_DELTA, delta);
+      Prefs.set(KEY_BETA, beta);
+      Prefs.set(KEY_SHOW_TABLE, showTable);
+      Prefs.set(KEY_SHOW_PAIRS, showPairs);
+      Prefs.set(KEY_SAVE_CLASS, saveClassifications);
+      Prefs.set(KEY_CLASS_FILE, classificationsFile);
+      Prefs.set(KEY_ID_ANALYSIS, idAnalysis);
+      Prefs.set(KEY_SAVE_PAIRS, savePairs);
+      Prefs.set(KEY_PAIRS_DIR, pairsDirectory);
     }
   }
 
@@ -637,10 +687,10 @@ public class ResultsMatchCalculator implements PlugIn {
     return null;
   }
 
-  private static TextFilePeakResults createFilePeakResults(String directory,
+  private static TextFilePeakResults createFilePeakResults(String directory, int set,
       MemoryPeakResults results, double distanceLow, double distanceHigh) {
-    final String filename = directory + String.format("%s_%s_%s", results.getName(),
-        rounder.toString(distanceLow), rounder.toString(distanceHigh));
+    final String filename = directory + String.format("Match%d_%s_%s_%s.txt", set,
+        results.getName(), rounder.toString(distanceLow), rounder.toString(distanceHigh));
     final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
     r.copySettings(results);
     r.begin();
@@ -1009,8 +1059,8 @@ public class ResultsMatchCalculator implements PlugIn {
     for (int i = 0; i < distanceThresholds.length; i++) {
       final double low = high;
       high = distanceThresholds[i];
-      output1[i] = createFilePeakResults(directory, results1, low, high);
-      output2[i] = createFilePeakResults(directory, results2, low, high);
+      output1[i] = createFilePeakResults(directory, 1, results1, low, high);
+      output2[i] = createFilePeakResults(directory, 2, results2, low, high);
     }
 
     // Square the thresholds
