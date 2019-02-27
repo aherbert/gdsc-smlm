@@ -82,6 +82,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,29 +94,14 @@ public class TraceMolecules implements PlugIn {
   private String pluginTitle = "Trace or Cluster Molecules";
   private String outputName;
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
-  private static String inputOption = "";
-  private static boolean inputDebugMode = true;
-  private static boolean inputOptimiseBlinkingRate;
-
-  // private static boolean fitOnlyCentroid = false;
-  // private static float distanceThreshold = 1;
-  // private static float expansionFactor = 2;
-  // private static boolean debugFailures = false;
 
   private static String header;
   private static TextWindow summaryTable;
 
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "Blinks",
-      "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)"};
+      "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)", "Dwell time (s)"};
   private static final String[] FILENAMES = new String[] {"total_signal", "signal_per_frame",
-      "blinks", "t_on", "t_off", "total_t_on", "total_t_off"};
-  private static boolean[] displayHistograms = new boolean[NAMES.length];
-
-  static {
-    for (int i = 0; i < displayHistograms.length; i++) {
-      displayHistograms[i] = true;
-    }
-  }
+      "blinks", "t_on", "t_off", "total_t_on", "total_t_off", "dwell_time"};
 
   private static final int TOTAL_SIGNAL = 0;
   private static final int SIGNAL_PER_FRAME = 1;
@@ -124,17 +110,13 @@ public class TraceMolecules implements PlugIn {
   private static final int T_OFF = 4;
   private static final int TOTAL_T_ON = 5;
   private static final int TOTAL_T_OFF = 6;
+  private static final int DWELL_TIME = 7;
 
   private static boolean[] integerDisplay;
 
   static {
     integerDisplay = new boolean[NAMES.length];
     integerDisplay[BLINKS] = true;
-    // Times are now in fractions of seconds
-    // integerDisplay[T_ON] = true;
-    // integerDisplay[T_OFF] = true;
-    // integerDisplay[TOTAL_T_ON] = true;
-    // integerDisplay[TOTAL_T_OFF] = true;
   }
 
   private static boolean[] alwaysRemoveOutliers;
@@ -144,8 +126,8 @@ public class TraceMolecules implements PlugIn {
     alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
   }
 
-  private static String filename = "";
-
+  /** The plugin settings. */
+  private Settings pluginSettings;
   private ClusteringSettings.Builder settings;
   private MemoryPeakResults results;
   /** Store exposure time in seconds. */
@@ -163,6 +145,81 @@ public class TraceMolecules implements PlugIn {
   private boolean debugMode;
   private boolean altKeyDown;
   private boolean optimiseBlinkingRate;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    // @formatter:off
+    private static final String KEY_INPUT_OPTION = "gdsc.smlm.tracemolecules.inputOption";
+    private static final String KEY_INPUT_DEBUG_MODE = "gdsc.smlm.tracemolecules.inputDebugMode";
+    private static final String KEY_INPUT_OPTIMISE = "gdsc.smlm.tracemolecules.inputOptimiseBlinkingRate";
+    private static final String KEY_DISPLAY_HISTOGRAMS = "gdsc.smlm.tracemolecules.displayHistograms";
+    private static final String KEY_FILENAME = "gdsc.smlm.tracemolecules.filename";
+    // @formatter:on
+    private static final char ON = '1';
+    private static final char OFF = '0';
+
+    String inputOption;
+    boolean inputDebugMode;
+    boolean inputOptimiseBlinkingRate;
+    boolean[] displayHistograms;
+    String filename;
+
+    Settings() {
+      inputOption = Prefs.get(KEY_INPUT_OPTION, "");
+      inputDebugMode = Prefs.getBoolean(KEY_INPUT_DEBUG_MODE, true);
+      inputOptimiseBlinkingRate = Prefs.getBoolean(KEY_INPUT_OPTIMISE, false);
+      displayHistograms = new boolean[NAMES.length];
+      Arrays.fill(displayHistograms, true);
+      final String display = Prefs.get(KEY_DISPLAY_HISTOGRAMS, "");
+      for (int i = Math.min(display.length(), displayHistograms.length); i-- != 0;) {
+        displayHistograms[i] = display.charAt(i) == ON;
+      }
+      filename = Prefs.get(KEY_FILENAME, "");
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      inputDebugMode = source.inputDebugMode;
+      inputOptimiseBlinkingRate = source.inputOptimiseBlinkingRate;
+      displayHistograms = source.displayHistograms.clone();
+      filename = source.filename;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+      Prefs.set(KEY_INPUT_OPTION, inputOption);
+      Prefs.set(KEY_INPUT_DEBUG_MODE, inputDebugMode);
+      Prefs.set(KEY_INPUT_OPTIMISE, inputOptimiseBlinkingRate);
+      StringBuilder sb = new StringBuilder(displayHistograms.length);
+      for (int i = 0; i < displayHistograms.length; i++) {
+        sb.append(displayHistograms[i] ? ON : OFF);
+      }
+      Prefs.set(KEY_DISPLAY_HISTOGRAMS, sb.toString());
+      Prefs.set(KEY_FILENAME, filename);
+    }
+  }
 
   private enum OptimiserPlot {
     //@formatter:off
@@ -313,10 +370,6 @@ public class TraceMolecules implements PlugIn {
 
     IJ.showStatus(String.format("%d localisations => %d traces (%d filtered)", results.size(),
         tracedResults.size(), totalFiltered));
-
-    //// Provide option to refit the traces as single peaks and save to memory
-    // if (settings.refitOption)
-    // fitTraces(results, traces);
   }
 
   private static double getDistance(double distanceThreshold, CalibrationOrBuilder calibration) {
@@ -385,8 +438,8 @@ public class TraceMolecules implements PlugIn {
     for (final Cluster cluster : clusters) {
       final Trace trace = new Trace();
       trace.setId(index + 1);
-      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null; point =
-          point.getNext()) {
+      for (ClusterPoint point = cluster.getHeadClusterPoint(); point != null;
+          point = point.getNext()) {
         // The point Id was the position in the original results array
         trace.add(results.get(point.getId()));
       }
@@ -455,7 +508,8 @@ public class TraceMolecules implements PlugIn {
   }
 
   private void saveTraces(Trace[] traces) {
-    filename = saveTraces(results, traces, createSettingsComment(), filename, 0);
+    pluginSettings.filename =
+        saveTraces(results, traces, createSettingsComment(), pluginSettings.filename, 0);
   }
 
   /**
@@ -551,6 +605,8 @@ public class TraceMolecules implements PlugIn {
       final double signal = trace.getSignal() / results.getGain();
       stats[TOTAL_SIGNAL].add(signal);
       stats[SIGNAL_PER_FRAME].add(signal / trace.size());
+      stats[DWELL_TIME]
+          .add((trace.getTail().getEndFrame() - trace.getHead().getFrame() + 1) * exposureTime);
       if (trace.size() == 1) {
         singles++;
       }
@@ -591,7 +647,7 @@ public class TraceMolecules implements PlugIn {
       final HistogramPlotBuilder builder =
           new HistogramPlotBuilder(pluginTitle).setNumberOfBins(settings.getHistogramBins());
       for (int i = 0; i < NAMES.length; i++) {
-        if (displayHistograms[i]) {
+        if (pluginSettings.displayHistograms[i]) {
           builder.setData((StoredDataStatistics) stats[i]).setName(NAMES[i])
               .setIntegerBins(integerDisplay[i])
               .setRemoveOutliersOption(
@@ -639,7 +695,7 @@ public class TraceMolecules implements PlugIn {
         ImageJUtils.getDirectory("Trace_data_directory", settings.getTraceDataDirectory());
     if (directory != null) {
       settings.setTraceDataDirectory(directory);
-      SettingsManager.writeSettings(settings.build());
+      writeSettings();
       for (int i = 0; i < NAMES.length; i++) {
         saveTraceData((StoredDataStatistics) stats[i], NAMES[i], FILENAMES[i]);
       }
@@ -670,9 +726,9 @@ public class TraceMolecules implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(About.HELP_URL);
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    readSettings();
 
-    settings = SettingsManager.readClusteringSettings(0).toBuilder();
+    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
 
     gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
     gd.addNumericField("Distance_Exclusion", settings.getDistanceExclusion(), 2, 6, "nm");
@@ -689,9 +745,8 @@ public class TraceMolecules implements PlugIn {
     gd.addCheckbox("Save_traces", settings.getSaveTraces());
     gd.addCheckbox("Show_histograms", settings.getShowHistograms());
     gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
-    // gd.addCheckbox("Refit_option", settings.refitOption);
     if (altKeyDown) {
-      gd.addCheckbox("Debug", inputDebugMode);
+      gd.addCheckbox("Debug", pluginSettings.inputDebugMode);
     }
 
     gd.showDialog();
@@ -700,11 +755,8 @@ public class TraceMolecules implements PlugIn {
       return false;
     }
 
-    // Update the settings
-    SettingsManager.writeSettings(settings.build());
-
     // Load the results
-    results = ResultsManager.loadInputResults(inputOption, true, null, null);
+    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
     if (results == null || results.size() == 0) {
       IJ.error(pluginTitle, "No results could be loaded");
       IJ.showStatus("");
@@ -718,7 +770,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   private boolean readDialog(ExtendedGenericDialog gd) {
-    inputOption = ResultsManager.getInputSource(gd);
+    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
     settings.setDistanceThreshold(gd.getNextNumber());
     settings.setDistanceExclusion(gd.getNextNumber());
     settings.setTimeThreshold(gd.getNextNumber());
@@ -731,32 +783,14 @@ public class TraceMolecules implements PlugIn {
     settings.setSaveTraces(gd.getNextBoolean());
     settings.setShowHistograms(gd.getNextBoolean());
     settings.setSaveTraceData(gd.getNextBoolean());
-    // settings.refitOption = gd.getNextBoolean();
     if (altKeyDown) {
-      debugMode = inputDebugMode = gd.getNextBoolean();
+      debugMode = pluginSettings.inputDebugMode = gd.getNextBoolean();
     }
 
-    if (gd.invalidNumber()) {
+    writeSettings();
+
+    if (gd.invalidNumber() || !showHistogramsDialog()) {
       return false;
-    }
-
-    if (settings.getShowHistograms()) {
-      gd = new ExtendedGenericDialog(pluginTitle);
-      gd.addMessage("Select the histograms to display");
-      gd.addCheckbox("Remove_outliers", settings.getRemoveOutliers());
-      gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
-      for (int i = 0; i < displayHistograms.length; i++) {
-        gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
-      }
-      gd.showDialog();
-      if (gd.wasCanceled()) {
-        return false;
-      }
-      settings.setRemoveOutliers(gd.getNextBoolean());
-      settings.setHistogramBins((int) Math.abs(gd.getNextNumber()));
-      for (int i = 0; i < displayHistograms.length; i++) {
-        displayHistograms[i] = gd.getNextBoolean();
-      }
     }
 
     // Check arguments
@@ -765,7 +799,6 @@ public class TraceMolecules implements PlugIn {
       ParameterUtils.isAboveZero("Time threshold", settings.getTimeThreshold());
       ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
       ParameterUtils.isPositive("Pulse window", settings.getPulseWindow());
-      // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
       return false;
@@ -774,14 +807,37 @@ public class TraceMolecules implements PlugIn {
     return true;
   }
 
+  private boolean showHistogramsDialog() {
+    if (settings.getShowHistograms()) {
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
+      gd.addMessage("Select the histograms to display");
+      gd.addCheckbox("Remove_outliers", settings.getRemoveOutliers());
+      gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
+      for (int i = 0; i < pluginSettings.displayHistograms.length; i++) {
+        gd.addCheckbox(NAMES[i].replace(' ', '_'), pluginSettings.displayHistograms[i]);
+      }
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return false;
+      }
+      settings.setRemoveOutliers(gd.getNextBoolean());
+      settings.setHistogramBins((int) Math.abs(gd.getNextNumber()));
+      for (int i = 0; i < pluginSettings.displayHistograms.length; i++) {
+        pluginSettings.displayHistograms[i] = gd.getNextBoolean();
+      }
+      writeSettings();
+    }
+    return true;
+  }
+
   private boolean showClusterDialog() {
     pluginTitle = outputName + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addHelp(About.HELP_URL);
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    readSettings();
 
-    settings = SettingsManager.readClusteringSettings(0).toBuilder();
+    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
 
     gd.addNumericField("Distance_Threshold", settings.getDistanceThreshold(), 2, 6, "nm");
     gd.addNumericField("Time_Threshold", settings.getTimeThreshold(), 2);
@@ -796,7 +852,7 @@ public class TraceMolecules implements PlugIn {
     gd.addCheckbox("Save_cluster_data", settings.getSaveTraceData());
     gd.addCheckbox("Refit_option", settings.getRefitOption());
     if (altKeyDown) {
-      gd.addCheckbox("Debug", inputDebugMode);
+      gd.addCheckbox("Debug", pluginSettings.inputDebugMode);
     }
 
     gd.showDialog();
@@ -805,11 +861,8 @@ public class TraceMolecules implements PlugIn {
       return false;
     }
 
-    // Update the settings
-    SettingsManager.writeSettings(settings.build());
-
     // Load the results
-    results = ResultsManager.loadInputResults(inputOption, true, null, null);
+    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
     if (results == null || results.size() == 0) {
       IJ.error(pluginTitle, "No results could be loaded");
       IJ.showStatus("");
@@ -822,8 +875,18 @@ public class TraceMolecules implements PlugIn {
     return true;
   }
 
+  private void readSettings() {
+    settings = SettingsManager.readClusteringSettings(0).toBuilder();
+    pluginSettings = Settings.load();
+  }
+
+  private void writeSettings() {
+    SettingsManager.writeSettings(settings.build());
+    pluginSettings.save();
+  }
+
   private boolean readClusterDialog(ExtendedGenericDialog gd) {
-    inputOption = ResultsManager.getInputSource(gd);
+    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
     settings.setDistanceThreshold(gd.getNextNumber());
     settings.setTimeThreshold(gd.getNextNumber());
     settings.setTimeUnit(SettingsManager.getTimeUnitValues()[gd.getNextChoiceIndex()]);
@@ -835,30 +898,13 @@ public class TraceMolecules implements PlugIn {
     settings.setSaveTraceData(gd.getNextBoolean());
     settings.setRefitOption(gd.getNextBoolean());
     if (altKeyDown) {
-      debugMode = inputDebugMode = gd.getNextBoolean();
+      debugMode = pluginSettings.inputDebugMode = gd.getNextBoolean();
     }
 
-    if (gd.invalidNumber()) {
+    writeSettings();
+
+    if (gd.invalidNumber() || !showHistogramsDialog()) {
       return false;
-    }
-
-    if (settings.getShowHistograms()) {
-      gd = new ExtendedGenericDialog(pluginTitle);
-      gd.addMessage("Select the histograms to display");
-      gd.addCheckbox("Remove_outliers", settings.getRemoveOutliers());
-      gd.addNumericField("Histogram_bins", settings.getHistogramBins(), 0);
-      for (int i = 0; i < displayHistograms.length; i++) {
-        gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
-      }
-      gd.showDialog();
-      if (gd.wasCanceled()) {
-        return false;
-      }
-      settings.setRemoveOutliers(gd.getNextBoolean());
-      settings.setHistogramBins((int) Math.abs(gd.getNextNumber()));
-      for (int i = 0; i < displayHistograms.length; i++) {
-        displayHistograms[i] = gd.getNextBoolean();
-      }
     }
 
     // Check arguments
@@ -871,7 +917,6 @@ public class TraceMolecules implements PlugIn {
         ParameterUtils.isAboveZero("Time threshold", settings.getTimeThreshold());
         ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
       }
-      // Parameters.isAboveZero("Histogram bins", settings.getHistogramBins());
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
       return false;
@@ -892,9 +937,6 @@ public class TraceMolecules implements PlugIn {
     // Use 2.5x sigma as per the PC-PALM protocol in Sengupta, et al (2013) Nature Protocols 8, 345
     final double dEstimate = stats.getMean() * 2.5 / nmPerPixel;
     final int traceCount = manager.traceMolecules(dEstimate, 1);
-    // for (double d : new double[] { 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4 })
-    // System.out.printf("d=%.2f, estimate=%d\n", d,
-    // manager.traceMolecules(stats.getMean() * d / this.results.getNmPerPixel(), 1));
 
     if (!getParameters(traceCount, dEstimate)) {
       return;
@@ -921,7 +963,6 @@ public class TraceMolecules implements PlugIn {
     }
 
     for (final double[] result : results) {
-      // System.out.printf("%g %g = %g\n", result[0], result[1], result[2]);
       if (optimiseBlinkingRate) {
         result[2] = (reference - result[statistic]) / reference;
       } else {
@@ -961,7 +1002,7 @@ public class TraceMolecules implements PlugIn {
     IJ.log(String.format(
         "Optimal fractional difference @ D-threshold=%g nm, T-threshold=%f s (%d frames)",
         settings.getDistanceThreshold(), timeThresholdInSeconds(), timeThresholdInFrames()));
-    SettingsManager.writeSettings(settings.build());
+    writeSettings();
   }
 
   private boolean getParameters(int traceCount, double distance) {
@@ -980,7 +1021,7 @@ public class TraceMolecules implements PlugIn {
     gd.addChoice("Plot", plotNames,
         plotNames[OptimiserPlot.get(settings.getOptimiserPlot()).ordinal()]);
     if (altKeyDown) {
-      gd.addCheckbox("Optimise_blinking", inputOptimiseBlinkingRate);
+      gd.addCheckbox("Optimise_blinking", pluginSettings.inputOptimiseBlinkingRate);
     }
 
     gd.showDialog();
@@ -997,8 +1038,10 @@ public class TraceMolecules implements PlugIn {
     settings.setBlinkingRate(gd.getNextNumber());
     settings.setOptimiserPlot(gd.getNextChoiceIndex());
     if (altKeyDown) {
-      optimiseBlinkingRate = inputOptimiseBlinkingRate = gd.getNextBoolean();
+      optimiseBlinkingRate = pluginSettings.inputOptimiseBlinkingRate = gd.getNextBoolean();
     }
+
+    writeSettings();
 
     if (gd.invalidNumber()) {
       return false;
@@ -1030,7 +1073,7 @@ public class TraceMolecules implements PlugIn {
       return false;
     }
 
-    SettingsManager.writeSettings(settings.build());
+    writeSettings();
 
     return true;
   }
@@ -1097,7 +1140,7 @@ public class TraceMolecules implements PlugIn {
     timeThresholds = convert(getIntervals(minTimeThreshold, maxTimeThreshold, optimiserSteps));
 
     final int total = ddistanceThresholds.length * timeThresholds.length;
-    final ArrayList<double[]> results = new ArrayList<>(total);
+    final ArrayList<double[]> resultsList = new ArrayList<>(total);
 
     IJ.showStatus("Optimising tracing (" + total + " steps) ...");
 
@@ -1110,7 +1153,7 @@ public class TraceMolecules implements PlugIn {
       for (final int t : timeThresholds) {
         IJ.showProgress(step++, total);
         final int n = manager.traceMolecules(d, t);
-        results.add(new double[] {d, t, n, getBlinkingRate(manager.getTraces())});
+        resultsList.add(new double[] {d, t, n, getBlinkingRate(manager.getTraces())});
         if (debugMode) {
           summarise(manager.getTraces(), manager.getTotalFiltered(), d, t);
         }
@@ -1124,7 +1167,7 @@ public class TraceMolecules implements PlugIn {
     IJ.showStatus("");
     IJ.showProgress(1.0);
 
-    return results;
+    return resultsList;
   }
 
   private static double getBlinkingRate(Trace[] traces) {
@@ -1317,15 +1360,6 @@ public class TraceMolecules implements PlugIn {
       IJ.log(sb.toString());
     }
 
-    // TODO - Fit a function to the zero crossing points. I am not sure what function
-    // is suitable for the asymptotic curve (e.g. 1/x == x^-1), perhaps:
-    // f(x) = a + (bx+c)^n
-    // where
-    // n < 0
-    // a = Distance asymptote (equivalent to the distance resolution?)
-    // b = Scaling factor
-    // c = Time asymptote
-
     // interpolateZeroCrossingPoints();
 
     return true;
@@ -1451,15 +1485,15 @@ public class TraceMolecules implements PlugIn {
     if (zeroCrossingPoints == null || zeroCrossingPoints.isEmpty()) {
       return;
     }
-    final Calibration cal = imp.getCalibration();
+    final Calibration impCal = imp.getCalibration();
     final int npoints = zeroCrossingPoints.size();
     final float[] xpoints = new float[npoints];
     final float[] ypoints = new float[npoints];
     for (int i = 0; i < npoints; i++) {
       final double[] point = zeroCrossingPoints.get(i);
       // Convert to pixel coordinates.
-      xpoints[i] = (float) (cal.xOrigin + (point[0] / cal.pixelWidth));
-      ypoints[i] = (float) (cal.yOrigin + (point[1] / cal.pixelHeight));
+      xpoints[i] = (float) (impCal.xOrigin + (point[0] / impCal.pixelWidth));
+      ypoints[i] = (float) (impCal.yOrigin + (point[1] / impCal.pixelHeight));
     }
     roi = new PolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
     imp.setRoi(roi);
@@ -1515,7 +1549,7 @@ public class TraceMolecules implements PlugIn {
   }
 
   private FloatProcessor createBilinearPlot(List<double[]> results, int width, int height) {
-    final FloatProcessor fp = new FloatProcessor(width, height);
+    final FloatProcessor ip = new FloatProcessor(width, height);
 
     // Create lookup table that map the tested threshold values to a position in the image
     final int[] xLookup = createLookup(timeThresholds, settings.getMinTimeThreshold(), width);
@@ -1551,7 +1585,7 @@ public class TraceMolecules implements PlugIn {
             final double v1 = x1y1 * (1 - xFraction) + x2y1 * xFraction;
             final double v2 = x1y2 * (1 - xFraction) + x2y2 * xFraction;
             final double value = v1 * (1 - yFraction) + v2 * yFraction;
-            fp.setf(xx, yy, (float) value);
+            ip.setf(xx, yy, (float) value);
           }
         }
 
@@ -1561,12 +1595,12 @@ public class TraceMolecules implements PlugIn {
     }
 
     // Convert to absolute for easier visualisation
-    final float[] data = (float[]) fp.getPixels();
+    final float[] data = (float[]) ip.getPixels();
     for (int i = 0; i < data.length; i++) {
       data[i] = Math.abs(data[i]);
     }
 
-    return fp;
+    return ip;
   }
 
   private static double getRange(double max, double min, int orig, int width) {
