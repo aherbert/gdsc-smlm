@@ -2816,7 +2816,7 @@ public class BenchmarkFilterAnalysis
     if (isHeadless) {
       IJ.log(createResultsHeader(false));
     } else {
-      if (resultsWindow == null || !resultsWindow.isShowing()) {
+      if (!ImageJUtils.isShowing(resultsWindow)) {
         final String header = createResultsHeader(false);
         resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
       }
@@ -2834,7 +2834,7 @@ public class BenchmarkFilterAnalysis
     if (isHeadless) {
       IJ.log(createResultsHeader(true));
     } else {
-      if (summaryWindow == null || !summaryWindow.isShowing()) {
+      if (!ImageJUtils.isShowing(summaryWindow)) {
         final String header = createResultsHeader(true);
         summaryWindow = new TextWindow(TITLE + " Summary", header, "", 900, 300);
       }
@@ -2850,7 +2850,7 @@ public class BenchmarkFilterAnalysis
       header += "\tIteration";
       IJ.log(header);
     } else {
-      if (gaWindow == null || !gaWindow.isShowing()) {
+      if (!ImageJUtils.isShowing(gaWindow)) {
         String header = createResultsHeader(false);
         header += "\tIteration";
         gaWindow = new TextWindow(TITLE + " Evolution", header, "", 900, 300);
@@ -2865,7 +2865,7 @@ public class BenchmarkFilterAnalysis
     if (isHeadless) {
       IJ.log(createComponentAnalysisHeader());
     } else {
-      if (componentAnalysisWindow == null || !componentAnalysisWindow.isShowing()) {
+      if (!ImageJUtils.isShowing(componentAnalysisWindow)) {
         final String header = createComponentAnalysisHeader();
         componentAnalysisWindow =
             new TextWindow(TITLE + " Component Analysis", header, "", 900, 300);
@@ -2942,7 +2942,7 @@ public class BenchmarkFilterAnalysis
   private void createSensitivityWindow() {
     if (isHeadless) {
       IJ.log(createSensitivityHeader());
-    } else if (sensitivityWindow == null || !sensitivityWindow.isShowing()) {
+    } else if (!ImageJUtils.isShowing(sensitivityWindow)) {
       final String header = createSensitivityHeader();
       sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
     }

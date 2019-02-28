@@ -414,7 +414,7 @@ public class SpotFit implements PlugIn {
      */
     private static TextWindow createResultsWindow() {
       TextWindow window = resultsWindow.get();
-      if (window == null || !window.isShowing()) {
+      if (!ImageJUtils.isShowing(window)) {
         window = new TextWindow(TITLE + " Results", createHeader(), "", 700, 300);
         resultsWindow.set(window);
       }

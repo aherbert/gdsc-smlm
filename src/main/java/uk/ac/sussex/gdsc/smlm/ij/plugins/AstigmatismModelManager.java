@@ -1246,7 +1246,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static void createResultWindow() {
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       resultsWindow = new TextWindow(TITLE,
           "N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 1000, 300);
     }

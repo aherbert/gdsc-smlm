@@ -686,7 +686,7 @@ public class FilterAnalysis implements PlugIn {
 
     if (isHeadless) {
       IJ.log(createResultsHeader());
-    } else if (resultsWindow == null || !resultsWindow.isShowing()) {
+    } else if (!ImageJUtils.isShowing(resultsWindow)) {
       final String header = createResultsHeader();
       resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
     }
@@ -710,7 +710,7 @@ public class FilterAnalysis implements PlugIn {
   private void createSensitivityWindow() {
     if (isHeadless) {
       IJ.log(createSensitivityHeader());
-    } else if (sensitivityWindow == null || !sensitivityWindow.isShowing()) {
+    } else if (!ImageJUtils.isShowing(sensitivityWindow)) {
       final String header = createSensitivityHeader();
       sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
     }

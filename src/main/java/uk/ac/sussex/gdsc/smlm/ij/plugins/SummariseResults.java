@@ -108,7 +108,7 @@ public class SummariseResults implements PlugIn {
   }
 
   private void createSummaryTable() {
-    if (summary == null || !summary.isShowing()) {
+    if (!ImageJUtils.isShowing(summary)) {
       final StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
       // Calibration
       sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");

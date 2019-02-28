@@ -714,7 +714,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
    * Create the result window (if it is not available).
    */
   private static void createResultsWindow() {
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
     }
   }

@@ -1109,7 +1109,7 @@ public class FailCountManager implements PlugIn {
   }
 
   private static void createTable() {
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       resultsWindow =
           new TextWindow(TITLE + " Analysis Results", "Rank\tFail Counter\tScore", "", 600, 400);
     }

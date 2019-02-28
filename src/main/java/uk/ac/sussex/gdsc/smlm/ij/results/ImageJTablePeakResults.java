@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -254,7 +255,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     }
 
     newWindow = false;
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       newWindow = true;
       resultsWindow = new TextWindow(tableTitle, header, "", 800, 300);
       roiPainter = new ImageRoiPainter(resultsWindow.getTextPanel(), "", this);

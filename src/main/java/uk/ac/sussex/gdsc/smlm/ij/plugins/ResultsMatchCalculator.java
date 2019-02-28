@@ -846,7 +846,7 @@ public class ResultsMatchCalculator implements PlugIn {
   private static TextWindow createResultsWindow(boolean doIdAnalysis) {
     TextWindow resultsWindow = resultsWindowRef.get();
     final String header = createResultsHeader(doIdAnalysis);
-    if (resultsWindow == null || !resultsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
       resultsWindowRef.set(resultsWindow);
     } else {
@@ -857,7 +857,7 @@ public class ResultsMatchCalculator implements PlugIn {
 
   private static TextWindow createPairsWindow(TextWindow resultsWindow) {
     TextWindow pairsWindow = pairsWindowRef.get();
-    if (pairsWindow == null || !pairsWindow.isShowing()) {
+    if (!ImageJUtils.isShowing(pairsWindow)) {
       pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
       // Position relative to results window
       if (resultsWindow != null) {

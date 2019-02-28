@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
@@ -193,7 +194,7 @@ public class TraceMatchCalculator implements PlugIn {
 
     // Create output
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
-      if (resultsWindow == null || !resultsWindow.isShowing()) {
+      if (!ImageJUtils.isShowing(resultsWindow)) {
         resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
       }
       if (showPairs) {
@@ -217,7 +218,7 @@ public class TraceMatchCalculator implements PlugIn {
 
         if (p3 == null) {
           // Produce a pairs output
-          if (pairsWindow == null || !pairsWindow.isShowing()) {
+          if (!ImageJUtils.isShowing(pairsWindow)) {
             pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
             final Point p = resultsWindow.getLocation();
             p.y += resultsWindow.getHeight();
@@ -245,7 +246,7 @@ public class TraceMatchCalculator implements PlugIn {
           }
         } else {
           // Produce a triple output
-          if (triplesWindow == null || !triplesWindow.isShowing()) {
+          if (!ImageJUtils.isShowing(triplesWindow)) {
             triplesWindow = new TextWindow(TITLE + " Triples", createTriplesHeader(), "", 900, 300);
             final Point p = resultsWindow.getLocation();
             p.y += resultsWindow.getHeight();
