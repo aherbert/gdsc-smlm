@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
