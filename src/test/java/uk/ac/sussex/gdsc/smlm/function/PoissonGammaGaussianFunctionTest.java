@@ -90,7 +90,7 @@ public class PoissonGammaGaussianFunctionTest {
       final MathContext mc = new MathContext(4, RoundingMode.UP);
 
       final StringBuilder sb = new StringBuilder();
-      final String newLine = System.getProperty("line.separator");
+      final String newLine = System.lineSeparator();
       for (int g = 1; g <= 10; g++) {
         double max = 0;
         final int steps = 10;

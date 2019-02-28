@@ -69,7 +69,7 @@ public class Version {
    */
   public static void main(String[] args) {
     final StringBuilder msg = new StringBuilder();
-    final String newLine = System.getProperty("line.separator");
+    final String newLine = System.lineSeparator();
     msg.append("Version : ").append(version).append(newLine);
     msg.append("Build Date : ").append(buildDate).append(newLine);
     msg.append("Build Number : ").append(buildNumber).append(newLine);

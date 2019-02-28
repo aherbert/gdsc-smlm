@@ -79,7 +79,7 @@ public class TensorTest {
   private static void print(double[] com, double[] values, double[][] vectors) {
     if (logger.isLoggable(Level.INFO)) {
       final StringBuilder sb = new StringBuilder();
-      final String newLine = System.getProperty("line.separator");
+      final String newLine = System.lineSeparator();
       sb.append(String.format("%scom = %s", newLine, Arrays.toString(com)));
       for (int i = 0; i < values.length; i++) {
         sb.append(String.format("%s[%d] %f = %s  %.2f", newLine, i, values[i],

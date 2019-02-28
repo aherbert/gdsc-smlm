@@ -1323,7 +1323,7 @@ public class DiffusionRateTest implements PlugIn {
     if (simpleDir == null) {
       return;
     }
-    final String newLine = System.getProperty("line.separator");
+    final String newLine = System.lineSeparator();
     final File file = new File(simpleDir, prefix + dimensions + "d.txt");
     try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
       for (final double d : storedDataStatistics.getValues()) {
