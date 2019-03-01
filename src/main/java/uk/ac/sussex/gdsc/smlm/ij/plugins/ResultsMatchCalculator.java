@@ -269,7 +269,7 @@ public class ResultsMatchCalculator implements PlugIn {
       Prefs.set(KEY_COORD_METHOD1, coordinateMethod1.getDescription());
       Prefs.set(KEY_COORD_METHOD2, coordinateMethod2.getDescription());
       Prefs.set(KEY_DISTANCE_THRESHOLD, distanceThreshold);
-      increments = Prefs.getInt(KEY_INCREMENTS, 5);
+      Prefs.set(KEY_INCREMENTS, increments);
       Prefs.set(KEY_DELTA, delta);
       Prefs.set(KEY_BETA, beta);
       Prefs.set(KEY_SHOW_TABLE, showTable);
