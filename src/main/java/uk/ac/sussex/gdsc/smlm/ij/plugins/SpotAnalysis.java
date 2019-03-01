@@ -108,6 +108,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -128,16 +129,18 @@ public class SpotAnalysis extends PlugInFrame
   private static final String PLUGIN_TITLE = "Spot Analysis";
 
   // Image titles
-  private static final String rawMeanTitle = PLUGIN_TITLE + " Raw mean";
-  private static final String rawSDTitle = PLUGIN_TITLE + " Raw SD";
-  private static final String rawSpotTitle = PLUGIN_TITLE + " Raw spot";
-  private static final String blurSpotTitle = PLUGIN_TITLE + " Blur spot";
-  private static final String avgSpotTitle = PLUGIN_TITLE + " Average spot";
+  private static final String RAW_MEAN_TITLE = PLUGIN_TITLE + " Raw mean";
+  private static final String RAW_SD_TITLE = PLUGIN_TITLE + " Raw SD";
+  private static final String RAW_SPLOT_TITLE = PLUGIN_TITLE + " Raw spot";
+  private static final String BLUR_SPOT_TITLE = PLUGIN_TITLE + " Blur spot";
+  private static final String AVG_SPOT_TITLE = PLUGIN_TITLE + " Average spot";
   private static final String[] resultsTitles =
-      new String[] {rawMeanTitle, rawSDTitle, rawSpotTitle, blurSpotTitle, avgSpotTitle};
+      new String[] {RAW_MEAN_TITLE, RAW_SD_TITLE, RAW_SPLOT_TITLE, BLUR_SPOT_TITLE, AVG_SPOT_TITLE};
 
   private static Frame instance;
-  private static TextWindow resultsWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+
+  private TextWindow resultsWindow;
 
   private Choice inputChoice;
   private TextField widthTextField;
@@ -581,8 +584,8 @@ public class SpotAnalysis extends PlugInFrame
     return (inputChoice.getSelectedIndex() != -1);
   }
 
-  private static boolean resultsWithinBounds(Rectangle bounds) {
-    if (resultsWindowShowing()) {
+  private boolean resultsWithinBounds(Rectangle bounds) {
+    if (ImageJUtils.isShowing(resultsWindow)) {
       final float minx = bounds.x;
       final float maxx = minx + bounds.width;
       final float miny = bounds.y;
@@ -602,10 +605,6 @@ public class SpotAnalysis extends PlugInFrame
       }
     }
     return false;
-  }
-
-  private static boolean resultsWindowShowing() {
-    return resultsWindow != null && resultsWindow.isShowing();
   }
 
   private void runCreateProfile(ImagePlus imp, Rectangle bounds, double psfWidth, double blur) {
@@ -629,7 +628,7 @@ public class SpotAnalysis extends PlugInFrame
       min = rawImp.getDisplayRangeMin();
       max = rawImp.getDisplayRangeMax();
     }
-    rawImp = showSpot(rawSpotTitle, rawSpot);
+    rawImp = showSpot(RAW_SPLOT_TITLE, rawSpot);
     if (max != Double.POSITIVE_INFINITY) {
       rawImp.setDisplayRange(min, max);
     }
@@ -675,7 +674,7 @@ public class SpotAnalysis extends PlugInFrame
         min = blurImp.getDisplayRangeMin();
         max = blurImp.getDisplayRangeMax();
       }
-      blurImp = showSpot(blurSpotTitle, blurSpot);
+      blurImp = showSpot(BLUR_SPOT_TITLE, blurSpot);
       if (max != Double.POSITIVE_INFINITY) {
         blurImp.setDisplayRange(min, max);
       }
@@ -688,7 +687,7 @@ public class SpotAnalysis extends PlugInFrame
     final ZProjector project = new ZProjector((blurImp == null) ? rawImp : blurImp);
     project.setMethod(ZProjector.AVG_METHOD);
     project.doProjection();
-    showSpot(avgSpotTitle, project.getProjection().getImageStack());
+    showSpot(AVG_SPOT_TITLE, project.getProjection().getImageStack());
 
     if (!candidateFrames.isEmpty()) {
       // Set the first candidate frame
@@ -811,8 +810,8 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private void drawProfiles() {
-    showProfile(rawMeanTitle, "Mean", xValues, rawMean, smoothMean);
-    showProfile(rawSDTitle, "SD", xValues, rawSd, smoothSd);
+    showProfile(RAW_MEAN_TITLE, "Mean", xValues, rawMean, smoothMean);
+    showProfile(RAW_SD_TITLE, "SD", xValues, rawSd, smoothSd);
   }
 
   private void showProfile(String title, String yTitle, double[] xValues, double[] yValues,
@@ -959,13 +958,11 @@ public class SpotAnalysis extends PlugInFrame
     updated = false;
   }
 
-  private static void createResultsWindow() {
-    if (!resultsWindowShowing()) {
-      resultsWindow = new TextWindow(PLUGIN_TITLE + " Results",
-          "Id\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
-          200);
-      resultsWindow.setVisible(true);
-    }
+  private void createResultsWindow() {
+    resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+        () -> new TextWindow(PLUGIN_TITLE + " Results",
+            "Id\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
+            200));
   }
 
   private void saveTraces() {
@@ -981,7 +978,7 @@ public class SpotAnalysis extends PlugInFrame
     }
 
     // For all spots in the results window, get the ID and then save the traces to memory
-    if (!resultsWindowShowing()) {
+    if (!ImageJUtils.isShowing(resultsWindow)) {
       return;
     }
 

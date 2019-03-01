@@ -89,9 +89,9 @@ public class CustomContentInstant extends ContentInstant {
   private ContentNode contentNode;
 
   // point list
-  private PointListShape plShape;
+  private final PointListShape plShape;
   private PointListDialog plDialog;
-  private PointListPanel plPanel;
+  private final PointListPanel plPanel;
   private PointList points;
 
   // scene graph entries

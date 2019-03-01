@@ -104,11 +104,11 @@ public class MultiDialog extends Dialog {
    */
   protected int lastEvent = -1;
 
-  private LocalActionListener actionListener = new LocalActionListener();
-  private LocalKeyListener keyListener = new LocalKeyListener();
-  private LocalWindowAdpater windowAdpater = new LocalWindowAdpater();
-  private LocalMouseAdpater mouseAdpater = new LocalMouseAdpater();
-  private LocalItemListener itemListener = new LocalItemListener();
+  private final LocalActionListener actionListener = new LocalActionListener();
+  private final LocalKeyListener keyListener = new LocalKeyListener();
+  private final LocalWindowAdpater windowAdpater = new LocalWindowAdpater();
+  private final LocalMouseAdpater mouseAdpater = new LocalMouseAdpater();
+  private final LocalItemListener itemListener = new LocalItemListener();
 
   private class LocalActionListener implements ActionListener {
     @Override

@@ -217,7 +217,7 @@ public class TraceMolecules implements PlugIn {
       Prefs.set(KEY_INPUT_OPTION, inputOption);
       Prefs.set(KEY_INPUT_DEBUG_MODE, inputDebugMode);
       Prefs.set(KEY_INPUT_OPTIMISE, inputOptimiseBlinkingRate);
-      StringBuilder sb = new StringBuilder(displayHistograms.length);
+      final StringBuilder sb = new StringBuilder(displayHistograms.length);
       for (int i = 0; i < displayHistograms.length; i++) {
         sb.append(displayHistograms[i] ? ON : OFF);
       }

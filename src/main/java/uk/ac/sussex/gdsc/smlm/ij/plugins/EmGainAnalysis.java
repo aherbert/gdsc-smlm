@@ -904,7 +904,7 @@ public class EmGainAnalysis implements PlugInFilter {
     // Get CDF
     double sum = 0;
     double sum2 = 0;
-    double prev = 0;
+    final double prev = 0;
     double[] x = pdf.x;
     double[] fvalues = new double[x.length];
     double[] cdf1 = new double[pmf.length];

@@ -2083,11 +2083,11 @@ public class PulseActivationAnalysis
       return 0;
     }
     final int size = molecules.length;
-    int numberOfSamples = bd.sample();
+    final int numberOfSamples = bd.sample();
     // Sample
     final NormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
     final int[] samples = RandomUtils.sample(numberOfSamples, size, rng);
-    for (int index : samples) {
+    for (final int index : samples) {
       final float[] xy = molecules[index];
       float x;
       float y;

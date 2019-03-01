@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 public class ImmutableMemoryPeakResults extends MemoryPeakResults {
   private static final String IMMUTABLE_MESSAGE = "This results set is immutable";
 
-  private boolean built;
+  private final boolean built;
 
   /**
    * Instantiates a new immutable memory peak results with the original results store.

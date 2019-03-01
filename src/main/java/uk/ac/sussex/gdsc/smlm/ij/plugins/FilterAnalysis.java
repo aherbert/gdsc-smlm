@@ -66,6 +66,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Run different filtering methods on a set of labelled peak results outputting performance
@@ -78,8 +80,8 @@ import java.util.List;
  */
 public class FilterAnalysis implements PlugIn {
   private static final String TITLE = "Filter Analysis";
-  private static TextWindow resultsWindow;
-  private static TextWindow sensitivityWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> sensitivityWindowRef = new AtomicReference<>();
 
   private static boolean saveFilterSets;
   private static boolean showResultsTable = true;
@@ -549,7 +551,7 @@ public class FilterAnalysis implements PlugIn {
    * @param filterSets the filter sets
    */
   public void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets) {
-    createResultsWindow();
+    final Consumer<String> output = createResultsWindow();
     plots = new ArrayList<>(plotTopN);
     bestFilter = new HashMap<>();
     bestFilterOrder = new LinkedList<>();
@@ -559,7 +561,7 @@ public class FilterAnalysis implements PlugIn {
     int count = 0;
     for (final FilterSet filterSet : filterSets) {
       IJ.showStatus("Analysing " + filterSet.getName() + " ...");
-      count = runAnalysis(filterSet, resultsList, count, total);
+      count = runAnalysis(output, filterSet, resultsList, count, total);
     }
     IJ.showProgress(1);
     IJ.showStatus("");
@@ -603,7 +605,7 @@ public class FilterAnalysis implements PlugIn {
     }
     if (!bestFilter.isEmpty()) {
       IJ.showStatus("Calculating sensitivity ...");
-      createSensitivityWindow();
+      final Consumer<String> output = createSensitivityWindow();
 
       int currentIndex = 0;
       for (final String type : bestFilterOrder) {
@@ -616,11 +618,7 @@ public class FilterAnalysis implements PlugIn {
         final String message = type + "\t\t\t" + MathUtils.rounded(s.getJaccard(), 4) + "\t\t"
             + MathUtils.rounded(s.getPrecision(), 4) + "\t\t" + MathUtils.rounded(s.getRecall(), 4);
 
-        if (isHeadless) {
-          IJ.log(message);
-        } else {
-          sensitivityWindow.append(message);
-        }
+        output.accept(message);
 
         // List all the parameters that can be adjusted.
         final int parameters = filter.getNumberOfParameters();
@@ -644,20 +642,11 @@ public class FilterAnalysis implements PlugIn {
               dx1, dx2);
           addSensitivityScore(sb, s.getRecall(), sHigher.getRecall(), sLower.getRecall(), dx1, dx2);
 
-          if (isHeadless) {
-            IJ.log(sb.toString());
-          } else {
-            sensitivityWindow.append(sb.toString());
-          }
+          output.accept(sb.toString());
         }
       }
 
-      final String message = "-=-=-=-";
-      if (isHeadless) {
-        IJ.log(message);
-      } else {
-        sensitivityWindow.append(message);
-      }
+      output.accept("-=-=-=-");
 
       IJ.showProgress(1);
       IJ.showStatus("");
@@ -679,17 +668,20 @@ public class FilterAnalysis implements PlugIn {
     sb.append(MathUtils.rounded(sensitivity, 4)).append('\t');
   }
 
-  private void createResultsWindow() {
+  private Consumer<String> createResultsWindow() {
     if (!showResultsTable) {
-      return;
+      return null;
     }
 
     if (isHeadless) {
       IJ.log(createResultsHeader());
-    } else if (!ImageJUtils.isShowing(resultsWindow)) {
-      final String header = createResultsHeader();
-      resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
+      return IJ::log;
     }
+
+    return ImageJUtils.refresh(resultsWindowRef, () -> {
+      final String header = createResultsHeader();
+      return new TextWindow(TITLE + " Results", header, "", 900, 300);
+    })::append;
   }
 
   private static String createResultsHeader() {
@@ -707,13 +699,15 @@ public class FilterAnalysis implements PlugIn {
     return sb.toString();
   }
 
-  private void createSensitivityWindow() {
+  private Consumer<String> createSensitivityWindow() {
     if (isHeadless) {
       IJ.log(createSensitivityHeader());
-    } else if (!ImageJUtils.isShowing(sensitivityWindow)) {
-      final String header = createSensitivityHeader();
-      sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
+      return IJ::log;
     }
+    return ImageJUtils.refresh(sensitivityWindowRef, () -> {
+      final String header = createSensitivityHeader();
+      return new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
+    })::append;
   }
 
   private static String createSensitivityHeader() {
@@ -730,8 +724,8 @@ public class FilterAnalysis implements PlugIn {
     return sb.toString();
   }
 
-  private int runAnalysis(FilterSet filterSet, List<MemoryPeakResults> resultsList, int count,
-      final int total) {
+  private int runAnalysis(Consumer<String> output, FilterSet filterSet,
+      List<MemoryPeakResults> resultsList, int count, final int total) {
     final double[] xValues = (isHeadless) ? null : new double[filterSet.size()];
     final double[] yValues = (isHeadless) ? null : new double[filterSet.size()];
     int index = 0;
@@ -750,7 +744,7 @@ public class FilterAnalysis implements PlugIn {
         IJ.showProgress(count, total);
       }
 
-      final ClassificationResult s = runFilter(filter, resultsList);
+      final ClassificationResult s = runFilter(output, filter, resultsList);
 
       if (type == null) {
         type = filter.getType();
@@ -783,15 +777,11 @@ public class FilterAnalysis implements PlugIn {
     }
 
     // Add spacer at end of each result set
-    if (isHeadless) {
-      if (showResultsTable) {
-        IJ.log("");
-      }
-    } else {
-      if (showResultsTable) {
-        resultsWindow.append("");
-      }
+    if (showResultsTable) {
+      output.accept("");
+    }
 
+    if (!isHeadless) {
       if (plotTopN > 0 && xValues != null) {
         // Check the xValues are unique. Since the filters have been sorted by their
         // numeric value we only need to compare adjacent entries.
@@ -821,7 +811,7 @@ public class FilterAnalysis implements PlugIn {
         final String title = filterSet.getName();
 
         // Check if a previous filter set had the same name, update if necessary
-        NamedPlot plot = getNamedPlot(title);
+        final NamedPlot plot = getNamedPlot(title);
         if (plot == null) {
           plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
         } else {
@@ -847,7 +837,8 @@ public class FilterAnalysis implements PlugIn {
     return null;
   }
 
-  private ClassificationResult runFilter(Filter filter, List<MemoryPeakResults> resultsList) {
+  private static ClassificationResult runFilter(Consumer<String> output, Filter filter,
+      List<MemoryPeakResults> resultsList) {
     final ClassificationResult s = filter.score(resultsList);
 
     if (showResultsTable) {
@@ -862,11 +853,7 @@ public class FilterAnalysis implements PlugIn {
       sb.append(s.getPrecision()).append('\t');
       sb.append(s.getRecall()).append('\t');
       sb.append(s.getF1Score());
-      if (isHeadless) {
-        IJ.log(sb.toString());
-      } else {
-        resultsWindow.append(sb.toString());
-      }
+      output.accept(sb.toString());
     }
     return s;
   }

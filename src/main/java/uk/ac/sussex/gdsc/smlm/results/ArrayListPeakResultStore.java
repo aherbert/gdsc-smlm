@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  */
 public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection {
   /** The results. */
-  private ArrayList<PeakResult> results;
+  private final ArrayList<PeakResult> results;
 
   /**
    * Instantiates a new array list peak results store.

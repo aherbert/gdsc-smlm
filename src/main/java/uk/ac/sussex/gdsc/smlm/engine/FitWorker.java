@@ -127,7 +127,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   /** The number of additional evaluations to use for doublets. */
   public static final int EVALUATION_INCREASE_FOR_DOUBLETS = 4; // 1 for no effect
 
-  private Logger logger;
+  private final Logger logger;
   private Logger debugLogger;
   private FitTypeCounter counter;
   private long time;

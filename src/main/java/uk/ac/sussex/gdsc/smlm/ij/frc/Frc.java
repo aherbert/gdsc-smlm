@@ -403,7 +403,7 @@ public class Frc {
     public final double mean2;
 
     /** The results. */
-    private FrcCurveResult[] results;
+    private final FrcCurveResult[] results;
 
     /**
      * Instantiates a new FRC curve.

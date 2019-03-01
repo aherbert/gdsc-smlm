@@ -128,9 +128,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   private final int defaultScale;
 
   /** Working space to store the probabilities. */
-  private TDoubleArrayList listP = new TDoubleArrayList();
+  private final TDoubleArrayList listP = new TDoubleArrayList();
   /** Working space to store the gradient. */
-  private TDoubleArrayList listA = new TDoubleArrayList();
+  private final TDoubleArrayList listA = new TDoubleArrayList();
 
   /**
    * The relative probability threshold of the Poisson-Gamma distribution that is used. Any

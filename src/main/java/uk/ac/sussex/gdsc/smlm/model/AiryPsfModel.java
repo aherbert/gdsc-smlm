@@ -47,8 +47,8 @@ import java.util.Arrays;
  * diffraction model for out-of-focus regions is not implemented.
  */
 public class AiryPsfModel extends PsfModel {
-  private double zeroW0;
-  private double zeroW1;
+  private final double zeroW0;
+  private final double zeroW1;
   private double w0;
   private double w1;
   private double zDepth;
@@ -779,8 +779,8 @@ public class AiryPsfModel extends PsfModel {
     final double step = RINGS[SAMPLE_RINGS] / samples;
     double to = 0;
     double from = 0;
-    double[] radius = new double[samples + 1];
-    double[] sum = new double[samples + 1];
+    final double[] radius = new double[samples + 1];
+    final double[] sum = new double[samples + 1];
     for (int i = 1; i < sum.length; i++) {
       from = to;
       radius[i] = to = step * i;

@@ -1385,7 +1385,7 @@ public class DriftCalculator implements PlugIn {
     final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    Ticker ticker = Ticker.createStarted(tracker, images.length * 2, true);
+    final Ticker ticker = Ticker.createStarted(tracker, images.length * 2, true);
 
     for (int i = 0; i < images.length; i++) {
       futures.add(threadPool
@@ -1567,7 +1567,7 @@ public class DriftCalculator implements PlugIn {
     final FHT[] fhtImages = new FHT[stack.getSize()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    Ticker ticker = Ticker.createStarted(tracker, images.length, true);
+    final Ticker ticker = Ticker.createStarted(tracker, images.length, true);
 
     final int imagesPerThread = getImagesPerThread(images);
     final AlignImagesFft aligner = new AlignImagesFft();

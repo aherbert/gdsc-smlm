@@ -177,7 +177,7 @@ public class PsfDrift implements PlugIn {
 
     public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width,
         FitConfiguration fitConfig) {
-      RandomGenerator rng = new Well19937c();
+      final RandomGenerator rng = new Well19937c();
       this.jobs = jobs;
       this.psf = psf.copy(rng);
       this.fitConfig2 = fitConfig.clone();

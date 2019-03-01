@@ -1058,7 +1058,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
               ResultCoordinate rb = new ResultCoordinate(result, 1, x2, y2);
 
               // Q. what did the single match?
-              int index = matched[j] - 1;
+              final int index = matched[j] - 1;
               if (index != -1 && !assigned[index]) {
                 // One of the doublet pair must match this
                 final double d2a = ra.distanceXySquared(actual[index]);
@@ -1786,8 +1786,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-    List<Worker> workers = new LinkedList<>();
-    List<Thread> threads = new LinkedList<>();
+    final List<Worker> workers = new LinkedList<>();
+    final List<Thread> threads = new LinkedList<>();
     final Overlay overlay = (showOverlay) ? new Overlay() : null;
     for (int i = 0; i < nThreads; i++) {
       final Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay);

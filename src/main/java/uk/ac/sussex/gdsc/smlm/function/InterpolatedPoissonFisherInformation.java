@@ -67,7 +67,7 @@ public class InterpolatedPoissonFisherInformation extends BasePoissonFisherInfor
   /**
    * The function to compute the Fisher information above the maximum of the interpolation range.
    */
-  private BasePoissonFisherInformation upperFi;
+  private final BasePoissonFisherInformation upperFi;
 
   /** The function to interpolate alpha in the range min-max. */
   private final PolynomialSplineFunction alphaF;

@@ -32,7 +32,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 public class ImmutablePeakResult extends AttributePeakResult {
   private static final String IMMUTABLE_MESSAGE = "This result is immutable";
 
-  private boolean built;
+  private final boolean built;
 
   /**
    * Instantiates a new peak result.

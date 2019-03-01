@@ -54,7 +54,8 @@ import ij.text.TextWindow;
 
 import java.awt.Frame;
 import java.awt.event.MouseListener;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Saves the fit results to an ImageJ results table.
@@ -89,7 +90,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
 
   // Store the ROI painters that have been attached to TextPanels so they can be updated
   // with a new image source
-  private static HashMap<TextPanel, ImageRoiPainter> map = new HashMap<>();
+  private static final Map<TextPanel, ImageRoiPainter> map = new ConcurrentHashMap<>();
 
   private boolean showDeviations;
   private boolean showEndFrame;

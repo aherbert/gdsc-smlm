@@ -105,6 +105,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces a 2D Gaussian astigmatism model for a 2D astigmatic PSF.
@@ -115,7 +116,7 @@ public class AstigmatismModelManager implements PlugIn {
   private static final String TITLE = "Astigmatism Model Manager";
 
   private static AstigmatismModelSettings.Builder settings;
-  private static TextWindow resultsWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private AstigmatismModelManagerSettings.Builder pluginSettings;
   private ImagePlus imp;
@@ -1225,7 +1226,6 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private void saveResult(Optimum optimum) {
-    createResultWindow();
     final StringBuilder sb = new StringBuilder();
     final Rounder rounder = RounderUtils.create(4);
     sb.append(fitZ.length * 2);
@@ -1242,14 +1242,12 @@ public class AstigmatismModelManager implements PlugIn {
     sb.append('\t').append(rounder.round(parameters[P_AY]));
     sb.append('\t').append(rounder.round(parameters[P_BY]));
     sb.append('\t').append(rounder.round(parameters[P_Z0]));
-    resultsWindow.append(sb.toString());
+    createResultWindow().append(sb.toString());
   }
 
-  private static void createResultWindow() {
-    if (!ImageJUtils.isShowing(resultsWindow)) {
-      resultsWindow = new TextWindow(TITLE,
-          "N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 1000, 300);
-    }
+  private static TextWindow createResultWindow() {
+    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE,
+        "N\tWeighted\tRMS\tIter\tEval\tgamma\td\ts0x\tAx\tBx\ts0y\tAy\tBy\tz0", "", 1000, 300));
   }
 
   private boolean saveModel() {

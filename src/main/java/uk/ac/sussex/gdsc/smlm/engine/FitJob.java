@@ -71,7 +71,7 @@ public class FitJob {
   }
 
   /** The id. */
-  private int id;
+  private final int id;
 
   /** The slice. */
   int slice;

@@ -104,7 +104,7 @@ public class TsfPeakResultsReader {
         uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON;
   }
 
-  private String filename;
+  private final String filename;
   private SpotList spotList;
   private boolean readHeader;
   private boolean isGdsc;

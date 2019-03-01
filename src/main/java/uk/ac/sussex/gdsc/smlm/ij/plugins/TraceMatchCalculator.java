@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.match.Pulse;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
@@ -48,11 +49,16 @@ import ij.text.TextWindow;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Point;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
@@ -69,12 +75,23 @@ public class TraceMatchCalculator implements PlugIn {
   private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
   private static int sortIndex = 1;
 
-  private static boolean writeHeader = true;
-  private static TextWindow resultsWindow;
-  private static TextWindow pairsWindow;
-  private static TextWindow triplesWindow;
-  private static ImageRoiPainter pairPainter;
-  private static ImageRoiPainter triplePainter;
+  private static AtomicBoolean writeHeader = new AtomicBoolean(true);
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static AtomicReference<WindowAndPainter> pairsWindowRef = new AtomicReference<>();
+  private static AtomicReference<WindowAndPainter> triplesWindowRef = new AtomicReference<>();
+
+  /**
+   * Class to allow atomic update of the text window and the painter.
+   */
+  private static class WindowAndPainter {
+    final TextWindow textWindow;
+    final ImageRoiPainter painter;
+
+    WindowAndPainter(TextWindow textWindow, ImageRoiPainter painter) {
+      this.textWindow = textWindow;
+      this.painter = painter;
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -193,41 +210,16 @@ public class TraceMatchCalculator implements PlugIn {
         MatchCalculator.analyseResults2D(p1, p3, distanceThreshold, tp2, fp2, fn2, pairs2);
 
     // Create output
+    Consumer<String> resultsOutput;
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
-      if (!ImageJUtils.isShowing(resultsWindow)) {
-        resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
-      }
-      if (showPairs) {
-        CoordinateProvider coordinateProvider = (line) -> {
-          // Extract the startT and x,y coordinates from the first pulse in the line
-          final int[] index = {0, 5, 12};
-          final String[] fields = line.split("\t");
-          for (final int i : index) {
-            if (i < fields.length) {
-              if (fields[i].equals("-")) {
-                continue;
-              }
-              final int startT = Integer.parseInt(fields[i]);
-              final double x = Double.parseDouble(fields[i + 2]);
-              final double y = Double.parseDouble(fields[i + 3]);
-              return new double[] {startT, x, y};
-            }
-          }
-          return null;
-        };
+      final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+          () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300));
+      resultsOutput = resultsWindow::append;
 
+      if (showPairs) {
         if (p3 == null) {
           // Produce a pairs output
-          if (!ImageJUtils.isShowing(pairsWindow)) {
-            pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
-            final Point p = resultsWindow.getLocation();
-            p.y += resultsWindow.getHeight();
-            pairsWindow.setLocation(p);
-            pairPainter = new ImageRoiPainter(pairsWindow.getTextPanel(),
-                results1.getSource().getOriginal().getName(), coordinateProvider);
-          }
-          pairsWindow.getTextPanel().clear();
-          pairPainter.setTitle(results1.getSource().getOriginal().getName());
+          final WindowAndPainter wap = refresh(pairsWindowRef, true, resultsWindow, results1);
 
           // Add the unmatched points
           WindowManager.getIDList();
@@ -242,20 +234,11 @@ public class TraceMatchCalculator implements PlugIn {
           final List<? extends PointPair> sortedPairs = sort(pairs);
 
           for (final PointPair pair : sortedPairs) {
-            addPairResult(pair);
+            addPairResult(wap.textWindow, pair);
           }
         } else {
           // Produce a triple output
-          if (!ImageJUtils.isShowing(triplesWindow)) {
-            triplesWindow = new TextWindow(TITLE + " Triples", createTriplesHeader(), "", 900, 300);
-            final Point p = resultsWindow.getLocation();
-            p.y += resultsWindow.getHeight();
-            triplesWindow.setLocation(p);
-            triplePainter = new ImageRoiPainter(triplesWindow.getTextPanel(),
-                results1.getSource().getName(), coordinateProvider);
-          }
-          triplesWindow.getTextPanel().clear();
-          triplePainter.setTitle(results1.getSource().getOriginal().getName());
+          final WindowAndPainter wap = refresh(triplesWindowRef, false, resultsWindow, results1);
 
           final HashMap<Pulse, Triple> map = new HashMap<>();
           final ArrayList<Triple> triples = new ArrayList<>(pairs.size());
@@ -296,19 +279,78 @@ public class TraceMatchCalculator implements PlugIn {
           final List<? extends Triple> sortedTriples = sort(triples);
 
           for (final Triple t : sortedTriples) {
-            addTripleResult(t);
+            addTripleResult(wap.textWindow, t);
           }
         }
       }
-    } else if (writeHeader) {
-      writeHeader = false;
-      IJ.log(createResultsHeader());
+    } else {
+      if (writeHeader.compareAndSet(true, false)) {
+        IJ.log(createResultsHeader());
+      }
+      resultsOutput = IJ::log;
     }
 
-    addResult(inputOption1, inputOption2, distanceThreshold, result);
+    final StringBuilder sb = new StringBuilder();
+    addResult(resultsOutput, sb, inputOption1, inputOption2, distanceThreshold, result);
     if (p3 != null) {
-      addResult(inputOption1, inputOption3, distanceThreshold, result2);
+      addResult(resultsOutput, sb, inputOption1, inputOption3, distanceThreshold, result2);
     }
+  }
+
+  private static WindowAndPainter refresh(AtomicReference<WindowAndPainter> ref, boolean pairs,
+      TextWindow resultsWindow, MemoryPeakResults results1) {
+    // Produce a pairs output
+    final WindowAndPainter wap = ConcurrencyUtils.refresh(ref,
+        // Test the window is showing
+        w -> ImageJUtils.isShowing(w.textWindow),
+        // Create
+        () -> {
+          final String title = TITLE + ((pairs) ? " Pairs" : " Triples");
+          final String header = pairs ? createPairsHeader() : createTriplesHeader();
+          final TextWindow window = new TextWindow(title, header, "", 900, 300);
+
+          // Position relative to results window
+          final Point p = resultsWindow.getLocation();
+          p.y += resultsWindow.getHeight();
+          window.setLocation(p);
+
+          final CoordinateProvider coordinateProvider = line -> {
+            // Extract the startT and x,y coordinates from the first pulse in the line
+            final int[] index = {0, 5, 12};
+            final String[] fields = line.split("\t");
+            for (final int i : index) {
+              if (i < fields.length) {
+                if (fields[i].equals("-")) {
+                  continue;
+                }
+                final int startT = Integer.parseInt(fields[i]);
+                final double x = Double.parseDouble(fields[i + 2]);
+                final double y = Double.parseDouble(fields[i + 3]);
+                return new double[] {startT, x, y};
+              }
+            }
+            return null;
+          };
+
+          final ImageRoiPainter painter = new ImageRoiPainter(window.getTextPanel(),
+              results1.getSource().getOriginal().getName(), coordinateProvider);
+          final WindowAndPainter result = new WindowAndPainter(window, painter);
+
+          // Free memory on close
+          window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent event) {
+              ref.compareAndSet(result, null);
+              super.windowClosed(event);
+            }
+          });
+
+          return result;
+        });
+
+    wap.textWindow.getTextPanel().clear();
+    wap.painter.setTitle(results1.getSource().getOriginal().getName());
+    return wap;
   }
 
   private static Pulse[] extractPulses(MemoryPeakResults results) {
@@ -343,9 +385,9 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addResult(String i1, String i2, double distanceThrehsold,
-      MatchResult result) {
-    final StringBuilder sb = new StringBuilder();
+  private static void addResult(Consumer<String> output, StringBuilder sb, String i1, String i2,
+      double distanceThrehsold, MatchResult result) {
+    sb.setLength(0);
     sb.append(i1).append('\t');
     sb.append(i2).append('\t');
     sb.append(IJ.d2s(distanceThrehsold, 2)).append('\t');
@@ -362,11 +404,7 @@ public class TraceMatchCalculator implements PlugIn {
     sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
     sb.append(IJ.d2s(result.getFScore(beta), 4));
 
-    if (java.awt.GraphicsEnvironment.isHeadless()) {
-      IJ.log(sb.toString());
-    } else {
-      resultsWindow.append(sb.toString());
-    }
+    output.accept(sb.toString());
   }
 
   private static String createPairsHeader() {
@@ -386,7 +424,7 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addPairResult(PointPair pair) {
+  private static void addPairResult(TextWindow pairsWindow, PointPair pair) {
     final StringBuilder sb = new StringBuilder();
     final Pulse p1 = (Pulse) pair.getPoint1();
     final Pulse p2 = (Pulse) pair.getPoint2();
@@ -431,7 +469,7 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addTripleResult(Triple triple) {
+  private static void addTripleResult(TextWindow triplesWindow, Triple triple) {
     final StringBuilder sb = new StringBuilder();
     final Pulse p1 = triple.p1;
     final Pulse p2 = triple.p2;

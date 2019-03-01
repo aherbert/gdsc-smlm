@@ -81,6 +81,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -96,7 +97,7 @@ public class FailCountManager implements PlugIn {
       SettingsManager.getNames((Object[]) FailCountOption.values());
 
   private static TurboList<FailCountData> failCountData = new TurboList<>(1);
-  private static TextWindow resultsWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private FailCountManagerSettings.Builder settings;
 
@@ -1043,7 +1044,7 @@ public class FailCountManager implements PlugIn {
     if (topN > 0) {
       final byte[] types = type.toArray();
       final byte maxType = types[types.length - 1];
-      createTable();
+      final TextWindow resultsWindow = createTable();
       for (byte b = 0; b <= maxType; b++) {
         int[] indices;
         // Use a heap to avoid a full sort
@@ -1061,16 +1062,16 @@ public class FailCountManager implements PlugIn {
         SortUtils.sortIndices(indices, score, false);
 
         final StringBuilder sb = new StringBuilder();
-        final BufferedTextWindow tw = new BufferedTextWindow(resultsWindow);
-        for (int i = 0; i < topN; i++) {
-          sb.setLength(0);
-          final int j = indices[i];
-          sb.append(i + 1).append('\t');
-          sb.append(counters.getf(j).getDescription()).append('\t');
-          sb.append(score[j]);
-          tw.append(sb.toString());
+        try (final BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+          for (int i = 0; i < topN; i++) {
+            sb.setLength(0);
+            final int j = indices[i];
+            sb.append(i + 1).append('\t');
+            sb.append(counters.getf(j).getDescription()).append('\t');
+            sb.append(score[j]);
+            tw.append(sb.toString());
+          }
         }
-        tw.flush();
       }
     }
 
@@ -1108,11 +1109,9 @@ public class FailCountManager implements PlugIn {
     return CounterStatus.CONTINUE;
   }
 
-  private static void createTable() {
-    if (!ImageJUtils.isShowing(resultsWindow)) {
-      resultsWindow =
-          new TextWindow(TITLE + " Analysis Results", "Rank\tFail Counter\tScore", "", 600, 400);
-    }
+  private static TextWindow createTable() {
+    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Analysis Results",
+        "Rank\tFail Counter\tScore", "", 600, 400));
   }
 
   private boolean showAnalysisDialog() {

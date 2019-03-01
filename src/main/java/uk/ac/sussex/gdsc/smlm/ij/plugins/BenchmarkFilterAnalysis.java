@@ -160,6 +160,8 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -175,14 +177,22 @@ public class BenchmarkFilterAnalysis
     implements PlugIn, FitnessFunction<FilterScore>, TrackProgress, FullScoreFunction<FilterScore> {
   private static final String TITLE = "Benchmark Filter Analysis";
   private static final UniqueIdPeakResult[] EMPTY = new UniqueIdPeakResult[0];
-  private static TextWindow resultsWindow;
-  private static TextWindow summaryWindow;
-  private static TextWindow sensitivityWindow;
-  private static TextWindow gaWindow;
-  private static TextWindow componentAnalysisWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> summaryWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> sensitivityWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> gaWindowRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> componentAnalysisWindowRef = new AtomicReference<>();
   private static int failCount = 1;
   private static int minFailCount;
   private static int maxFailCount = 10;
+
+  /**
+   * A reference to the results window if not in headless mode. This is used with a
+   * BufferedTextWindow to output the large results set.
+   */
+  private TextWindow resultsWindow;
+  /** The genetic analysis summary results output. */
+  private Consumer<String> gaWindow;
 
   // This can be used during filtering.
   // However the min filter is not used to determine if candidates are valid (that is the primary
@@ -2469,7 +2479,7 @@ public class BenchmarkFilterAnalysis
     ArrayList<FractionalAssignment[]> topFilterResults = null;
     String topFilterSummary = null;
     if (showSummaryTable || saveTemplate) {
-      createSummaryWindow();
+      final Consumer<String> summaryWindow = createSummaryWindow();
       int count = 0;
       final double range = (summaryDepth / simulationParameters.pixelPitch) * 0.5;
       int np = 0;
@@ -2554,11 +2564,7 @@ public class BenchmarkFilterAnalysis
         }
         text = sb.toString();
 
-        if (isHeadless) {
-          IJ.log(text);
-        } else {
-          summaryWindow.append(text);
-        }
+        summaryWindow.accept(text);
         count++;
         if (summaryTopN > 0 && count >= summaryTopN) {
           break;
@@ -2566,11 +2572,7 @@ public class BenchmarkFilterAnalysis
       }
       // Add a spacer to the summary table if we have multiple results
       if (count > 1 && showSummaryTable) {
-        if (isHeadless) {
-          IJ.log("");
-        } else {
-          summaryWindow.append("");
-        }
+        summaryWindow.accept("");
       }
     }
 
@@ -2706,7 +2708,7 @@ public class BenchmarkFilterAnalysis
     }
     if (!bestFilter.isEmpty()) {
       IJ.showStatus("Calculating sensitivity ...");
-      createSensitivityWindow();
+      final Consumer<String> output = createSensitivityWindow();
 
       int currentIndex = 0;
       for (final String type : bestFilterOrder) {
@@ -2722,11 +2724,7 @@ public class BenchmarkFilterAnalysis
             + MathUtils.rounded(score.getPrecision(), 4) + "\t\t"
             + MathUtils.rounded(score.getRecall(), 4);
 
-        if (isHeadless) {
-          IJ.log(message);
-        } else {
-          sensitivityWindow.append(message);
-        }
+        output.accept(message);
 
         // List all the parameters that can be adjusted.
         final int parameters = filter.getNumberOfParameters();
@@ -2755,20 +2753,12 @@ public class BenchmarkFilterAnalysis
           addSensitivityScore(sb, score.getRecall(), scoreHigher.getRecall(),
               scoreLower.getRecall(), dx1, dx2);
 
-          if (isHeadless) {
-            IJ.log(sb.toString());
-          } else {
-            sensitivityWindow.append(sb.toString());
-          }
+          output.accept(sb.toString());
         }
       }
 
       final String message = "-=-=-=-";
-      if (isHeadless) {
-        IJ.log(message);
-      } else {
-        sensitivityWindow.append(message);
-      }
+      output.accept(message);
 
       IJ.showProgress(1);
       IJ.showStatus("");
@@ -2816,32 +2806,33 @@ public class BenchmarkFilterAnalysis
     if (isHeadless) {
       IJ.log(createResultsHeader(false));
     } else {
-      if (!ImageJUtils.isShowing(resultsWindow)) {
+      resultsWindow = ImageJUtils.refresh(resultsWindowRef, () -> {
         final String header = createResultsHeader(false);
-        resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
-      }
+        return new TextWindow(TITLE + " Results", header, "", 900, 300);
+      });
       if (clearTables) {
         resultsWindow.getTextPanel().clear();
       }
     }
   }
 
-  private void createSummaryWindow() {
+  private Consumer<String> createSummaryWindow() {
     if (!showSummaryTable) {
-      return;
+      return null;
     }
 
     if (isHeadless) {
       IJ.log(createResultsHeader(true));
-    } else {
-      if (!ImageJUtils.isShowing(summaryWindow)) {
-        final String header = createResultsHeader(true);
-        summaryWindow = new TextWindow(TITLE + " Summary", header, "", 900, 300);
-      }
-      if (clearTables) {
-        summaryWindow.getTextPanel().clear();
-      }
+      return IJ::log;
     }
+    final TextWindow window = ImageJUtils.refresh(summaryWindowRef, () -> {
+      final String header = createResultsHeader(true);
+      return new TextWindow(TITLE + " Summary", header, "", 900, 300);
+    });
+    if (clearTables) {
+      window.getTextPanel().clear();
+    }
+    return window::append;
   }
 
   private void createGaWindow() {
@@ -2849,31 +2840,33 @@ public class BenchmarkFilterAnalysis
       String header = createResultsHeader(false);
       header += "\tIteration";
       IJ.log(header);
+      gaWindow = IJ::log;
     } else {
-      if (!ImageJUtils.isShowing(gaWindow)) {
+      final TextWindow window = ImageJUtils.refresh(gaWindowRef, () -> {
         String header = createResultsHeader(false);
         header += "\tIteration";
-        gaWindow = new TextWindow(TITLE + " Evolution", header, "", 900, 300);
-      }
+        return new TextWindow(TITLE + " Evolution", header, "", 900, 300);
+      });
       if (clearTables) {
-        gaWindow.getTextPanel().clear();
+        window.getTextPanel().clear();
       }
+      gaWindow = window::append;
     }
   }
 
-  private void createComponentAnalysisWindow() {
+  private Consumer<String> createComponentAnalysisWindow() {
     if (isHeadless) {
       IJ.log(createComponentAnalysisHeader());
-    } else {
-      if (!ImageJUtils.isShowing(componentAnalysisWindow)) {
-        final String header = createComponentAnalysisHeader();
-        componentAnalysisWindow =
-            new TextWindow(TITLE + " Component Analysis", header, "", 900, 300);
-      }
-      if (clearTables) {
-        componentAnalysisWindow.getTextPanel().clear();
-      }
+      return IJ::log;
     }
+    final TextWindow window = ImageJUtils.refresh(componentAnalysisWindowRef, () -> {
+      final String header = createComponentAnalysisHeader();
+      return new TextWindow(TITLE + " Component Analysis", header, "", 900, 300);
+    });
+    if (clearTables) {
+      window.getTextPanel().clear();
+    }
+    return window::append;
   }
 
   private static String createComponentAnalysisHeader() {
@@ -2883,8 +2876,8 @@ public class BenchmarkFilterAnalysis
     return header;
   }
 
-  private void addToComponentAnalysisWindow(ComplexFilterScore filterScore,
-      ComplexFilterScore bestFilterScore, String[] names) {
+  private static void addToComponentAnalysisWindow(Consumer<String> output,
+      ComplexFilterScore filterScore, ComplexFilterScore bestFilterScore, String[] names) {
     final FilterScoreResult result = filterScore.result;
     final StringBuilder sb = new StringBuilder(result.text);
     sb.append('\t').append(filterScore.size);
@@ -2913,12 +2906,7 @@ public class BenchmarkFilterAnalysis
       }
       sb.append(names[filterScore.combinations[i]]);
     }
-    final String text = sb.toString();
-    if (isHeadless) {
-      IJ.log(text);
-    } else {
-      componentAnalysisWindow.append(text);
-    }
+    output.accept(sb.toString());
   }
 
   private static String createResultsHeader(boolean summary) {
@@ -2939,13 +2927,13 @@ public class BenchmarkFilterAnalysis
     return sb.toString();
   }
 
-  private void createSensitivityWindow() {
+  private Consumer<String> createSensitivityWindow() {
     if (isHeadless) {
       IJ.log(createSensitivityHeader());
-    } else if (!ImageJUtils.isShowing(sensitivityWindow)) {
-      final String header = createSensitivityHeader();
-      sensitivityWindow = new TextWindow(TITLE + " Sensitivity", header, "", 900, 300);
+      return IJ::log;
     }
+    return ImageJUtils.refresh(sensitivityWindowRef, () -> new TextWindow(TITLE + " Sensitivity",
+        createSensitivityHeader(), "", 900, 300))::append;
   }
 
   private static String createSensitivityHeader() {
@@ -3697,17 +3685,7 @@ public class BenchmarkFilterAnalysis
     }
 
     if (showResultsTable) {
-      BufferedTextWindow tw = null;
-      if (resultsWindow != null) {
-        tw = new BufferedTextWindow(resultsWindow);
-        tw.setIncrement(Integer.MAX_VALUE);
-      }
-      for (int index = 0; index < scoreResults.length; index++) {
-        addToResultsWindow(tw, scoreResults[index].text);
-      }
-      if (resultsWindow != null) {
-        resultsWindow.getTextPanel().updateDisplay();
-      }
+      addToResultsWindow(scoreResults);
     }
 
     // Check the top filter against the limits of the original dimensions
@@ -4341,14 +4319,7 @@ public class BenchmarkFilterAnalysis
     analysisStopWatch.stop();
 
     if (showResultsTable) {
-      BufferedTextWindow tw = null;
-      if (resultsWindow != null) {
-        tw = new BufferedTextWindow(resultsWindow);
-      }
-      addToResultsWindow(tw, scoreResult.text);
-      if (resultsWindow != null) {
-        resultsWindow.getTextPanel().updateDisplay();
-      }
+      addToResultsWindow(scoreResult.text);
     }
 
     // Check the top result against the limits of the original dimensions
@@ -4416,12 +4387,8 @@ public class BenchmarkFilterAnalysis
     addBestFilter(type, allowDuplicates, newFilterScore);
 
     // Add spacer at end of each result set
-    if (isHeadless) {
-      if (showResultsTable) {
-        IJ.log("");
-      }
-    } else if (showResultsTable) {
-      resultsWindow.append("");
+    if (showResultsTable) {
+      addToResultsWindow("");
     }
 
     if (newFilterScore.compareTo(currentOptimum) <= 0) {
@@ -4471,13 +4438,49 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private void addToResultsWindow(BufferedTextWindow tw, final String text) {
+
+  private void addToResultsWindow(final String text) {
     if (text != null) {
-      if (isHeadless) {
-        IJ.log(text);
+      if (resultsWindow != null) {
+        resultsWindow.append(text);
       } else {
-        tw.append(text);
+        IJ.log(text);
       }
+    }
+  }
+  private void addToResultsWindow(ParameterScoreResult[] scoreResults) {
+    if (resultsWindow != null) {
+      try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+        tw.setIncrement(0);
+        for (int index = 0; index < scoreResults.length; index++) {
+          addToResultsOutput(tw::append, scoreResults[index].text);
+        }
+      }
+    } else {
+      for (int index = 0; index < scoreResults.length; index++) {
+        addToResultsOutput(IJ::log, scoreResults[index].text);
+      }
+    }
+  }
+
+  private void addToResultsWindow(FilterScoreResult[] scoreResults) {
+    if (resultsWindow != null) {
+      try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+        tw.setIncrement(0);
+        for (int index = 0; index < scoreResults.length; index++) {
+          addToResultsOutput(tw::append, scoreResults[index].text);
+        }
+      }
+    } else {
+      for (int index = 0; index < scoreResults.length; index++) {
+        addToResultsOutput(IJ::log, scoreResults[index].text);
+      }
+    }
+  }
+
+  private static void addToResultsOutput(Consumer<String> output, final String text) {
+    if (text != null) {
+      output.accept(text);
     }
   }
 
@@ -5435,7 +5438,7 @@ public class BenchmarkFilterAnalysis
     if (componentAnalysis == 0) {
       return;
     }
-    createComponentAnalysisWindow();
+    final Consumer<String> output = createComponentAnalysisWindow();
 
     final DirectFilter bestFilter = bestFilterScore.getFilter();
     final String[] names = getNames(bestFilter);
@@ -5540,7 +5543,7 @@ public class BenchmarkFilterAnalysis
           scores[i].index = add;
         }
 
-        addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
+        addToComponentAnalysisWindow(output, scores[i], bestFilterScore, names);
       }
 
       return;
@@ -5575,7 +5578,7 @@ public class BenchmarkFilterAnalysis
       // Rank them
       Arrays.sort(scores);
       for (int i = 0; i < scores.length; i++) {
-        addToComponentAnalysisWindow(scores[i], bestFilterScore, names);
+        addToComponentAnalysisWindow(output, scores[i], bestFilterScore, names);
         if (myComponentAnalysis == 1) {
           // Only add the best result
           break;
@@ -6589,7 +6592,7 @@ public class BenchmarkFilterAnalysis
 
     final StringBuilder text = createResult(filter, r);
     add(text, gaIteration);
-    gaWindow.append(text.toString());
+    gaWindow.accept(text.toString());
   }
 
   private SimpleFilterScore filterScoreOptimum;
@@ -6622,17 +6625,7 @@ public class BenchmarkFilterAnalysis
       }
 
       if (showResultsTable) {
-        BufferedTextWindow tw = null;
-        if (resultsWindow != null) {
-          tw = new BufferedTextWindow(resultsWindow);
-          tw.setIncrement(Integer.MAX_VALUE);
-        }
-        for (int index = 0; index < scoreResults.length; index++) {
-          addToResultsWindow(tw, scoreResults[index].text);
-        }
-        if (resultsWindow != null) {
-          resultsWindow.getTextPanel().updateDisplay();
-        }
+        addToResultsWindow(scoreResults);
       }
 
       parameterScoreOptimum = max;
@@ -6656,7 +6649,7 @@ public class BenchmarkFilterAnalysis
       final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
       add(text, gaIteration);
-      gaWindow.append(text.toString());
+      gaWindow.accept(text.toString());
 
       return new SearchResult<>(parameters, max);
     }
@@ -6667,12 +6660,7 @@ public class BenchmarkFilterAnalysis
       SimpleParameterScore max = parameterScoreOptimum;
 
       // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
-      Arrays.sort(points, new Comparator<double[]>() {
-        @Override
-        public int compare(double[] o1, double[] o2) {
-          return BenchmarkFilterAnalysis.compare(o1[2], o2[2]);
-        }
-      });
+      Arrays.sort(points, (o1, o2) -> BenchmarkFilterAnalysis.compare(o1[2], o2[2]));
 
       final ParameterScoreResult[] scoreResults = scoreFilters(points, showResultsTable);
 
@@ -6693,17 +6681,7 @@ public class BenchmarkFilterAnalysis
       }
 
       if (showResultsTable) {
-        BufferedTextWindow tw = null;
-        if (resultsWindow != null) {
-          tw = new BufferedTextWindow(resultsWindow);
-          tw.setIncrement(Integer.MAX_VALUE);
-        }
-        for (int index = 0; index < scoreResults.length; index++) {
-          addToResultsWindow(tw, scoreResults[index].text);
-        }
-        if (resultsWindow != null) {
-          resultsWindow.getTextPanel().updateDisplay();
-        }
+        addToResultsWindow(scoreResults);
       }
 
       parameterScoreOptimum = max;
@@ -6724,7 +6702,7 @@ public class BenchmarkFilterAnalysis
       final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
       add(text, gaIteration);
-      gaWindow.append(text.toString());
+      gaWindow.accept(text.toString());
 
       return scores;
     }
@@ -6777,7 +6755,7 @@ public class BenchmarkFilterAnalysis
 
     final StringBuilder text = createResult(filter, r);
     add(text, gaIteration);
-    gaWindow.append(text.toString());
+    gaWindow.accept(text.toString());
 
     return new SearchResult<>(filter.getParameters(), max);
   }
@@ -6817,7 +6795,7 @@ public class BenchmarkFilterAnalysis
 
     final StringBuilder text = createResult(filter, r);
     add(text, gaIteration);
-    gaWindow.append(text.toString());
+    gaWindow.accept(text.toString());
 
     return scores;
   }

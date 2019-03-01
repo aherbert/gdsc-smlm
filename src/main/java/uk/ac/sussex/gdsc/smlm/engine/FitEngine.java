@@ -58,7 +58,7 @@ public class FitEngine {
   // Used by the FitWorkers
   private final int fitting;
   private final MaximaSpotFilter spotFilter;
-  private Logger logger;
+  private final Logger logger;
   private final Logger debugLogger = null;
   private FitTypeCounter counter;
 

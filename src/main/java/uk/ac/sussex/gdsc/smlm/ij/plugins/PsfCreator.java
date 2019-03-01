@@ -246,10 +246,10 @@ public class PsfCreator implements PlugInFilter {
   private boolean normalise;
   private boolean resetScale = true;
 
-  private SoftLock plotLock1 = new SoftLock();
-  private SoftLock plotLock2 = new SoftLock();
-  private SoftLock plotLock3 = new SoftLock();
-  private SoftLock plotLock4 = new SoftLock();
+  private final SoftLock plotLock1 = new SoftLock();
+  private final SoftLock plotLock2 = new SoftLock();
+  private final SoftLock plotLock3 = new SoftLock();
+  private final SoftLock plotLock4 = new SoftLock();
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -4288,7 +4288,7 @@ public class PsfCreator implements PlugInFilter {
       ParameterUtils.isEqualOrAbove("PSF magnification", settings.getPsfMagnification(), 1);
       ParameterUtils.isAbove("Smoothing", settings.getSmoothing(), 0);
       ParameterUtils.isBelow("Smoothing", settings.getSmoothing(), 1);
-    } catch (IllegalArgumentException ex) {
+    } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
     }

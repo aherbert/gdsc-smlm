@@ -212,7 +212,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     @Override
     public String toString() {
       final CameraType cameraType = getType();
-      String name = cameraType.getShortName();
+      final String name = cameraType.getShortName();
       switch (cameraType) {
         case CCD:
         case CCD_APPROXIMATION:
@@ -723,7 +723,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
   private static String getName(FiKey key) {
     final CameraType type = key.getType();
-    String name = type.getShortName();
+    final String name = type.getShortName();
     switch (type) {
       case CCD:
       case CCD_APPROXIMATION:

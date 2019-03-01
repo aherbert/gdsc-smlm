@@ -466,7 +466,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // Note using a line mesh would work but does not cull the backface
       final Shape3D shape = Shape3DHelper.createShape(rendering, 0);
 
-      Appearance appearance = shape.getAppearance();
+      final Appearance appearance = shape.getAppearance();
 
       final PolygonAttributes pa = appearance.getPolygonAttributes();
       pa.setCullFace(PolygonAttributes.CULL_BACK);

@@ -48,7 +48,7 @@ public class GaussianKernel {
 
   private int currentScale;
 
-  private TDoubleArrayList halfKernel;
+  private final TDoubleArrayList halfKernel;
 
   /**
    * Instantiates a new gaussian kernel.

@@ -144,7 +144,7 @@ public class ResultsMatchCalculator implements PlugIn {
      */
     public static CoordinateMethod fromDescription(String description,
         CoordinateMethod defaultValue) {
-      for (CoordinateMethod value : values) {
+      for (final CoordinateMethod value : values) {
         if (value.description.equals(description)) {
           return value;
         }
@@ -844,30 +844,24 @@ public class ResultsMatchCalculator implements PlugIn {
   }
 
   private static TextWindow createResultsWindow(boolean doIdAnalysis) {
-    TextWindow resultsWindow = resultsWindowRef.get();
     final String header = createResultsHeader(doIdAnalysis);
-    if (!ImageJUtils.isShowing(resultsWindow)) {
-      resultsWindow = new TextWindow(TITLE + " Results", header, "", 900, 300);
-      resultsWindowRef.set(resultsWindow);
-    } else {
-      ImageJUtils.refreshHeadings(resultsWindow, header, true);
-    }
+    final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+        () -> new TextWindow(TITLE + " Results", header, "", 900, 300));
+    ImageJUtils.refreshHeadings(resultsWindow, header, true);
     return resultsWindow;
   }
 
   private static TextWindow createPairsWindow(TextWindow resultsWindow) {
-    TextWindow pairsWindow = pairsWindowRef.get();
-    if (!ImageJUtils.isShowing(pairsWindow)) {
-      pairsWindow = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
+    return ImageJUtils.refresh(pairsWindowRef, () -> {
+      final TextWindow window = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
       // Position relative to results window
       if (resultsWindow != null) {
         final Point p = resultsWindow.getLocation();
         p.y += resultsWindow.getHeight();
-        pairsWindow.setLocation(p);
+        window.setLocation(p);
       }
-      pairsWindowRef.set(pairsWindow);
-    }
-    return pairsWindow;
+      return window;
+    });
   }
 
   private static String createResultsHeader(boolean idAnalysis) {

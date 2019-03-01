@@ -128,10 +128,10 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private final int defaultScale;
 
   /** The poisson distribution used to generate the Poisson probabilities. */
-  private CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
+  private final CustomPoissonDistribution pd = new CustomPoissonDistribution(null, 1);
 
   /** Working space to store the Poisson probabilities. */
-  private TDoubleArrayList list = new TDoubleArrayList();
+  private final TDoubleArrayList list = new TDoubleArrayList();
 
   /** The mean threshold for the switch to a Gaussian-Gaussian convolution. */
   private double meanThreshold = 100;

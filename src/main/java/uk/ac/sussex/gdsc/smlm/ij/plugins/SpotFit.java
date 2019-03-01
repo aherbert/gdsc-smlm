@@ -413,12 +413,8 @@ public class SpotFit implements PlugIn {
      * @return the text window
      */
     private static TextWindow createResultsWindow() {
-      TextWindow window = resultsWindow.get();
-      if (!ImageJUtils.isShowing(window)) {
-        window = new TextWindow(TITLE + " Results", createHeader(), "", 700, 300);
-        resultsWindow.set(window);
-      }
-      return window;
+      return ImageJUtils.refresh(resultsWindow,
+          () -> new TextWindow(TITLE + " Results", createHeader(), "", 700, 300));
     }
 
     private static String createHeader() {

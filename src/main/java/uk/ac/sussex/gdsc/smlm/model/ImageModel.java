@@ -291,8 +291,8 @@ public abstract class ImageModel {
    * @param frames the frames
    * @return the fluorophores
    */
-  public List<FluorophoreSequenceModel>
-      createFluorophores(List<CompoundMoleculeModel> molecules, int frames) {
+  public List<FluorophoreSequenceModel> createFluorophores(List<CompoundMoleculeModel> molecules,
+      int frames) {
     frameLimit = frames;
     final ArrayList<FluorophoreSequenceModel> list = new ArrayList<>(molecules.size());
     for (int i = 0; i < molecules.size();) {

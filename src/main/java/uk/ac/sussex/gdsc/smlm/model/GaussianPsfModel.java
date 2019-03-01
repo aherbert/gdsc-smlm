@@ -42,7 +42,7 @@ import org.apache.commons.math3.special.Erf;
 public class GaussianPsfModel extends PsfModel {
   private double s0;
   private double s1;
-  private AstigmatismZModel zModel;
+  private final AstigmatismZModel zModel;
   private double range = 5;
 
   /**
@@ -126,7 +126,7 @@ public class GaussianPsfModel extends PsfModel {
 
   @Override
   public GaussianPsfModel copy(RandomGenerator rng) {
-    return new GaussianPsfModel(this,rng);
+    return new GaussianPsfModel(this, rng);
   }
 
   @Override

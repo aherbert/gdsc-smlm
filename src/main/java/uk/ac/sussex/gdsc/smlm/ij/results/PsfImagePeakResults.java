@@ -220,9 +220,9 @@ public class PsfImagePeakResults extends ImageJImagePeakResults {
     x -= 0.5 / scale;
     y -= 0.5 / scale;
 
-    int xmin = FastMath.max(0, (int) Math.floor(x - width * scale));
+    final int xmin = FastMath.max(0, (int) Math.floor(x - width * scale));
     int xmax = (int) Math.ceil(x + width * scale);
-    int ymin = FastMath.max(0, (int) Math.floor(y - height * scale));
+    final int ymin = FastMath.max(0, (int) Math.floor(y - height * scale));
     int ymax = (int) Math.ceil(y + height * scale);
 
     // Clip range

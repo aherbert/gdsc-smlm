@@ -1678,10 +1678,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     int failCfp = 0;
     int ctp = 0;
     int cfp = 0;
-    int[] singleStatus = new int[FitStatus.values().length];
-    int[] multiStatus = new int[singleStatus.length];
-    int[] doubletStatus = new int[singleStatus.length];
-    int[] multiDoubletStatus = new int[singleStatus.length];
+    final int[] singleStatus = new int[FitStatus.values().length];
+    final int[] multiStatus = new int[singleStatus.length];
+    final int[] doubletStatus = new int[singleStatus.length];
+    final int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
     final int[] frames = new int[filterCandidates.size()];

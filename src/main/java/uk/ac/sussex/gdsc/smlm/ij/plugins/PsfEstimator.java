@@ -68,6 +68,7 @@ import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,7 +86,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private static final int EXCEPTION = 4;
   private static final int BAD_ESTIMATE = 5;
 
-  private static TextWindow resultsWindow;
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private double initialPeakStdDev0 = 1;
   private double initialPeakStdDev1 = 1;
@@ -406,7 +407,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     // Use the fit configuration to generate a Gaussian function to test what is being evaluated
     final Gaussian2DFunction gf = config.getFitConfiguration().createGaussianFunction(1, 1, 1);
-    createResultsWindow();
     ignore[ANGLE] = !gf.evaluatesAngle();
     ignore[X] = !gf.evaluatesSD0();
     ignore[Y] = !gf.evaluatesSD1();
@@ -418,13 +418,14 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     final boolean[] identical = new boolean[4];
     final double[] p = new double[] {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
-    addToResultTable(0, 0, params, paramsDev, p);
+    final TextWindow resultsWindow = createResultsWindow();
+    addToResultTable(resultsWindow, 0, 0, params, paramsDev, p);
 
     if (!calculateStatistics(fitter, params, paramsDev)) {
       return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
     }
 
-    if (!addToResultTable(1, size(), params, paramsDev, p)) {
+    if (!addToResultTable(resultsWindow, 1, size(), params, paramsDev, p)) {
       return BAD_ESTIMATE;
     }
 
@@ -445,7 +446,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
           getPairedP(sampleNew[X], sampleNew[Y], XY, p, identical);
         }
 
-        if (!addToResultTable(iteration++, size(), params, paramsDev, p)) {
+        if (!addToResultTable(resultsWindow, iteration++, size(), params, paramsDev, p)) {
           return BAD_ESTIMATE;
         }
 
@@ -713,10 +714,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   /**
    * Create the result window (if it is not available).
    */
-  private static void createResultsWindow() {
-    if (!ImageJUtils.isShowing(resultsWindow)) {
-      resultsWindow = new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300);
-    }
+  private static TextWindow createResultsWindow() {
+    return ImageJUtils.refresh(resultsWindowRef,
+        () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300));
   }
 
   private static String createResultsHeader() {
@@ -736,8 +736,8 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     return sb.toString();
   }
 
-  private boolean addToResultTable(int iteration, int n, double[] params, double[] paramsDev,
-      double[] pvalue) {
+  private boolean addToResultTable(TextWindow resultsWindow, int iteration, int n, double[] params,
+      double[] paramsDev, double[] pvalue) {
     final StringBuilder sb = new StringBuilder();
     sb.append(iteration).append('\t').append(n).append('\t');
     for (int i = 0; i < 3; i++) {

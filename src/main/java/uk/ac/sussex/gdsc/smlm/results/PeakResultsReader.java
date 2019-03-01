@@ -1018,7 +1018,7 @@ public class PeakResultsReader {
   }
 
   private ProgressReporter createProgressReporter(FileInputStream fis) throws IOException {
-    TrackProgress trackProgress = tracker;
+    final TrackProgress trackProgress = tracker;
     if (trackProgress != null) {
       return new FileProgressReporter(fis, trackProgress);
     }

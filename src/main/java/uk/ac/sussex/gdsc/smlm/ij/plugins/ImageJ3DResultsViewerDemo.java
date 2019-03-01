@@ -254,7 +254,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
     ta.setTransparency(0.5f);
     ta.setTransparencyMode(TransparencyAttributes.FASTEST);
     appearance.setTransparencyAttributes(ta);
-    ItemGeometryGroup pointGroup =
+    final ItemGeometryGroup pointGroup =
         new ItemGeometryGroup(points, null, appearance, sizes, null, null);
     // pointGroup = new OrderedItemGeometryGroup(points, null, appearance, sizes, null, null);
 
