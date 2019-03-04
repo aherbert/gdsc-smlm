@@ -25,15 +25,16 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
@@ -42,9 +43,10 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
-import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -262,6 +264,21 @@ public class FilterResults implements PlugIn {
   }
 
   /**
+   * Simple interface for filtering the coordinates.
+   */
+  private interface CoordFilter {
+    /**
+     * Test if the coordinates are allowed.
+     *
+     * @param frame the frame
+     * @param x the x
+     * @param y the y
+     * @return true, if allowed
+     */
+    boolean match(int frame, float x, float y);
+  }
+
+  /**
    * Apply the filters to the data.
    */
   private void filterResults() {
@@ -272,21 +289,49 @@ public class FilterResults implements PlugIn {
     newResults.setName(results.getName() + " Filtered");
 
     // Initialise the mask
-    final ByteProcessor mask = getMask(filterSettings.getMaskTitle());
-    MaskDistribution maskFilter = null;
-    final float centreX = results.getBounds().width / 2.0f;
-    final float centreY = results.getBounds().height / 2.0f;
-    if (mask != null) {
-      final double scaleX = (double) results.getBounds().width / mask.getWidth();
-      final double scaleY = (double) results.getBounds().height / mask.getHeight();
-      maskFilter = new MaskDistribution((byte[]) mask.getPixels(), mask.getWidth(),
-          mask.getHeight(), 0, scaleX, scaleY);
+    CoordFilter maskFilter = null;
+    final ImagePlus maskImp = WindowManager.getImage(filterSettings.getMaskTitle());
+    if (maskImp != null) {
+      final int maxx = maskImp.getWidth();
+      final int maxy = maskImp.getHeight();
+      final double scaleX = (double) results.getBounds().width / maxx;
+      final double scaleY = (double) results.getBounds().height / maxy;
+
+      // Improve to allow stacks
+      if (maskImp.getStackSize() > 1) {
+        // 3D filter. The frame is mapped to the stack index.
+        final ImageStack stack = maskImp.getImageStack();
+        final ImageProcessor ip = stack.getProcessor(1);
+        maskFilter = (t, x, y) -> {
+          // Check stack index
+          if (t >= 1 && t <= stack.size()) {
+            int ix = (int) (x / scaleX);
+            int iy = (int) (y / scaleY);
+            if (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy) {
+              ip.setPixels(stack.getPixels(t));
+              return ip.get(iy * maxx + ix) != 0;
+            }
+          }
+          return false;
+        };
+      } else {
+        // 2D filter.
+        final ImageProcessor ip = maskImp.getProcessor();
+        maskFilter = (t, x, y) -> {
+          int ix = (int) (x / scaleX);
+          int iy = (int) (y / scaleY);
+          return (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy && ip.get(iy * maxx + ix) != 0);
+        };
+      }
+    } else {
+      maskFilter = (t, x, y) -> true;
     }
 
+    // Create the ticker with size+1 as we tick at the start of the loop
+    final Ticker ticker =
+        Ticker.createStarted(new ImageJTrackProgress(), results.size() + 1, false);
     for (int i = 0, size = results.size(); i < size; i++) {
-      if (i % 64 == 0) {
-        IJ.showProgress(i, size);
-      }
+      ticker.tick();
 
       // sp will not be null
 
@@ -303,12 +348,11 @@ public class FilterResults implements PlugIn {
         continue;
       }
 
-      if (maskFilter != null) {
-        // Check the coordinates are inside the mask
-        final double[] xy = new double[] {sp.x[i] - centreX, sp.y[i] - centreY};
-        if (!maskFilter.isWithinXy(xy)) {
-          continue;
-        }
+      final PeakResult peakResult = sp.peakResults[i];
+
+      // Check the coordinates are inside the mask
+      if (!maskFilter.match(peakResult.getFrame(), sp.x[i], sp.y[i])) {
+        continue;
       }
 
       if (pp != null && pp.precisions[i] > maxPrecision) {
@@ -323,20 +367,12 @@ public class FilterResults implements PlugIn {
       }
 
       // Passed all filters. Add to the results
-      newResults.add(sp.peakResults[i]);
+      newResults.add(peakResult);
     }
 
     IJ.showProgress(1);
     IJ.showStatus(newResults.size() + " Filtered localisations");
     MemoryPeakResults.addResults(newResults);
-  }
-
-  private static ByteProcessor getMask(String maskTitle) {
-    final ImagePlus imp = WindowManager.getImage(maskTitle);
-    if (imp != null) {
-      return (ByteProcessor) imp.getProcessor().convertToByte(false);
-    }
-    return null;
   }
 
   private boolean showDialog() {
