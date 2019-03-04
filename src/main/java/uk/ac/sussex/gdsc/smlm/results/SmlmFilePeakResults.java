@@ -137,7 +137,8 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
    */
   protected static void checkSize(int numberOfParams, float[] a) {
     if (a.length < numberOfParams) {
-      throw new IllegalArgumentException("Incorrect number of parameters " + a.length);
+      throw new IllegalArgumentException(String.format(
+          "Incorrect number of parameters: actual=%d, expected=%d", a.length, numberOfParams));
     }
   }
 
