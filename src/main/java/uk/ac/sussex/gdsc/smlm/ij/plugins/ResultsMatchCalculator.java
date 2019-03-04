@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -192,6 +193,12 @@ public class ResultsMatchCalculator implements PlugIn {
     private static final String KEY_PAIRS_DIR = "gdsc.smlm.resultsmatchcalculator.pairsDirectory";
     // @formatter:on
 
+    /** The options to save the classifications. */
+    private static final String[] saveClassificationsOptions =
+        {"None", "Matched", "Unmatched", "All"};
+    private static final int SAVE_MATCHED = 0x01;
+    private static final int SAVE_UNMATCHED = 0x02;
+
     String inputOption1 = "";
     String inputOption2 = "";
     CoordinateMethod coordinateMethod1 = CoordinateMethod.ALL;
@@ -202,7 +209,7 @@ public class ResultsMatchCalculator implements PlugIn {
     double beta = 4;
     boolean showTable = true;
     boolean showPairs;
-    boolean saveClassifications;
+    int saveClassificationsOption;
     String classificationsFile = "";
     boolean idAnalysis;
     boolean savePairs;
@@ -221,7 +228,7 @@ public class ResultsMatchCalculator implements PlugIn {
       beta = Prefs.get(KEY_BETA, 4);
       showTable = Prefs.get(KEY_SHOW_TABLE, true);
       showPairs = Prefs.get(KEY_SHOW_PAIRS, false);
-      saveClassifications = Prefs.get(KEY_SAVE_CLASS, false);
+      saveClassificationsOption = Prefs.getInt(KEY_SAVE_CLASS, 0);
       classificationsFile = Prefs.get(KEY_CLASS_FILE, "");
       idAnalysis = Prefs.get(KEY_ID_ANALYSIS, false);
       savePairs = Prefs.get(KEY_SAVE_PAIRS, false);
@@ -239,7 +246,7 @@ public class ResultsMatchCalculator implements PlugIn {
       this.beta = source.beta;
       this.showTable = source.showTable;
       this.showPairs = source.showPairs;
-      this.saveClassifications = source.saveClassifications;
+      this.saveClassificationsOption = source.saveClassificationsOption;
       this.classificationsFile = source.classificationsFile;
       this.idAnalysis = source.idAnalysis;
       this.savePairs = source.savePairs;
@@ -274,11 +281,38 @@ public class ResultsMatchCalculator implements PlugIn {
       Prefs.set(KEY_BETA, beta);
       Prefs.set(KEY_SHOW_TABLE, showTable);
       Prefs.set(KEY_SHOW_PAIRS, showPairs);
-      Prefs.set(KEY_SAVE_CLASS, saveClassifications);
+      Prefs.set(KEY_SAVE_CLASS, saveClassificationsOption);
       Prefs.set(KEY_CLASS_FILE, classificationsFile);
       Prefs.set(KEY_ID_ANALYSIS, idAnalysis);
       Prefs.set(KEY_SAVE_PAIRS, savePairs);
       Prefs.set(KEY_PAIRS_DIR, pairsDirectory);
+    }
+
+    /**
+     * Check if the save matched flag is set.
+     *
+     * @return true if set
+     */
+    boolean isSaveMatched() {
+      return BitFlagUtils.anySet(saveClassificationsOption, SAVE_MATCHED);
+    }
+
+    /**
+     * Check if the save unmatched flag is set.
+     *
+     * @return true if set
+     */
+    boolean isSaveUnmatched() {
+      return BitFlagUtils.anySet(saveClassificationsOption, SAVE_UNMATCHED);
+    }
+
+    /**
+     * Check if any save classifications options are set.
+     *
+     * @return true if set
+     */
+    boolean isSaveClassifications() {
+      return BitFlagUtils.anySet(saveClassificationsOption, SAVE_MATCHED | SAVE_UNMATCHED);
     }
   }
 
@@ -400,7 +434,8 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addNumericField("Beta", settings.beta, 2);
     gd.addCheckbox("Show_table", settings.showTable);
     gd.addCheckbox("Show_pairs", settings.showPairs);
-    gd.addCheckbox("Save_classifications", settings.saveClassifications);
+    gd.addChoice("Save_classifications", Settings.saveClassificationsOptions,
+        settings.saveClassificationsOption);
     gd.addCheckbox("Id_analysis", settings.idAnalysis);
     gd.addCheckbox("Save_pairs", settings.savePairs);
 
@@ -422,12 +457,12 @@ public class ResultsMatchCalculator implements PlugIn {
     settings.beta = gd.getNextNumber();
     settings.showTable = gd.getNextBoolean();
     settings.showPairs = gd.getNextBoolean();
-    settings.saveClassifications = gd.getNextBoolean();
+    settings.saveClassificationsOption = gd.getNextChoiceIndex();
     settings.idAnalysis = gd.getNextBoolean();
     settings.savePairs = gd.getNextBoolean();
     settings.save();
 
-    if (!(settings.showTable || settings.showPairs || settings.saveClassifications)) {
+    if (!(settings.showTable || settings.showPairs || !settings.isSaveClassifications())) {
       IJ.error(TITLE, "No outputs specified");
       return false;
     }
@@ -448,7 +483,9 @@ public class ResultsMatchCalculator implements PlugIn {
 
   @SuppressWarnings("null")
   private void runCompareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2) {
-    final boolean requirePairs = settings.showPairs || settings.saveClassifications;
+    final boolean requirePairs = settings.showPairs || settings.isSaveClassifications();
+    final boolean saveMatched = settings.isSaveMatched();
+    final boolean saveUnmatched = settings.isSaveUnmatched();
 
     final TextFilePeakResults fileResults = createFilePeakResults(results2);
 
@@ -498,17 +535,21 @@ public class ResultsMatchCalculator implements PlugIn {
       }
       if (fileResults != null) {
         // Matches are marked in the original value with 1 for true, 0 for false
-        for (final PointPair pair : matches) {
-          PeakResult result = ((PeakResultPoint) pair.getPoint2()).peakResult;
-          result = result.copy();
-          result.setOrigValue(1);
-          fileResults.add(result);
+        if (saveMatched) {
+          for (final PointPair pair : matches) {
+            PeakResult result = ((PeakResultPoint) pair.getPoint2()).peakResult;
+            result = result.copy();
+            result.setOrigValue(1);
+            fileResults.add(result);
+          }
         }
-        for (final Coordinate c : fp) {
-          PeakResult result = ((PeakResultPoint) c).peakResult;
-          result = result.copy();
-          result.setOrigValue(0);
-          fileResults.add(result);
+        if (saveUnmatched) {
+          for (final Coordinate c : fp) {
+            PeakResult result = ((PeakResultPoint) c).peakResult;
+            result = result.copy();
+            result.setOrigValue(0);
+            fileResults.add(result);
+          }
         }
       }
     }
@@ -671,14 +712,13 @@ public class ResultsMatchCalculator implements PlugIn {
   }
 
   private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2) {
-    if (!settings.saveClassifications) {
+    if (!settings.isSaveClassifications()) {
       return null;
     }
     final String filename =
         ImageJUtils.getFilename("Classifications_File", settings.classificationsFile);
     if (filename != null) {
       settings.classificationsFile = filename;
-      settings.save();
       final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
       r.copySettings(results2);
       r.begin();
@@ -1042,7 +1082,6 @@ public class ResultsMatchCalculator implements PlugIn {
       return;
     }
     settings.pairsDirectory = directory;
-    settings.save();
 
     final double[] distanceThresholds =
         getDistances(settings.distanceThreshold, settings.increments, settings.delta);
