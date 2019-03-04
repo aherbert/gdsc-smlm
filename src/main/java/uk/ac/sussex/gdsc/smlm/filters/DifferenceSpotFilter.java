@@ -48,11 +48,27 @@ public class DifferenceSpotFilter extends MaximaSpotFilter {
    */
   public DifferenceSpotFilter(int search, int border, DataProcessor processor1,
       DataProcessor processor2) {
+    this(search, border, processor1, processor2, false);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param search The search width for non-maximum suppression
+   * @param border The border to ignore for maxima
+   * @param processor1 The first data processor
+   * @param processor2 The second data processor
+   * @param allowInversion the allow inversion
+   * @throws IllegalArgumentException if the spread of the second processor is smaller than the
+   *         first and {@code allowInversion == false}
+   */
+  public DifferenceSpotFilter(int search, int border, DataProcessor processor1,
+      DataProcessor processor2, boolean allowInversion) {
     super(search, border);
     this.processor1 = ValidationUtils.checkNotNull(processor1, "Processor 1 is null");
     this.processor2 = ValidationUtils.checkNotNull(processor2, "Processor 2 is null");
     // This is a simple protection from invalid difference-of-smoothing.
-    ValidationUtils.checkArgument(processor2.getSpread() > processor1.getSpread(),
+    ValidationUtils.checkArgument(allowInversion || processor2.getSpread() > processor1.getSpread(),
         "Processor 2 acts on a smaller spread of data than processor 1");
   }
 

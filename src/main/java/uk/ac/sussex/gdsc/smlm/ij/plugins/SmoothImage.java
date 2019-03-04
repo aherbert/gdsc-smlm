@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.filters.DataProcessor;
@@ -63,6 +64,17 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
   private static final int FLAGS =
       DOES_16 | DOES_8G | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING;
 
+  // Track image contrast adjustments when the dialog is visible
+
+  /** The image ID. */
+  private int imageId;
+  /** Flag to show when the dialog is visible. */
+  private boolean dialogVisible;
+  /** The display min of the image. */
+  private double min;
+  /** The display max of the image. */
+  private double max;
+
   /** The plugin settings. */
   private Settings settings;
 
@@ -75,21 +87,27 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
         new AtomicReference<>(new Settings());
 
     int filter1;
-    double smooth1 = 1;
+    double smooth1;
     boolean differenceFilter;
     int filter2;
-    double smooth2 = 3;
+    double smooth2;
+    boolean autoAdjustConstrast;
+    boolean allowInversion;
 
     Settings() {
-      // Do nothing
+      smooth1 = 1;
+      smooth2 = 3;
+      autoAdjustConstrast = true;
     }
 
     Settings(Settings source) {
-      this.filter1 = source.filter1;
-      this.smooth1 = source.smooth1;
-      this.differenceFilter = source.differenceFilter;
-      this.filter2 = source.filter2;
-      this.smooth2 = source.smooth2;
+      filter1 = source.filter1;
+      smooth1 = source.smooth1;
+      differenceFilter = source.differenceFilter;
+      filter2 = source.filter2;
+      smooth2 = source.smooth2;
+      autoAdjustConstrast = source.autoAdjustConstrast;
+      allowInversion = source.allowInversion;
     }
 
     Settings copy() {
@@ -134,12 +152,33 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
+    // Support simultaneous contrast adjustment by saving the min/max
+    // only when in the preview.
+    imageId = imp.getID();
+    saveMinMax(imp);
+    ImagePlus.addImageListener(new ImageAdapter() {
+      @Override
+      public void imageUpdated(ImagePlus imp) {
+        // Only when the dialog is open
+        if (imp.getID() == imageId && dialogVisible) {
+          saveMinMax(imp);
+        }
+      }
+    });
+
     return FLAGS;
+  }
+
+
+  private void saveMinMax(ImagePlus imp) {
+    final ImageProcessor ip = imp.getProcessor();
+    min = ip.getMin();
+    max = ip.getMax();
   }
 
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
-    // Note: We cannot use a NonBlockinnericDialog as scrolling through the image
+    // Note: We cannot use a NonBlockingGenericDialog as scrolling through the image
     // throws away the snap shot. The pixel data for the previous slice is then fixed
     // with the preview. So we can only support a single slice.
 
@@ -153,10 +192,14 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     gd.addCheckbox("Difference_filter", settings.differenceFilter);
     gd.addChoice("Spot_filter2", filterNames, filterNames[settings.filter2]);
     gd.addSlider("Smoothing2", 1.5, 6, settings.smooth2);
+    gd.addCheckbox("Auto_adjust_contrast", settings.autoAdjustConstrast);
+    gd.addCheckbox("Allow_inversion", settings.allowInversion);
 
     gd.addPreviewCheckbox(pfr);
     gd.addDialogListener(this);
+    dialogVisible = true;
     gd.showDialog();
+    dialogVisible = false;
 
     if (gd.wasCanceled() || !dialogItemChanged(gd, null)) {
       return DONE;
@@ -174,6 +217,8 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
       settings.filter2 = gd.getNextChoiceIndex();
       settings.smooth2 = gd.getNextNumber();
     }
+    settings.autoAdjustConstrast = gd.getNextBoolean();
+    settings.allowInversion = gd.getNextBoolean();
     settings.save();
     return !gd.invalidNumber();
   }
@@ -192,10 +237,13 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     final int height = fp.getHeight();
     data = filter.preprocessData(data, width, height);
 
-
     fp = new FloatProcessor(width, height, data);
     ip.insert(fp, bounds.x, bounds.y);
-    ip.setMinAndMax(fp.getMin(), fp.getMax());
+    if (settings.autoAdjustConstrast) {
+      ip.setMinAndMax(fp.getMin(), fp.getMax());
+    } else {
+      ip.setMinAndMax(min, max);
+    }
   }
 
   private MaximaSpotFilter createSpotFilter() {
@@ -206,7 +254,8 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     if (settings.differenceFilter) {
       final DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border,
           filters[settings.filter2], settings.smooth2);
-      return new DifferenceSpotFilter(search, border, processor0, processor1);
+      return new DifferenceSpotFilter(search, border, processor0, processor1,
+          settings.allowInversion);
     }
     return new SingleSpotFilter(search, border, processor0);
   }
