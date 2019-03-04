@@ -30,6 +30,8 @@ import ij.plugin.PlugIn;
 /**
  * Default ImageJ plugin (no Java package) to run the {@link SmlmTools} plugin.
  *
+ * <p><strong>This class is not included in the packaged uk.ac.sussex.gdsc.smlm jar.</strong>
+ *
  * <p>This class allows the project to be run in debug mode from an IDE (e.g. Eclipse). The Maven
  * output directory will be target/classes. Create a symbolic link to that directory from the
  * project root and name it plugins. Optionally create a link to the macros directory to allow the
