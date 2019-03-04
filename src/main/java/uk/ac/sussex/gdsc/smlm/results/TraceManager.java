@@ -30,6 +30,9 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -547,15 +550,20 @@ public class TraceManager {
    *
    * <p>If the trace is empty it is ignored.
    *
+   * <p>The results will only have the standard parameters set [Background,Intensity,X,Y,Z] so
+   * a custom PSF is added to the results.
+   *
    * @param traces the traces
    * @param calibration the calibration
    * @return the peak results
+   * @see PSFType#CUSTOM
    */
   public static MemoryPeakResults toCentroidPeakResults(final Trace[] traces,
       final Calibration calibration) {
     final int capacity = 1 + ((traces != null) ? traces.length : 0);
     final MemoryPeakResults results = new MemoryPeakResults(capacity);
     results.setCalibration(calibration);
+    results.setPsf(PsfHelper.create(PSFType.CUSTOM));
     if (traces != null) {
       TypeConverter<DistanceUnit> converter = null;
       if (calibration != null) {
@@ -698,7 +706,10 @@ public class TraceManager {
   public static MemoryPeakResults convertToCentroidPeakResults(MemoryPeakResults source,
       final Trace[] traces) {
     final MemoryPeakResults results = toCentroidPeakResults(traces, source.getCalibration());
+    // Do not copy the PSF as it is invalid for centroids
+    final PSF psf = results.getPsf();
     results.copySettings(source);
+    results.setPsf(psf);
     // Change name
     results.setName(source.getSource() + " Traced Centroids");
     // TODO - Add the tracing settings
