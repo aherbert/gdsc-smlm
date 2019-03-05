@@ -30,8 +30,6 @@ import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -88,7 +86,6 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.AggregatedImageSource;
-import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.FilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.InterlacedImageSource;
@@ -117,6 +114,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Checkbox;
@@ -130,43 +128,49 @@ import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.SystemColor;
 import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits fail
  * to meet the fit criteria.
  */
-public class PeakFit implements PlugInFilter, ItemListener {
+public class PeakFit implements PlugInFilter {
   private static final String TITLE = "PeakFit";
+  private static final String LOG_SPACER = "-=-=-=-";
 
   /** Flag to indicate that additional options can be configured. */
-  public static final int FLAG_EXTRA_OPTIONS = 0x00000001;
+  public static final int FLAG_EXTRA_OPTIONS = 0x01;
   /** Flag to indicate that the calibration should not be configured. */
-  public static final int FLAG_IGNORE_CALIBRATION = 0x00000002;
+  public static final int FLAG_IGNORE_CALIBRATION = 0x02;
   /** Flag to indicate that configuration should not be saved. */
-  public static final int FLAG_NO_SAVE = 0x00000004;
+  public static final int FLAG_NO_SAVE = 0x04;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+
   private int pluginFlags;
   private int singleFrame;
   private ImagePlus imp;
 
   // Used within the run(ImageProcessor) method
   private Rectangle bounds;
-  private static boolean optionIgnoreBoundsForNoise = true;
-  private boolean ignoreBoundsForNoise;
+  private boolean ignoreBoundsForNoise = true;
   private Logger logger;
 
   private ImageSource source;
@@ -179,73 +183,443 @@ public class PeakFit implements PlugInFilter, ItemListener {
   private ResultsSettings.Builder resultsSettings;
   private boolean silent;
 
-  private static int numberOfThreads = 1;
-
-  // Flag for extra options in the dialog (shift-key down)
+  /** Flag for extra options in the dialog (shift-key down). */
   private boolean extraOptions;
+  /** True if running in maxima identification mode. */
   private boolean maximaIdentification;
+  /** True if running in fit maxima mode. */
   private boolean fitMaxima;
+  /** True if running in simple fit mode. */
   private boolean simpleFit;
-  private static int optionIntegrateFrames = 1;
-  private int integrateFrames = 1;
-  private static boolean optionInterlacedData;
-  private static int optionDataStart = 1;
-  private static int optionDataBlock = 1;
-  private static int optionDataSkip;
-  private boolean interlacedData;
-  private int dataStart = 1;
-  private int dataBlock = 1;
-  private int dataSkip;
-  private static boolean optionShowProcessedFrames;
-  private boolean showProcessedFrames;
-  // Testing has shown that we should use ~85% of the total number of cores the system has
-  // available.
-  // Extra cores then do not make a difference.
-  private static double fractionOfThreads = 0.85;
 
-  private static String inputOption = "";
-  private static boolean showTable = true;
-  private static boolean showImage = true;
   private static PSFCalculatorSettings.Builder calculatorSettings =
       GuiProtosHelper.defaultPSFCalculatorSettings.toBuilder();
 
-  // All the fields that will be updated when reloading the configuration file
-  private Choice textCameraType;
-  private TextField textNmPerPixel;
-  private TextField textExposure;
-  private Choice textPsf;
-  private Choice textDataFilterType;
-  private Choice textDataFilterMethod;
-  private TextField textSmooth;
-  private TextField textSearch;
-  private TextField textBorder;
-  private TextField textFitting;
-  private Choice textFitSolver;
-  private Checkbox textFitBackground;
-  private TextField textFailuresLimit;
-  private TextField textPassRate;
-  private Checkbox textIncludeNeighbours;
-  private TextField textNeighbourHeightThreshold;
-  private TextField textResidualsThreshold;
-  private TextField textDuplicateDistance;
-  private Scrollbar sliderCoordinateShiftFactor;
-  private TextField textCoordinateShiftFactor;
-  private TextField textSignalStrength;
-  private TextField textMinPhotons;
-  private TextField textPrecisionThreshold;
-  private Checkbox textSmartFilter;
-  private Checkbox textDisableSimpleFilter;
-  private TextField textNoise;
-  private Choice textNoiseMethod;
-  private TextField textMinWidthFactor;
-  private TextField textWidthFactor;
-  private Checkbox textLogProgress;
-  private Checkbox textShowDeviations;
-  private Checkbox textResultsTable;
-  private Choice textResultsImage;
-  private TextField textResultsDirectory;
-  private Choice textFileFormat;
-  private Checkbox textResultsInMemory;
+  /** The plugin settings. Loaded when a dialog is shown. */
+  private Settings settings;
+  /**
+   * The extra settings for uncommon processing options. This is always loaded as the class can be
+   * used via API method calls.
+   */
+  private ExtraSettings extraSettings = new ExtraSettings();
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    int numberOfThreads;
+    double fractionOfThreads;
+    String inputOption;
+    boolean showTable;
+    boolean showImage;
+    boolean fitAcrossAllFrames;
+
+    Settings() {
+      numberOfThreads = 1;
+      // Testing has shown that we should use ~85% of the total number of cores the system has
+      // available. Extra cores then do not make a difference.
+      fractionOfThreads = 0.85;
+      inputOption = "";
+      showTable = true;
+      showImage = true;
+    }
+
+    Settings(Settings source) {
+      numberOfThreads = source.numberOfThreads;
+      fractionOfThreads = source.fractionOfThreads;
+      inputOption = source.inputOption;
+      showTable = source.showTable;
+      showImage = source.showImage;
+      fitAcrossAllFrames = source.fitAcrossAllFrames;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
+  /**
+   * Contains the extra settings that are the re-usable state of the plugin.
+   *
+   * <p>These are not commonly used settings. They can be set in the plugin dialog by holding down
+   * the shift key.
+   */
+  private static class ExtraSettings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<ExtraSettings> lastSettings =
+        new AtomicReference<>(new ExtraSettings());
+
+    /**
+     * This option is only required for the dialog when the input image has a crop. Otherwise the
+     * class level {@link PeakFit#ignoreBoundsForNoise} will be set the default of via the API
+     * method {@link PeakFit#initialiseImage(ImageSource, Rectangle, boolean)}.
+     */
+    boolean optionIgnoreBoundsForNoise;
+    int integrateFrames;
+    boolean interlacedData;
+    int dataStart;
+    int dataBlock;
+    int dataSkip;
+    boolean showProcessedFrames;
+
+    ExtraSettings() {
+      // Set defaults
+      optionIgnoreBoundsForNoise = true;
+      integrateFrames = 1;
+      dataStart = 1;
+      dataBlock = 1;
+    }
+
+    ExtraSettings(ExtraSettings source) {
+      optionIgnoreBoundsForNoise = source.optionIgnoreBoundsForNoise;
+      integrateFrames = source.integrateFrames;
+      interlacedData = source.interlacedData;
+      dataStart = source.dataStart;
+      dataBlock = source.dataBlock;
+      dataSkip = source.dataSkip;
+      showProcessedFrames = source.showProcessedFrames;
+    }
+
+    ExtraSettings copy() {
+      return new ExtraSettings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static ExtraSettings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
+  /**
+   * Class to control listening to the main dialog and updating fields.
+   *
+   * <p>Supports changing all field values using the selected template.
+   */
+  private class ItemDialogListener implements ItemListener {
+
+    // All the fields that will be updated when reloading the configuration file
+    private Choice textCameraType;
+    private TextField textNmPerPixel;
+    private TextField textExposure;
+    private Choice textPsf;
+    private Choice textDataFilterType;
+    private Choice textDataFilterMethod;
+    private TextField textSmooth;
+    private TextField textSearch;
+    private TextField textBorder;
+    private TextField textFitting;
+    private Choice textFitSolver;
+    private Checkbox textFitBackground;
+    private TextField textFailuresLimit;
+    private TextField textPassRate;
+    private Checkbox textIncludeNeighbours;
+    private TextField textNeighbourHeightThreshold;
+    private TextField textResidualsThreshold;
+    private TextField textDuplicateDistance;
+    // Cannot be accessed through the GenericDialog API
+    private final Scrollbar sliderCoordinateShiftFactor;
+    private TextField textCoordinateShiftFactor;
+    private TextField textSignalStrength;
+    private TextField textMinPhotons;
+    private TextField textPrecisionThreshold;
+    private Checkbox textSmartFilter;
+    private Checkbox textDisableSimpleFilter;
+    private TextField textNoise;
+    private Choice textNoiseMethod;
+    private TextField textMinWidthFactor;
+    private TextField textWidthFactor;
+    private Checkbox textLogProgress;
+    private Checkbox textShowDeviations;
+    private Checkbox textResultsTable;
+    private Choice textResultsImage;
+    private TextField textResultsDirectory;
+    private Choice textFileFormat;
+    private Checkbox textResultsInMemory;
+
+    ItemDialogListener(Scrollbar sliderCoordinateShiftFactor) {
+      // Special case of a Scrollbar that cannot be accessed easily through the GenericDialog API.
+      this.sliderCoordinateShiftFactor = sliderCoordinateShiftFactor;
+    }
+
+    void attach(GenericDialog gd, boolean isCrop) {
+
+      final Vector<TextField> texts = gd.getStringFields();
+      final Vector<TextField> numerics = gd.getNumericFields();
+      final Vector<Checkbox> checkboxes = gd.getCheckboxes();
+      final Vector<Choice> choices = gd.getChoices();
+
+      final Iterator<TextField> te = texts.iterator();
+      final Iterator<TextField> nu = numerics.iterator();
+      final Iterator<Checkbox> cb = checkboxes.iterator();
+      final Iterator<Choice> ch = choices.iterator();
+
+      final Choice textTemplate = ch.next();
+      textTemplate.addItemListener(this);
+
+      textCameraType = ch.next();
+      textNmPerPixel = nu.next();
+      textExposure = nu.next();
+      if (isCrop) {
+        cb.next();
+      }
+      textPsf = ch.next();
+      textDataFilterType = ch.next();
+      textDataFilterMethod = ch.next();
+      textSmooth = nu.next();
+      textSearch = nu.next();
+      textBorder = nu.next();
+      textFitting = nu.next();
+      if (extraOptions && !fitMaxima) {
+        cb.next(); // Skip over the interlaced data option
+        nu.next(); // Skip over the integrate frames option
+      }
+      if (!maximaIdentification) {
+        textFitSolver = ch.next();
+        if (extraOptions) {
+          textFitBackground = cb.next();
+        }
+        textFailuresLimit = nu.next();
+        textPassRate = nu.next();
+        textIncludeNeighbours = cb.next();
+        textNeighbourHeightThreshold = nu.next();
+        textResidualsThreshold = nu.next();
+        textDuplicateDistance = nu.next();
+        textSmartFilter = cb.next();
+        textDisableSimpleFilter = cb.next();
+        textCoordinateShiftFactor = nu.next();
+        textSignalStrength = nu.next();
+        textMinPhotons = nu.next();
+        if (extraOptions) {
+          textNoise = nu.next();
+          textNoiseMethod = ch.next();
+        }
+        textMinWidthFactor = nu.next();
+        textWidthFactor = nu.next();
+        textPrecisionThreshold = nu.next();
+
+        updateFilterInput();
+        textSmartFilter.addItemListener(this);
+        textDisableSimpleFilter.addItemListener(this);
+      }
+      textLogProgress = cb.next();
+      if (!maximaIdentification) {
+        textShowDeviations = cb.next();
+      }
+      textResultsTable = cb.next();
+      textResultsImage = ch.next();
+      if (extraOptions) {
+        cb.next(); // Skip over show processed frames option
+      }
+      textResultsDirectory = te.next();
+
+      textFileFormat = ch.next();
+      textResultsInMemory = cb.next();
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent event) {
+      if (event.getSource() instanceof Choice) {
+        // Update the settings from the template
+        final Choice choice = (Choice) event.getSource();
+        final String templateName = choice.getSelectedItem();
+
+        // Get the configuration template
+        final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
+
+        if (template != null) {
+          IJ.log("Applying template: " + templateName);
+
+          for (final String note : template.getNotesList()) {
+            IJ.log(note);
+          }
+
+          final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
+          if (template.hasCalibration()) {
+            refreshSettings(template.getCalibration());
+          }
+          if (template.hasPsf()) {
+            refreshSettings(template.getPsf(), custom);
+          }
+          if (template.hasFitEngineSettings()) {
+            refreshSettings(template.getFitEngineSettings(), custom);
+          }
+          if (template.hasResultsSettings()) {
+            refreshSettings(template.getResultsSettings());
+          }
+        }
+      } else if (event.getSource() instanceof Checkbox) {
+        if (event.getSource() == textSmartFilter) {
+          // Prevent both filters being enabled
+          textDisableSimpleFilter.setState(textSmartFilter.getState());
+          updateFilterInput();
+        } else if (event.getSource() == textDisableSimpleFilter) {
+          updateFilterInput();
+        }
+      }
+    }
+
+    private void updateFilterInput() {
+      if (textDisableSimpleFilter.getState()) {
+        sliderCoordinateShiftFactor.setEnabled(false);
+        disableEditing(textCoordinateShiftFactor);
+        disableEditing(textSignalStrength);
+        disableEditing(textMinPhotons);
+        // These are used to set bounds
+        // disableEditing(textMinWidthFactor)
+        // disableEditing(textWidthFactor)
+        disableEditing(textPrecisionThreshold);
+      } else {
+        sliderCoordinateShiftFactor.setEnabled(true);
+        enableEditing(textCoordinateShiftFactor);
+        enableEditing(textSignalStrength);
+        enableEditing(textMinPhotons);
+        // enableEditing(textMinWidthFactor)
+        // enableEditing(textWidthFactor)
+        enableEditing(textPrecisionThreshold);
+      }
+    }
+
+    private void disableEditing(TextField textField) {
+      textField.setEditable(false);
+      textField.setBackground(SystemColor.control);
+    }
+
+    private void enableEditing(TextField textField) {
+      textField.setEditable(true);
+      textField.setBackground(Color.white);
+    }
+
+    private void refreshSettings(Calibration cal) {
+      if (cal == null) {
+        return;
+      }
+
+      // Do not use set() as we support merging a partial calibration
+      fitConfig.mergeCalibration(cal);
+      final CalibrationReader calibration = fitConfig.getCalibrationReader();
+
+      textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
+      if (calibration.hasNmPerPixel()) {
+        textNmPerPixel.setText("" + calibration.getNmPerPixel());
+      }
+      if (calibration.hasExposureTime()) {
+        textExposure.setText("" + calibration.getExposureTime());
+      }
+    }
+
+    private void refreshSettings(PSF psf, boolean isCustomTemplate) {
+      if (!isCustomTemplate || psf == null) {
+        return;
+      }
+
+      // Do not use set() as we support merging a partial PSF
+      fitConfig.mergePsf(psf);
+
+      textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
+    }
+
+    /**
+     * Refresh settings.
+     *
+     * <p>If this is a custom template then use all the settings. If a default template then leave
+     * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
+     *
+     * @param fitEngineSettings the config
+     * @param isCustomTemplate True if a custom template.
+     */
+    private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate) {
+      // Set the configuration
+      // This will clear everything and merge the configuration
+      PeakFit.this.config.setFitEngineSettings(fitEngineSettings);
+      fitConfig = PeakFit.this.config.getFitConfiguration();
+
+      textDataFilterType
+          .select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
+      textDataFilterMethod.select(
+          SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
+      textSmooth.setText("" + config.getDataFilterParameterValue(0));
+      textSearch.setText("" + config.getSearch());
+      textBorder.setText("" + config.getBorder());
+      textFitting.setText("" + config.getFitting());
+      if (!maximaIdentification) {
+        textFitSolver
+            .select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+        if (extraOptions) {
+          textFitBackground.setState(fitConfig.isBackgroundFitting());
+        }
+        textFailuresLimit.setText("" + config.getFailuresLimit());
+        textPassRate.setText("" + config.getPassRate());
+        textIncludeNeighbours.setState(config.isIncludeNeighbours());
+        textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
+        textResidualsThreshold.setText("" + config.getResidualsThreshold());
+        textDuplicateDistance.setText("" + config.getDuplicateDistance());
+
+        // Filtering
+        textSmartFilter.setState(fitConfig.isSmartFilter());
+        textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
+        if (!fitConfig.isDisableSimpleFilter()) {
+          textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
+          textSignalStrength.setText("" + fitConfig.getSignalStrength());
+          textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
+          textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+        }
+        // These are used for settings the bounds so they are included
+        textMinPhotons.setText("" + fitConfig.getMinPhotons());
+        textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+        updateFilterInput();
+
+        if (extraOptions) {
+          textNoise.setText("" + fitConfig.getNoise());
+          textNoiseMethod.select(config.getNoiseMethod().ordinal());
+        }
+      }
+    }
+
+    private void refreshSettings(ResultsSettings resultsSettings) {
+      PeakFit.this.resultsSettings = resultsSettings.toBuilder();
+      textLogProgress.setState(resultsSettings.getLogProgress());
+      if (!maximaIdentification) {
+        textShowDeviations.setState(resultsSettings.getShowDeviations());
+      }
+      textResultsTable.setState(resultsSettings.getResultsTableSettings().getShowTable());
+      textResultsImage.select(resultsSettings.getResultsImageSettings().getImageTypeValue());
+      textResultsDirectory
+          .setText("" + resultsSettings.getResultsFileSettings().getResultsDirectory());
+      textFileFormat.select(resultsSettings.getResultsFileSettings().getFileFormatValue());
+      textResultsInMemory.setState(resultsSettings.getResultsInMemorySettings().getInMemory());
+    }
+  }
 
   /**
    * Lazy load the {@link PSFType} values and names.
@@ -310,49 +684,42 @@ public class PeakFit implements PlugInFilter, ItemListener {
     pluginFlags = FLAGS;
     extraOptions = ImageJUtils.isExtraOptions();
 
-    maximaIdentification = (arg != null && arg.contains("spot"));
-    fitMaxima = (arg != null && arg.contains("maxima"));
-    simpleFit = (arg != null && arg.contains("simple"));
-    final boolean runSeries = (arg != null && arg.contains("series"));
+    maximaIdentification = StringUtils.contains(arg, "spot");
+    fitMaxima = StringUtils.contains(arg, "maxima");
+    simpleFit = StringUtils.contains(arg, "simple");
+    final boolean runSeries = StringUtils.contains(arg, "series");
 
     ImageSource imageSource = null;
     if (fitMaxima) {
-      imp = null;
       // The maxima will have been identified already.
       // The image source will be found from the peak results.
       if (!showMaximaDialog()) {
         return DONE;
       }
 
-      final MemoryPeakResults results =
-          ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
-      if (results == null || results.size() == 0) {
+      final MemoryPeakResults localResults =
+          ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL);
+      if (localResults == null || localResults.size() == 0) {
         IJ.error(TITLE, "No results could be loaded");
         return DONE;
       }
 
-      // Check for single frame
-      singleFrame = results.getFirstFrame();
-      final FrameCounter counter = new FrameCounter(singleFrame);
-      results.forEach(new PeakResultProcedureX() {
-        @Override
-        public boolean execute(PeakResult peakResult) {
-          // The counter will return true (stop execution) if a new frame
-          return counter.advance(peakResult.getFrame());
-        }
-      });
-      if (counter.currentFrame() != counter.previousFrame()) {
+      if (settings.fitAcrossAllFrames) {
+        // Allow the user to select a different image. The source will be set as per the
+        // main fit routine from the image (imp).
         singleFrame = 0;
+      } else {
+        // Check for single frame
+        singleFrame = getSingleFrame(localResults);
+        // Forces the maxima to be used with their original source.
+        imp = null;
+        imageSource = localResults.getSource();
+        pluginFlags |= NO_IMAGE_REQUIRED;
       }
-
-      imageSource = results.getSource();
-      pluginFlags |= NO_IMAGE_REQUIRED;
     } else if (runSeries) {
       imp = null;
       // Select input folder
-      String inputDirectory;
-      inputDirectory = IJ.getDirectory("Select image series ...");
-      // inputDirectory = getInputDirectory("Select image series ...");
+      final String inputDirectory = IJ.getDirectory("Select image series ...");
       if (inputDirectory == null) {
         return DONE;
       }
@@ -360,7 +727,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       // Load input series ...
       SeriesOpener series;
       if (extraOptions) {
-        series = SeriesOpener.create(inputDirectory, true, numberOfThreads);
+        series = SeriesOpener.create(inputDirectory, true, settings.numberOfThreads);
       } else {
         series = new SeriesOpener(inputDirectory);
       }
@@ -380,7 +747,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
       imageSource = seriesImageSource;
 
       pluginFlags |= NO_IMAGE_REQUIRED;
-    } else {
+    }
+
+    // If the image source has not been set then use the input image
+    if (imageSource == null) {
       if (imp == null) {
         IJ.noImage();
         return DONE;
@@ -388,7 +758,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
       // Check it is not a previous result
       if (imp.getTitle().endsWith(ImageJImagePeakResults.IMAGE_SUFFIX)) {
-        IJImageSource tmpImageSource = null;
+        IJImageSource ijImageSource = null;
 
         // Check the image to see if it has an image source XML structure in the info property
         final Object o = imp.getProperty("Info");
@@ -396,31 +766,31 @@ public class PeakFit implements PlugInFilter, ItemListener {
             Pattern.compile("Source: (<.*IJImageSource>.*<.*IJImageSource>)", Pattern.DOTALL);
         final Matcher match = pattern.matcher((o == null) ? "" : o.toString());
         if (match.find()) {
-          final ImageSource source = ImageSource.fromXml(match.group(1));
-          if (source instanceof IJImageSource) {
-            tmpImageSource = (IJImageSource) source;
-            if (!tmpImageSource.open()) {
-              tmpImageSource = null;
+          final ImageSource tmpSource = ImageSource.fromXml(match.group(1));
+          if (tmpSource instanceof IJImageSource) {
+            ijImageSource = (IJImageSource) tmpSource;
+            if (!ijImageSource.open()) {
+              ijImageSource = null;
             } else {
-              imp = WindowManager.getImage(tmpImageSource.getName());
+              imp = WindowManager.getImage(ijImageSource.getName());
             }
           }
         }
 
-        if (tmpImageSource == null) {
+        if (ijImageSource == null) {
           // Look for a parent using the title
           final String parentTitle = imp.getTitle().substring(0,
               imp.getTitle().length() - ImageJImagePeakResults.IMAGE_SUFFIX.length() - 1);
           final ImagePlus parentImp = WindowManager.getImage(parentTitle);
           if (parentImp != null) {
-            tmpImageSource = new IJImageSource(parentImp);
+            ijImageSource = new IJImageSource(parentImp);
             imp = parentImp;
           }
         }
         String message = "The selected image may be a previous fit result";
-        if (tmpImageSource != null) {
-          if (!TextUtils.isNullOrEmpty(tmpImageSource.getName())) {
-            message += " of: \n \n" + tmpImageSource.getName();
+        if (ijImageSource != null) {
+          if (!TextUtils.isNullOrEmpty(ijImageSource.getName())) {
+            message += " of: \n \n" + ijImageSource.getName();
           }
           message += " \n \nFit the parent?";
         } else {
@@ -428,13 +798,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
         }
 
         final YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message);
-        if (tmpImageSource == null) {
+        if (ijImageSource == null) {
           if (!d.yesPressed()) {
             return DONE;
           }
         } else {
           if (d.yesPressed()) {
-            imageSource = tmpImageSource;
+            imageSource = ijImageSource;
           }
           if (d.cancelPressed()) {
             return DONE;
@@ -463,13 +833,25 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final int flags = showDialog(imp);
     if ((flags & DONE) == 0) {
-      // Repeat so that we pass in the selected option for ignoring the bounds.
-      // This should not be necessary since it is set within the readDialog method.
-      // if (ignoreBoundsForNoise)
-      // initialiseImage(imageSource, bounds, ignoreBoundsForNoise);
       initialiseFitting();
     }
     return flags;
+  }
+
+  /**
+   * Gets the single frame containing all the results (if they are all in a single frame), else 0.
+   *
+   * @param results the results (must not be empty)
+   * @return the single frame (or zero)
+   */
+  private static int getSingleFrame(MemoryPeakResults results) {
+    final FrameCounter counter = new FrameCounter(results.getFirstFrame());
+    // The counter will return true (stop execution) if a new frame
+    results.forEach((PeakResultProcedureX) peakResult -> counter.advance(peakResult.getFrame()));
+    if (counter.currentFrame() != counter.previousFrame()) {
+      return 0;
+    }
+    return counter.currentFrame();
   }
 
   /**
@@ -541,25 +923,24 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return false;
     }
 
-    this.ignoreBoundsForNoise = ignoreBoundsForNoise;
     if (bounds == null) {
-      bounds = new Rectangle(0, 0, source.getWidth(), source.getHeight());
       // No region so no need to ignore the bounds.
+      this.bounds = new Rectangle(0, 0, source.getWidth(), source.getHeight());
       this.ignoreBoundsForNoise = false;
+    } else {
+      // The bounds must fit in the image
+      try {
+        imageSource.checkBounds(bounds);
+      } catch (final IllegalArgumentException ex) {
+        return false;
+      }
+      this.bounds = bounds;
+      this.ignoreBoundsForNoise = ignoreBoundsForNoise;
     }
 
-    this.bounds = bounds;
     results = new PeakResultsList();
 
     time = 0;
-    // config = null;
-
-    // The bounds must fit in the image
-    try {
-      imageSource.checkBounds(bounds);
-    } catch (final RuntimeException ex) {
-      return false;
-    }
 
     return true;
   }
@@ -643,7 +1024,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     results.begin();
 
-    if (simpleFit && showImage) {
+    if (simpleFit && settings.showImage) {
       for (final PeakResults r : results.toArray()) {
         if (r instanceof ImageJImagePeakResults) {
           final ImagePlus i = ((ImageJImagePeakResults) r).getImagePlus();
@@ -706,7 +1087,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       final String message = String.format("%s. Fitting Time = %s. Run time = %s",
           TextUtils.pleural(size, "localisation"), textTime, textRunTime);
       if (resultsSettings.getLogProgress()) {
-        IJ.log("-=-=-=-");
+        IJ.log(LOG_SPACER);
       }
       IJ.log(message);
       IJ.showStatus(message);
@@ -715,18 +1096,20 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
   }
 
-  private static boolean showMaximaDialog() {
+  private boolean showMaximaDialog() {
     final int size = MemoryPeakResults.countMemorySize();
     if (size == 0) {
       IJ.error(TITLE, "There are no fitting results in memory");
       return false;
     }
 
+    settings = Settings.load();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
     gd.addMessage("Select identified maxima for fitting");
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
+    gd.addCheckbox("Fit_across_all_frames", settings.fitAcrossAllFrames);
 
     gd.showDialog();
 
@@ -734,7 +1117,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.fitAcrossAllFrames = gd.getNextBoolean();
+    settings.save();
 
     return true;
   }
@@ -765,21 +1150,28 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // Settings are within the FitEngineSettings
     config = SettingsManager.readFitEngineConfiguration(0);
     fitConfig = config.getFitConfiguration();
+    settings = Settings.load();
 
     if (simpleFit) {
       return showSimpleDialog();
     }
 
+    // Note: The bounds are not set when running in the fit maxima option (since all candidates
+    // have been identified already the crop is not required).
     final boolean isCrop = (bounds != null && imp != null
         && (bounds.width < imp.getWidth() || bounds.height < imp.getHeight()));
 
+    // Some options are not always needed
+    if (extraOptions || isCrop) {
+      extraSettings = ExtraSettings.load();
+      ignoreBoundsForNoise = extraSettings.optionIgnoreBoundsForNoise;
+    }
+
     if (!extraOptions) {
-      integrateFrames = 1;
       resultsSettings.getResultsImageSettingsBuilder().setRollingWindowSize(0);
       fitConfig.setBackgroundFitting(true);
       fitConfig.setNoise(0);
       config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
-      showProcessedFrames = false;
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -796,23 +1188,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
     gd.addNumericField("Exposure_time", calibration.getExposureTime(), 2, 6, "ms");
 
     if (isCrop) {
-      gd.addCheckbox("Ignore_bounds_for_noise", optionIgnoreBoundsForNoise);
+      gd.addCheckbox("Ignore_bounds_for_noise", ignoreBoundsForNoise);
     }
 
-    final FitConfigurationProvider fitConfigurationProvider = new FitConfigurationProvider() {
-      @Override
-      public FitConfiguration getFitConfiguration() {
-        return fitConfig;
-      }
-    };
-
-    final FitEngineConfigurationProvider fitEngineConfigurationProvider =
-        new FitEngineConfigurationProvider() {
-          @Override
-          public FitEngineConfiguration getFitEngineConfiguration() {
-            return config;
-          }
-        };
+    final FitConfigurationProvider fitConfigurationProvider = () -> fitConfig;
+    final FitEngineConfigurationProvider fitEngineConfigurationProvider = () -> config;
 
     addPsfOptions(gd, fitConfigurationProvider);
     addDataFilterOptions(gd, fitEngineConfigurationProvider);
@@ -820,9 +1200,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
     addBorderOptions(gd, fitEngineConfigurationProvider);
     addFittingOptions(gd, fitEngineConfigurationProvider);
     if (extraOptions && !fitMaxima) {
-      gd.addCheckbox("Interlaced_data", optionInterlacedData);
-      gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
+      gd.addCheckbox("Interlaced_data", extraSettings.interlacedData);
+      gd.addSlider("Integrate_frames", 1, 5, extraSettings.integrateFrames);
     }
+
+    // Special case top get the slider since the GenericDialog does not provide access to this.
+    Scrollbar sliderCoordinateShiftFactor = null;
+    final boolean isShowGenericDialog = ImageJUtils.isShowGenericDialog();
 
     if (!maximaIdentification) {
       gd.addMessage("--- Gaussian fitting ---");
@@ -848,7 +1232,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
       gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
       gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
       gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
-      sliderCoordinateShiftFactor = gd.getLastScrollbar();
+      if (isShowGenericDialog) {
+        sliderCoordinateShiftFactor = gd.getLastScrollbar();
+      }
       gd.addNumericField("Signal_strength", fitConfig.getSignalStrength(), 2);
       gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
       if (extraOptions) {
@@ -871,7 +1257,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     ResultsManager.addImageResultsOptions(gd, resultsSettings,
         (extraOptions) ? ResultsManager.FLAG_EXTRA_OPTIONS : 0);
     if (extraOptions) {
-      gd.addCheckbox("Show_processed_frames", optionShowProcessedFrames);
+      gd.addCheckbox("Show_processed_frames", extraSettings.showProcessedFrames);
     }
     ResultsManager.addFileResultsOptions(gd, resultsSettings,
         ResultsManager.FLAG_RESULTS_DIRECTORY);
@@ -879,82 +1265,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     if (extraOptions) {
       gd.addMessage("--- Misc ---");
-      gd.addSlider("Fraction_of_threads", 0.1, 1, fractionOfThreads);
+      gd.addSlider("Fraction_of_threads", 0.1, 1, settings.fractionOfThreads);
     }
 
     // Add a mouse listener to the config file field
-    if (ImageJUtils.isShowGenericDialog()) {
-      final Vector<TextField> texts = gd.getStringFields();
-      final Vector<TextField> numerics = gd.getNumericFields();
-      final Vector<Checkbox> checkboxes = gd.getCheckboxes();
-      final Vector<Choice> choices = gd.getChoices();
-
-      final Iterator<TextField> te = texts.iterator();
-      final Iterator<TextField> nu = numerics.iterator();
-      final Iterator<Checkbox> cb = checkboxes.iterator();
-      final Iterator<Choice> ch = choices.iterator();
-
-      final Choice textTemplate = ch.next();
-      textTemplate.addItemListener(this);
-
-      textCameraType = ch.next();
-      textNmPerPixel = nu.next();
-      textExposure = nu.next();
-      if (isCrop) {
-        cb.next();
-      }
-      textPsf = ch.next();
-      textDataFilterType = ch.next();
-      textDataFilterMethod = ch.next();
-      textSmooth = nu.next();
-      textSearch = nu.next();
-      textBorder = nu.next();
-      textFitting = nu.next();
-      if (extraOptions && !fitMaxima) {
-        cb.next(); // Skip over the interlaced data option
-        nu.next(); // Skip over the integrate frames option
-      }
-      if (!maximaIdentification) {
-        textFitSolver = ch.next();
-        if (extraOptions) {
-          textFitBackground = cb.next();
-        }
-        textFailuresLimit = nu.next();
-        textPassRate = nu.next();
-        textIncludeNeighbours = cb.next();
-        textNeighbourHeightThreshold = nu.next();
-        textResidualsThreshold = nu.next();
-        textDuplicateDistance = nu.next();
-        textSmartFilter = cb.next();
-        textDisableSimpleFilter = cb.next();
-        textCoordinateShiftFactor = nu.next();
-        textSignalStrength = nu.next();
-        textMinPhotons = nu.next();
-        if (extraOptions) {
-          textNoise = nu.next();
-          textNoiseMethod = ch.next();
-        }
-        textMinWidthFactor = nu.next();
-        textWidthFactor = nu.next();
-        textPrecisionThreshold = nu.next();
-
-        updateFilterInput();
-        textSmartFilter.addItemListener(this);
-        textDisableSimpleFilter.addItemListener(this);
-      }
-      textLogProgress = cb.next();
-      if (!maximaIdentification) {
-        textShowDeviations = cb.next();
-      }
-      textResultsTable = cb.next();
-      textResultsImage = ch.next();
-      if (extraOptions) {
-        cb.next(); // Skip over show processed frames option
-      }
-      textResultsDirectory = te.next();
-
-      textFileFormat = ch.next();
-      textResultsInMemory = cb.next();
+    if (isShowGenericDialog) {
+      new ItemDialogListener(sliderCoordinateShiftFactor).attach(gd, isCrop);
     }
 
     gd.showDialog();
@@ -977,14 +1293,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
         singleFrame = imp.getCurrentSlice();
 
         // Account for interlaced data
-        if (interlacedData) {
+        if (extraSettings.interlacedData) {
           int start = singleFrame;
 
           // Calculate the first frame that is not skipped
-          while (ignoreFrame(start) && start > dataStart) {
+          while (ignoreFrame(start) && start > extraSettings.dataStart) {
             start--;
           }
-          if (start < dataStart) {
+          if (start < extraSettings.dataStart) {
             log("The current frame (%d) is before the start of the interlaced data", singleFrame);
             return DONE;
           }
@@ -997,16 +1313,16 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
         // Account for integrated frames
         int endFrame = singleFrame;
-        if (integrateFrames > 1) {
+        if (extraSettings.integrateFrames > 1) {
           int totalFrames = 1;
-          while (totalFrames < integrateFrames) {
+          while (totalFrames < extraSettings.integrateFrames) {
             endFrame++;
             if (!ignoreFrame(endFrame)) {
               totalFrames++;
             }
           }
           log("Updated the image end frame (%d) to %d allow %d integrated frames", singleFrame,
-              endFrame, integrateFrames);
+              endFrame, extraSettings.integrateFrames);
         }
 
         // Create a new image source with the correct frames
@@ -1019,13 +1335,14 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     // Allow interlaced data by wrapping the image source
-    if (interlacedData) {
-      setSource(new InterlacedImageSource(this.source, dataStart, dataBlock, dataSkip));
+    if (extraSettings.interlacedData) {
+      setSource(new InterlacedImageSource(this.source, extraSettings.dataStart,
+          extraSettings.dataBlock, extraSettings.dataSkip));
     }
 
     // Allow frame aggregation by wrapping the image source
-    if (integrateFrames > 1) {
-      setSource(new AggregatedImageSource(this.source, integrateFrames));
+    if (extraSettings.integrateFrames > 1) {
+      setSource(new AggregatedImageSource(this.source, extraSettings.integrateFrames));
     }
 
     // Ask if the user wants to log progress on multiple frame images
@@ -1350,29 +1667,29 @@ public class PeakFit implements PlugInFilter, ItemListener {
           }
 
           private boolean collectOptions(boolean silent) {
-            final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-            final PSFType psfType = fitConfig.getPsfType();
+            final FitConfiguration localFitConfig = fitConfigurationProvider.getFitConfiguration();
+            final PSFType psfType = localFitConfig.getPsfType();
             final ExtendedGenericDialog egd = new ExtendedGenericDialog("PSF Options", null);
             PSF oldPsf = null;
             if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
               // The PSF is entirely defined in the model
               String[] list = AstigmatismModelManager.listAstigmatismModels(false,
-                  fitConfig.getCalibrationReader().getNmPerPixel(), 0.1);
+                  localFitConfig.getCalibrationReader().getNmPerPixel(), 0.1);
               // In case the calibration has not been updated
               if (list.length == 0) {
                 list = AstigmatismModelManager.listAstigmatismModels(false, true);
               }
-              egd.addChoice("Z-model", list, fitConfig.getPsfModelName());
+              egd.addChoice("Z-model", list, localFitConfig.getPsfModelName());
             } else {
               // Collect the PSF parameters
-              oldPsf = fitConfig.getPsf();
+              oldPsf = localFitConfig.getPsf();
               for (int i = 0; i < oldPsf.getParametersCount(); i++) {
                 final PSFParameter p = oldPsf.getParameters(i);
                 egd.addNumericField(String.format("PSF_parameter_%d (%s)", i + 1, p.getName()),
                     p.getValue(), 3);
               }
               if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
-                egd.addCheckbox("Fixed", fitConfig.isFixedPsf());
+                egd.addCheckbox("Fixed", localFitConfig.isFixedPsf());
               }
             }
 
@@ -1383,7 +1700,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             }
             if (psfType == PSFType.ASTIGMATIC_GAUSSIAN_2D) {
               // The PSF is entirely defined in the model
-              fitConfig.setPsfModelName(egd.getNextChoice());
+              localFitConfig.setPsfModelName(egd.getNextChoice());
               return true;
             }
             @SuppressWarnings("null")
@@ -1393,12 +1710,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
               b.getParametersBuilder(i).setValue(egd.getNextNumber());
             }
             final PSF newPsf = b.build();
-            fitConfig.setPsf(newPsf);
+            localFitConfig.setPsf(newPsf);
             boolean changed = !oldPsf.equals(newPsf);
             if (psfType == PSFType.ONE_AXIS_GAUSSIAN_2D) {
               final boolean newFixed = egd.getNextBoolean();
-              changed = changed || (newFixed != fitConfig.isFixedPsf());
-              fitConfig.setFixedPsf(newFixed);
+              changed = changed || (newFixed != localFitConfig.isFixedPsf());
+              localFitConfig.setFixedPsf(newFixed);
             }
             return changed;
           }
@@ -1550,12 +1867,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
     updateFlag(flagLabel, rp.isAbsolute());
     p.add(flagLabel, pc);
 
-    gd.addOptionCollectedListener(new OptionCollectedListener() {
-      @Override
-      public void optionCollected(OptionCollectedEvent event) {
-        if (label.equals(event.getLabel())) {
-          updateFlag(flagLabel, rp.isAbsolute());
-        }
+    gd.addOptionCollectedListener(event -> {
+      if (label.equals(event.getLabel())) {
+        updateFlag(flagLabel, rp.isAbsolute());
       }
     });
   }
@@ -1737,10 +2051,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
         new OptionListener<Double>() {
           @Override
           public boolean collectOptions(Double field) {
-            final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
-            fitConfig.setPrecisionThreshold(field);
-            final boolean result = collectOptions(false);
-            return result;
+            fitConfigurationProvider.getFitConfiguration().setPrecisionThreshold(field);
+            return collectOptions(false);
           }
 
           @Override
@@ -1749,9 +2061,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
           }
 
           private boolean collectOptions(boolean silent) {
-            final FitConfiguration fitConfig = fitConfigurationProvider.getFitConfiguration();
+            final FitConfiguration localFitConfig = fitConfigurationProvider.getFitConfiguration();
             final ExtendedGenericDialog egd = new ExtendedGenericDialog("Precision Options", null);
-            final int oldIndex = fitConfig.getPrecisionMethod().ordinal();
+            final int oldIndex = localFitConfig.getPrecisionMethod().ordinal();
             egd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(), oldIndex);
             egd.setSilent(silent);
             egd.showDialog(true, gd);
@@ -1759,9 +2071,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
               return false;
             }
             final int newIndex = egd.getNextChoiceIndex();
-            fitConfig.setPrecisionMethod(newIndex);
-            final boolean changed = oldIndex != newIndex;
-            return changed;
+            localFitConfig.setPrecisionMethod(newIndex);
+            return oldIndex != newIndex;
           }
         });
   }
@@ -1782,10 +2093,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
     final boolean requireCalibration = requireCalibration(calibration);
-    if (requireCalibration) {
-      if (!showCalibrationWizard(calibration, true)) {
-        return DONE;
-      }
+    if (requireCalibration && !showCalibrationWizard(calibration, true)) {
+      return DONE;
     }
 
     // Present dialog with simple output options: Image, Table
@@ -1796,8 +2105,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
     if (!requireCalibration) {
       gd.addCheckbox("Use_current_calibration", true);
     }
-    gd.addCheckbox("Show_table", showTable);
-    gd.addCheckbox("Show_image", showImage);
+    gd.addCheckbox("Show_table", settings.showTable);
+    gd.addCheckbox("Show_image", settings.showImage);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -1808,13 +2117,11 @@ public class PeakFit implements PlugInFilter, ItemListener {
     if (!requireCalibration) {
       useCurrentCalibration = gd.getNextBoolean();
     }
-    showTable = gd.getNextBoolean();
-    showImage = gd.getNextBoolean();
+    settings.showTable = gd.getNextBoolean();
+    settings.showImage = gd.getNextBoolean();
 
-    if (!useCurrentCalibration) {
-      if (!showCalibrationWizard(calibration, false)) {
-        return DONE;
-      }
+    if (!useCurrentCalibration && !showCalibrationWizard(calibration, false)) {
+      return DONE;
     }
 
     // Restore fitting to default settings but maintain the calibrated width
@@ -1828,24 +2135,24 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     // Do simple results output. We only need set non-default values.
     resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(true);
-    if (showTable) {
+    if (settings.showTable) {
       final ResultsTableSettings.Builder tableSettings =
           resultsSettings.getResultsTableSettingsBuilder();
       tableSettings.setShowTable(true);
     }
-    if (showImage) {
+    if (settings.showImage) {
       final ResultsImageSettings.Builder imageSettings =
           resultsSettings.getResultsImageSettingsBuilder();
       imageSettings.setImageType(ResultsImageType.DRAW_INTENSITY);
-      imageSettings.setScale(Math.ceil(1024 / (FastMath.max(bounds.width, bounds.height))));
+      imageSettings.setScale(Math.ceil(1024.0 / FastMath.max(bounds.width, bounds.height)));
       imageSettings.setWeighted(true);
       imageSettings.setEqualised(true);
     }
 
     // Log the settings we care about:
-    IJ.log("-=-=-=-");
+    IJ.log(LOG_SPACER);
     IJ.log("Peak Fit");
-    IJ.log("-=-=-=-");
+    IJ.log(LOG_SPACER);
     ImageJUtils.log("Pixel pitch = %s", MathUtils.rounded(calibration.getNmPerPixel(), 4));
     ImageJUtils.log("Exposure Time = %s", MathUtils.rounded(calibration.getExposureTime(), 4));
     ImageJUtils.log("PSF width = %s", MathUtils.rounded(fitConfig.getInitialXSd(), 4));
@@ -1885,7 +2192,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return true;
     }
     // Bias can be zero (but this is unlikely)
-    if (!calibration.hasCountPerPhoton() || !(calibration.getBias() > 0)) {
+    if (!calibration.hasCountPerPhoton() || calibration.getBias() <= 0) {
       return true;
     }
     if (!calibration.hasExposureTime()) {
@@ -2038,18 +2345,15 @@ public class PeakFit implements PlugInFilter, ItemListener {
     gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSd(), 3);
     if (ImageJUtils.isShowGenericDialog()) {
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
-      gd.addAndGetButton("Run PSF calculator", new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent event) {
-          // Run the PSF Calculator
-          final PsfCalculator calculator = new PsfCalculator();
-          calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
-          calculatorSettings.setMagnification(1);
-          calculatorSettings.setBeamExpander(1);
-          final double sd = calculator.calculate(calculatorSettings.build(), true);
-          if (sd > 0) {
-            textInitialPeakStdDev0.setText(Double.toString(sd));
-          }
+      gd.addAndGetButton("Run PSF calculator", event -> {
+        // Run the PSF Calculator
+        final PsfCalculator calculator = new PsfCalculator();
+        calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
+        calculatorSettings.setMagnification(1);
+        calculatorSettings.setBeamExpander(1);
+        final double sd = calculator.calculate(calculatorSettings.build(), true);
+        if (sd > 0) {
+          textInitialPeakStdDev0.setText(Double.toString(sd));
         }
       });
     }
@@ -2059,80 +2363,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
     fitConfig.setInitialPeakStdDev(Math.abs(gd.getNextNumber()));
     return true;
-  }
-
-  @Override
-  public void itemStateChanged(ItemEvent event) {
-    if (event.getSource() instanceof Choice) {
-      // Update the settings from the template
-      final Choice choice = (Choice) event.getSource();
-      final String templateName = choice.getSelectedItem();
-      // System.out.println("Update to " + templateName);
-
-      // Get the configuration template
-      final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
-
-      if (template != null) {
-        IJ.log("Applying template: " + templateName);
-
-        for (final String note : template.getNotesList()) {
-          IJ.log(note);
-        }
-
-        final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-        if (template.hasCalibration()) {
-          refreshSettings(template.getCalibration());
-        }
-        if (template.hasPsf()) {
-          refreshSettings(template.getPsf(), custom);
-        }
-        if (template.hasFitEngineSettings()) {
-          refreshSettings(template.getFitEngineSettings(), custom);
-        }
-        if (template.hasResultsSettings()) {
-          refreshSettings(template.getResultsSettings());
-        }
-      }
-    } else if (event.getSource() instanceof Checkbox) {
-      if (event.getSource() == textSmartFilter) {
-        // Prevent both filters being enabled
-        textDisableSimpleFilter.setState(textSmartFilter.getState());
-        updateFilterInput();
-      } else if (event.getSource() == textDisableSimpleFilter) {
-        updateFilterInput();
-      }
-    }
-  }
-
-  private void updateFilterInput() {
-    if (textDisableSimpleFilter.getState()) {
-      sliderCoordinateShiftFactor.setEnabled(false);
-      disableEditing(textCoordinateShiftFactor);
-      disableEditing(textSignalStrength);
-      disableEditing(textMinPhotons);
-      // These are used to set bounds
-      // disableEditing(textMinWidthFactor);
-      // disableEditing(textWidthFactor);
-      disableEditing(textPrecisionThreshold);
-    } else {
-      sliderCoordinateShiftFactor.setEnabled(true);
-      enableEditing(textCoordinateShiftFactor);
-      enableEditing(textSignalStrength);
-      enableEditing(textMinPhotons);
-      // enableEditing(textMinWidthFactor);
-      // enableEditing(textWidthFactor);
-      enableEditing(textPrecisionThreshold);
-    }
-  }
-
-  private static void disableEditing(TextField textField) {
-    textField.setEditable(false);
-    textField.setBackground(SystemColor.control);
-  }
-
-  private static void enableEditing(TextField textField) {
-    textField.setEditable(true);
-    textField.setBackground(Color.white);
   }
 
   private boolean readDialog(ExtendedGenericDialog gd, boolean isCrop) {
@@ -2145,14 +2375,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
     calibration.setExposureTime(Math.abs(gd.getNextNumber()));
     fitConfig.setCalibration(calibration.getCalibration());
 
-    // Note: The bias and read noise will just end up being what was in the configuration file
+    // Note: The bias and read noise will just end up being what was in the configuration file.
     // One fix for this is to save/load only the settings that are required from the configuration
-    // file
-    // (the others will remain unchanged). This will require a big refactor of the settings
+    // file (the others will remain unchanged). This will require a big refactor of the settings
     // save/load.
     // The simple fix is to create a plugin to allow the configuration to be changed for results.
     if (isCrop) {
-      ignoreBoundsForNoise = optionIgnoreBoundsForNoise = gd.getNextBoolean();
+      ignoreBoundsForNoise = extraSettings.optionIgnoreBoundsForNoise = gd.getNextBoolean();
     }
 
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
@@ -2163,8 +2392,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
     config.setBorder(gd.getNextNumber());
     config.setFitting(gd.getNextNumber());
     if (extraOptions && !fitMaxima) {
-      interlacedData = gd.getNextBoolean();
-      integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
+      extraSettings.interlacedData = gd.getNextBoolean();
+      extraSettings.integrateFrames = (int) gd.getNextNumber();
     }
 
     if (!maximaIdentification) {
@@ -2202,13 +2431,13 @@ public class PeakFit implements PlugInFilter, ItemListener {
     resultsSettings.getResultsTableSettingsBuilder().setShowTable(gd.getNextBoolean());
     resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
     if (extraOptions) {
-      showProcessedFrames = optionShowProcessedFrames = gd.getNextBoolean();
+      extraSettings.showProcessedFrames = gd.getNextBoolean();
     }
     resultsSettings.getResultsFileSettingsBuilder().setFileFormatValue(gd.getNextChoiceIndex());
     resultsSettings.getResultsFileSettingsBuilder().setResultsDirectory(gd.getNextString());
     resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(gd.getNextBoolean());
     if (extraOptions) {
-      fractionOfThreads = Math.abs(gd.getNextNumber());
+      settings.fractionOfThreads = Math.abs(gd.getNextNumber());
     }
 
     gd.collectOptions();
@@ -2236,10 +2465,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
       ParameterUtils.isAboveZero("Search_width", config.getSearch());
       ParameterUtils.isAboveZero("Fitting_width", config.getFitting());
-      ParameterUtils.isPositive("Integrate frames", integrateFrames);
+      if (extraOptions && !fitMaxima) {
+        ParameterUtils.isPositive("Integrate frames", extraSettings.integrateFrames);
+      }
       if (!maximaIdentification) {
         // This can be negative to disable, i.e. fit everything
-        // Parameters.isPositive("Failures limit", config.getFailuresLimit());
+        // Parameters.isPositive("Failures limit", config.getFailuresLimit())
         ParameterUtils.isPositive("Neighbour height threshold",
             config.getNeighbourHeightThreshold());
         ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
@@ -2304,14 +2535,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
     }
 
     // Second dialog for solver dependent parameters
-    if (!maximaIdentification) {
-      if (!configureFitSolver(config, source.getBounds(), bounds, flags)) {
-        return false;
-      }
+    if (!maximaIdentification && !configureFitSolver(config, source.getBounds(), bounds, flags)) {
+      return false;
     }
 
     // Extra parameters are needed for interlaced data
-    if (interlacedData) {
+    if (extraSettings.interlacedData) {
       gd = new ExtendedGenericDialog(TITLE);
       gd.addMessage("Interlaced data requires a repeating pattern of frames to process.\n"
           + "Describe the regular repeat of the data:\n \n"
@@ -2320,9 +2549,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
           + "Skip = The number of continuous frames to ignore before the next data\n \n"
           + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
           + " then repeat.");
-      gd.addNumericField("Start", optionDataStart, 0);
-      gd.addNumericField("Block", optionDataBlock, 0);
-      gd.addNumericField("Skip", optionDataSkip, 0);
+      gd.addNumericField("Start", extraSettings.dataStart, 0);
+      gd.addNumericField("Block", extraSettings.dataBlock, 0);
+      gd.addNumericField("Skip", extraSettings.dataSkip, 0);
 
       gd.showDialog();
       if (gd.wasCanceled()) {
@@ -2330,19 +2559,17 @@ public class PeakFit implements PlugInFilter, ItemListener {
       }
 
       if (!gd.wasCanceled()) {
-        dataStart = (int) gd.getNextNumber();
-        dataBlock = (int) gd.getNextNumber();
-        dataSkip = (int) gd.getNextNumber();
+        extraSettings.dataStart = (int) gd.getNextNumber();
+        extraSettings.dataBlock = (int) gd.getNextNumber();
+        extraSettings.dataSkip = (int) gd.getNextNumber();
 
-        if (dataStart > 0 && dataBlock > 0 && dataSkip > 0) {
+        if (extraSettings.dataStart > 0 && extraSettings.dataBlock > 0
+            && extraSettings.dataSkip > 0) {
           // Store options for next time
-          optionInterlacedData = true;
-          optionDataStart = dataStart;
-          optionDataBlock = dataBlock;
-          optionDataSkip = dataSkip;
+          extraSettings.save();
         }
       } else {
-        interlacedData = false;
+        extraSettings.interlacedData = false;
       }
     }
 
@@ -2441,8 +2668,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // Create a converter to map the model units in pixels to nm for the dialog.
     // Note the output units of pixels may not yet be set in the calibration so we assume it is
     // pixels.
-    // TypeConverter<DistanceUnit> c =
-    // fitConfig.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
     final TypeConverter<DistanceUnit> c = UnitConverterUtils.createConverter(DistanceUnit.PIXEL,
         DistanceUnit.NM, fitConfig.getCalibrationReader().getNmPerPixel());
 
@@ -2625,8 +2850,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
           return c.getDataFilterParameterValue(ii, c.getDataFilterParameterValue(ii - 1));
         }
       });
-      // gd.addSlider("Smoothing" + filter, 0, 4.5, config.getDataFilterParameterValue(i,
-      // defaultSmooth));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -2927,11 +3150,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return false;
     }
 
-    if (config.isIncludeNeighbours()) {
-      if (!fitConfig.getFunctionSolver().isBounded()) {
-        IJ.error(TITLE, "Including neighbours requires a bounded fit solver");
-        return false;
-      }
+    if (config.isIncludeNeighbours() && !fitConfig.getFunctionSolver().isBounded()) {
+      IJ.error(TITLE, "Including neighbours requires a bounded fit solver");
+      return false;
     }
 
     return true;
@@ -3081,7 +3302,6 @@ public class PeakFit implements PlugInFilter, ItemListener {
       if (gd2.wasCanceled()) {
         return null;
       }
-      // throw new IllegalArgumentException("Unknown camera model crop");
       ox = (int) gd2.getNextNumber();
       oy = (int) gd2.getNextNumber();
 
@@ -3121,33 +3341,37 @@ public class PeakFit implements PlugInFilter, ItemListener {
   }
 
   private void addTableResults(PeakResultsList resultsList) {
-    final ImageJTablePeakResults r =
+    final ImageJTablePeakResults peakResults =
         ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
             resultsSettings.getShowDeviations(), false, false, false);
-    if (r != null) {
-      r.setShowZ(PsfHelper.is3D(resultsList.getPsf()));
-      r.setClearAtStart(simpleFit);
-      r.setShowEndFrame(integrateFrames > 1);
+    if (peakResults != null) {
+      peakResults.setShowZ(PsfHelper.is3D(resultsList.getPsf()));
+      peakResults.setClearAtStart(simpleFit);
+      peakResults.setShowEndFrame(getShowEndFrame());
     }
   }
 
+  private boolean getShowEndFrame() {
+    return extraSettings != null && extraSettings.integrateFrames > 1;
+  }
+
   private void addFileResults(PeakResultsList resultsList) {
-    final ResultsFileSettings resultsSettings = this.resultsSettings.getResultsFileSettings();
-    if (resultsSettings.getFileFormat().getNumber() > 0) {
+    final ResultsFileSettings resultsFileSettings = this.resultsSettings.getResultsFileSettings();
+    if (resultsFileSettings.getFileFormat().getNumber() > 0) {
       String resultsFilename = null;
-      if (resultsSettings.getResultsDirectory() != null
-          && new File(resultsSettings.getResultsDirectory()).exists()) {
-        resultsFilename =
-            resultsSettings.getResultsDirectory() + File.separatorChar + source.getName()
-                + ".results." + ResultsProtosHelper.getExtension(resultsSettings.getFileFormat());
+      if (resultsFileSettings.getResultsDirectory() != null
+          && new File(resultsFileSettings.getResultsDirectory()).exists()) {
+        resultsFilename = resultsFileSettings.getResultsDirectory() + File.separatorChar
+            + source.getName() + ".results."
+            + ResultsProtosHelper.getExtension(resultsFileSettings.getFileFormat());
 
         // This is used for running via other code calling PeakFit methods,
         // i.e. not as an ImageJ plugin.
       } else if (pluginFlags == 0) {
-        resultsFilename = resultsSettings.getResultsFilename();
+        resultsFilename = resultsFileSettings.getResultsFilename();
       }
-      final PeakResults r = ResultsManager.addFileResults(resultsList, resultsSettings,
-          resultsFilename, this.resultsSettings.getShowDeviations(), integrateFrames > 1, false);
+      final PeakResults r = ResultsManager.addFileResults(resultsList, resultsFileSettings,
+          resultsFilename, this.resultsSettings.getShowDeviations(), getShowEndFrame(), false);
       if (r instanceof FilePeakResults) {
         final FilePeakResults fr = (FilePeakResults) r;
         fr.setSortAfterEnd(Prefs.getThreads() > 1);
@@ -3157,10 +3381,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private void addMemoryResults(PeakResultsList resultsList, boolean force) {
     if (resultsSettings.getResultsInMemorySettings().getInMemory() || force) {
-      final MemoryPeakResults results = new MemoryPeakResults();
-      results.setSortAfterEnd(Prefs.getThreads() > 1);
-      resultsList.addOutput(results);
-      MemoryPeakResults.addResults(results);
+      final MemoryPeakResults peakResults = new MemoryPeakResults();
+      peakResults.setSortAfterEnd(Prefs.getThreads() > 1);
+      resultsList.addOutput(peakResults);
+      MemoryPeakResults.addResults(peakResults);
     }
   }
 
@@ -3228,10 +3452,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final int totalFrames = source.getFrames();
 
-    ImageStack stack = null;
-    if (showProcessedFrames) {
-      stack = new ImageStack(bounds.width, bounds.height);
-    }
+    final ImageStack stack =
+        (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
 
     // Do not crop the region from the source if the bounds match the source dimensions
     final Rectangle cropBounds =
@@ -3265,10 +3487,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
         break;
       }
 
-      if (++slice % step == 0) {
-        if (ImageJUtils.showStatus(String.format(format, slice, results.size()))) {
-          IJ.showProgress(slice, totalFrames);
-        }
+      if (++slice % step == 0
+          && ImageJUtils.showStatus(String.format(format, slice, results.size()))) {
+        IJ.showProgress(slice, totalFrames);
       }
 
       float noise = Float.NaN;
@@ -3289,7 +3510,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
             ImageJImageConverter.getData(data, source.getWidth(), source.getHeight(), bounds, null);
       }
 
-      if (showProcessedFrames) {
+      if (stack != null) {
         stack.addSlice(String.format("Frame %d - %d", source.getStartFrameNumber(),
             source.getEndFrameNumber()), data);
       }
@@ -3305,7 +3526,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
     time = engine.getTime();
     runTime = System.nanoTime() - runTime;
 
-    if (showProcessedFrames) {
+    if (stack != null) {
       ImageJUtils.display("Processed frames", stack);
     }
 
@@ -3316,24 +3537,22 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
   private void addSingleFrameOverlay() {
     // If a single frame was processed add the peaks as an overlay if they are in memory
-    ImagePlus imp = this.imp;
+    ImagePlus localImp = this.imp;
 
-    if (fitMaxima && singleFrame > 0) {
-      if (source instanceof IJImageSource) {
-        final String title = source.getName();
-        imp = WindowManager.getImage(title);
-      }
+    if (fitMaxima && singleFrame > 0 && source instanceof IJImageSource) {
+      final String title = source.getName();
+      localImp = WindowManager.getImage(title);
     }
 
-    if (singleFrame > 0 && imp != null) {
-      MemoryPeakResults results = null;
+    if (singleFrame > 0 && localImp != null) {
+      MemoryPeakResults memoryResults = null;
       for (final PeakResults r : this.results.toArray()) {
         if (r instanceof MemoryPeakResults) {
-          results = (MemoryPeakResults) r;
+          memoryResults = (MemoryPeakResults) r;
           break;
         }
       }
-      if (results == null || results.size() == 0) {
+      if (memoryResults == null || memoryResults.size() == 0) {
         return;
       }
 
@@ -3348,10 +3567,10 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
       final LUT lut = LutHelper.createLut(LutColour.ICE);
       final Overlay o = new Overlay();
-      final int size = results.size();
+      final int size = memoryResults.size();
       final Counter j = new Counter(size);
-      final ImagePlus finalImp = imp;
-      results.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
+      final ImagePlus finalImp = localImp;
+      memoryResults.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
         final PointRoi roi = new PointRoi(x, y);
         final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
         roi.setStrokeColor(c);
@@ -3361,8 +3580,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
         }
         o.add(roi);
       });
-      imp.setOverlay(o);
-      imp.getWindow().toFront();
+      localImp.setOverlay(o);
+      localImp.getWindow().toFront();
     }
   }
 
@@ -3372,8 +3591,8 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @param totalFrames the total frames
    * @return the number of threads
    */
-  private static int getNumberOfThreads(int totalFrames) {
-    final int t = Math.max(1, (int) (fractionOfThreads * Prefs.getThreads()));
+  private int getNumberOfThreads(int totalFrames) {
+    final int t = Math.max(1, (int) (settings.fractionOfThreads * Prefs.getThreads()));
     return FastMath.min(totalFrames, t);
   }
 
@@ -3384,7 +3603,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @return True if the frame should be ignored
    */
   private boolean ignoreFrame(int frame) {
-    if (!interlacedData) {
+    if (!extraSettings.interlacedData) {
       return false;
     }
 
@@ -3393,16 +3612,12 @@ public class PeakFit implements PlugInFilter, ItemListener {
     // |
     // |----|Block|Skip|Block|Skip|Block|Skip
     // Note the source data is still read so that the source is incremented.
-    if (frame < dataStart) {
-      // System.out.printf("Skipping %d\n", frame);
+    if (frame < extraSettings.dataStart) {
       return true;
     }
-    final int frameInBlock = (frame - dataStart) % (dataBlock + dataSkip);
-    if (frameInBlock >= dataBlock) {
-      // System.out.printf("Skipping %d\n", frame);
-      return true;
-    }
-    return false;
+    final int frameInBlock =
+        (frame - extraSettings.dataStart) % (extraSettings.dataBlock + extraSettings.dataSkip);
+    return frameInBlock >= extraSettings.dataBlock;
   }
 
   private FitJob createJob(int startFrame, int endFrame, float[] data, Rectangle bounds,
@@ -3431,6 +3646,29 @@ public class PeakFit implements PlugInFilter, ItemListener {
       return new ParameterisedFitJob(fitParams, startFrame, data, bounds);
     }
     return new FitJob(startFrame, data, bounds);
+  }
+
+  /**
+   * Creates the fit job to fit all the given candidate maxima.
+   *
+   * @param sliceCandidates the slice candidates
+   * @param startFrame the start frame
+   * @param endFrame the end frame
+   * @param data the data
+   * @param bounds the bounds
+   * @param noise the noise
+   * @return the fit job
+   */
+  private static FitJob createMaximaFitJob(int[] maxIndices, int startFrame, int endFrame,
+      float[] data, Rectangle bounds, float noise) {
+    final FitParameters fitParams = new FitParameters();
+    fitParams.maxIndices = maxIndices;
+    if (startFrame != endFrame) {
+      fitParams.endT = endFrame;
+    }
+    fitParams.fitTask = FitTask.PSF_FITTING;
+    fitParams.noise = noise;
+    return new ParameterisedFitJob(fitParams, startFrame, data, bounds);
   }
 
   private static boolean escapePressed() {
@@ -3487,9 +3725,9 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     // Write settings out to the IJ log
     if (resultsSettings.getLogProgress()) {
-      IJ.log("-=-=-=-");
+      IJ.log(LOG_SPACER);
       IJ.log("Peak Fit");
-      IJ.log("-=-=-=-");
+      IJ.log(LOG_SPACER);
       ImageJUtils.log("Initial Peak SD = %s,%s", MathUtils.rounded(fitConfig.getInitialXSd()),
           MathUtils.rounded(fitConfig.getInitialYSd()));
       final SpotFilter spotFilter = engine.getSpotFilter();
@@ -3508,7 +3746,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
         IJ.log("Noise = " + MathUtils.rounded(fitConfig.getNoise()));
       }
       IJ.log("Width factor = " + MathUtils.rounded(fitConfig.getMaxWidthFactor()));
-      IJ.log("-=-=-=-");
+      IJ.log(LOG_SPACER);
     }
 
     return engine;
@@ -3522,25 +3760,22 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @return true, if successful
    */
   private boolean updateFitConfiguration(FitEngineConfiguration config) {
-    final FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitConfiguration localFitConfig = config.getFitConfiguration();
 
     // Adjust the settings that are relevant within the fitting configuration.
-    fitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
+    localFitConfig.setComputeResiduals(config.getResidualsThreshold() < 1);
     logger =
         (resultsSettings.getLogProgress()) ? ImageJPluginLoggerHelper.getLogger(getClass()) : null;
-    fitConfig.setLog(logger);
+    localFitConfig.setLog(logger);
 
     if (resultsSettings.getShowDeviations()) {
       // Note: This may already by true if the deviations are needed for the smart filter
-      fitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
+      localFitConfig.setComputeDeviations(resultsSettings.getShowDeviations());
     }
 
     config.configureOutputUnits();
 
-    if (!checkCameraModel(fitConfig, source.getBounds(), bounds, true)) {
-      return false;
-    }
-    return true;
+    return checkCameraModel(localFitConfig, source.getBounds(), bounds, true);
   }
 
   /**
@@ -3549,18 +3784,65 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * using the configured parameters.
    */
   private void runMaximaFitting() {
-    final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
-    if (results == null || results.size() == 0) {
+    final MemoryPeakResults memoryResults =
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL);
+    if (memoryResults == null || memoryResults.size() == 0) {
       log("No results for maxima fitting");
       return;
     }
-    // No check for imageSource since this has been check in the calling method
 
-    final int totalFrames = source.getFrames();
+    // The total frames (for progress reporting)
+    int totalFrames;
+    // A function that can convert a frame into a set of candidate indices
+    final IntFunction<int[]> frameToMaxIndices;
+    // The frames to process (should be sorted ascending)
+    Supplier<IntStream> frames;
 
-    // Store the indices of each new time-frame
-    results.sort();
+    // Support fitting all time frames with the same results.
+    if (settings.fitAcrossAllFrames) {
+      // All results are candidates
+      // Check if the input spans multiple frames
+      if (getSingleFrame(memoryResults) == 0) {
+        final int min = memoryResults.getMinFrame();
+        final int max = memoryResults.getMaxFrame();
+        final GenericDialog gd = new GenericDialog(TITLE);
+        gd.enableYesNoCancel();
+        gd.hideCancelButton();
+        gd.addMessage(String.format(
+            "Candidate maxima for fitting span multiple frames (%d-%d).\n \n"
+                + "Please confirm the %s are correct.",
+            min, max, TextUtils.pleural(memoryResults.size(), "candidate")));
+        gd.showDialog();
+        if (!gd.wasOKed()) {
+          return;
+        }
+      }
+
+      final int[] maxIndices = getMaxIndices(Arrays.asList(memoryResults.toArray()));
+
+      // This may not work correctly if using for example a series image source that
+      // incorrectly estimates the number of frames
+      totalFrames = source.getFrames();
+      frameToMaxIndices = frame -> maxIndices;
+      frames = () -> IntStream.rangeClosed(1, totalFrames);
+    } else {
+
+      // Build a map between the time-frame and the results in that frame.
+      final Map<Integer, List<PeakResult>> map = Arrays.stream(memoryResults.toArray()).parallel()
+          // Ensure only single frame results are used to pick candidates
+          .filter(peakResult -> peakResult.getFrame() == peakResult.getEndFrame())
+          .collect(Collectors.groupingBy(PeakResult::getFrame));
+
+      totalFrames = map.size();
+
+      // Build a function that can convert a frame into a set of candidate indices
+      frameToMaxIndices = frame -> getMaxIndices(map.get(frame));
+
+      frames = () -> map.keySet().stream().mapToInt(Integer::intValue).sorted();
+    }
+
+    final ImageStack stack =
+        (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
 
     // Use the FitEngine to allow multi-threading.
     final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
@@ -3570,81 +3852,71 @@ public class PeakFit implements PlugInFilter, ItemListener {
 
     final int step = ImageJUtils.getProgressInterval(totalFrames);
 
+    // No crop bounds are supported.
+    // To pre-process data for noise estimation
+    final boolean isFitCameraCounts = fitConfig.isFitCameraCounts();
+    final CameraModel cameraModel = fitConfig.getCameraModel();
+
     runTime = System.nanoTime();
-    final ArrayList<PeakResult> sliceCandidates = new ArrayList<>();
-    final FrameCounter counter = new FrameCounter(results.getFirstFrame());
-    results.forEach((PeakResultProcedureX) result -> {
-      if (counter.advance(result.getFrame())) {
-        if (escapePressed()) {
-          return true;
-        }
-        final int slice = counter.previousFrame();
-        if (slice % step == 0 && ImageJUtils.showStatus("Slice: " + slice + " / " + totalFrames)) {
-          IJ.showProgress(slice, totalFrames);
-        }
-
-        // Process results
-        if (!processResults(engine, sliceCandidates, slice)) {
-          return true;
-        }
-
-        sliceCandidates.clear();
+    final AtomicBoolean shutdown = new AtomicBoolean();
+    final String format = String.format("Slice: %%d / %d (Results=%%d)", totalFrames);
+    frames.get().forEachOrdered(slice -> {
+      if (shutdown.get() || escapePressed()) {
+        shutdown.set(true);
+        return;
       }
-      sliceCandidates.add(result);
+      final float[] data = source.get(slice);
+      if (data == null) {
+        shutdown.set(true);
+        return;
+      }
 
-      return false;
+      if (slice % step == 0
+          && ImageJUtils.showStatus(String.format(format, slice, results.size()))) {
+        IJ.showProgress(slice, totalFrames);
+      }
+
+      // We must pre-process the data before noise estimation
+      final float[] data2 = data.clone();
+      if (isFitCameraCounts) {
+        cameraModel.removeBias(data2);
+      } else {
+        cameraModel.removeBiasAndGain(data2);
+      }
+
+      final float noise = FitWorker.estimateNoise(data2, source.getWidth(), source.getHeight(),
+          config.getNoiseMethod());
+
+      if (stack != null) {
+        stack.addSlice(String.format("Frame %d - %d", source.getStartFrameNumber(),
+            source.getEndFrameNumber()), data);
+      }
+
+      // Get the frame number from the source to allow for interlaced and aggregated data
+      engine.run(createMaximaFitJob(frameToMaxIndices.apply(slice), source.getStartFrameNumber(),
+          source.getEndFrameNumber(), data, bounds, noise));
     });
 
-    // Process final results
-    final boolean shutdown = escapePressed();
-    if (!shutdown) {
-      processResults(engine, sliceCandidates, counter.currentFrame());
-    }
-
-    engine.end(shutdown);
+    engine.end(shutdown.get());
     time = engine.getTime();
     runTime = System.nanoTime() - runTime;
+
+    if (stack != null) {
+      ImageJUtils.display("Processed frames", stack);
+    }
 
     showResults();
 
     source.close();
   }
 
-  private boolean processResults(FitEngine engine, ArrayList<PeakResult> sliceCandidates,
-      int slice) {
-    // Process results
+  private int[] getMaxIndices(List<PeakResult> sliceCandidates) {
     final int[] maxIndices = new int[sliceCandidates.size()];
     int count = 0;
-    final ArrayList<PeakResult> processedResults = new ArrayList<>(sliceCandidates.size());
     for (final PeakResult result : sliceCandidates) {
-      // Add ExtendedPeakResults to the results if they span multiple frames (they are the result of
-      // previous fitting).
-      if (result instanceof ExtendedPeakResult && result.getFrame() != result.getEndFrame()) {
-        processedResults.add(result);
-      } else {
-        // Fit single frame results.
-        maxIndices[count++] = result.getOrigX() + bounds.width * result.getOrigY();
-      }
+      maxIndices[count++] = result.getOrigX() + bounds.width * result.getOrigY();
     }
-
-    if (!processedResults.isEmpty()) {
-      this.results.addAll(processedResults);
-    }
-
-    if (count != 0) {
-      final float[] data = source.get(slice);
-      if (data == null) {
-        return false;
-      }
-
-      final FitParameters fitParams = new FitParameters();
-      fitParams.maxIndices = Arrays.copyOf(maxIndices, count);
-      final FitJob job = new ParameterisedFitJob(fitParams, slice, data, bounds);
-
-      engine.run(job);
-    }
-
-    return true;
+    return maxIndices;
   }
 
   /**
@@ -3662,9 +3934,7 @@ public class PeakFit implements PlugInFilter, ItemListener {
    * @return The total number of localisations.
    */
   public int getSize() {
-    // If only one output in the list it was extracted for the FitEngine to prevent
-    // passing data through all methods in the PeakResultsList. However the list
-    // returns the size using the first entry so this is OK.
+    // The list returns the size using the first entry.
     return results.size();
   }
 
@@ -3685,104 +3955,5 @@ public class PeakFit implements PlugInFilter, ItemListener {
    */
   public void setSilent(boolean silent) {
     this.silent = silent;
-  }
-
-  private void refreshSettings(Calibration cal) {
-    if (cal == null) {
-      return;
-    }
-
-    // Do not use set() as we support merging a partial calibration
-    fitConfig.mergeCalibration(cal);
-    final CalibrationReader calibration = fitConfig.getCalibrationReader();
-
-    textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
-    if (calibration.hasNmPerPixel()) {
-      textNmPerPixel.setText("" + calibration.getNmPerPixel());
-    }
-    if (calibration.hasExposureTime()) {
-      textExposure.setText("" + calibration.getExposureTime());
-    }
-  }
-
-  private void refreshSettings(PSF psf, boolean isCustomTemplate) {
-    if (!isCustomTemplate || psf == null) {
-      return;
-    }
-
-    // Do not use set() as we support merging a partial PSF
-    fitConfig.mergePsf(psf);
-
-    textPsf.select(PsfProtosHelper.getName(fitConfig.getPsfType()));
-  }
-
-  /**
-   * Refresh settings.
-   *
-   * <p>If this is a custom template then use all the settings. If a default template then leave
-   * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
-   *
-   * @param fitEngineSettings the config
-   * @param isCustomTemplate True if a custom template.
-   */
-  private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate) {
-    // Set the configuration
-    // This will clear everything and merge the configuration
-    this.config.setFitEngineSettings(fitEngineSettings);
-    fitConfig = this.config.getFitConfiguration();
-
-    textDataFilterType
-        .select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
-    textDataFilterMethod.select(
-        SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-    textSmooth.setText("" + config.getDataFilterParameterValue(0));
-    textSearch.setText("" + config.getSearch());
-    textBorder.setText("" + config.getBorder());
-    textFitting.setText("" + config.getFitting());
-    if (!maximaIdentification) {
-      textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
-      if (extraOptions) {
-        textFitBackground.setState(fitConfig.isBackgroundFitting());
-      }
-      textFailuresLimit.setText("" + config.getFailuresLimit());
-      textPassRate.setText("" + config.getPassRate());
-      textIncludeNeighbours.setState(config.isIncludeNeighbours());
-      textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
-      textResidualsThreshold.setText("" + config.getResidualsThreshold());
-      textDuplicateDistance.setText("" + config.getDuplicateDistance());
-
-      // Filtering
-      textSmartFilter.setState(fitConfig.isSmartFilter());
-      textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
-      if (!fitConfig.isDisableSimpleFilter()) {
-        textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-        textSignalStrength.setText("" + fitConfig.getSignalStrength());
-        textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
-        textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
-      }
-      // These are used for settings the bounds so they are included
-      textMinPhotons.setText("" + fitConfig.getMinPhotons());
-      textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
-      updateFilterInput();
-
-      if (extraOptions) {
-        textNoise.setText("" + fitConfig.getNoise());
-        textNoiseMethod.select(config.getNoiseMethod().ordinal());
-      }
-    }
-  }
-
-  private void refreshSettings(ResultsSettings resultsSettings) {
-    this.resultsSettings = resultsSettings.toBuilder();
-    textLogProgress.setState(resultsSettings.getLogProgress());
-    if (!maximaIdentification) {
-      textShowDeviations.setState(resultsSettings.getShowDeviations());
-    }
-    textResultsTable.setState(resultsSettings.getResultsTableSettings().getShowTable());
-    textResultsImage.select(resultsSettings.getResultsImageSettings().getImageTypeValue());
-    textResultsDirectory
-        .setText("" + resultsSettings.getResultsFileSettings().getResultsDirectory());
-    textFileFormat.select(resultsSettings.getResultsFileSettings().getFileFormatValue());
-    textResultsInMemory.setState(resultsSettings.getResultsInMemorySettings().getInMemory());
   }
 }
