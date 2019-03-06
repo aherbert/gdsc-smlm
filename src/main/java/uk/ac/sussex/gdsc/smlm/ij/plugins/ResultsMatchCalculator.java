@@ -711,7 +711,7 @@ public class ResultsMatchCalculator implements PlugIn {
     return results.hasId();
   }
 
-  private TextFilePeakResults createFilePeakResults(MemoryPeakResults results2) {
+  private TextFilePeakResults createFilePeakResults(MemoryPeakResults results) {
     if (!settings.isSaveClassifications()) {
       return null;
     }
@@ -719,8 +719,8 @@ public class ResultsMatchCalculator implements PlugIn {
         ImageJUtils.getFilename("Classifications_File", settings.classificationsFile);
     if (filename != null) {
       settings.classificationsFile = filename;
-      final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
-      r.copySettings(results2);
+      final TextFilePeakResults r = new TextFilePeakResults(filename, false, results.hasEndFrame());
+      r.copySettings(results);
       r.begin();
       return r;
     }
@@ -731,7 +731,7 @@ public class ResultsMatchCalculator implements PlugIn {
       MemoryPeakResults results, double distanceLow, double distanceHigh) {
     final String filename = directory + String.format("Match%d_%s_%s_%s.txt", set,
         results.getName(), rounder.toString(distanceLow), rounder.toString(distanceHigh));
-    final TextFilePeakResults r = new TextFilePeakResults(filename, false, false);
+    final TextFilePeakResults r = new TextFilePeakResults(filename, false, results.hasEndFrame());
     r.copySettings(results);
     r.begin();
     return r;
