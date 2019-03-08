@@ -191,6 +191,7 @@ public class ResultsMatchCalculator implements PlugIn {
     private static final String KEY_ID_ANALYSIS = "gdsc.smlm.resultsmatchcalculator.idAnalysis";
     private static final String KEY_SAVE_PAIRS = "gdsc.smlm.resultsmatchcalculator.savePairs";
     private static final String KEY_PAIRS_DIR = "gdsc.smlm.resultsmatchcalculator.pairsDirectory";
+    private static final String KEY_OUTPUT_END_FRAME = "gdsc.smlm.resultsmatchcalculator.outputEndFrame";
     // @formatter:on
 
     /** The options to save the classifications. */
@@ -214,6 +215,7 @@ public class ResultsMatchCalculator implements PlugIn {
     boolean idAnalysis;
     boolean savePairs;
     String pairsDirectory = "";
+    boolean outputEndFrame;
 
     Settings() {
       inputOption1 = Prefs.get(KEY_INPUT_OPTION1, "");
@@ -233,6 +235,7 @@ public class ResultsMatchCalculator implements PlugIn {
       idAnalysis = Prefs.get(KEY_ID_ANALYSIS, false);
       savePairs = Prefs.get(KEY_SAVE_PAIRS, false);
       pairsDirectory = Prefs.get(KEY_PAIRS_DIR, "");
+      outputEndFrame = Prefs.get(KEY_OUTPUT_END_FRAME, false);
     }
 
     Settings(Settings source) {
@@ -251,6 +254,7 @@ public class ResultsMatchCalculator implements PlugIn {
       this.idAnalysis = source.idAnalysis;
       this.savePairs = source.savePairs;
       this.pairsDirectory = source.pairsDirectory;
+      this.outputEndFrame = source.outputEndFrame;
     }
 
     Settings copy() {
@@ -438,6 +442,7 @@ public class ResultsMatchCalculator implements PlugIn {
         settings.saveClassificationsOption);
     gd.addCheckbox("Id_analysis", settings.idAnalysis);
     gd.addCheckbox("Save_pairs", settings.savePairs);
+    gd.addCheckbox("Output_end_frame", settings.outputEndFrame);
 
     gd.showDialog();
 
@@ -460,6 +465,7 @@ public class ResultsMatchCalculator implements PlugIn {
     settings.saveClassificationsOption = gd.getNextChoiceIndex();
     settings.idAnalysis = gd.getNextBoolean();
     settings.savePairs = gd.getNextBoolean();
+    settings.outputEndFrame = gd.getNextBoolean();
     settings.save();
 
     if (!(settings.showTable || settings.showPairs || !settings.isSaveClassifications())) {
@@ -719,7 +725,8 @@ public class ResultsMatchCalculator implements PlugIn {
         ImageJUtils.getFilename("Classifications_File", settings.classificationsFile);
     if (filename != null) {
       settings.classificationsFile = filename;
-      final TextFilePeakResults r = new TextFilePeakResults(filename, false, results.hasEndFrame());
+      final TextFilePeakResults r =
+          new TextFilePeakResults(filename, false, outputEndFrame(results));
       r.copySettings(results);
       r.begin();
       return r;
@@ -727,14 +734,24 @@ public class ResultsMatchCalculator implements PlugIn {
     return null;
   }
 
-  private static TextFilePeakResults createFilePeakResults(String directory, int set,
+  private TextFilePeakResults createFilePeakResults(String directory, int set,
       MemoryPeakResults results, double distanceLow, double distanceHigh) {
     final String filename = directory + String.format("Match%d_%s_%s_%s.txt", set,
         results.getName(), rounder.toString(distanceLow), rounder.toString(distanceHigh));
-    final TextFilePeakResults r = new TextFilePeakResults(filename, false, results.hasEndFrame());
+    final TextFilePeakResults r = new TextFilePeakResults(filename, false, outputEndFrame(results));
     r.copySettings(results);
     r.begin();
     return r;
+  }
+
+  /**
+   * Checks if the end frame is required in the file output.
+   *
+   * @param results the results
+   * @return true, if successful
+   */
+  private boolean outputEndFrame(MemoryPeakResults results) {
+    return settings.outputEndFrame || results.hasEndFrame();
   }
 
   /**
