@@ -290,6 +290,7 @@ public class ResultsMatchCalculator implements PlugIn {
       Prefs.set(KEY_ID_ANALYSIS, idAnalysis);
       Prefs.set(KEY_SAVE_PAIRS, savePairs);
       Prefs.set(KEY_PAIRS_DIR, pairsDirectory);
+      Prefs.set(KEY_OUTPUT_END_FRAME, outputEndFrame);
     }
 
     /**
