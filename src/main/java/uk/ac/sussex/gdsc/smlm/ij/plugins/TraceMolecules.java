@@ -764,7 +764,7 @@ public class TraceMolecules implements PlugIn {
 
     // Load the results
     results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(pluginTitle, "No results could be loaded");
       IJ.showStatus("");
       return false;
@@ -870,7 +870,7 @@ public class TraceMolecules implements PlugIn {
 
     // Load the results
     results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(pluginTitle, "No results could be loaded");
       IJ.showStatus("");
       return false;

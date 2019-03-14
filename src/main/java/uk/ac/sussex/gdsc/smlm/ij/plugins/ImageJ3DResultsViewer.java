@@ -160,6 +160,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
@@ -835,7 +836,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private class LocalUniverseListener implements UniverseListener {
+  private static class LocalUniverseListener implements UniverseListener {
     @Override
     public void transformationStarted(View view) {
       // Ignore
@@ -1166,7 +1167,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     SettingsManager.writeSettings(settings);
     MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }
@@ -2856,9 +2857,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static class ColourSurfaceContentAction extends BaseContentAction {
-    static String title = "";
-    static boolean resetTransparency = true;
-    ImagePlus imp;
+    private static final AtomicReference<Options> optionsRef = new AtomicReference<>(new Options());
+
+    private static class Options {
+      String title = "";
+      boolean resetTransparency = true;
+    }
 
     @Override
     public int run(Content content) {
@@ -2866,24 +2870,25 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return 0;
       }
 
+      final Options options = optionsRef.get();
+
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      final String[] list = ImageJUtils.getImageList(ImageJUtils.SINGLE);
+      if (list.length == 0) {
+        return -1;
+      }
+      gd.addChoice("Image", list, options.title);
+      gd.addCheckbox("Reset_transparency", options.resetTransparency);
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return -1;
+      }
+      options.title = gd.getNextChoice();
+      options.resetTransparency = gd.getNextBoolean();
+      ImagePlus imp = WindowManager.getImage(options.title);
+      optionsRef.set(options);
       if (imp == null) {
-        final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-        final String[] list = ImageJUtils.getImageList(ImageJUtils.SINGLE);
-        if (list.length == 0) {
-          return -1;
-        }
-        gd.addChoice("Image", list, title);
-        gd.addCheckbox("Reset_transparency", resetTransparency);
-        gd.showDialog();
-        if (gd.wasCanceled()) {
-          return -1;
-        }
-        title = gd.getNextChoice();
-        resetTransparency = gd.getNextBoolean();
-        imp = WindowManager.getImage(title);
-        if (imp == null) {
-          return -1;
-        }
+        return -1;
       }
 
       final ContentInstant contentInstant = content.getCurrent();
@@ -2894,19 +2899,21 @@ public class ImageJ3DResultsViewer implements PlugIn {
         if (!(mesh instanceof ItemShape)) {
           return 0;
         }
-        if (resetTransparency) {
+        if (options.resetTransparency) {
           mesh.setTransparency(0);
         }
         itemShape = (ItemShape) mesh;
       } else if (contentInstant.getContent() instanceof ItemGroupNode) {
         final ItemGroupNode node = (ItemGroupNode) contentInstant.getContent();
         final ItemGroup g = node.getItemGroup();
-        if (resetTransparency) {
+        if (options.resetTransparency) {
           g.setTransparency(0);
         }
         itemShape = g;
       }
-      CustomContentHelper.loadSurfaceColorsFromImage2D(itemShape, imp);
+      if (itemShape != null) {
+        CustomContentHelper.loadSurfaceColorsFromImage2D(itemShape, imp);
+      }
       return 0;
     }
   }

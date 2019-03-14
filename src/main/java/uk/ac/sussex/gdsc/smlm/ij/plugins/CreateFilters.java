@@ -343,7 +343,7 @@ public class CreateFilters implements PlugIn, ItemListener {
    * given substitutions. Attributes are processed in order. Substitutions are ignored (skipped) if
    * they are null.
    */
-  private class AttributeSubstitutionHandler extends DefaultHandler {
+  private static class AttributeSubstitutionHandler extends DefaultHandler {
     StringBuilder sb;
     String[] attributeSubstitutions;
     int substitutionCount;

@@ -372,7 +372,7 @@ public class PeakResultTableModel extends AbstractTableModel {
 
   @Override
   public String getColumnName(int column) {
-    return names[column]; // values[column].getValueName();
+    return names[column];
   }
 
   @Override
@@ -387,10 +387,8 @@ public class PeakResultTableModel extends AbstractTableModel {
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    if (rowCounter) {
-      if (columnIndex == 0) {
-        return new Integer(rowIndex + 1);
-      }
+    if (rowCounter && columnIndex == 0) {
+      return Integer.valueOf(rowIndex + 1);
     }
     final PeakResult r = get(rowIndex);
     return values[columnIndex].getValue(r);
@@ -634,7 +632,7 @@ public class PeakResultTableModel extends AbstractTableModel {
    */
   void setLive(boolean isLive) {
     if (isLive) {
-      liveCount.getAndDecrement();
+      liveCount.getAndIncrement();
     } else {
       liveCount.getAndDecrement();
     }

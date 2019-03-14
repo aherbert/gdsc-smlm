@@ -86,18 +86,18 @@ import com.google.protobuf.util.JsonFormat.Printer;
 
 import ij.Prefs;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,21 +106,26 @@ import java.util.logging.Logger;
  * Manage the settings for ImageJ plugins.
  */
 public final class SettingsManager {
+
+  /** The logger. */
   private static Logger logger = Logger.getLogger(SettingsManager.class.getName());
 
+  /** The Constant DEFAULT_FILENAME. */
   private static final String DEFAULT_FILENAME = System.getProperty("user.home")
       + System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
+
+  /** The Constant DEFAULT_DIRECTORY. */
   private static final String DEFAULT_DIRECTORY =
-      System.getProperty("user.home") + System.getProperty("file.separator") + ".gdsc.smlm";
+      System.getProperty("user.home") + File.separatorChar + ".gdsc.smlm";
 
   /** Use this to suppress warnings. */
-  public static final int FLAG_SILENT = 0x00000001;
+  public static final int FLAG_SILENT = 0x01;
   /** Use this flag to suppress returning a default instance. */
-  public static final int FLAG_NO_DEFAULT = 0x00000002;
+  public static final int FLAG_NO_DEFAULT = 0x02;
   /** Use this flag to include insignificant whitespace in JSON output. */
-  public static final int FLAG_JSON_WHITESPACE = 0x00000004;
+  public static final int FLAG_JSON_WHITESPACE = 0x04;
   /** Use this flag to include default values in JSON output. */
-  public static final int FLAG_JSON_DEFAULT_VALUES = 0x00000008;
+  public static final int FLAG_JSON_DEFAULT_VALUES = 0x08;
   /**
    * Use this to show file-not-found warning when reading settings. The default is to suppress the
    * warning as it is usually usually from a settings file that has not been created.
@@ -132,6 +137,22 @@ public final class SettingsManager {
 
   static {
     setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
+  }
+
+  /**
+   * Lazy load a default printer.
+   */
+  private static class PrinterLoader {
+    /** The printer. */
+    static final Printer printer = JsonFormat.printer();
+  }
+
+  /**
+   * Lazy load a default parser.
+   */
+  private static class ParserLoader {
+    /** The parser. */
+    static final com.google.protobuf.util.JsonFormat.Parser parser = JsonFormat.parser();
   }
 
   /** No public constructor. */
@@ -652,10 +673,8 @@ public final class SettingsManager {
     Prefs.set(Constants.settingsDirectory, directory);
     settingsDirectory = new File(directory);
     try {
-      if (!settingsDirectory.exists()) {
-        settingsDirectory.mkdirs();
-      }
-    } catch (final Exception ex) {
+      Files.createDirectories(settingsDirectory.toPath());
+    } catch (final IOException ex) {
       logger.log(Level.SEVERE, "Unable create settings directory", ex);
     }
   }
@@ -1301,9 +1320,6 @@ public final class SettingsManager {
     }
   }
 
-  /** The printer. */
-  private static Printer printer;
-
   /**
    * Write the message to a JSON string.
    *
@@ -1340,7 +1356,12 @@ public final class SettingsManager {
    * @return True if written
    */
   public static boolean toJson(MessageOrBuilder message, String filename, int flags) {
-    return toJson(message, new File(filename), flags);
+    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
+      return toJson(message, writer, flags);
+    } catch (final IOException ex) {
+      logWriteError(flags, ex);
+    }
+    return false;
   }
 
   /**
@@ -1354,9 +1375,9 @@ public final class SettingsManager {
    * @return True if written
    */
   public static boolean toJson(MessageOrBuilder message, File file, int flags) {
-    try (PrintStream fs = new PrintStream(file)) {
-      return toJson(message, fs, flags);
-    } catch (final FileNotFoundException ex) {
+    try (BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+      return toJson(message, writer, flags);
+    } catch (final IOException ex) {
       logWriteError(flags, ex);
     }
     return false;
@@ -1372,10 +1393,7 @@ public final class SettingsManager {
    */
   public static boolean toJson(MessageOrBuilder message, Appendable output, int flags) {
     try {
-      if (printer == null) {
-        printer = JsonFormat.printer();
-      }
-      Printer localPrinter = printer;
+      Printer localPrinter = PrinterLoader.printer;
       if (BitFlagUtils.anyNotSet(flags, FLAG_JSON_WHITESPACE)) {
         localPrinter = localPrinter.omittingInsignificantWhitespace();
       }
@@ -1389,9 +1407,6 @@ public final class SettingsManager {
     }
     return false;
   }
-
-  /** The parser. */
-  private static com.google.protobuf.util.JsonFormat.Parser parser;
 
   /**
    * Read the message from a JSON string.
@@ -1419,13 +1434,30 @@ public final class SettingsManager {
   /**
    * Read the message from a JSON string in a file.
    *
+   * @param filename the filename
+   * @param builder the builder
+   * @param flags the flags
+   * @return true, if successful
+   */
+  public static boolean fromJson(Path filename, Message.Builder builder, int flags) {
+    try (Reader reader = Files.newBufferedReader(filename)) {
+      return fromJson(reader, builder, flags);
+    } catch (final IOException ex) {
+      logReadError(flags, ex);
+    }
+    return false;
+  }
+
+  /**
+   * Read the message from a JSON string in a file.
+   *
    * @param file the file
    * @param builder the builder
    * @param flags the flags
    * @return true, if successful
    */
   public static boolean fromJson(File file, Message.Builder builder, int flags) {
-    try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
+    try (Reader reader = Files.newBufferedReader(file.toPath())) {
       return fromJson(reader, builder, flags);
     } catch (final IOException ex) {
       logReadError(flags, ex);
@@ -1443,10 +1475,7 @@ public final class SettingsManager {
    */
   public static boolean fromJson(Reader reader, Message.Builder builder, int flags) {
     try {
-      if (parser == null) {
-        parser = JsonFormat.parser();
-      }
-      parser.merge(reader, builder);
+      ParserLoader.parser.merge(reader, builder);
       return true;
     } catch (final IOException ex) {
       logReadError(flags, ex);

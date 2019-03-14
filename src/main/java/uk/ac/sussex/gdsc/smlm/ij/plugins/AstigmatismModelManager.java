@@ -102,6 +102,7 @@ import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -642,7 +643,7 @@ public class AstigmatismModelManager implements PlugIn {
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
-    final FitEngine engine = new FitEngine(config,
+    final FitEngine engine = FitEngine.create(config,
         SynchronizedPeakResults.create(results, threadCount), threadCount, FitQueue.BLOCKING);
 
     final IJImageSource source = new IJImageSource(imp);
@@ -1351,7 +1352,7 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setFilename(gd.getNextString());
 
     final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
-    if (!SettingsManager.fromJson(new File(pluginSettings.getFilename()), model, 0)) {
+    if (!SettingsManager.fromJson(Paths.get(pluginSettings.getFilename()), model, 0)) {
       return;
     }
 

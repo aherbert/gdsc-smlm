@@ -61,7 +61,7 @@ public final class Bessel {
 
     final double z = 8.0 / ax;
     final double y = z * z;
-    final double xx = ax - 0.785398164;
+    final double xx = ax - Math.PI / 4;
     final double ans1 = 1.0 + y
         * (-0.1098628627e-2 + y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
     final double ans2 = -0.1562499995e-1 + y

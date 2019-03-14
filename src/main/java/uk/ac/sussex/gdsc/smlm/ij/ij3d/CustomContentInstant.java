@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 
@@ -67,10 +69,13 @@ import vib.PointList;
 
 import voltex.VoltexGroup;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Extend the ContentInstant class to avoid using an OrderedPath.
@@ -317,9 +322,7 @@ public class CustomContentInstant extends ContentInstant {
 
   @Override
   public void restoreDisplayedData() {
-    System.out.println("restoreDisplayedData " + getName());
     if (available) {
-      System.out.println("not restoring because it is not swapped");
       return;
     }
     contentNode.restoreDisplayedData(getDisplayedDataSwapfile(), getName());
@@ -346,15 +349,13 @@ public class CustomContentInstant extends ContentInstant {
     if (displayedDataSwapfile != null) {
       return displayedDataSwapfile;
     }
-    File tmp = new File(System.getProperty("java.io.tmpdir"), "3D_Viewer");
-    if (!tmp.exists()) {
-      tmp.mkdirs();
+    try {
+      Path path = Files.createTempFile("3D_Viewer", "displayed");
+      displayedDataSwapfile = path.toString();
+    } catch (IOException ex) {
+      // This is not a critical failure so allow null to be returned
+      Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to create swap file", ex);
     }
-    tmp = new File(tmp, "displayed");
-    if (!tmp.exists()) {
-      tmp.mkdirs();
-    }
-    displayedDataSwapfile = new File(tmp, getName()).getAbsolutePath();
     return displayedDataSwapfile;
   }
 
@@ -690,12 +691,11 @@ public class CustomContentInstant extends ContentInstant {
 
   @Override
   public synchronized void setTransparency(float transparency) {
-    transparency = transparency < 0 ? 0 : transparency;
-    transparency = transparency > 1 ? 1 : transparency;
-    if (Math.abs(transparency - this.transparency) < 0.01) {
+    final float newTransparency = MathUtils.clip(0, 1, transparency);
+    if (Math.abs(newTransparency - this.transparency) < 0.01) {
       return;
     }
-    this.transparency = transparency;
+    this.transparency = newTransparency;
     if (contentNode != null) {
       contentNode.transparencyUpdated(this.transparency);
     }
@@ -816,7 +816,7 @@ public class CustomContentInstant extends ContentInstant {
   }
 
   @Override
-  public float getTransparency() {
+  public synchronized float getTransparency() {
     return transparency;
   }
 

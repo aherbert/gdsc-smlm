@@ -96,10 +96,16 @@ public class CameraModelAnalysis
   private static final String TITLE = "Camera Model Analysis";
   private static final KolmogorovSmirnovTest kolmogorovSmirnovTest = new KolmogorovSmirnovTest();
 
+  /** The relative change in cumulative probability to stop computation. */
+  private static final double PROBABILITY_DELTA = 1e-6;
   /** The lower limit on the cumulative probability. */
   private static final double LOWER = 1e-6;
   /** The upper limit on the cumulative probability. */
   private static final double UPPER = 1 - LOWER;
+
+  private static final double SIMPSON_RELATIVE_ACCURACY = 1e-4;
+  private static final double SIMPSON_ABSOLUTE_ACCURACY = 1e-8;
+  private static final int SIMPSON_MIN_ITERATION_COUNT = 3;
 
   private CameraModelAnalysisSettings.Builder settings;
 
@@ -111,7 +117,7 @@ public class CameraModelAnalysis
   private double[][] floatHistogram;
   private CameraModelAnalysisSettings lastSimulationSettings;
 
-  private static String[] MODE = {"CCD", "EM-CCD", "sCMOS"};
+  private static final String[] MODE = {"CCD", "EM-CCD", "sCMOS"};
   private static final int MODE_CCD = 0;
   private static final int MODE_EM_CCD = 1;
   private static final int MODE_SCMOS = 2;
@@ -1280,7 +1286,6 @@ public class CameraModelAnalysis
       y[i] = fun.likelihood(x[i], e);
     }
     // Add more until the probability change is marginal
-    final double delta = 1e-6;
     double sum = MathUtils.sum(y);
     final TDoubleArrayList list = new TDoubleArrayList(y);
     for (int o = (int) x[x.length - 1] + 1;; o++) {
@@ -1290,7 +1295,7 @@ public class CameraModelAnalysis
         break;
       }
       sum += p;
-      if (p / sum < delta) {
+      if (p / sum < PROBABILITY_DELTA) {
         break;
       }
     }
@@ -1302,7 +1307,7 @@ public class CameraModelAnalysis
         break;
       }
       sum += p;
-      if (p / sum < delta) {
+      if (p / sum < PROBABILITY_DELTA) {
         break;
       }
     }
@@ -1412,10 +1417,9 @@ public class CameraModelAnalysis
       if (c0 != -1) {
         if (uf != null) {
           // Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0
-          final double relativeAccuracy = 1e-4;
-          final double absoluteAccuracy = 1e-8;
-          final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(relativeAccuracy,
-              absoluteAccuracy, 3, CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
+          final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(SIMPSON_RELATIVE_ACCURACY,
+              SIMPSON_ABSOLUTE_ACCURACY, SIMPSON_MIN_ITERATION_COUNT,
+              CustomSimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
           final double lower = (settings.getRoundDown()) ? 0 : -0.5;
           final double upper = lower + 1;
           // Switch from c<=maxc to c<maxc. Avoid double computation at minc==maxc

@@ -60,12 +60,14 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.
@@ -157,7 +159,7 @@ public class PcPalmAnalysis implements PlugInFilter {
     log(TITLE);
     PcPalmMolecules.logSpacer();
 
-    final ArrayList<Molecule> molecules = cropToRoi(imp);
+    final List<Molecule> molecules = cropToRoi(imp);
     if (molecules.size() < 2) {
       error("No results within the crop region");
       return DONE;
@@ -267,7 +269,7 @@ public class PcPalmAnalysis implements PlugInFilter {
         results.add(result);
       }
       return true;
-    } catch (final Exception ex) {
+    } catch (final XStreamException | IOException ex) {
       IJ.log("Failed to load correlation result from file: " + path);
     }
     return false;
@@ -362,7 +364,7 @@ public class PcPalmAnalysis implements PlugInFilter {
    * @return the array list
    */
   @SuppressWarnings("null")
-  ArrayList<Molecule> cropToRoi(ImagePlus imp) {
+  List<Molecule> cropToRoi(ImagePlus imp) {
     croppedArea = PcPalmMolecules.area;
     if (PcPalmMolecules.molecules == null || PcPalmMolecules.molecules.isEmpty()) {
       return PcPalmMolecules.molecules;
@@ -473,7 +475,7 @@ public class PcPalmAnalysis implements PlugInFilter {
    *
    * @param molecules the molecules
    */
-  private void analyse(ArrayList<Molecule> molecules) {
+  private void analyse(List<Molecule> molecules) {
     // Check if the plots are currently shown
     final String spatialPlotTitle = TITLE + " molecules/um^2";
     final String frequencyDomainTitle = TITLE + " g(r)";

@@ -58,7 +58,7 @@ public class ConvertResults implements PlugIn {
 
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, false, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }

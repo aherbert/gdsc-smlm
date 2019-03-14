@@ -438,7 +438,7 @@ public class Fire implements PlugIn {
     }
 
     MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
@@ -625,8 +625,8 @@ public class Fire implements PlugIn {
     // Adjust bounds relative to input results image
     // Rectangle2D.Float bounds = results.getDataBounds();
     final Rectangle bounds = results.getBounds(true);
-    final double xscale = roiImageWidth / bounds.width;
-    final double yscale = roiImageHeight / bounds.height;
+    final double xscale = (double) roiImageWidth / bounds.width;
+    final double yscale = (double) roiImageHeight / bounds.height;
 
     final float minX = (float) (bounds.x + roiBounds.x / xscale);
     final float maxX = (float) (minX + roiBounds.width / xscale);
@@ -1375,7 +1375,7 @@ public class Fire implements PlugIn {
     }
 
     MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
@@ -1713,7 +1713,7 @@ public class Fire implements PlugIn {
     return Math.sin(value) / value;
   }
 
-  private class Quadratic implements ParametricUnivariateFunction {
+  private static class Quadratic implements ParametricUnivariateFunction {
     @Override
     public double value(double x, double... parameters) {
       return parameters[0] + parameters[1] * x * x;
@@ -2234,7 +2234,7 @@ public class Fire implements PlugIn {
   /**
    * Represent the precision histogram.
    */
-  private class PrecisionHistogram {
+  private static class PrecisionHistogram {
     final float[] x;
     final float[] y;
     final String title;
@@ -2625,7 +2625,7 @@ public class Fire implements PlugIn {
     }
   }
 
-  private class WorkSettings implements Cloneable {
+  private static class WorkSettings implements Cloneable {
     double mean;
     double sigma;
     double qvalue;
@@ -2811,7 +2811,7 @@ public class Fire implements PlugIn {
     return true;
   }
 
-  private class FireDialogListener extends MouseAdapter implements DialogListener {
+  private static class FireDialogListener extends MouseAdapter implements DialogListener {
     /**
      * Delay (in milliseconds) used when entering new values in the dialog before the preview is
      * processed.

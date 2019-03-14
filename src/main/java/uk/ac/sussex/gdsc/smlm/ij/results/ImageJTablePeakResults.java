@@ -693,14 +693,14 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     // Extract the startT and x,y coordinates from the PeakResult line
     final String[] fields = line.split("\t");
     try {
-      final int startT = Integer.valueOf(fields[indexT]);
-      final double x = Double.valueOf(fields[indexX]);
-      final double y = Double.valueOf(fields[indexY]);
+      final int startT = Integer.parseInt(fields[indexT]);
+      final double x = Double.parseDouble(fields[indexX]);
+      final double y = Double.parseDouble(fields[indexY]);
       return new double[] {startT, toPixelConverter.convert(x), toPixelConverter.convert(y)};
-    } catch (final ArrayIndexOutOfBoundsException ex) {
-      // Will happen if any index is still at the default of -1 or if there are not enough fields
-    } catch (final NumberFormatException ex) {
-      // In case any field is not a number
+    } catch (final ArrayIndexOutOfBoundsException | NumberFormatException ex) {
+      // Will happen if any index is still at the default of -1
+      // or if there are not enough fields
+      // or in case any field is not a number.
     }
     return null;
   }

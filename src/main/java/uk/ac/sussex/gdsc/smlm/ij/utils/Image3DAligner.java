@@ -46,6 +46,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Perform 3D image alignment using normalised cross-correlation.
@@ -140,7 +141,7 @@ public class Image3DAligner {
   private double[] buffer;
   private double[] region;
   private double frequencyDomainCorrelationError;
-  private int[] crop;
+  private int[] cropDimensions;
 
   // Allow cached window weights
   private double[] wx;
@@ -857,13 +858,14 @@ public class Image3DAligner {
       izd -= uz;
     }
 
-    crop = new int[] {ix, iy, iz, ixw - ix, iyh - iy, izd - iz};
+    cropDimensions = new int[] {ix, iy, iz, ixw - ix, iyh - iy, izd - iz};
 
     // The maximum correlation unnormalised. Since this is unnormalised
     // it will be biased towards the centre of the image. This is used
     // to restrict the bounds for finding the maximum of the normalised correlation
     // which should be close to this.
-    int maxi = correlation.findMaxIndex(ix, iy, iz, crop[3], crop[4], crop[5]);
+    int maxi = correlation.findMaxIndex(ix, iy, iz, cropDimensions[3], cropDimensions[4],
+        cropDimensions[5]);
 
     // Check in the spatial domain
     checkCorrelation(target, correlation, maxi);
@@ -907,7 +909,7 @@ public class Image3DAligner {
     int tz = dz;
 
     // Precompute the x-1,x+w-1,y-1,y+h-1
-    final int nx = crop[3];
+    final int nx = cropDimensions[3];
     final int[] rx1 = new int[nx];
     final int[] rxw1 = new int[nx];
     final int[] tx1 = new int[nx];
@@ -922,7 +924,7 @@ public class Image3DAligner {
       tx--;
       width[i] = rxw1[i] - rx1[i];
     }
-    final int ny = crop[4];
+    final int ny = cropDimensions[4];
     final int[] ry1 = new int[ny];
     final int[] ryh1 = new int[ny];
     final int[] ty1 = new int[ny];
@@ -1174,9 +1176,11 @@ public class Image3DAligner {
     frequencyDomainCorrelationError =
         DoubleEquality.relativeError(frequencyCorrelation, spatialCorrelation);
     if (frequencyDomainCorrelationError > 0.05) {
-      System.err.printf("3D Correlation Error = %s : Spatial = %s, Freq = %s\n",
-          MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(spatialCorrelation),
-          Double.toString(frequencyCorrelation));
+      final double finalSpatialCorrelation = spatialCorrelation;
+      Logger.getLogger(getClass().getName())
+          .warning(() -> String.format("3D Correlation Error = %s : Spatial = %s, Freq = %s",
+              MathUtils.rounded(frequencyDomainCorrelationError), finalSpatialCorrelation,
+              frequencyCorrelation));
     }
   }
 
@@ -1306,7 +1310,8 @@ public class Image3DAligner {
   public Image3D getCorrelation() {
     try {
       final DoubleImage3D image = new DoubleImage3D(nc, nr, ns, buffer);
-      image.fillOutside(crop[0], crop[1], crop[2], crop[3], crop[5], crop[5], 0);
+      image.fillOutside(cropDimensions[0], cropDimensions[1], cropDimensions[2], cropDimensions[3],
+          cropDimensions[5], cropDimensions[5], 0);
       return image;
     } catch (final IllegalArgumentException ex) {
       // Thrown when buffer is null or does not match the dimensions.

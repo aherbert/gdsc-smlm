@@ -123,7 +123,7 @@ public class CropResults implements PlugIn {
     }
     settings.setInputOption(ResultsManager.getInputSource(gd));
     results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
       return;

@@ -341,7 +341,7 @@ public class PulseActivationAnalysis
     }
   }
 
-  private class Activation implements Molecule {
+  private static class Activation implements Molecule {
     final Trace trace;
     float x;
     float y;
@@ -422,7 +422,7 @@ public class PulseActivationAnalysis
 
     // Load the results
     results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(title, "No results could be loaded");
       return;
     }
@@ -1941,8 +1941,8 @@ public class PulseActivationAnalysis
 
   private Shape[] createShapes(UniformRandomProvider rng, int channel) {
     Shape[] shapes;
-    final double min = sim_size / 20;
-    final double max = sim_size / 10;
+    final double min = sim_size / 20.0;
+    final double max = sim_size / 10.0;
     final double range = max - min;
     switch (sim_distribution[channel]) {
       case CIRCLE:

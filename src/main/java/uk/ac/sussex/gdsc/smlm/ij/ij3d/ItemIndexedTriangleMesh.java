@@ -52,8 +52,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
   /** The points. */
   protected Point3f[] points;
 
-  /** The sizes. */
-  protected Point3f[] sizes;
+  /** Flag indicating changes have been made to the coordinates. */
   private boolean dirty;
 
   /**
@@ -85,7 +84,6 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
 
     // Now build the actual vertices by repeating the points.
     this.points = points;
-    this.sizes = sizes;
 
     vertices = new Point3f[objectVertices.length * points.length];
     faces = new int[objectFaces.length * points.length];

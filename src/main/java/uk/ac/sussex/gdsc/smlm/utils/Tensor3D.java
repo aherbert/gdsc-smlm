@@ -32,8 +32,6 @@ import org.ejml.factory.EigenDecomposition;
 
 /**
  * Compute the inertia tensor for a 3D object.
- *
- * @author Alex Herbert
  */
 public class Tensor3D {
   private final double[] com;

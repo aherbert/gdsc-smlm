@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
@@ -103,7 +104,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         final ItemMesh mesh = new ReferenceItemMesh(new Point3f[] {new Point3f(x, y, 0)},
             (GeometryArray) shape.getGeometry(), a, null, null, 0f);
 
-        System.out.printf("R=%s %s  Vc=%d  V=%d  T=%d\n", rendering,
+        ImageJUtils.log("R=%s %s  Vc=%d  V=%d  T=%d", rendering,
             shape.getGeometry().getClass().getSimpleName(), mesh.getVerticesCountPerItem(),
             mesh.getVerticesPerItem(), Shape3DHelper.getNumberOfTriangles(rendering));
 
@@ -223,7 +224,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
 
       SettingsManager.writeSettings(settings);
       final MemoryPeakResults results = ResultsManager.loadInputResults(name, false, null, null);
-      if (results == null || results.size() == 0) {
+      if (MemoryPeakResults.isEmpty(results)) {
         IJ.error(TITLE, "No results could be loaded");
         IJ.showStatus("");
         return;

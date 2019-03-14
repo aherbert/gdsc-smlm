@@ -36,8 +36,6 @@ import org.scijava.vecmath.Point3f;
  * using a geometry array.
  *
  * <p>The order is fixed but can be user defined.
- *
- * @author Alex Herbert
  */
 public class OrderedItemGeometryGroup extends ItemGeometryGroup implements UpdateableItemShape {
   /** The ordered group. */

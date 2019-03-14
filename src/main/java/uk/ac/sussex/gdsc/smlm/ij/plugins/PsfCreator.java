@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -169,7 +170,6 @@ public class PsfCreator implements PlugInFilter {
   private static final String TITLE_SIGNAL = "PSF Signal";
   private static final String TITLE_HWHM = "PSF HWHM";
   private static final String TITLE_ANGLE = "PSF Angle";
-  // private static final String TITLE_CONTRAST = "PSF Contrast";
   private static final String TITLE_PSF = "PSF";
   private static final String TITLE_SPOT_PSF = "Spot PSF";
 
@@ -178,9 +178,7 @@ public class PsfCreator implements PlugInFilter {
   private static final int MODE_FITTING = 1;
   private static final String[] ALIGNMENT_MODE = {"2D Projections", "3D"};
   private static final int ALIGNMENT_MODE_2D = 0;
-  private static String[] PSF_TYPE = {"Spot", "Astigmatism", "Double Helix"};
-  @SuppressWarnings("unused")
-  private static final int PSF_TYPE_SPOT = 0;
+  private static final String[] PSF_TYPE = {"Spot", "Astigmatism", "Double Helix"};
   private static final int PSF_TYPE_ASTIGMATISM = 1;
   private static final int PSF_TYPE_DH = 2;
   private static final String[] OUTPUT_TYPE = {"CSpline", "Image PSF"};
@@ -189,14 +187,14 @@ public class PsfCreator implements PlugInFilter {
 
   private PSFCreatorSettings.Builder settings;
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private ImagePlus imp;
   private ImagePlus psfImp;
 
   private static Rounder rounder = RounderUtils.create(4);
   private PsfCentreSelector zSelector;
 
-  private final FitEngineConfiguration config = null;
+  private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
   private double nmPerPixel;
   private int boxRadius;
@@ -282,7 +280,7 @@ public class PsfCreator implements PlugInFilter {
     gd.addMessage("Produces an average PSF using selected diffraction limited spots.");
 
     gd.addChoice("Mode", MODE, settings.getMode());
-    gd.addSlider("Radius (px)", 3, MathUtils.max(10, imp.getWidth(), imp.getHeight()) / 2,
+    gd.addSlider("Radius (px)", 3, MathUtils.max(10, imp.getWidth(), imp.getHeight()) / 2.0,
         settings.getRadius());
     gd.addCheckbox("Interactive_mode", settings.getInteractiveMode());
 
@@ -310,7 +308,7 @@ public class PsfCreator implements PlugInFilter {
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   private void guessScale() {
@@ -457,7 +455,7 @@ public class PsfCreator implements PlugInFilter {
       ParameterUtils.isPositive("Start background frames", settings.getStartBackgroundFrames());
       ParameterUtils.isPositive("End background frames", settings.getEndBackgroundFrames());
       ParameterUtils.isAbove("Total background frames",
-          settings.getStartBackgroundFrames() + settings.getEndBackgroundFrames(), 1);
+          (double) settings.getStartBackgroundFrames() + settings.getEndBackgroundFrames(), 1);
       ParameterUtils.isAbove("Magnification", settings.getMagnification(), 1);
       ParameterUtils.isAbove("Smoothing", settings.getSmoothing(), 0);
       ParameterUtils.isBelow("Smoothing", settings.getSmoothing(), 1);
@@ -850,12 +848,13 @@ public class PsfCreator implements PlugInFilter {
 
     // Create a fit engine
     final MemoryPeakResults results = new MemoryPeakResults();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
     results.setCalibration(fitConfig.getCalibration());
     results.setPsf(fitConfig.getPsf());
     results.setSortAfterEnd(true);
     results.begin();
     final int threadCount = Prefs.getThreads();
-    final FitEngine engine = new FitEngine(config,
+    final FitEngine engine = FitEngine.create(config,
         SynchronizedPeakResults.create(results, threadCount), threadCount, FitQueue.BLOCKING);
 
     // List<ParameterisedFitJob> jobItems = new ArrayList<ParameterisedFitJob>(stack.getSize());
@@ -1165,7 +1164,8 @@ public class PsfCreator implements PlugInFilter {
         dx2[i] = dx * dx;
       }
       dmap = new boolean[dx2.length * (maxy - miny + 1)];
-      final double d2 = boxRadius * boxRadius / 4;
+      final int halfBoxRadius = boxRadius / 2;
+      final double d2 = halfBoxRadius * halfBoxRadius;
       for (int y = miny, j = 0; y < maxy; y++) {
         final double dy = (y + 0.5 - cy);
         final double dy2 = dy * dy;
@@ -1211,7 +1211,8 @@ public class PsfCreator implements PlugInFilter {
       final int n = (int) centre[4];
 
       final String title = TITLE_INTENSITY;
-      final Plot plot = new Plot(title, "Slice", "Sum", xValues, yValues);
+      final Plot plot = new Plot(title, "Slice", "Sum");
+      plot.addPoints(xValues, yValues, Plot.LINE);
       plot.setColor(Color.red);
       plot.addPoints(xValues, newY, Plot.LINE);
       plot.setColor(Color.green);
@@ -1599,18 +1600,18 @@ public class PsfCreator implements PlugInFilter {
   }
 
   private boolean loadConfiguration() {
-    final Configuration c = new Configuration();
+    final Configuration configPlugin = new Configuration();
     // We have a different fit configuration just for the PSF Creator.
     // This allows it to be saved and not effect PeakFit settings.
-    FitEngineConfiguration config = new FitEngineConfiguration(settings.getFitEngineSettings(),
-        settings.getCalibration(), settings.getPsf());
+    config = new FitEngineConfiguration(settings.getFitEngineSettings(), settings.getCalibration(),
+        settings.getPsf());
     final boolean save = false;
-    if (!c.showDialog(config, save)) {
+    if (!configPlugin.showDialog(config, save)) {
       IJ.error(TITLE, "No fit configuration loaded");
       return false;
     }
 
-    config = c.getFitEngineConfiguration();
+    config = configPlugin.getFitEngineConfiguration();
     config.configureOutputUnits();
     config.setResidualsThreshold(1);
     fitConfig = config.getFitConfiguration();
@@ -1637,7 +1638,7 @@ public class PsfCreator implements PlugInFilter {
    * @return the spots
    */
   private BasePoint[] getSpots() {
-    final float zpos = imp.getStackSize() / 2;
+    final int zpos = imp.getStackSize() / 2;
     final Roi roi = imp.getRoi();
     if (roi != null && roi.getType() == Roi.POINT) {
       final FloatPolygon p = roi.getFloatPolygon();
@@ -1667,7 +1668,7 @@ public class PsfCreator implements PlugInFilter {
    * @return the spots
    */
   private BasePoint[] getSpots(float offset, boolean checkOverlap) {
-    final float z = imp.getStackSize() / 2;
+    final int z = imp.getStackSize() / 2;
     // float z = (imp.getStackSize() - 1) / 2.0f; // Interpolate between slices
     final Roi roi = imp.getRoi();
     if (roi != null && roi.getType() == Roi.POINT) {
@@ -1677,11 +1678,10 @@ public class PsfCreator implements PlugInFilter {
         return new BasePoint[0];
       }
 
-      if (offset != 0) {
-        // Check if already float coordinates
-        if (!SimpleArrayUtils.isInteger(p.xpoints) || !SimpleArrayUtils.isInteger(p.ypoints)) {
-          offset = 0;
-        }
+      if (offset != 0
+          // Check if already float coordinates
+          && (!SimpleArrayUtils.isInteger(p.xpoints) || !SimpleArrayUtils.isInteger(p.ypoints))) {
+        offset = 0;
       }
 
       final BasePoint[] roiPoints = new BasePoint[n];
@@ -1843,20 +1843,19 @@ public class PsfCreator implements PlugInFilter {
     boxRadius = psfStack.getWidth() / 2;
     final int x = boxRadius;
     final int y = boxRadius;
-    final FitConfiguration fitConfig = config.getFitConfiguration();
     final double shift = fitConfig.getCoordinateShiftFactor();
 
     // Scale the PSF
-    final PSF.Builder psf = fitConfig.getPsf().toBuilder();
-    for (int i = 0; i < psf.getParametersCount(); i++) {
-      final PSFParameter param = psf.getParameters(i);
+    final PSF.Builder localPsf = fitConfig.getPsf().toBuilder();
+    for (int i = 0; i < localPsf.getParametersCount(); i++) {
+      final PSFParameter param = localPsf.getParameters(i);
       if (param.getUnit() == PSFParameterUnit.DISTANCE) {
         final PSFParameter.Builder b = param.toBuilder();
         b.setValue(b.getValue() * settings.getMagnification());
-        psf.setParameters(i, b);
+        localPsf.setParameters(i, b);
       }
     }
-    fitConfig.setPsf(psf.build());
+    fitConfig.setPsf(localPsf.build());
 
     // Need to be updated after the widths have been set
     fitConfig.setCoordinateShiftFactor(shift);
@@ -2528,7 +2527,8 @@ public class PsfCreator implements PlugInFilter {
     final CalibrationReader calibration = new CalibrationReader(settings.getCalibration());
 
     // Limit this
-    settings.setAnalysisWindow(Math.min(settings.getAnalysisWindow(), boxRadius / 2));
+    final int halfBoxRadius = boxRadius / 2;
+    settings.setAnalysisWindow(Math.min(settings.getAnalysisWindow(), halfBoxRadius));
 
     // Find the selected PSF spots x,y,z centre
     // We offset the centre to the middle of pixel.
@@ -2678,20 +2678,17 @@ public class PsfCreator implements PlugInFilter {
           imp.setOverlay(o);
           imp.updateAndDraw();
           final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-          gd.addMessage(String.format("Shift X = %s\nShift Y = %s\nShift Z = %s",
+          ImageJUtils.addMessage(gd, "Shift X = %s\nShift Y = %s\nShift Z = %s",
               rounder.toString(translation[j][0]), rounder.toString(translation[j][1]),
-              rounder.toString(translation[j][2])));
+              rounder.toString(translation[j][2]));
           final int spotIndex = j;
-          gd.addAndGetButton("Exclude spot", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-              if (excluded[spotIndex]) {
-                ImageJUtils.log("Included spot %d", spotIndex + 1);
-                excluded[spotIndex] = false;
-              } else {
-                ImageJUtils.log("Excluded spot %d", spotIndex + 1);
-                excluded[spotIndex] = true;
-              }
+          gd.addAndGetButton("Exclude spot", event -> {
+            if (excluded[spotIndex]) {
+              ImageJUtils.log("Included spot %d", spotIndex + 1);
+              excluded[spotIndex] = false;
+            } else {
+              ImageJUtils.log("Excluded spot %d", spotIndex + 1);
+              excluded[spotIndex] = true;
             }
           });
           gd.enableYesNoCancel("Accept", "Reject");
@@ -2788,9 +2785,9 @@ public class PsfCreator implements PlugInFilter {
       if (settings.getInteractiveMode()) {
         // Ask if OK to continue?
         final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addMessage(String.format("RMSD XY = %s\nRMSD Z = %s\nCombined CoM shift = %s,%s (%s)",
+        ImageJUtils.addMessage(gd, "RMSD XY = %s\nRMSD Z = %s\nCombined CoM shift = %s,%s (%s)",
             rounder.toString(rmsd[0]), rounder.toString(rmsd[1]), rounder.toString(shift[0]),
-            rounder.toString(shift[1]), rounder.toString(shiftd)));
+            rounder.toString(shift[1]), rounder.toString(shiftd));
         // Check if we can do more iterations
         if (iter + 1 < settings.getMaxIterations()) {
           gd.enableYesNoCancel("Continue", "Converged");
@@ -3463,7 +3460,8 @@ public class PsfCreator implements PlugInFilter {
             settings.getAnalysisWindow() * psf.magnification);
       }
       if (plotEdgeWindow) {
-        gd.addSlider("Edge_window", 0, psf.maxx / 2, settings.getWindow());
+        final int halfMax = psf.maxx / 2;
+        gd.addSlider("Edge_window", 0, halfMax, settings.getWindow());
       }
       if (cropOption) {
         gd.addCheckbox("Crop_to_z-centre", settings.getCropToZCentre());
@@ -3870,7 +3868,8 @@ public class PsfCreator implements PlugInFilter {
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addMessage("Crop the final PSF");
       final int maxz = psf.psf.length;
-      gd.addSlider("Slice", 1, maxz, maxz / 2);
+      final int halfMaxZ = maxz / 2;
+      gd.addSlider("Slice", 1, maxz, halfMaxZ);
       // Take away 1 from the limits to avoid having dimensions 1 on an axis
       gd.addSlider("Crop_border", 0, Math.min(psf.maxx, psf.maxy) / 2 - 1,
           settings.getCropBorder());
@@ -4033,13 +4032,13 @@ public class PsfCreator implements PlugInFilter {
       final Size size = CustomTricubicInterpolatingFunction.estimateSize(dimensions);
       if (outputType == OUTPUT_TYPE_IMAGE_PSF) {
         final Size next = size.enlarge(psfMagnification);
-        final long future = next.getTotalFunctionPoints() * 4; // 4 bytes for a float
-        final String futureS = MathUtils.rounded(future / 1048576);
-        label1.setText(String.format("Size for Image PSF = %s MB", futureS));
+        final long future = next.getTotalFunctionPoints() * Float.BYTES;
+        final String futureS = TextUtils.bytesToString(future);
+        label1.setText("Size for Image PSF = " + futureS);
       } else {
         final long current = size.getMemoryFootprint(singlePrecision);
-        final String currentS = MathUtils.rounded(current / 1048576);
-        label1.setText(String.format("Size of Cubic Spline = %s MB", currentS));
+        final String currentS = TextUtils.bytesToString(current);
+        label1.setText("Size of Cubic Spline = " + currentS);
       }
 
       // Draw ROI in the image
@@ -4853,7 +4852,7 @@ public class PsfCreator implements PlugInFilter {
                   final double[] table = tables[xxx + n * (yyy + n * zzz)];
                   data[maxx * ppy + ppx] = (float) f.value(table);
                   if (Float.isNaN(data[maxx * ppy + ppx])) {
-                    System.out.printf("%d,%d,%d\n", x, y, z);
+                    throw new DataException(String.format("NaN value at [%d,%d,%d]", x, y, z));
                   }
                 }
               }

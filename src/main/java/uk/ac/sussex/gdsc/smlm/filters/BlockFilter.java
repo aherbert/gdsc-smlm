@@ -871,14 +871,10 @@ public abstract class BlockFilter extends BaseWeightedFilter {
 
     // Inner block
     final int[] offset = new int[(2 * xwidth - 1) * (2 * ywidth - 1) - 1];
-    final int[] xoffset = new int[offset.length];
-    final int[] yoffset = new int[offset.length];
     for (int y = -ywidth + 1, d = 0; y < ywidth; y++) {
       for (int x = -xwidth + 1; x < xwidth; x++) {
         if (x != 0 || y != 0) {
           offset[d] = maxx * y + x;
-          xoffset[d] = x;
-          yoffset[d] = y;
           d++;
         }
       }

@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.core.ij.io.SeekableStream;
 import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
@@ -396,18 +397,21 @@ public class SeriesImageSource extends ImageSource {
      */
     boolean allSameSizeAndType(ExtendedFileInfo[] info) {
       boolean ok = info[0].nImages == 1;
+      contiguous = ok;
       final long startingOffset = info[0].getOffset();
-      final long size = info[0].width * info[0].height * info[0].getBytesPerPixel();
+      final long size = (long) info[0].width * info[0].height * info[0].getBytesPerPixel();
       for (int i = 1; i < info.length && ok; i++) {
-        ok &= info[i].fileType == info[0].fileType && info[i].width == info[0].width
-            && info[i].height == info[0].height && info[i].nImages == 1;
-        contiguous &= info[i].getOffset() == startingOffset + i * size;
-      }
-      if (ok) {
-        // We can read using only the first ExtendedFileInfo object if this is contiguous
-        if (contiguous) {
-          info[0].gapBetweenImages = 0;
+        if (info[i].fileType != info[0].fileType || info[i].width != info[0].width
+            || info[i].height != info[0].height || info[i].nImages != 1) {
+          ok = false;
         }
+        if (info[i].getOffset() != startingOffset + i * size) {
+          contiguous = false;
+        }
+      }
+      // We can read using only the first ExtendedFileInfo object if this is contiguous
+      if (ok && contiguous) {
+        info[0].gapBetweenImages = 0;
       }
       return ok;
     }
@@ -450,9 +454,9 @@ public class SeriesImageSource extends ImageSource {
      * Gets the next frame. This is only supported if all IFDs have been read.
      *
      * @return the object
-     * @throws Exception the exception
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    Object nextFrame() throws Exception {
+    Object nextFrame() throws IOException {
       // Skip ahead
       long skip;
 
@@ -489,7 +493,7 @@ public class SeriesImageSource extends ImageSource {
       frameCount++;
 
       // t = System.nanoTime();
-      ss.skip(skip);
+      FileUtils.skip(ss, skip);
       final Object pixels = readPixels();
       // .out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
 
@@ -820,7 +824,7 @@ public class SeriesImageSource extends ImageSource {
     }
   }
 
-  private class NextSource {
+  private static class NextSource {
     final byte[] buffer;
     final int imageId;
     // ExtendedFileInfo[] info;
@@ -1056,7 +1060,7 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Hold image data.
    */
-  private class ImageData {
+  private static class ImageData {
     long fileSize;
     TiffImage tiffImage;
 

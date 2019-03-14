@@ -377,8 +377,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       final float[] ypoints = new float[nMaxima];
       int count = 0;
       for (final int index : maxIndices) {
-        xpoints[count] = 0.5f + bounds.x + index % width;
-        ypoints[count] = 0.5f + bounds.y + index / width;
+        final int x = index % width;
+        final int y = index / width;
+        xpoints[count] = 0.5f + bounds.x + x;
+        ypoints[count] = 0.5f + bounds.y + y;
         count++;
       }
 

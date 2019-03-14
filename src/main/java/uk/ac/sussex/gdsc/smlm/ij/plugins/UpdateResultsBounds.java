@@ -94,7 +94,7 @@ public class UpdateResultsBounds implements PlugIn {
 
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(settings.inputOption, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }

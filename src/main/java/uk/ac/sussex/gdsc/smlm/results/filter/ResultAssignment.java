@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
  * point and many actual target points. It can be converted to a fractional assignment by specifying
  * a predicted Id.
  */
-public class ResultAssignment implements Comparable<ResultAssignment> {
+public class ResultAssignment {
   /**
    * The ID of the result that this assignment matches.
    */
@@ -71,16 +71,5 @@ public class ResultAssignment implements Comparable<ResultAssignment> {
   public FractionalAssignment toFractionalAssignment(final int predictedId,
       final PreprocessedPeakResult peakResult) {
     return new PeakFractionalAssignment(targetId, predictedId, distance, score, peakResult);
-  }
-
-  @Override
-  public int compareTo(ResultAssignment that) {
-    if (this.distance < that.distance) {
-      return -1;
-    }
-    if (this.distance > that.distance) {
-      return 1;
-    }
-    return 0;
   }
 }

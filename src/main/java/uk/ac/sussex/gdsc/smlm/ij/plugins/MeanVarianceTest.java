@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 
@@ -53,9 +54,7 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -79,7 +78,7 @@ public class MeanVarianceTest implements PlugIn {
   private int exposureCounter;
   private boolean singleImage;
 
-  private class PairSample {
+  private static class PairSample {
     int slice1;
     int slice2;
     double mean1;
@@ -171,7 +170,8 @@ public class MeanVarianceTest implements PlugIn {
     }
 
     private void checkSaturation(int slice, float[] data, float saturated) {
-      if (saturated == Float.NaN) {
+      if (Float.isNaN(saturated)) {
+        // float images cannot be saturated
         return;
       }
       for (final float f : data) {
@@ -552,18 +552,7 @@ public class MeanVarianceTest implements PlugIn {
     }
     IJ.showProgress(1);
     // Sort to ensure all 0 exposure images are first, the remaining order is arbitrary
-    Collections.sort(images, new Comparator<ImageSample>() {
-      @Override
-      public int compare(ImageSample o1, ImageSample o2) {
-        if (o1.exposure < o2.exposure) {
-          return -1;
-        }
-        if (o1.exposure > o2.exposure) {
-          return 1;
-        }
-        return 0;
-      }
-    });
+    Collections.sort(images, (o1, o2) -> Double.compare(o1.exposure, o2.exposure));
     return images;
   }
 
@@ -582,32 +571,15 @@ public class MeanVarianceTest implements PlugIn {
   }
 
   /**
-   * Returns a sorted list of indices of the specified double array. Modified from:
-   * http://stackoverflow.com/questions/951848 by N.Vischer. Copied from ImageJ 1.48 for backwards
-   * compatibility
+   * Returns a sorted list of indices of the specified double array.
    *
    * @param values the values
    * @return the indices
    */
   public static int[] rank(double[] values) {
-    final int n = values.length;
-    final Integer[] indexes = new Integer[n];
-    final Double[] data = new Double[n];
-    for (int i = 0; i < n; i++) {
-      indexes[i] = new Integer(i);
-      data[i] = new Double(values[i]);
-    }
-    Arrays.sort(indexes, new Comparator<Integer>() {
-      @Override
-      public int compare(final Integer o1, final Integer o2) {
-        return data[o1].compareTo(data[o2]);
-      }
-    });
-    final int[] indexes2 = new int[n];
-    for (int i = 0; i < n; i++) {
-      indexes2[i] = indexes[i].intValue();
-    }
-    return indexes2;
+    final int[] indices = SimpleArrayUtils.natural(values.length);
+    SortUtils.sortData(indices, values, false, false);
+    return indices;
   }
 
   private static double[] reorder(double[] data, int[] indices) {

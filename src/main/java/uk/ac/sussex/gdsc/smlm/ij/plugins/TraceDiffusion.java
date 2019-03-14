@@ -61,7 +61,6 @@ import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -70,11 +69,14 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optim
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -577,8 +579,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           }
           out.newLine();
         }
-      } catch (final Exception ex) {
-        // Ignore
+      } catch (final IOException ex) {
+        Logger.getLogger(getClass().getName()).log(Level.WARNING,
+            "Failed to save trace distances: " + distancesFilename, ex);
       }
     }
   }
@@ -591,9 +594,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (rawDataDirectory == null) {
       return;
     }
-    final String filename = rawDataDirectory + "MSD.txt";
+    final Path filename = Paths.get(rawDataDirectory, "MSD.txt");
 
-    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filename))) {
+    try (BufferedWriter out = Files.newBufferedWriter(filename)) {
       out.write("Time (s)\tDistance (um^2)\tS.E.");
       out.newLine();
       for (int i = 0; i < x.length; i++) {
@@ -604,8 +607,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.write(Double.toString(se[i]));
         out.newLine();
       }
-    } catch (final Exception ex) {
-      // Ignore
+    } catch (final IOException ex) {
+      Logger.getLogger(getClass().getName()).log(Level.WARNING,
+          "Failed to save MSD file: " + filename.toString(), ex);
     }
   }
 
@@ -637,8 +641,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           out.newLine();
         }
       }
-    } catch (final Exception ex) {
-      // Ignore
+    } catch (final IOException ex) {
+      Logger.getLogger(getClass().getName()).log(Level.WARNING,
+          "Failed to save statistics: " + filename, ex);
     }
   }
 
@@ -661,8 +666,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         out.write(Double.toString(y[i]));
         out.newLine();
       }
-    } catch (final Exception ex) {
-      // Ignore
+    } catch (final IOException ex) {
+      Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to save fit: " + filename,
+          ex);
     }
   }
 
@@ -851,7 +857,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (!multiMode) {
       final MemoryPeakResults results =
           ResultsManager.loadInputResults(inputOption, true, null, null);
-      if (results == null || results.size() == 0) {
+      if (MemoryPeakResults.isEmpty(results)) {
         IJ.error(TITLE, "No results could be loaded");
         IJ.showStatus("");
         return false;
@@ -1212,18 +1218,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           .start(function.guess())
           .target(function.getY())
           .weight(new DiagonalMatrix(function.getWeights()))
-          .model(function, new MultivariateMatrixFunction() {
-            @Override
-            public double[][] value(double[] point) throws IllegalArgumentException
-            {
-              return function.jacobian(point);
-            }} )
+          .model(function, function::jacobian)
           .build();
       //@formatter:on
 
       lvmSolution = optimizer.optimize(problem);
 
-      final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+      final RealVector residuals = lvmSolution.getResiduals();
+      final double ss = residuals.dotProduct(residuals);
       // double ss = 0;
       // double[] obs = function.getY();
       // double[] exp = lvmSolution.getValue();
@@ -1367,7 +1369,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
   }
 
-  private class LinearFunction implements MultivariateVectorFunction {
+  private static class LinearFunction implements MultivariateVectorFunction {
     double[] x;
     double[] y;
     double[][] jacobian;
@@ -1433,7 +1435,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
   }
 
-  private class LinearFunctionWithIntercept implements MultivariateVectorFunction {
+  private static class LinearFunctionWithIntercept implements MultivariateVectorFunction {
     final double[] x;
     final double[] y;
     final boolean fitIntercept;

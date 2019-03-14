@@ -31,8 +31,6 @@ import org.ejml.data.DenseMatrix64F;
 
 /**
  * Compute the inertia tensor for a 2D object.
- *
- * @author Alex Herbert
  */
 public class Tensor2D {
   private final double[] com;

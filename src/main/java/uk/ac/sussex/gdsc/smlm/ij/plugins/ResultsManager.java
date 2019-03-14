@@ -79,6 +79,8 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.util.Java2;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.EventQueue;
@@ -183,7 +185,7 @@ public class ResultsManager implements PlugIn {
       return;
     }
 
-    if (arg != null && arg.startsWith("clear")) {
+    if (StringUtils.startsWith(arg, "clear")) {
       runClearMemory(arg);
       return;
     }
@@ -194,7 +196,7 @@ public class ResultsManager implements PlugIn {
 
     final MemoryPeakResults results = loadResults(inputOption);
 
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
       return;
@@ -1390,10 +1392,10 @@ public class ResultsManager implements PlugIn {
       final Rectangle2D.Float dataBounds = results.getDataBounds(null);
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-      gd.addMessage(String.format("Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg,
+      ImageJUtils.addMessage(gd, "Results are %s.\nData bounds = (%s,%s) to (%s,%s)", msg,
           MathUtils.rounded(dataBounds.x), MathUtils.rounded(dataBounds.y),
           MathUtils.rounded(dataBounds.y + dataBounds.getWidth()),
-          MathUtils.rounded(dataBounds.x + dataBounds.getHeight())));
+          MathUtils.rounded(dataBounds.x + dataBounds.getHeight()));
       gd.addChoice("Calibration_distance_unit", SettingsManager.getDistanceUnitNames(),
           calibration.getDistanceUnitValue());
       gd.addChoice("Calibration_intensity_unit", SettingsManager.getIntensityUnitNames(),
@@ -1576,7 +1578,7 @@ public class ResultsManager implements PlugIn {
       Recorder.recordOption("save_to_memory");
     }
     final MemoryPeakResults results = loadInputResults(INPUT_FILE, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded from " + path);
     } else {
       if (Recorder.record) {

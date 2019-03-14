@@ -26,12 +26,14 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
+import java.util.Arrays;
+
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing
  * neighbours of a given position.
  */
 public class PeakResultGridManager {
-  private class PeakList {
+  private static class PeakList {
     int size;
     PeakResult[] list;
 
@@ -39,9 +41,7 @@ public class PeakResultGridManager {
       if (list == null) {
         list = new PeakResult[4];
       } else if (list.length == size) {
-        final PeakResult[] list2 = new PeakResult[size * 2];
-        System.arraycopy(list, 0, list2, 0, size);
-        list = list2;
+        list = Arrays.copyOf(list, size * 2);
       }
       list[size++] = peak;
     }

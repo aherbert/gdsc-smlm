@@ -62,6 +62,8 @@ import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.awt.AWTEvent;
 import java.awt.Label;
 import java.awt.TextField;
@@ -687,9 +689,10 @@ public class CubicSplineManager implements PlugIn {
     directory = egd.getNextString();
 
     final File[] fileList = (new File(directory)).listFiles(File::isFile);
-
-    for (final File file : fileList) {
-      loadFromFileAndSaveResource(file.getPath());
+    if (!ArrayUtils.isEmpty(fileList)) {
+      for (final File file : fileList) {
+        loadFromFileAndSaveResource(file.getPath());
+      }
     }
   }
 

@@ -3181,16 +3181,13 @@ public class PeakFit implements PlugInFilter {
    * @param cropBounds the crop bounds (relative to the input image)
    * @param initialise the initialise flag
    * @return true, if successful
+   * @throws IllegalStateException if no camera model exists for the camera type
    */
   private static boolean checkCameraModel(FitConfiguration fitConfig, Rectangle sourceBounds,
       Rectangle cropBounds, boolean initialise) {
     final CalibrationReader calibration = fitConfig.getCalibrationReader();
     if (calibration.isScmos() && sourceBounds != null) {
       CameraModel cameraModel = fitConfig.getCameraModel();
-      if (cameraModel == null) {
-        throw new IllegalStateException(
-            "No camera model for camera type: " + calibration.getCameraType());
-      }
 
       // The camera model origin must be reset to be relative to the source bounds origin
       cameraModel = cropCameraModel(cameraModel, sourceBounds, cropBounds, true);
@@ -3286,11 +3283,11 @@ public class PeakFit implements PlugInFilter {
     } else if (modelBounds.width > width || modelBounds.height > height) {
       final GenericDialog gd2 = new GenericDialog("Crop Camera Model");
       //@formatter:off
-      gd2.addMessage(String.format(
+      ImageJUtils.addMessage(gd2,
           "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image size [%dx%d].\n \nCrop the model?",
           modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
           width, height
-          ));
+          );
       //@formatter:on
       final int upperx = modelBounds.x + modelBounds.width - width;
       final int uppery = modelBounds.y + modelBounds.height - height;
@@ -3721,7 +3718,7 @@ public class PeakFit implements PlugInFilter {
       return null;
     }
 
-    final FitEngine engine = new FitEngine(config, r, numberOfThreads, queue, queueSize);
+    final FitEngine engine = FitEngine.create(config, r, numberOfThreads, queue, queueSize);
 
     // Write settings out to the IJ log
     if (resultsSettings.getLogProgress()) {

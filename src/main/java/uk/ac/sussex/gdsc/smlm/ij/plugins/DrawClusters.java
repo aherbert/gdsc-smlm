@@ -91,7 +91,7 @@ public class DrawClusters implements PlugIn {
     // Load the results
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }

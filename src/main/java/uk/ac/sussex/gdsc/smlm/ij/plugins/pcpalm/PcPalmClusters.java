@@ -277,7 +277,7 @@ public class PcPalmClusters implements PlugIn {
   private HistogramData doClustering() {
     // Perform clustering analysis to generate the histogram of cluster sizes
     final PcPalmAnalysis analysis = new PcPalmAnalysis();
-    final ArrayList<Molecule> molecules = analysis.cropToRoi(WindowManager.getCurrentImage());
+    final List<Molecule> molecules = analysis.cropToRoi(WindowManager.getCurrentImage());
 
     if (molecules.size() < 2) {
       error("No results within the crop region");
@@ -343,7 +343,7 @@ public class PcPalmClusters implements PlugIn {
    * @param molecules the molecules
    * @return the list of cluster points
    */
-  private List<ClusterPoint> convertToPoint(ArrayList<Molecule> molecules) {
+  private List<ClusterPoint> convertToPoint(List<Molecule> molecules) {
     final ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
     int id = 0;
     for (final Molecule m : molecules) {

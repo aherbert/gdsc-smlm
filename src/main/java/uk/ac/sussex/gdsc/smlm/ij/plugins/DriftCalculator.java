@@ -150,7 +150,7 @@ public class DriftCalculator implements PlugIn {
   /**
    * Align images to the reference initialised in the given aligner.
    */
-  private class ImageAligner implements Runnable {
+  private static class ImageAligner implements Runnable {
     final AlignImagesFft aligner;
     final ImageProcessor[] ip;
     final int[] time;
@@ -264,7 +264,7 @@ public class DriftCalculator implements PlugIn {
   /**
    * Prepare the slices in a stack for image correlation.
    */
-  private class ImageFhtInitialiser implements Runnable {
+  private static class ImageFhtInitialiser implements Runnable {
     final ImageStack stack;
     final ImageProcessor[] images;
     final AlignImagesFft aligner;
@@ -1123,10 +1123,11 @@ public class DriftCalculator implements PlugIn {
       return;
     }
     try (BufferedWriter out = Files.newBufferedWriter(Paths.get(driftFilename))) {
-      out.write("Time\tX\tY\n");
+      out.write("Time\tX\tY");
+      out.newLine();
       for (int t = 0; t < dx.length; t++) {
         if (originalDriftTimePoints[t] != 0) {
-          out.write(String.format("%d\t%f\t%f\n", t, dx[t], dy[t]));
+          out.write(String.format("%d\t%f\t%f%n", t, dx[t], dy[t]));
         }
       }
       ImageJUtils.log("Saved calculated drift to file: " + driftFilename);
@@ -1231,7 +1232,7 @@ public class DriftCalculator implements PlugIn {
     return ok;
   }
 
-  private class BlockPeakResultProcedure implements PeakResultProcedure {
+  private static class BlockPeakResultProcedure implements PeakResultProcedure {
     final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<>();
     ArrayList<Localisation> nextBlock;
     final Counter counter = new Counter();

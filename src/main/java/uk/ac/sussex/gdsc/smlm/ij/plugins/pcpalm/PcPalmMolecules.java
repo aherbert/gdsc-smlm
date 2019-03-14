@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -81,7 +82,6 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
@@ -196,7 +196,7 @@ public class PcPalmMolecules implements PlugIn {
   /** The nm per pixel. */
   static double nmPerPixel;
   /** The molecules. */
-  static ArrayList<Molecule> molecules;
+  static List<Molecule> molecules;
   /** The sigma S. */
   static double sigmaS = 20;
   /** The peak density. */
@@ -221,7 +221,7 @@ public class PcPalmMolecules implements PlugIn {
 
     if (runMode != 3) {
       results = ResultsManager.loadInputResults(inputOption, true, null, null);
-      if (results == null || results.size() == 0) {
+      if (MemoryPeakResults.isEmpty(results)) {
         IJ.error(TITLE, "No results could be loaded");
         return;
       }
@@ -458,15 +458,11 @@ public class PcPalmMolecules implements PlugIn {
     // Adjust bounds relative to input results image
     final double xscale = (double) roiImageWidth / bounds.width;
     final double yscale = (double) roiImageHeight / bounds.height;
-    roiBounds.x /= xscale;
-    roiBounds.width /= xscale;
-    roiBounds.y /= yscale;
-    roiBounds.height /= yscale;
 
-    final float minX = (roiBounds.x);
-    final float maxX = (int) Math.ceil(roiBounds.x + roiBounds.width);
-    final float minY = (roiBounds.y);
-    final float maxY = (int) Math.ceil(roiBounds.y + roiBounds.height);
+    final float minX = (float) Math.floor(roiBounds.x / xscale);
+    final float maxX = (float) Math.ceil((roiBounds.x + roiBounds.width) / xscale);
+    final float minY = (float) Math.floor(roiBounds.y / yscale);
+    final float maxY = (float) Math.ceil((roiBounds.y + roiBounds.height) / yscale);
 
     // Update the area with the cropped region
     area *= (maxX - minX) / bounds.width;
@@ -475,12 +471,9 @@ public class PcPalmMolecules implements PlugIn {
     // Create a new set of results within the bounds
     final MemoryPeakResults newResults = new MemoryPeakResults();
     newResults.begin();
-    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-      @Override
-      public void executeXyr(float x, float y, PeakResult result) {
-        if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-          newResults.add(result);
-        }
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
+      if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+        newResults.add(result);
       }
     });
     newResults.end();
@@ -499,7 +492,7 @@ public class PcPalmMolecules implements PlugIn {
 
     // Follow the PC-PALM protocol
     log("Fitting localisation precision...");
-    final ArrayList<Molecule> localisations = extractLocalisations(results);
+    final List<Molecule> localisations = extractLocalisations(results);
     final double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
     log("%d localisations with an average precision of %.2f", results.size(), sigmaRaw);
 
@@ -577,8 +570,8 @@ public class PcPalmMolecules implements PlugIn {
    * @return the array list
    * @throws DataException If conversion to nm and photons with computed precision is not possible
    */
-  public ArrayList<Molecule> extractLocalisations(MemoryPeakResults results) {
-    final ArrayList<Molecule> molecules = new ArrayList<>(results.size());
+  public List<Molecule> extractLocalisations(MemoryPeakResults results) {
+    final ArrayList<Molecule> list = new ArrayList<>(results.size());
 
     // Access calibrated data
     final StandardResultProcedure sp =
@@ -588,9 +581,9 @@ public class PcPalmMolecules implements PlugIn {
     pp.getPrecision();
 
     for (int i = 0, size = pp.size(); i < size; i++) {
-      molecules.add(new Molecule(sp.x[i], sp.y[i], pp.precisions[i], sp.intensity[i]));
+      list.add(new Molecule(sp.x[i], sp.y[i], pp.precisions[i], sp.intensity[i]));
     }
-    return molecules;
+    return list;
   }
 
   /**
@@ -601,7 +594,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param subTitle the sub title
    * @return The average precision
    */
-  private double calculateAveragePrecision(ArrayList<Molecule> molecules, String subTitle) {
+  private double calculateAveragePrecision(List<Molecule> molecules, String subTitle) {
     final String title = (showHistograms) ? TITLE + " Histogram " + subTitle : null;
     return calculateAveragePrecision(molecules, title, histogramBins, true, true);
   }
@@ -621,8 +614,8 @@ public class PcPalmMolecules implements PlugIn {
    *        inter-quartile range (IQR) of the data
    * @return The average precision
    */
-  public double calculateAveragePrecision(ArrayList<Molecule> molecules, String title,
-      int histogramBins, boolean logFitParameters, boolean removeOutliers) {
+  public double calculateAveragePrecision(List<Molecule> molecules, String title, int histogramBins,
+      boolean logFitParameters, boolean removeOutliers) {
     // Plot histogram of the precision
     final float[] data = new float[molecules.size()];
     final DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -768,6 +761,7 @@ public class PcPalmMolecules implements PlugIn {
     return newMean;
   }
 
+  @Nullable
   private static double[] fitGaussian(float[] x, float[] y) {
     final WeightedObservedPoints obs = new WeightedObservedPoints();
     for (int i = 0; i < x.length; i++) {
@@ -791,11 +785,11 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
+  @Nullable
   private double[] fitSkewGaussian(float[] x, float[] y, double[] initialSolution) {
     try {
-      final double[] skewParameters = (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
+      return (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
           : optimiseLeastSquares(x, y, initialSolution);
-      return skewParameters;
     } catch (final TooManyEvaluationsException ex) {
       return null;
     }
@@ -816,19 +810,13 @@ public class PcPalmMolecules implements PlugIn {
         .start(initialSolution)
         .target(function.calculateTarget())
         .weight(new DiagonalMatrix(function.calculateWeights()))
-        .model(function, new MultivariateMatrixFunction() {
-          @Override
-          public double[][] value(double[] point) throws IllegalArgumentException
-          {
-            return function.jacobian(point);
-          }} )
+        .model(function, function::jacobian)
         .build();
     //@formatter:on
 
     final Optimum optimum = optimizer.optimize(problem);
 
-    final double[] skewParameters = optimum.getPoint().toArray();
-    return skewParameters;
+    return optimum.getPoint().toArray();
   }
 
   private double[] optimiseSimplex(float[] x, float[] y, double[] initialSolution) {
@@ -840,8 +828,7 @@ public class PcPalmMolecules implements PlugIn {
     final PointValuePair solution = opt.optimize(new MaxEval(1000),
         new InitialGuess(initialSolution), simplex, new ObjectiveFunction(sn2), GoalType.MINIMIZE);
 
-    final double[] skewParameters2 = solution.getPointRef();
-    return skewParameters2;
+    return solution.getPointRef();
   }
 
   /**
@@ -918,8 +905,8 @@ public class PcPalmMolecules implements PlugIn {
    * @return The peak density
    */
   private static double calculatePeakDensity() {
-    // double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx;
-    // double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny;
+    // double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx
+    // double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny
     // double area = pcw * pch;
     // Use the area from the source of the molecules
     return molecules.size() / (area * 1E6);
@@ -932,7 +919,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param sigmaS The precision estimate
    * @return the array list
    */
-  private static ArrayList<Molecule> filterMolecules(ArrayList<Molecule> molecules, double sigmaS) {
+  private static ArrayList<Molecule> filterMolecules(List<Molecule> molecules, double sigmaS) {
     final ArrayList<Molecule> newMolecules = new ArrayList<>(molecules.size());
     final double limit = 3 * sigmaS;
     for (final Molecule m : molecules) {
@@ -1682,7 +1669,7 @@ public class PcPalmMolecules implements PlugIn {
     return true;
   }
 
-  private class FrameProcedure implements PeakResultProcedure {
+  private static class FrameProcedure implements PeakResultProcedure {
     int start;
     int end;
 
@@ -1720,7 +1707,7 @@ public class PcPalmMolecules implements PlugIn {
     seconds = (end - start + 1) * results.getCalibrationReader().getExposureTime() / 1000;
   }
 
-  private static boolean createImage(ArrayList<Molecule> molecules) {
+  private static boolean createImage(List<Molecule> molecules) {
     if (molecules.isEmpty()) {
       return false;
     }
@@ -1890,7 +1877,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param binary the binary
    * @return the image
    */
-  static ImageProcessor drawImage(ArrayList<Molecule> molecules, double minx, double miny,
+  static ImageProcessor drawImage(List<Molecule> molecules, double minx, double miny,
       double maxx, double maxy, double nmPerPixel, boolean checkBounds, boolean binary) {
     final double scalex = maxx - minx;
     final double scaley = maxy - miny;
@@ -1928,10 +1915,8 @@ public class PcPalmMolecules implements PlugIn {
 
     final short[] data = new short[width * height];
     for (final Molecule m : molecules) {
-      if (checkBounds) {
-        if (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy) {
-          continue;
-        }
+      if (checkBounds && (m.x < minx || m.x >= maxx || m.y < miny || m.y >= maxy)) {
+        continue;
       }
 
       // Shift to the origin. This makes the image more memory efficient.
@@ -1979,7 +1964,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param binary the binary
    * @return the image
    */
-  static ImagePlus displayImage(String title, ArrayList<Molecule> molecules, double minx,
+  static ImagePlus displayImage(String title, List<Molecule> molecules, double minx,
       double miny, double maxx, double maxy, double nmPerPixel, boolean checkBounds,
       boolean binary) {
     final ImageProcessor ip =

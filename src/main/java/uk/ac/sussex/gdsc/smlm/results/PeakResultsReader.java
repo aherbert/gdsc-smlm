@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1751,30 +1752,27 @@ public class PeakResultsReader {
   }
 
   private MemoryPeakResults readTable() {
-    final MemoryPeakResults results = createResults();
-    results.setName(FileUtils.getName(filename));
-
     try (FileInputStream fis = new FileInputStream(filename);
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      String line;
-      int errors = 0;
 
       // Skip over the single line header
       final String tableHeader = input.readLine();
+      if (tableHeader == null) {
+        return null;
+      }
+
+      Objects.requireNonNull(tableHeader, "GDSC SMLM Table header should exist");
 
       // V1: had the Signal and Amplitude. Parameters
       // V2: have only the Signal.
       // V3: Has variable columns with units for the PSF parameters. Signal was renamed to
       // Intensity.
       int tableVersion;
-      final int fieldCount = 0;
       if (tableHeader.contains("Signal")) {
         tableVersion = 1;
       } else if (tableHeader.contains("Amplitude")) {
         tableVersion = 2;
       } else {
-        tableVersion = 3;
-
         // We support reading old IJ table results as they had fixed columns.
         // The latest table results have dynamic columns so these must be loaded manually
         // as guessing the column format is not supported.
@@ -1783,22 +1781,29 @@ public class PeakResultsReader {
 
       final ProgressReporter reporter = createProgressReporter(fis);
 
+      final MemoryPeakResults results = createResults();
+      results.setName(FileUtils.getName(filename));
+
+      String line;
+      int errors = 0;
       while ((line = input.readLine()) != null) {
         if (line.isEmpty()) {
           continue;
         }
 
-        if (!addTableResult(results, line, tableVersion, fieldCount) && ++errors >= 10) {
+        if (!addTableResult(results, line, tableVersion) && ++errors >= 10) {
           break;
         }
 
         reporter.showProgress();
       }
+
+      return results;
     } catch (final IOException ex) {
       logError(ex);
     }
 
-    return results;
+    return null;
   }
 
   /**
@@ -1821,14 +1826,9 @@ public class PeakResultsReader {
     return null;
   }
 
-  private boolean addTableResult(MemoryPeakResults results, String line, int version,
-      int fieldCount) {
+  private boolean addTableResult(MemoryPeakResults results, String line, int version) {
     final PeakResult result;
     switch (version) {
-      case 3:
-        result = createTableResultV3(line, fieldCount);
-        break;
-
       case 2:
         result = createTableResultV2(line);
         break;
@@ -2021,79 +2021,6 @@ public class PeakResultsReader {
       params = mapGaussian2DFormatParams(params);
       paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
 
-      if (readId || readEndFrame) {
-        return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
-            paramsStdDev, endPeak, id);
-      }
-      return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final NoSuchElementException ex) {
-      // Ignore and return null
-    }
-    return null;
-  }
-
-  private PeakResult createTableResultV3(String line, int fieldCount) {
-    // Text file with fields:
-    // [#]
-    // [Source]
-    // Peak
-    // [End Peak]
-    // origX
-    // origY
-    // origValue
-    // Error
-    // Noise[ (units)]
-    // SNR
-    // Background[ (units)]
-    // [+/-]
-    // Intensity[ (units)]
-    // [+/-]
-    // X[ (units)]
-    // [+/-]
-    // Y[ (units)]
-    // [+/-]
-    // Z[ (units)]
-    // [+/-]
-    // Repeated:
-    // Field[ (units)]
-    // [+/-]
-    // [Precision]
-    try (Scanner scanner = new Scanner(line)) {
-      scanner.useDelimiter(tabPattern);
-      scanner.useLocale(Locale.US);
-      int id = 0;
-      int endPeak = 0;
-      if (readId) {
-        id = scanner.nextInt();
-      }
-      if (readSource) {
-        scanner.next();
-      }
-      final int peak = scanner.nextInt();
-      if (readEndFrame) {
-        endPeak = scanner.nextInt();
-      }
-      final int origX = scanner.nextInt();
-      final int origY = scanner.nextInt();
-      final float origValue = scanner.nextFloat();
-      final double error = scanner.nextDouble();
-      final float noise = scanner.nextFloat();
-      @SuppressWarnings("unused")
-      final float snr = scanner.nextFloat(); // Ignored but must be read
-      final float[] params = new float[fieldCount];
-      float[] paramsStdDev;
-      if (deviations) {
-        paramsStdDev = new float[params.length];
-        for (int i = 0; i < params.length; i++) {
-          params[i] = scanner.nextFloat();
-          paramsStdDev[i] = scanner.nextFloat();
-        }
-      } else {
-        paramsStdDev = null;
-        for (int i = 0; i < params.length; i++) {
-          params[i] = scanner.nextFloat();
-        }
-      }
       if (readId || readEndFrame) {
         return new ExtendedPeakResult(peak, origX, origY, origValue, error, noise, 0, params,
             paramsStdDev, endPeak, id);

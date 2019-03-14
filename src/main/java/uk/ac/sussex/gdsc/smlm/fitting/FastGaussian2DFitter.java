@@ -140,10 +140,8 @@ public class FastGaussian2DFitter extends Gaussian2DFitter {
         }
 
         // Guess the initial angle if input angle is out-of-bounds
-        if (isAngleFitting) {
-          if (angle == 0) {
-            angle = this.angle;
-          }
+        if (isAngleFitting && angle == 0) {
+          angle = this.angle;
         }
       }
 
@@ -164,7 +162,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter {
 
       // Convert amplitudes to signal
       if (amplitudeEstimate[i]) {
-        signal *= 6.283185307 * sx * sy; // 2 * Math.PI * sx * sy
+        signal *= 2 * Math.PI * sx * sy;
       }
 
       // Set all the parameters

@@ -857,14 +857,10 @@ public class AverageFilter {
 
     // Inner block
     final int[] offset = new int[(2 * xwidth - 1) * (2 * ywidth - 1) - 1];
-    final int[] xoffset = new int[offset.length];
-    final int[] yoffset = new int[offset.length];
     for (int y = -ywidth + 1, d = 0; y < ywidth; y++) {
       for (int x = -xwidth + 1; x < xwidth; x++) {
         if (x != 0 || y != 0) {
           offset[d] = maxx * y + x;
-          xoffset[d] = x;
-          yoffset[d] = y;
           d++;
         }
       }
@@ -873,21 +869,13 @@ public class AverageFilter {
     // Edges
     int offsetIndex = 0;
     final int size = 2 * ((2 * xwidth - 1) + (2 * ywidth - 1));
-    final int[] xoffset1 = new int[size];
-    final int[] yoffset1 = new int[size];
     final int[] offset1 = new int[size];
     for (int y = -ywidth + 1; y < ywidth; y++) {
-      yoffset1[offsetIndex] = yoffset1[offsetIndex + 1] = y;
-      xoffset1[offsetIndex] = -xwidth;
-      xoffset1[offsetIndex + 1] = xwidth;
       offset1[offsetIndex] = maxx * y - xwidth;
       offset1[offsetIndex + 1] = maxx * y + xwidth;
       offsetIndex += 2;
     }
     for (int x = -xwidth + 1; x < xwidth; x++) {
-      xoffset1[offsetIndex] = xoffset1[offsetIndex + 1] = x;
-      yoffset1[offsetIndex] = -ywidth;
-      yoffset1[offsetIndex + 1] = ywidth;
       offset1[offsetIndex] = maxx * -ywidth + x;
       offset1[offsetIndex + 1] = maxx * ywidth + x;
       offsetIndex += 2;

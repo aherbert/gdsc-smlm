@@ -39,7 +39,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper {
   private final PoissonGaussianFunction2 pg;
-  private final boolean usePicard = false;
+  private static final boolean USE_PICCARD = false;
 
   /**
    * Initialise the function.
@@ -59,7 +59,7 @@ public class PoissonGaussianLikelihoodWrapper extends LikelihoodWrapper {
       double[] data, int dataSize, double alpha, double sd) {
     super(function, parameters, data, dataSize);
     pg = PoissonGaussianFunction2.createWithStandardDeviation(alpha, sd);
-    pg.setUsePicardApproximation(usePicard);
+    pg.setUsePicardApproximation(USE_PICCARD);
   }
 
   @Override

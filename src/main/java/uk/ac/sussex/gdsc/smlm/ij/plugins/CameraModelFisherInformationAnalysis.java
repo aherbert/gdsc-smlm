@@ -157,9 +157,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
    * Class for hashing the Fisher information settings.
    */
   private static class FiKey {
-    // This is not part of the hashcode.
-    // It is used to ensure only the latest computations are saved to disk.
-    final long age = System.currentTimeMillis();
+    /**
+     * The time stamp. This is not part of the hashcode. It is used to ensure only the latest
+     * computations are saved to disk.
+     */
+    final long timeStamp = System.currentTimeMillis();
 
     final int type;
     final double gain;
@@ -314,11 +316,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         }
       }
       if (list.size() > MAX_DATA_TO_FILE) {
-        // Sort by age
-        list.sort((o1, o2) -> {
-          // Youngest first
-          return -Long.compare(o1.age, o2.age);
-        });
+        // Sort by age - Youngest first
+        list.sort((o1, o2) -> Long.compare(o2.timeStamp, o1.timeStamp));
       }
       final PoissonFisherInformationCache.Builder cacheData =
           PoissonFisherInformationCache.newBuilder();
@@ -561,11 +560,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     if (debug && f2 instanceof PoissonGammaGaussianFisherInformation) {
       final PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) f2;
       final double t = 200;
-      // for (int i=0; i<rpggFI.length; i++)
-      // {
-      // if (photons[i] > 100 && rpggFI[i] < 0.3)
-      // t = photons[i];
-      // }
 
       final double fi = pgg.getFisherInformation(t);
       final double alpha = fi * t;
@@ -579,7 +573,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
           max = j;
         }
       }
-      System.out.printf("PGG(p=%g) max=%g\n", t, data1[0][max]);
+      ImageJUtils.log("PGG(p=%g) max=%g", t, data1[0][max]);
 
       final String title =
           TITLE + " photons=" + MathUtils.rounded(t) + " alpha=" + MathUtils.rounded(alpha);

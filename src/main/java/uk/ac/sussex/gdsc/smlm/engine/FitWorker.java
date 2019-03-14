@@ -208,7 +208,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
    * Encapsulate all conversion of coordinates between the frame of data (data bounds) and the
    * sub-section currently used in fitting (region bounds) and the global coordinate system.
    */
-  private class CoordinateConverter {
+  private static class CoordinateConverter {
     /** The data bounds. */
     final Rectangle dataBounds;
 
@@ -305,7 +305,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   /**
    * Store an estimate for a spot candidate. This may be aquired during multi fitting of neighbours.
    */
-  private class Estimate {
+  private static class Estimate {
     final double[] params;
     final byte filterRank;
     final double d2;
@@ -697,6 +697,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (slice == -1) {
         fitConfig.initialise(1, 1, 1, null);
 
+        final String newLine = System.lineSeparator();
         SettingsManager.toJson(config.getFitEngineSettings(),
             new File(String.format("/tmp/config.%d.txt", slice)),
             SettingsManager.FLAG_JSON_WHITESPACE);
@@ -705,20 +706,20 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final StringBuilder sb = new StringBuilder();
         sb.append((benchmarking)
             ? ((uk.ac.sussex.gdsc.smlm.results.filter.Filter) filter.getFilter()).toXml()
-            : fitConfig.getSmartFilterString()).append("\n");
+            : fitConfig.getSmartFilterString()).append(newLine);
         sb.append(
             ((uk.ac.sussex.gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXml())
-            .append("\n");
-        sb.append(filter.residualsThreshold).append("\n");
-        sb.append(config.getFailuresLimit()).append("\n");
+            .append(newLine);
+        sb.append(filter.residualsThreshold).append(newLine);
+        sb.append(config.getFailuresLimit()).append(newLine);
         sb.append(config.getDuplicateDistance()).append(":");
-        sb.append(config.getDuplicateDistanceAbsolute()).append("\n");
+        sb.append(config.getDuplicateDistanceAbsolute()).append(newLine);
         if (spotFilter != null) {
-          sb.append(spotFilter.getDescription()).append("\n");
+          sb.append(spotFilter.getDescription()).append(newLine);
         }
-        sb.append("MaxCandidate = ").append(candidates.getSize()).append("\n");
+        sb.append("MaxCandidate = ").append(candidates.getSize()).append(newLine);
         for (int i = 0, len = candidates.getLength(); i < len; i++) {
-          sb.append(String.format("Fit %d [%d,%d = %.1f]\n", i, candidates.get(i).x,
+          sb.append(String.format("Fit %d [%d,%d = %.1f]%n", i, candidates.get(i).x,
               candidates.get(i).y, candidates.get(i).intensity));
         }
         FileUtils.save(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
@@ -1205,7 +1206,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final int candidateId;
     final int width;
     final int height;
-    final int parametersPerPeak = Gaussian2DFunction.PARAMETERS_PER_PEAK;
+    static final int PARAMETERS_PER_PEAK = Gaussian2DFunction.PARAMETERS_PER_PEAK;
     final FloatAreaSum area;
 
     int neighbours;
@@ -1228,7 +1229,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     boolean computedDoubletMulti;
     QuadrantAnalysis qaMulti;
 
-    double[] functionParamsSingle;
+    double[] precomputedFunctionParamsSingle;
     double[] precomputedFittedNeighboursSingle;
     MultiPathFitResult.FitResult resultSingle;
     double[] residualsSingle;
@@ -1360,7 +1361,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // Pre-compute the already fitted peaks.
 
         precomputedFunctionParamsMulti =
-            new double[1 + parametersPerPeak * precomputedFittedNeighbourCount];
+            new double[1 + PARAMETERS_PER_PEAK * precomputedFittedNeighbourCount];
         for (int i = 0, j = 0; i < fittedNeighbourCount; i++) {
           if (!precomputed[i]) {
             continue;
@@ -1369,7 +1370,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           // Adjust position relative to extracted region
           precomputedFunctionParamsMulti[j + Gaussian2DFunction.X_POSITION] -= xOffset;
           precomputedFunctionParamsMulti[j + Gaussian2DFunction.Y_POSITION] -= yOffset;
-          j += parametersPerPeak;
+          j += PARAMETERS_PER_PEAK;
         }
 
         final Gaussian2DFunction func =
@@ -1440,15 +1441,13 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             candidateNeighbourCount, fittedNeighbourCount, precomputedFittedNeighbourCount);
       }
 
-      final double[] params = new double[1 + npeaks * parametersPerPeak];
+      final double[] params = new double[1 + npeaks * PARAMETERS_PER_PEAK];
 
       // Estimate background.
       // Use the fitted peaks within the region or fall-back to the estimate for
       // a single peak (i.e. low point of the region).
       params[Gaussian2DFunction.BACKGROUND] =
           (backgroundCount == 0) ? getFittingBackgroundSingle() : background / backgroundCount;
-      // Store for debugging
-      background = params[Gaussian2DFunction.BACKGROUND];
 
       // Support bounds on the known fitted peaks
       final double[] lower = new double[params.length];
@@ -1467,8 +1466,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       amplitudeEstimate[0] = getEstimate(candidates.get(candidateId), params, 0, true);
 
       // The neighbours
-      for (int i = 0, j = parametersPerPeak; i < candidateNeighbourCount;
-          i++, j += parametersPerPeak) {
+      for (int i = 0, j = PARAMETERS_PER_PEAK; i < candidateNeighbourCount;
+          i++, j += PARAMETERS_PER_PEAK) {
         final Candidate candidateNeighbour = candidateNeighbours[i];
         amplitudeEstimate[i + 1] = getEstimate(candidateNeighbour, params, j, true);
 
@@ -1495,7 +1494,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         getPrecomputedFittedNeighbours();
 
         // Add the details of the already fitted peaks
-        for (int i = 0, j = (1 + candidateNeighbourCount) * parametersPerPeak;
+        for (int i = 0, j = (1 + candidateNeighbourCount) * PARAMETERS_PER_PEAK;
             i < fittedNeighbourCount; i++) {
           if (precomputed[i]) {
             continue;
@@ -1517,7 +1516,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           upper[j + Gaussian2DFunction.Y_POSITION] =
               params[j + Gaussian2DFunction.Y_POSITION] + 0.5;
 
-          j += parametersPerPeak;
+          j += PARAMETERS_PER_PEAK;
         }
       }
 
@@ -1533,7 +1532,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // Find the min amplitude
         double minSignal = Double.POSITIVE_INFINITY;
         for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
-            j += parametersPerPeak, i++) {
+            j += PARAMETERS_PER_PEAK, i++) {
           if (amplitudeEstimate[i] && minSignal > params[j]) {
             minSignal = params[j];
           }
@@ -1548,7 +1547,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
           // Make the amplitude estimates higher by the change in background
           for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
-              j += parametersPerPeak, i++) {
+              j += PARAMETERS_PER_PEAK, i++) {
             if (amplitudeEstimate[i]) {
               params[j] += backgroundChange;
             }
@@ -1560,7 +1559,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             final double defaultHeight = Math.max(1,
                 0.1 * (getMax(region, width, height) - params[Gaussian2DFunction.BACKGROUND]));
             for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length;
-                j += parametersPerPeak, i++) {
+                j += PARAMETERS_PER_PEAK, i++) {
               if (amplitudeEstimate[i] && params[j] <= 0) {
                 params[j] = defaultHeight;
               }
@@ -1571,7 +1570,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       // Note that if the input XY positions are on the integer grid then the fitter will estimate
       // the position using a CoM estimate. To avoid this adjust the centres to be off-grid.
-      for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += parametersPerPeak) {
+      for (int i = Gaussian2DFunction.X_POSITION; i < params.length; i += PARAMETERS_PER_PEAK) {
         for (int j = 0; j < 2; j++) {
           if ((int) params[i + j] == params[i + j]) {
             // If at the limit then decrement instead
@@ -2634,9 +2633,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         // Utils.display("Region", region, width, height);
 
-        final double[] precomputedFunctionParamsSingle =
-            new double[1 + parametersPerPeak * fittedNeighbourCount];
-        for (int i = 0, j = 0; i < fittedNeighbourCount; i++, j += parametersPerPeak) {
+        precomputedFunctionParamsSingle =
+            new double[1 + PARAMETERS_PER_PEAK * fittedNeighbourCount];
+        for (int i = 0, j = 0; i < fittedNeighbourCount; i++, j += PARAMETERS_PER_PEAK) {
           // Check if within the region
           if (!precomputed[i]) {
             background += fittedNeighbours[i].params[Gaussian2DFunction.BACKGROUND];
@@ -2665,8 +2664,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // a single peak (i.e. low point of the region).
       params[Gaussian2DFunction.BACKGROUND] =
           (backgroundCount == 0) ? getFittingBackgroundSingle() : background / backgroundCount;
-      // Store for debugging
-      background = params[Gaussian2DFunction.BACKGROUND];
 
       final boolean[] amplitudeEstimate = new boolean[1];
 
@@ -3068,7 +3065,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Check if the deviations require updating.
       // This will be the case if we have stored function parameters for the single fit.
       if (resultDoubletSingle != null && resultDoubletSingle.status == 0
-          && resultDoubletSingle.results != null && functionParamsSingle != null) {
+          && resultDoubletSingle.results != null && precomputedFunctionParamsSingle != null) {
         // Recompute the deviations with all the parameters.
         // For equivalence with the multi-fit we only include the fits within the region.
         FitResult doubletFitResult =
@@ -3077,10 +3074,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final double[] fitParamDevs = new double[fitParams.length];
 
         final int npeaks = 2 + fittedNeighbourCount - precomputedFittedNeighbourCount;
-        final double[] params = new double[1 + parametersPerPeak * npeaks];
+        final double[] params = new double[1 + PARAMETERS_PER_PEAK * npeaks];
         System.arraycopy(fitParams, 0, params, 0, fitParams.length);
-        System.arraycopy(functionParamsSingle, 1 + parametersPerPeak, params, fitParams.length,
-            params.length - fitParams.length);
+        System.arraycopy(precomputedFunctionParamsSingle, 1 + PARAMETERS_PER_PEAK, params,
+            fitParams.length, params.length - fitParams.length);
 
         final double[] paramDevs = new double[params.length];
         // These pre-computed values will be those peaks outside the region
@@ -3422,7 +3419,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             final double a = QuadrantAnalysis.getAngle(qa.vector, new double[] {xShift, yShift});
             // Check the domain is OK (the angle is in radians).
             // Allow up to a 45 degree difference to show the shift is along the vector
-            if (a > 0.785398 && a < 2.356194) {
+            if (a > 0.25 * Math.PI && a < 0.75 * Math.PI) {
               if (logger != null) {
                 LoggerUtils.log(logger, Level.INFO,
                     "Bad peak %d: Fitted coordinates moved into wrong quadrant (x=%g,y=%g,a=%f)", n,
@@ -3897,22 +3894,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   private static boolean canIgnore(float x, float y, float xmin, float xmax, float ymin,
       float ymax) {
     return (x < xmin || x > xmax || y < ymin || y > ymax);
-  }
-
-  /**
-   * Gets the adjusted coefficient of determination.
-   *
-   * @param ssResid Sum of squared residuals from the model
-   * @param ssTotal Sum of the squared differences from the mean of the dependent variable (total
-   *        sum of squares)
-   * @param observations Number of observations
-   * @param params Number of parameters in the model
-   * @return the adjusted coefficient of determination
-   */
-  @SuppressWarnings("unused")
-  private static double getAdjustedCoefficientOfDetermination(double ssResid, double ssTotal,
-      int observations, int params) {
-    return 1 - (ssResid / ssTotal) * ((observations - 1) / (observations - params - 1));
   }
 
   /**

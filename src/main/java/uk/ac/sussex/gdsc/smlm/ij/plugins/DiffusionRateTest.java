@@ -227,10 +227,7 @@ public class DiffusionRateTest implements PlugIn {
     // Convert diffusion co-efficient into the standard deviation for the random walk
     final DiffusionType diffusionType =
         CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
-    final double diffusionSigma = (diffusionType == DiffusionType.LINEAR_WALK)
-        // Q. What should this be? At the moment just do 1D diffusion on a random vector
-        ? ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep)
-        : ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
+    final double diffusionSigma = ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
     ImageJUtils.log("Simulation step-size = %s nm",
         MathUtils.rounded(settings.getPixelPitch() * diffusionSigma, 4));
 
@@ -241,8 +238,8 @@ public class DiffusionRateTest implements PlugIn {
     final RandomGenerator[] random = new RandomGenerator[3];
     final RandomGenerator[] random2 = new RandomGenerator[3];
     for (int i = 0; i < 3; i++) {
-      random[i] = new Well19937c(seed + i * 12436);
-      random2[i] = new Well19937c(seed + i * 678678 + 3);
+      random[i] = new Well19937c(seed + i * 12436L);
+      random2[i] = new Well19937c(seed + i * 678678L + 3);
     }
     final Statistics[] stats2D = new Statistics[totalSteps];
     final Statistics[] stats3D = new Statistics[totalSteps];
@@ -930,11 +927,11 @@ public class DiffusionRateTest implements PlugIn {
     // Ensure we draw something, even it is a simple dot at the centre for no diffusion
     if (width == 0) {
       width = (int) (32 * magnification);
-      limitsx[0] = -width / 2;
+      limitsx[0] = -width / 2.0f;
     }
     if (height == 0) {
       height = (int) (32 * magnification);
-      limitsy[0] = -height / 2;
+      limitsy[0] = -height / 2.0f;
     }
 
     final ImageProcessor ip = new ByteProcessor(width, height);

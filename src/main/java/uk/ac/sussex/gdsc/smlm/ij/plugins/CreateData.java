@@ -103,7 +103,6 @@ import uk.ac.sussex.gdsc.smlm.model.MoleculeModel;
 import uk.ac.sussex.gdsc.smlm.model.PsfModel;
 import uk.ac.sussex.gdsc.smlm.model.PsfModelGradient1Function;
 import uk.ac.sussex.gdsc.smlm.model.RadialFalloffIllumination;
-import uk.ac.sussex.gdsc.smlm.model.RandomGeneratorFactory;
 import uk.ac.sussex.gdsc.smlm.model.SpatialDistribution;
 import uk.ac.sussex.gdsc.smlm.model.SpatialIllumination;
 import uk.ac.sussex.gdsc.smlm.model.SphericalDistribution;
@@ -197,7 +196,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Creates data using a simulated PSF.
  */
-public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory {
+public class CreateData implements PlugIn, ItemListener {
   /** The title. */
   static final String TITLE = "Create Data";
   private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
@@ -770,7 +769,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
         // Randomly sample (i.e. not uniform density in all frames)
         if (settings.getSamplePerFrame()) {
           final double mean = areaInUm * settings.getDensity();
-          System.out.printf("Mean samples = %f\n", mean);
+          ImageJUtils.log("Mean samples = %f", mean);
           if (mean < 0.5) {
             final GenericDialog gd = new GenericDialog(TITLE);
             gd.addMessage(
@@ -1494,7 +1493,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
   private UniformDistribution createUniformDistributionWithPsfWidthBorder() {
     double border = getHwhm() * 3;
-    border = FastMath.min(border, settings.getSize() / 4);
+    border = FastMath.min(border, settings.getSize() / 4.0);
     return createUniformDistribution(border);
   }
 
@@ -1672,7 +1671,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
 
     // Ensure the focal plane is in the middle of the zDepth
     final double[] max =
-        new double[] {settings.getSize() / 2 - border, settings.getSize() / 2 - border, depth};
+        new double[] {settings.getSize() / 2.0 - border, settings.getSize() / 2.0 - border, depth};
     final double[] min = new double[3];
     for (int i = 0; i < 3; i++) {
       min[i] = -max[i];
@@ -1695,8 +1694,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     }
 
     // Create a distribution using random generators for each dimension
-    final UniformDistribution distribution = new UniformDistribution(min, max, this);
-    return distribution;
+    return new UniformDistribution(min, max, this::createRandomGenerator);
   }
 
   private SpatialDistribution createConfinementDistribution() {
@@ -1738,7 +1736,6 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
             + CONFINEMENT[CONFINEMENT_WITHIN_IMAGE] + " confinement");
       }
 
-      // return createUniformDistribution(0);
       return createUniformDistributionWithPsfWidthBorder();
     }
 
@@ -1761,9 +1758,9 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   private SpatialIllumination createIllumination(double intensity, int pulseInterval) {
     if (settings.getIllumination().equals(ILLUMINATION[RADIAL])) {
       if (pulseInterval > 1) {
-        return new RadialFalloffIllumination(1, settings.getSize() / 2, intensity, pulseInterval);
+        return new RadialFalloffIllumination(1, settings.getSize() / 2.0, intensity, pulseInterval);
       }
-      return new RadialFalloffIllumination(intensity, settings.getSize() / 2);
+      return new RadialFalloffIllumination(intensity, settings.getSize() / 2.0);
     }
     uniformBackground = true;
     if (pulseInterval > 1) {
@@ -2594,7 +2591,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
     IJ.showProgress(frame++, totalFrames);
   }
 
-  private class Spot {
+  private static class Spot {
     final double[] psf;
     final int x0min;
     final int x0max;
@@ -4066,7 +4063,7 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
       SettingsManager.writeSettings(settings.build());
 
       try (BufferedWriter output =
-          new BufferedWriter(new FileWriter(settings.getLocalisationsFilename()))) {
+          Files.newBufferedWriter(Paths.get(settings.getLocalisationsFilename()))) {
         output.write(createResultsFileHeader());
         output.write("#T\tId\tX\tY\tZ\tIntensity");
         output.newLine();
@@ -5358,24 +5355,21 @@ public class CreateData implements PlugIn, ItemListener, RandomGeneratorFactory 
   }
 
   private int getSeedAddition() {
-    if (seedMode.identicalAddition()) {
-      if (resetSeed) {
-        // Reset only once per plugin execution
-        resetSeed = false;
-        seedAddition = 0;
-      }
+    if (seedMode.identicalAddition() && resetSeed) {
+      // Reset only once per plugin execution
+      resetSeed = false;
+      seedAddition = 0;
     }
     // Increment the seed to ensure that new generators are created at the same system time point
     return seedAddition++;
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a random generator.
    *
    * <p>The generators used in the simulation can be adjusted by changing this method.
    */
-  @Override
-  public RandomGenerator createRandomGenerator() {
+  private RandomGenerator createRandomGenerator() {
     return new Well44497b(getSeedOffset() + getSeedAddition());
   }
 

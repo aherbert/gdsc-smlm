@@ -205,7 +205,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
    *         function) is exceeded.
    */
   @Override
-  public PointValuePair optimize(OptimizationData... optData) throws TooManyEvaluationsException {
+  public PointValuePair optimize(OptimizationData... optData) {
     // Set up base class and perform computation.
     return super.optimize(optData);
   }
@@ -233,17 +233,10 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
 
     PointValuePair lastResult = null;
     PointValuePair result = null;
-    // int lastConverge = 0;
     int iteration = 0;
-    // int initialConvergenceIteration = 0;
-    // int[] count = new int[3];
     while (iteration <= restarts) {
       iteration++;
       result = bfgsWithRoundoffCheck(checker, point, lineSearch);
-      // count[converged]++;
-
-      // if (lastResult == null)
-      // initialConvergenceIteration = getIterations();
 
       if (converged == GRADIENT) {
         // If no gradient remains then we cannot move anywhere so return
@@ -251,22 +244,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
       }
 
       if (lastResult != null) {
-        //// Check if the optimum was improved using the last convergence criteria
-        // if (lastConverge == CHECKER)
-        // {
-        // if (checker.converged(getIterations(), lastResult, result))
-        // {
-        // break;
-        // }
-        // }
-        // else
-        // {
-        // if (positionChecker.converged(lastResult.getPointRef(), result.getPointRef()))
-        // {
-        // break;
-        // }
-        // }
-
         // Check if the optimum was improved using the convergence criteria
         if (checker != null && checker.converged(getIterations(), lastResult, result)) {
           break;
@@ -278,13 +255,8 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
 
       // Store the new optimum and repeat
       lastResult = result;
-      // lastConverge = converged;
       point = lastResult.getPointRef();
     }
-
-    // System.out.printf("Iter=%d (%d > %d): %s\n", iteration, initialConvergenceIteration,
-    // getIterations(),
-    // java.util.Arrays.toString(count));
 
     return result;
   }
@@ -316,9 +288,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
     if (converged == ROUNDOFF_ERROR) {
       throw new LineSearchRoundoffException();
     }
-
-    // if (iteration > 0)
-    // System.out.printf("Restarts for roundoff error = %d\n", iteration);
 
     return result;
   }
@@ -375,7 +344,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
         // This can happen if the Hessian is nearly singular or non-positive-definite.
         // In this case the algorithm should be restarted.
         converged = ROUNDOFF_ERROR;
-        // System.out.printf("Roundoff error, iter=%d\n", getIterations());
         return current;
       }
 
@@ -411,7 +379,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
       double test = 0;
       for (int i = 0; i < n; i++) {
         final double temp = Math.abs(gradient[i]) * FastMath.max(Math.abs(point[i]), 1);
-        // final double temp = Math.abs(g[i]);
         if (test < temp) {
           test = temp;
         }
@@ -561,12 +528,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
    */
   private class LineStepSearch {
     /**
-     * Set to true when the the new point is too close to the old point. In a minimisation algorithm
-     * this signifies convergence.
-     */
-    @SuppressWarnings("unused")
-    boolean check;
-    /**
      * The function value at the new point.
      */
     double functionValue;
@@ -591,7 +552,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
       final double[] x = new double[oldX.length];
 
       final int n = oldX.length;
-      check = false;
 
       // Limit the search step size for each dimension
       if (maximumStepLength != null) {
@@ -635,9 +595,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
         if (alam < alamin) {
           // Convergence (insignificant step).
           // Since we use the old f and x then we do not need to compute the objective value
-          check = true;
           functionValue = oldF;
-          // System.out.printf("alam %f < alamin %f\n", alam, alamin);
           return oldX;
         }
 
@@ -646,10 +604,8 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
         }
         applyBounds(x);
         functionValue = BfgsOptimizer.this.computeObjectiveValue(x);
-        // System.out.printf("f=%f @ %f : %s\n", f, alam, java.util.Arrays.toString(x));
         if (functionValue <= oldF + ALF * alam * slope) {
           // Sufficient function decrease
-          // System.out.printf("f=%f < %f\n", f, oldF + ALF * alam * slope);
           return x;
         }
 
@@ -731,7 +687,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
     }
 
     // Ensure that the step length is strictly positive
-    if (maximumStepLength == null) {
+    if (maximumStepLength != null) {
       for (int i = 0; i < maximumStepLength.length; i++) {
         if (maximumStepLength[i] <= 0) {
           throw new MathUnsupportedOperationException(
@@ -739,10 +695,6 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
         }
       }
     }
-
-    // Set a tolerance? If not then the routine will iterate until position convergence
-    // if (gradientTolerance == 0)
-    // gradientTolerance = 1e-6;
   }
 
   /**

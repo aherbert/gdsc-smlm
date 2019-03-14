@@ -100,7 +100,7 @@ public class DarkTimeAnalysis implements PlugIn {
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, true, DistanceUnit.PIXEL);
     IJ.showStatus("");
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }

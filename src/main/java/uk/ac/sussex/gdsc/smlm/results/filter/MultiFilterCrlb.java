@@ -98,16 +98,6 @@ public class MultiFilterCrlb extends MultiFilter implements IMultiFilter {
   }
 
   @Override
-  public Filter adjustParameter(int index, double delta) {
-    checkIndex(index);
-    final double[] params =
-        new double[] {signal, snr, minWidth, maxWidth, shift, eshift, precision};
-    params[index] = updateParameter(params[index], delta, MultiFilter.defaultRange[index]);
-    return new MultiFilterCrlb(params[0], (float) params[1], params[2], params[3], params[4],
-        params[5], params[6], (float) params[7], (float) params[8]);
-  }
-
-  @Override
   public Filter create(double... parameters) {
     return new MultiFilterCrlb(parameters[0], (float) parameters[1], parameters[2], parameters[3],
         parameters[4], parameters[5], parameters[6], (float) parameters[7], (float) parameters[8]);

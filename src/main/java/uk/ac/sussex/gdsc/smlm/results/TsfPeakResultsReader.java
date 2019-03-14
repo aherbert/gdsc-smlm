@@ -52,6 +52,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,49 +61,37 @@ import java.util.logging.Logger;
  *
  * <p>Has only limited support for TSF in that only 1 channel, position, slice and fluorophore type
  * can be read into a dataset.
- *
- * @author Alex Herbert
  */
 public class TsfPeakResultsReader {
   private static Logger logger = Logger.getLogger(TsfPeakResultsReader.class.getName());
 
-  private static uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[] cameraTypeMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[] thetaUnitsMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[] locationUnitsMap;
-  private static uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[] intensityUnitsMap;
+  // @formatter:off
+  private static EnumMap<CameraType, uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType> cameraTypeMap;
+  private static EnumMap<ThetaUnits, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit> thetaUnitsMap;
+  private static EnumMap<LocationUnits, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit> locationUnitsMap;
+  private static EnumMap<IntensityUnits, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit> intensityUnitsMap;
 
   static {
     // These should have 1:1 mapping. We can extends the TSF proto if necessary.
-    cameraTypeMap = new uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType[CameraType
-        .values().length];
-    cameraTypeMap[CameraType.CCD.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD;
-    cameraTypeMap[CameraType.EMCCD.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD;
-    cameraTypeMap[CameraType.SCMOS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS;
-    thetaUnitsMap =
-        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit[ThetaUnits.values().length];
-    thetaUnitsMap[ThetaUnits.RADIANS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN;
-    thetaUnitsMap[ThetaUnits.DEGREES.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE;
-    locationUnitsMap = new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit[LocationUnits
-        .values().length];
-    locationUnitsMap[LocationUnits.NM.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM;
-    locationUnitsMap[LocationUnits.UM.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM;
-    locationUnitsMap[LocationUnits.PIXELS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL;
-    intensityUnitsMap =
-        new uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit[IntensityUnits
-            .values().length];
-    intensityUnitsMap[IntensityUnits.COUNTS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT;
-    intensityUnitsMap[IntensityUnits.PHOTONS.ordinal()] =
-        uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON;
+    cameraTypeMap = new EnumMap<>(CameraType.class);
+    cameraTypeMap.put(CameraType.CCD, uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD);
+    cameraTypeMap.put(CameraType.EMCCD, uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD);
+    cameraTypeMap.put(CameraType.SCMOS, uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS);
+
+    thetaUnitsMap = new EnumMap<>(ThetaUnits.class);
+    thetaUnitsMap.put(ThetaUnits.RADIANS, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN);
+    thetaUnitsMap.put(ThetaUnits.DEGREES, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE);
+
+    locationUnitsMap = new EnumMap<>(LocationUnits.class);
+    locationUnitsMap.put(LocationUnits.NM, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM);
+    locationUnitsMap.put(LocationUnits.UM, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM);
+    locationUnitsMap.put(LocationUnits.PIXELS, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL);
+
+    intensityUnitsMap =new EnumMap<>(IntensityUnits.class);
+    intensityUnitsMap.put(IntensityUnits.COUNTS, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT);
+    intensityUnitsMap.put(IntensityUnits.PHOTONS, uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON);
   }
+  // @formatter:on
 
   private final String filename;
   private SpotList spotList;
@@ -229,7 +218,7 @@ public class TsfPeakResultsReader {
       if (spotList != null) {
         return true;
       }
-    } catch (final Exception ex) {
+    } catch (final IOException ex) {
       // Fail
     }
 
@@ -254,7 +243,8 @@ public class TsfPeakResultsReader {
 
     // Read the messages that contain the spot data
     try (BufferedInputStream fi = new BufferedInputStream(new FileInputStream(filename))) {
-      fi.skip(12); // size of int + size of long
+      // size of int + size of long
+      FileUtils.skip(fi, 12);
 
       final LocationUnits locationUnits = spotList.getLocationUnits();
       boolean locationUnitsWarning = false;
@@ -536,7 +526,7 @@ public class TsfPeakResultsReader {
         cal.setBias(spotList.getBias());
       }
       if (spotList.hasCameraType()) {
-        cal.setCameraType(cameraTypeMap[spotList.getCameraType().ordinal()]);
+        cal.setCameraType(cameraTypeMap.get(spotList.getCameraType()));
       } else {
         cal.setCameraType(null);
       }
@@ -558,7 +548,7 @@ public class TsfPeakResultsReader {
     }
 
     if (spotList.hasLocationUnits()) {
-      cal.setDistanceUnit(locationUnitsMap[spotList.getLocationUnits().ordinal()]);
+      cal.setDistanceUnit(locationUnitsMap.get(spotList.getLocationUnits()));
       if (!spotList.hasPixelSize() && spotList.getLocationUnits() != LocationUnits.PIXELS) {
         logger.warning(
             () -> "TSF location units are not pixels and no pixel size calibration is available."
@@ -570,7 +560,7 @@ public class TsfPeakResultsReader {
     }
 
     if (spotList.hasIntensityUnits()) {
-      cal.setIntensityUnit(intensityUnitsMap[spotList.getIntensityUnits().ordinal()]);
+      cal.setIntensityUnit(intensityUnitsMap.get(spotList.getIntensityUnits()));
       if (!spotList.hasGain() && spotList.getIntensityUnits() != IntensityUnits.COUNTS) {
         logger.warning(
             () -> "TSF intensity units are not counts and no gain calibration is available."
@@ -582,7 +572,7 @@ public class TsfPeakResultsReader {
     }
 
     if (spotList.hasThetaUnits()) {
-      cal.setAngleUnit(thetaUnitsMap[spotList.getThetaUnits().ordinal()]);
+      cal.setAngleUnit(thetaUnitsMap.get(spotList.getThetaUnits()));
     } else {
       cal.setAngleUnit(null);
     }

@@ -48,7 +48,7 @@ public class ImageBackground implements PlugInFilter {
   private static float bias = 500;
   private static double sigma = 2;
 
-  private final int flags = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
+  private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private ImagePlus imp;
 
   @Override
@@ -92,7 +92,7 @@ public class ImageBackground implements PlugInFilter {
       return DONE;
     }
 
-    return flags;
+    return FLAGS;
   }
 
   @Override

@@ -62,6 +62,7 @@ import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
@@ -74,7 +75,10 @@ import org.apache.commons.math3.stat.inference.TestUtils;
 import org.apache.commons.math3.util.MathArrays;
 
 import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -404,7 +408,12 @@ public class CmosAnalysis implements PlugIn {
       if (!showSimulateDialog()) {
         return;
       }
-      simulate();
+      try {
+        simulate();
+      } catch (IOException ex) {
+        IJ.error(TITLE, "Failed to perform simulation: " + ex.getMessage());
+        return;
+      }
     }
 
     if (!showDialog()) {
@@ -427,7 +436,7 @@ public class CmosAnalysis implements PlugIn {
     }
   }
 
-  private void simulate() {
+  private void simulate() throws IOException {
     // Create the offset, variance and gain for each pixel
     final int n = size * size;
     final float[] pixelOffset = new float[n];
@@ -483,14 +492,12 @@ public class CmosAnalysis implements PlugIn {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 
       // Create the directory
-      final File out = new File(directory, String.format("photon%03d", p));
-      if (!out.exists()) {
-        out.mkdir();
-      }
+      Path out = Paths.get(directory, String.format("photon%03d", p));
+      Files.createDirectories(out);
 
       for (int from = 0; from < frames;) {
         final int to = Math.min(from + numberPerThread, frames);
-        futures.add(executor.submit(new SimulationWorker(ticker, seed++, out.getPath(),
+        futures.add(executor.submit(new SimulationWorker(ticker, seed++, out.toString(),
             simulationStack, from, to, blockSize, p)));
         from = to;
       }
@@ -561,14 +568,9 @@ public class CmosAnalysis implements PlugIn {
   private boolean showDialog() {
     // Determine sub-directories to process
     final File dir = new File(directory);
-    final File[] dirs = dir.listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File pathname) {
-        return pathname.isDirectory();
-      }
-    });
+    final File[] dirs = dir.listFiles(File::isDirectory);
 
-    if (dirs.length == 0) {
+    if (ArrayUtils.isEmpty(dirs)) {
       IJ.error(TITLE, "No sub-directories");
       return false;
     }

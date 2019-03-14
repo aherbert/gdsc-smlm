@@ -753,8 +753,6 @@ public class ImagePsfModel extends PsfModel {
 
     x0 -= xyCentre[slice][0] * unitsPerPixel;
     x1 -= xyCentre[slice][1] * unitsPerPixel;
-    // x0 -= 0.5 * psfWidth * unitsPerPixel;
-    // x1 -= 0.5 * psfWidth * unitsPerPixel;
 
     final double max = sumPsf[sumPsf.length - 1];
     double[] x = new double[n];
@@ -769,10 +767,11 @@ public class ImagePsfModel extends PsfModel {
       final int index = findIndex(sumPsf, p);
 
       // Interpolate xi using the fraction of the pixel
-      double xi = index % psfWidth;
-      xi += (p - sumPsf[index]) / (sumPsf[index + 1] - sumPsf[index]);
+      final int xpos = index % psfWidth;
+      final int ypos = index / psfWidth;
+      final double xi = xpos + (p - sumPsf[index]) / (sumPsf[index + 1] - sumPsf[index]);
       // Add random dither within pixel for y
-      final double yi = randomY.nextDouble() + (index / psfWidth);
+      final double yi = ypos + randomY.nextDouble();
 
       x[count] = x0 + (xi * this.unitsPerPixel);
       y[count] = x1 + (yi * this.unitsPerPixel);
@@ -806,7 +805,7 @@ public class ImagePsfModel extends PsfModel {
     int lower = 0;
 
     while (upper - lower > 1) {
-      final int mid = (upper + lower) / 2;
+      final int mid = (upper + lower) >>> 1;
 
       if (pvalue >= sum[mid]) {
         lower = mid;

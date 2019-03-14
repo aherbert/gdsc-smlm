@@ -48,11 +48,9 @@ import java.util.logging.Logger;
  * <p>Adapted by Alex Herbert from the FIRE (Fourier Image REsolution) plugin produced as part of
  * the paper:<br> Niewenhuizen, et al (2013). Measuring image resolution in optical nanoscopy.
  * Nature Methods, 10, 557<br> http://www.nature.com/nmeth/journal/v10/n6/full/nmeth.2448.html
- *
- * @author Alex Herbert
- * @author Bernd Rieger, b.rieger@tudelft.nl
  */
 public class Frc {
+  // Note: Example Matlab code was provided by Bernd Rieger (original author on the FIRE paper).
 
   /** Constant containing the value of a third. */
   private static final double THIRD = 1.0 / 3.0;
@@ -1007,30 +1005,6 @@ public class Frc {
     return fht.getComplexTransformProcessors();
   }
 
-  /**
-   * Returns the closest power-of-two number greater than or equal to x.
-   *
-   * <p>Copied from the JTransforms library class edu.emory.mathcs.utils.ConcurrencyUtils.
-   *
-   * @param x the x
-   * @return the closest power-of-two number greater than or equal to x
-   */
-  public static int nextPow2(int x) {
-    if (x < 1) {
-      throw new IllegalArgumentException("x must be greater or equal 1");
-    }
-    if ((x & (x - 1)) == 0) {
-      return x; // x is already a power-of-two number
-    }
-    x |= (x >>> 1);
-    x |= (x >>> 2);
-    x |= (x >>> 4);
-    x |= (x >>> 8);
-    x |= (x >>> 16);
-    x |= (x >>> 32);
-    return x + 1;
-  }
-
   /** The tapered image mean. */
   private double taperedImageMean;
 
@@ -1054,7 +1028,7 @@ public class Frc {
     final float[] wy = getWindowFunctionY(dataImage.getHeight());
 
     // Pad to a power of 2
-    final int newSize = nextPow2(size);
+    final int newSize = MathUtils.nextPow2(size);
 
     dataImage = dataImage.toFloat(0, null);
     final float[] data = (float[]) dataImage.getPixels();

@@ -60,6 +60,7 @@ import ij.Prefs;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 
 import java.awt.Rectangle;
@@ -69,6 +70,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -150,7 +152,7 @@ public class BenchmarkFit implements PlugIn {
   /**
    * Store the benchmark result.
    */
-  public class BenchmarkResult {
+  public static class BenchmarkResult {
     /**
      * The parameters used to create the data.
      */
@@ -261,8 +263,8 @@ public class BenchmarkFit implements PlugIn {
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
       } finally {
         finished = true;
       }
@@ -948,7 +950,8 @@ public class BenchmarkFit implements PlugIn {
       try {
         threads.get(i).join();
       } catch (final InterruptedException ex) {
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
       }
     }
     threads.clear();
@@ -975,11 +978,13 @@ public class BenchmarkFit implements PlugIn {
     }
     workers.clear();
 
+    Objects.requireNonNull(stats, "No statistics were computed");
+
     // Show a table of the results
     summariseResults(stats, cameraModel);
 
     // Optionally show histograms
-    if (showHistograms && stats != null) {
+    if (showHistograms) {
       IJ.showStatus("Calculating histograms ...");
 
       final WindowOrganiser windowOrganiser = new WindowOrganiser();
@@ -1205,11 +1210,9 @@ public class BenchmarkFit implements PlugIn {
     sb.append(MathUtils.rounded(fitConfig.getInitialPeakStdDev() * benchmarkParameters.pixelPitch))
         .append('\t');
     sb.append(PsfProtosHelper.getName(fitConfig.getPsf().getPsfType()));
-    if (fitConfig.isFixedPsf()) {
-      // Only fixed fitting can ignore the signal
-      if (!signalFitting) {
-        sb.append("NS");
-      }
+    // Only fixed fitting can ignore the signal
+    if (fitConfig.isFixedPsf() && !signalFitting) {
+      sb.append("NS");
     }
     if (!backgroundFitting) {
       sb.append("NB");
@@ -1361,9 +1364,9 @@ public class BenchmarkFit implements PlugIn {
       return;
     }
 
-    // Get the number of start points valid for all the results
+    // Get the number of start points normalised for all the results
     final int totalFrames = benchmarkParameters.frames;
-    final double numberOfStartPoints = length / totalFrames;
+    final double numberOfStartPointsNormalisation = (double) length / totalFrames;
 
     createAnalysisTable();
 
@@ -1391,12 +1394,12 @@ public class BenchmarkFit implements PlugIn {
       // Now output the actual results ...
       sb.append('\t');
       final double recall =
-          (stats[0].getN() / numberOfStartPoints) / benchmarkParameters.getMolecules();
+          (stats[0].getN() / numberOfStartPointsNormalisation) / benchmarkParameters.getMolecules();
       sb.append(MathUtils.rounded(recall));
       // Add the original recall
       sb.append('\t');
       final double recall2 =
-          (counts[index++] / numberOfStartPoints) / benchmarkParameters.getMolecules();
+          (counts[index++] / numberOfStartPointsNormalisation) / benchmarkParameters.getMolecules();
       sb.append(MathUtils.rounded(recall2));
 
       // Convert to units of the image (ADUs and pixels)

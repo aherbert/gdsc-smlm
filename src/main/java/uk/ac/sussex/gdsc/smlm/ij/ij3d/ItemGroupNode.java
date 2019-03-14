@@ -33,8 +33,6 @@ import org.scijava.vecmath.Tuple3d;
 
 /**
  * Node to allow display of ItemGroup content.
- *
- * @author Alex Herbert
  */
 public class ItemGroupNode extends ContentNode {
   private final ItemGroup itemGroup;

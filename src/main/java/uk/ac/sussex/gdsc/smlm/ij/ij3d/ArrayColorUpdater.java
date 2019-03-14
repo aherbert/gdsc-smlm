@@ -29,8 +29,6 @@ import org.scijava.vecmath.Color4f;
 
 /**
  * Class to create the colour array for a set of vertex coordinates with the same colour.
- *
- * @author Alex Herbert
  */
 public abstract class ArrayColorUpdater {
   /** The colour array. Used for GeometryArrays to colour coordinates with the same colour. */

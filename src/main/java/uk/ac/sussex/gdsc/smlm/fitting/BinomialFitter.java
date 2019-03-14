@@ -425,7 +425,7 @@ public class BinomialFitter {
       }
 
       return solution;
-    } catch (final Exception ex) {
+    } catch (final RuntimeException ex) {
       log("Failed to fit Binomial distribution with N=%d : %s", n, ex.getMessage());
     }
     return null;

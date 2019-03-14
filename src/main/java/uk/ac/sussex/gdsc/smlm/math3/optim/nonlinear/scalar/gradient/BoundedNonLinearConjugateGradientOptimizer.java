@@ -448,7 +448,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
         noBracket = true;
 
         // Check we made at least one step to a place with a new gradient
-        if (lastB != Double.NaN) {
+        if (!Double.isNaN(lastB)) {
           // Return the point we reached as the minimum
           return lastB;
         }
@@ -465,7 +465,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
             lastB = upper;
           }
         }
-        if (lastB != Double.NaN) {
+        if (!Double.isNaN(lastB)) {
           // Return the point we reached as the minimum
           return lastB;
         }

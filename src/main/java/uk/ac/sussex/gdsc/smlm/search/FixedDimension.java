@@ -61,6 +61,7 @@ public class FixedDimension implements Dimension {
    * Instantiates a new inactive search dimension. The centre can be set to any value.
    *
    * @param centre the centre
+   * @throws IllegalArgumentException if the centre is not finite
    */
   public FixedDimension(double centre) {
     this(centre, centre, 0);
@@ -72,6 +73,7 @@ public class FixedDimension implements Dimension {
    * @param min the minimum of the range
    * @param max the maximum of the range
    * @param minIncrement the min increment to use around the centre
+   * @throws IllegalArgumentException if the numbers are not finite or {@code max < min}
    */
   public FixedDimension(double min, double max, double minIncrement) {
     this(min, max, minIncrement, min, max);
@@ -85,6 +87,8 @@ public class FixedDimension implements Dimension {
    * @param minIncrement the min increment to use around the centre
    * @param lower the current lower bound of the range (will be clipped to min/max)
    * @param upper the current upper bound of the range (will be clipped to min/max)
+   * @throws IllegalArgumentException if the numbers are not finite or {@code max < min} or
+   *         {@code upper < lower}
    */
   public FixedDimension(double min, double max, double minIncrement, double lower, double upper) {
     if (!Double.isFinite(min)) {

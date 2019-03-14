@@ -33,6 +33,8 @@ import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
 
+import java.util.logging.Logger;
+
 /**
  * Solves (one) linear equation, A x = b.
  *
@@ -55,7 +57,7 @@ public class EjmlLinearSolver {
   /**
    * Solve the matrix using direct inversion.
    */
-  private class InversionSolver implements LinearSolver<DenseMatrix64F> {
+  private static class InversionSolver implements LinearSolver<DenseMatrix64F> {
     /** The matrix A. */
     private DenseMatrix64F A;
 
@@ -833,10 +835,10 @@ public class EjmlLinearSolver {
     solver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = Ainv.data;
-    for (int i = a_inv.length; i-- > 0;) {
-      if (!Double.isFinite(a_inv[i])) {
-        System.out.printf("Not finite\n");
+    final double[] inverse = Ainv.data;
+    for (int i = inverse.length; i-- > 0;) {
+      if (!Double.isFinite(inverse[i])) {
+        Logger.getLogger(getClass().getName()).warning("Inversion not finite");
         return false;
       }
     }
@@ -845,7 +847,7 @@ public class EjmlLinearSolver {
       return false;
     }
 
-    System.arraycopy(a_inv, 0, A.data, 0, a_inv.length);
+    System.arraycopy(inverse, 0, A.data, 0, inverse.length);
 
     return true;
   }
@@ -898,10 +900,6 @@ public class EjmlLinearSolver {
    * @return true, if successful
    */
   private boolean invalid(double e, double o) {
-    // if (Math.abs(e - o) > inversionTolerance)
-    // System.out.printf("Bad solution: %g != %g (%g = %d)\n", e, o, DoubleEquality.relativeError(e,
-    // o),
-    // DoubleEquality.complement(e, o));
     return (Math.abs(e - o) > inversionTolerance);
   }
 
@@ -925,17 +923,12 @@ public class EjmlLinearSolver {
 
     createSolver(A.numCols);
 
-    if (A.numCols <= UnrolledInverseFromMinorExt.MAX) {
-      // The fast inversion failed so try a pseudo-inverse
-      if (!invertSafe(getPseudoInverseSolver(), A, true)) {
-        return null;
-      }
-
-      // The matrix was too big for fast inversion so try linear algebra
-    } else if (!invertSafe(getCholeskyLdlTSolver(), A, false)) {
-      if (!invertSafe(getPseudoInverseSolver(), A, true)) {
-        return null;
-      }
+    // Do the LdlT solver only if the fast inversion failed
+    if ((A.numCols <= UnrolledInverseFromMinorExt.MAX
+        || !invertSafe(getCholeskyLdlTSolver(), A, false))
+        // The first inversion failed so try a pseudo-inverse
+        && !invertSafe(getPseudoInverseSolver(), A, true)) {
+      return null;
     }
 
     // We reach here when 'a' has been inverted
@@ -966,15 +959,11 @@ public class EjmlLinearSolver {
 
     createSolver(A.numCols);
 
-    if (A.numCols <= UnrolledInverseFromMinorExt.MAX) {
-      // The fast inversion failed so try a pseudo-inverse
-      if (!invertUnsafe(getPseudoInverseSolver(), A, true)) {
-        return null;
-      }
-
-      // The matrix was too big for fast inversion so try linear algebra
-    } else if (!invertSafe(getCholeskyLdlTSolver(), A, false)
-        && (!invertUnsafe(getPseudoInverseSolver(), A, true))) {
+    // Do the LdlT solver only if the fast inversion failed
+    if ((A.numCols <= UnrolledInverseFromMinorExt.MAX
+        || !invertSafe(getCholeskyLdlTSolver(), A, false))
+        // The first inversion failed so try a pseudo-inverse
+        && !invertUnsafe(getPseudoInverseSolver(), A, true)) {
       return null;
     }
 

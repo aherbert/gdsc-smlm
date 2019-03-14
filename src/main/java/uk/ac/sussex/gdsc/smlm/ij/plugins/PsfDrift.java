@@ -321,7 +321,7 @@ public class PsfDrift implements PlugIn {
     private void setConstraints(FunctionSolver solver) {
       if (uc == null) {
         lc = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-        uc = new double[uc.length];
+        uc = new double[lc.length];
         Arrays.fill(lc, Float.NEGATIVE_INFINITY);
         Arrays.fill(uc, Float.POSITIVE_INFINITY);
         lc[Gaussian2DFunction.BACKGROUND] = 0;

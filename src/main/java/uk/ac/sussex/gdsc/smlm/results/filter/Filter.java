@@ -1572,7 +1572,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       return -1;
     }
 
-    // Compare using the numerical value first
+    // Compare using the numerical value first.
+    // This is fast comparison ignoring edge cases.
     final double v1 = getNumericalValue();
     final double v2 = obj.getNumericalValue();
     if (v1 < v2) {
@@ -1581,6 +1582,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     if (v1 > v2) {
       return 1;
     }
+    // Double comparison result is either: equal (==) or NaN
 
     // Use all the parameters.
     final int size = getNumberOfParameters();
@@ -1589,11 +1591,9 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       for (int i = 0; i < size; i++) {
         final double d1 = getParameterValueInternal(i);
         final double d2 = obj.getParameterValueInternal(i);
-        if (d1 < d2) {
-          return -1;
-        }
-        if (d1 > d2) {
-          return 1;
+        int result = Double.compare(d1, d2);
+        if (result != 0) {
+          return result;
         }
       }
       return 0;

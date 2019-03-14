@@ -29,7 +29,6 @@ import uk.ac.sussex.gdsc.smlm.utils.Pair;
 /**
  * A worker to update results based on new settings.
  *
- * @author Alex Herbert
  * @param <S> the generic type
  * @param <R> the generic type
  */

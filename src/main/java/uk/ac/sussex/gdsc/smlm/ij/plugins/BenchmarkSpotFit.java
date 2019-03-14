@@ -186,7 +186,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private class FilterCriteria {
+  private static class FilterCriteria {
     final ParameterType type;
     final String name;
     final LowerLimit lower;
@@ -420,11 +420,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /** The lower distance in pixels. */
   static double lowerDistanceInPixels;
 
-  /** The candidate true negatives. */
-  static double candidateTN;
-
-  /** The candidate false negatives. */
-  static double candidateFN;
   /** Allow access to the time. */
   static StopWatch stopWatch;
 
@@ -434,7 +429,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /** The result prefix. */
   public static String resultPrefix;
 
-  private class MultiPathPoint extends BasePoint {
+  private static class MultiPathPoint extends BasePoint {
     static final int SPOT = -1;
     static final int SINGLE = 0;
     static final int MULTI = 1;
@@ -615,7 +610,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Store the filter candidates.
    */
-  public class FilterCandidates implements Cloneable {
+  public static class FilterCandidates implements Cloneable {
     /** Integer counts of positives (matches). */
     final int pos;
     /** Integer counts of negatives. */
@@ -687,18 +682,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private class Ranking implements Comparable<Ranking> {
+  private static class Ranking {
     final double value;
     final int index;
 
     Ranking(double value, int index) {
       this.value = value;
       this.index = index;
-    }
-
-    @Override
-    public int compareTo(Ranking that) {
-      return Double.compare(this.value, that.value);
     }
   }
 
@@ -1881,7 +1871,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera()) {
         name += " Camera";
       }
-      System.out.println("Failure counts: " + name);
+      IJ.log("Failure counts: " + name);
       printFailures("Single", singleStatus);
       printFailures("Multi", multiStatus);
       printFailures("Doublet", doubletStatus);
@@ -2231,7 +2221,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (total != 0) {
       for (int i = 1; i < status.length; i++) {
         if (status[i] != 0) {
-          System.out.printf("%s %s = %d / %d  (%.2f)\n", title, FitStatus.values()[i].toString(),
+          ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, FitStatus.values()[i].toString(),
               status[i], total, 100.0 * status[i] / total);
         }
       }
@@ -2239,7 +2229,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Print total
     final int all = total + status[0];
     if (all != 0) {
-      System.out.printf("%s %s = %d / %d  (%.2f)\n", title, "Total", total, all,
+      ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, "Total", total, all,
           100.0 * total / all);
     }
   }
@@ -2371,7 +2361,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private static int[] rank(ArrayList<Ranking> pc) {
-    Collections.sort(pc);
+    Collections.sort(pc, (r1, r2) -> Double.compare(r1.value, r2.value));
     final int[] ranking = new int[pc.size()];
     int rank = 1;
     for (final Ranking r : pc) {

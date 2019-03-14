@@ -115,6 +115,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -831,7 +832,8 @@ public class Optics implements PlugIn {
   /**
    * Compute which clusters were selected.
    */
-  private class ClusterSelectedEventWorker extends WorkflowWorker<ClusterSelectedEvent, int[]> {
+  private static class ClusterSelectedEventWorker
+      extends WorkflowWorker<ClusterSelectedEvent, int[]> {
     @Override
     public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous) {
       // Return false to always run doWork
@@ -857,7 +859,7 @@ public class Optics implements PlugIn {
   /**
    * Relay the selected clusters to all the handlers.
    */
-  private class ClusterSelectedWorker extends WorkflowWorker<ClusterSelectedEvent, int[]> {
+  private static class ClusterSelectedWorker extends WorkflowWorker<ClusterSelectedEvent, int[]> {
     TurboList<ClusterSelectedHandler> handlers = new TurboList<>();
 
     @Override
@@ -1420,7 +1422,7 @@ public class Optics implements PlugIn {
     }
   }
 
-  private class ClusterResult {
+  private static class ClusterResult {
     final int[] c1;
     final int[] c2;
 
@@ -2291,8 +2293,7 @@ public class Optics implements PlugIn {
 
             if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
               lut = clusterOrderLut;
-            } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal()
-                && max == max2) {
+            } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal()) {
               lut = clusterDepthLut;
               final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
               Arrays.fill(map, 0);
@@ -2702,7 +2703,7 @@ public class Optics implements PlugIn {
     }
   }
 
-  private class TableResult {
+  private static class TableResult {
     int id;
     int size;
     int level;
@@ -2761,7 +2762,9 @@ public class Optics implements PlugIn {
   /**
    * Base result comparator allows chaining comparisons together.
    */
-  private abstract static class BaseTableResultComparator implements Comparator<TableResult> {
+  private abstract static class BaseTableResultComparator
+      implements Comparator<TableResult>, Serializable {
+    private static final long serialVersionUID = 1L;
     BaseTableResultComparator next;
     boolean reverse;
 
@@ -2795,50 +2798,47 @@ public class Optics implements PlugIn {
   }
 
   private static class IdTableResultComparator extends BaseTableResultComparator {
+    private static final long serialVersionUID = 1L;
+
     public IdTableResultComparator(BaseTableResultComparator next, boolean reverse) {
       super(next, reverse);
     }
 
     @Override
     public int compareColumn(TableResult o1, TableResult o2) {
-      return compareInt(o1.id, o2.id);
+      return Integer.compare(o1.id, o2.id);
     }
   }
 
   private static class SizeTableResultComparator extends BaseTableResultComparator {
+    private static final long serialVersionUID = 1L;
+
     public SizeTableResultComparator(BaseTableResultComparator next, boolean reverse) {
       super(next, reverse);
     }
 
     @Override
     public int compareColumn(TableResult o1, TableResult o2) {
-      return compareInt(o1.size, o2.size);
+      return Integer.compare(o1.size, o2.size);
     }
   }
 
   private static class LevelTableResultComparator extends BaseTableResultComparator {
+    private static final long serialVersionUID = 1L;
+
     public LevelTableResultComparator(BaseTableResultComparator next, boolean reverse) {
       super(next, reverse);
     }
 
     @Override
     public int compareColumn(TableResult o1, TableResult o2) {
-      return compareInt(o1.level, o2.level);
+      return Integer.compare(o1.level, o2.level);
     }
   }
 
-  /**
-   * Compare the integers. Copied from Java 1.7.
-   *
-   * @param x the x
-   * @param y the y
-   * @return the result
-   */
-  private static int compareInt(int x, int y) {
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-  }
-
   private static class AreaTableResultComparator extends BaseTableResultComparator {
+    private static final long serialVersionUID = 1L;
+
     public AreaTableResultComparator(BaseTableResultComparator next, boolean reverse) {
       super(next, reverse);
     }
@@ -2850,6 +2850,8 @@ public class Optics implements PlugIn {
   }
 
   private static class DensityTableResultComparator extends BaseTableResultComparator {
+    private static final long serialVersionUID = 1L;
+
     public DensityTableResultComparator(BaseTableResultComparator next, boolean reverse) {
       super(next, reverse);
     }
@@ -3488,7 +3490,7 @@ public class Optics implements PlugIn {
         results = ResultsManager.loadInputResults(inputSettings.getInputOption(), true,
             DistanceUnit.PIXEL, null);
       }
-      if (results == null || results.size() == 0) {
+      if (MemoryPeakResults.isEmpty(results)) {
         IJ.error(pluginTitle, "No results could be loaded");
         return false;
       }

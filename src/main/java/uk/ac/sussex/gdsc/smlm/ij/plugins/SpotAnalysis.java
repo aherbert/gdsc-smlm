@@ -226,7 +226,7 @@ public class SpotAnalysis extends PlugInFrame
     }
   }
 
-  private class TraceResult {
+  private static class TraceResult {
     Spot spot;
     Trace trace;
 
@@ -1164,10 +1164,8 @@ public class SpotAnalysis extends PlugInFrame
     onFramesList = new JList(listModel);
     onFramesList.setVisibleRowCount(15);
     onFramesList.addListSelectionListener(this);
-    // mainPanel.add(onFramesList);
 
     final JScrollPane scrollPane = new JScrollPane(onFramesList);
-    scrollPane.getVerticalScrollBarPolicy();
     mainPanel.add(scrollPane);
 
     final GridBagLayout mainGrid = new GridBagLayout();

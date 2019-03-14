@@ -33,6 +33,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Perform 2D image alignment using normalised cross-correlation.
@@ -94,7 +95,7 @@ public class Image2DAligner {
   private double[] buffer;
   private double[] region;
   private double frequencyDomainCorrelationError;
-  private int[] crop;
+  private int[] cropDimensions;
 
   // Allow cached window weights
   private double[] wx;
@@ -669,13 +670,13 @@ public class Image2DAligner {
       iyh -= uy;
     }
 
-    crop = new int[] {ix, iy, ixw - ix, iyh - iy};
+    cropDimensions = new int[] {ix, iy, ixw - ix, iyh - iy};
 
     // The maximum correlation unnormalised. Since this is unnormalised
     // it will be biased towards the centre of the image. This is used
     // to restrict the bounds for finding the maximum of the normalised correlation
     // which should be close to this.
-    int maxi = correlation.findMaxIndex(ix, iy, crop[2], crop[3]);
+    int maxi = correlation.findMaxIndex(ix, iy, cropDimensions[2], cropDimensions[3]);
 
     // Check in the spatial domain
     checkCorrelation(target, correlation, maxi);
@@ -709,7 +710,7 @@ public class Image2DAligner {
     int ty = dy;
 
     // Precompute the x-1,x+width-1
-    final int nx = crop[2];
+    final int nx = cropDimensions[2];
     final int[] rx1 = new int[nx];
     final int[] rxw1 = new int[nx];
     final int[] tx1 = new int[nx];
@@ -831,6 +832,7 @@ public class Image2DAligner {
       final int x = MathUtils.clip(ix, ixw - 5, xy[0] - 2);
       final int y = MathUtils.clip(iy, iyh - 5, xy[1] - 2);
       final DoubleImage2D crop = correlation.crop(x, y, 5, 5, region);
+      region = crop.getData();
 
       // Find the maximum starting at the current origin
       final int ox = xy[0] - x;
@@ -902,9 +904,11 @@ public class Image2DAligner {
     frequencyDomainCorrelationError =
         DoubleEquality.relativeError(frequencyCorrelation, spatialCorrelation);
     if (frequencyDomainCorrelationError > 0.05) {
-      System.err.printf("2D Correlation Error = %s : Spatial = %s, Freq = %s\n",
-          MathUtils.rounded(frequencyDomainCorrelationError), Double.toString(spatialCorrelation),
-          Double.toString(frequencyCorrelation));
+      final double finalSpatialCorrelation = spatialCorrelation;
+      Logger.getLogger(getClass().getName())
+          .warning(() -> String.format("2D Correlation Error = %s : Spatial = %s, Freq = %s",
+              MathUtils.rounded(frequencyDomainCorrelationError), finalSpatialCorrelation,
+              frequencyCorrelation));
     }
   }
 
@@ -1138,7 +1142,8 @@ public class Image2DAligner {
   public Image2D getCorrelation() {
     try {
       final DoubleImage2D image = new DoubleImage2D(nc, nr, buffer);
-      image.fillOutside(crop[0], crop[1], crop[2], crop[3], 0);
+      image.fillOutside(cropDimensions[0], cropDimensions[1], cropDimensions[2], cropDimensions[3],
+          0);
       return image;
     } catch (final IllegalArgumentException ex) {
       // Thrown when buffer is null or does not match the dimensions.

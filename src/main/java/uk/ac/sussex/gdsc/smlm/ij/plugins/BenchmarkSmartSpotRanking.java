@@ -226,7 +226,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private class RankResults {
+  private static class RankResults {
     final ScoredSpot[] spots;
     /**
      * Store the z-position of the actual spots for later analysis. Size is the number of actual
@@ -914,7 +914,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return true;
     });
     final int countTp = counter2[0];
-    final int countFp = counter2[2];
+    final int countFp = counter2[1];
 
     // The fraction of positive and negative candidates that were included
     add(sb, (100.0 * countTp) / nP);

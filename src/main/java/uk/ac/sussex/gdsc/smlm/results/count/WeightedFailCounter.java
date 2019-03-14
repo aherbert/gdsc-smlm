@@ -87,7 +87,7 @@ public class WeightedFailCounter extends BaseFailCounter {
     if (n < 0) {
       throw new IllegalArgumentException("Number of passes must be positive");
     }
-    failCount -= n * passDecrement;
+    failCount -= (long) n * passDecrement;
     if (failCount < 0L) {
       failCount = 0L;
     }
@@ -106,7 +106,7 @@ public class WeightedFailCounter extends BaseFailCounter {
     if (n < 0) {
       throw new IllegalArgumentException("Number of fails must be positive");
     }
-    failCount += n * failIncrement;
+    failCount += (long) n * failIncrement;
     if (failCount < 0L) {
       throw new IllegalStateException("Unable to increment");
     }

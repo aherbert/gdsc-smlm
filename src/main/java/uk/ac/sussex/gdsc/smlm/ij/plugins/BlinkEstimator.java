@@ -53,7 +53,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 
 import java.awt.Color;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Estimates the flourophore blinking rate from a set of localisations.
@@ -63,6 +63,15 @@ import java.util.ArrayList;
  */
 public class BlinkEstimator implements PlugIn {
   private static final String TITLE = "Blink Estimator";
+
+  // For the LevenbergMarquardtOptimizer:
+  // Different convergence thresholds seem to have no effect on the resulting fit, only the number
+  // of iterations for convergence
+  private static final double INITIAL_STEP_BOUND_FACTOR = 100;
+  private static final double COST_RELATIVE_TOLERANCE = 1e-6;
+  private static final double PAR_RELATIVE_TOLERANCE = 1e-6;
+  private static final double ORTHO_TOLERANCE = 1e-6;
+  private static final double THRESHOLD = Precision.SAFE_MIN;
 
   private static String inputOption = "";
   private static int maxDarkTimeSetting = 80;
@@ -113,7 +122,7 @@ public class BlinkEstimator implements PlugIn {
 
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
       return;
@@ -395,7 +404,7 @@ public class BlinkEstimator implements PlugIn {
 
     try {
       final PcPalmMolecules fitter = new PcPalmMolecules();
-      final ArrayList<Molecule> molecules = fitter.extractLocalisations(results);
+      final List<Molecule> molecules = fitter.extractLocalisations(results);
       final String title = (verbose) ? TITLE + " Localisation Precision" : null;
 
       fittedAverage = fitter.calculateAveragePrecision(molecules, title, histogramBins, true, true);
@@ -438,17 +447,9 @@ public class BlinkEstimator implements PlugIn {
       blinkingModel.addPoint(td[i], ntd[i]);
     }
 
-    // Different convergence thresholds seem to have no effect on the resulting fit, only the number
-    // of
-    // iterations for convergence
-    final double initialStepBoundFactor = 100;
-    final double costRelativeTolerance = 1e-6;
-    final double parRelativeTolerance = 1e-6;
-    final double orthoTolerance = 1e-6;
-    final double threshold = Precision.SAFE_MIN;
     final LevenbergMarquardtOptimizer optimiser =
-        new LevenbergMarquardtOptimizer(initialStepBoundFactor, costRelativeTolerance,
-            parRelativeTolerance, orthoTolerance, threshold);
+        new LevenbergMarquardtOptimizer(INITIAL_STEP_BOUND_FACTOR, COST_RELATIVE_TOLERANCE,
+            PAR_RELATIVE_TOLERANCE, ORTHO_TOLERANCE, THRESHOLD);
     try {
       final double[] obs = blinkingModel.getY();
 
@@ -470,7 +471,6 @@ public class BlinkEstimator implements PlugIn {
 
       final double[] parameters = optimum.getPoint().toArray();
 
-      // double[] exp = blinkingModel.value(parameters);
       double mean = 0;
       for (final double d : obs) {
         mean += d;
@@ -479,7 +479,6 @@ public class BlinkEstimator implements PlugIn {
       double ssResiduals = 0;
       double ssTotal = 0;
       for (int i = 0; i < obs.length; i++) {
-        // ssResiduals += (obs[i] - exp[i]) * (obs[i] - exp[i]);
         ssTotal += (obs[i] - mean) * (obs[i] - mean);
       }
       // This is true if the weights are 1
@@ -606,7 +605,7 @@ public class BlinkEstimator implements PlugIn {
    * of photoblinking molecules in the sample<br> nBlink = The average number of blinks per
    * flourophore<br> td = The dark time<br> tOff = The off-time<br>
    */
-  public class BlinkingFunction extends LoggingOptimiserFunction
+  private static class BlinkingFunction extends LoggingOptimiserFunction
       implements MultivariateVectorFunction {
     /**
      * Instantiates a new blinking function.

@@ -27,8 +27,6 @@ package uk.ac.sussex.gdsc.smlm.engine;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
 
-import java.util.List;
-
 /**
  * Specifies additional parameters for the job.
  *
@@ -68,44 +66,29 @@ public class FitParameters {
    * The noise for the image data.
    */
   public float noise = Float.NaN;
+
   /**
    * The spots to fit within the data.
    */
   public Spot[] spots;
+
   /**
    * The maximum candidate spot to fit. This should be equal to spots.length or less. It is used
    * when additional candidates have been added to the spots list that are neighbours of the primary
    * spot candidates.
    */
   public int maxCandidate;
+
   /**
    * The maxima to fit within the data.
    */
   public int[] maxIndices;
-  /**
-   * The background for the image data. This is no longer used as the background is estimated using
-   * the local fit region.
-   */
-  @Deprecated
-  public float background = Float.NaN;
-  /**
-   * Only maxima within the distance threshold to these coordinates will be included in the results.
-   *
-   * @deprecated Filtering is no longer supported
-   */
-  @Deprecated
-  public List<float[]> filter;
-  /**
-   * The distance threshold to use when checking if fitted peaks match the desired results.
-   *
-   * @deprecated Filtering is no longer supported
-   */
-  @Deprecated
-  public float distanceThreshold = 1;
+
   /**
    * The task to perform.
    */
   public FitTask fitTask = FitTask.PSF_FITTING;
+
   /**
    * The frame acquisition end time for the input data. Used when data represents multiple frames.
    */
@@ -120,11 +103,6 @@ public class FitParameters {
    * used to construct the FitWorker).
    */
   public MultiPathFilter benchmarkFilter;
-
-  /**
-   * The distance to an existing result to be declared a duplicate.
-   */
-  public double duplicateDistance;
 
   /**
    * The pass array.

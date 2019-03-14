@@ -69,10 +69,12 @@ public class LogFactorial {
   public static int getTableMaxN() {
     final ReadWriteLock rwl = LogFactorial.lock;
     rwl.readLock().lock();
-    final int maxN = masterTable.length - 1;
-    // Unlock read
-    rwl.readLock().unlock();
-    return maxN;
+    try {
+      return masterTable.length - 1;
+    } finally {
+      // Unlock read
+      rwl.readLock().unlock();
+    }
   }
 
   /**
@@ -257,10 +259,12 @@ public class LogFactorial {
   public int getMaxN() {
     final ReadWriteLock rwl = this.objectLock;
     rwl.readLock().lock();
-    final int maxN = objectTable.length - 1;
-    // Unlock read
-    rwl.readLock().unlock();
-    return maxN;
+    try {
+      return objectTable.length - 1;
+    } finally {
+      // Unlock read
+      rwl.readLock().unlock();
+    }
   }
 
   /**

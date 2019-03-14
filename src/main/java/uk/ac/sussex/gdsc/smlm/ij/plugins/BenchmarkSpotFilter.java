@@ -71,7 +71,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.procedure.TObjectProcedure;
 
 import ij.IJ;
@@ -521,7 +520,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   /**
    * Store a filter result.
    */
-  public class FilterResult {
+  public static class FilterResult {
 
     /** The frame. */
     final int frame;
@@ -1079,7 +1078,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       if (debug) {
-        System.out.printf("Frame %d : N = %d, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f\n", frame,
+        System.out.printf("Frame %d : N = %.2f, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f%n", frame,
             actualLength, result.getTruePositives(), result.getFalsePositives(), result.getRecall(),
             result.getPrecision());
       }
@@ -1817,12 +1816,9 @@ public class BenchmarkSpotFilter implements PlugIn {
       totalProgress = coordinates.size();
       stepProgress = ImageJUtils.getProgressInterval(totalProgress);
       progress = 0;
-      coordinates.forEachKey(new TIntProcedure() {
-        @Override
-        public boolean execute(int value) {
-          put(jobs, value);
-          return true;
-        }
+      coordinates.forEachKey(value -> {
+        put(jobs, value);
+        return true;
       });
       // Finish all the worker threads by passing in a null job
       for (int i = 0; i < threads.size(); i++) {
@@ -1848,7 +1844,7 @@ public class BenchmarkSpotFilter implements PlugIn {
               calculator.getAmplitude(spot.peakResult.getParameters()));
         }
       }
-      System.out.printf("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d\n", regression.getR(),
+      ImageJUtils.log("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d", regression.getR(),
           regression.getSlope(), regression.getN());
 
       IJ.showProgress(-1);

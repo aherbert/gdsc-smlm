@@ -79,7 +79,7 @@ public class MultiPathFilter {
    * Stores the results that were accepted when filtering a multi-path result. Also stores the fit
    * result that was used to select the results.
    */
-  public class SelectedResult {
+  public static class SelectedResult {
 
     /** The results. */
     public final PreprocessedPeakResult[] results;
@@ -146,7 +146,7 @@ public class MultiPathFilter {
   /**
    * Allow tracking of candidates that have been fit.
    */
-  private class SimpleSelectedResultStore implements SelectedResultStore {
+  private static class SimpleSelectedResultStore implements SelectedResultStore {
     /** The is fit. */
     boolean[] isFit;
 

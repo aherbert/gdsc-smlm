@@ -557,19 +557,17 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   }
 
   /** The default range. */
-  protected static double[] defaultRange = new double[] {SignalFilter.DEFAULT_RANGE,
-      SnrFilter.DEFAULT_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
-      ShiftFilter.DEFAULT_RANGE, EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE,
-      ZCoordinateFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE};
+  protected static double[] defaultRange = {SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
+      WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
+      EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
+      ZCoordinateFilter.DEFAULT_RANGE};
 
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
-    final double[] params =
-        new double[] {signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ};
+    final double[] params = getParameters();
     params[index] = updateParameter(params[index], delta, defaultRange[index]);
-    return new MultiFilter(params[0], (float) params[1], params[2], params[3], params[4], params[5],
-        params[6], (float) params[7], (float) params[8]);
+    return create(params);
   }
 
   @Override

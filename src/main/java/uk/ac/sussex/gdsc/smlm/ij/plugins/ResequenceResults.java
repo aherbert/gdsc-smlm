@@ -61,7 +61,7 @@ public class ResequenceResults implements PlugIn {
 
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, true, null, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }
@@ -172,7 +172,7 @@ public class ResequenceResults implements PlugIn {
    */
   private static boolean resequenceResults(MemoryPeakResults results, final int start,
       final int block, final int skip, final TrackProgress tracker) {
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       return false;
     }
 

@@ -97,7 +97,7 @@ public class MedianFilter {
       return;
     }
 
-    final float[] newData = floatBuffer(floatDataBuffer, data.length);
+    floatDataBuffer = floatBuffer(floatDataBuffer, data.length);
 
     final int[] offsets = new int[blockSize * blockSize - 1];
     for (int y = -n, d = 0; y <= n; y++) {
@@ -123,7 +123,7 @@ public class MedianFilter {
           add(data[index + offset]);
         }
 
-        newData[index] = getMedian();
+        floatDataBuffer[index] = getMedian();
       }
     }
 
@@ -131,7 +131,7 @@ public class MedianFilter {
     for (int y = n; y < maxy - n; y++) {
       int index = y * maxx + n;
       for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = newData[index];
+        data[index] = floatDataBuffer[index];
       }
     }
   }

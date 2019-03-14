@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical
@@ -266,6 +267,7 @@ public class Gaussian2DFitter {
       }
       params[Gaussian2DFunction.SIGNAL] = sum - background * size;
       params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
+      // Requires integer division result to get the y-position
       params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
     } else {
       for (int i = 0, j = 0; i < peaks.length; i++, j += paramsPerPeak) {
@@ -899,13 +901,17 @@ public class Gaussian2DFitter {
     // Debug check
     for (int i = (fitConfiguration.isBackgroundFitting()) ? 0 : 1; i < params.length; i++) {
       if (params[i] < lower[i]) {
-        System.out.printf("Param %d (%s) too low %f < %f\n", i, solver.getName(i), params[i],
-            lower[i]);
+        final int ii = i;
+        Logger.getLogger(getClass().getName())
+            .warning(() -> String.format("Param %d (%s) too low %f < %f", ii, solver.getName(ii),
+                params[ii], lower[ii]));
         lower[i] = params[i] - (lower[i] - params[i]);
       }
       if (params[i] > upper[i]) {
-        System.out.printf("Param %d (%s) too high %f > %f\n", i, solver.getName(i), params[i],
-            upper[i]);
+        final int ii = i;
+        Logger.getLogger(getClass().getName())
+            .warning(() -> String.format("Param %d (%s) too high %f > %f", ii, solver.getName(ii),
+                params[ii], upper[ii]));
         upper[i] = params[i] + (params[i] - upper[i]);
       }
     }

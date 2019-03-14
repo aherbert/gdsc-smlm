@@ -34,7 +34,6 @@ import org.apache.commons.math3.random.Well19937c;
 
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
@@ -43,18 +42,15 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 /**
  * A frame that shows a PeakResultsListModel.
- *
- * @author Alex Herbert
  */
 public class PeakResultListModelFrame extends JFrame {
   private static final long serialVersionUID = -1530205032042929260L;
 
-  private class MyCellRenderer extends JLabel implements ListCellRenderer<PeakResult> {
+  private static class MyCellRenderer extends JLabel implements ListCellRenderer<PeakResult> {
     // This is the only method defined by ListCellRenderer.
     // We just reconfigure the JLabel each time we're called.
     private static final long serialVersionUID = 1998620838894273028L;
@@ -62,8 +58,6 @@ public class PeakResultListModelFrame extends JFrame {
     @Override
     public Component getListCellRendererComponent(JList<? extends PeakResult> list,
         PeakResult value, int index, boolean isSelected, boolean cellHasFocus) {
-      // TODO - Make this a better representation of the Peak Result.
-      // Build a configurable layout using the TableResults settings.
       final StringBuilder sb = new StringBuilder();
       for (int i = 0; i < PeakResult.STANDARD_PARAMETERS; i++) {
         if (sb.length() != 0) {
@@ -147,71 +141,28 @@ public class PeakResultListModelFrame extends JFrame {
 
     final ListSelectionModel selectionModel = new DefaultListSelectionModel();
 
-    // The way to interact with a model from many parts of the same GUI is through
-    // the same selection model. Each JList updates using the same selection.
-    selectionModel.addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(ListSelectionEvent event) {
-        if (event.getValueIsAdjusting()) {
-          return;
+    EventQueue.invokeLater((Runnable) () -> {
+      try {
+        final PeakResultStoreList store = new ArrayPeakResultStore(10);
+        for (int i = n; i-- > 0;) {
+          store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
+              r.nextDouble(), r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(),
+                  r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat()),
+              null));
         }
-        System.out.printf("Model Selected %d-%d [%b] : %s\n", event.getFirstIndex(),
-            event.getLastIndex(), event.getValueIsAdjusting(),
-            Arrays.toString(ListSelectionModelHelper.getSelectedIndices(selectionModel)));
-      }
-    });
+        final PeakResultListModel model = new PeakResultListModel(store);
 
-    EventQueue.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          final PeakResultStoreList store = new ArrayPeakResultStore(10);
-          for (int i = n; i-- > 0;) {
-            store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
-                r.nextDouble(), r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(),
-                    r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat()),
-                null));
-          }
-          final PeakResultListModel model = new PeakResultListModel(store);
+        final PeakResultListModelFrame d = new PeakResultListModelFrame(model, selectionModel);
+        d.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        d.setVisible(true);
 
-          final PeakResultListModelFrame d = new PeakResultListModelFrame(model, selectionModel);
-          // d.addListSelectionListener(new ListSelectionListener()
-          // {
-          // public void valueChanged(ListSelectionEvent event)
-          // {
-          // // Only process the event if the value is not adjusting.
-          // // Then to determine what has changed only process the
-          // // indices between the first and last index.
-          //
-          // if (e.getValueIsAdjusting())
-          // return;
-          // System.out.printf("D Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-          // e.getValueIsAdjusting(), Arrays.toString(d.list.getSelectedIndices()));
-          // }
-          // });
-          d.setDefaultCloseOperation(EXIT_ON_CLOSE);
-          d.setVisible(true);
+        // Selecting in one list activates the other list
 
-          // Selecting in one list activates the other list
-
-          final PeakResultListModelFrame d2 = new PeakResultListModelFrame(model, selectionModel);
-          // d2.addListSelectionListener(new ListSelectionListener()
-          // {
-          // public void valueChanged(ListSelectionEvent event)
-          // {
-          // if (e.getValueIsAdjusting())
-          // return;
-          // int[] indices = d2.list.getSelectedIndices();
-          // System.out.printf("D2 Selected %d-%d [%b] : %s\n", e.getFirstIndex(), e.getLastIndex(),
-          // e.getValueIsAdjusting(), Arrays.toString(indices));
-          // //d.list.setSelectedIndices(indices);
-          // }
-          // });
-          d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
-          d2.setVisible(true);
-        } catch (final Exception ex) {
-          ex.printStackTrace();
-        }
+        final PeakResultListModelFrame d2 = new PeakResultListModelFrame(model, selectionModel);
+        d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        d2.setVisible(true);
+      } catch (final Exception ex) {
+        ex.printStackTrace();
       }
     });
   }

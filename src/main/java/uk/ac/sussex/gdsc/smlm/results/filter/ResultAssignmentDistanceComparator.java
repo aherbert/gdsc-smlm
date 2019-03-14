@@ -22,26 +22,24 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.settings;
+package uk.ac.sussex.gdsc.smlm.results.filter;
+
+import java.io.Serializable;
+import java.util.Comparator;
 
 /**
- * Contain the settings for a parameter for the batch fitting plugin.
+ * Compares the {@link ResultAssignment} using the distance, lowest first.
  */
-public class ParameterSettings {
-  /** The name. */
-  public String name = "";
+public class ResultAssignmentDistanceComparator
+    implements Comparator<ResultAssignment>, Serializable {
+  private static final long serialVersionUID = 1L;
 
-  /** The value. */
-  public String value = "";
+  /** The instance. */
+  public static final ResultAssignmentDistanceComparator INSTANCE =
+      new ResultAssignmentDistanceComparator();
 
-  /**
-   * Instantiates a new parameter settings.
-   *
-   * @param name the name
-   * @param value the value
-   */
-  public ParameterSettings(String name, String value) {
-    this.name = name;
-    this.value = value;
+  @Override
+  public int compare(ResultAssignment o1, ResultAssignment o2) {
+    return Double.compare(o1.distance, o2.distance);
   }
 }

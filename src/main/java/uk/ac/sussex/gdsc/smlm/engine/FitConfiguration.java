@@ -2267,7 +2267,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     // Compare the signal to the desired signal strength
     if (signal < minSignal) {
       if (log != null) {
-        log.info(() -> String.format("Bad peak %d: Insufficient signal %g\n", n, signal));
+        log.info(() -> String.format("Bad peak %d: Insufficient signal %g", n, signal));
       }
       // if (params.length == 7) // Single peak
       // System.out.printf("Bad peak %d: Insufficient signal (%g)\n", n, signal);
@@ -2290,7 +2290,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
       if (s2 > widthFactor || s2 < minWidthFactor) {
         if (log != null) {
-          log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n,
+          log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)", n,
               xFactor, yFactor));
         }
         return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] {xFactor, yFactor});
@@ -2312,7 +2312,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     // Compare the signal to the desired signal strength
     if (snr < getSignalStrength()) {
       if (log != null) {
-        log.info(() -> String.format("Bad peak %d: Insufficient SNR %g\n", n, snr));
+        log.info(() -> String.format("Bad peak %d: Insufficient SNR %g", n, snr));
       }
       // if (params.length == 7) // Single peak
       // System.out.printf("Bad peak %d: Insufficient SNR (%g)\n", n, snr);
@@ -2339,7 +2339,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (log != null) {
           final double localXFactor = xfactor;
           final double localYFactor = yfactor;
-          log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)\n", n,
+          log.info(() -> String.format("Bad peak %d: Fitted width diverged (x=%gx,y=%gx)", n,
               localXFactor, localYFactor));
         }
         return setValidationResult(FitStatus.WIDTH_DIVERGED, new double[] {xfactor, yfactor});
@@ -2375,7 +2375,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         if (log != null) {
           final double precision = Math.sqrt(variance);
           log.info(
-              () -> String.format("Bad peak %d: Insufficient precision (%gx)\n", n, precision));
+              () -> String.format("Bad peak %d: Insufficient precision (%gx)", n, precision));
         }
         return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, variance);
       }
@@ -3921,6 +3921,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
    * Gets the camera model.
    *
    * @return the camera model
+   * @throws IllegalStateException if no camera model exists for the camera type
    */
   public CameraModel getCameraModel() {
     if (cameraModel == null) {

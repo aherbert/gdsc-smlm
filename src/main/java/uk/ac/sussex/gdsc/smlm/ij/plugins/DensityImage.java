@@ -111,7 +111,7 @@ public class DensityImage implements PlugIn {
 
     MemoryPeakResults results =
         ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
       return;
@@ -157,7 +157,7 @@ public class DensityImage implements PlugIn {
   }
 
   private static DensityManager createDensityManager(MemoryPeakResults results) {
-    if (results == null || results.size() == 0) {
+    if (MemoryPeakResults.isEmpty(results)) {
       throw new IllegalArgumentException("Results are null or empty");
     }
 

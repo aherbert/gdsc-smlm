@@ -66,6 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -425,7 +426,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       return;
     }
 
-    try (InputStreamReader reader = new InputStreamReader(templateStream)) {
+    try (InputStreamReader reader = new InputStreamReader(templateStream, StandardCharsets.UTF_8)) {
       final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
       if (SettingsManager.fromJson(reader, builder, 0
       // SettingsManager.FLAG_SILENT
@@ -484,37 +485,39 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       if (templateListStream == null) {
         return new TemplateResource[0];
       }
-      final BufferedReader input = new BufferedReader(new InputStreamReader(templateListStream));
-      String line;
-      final ArrayList<TemplateResource> list = new ArrayList<>();
-      while ((line = input.readLine()) != null) {
-        // Skip comment character
-        if (line.length() == 0 || line.charAt(0) == '#') {
-          continue;
-        }
-
-        // Check the resource exists
-        final String path = templateDir + line;
-        try (InputStream templateStream = resourceClass.getResourceAsStream(path)) {
-          if (templateStream == null) {
+      try (final BufferedReader input =
+          new BufferedReader(new InputStreamReader(templateListStream, StandardCharsets.UTF_8))) {
+        String line;
+        final ArrayList<TemplateResource> list = new ArrayList<>();
+        while ((line = input.readLine()) != null) {
+          // Skip comment character
+          if (line.length() == 0 || line.charAt(0) == '#') {
             continue;
           }
-        }
 
-        // Create a simple name
-        final String name = FileUtils.removeExtension(line);
-
-        // Check if an example TIF file exists for the template
-        String tifPath = templateDir + name + ".tif";
-        try (InputStream tifStream = resourceClass.getResourceAsStream(tifPath)) {
-          if (tifStream == null) {
-            tifPath = null;
+          // Check the resource exists
+          final String path = templateDir + line;
+          try (InputStream templateStream = resourceClass.getResourceAsStream(path)) {
+            if (templateStream == null) {
+              continue;
+            }
           }
-        }
 
-        list.add(new TemplateResource(path, name, tifPath));
+          // Create a simple name
+          final String name = FileUtils.removeExtension(line);
+
+          // Check if an example TIF file exists for the template
+          String tifPath = templateDir + name + ".tif";
+          try (InputStream tifStream = resourceClass.getResourceAsStream(tifPath)) {
+            if (tifStream == null) {
+              tifPath = null;
+            }
+          }
+
+          list.add(new TemplateResource(path, name, tifPath));
+        }
+        return list.toArray(new TemplateResource[0]);
       }
-      return list.toArray(new TemplateResource[list.size()]);
     } catch (final IOException ex) {
       // Ignore
     }
@@ -545,7 +548,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         continue;
       }
 
-      try (InputStreamReader reader = new InputStreamReader(templateStream)) {
+      try (InputStreamReader reader =
+          new InputStreamReader(templateStream, StandardCharsets.UTF_8)) {
         builder.clear();
         if (SettingsManager.fromJson(reader, builder, 0
         // SettingsManager.FLAG_SILENT

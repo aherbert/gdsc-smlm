@@ -42,9 +42,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     gradientIndices = createGradientIndices(1, new SingleFixedGaussian2DFunction(1, 1));
   }
 
-  /** The width. */
-  protected double width;
-
   /** The background. */
   protected double background;
   /** The x0 position. */
@@ -52,7 +49,7 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
   /** The x1 position. */
   protected double x1pos;
 
-  /** The amplitude./height normalisation: 1/(2*pi*sx*sy). */
+  /** The amplitude./height normalisation: 1/(2*pi*sx*sx). */
   protected double norm;
   /** The amplitude./height. */
   protected double height;
@@ -83,7 +80,6 @@ public class SingleFixedGaussian2DFunction extends Gaussian2DFunction {
     background = a[BACKGROUND];
     x0pos = a[X_POSITION];
     x1pos = a[Y_POSITION];
-    width = a[X_SD];
 
     final double sx = a[X_SD];
     final double sx2 = sx * sx;

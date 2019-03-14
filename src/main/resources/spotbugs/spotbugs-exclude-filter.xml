@@ -33,6 +33,31 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://github.com/spotbugs/filter/3.1.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
 
-  <Class name="~.*\.jmh\.generated\..*" />
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.results.ImmutablePeakResult" />
+    <!-- The immutable class allows the parent constructor to call methods. -->
+    <Bug pattern="UR_UNINIT_READ_CALLED_FROM_SUPER_CONSTRUCTOR" />
+  </Match>
+
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.BatchPeakFit" />
+    <!-- The bytes are loaded from a String conversion using the default encoding. -->
+    <Method name="loadDocument" />
+    <Bug pattern="DM_DEFAULT_ENCODING" />
+  </Match>
+
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.function.LogFactorial" />
+    <!-- The read lock is not released in a finally block. The only point an exception could
+    occur when the read lock is held is checking the table array size. The array is never null so
+    this is not a bug. -->
+    <Or>
+      <Method name="increaseTableMaxN" />
+      <Method name="reduceTableMaxN" />
+      <Method name="increaseMaxN" />
+      <Method name="ensureRange" />
+    </Or>
+    <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH" />
+  </Match>
 
 </FindBugsFilter>

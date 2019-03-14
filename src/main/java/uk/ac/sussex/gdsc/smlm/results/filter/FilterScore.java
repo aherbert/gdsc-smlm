@@ -78,23 +78,18 @@ public class FilterScore implements Comparable<FilterScore> {
         return -1;
       }
 
-      // Sort by the score
-      if (this.score > that.score) {
-        return -1;
+      // Sort by the score then criteria, highest first
+      int result = Double.compare(that.score , this.score);
+      if (result != 0) {
+        return result;
       }
-      if (this.score < that.score) {
-        return 1;
+      result = Double.compare(that.criteria, this.criteria);
+      if (result != 0) {
+        return result;
       }
-      if (this.criteria > that.criteria) {
-        return -1;
-      }
-      if (this.criteria < that.criteria) {
-        return 1;
-      }
+
       // If the same type then compare the parameters
-      if (allSameType) {
-        return compareParameters(that);
-      } else if (this.filter.getType().equals(that.filter.getType())) {
+      if (allSameType || this.filter.getType().equals(that.filter.getType())) {
         return compareParameters(that);
       }
       return 0;
@@ -105,23 +100,18 @@ public class FilterScore implements Comparable<FilterScore> {
       return 1;
     }
 
-    // Sort by how close we are to passing the criteria
-    if (this.criteria > that.criteria) {
-      return -1;
+    // Sort by how close we are to passing the criteria, highest first
+    int result = Double.compare(that.criteria, this.criteria);
+    if (result != 0) {
+      return result;
     }
-    if (this.criteria < that.criteria) {
-      return 1;
+    result = Double.compare(that.score , this.score);
+    if (result != 0) {
+      return result;
     }
-    if (this.score > that.score) {
-      return -1;
-    }
-    if (this.score < that.score) {
-      return 1;
-    }
+
     // If the same type then compare the parameters
-    if (allSameType) {
-      return compareParameters(that);
-    } else if (this.filter.getType().equals(that.filter.getType())) {
+    if (allSameType || this.filter.getType().equals(that.filter.getType())) {
       return compareParameters(that);
     }
     return 0;

@@ -28,6 +28,8 @@ import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
 
+import java.util.function.Supplier;
+
 /**
  * Samples uniformly from the specified volume.
  *
@@ -39,21 +41,21 @@ public class UniformDistribution implements SpatialDistribution {
   /**
    * Wrap a standard random generator to create a vector generator for 3 dimensions.
    */
-  private class VectorGeneratorWrapper implements RandomVectorGenerator {
+  private static class VectorGeneratorWrapper implements RandomVectorGenerator {
     private final RandomGenerator rng1;
     private final RandomGenerator rng2;
     private final RandomGenerator rng3;
 
-    public VectorGeneratorWrapper(RandomGeneratorFactory randomGeneratorFactory) {
+    VectorGeneratorWrapper(Supplier<RandomGenerator> randomGeneratorFactory) {
       rng1 = create(randomGeneratorFactory);
       rng2 = create(randomGeneratorFactory);
       rng3 = create(randomGeneratorFactory);
     }
 
-    private RandomGenerator create(RandomGeneratorFactory randomGeneratorFactory) {
-      final RandomGenerator rng = randomGeneratorFactory.createRandomGenerator();
+    private RandomGenerator create(Supplier<RandomGenerator> randomGeneratorFactory) {
+      final RandomGenerator rng = randomGeneratorFactory.get();
       if (rng == null) {
-        throw new RuntimeException("RandomGeneratorFactory created null RandomGenerator");
+        throw new NullPointerException("RandomGeneratorFactory created null RandomGenerator");
       }
       return rng;
     }
@@ -75,7 +77,7 @@ public class UniformDistribution implements SpatialDistribution {
    * @param max The maximum bounds for the distribution
    */
   public UniformDistribution(double[] max) {
-    init(min, max, null);
+    init(new double[3], max, null);
   }
 
   /**
@@ -96,10 +98,10 @@ public class UniformDistribution implements SpatialDistribution {
    * @param seed Start at the i-th point in the Halton sequence
    */
   public UniformDistribution(double[] min, double[] max, int seed) {
-    // HaltonSequenceGenerator randomVectorGenerator = new HaltonSequenceGenerator(3);
     // The Halton sequence based on the prime of 2 does not provide great variety in the
     // lesser significant digits when simulating a 512x512 pixel image. This is not suitable for
-    // PSF fitting since we require variation to at least 3 decimal places.
+    // PSF fitting since we require variation to at least 3 decimal places. So start at the
+    // prime of 3.
     final HaltonSequenceGenerator randomVectorGenerator =
         new HaltonSequenceGenerator(3, new int[] {3, 5, 7}, null);
     randomVectorGenerator.skipTo(Math.abs(seed));
@@ -128,7 +130,7 @@ public class UniformDistribution implements SpatialDistribution {
    *        in the domain [0,1]
    */
   public UniformDistribution(double[] min, double[] max,
-      RandomGeneratorFactory randomGeneratorFactory) {
+      Supplier<RandomGenerator> randomGeneratorFactory) {
     final RandomVectorGenerator randomVectorGenerator =
         new VectorGeneratorWrapper(randomGeneratorFactory);
     init(min, max, randomVectorGenerator);

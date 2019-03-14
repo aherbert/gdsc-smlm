@@ -31,6 +31,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -47,19 +49,20 @@ import java.util.logging.Logger;
  * the number of worker threads can be configured.
  */
 public class FitEngine {
+  /** The empty job used as a shutdown signal. */
+  private static final FitJob EMPTY_JOB = new FitJob();
+
   private final BlockingQueue<FitJob> jobs;
   private final List<FitWorker> workers;
-  private final List<Thread> threads;
+  private List<Thread> threads;
   private long time;
   private final FitQueue queueType;
   private final PeakResults results;
-  private boolean isAlive = true;
 
   // Used by the FitWorkers
   private final int fitting;
   private final MaximaSpotFilter spotFilter;
   private final Logger logger;
-  private final Logger debugLogger = null;
   private FitTypeCounter counter;
 
   /**
@@ -88,30 +91,11 @@ public class FitEngine {
    * @param results Output results (must be thread safe if using multiple threads)
    * @param threads The number of threads to use (set to 1 if less than 1)
    * @param queueType Specify the queue behaviour
-   */
-  public FitEngine(FitEngineConfiguration config, PeakResults results, int threads,
-      FitQueue queueType) {
-    this(config, results, threads, queueType, 3 * threads);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param config The fit configuration
-   * @param results Output results (must be thread safe if using multiple threads)
-   * @param threads The number of threads to use (set to 1 if less than 1)
-   * @param queueType Specify the queue behaviour
    * @param queueSize The size of the queue
    */
-  public FitEngine(FitEngineConfiguration config, PeakResults results, int threads,
+  private FitEngine(FitEngineConfiguration config, PeakResults results, int threads,
       FitQueue queueType, int queueSize) {
-    if (threads < 1) {
-      threads = 1;
-      queueSize = 3;
-    }
-
     workers = new ArrayList<>(threads);
-    this.threads = new ArrayList<>(threads);
     this.queueType = queueType;
     switch (queueType) {
       case NON_BLOCKING:
@@ -129,20 +113,6 @@ public class FitEngine {
     spotFilter = config.createSpotFilter();
 
     logger = config.getFitConfiguration().getLog();
-    //// Allow debugging the fit process
-    // try {
-    // String pattern = new File(System.getProperty("java.io.tmpdir"),
-    // String.format("%s%s.log",
-    // FitProtosHelper.getName(config.getFitConfiguration().getFitSolver()),
-    // (config.getFitConfiguration().isModelCamera()) ? "C" : "")
-    // ).getPath();
-    // FileHandler handler = new FileHandler(pattern);
-    // handler.setFormatter(new PlainMessageFormatter());
-    // debugLogger = LoggerUtils.getUnconfiguredLogger();
-    // debugLogger.addHandler(handler);
-    // } catch (IOException ex) {
-    // // Ignore
-    // }
 
     // Allow logging the type of fit
     if (logger != null) {
@@ -164,29 +134,69 @@ public class FitEngine {
       // Copy anything else not in a proto object
       copy.getFitConfiguration().copySettings(fitConfiguration);
 
-      final FitWorker worker = new FitWorker(
-          // config.clone(),
-          copy, results, jobs);
-      // Note - Clone the spot filter for each worker.
+      final FitWorker worker = new FitWorker(copy, results, jobs);
+      // Note - Copy the spot filter for each worker.
       worker.setSearchParameters(getSpotFilter(), fitting);
-      worker.setDebugLogger(debugLogger);
       worker.setCounter(counter);
-      final Thread t = new Thread(worker);
-
       workers.add(worker);
-      this.threads.add(t);
+    }
+  }
 
+  /**
+   * Create a new FitEngine.
+   *
+   * @param config The fit configuration
+   * @param results Output results (must be thread safe if using multiple threads)
+   * @param threads The number of threads to use (set to 1 if less than 1)
+   * @param queueType Specify the queue behaviour
+   * @return the fit engine
+   */
+  public static FitEngine create(FitEngineConfiguration config, PeakResults results, int threads,
+      FitQueue queueType) {
+    return create(config, results, threads, queueType, 3 * threads);
+  }
+
+  /**
+   * Create a new FitEngine.
+   *
+   * @param config The fit configuration
+   * @param results Output results (must be thread safe if using multiple threads)
+   * @param threads The number of threads to use (set to 1 if less than 1)
+   * @param queueType Specify the queue behaviour
+   * @param queueSize The size of the queue
+   * @return the fit engine
+   */
+  public static FitEngine create(FitEngineConfiguration config, PeakResults results, int threads,
+      FitQueue queueType, int queueSize) {
+    if (threads < 1) {
+      threads = 1;
+      queueSize = 3;
+    }
+    final FitEngine fitEngine = new FitEngine(config, results, threads, queueType, queueSize);
+    fitEngine.start();
+    return fitEngine;
+  }
+
+  /**
+   * Create the threads that run the workers.
+   */
+  private void start() {
+    threads = new ArrayList<>(workers.size());
+    for (final FitWorker worker : workers) {
+      final Thread t = new Thread(worker);
+      threads.add(t);
       t.start();
     }
   }
 
   /**
-   * Locate all the peaks in the given processor. Adds the work to the current queue.
+   * Adds the work to the current queue, waiting if necessary for space to become available.
    *
    * @param job The job
+   * @throws ConcurrentRuntimeException if interrupted while waiting to add.
    */
   public void run(FitJob job) {
-    if (!isAlive || job == null || job.getData() == null) {
+    if (job == null || job.getData() == null) {
       return;
     }
 
@@ -198,8 +208,6 @@ public class FitEngine {
       }
 
       put(job);
-    } else {
-      isAlive = false;
     }
   }
 
@@ -212,8 +220,8 @@ public class FitEngine {
     try {
       jobs.put(job);
     } catch (final InterruptedException ex) {
-      // TODO - Handle thread errors
-      throw new RuntimeException("Unexpected interruption", ex);
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
   }
 
@@ -223,6 +231,7 @@ public class FitEngine {
    * <p>Ask all threads to end and wait. Returns when all threads have stopped running.
    *
    * @param now Stop the work immediately, otherwise finish all work in the queue
+   * @throws ConcurrentRuntimeException if interrupted while waiting to add.
    */
   public synchronized void end(boolean now) {
     if (threads.isEmpty()) {
@@ -241,12 +250,16 @@ public class FitEngine {
       // Add null jobs if the queue is not at capacity so they can be collected by alive workers.
       // If there are already jobs then the worker will stop due to the finish() signal.
       for (int i = 0; i < threads.size(); i++) {
-        jobs.offer(new FitJob()); // non-blocking add to queue
+        // non-blocking add to queue
+        if (!jobs.offer(EMPTY_JOB)) {
+          // At capacity so stop adding more
+          break;
+        }
       }
     } else {
       // Finish all the worker threads by passing in a null job
       for (int i = 0; i < threads.size(); i++) {
-        put(new FitJob()); // blocking add to queue
+        put(EMPTY_JOB); // blocking add to queue
       }
     }
 
@@ -256,13 +269,10 @@ public class FitEngine {
         threads.get(i).join();
         time += workers.get(i).getTime();
       } catch (final InterruptedException ex) {
-        // TODO - Handle thread errors
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Unexpected interruption", ex);
+        throw new ConcurrentRuntimeException(ex);
       }
-    }
-
-    if (debugLogger != null) {
-      debugLogger.getHandlers()[0].close();
     }
 
     // Output this to the log

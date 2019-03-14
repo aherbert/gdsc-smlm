@@ -26,10 +26,12 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -92,6 +94,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ParameterType;
 import uk.ac.sussex.gdsc.smlm.results.filter.PeakFractionalAssignment;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ResultAssignment;
+import uk.ac.sussex.gdsc.smlm.results.filter.ResultAssignmentDistanceComparator;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.search.ConvergenceChecker;
 import uk.ac.sussex.gdsc.smlm.search.ConvergenceToleranceChecker;
@@ -146,6 +149,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -411,7 +415,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private class Job {
+  private static class Job {
     final int frame;
     final FilterCandidates candidates;
 
@@ -666,10 +670,9 @@ public class BenchmarkFilterAnalysis
 
           // Save
           if (!assignments.isEmpty()) {
-            final ResultAssignment[] tmp = new ResultAssignment[assignments.size()];
-            assignments.toArray(tmp);
+            final ResultAssignment[] tmp = assignments.toArray(new ResultAssignment[0]);
             // Sort here to speed up a later sort of merged assignment arrays
-            Arrays.sort(tmp);
+            Arrays.sort(tmp, ResultAssignmentDistanceComparator.INSTANCE);
             peak.setAssignments(tmp);
           }
         }
@@ -687,7 +690,7 @@ public class BenchmarkFilterAnalysis
   }
 
   // Store the best filter scores
-  private class FilterResult {
+  private static class FilterResult {
     final double score;
     final int failCount;
     final double residualsThreshold;
@@ -2710,9 +2713,9 @@ public class BenchmarkFilterAnalysis
       IJ.showStatus("Calculating sensitivity ...");
       final Consumer<String> output = createSensitivityWindow();
 
-      int currentIndex = 0;
+      final Ticker ticker =
+          Ticker.createStarted(new ImageJTrackProgress(), bestFilter.size(), false);
       for (final String type : bestFilterOrder) {
-        IJ.showProgress(currentIndex++, bestFilter.size());
 
         final DirectFilter filter = bestFilter.get(type).getFilter();
 
@@ -2755,6 +2758,8 @@ public class BenchmarkFilterAnalysis
 
           output.accept(sb.toString());
         }
+
+        ticker.tick();
       }
 
       final String message = "-=-=-=-";
@@ -3964,25 +3969,24 @@ public class BenchmarkFilterAnalysis
     double[] point = createParameters();
     final String[] names = {"Fail count", "Residuals threshold", "Duplicate distance"};
 
-    {
-      // Local scope for index
-      int index = 0;
-      try {
-        originalDimensions[index++] = new FixedDimension(minFailCount, maxFailCount, 1);
-        // TODO - let the min intervals be configured, maybe via extra options
-        if (BenchmarkSpotFit.computeDoublets) {
-          originalDimensions[index++] =
-              new FixedDimension(minResidualsThreshold, maxResidualsThreshold, 0.05);
-        } else {
-          originalDimensions[index++] = new FixedDimension(1, 1, 0.05);
-        }
-        originalDimensions[index++] =
-            new FixedDimension(minDuplicateDistance, maxDuplicateDistance, 0.5);
-      } catch (final IllegalArgumentException ex) {
-        ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(),
-            index, names[index]);
-        return null;
+    // Start at -1 so an exception constructing the dimension can use the same index
+    // to log the error.
+    int index = -1;
+    try {
+      originalDimensions[++index] = new FixedDimension(minFailCount, maxFailCount, 1);
+      // TODO - let the min intervals be configured, maybe via extra options
+      if (BenchmarkSpotFit.computeDoublets) {
+        originalDimensions[++index] =
+            new FixedDimension(minResidualsThreshold, maxResidualsThreshold, 0.05);
+      } else {
+        originalDimensions[++index] = new FixedDimension(1, 1, 0.05);
       }
+      originalDimensions[++index] =
+          new FixedDimension(minDuplicateDistance, maxDuplicateDistance, 0.5);
+    } catch (final IllegalArgumentException ex) {
+      ImageJUtils.log(TITLE + " : Unable to configure dimension [%d] %s: " + ex.getMessage(), index,
+          names[index]);
+      return null;
     }
 
     // Check for a search
@@ -4299,18 +4303,15 @@ public class BenchmarkFilterAnalysis
     // i.e. multi-threading use of the filter clone is not working.
     // Or it could be that the optimisation produced params off the min-interval grid
     final FilterScoreResult scoreResult = scoreFilter(searchScoreFilter);
-    if (optimum != null) {
-      if (scoreResult.score != optimum.getScore().score
-          && scoreResult.criteria != optimum.getScore().criteria) {
-        final ParameterScoreResult r = scoreFilter((DirectFilter) searchScoreFilter.clone(),
-            minimalFilter, failCount, residualsThreshold, duplicateDistance,
-            createCoordinateStore(duplicateDistance), false);
+    if (optimum != null && (scoreResult.score != optimum.getScore().score
+        && scoreResult.criteria != optimum.getScore().criteria)) {
+      final ParameterScoreResult r = scoreFilter((DirectFilter) searchScoreFilter.clone(),
+          minimalFilter, failCount, residualsThreshold, duplicateDistance,
+          createCoordinateStore(duplicateDistance), false);
 
-        System.out.printf("Weird re- score of the filter: %f!=%f or %f!=%f (%f:%f)\n",
-            scoreResult.score, optimum.getScore().score, scoreResult.criteria,
-            optimum.getScore().criteria, r.score, r.criteria);
-
-      }
+      ImageJUtils.log("Weird re-score of the filter: %f!=%f or %f!=%f (%f:%f)", scoreResult.score,
+          optimum.getScore().score, scoreResult.criteria, optimum.getScore().criteria, r.score,
+          r.criteria);
     }
 
     final SimpleFilterScore max =
@@ -4448,6 +4449,7 @@ public class BenchmarkFilterAnalysis
       }
     }
   }
+
   private void addToResultsWindow(ParameterScoreResult[] scoreResults) {
     if (resultsWindow != null) {
       try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
@@ -4498,7 +4500,7 @@ public class BenchmarkFilterAnalysis
   private static String getDialogName(String prefix, Filter filter, int index) {
     final ParameterType type = filter.getParameterType(index);
     final String parameterName = prefix + type.getShortName().replace(" ", "_");
-    if (type.getName() == type.getShortName()) {
+    if (type.getShortName().equals(type.getName())) {
       return parameterName;
     }
     return parameterName + " (" + type.getName() + ")";
@@ -5486,7 +5488,7 @@ public class BenchmarkFilterAnalysis
       }
 
       // Report
-      Arrays.sort(scores, new FilterScoreCompararor());
+      Arrays.sort(scores, FilterScoreCompararor.INSTANCE);
 
       int lastSize = 0;
       for (int i = 0; i < scores.length; i++) {
@@ -5707,7 +5709,12 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private static class FilterScoreCompararor implements Comparator<ComplexFilterScore> {
+  private static class FilterScoreCompararor
+      implements Comparator<ComplexFilterScore>, Serializable {
+    private static final long serialVersionUID = 1L;
+    /** The instance. */
+    static final FilterScoreCompararor INSTANCE = new FilterScoreCompararor();
+
     @Override
     public int compare(ComplexFilterScore o1, ComplexFilterScore o2) {
       // Sort by size, smallest first
@@ -5781,7 +5788,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private class NamedPlot implements Comparable<NamedPlot> {
+  private static class NamedPlot implements Comparable<NamedPlot> {
     String name;
     String xAxisName;
     double[] xValues;
@@ -6082,7 +6089,7 @@ public class BenchmarkFilterAnalysis
   private FilterScoreResult[] gaScoreResults;
   private int gaScoreIndex;
 
-  private class ScoreJob {
+  private static class ScoreJob {
     final DirectFilter filter;
     final int index;
 
@@ -6092,7 +6099,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private class ParameterScoreJob {
+  private static class ParameterScoreJob {
     final double[] point;
     final int index;
 

@@ -388,18 +388,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
 
     void addTP1(double score) {
-      // if (score > 1)
-      // System.out.printf("Bad score %f\n", score);
-      if (tp1 != 0) {
-        System.out.printf("Double counting: %f\n", score);
-      }
       tp1 += score;
       fp1 -= score;
     }
 
     void addTP2(double score, int id) {
-      // if (score > 1)
-      // System.out.printf("Bad score %f\n", score);
       if (id == 0) {
         tp2a += score;
         fp2a -= score;
@@ -428,11 +421,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         return result;
       }
       return r1.spot.y - r2.spot.y;
-      // if (r1.spot.intensity > that.spot.intensity)
-      // return -1;
-      // if (r1.spot.intensity < that.spot.intensity)
-      // return 1;
-      // return 0;
     }
   }
 
@@ -813,7 +801,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                         .signum(result.maic1 - result.maic2)) {
                       daic++;
                       System.out.printf(
-                          "AIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)\n", frame,
+                          "AIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)%n", frame,
                           spot.x, spot.y, matchCount, Math.signum(result.aic1 - result.aic2),
                           Math.signum(result.maic1 - result.maic2), result.getMaxScore());
                     }
@@ -821,12 +809,12 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                         .signum(result.mbic1 - result.mbic2)) {
                       dbic++;
                       System.out.printf(
-                          "BIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)\n", frame,
+                          "BIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)%n", frame,
                           spot.x, spot.y, matchCount, Math.signum(result.bic1 - result.bic2),
                           Math.signum(result.mbic1 - result.mbic2), result.getMaxScore());
                     }
                     if (Double.isInfinite(result.value1) || Double.isInfinite(result.value2)) {
-                      System.out.printf("oops\n", result.value1, result.value2);
+                      throw new IllegalStateException("Infinite values in results");
                     }
                   }
                 } else {
@@ -1019,18 +1007,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         // Rank the doublets by residuals threshold instead. 1 from the doublet
         // must match the spot that it matched as a single (if still available).
         // The other can match anything else...
-        Collections.sort(frameResults, new Comparator<DoubletResult>() {
-          @Override
-          public int compare(DoubletResult o1, DoubletResult o2) {
-            if (o1.getMaxScore() > o2.getMaxScore()) {
-              return -1;
-            }
-            if (o1.getMaxScore() < o2.getMaxScore()) {
-              return -1;
-            }
-            return 0;
-          }
-        });
+        Collections.sort(frameResults,
+            (o1, o2) -> Double.compare(o1.getMaxScore(), o2.getMaxScore()));
 
         count = 0;
         Arrays.fill(assigned, false);
@@ -1849,7 +1827,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       }
     }
     if (cic > 0) {
-      System.out.printf("Difference AIC %d, BIC %d, Total %d\n", daic, dbic, cic);
+      ImageJUtils.log("Difference AIC %d, BIC %d, Total %d", daic, dbic, cic);
     }
     if (showHistograms) {
       final double[] spotHistogram = new double[maxH];

@@ -52,9 +52,10 @@ import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -397,15 +398,11 @@ public class CameraModelManager implements PlugIn {
 
     directory = egd.getNextString();
 
-    final File[] fileList = (new File(directory)).listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File pathname) {
-        return pathname.isFile();
+    final File[] fileList = (new File(directory)).listFiles(File::isFile);
+    if (!ArrayUtils.isEmpty(fileList)) {
+      for (final File file : fileList) {
+        loadFromFileAndSaveResource(file.getPath());
       }
-    });
-
-    for (final File file : fileList) {
-      loadFromFileAndSaveResource(file.getPath());
     }
   }
 

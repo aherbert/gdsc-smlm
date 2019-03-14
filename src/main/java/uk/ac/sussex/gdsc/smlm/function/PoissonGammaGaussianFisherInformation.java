@@ -578,7 +578,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     double sum = compute(scale, range1, p, a, minP);
 
     if (sum == Double.POSITIVE_INFINITY) {
-      extremeLimit(theta);
+      return extremeLimit(theta);
     }
 
     // Iterate
@@ -951,6 +951,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       valueP = result[0];
       gradientA = result[1];
       dx = 1.0 / lastScale;
+      // Requires integer division. The kernel should be an odd size.
       offset = lastG.length / 2 * -dx;
       scaleFactor = gaussianKernel.getConversionFactor(lastG);
     } else {

@@ -45,6 +45,8 @@ import ij.process.InfinityMappedFloatProcessor;
 import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+
 import java.awt.Rectangle;
 import java.util.Arrays;
 
@@ -1206,10 +1208,14 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     // Wait for previous image to finish rendering
     while (!imageLock.acquire()) {
       try {
-        System.out.printf("Waiting for final image\n");
+        if (IJ.debugMode) {
+          IJ.log("Waiting for final image");
+        }
         Thread.sleep(50);
       } catch (final InterruptedException ex) {
-        // Ignore
+        // Reset interrupt status
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException("Unexpected interruption", ex);
       }
     }
 

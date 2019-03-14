@@ -53,8 +53,6 @@ import java.util.Arrays;
  *
  * <p>A special exception is made for a PointArray as that has no surface to colour. In this case it
  * must be created using the GeometryArray.COLOR_4 flag.
- *
- * @author Alex Herbert
  */
 public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape {
   /**

@@ -67,8 +67,6 @@ import java.util.logging.Logger;
  * (electrons/count) and camera bias. The bias is removed from the background. If amplification is
  * not strictly positive then the calibration gain will be written to the TSF 'electron conversion
  * factor' field.
- *
- * @author Alex Herbert
  */
 public class TsfPeakResultsWriter extends AbstractPeakResults {
   private static Logger logger = Logger.getLogger(TsfPeakResultsWriter.class.getName());

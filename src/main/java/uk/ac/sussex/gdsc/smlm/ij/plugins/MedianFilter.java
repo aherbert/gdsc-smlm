@@ -304,7 +304,7 @@ public class MedianFilter implements PlugInFilter {
    * <p>Use a runnable for the image generation to allow multi-threaded operation. Input parameters
    * that are manipulated should have synchronized methods.
    */
-  private class ImageFilter implements Runnable {
+  private static class ImageFilter implements Runnable {
     final ImageStack inputStack;
     final float[][] imageStack;
     final int slice;

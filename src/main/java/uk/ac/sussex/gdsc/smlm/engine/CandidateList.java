@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -44,15 +45,16 @@ class CandidateList {
     boolean test(Candidate candidate);
   }
 
-  private static class CandidateComparator implements Comparator<Candidate> {
+  private static class CandidateComparator implements Comparator<Candidate>, Serializable {
+    private static final long serialVersionUID = 1L;
+    /** The candidate comparator. */
+    private static final CandidateComparator INSTANCE = new CandidateComparator();
+
     @Override
     public int compare(Candidate o1, Candidate o2) {
       return o1.index - o2.index;
     }
   }
-
-  /** The candidate comparator. */
-  private static final CandidateComparator comp = new CandidateComparator();
 
   private int size;
   private Candidate[] list;
@@ -115,7 +117,7 @@ class CandidateList {
    */
   public void sort() {
     if (size != 0) {
-      Arrays.sort(list, 0, size, comp);
+      Arrays.sort(list, 0, size, CandidateComparator.INSTANCE);
     }
   }
 

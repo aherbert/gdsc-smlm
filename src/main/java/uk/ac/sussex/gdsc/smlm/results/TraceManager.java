@@ -34,6 +34,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -43,7 +44,6 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Trace localisations through a time stack to identify single molecules.
@@ -113,7 +113,7 @@ public class TraceManager {
    */
   private float minD;
 
-  private class Localisation {
+  private static class Localisation {
     int time;
     int endTime;
     int id;
@@ -139,7 +139,7 @@ public class TraceManager {
     }
   }
 
-  private class Assignment {
+  private static class Assignment {
     int index;
     float distance;
     int traceId;
@@ -161,17 +161,6 @@ public class TraceManager {
     initialise(results);
   }
 
-  private class LocalisationProcedure implements PeakResultProcedure {
-    int id;
-
-    @Override
-    public void execute(PeakResult result) {
-      localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(),
-          result.getXPosition(), result.getYPosition());
-      id++;
-    }
-  }
-
   private void initialise(final MemoryPeakResults results) {
     if (results == null || results.size() == 0) {
       throw new IllegalArgumentException("Results are null or empty");
@@ -180,7 +169,12 @@ public class TraceManager {
 
     // Assign localisations. We use the native result units to avoid conversion exceptions.
     localisations = new Localisation[results.size()];
-    results.forEach(new LocalisationProcedure());
+    Counter counter = new Counter();
+    results.forEach((PeakResultProcedure) result -> {
+      final int id = counter.getAndIncrement();
+      localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(),
+          result.getXPosition(), result.getYPosition());
+    });
 
     totalTraces = localisations.length;
 
@@ -336,18 +330,8 @@ public class TraceManager {
           // Sort the remaining allocations by their distance
           if (reSort) {
             reSort = false;
-            Arrays.sort(assigned, i, assignedToTrace, new Comparator<Assignment>() {
-              @Override
-              public int compare(Assignment o1, Assignment o2) {
-                if (o1.distance < o2.distance) {
-                  return -1;
-                }
-                if (o1.distance > o2.distance) {
-                  return 1;
-                }
-                return 0;
-              }
-            });
+            Arrays.sort(assigned, i, assignedToTrace,
+                (o1, o2) -> Double.compare(o1.distance, o2.distance));
             // Check for new traces (allocated in a previous loop). These have distance <0 so will
             // be sorted to the front.
             if (assigned[i].distance < 0) {
@@ -550,8 +534,8 @@ public class TraceManager {
    *
    * <p>If the trace is empty it is ignored.
    *
-   * <p>The results will only have the standard parameters set [Background,Intensity,X,Y,Z] so
-   * a custom PSF is added to the results.
+   * <p>The results will only have the standard parameters set [Background,Intensity,X,Y,Z] so a
+   * custom PSF is added to the results.
    *
    * @param traces the traces
    * @param calibration the calibration

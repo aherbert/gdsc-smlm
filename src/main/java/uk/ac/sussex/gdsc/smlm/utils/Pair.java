@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.utils;
 /**
  * A generic pair.
  *
- * @author Alex Herbert
  * @param <A> the generic type
  * @param <B> the generic type
  */

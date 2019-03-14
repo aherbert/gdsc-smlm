@@ -38,11 +38,6 @@ public class PsfSpot extends BasePoint {
   /** The peak result. */
   public final PeakResult peakResult;
   /**
-   * The amount of total intensity contributed within the region of this spot from overlapping PSFs,
-   * i.e. how much more signal is in the area of this spot due to other PSFs.
-   */
-  public float intensityOffset;
-  /**
    * The amount of total background contributed within the region of this spot from overlapping
    * PSFs, i.e. how much higher is this spot due to other PSFs.
    */
