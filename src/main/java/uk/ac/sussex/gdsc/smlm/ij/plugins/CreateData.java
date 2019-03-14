@@ -175,7 +175,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -236,7 +235,7 @@ public class CreateData implements PlugIn, ItemListener {
   private PsfModel psfModelCache;
 
   private static TextWindow summaryTable;
-  private static int datasetNumber;
+  private static AtomicInteger datasetNumber = new AtomicInteger();
   private static double areaInUm;
   private static String header;
 
@@ -701,9 +700,6 @@ public class CreateData implements PlugIn, ItemListener {
       return;
     }
 
-    // Each localisation is a simulated emission of light from a point in space and time
-    List<LocalisationModel> localisations = null;
-
     // Each localisation set is a collection of localisations that represent all localisations
     // with the same ID that are on in the same image time frame (Note: the simulation
     // can create many localisations per fluorophore per time frame which is useful when
@@ -799,7 +795,7 @@ public class CreateData implements PlugIn, ItemListener {
 
       RandomGenerator random = null;
 
-      localisations = new ArrayList<>(settings.getParticles());
+      // List<LocalisationModel> localisations = new ArrayList<>(settings.getParticles());
       localisationSets = new ArrayList<>(settings.getParticles());
 
       final int minPhotons = (int) settings.getPhotonsPerSecond();
@@ -834,7 +830,6 @@ public class CreateData implements PlugIn, ItemListener {
 
           final LocalisationModel m =
               new LocalisationModel(id, time, xyz, intensity, LocalisationModel.CONTINUOUS);
-          localisations.add(m);
 
           // Each localisation can be a separate localisation set
           final LocalisationModelSet set = new LocalisationModelSet(id, time);
@@ -963,9 +958,10 @@ public class CreateData implements PlugIn, ItemListener {
       // This should be optimised
       imageModel.setConfinementAttempts(10);
 
-      localisations = imageModel.createImage(molecules, settings.getFixedFraction(), totalSteps,
-          settings.getPhotonsPerSecond() / settings.getStepsPerSecond(), correlation,
-          settings.getRotateDuringSimulation());
+      final List<LocalisationModel> localisations =
+          imageModel.createImage(molecules, settings.getFixedFraction(), totalSteps,
+              settings.getPhotonsPerSecond() / settings.getStepsPerSecond(), correlation,
+              settings.getRotateDuringSimulation());
 
       // Re-adjust the fluorophores to the correct time
       if (settings.getStepsPerSecond() != 1) {
@@ -981,9 +977,9 @@ public class CreateData implements PlugIn, ItemListener {
       localisationSets = filterToImageBounds(localisationSets);
     }
 
-    datasetNumber++;
+    datasetNumber.getAndIncrement();
 
-    localisations = drawImage(localisationSets);
+    final List<LocalisationModel> localisations = drawImage(localisationSets);
 
     if (localisations == null || localisations.isEmpty()) {
       IJ.error(TITLE, "No localisations created");
@@ -1001,7 +997,6 @@ public class CreateData implements PlugIn, ItemListener {
 
     IJ.showStatus("Saving data ...");
 
-    // convertRelativeToAbsolute(molecules);
     saveFluorophores(fluorophores);
     saveImageResults(results);
     saveLocalisations(localisations);

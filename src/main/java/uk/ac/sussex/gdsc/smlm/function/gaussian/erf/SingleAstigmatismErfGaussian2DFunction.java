@@ -335,7 +335,7 @@ public class SingleAstigmatismErfGaussian2DFunction
             // Add the equivalent term we add in the circular version.
             // Note: this is not in the Smith, et al (2010) paper but is
             // in the GraspJ source code and it works in JUnit tests.
-            //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+            // 2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI
             two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * duDtsx[x];
         //@formatter:on
 
@@ -422,7 +422,7 @@ public class SingleAstigmatismErfGaussian2DFunction
             // Add the equivalent term we add in the circular version.
             // Note: this is not in the Smith, et al (2010) paper but is
             // in the GraspJ source code and it works in JUnit tests.
-            //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+            // 2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI
             two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI * duDtsx[x];
         //@formatter:on
 

@@ -561,7 +561,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       int total = 0;
       int ignored = 0;
       final int[] spotMatchCount = new int[spots.length];
-      final int[] neighbourIndices = new int[spots.length];
       for (int i = 0; i < actual.length; i++) {
         if (matches[i] != -1) {
           // Count all matches
@@ -632,7 +631,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                 || spots[jj].intensity < heightThreshold) {
               almostNeighbourCount++;
             } else {
-              neighbourIndices[neighbourCount++] = jj;
+              neighbourCount++;
             }
           }
 

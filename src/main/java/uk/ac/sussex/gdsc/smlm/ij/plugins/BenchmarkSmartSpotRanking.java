@@ -1075,7 +1075,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       final Overlay o = new Overlay();
       for (int j = 0; j < results.length; j++) {
         final int frame = frames[j];
-        // FilterCandidates candidates = filterCandidates.get(frame);
         final RankResults rr = results[j];
         final RankResult r = rr.results.get(bestMethod);
         final int[] x1 = new int[r.good.length];
@@ -1111,7 +1110,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         }
         addToOverlay(o, frame, x1, y1, c1, Color.green);
         addToOverlay(o, frame, x2, y2, c2, Color.red);
-        // addToOverlay(o, frame, x3, y3, c3, new Color(153, 255, 153)); // light green
+        if (IJ.debugMode) {
+          addToOverlay(o, frame, x3, y3, c3, new Color(153, 255, 153)); // light green
+        }
         addToOverlay(o, frame, x4, y4, c4, new Color(255, 153, 153)); // light red
       }
 

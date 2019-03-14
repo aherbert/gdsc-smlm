@@ -386,7 +386,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
               // Add the equivalent term we add in the circular version.
               // Note: this is not in the Smith, et al (2010) paper but is
               // in the GraspJ source code and it works in JUnit tests.
-              //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+              // 2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI
               two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }
@@ -401,12 +401,6 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
     final double[] duda = new double[ng];
     final double[] d2udadb = new double[ng * ng];
     duda[0] = 1.0;
-    final double[] du_dtsx_tI = new double[duDtsx.length];
-    for (int x = 0; x < maxx; x++) {
-      for (int n = 0, xx = x; n < numberOfPeaks; n++, xx += maxx) {
-        du_dtsx_tI[xx] = duDtsx[xx] / tI[n];
-      }
-    }
     final double[] du_dty_tI = new double[numberOfPeaks];
     final double[] du_dtsy_by_dtsy_dtz_tI = new double[numberOfPeaks];
     final double[] du_dty_by_dtsx_dtz_tI = new double[numberOfPeaks];
@@ -502,7 +496,7 @@ public class MultiAstigmatismErfGaussian2DFunction extends MultiFreeCircularErfG
               // Add the equivalent term we add in the circular version.
               // Note: this is not in the Smith, et al (2010) paper but is
               // in the GraspJ source code and it works in JUnit tests.
-              //2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI;
+              // 2 * du_dtsx[x] * dtsx_dtz * du_dtsy * dtsy_dtz / tI
               two_dtsx_dtz_by_du_dtsy_by_dtsy_dtz_tI[n] * duDtsx[xx];
           //@formatter:on
         }

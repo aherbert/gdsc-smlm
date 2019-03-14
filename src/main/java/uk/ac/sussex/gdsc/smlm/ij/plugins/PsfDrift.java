@@ -74,8 +74,6 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Label;
 import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -548,12 +546,10 @@ public class PsfDrift implements PlugIn {
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-    final List<Worker> workers = new LinkedList<>();
     final List<Thread> threads = new LinkedList<>();
     for (int i = 0; i < nThreads; i++) {
       final Worker worker = new Worker(jobs, psf, w, fitConfig);
       final Thread t = new Thread(worker);
-      workers.add(worker);
       threads.add(t);
       t.start();
     }
@@ -1160,12 +1156,7 @@ public class PsfDrift implements PlugIn {
     gd2.addSlider("z-centre", cx[0], cx[cx.length - 1], newCentre);
     final TextField tf = gd2.getLastTextField();
     gd2.addMessage("");
-    gd2.addAndGetButton("Reset", new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        tf.setText(Integer.toString(newCentre));
-      }
-    });
+    gd2.addAndGetButton("Reset", event -> tf.setText(Integer.toString(newCentre)));
     final Label label = gd2.getLastLabel();
     gd2.addCheckbox("Update_centre", updateCentre);
     gd2.addCheckbox("Update_HWHM", updateHWHM);
@@ -1175,17 +1166,15 @@ public class PsfDrift implements PlugIn {
         new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
     gd2.addDialogListener(dl);
     gd2.showDialog();
-    if (gd2.wasOKed()) {
-      if (updateCentre || updateHWHM) {
-        final ImagePSF.Builder b = psfSettings.toBuilder();
-        if (updateCentre) {
-          b.setCentreImage(dl.centre);
-        }
-        if (updateHWHM) {
-          b.setFwhm(dl.getFwhm());
-        }
-        imp.setProperty("Info", ImagePsfHelper.toString(b));
+    if (gd2.wasOKed() && (updateCentre || updateHWHM)) {
+      final ImagePSF.Builder b = psfSettings.toBuilder();
+      if (updateCentre) {
+        b.setCentreImage(dl.centre);
       }
+      if (updateHWHM) {
+        b.setFwhm(dl.getFwhm());
+      }
+      imp.setProperty("Info", ImagePsfHelper.toString(b));
     }
   }
 
@@ -1210,9 +1199,9 @@ public class PsfDrift implements PlugIn {
         final LinearInterpolator in = new LinearInterpolator();
         final PolynomialSplineFunction f = in.interpolate(cx, cy);
         cx = SimpleArrayUtils.newArray(upper + 1, cx[0], 1.0);
-        cy = new double[cx.length];
+        this.cy = new double[cx.length];
         for (int i = 0; i < cx.length; i++) {
-          cy[i] = f.value(cx[i]);
+          this.cy[i] = f.value(cx[i]);
         }
       }
 

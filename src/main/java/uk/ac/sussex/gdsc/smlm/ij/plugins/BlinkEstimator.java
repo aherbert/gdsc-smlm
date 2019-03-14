@@ -218,6 +218,9 @@ public class BlinkEstimator implements PlugIn {
     plot("Fitted points", "N", npoints, parameters[0]);
     plot("Fitted points", "nBlinks", npoints, parameters[1]);
     plot("Fitted points", "tOff", npoints, parameters[2]);
+    if (IJ.debugMode) {
+      plot("Fitted points", "R^2", npoints, r2);
+    }
     plot("Fitted points", "Adjusted R^2", npoints, adjustedR2);
   }
 

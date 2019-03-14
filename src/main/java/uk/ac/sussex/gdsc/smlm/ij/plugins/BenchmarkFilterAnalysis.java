@@ -4115,14 +4115,13 @@ public class BenchmarkFilterAnalysis
           if (pSeedSize > 0) {
             // Add current optimum to seed
             // Note: If we have an optimum and we are not seeding this should not matter as the
-            // dimensions
-            // have been centred on the current optimum
+            // dimensions have been centred on the current optimum
             final double[][] seed = new double[1][];
             seed[0] = point;
             // Sample without rounding as the seed will be rounded
             final double[][] sample =
                 SearchSpace.sampleWithoutRounding(dimensions, pSeedSize - 1, null);
-            ss.seed(merge(sample, seed));
+            ss.seed(merge(seed, sample));
           }
           final ConvergenceChecker<FilterScore> checker =
               new InterruptConvergenceChecker(0, 0, pMaxIterations);
@@ -4835,8 +4834,6 @@ public class BenchmarkFilterAnalysis
       final List<Filter> filters = new ArrayList<>(1);
       filters.add(filter);
       final FilterSet filterSet = new FilterSet(filter.getName(), filters);
-      final List<FilterSet> list = new ArrayList<>(1);
-      list.add(filterSet);
       saveFilterSet(filterSet, filename);
     }
   }
@@ -6282,13 +6279,11 @@ public class BenchmarkFilterAnalysis
       // Multi-thread score all the result
       final int nThreads = getThreads(scoreResults.length);
       final BlockingQueue<ScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-      final List<ScoreWorker> workers = new LinkedList<>();
       final List<Thread> threads = new LinkedList<>();
       for (int i = 0; i < nThreads; i++) {
         final ScoreWorker worker = new ScoreWorker(jobs, scoreResults, createTextResult,
             (coordinateStore == null) ? null : coordinateStore.newInstance());
         final Thread t = new Thread(worker);
-        workers.add(worker);
         threads.add(t);
         t.start();
       }
@@ -6361,13 +6356,11 @@ public class BenchmarkFilterAnalysis
       // Multi-thread score all the result
       final int nThreads = getThreads(scoreResults.length);
       final BlockingQueue<ParameterScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-      final List<ParameterScoreWorker> workers = new LinkedList<>();
       final List<Thread> threads = new LinkedList<>();
       for (int i = 0; i < nThreads; i++) {
         final ParameterScoreWorker worker =
             new ParameterScoreWorker(jobs, scoreResults, createTextResult);
         final Thread t = new Thread(worker);
-        workers.add(worker);
         threads.add(t);
         t.start();
       }

@@ -139,8 +139,6 @@ import java.awt.Label;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2374,14 +2372,12 @@ public class PsfCreator implements PlugInFilter {
     // Even PSFs have the middle in the centre of two pixels
     final int cx2 = (size % 2 == 0) ? cx - 1 : cx;
 
-    final double[] p0 = new double[size];
     final double[] p1 = new double[size];
     final double[] p2 = new double[size];
     final double[] p3 = new double[size];
     final double[] p4 = new double[size];
     final ImageProcessor ip = psf.getProcessor(maxz);
     for (int i = 0, j = size - 1; i < size; i++, j--) {
-      p0[i] = i;
       p1[i] = (ip.getf(i, cx) + ip.getf(i, cx2)) / 2.0;
       p2[i] = (ip.getf(cx, i) + ip.getf(cx2, i)) / 2.0;
       p3[i] = ip.getf(i, i);

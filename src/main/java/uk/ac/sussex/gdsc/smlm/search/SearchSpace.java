@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.search;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
@@ -1018,7 +1019,7 @@ public class SearchSpace {
 
   /**
    * Sample uniformly from the given dimensions. The lower and upper bounds of active dimensions are
-   * used to define the search space. The min interval of each dimension is not respected, i.e the
+   * used to define the search space. The min interval of each dimension is not respected, i.e. the
    * coordinates are not rounded.
    *
    * <p>If the input generator array is null, the first element is null, or the vector length is the
@@ -1030,6 +1031,7 @@ public class SearchSpace {
    * @param generator the generator
    * @return the sample
    */
+  @Nullable
   public static double[][] sampleWithoutRounding(Dimension[] dimensions, int samples,
       RandomVectorGenerator[] generator) {
     if (samples <= 0) {
@@ -1037,7 +1039,6 @@ public class SearchSpace {
     }
     // Count the number of active dimensions
     final int[] indices = new int[dimensions.length];
-    final Dimension[] dimensions2 = new Dimension[dimensions.length];
     int size = 0;
     final double[] centre = new double[dimensions.length];
     final double[] lower = new double[dimensions.length];
@@ -1047,7 +1048,6 @@ public class SearchSpace {
       if (dimensions[i].isActive()) {
         lower[size] = dimensions[i].getLower();
         range[size] = (dimensions[i].getUpper() - lower[size]);
-        dimensions2[size] = dimensions[i];
         indices[size++] = i;
       }
     }
