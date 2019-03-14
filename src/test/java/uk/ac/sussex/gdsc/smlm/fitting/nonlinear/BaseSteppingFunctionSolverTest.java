@@ -50,8 +50,8 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
   }
 
   enum SteppingFunctionSolverType {
-    // Enum names should al be uppercase but this is just for a test so ignore that convention
-    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, JFastMLE, BtFastMLE
+    // Enum names should all be uppercase but this is just for a test so ignore that convention
+    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, BtFastMLE
   }
 
   // For convenience declare variables of the enum type
@@ -64,7 +64,6 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
   static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
   static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
   static final SteppingFunctionSolverType FastMLE = SteppingFunctionSolverType.FastMLE;
-  static final SteppingFunctionSolverType JFastMLE = SteppingFunctionSolverType.JFastMLE;
   static final SteppingFunctionSolverType BtFastMLE = SteppingFunctionSolverType.BtFastMLE;
   static final boolean BOUNDED = true;
   static final boolean NO_BOUND = false;
@@ -88,7 +87,6 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
     return getSolver(clamp, type, new ToleranceChecker(1e-5, 1e-5, 0, 0, 100));
   }
 
-  @SuppressWarnings("deprecation")
   SteppingFunctionSolver getSolver(SteppingFunctionSolverClamp clamp,
       SteppingFunctionSolverType type, ToleranceChecker tc) {
     final ErfGaussian2DFunction f =
@@ -134,14 +132,6 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
       case BtFastMLE:
         solver = new BacktrackingFastMleSteppingFunctionSolver(f, tc, bounds);
         // MLE requires a positive function value so use a lower bound
-        solver.setBounds(getLb(), null);
-        break;
-      case JFastMLE:
-        final ExtendedFastMleSteppingFunctionSolver efmSolver =
-            new ExtendedFastMleSteppingFunctionSolver(f, tc, bounds);
-        efmSolver.enableJacobianSolution(true);
-        // MLE requires a positive function value so use a lower bound
-        solver = efmSolver;
         solver.setBounds(getLb(), null);
         break;
       default:

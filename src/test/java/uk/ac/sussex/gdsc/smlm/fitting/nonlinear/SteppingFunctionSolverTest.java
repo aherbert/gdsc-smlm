@@ -30,9 +30,7 @@ import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.opentest4j.AssertionFailedError;
 
 /**
  * Test that a stepping solver can fit a function.
@@ -224,48 +222,6 @@ public class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
   public void canFitSingleGaussianEmCcd_B_DC_BtFastMle(RandomSeed seed) {
     fitSingleGaussian(seed, BOUNDED, DYNAMIC_CLAMP, BtFastMLE, NoiseModel.EMCCD);
   }
-
-  @SeededTest
-  public void cannotFitSingleGaussianEmCcd_x_x__JFastMle(RandomSeed seed) {
-    // The JFastMle method was built using a misinterpretation of the Newton
-    // method in Numerical Recipes, 2nd Ed. This test is just here to prove that.
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
-
-    // The JFastMle method does not work
-    Assertions.assertThrows(AssertionFailedError.class, () -> {
-      fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
-    });
-  }
-
-  // @Test
-  // public void canFitSingleGaussianEmCcd_x_C__JFastMle()
-  // {
-  // fitSingleGaussian(seed, NO_BOUND, CLAMP, JFastMLE, NoiseModel.EMCCD);
-  // }
-  //
-  // @Test
-  // public void canFitSingleGaussianEmCcd_x_DC_JFastMle()
-  // {
-  // fitSingleGaussian(seed, NO_BOUND, DYNAMIC_CLAMP, JFastMLE, NoiseModel.EMCCD);
-  // }
-  //
-  // @Test
-  // public void canFitSingleGaussianEmCcd_B_x__JFastMle()
-  // {
-  // fitSingleGaussian(seed, BOUNDED, NO_CLAMP, JFastMLE, NoiseModel.EMCCD);
-  // }
-  //
-  // @Test
-  // public void canFitSingleGaussianEmCcd_B_C__JFastMle()
-  // {
-  // fitSingleGaussian(seed, BOUNDED, CLAMP, JFastMLE, NoiseModel.EMCCD);
-  // }
-  //
-  // @Test
-  // public void canFitSingleGaussianEmCcd_B_DC_JFastMle()
-  // {
-  // fitSingleGaussian(seed, BOUNDED, DYNAMIC_CLAMP, JFastMLE, NoiseModel.EMCCD);
-  // }
 
   // Weighted solvers for sCMOS
 
