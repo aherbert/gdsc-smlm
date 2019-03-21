@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -846,8 +845,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         if (es == null) {
           es = Executors.newFixedThreadPool(nThreads);
         }
-        final Ticker ticker =
-            Ticker.createStarted(new ImageJTrackProgress(), index.length, nThreads != 1);
+        final Ticker ticker = ImageJUtils.createTicker(index.length, nThreads);
         final int nPerThread = (int) Math.ceil((double) index.length / nThreads);
         final TurboList<Future<?>> futures = new TurboList<>(nThreads);
         for (int i = 0; i < index.length; i += nPerThread) {
@@ -863,8 +861,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
           }));
         }
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
-        ticker.stop();
-        IJ.showStatus("");
+        ImageJUtils.finished();
 
         save(key, exp, alpha);
       }

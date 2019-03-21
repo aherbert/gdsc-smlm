@@ -29,6 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
@@ -39,7 +40,9 @@ import java.util.function.Predicate;
 /**
  * Stores peak results using an array.
  */
-public class ArrayPeakResultStore implements PeakResultStoreList {
+public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
+  private static final long serialVersionUID = 20190319L;
+
   /** The results. */
   private PeakResult[] results;
 

@@ -206,10 +206,10 @@ public class PsfCombiner implements PlugIn {
         crop = options.contains(" crop");
       } else {
         final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "The range of the PSFs is different:\nStart %d to %d\nEnd %d to %d\n"
                 + "Size %d to %d\n \nCrop to the smallest?",
-            minStart, maxStart, minEnd, maxEnd, minSize, maxSize));
+            minStart, maxStart, minEnd, maxEnd, minSize, maxSize);
         gd.enableYesNoCancel();
         gd.showDialog();
         if (gd.wasCanceled()) {

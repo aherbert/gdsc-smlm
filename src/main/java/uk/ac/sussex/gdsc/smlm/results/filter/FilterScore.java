@@ -26,6 +26,8 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
  * Store the filter score used in benchmarking.
+ *
+ * <p>Note: this class has a natural ordering that is inconsistent with equals.
  */
 public class FilterScore implements Comparable<FilterScore> {
   /** The filter. */

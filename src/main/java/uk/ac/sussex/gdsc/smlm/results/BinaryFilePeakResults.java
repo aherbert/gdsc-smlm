@@ -34,6 +34,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -325,12 +326,12 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     if (fos == null) {
       return;
     }
-    size += count;
     try {
       bytes.writeTo(out);
     } catch (final IOException ioe) {
       closeOutput();
     }
+    size += count;
   }
 
   @Override
@@ -449,11 +450,16 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
 
     private void extractSlice() {
       final int offset = (isShowId()) ? 4 : 0;
-      final int ch1 = line[offset + 0] & 0xff;
-      final int ch2 = line[offset + 1] & 0xff;
-      final int ch3 = line[offset + 2] & 0xff;
-      final int ch4 = line[offset + 3] & 0xff;
-      slice = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + ch4);
+      slice = makeInt(line[offset + 0], line[offset + 1], line[offset + 2], line[offset + 3]);
+    }
+
+    private int makeInt(byte b3, byte b2, byte b1, byte b0) {
+      // @formatter:off
+      return (( b3         << 24) |
+              ((b2 & 0xff) << 16) |
+              ((b1 & 0xff) <<  8) |
+              ( b0 & 0xff       ));
+      // @formatter:on
     }
   }
 

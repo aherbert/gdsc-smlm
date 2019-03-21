@@ -59,11 +59,11 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    * @param minimalIterationCount minimum number of iterations
    * @param maximalIterationCount maximum number of iterations (must be less than or equal to
    *        {@link #SIMPSON_MAX_ITERATIONS_COUNT})
-   * @exception NotStrictlyPositiveException if minimal number of iterations is not strictly
+   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly
    *            positive
-   * @exception NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
+   * @throws NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
    *            the minimal number of iterations
-   * @exception NumberIsTooLargeException if maximal number of iterations is greater than
+   * @throws NumberIsTooLargeException if maximal number of iterations is greater than
    *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
   public CustomSimpsonIntegrator(final double relativeAccuracy, final double absoluteAccuracy,
@@ -81,11 +81,11 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    * @param minimalIterationCount minimum number of iterations
    * @param maximalIterationCount maximum number of iterations (must be less than or equal to
    *        {@link #SIMPSON_MAX_ITERATIONS_COUNT})
-   * @exception NotStrictlyPositiveException if minimal number of iterations is not strictly
+   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly
    *            positive
-   * @exception NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
+   * @throws NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
    *            the minimal number of iterations
-   * @exception NumberIsTooLargeException if maximal number of iterations is greater than
+   * @throws NumberIsTooLargeException if maximal number of iterations is greater than
    *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
   public CustomSimpsonIntegrator(final int minimalIterationCount, final int maximalIterationCount) {

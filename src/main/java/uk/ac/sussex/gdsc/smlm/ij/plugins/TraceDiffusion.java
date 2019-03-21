@@ -27,8 +27,8 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -949,7 +949,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       final TraceManager manager = new TraceManager(r);
 
       // Run the tracing
-      manager.setTracker(new ImageJTrackProgress());
+      manager.setTracker(SimpleImageJTrackProgress.getInstance());
       // convert from
       manager.setDistanceExclusion(distanceExclusion);
       manager.traceMolecules(distanceThreshold, 1);
@@ -1144,7 +1144,6 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * @param plot the plot
    * @return [D, precision]
    */
-  @SuppressWarnings("null")
   private double[] fitMsd(double[] x, double[] y, String title, Plot2 plot) {
     // The Weimann paper (Plos One e64287) fits:
     // MSD(n dt) = 4D n dt + 4s^2
@@ -1161,7 +1160,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
     Optimum lvmSolution;
-    double ic = 0;
+    double ic = Double.NaN;
 
     // Fit with no intercept
     try {
@@ -1238,18 +1237,18 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       final double s = lvmSolution.getPoint().getEntry(1);
       final double intercept2 = 4 * s * s;
 
-      if (ic2 < ic || debugFitting) {
-        // Convert fitted precision in um to nm
-        ImageJUtils.log(
-            "Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, "
-                + "D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
-            function.getY().length, MathUtils.rounded(gradient, 4),
-            MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
-            MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
-            lvmSolution.getEvaluations());
-      }
+      if (ic2 < ic || Double.isNaN(ic)) {
+        if (debugFitting) {
+          // Convert fitted precision in um to nm
+          ImageJUtils.log(
+              "Linear fit with intercept (%d points) : Gradient = %s, Intercept = %s, "
+                  + "D = %s um^2/s, precision = %s nm, SS = %s, IC = %s (%d evaluations)",
+              function.getY().length, MathUtils.rounded(gradient, 4),
+              MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
+              MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
+              lvmSolution.getEvaluations());
+        }
 
-      if (lvmSolution == null || ic2 < ic) {
         intercept = intercept2;
         diffCoeff = gradient / 4;
         precision = s;
@@ -1290,7 +1289,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
         lvmSolution = optimizer.optimize(problem);
 
-        final double ss = lvmSolution.getResiduals().dotProduct(lvmSolution.getResiduals());
+        final RealVector residuals = lvmSolution.getResiduals();
+        final double ss = residuals.dotProduct(residuals);
         // double ss = 0;
         // double[] obs = function.getY();
         // double[] exp = lvmSolution.getValue();
@@ -1314,19 +1314,19 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         // Incorporate the exposure time into the gradient to allow comparison to other fits
         gradient /= exposureTime;
 
-        if (ic2 < ic || debugFitting) {
-          // Convert fitted precision in um to nm
-          ImageJUtils.log(
-              "Linear fit with MSD corrected intercept (%d points) : Gradient = %s, "
-                  + "Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, "
-                  + "IC = %s (%d evaluations)",
-              function.getY().length, MathUtils.rounded(gradient, 4),
-              MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
-              MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
-              lvmSolution.getEvaluations());
-        }
+        if (ic2 < ic || Double.isNaN(ic)) {
+          if (debugFitting) {
+            // Convert fitted precision in um to nm
+            ImageJUtils.log(
+                "Linear fit with MSD corrected intercept (%d points) : Gradient = %s, "
+                    + "Intercept = %s, D = %s um^2/s, precision = %s nm, SS = %s, "
+                    + "IC = %s (%d evaluations)",
+                function.getY().length, MathUtils.rounded(gradient, 4),
+                MathUtils.rounded(intercept2, 4), MathUtils.rounded(gradient / 4, 4),
+                MathUtils.rounded(s * 1000, 4), MathUtils.rounded(ss), MathUtils.rounded(ic2),
+                lvmSolution.getEvaluations());
+          }
 
-        if (lvmSolution == null || ic2 < ic) {
           intercept = intercept2;
           diffCoeff = gradient / 4;
           precision = s;

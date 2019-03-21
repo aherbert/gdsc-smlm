@@ -28,12 +28,10 @@ import uk.ac.sussex.gdsc.core.data.IntegerType;
 import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.ArrayMoment;
 import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
 import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
@@ -47,6 +45,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
@@ -263,7 +262,7 @@ public class CmosAnalysis implements PlugIn {
     }
   }
 
-  private static class SubDir implements Comparable<SubDir> {
+  private static class SubDir {
     int exposureTime;
     File path;
     String name;
@@ -274,9 +273,15 @@ public class CmosAnalysis implements PlugIn {
       this.name = name;
     }
 
-    @Override
-    public int compareTo(SubDir other) {
-      return Integer.compare(exposureTime, other.exposureTime);
+    /**
+     * Compare the two results.
+     *
+     * @param r1 the first result
+     * @param r2 the second result
+     * @return -1, 0 or 1
+     */
+    static int compare(SubDir r1, SubDir r2) {
+      return Integer.compare(r1.exposureTime, r2.exposureTime);
     }
   }
 
@@ -310,11 +315,7 @@ public class CmosAnalysis implements PlugIn {
           }
         }
       } catch (final InterruptedException ex) {
-        if (!finished) {
-          // This is not expected
-          Thread.currentThread().interrupt();
-          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
-        }
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -451,7 +452,7 @@ public class CmosAnalysis implements PlugIn {
         PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
     final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
         ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-    Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), n, false);
+    Ticker ticker = ImageJUtils.createTicker(n, 0);
     for (int i = 0; i < n; i++) {
       // Q. Should these be clipped to a sensible range?
       pixelOffset[i] = pd.sample();
@@ -474,7 +475,8 @@ public class CmosAnalysis implements PlugIn {
     IJ.save(simulationImp, new File(directory, "perPixelSimulation.tif").getPath());
 
     // Create thread pool and workers
-    final ExecutorService executor = Executors.newFixedThreadPool(getThreads());
+    final int threadCount = getThreads();
+    final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
     final TurboList<Future<?>> futures = new TurboList<>(numberOfThreads);
 
     // Simulate the zero exposure input.
@@ -487,7 +489,7 @@ public class CmosAnalysis implements PlugIn {
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
     long seed = start;
 
-    ticker = Ticker.createStarted(new ImageJTrackProgress(), photons.length * frames, true);
+    ticker = ImageJUtils.createTicker((long) photons.length * frames, threadCount);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 
@@ -501,21 +503,12 @@ public class CmosAnalysis implements PlugIn {
             simulationStack, from, to, blockSize, p)));
         from = to;
       }
-      // Wait for all to finish
-      for (int t = futures.size(); t-- > 0;) {
-        try {
-          // The future .get() method will block until completed
-          futures.get(t).get();
-        } catch (final Exception ex) {
-          // This should not happen.
-          ex.printStackTrace();
-        }
-      }
+
+      ConcurrencyUtils.waitForCompletionUnchecked(futures);
       futures.clear();
     }
 
-    IJ.showStatus("");
-    IJ.showProgress(1);
+    ImageJUtils.finished();
 
     executor.shutdown();
 
@@ -593,7 +586,7 @@ public class CmosAnalysis implements PlugIn {
       return false;
     }
 
-    Collections.sort(subDirs);
+    Collections.sort(subDirs, SubDir::compare);
 
     if (subDirs.get(0).exposureTime != 0) {
       IJ.error(TITLE, "No sub-directories with exposure time 0");
@@ -635,8 +628,6 @@ public class CmosAnalysis implements PlugIn {
 
   private void runAnalysis() {
     final long start = System.currentTimeMillis();
-
-    final TrackProgress trackProgress2 = new ImageJTrackProgress();
 
     // Create thread pool and workers. The system is likely to be IO limited
     // so reduce the computation threads to allow the reading thread in the
@@ -716,7 +707,7 @@ public class CmosAnalysis implements PlugIn {
         }
 
         // So the bar remains at 99% when workers have finished use frames + 1
-        final Ticker ticker = Ticker.createStarted(trackProgress2, source.getFrames() + 1, true);
+        final Ticker ticker = ImageJUtils.createTicker(source.getFrames() + 1L, nThreads);
 
         // Open the first frame to get the bit depth.
         // Assume the first pixels are not empty as the source is open.
@@ -761,15 +752,10 @@ public class CmosAnalysis implements PlugIn {
         if (error) {
           // Kill the workers
           jobs.close(true);
-          for (int t = futures.size(); t-- > 0;) {
-            try {
-              workers.get(t).finished = true;
-              futures.get(t).cancel(true);
-            } catch (final Exception ex) {
-              // This should not happen.
-              ex.printStackTrace();
-            }
-          }
+          workers.stream().forEach(worker -> worker.finished = true);
+          // Cancel by interruption. We set the finished flag so the ImageWorker should
+          // ignore the interrupt.
+          futures.stream().forEach(future -> future.cancel(true));
           break;
         }
 
@@ -777,15 +763,7 @@ public class CmosAnalysis implements PlugIn {
         jobs.close(false);
 
         // Wait for all to finish
-        for (int t = futures.size(); t-- > 0;) {
-          try {
-            // The future .get() method will block until completed
-            futures.get(t).get();
-          } catch (final Exception ex) {
-            // This should not happen.
-            ex.printStackTrace();
-          }
-        }
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
         // Create the final aggregate statistics
         for (final ImageWorker w : workers) {

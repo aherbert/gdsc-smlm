@@ -28,6 +28,8 @@ package uk.ac.sussex.gdsc.smlm.results;
  * Specifies a peak fitting result that spans multiple frames.
  */
 public class ExtendedPeakResult extends IdPeakResult {
+  private static final long serialVersionUID = 20190319L;
+
   private int endFrame;
 
   /**

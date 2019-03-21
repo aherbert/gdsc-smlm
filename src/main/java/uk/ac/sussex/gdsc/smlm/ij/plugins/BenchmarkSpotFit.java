@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.Assignment;
 import uk.ac.sussex.gdsc.core.match.AssignmentComparator;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
@@ -49,6 +50,7 @@ import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
@@ -224,22 +226,23 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   // TODO - Add support for optimising z-depth during 3D fitting
 
-  private FilterCriteria[] createFilterCriteria() {
-    if (filterCriteria == null) {
-      filterCriteria = new FilterCriteria[9];
+  private static FilterCriteria[] createFilterCriteria() {
+    FilterCriteria[] criteria = filterCriteria;
+    if (criteria == null) {
+      criteria = new FilterCriteria[9];
       int index = 0;
       //@formatter:off
-      filterCriteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      filterCriteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      filterCriteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
-      filterCriteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
-      filterCriteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-      filterCriteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+      criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
       // Precision has enough discrimination power to be able to use the jaccard score
-      filterCriteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
+      criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
       // These are not filters but are used for stats analysis
-      filterCriteria[index++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-      filterCriteria[index++] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
       //@formatter:on
 
       // Some parameter types may not be for DirectFilters so ignore this check...
@@ -250,12 +253,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // ParameterType[] types = ParameterType.values();
       // NEXT_TYPE: for (int k = 0; k < types.length; k++)
       // {
-      // for (int j = 0; j < filterCriteria.length; j++)
-      // if (filterCriteria[j].type == types[k])
+      // for (int j = 0; j < criteria.length; j++)
+      // if (criteria[j].type == types[k])
       // continue NEXT_TYPE;
-      // filterCriteria = null;
       // throw new RuntimeException("Missing parameter type: " + types[k].toString());
       // }
+      filterCriteria = criteria;
     }
     return filterCriteria;
   }
@@ -367,7 +370,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private static boolean useBenchmarkSettings;
   /** The compute doublets option. */
-  static boolean computeDoublets = true; // config.getResidualsThreshold() < 1;
+  static boolean computeDoublets = true;
   private static boolean showFilterScoreHistograms;
   private static boolean saveFilterRange = true;
   private static boolean showCorrelation;
@@ -424,10 +427,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   static StopWatch stopWatch;
 
   /** The table prefix. */
-  public static String tablePrefix;
+  static String tablePrefix;
 
   /** The result prefix. */
-  public static String resultPrefix;
+  static String resultPrefix;
 
   private static class MultiPathPoint extends BasePoint {
     static final int SPOT = -1;
@@ -442,7 +445,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int type;
     final int index;
 
-    public MultiPathPoint(PreprocessedPeakResult result, int id, int type, int index) {
+    MultiPathPoint(PreprocessedPeakResult result, int id, int type, int index) {
       super(result.getX(), result.getY());
       this.result = result;
       this.id = id;
@@ -450,12 +453,24 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.index = index;
     }
 
-    public MultiPathPoint(float x, float y, int id, int type, int index) {
+    MultiPathPoint(float x, float y, int id, int type, int index) {
       super(x, y);
       this.result = null;
       this.id = id;
       this.type = type;
       this.index = index;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+      // Ignore extra fields
+      return super.equals(object);
+    }
+
+    @Override
+    public int hashCode() {
+      // Ignore extra fields
+      return super.hashCode();
     }
   }
 
@@ -705,13 +720,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final TIntObjectHashMap<FilterCandidates> results;
     final Rectangle bounds;
     final MultiPathFilter multiFilter;
+    final Ticker ticker;
 
     float[] data;
     List<PointPair> matches = new ArrayList<>();
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
-        TIntObjectHashMap<FilterCandidates> filterCandidates, PeakResults peakResults) {
+        TIntObjectHashMap<FilterCandidates> filterCandidates, PeakResults peakResults,
+        Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
       this.fitWorker = new FitWorker(config.clone(), peakResults, null);
@@ -725,6 +742,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
       // Instance copy
       multiFilter = BenchmarkSpotFit.multiFilter.copy();
+      this.ticker = ticker;
     }
 
     @Override
@@ -738,11 +756,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           if (!finished) {
             // Only run jobs when not finished. This allows the queue to be emptied.
             run(job.intValue());
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -753,8 +771,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         finished = true;
         return;
       }
-
-      showProgress();
 
       // Extract the data
       data = ImageJImageConverter.getData(stack.getPixels(frame), stack.getWidth(),
@@ -1085,12 +1101,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(String.format(
+    ImageJUtils.addMessage(gd,
         "Fit candidate spots in the benchmark image created by " + CreateData.TITLE
             + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
             + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
             + "Configure the fitting:",
-        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa())));
+        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa()));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
     gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
@@ -1307,22 +1323,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     return true;
   }
 
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      if (ImageJUtils.showStatus("Fitting frame: " + progress + " / " + totalProgress)) {
-        IJ.showProgress(progress, totalProgress);
-      }
-    }
-    progress++;
-  }
-
   private void runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
@@ -1364,10 +1364,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
     final List<Worker> workers = new LinkedList<>();
     final List<Thread> threads = new LinkedList<>();
+    final Ticker ticker = ImageJUtils.createTicker(stack.getSize(), nThreads, "Fitting frames ...");
     final PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
     for (int i = 0; i < nThreads; i++) {
       final Worker worker =
-          new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults);
+          new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults, ticker);
       final Thread t = new Thread(worker);
       workers.add(worker);
       threads.add(t);
@@ -1376,10 +1377,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     // Fit the frames
     final long startTime = System.nanoTime();
-    totalProgress = stack.getSize();
-    stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-    progress = 0;
-    for (int i = 1; i <= totalProgress; i++) {
+    for (int i = 1; i <= stack.getSize(); i++) {
       put(jobs, i);
     }
     // Finish all the worker threads by passing in a null job
@@ -1392,13 +1390,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       try {
         threads.get(i).join();
       } catch (final InterruptedException ex) {
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
       }
     }
+    final long runTime = System.nanoTime() - startTime;
+
     threads.clear();
 
-    IJ.showProgress(1);
-    final long runTime = System.nanoTime() - startTime;
+    ImageJUtils.finished();
 
     if (ImageJUtils.isInterrupted()) {
       return;
@@ -1792,13 +1792,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Filter with no filter
     final MultiPathFilter mpf =
         new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
-    @SuppressWarnings("unused")
-    final FractionClassificationResult fractionResult = mpf.fractionScoreSubset(multiResults,
-        NullFailCounter.INSTANCE, this.results.size(), assignments, scoreStore,
-        CoordinateStoreFactory.create(0, 0, imp.getWidth(), imp.getHeight(),
-            config.convertUsingHwhMax(config.getDuplicateDistanceParameter())));
-
-    // double nPredicted = fractionResult.getTruePositives() + fractionResult.getFalsePositives();
+    mpf.fractionScoreSubset(multiResults, NullFailCounter.INSTANCE, this.results.size(),
+        assignments, scoreStore, CoordinateStoreFactory.create(0, 0, imp.getWidth(),
+            imp.getHeight(), config.convertUsingHwhMax(config.getDuplicateDistanceParameter())));
 
     final double[][] matchScores = new double[set.size()][];
     int count = 0;
@@ -2229,8 +2225,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Print total
     final int all = total + status[0];
     if (all != 0) {
-      ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, "Total", total, all,
-          100.0 * total / all);
+      ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, "Total", total, all, 100.0 * total / all);
     }
   }
 

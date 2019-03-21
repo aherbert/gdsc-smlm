@@ -557,7 +557,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   }
 
   /** The default range. */
-  protected static double[] defaultRange = {SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
+  static final double[] defaultRange = {SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
       WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
       EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
       ZCoordinateFilter.DEFAULT_RANGE};

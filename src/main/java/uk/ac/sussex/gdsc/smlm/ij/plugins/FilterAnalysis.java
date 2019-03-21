@@ -332,8 +332,8 @@ public class FilterAnalysis implements PlugIn {
         }
       });
     }
-    gd.addMessage(String.format("%d files, %d results, %d True-Positives", resultsList.size(),
-        total, tp.getCount()));
+    ImageJUtils.addMessage(gd, "%d files, %d results, %d True-Positives", resultsList.size(),
+        total, tp.getCount());
 
     if (!fileInput) {
       gd.addCheckbox("SNR_filter", snrFilter);

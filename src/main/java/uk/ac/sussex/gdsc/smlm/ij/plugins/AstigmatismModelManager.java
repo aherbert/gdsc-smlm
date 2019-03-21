@@ -28,7 +28,6 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -105,6 +104,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -466,7 +466,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static double guessScale(String unit, double units) {
-    unit = unit.toLowerCase();
+    unit = unit.toLowerCase(Locale.US);
     if (unit.equals("nm") || unit.startsWith("nanomet")) {
       return units;
     }
@@ -657,8 +657,7 @@ public class AstigmatismModelManager implements PlugIn {
     final int y = cy - regionBounds.y;
     final int[] maxIndices = new int[] {y * regionBounds.width + x};
 
-    final Ticker ticker =
-        Ticker.createStarted(new ImageJTrackProgress(), source.getFrames(), threadCount > 1);
+    final Ticker ticker = ImageJUtils.createTicker(source.getFrames(), threadCount);
     IJ.showStatus("Fitting ...");
 
     boolean shutdown = false;

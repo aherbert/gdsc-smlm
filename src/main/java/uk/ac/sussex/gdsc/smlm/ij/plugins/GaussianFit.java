@@ -71,6 +71,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Locale;
 
 /**
  * Fits the selected rectangular ROI using a 2D Gaussian.
@@ -653,7 +654,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       return "";
     }
     final FitStatus status = fitResult.getStatus();
-    return status.toString().toLowerCase().replace("_", " ");
+    return status.toString().toLowerCase(Locale.US).replace("_", " ");
   }
 
   private static double[] extractParams(double[] params, int index) {

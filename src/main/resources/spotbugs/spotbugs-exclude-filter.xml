@@ -29,9 +29,9 @@
   put here to instruct spotbugs it must ignore them.
 -->
 <FindBugsFilter
-    xmlns="https://github.com/spotbugs/filter/3.1.0"
+    xmlns="https://github.com/spotbugs/filter/3.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="https://github.com/spotbugs/filter/3.1.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
+    xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
 
   <Match>
     <Class name="uk.ac.sussex.gdsc.smlm.results.ImmutablePeakResult" />
@@ -58,6 +58,134 @@
       <Method name="ensureRange" />
     </Or>
     <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH" />
+  </Match>
+
+  <!--  Ignore Google proto buffers files -->
+  <Match>
+    <Or>
+      <Class name="~.*Protos" />
+      <Class name="~.*Protos\$.*" />
+    </Or>
+  </Match>
+
+  <!-- Allow use of "\n" in String.format when building messages for GenericDialog  -->
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkFilterAnalysis" />
+    <Or>
+      <Method name="addSimulationData" />
+      <Method name="saveTemplate" />
+    </Or>
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE" />
+  </Match>
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.CmosAnalysis" />
+    <Method name="runAnalysis" />
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE" />
+  </Match>
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.MeanVarianceTest" />
+    <Method name="run" />
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE" />
+  </Match>
+
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.results.Filter" />
+    <Method name="compareTo" />
+    <Bug pattern="CO_COMPARETO_INCORRECT_FLOATING" />
+  </Match>
+
+  <Match>
+    <Or>
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.utils.Image2DAligner" />
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.utils.Image3DAligner" />
+    </Or>
+    <Method name="align" />
+    <Bug pattern="FE_FLOATING_POINT_EQUALITY" />
+  </Match>
+
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.math3.distribution.SaddlePointExpansionCopy" />
+    <Bug pattern="FE_FLOATING_POINT_EQUALITY" />
+  </Match>
+
+  <!-- Don't care if we store or return references to objects directly. -->
+  <Match>
+    <Or>
+      <Bug pattern="EI_EXPOSE_REP" />
+      <Bug pattern="EI_EXPOSE_REP2" />
+    </Or>
+  </Match>
+
+  <!-- Ignore serialisation issues for PlugInFrame classes. -->
+  <Match>
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.SpotAnalysis" />
+    <Bug pattern="SE_BAD_FIELD" />
+  </Match>
+
+  <Match>
+    <Or>
+      <Class name="uk.ac.sussex.gdsc.smlm.ga.Fitness" />
+      <Class name="uk.ac.sussex.gdsc.smlm.results.filter.FilterScore" />
+      <Class name="uk.ac.sussex.gdsc.smlm.search.SearchResult" />
+    </Or>
+    <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS" />
+  </Match>
+
+  <Match>
+    <Or>
+      <!-- This uses a private class where synchronization access is controlled. -->
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.FailCountManager$FailCountData" />
+      <!-- This uses thread-safe blocking queues outside of synchronized blocks. -->
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource" />
+      <!-- This always initialises the hwhm before accessing it, or uses double-checked locking. -->
+      <Class name="uk.ac.sussex.gdsc.smlm.model.ImagePsfModel" />
+      <!-- False positive in actionPerformed method. -->
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.SpotAnalysis" />
+      <!-- Allow peak at the inbox. -->
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.Workflow$WorkStack" />
+    </Or>
+    <Bug pattern="IS2_INCONSISTENT_SYNC" />
+  </Match>
+
+  <Match>
+    <!-- False positive. -->
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkFilterAnalysis" />
+    <Method name="calculateSensitivity" />
+    <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+  </Match>
+
+  <Match>
+    <!-- False positive. -->
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PulseActivationAnalysis" />
+    <Method name="dialogItemChanged" />
+    <Bug pattern="BC_UNCONFIRMED_CAST" />
+  </Match>
+
+  <Match>
+    <!-- This uses a synchronized block to do the analysis. Some private fields are also accessed 
+    without synchronization from within the class. -->
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PulseActivationAnalysis" />
+    <Or>
+      <Field name="executor" />
+      <Field name="output" />
+    </Or>
+    <Bug pattern="IS2_INCONSISTENT_SYNC" />
+  </Match>
+
+  <!-- These know what they are doing with floating point equality -->
+  <Match>
+    <Or>
+      <Class name="uk.ac.sussex.gdsc.smlm.function.InterpolatedPoissonFisherInformation" />
+      <Class name="uk.ac.sussex.gdsc.smlm.function.InterpolatedPoissonFunction" />
+      <Class name="uk.ac.sussex.gdsc.smlm.function.PoissonFunction" />
+      <Class name="uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFisherInformation" />
+      <Class name="uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction" />
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PulseActivationAnalysis$RunSettings" />
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCreator$ExtractedPsf" />
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCreator$PsfCentreSelector" />
+      <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PsfDrift$UpdateDialogListener" />
+    </Or>
+    <Bug pattern="FE_FLOATING_POINT_EQUALITY" />
   </Match>
 
 </FindBugsFilter>

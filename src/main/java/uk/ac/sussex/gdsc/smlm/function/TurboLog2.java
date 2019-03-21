@@ -194,12 +194,12 @@ public class TurboLog2 extends TurboLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+    if ((e == 126 && m >= LOWER_BOUND_MANTISSA_F) || (e == 127 && m <= UPPER_BOUND_MANTISSA_F)) {
       return (float) Math.log(x);
     }
 
     // Round the mantissa
-    return logMantissa[(m + roundF) >>> q] + logExpF[e];
+    return logMantissa[(m + roundF) >>> q] + getLogExpF(e);
   }
 
   @Override
@@ -245,12 +245,12 @@ public class TurboLog2 extends TurboLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return (float) Math.log(x);
     }
 
     // Round the mantissa
-    return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
+    return logMantissa[(int) ((m + roundD) >>> qd)] + getLogExpD(e);
   }
 
   /**
@@ -274,10 +274,10 @@ public class TurboLog2 extends TurboLog {
     if (e == 0) {
       return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
     }
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+    if ((e == 126 && m >= LOWER_BOUND_MANTISSA_F) || (e == 127 && m <= UPPER_BOUND_MANTISSA_F)) {
       return (float) Math.log(x);
     }
-    return logMantissa[(m + roundF) >>> q] + logExpF[e];
+    return logMantissa[(m + roundF) >>> q] + getLogExpF(e);
   }
 
 
@@ -302,11 +302,11 @@ public class TurboLog2 extends TurboLog {
     if (e == 0) {
       return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
     }
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return (float) Math.log(x);
     }
     // Round the mantissa
-    return logMantissa[(int) ((m + roundD) >>> qd)] + logExpD[e];
+    return logMantissa[(int) ((m + roundD) >>> qd)] + getLogExpD(e);
   }
 
   @Override
@@ -352,7 +352,7 @@ public class TurboLog2 extends TurboLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return Math.log(x);
     }
 
@@ -382,7 +382,7 @@ public class TurboLog2 extends TurboLog {
     if (e == 0) {
       return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
     }
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return Math.log(x);
     }
     // return logMantissa[(int) ((m+roundD) >>> qd)] + logExpD[e];

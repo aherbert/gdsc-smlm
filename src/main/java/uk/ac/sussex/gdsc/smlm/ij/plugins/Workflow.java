@@ -80,23 +80,29 @@ public class Workflow<S, R> {
 
     synchronized void addWork(Work work) {
       this.work = work;
-      this.notify();
+      this.notifyAll();
     }
 
     @SuppressWarnings("unused")
     synchronized void close() {
       this.work = null;
-      this.notify();
+      this.notifyAll();
     }
 
     synchronized Work getWork() {
-      final Work work = this.work;
+      final Work nextWork = this.work;
       this.work = null;
-      return work;
+      return nextWork;
     }
 
-    boolean isEmpty() {
+    synchronized boolean isEmpty() {
       return work == null;
+    }
+
+    synchronized void notifyIfNotEmpty() {
+      if (work != null) {
+        this.notifyAll();
+      }
     }
   }
 
@@ -150,9 +156,10 @@ public class Workflow<S, R> {
               debug(" Delaying");
               Thread.sleep(50);
               // Assume new work can be added to the inbox. Here we are peaking at the inbox
-              // so we do not take ownership with synchronized
-              if (inbox.work != null) {
-                timeout = inbox.work.timeout;
+              // so we do not take ownership with synchronized.
+              final Work newWork = inbox.work;
+              if (newWork != null) {
+                timeout = newWork.timeout;
               }
             }
             // If we intend to modify the inbox then we should take ownership
@@ -442,7 +449,7 @@ public class Workflow<S, R> {
    * Run the staged work.
    */
   public void runStaged() {
-    inputStack.addWork(inputStack.work);
+    inputStack.notifyIfNotEmpty();
   }
 
   /**

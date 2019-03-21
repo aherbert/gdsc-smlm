@@ -25,11 +25,11 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -328,8 +328,7 @@ public class FilterResults implements PlugIn {
     }
 
     // Create the ticker with size+1 as we tick at the start of the loop
-    final Ticker ticker =
-        Ticker.createStarted(new ImageJTrackProgress(), results.size() + 1, false);
+    final Ticker ticker = ImageJUtils.createTicker(results.size() + 1, 0);
     for (int i = 0, size = results.size(); i < size; i++) {
       ticker.tick();
 
@@ -370,8 +369,7 @@ public class FilterResults implements PlugIn {
       newResults.add(peakResult);
     }
 
-    IJ.showProgress(1);
-    IJ.showStatus(newResults.size() + " Filtered localisations");
+    ImageJUtils.finished(TextUtils.pleural(newResults.size(), "Filtered localisation"));
     MemoryPeakResults.addResults(newResults);
   }
 

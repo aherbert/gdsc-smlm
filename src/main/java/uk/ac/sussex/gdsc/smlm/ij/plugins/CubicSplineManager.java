@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -184,9 +185,9 @@ public class CubicSplineManager implements PlugIn {
 
     final int size = maxi * maxj;
     final CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxk][size];
-    final Ticker ticker = Ticker.create(new ImageJTrackProgress(), (long) maxi * maxj * maxk, true);
-    ticker.start();
-    final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+    final int threadCount = Prefs.getThreads();
+    final Ticker ticker = ImageJUtils.createTicker((long) maxi * maxj * maxk, threadCount);
+    final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
     final TurboList<Future<?>> futures = new TurboList<>(maxk);
     // Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack.
     // Note that the function is enlarge x3 so a 4x4x4 block samples the voxel at [0,1/3,2/3,1]
@@ -297,10 +298,8 @@ public class CubicSplineManager implements PlugIn {
 
     // Try to save to file
     try (FileOutputStream os = new FileOutputStream(filename)) {
-      final TrackProgress progress = new ImageJTrackProgress();
-
       psfModel.imagePsf.writeDelimitedTo(os);
-      psfModel.splineData.write(os, progress);
+      psfModel.splineData.write(os, SimpleImageJTrackProgress.getInstance());
 
       saveResource(psfModel, filename, getName(filename));
 
@@ -359,10 +358,9 @@ public class CubicSplineManager implements PlugIn {
     // Try to load from file
     try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
       IJ.showStatus("Loading cubic spline: " + name);
-      final TrackProgress progress = new ImageJTrackProgress();
-
       final ImagePSF imagePsf = ImagePSF.parseDelimitedFrom(is);
-      final CubicSplineData function = CubicSplineData.read(is, progress);
+      final CubicSplineData function =
+          CubicSplineData.read(is, SimpleImageJTrackProgress.getInstance());
 
       return new CubicSplinePsf(imagePsf, function);
     } catch (final Exception ex) {
@@ -742,7 +740,7 @@ public class CubicSplineManager implements PlugIn {
 
     IJ.showStatus("Drawing cubic spline");
     final FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
-    psfModel.splineData.sample(magnification, p, new ImageJTrackProgress());
+    psfModel.splineData.sample(magnification, p, SimpleImageJTrackProgress.getInstance());
 
     final ImageStack stack = new ImageStack(p.getXAxis().length, p.getYAxis().length);
     for (final float[] pixels : p.getValue()) {

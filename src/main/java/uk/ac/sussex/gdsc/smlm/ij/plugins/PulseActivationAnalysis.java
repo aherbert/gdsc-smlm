@@ -29,8 +29,6 @@ import uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -69,7 +67,6 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.WindowManager;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
@@ -98,7 +95,6 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -116,8 +112,7 @@ import java.util.logging.Logger;
  * Xiaowei Zhuang (2007). Multicolor Super-Resolution Imaging with Photo-Switchable Fluorescent
  * Probes. Science 317, 1749. DOI: 10.1126/science.1146598.
  */
-public class PulseActivationAnalysis
-    implements PlugIn, DialogListener, ActionListener, OptionCollectedListener {
+public class PulseActivationAnalysis implements PlugIn {
   private String title = "Activation Analysis";
 
   private static final Correction[] specificCorrection;
@@ -136,10 +131,10 @@ public class PulseActivationAnalysis
   private static final int MAX_CHANNELS = 3;
 
   private static int repeatInterval = 30;
-  private static int[] startFrame = {1, 11, 21};
+  private static final int[] startFrame = {1, 11, 21};
   /** The crosstalk between channels. */
-  private static double[] ct = new double[6];
-  private static String[] ctNames = {"21", "31", "12", "32", "13", "23"};
+  private static final double[] ct = new double[6];
+  private static final String[] ctNames = {"21", "31", "12", "32", "13", "23"};
   private static final int C21 = 0;
   private static final int C31 = 1;
   private static final int C12 = 2;
@@ -177,7 +172,7 @@ public class PulseActivationAnalysis
   private static double sim_activationDensity = 0.1; // molecules/micrometer
   private static double sim_nonSpecificFrequency = 0.01;
 
-  private ResultsSettings resultsSettings;
+  // private ResultsSettings resultsSettings;
   private ResultsSettings.Builder resultsSettingsBuilder;
   private MemoryPeakResults results;
   private Trace[] traces;
@@ -926,9 +921,9 @@ public class PulseActivationAnalysis
     Correction nonSpecificCorrection = Correction.NONE;
     double nonSpecificCorrectionCutoff;
 
-    ResultsSettings resultsSettings;
+    final ResultsSettings resultsSettings;
 
-    RunSettings() {
+    RunSettings(ResultsSettings resultsSettings) {
       // Copy the current settings required
       if (channels > 1) {
         this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
@@ -948,7 +943,7 @@ public class PulseActivationAnalysis
         this.nonSpecificCorrectionCutoff =
             PulseActivationAnalysis.nonSpecificCorrectionCutoff / 100.0;
       }
-      this.resultsSettings = PulseActivationAnalysis.this.resultsSettings;
+      this.resultsSettings = resultsSettings;
     }
 
     Correction getCorrection(Correction[] correction, int index) {
@@ -1023,7 +1018,9 @@ public class PulseActivationAnalysis
 
       @Override
       public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work) {
-        PulseActivationAnalysis.this.runAnalysis(work.item1);
+        synchronized (PulseActivationAnalysis.this.analysisLock) {
+          PulseActivationAnalysis.this.runAnalysis(work.item1);
+        }
         return work;
       }
     });
@@ -1076,9 +1073,7 @@ public class PulseActivationAnalysis
       gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
     }
 
-    resultsSettings = SettingsManager.readResultsSettings(0);
-
-    resultsSettingsBuilder = resultsSettings.toBuilder();
+    resultsSettingsBuilder = SettingsManager.readResultsSettings(0).toBuilder();
     ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder, 0);
 
     // ResultsImageSettings s = resultsSettings.getResultsImageSettings();
@@ -1093,11 +1088,11 @@ public class PulseActivationAnalysis
 
     final String buttonLabel = "Draw loop";
     gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
-    gd.addAndGetButton(buttonLabel, this);
+    gd.addAndGetButton(buttonLabel, this::actionPerformed);
     magnificationChoice = gd.addAndGetChoice("Magnification", magnifications, magnification);
 
-    gd.addDialogListener(this);
-    gd.addOptionCollectedListener(this);
+    gd.addDialogListener(this::dialogItemChanged);
+    gd.addOptionCollectedListener(event -> addWork(previewCheckBox.getState()));
 
     gd.showDialog();
 
@@ -1115,7 +1110,7 @@ public class PulseActivationAnalysis
       if (channels > 1) {
         // Suppress null warnings
         if (correctionNames == null || assignmentNames == null) {
-          throw new RuntimeException();
+          throw new IllegalStateException();
         }
 
         if (channels == 2) {
@@ -1141,7 +1136,7 @@ public class PulseActivationAnalysis
             Double.toString(nonSpecificCorrectionCutoff));
       }
 
-      final ResultsImageSettings s = resultsSettings.getResultsImageSettings();
+      final ResultsImageSettings s = resultsSettingsBuilder.getResultsImageSettings();
       Recorder.recordOption("Image",
           SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
       if (s.getWeighted()) {
@@ -1154,19 +1149,16 @@ public class PulseActivationAnalysis
       Recorder.recordOption("Image_Scale", Double.toString(s.getScale()));
     }
 
-    SettingsManager.writeSettings(resultsSettings);
+    SettingsManager.writeSettings(resultsSettingsBuilder);
 
     return true;
   }
 
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    // The event is null when the NonBlockingExtendedGenericDialog is first shown
-    if (event == null) {
-      // Do not ignore this if a macro
-      if (ImageJUtils.isMacro()) {
-        return true;
-      }
+  private boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+    // The event is null when the NonBlockingExtendedGenericDialog is first shown.
+    // Do not ignore this if a macro.
+    if (event == null && !ImageJUtils.isMacro()) {
+      return true;
     }
 
     // Check arguments
@@ -1221,34 +1213,17 @@ public class PulseActivationAnalysis
       return false;
     }
 
+    // This should not fail as this plugin built the dialog
     ((NonBlockingExtendedGenericDialog) gd).collectOptions();
 
-    resultsSettings = resultsSettingsBuilder.build();
-
-    final RunSettings settings = new RunSettings();
-    if (preview) {
-      // Run the settings
-      workflow.run(settings);
-      workflow.startPreview();
-    } else {
-      workflow.stopPreview();
-      // Stage the work but do not run
-      workflow.stage(settings);
-    }
+    addWork(preview);
 
     return true;
   }
 
-  @Override
-  public void optionCollected(OptionCollectedEvent event) {
-    resultsSettings = resultsSettingsBuilder.build();
-
-    if (lastRunSettings != null && resultsSettings.equals(lastRunSettings.resultsSettings)) {
-      return;
-    }
-
-    final RunSettings settings = new RunSettings();
-    if (previewCheckBox.getState()) {
+  private void addWork(boolean preview) {
+    final RunSettings settings = new RunSettings(resultsSettingsBuilder.build());
+    if (preview) {
       // Run the settings
       workflow.run(settings);
       workflow.startPreview();
@@ -1277,17 +1252,26 @@ public class PulseActivationAnalysis
     ParameterUtils.isEqualOrBelow(name, percentage, 100);
   }
 
+  /**
+   * The analysis lock. All access to state modified by the analysis must be synchronized on this.
+   */
+  private final Object analysisLock = new Object();
   private DensityCounter dc;
   private int[][] density;
   private int numberOfThreads;
   private ExecutorService executor;
   private TurboList<Future<?>> futures;
+  /** The last run settings. All access to the must be synchronized. */
   private RunSettings lastRunSettings;
 
-  private synchronized void runAnalysis(RunSettings runSettings) {
-    // This is synchronized since it updates the class results.
-    // Note: We check against the last settings and only repeat what is necessary ...
-
+  /**
+   * Run the analysis. This modifies state and so should be synchronized.
+   *
+   * <p>Note: We check against the last settings and only repeat what is necessary.
+   *
+   * @param runSettings the run settings
+   */
+  private void runAnalysis(RunSettings runSettings) {
     if (runSettings == null) {
       lastRunSettings = null;
       return;
@@ -1404,8 +1388,8 @@ public class PulseActivationAnalysis
     }
 
     // Collate image into a stack
-    if (channels > 1
-        && resultsSettings.getResultsImageSettings().getImageType() != ResultsImageType.DRAW_NONE) {
+    if (channels > 1 && runSettings.resultsSettings.getResultsImageSettings()
+        .getImageType() != ResultsImageType.DRAW_NONE) {
       final ImageProcessor[] images = new ImageProcessor[channels];
       for (int c = 0; c < channels; c++) {
         images[c] = getImage(output[c]);
@@ -1519,7 +1503,7 @@ public class PulseActivationAnalysis
     if (hmax >= hmin) {
       double min = stats.histMin + hmin * stats.binSize;
       double max = stats.histMin + hmax * stats.binSize;
-      if (min == max) {
+      if (Double.compare(min, max) == 0) {
         min = stats.min;
         max = stats.max;
       }
@@ -1767,35 +1751,36 @@ public class PulseActivationAnalysis
   }
 
   private PeakResultsList createOutput(int channel) {
-    final PeakResultsList output = new PeakResultsList();
-    output.copySettings(results);
+    final PeakResultsList outputList = new PeakResultsList();
+    outputList.copySettings(results);
     if (channels > 1) {
-      output.setName(results.getName() + " " + title + " C" + channel);
+      outputList.setName(results.getName() + " " + title + " C" + channel);
     } else {
-      output.setName(results.getName() + " " + title);
+      outputList.setName(results.getName() + " " + title);
     }
 
     // Store the set in memory
     final MemoryPeakResults memoryResults = new MemoryPeakResults(this.results.size());
-    output.addOutput(memoryResults);
+    outputList.addOutput(memoryResults);
     MemoryPeakResults.addResults(memoryResults);
 
     // Draw the super-resolution image
     final Rectangle bounds = results.getBounds(true);
-    addImageResults(output, results.getName(), bounds, results.getNmPerPixel(), results.getGain());
+    addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(),
+        results.getGain(), resultsSettingsBuilder.getResultsImageSettings());
 
-    output.begin();
+    outputList.begin();
 
-    return output;
+    return outputList;
   }
 
-  private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
-      double nmPerPixel, double gain) {
-    final ResultsImageSettings s = resultsSettings.getResultsImageSettings();
-    if (s.getImageType() != ResultsImageType.DRAW_NONE) {
+  private static void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
+      double nmPerPixel, double gain, ResultsImageSettings imageSettings) {
+    if (imageSettings.getImageType() != ResultsImageType.DRAW_NONE) {
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          s.getImageType(), s.getWeighted(), s.getEqualised(), title, bounds, nmPerPixel, gain,
-          s.getScale(), s.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
+          imageSettings.getImageType(), imageSettings.getWeighted(), imageSettings.getEqualised(),
+          title, bounds, nmPerPixel, gain, imageSettings.getScale(),
+          imageSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
       image.setLiveImage(false);
       image.setDisplayImage(channels == 1);
       resultsList.addOutput(image);
@@ -2186,8 +2171,7 @@ public class PulseActivationAnalysis
     return true;
   }
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
+  private void actionPerformed(@SuppressWarnings("unused") ActionEvent event) {
     final ImagePlus imp = WindowManager.getImage(results.getName() + " " + title);
     if (imp == null || output == null) {
       return;

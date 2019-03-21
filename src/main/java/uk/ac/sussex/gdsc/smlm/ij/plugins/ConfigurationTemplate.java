@@ -73,6 +73,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -903,7 +904,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     // XML files. We can try and deserialise everything that is not a tif image
     // (which may be the template source image example).
     final File[] fileList = (new File(newDirectory))
-        .listFiles(file -> file.isFile() && !file.getName().toLowerCase().endsWith("tif"));
+        .listFiles(file -> file.isFile() && !file.getName().toLowerCase(Locale.US).endsWith("tif"));
     if (fileList == null) {
       return;
     }

@@ -32,8 +32,8 @@ import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
@@ -146,6 +146,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -325,7 +326,7 @@ public class PsfCreator implements PlugInFilter {
   }
 
   private static double guessScale(String unit, double units) {
-    unit = unit.toLowerCase();
+    unit = unit.toLowerCase(Locale.US);
     if (unit.equals("nm") || unit.startsWith("nanomet")) {
       return units;
     }
@@ -679,10 +680,8 @@ public class PsfCreator implements PlugInFilter {
     final Statistics stats = new Statistics();
     boolean ok = true;
     for (int i = 0; ok && i < centres.size(); i++) {
-      // double
-      progress = (double) i / centres.size();
       final double increment = 1.0 / (stack.getSize() * centres.size());
-      IJ.showProgress(progress);
+      setProgress((double) i / centres.size());
       final double[] centre = centres.get(i);
 
       // Extract the spot
@@ -950,9 +949,10 @@ public class PsfCreator implements PlugInFilter {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
-      gd.addMessage(
-          String.format("Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \n"
-              + "x = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n", n, cx, cy, cz, csd));
+      ImageJUtils.addMessage(gd,
+          "Add spot %d to the PSF?\n \nEstimated centre using min PSF width:\n \n"
+              + "x = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
+          n, cx, cy, cz, csd);
       gd.addSlider("Slice", z[0], z[z.length - 1], slice);
       if (yesNoPosition != null) {
         gd.centerDialog(false);
@@ -1223,9 +1223,9 @@ public class PsfCreator implements PlugInFilter {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.hideCancelButton();
-      gd.addMessage(String.format(
+      ImageJUtils.addMessage(gd,
           "Add spot %d to the PSF?\n(The intensity profile is the sum within half the box region)",
-          n));
+          n);
       if (yesNoPosition != null) {
         gd.centerDialog(false);
         gd.setLocation(yesNoPosition);
@@ -1421,6 +1421,11 @@ public class PsfCreator implements PlugInFilter {
 
   private synchronized void incrementProgress(final double increment) {
     progress += increment;
+    IJ.showProgress(progress);
+  }
+
+  private synchronized void setProgress(final double value) {
+    progress = value;
     IJ.showProgress(progress);
   }
 
@@ -5076,7 +5081,6 @@ public class PsfCreator implements PlugInFilter {
         return this;
       }
 
-      final ImageJTrackProgress progress = new ImageJTrackProgress();
       final FloatStackTrivalueProcedure p = new FloatStackTrivalueProcedure();
       final FloatStackTrivalueProvider fval = new FloatStackTrivalueProvider(psf, maxx, maxy);
 
@@ -5089,7 +5093,7 @@ public class PsfCreator implements PlugInFilter {
       //@formatter:off
       new CustomTricubicInterpolator.Builder()
           .setExecutorService(threadPool)
-          .setProgress(progress)
+          .setProgress(SimpleImageJTrackProgress.getInstance())
           .build()
           .sample(fval, n, p);
       //@formatter:on

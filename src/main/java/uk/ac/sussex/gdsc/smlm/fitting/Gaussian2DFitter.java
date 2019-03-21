@@ -268,13 +268,15 @@ public class Gaussian2DFitter {
       params[Gaussian2DFunction.SIGNAL] = sum - background * size;
       params[Gaussian2DFunction.X_POSITION] = peaks[0] % maxx;
       // Requires integer division result to get the y-position
-      params[Gaussian2DFunction.Y_POSITION] = peaks[0] / maxx;
+      final int ypos = peaks[0] / maxx;
+      params[Gaussian2DFunction.Y_POSITION] = ypos;
     } else {
       for (int i = 0, j = 0; i < peaks.length; i++, j += paramsPerPeak) {
         final int index = peaks[i];
         params[j + Gaussian2DFunction.SIGNAL] = heights[i] - background;
         params[j + Gaussian2DFunction.X_POSITION] = index % maxx;
-        params[j + Gaussian2DFunction.Y_POSITION] = index / maxx;
+        final int ypos = index / maxx;
+        params[j + Gaussian2DFunction.Y_POSITION] = ypos;
         amplitudeEstimate[i] = true;
       }
     }

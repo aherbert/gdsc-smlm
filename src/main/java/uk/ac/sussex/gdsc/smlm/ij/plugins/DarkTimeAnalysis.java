@@ -28,10 +28,11 @@ import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -169,7 +170,7 @@ public class DarkTimeAnalysis implements PlugIn {
       range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
     }
 
-    final ImageJTrackProgress tracker = new ImageJTrackProgress();
+    final TrackProgress tracker = SimpleImageJTrackProgress.getInstance();
     tracker.status("Analysing ...");
     tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...",
         MathUtils.rounded(searchDistance), MathUtils.rounded(d),

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.filters;
 /**
  * Identify a candidate spot (local maximum).
  */
-public class Spot implements Comparable<Spot>, Cloneable {
+public class Spot {
   /** The x. */
   public final int x;
 
@@ -69,6 +69,27 @@ public class Spot implements Comparable<Spot>, Cloneable {
   }
 
   /**
+   * Copy constructor.
+   *
+   * @param source the source
+   */
+  protected Spot(Spot source) {
+    x = source.x;
+    y = source.y;
+    intensity = source.intensity;
+    score = source.score;
+  }
+
+  /**
+   * Get a copy.
+   *
+   * @return the copy
+   */
+  public Spot copy() {
+    return new Spot(this);
+  }
+
+  /**
    * Get the distance between the two spots.
    *
    * @param other the other spot
@@ -85,24 +106,9 @@ public class Spot implements Comparable<Spot>, Cloneable {
    * @return The squared distance
    */
   public double distance2(Spot other) {
-    final int dx = x - other.x;
-    final int dy = y - other.y;
+    final double dx = (double) x - other.x;
+    final double dy = (double) y - other.y;
     return dx * dx + dy * dy;
-  }
-
-  @Override
-  public int compareTo(Spot other) {
-    return Double.compare(other.score, score);
-  }
-
-  @Override
-  public Spot clone() {
-    try {
-      return (Spot) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      // Ignore
-    }
-    return null;
   }
 
   /**

@@ -30,6 +30,8 @@ package uk.ac.sussex.gdsc.smlm.results;
  * <p>Any method that modifies the result will throw a data exception.
  */
 public class ImmutablePeakResult extends AttributePeakResult {
+  private static final long serialVersionUID = 20190319L;
+
   private static final String IMMUTABLE_MESSAGE = "This result is immutable";
 
   private final boolean built;

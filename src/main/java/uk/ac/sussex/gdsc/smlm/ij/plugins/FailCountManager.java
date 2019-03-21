@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ags.utils.data.trees.gen2.IntResultHeap;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -78,6 +77,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -428,6 +428,7 @@ public class FailCountManager implements PlugIn {
       }
       final FailCountData data = failCountData.get(item);
 
+      // Ensure consistent synchronisation
       data.createData();
       final WindowOrganiser wo = new WindowOrganiser();
       if (isNew) {
@@ -732,7 +733,7 @@ public class FailCountManager implements PlugIn {
         return false;
       }
     } else {
-      string = string.toLowerCase();
+      string = string.toLowerCase(Locale.US);
       if (string.equals("pass")) {
         return true;
       }
@@ -982,8 +983,7 @@ public class FailCountManager implements PlugIn {
     final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
     final TurboList<Future<?>> futures = new TurboList<>(nThreads);
 
-    final Ticker ticker =
-        Ticker.createStarted(new ImageJTrackProgress(), failCountData.size(), nThreads > 1);
+    final Ticker ticker = ImageJUtils.createTicker(failCountData.size(), nThreads);
     IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
     for (int i = 0; i < failCountData.size(); i++) {
       final FailCountData data = failCountData.getf(i);

@@ -36,8 +36,8 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.detection.BinarySearchDetectionGrid;
 import uk.ac.sussex.gdsc.core.data.detection.DetectionGrid;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
@@ -925,7 +925,7 @@ public class Optics implements PlugIn {
       p.getXy();
       final Rectangle bounds = results.getBounds(true);
       final OpticsManager opticsManager = new OpticsManager(p.x, p.y, bounds);
-      opticsManager.setTracker(new ImageJTrackProgress());
+      opticsManager.setTracker(SimpleImageJTrackProgress.getInstance());
       opticsManager.addOptions(Option.CACHE);
       return new Pair<>(settings, new SettingsList(results, opticsManager));
     }
@@ -2209,10 +2209,10 @@ public class Optics implements PlugIn {
             image.add(sp.x, sp.y, sp.intensity);
           }
           image.end();
-          if (mode.isMapped()) {
-            // Convert already mapped image to 8-bit (so the values are fixed)
-            // imp.setProcessor(imp.getProcessor().convertToByteProcessor(false));
-          }
+          // if (mode.isMapped()) {
+          // // Convert already mapped image to 8-bit (so the values are fixed)
+          // // imp.setProcessor(imp.getProcessor().convertToByteProcessor(false));
+          // }
           imp.getWindow().toFront();
         }
       } else {

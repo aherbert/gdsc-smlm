@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -67,7 +67,7 @@ public class ResequenceResults implements PlugIn {
     }
 
     if (resequenceResults(results, start, block, skip,
-        (logMapping) ? new ImageJTrackProgress() : null)) {
+        (logMapping) ? SimpleImageJTrackProgress.getInstance() : null)) {
       IJ.showStatus("Resequenced " + results.getName());
     }
   }

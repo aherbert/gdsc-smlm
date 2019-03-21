@@ -495,13 +495,14 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         run(fitjob);
       }
     } catch (final InterruptedException ex) {
-      Logger.getLogger(FitWorker.class.getName()).log(Level.WARNING,
-          () -> "Interrupted: " + ex.toString());
-      Thread.currentThread().interrupt();
-      throw new ConcurrentRuntimeException(ex);
+      if (!finished) {
+        Logger.getLogger(FitWorker.class.getName()).log(Level.WARNING,
+            () -> "Interrupted: " + ex.toString());
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
+      }
     } finally {
       finished = true;
-      // notifyAll();
     }
   }
 

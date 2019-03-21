@@ -98,7 +98,9 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -750,7 +752,7 @@ public final class SettingsManager {
    * @return the file
    */
   private static File createSettingsFile(Class<?> clazz) {
-    return new File(settingsDirectory, clazz.getSimpleName().toLowerCase() + ".settings");
+    return new File(settingsDirectory, clazz.getSimpleName().toLowerCase(Locale.US) + ".settings");
   }
 
   /**

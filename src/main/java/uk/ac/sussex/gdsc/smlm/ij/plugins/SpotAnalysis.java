@@ -416,7 +416,7 @@ public class SpotAnalysis extends PlugInFrame
   public synchronized void actionPerformed(ActionEvent event) {
     final Object actioner = event.getSource();
 
-    if (actioner == null || runMode > 0) {
+    if (actioner == null) {
       return;
     }
 
@@ -467,12 +467,15 @@ public class SpotAnalysis extends PlugInFrame
           }
         }
 
+        // Alert anything waiting for the actionPerformed method
         synchronized (SpotAnalysis.this) {
           super.notifyAll();
         }
       }, PLUGIN_TITLE);
       thread.start();
     }
+
+    // Alert anything waiting for the actionPerformed method
     super.notifyAll();
   }
 

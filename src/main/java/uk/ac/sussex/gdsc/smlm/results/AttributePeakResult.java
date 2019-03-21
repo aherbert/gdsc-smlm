@@ -29,12 +29,14 @@ package uk.ac.sussex.gdsc.smlm.results;
  * the default values are returned.
  */
 public class AttributePeakResult extends PeakResult {
+  private static final long serialVersionUID = 20190319L;
+
   // Provide assignable attributes for all the attribute methods in the super class
 
   // State flags
-  private static final int FIELD_ID = 0x00000001;
-  private static final int FIELD_END_FRAME = 0x00000002;
-  private static final int FIELD_PRECISION = 0x00000004;
+  private static final int FIELD_ID = 0x01;
+  private static final int FIELD_END_FRAME = 0x02;
+  private static final int FIELD_PRECISION = 0x04;
   private int fields;
 
   private int id;

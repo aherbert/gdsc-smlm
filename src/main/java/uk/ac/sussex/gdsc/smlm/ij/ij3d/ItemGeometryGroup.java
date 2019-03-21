@@ -352,7 +352,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
           if (tr.getTransparencyMode() != mode) {
             tr.setTransparencyMode(mode);
           }
-          if (tr.getTransparency() != t) {
+          if (Float.compare(tr.getTransparency(), t) != 0) {
             tr.setTransparency(t);
           }
         }

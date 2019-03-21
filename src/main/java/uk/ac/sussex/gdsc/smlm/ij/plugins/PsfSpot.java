@@ -68,4 +68,15 @@ public class PsfSpot extends BasePoint {
   public int getTime() {
     return time;
   }
+
+  @Override
+  public boolean equals(Object object) {
+    // Note: super.equals ensures the class matches
+    return super.equals(object) && time == ((PsfSpot) object).time;
+  }
+
+  @Override
+  public int hashCode() {
+    return 41 * super.hashCode() + time;
+  }
 }

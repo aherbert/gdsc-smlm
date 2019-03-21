@@ -32,7 +32,7 @@ import java.util.List;
  * Contains a collection of localisations associated with a discrete-time. This can be used to model
  * a moving localisation simulated on a more refined time-scale to a single localisation.
  */
-public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
+public class LocalisationModelSet {
   private int id;
   private final int time;
   private final List<LocalisationModel> localisations = new ArrayList<>();
@@ -103,11 +103,6 @@ public class LocalisationModelSet implements Comparable<LocalisationModelSet> {
    */
   public int getTime() {
     return time;
-  }
-
-  @Override
-  public int compareTo(LocalisationModelSet other) {
-    return Integer.compare(time, other.time);
   }
 
   /**

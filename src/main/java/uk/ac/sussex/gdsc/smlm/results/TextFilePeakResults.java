@@ -486,12 +486,12 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     if (fos == null) {
       return;
     }
-    size += count;
     try {
       out.write(result);
     } catch (final IOException ex) {
       closeOutput();
     }
+    size += count;
   }
 
   @Override
@@ -518,7 +518,8 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
       }
     }
 
-    Collections.sort(results);
+    // Sort by slice number
+    Collections.sort(results, (r1, r2) -> Integer.compare(r1.slice, r2.slice));
 
     try (BufferedWriter output = Files.newBufferedWriter(path)) {
       output.write(header.toString());
@@ -529,7 +530,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     }
   }
 
-  private class Result implements Comparable<Result> {
+  private class Result {
     String line;
     int slice;
 
@@ -549,13 +550,6 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
       } catch (final NoSuchElementException ex) {
         // Ignore
       }
-    }
-
-    @Override
-    public int compareTo(Result other) {
-      // Sort by slice number
-      // (Note: peak height is already done in the run(...) method)
-      return Integer.compare(slice, other.slice);
     }
   }
 

@@ -50,6 +50,7 @@ import ij.ImagePlus;
 import ij.io.FileInfo;
 import ij.io.Opener;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.awt.Rectangle;
@@ -1544,15 +1545,13 @@ public class SeriesImageSource extends ImageSource {
   }
 
   @Override
-  protected void closeSource() {
-    if (threads != null) {
-      closeQueue();
-    }
+  protected synchronized void closeSource() {
+    closeQueue();
 
     if (lastImage != null) {
       lastImage.close(true);
+      lastImage = null;
     }
-    lastImage = null;
     lastImageId = 0;
   }
 
@@ -1567,7 +1566,7 @@ public class SeriesImageSource extends ImageSource {
    */
   private synchronized void createQueue() {
     // Q. What size is optimal?
-    long bytesPerFrame = 1024 * 1024 * 2; // A typical unsigned short image
+    long bytesPerFrame = 1024L * 1024 * 2; // A typical unsigned short image
     // We should have successfully opened the first image and so find the pixel size
     if (imageData != null && imageData[0] != null && imageData[0].tiffImage != null
         && imageData[0].tiffImage.bytesPerFrame > 0) {
@@ -1630,21 +1629,15 @@ public class SeriesImageSource extends ImageSource {
           // or sourceQueue.take() which contains shutdown signals, it should be finished by now
           thread.join();
         } catch (final InterruptedException ex) {
-          // Ignore thread errors
-          // ex.printStackTrace();
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
         }
       }
-      threads.clear();
-      threads = null;
-      workers.clear();
-      workers = null;
 
-      if (decodeQueue != null) {
-        decodeQueue.close(false);
-        readQueue.close(false);
-        decodeQueue = null;
-        readQueue = null;
-      }
+      threads = null;
+      workers = null;
+      decodeQueue = null;
+      readQueue = null;
 
       // Do not set this to null as it is used in nextRawFrame()
       rawFramesQueue.close(false);
@@ -1714,12 +1707,9 @@ public class SeriesImageSource extends ImageSource {
       if (error != null) {
         throw error;
       }
-    } catch (final IllegalStateException ex) {
-      // We do not expect these as we use the queue without exceptions when closed
-      ex.printStackTrace();
     } catch (final InterruptedException ex) {
-      // Maybe if we forced the threads to stop
-      ex.printStackTrace();
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
 
     // We are here because the pixels were null so shut down sequential reading

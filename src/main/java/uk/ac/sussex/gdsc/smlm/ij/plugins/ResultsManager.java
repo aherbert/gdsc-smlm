@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -1249,7 +1249,7 @@ public class ResultsManager implements PlugIn {
       if (options.length != 0) {
         collectOptions(reader, options);
       }
-      reader.setTracker(new ImageJTrackProgress());
+      reader.setTracker(SimpleImageJTrackProgress.getInstance());
       results = reader.getResults();
       reader.getTracker().progress(1.0);
 
@@ -1619,7 +1619,7 @@ public class ResultsManager implements PlugIn {
     b.setFileFormatValue(gd.getNextChoiceIndex());
     b.setResultsDirectory(dir);
     SettingsManager.writeSettings(resultsSettings);
-    if (dir == null || !new File(dir).exists()) {
+    if (!new File(dir).exists()) {
       IJ.error(TITLE, "Output directory does not exist");
       return;
     }

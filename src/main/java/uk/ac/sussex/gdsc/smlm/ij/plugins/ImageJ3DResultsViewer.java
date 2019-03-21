@@ -155,6 +155,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -236,7 +237,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (Modifier.isStatic(field.getModifiers()) && field.getType() == Color.class) {
         try {
           final Color c = (Color) field.get(null);
-          colours.put(field.getName().toLowerCase(), new Color3f(c));
+          colours.put(field.getName().toLowerCase(Locale.US), new Color3f(c));
         } catch (final IllegalArgumentException | IllegalAccessException ex) {
           // Ignore
         }
@@ -1852,7 +1853,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
     }
-    highlightColor = colours.get(highlightColour.toLowerCase());
+    highlightColor = colours.get(highlightColour.toLowerCase(Locale.US));
   }
 
   @SuppressWarnings("null")
@@ -3004,7 +3005,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       newResults.setName(outputName);
       newResults.begin();
       ImageJUtils.showStatus("Cropping " + results.getName());
-      final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), results.size(), false);
+      final Ticker ticker = ImageJUtils.createTicker(results.size(), 0);
       final PeakResult[] allResults = results.toArray();
       for (int i = 0, size = results.size(); i < size; i++) {
         final Point3d locInImagePlate = new Point3d(points.getf(i));
@@ -3017,8 +3018,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       final int size = newResults.size();
-      IJ.showStatus("Cropped " + TextUtils.pleural(size, "result"));
-      ticker.stop();
+      ImageJUtils.finished("Cropped " + TextUtils.pleural(size, "result"));
       newResults.end();
       if (size != 0) {
         MemoryPeakResults.addResults(newResults);

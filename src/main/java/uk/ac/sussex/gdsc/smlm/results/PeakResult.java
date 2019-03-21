@@ -28,12 +28,15 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Specifies a peak fitting result.
  */
-public class PeakResult {
+public class PeakResult implements Serializable {
+  private static final long serialVersionUID = 20190319L;
+
   /** Index of the background in the parameters array. */
   public static final int BACKGROUND = 0;
   /** Index of the intensity in the parameters array. */

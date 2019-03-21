@@ -31,8 +31,8 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -293,7 +293,8 @@ public class TraceMolecules implements PlugIn {
       }
 
       final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
-          getClusteringAlgorithm(settings.getClusteringAlgorithm()), new ImageJTrackProgress());
+          getClusteringAlgorithm(settings.getClusteringAlgorithm()),
+          SimpleImageJTrackProgress.getInstance());
 
       if (settings.getSplitPulses()) {
         engine.setPulseInterval(settings.getPulseInterval());
@@ -337,7 +338,7 @@ public class TraceMolecules implements PlugIn {
         limitTimeThreshold(settings.getPulseInterval());
       }
 
-      manager.setTracker(new ImageJTrackProgress());
+      manager.setTracker(SimpleImageJTrackProgress.getInstance());
       manager.traceMolecules(getDistance(settings.getDistanceThreshold(), results.getCalibration()),
           timeThresholdInFrames());
       traces = manager.getTraces();

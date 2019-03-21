@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -315,9 +316,10 @@ public class CreateData implements PlugIn, ItemListener {
   private MemoryPeakResults results;
 
   // Used by the ImageGenerator to show progress when the thread starts
-  private int frame;
+  // private int frame;
+  /** The maximum frame. */
   private int maxT;
-  private int totalFrames;
+  // private int totalFrames;
 
   private boolean simpleMode;
   private boolean benchmarkMode;
@@ -1138,7 +1140,7 @@ public class CreateData implements PlugIn, ItemListener {
     final double u0 = MathUtils.max(v);
 
     // Store the benchmark settings when not using variable photons
-    if (min == max) {
+    if (Double.compare(min, max) == 0) {
       ImageJUtils.log("50%% PSF SNR : %s : Peak SNR : %s", MathUtils.rounded(u / noise),
           MathUtils.rounded(u0 / noise));
 
@@ -1327,14 +1329,14 @@ public class CreateData implements PlugIn, ItemListener {
       if (totalSteps != 0) {
         final int totalFrames =
             (int) Math.ceil(settings.getSeconds() * 1000 / settings.getExposureTime());
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "Require %d (%s%%) additional frames to draw all fluorophores.\n"
                 + "Do you want to add extra frames?",
             newFrames - totalFrames,
-            MathUtils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3)));
+            MathUtils.rounded((100.0 * (newFrames - totalFrames)) / totalFrames, 3));
       } else {
-        gd.addMessage(String.format(
-            "Require %d frames to draw all fluorophores.\nDo you want to proceed?", newFrames));
+        ImageJUtils.addMessage(gd,
+            "Require %d frames to draw all fluorophores.\nDo you want to proceed?", newFrames);
       }
       gd.showDialog();
       if (gd.wasOKed()) {
@@ -2002,7 +2004,7 @@ public class CreateData implements PlugIn, ItemListener {
       }
     }
     // Sort by time
-    Collections.sort(newLocalisations);
+    Collections.sort(newLocalisations, (r1, r2) -> Integer.compare(r1.getTime(), r2.getTime()));
     return newLocalisations;
 
   }
@@ -2172,8 +2174,7 @@ public class CreateData implements PlugIn, ItemListener {
     List<Future<?>> futures = new LinkedList<>();
 
     // Count all the frames to process
-    frame = 0;
-    totalFrames = maxT;
+    final Ticker ticker = ImageJUtils.createTicker(maxT, threadCount);
 
     // Collect statistics on the number of photons actually simulated
 
@@ -2188,7 +2189,7 @@ public class CreateData implements PlugIn, ItemListener {
         lastT = l.getTime();
         futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, index,
             lastT, copyPsfModel(psfModel), syncResults, stack, poissonNoise,
-            new RandomDataGenerator(createRandomGenerator()))));
+            new RandomDataGenerator(createRandomGenerator()), ticker)));
       }
       index++;
     }
@@ -2210,7 +2211,7 @@ public class CreateData implements PlugIn, ItemListener {
       if (pixels == null) {
         futures.add(threadPool.submit(
             new ImageGenerator(localisationSets, newLocalisations, maxT, t, null, syncResults,
-                stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()))));
+                stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()), ticker)));
       } else if (limits == null) {
         limits = MathUtils.limits((float[]) pixels);
       }
@@ -2218,18 +2219,13 @@ public class CreateData implements PlugIn, ItemListener {
 
     // Finish
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
+    futures.clear();
     threadPool.shutdown();
     IJ.showProgress(1);
     if (ImageJUtils.isInterrupted() || limits == null) {
       return null;
     }
     results.end();
-
-    // Clear memory
-    psfModel = null;
-    threadPool = null;
-    futures.clear();
-    futures = null;
 
     if (photonsRemoved.get() > 0) {
       ImageJUtils.log("Removed %d localisations with less than %.1f rendered photons",
@@ -2329,7 +2325,6 @@ public class CreateData implements PlugIn, ItemListener {
 
     imp.setDimensions(1, 1, newStack.getSize());
     imp.setDisplayRange(limits[0], limits[1]);
-    // imp.resetDisplayRange();
     imp.updateAndDraw();
 
     saveImage(imp);
@@ -2582,10 +2577,6 @@ public class CreateData implements PlugIn, ItemListener {
     return psfModel.copy(createRandomGenerator());
   }
 
-  private synchronized void showProgress() {
-    IJ.showProgress(frame++, totalFrames);
-  }
-
   private static class Spot {
     final double[] psf;
     final int x0min;
@@ -2686,12 +2677,14 @@ public class CreateData implements PlugIn, ItemListener {
     final ImageStack stack;
     final boolean poissonNoise;
     final RandomDataGenerator random;
+    final Ticker ticker;
     final double emGain;
     final double qe;
 
     public ImageGenerator(final List<LocalisationModelSet> localisationSets,
         List<LocalisationModelSet> newLocalisations, int startIndex, int time, PsfModel psfModel,
-        PeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random) {
+        PeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random,
+        Ticker ticker) {
       this.localisations = localisationSets;
       this.newLocalisations = newLocalisations;
       this.startIndex = startIndex;
@@ -2701,6 +2694,7 @@ public class CreateData implements PlugIn, ItemListener {
       this.stack = stack;
       this.poissonNoise = poissonNoise;
       this.random = random;
+      this.ticker = ticker;
       // This could be >=1 but the rest of the code ignores EM-gain if it is <=1
       emGain = (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
           ? settings.getEmGain()
@@ -2710,11 +2704,14 @@ public class CreateData implements PlugIn, ItemListener {
 
     @Override
     public void run() {
+      generate();
+      ticker.tick();
+    }
+
+    private void generate() {
       if (ImageJUtils.isInterrupted()) {
         return;
       }
-
-      showProgress();
 
       final boolean checkSnr = minSnrT1 > 0 || minSnrTn > 0;
 
@@ -3493,34 +3490,34 @@ public class CreateData implements PlugIn, ItemListener {
         ImageJUtils.log("Unable to compute LSE precision: " + ex.getMessage());
       }
 
-      // Compute density per frame. Multithread for speed
+      // Compute density per frame. Multi-thread for speed
       if (settings.getDensityRadius() > 0) {
-        IJ.showStatus("Calculating density ...");
-        final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+        final int threadCount = Prefs.getThreads();
+        final Ticker ticker = ImageJUtils.createTicker(results.getLastFrame(), threadCount,
+            "Calculating density ...");
+        final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
         final List<Future<?>> futures = new LinkedList<>();
         final TFloatArrayList coordsX = new TFloatArrayList();
         final TFloatArrayList coordsY = new TFloatArrayList();
         final Statistics densityStats = stats[DENSITY];
         final float radius = (float) (settings.getDensityRadius() * getHwhm());
         final Rectangle bounds = results.getBounds();
-        currentIndex = 0;
-        finalIndex = results.getLastFrame();
         // Store the density for each result.
         final int[] allDensity = new int[results.size()];
         final FrameCounter counter = results.newFrameCounter();
         results.forEach((PeakResultProcedure) result -> {
           if (counter.advance(result.getFrame())) {
             counter.increment(runDensityCalculation(threadPool, futures, coordsX, coordsY,
-                densityStats, radius, bounds, allDensity, counter.getCount()));
+                densityStats, radius, bounds, allDensity, counter.getCount(), ticker));
           }
           coordsX.add(result.getXPosition());
           coordsY.add(result.getYPosition());
         });
         runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, bounds,
-            allDensity, counter.getCount());
+            allDensity, counter.getCount(), ticker);
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
-        threadPool.shutdownNow();
-        IJ.showProgress(1);
+        threadPool.shutdown();
+        ImageJUtils.finished();
 
         // Split results into singles (density = 0) and clustered (density > 0)
         final MemoryPeakResults singles = copyMemoryPeakResults("No Density");
@@ -3628,16 +3625,16 @@ public class CreateData implements PlugIn, ItemListener {
     return stats[SIGNAL].getMean();
   }
 
-  private int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
+  private static int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
       final TFloatArrayList coordsX, final TFloatArrayList coordsY, final Statistics densityStats,
-      final float radius, final Rectangle bounds, final int[] allDensity, final int allIndex) {
+      final float radius, final Rectangle bounds, final int[] allDensity, final int allIndex,
+      Ticker ticker) {
     final int size = coordsX.size();
     final float[] xCoords = coordsX.toArray();
     final float[] yCoords = coordsY.toArray();
     coordsX.resetQuick();
     coordsY.resetQuick();
     futures.add(threadPool.submit(() -> {
-      incrementProgress();
       final DensityManager dm = new DensityManager(xCoords, yCoords, bounds);
       final int[] density = dm.calculateDensity(radius, true);
       addDensity(densityStats, density);
@@ -3647,15 +3644,9 @@ public class CreateData implements PlugIn, ItemListener {
       for (int i = 0, index = allIndex; i < density.length; i++, index++) {
         allDensity[index] = density[i];
       }
+      ticker.tick();
     }));
     return size;
-  }
-
-  private int currentIndex;
-  private int finalIndex;
-
-  private synchronized void incrementProgress() {
-    IJ.showProgress(currentIndex, finalIndex);
   }
 
   private static synchronized void addDensity(Statistics stats, int[] density) {
@@ -4477,11 +4468,11 @@ public class CreateData implements PlugIn, ItemListener {
       if (modelBounds.width > size || modelBounds.height > size) {
         final GenericDialog gd = new GenericDialog(TITLE);
         //@formatter:off
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\n"
             + "are larger than the simulation size [=%d].\n \nCrop the model?",
             modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height, size
-            ));
+            );
         //@formatter:on
         gd.addCheckbox("Random_crop", settings.getRandomCrop());
         final int upperx = modelBounds.x + modelBounds.width - size;

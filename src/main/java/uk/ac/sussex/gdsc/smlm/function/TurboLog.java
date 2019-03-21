@@ -44,13 +44,13 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class TurboLog extends FastLog {
   /**
-   * The table of the log value of the unbaised float exponent (an integer from -127 to 128).
+   * The table of the log value of the unbiased float exponent (an integer from -127 to 128).
    */
-  protected static final float[] logExpF;
+  private static final float[] logExpF;
   /**
-   * The table of the log value of the unbaised double exponent (an integer from -1023 to 1024).
+   * The table of the log value of the unbiased double exponent (an integer from -1023 to 1024).
    */
-  protected static final float[] logExpD;
+  private static final float[] logExpD;
 
   /**
    * The bounds below 1 where the function switches to use Math.log. This results in a maximum
@@ -64,13 +64,13 @@ public class TurboLog extends FastLog {
   public static final double UPPER_ONE_BOUND = 1.16;
 
   /** The lower bound mantissa (for a double) below 1 where the function switches to use Math.log */
-  protected static final long lowerBoundMantissa;
+  protected static final long LOWER_BOUND_MANTISSA;
   /** The upper bound mantissa (for a double) above 1 where the function switches to use Math.log */
-  protected static final long upperBoundMantissa;
+  protected static final long UPPER_BOUND_MANTISSA;
   /** The lower bound mantissa (for a float) below 1 where the function switches to use Math.log */
-  protected static final int lowerBoundMantissaF;
+  protected static final int LOWER_BOUND_MANTISSA_F;
   /** The upper bound mantissa (for a float) above 1 where the function switches to use Math.log */
-  protected static final int upperBoundMantissaF;
+  protected static final int UPPER_BOUND_MANTISSA_F;
 
   static {
     // Note: the exponent is already in base 2. Just multiply by ln(2) to convert to base E
@@ -88,15 +88,15 @@ public class TurboLog extends FastLog {
         - 1023) == -1 : "lower bound exponent not -1";
     assert ((Double.doubleToRawLongBits(UPPER_ONE_BOUND) >> 52)
         - 1023) == 0 : "upper bound exponent not 0";
-    lowerBoundMantissa = Double.doubleToRawLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
-    upperBoundMantissa = Double.doubleToRawLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
+    LOWER_BOUND_MANTISSA = Double.doubleToRawLongBits(LOWER_ONE_BOUND) & 0xfffffffffffffL;
+    UPPER_BOUND_MANTISSA = Double.doubleToRawLongBits(UPPER_ONE_BOUND) & 0xfffffffffffffL;
 
     assert ((Float.floatToIntBits((float) LOWER_ONE_BOUND) >> 23)
         - 127) == -1 : "lower bound exponent not -1";
     assert ((Float.floatToIntBits((float) UPPER_ONE_BOUND) >> 23)
         - 127) == 0 : "upper bound exponent not 0";
-    lowerBoundMantissaF = Float.floatToIntBits((float) LOWER_ONE_BOUND) & 0x7fffff;
-    upperBoundMantissaF = Float.floatToIntBits((float) UPPER_ONE_BOUND) & 0x7fffff;
+    LOWER_BOUND_MANTISSA_F = Float.floatToIntBits((float) LOWER_ONE_BOUND) & 0x7fffff;
+    UPPER_BOUND_MANTISSA_F = Float.floatToIntBits((float) UPPER_ONE_BOUND) & 0x7fffff;
   }
 
   /** The number of bits to remove from a float mantissa. */
@@ -110,6 +110,36 @@ public class TurboLog extends FastLog {
    * 1.1111....), depending on the precision.
    */
   private final float[] logMantissa;
+
+  /**
+   * Gets the log value of the unbiased float exponent (an integer from -127 to 128) using the
+   * biased exponent.
+   *
+   * <pre>
+   * {@code (float) ((exponent - 127) * Math.log(2.0))}
+   * </pre>
+   *
+   * @param exponent the biased exponent
+   * @return the log value
+   */
+  static final float getLogExpF(int exponent) {
+    return logExpF[exponent];
+  }
+
+  /**
+   * Gets the log value of the unbiased float exponent (an integer from -1023 to 1024) using the
+   * biased exponent.
+   *
+   * <pre>
+   * {@code (float) ((exponent - 1023) * Math.log(2.0))}
+   * </pre>
+   *
+   * @param exponent the biased exponent
+   * @return the log value
+   */
+  static final float getLogExpD(int exponent) {
+    return logExpD[exponent];
+  }
 
   /**
    * Create a new natural logarithm calculation instance. This will hold the pre-calculated log
@@ -235,7 +265,7 @@ public class TurboLog extends FastLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+    if ((e == 126 && m >= LOWER_BOUND_MANTISSA_F) || (e == 127 && m <= UPPER_BOUND_MANTISSA_F)) {
       return (float) Math.log(x);
     }
 
@@ -285,7 +315,7 @@ public class TurboLog extends FastLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return (float) Math.log(x);
     }
 
@@ -397,7 +427,7 @@ public class TurboLog extends FastLog {
     if (e == 0) {
       return (m == 0) ? Float.NEGATIVE_INFINITY : computeSubnormal(m << 1);
     }
-    if ((e == 126 && m >= lowerBoundMantissaF) || (e == 127 && m <= upperBoundMantissaF)) {
+    if ((e == 126 && m >= LOWER_BOUND_MANTISSA_F) || (e == 127 && m <= UPPER_BOUND_MANTISSA_F)) {
       return (float) Math.log(x);
     }
     return logMantissa[m >>> q] + logExpF[e];
@@ -425,7 +455,7 @@ public class TurboLog extends FastLog {
     if (e == 0) {
       return (m == 0L) ? Float.NEGATIVE_INFINITY : computeSubnormalF(m << 1);
     }
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return (float) Math.log(x);
     }
     return logMantissa[(int) (m >>> qd)] + logExpD[e];
@@ -475,7 +505,7 @@ public class TurboLog extends FastLog {
     }
 
     // When the value is close to 1 then the relative error can be very large
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return Math.log(x);
     }
 
@@ -504,7 +534,7 @@ public class TurboLog extends FastLog {
     if (e == 0) {
       return (m == 0L) ? Double.NEGATIVE_INFINITY : computeSubnormal(m << 1);
     }
-    if ((e == 1022 && m >= lowerBoundMantissa) || (e == 1023 && m <= upperBoundMantissa)) {
+    if ((e == 1022 && m >= LOWER_BOUND_MANTISSA) || (e == 1023 && m <= UPPER_BOUND_MANTISSA)) {
       return Math.log(x);
     }
     // return logMantissa[(int) (m >>> qd)] + logExpD[e];

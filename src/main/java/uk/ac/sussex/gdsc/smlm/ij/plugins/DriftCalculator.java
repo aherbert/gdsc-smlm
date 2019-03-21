@@ -26,8 +26,8 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -142,7 +142,7 @@ public class DriftCalculator implements PlugIn {
   private double[] lastdx;
   private double[] lastdy;
 
-  private final TrackProgress tracker = new ImageJTrackProgress();
+  private final TrackProgress tracker = SimpleImageJTrackProgress.getInstance();
 
   // Used to multi-thread the image alignment
   private ExecutorService threadPool;
@@ -561,7 +561,7 @@ public class DriftCalculator implements PlugIn {
     gd.addMessage("Apply drift correction to in-memory results?");
     gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
     // Option to save the drift unless it was loaded from file
-    if (method != DRIFT_FILE) {
+    if (!DRIFT_FILE.equals(method)) {
       gd.addCheckbox("Save_drift", saveDrift);
     }
     gd.showDialog();
@@ -1386,7 +1386,7 @@ public class DriftCalculator implements PlugIn {
     final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    final Ticker ticker = Ticker.createStarted(tracker, images.length * 2, true);
+    final Ticker ticker = Ticker.createStarted(tracker, images.length * 2L, true);
 
     for (int i = 0; i < images.length; i++) {
       futures.add(threadPool
@@ -1660,7 +1660,7 @@ public class DriftCalculator implements PlugIn {
 
       // Build an image using the current drift
       final List<Future<?>> futures = new LinkedList<>();
-      ticker = Ticker.createStarted(tracker, images.length * 2, true);
+      ticker = Ticker.createStarted(tracker, images.length * 2L, true);
 
       final ImageProcessor[] blockIp = new ImageProcessor[images.length];
       final double[] threadDx = new double[images.length];

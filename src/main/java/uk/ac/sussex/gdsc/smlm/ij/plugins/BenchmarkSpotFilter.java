@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.AssignmentComparator;
 import uk.ac.sussex.gdsc.core.match.AucCalculator;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
@@ -45,6 +45,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
@@ -71,7 +72,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TObjectProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -96,6 +96,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Filters the benchmark spot image created by CreateData plugin to identify candidates and then
@@ -178,8 +179,8 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private static int id = 1;
 
-  private static BufferedTextWindow summaryTable;
-  private static BufferedTextWindow batchSummaryTable;
+  private static AtomicReference<TextWindow> summaryTable = new AtomicReference<>();
+  private static AtomicReference<TextWindow> batchSummaryTable = new AtomicReference<>();
 
   private ImagePlus imp;
   private MemoryPeakResults results;
@@ -200,13 +201,13 @@ public class BenchmarkSpotFilter implements PlugIn {
    * The prefix for the results table header. Contains all the standard header data about the input
    * results data.
    */
-  public static String tablePrefix;
+  static String tablePrefix;
 
   /**
    * The prefix for the results table entry. Contains all the standard data about the input results
    * data.
    */
-  public static String resultPrefix;
+  static String resultPrefix;
 
   // Used by the Benchmark Spot Fit plugin
   private static int filterResultsId;
@@ -564,12 +565,14 @@ public class BenchmarkSpotFilter implements PlugIn {
     final BlockingQueue<Integer> jobs;
     final TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates;
     final TIntObjectHashMap<PsfSpot[]> coordinates;
+    final Ticker overlapTicker;
 
     public OverlapWorker(BlockingQueue<Integer> jobs,
-        TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates) {
+        TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates, Ticker overlapTicker) {
       this.jobs = jobs;
       this.originalCoordinates = originalCoordinates;
       this.coordinates = new TIntObjectHashMap<>();
+      this.overlapTicker = overlapTicker;
     }
 
     @Override
@@ -583,11 +586,11 @@ public class BenchmarkSpotFilter implements PlugIn {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job.intValue());
+            overlapTicker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -598,8 +601,6 @@ public class BenchmarkSpotFilter implements PlugIn {
         finished = true;
         return;
       }
-
-      showProgress();
 
       // Extract the data
       final PsfSpot[] actual = getCoordinates(originalCoordinates, frame);
@@ -747,11 +748,11 @@ public class BenchmarkSpotFilter implements PlugIn {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job.intValue());
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -762,8 +763,6 @@ public class BenchmarkSpotFilter implements PlugIn {
         finished = true;
         return;
       }
-
-      showProgress();
 
       // Extract the data
       data = ImageJImageConverter.getData(stack.getPixels(frame), stack.getWidth(),
@@ -1122,10 +1121,22 @@ public class BenchmarkSpotFilter implements PlugIn {
     private class SpotCoordinate extends BasePoint {
       Spot spot;
 
-      public SpotCoordinate(Spot spot) {
+      SpotCoordinate(Spot spot) {
         // Centre on the middle of the pixel
         super(spot.x + 0.5f, spot.y + 0.5f);
         this.spot = spot;
+      }
+
+      @Override
+      public boolean equals(Object object) {
+        // Ignore extra fields
+        return super.equals(object);
+      }
+
+      @Override
+      public int hashCode() {
+        // Ignore extra fields
+        return super.hashCode();
       }
     }
   }
@@ -1183,11 +1194,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
 
     // Clear old results to free memory
-    if (filterResult != null) {
-      filterResult.filterResults.clear();
-      filterResult.filterResults = null;
-      filterResult = null;
-    }
+    BenchmarkFilterResult localFilterResult;
+    BenchmarkSpotFilter.filterResult = null;
 
     // For graphs
     windowOrganiser = new WindowOrganiser();
@@ -1211,7 +1219,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       // Discrete parameters
       final double[] medParam = (batchMedian) ? getRange(limit, 1) : pEmpty;
 
-      setupProgress(imp.getImageStackSize() * searchParam.length
+      setupProgress((long) imp.getImageStackSize() * searchParam.length
           * (mParam.length + gParam.length + cParam.length + medParam.length), "Frame");
 
       ArrayList<BatchResult[]> batchResults = new ArrayList<>(cachedBatchResults.size());
@@ -1302,39 +1310,39 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       // Store in global singleton
-      filterResult = analyse(batchResults);
+      localFilterResult = analyse(batchResults);
     } else {
       // Single filter mode
       setupProgress(imp.getImageStackSize(), "Frame");
 
-      filterResult = runAnalysis(config);
+      localFilterResult = runAnalysis(config);
     }
 
     IJ.showProgress(-1);
     IJ.showStatus("");
 
-    getTable(false).flush();
-
-    if (filterResult == null) {
+    if (localFilterResult == null) {
       return;
     }
 
     // Store a clone of the config
-    filterResult.config = filterResult.config.clone();
+    localFilterResult.config = localFilterResult.config.clone();
+
+    BenchmarkSpotFilter.filterResult = localFilterResult;
 
     // Debugging the matches
     if (debug) {
-      addSpotsToMemory(filterResult.filterResults);
+      addSpotsToMemory(localFilterResult.filterResults);
     }
 
     if (showFailuresPlot) {
-      showFailuresPlot(filterResult);
+      showFailuresPlot(localFilterResult);
     }
     if (showPlot) {
-      showPlot(filterResult);
+      showPlot(localFilterResult);
     }
     if (isShowOverlay()) {
-      showOverlay(imp, filterResult);
+      showOverlay(imp, localFilterResult);
     }
 
     windowOrganiser.tile();
@@ -1465,9 +1473,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
       }
 
-      final BenchmarkFilterResult result = runAnalysis(config, true);
-      getTable(true).flush();
-      return result;
+      return runAnalysis(config, true);
     }
 
     return null;
@@ -1519,6 +1525,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private BatchResult[] runFilter(DataFilterMethod dataFilter, double[] param, int search,
       double param2) {
+    // Set the prefix for this batch
     progressPrefix = new BatchResult(null, dataFilter, 0, search, param2).getName();
     final TurboList<BatchResult> result = new TurboList<>();
 
@@ -1743,30 +1750,13 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   /** The total progress. */
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
+  private Ticker ticker = Ticker.getDefaultInstance();
+  /** The prefix for the total progress. */
   private String progressPrefix;
 
-  private void setupProgress(int total, String prefix) {
-    totalProgress = total;
-    stepProgress = ImageJUtils.getProgressInterval(totalProgress);
+  private void setupProgress(long total, String prefix) {
     progressPrefix = prefix;
-    progress = 0;
-  }
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      // if (Utils.showStatus(String.format("%s: %d / %d", progressPrefix, progress,
-      // totalProgress)))
-      if (ImageJUtils.showStatus(progressPrefix)) {
-        IJ.showProgress(progress, totalProgress);
-      }
-    }
-    progress++;
+    ticker = ImageJUtils.createTicker(total, 2, progressPrefix);
   }
 
   private BenchmarkFilterResult runAnalysis(FitEngineConfiguration config) {
@@ -1791,21 +1781,17 @@ public class BenchmarkSpotFilter implements PlugIn {
       lastId = simulationParameters.id;
       // lastRelativeDistances = relativeDistances;
 
-      // Store these so we can reset them
-      final int total = totalProgress;
-      final String prefix = progressPrefix;
-
       // Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude
-      // effect
-      // for each spot...
-      IJ.showStatus("Computing PSF overlap ...");
+      // effect for each spot...
 
       final int nThreads = Prefs.getThreads();
       final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
       final List<OverlapWorker> workers = new LinkedList<>();
       final List<Thread> threads = new LinkedList<>();
+      final Ticker overlapTicker =
+          ImageJUtils.createTicker(coordinates.size(), nThreads, "Computing PSF overlap ...");
       for (int i = 0; i < nThreads; i++) {
-        final OverlapWorker worker = new OverlapWorker(jobs, coordinates);
+        final OverlapWorker worker = new OverlapWorker(jobs, coordinates, overlapTicker);
         final Thread t = new Thread(worker);
         workers.add(worker);
         threads.add(t);
@@ -1813,9 +1799,6 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       // Process the frames
-      totalProgress = coordinates.size();
-      stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-      progress = 0;
       coordinates.forEachKey(value -> {
         put(jobs, value);
         return true;
@@ -1847,10 +1830,9 @@ public class BenchmarkSpotFilter implements PlugIn {
       ImageJUtils.log("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d", regression.getR(),
           regression.getSlope(), regression.getN());
 
-      IJ.showProgress(-1);
-      IJ.showStatus("");
-
-      setupProgress(total, prefix);
+      // Reset status.
+      // This is either the default 'Frame' or the batch result name
+      IJ.showStatus(progressPrefix);
     }
 
     if (!batchMode) {
@@ -1939,7 +1921,9 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     filterResults.compact();
 
-    IJ.showStatus("Summarising results ...");
+    if (!batchMode) {
+      IJ.showStatus("Summarising results ...");
+    }
 
     // Show a table of the results
     final BenchmarkFilterResult filterResult =
@@ -2061,15 +2045,12 @@ public class BenchmarkSpotFilter implements PlugIn {
     // Create the overall match score
     final double[] total = new double[3];
     final ArrayList<ScoredSpot> allSpots = new ArrayList<>();
-    filterResults.forEachValue(new TObjectProcedure<FilterResult>() {
-      @Override
-      public boolean execute(FilterResult result) {
-        total[0] += result.result.getTruePositives();
-        total[1] += result.result.getFalsePositives();
-        total[2] += result.result.getFalseNegatives();
-        allSpots.addAll(Arrays.asList(result.spots));
-        return true;
-      }
+    filterResults.forEachValue(result -> {
+      total[0] += result.result.getTruePositives();
+      total[1] += result.result.getFalsePositives();
+      total[2] += result.result.getFalseNegatives();
+      allSpots.addAll(Arrays.asList(result.spots));
+      return true;
     });
     double tp = total[0];
     double fp = total[1];
@@ -2178,7 +2159,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
       recall[index] = tp / numberOfResults;
       precision[index] = tp / (tp + fp);
-      jaccard[index] = tp / (fp + numberOfResults); // (tp+fp+fn) == (fp+n) since tp+fn=n;
+      jaccard[index] = tp / (fp + numberOfResults); // (tp+fp+fn) == (fp+n) since tp+fn=n
       correlation[index] = lastCorrelation;
       truePositives[index] = tp;
       falsePositives[index] = fp;
@@ -2253,8 +2234,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       sb.append("\t\t\t\t\t");
     }
 
-    final BufferedTextWindow resultsTable = getTable(batchSummary);
-    resultsTable.append(sb.toString());
+    getTable(batchSummary).append(sb.toString());
 
     // Store results
     filterResult.auc = auc;
@@ -2452,21 +2432,18 @@ public class BenchmarkSpotFilter implements PlugIn {
     sb.append('\t');
   }
 
-  private static BufferedTextWindow getTable(boolean batchSummary) {
+  private static TextWindow getTable(boolean batchSummary) {
+    AtomicReference<TextWindow> tableRef;
+    String title;
     if (batchSummary) {
-      if (batchSummaryTable == null || !batchSummaryTable.isVisible()) {
-        final TextWindow table = new TextWindow(TITLE + " Batch", createHeader(), "", 1000, 300);
-        table.setVisible(true);
-        batchSummaryTable = new BufferedTextWindow(table);
-      }
-      return batchSummaryTable;
+      tableRef = batchSummaryTable;
+      title = TITLE + " Batch";
+    } else {
+      tableRef = summaryTable;
+      title = TITLE;
     }
-    if (summaryTable == null || !summaryTable.isVisible()) {
-      final TextWindow table = new TextWindow(TITLE, createHeader(), "", 1000, 300);
-      table.setVisible(true);
-      summaryTable = new BufferedTextWindow(table);
-    }
-    return summaryTable;
+    return ImageJUtils.refresh(tableRef,
+        () -> new TextWindow(title, createHeader(), "", 1000, 300));
   }
 
   private static String createHeader() {

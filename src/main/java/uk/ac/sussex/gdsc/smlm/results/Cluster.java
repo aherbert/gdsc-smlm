@@ -33,7 +33,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Define a cluster of localisations.
  */
-public class Cluster implements Comparable<Cluster> {
+public class Cluster {
   /**
    * The method for computing the centroid.
    */
@@ -343,12 +343,6 @@ public class Cluster implements Comparable<Cluster> {
    */
   public void setId(int id) {
     this.id = id;
-  }
-
-  @Override
-  public int compareTo(Cluster that) {
-    // Sort by ID ascending
-    return Integer.compare(this.id, that.id);
   }
 
   /**

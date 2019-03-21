@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
@@ -345,7 +344,7 @@ public class MedianFilter implements PlugInFilter {
   public void run(ImageProcessor ip) {
     final long start = System.nanoTime();
 
-    final ImageJTrackProgress trackProgress = new ImageJTrackProgress();
+    //final ImageJTrackProgress trackProgress = SimpleImageJTrackProgress.getInstance();
     final ImageStack stack = imp.getImageStack();
 
     final int width = stack.getWidth();
@@ -354,10 +353,11 @@ public class MedianFilter implements PlugInFilter {
     final float[] mean = new float[imageStack.length];
 
     // Get the mean for each frame and normalise the data using the mean
-    final ExecutorService threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+    final int threadCount = Prefs.getThreads();
+    final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
     List<Future<?>> futures = new LinkedList<>();
 
-    Ticker ticker = Ticker.createStarted(trackProgress, stack.getSize(), true);
+    Ticker ticker = ImageJUtils.createTicker(stack.getSize(), threadCount);
     IJ.showStatus("Calculating means...");
     for (int n = 1; n <= stack.getSize(); n++) {
       futures.add(threadPool.submit(new ImageNormaliser(stack, imageStack, mean, n, ticker)));
@@ -369,7 +369,7 @@ public class MedianFilter implements PlugInFilter {
     futures = new LinkedList<>();
 
     final int size = width * height;
-    ticker = Ticker.createStarted(trackProgress, size, true);
+    ticker = ImageJUtils.createTicker(size, threadCount);
     IJ.showStatus("Calculating medians...");
     for (int i = 0; i < size; i += blockSize) {
       futures.add(threadPool.submit(
@@ -385,7 +385,7 @@ public class MedianFilter implements PlugInFilter {
 
     if (subtract) {
       IJ.showStatus("Subtracting medians...");
-      ticker = Ticker.createStarted(trackProgress, stack.getSize(), true);
+      ticker = ImageJUtils.createTicker(stack.getSize(), threadCount);
       for (int n = 1; n <= stack.getSize(); n++) {
         futures.add(threadPool.submit(new ImageFilter(stack, imageStack, n, ticker)));
       }

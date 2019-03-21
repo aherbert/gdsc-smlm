@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
@@ -41,6 +42,7 @@ import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -80,6 +82,7 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.util.FastMath;
 
@@ -315,6 +318,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     static int compare(ResultCoordinate r1, ResultCoordinate r2) {
       return Integer.compare(r1.result.spotIndex, r2.result.spotIndex);
     }
+
+    @Override
+    public boolean equals(Object object) {
+      // Ignore extra fields
+      return super.equals(object);
+    }
+
+    @Override
+    public int hashCode() {
+      // Ignore extra fields
+      return super.hashCode();
+    }
   }
 
   /**
@@ -443,6 +458,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int[][] neighbourHistogram;
     final int[][] almostNeighbourHistogram;
     final Overlay overlay;
+    final Ticker ticker;
     double[] region;
     float[] data;
     ArrayList<DoubletResult> results = new ArrayList<>();
@@ -460,14 +476,18 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      * @param actualCoordinates the actual coordinates
      * @param fitConfig the fit config
      * @param overlay the overlay
+     * @param ticker the ticker
      */
-    public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
+    Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitConfiguration fitConfig,
-        Overlay overlay) {
+        Overlay overlay, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
       this.actualCoordinates = actualCoordinates;
       this.fitConfig = fitConfig.clone();
+      this.overlay = overlay;
+      this.ticker = ticker;
+
       this.gf = new Gaussian2DFitter(this.fitConfig);
       this.spotFilter = config.createSpotFilter();
       this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
@@ -479,7 +499,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       resultHistogram = new int[spotHistogram.length];
       neighbourHistogram = new int[3][spotHistogram.length];
       almostNeighbourHistogram = new int[3][spotHistogram.length];
-      this.overlay = overlay;
       rampedScore = new RampedScore(lowerDistance, matchDistance);
       if (signalFactor > 0) {
         signalScore = new RampedScore(lowerSignalFactor, signalFactor);
@@ -497,11 +516,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job.intValue());
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        // throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -512,8 +531,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         finished = true;
         return;
       }
-
-      showProgress();
 
       final Coordinate[] actual = ResultsMatchCalculator.getCoordinates(actualCoordinates, frame);
       final ArrayList<DoubletResult> frameResults = new ArrayList<>(actual.length);
@@ -1499,10 +1516,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     gd.addHelp(About.HELP_URL);
 
     final double sa = getSa();
-    gd.addMessage(String.format(
+    ImageJUtils.addMessage(gd,
         "Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
         MathUtils.rounded(simulationParameters.sd / simulationParameters.pixelPitch),
-        MathUtils.rounded(sa)));
+        MathUtils.rounded(sa));
 
     // For each new benchmark width, reset the PSF width to the square pixel adjustment
     if (lastId != simulationParameters.id) {
@@ -1726,21 +1743,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         simulationParameters.pixelPitch) / simulationParameters.pixelPitch;
   }
 
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0
-        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-      IJ.showProgress(progress, totalProgress);
-    }
-    progress++;
-  }
-
   private void runFitting() {
     doubletResults = null;
 
@@ -1763,11 +1765,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+    final Ticker ticker =
+        ImageJUtils.createTicker(actualCoordinates.size(), nThreads, "Computing results ...");
     final List<Worker> workers = new LinkedList<>();
     final List<Thread> threads = new LinkedList<>();
     final Overlay overlay = (showOverlay) ? new Overlay() : null;
     for (int i = 0; i < nThreads; i++) {
-      final Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay);
+      final Worker worker = new Worker(jobs, stack, actualCoordinates, fitConfig, overlay, ticker);
       final Thread t = new Thread(worker);
       workers.add(worker);
       threads.add(t);
@@ -1776,9 +1780,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Fit the frames
     final long startTime = System.nanoTime();
-    totalProgress = actualCoordinates.size();
-    stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-    progress = 0;
     actualCoordinates.forEachKey(frame -> {
       put(jobs, frame);
       return true;
@@ -1793,13 +1794,13 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       try {
         threads.get(i).join();
       } catch (final InterruptedException ex) {
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException(ex);
       }
     }
     threads.clear();
 
-    IJ.showProgress(1);
-    IJ.showStatus("Collecting results ...");
+    ImageJUtils.finished("Collecting results ...");
     final long runTime = System.nanoTime() - startTime;
 
     // Collect the results

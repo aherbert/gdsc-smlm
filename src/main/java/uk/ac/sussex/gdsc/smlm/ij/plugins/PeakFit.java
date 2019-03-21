@@ -26,9 +26,9 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
@@ -738,7 +738,7 @@ public class PeakFit implements PlugInFilter {
 
       final SeriesImageSource seriesImageSource =
           new SeriesImageSource(getName(series.getImageList()), series);
-      seriesImageSource.setTrackProgress(new ImageJTrackProgress());
+      seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
       // if (extraOptions)
       // {
       // numberOfThreads = Math.max(1, series.getNumberOfThreads());
@@ -2806,13 +2806,13 @@ public class PeakFit implements PlugInFilter {
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       if (filter == filterCount) {
         // This is maximum filter count so no continue option
-        gd.addMessage(String.format("Configure the %s filter.",
-            FitProtosHelper.getName(config.getDataFilterType())));
+        ImageJUtils.addMessage(gd, "Configure the %s filter.",
+            FitProtosHelper.getName(config.getDataFilterType()));
       } else {
         gd.enableYesNoCancel("Add", "Continue");
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "Configure the %s filter.\nClick continue to proceed with the current set of %d.",
-            FitProtosHelper.getName(config.getDataFilterType()), i));
+            FitProtosHelper.getName(config.getDataFilterType()), i);
       }
 
       final String fieldName = "Spot_filter" + filter;
@@ -3805,10 +3805,10 @@ public class PeakFit implements PlugInFilter {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.enableYesNoCancel();
         gd.hideCancelButton();
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "Candidate maxima for fitting span multiple frames (%d-%d).\n \n"
                 + "Please confirm the %s are correct.",
-            min, max, TextUtils.pleural(memoryResults.size(), "candidate")));
+            min, max, TextUtils.pleural(memoryResults.size(), "candidate"));
         gd.showDialog();
         if (!gd.wasOKed()) {
           return;

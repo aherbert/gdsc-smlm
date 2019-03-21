@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -213,7 +212,6 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
       lastZero = zero;
     }
 
-    ticker = Ticker.create(new ImageJTrackProgress(), passes, passes != 1);
-    ticker.start();
+    ticker = ImageJUtils.createTicker(passes, passes);
   }
 }

@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
@@ -208,8 +209,7 @@ public class PsfDrift implements PlugIn {
           }
         }
       } catch (final InterruptedException ex) {
-        Thread.currentThread().interrupt();
-        throw new ConcurrentRuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -671,10 +671,10 @@ public class PsfDrift implements PlugIn {
     gd.hideCancelButton();
     startSlice = psfSettings.getCentreImage() - (centre - start);
     endSlice = psfSettings.getCentreImage() + (end - centre);
-    gd.addMessage(String.format(
+    ImageJUtils.addMessage(gd,
         "Save the drift to the PSF?\n \nSlices %d (%s nm) - %d (%s nm) above recall limit",
         startSlice, MathUtils.rounded(zPosition[start]), endSlice,
-        MathUtils.rounded(zPosition[end])));
+        MathUtils.rounded(zPosition[end]));
     gd.addMessage("Optionally average the end points to set drift outside the limits.\n"
         + "(Select zero to ignore)");
     gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
@@ -1148,10 +1148,10 @@ public class PsfDrift implements PlugIn {
     final NonBlockingExtendedGenericDialog gd2 = new NonBlockingExtendedGenericDialog(TITLE);
     final double scale = psfSettings.getPixelSize();
     //@formatter:off
-    gd2.addMessage(String.format(
+    ImageJUtils.addMessage(gd2,
         "Update the PSF information?\n \n" +
         "Current z-centre = %d, FHWM = %s px (%s nm)\n",
-        centre, MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale)));
+        centre, MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale));
     //@formatter:on
     gd2.addSlider("z-centre", cx[0], cx[cx.length - 1], newCentre);
     final TextField tf = gd2.getLastTextField();

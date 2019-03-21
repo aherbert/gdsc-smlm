@@ -30,8 +30,8 @@ import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -289,11 +289,11 @@ public class PcPalmClusters implements PlugIn {
 
     final long s1 = System.nanoTime();
     final ClusteringEngine engine =
-        new ClusteringEngine(1, clusteringAlgorithm, new ImageJTrackProgress());
+        new ClusteringEngine(1, clusteringAlgorithm, SimpleImageJTrackProgress.getInstance());
     if (multiThread) {
       engine.setThreadCount(Prefs.getThreads());
     }
-    engine.setTracker(new ImageJTrackProgress());
+    engine.setTracker(SimpleImageJTrackProgress.getInstance());
     IJ.showStatus("Clustering ...");
     final List<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
     IJ.showStatus("");

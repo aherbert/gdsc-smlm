@@ -33,8 +33,8 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
@@ -1120,8 +1120,7 @@ public class PcPalmMolecules implements PlugIn {
             break;
           }
         }
-        IJ.showProgress(1);
-        IJ.showStatus("");
+        ImageJUtils.finished();
       } else {
         // Pick centres randomly from the distribution
         while (clusterCentres.size() < totalSteps) {
@@ -1482,7 +1481,7 @@ public class PcPalmMolecules implements PlugIn {
       points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
     }
     final ClusteringEngine engine = new ClusteringEngine(Prefs.getThreads(),
-        ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE, new ImageJTrackProgress());
+        ClusteringAlgorithm.PARTICLE_SINGLE_LINKAGE, SimpleImageJTrackProgress.getInstance());
     IJ.showStatus("Clustering to check inter-molecule distances");
     engine.setTrackJoins(true);
     final List<Cluster> clusters = engine.findClusters(points, intraHist[0][p99]);

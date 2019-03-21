@@ -50,8 +50,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   protected String filename;
   private boolean sortAfterEnd;
 
-  /** The size of the results. */
-  protected int size;
+  /** The size of the results. This is only modified within synchronized blocks. */
+  protected volatile int size;
 
   /**
    * Instantiates a new file peak results.
@@ -63,7 +63,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
   }
 
   @Override
-  public void begin() {
+  public synchronized void begin() {
     fos = null;
     size = 0;
     try {
@@ -103,8 +103,8 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     if (fos == null) {
       return;
     }
-    size += count;
     write(result);
+    size += count;
   }
 
   /**

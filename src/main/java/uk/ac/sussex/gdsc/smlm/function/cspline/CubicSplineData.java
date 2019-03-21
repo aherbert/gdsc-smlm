@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.data.procedures.TrivalueProcedure;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -306,7 +305,7 @@ public class CubicSplineData {
    * @param progress the progress
    * @throws IllegalArgumentException If the number of sample is not positive
    */
-  public void sample(int n, TrivalueProcedure procedure, ImageJTrackProgress progress) {
+  public void sample(int n, TrivalueProcedure procedure, TrackProgress progress) {
     sample(n, n, n, procedure, progress);
   }
 

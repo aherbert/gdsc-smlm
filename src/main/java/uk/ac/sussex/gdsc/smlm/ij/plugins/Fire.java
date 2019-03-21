@@ -27,16 +27,16 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
-import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
 import uk.ac.sussex.gdsc.core.utils.DoubleMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
@@ -283,7 +283,7 @@ public class Fire implements PlugIn {
   private double correctionMean;
   private double correctionSigma;
 
-  private TrackProgress progress = new ImageJTrackProgress();
+  private TrackProgress progress = SimpleImageJTrackProgress.getInstance();
 
   private int numberOfThreads;
 
@@ -395,8 +395,8 @@ public class Fire implements PlugIn {
    * Dumb implementation of the track progress interface for parallel threads. Uses simple
    * synchronisation to increment total progress.
    */
-  private static class ParallelTrackProgress extends NullTrackProgress {
-    AtomicDouble done = new AtomicDouble();
+  private static class ParallelTrackProgress extends TrackProgressAdaptor {
+    final AtomicDouble done = new AtomicDouble();
     final int total;
 
     ParallelTrackProgress(int repeats) {
@@ -2755,10 +2755,10 @@ public class Fire implements PlugIn {
       final double sd = histogram.sigma / nmPerPixel;
       final double plateauness = qplot.computePlateauness(qplot.qvalue, mu, sd);
 
-      gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n"
-          + String.format("Initial estimate:\nPrecision = %.3f +/- %.3f\n", histogram.mean,
-              histogram.sigma)
-          + String.format("Q = %s\nCost = %.3f", MathUtils.rounded(qplot.qvalue), plateauness));
+      ImageJUtils.addMessage(gd,
+          "Estimate the blinking correction parameter Q for Fourier Ring Correlation\n \n"
+              + "Initial estimate:\nPrecision = %.3f +/- %.3f\nQ = %s\nCost = %.3f",
+          histogram.mean, histogram.sigma, MathUtils.rounded(qplot.qvalue), plateauness);
 
       final double mean10 = histogram.mean * 10;
       final double sd10 = histogram.sigma * 10;
@@ -2982,7 +2982,7 @@ public class Fire implements PlugIn {
     if (repeats > 1) {
       progress = new ParallelTrackProgress(repeats);
     } else {
-      progress = new ImageJTrackProgress();
+      progress = SimpleImageJTrackProgress.getInstance();
     }
   }
 }

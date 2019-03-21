@@ -28,7 +28,6 @@ import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -604,8 +603,7 @@ public class ResultsMatchCalculator implements PlugIn {
     final TextWindow pairsWindow = createPairsWindow(resultsWindow);
     pairsWindow.getTextPanel().clear();
     createPairPainter(pairsWindow, results1.getSource());
-    IJ.showStatus("Writing pairs table");
-    final Ticker ticker = Ticker.createStarted(new ImageJTrackProgress(), pairs.size(), false);
+    final Ticker ticker = ImageJUtils.createTicker(pairs.size(), 0, "Writing pairs table");
     try (final BufferedTextWindow bw = new BufferedTextWindow(pairsWindow)) {
       final StringBuilder sb = new StringBuilder();
       for (final PointPair pair : pairs) {
@@ -613,7 +611,7 @@ public class ResultsMatchCalculator implements PlugIn {
         ticker.tick();
       }
     }
-    IJ.showProgress(1);
+    ImageJUtils.finished();
   }
 
   @SuppressWarnings("null")

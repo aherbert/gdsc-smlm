@@ -29,12 +29,14 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -202,7 +204,7 @@ public class BenchmarkFit implements PlugIn {
   /**
    * Store all the results from fitting on the same benchmark dataset.
    */
-  public static LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<>();
+  static final LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<>();
 
   /**
    * Used to allow multi-threading of the fitting method.
@@ -216,6 +218,7 @@ public class BenchmarkFit implements PlugIn {
     final double[][] offsets;
     final FitConfiguration fitConfig;
     final CameraModel cameraModel;
+    final Ticker ticker;
     final double sa;
     final int size;
     final int totalFrames;
@@ -228,12 +231,13 @@ public class BenchmarkFit implements PlugIn {
     private double[] uc;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack, Rectangle region,
-        FitConfiguration fitConfig, CameraModel cameraModel) {
+        FitConfiguration fitConfig, CameraModel cameraModel, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
       this.region = region;
       this.fitConfig = fitConfig.clone();
       this.cameraModel = cameraModel;
+      this.ticker = ticker;
       this.offsets = startPoints;
 
       for (int i = 0; i < stats.length; i++) {
@@ -260,11 +264,11 @@ public class BenchmarkFit implements PlugIn {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job.intValue());
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        Thread.currentThread().interrupt();
-        throw new ConcurrentRuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -275,8 +279,6 @@ public class BenchmarkFit implements PlugIn {
         finished = true;
         return;
       }
-
-      showProgress();
 
       // Extract the data
       data = ImageJImageConverter.getData(stack.getPixels(frame + 1), stack.getWidth(),
@@ -589,10 +591,10 @@ public class BenchmarkFit implements PlugIn {
     gd.addHelp(About.HELP_URL);
 
     final double sa = getSa();
-    gd.addMessage(String.format(
+    ImageJUtils.addMessage(gd,
         "Fits the benchmark image created by CreateData plugin.\nPSF width = %s, adjusted = %s",
         MathUtils.rounded(benchmarkParameters.sd / benchmarkParameters.pixelPitch),
-        MathUtils.rounded(sa)));
+        MathUtils.rounded(sa));
 
     final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
     fitConfig = config.getFitConfiguration();
@@ -853,21 +855,6 @@ public class BenchmarkFit implements PlugIn {
         benchmarkParameters.pixelPitch) / benchmarkParameters.pixelPitch;
   }
 
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0
-        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-      IJ.showProgress(progress, totalProgress);
-    }
-    progress++;
-  }
-
   private void runFit() {
     // Initialise the answer.
     answer[Gaussian2DFunction.BACKGROUND] = benchmarkParameters.getBackground();
@@ -911,29 +898,28 @@ public class BenchmarkFit implements PlugIn {
 
     final ImageStack stack = imp.getImageStack();
 
+    final int totalFrames = benchmarkParameters.frames;
+
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
     final List<Worker> workers = new LinkedList<>();
     final List<Thread> threads = new LinkedList<>();
+    final Ticker ticker = ImageJUtils.createTicker(totalFrames, nThreads, "Fitting frames ...");
     for (int i = 0; i < nThreads; i++) {
-      final Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel);
+      final Worker worker = new Worker(jobs, stack, region, fitConfig, cameraModel, ticker);
       final Thread t = new Thread(worker);
       workers.add(worker);
       threads.add(t);
       t.start();
     }
 
-    final int totalFrames = benchmarkParameters.frames;
 
     // Store all the fitting results
     results = new double[totalFrames * startPoints.length][];
     resultsTime = new long[results.length];
 
     // Fit the frames
-    totalProgress = totalFrames;
-    stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-    progress = 0;
     for (int i = 0; i < totalFrames; i++) {
       // Only fit if there were simulated photons
       if (benchmarkParameters.framePhotons[i] > 0) {
@@ -961,8 +947,7 @@ public class BenchmarkFit implements PlugIn {
           totalFrames, MathUtils.rounded((100.0 * comValid.intValue()) / totalFrames));
     }
 
-    IJ.showProgress(1);
-    IJ.showStatus("Collecting results ...");
+    ImageJUtils.finished("Collecting results ...");
 
     // Collect the results
     Statistics[] stats = null;

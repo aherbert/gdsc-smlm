@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -67,7 +67,7 @@ public class NeighbourAnalysis implements PlugIn {
     final TraceManager manager = new TraceManager(results);
 
     // Run the tracing
-    manager.setTracker(new ImageJTrackProgress());
+    manager.setTracker(SimpleImageJTrackProgress.getInstance());
     final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
 
     saveTraces(traces);

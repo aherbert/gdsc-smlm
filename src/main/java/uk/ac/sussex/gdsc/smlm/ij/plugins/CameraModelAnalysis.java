@@ -107,6 +107,12 @@ public class CameraModelAnalysis
   private static final double SIMPSON_ABSOLUTE_ACCURACY = 1e-8;
   private static final int SIMPSON_MIN_ITERATION_COUNT = 3;
 
+  // Use Simpson's integration with n=4 to get the integral of the probability
+  // over the range of each count.
+  private static final int SIMPSON_N = 4;
+  private static final int SIMPSON_N_2 = SIMPSON_N / 2;
+  private static final double SIMPSON_H = 1.0 / SIMPSON_N;
+
   private CameraModelAnalysisSettings.Builder settings;
 
   private boolean extraOptions;
@@ -1354,15 +1360,12 @@ public class CameraModelAnalysis
 
       // Use Simpson's integration with n=4 to get the integral of the probability
       // over the range of each count.
-      final int n = 4;
-      final int n_2 = n / 2;
-      final double h = 1.0 / n;
 
       // Note the Poisson-Gamma function cannot be integrated with the
       // Dirac delta function at c==0
 
       // Compute the extra function points
-      final double[] f = new double[y.length * n + 1];
+      final double[] f = new double[y.length * SIMPSON_N + 1];
       int index = f.length;
 
       final int mod;
@@ -1370,37 +1373,37 @@ public class CameraModelAnalysis
         // Do this final value outside the loop as y[index/n] does not exists
         mod = 0;
         index--;
-        f[index] = fun.likelihood(start + index * h, e);
+        f[index] = fun.likelihood(start + index * SIMPSON_H, e);
       } else {
         // Used when computing for rounding up/down
-        mod = n_2;
-        start -= n_2 * h;
+        mod = SIMPSON_N_2;
+        start -= SIMPSON_N_2 * SIMPSON_H;
       }
 
       while (index-- > 0) {
-        if (index % n == mod) {
-          f[index] = y[index / n];
+        if (index % SIMPSON_N == mod) {
+          f[index] = y[index / SIMPSON_N];
         } else {
-          f[index] = fun.likelihood(start + index * h, e);
+          f[index] = fun.likelihood(start + index * SIMPSON_H, e);
         }
       }
 
       // Compute indices for the integral
-      final TIntArrayList tmp = new TIntArrayList(n);
-      for (int j = 1; j <= n_2 - 1; j++) {
+      final TIntArrayList tmp = new TIntArrayList(SIMPSON_N);
+      for (int j = 1; j <= SIMPSON_N_2 - 1; j++) {
         tmp.add(2 * j);
       }
       final int[] i2 = tmp.toArray();
       tmp.resetQuick();
-      for (int j = 1; j <= n_2; j++) {
+      for (int j = 1; j <= SIMPSON_N_2; j++) {
         tmp.add(2 * j - 1);
       }
       final int[] i4 = tmp.toArray();
 
       // Compute integral
       for (int i = 0; i < y.length; i++) {
-        final int a = i * n;
-        final int b = a + n;
+        final int a = i * SIMPSON_N;
+        final int b = a + SIMPSON_N;
         sum = f[a] + f[b];
         for (int j = i2.length; j-- > 0;) {
           sum += 2 * f[a + i2[j]];
@@ -1408,7 +1411,7 @@ public class CameraModelAnalysis
         for (int j = i4.length; j-- > 0;) {
           sum += 4 * f[a + i4[j]];
         }
-        sum *= h / 3;
+        sum *= SIMPSON_H / 3;
         // System.out.printf("y[%d] = %f => %f\n", i, y[i], s);
         y[i] = sum;
       }

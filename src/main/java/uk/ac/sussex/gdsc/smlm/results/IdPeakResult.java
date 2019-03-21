@@ -28,6 +28,8 @@ package uk.ac.sussex.gdsc.smlm.results;
  * Specifies a peak fitting result with an Id.
  */
 public class IdPeakResult extends PeakResult {
+  private static final long serialVersionUID = 20190319L;
+
   private final int id;
 
   /**

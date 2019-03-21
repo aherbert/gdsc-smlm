@@ -894,8 +894,12 @@ public class ImagePsfModel extends PsfModel {
    * @return The HWHM table for dimension 0 for all the slices.
    */
   public double[] getAllHwhm0() {
-    initialiseHwhm();
-    return hwhm0;
+    double[] hwhm = hwhm0;
+    if (hwhm == null) {
+      initialiseHwhm();
+      hwhm = hwhm0;
+    }
+    return hwhm;
   }
 
   /**
@@ -904,21 +908,28 @@ public class ImagePsfModel extends PsfModel {
    * @return The HWHM table for dimension 1 for all the slices.
    */
   public double[] getAllHwhm1() {
-    initialiseHwhm();
-    return hwhm1;
+    double[] hwhm = hwhm1;
+    if (hwhm == null) {
+      initialiseHwhm();
+      hwhm = hwhm1;
+    }
+    return hwhm;
   }
 
   /**
    * Initialise the HWHM look-up table.
    */
   public void initialiseHwhm() {
-    if (hwhm0 != null) {
-      return;
+    double[] hwhm = hwhm0;
+    if (hwhm == null) {
+      computeHwhm();
     }
-    computeHwhm();
   }
 
   private synchronized void computeHwhm() {
+    if (hwhm0 != null) {
+      return;
+    }
     // The concept of HWHM only applies to a PSF that is a peaked maxima.
     // This may not be true for an image. To approximate this we assume that
     // the peak is Gaussian and find the sum which equals the integral of

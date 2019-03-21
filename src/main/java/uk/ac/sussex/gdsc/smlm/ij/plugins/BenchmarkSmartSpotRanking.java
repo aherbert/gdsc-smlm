@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
@@ -36,6 +37,7 @@ import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
@@ -50,7 +52,6 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -138,9 +139,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static int negativesAfterAllPositives = 10;
   private static boolean selectMethods = true;
   private static int compactBins = 1024;
-  private static String[] SORT = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision",
+  private static String[] sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision",
       "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
-  private static int sortIndex = SORT.length - 3; // F2 to favour recall
+  private static int sortIndex = sortMethods.length - 3; // F2 to favour recall
   private static boolean useFractionScores = true;
   private static boolean showOverlay;
 
@@ -254,18 +255,20 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final TIntObjectHashMap<RankResults> results;
     final int fitting;
     final boolean requireSnr;
+    final Ticker ticker;
 
     float[] data;
     double[] region;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
         TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
-        TIntObjectHashMap<FilterCandidates> filterCandidates) {
+        TIntObjectHashMap<FilterCandidates> filterCandidates, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
       this.actualCoordinates = actualCoordinates;
       this.filterCandidates = filterCandidates;
       this.results = new TIntObjectHashMap<>();
+      this.ticker = ticker;
       fitting = config.getFittingWidth();
       requireSnr = (levels.length > 0);
     }
@@ -281,11 +284,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job.intValue());
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -297,8 +300,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         finished = true;
         return;
       }
-
-      showProgress();
 
       final FilterCandidates candidates = filterCandidates.get(frame);
 
@@ -538,19 +539,19 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage(String.format(
+    ImageJUtils.addMessage(gd,
         "Rank candidate spots in the benchmark image created by " + CreateData.TITLE
             + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
             + " plugin.\nPSF width = %s nm (Square pixel adjustment = %s nm)\n \n"
             + "Configure the fitting:",
-        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa())));
+        MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa()));
 
     gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
     gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
     gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
     gd.addCheckbox("Select_methods", selectMethods);
     gd.addNumericField("Compact_bins", compactBins, 0);
-    gd.addChoice("Sort", SORT, SORT[sortIndex]);
+    gd.addChoice("Sort", sortMethods, sortMethods[sortIndex]);
     gd.addCheckbox("Use_fraction_scores", useFractionScores);
 
     // Collect options for fitting that may effect ranking
@@ -648,21 +649,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     return true;
   }
 
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0
-        && ImageJUtils.showStatus("Frame: " + progress + " / " + totalProgress)) {
-      IJ.showProgress(progress, totalProgress);
-    }
-    progress++;
-  }
-
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
@@ -696,8 +682,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
     final List<Worker> workers = new LinkedList<>();
     final List<Thread> threads = new LinkedList<>();
+    final Ticker ticker = ImageJUtils.createTicker(filterCandidates.size(), nThreads);
     for (int i = 0; i < nThreads; i++) {
-      final Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates);
+      final Worker worker = new Worker(jobs, stack, actualCoordinates, filterCandidates, ticker);
       final Thread t = new Thread(worker);
       workers.add(worker);
       threads.add(t);
@@ -705,15 +692,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
 
     // Process the frames
-    totalProgress = filterCandidates.size();
-    stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-    progress = 0;
-    filterCandidates.forEachKey(new TIntProcedure() {
-      @Override
-      public boolean execute(int value) {
-        put(jobs, value);
-        return true;
-      }
+    filterCandidates.forEachKey(value -> {
+      put(jobs, value);
+      return true;
     });
     // Finish all the worker threads by passing in a null job
     for (int i = 0; i < threads.size(); i++) {
@@ -874,7 +855,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private static class ScoredResult implements Comparable<ScoredResult> {
+  private static class ScoredResult {
     int index;
     double score;
     String result;
@@ -885,9 +866,15 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       this.result = result;
     }
 
-    @Override
-    public int compareTo(ScoredResult other) {
-      return Double.compare(other.score, score);
+    /**
+     * Compare the two results.
+     *
+     * @param r1 the first result
+     * @param r2 the second result
+     * @return -1, 0 or 1
+     */
+    static int compare(ScoredResult r1, ScoredResult r2) {
+      return Double.compare(r2.score, r1.score);
     }
   }
 
@@ -1061,7 +1048,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return;
     }
 
-    Collections.sort(list);
+    Collections.sort(list, ScoredResult::compare);
 
     if (summaryTable.getTextPanel().getLineCount() > 0) {
       summaryTable.append("");
@@ -1199,15 +1186,15 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static void addScoreColumns(StringBuilder sb, String prefix) {
-    SORT = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5", "F1",
-        "F2", "Jaccard", "MCC"};
-    for (int i = 1; i < SORT.length; i++) {
-      addScoreColumn(sb, prefix, SORT[i]);
+    sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5",
+        "F1", "F2", "Jaccard", "MCC"};
+    for (int i = 1; i < sortMethods.length; i++) {
+      addScoreColumn(sb, prefix, sortMethods[i]);
     }
   }
 
   private static double addScores(StringBuilder sb, FractionClassificationResult result) {
-    final double[] scores = new double[SORT.length - 1];
+    final double[] scores = new double[sortMethods.length - 1];
     int index = 0;
     scores[index++] = result.getTruePositives();
     scores[index++] = result.getFalsePositives();

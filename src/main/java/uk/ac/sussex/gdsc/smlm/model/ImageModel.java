@@ -416,7 +416,7 @@ public abstract class ImageModel {
 
       if (on == off) {
         onTime[on] += (burst[1] - burst[0]);
-        state[on] |= LocalisationModel.SINGLE;
+        // This is a LocalisationModel.SINGLE (state value = 0)
       } else {
         for (int t = on; t <= off; t++) {
           if (t > on) {

@@ -29,6 +29,8 @@ import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;
 
 /**
  * Store the parameter score used in benchmarking.
+ *
+ * <p>Note: this class has a natural ordering that is inconsistent with equals.
  */
 public class SimpleParameterScore extends FilterScore {
   /** The result. */

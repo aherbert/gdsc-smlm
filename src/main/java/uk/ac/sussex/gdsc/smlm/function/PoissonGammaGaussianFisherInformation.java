@@ -952,7 +952,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       gradientA = result[1];
       dx = 1.0 / lastScale;
       // Requires integer division. The kernel should be an odd size.
-      offset = lastG.length / 2 * -dx;
+      final int radius = lastG.length / 2;
+      offset = radius * -dx;
       scaleFactor = gaussianKernel.getConversionFactor(lastG);
     } else {
       valueP = p;

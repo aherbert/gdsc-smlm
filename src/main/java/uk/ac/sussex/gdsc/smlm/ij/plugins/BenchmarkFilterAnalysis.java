@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -48,6 +47,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -112,7 +112,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.Macro;
 import ij.Prefs;
 import ij.gui.DialogListener;
@@ -127,7 +126,6 @@ import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
@@ -392,6 +390,7 @@ public class BenchmarkFilterAnalysis
   }
 
   private static class UniqueIdPeakResult extends PeakResult {
+    private static final long serialVersionUID = 20190319L;
     final int id;
     final int uniqueId;
 
@@ -452,10 +451,11 @@ public class BenchmarkFilterAnalysis
     final float xlimit;
     final float ylimit;
     final CoordinateStore coordinateStore;
+    final Ticker ticker;
 
-    public FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults,
+    FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults,
         double matchDistance, RampedScore distanceScore, RampedScore signalScore,
-        AtomicInteger uniqueId, CoordinateStore coordinateStore) {
+        AtomicInteger uniqueId, CoordinateStore coordinateStore, Ticker ticker) {
       this.jobs = jobs;
       this.results = syncResults;
       this.matchDistance = matchDistance;
@@ -463,6 +463,7 @@ public class BenchmarkFilterAnalysis
       this.signalScore = signalScore;
       this.uniqueId = uniqueId;
       this.coordinateStore = coordinateStore;
+      this.ticker = ticker;
 
       depthStats = new StoredData();
       depthFitStats = new StoredData();
@@ -495,8 +496,7 @@ public class BenchmarkFilterAnalysis
           }
         }
       } catch (final InterruptedException ex) {
-        System.out.println(ex.toString());
-        throw new RuntimeException(ex);
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -507,8 +507,6 @@ public class BenchmarkFilterAnalysis
         finished = true;
         return;
       }
-
-      showProgress();
 
       final int frame = job.frame;
       final FilterCandidates result = job.candidates;
@@ -565,6 +563,8 @@ public class BenchmarkFilterAnalysis
 
       results.add(new MultiPathFitResults(frame, Arrays.copyOf(multiPathFitResults, size),
           result.spots.length, nActual));
+
+      ticker.tick();
     }
 
     /**
@@ -832,7 +832,9 @@ public class BenchmarkFilterAnalysis
 
   private void iterate() {
     // If this is run again immediately then provide options for reporting the results
-    if (iterBestFilter != null && iterBestFilter == bestFilter) {
+    HashMap<String, ComplexFilterScore> localIterBestFilter = iterBestFilter;
+    HashMap<String, ComplexFilterScore> localBestFilter = bestFilter;
+    if (localIterBestFilter != null && localIterBestFilter == localBestFilter) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.addMessage("Iteration results are held in memory.\n \nReport these results?");
@@ -847,7 +849,6 @@ public class BenchmarkFilterAnalysis
     }
 
     // Show this dialog first so we can run fully automated after interactive dialogs
-    // TODO - collect this in the iteration dialog
     if (!showIterationDialog()) {
       return;
     }
@@ -1002,7 +1003,7 @@ public class BenchmarkFilterAnalysis
     }
 
     time += iterationStopWatch.getTime();
-    IJ.log("Iteration analysis time : " + DurationFormatUtils.formatDurationHMS(time));
+    IJ.log("Iteration analysis time : " + TextUtils.millisToString(time));
 
     IJ.showStatus("Finished");
   }
@@ -1659,18 +1660,17 @@ public class BenchmarkFilterAnalysis
       final List<Thread> threads = new LinkedList<>();
       final AtomicInteger uniqueId = new AtomicInteger();
       final CoordinateStore coordinateStore = createCoordinateStore();
+      final Ticker ticker =
+          ImageJUtils.createTicker(BenchmarkSpotFit.fitResults.size(), nThreads, null);
       for (int i = 0; i < nThreads; i++) {
         final FitResultsWorker worker = new FitResultsWorker(jobs, syncResults, matchDistance,
-            distanceScore, signalScore, uniqueId, coordinateStore.newInstance());
+            distanceScore, signalScore, uniqueId, coordinateStore.newInstance(), ticker);
         final Thread t = new Thread(worker);
         workers.add(worker);
         threads.add(t);
         t.start();
       }
 
-      totalProgress = BenchmarkSpotFit.fitResults.size();
-      stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-      progress = 0;
       BenchmarkSpotFit.fitResults.forEachEntry((frame, candidates) -> {
         put(jobs, new Job(frame, candidates));
         return true;
@@ -1707,8 +1707,7 @@ public class BenchmarkFilterAnalysis
         }
       }
       threads.clear();
-      IJ.showProgress(1);
-      IJ.showStatus("");
+      ImageJUtils.finished();
 
       maxUniqueId = uniqueId.get();
 
@@ -1806,9 +1805,9 @@ public class BenchmarkFilterAnalysis
     gd.addChoice("Criteria", COLUMNS, COLUMNS[criteriaIndex]);
     gd.addNumericField("Criteria_limit", criteriaLimit, 4);
     gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
-    gd.addMessage(String.format("Fitting match distance = %s nm; signal factor = %s",
+    ImageJUtils.addMessage(gd, "Fitting match distance = %s nm; signal factor = %s",
         MathUtils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.pixelPitch),
-        MathUtils.rounded(BenchmarkSpotFit.signalFactor)));
+        MathUtils.rounded(BenchmarkSpotFit.signalFactor));
     gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
     gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
     gd.addSlider("Upper_signal_factor (%)", 0, 100, upperSignalFactor);
@@ -2153,11 +2152,7 @@ public class BenchmarkFilterAnalysis
       return false;
     }
 
-    if (!selectTableColumns()) {
-      return false;
-    }
-
-    return true;
+    return selectTableColumns();
   }
 
   private boolean showScoreDialog() {
@@ -2710,11 +2705,10 @@ public class BenchmarkFilterAnalysis
       return;
     }
     if (!bestFilter.isEmpty()) {
-      IJ.showStatus("Calculating sensitivity ...");
       final Consumer<String> output = createSensitivityWindow();
 
       final Ticker ticker =
-          Ticker.createStarted(new ImageJTrackProgress(), bestFilter.size(), false);
+          ImageJUtils.createTicker(bestFilter.size(), 0, "Calculating sensitivity ...");
       for (final String type : bestFilterOrder) {
 
         final DirectFilter filter = bestFilter.get(type).getFilter();
@@ -2765,8 +2759,7 @@ public class BenchmarkFilterAnalysis
       final String message = "-=-=-=-";
       output.accept(message);
 
-      IJ.showProgress(1);
-      IJ.showStatus("");
+      ImageJUtils.finished();
     }
   }
 
@@ -3449,9 +3442,9 @@ public class BenchmarkFilterAnalysis
         long combinations = SearchSpace.countCombinations(dimensions);
         if (!nonInteractive && combinations > 10000) {
           gd = new GenericDialog(TITLE);
-          gd.addMessage(String.format(
+          ImageJUtils.addMessage(gd,
               "%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
-              combinations));
+              combinations);
           gd.enableYesNoCancel();
           gd.hideCancelButton();
           gd.showDialog();
@@ -3829,7 +3822,7 @@ public class BenchmarkFilterAnalysis
         }
 
         if (plots.size() > plotTopN) {
-          Collections.sort(plots);
+          Collections.sort(plots, NamedPlot::compare);
           plot = plots.remove(plots.size() - 1);
         }
       }
@@ -4091,9 +4084,9 @@ public class BenchmarkFilterAnalysis
         long combinations = SearchSpace.countCombinations(dimensions);
         if (!nonInteractive && combinations > 10000) {
           gd = new GenericDialog(TITLE);
-          gd.addMessage(String.format(
+          ImageJUtils.addMessage(gd,
               "%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
-              combinations));
+              combinations);
           gd.enableYesNoCancel();
           gd.hideCancelButton();
           gd.showDialog();
@@ -4241,9 +4234,9 @@ public class BenchmarkFilterAnalysis
       long combinations = SearchSpace.countCombinations(dimensions);
       if (!nonInteractive && combinations > 2000) {
         gd = new GenericDialog(TITLE);
-        gd.addMessage(String.format(
+        ImageJUtils.addMessage(gd,
             "%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
-            combinations));
+            combinations);
         gd.enableYesNoCancel();
         gd.hideCancelButton();
         gd.showDialog();
@@ -4894,6 +4887,7 @@ public class BenchmarkFilterAnalysis
   }
 
   private static ResultsImageSampler sampler;
+  private static int sampleImageId;
 
   /**
    * Save PeakFit configuration template using the current benchmark settings.
@@ -4929,12 +4923,7 @@ public class BenchmarkFilterAnalysis
       }
 
       // Get the number of frames
-      final ImageStack stack = imp.getImageStack();
-
-      if (sampler == null || sampler.getResults() != results) {
-        sampler = new ResultsImageSampler(results, stack, 32);
-        sampler.analyse();
-      }
+      final ResultsImageSampler sampler = getSampler(results, imp);
       if (!sampler.isValid()) {
         return;
       }
@@ -5076,6 +5065,16 @@ public class BenchmarkFilterAnalysis
       filename = FileUtils.replaceExtension(filename, ".tif");
       IJ.save(example, filename);
     }
+  }
+
+  private static synchronized ResultsImageSampler getSampler(MemoryPeakResults results,
+      ImagePlus imp) {
+    if (sampler == null || imp.getID() != sampleImageId || sampler.getResults() != results) {
+      sampler = new ResultsImageSampler(results, imp.getImageStack(), 32);
+      sampler.analyse();
+      sampleImageId = imp.getID();
+    }
+    return sampler;
   }
 
   private static ImagePlus display(ImagePlus example, WindowOrganiser windowOrganiser) {
@@ -5785,7 +5784,7 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private static class NamedPlot implements Comparable<NamedPlot> {
+  private static class NamedPlot {
     String name;
     String xAxisName;
     double[] xValues;
@@ -5804,9 +5803,15 @@ public class BenchmarkFilterAnalysis
       this.score = getMaximum(yValues);
     }
 
-    @Override
-    public int compareTo(NamedPlot other) {
-      return Double.compare(other.score, score);
+    /**
+     * Compare the two results.
+     *
+     * @param r1 the first result
+     * @param r2 the second result
+     * @return -1, 0 or 1
+     */
+    static int compare(NamedPlot r1, NamedPlot r2) {
+      return Double.compare(r2.score, r1.score);
     }
   }
 
@@ -6116,14 +6121,16 @@ public class BenchmarkFilterAnalysis
     final boolean createTextResult;
     final DirectFilter minFilter;
     final CoordinateStore coordinateStore;
+    final Ticker ticker;
 
     public ScoreWorker(BlockingQueue<ScoreJob> jobs, FilterScoreResult[] scoreResults,
-        boolean createTextResult, CoordinateStore coordinateStore) {
+        boolean createTextResult, CoordinateStore coordinateStore, Ticker ticker) {
       this.jobs = jobs;
       this.scoreResults = scoreResults;
       this.createTextResult = createTextResult;
       this.minFilter = (minimalFilter != null) ? (DirectFilter) minimalFilter.clone() : null;
       this.coordinateStore = coordinateStore;
+      this.ticker = ticker;
     }
 
     @Override
@@ -6140,9 +6147,7 @@ public class BenchmarkFilterAnalysis
           }
         }
       } catch (final InterruptedException ex) {
-        Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
-            ex);
-        Thread.currentThread().interrupt();
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -6153,10 +6158,10 @@ public class BenchmarkFilterAnalysis
         finished = true;
         return;
       }
-      showProgress();
       // Directly write to the result array, this is thread safe
       scoreResults[job.index] =
           scoreFilter(job.filter, minFilter, createTextResult, coordinateStore);
+      ticker.tick();
     }
   }
 
@@ -6171,9 +6176,10 @@ public class BenchmarkFilterAnalysis
     final DirectFilter filter;
     final DirectFilter minFilter;
     final GridCoordinateStore gridCoordinateStore;
+    final Ticker ticker;
 
     public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs,
-        ParameterScoreResult[] scoreResults, boolean createTextResult) {
+        ParameterScoreResult[] scoreResults, boolean createTextResult, Ticker ticker) {
       this.jobs = jobs;
       this.scoreResults = scoreResults;
       this.createTextResult = createTextResult;
@@ -6182,6 +6188,7 @@ public class BenchmarkFilterAnalysis
       getBounds();
       this.gridCoordinateStore =
           new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
+      this.ticker = ticker;
     }
 
     @Override
@@ -6198,9 +6205,7 @@ public class BenchmarkFilterAnalysis
           }
         }
       } catch (final InterruptedException ex) {
-        Logger.getLogger(BenchmarkFilterAnalysis.class.getName()).log(Level.WARNING, "Interrupted!",
-            ex);
-        Thread.currentThread().interrupt();
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
       } finally {
         finished = true;
       }
@@ -6211,7 +6216,6 @@ public class BenchmarkFilterAnalysis
         finished = true;
         return;
       }
-      showProgress();
 
       final double[] point = job.point;
       final int failCount = (int) Math.round(point[0]);
@@ -6243,23 +6247,9 @@ public class BenchmarkFilterAnalysis
       // Double.toString(scoreResults[job.index].criteria), failCount, residualsThreshold,
       // duplicateDistance);
       // }
-    }
-  }
 
-  private int progress;
-  private int stepProgress;
-  private int totalProgress;
-
-  /**
-   * Show progress.
-   */
-  private synchronized void showProgress() {
-    if (progress % stepProgress == 0) {
-      if (ImageJUtils.showStatus("Scoring Filter: " + progress + " / " + totalProgress)) {
-        IJ.showProgress(progress, totalProgress);
-      }
+      ticker.tick();
     }
-    progress++;
   }
 
   private FilterScoreResult[] scoreFilters(FilterSet filterSet, boolean createTextResult) {
@@ -6280,18 +6270,17 @@ public class BenchmarkFilterAnalysis
       final int nThreads = getThreads(scoreResults.length);
       final BlockingQueue<ScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
       final List<Thread> threads = new LinkedList<>();
+      final Ticker ticker =
+          ImageJUtils.createTicker(scoreResults.length, nThreads, "Scoring Filters");
       for (int i = 0; i < nThreads; i++) {
         final ScoreWorker worker = new ScoreWorker(jobs, scoreResults, createTextResult,
-            (coordinateStore == null) ? null : coordinateStore.newInstance());
+            (coordinateStore == null) ? null : coordinateStore.newInstance(), ticker);
         final Thread t = new Thread(worker);
         threads.add(t);
         t.start();
       }
 
       int index = 0;
-      totalProgress = scoreResults.length;
-      stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-      progress = 0;
       for (final Filter filter : filterSet.getFilters()) {
         if (IJ.escapePressed()) {
           break;
@@ -6315,7 +6304,7 @@ public class BenchmarkFilterAnalysis
         }
       }
       threads.clear();
-      IJ.showProgress(1);
+      ImageJUtils.finished();
 
       // In case the threads were interrupted
       if (ImageJUtils.isInterrupted()) {
@@ -6357,17 +6346,17 @@ public class BenchmarkFilterAnalysis
       final int nThreads = getThreads(scoreResults.length);
       final BlockingQueue<ParameterScoreJob> jobs = new ArrayBlockingQueue<>(nThreads * 2);
       final List<Thread> threads = new LinkedList<>();
+      final Ticker ticker =
+          ImageJUtils.createTicker(scoreResults.length, nThreads, "Scoring Filters");
       for (int i = 0; i < nThreads; i++) {
         final ParameterScoreWorker worker =
-            new ParameterScoreWorker(jobs, scoreResults, createTextResult);
+            new ParameterScoreWorker(jobs, scoreResults, createTextResult, ticker);
         final Thread t = new Thread(worker);
         threads.add(t);
         t.start();
       }
 
-      totalProgress = scoreResults.length;
-      stepProgress = ImageJUtils.getProgressInterval(totalProgress);
-      progress = 0;
+      ticker.start();
       for (int i = 0; i < points.length; i++) {
         if (IJ.escapePressed()) {
           break;
@@ -6391,7 +6380,7 @@ public class BenchmarkFilterAnalysis
         }
       }
       threads.clear();
-      IJ.showProgress(1);
+      ImageJUtils.finished();
 
       // In case the threads were interrupted
       if (ImageJUtils.isInterrupted()) {

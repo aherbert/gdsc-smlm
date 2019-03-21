@@ -180,7 +180,7 @@ public class FitEngine {
   /**
    * Create the threads that run the workers.
    */
-  private void start() {
+  private synchronized void start() {
     threads = new ArrayList<>(workers.size());
     for (final FitWorker worker : workers) {
       final Thread t = new Thread(worker);
@@ -203,7 +203,7 @@ public class FitEngine {
     // Check the output is still OK. If no output then there is no point running any calculations.
     if (results.isActive()) {
       // Allow the jobs to create a small backlog since some frames may process faster
-      if (queueType == FitQueue.IGNORE && jobs.size() > threads.size() * 1.5) {
+      if (queueType == FitQueue.IGNORE && jobs.size() > workers.size() * 1.5) {
         return;
       }
 
@@ -327,7 +327,7 @@ public class FitEngine {
    *
    * @return True if there are no worker threads
    */
-  public boolean isThreadsEmpty() {
+  public synchronized boolean isThreadsEmpty() {
     return threads.isEmpty();
   }
 
