@@ -81,7 +81,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags) {
-    if (areSet(flags, IDirectFilter.NO_SHIFT)) {
+    if (areSet(flags, FilterValidationOption.NO_SHIFT)) {
       shiftEnabled = false;
     } else {
       setup(eshift);
@@ -90,7 +90,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags, FilterSetupData... filterSetupData) {
-    if (areSet(flags, IDirectFilter.NO_SHIFT)) {
+    if (areSet(flags, FilterValidationOption.NO_SHIFT)) {
       shiftEnabled = false;
       return;
     }
@@ -102,7 +102,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
         // Updating it creates a circle with radius at the box corner.
         final double shift = ((ShiftFilterSetupData) filterSetupData[i]).shift;
         // Leave for now
-        // shift = Math.sqrt(shift * shift * 2);
+        // shift = Math.sqrt(shift * shift * 2)
         setup(shift);
         return;
       }
@@ -117,7 +117,7 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
+  public FilterSetupData[] getFilterSetupData() {
     if (shiftEnabled && eshift2 != Float.POSITIVE_INFINITY) {
       if (eshift2 == getUpperSquaredLimit(eshift)) {
         // This is the default so ignore
@@ -129,8 +129,8 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
-    return (shiftEnabled) ? 0 : IDirectFilter.NO_SHIFT;
+  public int getFilterSetupFlags() {
+    return (shiftEnabled) ? 0 : FilterValidationOption.NO_SHIFT;
   }
 
   @Override
@@ -142,15 +142,13 @@ public class EShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+    return FilterValidationFlag.X_RELATIVE_SHIFT | FilterValidationFlag.Y_RELATIVE_SHIFT;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
-    if (shiftEnabled) {
-      if ((peak.getXRelativeShift2() + peak.getYRelativeShift2()) > eshift2) {
-        return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
-      }
+    if (shiftEnabled && (peak.getXRelativeShift2() + peak.getYRelativeShift2()) > eshift2) {
+      return getValidationFlags();
     }
     return 0;
   }

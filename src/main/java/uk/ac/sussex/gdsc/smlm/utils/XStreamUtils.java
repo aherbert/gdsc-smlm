@@ -28,16 +28,30 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
  * Provide XML utilities using XStream.
  */
 public class XStreamUtils {
-  private static XStream xs;
+
+  /** The logger. */
+  private static final Logger logger = Logger.getLogger(XStreamUtils.class.getName());
 
   private static class PatternLoader {
     static final Pattern PACKAGE_PATTERN = Pattern.compile("(</?)gdsc.smlm");
+  }
+
+  private static class XStreamLoader {
+    static final XStream xs;
+    static {
+      final XStream xstream = new XStream(new DomDriver());
+      XStream.setupDefaultSecurity(xstream); // to be removed after 1.5
+      xstream.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
+      xs = xstream;
+    }
   }
 
   /**
@@ -47,12 +61,11 @@ public class XStreamUtils {
    * @return XML string representation
    */
   public static String toXml(Object obj) {
-    init();
-    if (xs != null) {
+    if (XStreamLoader.xs != null) {
       try {
-        return xs.toXML(obj);
+        return XStreamLoader.xs.toXML(obj);
       } catch (final XStreamException ex) {
-        // ex.printStackTrace();
+        logger.log(Level.FINE, "Failed to convert to XML", ex);
       }
     }
     return "";
@@ -65,23 +78,14 @@ public class XStreamUtils {
    * @return the object
    */
   public static Object fromXml(String xml) {
-    init();
-    if (xs != null) {
+    if (XStreamLoader.xs != null) {
       try {
-        return xs.fromXML(xml);
+        return XStreamLoader.xs.fromXML(xml);
       } catch (final XStreamException ex) {
-        // ex.printStackTrace();
+        logger.log(Level.FINE, "Failed to load from XML", ex);
       }
     }
     return null;
-  }
-
-  private static void init() {
-    if (xs == null) {
-      xs = new XStream(new DomDriver());
-      XStream.setupDefaultSecurity(xs); // to be removed after 1.5
-      xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
-    }
   }
 
   /**

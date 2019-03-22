@@ -73,8 +73,9 @@ public class DensityImage implements PlugIn {
   private static boolean useSquareApproximation;
   private static int resolution = 10;
 
-  private static String[] ScoreMethods = new String[] {"Density", "Ripley's K", "Ripley's K / Area",
-      "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
+  private static final String[] scoreMethods =
+      new String[] {"Density", "Ripley's K", "Ripley's K / Area", "Ripley's L", "Ripley's L - r",
+          "Ripley's L / r", "Ripley's (L - r) / r"};
   private static int scoreMethodIndex;
 
   private static boolean filterLocalisations = true;
@@ -575,7 +576,7 @@ public class DensityImage implements PlugIn {
 
     gd.addCheckbox("Use_square_approx", useSquareApproximation);
     gd.addNumericField("Square_resolution", resolution, 0);
-    gd.addChoice("Score", ScoreMethods, ScoreMethods[scoreMethodIndex]);
+    gd.addChoice("Score", scoreMethods, scoreMethods[scoreMethodIndex]);
 
     gd.addMessage("Filter localisations using the L-score / Relative density.\n"
         + "Filtered results will be added to memory:");

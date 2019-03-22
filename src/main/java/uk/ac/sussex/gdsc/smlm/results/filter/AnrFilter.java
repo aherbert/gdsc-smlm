@@ -87,13 +87,13 @@ public class AnrFilter extends DirectFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_AMPLITUDE | V_NOISE;
+    return FilterValidationFlag.AMPLITUDE | FilterValidationFlag.NOISE;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (getAnr(peak) < this.anr) {
-      return V_AMPLITUDE | V_NOISE;
+      return getValidationFlags();
     }
     return 0;
   }

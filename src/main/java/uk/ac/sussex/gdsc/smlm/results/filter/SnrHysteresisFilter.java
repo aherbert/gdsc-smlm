@@ -111,12 +111,7 @@ public class SnrHysteresisFilter extends HysteresisFilter {
       return super.getParameterValueInternal(index);
     }
     index -= super.getNumberOfParameters();
-    switch (index) {
-      case 0:
-        return strictSnr;
-      default:
-        return range;
-    }
+    return (index == 0) ? strictSnr : range;
   }
 
   @Override
@@ -126,12 +121,7 @@ public class SnrHysteresisFilter extends HysteresisFilter {
       return super.getParameterType(index);
     }
     index -= super.getNumberOfParameters();
-    switch (index) {
-      case 0:
-        return ParameterType.SNR;
-      default:
-        return ParameterType.SNR_RANGE;
-    }
+    return (index == 0) ? ParameterType.SNR : ParameterType.SNR_RANGE;
   }
 
   private static double[] defaultRange =

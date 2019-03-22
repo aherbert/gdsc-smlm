@@ -69,11 +69,6 @@ public class FilterScore implements Comparable<FilterScore> {
       return -1;
     }
 
-    // if (this.criteriaPassed && !that.criteriaPassed)
-    // return -1;
-    // if (that.criteriaPassed && !this.criteriaPassed)
-    // return 1;
-
     if (this.criteriaPassed) {
       // Must pass criteria first
       if (!that.criteriaPassed) {
@@ -81,7 +76,7 @@ public class FilterScore implements Comparable<FilterScore> {
       }
 
       // Sort by the score then criteria, highest first
-      int result = Double.compare(that.score , this.score);
+      int result = Double.compare(that.score, this.score);
       if (result != 0) {
         return result;
       }
@@ -107,7 +102,7 @@ public class FilterScore implements Comparable<FilterScore> {
     if (result != 0) {
       return result;
     }
-    result = Double.compare(that.score , this.score);
+    result = Double.compare(that.score, this.score);
     if (result != 0) {
       return result;
     }

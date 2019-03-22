@@ -75,6 +75,7 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -448,8 +449,8 @@ public class CameraModelAnalysis
     double pvalue = Double.NaN;
     try {
       pvalue = 1d - kolmogorovSmirnovTest.cdf(distance, n);
-    } catch (final Exception ex) {
-      // Ignore
+    } catch (final MathArithmeticException ex) {
+      // Cannot be computed to leave at NaN
     }
 
     // Plot

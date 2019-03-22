@@ -235,7 +235,7 @@ public class BenchmarkFit implements PlugIn {
       this.jobs = jobs;
       this.stack = stack;
       this.region = region;
-      this.fitConfig = fitConfig.clone();
+      this.fitConfig = fitConfig.createCopy();
       this.cameraModel = cameraModel;
       this.ticker = ticker;
       this.offsets = startPoints;

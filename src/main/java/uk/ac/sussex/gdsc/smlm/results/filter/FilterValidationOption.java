@@ -25,27 +25,32 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Filter results using Signal.
+ * Contains Support direct filtering of PreprocessedPeakResult objects.
+ *
+ * <p>The decision to support for filtering as both a DirectFilter and Filter concurrently is left
+ * to the implementing class. It is not a requirement.
  */
-public class MultiFilterSignalComponent implements MultiFilterComponent {
-  private final float signal;
+public final class FilterValidationOption {
+  /**
+   * Disable filtering using the width of the result.
+   */
+  public static final int NO_WIDTH = 0x000000001;
 
   /**
-   * Instantiates a new multi filter signal component.
-   *
-   * @param signal the signal
+   * Disable filtering using the shift of the result.
    */
-  public MultiFilterSignalComponent(double signal) {
-    this.signal = (float) signal;
-  }
+  public static final int NO_SHIFT = 0x000000002;
 
-  @Override
-  public boolean fail(final PreprocessedPeakResult peak) {
-    return peak.getSignal() < this.signal;
-  }
+  /**
+   * Enable filtering both X and Y widths.
+   */
+  public static final int XY_WIDTH = 0x000000004;
 
-  @Override
-  public int getType() {
-    return FilterValidationFlag.PHOTONS;
-  }
+  /**
+   * Disable Z filtering (use when not fitting in 3D).
+   */
+  public static final int NO_Z = 0x000000008;
+
+  /** No public construction. */
+  private FilterValidationOption() {}
 }

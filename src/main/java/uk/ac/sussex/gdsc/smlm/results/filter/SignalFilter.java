@@ -70,13 +70,13 @@ public class SignalFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_PHOTONS;
+    return FilterValidationFlag.PHOTONS;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getSignal() < signal) {
-      return V_PHOTONS;
+      return getValidationFlags();
     }
     return 0;
   }

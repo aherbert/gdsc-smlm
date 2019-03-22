@@ -87,6 +87,8 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterSetupData;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterType;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterValidationFlag;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterValidationOption;
 import uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
@@ -100,7 +102,7 @@ import java.util.logging.Logger;
 /**
  * Specifies the fitting configuration.
  */
-public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFitConfiguration {
+public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfiguration {
   private FitSettings.Builder fitSettings;
 
   // Extract the settings for convenience
@@ -602,34 +604,19 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     this.directFilter = (DirectFilter) f;
   }
 
-  @Override
-  public FitConfiguration clone() {
-    // Make a new initialised instance. This will have new settings builder objects.
+  /**
+   * Creates a copy of the configuration.
+   *
+   * @return the copy
+   */
+  public FitConfiguration createCopy() {
+    // This is not named copy() to avoid a name clash with IDirectFilter::copy
     return new FitConfiguration(getFitSettings(), getCalibration(), getPsf()).copySettings(this);
-
-    // // This is not a complete duplicate. The settings builder objects with the
-    // // underlying configuration will be the same between all instances.
-    // try
-    // {
-    // FitConfiguration f = (FitConfiguration) super.clone();
-    // // Reset instance specific objects
-    // f.toleranceChecker = null;
-    // f.gaussianFunction = null;
-    // f.functionSolver = null;
-    // f.setValidationResult(null, null);
-    // f.dynamicPeakResult = new DynamicPeakResult();
-    // return f;
-    // }
-    // catch (CloneNotSupportedException e)
-    // {
-    // // Ignore
-    // }
-    // return null;
   }
 
   /**
    * Copy settings from the other configuration. This copies all the instance fields not stored in
-   * settings objects that can be shared between instances. It is used in the {@link #clone()}
+   * settings objects that can be shared between instances. It is used in the {@link #createCopy()}
    * method after a new instance has been created with the current settings objects.
    *
    * @param other the other configuration
@@ -1473,13 +1460,13 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private PrecisionMethod getFilterPrecisionMethodInternal() {
     if (isDirectFilter()) {
       final int flags = directFilter.getValidationFlags();
-      if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE_CRLB)) {
+      if (DirectFilter.areSet(flags, FilterValidationFlag.LOCATION_VARIANCE_CRLB)) {
         return PrecisionMethod.POISSON_CRLB;
       }
-      if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE2)) {
+      if (DirectFilter.areSet(flags, FilterValidationFlag.LOCATION_VARIANCE2)) {
         return PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
       }
-      if (DirectFilter.areSet(flags, IDirectFilter.V_LOCATION_VARIANCE)) {
+      if (DirectFilter.areSet(flags, FilterValidationFlag.LOCATION_VARIANCE)) {
         return PrecisionMethod.MORTENSEN;
       }
     }
@@ -2209,7 +2196,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
         log.info(() -> String.format("Bad peak %d: %s", peak.getId(),
             DirectFilter.getStatusMessage(peak, directFilter.getResult())));
       }
-      if (DirectFilter.anySet(directFilter.getResult(), V_X_SD_FACTOR | V_Y_SD_FACTOR)) {
+      if (DirectFilter.anySet(directFilter.getResult(),
+          FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR)) {
         return setValidationResult(FitStatus.WIDTH_DIVERGED, null);
       }
       // At the moment we do not get any other validation data
@@ -2374,8 +2362,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       if (variance > precisionThreshold) {
         if (log != null) {
           final double precision = Math.sqrt(variance);
-          log.info(
-              () -> String.format("Bad peak %d: Insufficient precision (%gx)", n, precision));
+          log.info(() -> String.format("Bad peak %d: Insufficient precision (%gx)", n, precision));
         }
         return setValidationResult(FitStatus.INSUFFICIENT_PRECISION, variance);
       }
@@ -3400,8 +3387,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     if (directFilter != null) {
       directFilter.setup(flags);
     } else {
-      widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
-      if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT)) {
+      widthEnabled = !DirectFilter.areSet(flags, FilterValidationOption.NO_WIDTH);
+      if (DirectFilter.areSet(flags, FilterValidationOption.NO_SHIFT)) {
         shiftOffset = Float.POSITIVE_INFINITY;
       } else {
         final double shiftFactor = getCoordinateShiftFactor();
@@ -3421,8 +3408,8 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       directFilter.setup(flags, filterSetupData);
     } else {
       // Note: These variables should be copied in copySettings(...)
-      widthEnabled = !DirectFilter.areSet(flags, IDirectFilter.NO_WIDTH);
-      if (DirectFilter.areSet(flags, IDirectFilter.NO_SHIFT)) {
+      widthEnabled = !DirectFilter.areSet(flags, FilterValidationOption.NO_WIDTH);
+      if (DirectFilter.areSet(flags, FilterValidationOption.NO_SHIFT)) {
         shiftOffset = Float.POSITIVE_INFINITY;
       } else {
         double shiftFactor = getCoordinateShiftFactor();
@@ -3448,11 +3435,11 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
   private int createFlags(int flags) {
     // Handle switching to a 2 axis width filter
     if (isTwoAxisGaussian2D) {
-      flags |= IDirectFilter.XY_WIDTH;
+      flags |= FilterValidationOption.XY_WIDTH;
     }
     // Ignore z if not 3D
     if (!zEnabled) {
-      flags |= IDirectFilter.NO_Z;
+      flags |= FilterValidationOption.NO_Z;
     }
     return flags;
   }
@@ -3495,22 +3482,23 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       return 0;
     }
     // These could be conditional on the filter settings. For now just set them all.
-    int validationFlags = V_PHOTONS | V_SNR | V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+    int validationFlags = FilterValidationFlag.PHOTONS | FilterValidationFlag.SNR
+        | FilterValidationFlag.X_RELATIVE_SHIFT | FilterValidationFlag.Y_RELATIVE_SHIFT;
     if (widthEnabled) {
-      validationFlags |= V_X_SD_FACTOR;
+      validationFlags |= FilterValidationFlag.X_SD_FACTOR;
       if (isTwoAxisGaussian2D) {
-        validationFlags |= V_Y_SD_FACTOR;
+        validationFlags |= FilterValidationFlag.Y_SD_FACTOR;
       }
     }
     switch (getPrecisionMethodValue()) {
       case PrecisionMethod.MORTENSEN_VALUE:
-        validationFlags |= V_LOCATION_VARIANCE;
+        validationFlags |= FilterValidationFlag.LOCATION_VARIANCE;
         break;
       case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
-        validationFlags |= V_LOCATION_VARIANCE2;
+        validationFlags |= FilterValidationFlag.LOCATION_VARIANCE2;
         break;
       case PrecisionMethod.POISSON_CRLB_VALUE:
-        validationFlags |= V_LOCATION_VARIANCE_CRLB;
+        validationFlags |= FilterValidationFlag.LOCATION_VARIANCE_CRLB;
         break;
       default:
         break;
@@ -3540,10 +3528,10 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
     // Do filtering
     if (peak.getSignal() < getMinPhotons()) {
-      return V_PHOTONS;
+      return FilterValidationFlag.PHOTONS;
     }
     if (peak.getSnr() < getSignalStrength()) {
-      return V_SNR;
+      return FilterValidationFlag.SNR;
     }
     if (widthEnabled) {
       // Handle switching to a 2 axis width filter.
@@ -3552,27 +3540,27 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
       if (isTwoAxisGaussian2D) {
         final float s2 = peak.getXSdFactor() * peak.getYSdFactor();
         if (s2 > widthFactor || s2 < minWidthFactor) {
-          return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+          return FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR;
         }
       } else {
         final double s = peak.getXSdFactor();
         if (s > widthFactor || s < minWidthFactor) {
-          return V_X_SD_FACTOR;
+          return FilterValidationFlag.X_SD_FACTOR;
         }
       }
     }
     if (peak.getXRelativeShift2() > shiftOffset) {
-      return V_X_RELATIVE_SHIFT;
+      return FilterValidationFlag.X_RELATIVE_SHIFT;
     }
     if (peak.getYRelativeShift2() > shiftOffset) {
-      return V_Y_RELATIVE_SHIFT;
+      return FilterValidationFlag.Y_RELATIVE_SHIFT;
     }
     // Note: Do not support Euclidian shift
 
     if (zEnabled) {
       final double z = peak.getZ();
       if (z < getMinZ() || z > getMaxZ()) {
-        return V_Z;
+        return FilterValidationFlag.Z;
       }
     }
 
@@ -3580,17 +3568,17 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
     switch (getPrecisionMethodValue()) {
       case PrecisionMethod.MORTENSEN_VALUE:
         if (peak.getLocationVariance() > varianceThreshold) {
-          return V_LOCATION_VARIANCE;
+          return FilterValidationFlag.LOCATION_VARIANCE;
         }
         break;
       case PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND_VALUE:
         if (peak.getLocationVariance2() > varianceThreshold) {
-          return V_LOCATION_VARIANCE2;
+          return FilterValidationFlag.LOCATION_VARIANCE2;
         }
         break;
       case PrecisionMethod.POISSON_CRLB_VALUE:
         if (peak.getLocationVarianceCrlb() > varianceThreshold) {
-          return V_LOCATION_VARIANCE_CRLB;
+          return FilterValidationFlag.LOCATION_VARIANCE_CRLB;
         }
         break;
       default:
@@ -3612,7 +3600,7 @@ public class FitConfiguration implements Cloneable, IDirectFilter, Gaussian2DFit
 
   @Override
   public IDirectFilter copy() {
-    return clone();
+    return createCopy();
   }
 
   /**

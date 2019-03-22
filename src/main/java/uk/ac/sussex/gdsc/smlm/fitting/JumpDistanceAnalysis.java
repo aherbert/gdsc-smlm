@@ -33,7 +33,6 @@ import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -345,12 +344,7 @@ public class JumpDistanceAnalysis {
             .start(function.guess())
             .target(function.getY())
             .weight(new DiagonalMatrix(function.getWeights()))
-            .model(function, new MultivariateMatrixFunction() {
-              @Override
-              public double[][] value(double[] point) throws IllegalArgumentException
-              {
-                return function.jacobian(point);
-              }} )
+            .model(function, function::jacobian)
             .build();
         //@formatter:on
 
@@ -526,12 +520,7 @@ public class JumpDistanceAnalysis {
           .start(fitParams)
           .target(functionGradient.getY())
           .weight(new DiagonalMatrix(functionGradient.getWeights()))
-          .model(functionGradient, new MultivariateMatrixFunction() {
-            @Override
-            public double[][] value(double[] point) throws IllegalArgumentException
-            {
-              return functionGradient.jacobian(point);
-            }} )
+          .model(functionGradient, functionGradient::jacobian)
           .build();
       //@formatter:on
 

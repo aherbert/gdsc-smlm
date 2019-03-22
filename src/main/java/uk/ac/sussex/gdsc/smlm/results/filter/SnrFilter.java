@@ -66,13 +66,13 @@ public class SnrFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_SNR;
+    return FilterValidationFlag.SNR;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getSnr() < this.snr) {
-      return V_SNR;
+      return getValidationFlags();
     }
     return 0;
   }

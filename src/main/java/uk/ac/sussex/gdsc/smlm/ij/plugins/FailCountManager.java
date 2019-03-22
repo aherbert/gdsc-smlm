@@ -335,11 +335,11 @@ public class FailCountManager implements PlugIn {
 
   private static class PlotData {
     final int item;
+    final boolean fixedXAxis;
     final int rollingWindow;
     final int passWeight;
     final int failWeight;
     final double resetFraction;
-    final boolean fixedXAxis;
 
     PlotData(int item, boolean fixedXAxis, int rollingWindow, int passWeight, int failWeight,
         double resetFraction) {
@@ -357,7 +357,7 @@ public class FailCountManager implements PlugIn {
      * @param that the other object
      * @return true, if successful
      */
-    public boolean equals(PlotData that) {
+    public boolean equalsPlot(PlotData that) {
       //@formatter:off
       return that != null &&
           this.item == that.item &&
@@ -407,7 +407,7 @@ public class FailCountManager implements PlugIn {
           if (plotData == null) {
             break;
           }
-          if (plotData.equals(lastPlotData)) {
+          if (plotData.equalsPlot(lastPlotData)) {
             continue;
           }
           run(plotData);
@@ -558,7 +558,8 @@ public class FailCountManager implements PlugIn {
       }
 
       if (slice++ % step == 0) {
-        if (ImageJUtils.showStatus("Fitting slice: " + slice + " / " + totalFrames)) {
+        final int frames = slice;
+        if (ImageJUtils.showStatus(() -> "Fitting slice: " + frames + " / " + totalFrames)) {
           IJ.showProgress(slice, totalFrames);
         }
       }

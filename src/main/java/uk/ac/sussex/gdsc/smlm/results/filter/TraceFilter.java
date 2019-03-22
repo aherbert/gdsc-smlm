@@ -139,45 +139,26 @@ public class TraceFilter extends Filter {
 
   @Override
   protected double getParameterValueInternal(int index) {
-    switch (index) {
-      case 0:
-        return d;
-      default:
-        return t;
-    }
+    return (index == 0) ? d : t;
   }
 
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return DEFAULT_DISTANCE_INCREMENT;
-      default:
-        return DEFAULT_TIME_INCREMENT;
-    }
+    return (index == 0) ? DEFAULT_DISTANCE_INCREMENT : DEFAULT_TIME_INCREMENT;
   }
 
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return ParameterType.DISTANCE_THRESHOLD;
-      default:
-        return ParameterType.TIME_THRESHOLD;
-    }
+    return (index == 0) ? ParameterType.DISTANCE_THRESHOLD : ParameterType.TIME_THRESHOLD;
   }
 
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return new TraceFilter(updateParameter(d, delta, DEFAULT_DISTANCE_RANGE), t);
-      default:
-        return new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
-    }
+    return (index == 0) ? new TraceFilter(updateParameter(d, delta, DEFAULT_DISTANCE_RANGE), t)
+        : new TraceFilter(d, updateParameter(t, delta, DEFAULT_TIME_RANGE));
   }
 
   @Override

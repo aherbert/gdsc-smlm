@@ -46,6 +46,7 @@ import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.simple.internal.SeedFactory;
 
 import java.awt.Rectangle;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -131,7 +132,8 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class IndexComparator implements Comparator<ResultsSample> {
+  private static class IndexComparator implements Comparator<ResultsSample>, Serializable {
+    private static final long serialVersionUID = 1L;
     static final IndexComparator INSTANCE = new IndexComparator();
 
     @Override
@@ -140,7 +142,8 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class CountComparator implements Comparator<ResultsSample> {
+  private static class CountComparator implements Comparator<ResultsSample>, Serializable {
+    private static final long serialVersionUID = 1L;
     static final CountComparator INSTANCE = new CountComparator();
 
     @Override
@@ -154,7 +157,8 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class ReverseCountComparator implements Comparator<ResultsSample> {
+  private static class ReverseCountComparator implements Comparator<ResultsSample>, Serializable {
+    private static final long serialVersionUID = 1L;
     static final ReverseCountComparator INSTANCE = new ReverseCountComparator();
 
     @Override

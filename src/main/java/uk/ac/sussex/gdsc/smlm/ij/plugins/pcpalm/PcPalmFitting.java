@@ -523,7 +523,7 @@ public class PcPalmFitting implements PlugIn {
     if (parameters != null) {
       log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
           MathUtils.rounded(peakDensity / parameters[1], 4));
-      log("  Plot %s == %s", randomModel.getName(), resultColour.toString());
+      log("  Plot %s == %s", randomModel.getName(), resultColour);
       plot.setColor(color);
       plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
       addNonFittedPoints(plot, gr, randomModel, parameters);
@@ -2086,7 +2086,7 @@ public class PcPalmFitting implements PlugIn {
       double ic) {
     final StringBuilder sb = new StringBuilder();
     sb.append(model).append('\t');
-    sb.append(resultColour.toString()).append('\t');
+    sb.append(resultColour).append('\t');
     sb.append(valid).append('\t');
     sb.append(MathUtils.rounded(precision, 4)).append('\t');
     sb.append(MathUtils.rounded(density * 1e6, 4)).append('\t');

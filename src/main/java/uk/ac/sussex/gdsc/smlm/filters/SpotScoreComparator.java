@@ -24,12 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * Sort {@link Spot} using the score in descending order.
  */
-public class SpotScoreComparator implements Comparator<Spot> {
+public class SpotScoreComparator implements Comparator<Spot>, Serializable {
+  private static final long serialVersionUID = 1L;
   private static final SpotScoreComparator INSTANCE = new SpotScoreComparator();
 
   /**

@@ -24,7 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,6 +118,7 @@ public class Workflow<S, R> {
     private Work lastWork;
     private Work result;
     private WorkStack inbox;
+    /** Cannot create an array of WorkStack[] due to generic type erasure of S and R. */
     private Object[] outbox;
 
     /**
@@ -130,7 +134,7 @@ public class Workflow<S, R> {
     @SuppressWarnings("unchecked")
     public void run() {
       // Note: We check the condition for loop termination within the loop
-      while (true) {
+      while (running) {
         try {
           Work work = null;
           synchronized (inbox) {
@@ -192,15 +196,11 @@ public class Workflow<S, R> {
             }
           }
         } catch (final InterruptedException ex) {
+          ConcurrencyUtils.interruptAndThrowUncheckedIf(running, ex);
           debug(" Interrupted, stopping");
-          break;
-        }
-
-        if (!running) {
-          debug(" Shutdown");
-          break;
         }
       }
+      debug(" Shutdown");
     }
 
     private void debug(String msg) {
@@ -245,7 +245,7 @@ public class Workflow<S, R> {
   private long delay;
 
   /** The debug flag. Set to true to allow print statements during operation. */
-  public boolean debug;
+  boolean debug;
 
   /**
    * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input if the
@@ -365,6 +365,12 @@ public class Workflow<S, R> {
   @SuppressWarnings("static-method")
   private void finishWorkers(ArrayList<RunnableWorker> workers, ArrayList<Thread> threads,
       boolean now) {
+
+    // Finish work
+    for (final RunnableWorker w : workers) {
+      w.running = false;
+    }
+
     // Finish work
     for (int i = 0; i < threads.size(); i++) {
       final Thread t = threads.get(i);
@@ -376,23 +382,23 @@ public class Workflow<S, R> {
           t.interrupt();
         } catch (final SecurityException ex) {
           // We should have permission to interrupt this thread.
-          ex.printStackTrace();
+          throw new ConcurrentRuntimeException("Cannot interrupt!", ex);
         }
       } else {
         // Stop after the current work in the inbox
-        w.running = false;
 
         // Notify a workers waiting on the inbox.
         // Q. How to check if the worker is sleeping?
         synchronized (w.inbox) {
-          w.inbox.notify();
+          w.inbox.notifyAll();
         }
 
         // Leave to finish their current work
         try {
           t.join(0);
         } catch (final InterruptedException ex) {
-          // Ignore
+          // Unexpected
+          ConcurrencyUtils.interruptAndThrowUncheckedIf(true, ex);
         }
       }
     }

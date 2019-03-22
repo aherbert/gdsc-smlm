@@ -65,7 +65,7 @@ import org.apache.commons.math3.util.FastMath;
 /**
  * Specifies the configuration for the fit engine.
  */
-public class FitEngineConfiguration implements Cloneable {
+public class FitEngineConfiguration {
   private FitEngineSettings.Builder fitEngineSettings;
   private FitConfiguration fitConfiguration;
 
@@ -557,8 +557,12 @@ public class FitEngineConfiguration implements Cloneable {
     return fitEngineSettings.getDuplicateDistance().getAbsolute();
   }
 
-  @Override
-  public FitEngineConfiguration clone() {
+  /**
+   * Creates a copy of the configuration.
+   *
+   * @return the copy
+   */
+  public FitEngineConfiguration createCopy() {
     // Manual copy using the current proto objects
     final FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
         getFitConfiguration().getCalibration(), getFitConfiguration().getPsf());

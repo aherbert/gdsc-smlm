@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Wrapper class to output to multiple results destinations.
  */
-public class PeakResultsList extends AbstractPeakResults implements PeakResults {
+public class PeakResultsList extends AbstractPeakResults {
   private final List<PeakResults> results = new ArrayList<>();
 
   /**

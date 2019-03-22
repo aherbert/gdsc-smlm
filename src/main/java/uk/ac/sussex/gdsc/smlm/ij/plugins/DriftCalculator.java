@@ -569,7 +569,7 @@ public class DriftCalculator implements PlugIn {
       return;
     }
     updateMethod = gd.getNextChoiceIndex();
-    if (method != DRIFT_FILE) {
+    if (!DRIFT_FILE.equals(method)) {
       saveDrift = gd.getNextBoolean();
       saveDrift(calculatedTimepoints, lastdx, lastdy);
     }

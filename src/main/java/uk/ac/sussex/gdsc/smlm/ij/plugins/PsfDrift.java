@@ -179,7 +179,7 @@ public class PsfDrift implements PlugIn {
       final RandomGenerator rng = new Well19937c();
       this.jobs = jobs;
       this.psf = psf.copy(rng);
-      this.fitConfig2 = fitConfig.clone();
+      this.fitConfig2 = fitConfig.createCopy();
       sx = fitConfig.getInitialXSd();
       sy = fitConfig.getInitialYSd();
       pixelPitch = psfSettings.getPixelSize() * scale;

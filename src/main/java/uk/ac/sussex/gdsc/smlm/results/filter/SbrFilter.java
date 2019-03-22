@@ -70,7 +70,8 @@ public class SbrFilter extends DirectFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_PHOTONS | V_BACKGROUND | V_SNR;
+    return FilterValidationFlag.PHOTONS | FilterValidationFlag.BACKGROUND
+        | FilterValidationFlag.SNR;
   }
 
   @Override
@@ -80,12 +81,12 @@ public class SbrFilter extends DirectFilter {
       // Get the mean signal assuming the integral / area of 1 SD of the Gaussian
       if (Gaussian2DPeakResultHelper.getMeanSignalUsingR1(peak.getSignal(), peak.getXSd(),
           peak.getYSd()) / Math.sqrt(background) < this.sbr) {
-        return V_PHOTONS | V_BACKGROUND;
+        return FilterValidationFlag.PHOTONS | FilterValidationFlag.BACKGROUND;
       }
       return 0;
     }
     if (peak.getSnr() < this.sbr) {
-      return V_SNR;
+      return FilterValidationFlag.SNR;
     }
     return 0;
   }

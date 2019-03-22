@@ -812,7 +812,7 @@ public class Shape3DHelper {
       if (colorDepth == 3 || colorDepth == 4) {
         if (colorDepth == 3) {
           gi.setColors3(new float[iCoords.length * 3]);
-        } else if (colorDepth == 4) {
+        } else {
           gi.setColors4(new float[iCoords.length * 4]);
           // gi.setColorIndices(p.b);
         }

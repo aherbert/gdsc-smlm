@@ -114,7 +114,7 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags) {
-    if (areSet(flags, IDirectFilter.NO_WIDTH)) {
+    if (areSet(flags, FilterValidationOption.NO_WIDTH)) {
       widthEnabled = false;
     } else {
       setup(minWidth, maxWidth);
@@ -149,8 +149,8 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
-    return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
+  public int getFilterSetupFlags() {
+    return (widthEnabled) ? 0 : FilterValidationOption.NO_WIDTH;
   }
 
   @Override
@@ -161,15 +161,14 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
-    if (widthEnabled) {
-      if (peak.getXSdFactor() > upperSigmaThreshold || peak.getXSdFactor() < lowerSigmaThreshold) {
-        return V_X_SD_FACTOR;
-      }
+    if (widthEnabled && (peak.getXSdFactor() > upperSigmaThreshold
+        || peak.getXSdFactor() < lowerSigmaThreshold)) {
+      return getValidationFlags();
     }
     return 0;
   }
@@ -186,46 +185,27 @@ public class WidthFilter2 extends DirectFilter implements IMultiFilter {
 
   @Override
   protected double getParameterValueInternal(int index) {
-    switch (index) {
-      case 0:
-        return minWidth;
-      default:
-        return maxWidth;
-    }
+    return (index == 0) ? minWidth : maxWidth;
   }
 
   @Override
   public double getParameterIncrement(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return WidthFilter2.DEFAULT_MIN_INCREMENT;
-      default:
-        return WidthFilter.DEFAULT_INCREMENT;
-    }
+    return (index == 0) ? WidthFilter2.DEFAULT_MIN_INCREMENT : WidthFilter.DEFAULT_INCREMENT;
   }
 
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return ParameterType.MIN_WIDTH;
-      default:
-        return ParameterType.MAX_WIDTH;
-    }
+    return (index == 0) ? ParameterType.MIN_WIDTH : ParameterType.MAX_WIDTH;
   }
 
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return new WidthFilter2(updateParameter(minWidth, delta, DEFAULT_MIN_RANGE), maxWidth);
-      default:
-        return new WidthFilter2(minWidth,
-            updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
-    }
+    return (index == 0)
+        ? new WidthFilter2(updateParameter(minWidth, delta, DEFAULT_MIN_RANGE), maxWidth)
+        : new WidthFilter2(minWidth, updateParameter(maxWidth, delta, WidthFilter.DEFAULT_RANGE));
   }
 
   @Override

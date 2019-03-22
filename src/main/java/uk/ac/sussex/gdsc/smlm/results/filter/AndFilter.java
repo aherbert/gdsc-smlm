@@ -63,9 +63,4 @@ public class AndFilter extends CombinedFilter {
   protected Filter createFilter(Filter f1, Filter f2) {
     return new AndFilter(f1, f2);
   }
-
-  @Override
-  public Filter clone() {
-    return new AndFilter(filter1.clone(), filter2.clone());
-  }
 }

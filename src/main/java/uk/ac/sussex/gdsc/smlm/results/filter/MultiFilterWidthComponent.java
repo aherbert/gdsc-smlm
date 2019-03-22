@@ -54,6 +54,6 @@ public class MultiFilterWidthComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_X_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR;
   }
 }

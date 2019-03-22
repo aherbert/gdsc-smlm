@@ -46,6 +46,6 @@ public class MultiFilterSnrComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_SNR;
+    return FilterValidationFlag.SNR;
   }
 }

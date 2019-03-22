@@ -260,21 +260,18 @@ public abstract class HysteresisFilter extends Filter {
 
     // Initialise peaks to check
     final LinkedList<PeakResult> candidates = new LinkedList<>();
-    peakResults.forEach(new PeakResultProcedure() {
-      @Override
-      public void execute(PeakResult result) {
-        switch (getStatus(result)) {
-          case OK:
-            ok.add(result);
-            traceResults.add(result);
-            break;
-          case CANDIDATE:
-            candidates.add(result);
-            traceResults.add(result);
-            break;
-          default:
-            break;
-        }
+    peakResults.forEach((PeakResultProcedure) result -> {
+      switch (getStatus(result)) {
+        case OK:
+          ok.add(result);
+          traceResults.add(result);
+          break;
+        case CANDIDATE:
+          candidates.add(result);
+          traceResults.add(result);
+          break;
+        default:
+          break;
       }
     });
 
@@ -364,8 +361,7 @@ public abstract class HysteresisFilter extends Filter {
       sum += calculator.getLsePrecision(peakResult.getParameters(), peakResult.getNoise());
     }
     final double nmPerPixel = peakResults.getNmPerPixel();
-    final double distanceThreshold = (sum / candidates.size()) * searchDistance / nmPerPixel;
-    return distanceThreshold;
+    return (sum / candidates.size()) * searchDistance / nmPerPixel;
   }
 
   /**
@@ -440,8 +436,6 @@ public abstract class HysteresisFilter extends Filter {
 
   @Override
   public double[] sequence() {
-    // Remind derived classes to implement this.
-    // throw new NotImplementedException();
     // Implement a default version using the results of getChromosomeParameters() and
     // getParameters().
     final double[] sequence = new double[length()];

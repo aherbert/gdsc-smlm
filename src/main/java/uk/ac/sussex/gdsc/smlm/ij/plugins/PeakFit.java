@@ -3484,9 +3484,11 @@ public class PeakFit implements PlugInFilter {
         break;
       }
 
-      if (++slice % step == 0
-          && ImageJUtils.showStatus(String.format(format, slice, results.size()))) {
-        IJ.showProgress(slice, totalFrames);
+      if (++slice % step == 0) {
+        final int frames = slice;
+        if (ImageJUtils.showStatus(() -> String.format(format, frames, results.size()))) {
+          IJ.showProgress(slice, totalFrames);
+        }
       }
 
       float noise = Float.NaN;
@@ -3868,9 +3870,10 @@ public class PeakFit implements PlugInFilter {
         return;
       }
 
-      if (slice % step == 0
-          && ImageJUtils.showStatus(String.format(format, slice, results.size()))) {
-        IJ.showProgress(slice, totalFrames);
+      if (slice % step == 0) {
+        if (ImageJUtils.showStatus(() -> String.format(format, slice, results.size()))) {
+          IJ.showProgress(slice, totalFrames);
+        }
       }
 
       // We must pre-process the data before noise estimation

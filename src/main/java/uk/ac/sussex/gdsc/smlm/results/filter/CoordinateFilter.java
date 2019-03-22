@@ -94,16 +94,16 @@ public class CoordinateFilter extends DirectFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X | V_Y;
+    return FilterValidationFlag.X | FilterValidationFlag.Y;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getX() < minX || peak.getX() > maxX) {
-      return V_X;
+      return FilterValidationFlag.X;
     }
     if (peak.getY() < minY || peak.getY() > maxY) {
-      return V_Y;
+      return FilterValidationFlag.Y;
     }
     return 0;
   }

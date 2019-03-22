@@ -86,13 +86,13 @@ public class ZCoordinateFilter extends DirectFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_Z;
+    return FilterValidationFlag.Z;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getZ() < minZ || peak.getZ() > maxZ) {
-      return V_Z;
+      return getValidationFlags();
     }
     return 0;
   }
@@ -109,12 +109,7 @@ public class ZCoordinateFilter extends DirectFilter {
 
   @Override
   protected double getParameterValueInternal(int index) {
-    switch (index) {
-      case 0:
-        return minZ;
-      default:
-        return maxZ;
-    }
+    return (index == 0) ? minZ : maxZ;
   }
 
   @Override
@@ -126,34 +121,20 @@ public class ZCoordinateFilter extends DirectFilter {
   @Override
   public double getDisabledParameterValue(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return Double.NEGATIVE_INFINITY;
-      default:
-        return Double.POSITIVE_INFINITY;
-    }
+    return (index == 0) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
   }
 
   @Override
   public ParameterType getParameterType(int index) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return ParameterType.MIN_Z;
-      default:
-        return ParameterType.MAX_Z;
-    }
+    return (index == 0) ? ParameterType.MIN_Z : ParameterType.MAX_Z;
   }
 
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
-    switch (index) {
-      case 0:
-        return new ZCoordinateFilter(updateParameter(minZ, delta, DEFAULT_RANGE), maxZ);
-      default:
-        return new ZCoordinateFilter(minZ, updateParameter(maxZ, delta, DEFAULT_RANGE));
-    }
+    return (index == 0) ? new ZCoordinateFilter(updateParameter(minZ, delta, DEFAULT_RANGE), maxZ)
+        : new ZCoordinateFilter(minZ, updateParameter(maxZ, delta, DEFAULT_RANGE));
   }
 
   @Override

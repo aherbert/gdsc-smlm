@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Filter results using an upper width factor. Assumes width is different on the X and Y axis and
  * they are combined using s = sqrt(s0*s1).
  */
-public class XyWidthFilter extends WidthFilter implements IMultiFilter {
+public class XyWidthFilter extends WidthFilter {
   /**
    * Instantiates a new XY width filter.
    *
@@ -66,15 +66,13 @@ public class XyWidthFilter extends WidthFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
-    if (widthEnabled) {
-      if (peak.getXSdFactor() * peak.getYSdFactor() > upperSigmaThreshold) {
-        return V_X_SD_FACTOR | V_Y_SD_FACTOR;
-      }
+    if (widthEnabled && (peak.getXSdFactor() * peak.getYSdFactor() > upperSigmaThreshold)) {
+      return getValidationFlags();
     }
     return 0;
   }

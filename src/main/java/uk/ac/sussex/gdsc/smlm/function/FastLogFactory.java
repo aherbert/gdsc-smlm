@@ -28,7 +28,10 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Factory class for creating a fast log instance.
  */
 public class FastLogFactory {
-  private static FastLog fastLog;
+
+  private static class FastLogLoader {
+    static final FastLog fastLog = new TurboLog();
+  }
 
   /**
    * Gets the global fast log instance.
@@ -36,10 +39,7 @@ public class FastLogFactory {
    * @return the fast log instance
    */
   public static FastLog getFastLog() {
-    if (fastLog == null) {
-      fastLog = new TurboLog();
-    }
-    return fastLog;
+    return FastLogLoader.fastLog;
   }
 
   /**

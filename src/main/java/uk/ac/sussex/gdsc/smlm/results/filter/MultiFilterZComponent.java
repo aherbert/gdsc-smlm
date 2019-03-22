@@ -50,6 +50,6 @@ public class MultiFilterZComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_Z;
+    return FilterValidationFlag.Z;
   }
 }

@@ -100,11 +100,9 @@ public class MultiPathFitResult {
     public final int status;
 
     /**
-     * The results from the fit. It is expected that one or more results will be true for
-     * {@link PreprocessedPeakResult#isNewResult()} and zero or more could be true for
-     * {@link PreprocessedPeakResult#isExistingResult()}.
+     * The results from the fit.
      */
-    public PreprocessedPeakResult[] results;
+    private PreprocessedPeakResult[] results;
 
     /**
      * Allows storing any data associated with the fit result.
@@ -161,12 +159,25 @@ public class MultiPathFitResult {
     }
 
     /**
-     * Gets the results.
+     * Gets the results results from the fit. It is expected that one or more results will be true
+     * for {@link PreprocessedPeakResult#isNewResult()} and zero or more could be true for
+     * {@link PreprocessedPeakResult#isExistingResult()}.
      *
      * @return the results
      */
     public PreprocessedPeakResult[] getResults() {
       return results;
+    }
+
+    /**
+     * Sets the results from the fit. It is expected that one or more results will be true for
+     * {@link PreprocessedPeakResult#isNewResult()} and zero or more could be true for
+     * {@link PreprocessedPeakResult#isExistingResult()}.
+     *
+     * @param results the new results
+     */
+    public void setResults(PreprocessedPeakResult[] results) {
+      this.results = results;
     }
 
     /**

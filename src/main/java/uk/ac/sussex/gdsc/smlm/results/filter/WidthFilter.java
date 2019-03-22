@@ -92,7 +92,7 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags) {
-    if (areSet(flags, IDirectFilter.NO_WIDTH)) {
+    if (areSet(flags, FilterValidationOption.NO_WIDTH)) {
       widthEnabled = false;
     } else {
       setup(width);
@@ -115,8 +115,8 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
-    return (widthEnabled) ? 0 : IDirectFilter.NO_WIDTH;
+  public int getFilterSetupFlags() {
+    return (widthEnabled) ? 0 : FilterValidationOption.NO_WIDTH;
   }
 
   @Override
@@ -126,15 +126,13 @@ public class WidthFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
-    if (widthEnabled) {
-      if (peak.getXSdFactor() > upperSigmaThreshold) {
-        return V_X_SD_FACTOR;
-      }
+    if (widthEnabled && peak.getXSdFactor() > upperSigmaThreshold) {
+      return getValidationFlags();
     }
     return 0;
   }

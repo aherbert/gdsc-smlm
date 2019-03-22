@@ -54,17 +54,17 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
   }
 
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
+  public int getFilterSetupFlags()  {
     return 0;
   }
 
   @Override
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
+  public FilterSetupData[] getFilterSetupData() {
     return null;
   }
 
   /**
-   * Convenience method to convert variable input data to ann array.
+   * Convenience method to convert variable input data to an array.
    *
    * @param data the data
    * @return the filter setup data
@@ -101,9 +101,6 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
   }
 
   @Override
-  public abstract int validate(final PreprocessedPeakResult peak);
-
-  @Override
   public FilterType getFilterType() {
     return FilterType.DIRECT;
   }
@@ -131,61 +128,61 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     }
     final StringBuilder sb = new StringBuilder();
     //@formatter:off
-    if (areSet(flags, V_PHOTONS)) {
+    if (areSet(flags, FilterValidationFlag.PHOTONS)) {
       append(sb, "Signal",           peak.getSignal());
     }
-    if (areSet(flags, V_SNR)) {
+    if (areSet(flags, FilterValidationFlag.SNR)) {
       append(sb, "SNR",              peak.getSnr());
     }
-    if (areSet(flags, V_NOISE)) {
+    if (areSet(flags, FilterValidationFlag.NOISE)) {
       append(sb, "Noise",            peak.getNoise());
     }
-    if (areSet(flags, V_LOCATION_VARIANCE)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE)) {
       append(sb, "Precision",        Math.sqrt(peak.getLocationVariance()));
     }
-    if (areSet(flags, V_LOCATION_VARIANCE2)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE2)) {
       append(sb, "Precision2",       Math.sqrt(peak.getLocationVariance2()));
     }
-    if (areSet(flags, V_LOCATION_VARIANCE_CRLB)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE_CRLB)) {
       append(sb, "Precision CRLB",   Math.sqrt(peak.getLocationVarianceCrlb()));
     }
-    if (areSet(flags, V_SD)) {
+    if (areSet(flags, FilterValidationFlag.SD)) {
       append(sb, "SD",               peak.getSd());
     }
-    if (areSet(flags, V_BACKGROUND)) {
+    if (areSet(flags, FilterValidationFlag.BACKGROUND)) {
       append(sb, "Background",       peak.getBackground());
     }
-    if (areSet(flags, V_AMPLITUDE)) {
+    if (areSet(flags, FilterValidationFlag.AMPLITUDE)) {
       append(sb, "Amplitude",        peak.getAmplitude());
     }
-    if (areSet(flags, V_ANGLE)) {
+    if (areSet(flags, FilterValidationFlag.ANGLE)) {
       append(sb, "Angle",            peak.getAngle());
     }
-    if (areSet(flags, V_X)) {
+    if (areSet(flags, FilterValidationFlag.X)) {
       append(sb, "X",                peak.getX());
     }
-    if (areSet(flags, V_Y)) {
+    if (areSet(flags, FilterValidationFlag.Y)) {
       append(sb, "Y",                peak.getY());
     }
-    if (areSet(flags, V_Z)) {
+    if (areSet(flags, FilterValidationFlag.Z)) {
       append(sb, "Z",                peak.getZ());
     }
-    if (areSet(flags, V_X_RELATIVE_SHIFT)) {
+    if (areSet(flags, FilterValidationFlag.X_RELATIVE_SHIFT)) {
       append(sb, "X Relative Shift", Math.sqrt(peak.getXRelativeShift2()));
     }
-    if (areSet(flags, V_Y_RELATIVE_SHIFT)) {
+    if (areSet(flags, FilterValidationFlag.Y_RELATIVE_SHIFT)) {
       append(sb, "Y Relative Shift", Math.sqrt(peak.getYRelativeShift2()));
     }
-    if (areSet(flags, V_X_SD)) {
+    if (areSet(flags, FilterValidationFlag.X_SD)) {
       append(sb, "X SD",             peak.getXSd());
     }
-    if (areSet(flags, V_Y_SD)) {
+    if (areSet(flags, FilterValidationFlag.Y_SD)) {
       append(sb, "Y SD",             peak.getYSd());
     }
-    if (areSet(flags, V_X_SD_FACTOR)) {
+    if (areSet(flags, FilterValidationFlag.X_SD_FACTOR)) {
       append(sb, "X SD Factor",      peak.getXSdFactor());
     }
-    if (areSet(flags, V_Y_SD_FACTOR)) {
+    if (areSet(flags, FilterValidationFlag.Y_SD_FACTOR)) {
       append(sb, "Y SD Factor",      peak.getYSdFactor());
     }
     //@formatter:on
@@ -203,65 +200,63 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       return "";
     }
     final StringBuilder sb = new StringBuilder();
-    //@formatter:off
-    if (areSet(flags, V_PHOTONS)) {
+    if (areSet(flags, FilterValidationFlag.PHOTONS)) {
       append(sb, "Signal");
     }
-    if (areSet(flags, V_SNR)) {
+    if (areSet(flags, FilterValidationFlag.SNR)) {
       append(sb, "SNR");
     }
-    if (areSet(flags, V_NOISE)) {
+    if (areSet(flags, FilterValidationFlag.NOISE)) {
       append(sb, "Noise");
     }
-    if (areSet(flags, V_LOCATION_VARIANCE)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE)) {
       append(sb, "Precision");
     }
-    if (areSet(flags, V_LOCATION_VARIANCE2)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE2)) {
       append(sb, "Precision2");
     }
-    if (areSet(flags, V_LOCATION_VARIANCE_CRLB)) {
+    if (areSet(flags, FilterValidationFlag.LOCATION_VARIANCE_CRLB)) {
       append(sb, "Precision CRLB");
     }
-    if (areSet(flags, V_SD)) {
+    if (areSet(flags, FilterValidationFlag.SD)) {
       append(sb, "SD");
     }
-    if (areSet(flags, V_BACKGROUND)) {
+    if (areSet(flags, FilterValidationFlag.BACKGROUND)) {
       append(sb, "Background");
     }
-    if (areSet(flags, V_AMPLITUDE)) {
+    if (areSet(flags, FilterValidationFlag.AMPLITUDE)) {
       append(sb, "Amplitude");
     }
-    if (areSet(flags, V_ANGLE)) {
+    if (areSet(flags, FilterValidationFlag.ANGLE)) {
       append(sb, "Angle");
     }
-    if (areSet(flags, V_X)) {
+    if (areSet(flags, FilterValidationFlag.X)) {
       append(sb, "X");
     }
-    if (areSet(flags, V_Y)) {
+    if (areSet(flags, FilterValidationFlag.Y)) {
       append(sb, "Y");
     }
-    if (areSet(flags, V_Z)) {
+    if (areSet(flags, FilterValidationFlag.Z)) {
       append(sb, "Z");
     }
-    if (areSet(flags, V_X_RELATIVE_SHIFT)) {
+    if (areSet(flags, FilterValidationFlag.X_RELATIVE_SHIFT)) {
       append(sb, "X Relative Shift");
     }
-    if (areSet(flags, V_Y_RELATIVE_SHIFT)) {
+    if (areSet(flags, FilterValidationFlag.Y_RELATIVE_SHIFT)) {
       append(sb, "Y Relative Shift");
     }
-    if (areSet(flags, V_X_SD)) {
+    if (areSet(flags, FilterValidationFlag.X_SD)) {
       append(sb, "X SD");
     }
-    if (areSet(flags, V_Y_SD)) {
+    if (areSet(flags, FilterValidationFlag.Y_SD)) {
       append(sb, "Y SD");
     }
-    if (areSet(flags, V_X_SD_FACTOR)) {
+    if (areSet(flags, FilterValidationFlag.X_SD_FACTOR)) {
       append(sb, "X SD Factor");
     }
-    if (areSet(flags, V_Y_SD_FACTOR)) {
+    if (areSet(flags, FilterValidationFlag.Y_SD_FACTOR)) {
       append(sb, "Y SD Factor");
     }
-    //@formatter:on
     return sb.toString();
   }
 
@@ -315,7 +310,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
    * @return the strength
    */
   public float computeStrength(double[] lower, double[] upper) {
-    double strength = 0;
+    double sum = 0;
     final double[] p = getParameters();
     for (int i = 0; i < p.length; i++) {
       final double range = upper[i] - lower[i];
@@ -325,12 +320,12 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
       }
       final int o = lowerBoundOrientation(i);
       if (o < 0) {
-        strength += (p[i] - lower[i]) / range;
+        sum += (p[i] - lower[i]) / range;
       } else if (o > 0) {
-        strength += (upper[i] - p[i]) / range;
+        sum += (upper[i] - p[i]) / range;
       }
     }
-    return (float) strength;
+    return (float) sum;
   }
 
   /**

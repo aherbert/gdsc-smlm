@@ -1513,7 +1513,8 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
       f.initialiseState();
       return f;
     } catch (final CloneNotSupportedException ex) {
-      return null;
+      // This should not happen
+      throw new AssertionError(ex);
     }
   }
 

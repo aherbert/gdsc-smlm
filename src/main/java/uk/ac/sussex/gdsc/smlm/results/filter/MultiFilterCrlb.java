@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift, precision and
  * z-depth. Calculates the precision using the fitted X/Y parameter deviations.
  */
-public class MultiFilterCrlb extends MultiFilter implements IMultiFilter {
+public class MultiFilterCrlb extends MultiFilter {
 
   /**
    * Instantiates a new multi filter CRLB.

@@ -40,8 +40,7 @@ import java.util.List;
  *
  * @param <T> the generic type
  */
-public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T>
-    implements SelectionStrategy<T> {
+public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSelectionStrategy<T> {
   private List<? extends Chromosome<T>> sorted;
   private int numberSelected;
   private long[] sum;

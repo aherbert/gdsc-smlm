@@ -645,7 +645,7 @@ public class MultiPathFilter {
     if (doDoublet) {
       // We must validate the spot without shift filtering. Doublets may drift further than single
       // spot candidates.
-      setupFilter(IDirectFilter.NO_SHIFT);
+      setupFilter(FilterValidationOption.NO_SHIFT);
       singleDoubletResults = acceptAny(candidateId, multiPathResult.getDoubletFitResult(),
           validateCandidates, store, precomputed);
       restoreFilterState();
@@ -871,7 +871,7 @@ public class MultiPathFilter {
     if (doDoublet) {
       // We must validate the spot without shift filtering. Doublets may drift further than single
       // spot candidates.
-      setupFilter(IDirectFilter.NO_SHIFT);
+      setupFilter(FilterValidationOption.NO_SHIFT);
       singleDoubletResults =
           acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates, store);
       restoreFilterState();
@@ -1134,7 +1134,7 @@ public class MultiPathFilter {
   private boolean isSuitableForDoubletFit(MultiPathFitResult multiPathResult, FitResult fitResult,
       boolean singleQa) {
     // Check there is a fit result
-    if (fitResult == null || fitResult.status != 0 || fitResult.results == null) {
+    if (fitResult == null || fitResult.status != 0 || fitResult.getResults() == null) {
       return false;
     }
 
@@ -1146,7 +1146,7 @@ public class MultiPathFilter {
     // Check the other results are OK. Candidates are allowed to fail. New and existing results must
     // pass.
     for (int i = 1; i < validationResults.length; i++) {
-      if ((fitResult.results[i].isNewResult() || fitResult.results[i].isExistingResult())
+      if ((fitResult.getResults()[i].isNewResult() || fitResult.getResults()[i].isExistingResult())
           && validationResults[i] != 0) {
         return false;
       }
@@ -1160,12 +1160,12 @@ public class MultiPathFilter {
 
     // Check if it failed due to width
     if (!DirectFilter.anySet(validationResults[0],
-        IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_X_SD_FACTOR)) {
+        FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.X_SD_FACTOR)) {
       return false;
     }
 
     // Get the first spot
-    final PreprocessedPeakResult firstResult = fitResult.results[0];
+    final PreprocessedPeakResult firstResult = fitResult.getResults()[0];
 
     // Check the width is reasonable given the size of the fitted region.
     //@formatter:off
@@ -1186,7 +1186,7 @@ public class MultiPathFilter {
     }
 
     // We must validate the spot without width filtering. Do not change the min filter.
-    setupFilter(IDirectFilter.NO_WIDTH);
+    setupFilter(FilterValidationOption.NO_WIDTH);
 
     try {
       if (!filter.accept(firstResult)) {
@@ -1245,10 +1245,10 @@ public class MultiPathFilter {
    */
   public @Nullable PreprocessedPeakResult[] acceptAll(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store, boolean precomputed) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return null;
     }
-    final PreprocessedPeakResult[] results = fitResult.results;
+    final PreprocessedPeakResult[] results = fitResult.getResults();
 
     getValidationResults(precomputed, results);
 
@@ -1363,10 +1363,10 @@ public class MultiPathFilter {
    */
   public @Nullable PreprocessedPeakResult[] acceptAny(int candidateId, final FitResult fitResult,
       boolean validateCandidates, SelectedResultStore store, boolean precomputed) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return null;
     }
-    final PreprocessedPeakResult[] results = fitResult.results;
+    final PreprocessedPeakResult[] results = fitResult.getResults();
 
     // Validate the results
     getValidationResults(precomputed, results);
@@ -1389,10 +1389,10 @@ public class MultiPathFilter {
    */
   private @Nullable PreprocessedPeakResult[] acceptAnyInternal(int candidateId,
       final FitResult fitResult, boolean validateCandidates, SelectedResultStore store) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return null;
     }
-    final PreprocessedPeakResult[] results = fitResult.results;
+    final PreprocessedPeakResult[] results = fitResult.getResults();
 
     // Results are already in the validationResults array
 
@@ -1480,7 +1480,7 @@ public class MultiPathFilter {
       final MultiPathFitResult multiPathResult, boolean validateCandidates,
       SelectedResultStore store, final int candidateId) {
     final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
-    if (multiDoubletFitResult == null || multiDoubletFitResult.results == null) {
+    if (multiDoubletFitResult == null || multiDoubletFitResult.getResults() == null) {
       return null;
     }
 
@@ -1489,10 +1489,10 @@ public class MultiPathFilter {
     // Note: Only disable shift for the doublet results.
     // doublets = len(multi-doublet) - len(multi) + 1
 
-    final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
-    final int nDoublets = results.length - multiPathResult.getMultiFitResult().results.length + 1;
+    final PreprocessedPeakResult[] results = multiDoubletFitResult.getResults();
+    final int nDoublets = results.length - multiPathResult.getMultiFitResult().getResults().length + 1;
 
-    setupFilter(IDirectFilter.NO_SHIFT);
+    setupFilter(FilterValidationOption.NO_SHIFT);
 
     validationResults = new int[results.length];
     for (int i = 0; i < nDoublets; i++) {
@@ -1828,17 +1828,17 @@ public class MultiPathFilter {
         // is removed that could be used.
         checkIsValid(multiPathResult.getSingleFitResult(), store);
         checkIsValid(multiPathResult.getMultiFitResult(), store);
-        setupFilter(IDirectFilter.NO_SHIFT);
+        setupFilter(FilterValidationOption.NO_SHIFT);
         checkIsValid(multiPathResult.getDoubletFitResult(), store);
 
         // Fix to only disable shift filtering for the doublet results...
         final FitResult multiDoubletFitResult = multiPathResult.getMultiDoubletFitResult();
-        if (multiDoubletFitResult != null && multiDoubletFitResult.results != null) {
+        if (multiDoubletFitResult != null && multiDoubletFitResult.getResults() != null) {
           // Note: Only disable shift for the doublet results.
           // doublets = len(multi-doublet) - len(multi) + 1
-          final PreprocessedPeakResult[] results = multiDoubletFitResult.results;
+          final PreprocessedPeakResult[] results = multiDoubletFitResult.getResults();
           final int nDoublets =
-              results.length - multiPathResult.getMultiFitResult().results.length + 1;
+              results.length - multiPathResult.getMultiFitResult().getResults().length + 1;
           checkIsValid(results, store, 0, nDoublets);
           restoreFilterState();
           checkIsValid(results, store, nDoublets, results.length);
@@ -1929,10 +1929,10 @@ public class MultiPathFilter {
   }
 
   private void checkIsValid(FitResult fitResult, SimpleSelectedResultStore store) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return;
     }
-    final PreprocessedPeakResult[] results = fitResult.results;
+    final PreprocessedPeakResult[] results = fitResult.getResults();
 
     for (int i = 0; i < results.length; i++) {
       // Validate everything
@@ -2316,10 +2316,10 @@ public class MultiPathFilter {
    * @param fitResult the fit result
    */
   public static void resetValidationFlag(FitResult fitResult) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return;
     }
-    final PreprocessedPeakResult[] results = fitResult.results;
+    final PreprocessedPeakResult[] results = fitResult.getResults();
     for (int i = 0; i < results.length; i++) {
       results[i].setValidationResult(0);
     }

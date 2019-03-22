@@ -28,8 +28,8 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  * Filter results using Shift.
  */
 public class MultiFilterShiftComponent implements MultiFilterComponent {
-  private static final int type =
-      IDirectFilter.V_X_RELATIVE_SHIFT | IDirectFilter.V_Y_RELATIVE_SHIFT;
+  private static final int TYPE =
+      FilterValidationFlag.X_RELATIVE_SHIFT | FilterValidationFlag.Y_RELATIVE_SHIFT;
 
   private final float offset;
 
@@ -52,6 +52,6 @@ public class MultiFilterShiftComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return type;
+    return TYPE;
   }
 }

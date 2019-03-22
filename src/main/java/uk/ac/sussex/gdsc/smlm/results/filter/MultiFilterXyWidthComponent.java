@@ -54,6 +54,6 @@ public class MultiFilterXyWidthComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_X_SD_FACTOR | IDirectFilter.V_Y_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR;
   }
 }

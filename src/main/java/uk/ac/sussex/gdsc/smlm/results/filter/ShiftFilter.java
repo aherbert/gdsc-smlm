@@ -84,7 +84,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags) {
-    if (areSet(flags, IDirectFilter.NO_SHIFT)) {
+    if (areSet(flags, FilterValidationOption.NO_SHIFT)) {
       shiftEnabled = false;
     } else {
       setup(shift);
@@ -93,7 +93,7 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public void setup(int flags, FilterSetupData... filterSetupData) {
-    if (areSet(flags, IDirectFilter.NO_SHIFT)) {
+    if (areSet(flags, FilterValidationOption.NO_SHIFT)) {
       shiftEnabled = false;
       return;
     }
@@ -114,12 +114,12 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
   }
 
   @Override
-  public int getFilterSetupFlags() throws IllegalStateException {
-    return (shiftEnabled) ? 0 : IDirectFilter.NO_SHIFT;
+  public int getFilterSetupFlags() {
+    return (shiftEnabled) ? 0 : FilterValidationOption.NO_SHIFT;
   }
 
   @Override
-  public FilterSetupData[] getFilterSetupData() throws IllegalStateException {
+  public FilterSetupData[] getFilterSetupData() {
     if (shiftEnabled && shift2 != Float.POSITIVE_INFINITY) {
       if (shift2 == getUpperSquaredLimit(shift)) {
         // This is the default so ignore
@@ -137,17 +137,17 @@ public class ShiftFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_RELATIVE_SHIFT | V_Y_RELATIVE_SHIFT;
+    return FilterValidationFlag.X_RELATIVE_SHIFT | FilterValidationFlag.Y_RELATIVE_SHIFT;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (shiftEnabled) {
       if (peak.getXRelativeShift2() > shift2) {
-        return V_X_RELATIVE_SHIFT;
+        return FilterValidationFlag.X_RELATIVE_SHIFT;
       }
       if (peak.getYRelativeShift2() > shift2) {
-        return V_Y_RELATIVE_SHIFT;
+        return FilterValidationFlag.Y_RELATIVE_SHIFT;
       }
     }
     return 0;

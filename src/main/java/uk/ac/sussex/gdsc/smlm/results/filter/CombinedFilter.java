@@ -29,8 +29,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import java.util.Arrays;
 
 /**
@@ -89,9 +87,12 @@ public abstract class CombinedFilter extends DirectFilter {
   }
 
   @Override
-  public Filter clone() {
-    // Add a reminder to implement clone
-    throw new NotImplementedException("Derived classes must clone filter1 and filter2");
+  public CombinedFilter clone() {
+    CombinedFilter filter = (CombinedFilter) super.clone();
+    filter.filter1 = this.filter1.clone();
+    filter.filter2 = this.filter2.clone();
+    initialiseState();
+    return filter;
   }
 
   @Override

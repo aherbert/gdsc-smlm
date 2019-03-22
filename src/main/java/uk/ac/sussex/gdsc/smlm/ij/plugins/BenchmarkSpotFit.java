@@ -731,7 +731,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
-      this.fitWorker = new FitWorker(config.clone(), peakResults, null);
+      this.fitWorker = new FitWorker(config.createCopy(), peakResults, null);
 
       final int fitting = config.getFittingWidth();
       fitWorker.setSearchParameters((MaximaSpotFilter) spotFilter.copy(), fitting);
@@ -999,14 +999,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     private void add(ArrayList<MultiPathPoint> predicted,
         uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int type,
         int spotId) {
-      if (fitResult == null || fitResult.status != 0 || fitResult.results == null) {
+      if (fitResult == null || fitResult.status != 0 || fitResult.getResults() == null) {
         return;
       }
 
-      for (int i = 0; i < fitResult.results.length; i++) {
-        if (fitResult.results[i].isNewResult()) {
-          predicted.add(new MultiPathPoint(fitResult.results[i],
-              fitResult.results[i].getCandidateId(), type, spotId));
+      for (int i = 0; i < fitResult.getResults().length; i++) {
+        if (fitResult.getResults()[i].isNewResult()) {
+          predicted.add(new MultiPathPoint(fitResult.getResults()[i],
+              fitResult.getResults()[i].getCandidateId(), type, spotId));
         }
       }
     }
@@ -1464,12 +1464,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private static int
       count(uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return 0;
     }
     int count = 0;
-    for (int i = 0; i < fitResult.results.length; i++) {
-      final PreprocessedPeakResult result = fitResult.results[i];
+    for (int i = 0; i < fitResult.getResults().length; i++) {
+      final PreprocessedPeakResult result = fitResult.getResults()[i];
       if (result.isNewResult()) {
         count++;
       }
@@ -1480,11 +1480,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static int store(
       uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult, int count,
       PreprocessedPeakResult[] preprocessedPeakResults) {
-    if (fitResult == null || fitResult.results == null) {
+    if (fitResult == null || fitResult.getResults() == null) {
       return count;
     }
-    for (int i = 0; i < fitResult.results.length; i++) {
-      final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.results[i];
+    for (int i = 0; i < fitResult.getResults().length; i++) {
+      final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.getResults()[i];
       if (result.isNewResult()) {
         result.uniqueId = count++;
         preprocessedPeakResults[result.uniqueId] = result;
@@ -2252,15 +2252,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       return;
     }
 
-    if (fitResult.results == null) {
+    if (fitResult.getResults() == null) {
       return;
     }
 
     boolean isMatch = false;
 
-    for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++) {
+    for (int resultIndex = 0; resultIndex < fitResult.getResults().length; resultIndex++) {
       final BasePreprocessedPeakResult result =
-          (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+          (BasePreprocessedPeakResult) fitResult.getResults()[resultIndex];
 
       // Q. Only build stats on new results?
       if (!result.isNewResult()) {
@@ -2339,12 +2339,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (fitResult.status != 0) {
       return false;
     }
-    if (fitResult.results == null) {
+    if (fitResult.getResults() == null) {
       return false;
     }
-    for (int resultIndex = 0; resultIndex < fitResult.results.length; resultIndex++) {
+    for (int resultIndex = 0; resultIndex < fitResult.getResults().length; resultIndex++) {
       final BasePreprocessedPeakResult result =
-          (BasePreprocessedPeakResult) fitResult.results[resultIndex];
+          (BasePreprocessedPeakResult) fitResult.getResults()[resultIndex];
       if (!result.isNewResult()) {
         continue;
       }

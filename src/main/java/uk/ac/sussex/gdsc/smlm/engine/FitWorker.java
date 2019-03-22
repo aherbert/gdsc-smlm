@@ -1177,7 +1177,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (localStats[peak] == null) {
         compute(peak);
       }
-      return localStats[peak][0];
+      return localStats[peak][Gaussian2DFunction.BACKGROUND];
     }
 
     @Override
@@ -2346,7 +2346,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // We do not perform validation of the results. So we assume that the results have
       // been checked and are valid and continue.
 
-      final PreprocessedPeakResult[] fitResults = resultMulti.results;
+      final PreprocessedPeakResult[] fitResults = resultMulti.getResults();
 
       // Get the background for the multi-fit result
       final FitResult multiFitResult = (FitResult) resultMulti.data;
@@ -2495,7 +2495,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // }
 
       if (resultDoubletMulti != null && resultDoubletMulti.status == 0
-          && resultDoubletMulti.results != null) {
+          && resultDoubletMulti.getResults() != null) {
         // The code below builds a combined result for the multi-fit and the primary candidate
         // fitted as a doublet. However this means that validation will be repeated on the spots
         // that have
@@ -2544,8 +2544,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         // Create all the output results
         final PreprocessedPeakResult[] results =
-            new PreprocessedPeakResult[resultDoubletMulti.results.length
-                + resultMulti.results.length - 1];
+            new PreprocessedPeakResult[resultDoubletMulti.getResults().length
+                + resultMulti.getResults().length - 1];
 
         // We must compute a local background for all the spots
         final DynamicPeakResultValidationData validationData =
@@ -2561,8 +2561,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // fitConfig.getAstigmatismZModel(), frozenParams);
 
         int resultIndex = 0;
-        for (int i = 0; i < resultDoubletMulti.results.length; i++) {
-          final PreprocessedPeakResult r = resultDoubletMulti.results[i];
+        for (int i = 0; i < resultDoubletMulti.getResults().length; i++) {
+          final PreprocessedPeakResult r = resultDoubletMulti.getResults()[i];
           results[resultIndex] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(),
               r.getId(), initialParams, params, paramDevs,
               // getLocalBackground(n, npeaks, frozenParams, flags,
@@ -2572,8 +2572,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           resultIndex++;
         }
         // Ignore the first result (this was removed and fit as the doublet)
-        for (int i = 1; i < resultMulti.results.length; i++) {
-          final PreprocessedPeakResult r = resultMulti.results[i];
+        for (int i = 1; i < resultMulti.getResults().length; i++) {
+          final PreprocessedPeakResult r = resultMulti.getResults()[i];
           // Increment the ID by one since the position in the parameters array is moved to
           // accommodate 2 preceding peaks and not 1
           results[resultIndex] = resultFactory.createPreprocessedPeakResult(r.getCandidateId(),
@@ -2806,7 +2806,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         int otherId = candidateId;
         ResultType resultType = ResultType.NEW;
-
+        
         final double xShift =
             fitParams[Gaussian2DFunction.X_POSITION] - initialParams[Gaussian2DFunction.X_POSITION];
         final double yShift =
@@ -2919,9 +2919,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         results = new PreprocessedPeakResult[1];
 
-        final double[] fitParamDevs = fitResult.getParameterDeviations();
-
-        localBackgroundSingle = validationData.getLocalBackground();
+        final double[] fitParamStdDevs = fitResult.getParameterDeviations();
 
         // int npeaks = 1 + fittedNeighbourCount - precomputedFittedNeighbourCount;
         // if (npeaks > 1)
@@ -2979,8 +2977,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // // localBackgroundSingle / fitParams[Gaussian2DFunction.BACKGROUND]);
         // }
 
+        validationData.setResult(0, initialParams, fitParams, fitParamStdDevs);
+        localBackgroundSingle = validationData.getLocalBackground();
+        
         results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams,
-            fitParams, fitParamDevs, validationData, resultType);
+            fitParams, fitParamStdDevs, validationData, resultType);
       }
 
       resultSingle = createResult(fitResult, results);
@@ -3020,7 +3021,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         PreprocessedPeakResult[] results, FitStatus fitStatus) {
       final MultiPathFitResult.FitResult mfitResult =
           new MultiPathFitResult.FitResult(fitStatus.ordinal(), fitResult);
-      mfitResult.results = results;
+      mfitResult.setResults(results);
       return mfitResult;
     }
 
@@ -3066,7 +3067,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Check if the deviations require updating.
       // This will be the case if we have stored function parameters for the single fit.
       if (resultDoubletSingle != null && resultDoubletSingle.status == 0
-          && resultDoubletSingle.results != null && precomputedFunctionParamsSingle != null) {
+          && resultDoubletSingle.getResults() != null && precomputedFunctionParamsSingle != null) {
         // Recompute the deviations with all the parameters.
         // For equivalence with the multi-fit we only include the fits within the region.
         FitResult doubletFitResult =
@@ -3091,10 +3092,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // Use the updated deviations
         doubletFitResult =
             doubletFitResult.toBuilder().setParameterDeviations(fitParamDevs).build();
-        resultDoubletSingle = createResult(doubletFitResult, resultDoubletSingle.results);
+        resultDoubletSingle = createResult(doubletFitResult, resultDoubletSingle.getResults());
 
         final double[] initialParams = doubletFitResult.getInitialParameters();
-        final PreprocessedPeakResult[] results = resultDoubletSingle.results;
+        final PreprocessedPeakResult[] results = resultDoubletSingle.getResults();
 
         // We must compute a local background for all the spots
         final DynamicPeakResultValidationData validationData =

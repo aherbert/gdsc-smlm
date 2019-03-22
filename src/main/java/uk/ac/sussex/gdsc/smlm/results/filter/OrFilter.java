@@ -64,9 +64,4 @@ public class OrFilter extends CombinedFilter {
   protected Filter createFilter(Filter f1, Filter f2) {
     return new OrFilter(f1, f2);
   }
-
-  @Override
-  public Filter clone() {
-    return new OrFilter(filter1.clone(), filter2.clone());
-  }
 }

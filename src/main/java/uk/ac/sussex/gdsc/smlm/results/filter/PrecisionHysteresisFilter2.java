@@ -137,12 +137,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
       return super.getParameterValueInternal(index);
     }
     index -= super.getNumberOfParameters();
-    switch (index) {
-      case 0:
-        return strictPrecision;
-      default:
-        return range;
-    }
+    return (index == 0) ? strictPrecision : range;
   }
 
   @Override
@@ -161,12 +156,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
       return super.getParameterType(index);
     }
     index -= super.getNumberOfParameters();
-    switch (index) {
-      case 0:
-        return ParameterType.PRECISION2;
-      default:
-        return ParameterType.PRECISION2_RANGE;
-    }
+    return (index == 0) ? ParameterType.PRECISION2 : ParameterType.PRECISION2_RANGE;
   }
 
   @Override

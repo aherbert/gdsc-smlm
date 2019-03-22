@@ -46,6 +46,6 @@ public class MultiFilterVarianceComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_LOCATION_VARIANCE;
+    return FilterValidationFlag.LOCATION_VARIANCE;
   }
 }

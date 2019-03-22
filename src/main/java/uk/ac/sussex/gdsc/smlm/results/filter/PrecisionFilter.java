@@ -80,13 +80,13 @@ public class PrecisionFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_LOCATION_VARIANCE;
+    return FilterValidationFlag.LOCATION_VARIANCE;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getLocationVariance() > variance) {
-      return V_LOCATION_VARIANCE;
+      return getValidationFlags();
     }
     return 0;
   }

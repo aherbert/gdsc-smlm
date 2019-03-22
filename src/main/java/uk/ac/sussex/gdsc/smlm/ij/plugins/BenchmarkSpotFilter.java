@@ -1326,7 +1326,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
 
     // Store a clone of the config
-    localFilterResult.config = localFilterResult.config.clone();
+    localFilterResult.config = localFilterResult.config.createCopy();
 
     BenchmarkSpotFilter.filterResult = localFilterResult;
 

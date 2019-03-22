@@ -25,8 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
@@ -38,7 +40,6 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 
 import ij.IJ;
-import ij.ImageListener;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
@@ -63,7 +64,7 @@ import java.util.logging.Logger;
 /**
  * Produces a summary table of the results that are stored in memory.
  */
-public class OverlayResults implements PlugIn, ItemListener, ImageListener {
+public class OverlayResults implements PlugIn {
   private static final String TITLE = "Overlay Results";
   private static String name = "";
   private static boolean showTable;
@@ -74,44 +75,9 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
   private Checkbox checkbox;
   private Label label;
 
-  private int currentIndex;
-  private int currentSlice = -1;
+  private final ConcurrentMonoStack<Integer> inbox = new ConcurrentMonoStack<>();
 
-  private static class Job {
-    final int index;
-
-    Job(int index) {
-      this.index = index;
-    }
-  }
-
-  private static class InBox {
-    private Job job;
-
-    synchronized void add(int index) {
-      this.job = new Job(index);
-      this.notifyAll();
-    }
-
-    synchronized void close() {
-      this.job = null;
-      this.notifyAll();
-    }
-
-    synchronized Job next() {
-      final Job nextJob = this.job;
-      this.job = null;
-      return nextJob;
-    }
-
-    boolean isEmpty() {
-      return job == null;
-    }
-  }
-
-  private final InBox inbox = new InBox();
-
-  private class Worker implements Runnable {
+  private class Worker extends ImageAdapter implements ItemListener, Runnable {
     private boolean running = true;
     private final boolean[] error = new boolean[ids.length];
     // The results text window (so we can close it)
@@ -123,32 +89,56 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     PeakResultView view;
     TypeConverter<DistanceUnit> converter;
 
+    private int currentIndex;
+    private int currentSlice = -1;
+
+
+    @Override
+    public void itemStateChanged(ItemEvent event) {
+      // Read other options from the dialog
+      showTable = checkbox.getState();
+      refresh();
+    }
+
+    @Override
+    public void imageUpdated(ImagePlus imp) {
+      if (imp == null) {
+        return;
+      }
+      // If this is a change to the current image then refresh
+      if (ids[currentIndex] == imp.getID()) {
+        refresh();
+      }
+    }
+
+    /**
+     * Refresh the overlay with the currently selected image from the list.
+     */
+    void refresh() {
+      inbox.insert(choice.getSelectedIndex());
+    }
+
     @Override
     public void run() {
       while (running) {
         try {
-          Job job = null;
-          synchronized (inbox) {
-            if (inbox.isEmpty()) {
-              inbox.wait();
-            }
-            job = inbox.next();
-          }
+          final Integer job = inbox.pop();
           if (job == null || !running) {
             break;
           }
-          if (job.index == 0) {
+          final int index = job.intValue();
+          if (index == 0) {
             // This may be selection of no image
             clearOldOverlay();
             continue;
           }
 
           // Check name of the image
-          if (currentIndex != job.index) {
+          if (currentIndex != index) {
             clearOldOverlay();
           }
 
-          currentIndex = job.index;
+          currentIndex = index;
           drawOverlay();
         } catch (final InterruptedException ex) {
           running = false;
@@ -248,8 +238,6 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
         table.setHideSourceText(true);
         table.setShowZ(is3D);
         table.setShowId(hasId);
-        // table.setShowFittingData(true);
-        // table.setShowNoiseData(true);
         table.begin();
 
         tw = table.getResultsWindow();
@@ -281,36 +269,17 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
         oy.add(converter.convert(r.getYPosition()));
         if (table != null) {
           table.add(r);
-          if (selectedId != null) {
-            if (selectedId.contains(r.getId())) {
-              // For now just preserve the first selected ID.
-              // This at least allows tracking a single localisation.
-              select = i;
-              selectedId = null;
-            }
+          if (selectedId != null && selectedId.contains(r.getId())) {
+            // For now just preserve the first selected ID.
+            // This at least allows tracking a single localisation.
+            select = i;
+            selectedId = null;
           }
         }
       }
-      // Old method without the cached view
-      // results.forEach(DistanceUnit.PIXEL, new XYRResultProcedure()
-      // {
-      // public void executeXYR(float x, float y, PeakResult r)
-      // {
-      // if (r.getFrame() == currentSlice)
-      // {
-      // ox.add(x);
-      // oy.add(y);
-      // if (table != null)
-      // table.add(r);
-      // }
-      // }
-      // });
+
       final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
       roi.setPointType(3);
-      // Leave to ImageJ default. Then the user can change it using the options.
-      // Color c = Color.GREEN;
-      // roi.setStrokeColor(c);
-      // roi.setFillColor(c);
       imp.getWindow().toFront();
       imp.setOverlay(new Overlay(roi));
 
@@ -383,25 +352,24 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     gd.hideCancelButton();
     gd.setOKLabel("Close");
     if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless())) {
+      worker = new Worker();
+
       choice = (Choice) gd.getChoices().get(0);
-      choice.addItemListener(this);
+      choice.addItemListener(worker);
       checkbox = (Checkbox) gd.getCheckboxes().get(0);
-      checkbox.addItemListener(this);
+      checkbox.addItemListener(worker);
       label = (Label) gd.getMessage();
 
       // Listen for changes to an image
-      ImagePlus.addImageListener(this);
+      ImagePlus.addImageListener(worker);
 
-      show();
-
-      worker = new Worker();
       thread = new Thread(worker);
       thread.setDaemon(true);
       thread.start();
     }
     gd.showDialog();
-    if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless())) {
-      ImagePlus.removeImageListener(this);
+    if (worker != null) {
+      ImagePlus.removeImageListener(worker);
     }
     if (!gd.wasCanceled()) {
       name = gd.getNextChoice();
@@ -409,43 +377,13 @@ public class OverlayResults implements PlugIn, ItemListener, ImageListener {
     }
     if (thread != null && worker != null) {
       worker.running = false;
-      inbox.close();
+      inbox.close(true);
       try {
         thread.join(0);
       } catch (final InterruptedException ex) {
-        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unexpected intteruption", ex);
+        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unexpected interruption", ex);
         Thread.currentThread().interrupt();
       }
     }
-  }
-
-  @Override
-  public void itemStateChanged(ItemEvent event) {
-    show();
-  }
-
-  @Override
-  public void imageClosed(ImagePlus arg0) {
-    // Ignore
-  }
-
-  @Override
-  public void imageOpened(ImagePlus arg0) {
-    // Ignore
-  }
-
-  @Override
-  public void imageUpdated(ImagePlus imp) {
-    if (imp == null) {
-      return;
-    }
-    if (ids[currentIndex] == imp.getID()) {
-      show();
-    }
-  }
-
-  private void show() {
-    showTable = checkbox.getState();
-    inbox.add(choice.getSelectedIndex());
   }
 }

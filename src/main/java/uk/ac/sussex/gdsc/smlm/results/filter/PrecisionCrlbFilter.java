@@ -71,13 +71,13 @@ public class PrecisionCrlbFilter extends DirectFilter implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_LOCATION_VARIANCE_CRLB;
+    return FilterValidationFlag.LOCATION_VARIANCE_CRLB;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
     if (peak.getLocationVarianceCrlb() > variance) {
-      return V_LOCATION_VARIANCE_CRLB;
+      return getValidationFlags();
     }
     return 0;
   }

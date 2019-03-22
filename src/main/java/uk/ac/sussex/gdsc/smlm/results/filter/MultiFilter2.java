@@ -35,7 +35,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * Filter results using multiple thresholds: Signal, SNR, width, coordinate shift, precision and
  * z-depth. Calculates the precision using the true fitted background if a bias is provided.
  */
-public class MultiFilter2 extends MultiFilter implements IMultiFilter {
+public class MultiFilter2 extends MultiFilter {
   @XStreamOmitField
   private boolean useBackground;
 

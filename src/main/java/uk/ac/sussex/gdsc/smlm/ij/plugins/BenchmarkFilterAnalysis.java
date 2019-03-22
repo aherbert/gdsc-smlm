@@ -582,8 +582,8 @@ public class BenchmarkFilterAnalysis
         final PeakResultGridManager resultGrid, final boolean[] matched) {
       if (fitResult != null && fitResult.status == 0) {
         // Get the new results
-        for (int i = 0; i < fitResult.results.length; i++) {
-          final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.results[i];
+        for (int i = 0; i < fitResult.getResults().length; i++) {
+          final BasePreprocessedPeakResult peak = (BasePreprocessedPeakResult) fitResult.getResults()[i];
           peak.setAssignments(null);
           peak.setIgnore(false);
 
@@ -677,7 +677,7 @@ public class BenchmarkFilterAnalysis
           }
         }
 
-        return (fitResult.results.length != 0);
+        return (fitResult.getResults().length != 0);
       }
       return false;
     }

@@ -137,7 +137,7 @@ public class EjmlLinearSolver {
   private DenseMatrix64F x;
 
   /** The inverse of matrix A. */
-  private DenseMatrix64F Ainv;
+  private DenseMatrix64F invA;
 
   /** The solver size. */
   private int solverSize;
@@ -518,7 +518,7 @@ public class EjmlLinearSolver {
     lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = Ainv.data;
+    final double[] a_inv = invA.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -562,7 +562,7 @@ public class EjmlLinearSolver {
       choleskySolver = null;
       linearSolver = null;
       x = null;
-      Ainv = null;
+      invA = null;
     }
   }
 
@@ -584,10 +584,10 @@ public class EjmlLinearSolver {
    * @return the space for A^-1
    */
   private DenseMatrix64F getAinv() {
-    if (Ainv == null) {
-      Ainv = new DenseMatrix64F(solverSize, solverSize);
+    if (invA == null) {
+      invA = new DenseMatrix64F(solverSize, solverSize);
     }
-    return Ainv;
+    return invA;
   }
 
   /**
@@ -802,7 +802,7 @@ public class EjmlLinearSolver {
     solver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = Ainv.data;
+    final double[] a_inv = invA.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -835,7 +835,7 @@ public class EjmlLinearSolver {
     solver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] inverse = Ainv.data;
+    final double[] inverse = invA.data;
     for (int i = inverse.length; i-- > 0;) {
       if (!Double.isFinite(inverse[i])) {
         Logger.getLogger(getClass().getName()).warning("Inversion not finite");
@@ -864,7 +864,7 @@ public class EjmlLinearSolver {
     // Compute A Ainv = I
     final int n = A.numCols;
     final DenseMatrix64F I = new DenseMatrix64F(n, n);
-    CommonOps.mult(A, Ainv, I);
+    CommonOps.mult(A, invA, I);
 
     if (pseudoInverse) {
       for (int i = n, index = I.data.length; i-- > 0;) {
@@ -1152,7 +1152,7 @@ public class EjmlLinearSolver {
     lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] a_inv = Ainv.data;
+    final double[] a_inv = invA.data;
     for (int i = a_inv.length; i-- > 0;) {
       if (!Double.isFinite(a_inv[i])) {
         return false;
@@ -1162,7 +1162,7 @@ public class EjmlLinearSolver {
     // Q. Should we check the product is the identity matrix?
     // This will require that we have the original matrix A used to initialise the solver.
 
-    toSquareData(Ainv, a);
+    toSquareData(invA, a);
     return true;
   }
 
@@ -1387,7 +1387,7 @@ public class EjmlLinearSolver {
     lastSuccessfulSolver.invert(getAinv());
 
     // Check for NaN or Infinity
-    final double[] inv = Ainv.data;
+    final double[] inv = invA.data;
     for (int i = inv.length; i-- > 0;) {
       if (!Double.isFinite(inv[i])) {
         return false;

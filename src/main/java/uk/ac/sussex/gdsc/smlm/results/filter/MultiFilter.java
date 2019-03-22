@@ -226,9 +226,10 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   public void setup(int flags) {
     filterSetupFlags = flags;
     this.filterSetupData = null;
-    setupComponents(!areSet(flags, IDirectFilter.NO_WIDTH), !areSet(flags, IDirectFilter.NO_SHIFT),
+    setupComponents(!areSet(flags, FilterValidationOption.NO_WIDTH),
+        !areSet(flags, FilterValidationOption.NO_SHIFT),
         // Pass through the flags that are recognised
-        flags & (IDirectFilter.XY_WIDTH | IDirectFilter.NO_Z));
+        flags & (FilterValidationOption.XY_WIDTH | FilterValidationOption.NO_Z));
   }
 
   @Override
@@ -287,7 +288,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       if ((maxWidth > 1 && maxWidth != Double.POSITIVE_INFINITY)
           || (minWidth > 0 && minWidth < 1)) {
         // Handle the width being 1/2 axis variable.
-        if (areSet(flags, IDirectFilter.XY_WIDTH)) {
+        if (areSet(flags, FilterValidationOption.XY_WIDTH)) {
           components1[s1++] = new MultiFilterXyWidthComponent(minWidth, maxWidth);
         } else {
           components1[s1++] = new MultiFilterWidthComponent(minWidth, maxWidth);
@@ -307,7 +308,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
       if (isFiniteStrictlyPositive(eshift)) {
         components1[s1++] = new MultiFilterEShiftComponent(eshift);
       }
-      if (isZEnabled() && !areSet(flags, IDirectFilter.NO_Z)) {
+      if (isZEnabled() && !areSet(flags, FilterValidationOption.NO_Z)) {
         components1[s1++] = new MultiFilterZComponent(minZ, maxZ);
       }
 
@@ -415,11 +416,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
     // Euclidian shift
     final float dx = peak.getXPosition();
     final float dy = peak.getYPosition();
-    if (dx * dx + dy * dy > eoffset) {
-      return false;
-    }
-
-    return true;
+    return (dx * dx + dy * dy <= eoffset);
   }
 
   /**

@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Filter results using a width range. Assumes width is different on the X and Y axis and they are
  * combined using s = sqrt(s0*s1).
  */
-public class XyWidthFilter2 extends WidthFilter2 implements IMultiFilter {
+public class XyWidthFilter2 extends WidthFilter2 {
 
   /**
    * Instantiates a new XY width filter 2.
@@ -87,7 +87,7 @@ public class XyWidthFilter2 extends WidthFilter2 implements IMultiFilter {
 
   @Override
   public int getValidationFlags() {
-    return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+    return FilterValidationFlag.X_SD_FACTOR | FilterValidationFlag.Y_SD_FACTOR;
   }
 
   @Override
@@ -95,7 +95,7 @@ public class XyWidthFilter2 extends WidthFilter2 implements IMultiFilter {
     if (widthEnabled) {
       final float s2 = peak.getXSdFactor() * peak.getYSdFactor();
       if (s2 > upperSigmaThreshold || s2 < lowerSigmaThreshold) {
-        return V_X_SD_FACTOR | V_Y_SD_FACTOR;
+        return getValidationFlags();
       }
     }
     return 0;

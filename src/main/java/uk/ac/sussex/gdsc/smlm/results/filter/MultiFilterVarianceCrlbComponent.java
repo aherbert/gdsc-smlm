@@ -47,6 +47,6 @@ public class MultiFilterVarianceCrlbComponent implements MultiFilterComponent {
 
   @Override
   public int getType() {
-    return IDirectFilter.V_LOCATION_VARIANCE_CRLB;
+    return FilterValidationFlag.LOCATION_VARIANCE_CRLB;
   }
 }

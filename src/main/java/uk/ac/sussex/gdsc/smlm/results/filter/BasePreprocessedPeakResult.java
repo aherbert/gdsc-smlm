@@ -83,9 +83,7 @@ public class BasePreprocessedPeakResult implements AssignablePreprocessedPeakRes
   /**
    * Create a new BasePreprocessedPeakResult.
    *
-*
-* <p>
-   * Note: The candidate Id is usually the spot that was used to initiate the fit process.
+   * <p>Note: The candidate Id is usually the spot that was used to initiate the fit process.
    * However if neighbour spots were present then the candidate Id should be that of the neighbour.
    *
    * @param frame

@@ -484,7 +484,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       this.jobs = jobs;
       this.stack = stack;
       this.actualCoordinates = actualCoordinates;
-      this.fitConfig = fitConfig.clone();
+      this.fitConfig = fitConfig.createCopy();
       this.overlay = overlay;
       this.ticker = ticker;
 
@@ -2473,7 +2473,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // No coordinate shift for the doublet. We have already done simple checking of the
     // coordinates to get the good=2 flag
-    final FitConfiguration filterFitConfig2 = filterFitConfig.clone();
+    final FitConfiguration filterFitConfig2 = filterFitConfig.createCopy();
     filterFitConfig2.setCoordinateShift(Integer.MAX_VALUE);
 
     final int size = 2 * config.getFittingWidth() + 1;

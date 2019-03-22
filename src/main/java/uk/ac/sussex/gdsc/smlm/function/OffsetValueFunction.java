@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  * Wraps a value function to add a pre-computed offset to the value during the forEach procedure.
  */
 public class OffsetValueFunction extends PrecomputedValueFunction
-    implements ValueFunction, ValueProcedure, NamedFunction {
+    implements ValueProcedure, NamedFunction {
   /** The value function. */
   protected final ValueFunction vf;
   /** The counter i. */

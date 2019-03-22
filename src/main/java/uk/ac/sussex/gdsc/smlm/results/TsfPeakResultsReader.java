@@ -124,29 +124,27 @@ public class TsfPeakResultsReader {
     }
     readHeader = true;
 
-    try (FileInputStream fi = new FileInputStream(filename)) {
-      try (DataInputStream di = new DataInputStream(fi)) {
-        // The file has an initial 0, then the offset (as long)
-        // to the position of spotList.
-        final int magic = di.readInt();
-        // Throw exceptions which are caught below
-        if (magic != 0) {
-          throw new DataException("Magic number is not 0 (required for a TSF file)");
-        }
-        if (fi.available() == 0) {
-          throw new DataException("Cannot read offset");
-        }
-        final long offset = di.readLong();
-        if (offset == 0) {
-          throw new DataException("Offset is 0, cannot find header data in this file");
-        }
-        fi.skip(offset);
-        spotList = SpotList.parseDelimitedFrom(fi);
-
-        // We can do special processing for a TSF file we created
-        isGdsc = (spotList.getApplicationId() == TsfPeakResultsWriter.APPLICATION_ID);
-        isMulti = isMulti(spotList);
+    try (FileInputStream fi = new FileInputStream(filename);
+        DataInputStream di = new DataInputStream(fi)) {
+      // The file has an initial 0, then the offset (as long)
+      // to the position of spotList.
+      final int magic = di.readInt();
+      // Throw exceptions which are caught below
+      if (magic != 0) {
+        throw new DataException("Magic number is not 0 (required for a TSF file)");
       }
+      final long offset = di.readLong();
+      if (offset < 0) {
+        throw new DataException("Offset < 0, cannot find header data in this file");
+      }
+      if (fi.skip(offset) != offset) {
+        throw new DataException("Failed to skip to the spot list offset");
+      }
+      spotList = SpotList.parseDelimitedFrom(fi);
+
+      // We can do special processing for a TSF file we created
+      isGdsc = (spotList.getApplicationId() == TsfPeakResultsWriter.APPLICATION_ID);
+      isMulti = isMulti(spotList);
     } catch (final Exception ex) {
       logger.warning(() -> "Failed to read SpotList message: " + ex.getMessage());
     }
@@ -201,12 +199,8 @@ public class TsfPeakResultsReader {
         // Magic number should be zero
         return false;
       }
-      if (fi.available() == 0) {
-        // No more contents
-        return false;
-      }
       final long offset = di.readLong();
-      if (offset == 0) {
+      if (offset < 0) {
         // No offset record
         return false;
       }
