@@ -438,7 +438,7 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
     try (RandomAccessFile f = new RandomAccessFile(new File(filename), "rw")) {
       // The offset is the amount to skip forward after reading the int
       // magic number (4 bytes) and long offset (8 bytes).
-      final long offset = f.length() - Integer.BYTES + Long.BYTES;
+      final long offset = f.length() - (Integer.BYTES + Long.BYTES);
 
       // Write the spotlist message at the end
       f.seek(f.length());
