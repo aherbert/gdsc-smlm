@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction.ConvolutionMode;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
@@ -111,7 +112,7 @@ public class PoissonGammaGaussianFunctionTest {
         pgSum[g] = max;
         final BigDecimal bd = new BigDecimal(max);
         sb.append(newLine);
-        sb.append(String.format("pgSum[%d] = %.3f;", g, bd.round(mc).doubleValue()));
+        TextUtils.formatTo(sb, "pgSum[%d] = %.3f;", g, bd.round(mc).doubleValue());
       }
       logger.info(sb.toString());
     }

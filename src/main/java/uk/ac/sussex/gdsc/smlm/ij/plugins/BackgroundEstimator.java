@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -58,7 +59,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Formatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Contains methods to find the noise in the provided image data.
@@ -70,19 +73,60 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
       DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
   private PlugInFilterRunner pfr;
   private ImagePlus imp;
-  private NonBlockingExtendedGenericDialog gd;
-  private static double percentile;
-  private static NoiseEstimatorMethod noiseMethod =
-      NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
-  private NoiseEstimator.Method myNoiseMethod;
-  private static AutoThreshold.Method thresholdMethod = AutoThreshold.Method.DEFAULT;
-  private static float fraction;
-  private static int histogramSize;
 
-  static {
-    final DataEstimator de = new DataEstimator(new float[0], 0, 0);
-    fraction = de.getFraction();
-    histogramSize = de.getHistogramSize();
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    double percentile;
+    NoiseEstimatorMethod noiseMethod;
+    AutoThreshold.Method thresholdMethod;
+    float fraction;
+    int histogramSize;
+
+    Settings() {
+      // Set defaults
+      noiseMethod = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES;
+      thresholdMethod = AutoThreshold.Method.DEFAULT;
+      final DataEstimator de = new DataEstimator(new float[0], 0, 0);
+      fraction = de.getFraction();
+      histogramSize = de.getHistogramSize();
+    }
+
+    Settings(Settings source) {
+      percentile = source.percentile;
+      noiseMethod = source.noiseMethod;
+      thresholdMethod = source.thresholdMethod;
+      fraction = source.fraction;
+      histogramSize = source.histogramSize;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
   }
 
   @Override
@@ -104,26 +148,30 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
+    settings = Settings.load();
+    // Save now as this just updates the reference held in memory
+    settings.save();
+
     // If using a stack, provide a preview graph of the noise for two methods
     if (imp.getStackSize() > 1) {
       this.pfr = pfr;
 
       drawPlot();
 
-      gd = new NonBlockingExtendedGenericDialog(TITLE);
+      final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addHelp(About.HELP_URL);
 
-      gd.addSlider("Percential", 0, 100, percentile);
+      gd.addSlider("Percential", 0, 100, settings.percentile);
 
       gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(),
-          noiseMethod.ordinal());
+          settings.noiseMethod.ordinal());
 
       // For background based on pixel below a threshold
       final String[] thresholdMethods = AutoThreshold.getMethods(true);
       gd.addChoice("Threshold_method", thresholdMethods,
-          thresholdMethods[thresholdMethod.ordinal() - 1]);
-      gd.addSlider("Fraction", 0, 0.999, fraction);
-      gd.addNumericField("Histogram_size", histogramSize, 0);
+          thresholdMethods[settings.thresholdMethod.ordinal() - 1]);
+      gd.addSlider("Fraction", 0, 0.999, settings.fraction);
+      gd.addNumericField("Histogram_size", settings.histogramSize, 0);
 
       gd.addDialogListener(this);
       gd.addMessage("Click OK to compute table for all slices");
@@ -139,12 +187,11 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    percentile = gd.getNextNumber();
-    noiseMethod = SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()];
-    myNoiseMethod = FitProtosHelper.convertNoiseEstimatorMethod(noiseMethod);
-    thresholdMethod = AutoThreshold.getMethod(gd.getNextChoiceIndex(), true);
-    fraction = (float) gd.getNextNumber();
-    histogramSize = (int) gd.getNextNumber();
+    settings.percentile = gd.getNextNumber();
+    settings.noiseMethod = SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()];
+    settings.thresholdMethod = AutoThreshold.getMethod(gd.getNextChoiceIndex(), true);
+    settings.fraction = (float) gd.getNextNumber();
+    settings.histogramSize = (int) gd.getNextNumber();
     if (gd.isShowing()) {
       drawPlot();
     }
@@ -176,19 +223,18 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
       buffer = ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds,
           buffer);
       final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
-      de.setFraction(fraction);
-      de.setHistogramSize(histogramSize);
-      de.setThresholdMethod(thresholdMethod);
+      de.setFraction(settings.fraction);
+      de.setHistogramSize(settings.histogramSize);
+      de.setThresholdMethod(settings.thresholdMethod);
       xValues[i] = slice;
       try {
         noise1[i] = de.getNoise();
-        noise2[i] = de.getNoise(myNoiseMethod);
+        noise2[i] = de.getNoise(FitProtosHelper.convertNoiseEstimatorMethod(settings.noiseMethod));
         background[i] = de.getBackground();
         threshold[i] = de.getThreshold();
-        percentile[i] = de.getPercentile(BackgroundEstimator.percentile);
+        percentile[i] = de.getPercentile(settings.percentile);
       } catch (final Exception ex) {
-        ex.printStackTrace();
-        throw new RuntimeException(ex);
+        throw new DataException("Failed to estimate the background", ex);
       }
     }
     IJ.showProgress(1);
@@ -226,21 +272,22 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     plot.addPoints(xvalues, data1, Plot.LINE);
     plot.draw();
     Statistics stats = Statistics.create(data1);
-    final StringBuffer label = new StringBuffer(String.format("%s (Blue) = %s +/- %s", title1,
-        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation())));
+    @SuppressWarnings("resource")
+    final Formatter label = new Formatter().format("%s (Blue) = %s +/- %s", title1,
+        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation()));
 
     plot.setColor(Color.red);
     plot.addPoints(xvalues, data2, Plot.LINE);
     stats = Statistics.create(data2);
-    label.append(String.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
-        MathUtils.rounded(stats.getStandardDeviation())));
+    label.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
+        MathUtils.rounded(stats.getStandardDeviation()));
 
     if (data3 != null) {
       plot.setColor(Color.green);
       plot.addPoints(xvalues, data3, Plot.LINE);
       stats = Statistics.create(data3);
-      label.append(String.format(", %s (Green) = %s +/- %s", title3,
-          MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation())));
+      label.format(", %s (Green) = %s +/- %s", title3, MathUtils.rounded(stats.getMean()),
+          MathUtils.rounded(stats.getStandardDeviation()));
     }
 
     plot.setColor(Color.black);
@@ -259,16 +306,17 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     final float[] buffer =
         ImageJImageConverter.getData(ip.getPixels(), ip.getWidth(), ip.getHeight(), bounds, null);
     final DataEstimator de = new DataEstimator(buffer, bounds.width, bounds.height);
-    de.setFraction(fraction);
-    de.setHistogramSize(histogramSize);
-    de.setThresholdMethod(thresholdMethod);
+    de.setFraction(settings.fraction);
+    de.setHistogramSize(settings.histogramSize);
+    de.setThresholdMethod(settings.thresholdMethod);
     result[index++] = de.isBackgroundRegion() ? 1 : 0;
     result[index++] = de.getNoise();
-    result[index++] = de.getNoise(myNoiseMethod);
+    result[index++] =
+        de.getNoise(FitProtosHelper.convertNoiseEstimatorMethod(settings.noiseMethod));
     result[index++] = de.getBackground();
     result[index++] = de.getThreshold();
     result[index++] = de.getBackgroundSize();
-    result[index++] = de.getPercentile(percentile);
+    result[index] = de.getPercentile(settings.percentile);
     results.add(result);
   }
 
@@ -278,29 +326,23 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
   }
 
   private void showResults() {
-    Collections.sort(results, new Comparator<double[]>() {
-      @Override
-      public int compare(double[] o1, double[] o2) {
-        // Sort on slice number
-        return (o1[0] < o2[0]) ? -1 : 1;
-      }
-    });
+    Collections.sort(results, (o1, o2) -> Double.compare(o1[0], o2[0]));
 
-    final BufferedTextWindow tw = new BufferedTextWindow(
-        new TextWindow(imp.getTitle() + " Background", createHeader(), "", 800, 400));
-    for (final double[] result : results) {
-      tw.append(createResult(result));
+    try (BufferedTextWindow tw = new BufferedTextWindow(
+        new TextWindow(imp.getTitle() + " Background", createHeader(), "", 800, 400))) {
+      for (final double[] result : results) {
+        tw.append(createResult(result));
+      }
     }
-    tw.flush();
   }
 
   private String createHeader() {
     StringBuilder sb = new StringBuilder(imp.getTitle());
-    sb.append('\t').append(MathUtils.rounded(percentile));
-    sb.append('\t').append(noiseMethod.toString());
-    sb.append('\t').append(thresholdMethod.toString());
-    sb.append('\t').append(MathUtils.rounded(fraction));
-    sb.append('\t').append(histogramSize).append('\t');
+    sb.append('\t').append(MathUtils.rounded(settings.percentile));
+    sb.append('\t').append(settings.noiseMethod.toString());
+    sb.append('\t').append(settings.thresholdMethod.toString());
+    sb.append('\t').append(MathUtils.rounded(settings.fraction));
+    sb.append('\t').append(settings.histogramSize).append('\t');
     prefix = sb.toString();
 
     sb = new StringBuilder("Image");

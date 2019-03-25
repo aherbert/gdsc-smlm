@@ -38,6 +38,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,11 +81,13 @@ public class TensorTest {
     if (logger.isLoggable(Level.INFO)) {
       final StringBuilder sb = new StringBuilder();
       final String newLine = System.lineSeparator();
-      sb.append(String.format("%scom = %s", newLine, Arrays.toString(com)));
-      for (int i = 0; i < values.length; i++) {
-        sb.append(String.format("%s[%d] %f = %s  %.2f", newLine, i, values[i],
-            java.util.Arrays.toString(vectors[i]),
-            180.0 * Math.atan2(vectors[i][1], vectors[i][0]) / Math.PI));
+      try (Formatter formatter = new Formatter(sb)) {
+        formatter.format("%scom = %s", newLine, Arrays.toString(com));
+        for (int i = 0; i < values.length; i++) {
+          formatter.format("%s[%d] %f = %s  %.2f", newLine, i, values[i],
+              java.util.Arrays.toString(vectors[i]),
+              180.0 * Math.atan2(vectors[i][1], vectors[i][0]) / Math.PI);
+        }
       }
       logger.info(sb.toString());
     }

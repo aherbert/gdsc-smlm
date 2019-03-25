@@ -183,6 +183,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -4078,119 +4079,126 @@ public class CreateData implements PlugIn, ItemListener {
 
       final StringBuilder sb = new StringBuilder();
       sb.append("# ").append(TITLE).append(" Parameters:\n");
-      addHeaderLine(sb, "Pixel_pitch (nm)", settings.getPixelPitch());
-      addHeaderLine(sb, "Size", settings.getSize());
-      if (!benchmarkMode) {
-        addHeaderLine(sb, "Depth", settings.getDepth());
-        addHeaderLine(sb, "Fixed depth", settings.getFixedDepth());
-      }
-      if (!(simpleMode || benchmarkMode)) {
-        if (!trackMode) {
-          addHeaderLine(sb, "Seconds", settings.getSeconds());
+      try (Formatter formatter = new Formatter(sb)) {
+        addHeaderLine(formatter, "Pixel_pitch (nm)", settings.getPixelPitch());
+        addHeaderLine(formatter, "Size", settings.getSize());
+        if (!benchmarkMode) {
+          addHeaderLine(formatter, "Depth", settings.getDepth());
+          addHeaderLine(formatter, "Fixed depth", settings.getFixedDepth());
         }
-        addHeaderLine(sb, "Exposure_time", settings.getExposureTime());
-        addHeaderLine(sb, "Steps_per_second", settings.getStepsPerSecond());
-        if (!trackMode) {
-          addHeaderLine(sb, "Illumination", settings.getIllumination());
-          addHeaderLine(sb, "Pulse_interval", settings.getPulseInterval());
-          addHeaderLine(sb, "Pulse_ratio", settings.getPulseRatio());
+        if (!(simpleMode || benchmarkMode)) {
+          if (!trackMode) {
+            addHeaderLine(formatter, "Seconds", settings.getSeconds());
+          }
+          addHeaderLine(formatter, "Exposure_time", settings.getExposureTime());
+          addHeaderLine(formatter, "Steps_per_second", settings.getStepsPerSecond());
+          if (!trackMode) {
+            addHeaderLine(formatter, "Illumination", settings.getIllumination());
+            addHeaderLine(formatter, "Pulse_interval", settings.getPulseInterval());
+            addHeaderLine(formatter, "Pulse_ratio", settings.getPulseRatio());
+          }
+          if (backgroundImages != null) {
+            addHeaderLine(formatter, "Background_image", settings.getBackgroundImage());
+          }
         }
-        if (backgroundImages != null) {
-          addHeaderLine(sb, "Background_image", settings.getBackgroundImage());
-        }
-      }
-      addHeaderLine(sb, "Background", settings.getBackground());
-      addCameraOptionsHeader(sb);
-      addHeaderLine(sb, "PSF_model", settings.getPsfModel());
-      if (psfModelType == PSF_MODEL_IMAGE) {
-        addHeaderLine(sb, "PSF_image", settings.getPsfImageName());
-      } else if (psfModelType == PSF_MODEL_ASTIGMATISM) {
-        addHeaderLine(sb, "Astigmatism_model", settings.getAstigmatismModel());
-        // Q. Should the actual model be appended?
-        // addHeaderLine(sb, "Astigmatism_model parameters", SettingsManager.toJSON(getTheModel()));
-      } else {
-        addHeaderLine(sb, "Depth-of-focus (nm)", settings.getDepthOfFocus());
-        if (settings.getEnterWidth()) {
-          addHeaderLine(sb, "PSF_SD", settings.getPsfSd());
+        addHeaderLine(formatter, "Background", settings.getBackground());
+        addCameraOptionsHeader(formatter);
+        addHeaderLine(formatter, "PSF_model", settings.getPsfModel());
+        if (psfModelType == PSF_MODEL_IMAGE) {
+          addHeaderLine(formatter, "PSF_image", settings.getPsfImageName());
+        } else if (psfModelType == PSF_MODEL_ASTIGMATISM) {
+          addHeaderLine(formatter, "Astigmatism_model", settings.getAstigmatismModel());
+          // Q. Should the actual model be appended?
+          // addHeaderLine(formatter, "Astigmatism_model parameters",
+          // SettingsManager.toJSON(getTheModel()));
         } else {
-          addHeaderLine(sb, "Wavelength (nm)", settings.getWavelength());
-          addHeaderLine(sb, "Numerical_aperture", settings.getNumericalAperture());
+          addHeaderLine(formatter, "Depth-of-focus (nm)", settings.getDepthOfFocus());
+          if (settings.getEnterWidth()) {
+            addHeaderLine(formatter, "PSF_SD", settings.getPsfSd());
+          } else {
+            addHeaderLine(formatter, "Wavelength (nm)", settings.getWavelength());
+            addHeaderLine(formatter, "Numerical_aperture", settings.getNumericalAperture());
+          }
         }
-      }
-      if (!(benchmarkMode || spotMode)) {
-        addHeaderLine(sb, "Distribution", settings.getDistribution());
-        if (settings.getDistribution().equals(DISTRIBUTION[MASK])) {
-          addHeaderLine(sb, "Distribution_mask", settings.getDistributionMask());
-        } else if (settings.getDistribution().equals(DISTRIBUTION[GRID])) {
-          addHeaderLine(sb, "Cell_size", settings.getCellSize());
-          addHeaderLine(sb, "p-binary", settings.getProbabilityBinary());
-          addHeaderLine(sb, "Min_binary_distance (nm)", settings.getMinBinaryDistance());
-          addHeaderLine(sb, "Max_binary_distance (nm)", settings.getMaxBinaryDistance());
+        if (!(benchmarkMode || spotMode)) {
+          addHeaderLine(formatter, "Distribution", settings.getDistribution());
+          if (settings.getDistribution().equals(DISTRIBUTION[MASK])) {
+            addHeaderLine(formatter, "Distribution_mask", settings.getDistributionMask());
+          } else if (settings.getDistribution().equals(DISTRIBUTION[GRID])) {
+            addHeaderLine(formatter, "Cell_size", settings.getCellSize());
+            addHeaderLine(formatter, "p-binary", settings.getProbabilityBinary());
+            addHeaderLine(formatter, "Min_binary_distance (nm)", settings.getMinBinaryDistance());
+            addHeaderLine(formatter, "Max_binary_distance (nm)", settings.getMaxBinaryDistance());
+          }
         }
-      }
-      addHeaderLine(sb, "Particles", settings.getParticles());
-      if (benchmarkMode) {
-        addHeaderLine(sb, "X_position", settings.getXPosition());
-        addHeaderLine(sb, "Y_position", settings.getYPosition());
-        addHeaderLine(sb, "Z_position", settings.getZPosition());
-        addHeaderLine(sb, "Min_photons", settings.getPhotonsPerSecond());
-        addHeaderLine(sb, "Max_photons", settings.getPhotonsPerSecondMaximum());
-      } else if (simpleMode) {
-        addHeaderLine(sb, "Density (um^-2)", settings.getDensity());
-        addHeaderLine(sb, "Min_photons", settings.getPhotonsPerSecond());
-        addHeaderLine(sb, "Max_photons", settings.getPhotonsPerSecondMaximum());
-      } else if (spotMode) {
-        addHeaderLine(sb, "Min_photons", settings.getPhotonsPerSecond());
-        addHeaderLine(sb, "Max_photons", settings.getPhotonsPerSecondMaximum());
-      } else {
-        addHeaderLine(sb, "Diffusion_rate", settings.getDiffusionRate());
-        addHeaderLine(sb, "Diffusion_type", settings.getDiffusionType());
-        addHeaderLine(sb, "Fixed_fraction", settings.getFixedFraction());
-        if (settings.getCompoundMolecules()) {
-          addHeaderLine(sb, "Compound_molecules",
-              settings.getCompoundText().replaceAll("\n *", ""));
-          addHeaderLine(sb, "Enable_2D_diffusion", settings.getDiffuse2D());
-          addHeaderLine(sb, "Rotate_initial_orientation", settings.getRotateInitialOrientation());
-          addHeaderLine(sb, "Rotate_during_simulation", settings.getRotateDuringSimulation());
-          addHeaderLine(sb, "Enable_2D_rotation", settings.getRotate2D());
+        addHeaderLine(formatter, "Particles", settings.getParticles());
+        if (benchmarkMode) {
+          addHeaderLine(formatter, "X_position", settings.getXPosition());
+          addHeaderLine(formatter, "Y_position", settings.getYPosition());
+          addHeaderLine(formatter, "Z_position", settings.getZPosition());
+          addHeaderLine(formatter, "Min_photons", settings.getPhotonsPerSecond());
+          addHeaderLine(formatter, "Max_photons", settings.getPhotonsPerSecondMaximum());
+        } else if (simpleMode) {
+          addHeaderLine(formatter, "Density (um^-2)", settings.getDensity());
+          addHeaderLine(formatter, "Min_photons", settings.getPhotonsPerSecond());
+          addHeaderLine(formatter, "Max_photons", settings.getPhotonsPerSecondMaximum());
+        } else if (spotMode) {
+          addHeaderLine(formatter, "Min_photons", settings.getPhotonsPerSecond());
+          addHeaderLine(formatter, "Max_photons", settings.getPhotonsPerSecondMaximum());
+        } else {
+          addHeaderLine(formatter, "Diffusion_rate", settings.getDiffusionRate());
+          addHeaderLine(formatter, "Diffusion_type", settings.getDiffusionType());
+          addHeaderLine(formatter, "Fixed_fraction", settings.getFixedFraction());
+          if (settings.getCompoundMolecules()) {
+            addHeaderLine(formatter, "Compound_molecules",
+                settings.getCompoundText().replaceAll("\n *", ""));
+            addHeaderLine(formatter, "Enable_2D_diffusion", settings.getDiffuse2D());
+            addHeaderLine(formatter, "Rotate_initial_orientation",
+                settings.getRotateInitialOrientation());
+            addHeaderLine(formatter, "Rotate_during_simulation",
+                settings.getRotateDuringSimulation());
+            addHeaderLine(formatter, "Enable_2D_rotation", settings.getRotate2D());
+          }
+          addHeaderLine(formatter, "Confinement", settings.getConfinement());
+          if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE])) {
+            addHeaderLine(formatter, "Confinement_radius", settings.getConfinementRadius());
+          } else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_MASK])) {
+            addHeaderLine(formatter, "Confinement_mask", settings.getConfinementMask());
+          }
+          addHeaderLine(formatter, "Photon", settings.getPhotonsPerSecond());
+          addHeaderLine(formatter, "Photon_distribution", settings.getPhotonDistribution());
+          if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution())) {
+            addHeaderLine(formatter, "Photon_distribution_file",
+                settings.getPhotonDistributionFile());
+          } else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution())) {
+            addHeaderLine(formatter, "Photon_max", settings.getPhotonsPerSecondMaximum());
+          } else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution())) {
+            addHeaderLine(formatter, "Photon_shape", settings.getPhotonShape());
+          } else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED]
+              .equals(settings.getPhotonDistribution())) {
+            addHeaderLine(formatter, "Correlation", settings.getCorrelation());
+          }
+          addHeaderLine(formatter, "On_time", settings.getTOn());
+          if (!trackMode) {
+            addHeaderLine(formatter, "Off_time_short", settings.getTOffShort());
+            addHeaderLine(formatter, "Off_time_long", settings.getTOffLong());
+            addHeaderLine(formatter, "n_Blinks_short", settings.getNBlinksShort());
+            addHeaderLine(formatter, "n_Blinks_long", settings.getNBlinksLong());
+            addHeaderLine(formatter, "n_Blinks_Geometric",
+                settings.getNBlinksGeometricDistribution());
+          }
+          addHeaderLine(formatter, "Min_photons", settings.getMinPhotons());
+          addHeaderLine(formatter, "Min_SNR_t1", settings.getMinSnrT1());
+          addHeaderLine(formatter, "Min_SNR_tN", settings.getMinSnrTN());
         }
-        addHeaderLine(sb, "Confinement", settings.getConfinement());
-        if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_SPHERE])) {
-          addHeaderLine(sb, "Confinement_radius", settings.getConfinementRadius());
-        } else if (settings.getConfinement().equals(CONFINEMENT[CONFINEMENT_MASK])) {
-          addHeaderLine(sb, "Confinement_mask", settings.getConfinementMask());
-        }
-        addHeaderLine(sb, "Photon", settings.getPhotonsPerSecond());
-        addHeaderLine(sb, "Photon_distribution", settings.getPhotonDistribution());
-        if (PHOTON_DISTRIBUTION[PHOTON_CUSTOM].equals(settings.getPhotonDistribution())) {
-          addHeaderLine(sb, "Photon_distribution_file", settings.getPhotonDistributionFile());
-        } else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution())) {
-          addHeaderLine(sb, "Photon_max", settings.getPhotonsPerSecondMaximum());
-        } else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution())) {
-          addHeaderLine(sb, "Photon_shape", settings.getPhotonShape());
-        } else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED]
-            .equals(settings.getPhotonDistribution())) {
-          addHeaderLine(sb, "Correlation", settings.getCorrelation());
-        }
-        addHeaderLine(sb, "On_time", settings.getTOn());
-        if (!trackMode) {
-          addHeaderLine(sb, "Off_time_short", settings.getTOffShort());
-          addHeaderLine(sb, "Off_time_long", settings.getTOffLong());
-          addHeaderLine(sb, "n_Blinks_short", settings.getNBlinksShort());
-          addHeaderLine(sb, "n_Blinks_long", settings.getNBlinksLong());
-          addHeaderLine(sb, "n_Blinks_Geometric", settings.getNBlinksGeometricDistribution());
-        }
-        addHeaderLine(sb, "Min_photons", settings.getMinPhotons());
-        addHeaderLine(sb, "Min_SNR_t1", settings.getMinSnrT1());
-        addHeaderLine(sb, "Min_SNR_tN", settings.getMinSnrTN());
       }
       resultsFileHeader = sb.toString();
     }
     return resultsFileHeader;
   }
 
-  private static void addHeaderLine(StringBuilder sb, String name, Object object) {
-    sb.append(String.format("# %-20s = %s%n", name, object.toString()));
+  private static void addHeaderLine(Formatter formatter, String name, Object object) {
+    formatter.format("# %-20s = %s%n", name, object.toString());
   }
 
   /**
@@ -4513,20 +4521,20 @@ public class CreateData implements PlugIn, ItemListener {
     }
   }
 
-  private void addCameraOptionsHeader(StringBuilder sb) {
+  private void addCameraOptionsHeader(Formatter formatter) {
     final CameraType cameraType = settings.getCameraType();
     final boolean isCcd = CalibrationProtosHelper.isCcdCameraType(cameraType);
     if (isCcd) {
       if (cameraType == CameraType.EMCCD) {
-        addHeaderLine(sb, "EM_gain", settings.getEmGain());
+        addHeaderLine(formatter, "EM_gain", settings.getEmGain());
       }
-      addHeaderLine(sb, "Camera_gain", settings.getCameraGain());
-      addHeaderLine(sb, "Quantum_efficiency", getQuantumEfficiency());
-      addHeaderLine(sb, "Read_noise", settings.getReadNoise());
-      addHeaderLine(sb, "Bias", settings.getBias());
+      addHeaderLine(formatter, "Camera_gain", settings.getCameraGain());
+      addHeaderLine(formatter, "Quantum_efficiency", getQuantumEfficiency());
+      addHeaderLine(formatter, "Read_noise", settings.getReadNoise());
+      addHeaderLine(formatter, "Bias", settings.getBias());
     } else if (cameraType == CameraType.SCMOS) {
-      addHeaderLine(sb, "Camera_model_name", settings.getCameraModelName());
-      addHeaderLine(sb, "Quantum_efficiency", getQuantumEfficiency());
+      addHeaderLine(formatter, "Camera_model_name", settings.getCameraModelName());
+      addHeaderLine(formatter, "Quantum_efficiency", getQuantumEfficiency());
     }
   }
 

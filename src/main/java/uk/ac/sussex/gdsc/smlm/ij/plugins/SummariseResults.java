@@ -216,8 +216,8 @@ public class SummariseResults implements PlugIn {
       sb.append("\t-");
     }
     final Rectangle bounds = result.getBounds(true);
-    sb.append(String.format("\t%d,%d,%d,%d", bounds.x, bounds.y, bounds.x + bounds.width,
-        bounds.y + bounds.height));
+    TextUtils.formatTo(sb, "\t%d,%d,%d,%d", bounds.x, bounds.y, bounds.x + bounds.width,
+        bounds.y + bounds.height);
     if (calibration != null) {
       //@formatter:off
       sb.append('\t').append(calibration.hasNmPerPixel() ? MathUtils.rounded(calibration.getNmPerPixel()) : '-');

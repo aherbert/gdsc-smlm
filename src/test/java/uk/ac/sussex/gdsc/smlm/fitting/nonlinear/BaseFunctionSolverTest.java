@@ -29,6 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -731,9 +732,9 @@ public abstract class BaseFunctionSolverTest {
           continue;
         }
         fail++;
-        sb.append(String.format(
+        TextUtils.formatTo(sb,
             "Fit 1 peak + 1 precomputed is higher than deviations 2 peaks %s: %s > %s",
-            Gaussian2DFunction.getName(i), expected[i], observed[i]));
+            Gaussian2DFunction.getName(i), expected[i], observed[i]);
       }
       if (fail > ok) {
         Assertions.fail(sb.toString());

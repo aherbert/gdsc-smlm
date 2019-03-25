@@ -36,6 +36,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -116,58 +117,61 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     final StringBuilder sb = new StringBuilder();
 
     addComment(sb, getHeaderTitle());
-    sb.append(String.format("#FileVersion %s%n", getVersion()));
+    try (Formatter formatter = new Formatter(sb)) {
 
-    Printer printer = null;
+      formatter.format("#FileVersion %s%n", getVersion());
 
-    // Add the standard details
-    if (!TextUtils.isNullOrEmpty(getName())) {
-      sb.append(String.format("#Name %s%n", singleLine(getName())));
-    }
-    if (getSource() != null) {
-      sb.append(String.format("#Source %s%n", singleLine(getSource().toXml())));
-    }
-    if (getBounds() != null) {
-      sb.append(String.format("#Bounds x%d y%d w%d h%d%n", getBounds().x, getBounds().y,
-          getBounds().width, getBounds().height));
-    }
-    if (getCalibration() != null) {
-      printer = addMessage(sb, printer, "Calibration", getCalibration());
-    }
-    if (!TextUtils.isNullOrEmpty(getConfiguration())) {
-      sb.append(String.format("#Configuration %s%n", singleLine(getConfiguration())));
-    }
-    if (getPsf() != null) {
-      addMessage(sb, printer, "PSF", getPsf());
-    }
+      Printer printer = null;
 
-    // Add any extra comments
-    final String[] comments = getHeaderComments();
-    if (comments != null) {
-      for (final String comment : comments) {
-        addComment(sb, comment);
+      // Add the standard details
+      if (!TextUtils.isNullOrEmpty(getName())) {
+        formatter.format("#Name %s%n", singleLine(getName()));
       }
-    }
+      if (getSource() != null) {
+        formatter.format("#Source %s%n", singleLine(getSource().toXml()));
+      }
+      if (getBounds() != null) {
+        formatter.format("#Bounds x%d y%d w%d h%d%n", getBounds().x, getBounds().y,
+            getBounds().width, getBounds().height);
+      }
+      if (getCalibration() != null) {
+        printer = addMessage(formatter, printer, "Calibration", getCalibration());
+      }
+      if (!TextUtils.isNullOrEmpty(getConfiguration())) {
+        formatter.format("#Configuration %s%n", singleLine(getConfiguration()));
+      }
+      if (getPsf() != null) {
+        addMessage(formatter, printer, "PSF", getPsf());
+      }
 
-    // Output the field names
-    final String[] fields = getFieldNames();
-    if (fields != null) {
-      sb.append('#');
-      for (int i = 0; i < fields.length; i++) {
-        if (i != 0) {
-          sb.append('\t');
+      // Add any extra comments
+      final String[] comments = getHeaderComments();
+      if (comments != null) {
+        for (final String comment : comments) {
+          addComment(sb, comment);
         }
-        sb.append(fields[i]);
       }
-      sb.append(System.lineSeparator());
-    }
 
-    addComment(sb, getHeaderEnd());
+      // Output the field names
+      final String[] fields = getFieldNames();
+      if (fields != null) {
+        sb.append('#');
+        for (int i = 0; i < fields.length; i++) {
+          if (i != 0) {
+            sb.append('\t');
+          }
+          sb.append(fields[i]);
+        }
+        sb.append(System.lineSeparator());
+      }
+
+      addComment(sb, getHeaderEnd());
+    }
 
     return sb.toString();
   }
 
-  private static Printer addMessage(StringBuilder sb, Printer printer, String name,
+  private static Printer addMessage(Formatter formatter, Printer printer, String name,
       MessageOrBuilder msg) {
     try {
       if (printer == null) {
@@ -175,7 +179,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
         // .includingDefaultValueFields()
         ;
       }
-      sb.append(String.format("#%s %s%n", name, printer.print(msg)));
+      formatter.format("#%s %s%n", name, printer.print(msg));
     } catch (final InvalidProtocolBufferException ex) {
       // This shouldn't happen so throw it
       throw new NotImplementedException("Unable to serialise the " + name + " settings", ex);

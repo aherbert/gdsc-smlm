@@ -446,10 +446,6 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     if (sourceText != null) {
       sb.append(sourceText);
     }
-    // Do not calibrate the original values
-    // if (showCalibratedValues)
-    // sb.append(frame).append(String.format("\t%g", origX)).append(String.format("\t%g", origY));
-    // else
     sb.append(frame);
     if (showEndFrame) {
       sb.append('\t').append(endFrame);
@@ -458,6 +454,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       sb.append('\t').append(id);
     }
     if (showFittingData) {
+      // Note: Do not calibrate the original values. They are always in pixels.
       sb.append('\t').append(origX).append('\t').append(origY);
       addFloat(sb, origValue);
       addDouble(sb, error);

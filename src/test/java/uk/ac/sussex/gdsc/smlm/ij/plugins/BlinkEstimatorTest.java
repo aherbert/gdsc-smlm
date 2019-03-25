@@ -28,6 +28,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
@@ -222,7 +223,7 @@ public class BlinkEstimatorTest {
       for (int n = MIN_FITTED_POINTS; n <= MAX_FITTED_POINTS; n++) {
         if (logger.isLoggable(Level.INFO)) {
           final StringBuilder sb = new StringBuilder();
-          sb.append(String.format("%2d = %2d/%2d |", n, count[n], tests));
+          TextUtils.formatTo(sb, "%2d = %2d/%2d |", n, count[n], tests);
           for (int i = 0; i < count[n]; i++) {
             sb.append('-');
           }

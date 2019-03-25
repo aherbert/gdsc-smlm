@@ -720,8 +720,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
         sb.append("MaxCandidate = ").append(candidates.getSize()).append(newLine);
         for (int i = 0, len = candidates.getLength(); i < len; i++) {
-          sb.append(String.format("Fit %d [%d,%d = %.1f]%n", i, candidates.get(i).x,
-              candidates.get(i).y, candidates.get(i).intensity));
+          TextUtils.formatTo(sb, "Fit %d [%d,%d = %.1f]%n", i, candidates.get(i).x,
+              candidates.get(i).y, candidates.get(i).intensity);
         }
         FileUtils.save(String.format("/tmp/candidates.%d.xml", slice), sb.toString());
       }
