@@ -241,8 +241,7 @@ public class CubicSplineData {
   public static CubicSplineData read(InputStream inputStream, TrackProgress progress)
       throws IOException {
     // Read dimensions
-    final BufferedInputStream buffer = new BufferedInputStream(inputStream);
-    final DataInput in = new DataInputStream(buffer);
+    final DataInput in = new DataInputStream(inputStream);
     final int maxx = in.readInt();
     final int maxy = in.readInt();
     final int maxz = in.readInt();
