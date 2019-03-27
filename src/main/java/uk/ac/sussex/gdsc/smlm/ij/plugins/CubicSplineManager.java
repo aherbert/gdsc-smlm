@@ -25,15 +25,14 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
@@ -213,7 +212,7 @@ public class CubicSplineManager implements PlugIn {
                 }
               }
             }
-            splines[kk][index] = CustomTricubicFunction.create(calc.compute(value));
+            splines[kk][index] = CustomTricubicFunctionUtils.create(calc.compute(value));
             if (singlePrecision) {
               splines[kk][index] = splines[kk][index].toSinglePrecision();
             }
@@ -245,7 +244,7 @@ public class CubicSplineManager implements PlugIn {
     final double scale = 1.0 / maxSum;
     for (int k = 0; k < maxk; k++) {
       for (int i = 0; i < size; i++) {
-        splines[k][i].scale(scale);
+        splines[k][i] = splines[k][i].scale(scale);
       }
     }
 

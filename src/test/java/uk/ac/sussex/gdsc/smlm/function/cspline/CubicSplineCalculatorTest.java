@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -48,7 +49,7 @@ public class CubicSplineCalculatorTest {
         }
       }
     }
-    final CustomTricubicFunction f = CustomTricubicFunction.create(exp);
+    final CustomTricubicFunction f = CustomTricubicFunctionUtils.create(exp);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);
@@ -88,9 +89,10 @@ public class CubicSplineCalculatorTest {
     final CustomTricubicInterpolatingFunction f1 =
         new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval);
 
-    final double[] exp = f1.getCoefficients(1, 1, 1);
+    final double[] exp = new double[64];
+    f1.getSplineNode(1, 1,1).getCoefficients(exp);
 
-    final CustomTricubicFunction f = CustomTricubicFunction.create(exp);
+    final CustomTricubicFunction f = CustomTricubicFunctionUtils.create(exp);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];
     for (int i = 0; i < 4; i++) {
       s[i] = new CubicSplinePosition((double) i / 3);

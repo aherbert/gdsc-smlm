@@ -47,6 +47,7 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
+import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
@@ -4703,11 +4704,12 @@ public class PsfCreator implements PlugInFilter {
       final CubicSplinePosition[] sz = createCubicSplinePosition(cz, pc);
 
       // Create the interpolation tables
-      final double[][] tables = new double[magnification * magnification * magnification][];
+      final DoubleCubicSplineData[] tables =
+          new DoubleCubicSplineData[magnification * magnification * magnification];
       for (int z = 0, i = 0; z < magnification; z++) {
         for (int y = 0; y < magnification; y++) {
           for (int x = 0; x < magnification; x++) {
-            tables[i++] = CustomTricubicFunction.computePowerTable(sx[x], sy[y], sz[z]);
+            tables[i++] = new DoubleCubicSplineData(sx[x], sy[y], sz[z]);
           }
         }
       }
@@ -4850,7 +4852,7 @@ public class PsfCreator implements PlugInFilter {
               final float[] data = psf[ppz];
               for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++) {
                 for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++) {
-                  final double[] table = tables[xxx + n * (yyy + n * zzz)];
+                  final DoubleCubicSplineData table = tables[xxx + n * (yyy + n * zzz)];
                   data[maxx * ppy + ppx] = (float) f.value(table);
                   if (Float.isNaN(data[maxx * ppy + ppx])) {
                     throw new DataException(String.format("NaN value at [%d,%d,%d]", x, y, z));

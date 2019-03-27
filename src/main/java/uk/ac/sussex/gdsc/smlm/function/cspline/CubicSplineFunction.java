@@ -24,7 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
+import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
+import uk.ac.sussex.gdsc.core.math.interpolation.FloatCubicSplineData;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 
 /**
@@ -540,47 +543,30 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   protected class DoubleTargetSpline extends TargetSpline {
 
     /** The table 1. */
-    double[] table1 = new double[64];
+    DoubleCubicSplineData table1;
 
     /** The table 2. */
-    double[] table2;
+    DoubleCubicSplineData table2;
 
     /** The table 3. */
-    double[] table3;
+    DoubleCubicSplineData table3;
 
     /** The table 6. */
-    double[] table6;
+    DoubleCubicSplineData table6;
 
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
-      table1 = CustomTricubicFunction.computePowerTable(x, y, z);
+      table1 = new DoubleCubicSplineData(new CubicSplinePosition(x), new CubicSplinePosition(y),
+          new CubicSplinePosition(z));
 
       // Create tables for derivatives
-      if (order == 1) {
-        table2 = multiply(2, table2);
-        table3 = multiply(3, table3);
-      } else if (order == 2) {
-        table2 = multiply(2, table2);
-        table3 = multiply(3, table3);
-        table6 = multiply(6, table6);
+      if (order > 0) {
+        table2 = table1.scale(2);
+        table3 = table1.scale(3);
+        if (order == 2) {
+          table6 = table1.scale(6);
+        }
       }
-    }
-
-    /**
-     * Multiply.
-     *
-     * @param n the n
-     * @param table the table
-     * @return the double[]
-     */
-    private double[] multiply(int n, double[] table) {
-      if (table == null) {
-        table = new double[64];
-      }
-      for (int i = 0; i < 64; i++) {
-        table[i] = table1[i] * n;
-      }
-      return table;
     }
 
     @Override
@@ -610,47 +596,30 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   protected class FloatTargetSpline extends TargetSpline {
 
     /** The table 1. */
-    float[] table1 = new float[64];
+    FloatCubicSplineData table1;
 
     /** The table 2. */
-    float[] table2;
+    FloatCubicSplineData table2;
 
     /** The table 3. */
-    float[] table3;
+    FloatCubicSplineData table3;
 
     /** The table 6. */
-    float[] table6;
+    FloatCubicSplineData table6;
 
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
-      table1 = CustomTricubicFunction.computeFloatPowerTable(x, y, z);
+      table1 = new FloatCubicSplineData(new CubicSplinePosition(x), new CubicSplinePosition(y),
+          new CubicSplinePosition(z));
 
       // Create tables for derivatives
-      if (order == 1) {
-        table2 = multiply(2, table2);
-        table3 = multiply(3, table3);
-      } else if (order == 2) {
-        table2 = multiply(2, table2);
-        table3 = multiply(3, table3);
-        table6 = multiply(6, table6);
+      if (order > 0) {
+        table2 = table1.scale(2);
+        table3 = table1.scale(3);
+        if (order == 2) {
+          table6 = table1.scale(6);
+        }
       }
-    }
-
-    /**
-     * Multiply.
-     *
-     * @param n the n
-     * @param table the table
-     * @return the float[]
-     */
-    private float[] multiply(int n, float[] table) {
-      if (table == null) {
-        table = new float[64];
-      }
-      for (int i = 0; i < 64; i++) {
-        table[i] = table1[i] * n;
-      }
-      return table;
     }
 
     @Override
