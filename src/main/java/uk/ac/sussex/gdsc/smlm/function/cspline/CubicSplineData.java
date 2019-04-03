@@ -31,7 +31,6 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
-import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 import uk.ac.sussex.gdsc.core.math.interpolation.FloatCustomTricubicFunction;
 
 import java.io.BufferedOutputStream;
@@ -342,27 +341,12 @@ public class CubicSplineData {
     }
 
     final Ticker ticker =
-        Ticker.create(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
-    ticker.start();
+        Ticker.createStarted(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
 
     // Pre-compute interpolation tables
     final CubicSplinePosition[] sx = createCubicSplinePosition(nx);
     final CubicSplinePosition[] sy = createCubicSplinePosition(ny);
     final CubicSplinePosition[] sz = createCubicSplinePosition(nz);
-    final int nx1 = nx + 1;
-    final int ny1 = ny + 1;
-    final int nz1 = nz + 1;
-
-    final DoubleCubicSplineData[] tables = new DoubleCubicSplineData[nx1 * ny1 * nz1];
-    for (int z = 0, i = 0; z < nz1; z++) {
-      final CubicSplinePosition szz = sz[z];
-      for (int y = 0; y < ny1; y++) {
-        final CubicSplinePosition syy = sy[y];
-        for (int x = 0; x < nx1; x++, i++) {
-          tables[i] = new DoubleCubicSplineData(sx[x], syy, szz);
-        }
-      }
-    }
 
     // Write axis values
     // Cache the table and the spline position to use for each interpolation point
@@ -414,10 +398,10 @@ public class CubicSplineData {
       final CustomTricubicFunction[] xySplines = splines[zp[z]];
       for (int y = 0; y <= maxy; y++) {
         final int index = yp[y] * getMaxX();
-        final int j = nx1 * (yt[y] + ny1 * zt[z]);
         for (int x = 0; x <= maxx; x++) {
+          procedure.setValue(x, y, z,
+              xySplines[index + xp[x]].value(sx[xt[x]], sy[yt[y]], sz[zt[z]]));
           ticker.tick();
-          procedure.setValue(x, y, z, xySplines[index + xp[x]].value(tables[j + xt[x]]));
         }
       }
     }

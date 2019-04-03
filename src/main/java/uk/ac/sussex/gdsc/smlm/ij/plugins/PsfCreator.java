@@ -4838,8 +4838,10 @@ public class PsfCreator implements PlugInFilter {
       rangex--;
 
       for (int z = 0, pz = 0; z < rangez; z++, pz += n) {
-        // We use pointers to the position in the interpolation tables so that the initial edge is
-        // treated differently. This makes the X/Y dimension the same for all PSFs
+        // We use pointers to the spline position (xx, yy) so that the initial edge is
+        // treated differently. This makes the X/Y dimension the same for all PSFs.
+        // After the first loop this is reset to zero so the remaining loops cover the
+        // entire spline.
         for (int y = 0, yy = iy, py = 0; y < rangey; y++, py += (n - yy), yy = 0) {
           for (int x = 0, xx = ix, px = 0; x < rangex; x++, px += (n - xx), xx = 0) {
             // Build the interpolator
@@ -4852,10 +4854,9 @@ public class PsfCreator implements PlugInFilter {
               final float[] data = psf[ppz];
               for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++) {
                 for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++) {
-                  final DoubleCubicSplineData table = tables[xxx + n * (yyy + n * zzz)];
-                  data[maxx * ppy + ppx] = (float) f.value(table);
+                  data[maxx * ppy + ppx] = (float) f.value(sx[xxx], sy[yyy], sz[zzz]);
                   if (Float.isNaN(data[maxx * ppy + ppx])) {
-                    throw new DataException(String.format("NaN value at [%d,%d,%d]", x, y, z));
+                    throw new DataException(String.format("NaN value at [%d,%d,%d]", ppx, ppy, z));
                   }
                 }
               }

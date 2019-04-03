@@ -26,8 +26,6 @@ package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
-import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
-import uk.ac.sussex.gdsc.core.math.interpolation.FloatCubicSplineData;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 
 /**
@@ -537,56 +535,55 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     public abstract boolean isNodeBoundary(int dimension);
   }
 
+  // TODO
+  // Note: The code was updated to factorise the computation making the division
+  // into double / float specialisation unnecessary.
+  // Currently using a float cubic spline saves 2-fold memory usage but penalises computation
+  // speed approximately 2-fold (see gdsc-examples-jmh project).
+  // The code should be evaluated to verify it works and the speed implications before the
+  // switch between double / float is totally removed.
+
   /**
    * Double precision computation of the target spline.
    */
   protected class DoubleTargetSpline extends TargetSpline {
-
-    /** The table 1. */
-    DoubleCubicSplineData table1;
-
-    /** The table 2. */
-    DoubleCubicSplineData table2;
-
-    /** The table 3. */
-    DoubleCubicSplineData table3;
-
-    /** The table 6. */
-    DoubleCubicSplineData table6;
+    private CubicSplinePosition x;
+    private CubicSplinePosition y;
+    private CubicSplinePosition z;
 
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
-      table1 = new DoubleCubicSplineData(new CubicSplinePosition(x), new CubicSplinePosition(y),
-          new CubicSplinePosition(z));
-
-      // Create tables for derivatives
-      if (order > 0) {
-        table2 = table1.scale(2);
-        table3 = table1.scale(3);
-        if (order == 2) {
-          table6 = table1.scale(6);
-        }
-      }
+      this.x = new CubicSplinePosition(x);
+      this.y = new CubicSplinePosition(y);
+      this.z = new CubicSplinePosition(z);
     }
 
     @Override
     public double computeValue(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1);
+      return customTricubicFunction.value(x, y, z);
     }
 
     @Override
     public double computeValue1(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1, table2, table3, dfda);
+      return customTricubicFunction.value(x, y, z, dfda);
     }
 
     @Override
     public double computeValue2(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
+      return customTricubicFunction.value(x, y, z, dfda, d2fda2);
     }
 
     @Override
     public boolean isNodeBoundary(int dimension) {
-      return CustomTricubicFunction.isBoundary(dimension, table1);
+      CubicSplinePosition position;
+      if (dimension == 0) {
+        position = x;
+      } else if (dimension == 1) {
+        position = y;
+      } else {
+        position = z;
+      }
+      return CustomTricubicFunction.isBoundary(position);
     }
   }
 
@@ -594,52 +591,43 @@ public abstract class CubicSplineFunction implements Gradient2Function {
    * Single precision computation of the target spline.
    */
   protected class FloatTargetSpline extends TargetSpline {
-
-    /** The table 1. */
-    FloatCubicSplineData table1;
-
-    /** The table 2. */
-    FloatCubicSplineData table2;
-
-    /** The table 3. */
-    FloatCubicSplineData table3;
-
-    /** The table 6. */
-    FloatCubicSplineData table6;
+    private CubicSplinePosition x;
+    private CubicSplinePosition y;
+    private CubicSplinePosition z;
 
     @Override
     public void computePowerTable(double x, double y, double z, int order) {
-      table1 = new FloatCubicSplineData(new CubicSplinePosition(x), new CubicSplinePosition(y),
-          new CubicSplinePosition(z));
-
-      // Create tables for derivatives
-      if (order > 0) {
-        table2 = table1.scale(2);
-        table3 = table1.scale(3);
-        if (order == 2) {
-          table6 = table1.scale(6);
-        }
-      }
+      this.x = new CubicSplinePosition(x);
+      this.y = new CubicSplinePosition(y);
+      this.z = new CubicSplinePosition(z);
     }
 
     @Override
     public double computeValue(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1);
+      return customTricubicFunction.value(x, y, z);
     }
 
     @Override
     public double computeValue1(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1, table2, table3, dfda);
+      return customTricubicFunction.value(x, y, z, dfda);
     }
 
     @Override
     public double computeValue2(CustomTricubicFunction customTricubicFunction) {
-      return customTricubicFunction.value(table1, table2, table3, table6, dfda, d2fda2);
+      return customTricubicFunction.value(x, y, z, dfda, d2fda2);
     }
 
     @Override
     public boolean isNodeBoundary(int dimension) {
-      return CustomTricubicFunction.isBoundary(dimension, table1);
+      CubicSplinePosition position;
+      if (dimension == 0) {
+        position = x;
+      } else if (dimension == 1) {
+        position = y;
+      } else {
+        position = z;
+      }
+      return CustomTricubicFunction.isBoundary(position);
     }
   }
 
