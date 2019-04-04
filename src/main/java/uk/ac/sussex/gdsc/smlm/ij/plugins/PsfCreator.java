@@ -47,7 +47,6 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
-import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
@@ -4705,17 +4704,6 @@ public class PsfCreator implements PlugInFilter {
       final CubicSplinePosition[] sx = createCubicSplinePosition(cx, pc);
       final CubicSplinePosition[] sy = createCubicSplinePosition(cy, pc);
       final CubicSplinePosition[] sz = createCubicSplinePosition(cz, pc);
-
-      // Create the interpolation tables
-      final DoubleCubicSplineData[] tables =
-          new DoubleCubicSplineData[magnification * magnification * magnification];
-      for (int z = 0, i = 0; z < magnification; z++) {
-        for (int y = 0; y < magnification; y++) {
-          for (int x = 0; x < magnification; x++) {
-            tables[i++] = new DoubleCubicSplineData(sx[x], sy[y], sz[z]);
-          }
-        }
-      }
 
       // Find where centre is within the sample points
       final int ix = findCentre(sx, cx);
