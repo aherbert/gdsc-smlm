@@ -2967,7 +2967,10 @@ public class PsfCreator implements PlugInFilter {
         IJ.showStatus("Saving cubic spline");
         CubicSplineManager.save(cubicSplinePsf, settings.getSplineFilename());
 
-        IJ.showStatus("Spline saved to " + settings.getSplineFilename());
+        final String msg = "Spline saved to " + settings.getSplineFilename();
+        IJ.showStatus(msg);
+        IJ.log(msg);
+
         return; // To leave the status message
       }
     }
