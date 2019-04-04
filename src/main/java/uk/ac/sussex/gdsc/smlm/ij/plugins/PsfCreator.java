@@ -4854,10 +4854,12 @@ public class PsfCreator implements PlugInFilter {
               final float[] data = psf[ppz];
               for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++) {
                 for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++) {
-                  data[maxx * ppy + ppx] = (float) f.value(sx[xxx], sy[yyy], sz[zzz]);
-                  if (Float.isNaN(data[maxx * ppy + ppx])) {
-                    throw new DataException(String.format("NaN value at [%d,%d,%d]", ppx, ppy, z));
+                  final float newValue = (float) f.value(sx[xxx], sy[yyy], sz[zzz]);
+                  if (!Float.isFinite(newValue)) {
+                    throw new DataException(
+                        String.format("Not finite value at [%d,%d,%d]", ppx, ppy, z));
                   }
+                  data[maxx * ppy + ppx] = newValue;
                 }
               }
             }
