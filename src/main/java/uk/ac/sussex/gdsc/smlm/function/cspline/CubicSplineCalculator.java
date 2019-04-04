@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
@@ -48,10 +48,11 @@ public class CubicSplineCalculator {
       s[i] = new CubicSplinePosition((double) i / 3);
     }
     int count = 0;
+    final double[] pt = new double[64];
     for (int k = 0; k < 4; k++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
-          final double[] pt = CustomTricubicFunction.computePowerTable(s[i], s[j], s[k]);
+          new DoubleCubicSplineData(s[i], s[j], s[k]).toArray(pt);
           System.arraycopy(pt, 0, A.data, count, 64);
           count += 64;
         }

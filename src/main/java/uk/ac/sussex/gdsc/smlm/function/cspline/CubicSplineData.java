@@ -29,10 +29,10 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.FloatCustomTricubicFunction;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -127,19 +127,25 @@ public class CubicSplineData {
   }
 
   private static class FloatSplineWriter implements SplineWriter {
+    final float[] data = new float[64];
+
     @Override
     public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
-      for (int i = 0; i < 64; i++) {
-        out.writeFloat(function.getf(i));
+      function.getCoefficients(data);
+      for (int i = 0; i < data.length; i++) {
+        out.writeFloat(data[i]);
       }
     }
   }
 
   private static class DoubleSplineWriter implements SplineWriter {
+    final double[] data = new double[64];
+
     @Override
     public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
-      for (int i = 0; i < 64; i++) {
-        out.writeDouble(function.get(i));
+      function.getCoefficients(data);
+      for (int i = 0; i < data.length; i++) {
+        out.writeDouble(data[i]);
       }
     }
   }
@@ -149,26 +155,26 @@ public class CubicSplineData {
   }
 
   private static class FloatSplineReader implements SplineReader {
-    float[] splines = new float[64];
+    final float[] splines = new float[64];
 
     @Override
     public CustomTricubicFunction read(DataInput in) throws IOException {
       for (int i = 0; i < 64; i++) {
         splines[i] = in.readFloat();
       }
-      return CustomTricubicFunction.create(splines.clone());
+      return CustomTricubicFunctionUtils.create(splines);
     }
   }
 
   private static class DoubleSplineReader implements SplineReader {
-    double[] splines = new double[64];
+    final double[] splines = new double[64];
 
     @Override
     public CustomTricubicFunction read(DataInput in) throws IOException {
       for (int i = 0; i < 64; i++) {
         splines[i] = in.readDouble();
       }
-      return CustomTricubicFunction.create(splines.clone());
+      return CustomTricubicFunctionUtils.create(splines);
     }
   }
 
@@ -192,8 +198,7 @@ public class CubicSplineData {
   public void write(OutputStream outputStream, TrackProgress progress) throws IOException {
     // Write dimensions
     final int maxz = splines.length;
-    final Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
-    ticker.start();
+    final Ticker ticker = Ticker.createStarted(progress, (long) maxx * maxy * maxz, false);
     final BufferedOutputStream buffer = new BufferedOutputStream(outputStream);
     final DataOutput out = new DataOutputStream(buffer);
     out.writeInt(maxx);
@@ -207,12 +212,12 @@ public class CubicSplineData {
     final int size = maxx * maxy;
     for (int z = 0; z < maxz; z++) {
       for (int i = 0; i < size; i++) {
-        ticker.tick();
         writer.write(out, splines[z][i]);
+        ticker.tick();
       }
     }
-    ticker.stop();
     buffer.flush();
+    ticker.stop();
   }
 
   /**
@@ -245,8 +250,7 @@ public class CubicSplineData {
     final int maxx = in.readInt();
     final int maxy = in.readInt();
     final int maxz = in.readInt();
-    final Ticker ticker = Ticker.create(progress, (long) maxx * maxy * maxz, false);
-    ticker.start();
+    final Ticker ticker = Ticker.createStarted(progress, (long) maxx * maxy * maxz, false);
     // Read precision
     final boolean singlePrecision = in.readBoolean();
     final SplineReader reader =
@@ -255,8 +259,8 @@ public class CubicSplineData {
     final CustomTricubicFunction[][] splines = new CustomTricubicFunction[maxz][maxx * maxy];
     for (int z = 0; z < maxz; z++) {
       for (int i = 0; i < size; i++) {
-        ticker.tick();
         splines[z][i] = reader.read(in);
+        ticker.tick();
       }
     }
     ticker.stop();
@@ -337,27 +341,12 @@ public class CubicSplineData {
     }
 
     final Ticker ticker =
-        Ticker.create(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
-    ticker.start();
+        Ticker.createStarted(progress, (long) (maxx + 1) * (maxy + 1) * (maxz + 1), false);
 
     // Pre-compute interpolation tables
     final CubicSplinePosition[] sx = createCubicSplinePosition(nx);
     final CubicSplinePosition[] sy = createCubicSplinePosition(ny);
     final CubicSplinePosition[] sz = createCubicSplinePosition(nz);
-    final int nx1 = nx + 1;
-    final int ny1 = ny + 1;
-    final int nz1 = nz + 1;
-
-    final double[][] tables = new double[nx1 * ny1 * nz1][];
-    for (int z = 0, i = 0; z < nz1; z++) {
-      final CubicSplinePosition szz = sz[z];
-      for (int y = 0; y < ny1; y++) {
-        final CubicSplinePosition syy = sy[y];
-        for (int x = 0; x < nx1; x++, i++) {
-          tables[i] = CustomTricubicFunction.computePowerTable(sx[x], syy, szz);
-        }
-      }
-    }
 
     // Write axis values
     // Cache the table and the spline position to use for each interpolation point
@@ -409,10 +398,10 @@ public class CubicSplineData {
       final CustomTricubicFunction[] xySplines = splines[zp[z]];
       for (int y = 0; y <= maxy; y++) {
         final int index = yp[y] * getMaxX();
-        final int j = nx1 * (yt[y] + ny1 * zt[z]);
         for (int x = 0; x <= maxx; x++) {
+          procedure.setValue(x, y, z,
+              xySplines[index + xp[x]].value(sx[xt[x]], sy[yt[y]], sz[zt[z]]));
           ticker.tick();
-          procedure.setValue(x, y, z, xySplines[index + xp[x]].value(tables[j + xt[x]]));
         }
       }
     }

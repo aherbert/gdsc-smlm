@@ -47,6 +47,7 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
+import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
@@ -2966,7 +2967,10 @@ public class PsfCreator implements PlugInFilter {
         IJ.showStatus("Saving cubic spline");
         CubicSplineManager.save(cubicSplinePsf, settings.getSplineFilename());
 
-        IJ.showStatus("Spline saved to " + settings.getSplineFilename());
+        final String msg = "Spline saved to " + settings.getSplineFilename();
+        IJ.showStatus(msg);
+        IJ.log(msg);
+
         return; // To leave the status message
       }
     }
@@ -4703,11 +4707,12 @@ public class PsfCreator implements PlugInFilter {
       final CubicSplinePosition[] sz = createCubicSplinePosition(cz, pc);
 
       // Create the interpolation tables
-      final double[][] tables = new double[magnification * magnification * magnification][];
+      final DoubleCubicSplineData[] tables =
+          new DoubleCubicSplineData[magnification * magnification * magnification];
       for (int z = 0, i = 0; z < magnification; z++) {
         for (int y = 0; y < magnification; y++) {
           for (int x = 0; x < magnification; x++) {
-            tables[i++] = CustomTricubicFunction.computePowerTable(sx[x], sy[y], sz[z]);
+            tables[i++] = new DoubleCubicSplineData(sx[x], sy[y], sz[z]);
           }
         }
       }
@@ -4836,8 +4841,10 @@ public class PsfCreator implements PlugInFilter {
       rangex--;
 
       for (int z = 0, pz = 0; z < rangez; z++, pz += n) {
-        // We use pointers to the position in the interpolation tables so that the initial edge is
-        // treated differently. This makes the X/Y dimension the same for all PSFs
+        // We use pointers to the spline position (xx, yy) so that the initial edge is
+        // treated differently. This makes the X/Y dimension the same for all PSFs.
+        // After the first loop this is reset to zero so the remaining loops cover the
+        // entire spline.
         for (int y = 0, yy = iy, py = 0; y < rangey; y++, py += (n - yy), yy = 0) {
           for (int x = 0, xx = ix, px = 0; x < rangex; x++, px += (n - xx), xx = 0) {
             // Build the interpolator
@@ -4850,11 +4857,12 @@ public class PsfCreator implements PlugInFilter {
               final float[] data = psf[ppz];
               for (int yyy = yy, ppy = py; yyy < n && ppy < maxy; yyy++, ppy++) {
                 for (int xxx = xx, ppx = px; xxx < n && ppx < maxx; xxx++, ppx++) {
-                  final double[] table = tables[xxx + n * (yyy + n * zzz)];
-                  data[maxx * ppy + ppx] = (float) f.value(table);
-                  if (Float.isNaN(data[maxx * ppy + ppx])) {
-                    throw new DataException(String.format("NaN value at [%d,%d,%d]", x, y, z));
+                  final float newValue = (float) f.value(sx[xxx], sy[yyy], sz[zzz]);
+                  if (!Float.isFinite(newValue)) {
+                    throw new DataException(
+                        String.format("Not finite value at [%d,%d,%d]", ppx, ppy, z));
                   }
+                  data[maxx * ppy + ppx] = newValue;
                 }
               }
             }

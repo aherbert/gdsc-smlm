@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -1055,7 +1056,7 @@ public class Image3DAligner {
       final int z = MathUtils.clip(iz, izd - 4, xyz[2] - 1);
       final DoubleImage3D crop = correlation.crop(x, y, z, 4, 4, 4, region);
       region = crop.getData();
-      final CustomTricubicFunction f = CustomTricubicFunction.create(calc.compute(region));
+      final CustomTricubicFunction f = CustomTricubicFunctionUtils.create(calc.compute(region));
 
       // Find the maximum starting at the current origin
       final int ox = xyz[0] - x;
@@ -1264,7 +1265,6 @@ public class Image3DAligner {
   private static class SplineFunction {
     final CustomTricubicFunction function;
     CubicSplinePosition[] sp = new CubicSplinePosition[3];
-    double[] table;
 
     SplineFunction(CustomTricubicFunction function, double[] origin) {
       this.function = function;
@@ -1276,12 +1276,12 @@ public class Image3DAligner {
     double value(double[] point) {
       initialise(point);
       // BFGS algorithm minimises so invert
-      return -function.value(table);
+      return -function.value(sp[0], sp[1], sp[2]);
     }
 
     void value(double[] point, double[] derivative) {
       initialise(point);
-      function.gradient(table, derivative);
+      function.value(sp[0], sp[1], sp[2], derivative);
       // BFGS algorithm minimises so invert
       for (int i = 0; i < 3; i++) {
         derivative[i] = -derivative[i];
@@ -1289,15 +1289,11 @@ public class Image3DAligner {
     }
 
     void initialise(double[] point) {
-      // Allow caching the the spline positions and the table
+      // Allow caching the spline positions
       for (int i = 0; i < 3; i++) {
         if (sp[i].getX() != point[i]) {
           sp[i] = new CubicSplinePosition(point[i]);
-          table = null;
         }
-      }
-      if (table == null) {
-        table = CustomTricubicFunction.computePowerTable(sp[0], sp[1], sp[2]);
       }
     }
   }

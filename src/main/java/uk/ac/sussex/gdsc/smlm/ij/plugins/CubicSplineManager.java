@@ -25,15 +25,14 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
@@ -64,6 +63,7 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.AWTEvent;
 import java.awt.Label;
@@ -78,6 +78,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This plugin handle the save and load of per-pixel spline models.
@@ -143,8 +144,8 @@ public class CubicSplineManager implements PlugIn {
   private static final String TITLE = "Cubic Spline Manager";
   private static String directory = "";
   private static String filename = "";
-  private static String cacheName = "";
-  private static CubicSplinePsf cache;
+  /** The cache of the last named cubic spline PSF that was either saved or loaded. */
+  private static AtomicReference<Pair<String, CubicSplinePsf>> cache = new AtomicReference<>();
 
   private static CubicSplineSettings.Builder settings;
 
@@ -213,7 +214,7 @@ public class CubicSplineManager implements PlugIn {
                 }
               }
             }
-            splines[kk][index] = CustomTricubicFunction.create(calc.compute(value));
+            splines[kk][index] = CustomTricubicFunctionUtils.create(calc.compute(value));
             if (singlePrecision) {
               splines[kk][index] = splines[kk][index].toSinglePrecision();
             }
@@ -245,7 +246,7 @@ public class CubicSplineManager implements PlugIn {
     final double scale = 1.0 / maxSum;
     for (int k = 0; k < maxk; k++) {
       for (int i = 0; i < size; i++) {
-        splines[k][i].scale(scale);
+        splines[k][i] = splines[k][i].scale(scale);
       }
     }
 
@@ -324,8 +325,7 @@ public class CubicSplineManager implements PlugIn {
     settings.putCubicSplineResources(name, resource.build());
     SettingsManager.writeSettings(settings.build());
 
-    cacheName = name;
-    cache = psfModel;
+    cache.set(Pair.of(name, psfModel));
   }
 
   /**
@@ -336,8 +336,9 @@ public class CubicSplineManager implements PlugIn {
    * @return the per pixel spline model (or null)
    */
   public static CubicSplinePsf load(String name) {
-    if (cache != null && cacheName.equals(name)) {
-      return cache;
+    final Pair<String, CubicSplinePsf> previous = cache.get();
+    if (previous != null && previous.getKey().equals(name)) {
+      return previous.getValue();
     }
 
     final CubicSplineSettings.Builder settings = getSettings();
@@ -346,12 +347,11 @@ public class CubicSplineManager implements PlugIn {
     if (resource == null) {
       return null;
     }
-    final CubicSplinePsf f = loadFromFile(name, resource.getFilename());
-    if (f != null) {
-      cache = f;
-      cacheName = name;
+    final CubicSplinePsf psfModel = loadFromFile(name, resource.getFilename());
+    if (psfModel != null) {
+      cache.set(Pair.of(name, psfModel));
     }
-    return f;
+    return psfModel;
   }
 
   private static CubicSplinePsf loadFromFile(String name, String filename) {

@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
@@ -63,7 +64,7 @@ public class CubicSplineDataTest {
         for (int j = 0; j < 64; j++) {
           a[j] = r.nextDouble();
         }
-        splines[zz][i] = CustomTricubicFunction.create(a.clone());
+        splines[zz][i] = CustomTricubicFunctionUtils.create(a);
         if (singlePrecision) {
           splines[zz][i] = splines[zz][i].toSinglePrecision();
         }
@@ -77,10 +78,13 @@ public class CubicSplineDataTest {
     final byte[] bytes = b.toByteArray();
     final CubicSplineData f2 = CubicSplineData.read(new ByteArrayInputStream(bytes));
 
+    final double[] exp = new double[64];
+    final double[] obs = new double[64];
     for (int zz = 0; zz < z; zz++) {
       for (int i = 0; i < size; i++) {
-        Assertions.assertArrayEquals(f1.splines[zz][i].getCoefficients(),
-            f2.splines[zz][i].getCoefficients());
+        f1.splines[zz][i].getCoefficients(exp);
+        f2.splines[zz][i].getCoefficients(obs);
+        Assertions.assertArrayEquals(exp, obs);
       }
     }
   }
