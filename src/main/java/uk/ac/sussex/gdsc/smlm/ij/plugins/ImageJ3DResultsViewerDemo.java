@@ -41,7 +41,6 @@ import uk.ac.sussex.gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import customnode.CustomMesh;
 
@@ -54,6 +53,7 @@ import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.Shape3D;
@@ -142,7 +142,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         final int v = points.size();
         final int t = v / 3;
         System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d\n", d, v, t,
-            p.item1.length, v / (double) p.item1.length, p.item2.length);
+            p.getKey().length, v / (double) p.getKey().length, p.getValue().length);
 
         CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
             new Point3f[] {new Point3f(x, y, 0)}, null, null, 0);
@@ -151,8 +151,8 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         univ.addCustomMesh(mesh, x + "," + y + "," + t);
 
         final float y2 = y + space;
-        mesh = new ItemIndexedTriangleMesh(p.item1, p.item2, new Point3f[] {new Point3f(x, y2, 0)},
-            null, null, 0);
+        mesh = new ItemIndexedTriangleMesh(p.getKey(), p.getValue(),
+            new Point3f[] {new Point3f(x, y2, 0)}, null, null, 0);
         univ.addCustomMesh(mesh, x + "," + y2 + "," + t);
 
         x += space;

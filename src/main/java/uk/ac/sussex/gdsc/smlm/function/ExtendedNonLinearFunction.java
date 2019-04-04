@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Defines the non-linear fitting function.

@@ -46,6 +46,7 @@ public class XStreamUtils {
 
   private static class XStreamLoader {
     static final XStream xs;
+
     static {
       final XStream xstream = new XStream(new DomDriver());
       XStream.setupDefaultSecurity(xstream); // to be removed after 1.5

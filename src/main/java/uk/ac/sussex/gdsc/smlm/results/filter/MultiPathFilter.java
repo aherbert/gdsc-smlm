@@ -1490,7 +1490,8 @@ public class MultiPathFilter {
     // doublets = len(multi-doublet) - len(multi) + 1
 
     final PreprocessedPeakResult[] results = multiDoubletFitResult.getResults();
-    final int nDoublets = results.length - multiPathResult.getMultiFitResult().getResults().length + 1;
+    final int nDoublets =
+        results.length - multiPathResult.getMultiFitResult().getResults().length + 1;
 
     setupFilter(FilterValidationOption.NO_SHIFT);
 

@@ -63,7 +63,6 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;

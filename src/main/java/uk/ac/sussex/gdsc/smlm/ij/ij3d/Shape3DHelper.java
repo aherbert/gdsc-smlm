@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.GeometryArray;
@@ -262,7 +262,7 @@ public class Shape3DHelper {
       ng.setCreaseAngle(Math.toRadians(creaseAngle));
     }
     ng.generateNormals(gi);
-    return new Pair<>(gi.getNormals(), gi.getNormalIndices());
+    return Pair.of(gi.getNormals(), gi.getNormalIndices());
   }
 
   /**
@@ -794,9 +794,9 @@ public class Shape3DHelper {
       // E.g. the icosahedron gets extra indexes to normals that are 0,0,0.
       final Pair<Point3f[], int[]> p = createIndexedObject(coords);
 
-      final Point3f[] iCoords = p.item1;
+      final Point3f[] iCoords = p.getKey();
       gi.setCoordinates(iCoords);
-      gi.setCoordinateIndices(p.item2);
+      gi.setCoordinateIndices(p.getValue());
 
       // Normals are just the vector from 0,0,0 to the vertex
       final Vector3f[] normals = new Vector3f[iCoords.length];
@@ -853,7 +853,7 @@ public class Shape3DHelper {
       faces.add(value);
     }
 
-    return new Pair<>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
   }
 
   /**

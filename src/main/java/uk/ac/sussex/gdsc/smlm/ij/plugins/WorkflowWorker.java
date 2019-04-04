@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A worker to update results based on new settings.

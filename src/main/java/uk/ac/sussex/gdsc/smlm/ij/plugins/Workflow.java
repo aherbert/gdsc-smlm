@@ -25,9 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class Workflow<S, R> {
     public final Pair<S, R> work;
 
     Work(long time, Pair<S, R> work) {
-      if (work.item1 == null) {
+      if (work.getKey() == null) {
         throw new NullPointerException("Settings cannot be null");
       }
       this.timeout = time;
@@ -62,11 +62,11 @@ public class Workflow<S, R> {
     }
 
     S getSettings() {
-      return work.item1;
+      return work.getKey();
     }
 
     R getResults() {
-      return work.item2;
+      return work.getValue();
     }
   }
 
@@ -185,7 +185,7 @@ public class Workflow<S, R> {
             // This allows a worker to ignore settings changes that do not effect
             // its results but pass the new settings to downstream workers.
             debug(" Updating existing result");
-            result = new Work(new Pair<>(work.getSettings(), result.getResults()));
+            result = new Work(Pair.of(work.getSettings(), result.getResults()));
           }
           lastWork = work;
           // Add the result to the output
@@ -420,7 +420,7 @@ public class Workflow<S, R> {
    * @param results the results
    */
   public void run(S settings, R results) {
-    inputStack.addWork(new Work(getTimeout(), new Pair<>(settings, results)));
+    inputStack.addWork(new Work(getTimeout(), Pair.of(settings, results)));
   }
 
   /**
@@ -439,7 +439,7 @@ public class Workflow<S, R> {
    * @param results the results
    */
   public void stage(S settings, R results) {
-    inputStack.setWork(new Work(getTimeout(), new Pair<>(settings, results)));
+    inputStack.setWork(new Work(getTimeout(), Pair.of(settings, results)));
   }
 
   /**

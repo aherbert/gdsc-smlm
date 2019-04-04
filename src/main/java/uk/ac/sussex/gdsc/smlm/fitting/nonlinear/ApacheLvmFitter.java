@@ -115,10 +115,10 @@ public class ApacheLvmFitter extends LseBaseFunctionSolver {
           @Override
           public Pair<RealVector, RealMatrix> value(RealVector point) {
             final double[] p = point.toArray();
-            final uk.ac.sussex.gdsc.smlm.utils.Pair<double[], double[][]> result =
+            final org.apache.commons.lang3.tuple.Pair<double[], double[][]> result =
                 fun.computeValuesAndJacobian(p);
-            return new Pair<>(new ArrayRealVector(result.item1, false),
-                new Array2DRowRealMatrix(result.item2, false));
+            return new Pair<>(new ArrayRealVector(result.getKey(), false),
+                new Array2DRowRealMatrix(result.getValue(), false));
           }
 
           @Override

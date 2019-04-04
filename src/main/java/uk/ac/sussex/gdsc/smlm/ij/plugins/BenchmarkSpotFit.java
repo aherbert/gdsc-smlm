@@ -1484,7 +1484,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       return count;
     }
     for (int i = 0; i < fitResult.getResults().length; i++) {
-      final BasePreprocessedPeakResult result = (BasePreprocessedPeakResult) fitResult.getResults()[i];
+      final BasePreprocessedPeakResult result =
+          (BasePreprocessedPeakResult) fitResult.getResults()[i];
       if (result.isNewResult()) {
         result.uniqueId = count++;
         preprocessedPeakResults[result.uniqueId] = result;

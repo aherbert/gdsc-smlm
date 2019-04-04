@@ -2806,7 +2806,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         int otherId = candidateId;
         ResultType resultType = ResultType.NEW;
-        
+
         final double xShift =
             fitParams[Gaussian2DFunction.X_POSITION] - initialParams[Gaussian2DFunction.X_POSITION];
         final double yShift =
@@ -2979,7 +2979,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
         validationData.setResult(0, initialParams, fitParams, fitParamStdDevs);
         localBackgroundSingle = validationData.getLocalBackground();
-        
+
         results[0] = resultFactory.createPreprocessedPeakResult(otherId, 0, initialParams,
             fitParams, fitParamStdDevs, validationData, resultType);
       }

@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -35,6 +34,7 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 
@@ -115,7 +115,7 @@ public final class CustomContentHelper {
       index = addFace(map, vertices, faces, list.get(i + 2), index);
     }
 
-    return new Pair<>(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
   }
 
   private static int addFace(TObjectIntHashMap<Point3f> map, TurboList<Point3f> vertices,

@@ -59,7 +59,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import ij.CompositeImage;
 import ij.IJ;
@@ -78,6 +77,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -1019,7 +1019,7 @@ public class PulseActivationAnalysis implements PlugIn {
       @Override
       public Pair<RunSettings, Object> doWork(Pair<RunSettings, Object> work) {
         synchronized (PulseActivationAnalysis.this.analysisLock) {
-          PulseActivationAnalysis.this.runAnalysis(work.item1);
+          PulseActivationAnalysis.this.runAnalysis(work.getKey());
         }
         return work;
       }

@@ -68,7 +68,6 @@ import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -88,6 +87,7 @@ import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -2687,7 +2687,7 @@ public class Fire implements PlugIn {
     @Override
     public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work) {
       // Plot the histogram
-      histogram.plot(work.item1.mean, work.item1.sigma, wo);
+      histogram.plot(work.getKey().mean, work.getKey().sigma, wo);
       return work;
     }
   }
@@ -2711,7 +2711,7 @@ public class Fire implements PlugIn {
     @Override
     public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work) {
       // Compute Q and then plot the scaled FRC numerator
-      final WorkSettings settings = work.item1;
+      final WorkSettings settings = work.getKey();
       qplot.plot(settings.mean, settings.sigma, settings.qvalue, wo);
       return work;
     }

@@ -31,7 +31,8 @@ import uk.ac.sussex.gdsc.smlm.function.IntegralValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.NamedFunction;
 import uk.ac.sussex.gdsc.smlm.function.NoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.
@@ -447,7 +448,7 @@ public abstract class Gaussian2DFunction
 
   @Override
   public double[][] computeJacobian(double[] variables) {
-    return computeValuesAndJacobian(variables).item2;
+    return computeValuesAndJacobian(variables).getValue();
   }
 
   @Override
@@ -470,7 +471,7 @@ public abstract class Gaussian2DFunction
         jacobian[index++] = derivative.clone();
       }
     });
-    return new Pair<>(values, jacobian);
+    return Pair.of(values, jacobian);
   }
 
   @Override

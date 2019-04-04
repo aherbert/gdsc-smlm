@@ -82,8 +82,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.RawResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
-import uk.ac.sussex.gdsc.smlm.utils.Triplet;
 
 import customnode.CustomLineMesh;
 import customnode.CustomMesh;
@@ -112,6 +110,8 @@ import ij3d.UniverseListener;
 import ij3d.UniverseSettings;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.scijava.java3d.Appearance;
@@ -203,7 +203,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static String lastWindow = "";
 
   private static HashMap<PeakResultsDigest,
-      Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
+      Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
           new HashMap<>();
   private static ResultsTableSettings.Builder resultsTableSettings;
   private static boolean addToSelection;
@@ -580,9 +580,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     void addSelectionModel(
-        Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet) {
-      this.peakResultTableModel = triplet.item1;
-      this.listSelectionModel = triplet.item2;
+        Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet) {
+      this.peakResultTableModel = triplet.getLeft();
+      this.listSelectionModel = triplet.getMiddle();
       listSelectionModel.addListSelectionListener(this);
       updateSelection();
     }
@@ -1270,13 +1270,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       IJ.showStatus("");
       return;
     }
-    Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
+    Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
         resultsTables.get(data.digest);
     if (triplet == null) {
-      triplet = new Triplet<>(new PeakResultTableModel(results, false,
+      triplet = Triple.of(new PeakResultTableModel(results, false,
           // Note the settings do not matter until the table is set live
           resultsTableSettings.build()), new DefaultListSelectionModel(), null);
-      triplet.item1.setCheckDuplicates(true);
+      triplet.getLeft().setCheckDuplicates(true);
       resultsTables.put(data.digest, triplet);
     }
 
@@ -1978,7 +1978,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
 
         // Only process content added from localisations
-        final Content c = pair.item1;
+        final Content c = pair.getKey();
         if (!(c.getUserData() instanceof ResultsMetaData)) {
           univ.select(c); // Do the same as the mouseClicked in Image3DUniverse
           return;
@@ -2006,7 +2006,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           final int countPerLocalisation = vertexCount / results.size();
 
           // Determine the localisation
-          final int vertexIndex = pair.item2.getVertexIndices()[0];
+          final int vertexIndex = pair.getValue().getVertexIndices()[0];
           index = vertexIndex / countPerLocalisation;
           // System.out.printf("n=%d [%d] %s %s\n", nPerLocalisation, index,
           // Arrays.toString(pair.b.getVertexIndices()), pair.b.getIntersectionPoint());
@@ -2014,9 +2014,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
           // ItemGeometryNode node = (ItemGeometryNode) content.getContent();
           // ItemGroup g = node.getItemGroup();
           // All shapes have the index as the user data
-          final Object o = pair.item2.getGeometry().getUserData();
+          final Object o = pair.getValue().getGeometry().getUserData();
           if (o instanceof Integer) {
-            index = (Integer) pair.item2.getGeometry().getUserData();
+            index = (Integer) pair.getValue().getGeometry().getUserData();
           }
         }
         if (index == -1) {
@@ -2115,9 +2115,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static PeakResultTableModelFrame findTable(ResultsMetaData data) {
     // There is a single TableModel and SelectionModel for each unique results set.
     // This may be displayed in a window.
-    final Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
+    final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
         resultsTables.get(data.digest);
-    final PeakResultTableModelFrame table = t.item3;
+    final PeakResultTableModelFrame table = t.getRight();
     if (table != null && table.isVisible()) {
       return table;
     }
@@ -2132,10 +2132,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     // Clicks just select from the selection model, and add results to the table model.
 
-    final Triplet<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
+    final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
         resultsTables.get(data.digest);
 
-    PeakResultTableModelFrame table = triplet.item3;
+    PeakResultTableModelFrame table = triplet.getRight();
     if (table != null) {
       if (table.isVisible()) {
         return table;
@@ -2146,7 +2146,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // No table or not visible so create a new one
-    table = new PeakResultTableModelFrame(triplet.item1, triplet.item2);
+    table = new PeakResultTableModelFrame(triplet.getLeft(), triplet.getMiddle());
     table.setTitle(TITLE + " " + results.getName());
     table.setReadOnly(false);
     // Ensure cleanup
@@ -2157,14 +2157,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
       public void windowClosed(WindowEvent event) {
         // We must unmap the selection since we use the selection model
         // across all active views of the same dataset.
-        final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.item2);
+        final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.getMiddle());
         finalTable.convertRowIndexToModel(indices);
         finalTable.cleanUp(); // Remove listeners
-        ListSelectionModelHelper.setSelectedIndices(triplet.item2, indices);
+        ListSelectionModelHelper.setSelectedIndices(triplet.getMiddle(), indices);
       }
     });
     table.setVisible(true);
-    resultsTables.put(data.digest, new Triplet<>(triplet.item1, triplet.item2, table));
+    resultsTables.put(data.digest, Triple.of(triplet.getLeft(), triplet.getMiddle(), table));
 
     return table;
   }
@@ -2275,7 +2275,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         if (content == null) {
           continue;
         }
-        return new Pair<>(content, result[i].getIntersectionInfos()[0]);
+        return Pair.of(content, result[i].getIntersectionInfos()[0]);
       }
       return null;
     } catch (final Exception ex) {
@@ -3219,8 +3219,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // Update the table settings for all the selection models
       if (resultsTableSettings.getUpdateExistingTables()) {
         final ResultsTableSettings ts = resultsTableSettings.build();
-        for (final Triplet<PeakResultTableModel, ?, ?> t : resultsTables.values()) {
-          t.item1.setTableSettings(ts);
+        for (final Triple<PeakResultTableModel, ?, ?> t : resultsTables.values()) {
+          t.getLeft().setTableSettings(ts);
         }
       }
 

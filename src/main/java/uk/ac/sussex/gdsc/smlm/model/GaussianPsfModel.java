@@ -30,8 +30,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.NullAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.special.Erf;
@@ -534,8 +534,8 @@ public class GaussianPsfModel extends PsfModel {
     final int i1 = f.findGradientIndex(Gaussian2DFunction.Y_POSITION);
     final int i2 = f.findGradientIndex(Gaussian2DFunction.Z_POSITION);
     final Pair<double[], double[][]> pair = f.computeValuesAndJacobian(p);
-    final double[] v = pair.item1;
-    final double[][] j = pair.item2;
+    final double[] v = pair.getKey();
+    final double[][] j = pair.getValue();
     for (int y = 0; y < x1range; y++) {
       // Locate the insert location
       int indexTo = (y + x1min) * width + x0min;

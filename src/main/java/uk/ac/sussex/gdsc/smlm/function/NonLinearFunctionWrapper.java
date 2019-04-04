@@ -25,7 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.utils.Pair;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Wrap the NonLinearFunction to remove the parameters that are fixed from the evaluation methods.
@@ -148,6 +149,6 @@ public class NonLinearFunctionWrapper implements ExtendedNonLinearFunction {
       jacobian[i] = dyda;
     }
 
-    return new Pair<>(values, jacobian);
+    return Pair.of(values, jacobian);
   }
 }
