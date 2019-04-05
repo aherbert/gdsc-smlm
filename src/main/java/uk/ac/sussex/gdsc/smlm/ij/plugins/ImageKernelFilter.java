@@ -44,6 +44,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.AWTEvent;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Convolve an image with a kernel from another image.
@@ -62,12 +63,6 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     FILTERS = SettingsManager.getNames((Object[]) Operation.values());
   }
 
-  private static String imageTitle = "";
-  private static int method = METHOD_FHT;
-  private static int filter = Operation.CORRELATION.ordinal();
-  private static int border;
-  private static boolean zero;
-
   // Ensure not null
   private Ticker ticker = Ticker.getDefaultInstance();
 
@@ -79,6 +74,59 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private FhtFilter ff;
   private ImagePlus dataImp;
   private ImagePlus kernelImp;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String imageTitle;
+    int method;
+    int filter;
+    int border;
+    boolean zero;
+
+    Settings() {
+      // Set defaults
+      imageTitle = "";
+      method = METHOD_FHT;
+      filter = Operation.CORRELATION.ordinal();
+    }
+
+    Settings(Settings source) {
+      imageTitle = source.imageTitle;
+      method = source.method;
+      filter = source.filter;
+      border = source.border;
+      zero = source.zero;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -102,12 +150,12 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     final float[] data = (float[]) ip.getPixels();
     final int w = ip.getWidth();
     final int h = ip.getHeight();
-    if (method == METHOD_SPATIAL) {
-      kf.convolve(data, w, h, border);
+    if (settings.method == METHOD_SPATIAL) {
+      kf.convolve(data, w, h, settings.border);
     } else {
       // Use a clone for thread safety
       final FhtFilter f = (ticker.getTotal() > 1) ? ff.copy() : ff;
-      f.filter(data, w, h, border);
+      f.filter(data, w, h, settings.border);
     }
     if (ticker.getTotal() == 1) {
       ip.resetMinAndMax();
@@ -131,14 +179,18 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
 
     gd.addMessage("Convolve an image using another image as the convolution kernel");
 
-    gd.addChoice("Kernel_image", names, imageTitle);
-    gd.addChoice("Method", METHODS, method);
-    gd.addChoice("Filter", FILTERS, filter);
-    gd.addSlider("Border", 0, 10, border);
-    gd.addCheckbox("Zero_outside_image", zero);
+    settings = Settings.load();
+    gd.addChoice("Kernel_image", names, settings.imageTitle);
+    gd.addChoice("Method", METHODS, settings.method);
+    gd.addChoice("Filter", FILTERS, settings.filter);
+    gd.addSlider("Border", 0, 10, settings.border);
+    gd.addCheckbox("Zero_outside_image", settings.zero);
 
     gd.addDialogListener(this);
     gd.addPreviewCheckbox(pfr);
+
+    // Only need do this once. Do it here to save settings from the preview
+    settings.save();
 
     gd.showDialog();
 
@@ -151,36 +203,34 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
 
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    imageTitle = gd.getNextChoice();
-    method = gd.getNextChoiceIndex();
-    filter = gd.getNextChoiceIndex();
-    border = (int) gd.getNextNumber();
-    zero = gd.getNextBoolean();
+    settings.imageTitle = gd.getNextChoice();
+    settings.method = gd.getNextChoiceIndex();
+    settings.filter = gd.getNextChoiceIndex();
+    settings.border = (int) gd.getNextNumber();
+    settings.zero = gd.getNextBoolean();
 
-    kernelImp = WindowManager.getImage(imageTitle);
-    if (kernelImp == null) {
-      return false;
-    }
-
-    return true;
+    kernelImp = WindowManager.getImage(settings.imageTitle);
+    return (kernelImp != null);
   }
 
   @Override
   public void setNPasses(int passes) {
     // Create the kernel from the image
-    boolean build = kernelImp.getID() != lastId || method != lastMethod || filter != lastFilter;
-    build = build || (method == METHOD_SPATIAL && kf == null);
-    build = build || (method == METHOD_FHT && ff == null);
+    boolean build = kernelImp.getID() != lastId || settings.method != lastMethod
+        || settings.filter != lastFilter;
+    build = build || (settings.method == METHOD_SPATIAL && kf == null);
+    build = build || (settings.method == METHOD_FHT && ff == null);
     if (build) {
-      final Operation operation = Operation.forOrdinal(filter);
+      final Operation operation = Operation.forOrdinal(settings.filter);
       FloatProcessor fp = kernelImp.getProcessor().toFloat(0, null);
-      if (method == METHOD_SPATIAL) {
-        if (kf == null || kernelImp.getID() != lastId || zero != lastZero) {
+      if (settings.method == METHOD_SPATIAL) {
+        if (kf == null || kernelImp.getID() != lastId || settings.zero != lastZero) {
           fp = KernelFilter.pad(fp);
           final int kw = fp.getWidth();
           final int kh = fp.getHeight();
           final float[] kernel = (float[]) fp.getPixels();
-          kf = (zero) ? new ZeroKernelFilter(kernel, kw, kh) : new KernelFilter(kernel, kw, kh);
+          kf = (settings.zero) ? new ZeroKernelFilter(kernel, kw, kh)
+              : new KernelFilter(kernel, kw, kh);
         }
         switch (operation) {
           case CONVOLUTION:
@@ -207,9 +257,9 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
         ff.setOperation(operation);
       }
       lastId = kernelImp.getID();
-      lastMethod = method;
-      lastFilter = filter;
-      lastZero = zero;
+      lastMethod = settings.method;
+      lastFilter = settings.filter;
+      lastZero = settings.zero;
     }
 
     ticker = ImageJUtils.createTicker(passes, passes);

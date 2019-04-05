@@ -29,45 +29,45 @@ import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 /**
  * Used to store the correlation (g(r)) result for the PC-PALM analysis.
  */
-public class CorrelationResult {
+class CorrelationResult {
   /** The id. */
-  public int id;
+  int id;
 
   /** The source. */
-  public ImageSource source;
+  ImageSource source;
 
   /** The minx. */
-  public double minx;
+  double minx;
 
   /** The miny. */
-  public double miny;
+  double miny;
 
   /** The maxx. */
-  public double maxx;
+  double maxx;
 
   /** The maxy. */
-  public double maxy;
+  double maxy;
 
   /** The nm per pixel. */
-  public double nmPerPixel;
+  double nmPerPixel;
 
   /** The peak density. */
-  public double peakDensity;
+  double peakDensity;
 
   /** The number of unique points. */
-  public double uniquePoints;
+  double uniquePoints;
 
   /**
    * Set to true if pixels in the image have a 1/0 value. Otherwise it is assumed the image has
    * continuous real values, i.e. pixels can have 1 or more localisations.
    */
-  public boolean binaryImage;
+  boolean binaryImage;
 
   /** The correlation curve. */
-  public double[][] gr;
+  double[][] gr;
 
   /** The spatial domain. */
-  public boolean spatialDomain;
+  boolean spatialDomain;
 
   /**
    * Instantiates a new correlation result.
@@ -86,8 +86,8 @@ public class CorrelationResult {
    * @param gr the correlation curve
    * @param spatialDomain the spatial domain
    */
-  public CorrelationResult(int id, ImageSource source, double minx, double miny, double maxx,
-      double maxy, double uniquePoints, double nmPerPixel, double peakDensity, boolean binaryImage,
+  CorrelationResult(int id, ImageSource source, double minx, double miny, double maxx, double maxy,
+      double uniquePoints, double nmPerPixel, double peakDensity, boolean binaryImage,
       double[][] gr, boolean spatialDomain) {
     this.id = id;
     this.source = source;
@@ -110,7 +110,7 @@ public class CorrelationResult {
    * @param r2 the second result
    * @return the comparison (-1, 0, or 1)
    */
-  public static int compare(CorrelationResult r1, CorrelationResult r2) {
+  static int compare(CorrelationResult r1, CorrelationResult r2) {
     return Integer.compare(r1.id, r2.id);
   }
 }

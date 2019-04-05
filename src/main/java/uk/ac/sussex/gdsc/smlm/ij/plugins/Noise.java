@@ -61,27 +61,74 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Contains methods to find the noise in the provided image data.
  */
 public class Noise implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Noise Estimator";
-  private List<double[]> results;
   private static final int FLAGS =
       DOES_8G | DOES_16 | DOES_32 | PARALLELIZE_STACKS | FINAL_PROCESSING | NO_CHANGES;
+  private static final String Y_AXIS_COUNT = "Noise (counts)";
+  private static final String Y_AXIS_PHOTON = "Noise (photons)";
+
+  private List<double[]> results;
   private PlugInFilterRunner pfr;
   private ImagePlus imp;
-  private static int algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
-  private static int algorithm2 =
-      NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
-  private static int lowestPixelsRange = 6;
   private CalibrationWriter calibration;
   private CameraModel cameraModel;
 
-  private static final String Y_AXIS_COUNT = "Noise (counts)";
-  private static final String Y_AXIS_PHOTON = "Noise (photons)";
   private String yAxisTitle;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    int algorithm;
+    int algorithm2;
+    int lowestPixelsRange;
+
+    Settings() {
+      // Set defaults
+      algorithm = NoiseEstimatorMethod.ALL_PIXELS_VALUE;
+      algorithm2 = NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES_VALUE;
+      lowestPixelsRange = 6;
+    }
+
+    Settings(Settings source) {
+      algorithm = source.algorithm;
+      algorithm2 = source.algorithm2;
+      lowestPixelsRange = source.lowestPixelsRange;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -122,6 +169,11 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
       return DONE;
     }
 
+    settings = Settings.load();
+
+    // Do this now to prevent doing it in the preview.
+    settings.save();
+
     // If using a stack, provide a preview graph of the noise for two methods
     if (imp.getStackSize() > 1) {
       this.pfr = pfr;
@@ -133,9 +185,9 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
       final String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
 
-      gd.addChoice("Method1 (blue)", methodNames, methodNames[algorithm]);
-      gd.addChoice("Method2 (red)", methodNames, methodNames[algorithm2]);
-      gd.addSlider("Lowest_radius", 1, 15, lowestPixelsRange);
+      gd.addChoice("Method1 (blue)", methodNames, methodNames[settings.algorithm]);
+      gd.addChoice("Method2 (red)", methodNames, methodNames[settings.algorithm2]);
+      gd.addSlider("Lowest_radius", 1, 15, settings.lowestPixelsRange);
 
       gd.addDialogListener(this);
       gd.addMessage("Click OK to compute noise table using all methods");
@@ -187,10 +239,10 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    algorithm = gd.getNextChoiceIndex();
-    algorithm2 = gd.getNextChoiceIndex();
-    lowestPixelsRange = (int) gd.getNextNumber();
-    if (gd.invalidNumber() || lowestPixelsRange < 1) {
+    settings.algorithm = gd.getNextChoiceIndex();
+    settings.algorithm2 = gd.getNextChoiceIndex();
+    settings.lowestPixelsRange = (int) gd.getNextNumber();
+    if (gd.invalidNumber() || settings.lowestPixelsRange < 1) {
       return false;
     }
     if (gd.isShowing()) {
@@ -205,9 +257,9 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
   private void drawPlot() {
     final NoiseEstimatorMethod[] values = SettingsManager.getNoiseEstimatorMethodValues();
     final NoiseEstimator.Method method1 =
-        FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm]);
+        FitProtosHelper.convertNoiseEstimatorMethod(values[settings.algorithm]);
     final NoiseEstimator.Method method2 =
-        FitProtosHelper.convertNoiseEstimatorMethod(values[algorithm2]);
+        FitProtosHelper.convertNoiseEstimatorMethod(values[settings.algorithm2]);
     IJ.showStatus("Estimating noise ...");
 
     final boolean twoMethods = method1 != method2;
@@ -242,7 +294,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
       cameraModel.removeBiasAndGain(bounds, buffer);
       final NoiseEstimator ne = NoiseEstimator.wrap(buffer, bounds.width, bounds.height);
       ne.setPreserveResiduals(preserveResiduals);
-      ne.setRange(lowestPixelsRange);
+      ne.setRange(settings.lowestPixelsRange);
       xValues[i] = slice;
       yValues1[i] = ne.getNoise(method1);
       if (yValues2 != null) {

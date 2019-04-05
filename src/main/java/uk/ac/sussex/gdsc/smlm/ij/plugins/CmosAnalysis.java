@@ -84,6 +84,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,40 +97,6 @@ import java.util.regex.Pattern;
 public class CmosAnalysis implements PlugIn {
   private static final String TITLE = "sCMOS Analysis";
 
-  private static String directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
-  private static String modelDirectory;
-  private static String modelName;
-  private static boolean rollingAlgorithm;
-  private static boolean reuseProcessedData = true;
-
-  // The simulation can default roughly to the values displayed
-  // in the Huang sCMOS paper supplementary figure 1:
-
-  // Offset = Approximately Normal or Poisson. We use Poisson
-  // since that is an integer distribution which would be expected
-  // for an offset & Poisson approaches the Gaussian at high mean.
-  private static double offset = 100;
-
-  // Variance = Exponential (equivalent to chi-squared with k=1, i.e.
-  // sum of the squares of 1 normal distribution).
-  // We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b
-  // cumul = 1 - e^-lx (with l = 1/mean)
-  // => e^-lx = 1 - cumul
-  // => -lx = log(1-0.999)
-  // => l = -log(0.001) / 400 (since x==400)
-  // => 1/l = 57.9
-  private static double variance = 57.9; // SD = 7.6
-
-  // Gain = Approximately Normal
-  private static double gain = 2.2;
-  private static double gainSD = 0.2;
-
-  private static int size = 512;
-  private static int frames = 512;
-
-  private static int imagejNThreads = Prefs.getThreads();
-  private static int lastNumberOfThreads = imagejNThreads;
-
   private int numberOfThreads;
   // The simulated offset, variance and gain
   private ImagePlus simulationImp;
@@ -137,6 +104,102 @@ public class CmosAnalysis implements PlugIn {
   private ImageStack measuredStack;
   // The sub-directories containing the sCMOS images
   private TurboList<SubDir> subDirs;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String directory;
+    String modelDirectory;
+    String modelName;
+    boolean rollingAlgorithm;
+    boolean reuseProcessedData;
+    double offset;
+    double variance;
+    double gain;
+    double gainStdDev;
+    int size;
+    int frames;
+    int imagejNThreads;
+    int lastNumberOfThreads;
+
+    Settings() {
+      // Set defaults
+      directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
+      reuseProcessedData = true;
+
+      // The simulation can default roughly to the values displayed
+      // in the Huang sCMOS paper supplementary figure 1:
+
+      // Offset = Approximately Normal or Poisson. We use Poisson
+      // since that is an integer distribution which would be expected
+      // for an offset & Poisson approaches the Gaussian at high mean.
+      offset = 100;
+
+      // Variance = Exponential (equivalent to chi-squared with k=1, i.e.
+      // sum of the squares of 1 normal distribution).
+      // We want 99.9% @ 400 ADU based on supplementary figure 1.a/1.b
+      // cumul = 1 - e^-lx (l = 1/mean)
+      // => e^-lx = 1 - cumul
+      // => -lx = log(1-0.999)
+      // => l = -log(0.001) / 400 (since x==400)
+      // => 1/l = 57.9
+      variance = 57.9; // SD = 7.6
+
+      // Gain = Approximately Normal
+      gain = 2.2;
+      gainStdDev = 0.2;
+
+      size = 512;
+      frames = 512;
+
+      imagejNThreads = Prefs.getThreads();
+      lastNumberOfThreads = imagejNThreads;
+    }
+
+    Settings(Settings source) {
+      directory = source.directory;
+      modelDirectory = source.modelDirectory;
+      modelName = source.modelName;
+      rollingAlgorithm = source.rollingAlgorithm;
+      reuseProcessedData = source.reuseProcessedData;
+      offset = source.offset;
+      variance = source.variance;
+      gain = source.gain;
+      gainStdDev = source.gainStdDev;
+      size = source.size;
+      frames = source.frames;
+      imagejNThreads = source.imagejNThreads;
+      lastNumberOfThreads = source.lastNumberOfThreads;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class SimulationWorker implements Runnable {
     static final short MIN_SHORT = 0;
@@ -154,8 +217,8 @@ public class CmosAnalysis implements PlugIn {
     final int blockSize;
     final int photons;
 
-    public SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from,
-        int to, int blockSize, int photons) {
+    SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from, int to,
+        int blockSize, int photons) {
       this.ticker = ticker;
       rg = new Well19937c(seed);
       pixelOffset = (float[]) stack.getPixels(1);
@@ -295,7 +358,7 @@ public class CmosAnalysis implements PlugIn {
     final ArrayMoment moment;
     int bitDepth;
 
-    public ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment) {
+    ImageWorker(Ticker ticker, BlockingQueue<Object> jobs, ArrayMoment moment) {
       this.ticker = ticker;
       this.jobs = jobs;
       this.moment = moment.newInstance();
@@ -348,13 +411,13 @@ public class CmosAnalysis implements PlugIn {
    *
    * @return the last number of threads
    */
-  private static int getLastNumberOfThreads() {
+  private int getLastNumberOfThreads() {
     // See if ImageJ preference were updated
-    if (imagejNThreads != Prefs.getThreads()) {
-      lastNumberOfThreads = imagejNThreads = Prefs.getThreads();
+    if (settings.imagejNThreads != Prefs.getThreads()) {
+      settings.lastNumberOfThreads = settings.imagejNThreads = Prefs.getThreads();
     }
     // Otherwise use the last user input
-    return lastNumberOfThreads;
+    return settings.lastNumberOfThreads;
   }
 
   /**
@@ -377,7 +440,7 @@ public class CmosAnalysis implements PlugIn {
   private void setThreads(int numberOfThreads) {
     this.numberOfThreads = Math.max(1, numberOfThreads);
     // Save user input
-    lastNumberOfThreads = this.numberOfThreads;
+    settings.lastNumberOfThreads = this.numberOfThreads;
   }
 
   @Override
@@ -397,11 +460,13 @@ public class CmosAnalysis implements PlugIn {
         80));
     //@formatter:on
 
-    final String dir = ImageJUtils.getDirectory(TITLE, directory);
+    settings = Settings.load();
+    final String dir = ImageJUtils.getDirectory(TITLE, settings.directory);
     if (TextUtils.isNullOrEmpty(dir)) {
       return;
     }
-    directory = dir;
+    settings.directory = dir;
+    settings.save();
     Prefs.set(Constants.sCMOSAnalysisDirectory, dir);
 
     final boolean simulate = "simulate".equals(arg);
@@ -425,7 +490,8 @@ public class CmosAnalysis implements PlugIn {
 
     if (simulationImp == null) {
       // Just in case an old simulation is in the directory
-      final ImagePlus imp = IJ.openImage(new File(directory, "perPixelSimulation.tif").getPath());
+      final ImagePlus imp =
+          IJ.openImage(new File(settings.directory, "perPixelSimulation.tif").getPath());
       if (imp != null && imp.getStackSize() == 3 && imp.getWidth() == measuredStack.getWidth()
           && imp.getHeight() == measuredStack.getHeight()) {
         simulationImp = imp;
@@ -439,7 +505,7 @@ public class CmosAnalysis implements PlugIn {
 
   private void simulate() throws IOException {
     // Create the offset, variance and gain for each pixel
-    final int n = size * size;
+    final int n = settings.size * settings.size;
     final float[] pixelOffset = new float[n];
     final float[] pixelVariance = new float[n];
     final float[] pixelGain = new float[n];
@@ -448,31 +514,32 @@ public class CmosAnalysis implements PlugIn {
     final long start = System.currentTimeMillis();
 
     final RandomGenerator rg = new Well19937c();
-    final PoissonDistribution pd = new PoissonDistribution(rg, offset,
+    final PoissonDistribution pd = new PoissonDistribution(rg, settings.offset,
         PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-    final ExponentialDistribution ed = new ExponentialDistribution(rg, variance,
+    final ExponentialDistribution ed = new ExponentialDistribution(rg, settings.variance,
         ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
     Ticker ticker = ImageJUtils.createTicker(n, 0);
     for (int i = 0; i < n; i++) {
       // Q. Should these be clipped to a sensible range?
       pixelOffset[i] = pd.sample();
       pixelVariance[i] = (float) ed.sample();
-      pixelGain[i] = (float) (gain + rg.nextGaussian() * gainSD);
+      pixelGain[i] = (float) (settings.gain + rg.nextGaussian() * settings.gainStdDev);
       ticker.tick();
     }
     IJ.showProgress(1);
 
     // Save to the directory as a stack
-    final ImageStack simulationStack = new ImageStack(size, size);
+    final ImageStack simulationStack = new ImageStack(settings.size, settings.size);
     simulationStack.addSlice("Offset", pixelOffset);
     simulationStack.addSlice("Variance", pixelVariance);
     simulationStack.addSlice("Gain", pixelGain);
     simulationImp = new ImagePlus("PerPixel", simulationStack);
     // Only the info property is saved to the TIFF file
     simulationImp.setProperty("Info",
-        String.format("Offset=%s; Variance=%s; Gain=%s +/- %s", MathUtils.rounded(offset),
-            MathUtils.rounded(variance), MathUtils.rounded(gain), MathUtils.rounded(gainSD)));
-    IJ.save(simulationImp, new File(directory, "perPixelSimulation.tif").getPath());
+        String.format("Offset=%s; Variance=%s; Gain=%s +/- %s", MathUtils.rounded(settings.offset),
+            MathUtils.rounded(settings.variance), MathUtils.rounded(settings.gain),
+            MathUtils.rounded(settings.gainStdDev)));
+    IJ.save(simulationImp, new File(settings.directory, "perPixelSimulation.tif").getPath());
 
     // Create thread pool and workers
     final int threadCount = getThreads();
@@ -484,21 +551,21 @@ public class CmosAnalysis implements PlugIn {
     final int[] photons = new int[] {0, 20, 50, 100, 200};
 
     final int blockSize = 10; // For saving stacks
-    int numberPerThread = (int) Math.ceil((double) frames / numberOfThreads);
+    int numberPerThread = (int) Math.ceil((double) settings.frames / numberOfThreads);
     // Convert to fit the block size
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
     long seed = start;
 
-    ticker = ImageJUtils.createTicker((long) photons.length * frames, threadCount);
+    ticker = ImageJUtils.createTicker((long) photons.length * settings.frames, threadCount);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 
       // Create the directory
-      Path out = Paths.get(directory, String.format("photon%03d", p));
+      Path out = Paths.get(settings.directory, String.format("photon%03d", p));
       Files.createDirectories(out);
 
-      for (int from = 0; from < frames;) {
-        final int to = Math.min(from + numberPerThread, frames);
+      for (int from = 0; from < settings.frames;) {
+        final int to = Math.min(from + numberPerThread, settings.frames);
         futures.add(executor.submit(new SimulationWorker(ticker, seed++, out.toString(),
             simulationStack, from, to, blockSize, p)));
         from = to;
@@ -523,33 +590,33 @@ public class CmosAnalysis implements PlugIn {
     gd.addMessage("Simulate per-pixel offset, variance and gain of sCMOS images.");
 
     gd.addNumericField("nThreads", getLastNumberOfThreads(), 0);
-    gd.addNumericField("Offset (Poisson)", offset, 3);
-    gd.addNumericField("Variance (Exponential)", variance, 3);
-    gd.addNumericField("Gain (Gaussian)", gain, 3);
-    gd.addNumericField("Gain_SD", gainSD, 3);
-    gd.addNumericField("Size", size, 0);
-    gd.addNumericField("Frames", frames, 0);
+    gd.addNumericField("Offset (Poisson)", settings.offset, 3);
+    gd.addNumericField("Variance (Exponential)", settings.variance, 3);
+    gd.addNumericField("Gain (Gaussian)", settings.gain, 3);
+    gd.addNumericField("Gain_SD", settings.gainStdDev, 3);
+    gd.addNumericField("Size", settings.size, 0);
+    gd.addNumericField("Frames", settings.frames, 0);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
 
     setThreads((int) gd.getNextNumber());
-    offset = Math.abs(gd.getNextNumber());
-    variance = Math.abs(gd.getNextNumber());
-    gain = Math.abs(gd.getNextNumber());
-    gainSD = Math.abs(gd.getNextNumber());
-    size = Math.abs((int) gd.getNextNumber());
-    frames = Math.abs((int) gd.getNextNumber());
+    settings.offset = Math.abs(gd.getNextNumber());
+    settings.variance = Math.abs(gd.getNextNumber());
+    settings.gain = Math.abs(gd.getNextNumber());
+    settings.gainStdDev = Math.abs(gd.getNextNumber());
+    settings.size = Math.abs((int) gd.getNextNumber());
+    settings.frames = Math.abs((int) gd.getNextNumber());
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Offset", offset);
-      ParameterUtils.isAboveZero("Variance", variance);
-      ParameterUtils.isAboveZero("Gain", gain);
-      ParameterUtils.isAboveZero("Gain SD", gainSD);
-      ParameterUtils.isAboveZero("Size", size);
-      ParameterUtils.isAboveZero("Frames", frames);
+      ParameterUtils.isAboveZero("Offset", settings.offset);
+      ParameterUtils.isAboveZero("Variance", settings.variance);
+      ParameterUtils.isAboveZero("Gain", settings.gain);
+      ParameterUtils.isAboveZero("Gain SD", settings.gainStdDev);
+      ParameterUtils.isAboveZero("Size", settings.size);
+      ParameterUtils.isAboveZero("Frames", settings.frames);
     } catch (final IllegalArgumentException ex) {
       ImageJUtils.log(TITLE + ": " + ex.getMessage());
       return false;
@@ -560,7 +627,7 @@ public class CmosAnalysis implements PlugIn {
 
   private boolean showDialog() {
     // Determine sub-directories to process
-    final File dir = new File(directory);
+    final File dir = new File(settings.directory);
     final File[] dirs = dir.listFiles(File::isDirectory);
 
     if (ArrayUtils.isEmpty(dirs)) {
@@ -612,8 +679,8 @@ public class CmosAnalysis implements PlugIn {
     gd.addNumericField("nThreads", getLastNumberOfThreads(), 0);
     gd.addMessage(TextUtils.wrap("A rolling algorithm can handle any size of data but is slower. "
         + "Otherwise the camera is assumed to produce a maximum of 16-bit unsigned data.", 80));
-    gd.addCheckbox("Rolling_algorithm", rollingAlgorithm);
-    gd.addCheckbox("Re-use_processed_data", reuseProcessedData);
+    gd.addCheckbox("Rolling_algorithm", settings.rollingAlgorithm);
+    gd.addCheckbox("Re-use_processed_data", settings.reuseProcessedData);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -621,7 +688,7 @@ public class CmosAnalysis implements PlugIn {
     }
 
     setThreads((int) gd.getNextNumber());
-    rollingAlgorithm = gd.getNextBoolean();
+    settings.rollingAlgorithm = gd.getNextBoolean();
 
     return true;
   }
@@ -659,9 +726,9 @@ public class CmosAnalysis implements PlugIn {
       final StopWatch sw = StopWatch.createStarted();
 
       // Option to reuse data
-      final File file = new File(directory, "perPixel" + sd.name + ".tif");
+      final File file = new File(settings.directory, "perPixel" + sd.name + ".tif");
       boolean found = false;
-      if (reuseProcessedData && file.exists()) {
+      if (settings.reuseProcessedData && file.exists()) {
         final Opener opener = new Opener();
         opener.setSilentMode(true);
         final ImagePlus imp = opener.openImage(file.getPath());
@@ -715,7 +782,7 @@ public class CmosAnalysis implements PlugIn {
         final int bitDepth = ImageJUtils.getBitDepth(pixels);
 
         ArrayMoment moment;
-        if (rollingAlgorithm) {
+        if (settings.rollingAlgorithm) {
           moment = new RollingArrayMoment();
           // We assume 16-bit camera at the maximum
         } else if (bitDepth <= 16
@@ -856,22 +923,6 @@ public class CmosAnalysis implements PlugIn {
       pixelGain[i] = biaiT[i] / bibiT[i];
     }
 
-    // for (int i = 0; i < pixelGain.length; i++)
-    // {
-    // // Use equation 2.5 from the Huang et al paper.
-    // double bibiT = 0;
-    // double biaiT = 0;
-    // // Ignore first as this is the 0 exposure image
-    // for (int n = 1; n < nSubDirs; n++)
-    // {
-    // double bi = data[2*n][i] - pixelOffset[i];
-    // double ai = data[2*n+1][i] - pixelVariance[i];
-    // bibiT += bi * bi;
-    // biaiT += bi * ai;
-    // }
-    // pixelGain[i] = biaiT / bibiT;
-    // }
-
     final Statistics statsGain = Statistics.create(pixelGain);
     ImageJUtils.log("Gain Mean = %s +/- %s", MathUtils.rounded(statsGain.getMean()),
         MathUtils.rounded(statsGain.getStandardDeviation()));
@@ -895,19 +946,20 @@ public class CmosAnalysis implements PlugIn {
 
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Save the sCMOS camera model?");
-    if (modelDirectory == null) {
-      modelDirectory = directory;
-      modelName = "sCMOS Camera";
+    if (settings.modelDirectory == null) {
+      settings.modelDirectory = settings.directory;
+      settings.modelName = "sCMOS Camera";
     }
-    egd.addStringField("Model_name", modelName, 30);
-    egd.addDirectoryField("Model_directory", modelDirectory);
+    egd.addStringField("Model_name", settings.modelName, 30);
+    egd.addDirectoryField("Model_directory", settings.modelDirectory);
     egd.showDialog();
     if (!egd.wasCanceled()) {
-      modelName = egd.getNextString();
-      modelDirectory = egd.getNextString();
+      settings.modelName = egd.getNextString();
+      settings.modelDirectory = egd.getNextString();
       final PerPixelCameraModel cameraModel =
           new PerPixelCameraModel(width, height, bias, gain, variance);
-      if (!CameraModelManager.save(cameraModel, new File(directory, modelName).getPath())) {
+      if (!CameraModelManager.save(cameraModel,
+          new File(settings.directory, settings.modelName).getPath())) {
         IJ.error(TITLE, "Failed to save model to file");
       }
     }

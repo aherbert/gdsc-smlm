@@ -83,49 +83,23 @@ public class FilterAnalysis implements PlugIn {
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
   private static AtomicReference<TextWindow> sensitivityWindowRef = new AtomicReference<>();
 
-  private static boolean saveFilterSets;
-  private static boolean showResultsTable = true;
-  private static int plotTopN;
+  private static final AtomicReference<LastResults> lastResults = new AtomicReference<>();
+
   private ArrayList<NamedPlot> plots;
-  private static boolean calculateSensitivity;
-  private static double delta = 0.1;
   private HashMap<String, FilterScore> bestFilter;
   private LinkedList<String> bestFilterOrder;
 
-  private static boolean snrFilter = true;
-  private static int minSnr = 20;
-  private static int maxSnr = 80;
-  private static double minWidth = 1.5;
-  private static double maxWidth = 2.0;
-  private static double incWidth = 0.5;
-
-  private static boolean precisionFilter = true;
-  private static int minPrecision = 20;
-  private static int maxPrecision = 80;
-
-  private static boolean traceFilter;
-  private static double minDistance = 0.3;
-  private static double maxDistance = 1.2;
-  private static double incDistance = 0.3;
-  private static int minTime = 1;
-  private static int maxTime = 80;
-  private static int incTime = 10;
-
-  private static boolean hysteresisSnrFilter = true;
-  private static int minSnrGap = 10;
-  private static int maxSnrGap = 40;
-  private static int incSnrGap = 10;
-
-  private static boolean hysteresisPrecisionFilter = true;
-  private static int minPrecisionGap = 10;
-  private static int maxPrecisionGap = 40;
-  private static int incPrecisionGap = 10;
-
-  private static List<MemoryPeakResults> resultsList;
-  private String inputDirectory;
-  private static String lastInputDirectory = "";
-
   private final boolean isHeadless;
+
+  private static class LastResults {
+    List<MemoryPeakResults> resultsList;
+    String inputDirectory;
+
+    LastResults(List<MemoryPeakResults> resultsList, String inputDirectory) {
+      this.resultsList = resultsList;
+      this.inputDirectory = inputDirectory;
+    }
+  }
 
   private static class FilterScore {
     Filter filter;
@@ -138,6 +112,134 @@ public class FilterAnalysis implements PlugIn {
     void update(Filter filter, double score) {
       this.filter = filter;
       this.score = score;
+    }
+  }
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    boolean saveFilterSets;
+    boolean showResultsTable;
+    int plotTopN;
+    boolean calculateSensitivity;
+    double delta;
+
+    boolean snrFilter;
+    int minSnr;
+    int maxSnr;
+    double minWidth;
+    double maxWidth;
+    double incWidth;
+
+    boolean precisionFilter;
+    int minPrecision;
+    int maxPrecision;
+
+    boolean traceFilter;
+    double minDistance;
+    double maxDistance;
+    double incDistance;
+    int minTime;
+    int maxTime;
+    int incTime;
+
+    boolean hysteresisSnrFilter;
+    int minSnrGap;
+    int maxSnrGap;
+    int incSnrGap;
+
+    boolean hysteresisPrecisionFilter;
+    int minPrecisionGap;
+    int maxPrecisionGap;
+    int incPrecisionGap;
+
+    Settings() {
+      // Set defaults
+      showResultsTable = true;
+      delta = 0.1;
+      snrFilter = true;
+      minSnr = 20;
+      maxSnr = 80;
+      minWidth = 1.5;
+      maxWidth = 2.0;
+      incWidth = 0.5;
+      precisionFilter = true;
+      minPrecision = 20;
+      maxPrecision = 80;
+      minDistance = 0.3;
+      maxDistance = 1.2;
+      incDistance = 0.3;
+      minTime = 1;
+      maxTime = 80;
+      incTime = 10;
+      hysteresisSnrFilter = true;
+      minSnrGap = 10;
+      maxSnrGap = 40;
+      incSnrGap = 10;
+      hysteresisPrecisionFilter = true;
+      minPrecisionGap = 10;
+      maxPrecisionGap = 40;
+      incPrecisionGap = 10;
+    }
+
+    Settings(Settings source) {
+      saveFilterSets = source.saveFilterSets;
+      showResultsTable = source.showResultsTable;
+      plotTopN = source.plotTopN;
+      calculateSensitivity = source.calculateSensitivity;
+      delta = source.delta;
+      snrFilter = source.snrFilter;
+      minSnr = source.minSnr;
+      maxSnr = source.maxSnr;
+      minWidth = source.minWidth;
+      maxWidth = source.maxWidth;
+      incWidth = source.incWidth;
+      precisionFilter = source.precisionFilter;
+      minPrecision = source.minPrecision;
+      maxPrecision = source.maxPrecision;
+      traceFilter = source.traceFilter;
+      minDistance = source.minDistance;
+      maxDistance = source.maxDistance;
+      incDistance = source.incDistance;
+      minTime = source.minTime;
+      maxTime = source.maxTime;
+      incTime = source.incTime;
+      hysteresisSnrFilter = source.hysteresisSnrFilter;
+      minSnrGap = source.minSnrGap;
+      maxSnrGap = source.maxSnrGap;
+      incSnrGap = source.incSnrGap;
+      hysteresisPrecisionFilter = source.hysteresisPrecisionFilter;
+      minPrecisionGap = source.minPrecisionGap;
+      maxPrecisionGap = source.maxPrecisionGap;
+      incPrecisionGap = source.incPrecisionGap;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
     }
   }
 
@@ -176,11 +278,12 @@ public class FilterAnalysis implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    if (getInputDirectory() == null) {
+    final String inputDirectory = getInputDirectory();
+    if (inputDirectory == null) {
       return;
     }
 
-    resultsList = readResults();
+    final List<MemoryPeakResults> resultsList = readResults(inputDirectory);
     if (resultsList.isEmpty()) {
       IJ.error(TITLE, "No results could be loaded. Check files have the suffix .xls, .csv or .bin");
       return;
@@ -196,7 +299,7 @@ public class FilterAnalysis implements PlugIn {
 
     if (fileInput) {
       filterSets = readFilterSets();
-      if (filterSets == null) {
+      if (filterSets.isEmpty()) {
         return;
       }
     } else {
@@ -208,14 +311,14 @@ public class FilterAnalysis implements PlugIn {
       return;
     }
 
-    if (!fileInput && saveFilterSets) {
+    if (!fileInput && settings.saveFilterSets) {
       saveFilterSets(filterSets);
     }
 
     analyse(resultsList, filterSets);
   }
 
-  private String getInputDirectory() {
+  private static String getInputDirectory() {
     final GUIFilterSettings.Builder filterSettings =
         SettingsManager.readGuiFilterSettings(0).toBuilder();
 
@@ -229,8 +332,7 @@ public class FilterAnalysis implements PlugIn {
 
     SettingsManager.writeSettings(filterSettings.build());
 
-    inputDirectory = filterSettings.getFilterAnalysisDirectory();
-    return inputDirectory;
+    return filterSettings.getFilterAnalysisDirectory();
   }
 
   @SuppressWarnings("unchecked")
@@ -260,7 +362,7 @@ public class FilterAnalysis implements PlugIn {
         IJ.showStatus("");
       }
     }
-    return null;
+    return Collections.emptyList();
   }
 
   private static void saveFilterSets(List<FilterSet> filterSets) {
@@ -282,15 +384,16 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
-  private List<MemoryPeakResults> readResults() {
-    if (resultsList != null && inputDirectory.equals(lastInputDirectory)) {
+  private static List<MemoryPeakResults> readResults(String inputDirectory) {
+    final LastResults last = lastResults.get();
+    if (last != null && last.inputDirectory.equals(inputDirectory)) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Re-use results from the same directory (no to refresh)?");
       gd.enableYesNoCancel();
       gd.hideCancelButton();
       gd.showDialog();
       if (gd.wasOKed()) {
-        return resultsList;
+        return last.resultsList;
       }
     }
 
@@ -313,12 +416,12 @@ public class FilterAnalysis implements PlugIn {
     }
     IJ.showStatus("");
     IJ.showProgress(1);
-    lastInputDirectory = inputDirectory;
+    lastResults.set(new LastResults(list, inputDirectory));
 
     return list;
   }
 
-  private static boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput) {
+  private boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput) {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -332,91 +435,94 @@ public class FilterAnalysis implements PlugIn {
         }
       });
     }
-    ImageJUtils.addMessage(gd, "%d files, %d results, %d True-Positives", resultsList.size(),
-        total, tp.getCount());
+    ImageJUtils.addMessage(gd, "%d files, %d results, %d True-Positives", resultsList.size(), total,
+        tp.getCount());
+
+    settings = Settings.load();
+    settings.save();
 
     if (!fileInput) {
-      gd.addCheckbox("SNR_filter", snrFilter);
-      gd.addNumericField("Min_SNR", minSnr, 0);
-      gd.addNumericField("Max_SNR", maxSnr, 0);
-      gd.addNumericField("Min_Width", minWidth, 2);
-      gd.addNumericField("Max_Width", maxWidth, 2);
-      gd.addNumericField("Increment_Width", incWidth, 2);
+      gd.addCheckbox("SNR_filter", settings.snrFilter);
+      gd.addNumericField("Min_SNR", settings.minSnr, 0);
+      gd.addNumericField("Max_SNR", settings.maxSnr, 0);
+      gd.addNumericField("Min_Width", settings.minWidth, 2);
+      gd.addNumericField("Max_Width", settings.maxWidth, 2);
+      gd.addNumericField("Increment_Width", settings.incWidth, 2);
 
-      gd.addCheckbox("Precision_filter", precisionFilter);
-      gd.addNumericField("Min_Precision", minPrecision, 0);
-      gd.addNumericField("Max_Precision", maxPrecision, 0);
+      gd.addCheckbox("Precision_filter", settings.precisionFilter);
+      gd.addNumericField("Min_Precision", settings.minPrecision, 0);
+      gd.addNumericField("Max_Precision", settings.maxPrecision, 0);
 
-      gd.addCheckbox("Trace_filter", traceFilter);
-      gd.addNumericField("Min_distance", minDistance, 2);
-      gd.addNumericField("Max_distance", maxDistance, 2);
-      gd.addNumericField("Increment_distance", incDistance, 2);
-      gd.addNumericField("Min_time", minTime, 0);
-      gd.addNumericField("Max_time", maxTime, 0);
-      gd.addNumericField("Increment_time", incTime, 0);
+      gd.addCheckbox("Trace_filter", settings.traceFilter);
+      gd.addNumericField("Min_distance", settings.minDistance, 2);
+      gd.addNumericField("Max_distance", settings.maxDistance, 2);
+      gd.addNumericField("Increment_distance", settings.incDistance, 2);
+      gd.addNumericField("Min_time", settings.minTime, 0);
+      gd.addNumericField("Max_time", settings.maxTime, 0);
+      gd.addNumericField("Increment_time", settings.incTime, 0);
 
-      gd.addCheckbox("Hysteresis_SNR_filter", hysteresisSnrFilter);
-      gd.addNumericField("Min_SNR_gap", minSnrGap, 0);
-      gd.addNumericField("Max_SNR_gap", maxSnrGap, 0);
-      gd.addNumericField("Increment_SNR_gap", incSnrGap, 0);
+      gd.addCheckbox("Hysteresis_SNR_filter", settings.hysteresisSnrFilter);
+      gd.addNumericField("Min_SNR_gap", settings.minSnrGap, 0);
+      gd.addNumericField("Max_SNR_gap", settings.maxSnrGap, 0);
+      gd.addNumericField("Increment_SNR_gap", settings.incSnrGap, 0);
 
-      gd.addCheckbox("Hysteresis_Precision_filter", hysteresisPrecisionFilter);
-      gd.addNumericField("Min_Precision_gap", minPrecisionGap, 0);
-      gd.addNumericField("Max_Precision_gap", maxPrecisionGap, 0);
-      gd.addNumericField("Increment_Precision_gap", incPrecisionGap, 0);
+      gd.addCheckbox("Hysteresis_Precision_filter", settings.hysteresisPrecisionFilter);
+      gd.addNumericField("Min_Precision_gap", settings.minPrecisionGap, 0);
+      gd.addNumericField("Max_Precision_gap", settings.maxPrecisionGap, 0);
+      gd.addNumericField("Increment_Precision_gap", settings.incPrecisionGap, 0);
 
-      gd.addCheckbox("Save_filters", saveFilterSets);
+      gd.addCheckbox("Save_filters", settings.saveFilterSets);
     }
-    gd.addCheckbox("Show_table", showResultsTable);
-    gd.addSlider("Plot_top_n", 0, 20, plotTopN);
-    gd.addCheckbox("Calculate_sensitivity", calculateSensitivity);
-    gd.addSlider("Delta", 0.01, 1, delta);
+    gd.addCheckbox("Show_table", settings.showResultsTable);
+    gd.addSlider("Plot_top_n", 0, 20, settings.plotTopN);
+    gd.addCheckbox("Calculate_sensitivity", settings.calculateSensitivity);
+    gd.addSlider("Delta", 0.01, 1, settings.delta);
 
     gd.showDialog();
 
     return !gd.wasCanceled() && readDialog(gd, fileInput);
   }
 
-  private static boolean readDialog(GenericDialog gd, boolean fileInput) {
+  private boolean readDialog(GenericDialog gd, boolean fileInput) {
     if (!fileInput) {
-      snrFilter = gd.getNextBoolean();
-      minSnr = (int) gd.getNextNumber();
-      maxSnr = (int) gd.getNextNumber();
-      minWidth = gd.getNextNumber();
-      maxWidth = gd.getNextNumber();
-      incWidth = gd.getNextNumber();
+      settings.snrFilter = gd.getNextBoolean();
+      settings.minSnr = (int) gd.getNextNumber();
+      settings.maxSnr = (int) gd.getNextNumber();
+      settings.minWidth = gd.getNextNumber();
+      settings.maxWidth = gd.getNextNumber();
+      settings.incWidth = gd.getNextNumber();
 
-      precisionFilter = gd.getNextBoolean();
-      minPrecision = (int) gd.getNextNumber();
-      maxPrecision = (int) gd.getNextNumber();
+      settings.precisionFilter = gd.getNextBoolean();
+      settings.minPrecision = (int) gd.getNextNumber();
+      settings.maxPrecision = (int) gd.getNextNumber();
 
-      traceFilter = gd.getNextBoolean();
-      minDistance = gd.getNextNumber();
-      maxDistance = gd.getNextNumber();
-      incDistance = gd.getNextNumber();
-      minTime = (int) gd.getNextNumber();
-      maxTime = (int) gd.getNextNumber();
-      incTime = (int) gd.getNextNumber();
+      settings.traceFilter = gd.getNextBoolean();
+      settings.minDistance = gd.getNextNumber();
+      settings.maxDistance = gd.getNextNumber();
+      settings.incDistance = gd.getNextNumber();
+      settings.minTime = (int) gd.getNextNumber();
+      settings.maxTime = (int) gd.getNextNumber();
+      settings.incTime = (int) gd.getNextNumber();
 
-      hysteresisSnrFilter = gd.getNextBoolean();
-      minSnrGap = (int) gd.getNextNumber();
-      maxSnrGap = (int) gd.getNextNumber();
-      incSnrGap = (int) gd.getNextNumber();
+      settings.hysteresisSnrFilter = gd.getNextBoolean();
+      settings.minSnrGap = (int) gd.getNextNumber();
+      settings.maxSnrGap = (int) gd.getNextNumber();
+      settings.incSnrGap = (int) gd.getNextNumber();
 
-      hysteresisPrecisionFilter = gd.getNextBoolean();
-      minPrecisionGap = (int) gd.getNextNumber();
-      maxPrecisionGap = (int) gd.getNextNumber();
-      incPrecisionGap = (int) gd.getNextNumber();
+      settings.hysteresisPrecisionFilter = gd.getNextBoolean();
+      settings.minPrecisionGap = (int) gd.getNextNumber();
+      settings.maxPrecisionGap = (int) gd.getNextNumber();
+      settings.incPrecisionGap = (int) gd.getNextNumber();
 
-      saveFilterSets = gd.getNextBoolean();
+      settings.saveFilterSets = gd.getNextBoolean();
     }
-    showResultsTable = gd.getNextBoolean();
-    plotTopN = (int) Math.abs(gd.getNextNumber());
-    calculateSensitivity = gd.getNextBoolean();
-    delta = gd.getNextNumber();
+    settings.showResultsTable = gd.getNextBoolean();
+    settings.plotTopN = (int) Math.abs(gd.getNextNumber());
+    settings.calculateSensitivity = gd.getNextBoolean();
+    settings.delta = gd.getNextNumber();
 
     // Check there is one output
-    if (!showResultsTable && !calculateSensitivity && plotTopN < 1) {
+    if (!settings.showResultsTable && !settings.calculateSensitivity && settings.plotTopN < 1) {
       IJ.error(TITLE, "No output selected");
       return false;
     }
@@ -424,29 +530,29 @@ public class FilterAnalysis implements PlugIn {
     // Check arguments
     try {
       if (!fileInput) {
-        ParameterUtils.isPositive("Min SNR", minSnr);
-        ParameterUtils.isAboveZero("Max SNR", maxSnr);
-        ParameterUtils.isPositive("Min width", minWidth);
-        ParameterUtils.isAboveZero("Max width", maxWidth);
-        ParameterUtils.isAboveZero("Increment width", incWidth);
-        ParameterUtils.isPositive("Min precision", minPrecision);
-        ParameterUtils.isAboveZero("Max precision", maxPrecision);
-        ParameterUtils.isPositive("Min Distance", minDistance);
-        ParameterUtils.isAboveZero("Max Distance", maxDistance);
-        ParameterUtils.isAboveZero("Increment Distance", incDistance);
-        ParameterUtils.isPositive("Min Time", minTime);
-        ParameterUtils.isAboveZero("Max Time", maxTime);
-        ParameterUtils.isAboveZero("Increment Time", incTime);
-        ParameterUtils.isPositive("Min Snr Gap", minSnrGap);
-        ParameterUtils.isAboveZero("Max Snr Gap", maxSnrGap);
-        ParameterUtils.isAboveZero("Increment Snr Gap", incSnrGap);
-        ParameterUtils.isPositive("Min Precision Gap", minPrecisionGap);
-        ParameterUtils.isAboveZero("Max Precision Gap", maxPrecisionGap);
-        ParameterUtils.isAboveZero("Increment Precision Gap", incPrecisionGap);
+        ParameterUtils.isPositive("Min SNR", settings.minSnr);
+        ParameterUtils.isAboveZero("Max SNR", settings.maxSnr);
+        ParameterUtils.isPositive("Min width", settings.minWidth);
+        ParameterUtils.isAboveZero("Max width", settings.maxWidth);
+        ParameterUtils.isAboveZero("Increment width", settings.incWidth);
+        ParameterUtils.isPositive("Min precision", settings.minPrecision);
+        ParameterUtils.isAboveZero("Max precision", settings.maxPrecision);
+        ParameterUtils.isPositive("Min Distance", settings.minDistance);
+        ParameterUtils.isAboveZero("Max Distance", settings.maxDistance);
+        ParameterUtils.isAboveZero("Increment Distance", settings.incDistance);
+        ParameterUtils.isPositive("Min Time", settings.minTime);
+        ParameterUtils.isAboveZero("Max Time", settings.maxTime);
+        ParameterUtils.isAboveZero("Increment Time", settings.incTime);
+        ParameterUtils.isPositive("Min Snr Gap", settings.minSnrGap);
+        ParameterUtils.isAboveZero("Max Snr Gap", settings.maxSnrGap);
+        ParameterUtils.isAboveZero("Increment Snr Gap", settings.incSnrGap);
+        ParameterUtils.isPositive("Min Precision Gap", settings.minPrecisionGap);
+        ParameterUtils.isAboveZero("Max Precision Gap", settings.maxPrecisionGap);
+        ParameterUtils.isAboveZero("Increment Precision Gap", settings.incPrecisionGap);
       }
 
-      ParameterUtils.isAboveZero("Delta", delta);
-      ParameterUtils.isBelow("Delta", delta, 1);
+      ParameterUtils.isAboveZero("Delta", settings.delta);
+      ParameterUtils.isBelow("Delta", settings.delta, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -455,7 +561,7 @@ public class FilterAnalysis implements PlugIn {
     return !gd.invalidNumber();
   }
 
-  private static List<FilterSet> createFilters() {
+  private List<FilterSet> createFilters() {
     IJ.showStatus("Creating filters ...");
     final List<FilterSet> filterSets = new LinkedList<>();
     addSnrFilters(filterSets);
@@ -467,54 +573,55 @@ public class FilterAnalysis implements PlugIn {
     return filterSets;
   }
 
-  private static void addSnrFilters(List<FilterSet> filterSets) {
-    if (!snrFilter) {
+  private void addSnrFilters(List<FilterSet> filterSets) {
+    if (!settings.snrFilter) {
       return;
     }
-    for (double w = minWidth; w <= maxWidth; w += incWidth) {
+    for (double w = settings.minWidth; w <= settings.maxWidth; w += settings.incWidth) {
       final WidthFilter wf = new WidthFilter((float) w);
       final List<Filter> filters = new LinkedList<>();
-      for (int snr = minSnr; snr <= maxSnr; snr++) {
+      for (int snr = settings.minSnr; snr <= settings.maxSnr; snr++) {
         filters.add(new AndFilter(wf, new SnrFilter(snr)));
       }
       filterSets.add(new FilterSet(filters));
     }
   }
 
-  private static void addPrecisionFilters(List<FilterSet> filterSets) {
-    if (!precisionFilter) {
+  private void addPrecisionFilters(List<FilterSet> filterSets) {
+    if (!settings.precisionFilter) {
       return;
     }
     final List<Filter> filters = new LinkedList<>();
-    for (int p = minPrecision; p <= maxPrecision; p++) {
+    for (int p = settings.minPrecision; p <= settings.maxPrecision; p++) {
       filters.add(new PrecisionFilter(p));
     }
     filterSets.add(new FilterSet(filters));
   }
 
-  private static void addTraceFilters(List<FilterSet> filterSets) {
-    if (!traceFilter) {
+  private void addTraceFilters(List<FilterSet> filterSets) {
+    if (!settings.traceFilter) {
       return;
     }
-    for (double d = minDistance; d <= maxDistance; d += incDistance) {
-      final SnrFilter snr = new SnrFilter(maxSnr);
+    for (double d = settings.minDistance; d <= settings.maxDistance; d += settings.incDistance) {
+      final SnrFilter snr = new SnrFilter(settings.maxSnr);
       final List<Filter> filters = new LinkedList<>();
-      for (int t = minTime; t <= maxTime; t += incTime) {
+      for (int t = settings.minTime; t <= settings.maxTime; t += settings.incTime) {
         filters.add(new OrFilter(snr, new TraceFilter(d, t)));
       }
       filterSets.add(new FilterSet(filters));
     }
   }
 
-  private static void addSnrHysteresisFilters(List<FilterSet> filterSets) {
-    if (!hysteresisSnrFilter) {
+  private void addSnrHysteresisFilters(List<FilterSet> filterSets) {
+    if (!settings.hysteresisSnrFilter) {
       return;
     }
-    for (double w = minWidth; w <= maxWidth; w += incWidth) {
+    for (double w = settings.minWidth; w <= settings.maxWidth; w += settings.incWidth) {
       final WidthFilter wf = new WidthFilter((float) w);
-      for (int snrGap = minSnrGap; snrGap <= maxSnrGap; snrGap += incSnrGap) {
+      for (int snrGap = settings.minSnrGap; snrGap <= settings.maxSnrGap;
+          snrGap += settings.incSnrGap) {
         final List<Filter> filters = new LinkedList<>();
-        for (int snr = minSnr; snr <= maxSnr; snr++) {
+        for (int snr = settings.minSnr; snr <= settings.maxSnr; snr++) {
           filters.add(new AndFilter(wf, new SnrHysteresisFilter(2, 0, 1, 0, snr, snrGap)));
         }
         filterSets.add(new FilterSet(filters));
@@ -522,14 +629,14 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
-  private static void addPrecisionHysteresisFilters(List<FilterSet> filterSets) {
-    if (!hysteresisPrecisionFilter) {
+  private void addPrecisionHysteresisFilters(List<FilterSet> filterSets) {
+    if (!settings.hysteresisPrecisionFilter) {
       return;
     }
-    for (int precisionGap = minPrecisionGap; precisionGap <= maxPrecisionGap;
-        precisionGap += incPrecisionGap) {
+    for (int precisionGap = settings.minPrecisionGap; precisionGap <= settings.maxPrecisionGap;
+        precisionGap += settings.incPrecisionGap) {
       final List<Filter> filters = new LinkedList<>();
-      for (int precision = minPrecision; precision <= maxPrecision; precision++) {
+      for (int precision = settings.minPrecision; precision <= settings.maxPrecision; precision++) {
         filters.add(new PrecisionHysteresisFilter(2, 0, 1, 0, precision, precisionGap));
       }
       filterSets.add(new FilterSet(filters));
@@ -552,7 +659,7 @@ public class FilterAnalysis implements PlugIn {
    */
   public void analyse(List<MemoryPeakResults> resultsList, List<FilterSet> filterSets) {
     final Consumer<String> output = createResultsWindow();
-    plots = new ArrayList<>(plotTopN);
+    plots = new ArrayList<>(settings.plotTopN);
     bestFilter = new HashMap<>();
     bestFilterOrder = new LinkedList<>();
 
@@ -600,7 +707,7 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private void calculateSensitivity(List<MemoryPeakResults> resultsList) {
-    if (!calculateSensitivity) {
+    if (!settings.calculateSensitivity) {
       return;
     }
     if (!bestFilter.isEmpty()) {
@@ -624,8 +731,8 @@ public class FilterAnalysis implements PlugIn {
         final int parameters = filter.getNumberOfParameters();
         for (int index = 0; index < parameters; index++) {
           // For each parameter compute as upward + downward delta and get the average gradient
-          final Filter higher = filter.adjustParameter(index, delta);
-          final Filter lower = filter.adjustParameter(index, -delta);
+          final Filter higher = filter.adjustParameter(index, settings.delta);
+          final Filter lower = filter.adjustParameter(index, -settings.delta);
 
           final ClassificationResult sHigher = higher.score(resultsList);
           final ClassificationResult sLower = lower.score(resultsList);
@@ -669,7 +776,7 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private Consumer<String> createResultsWindow() {
-    if (!showResultsTable) {
+    if (!settings.showResultsTable) {
       return null;
     }
 
@@ -764,7 +871,7 @@ public class FilterAnalysis implements PlugIn {
       }
     }
 
-    if (allSameType && calculateSensitivity) {
+    if (allSameType && settings.calculateSensitivity) {
       final FilterScore filterScore = bestFilter.get(type);
       if (filterScore != null) {
         if (filterScore.score < maxScore) {
@@ -777,51 +884,49 @@ public class FilterAnalysis implements PlugIn {
     }
 
     // Add spacer at end of each result set
-    if (showResultsTable) {
+    if (settings.showResultsTable) {
       output.accept("");
     }
 
-    if (!isHeadless) {
-      if (plotTopN > 0 && xValues != null) {
-        // Check the xValues are unique. Since the filters have been sorted by their
-        // numeric value we only need to compare adjacent entries.
-        boolean unique = true;
-        for (int ii = 0; ii < xValues.length - 1; ii++) {
-          if (xValues[ii] == xValues[ii + 1]) {
-            unique = false;
-            break;
-          }
+    if (!isHeadless && settings.plotTopN > 0 && xValues != null) {
+      // Check the xValues are unique. Since the filters have been sorted by their
+      // numeric value we only need to compare adjacent entries.
+      boolean unique = true;
+      for (int ii = 0; ii < xValues.length - 1; ii++) {
+        if (xValues[ii] == xValues[ii + 1]) {
+          unique = false;
+          break;
         }
-        String xAxisName = filterSet.getValueName();
-        // Check the values all refer to the same property
-        for (final Filter filter : filterSet.getFilters()) {
-          if (!xAxisName.equals(filter.getNumericalValueName())) {
-            unique = false;
-            break;
-          }
+      }
+      String xAxisName = filterSet.getValueName();
+      // Check the values all refer to the same property
+      for (final Filter filter : filterSet.getFilters()) {
+        if (!xAxisName.equals(filter.getNumericalValueName())) {
+          unique = false;
+          break;
         }
-        if (!unique) {
-          // If not unique then renumber them and use an arbitrary label
-          xAxisName = "Filter";
-          for (int ii = 0; ii < xValues.length; ii++) {
-            xValues[ii] = ii + 1.0;
-          }
+      }
+      if (!unique) {
+        // If not unique then renumber them and use an arbitrary label
+        xAxisName = "Filter";
+        for (int ii = 0; ii < xValues.length; ii++) {
+          xValues[ii] = ii + 1.0;
         }
+      }
 
-        final String title = filterSet.getName();
+      final String title = filterSet.getName();
 
-        // Check if a previous filter set had the same name, update if necessary
-        final NamedPlot plot = getNamedPlot(title);
-        if (plot == null) {
-          plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
-        } else {
-          plot.updateValues(xAxisName, xValues, yValues);
-        }
+      // Check if a previous filter set had the same name, update if necessary
+      final NamedPlot plot = getNamedPlot(title);
+      if (plot == null) {
+        plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
+      } else {
+        plot.updateValues(xAxisName, xValues, yValues);
+      }
 
-        if (plots.size() > plotTopN) {
-          Collections.sort(plots, NamedPlot::compare);
-          plots.remove(plots.size() - 1);
-        }
+      if (plots.size() > settings.plotTopN) {
+        Collections.sort(plots, NamedPlot::compare);
+        plots.remove(plots.size() - 1);
       }
     }
 
@@ -837,11 +942,11 @@ public class FilterAnalysis implements PlugIn {
     return null;
   }
 
-  private static ClassificationResult runFilter(Consumer<String> output, Filter filter,
+  private ClassificationResult runFilter(Consumer<String> output, Filter filter,
       List<MemoryPeakResults> resultsList) {
     final ClassificationResult s = filter.score(resultsList);
 
-    if (showResultsTable) {
+    if (settings.showResultsTable) {
       final StringBuilder sb = new StringBuilder();
       sb.append(filter.getName()).append('\t');
       sb.append(s.getTruePositives() + s.getFalsePositives()).append('\t');

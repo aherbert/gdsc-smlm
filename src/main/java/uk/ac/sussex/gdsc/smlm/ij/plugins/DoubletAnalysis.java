@@ -124,6 +124,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   // codebase in case it is useful in the future.
 
   private static final String TITLE = "Doublet Analysis";
+
   private static FitConfiguration fitConfig;
   private static FitConfiguration filterFitConfig;
   private static FitEngineConfiguration config;
@@ -186,13 +187,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static boolean analysisLogging;
   private static String analysisTitle = "";
   private static boolean saveTemplate;
-  private static String templateFilename = "";
-
-  static {
-    final String currentUsersHomeDir = System.getProperty("user.home");
-    templateFilename =
-        currentUsersHomeDir + File.separator + "gdsc.smlm" + File.separator + "template";
-  }
+  private static String templateFilename =
+      System.getProperty("user.home") + File.separator + "gdsc.smlm" + File.separator + "template";
 
   private static final String[] SELECTION_CRITERIAS = {"R2", "AIC", "BIC", "ML AIC", "ML BIC"};
   private static int selectionCriteria = 4;

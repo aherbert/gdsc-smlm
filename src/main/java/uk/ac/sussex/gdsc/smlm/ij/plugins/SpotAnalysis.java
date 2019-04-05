@@ -137,7 +137,7 @@ public class SpotAnalysis extends PlugInFrame
   private static final String[] resultsTitles =
       new String[] {RAW_MEAN_TITLE, RAW_SD_TITLE, RAW_SPLOT_TITLE, BLUR_SPOT_TITLE, AVG_SPOT_TITLE};
 
-  private static Frame instance;
+  private static final AtomicReference<Frame> instance = new AtomicReference<>();
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private TextWindow resultsWindow;
@@ -292,19 +292,21 @@ public class SpotAnalysis extends PlugInFrame
       return;
     }
 
+    final Frame frame = instance.get();
+
     if ("add".equals(arg)) {
-      if (instance != null) {
-        ((SpotAnalysis) instance).addFrame();
+      if (frame != null) {
+        ((SpotAnalysis) frame).addFrame();
       }
       return;
     }
 
-    if (instance != null) {
-      instance.toFront();
+    if (frame != null) {
+      frame.toFront();
       return;
     }
 
-    instance = this;
+    instance.set(this);
     IJ.register(SpotAnalysis.class);
     WindowManager.addWindow(this);
     ImagePlus.addImageListener(new ImageAdapter() {
@@ -492,7 +494,7 @@ public class SpotAnalysis extends PlugInFrame
 
   @Override
   public void close() {
-    instance = null;
+    instance.set(null);
     super.close();
   }
 
@@ -886,7 +888,6 @@ public class SpotAnalysis extends PlugInFrame
         listModel.add(index, s);
         updateProfilePlots();
         updated = true;
-        // pack();
       }
     }
   }

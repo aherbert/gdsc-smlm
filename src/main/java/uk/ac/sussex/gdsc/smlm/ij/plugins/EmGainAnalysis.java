@@ -88,9 +88,9 @@ public class EmGainAnalysis implements PlugInFilter {
   private static boolean settingSimulate;
   private static boolean showApproximation;
   private static boolean relativeDelta;
-  private static final String[] APPROXIMATION =
+  private static final String[] APPROXIMATION_TYPE =
       {"PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson"};
-  private static int approximation;
+  private static int approximationType;
   private boolean simulate;
   private boolean extraOptions;
   private static double settingPhotons = 1;
@@ -871,7 +871,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Get the approximation
     LikelihoodFunction fun;
-    switch (approximation) {
+    switch (approximationType) {
       case 3:
         fun = new PoissonFunction(1.0 / settingGain);
         break;
@@ -1089,7 +1089,7 @@ public class EmGainAnalysis implements PlugInFilter {
     gd.addNumericField("Gain", settingGain, 2, 6, "Count/electron");
     gd.addNumericField("Noise", settingNoise, 2, 6, "Count");
     gd.addNumericField("Photons", settingPhotons, 2);
-    gd.addChoice("Approx", APPROXIMATION, APPROXIMATION[approximation]);
+    gd.addChoice("Approx", APPROXIMATION_TYPE, APPROXIMATION_TYPE[approximationType]);
     gd.addCheckbox("Show_approximation", showApproximation);
     if (extraOptions) {
       gd.addNumericField("Approximation_offset (%)", settingOffset, 2);
@@ -1107,7 +1107,7 @@ public class EmGainAnalysis implements PlugInFilter {
     settingGain = gd.getNextNumber();
     settingNoise = FastMath.abs(gd.getNextNumber());
     settingPhotons = FastMath.abs(gd.getNextNumber());
-    approximation = gd.getNextChoiceIndex();
+    approximationType = gd.getNextChoiceIndex();
     showApproximation = gd.getNextBoolean();
     if (extraOptions) {
       offset = settingOffset = gd.getNextNumber();

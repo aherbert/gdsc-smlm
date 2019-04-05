@@ -171,7 +171,6 @@ import org.apache.commons.rng.simple.RandomSource;
 import java.awt.Checkbox;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -192,12 +191,15 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Creates data using a simulated PSF.
  */
-public class CreateData implements PlugIn, ItemListener {
+public class CreateData implements PlugIn {
   /** The title. */
   static final String TITLE = "Create Data";
   private static final String CREATE_DATA_IMAGE_TITLE = "Localisation Data";
@@ -236,10 +238,10 @@ public class CreateData implements PlugIn, ItemListener {
   private AstigmatismModel astigmatismModel;
   private PsfModel psfModelCache;
 
-  private static TextWindow summaryTable;
+  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
   private static AtomicInteger datasetNumber = new AtomicInteger();
-  private static double areaInUm;
-  private static String header;
+  private static AtomicBoolean header = new AtomicBoolean();
+  private double areaInUm;
 
   private CreateDataSettings.Builder settings;
 
@@ -247,13 +249,6 @@ public class CreateData implements PlugIn, ItemListener {
       "Signal/Frame (continuous)", "Total Signal", "Blinks", "t-On", "t-Off", "Sampled blinks",
       "Sampled t-On", "Sampled t-Off", "Noise", "SNR", "SNR (continuous)", "Density", "Precision",
       "Precision (in-focus)", "X", "Y", "Z", "Width"};
-  private static boolean[] displayHistograms = new boolean[NAMES.length];
-
-  static {
-    for (int i = 0; i < displayHistograms.length; i++) {
-      displayHistograms[i] = true;
-    }
-  }
 
   private static final int SAMPLES = 0;
   private static final int SIGNAL = 1;
@@ -276,6 +271,7 @@ public class CreateData implements PlugIn, ItemListener {
   private static final int Z = 18;
   private static final int WIDTH = 19;
 
+  /** Flags to indicate that the histogram for the statistic is an integer display. */
   private static boolean[] integerDisplay;
 
   static {
@@ -292,6 +288,7 @@ public class CreateData implements PlugIn, ItemListener {
     integerDisplay[DENSITY] = true;
   }
 
+  /** Flags to indicate that the statistics should remove outliers. */
   private static boolean[] alwaysRemoveOutliers;
 
   static {
@@ -316,11 +313,8 @@ public class CreateData implements PlugIn, ItemListener {
   // Created by drawImage(...)
   private MemoryPeakResults results;
 
-  // Used by the ImageGenerator to show progress when the thread starts
-  // private int frame;
   /** The maximum frame. */
   private int maxT;
-  // private int totalFrames;
 
   private boolean simpleMode;
   private boolean benchmarkMode;
@@ -336,6 +330,49 @@ public class CreateData implements PlugIn, ItemListener {
 
   // Compute the CRLB for the PSF using the fisher information
   private BasePoissonFisherInformation[] fiFunction;
+
+  /** The plugin settings. */
+  private Settings pluginSettings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    boolean[] displayHistograms = new boolean[NAMES.length];
+
+    Settings() {
+      // Set defaults
+      Arrays.fill(displayHistograms, true);
+    }
+
+    Settings(Settings source) {
+      displayHistograms = source.displayHistograms.clone();
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /** Store the parameters. */
   public static class BaseParameters {
@@ -3333,8 +3370,6 @@ public class CreateData implements PlugIn, ItemListener {
       List<LocalisationModel> localisations) {
     IJ.showStatus("Calculating statistics ...");
 
-    createSummaryTable();
-
     final Statistics[] stats = new Statistics[NAMES.length];
     for (int i = 0; i < stats.length; i++) {
       stats[i] =
@@ -3457,7 +3492,6 @@ public class CreateData implements PlugIn, ItemListener {
       // show no blinks
       stats[BLINKS].add(0);
       stats[T_ON].add(1);
-      // stats[T_OFF].add(0);
     }
 
     if (results != null) {
@@ -3596,14 +3630,11 @@ public class CreateData implements PlugIn, ItemListener {
           : stats[i].getMean();
       sb.append(MathUtils.rounded(centre, 4)).append('\t');
     }
-    if (java.awt.GraphicsEnvironment.isHeadless()) {
-      IJ.log(sb.toString());
-      return stats[SIGNAL].getMean();
-    }
-    summaryTable.append(sb.toString());
+
+    createSummaryTable().accept(sb.toString());
 
     // Show histograms
-    if (settings.getShowHistograms()) {
+    if (settings.getShowHistograms() && !java.awt.GraphicsEnvironment.isHeadless()) {
       IJ.showStatus("Calculating histograms ...");
       final boolean[] chosenHistograms = getChoosenHistograms();
 
@@ -3672,10 +3703,10 @@ public class CreateData implements PlugIn, ItemListener {
 
   private boolean[] getChoosenHistograms() {
     if (settings.getChooseHistograms()) {
-      return displayHistograms;
+      return pluginSettings.displayHistograms;
     }
 
-    final boolean[] all = new boolean[displayHistograms.length];
+    final boolean[] all = new boolean[NAMES.length];
     for (int i = 0; i < all.length; i++) {
       all[i] = true;
     }
@@ -3683,24 +3714,21 @@ public class CreateData implements PlugIn, ItemListener {
   }
 
   private static void sortLocalisationsByIdThenTime(List<LocalisationModel> localisations) {
-    Collections.sort(localisations, new Comparator<LocalisationModel>() {
-      @Override
-      public int compare(LocalisationModel o1, LocalisationModel o2) {
-        // Order by ID then time
-        if (o1.getId() < o2.getId()) {
-          return -1;
-        }
-        if (o1.getId() > o2.getId()) {
-          return 1;
-        }
-        if (o1.getTime() < o2.getTime()) {
-          return -1;
-        }
-        if (o1.getTime() > o2.getTime()) {
-          return 1;
-        }
-        return 0;
+    Collections.sort(localisations, (o1, o2) -> {
+      // Order by ID then time
+      if (o1.getId() < o2.getId()) {
+        return -1;
       }
+      if (o1.getId() > o2.getId()) {
+        return 1;
+      }
+      if (o1.getTime() < o2.getTime()) {
+        return -1;
+      }
+      if (o1.getTime() > o2.getTime()) {
+        return 1;
+      }
+      return 0;
     });
   }
 
@@ -3735,16 +3763,16 @@ public class CreateData implements PlugIn, ItemListener {
     }
   }
 
-  private static void createSummaryTable() {
+  private static Consumer<String> createSummaryTable() {
     if (java.awt.GraphicsEnvironment.isHeadless()) {
-      if (header == null) {
-        header = createHeader();
-        IJ.log(header);
+      if (header.compareAndSet(false, true)) {
+        IJ.log(createHeader());
       }
-    } else if (summaryTable == null || !summaryTable.isVisible()) {
-      summaryTable = new TextWindow("Data Summary", createHeader(), "", 800, 300);
-      summaryTable.setVisible(true);
+      return IJ::log;
     }
+
+    return ImageJUtils.refresh(summaryTableRef,
+        () -> new TextWindow("Data Summary", createHeader(), "", 800, 300))::append;
   }
 
   private static String createHeader() {
@@ -3754,8 +3782,6 @@ public class CreateData implements PlugIn, ItemListener {
     for (int i = 0; i < NAMES.length; i++) {
       sb.append('\t').append(NAMES[i]);
     }
-    // if (alwaysRemoveOutliers[i])
-    // sb.append("*");
     return sb.toString();
   }
 
@@ -4703,16 +4729,18 @@ public class CreateData implements PlugIn, ItemListener {
     if (settings.getShowHistograms() && settings.getChooseHistograms()) {
       gd = new GenericDialog(TITLE);
       gd.addMessage("Select the histograms to display");
-      for (int i = 0; i < displayHistograms.length; i++) {
-        gd.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+      pluginSettings = Settings.load();
+      for (int i = 0; i < pluginSettings.displayHistograms.length; i++) {
+        gd.addCheckbox(NAMES[i].replace(' ', '_'), pluginSettings.displayHistograms[i]);
       }
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
       }
-      for (int i = 0; i < displayHistograms.length; i++) {
-        displayHistograms[i] = gd.getNextBoolean();
+      for (int i = 0; i < pluginSettings.displayHistograms.length; i++) {
+        pluginSettings.displayHistograms[i] = gd.getNextBoolean();
       }
+      pluginSettings.save();
     }
     return true;
   }
@@ -5044,7 +5072,7 @@ public class CreateData implements PlugIn, ItemListener {
         @SuppressWarnings("rawtypes")
         final Vector v = gd.getCheckboxes();
         final Checkbox cb = (Checkbox) v.get(v.size() - 1);
-        cb.addItemListener(this);
+        cb.addItemListener(this::itemStateChanged);
       }
 
       gd.showDialog();
@@ -5167,8 +5195,7 @@ public class CreateData implements PlugIn, ItemListener {
     return null;
   }
 
-  @Override
-  public void itemStateChanged(ItemEvent event) {
+  private void itemStateChanged(ItemEvent event) {
     // When the checkbox is clicked, output example compounds to the ImageJ log
     final Checkbox cb = (Checkbox) event.getSource();
     if (cb.getState()) {

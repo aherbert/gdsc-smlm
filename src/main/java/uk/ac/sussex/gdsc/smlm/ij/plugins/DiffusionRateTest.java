@@ -75,6 +75,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
@@ -82,25 +83,21 @@ import java.util.Arrays;
  */
 public class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
+
   private static TextWindow msdTable;
 
   // Used to allow other plugins to detect if a dataset is simulated
 
+  private static final AtomicReference<SimulationData> lastSimulation = new AtomicReference<>();
+  private SimulationData simulation;
+
   /** The last simulated precision. */
-  static double lastSimulatedPrecision;
+  // static double lastSimulatedPrecision;
 
   /** The last simulated dataset. */
-  static String[] lastSimulatedDataset = new String[2];
+  // static String[] lastSimulatedDataset = new String[2];
 
   private CreateDataSettings.Builder settings;
-  private static boolean useConfinement;
-  private static int confinementAttempts = 5;
-  private static int fitN = 20;
-  private static boolean showDiffusionExample;
-  private static double magnification = 5;
-  private static int aggregateSteps = 10;
-  private static int msdAnalysisSteps;
-  private static double precision;
   private int myAggregateSteps;
   private int myMsdAnalysisSteps;
   private boolean extraOptions;
@@ -108,6 +105,85 @@ public class DiffusionRateTest implements PlugIn {
   private double myPrecision;
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
+
+  /** The plugin settings. */
+  private Settings pluginSettings;
+
+  /**
+   * Contain information on simulation data.
+   */
+  private static class SimulationData {
+    String[] dataset;
+    double precision;
+
+    /**
+     * Create a new instance.
+     *
+     * @param name the dataset name
+     * @param precision the precision
+     */
+    SimulationData(String name, double precision) {
+      dataset = new String[] {name, ""};
+      this.precision = precision;
+    }
+  }
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    boolean useConfinement;
+    int confinementAttempts;
+    int fitN;
+    boolean showDiffusionExample;
+    double magnification;
+    int aggregateSteps;
+    int msdAnalysisSteps;
+    double precision;
+
+    Settings() {
+      // Set defaults
+      confinementAttempts = 5;
+      fitN = 20;
+      magnification = 5;
+      aggregateSteps = 10;
+    }
+
+    Settings(Settings source) {
+      useConfinement = source.useConfinement;
+      confinementAttempts = source.confinementAttempts;
+      fitN = source.fitN;
+      showDiffusionExample = source.showDiffusionExample;
+      magnification = source.magnification;
+      aggregateSteps = source.aggregateSteps;
+      msdAnalysisSteps = source.msdAnalysisSteps;
+      precision = source.precision;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /**
    * Used to aggregate points into results.
@@ -177,9 +253,12 @@ public class DiffusionRateTest implements PlugIn {
    * @return true, if is simulated
    */
   static boolean isSimulated(String name) {
-    for (final String name2 : lastSimulatedDataset) {
-      if (name.equals(name2)) {
-        return true;
+    SimulationData data = lastSimulation.get();
+    if (data != null) {
+      for (final String name2 : data.dataset) {
+        if (name.equals(name2)) {
+          return true;
+        }
       }
     }
     return false;
@@ -188,6 +267,9 @@ public class DiffusionRateTest implements PlugIn {
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
+
+    pluginSettings = Settings.load();
+    pluginSettings.save();
 
     if (IJ.controlKeyDown()) {
       simpleTest();
@@ -200,8 +282,7 @@ public class DiffusionRateTest implements PlugIn {
       return;
     }
 
-    lastSimulatedDataset[0] = lastSimulatedDataset[1] = "";
-    lastSimulatedPrecision = 0;
+    lastSimulation.set(null);
 
     final int totalSteps = (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond());
 
@@ -282,7 +363,7 @@ public class DiffusionRateTest implements PlugIn {
       if (addError) {
         origin = addError(origin, precisionInPixels, random);
       }
-      if (useConfinement) {
+      if (pluginSettings.useConfinement) {
         // Note: When using confinement the average displacement should asymptote
         // at the average distance of a point from the centre of a ball. This is 3r/4.
         // See: http://answers.yahoo.com/question/index?qid=20090131162630AAMTUfM
@@ -294,7 +375,7 @@ public class DiffusionRateTest implements PlugIn {
         for (int j = 0; j < totalSteps; j++) {
           double[] xyz = m.getCoordinates();
           final double[] originalXyz = xyz.clone();
-          for (int n = confinementAttempts; n-- > 0;) {
+          for (int n = pluginSettings.confinementAttempts; n-- > 0;) {
             if (diffusionType == DiffusionType.GRID_WALK) {
               m.walk(diffusionSigma, random);
             } else if (diffusionType == DiffusionType.LINEAR_WALK) {
@@ -372,8 +453,7 @@ public class DiffusionRateTest implements PlugIn {
     IJ.showProgress(1);
 
     MemoryPeakResults.addResults(results);
-    lastSimulatedDataset[0] = results.getName();
-    lastSimulatedPrecision = myPrecision;
+    simulation = new SimulationData(results.getName(), myPrecision);
 
     // Convert pixels^2/step to um^2/sec
     final double msd2D = (jumpDistances2D.getMean() / conversionFactor)
@@ -393,7 +473,7 @@ public class DiffusionRateTest implements PlugIn {
 
     IJ.showStatus("Analysing results ...");
 
-    if (showDiffusionExample) {
+    if (pluginSettings.showDiffusionExample) {
       showExample(totalSteps, diffusionSigma, random);
     }
 
@@ -409,7 +489,7 @@ public class DiffusionRateTest implements PlugIn {
     final SimpleRegression r2D = new SimpleRegression(false);
     final SimpleRegression r3D = new SimpleRegression(false);
 
-    final int firstN = (useConfinement) ? fitN : totalSteps;
+    final int firstN = (pluginSettings.useConfinement) ? pluginSettings.fitN : totalSteps;
     for (int j = 0; j < totalSteps; j++) {
       // Convert steps to seconds
       xValues[j] = (j + 1) / settings.getStepsPerSecond();
@@ -480,7 +560,7 @@ public class DiffusionRateTest implements PlugIn {
 
     windowOrganiser.tile();
 
-    if (useConfinement) {
+    if (pluginSettings.useConfinement) {
       ImageJUtils.log("3D asymptote distance = %s nm (expected %.2f)",
           MathUtils.rounded(asymptote.getMean() * settings.getPixelPitch(), 4),
           3 * settings.getConfinementRadius() / 4);
@@ -777,22 +857,22 @@ public class DiffusionRateTest implements PlugIn {
     gd.addNumericField("Seconds", settings.getSeconds(), 1);
     gd.addSlider("Steps_per_second", 1, 15, settings.getStepsPerSecond());
     if (extraOptions) {
-      gd.addSlider("Aggregate_steps", 2, 20, aggregateSteps);
-      gd.addNumericField("MSD_analysis_steps", msdAnalysisSteps, 0);
+      gd.addSlider("Aggregate_steps", 2, 20, pluginSettings.aggregateSteps);
+      gd.addNumericField("MSD_analysis_steps", pluginSettings.msdAnalysisSteps, 0);
     }
     gd.addNumericField("Particles", settings.getParticles(), 0);
     gd.addNumericField("Diffusion_rate (um^2/sec)", settings.getDiffusionRate(), 2);
     if (extraOptions) {
-      gd.addNumericField("Precision (nm)", precision, 2);
+      gd.addNumericField("Precision (nm)", pluginSettings.precision, 2);
     }
     final String[] diffusionTypes = SettingsManager.getNames((Object[]) DiffusionType.values());
     gd.addChoice("Diffusion_type", diffusionTypes, diffusionTypes[settings.getDiffusionType()]);
-    gd.addCheckbox("Use_confinement", useConfinement);
-    gd.addSlider("Confinement_attempts", 1, 20, confinementAttempts);
+    gd.addCheckbox("Use_confinement", pluginSettings.useConfinement);
+    gd.addSlider("Confinement_attempts", 1, 20, pluginSettings.confinementAttempts);
     gd.addSlider("Confinement_radius (nm)", 0, 3000, settings.getConfinementRadius());
-    gd.addSlider("Fit_N", 5, 20, fitN);
-    gd.addCheckbox("Show_example", showDiffusionExample);
-    gd.addSlider("Magnification", 1, 10, magnification);
+    gd.addSlider("Fit_N", 5, 20, pluginSettings.fitN);
+    gd.addCheckbox("Show_example", pluginSettings.showDiffusionExample);
+    gd.addSlider("Magnification", 1, 10, pluginSettings.magnification);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -803,21 +883,21 @@ public class DiffusionRateTest implements PlugIn {
     settings.setSeconds(Math.abs(gd.getNextNumber()));
     settings.setStepsPerSecond(Math.abs(gd.getNextNumber()));
     if (extraOptions) {
-      myAggregateSteps = aggregateSteps = Math.abs((int) gd.getNextNumber());
-      myMsdAnalysisSteps = msdAnalysisSteps = Math.abs((int) gd.getNextNumber());
+      myAggregateSteps = pluginSettings.aggregateSteps = Math.abs((int) gd.getNextNumber());
+      myMsdAnalysisSteps = pluginSettings.msdAnalysisSteps = Math.abs((int) gd.getNextNumber());
     }
     settings.setParticles(Math.abs((int) gd.getNextNumber()));
     settings.setDiffusionRate(Math.abs(gd.getNextNumber()));
     if (extraOptions) {
-      myPrecision = precision = Math.abs(gd.getNextNumber());
+      myPrecision = pluginSettings.precision = Math.abs(gd.getNextNumber());
     }
     settings.setDiffusionType(gd.getNextChoiceIndex());
-    useConfinement = gd.getNextBoolean();
-    confinementAttempts = Math.abs((int) gd.getNextNumber());
+    pluginSettings.useConfinement = gd.getNextBoolean();
+    pluginSettings.confinementAttempts = Math.abs((int) gd.getNextNumber());
     settings.setConfinementRadius(Math.abs(gd.getNextNumber()));
-    fitN = Math.abs((int) gd.getNextNumber());
-    showDiffusionExample = gd.getNextBoolean();
-    magnification = gd.getNextNumber();
+    pluginSettings.fitN = Math.abs((int) gd.getNextNumber());
+    pluginSettings.showDiffusionExample = gd.getNextBoolean();
+    pluginSettings.magnification = gd.getNextNumber();
 
     // Save before validation so that the current values are preserved.
     SettingsManager.writeSettings(settings.build());
@@ -829,9 +909,9 @@ public class DiffusionRateTest implements PlugIn {
       ParameterUtils.isAboveZero("Steps per second", settings.getStepsPerSecond());
       ParameterUtils.isAboveZero("Particles", settings.getParticles());
       ParameterUtils.isPositive("Diffusion rate", settings.getDiffusionRate());
-      ParameterUtils.isAboveZero("Magnification", magnification);
-      ParameterUtils.isAboveZero("Confinement attempts", confinementAttempts);
-      ParameterUtils.isAboveZero("Fit N", fitN);
+      ParameterUtils.isAboveZero("Magnification", pluginSettings.magnification);
+      ParameterUtils.isAboveZero("Confinement attempts", pluginSettings.confinementAttempts);
+      ParameterUtils.isAboveZero("Fit N", pluginSettings.fitN);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -915,8 +995,8 @@ public class DiffusionRateTest implements PlugIn {
 
     // Scale up and draw 2D position
     for (int j = 0; j < totalSteps; j++) {
-      x[j] *= magnification;
-      y[j] *= magnification;
+      x[j] *= pluginSettings.magnification;
+      y[j] *= pluginSettings.magnification;
     }
     final float[] limitsx = getLimits(x);
     final float[] limitsy = getLimits(y);
@@ -926,11 +1006,11 @@ public class DiffusionRateTest implements PlugIn {
 
     // Ensure we draw something, even it is a simple dot at the centre for no diffusion
     if (width == 0) {
-      width = (int) (32 * magnification);
+      width = (int) (32 * pluginSettings.magnification);
       limitsx[0] = -width / 2.0f;
     }
     if (height == 0) {
-      height = (int) (32 * magnification);
+      height = (int) (32 * pluginSettings.magnification);
       limitsy[0] = -height / 2.0f;
     }
 
@@ -994,7 +1074,7 @@ public class DiffusionRateTest implements PlugIn {
     results.setName(TITLE + " Aggregated");
     results.setPsf(PsfHelper.create(PSFType.CUSTOM));
     MemoryPeakResults.addResults(results);
-    lastSimulatedDataset[1] = results.getName();
+    simulation.dataset[1] = results.getName();
     int id = 0;
     int peak = 1;
     int number = 0;
@@ -1104,8 +1184,8 @@ public class DiffusionRateTest implements PlugIn {
 
     // Create a new set of points that have coordinates that
     // are the rolling average over the number of aggregate steps
-    final DoubleRollingArray x = new DoubleRollingArray(aggregateSteps);
-    final DoubleRollingArray y = new DoubleRollingArray(aggregateSteps);
+    final DoubleRollingArray x = new DoubleRollingArray(pluginSettings.aggregateSteps);
+    final DoubleRollingArray y = new DoubleRollingArray(pluginSettings.aggregateSteps);
 
     int id = 0;
     int length = 0;
@@ -1128,8 +1208,8 @@ public class DiffusionRateTest implements PlugIn {
     final long seed = System.currentTimeMillis() + System.identityHashCode(this);
     final RandomGenerator rand = new Well19937c(seed);
 
-    final int totalSteps =
-        (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond() - aggregateSteps);
+    final int totalSteps = (int) Math
+        .ceil(settings.getSeconds() * settings.getStepsPerSecond() - pluginSettings.aggregateSteps);
     final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
     final int interval = ImageJUtils.getProgressInterval(limit);
     final ArrayList<String> results = new ArrayList<>(totalSteps);
@@ -1330,5 +1410,15 @@ public class DiffusionRateTest implements PlugIn {
     } catch (final Exception ex) {
       ex.printStackTrace(); // Show the error
     }
+  }
+
+  /**
+   * Gets the last simulation precision.
+   *
+   * @return the last simulation precision
+   */
+  static double getLastSimulationPrecision() {
+    final SimulationData data = lastSimulation.get();
+    return (data != null) ? data.precision : 0;
   }
 }

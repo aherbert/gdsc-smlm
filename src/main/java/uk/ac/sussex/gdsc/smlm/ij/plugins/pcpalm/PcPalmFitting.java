@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -31,6 +32,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 
@@ -75,8 +77,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,30 +92,13 @@ import java.util.regex.Pattern;
  */
 public class PcPalmFitting implements PlugIn {
   /** The title. */
-  static String TITLE = "PC-PALM Fitting";
+  static final String TITLE = "PC-PALM Fitting";
 
-  private static String INPUT_FROM_FILE = "Load from file";
-  private static String INPUT_PREVIOUS = "Re-use previous curve";
-  private static String INPUT_ANALYSIS = "Select PC-PALM Analysis results";
-  private static String HEADER_PEAK_DENSITY = "Peak density (um^-2)";
-  private static String HEADER_SPATIAL_DOMAIN = "Spatial domain";
-
-  private static String inputOption = "";
-  private static double correlationDistance = 800; // nm
-  private static double estimatedPrecision = -1;
-  private static double copiedEstimatedPrecision = -1;
-  private static double blinkingRate = -1;
-  private static double copiedBlinkingRate = -1;
-  private static boolean showErrorBars;
-  private static boolean fitClusteredModels;
-  private static boolean saveCorrelationCurve;
-  private static String inputFilename = "";
-  private static String outputFilename = "";
-  private static int fitRestarts = 3;
-  private static boolean useLSE;
-  private static double fitAboveEstimatedPrecision;
-  private static double fittingTolerance; // Zero to ignore
-  private static double gr_protein_threshold = 1.5;
+  private static final String INPUT_FROM_FILE = "Load from file";
+  private static final String INPUT_PREVIOUS = "Re-use previous curve";
+  private static final String INPUT_ANALYSIS = "Select PC-PALM Analysis results";
+  private static final String HEADER_PEAK_DENSITY = "Peak density (um^-2)";
+  private static final String HEADER_SPATIAL_DOMAIN = "Spatial domain";
 
   private RandomModelFunction randomModel;
   private ClusteredModelFunctionGradient clusteredModel;
@@ -121,13 +108,12 @@ public class PcPalmFitting implements PlugIn {
 
   // Information criterion of models
   private double ic1;
-  private double ic2;
-  private double ic3;
   private boolean valid1;
   private boolean valid2;
 
   // Used for the results table
-  private static TextWindow resultsTable;
+  private static AtomicReference<TextWindow> resultsTableRef = new AtomicReference<>();
+  private TextWindow resultsTable;
 
   private boolean doneHeader;
 
@@ -138,21 +124,121 @@ public class PcPalmFitting implements PlugIn {
 
   // Save the input for the analysis
 
-  /** The previous correlation curve (gr). */
-  static double[][] previous_gr;
-  private static double previous_peakDensity;
-  private static boolean previous_spatialDomain;
+  /** The latest correlation curve (g(r)). */
+  private static AtomicReference<CorrelationCurveResult> latestResult = new AtomicReference<>();
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Hold the correlation curve results.
+   */
+  static class CorrelationCurveResult {
+    /** The correlation curve (g(r)). */
+    final double[][] gr;
+    /** The peak density. */
+    final double peakDensity;
+    /** The spatial domain. */
+    final boolean spatialDomain;
+
+    /**
+     * Instantiates a new correlation curve result.
+     *
+     * @param gr the correlation curve
+     * @param peakDensity the peak density
+     * @param spatialDomain the spatial domain
+     */
+    CorrelationCurveResult(double[][] gr, double peakDensity, boolean spatialDomain) {
+      this.gr = gr;
+      this.peakDensity = peakDensity;
+      this.spatialDomain = spatialDomain;
+    }
+  }
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    double correlationDistance;
+    double estimatedPrecision;
+    double copiedEstimatedPrecision;
+    double blinkingRate;
+    double copiedBlinkingRate;
+    boolean showErrorBars;
+    boolean fitClusteredModels;
+    boolean saveCorrelationCurve;
+    String inputFilename;
+    String outputFilename;
+    int fitRestarts;
+    boolean useLse;
+    double fitAboveEstimatedPrecision;
+    double fittingTolerance; // Zero to ignore
+    double grProteinThreshold;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      correlationDistance = 800; // nm
+      estimatedPrecision = -1;
+      copiedEstimatedPrecision = -1;
+      blinkingRate = -1;
+      copiedBlinkingRate = -1;
+      inputFilename = "";
+      outputFilename = "";
+      fitRestarts = 3;
+      grProteinThreshold = 1.5;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      correlationDistance = source.correlationDistance;
+      estimatedPrecision = source.estimatedPrecision;
+      copiedEstimatedPrecision = source.copiedEstimatedPrecision;
+      blinkingRate = source.blinkingRate;
+      copiedBlinkingRate = source.copiedBlinkingRate;
+      showErrorBars = source.showErrorBars;
+      fitClusteredModels = source.fitClusteredModels;
+      saveCorrelationCurve = source.saveCorrelationCurve;
+      inputFilename = source.inputFilename;
+      outputFilename = source.outputFilename;
+      fitRestarts = source.fitRestarts;
+      useLse = source.useLse;
+      fitAboveEstimatedPrecision = source.fitAboveEstimatedPrecision;
+      fittingTolerance = source.fittingTolerance;
+      grProteinThreshold = source.grProteinThreshold;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    // if (PCPALMAnalysis.results.isEmpty())
-    // {
-    // IJ.error(TITLE, "Require a set of correlation curves for analysis.\n" +
-    // "Please create a g(r) curve using " + PCPALMAnalysis.TITLE);
-    // return;
-    // }
+    settings = Settings.load();
     if (!showDialog()) {
       return;
     }
@@ -190,34 +276,37 @@ public class PcPalmFitting implements PlugIn {
       // Spatial domain results are just combined to a curve
       // Add option to save the results curve
       gd.addMessage("Options:");
-      gd.addCheckbox("Save_correlation_curve", saveCorrelationCurve);
+      gd.addCheckbox("Save_correlation_curve", settings.saveCorrelationCurve);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
       }
-      saveCorrelationCurve = gd.getNextBoolean();
+      settings.saveCorrelationCurve = gd.getNextBoolean();
       return true;
     }
 
-    if (estimatedPrecision < 0 || copiedEstimatedPrecision != PcPalmMolecules.sigmaS) {
-      copiedEstimatedPrecision = estimatedPrecision = PcPalmMolecules.sigmaS;
+    final MoleculesResults moleculesResults = PcPalmMolecules.getMoleculesResults();
+    if (settings.estimatedPrecision < 0
+        || settings.copiedEstimatedPrecision != moleculesResults.sigmaS) {
+      settings.copiedEstimatedPrecision = settings.estimatedPrecision = moleculesResults.sigmaS;
     }
-    if (blinkingRate < 0 || copiedBlinkingRate != PcPalmAnalysis.blinkingRate) {
-      copiedBlinkingRate = blinkingRate = PcPalmAnalysis.blinkingRate;
+    final double analysisBlinkingRate = PcPalmAnalysis.getBlinkingRate();
+    if (settings.blinkingRate < 0 || settings.copiedBlinkingRate != analysisBlinkingRate) {
+      settings.copiedBlinkingRate = settings.blinkingRate = analysisBlinkingRate;
     }
 
     gd.addMessage("Analyse clusters using Pair Correlation.");
 
-    gd.addNumericField("Estimated_precision", estimatedPrecision, 2);
-    gd.addNumericField("Blinking_rate", blinkingRate, 2);
-    gd.addCheckbox("Show_error_bars", showErrorBars);
-    gd.addSlider("Fit_restarts", 0, 5, fitRestarts);
-    gd.addCheckbox("Refit_using_LSE", useLSE);
-    gd.addSlider("Fit_above_estimated_precision", 0, 2.5, fitAboveEstimatedPrecision);
-    gd.addSlider("Fitting_tolerance", 0, 200, fittingTolerance);
-    gd.addSlider("gr_random_threshold", 1, 2.5, gr_protein_threshold);
-    gd.addCheckbox("Fit_clustered_models", fitClusteredModels);
-    gd.addCheckbox("Save_correlation_curve", saveCorrelationCurve);
+    gd.addNumericField("Estimated_precision", settings.estimatedPrecision, 2);
+    gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
+    gd.addCheckbox("Show_error_bars", settings.showErrorBars);
+    gd.addSlider("Fit_restarts", 0, 5, settings.fitRestarts);
+    gd.addCheckbox("Refit_using_LSE", settings.useLse);
+    gd.addSlider("Fit_above_estimated_precision", 0, 2.5, settings.fitAboveEstimatedPrecision);
+    gd.addSlider("Fitting_tolerance", 0, 200, settings.fittingTolerance);
+    gd.addSlider("gr_random_threshold", 1, 2.5, settings.grProteinThreshold);
+    gd.addCheckbox("Fit_clustered_models", settings.fitClusteredModels);
+    gd.addCheckbox("Save_correlation_curve", settings.saveCorrelationCurve);
 
     gd.showDialog();
 
@@ -225,23 +314,25 @@ public class PcPalmFitting implements PlugIn {
       return false;
     }
 
-    estimatedPrecision = gd.getNextNumber();
-    blinkingRate = gd.getNextNumber();
-    showErrorBars = gd.getNextBoolean();
-    fitRestarts = (int) Math.abs(gd.getNextNumber());
-    useLSE = gd.getNextBoolean();
-    fitAboveEstimatedPrecision = Math.abs(gd.getNextNumber());
-    fittingTolerance = Math.abs(gd.getNextNumber());
-    gr_protein_threshold = gd.getNextNumber();
-    fitClusteredModels = gd.getNextBoolean();
-    saveCorrelationCurve = gd.getNextBoolean();
+    settings.estimatedPrecision = gd.getNextNumber();
+    settings.blinkingRate = gd.getNextNumber();
+    settings.showErrorBars = gd.getNextBoolean();
+    settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
+    settings.useLse = gd.getNextBoolean();
+    settings.fitAboveEstimatedPrecision = Math.abs(gd.getNextNumber());
+    settings.fittingTolerance = Math.abs(gd.getNextNumber());
+    settings.grProteinThreshold = gd.getNextNumber();
+    settings.fitClusteredModels = gd.getNextBoolean();
+    settings.saveCorrelationCurve = gd.getNextBoolean();
+
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAbove("Correlation distance", correlationDistance, 1);
-      ParameterUtils.isAbove("Estimated precision", estimatedPrecision, 0);
-      ParameterUtils.isAbove("Blinking_rate", blinkingRate, 0);
-      ParameterUtils.isAbove("gr random threshold", gr_protein_threshold, 1);
+      ParameterUtils.isAbove("Correlation distance", settings.correlationDistance, 1);
+      ParameterUtils.isAbove("Estimated precision", settings.estimatedPrecision, 0);
+      ParameterUtils.isAbove("Blinking_rate", settings.blinkingRate, 0);
+      ParameterUtils.isAbove("gr random threshold", settings.grProteinThreshold, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -257,40 +348,43 @@ public class PcPalmFitting implements PlugIn {
     // - select a set of analysis results (if available)
     String[] options = new String[] {INPUT_FROM_FILE, "", ""};
     int count = 1;
-    if (previous_gr != null) {
+    final CorrelationCurveResult previous = latestResult.get();
+    if (previous != null) {
       options[count++] = INPUT_PREVIOUS;
     }
-    if (!PcPalmAnalysis.results.isEmpty()) {
+    final List<CorrelationResult> allResults = PcPalmAnalysis.getResults();
+    if (!allResults.isEmpty()) {
       options[count++] = INPUT_ANALYSIS;
     }
 
     options = Arrays.copyOf(options, count);
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Select the source for the correlation curve");
-    gd.addChoice("Input", options, inputOption);
+    gd.addChoice("Input", options, settings.inputOption);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
-    inputOption = gd.getNextChoice();
+    settings.inputOption = gd.getNextChoice();
+    settings.save();
 
-    if (inputOption.equals(INPUT_PREVIOUS)) {
+    if (settings.inputOption.equals(INPUT_PREVIOUS)) {
       // In the case of a macro the previous results may be null
-      if (previous_gr == null) {
+      if (previous == null) {
         return false;
       }
 
-      gr = previous_gr;
-      peakDensity = previous_peakDensity;
-      spatialDomain = previous_spatialDomain;
+      gr = previous.gr;
+      peakDensity = previous.peakDensity;
+      spatialDomain = previous.spatialDomain;
       return true;
-    } else if (inputOption.equals(INPUT_FROM_FILE)) {
+    } else if (settings.inputOption.equals(INPUT_FROM_FILE)) {
       return loadCorrelationCurve();
     }
 
     // Fill the results list with analysis results from PCPALM Analysis
     final ArrayList<CorrelationResult> results = new ArrayList<>();
-    if (!selectAnalysisResults(results)) {
+    if (!selectAnalysisResults(allResults, results)) {
       return false;
     }
 
@@ -317,21 +411,22 @@ public class PcPalmFitting implements PlugIn {
     return true;
   }
 
-  private boolean selectAnalysisResults(ArrayList<CorrelationResult> results) {
+  private boolean selectAnalysisResults(List<CorrelationResult> allResults,
+      ArrayList<CorrelationResult> results) {
     // If no results then fail
-    if (PcPalmAnalysis.results.isEmpty()) {
+    if (allResults.isEmpty()) {
       return false;
     }
 
     // If only one result then use that
-    if (PcPalmAnalysis.results.size() == 1) {
-      results.add(PcPalmAnalysis.results.get(0));
+    if (allResults.size() == 1) {
+      results.add(allResults.get(0));
       return true;
     }
 
     // Otherwise build a set of matched analysis results
     try {
-      while (selectNextCorrelation(results)) {
+      while (selectNextCorrelation(allResults, results)) {
         // All processing done in selectNextCorrelation
       }
     } catch (final Exception ex) {
@@ -369,8 +464,9 @@ public class PcPalmFitting implements PlugIn {
     return !results.isEmpty();
   }
 
-  private static boolean selectNextCorrelation(ArrayList<CorrelationResult> results) {
-    final ArrayList<String> titles = buildTitlesList(results);
+  private static boolean selectNextCorrelation(List<CorrelationResult> allResults,
+      ArrayList<CorrelationResult> results) {
+    final ArrayList<String> titles = buildTitlesList(allResults, results);
 
     // Show a dialog allowing the user to select an input image
     if (titles.isEmpty()) {
@@ -412,7 +508,7 @@ public class PcPalmFitting implements PlugIn {
     final String[] fields = title.split("\\*?:");
     try {
       final int id = Integer.parseInt(fields[0]);
-      for (final CorrelationResult r : PcPalmAnalysis.results) {
+      for (final CorrelationResult r : allResults) {
         if (r.id == id) {
           results.add(r);
           return true;
@@ -424,7 +520,8 @@ public class PcPalmFitting implements PlugIn {
     return false;
   }
 
-  private static ArrayList<String> buildTitlesList(ArrayList<CorrelationResult> results) {
+  private static ArrayList<String> buildTitlesList(List<CorrelationResult> allResults,
+      ArrayList<CorrelationResult> results) {
     // Make all subsequent results match the same nmPerPixel limit
     double nmPerPixel = 0;
     boolean spatialDomain = false;
@@ -436,7 +533,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     final ArrayList<String> titles = new ArrayList<>();
-    for (final CorrelationResult r : PcPalmAnalysis.results) {
+    for (final CorrelationResult r : allResults) {
       if (alreadySelected(results, r)
           || (filter && (r.nmPerPixel != nmPerPixel || r.spatialDomain != spatialDomain))) {
         continue;
@@ -475,9 +572,7 @@ public class PcPalmFitting implements PlugIn {
    * <p>Frequency domain results can be fit using the g(r) model.
    */
   private void analyse() {
-    previous_gr = gr;
-    previous_peakDensity = peakDensity;
-    previous_spatialDomain = spatialDomain;
+    latestResult.set(new CorrelationCurveResult(gr, peakDensity, spatialDomain));
 
     String axisTitle;
     if (spatialDomain) {
@@ -489,8 +584,8 @@ public class PcPalmFitting implements PlugIn {
       axisTitle = "g(r)";
     }
     final String title = TITLE + " " + axisTitle;
-    final Plot plot =
-        PcPalmAnalysis.plotCorrelation(gr, offset, title, axisTitle, spatialDomain, showErrorBars);
+    final Plot plot = PcPalmAnalysis.plotCorrelation(gr, offset, title, axisTitle, spatialDomain,
+        settings.showErrorBars);
 
     if (spatialDomain) {
       saveCorrelationCurve(gr);
@@ -503,23 +598,24 @@ public class PcPalmFitting implements PlugIn {
     // -------------
     log("Fitting g(r) correlation curve from the frequency domain");
     log("Average peak density = %s um^-2. Blinking estimate = %s",
-        MathUtils.rounded(peakDensity, 4), MathUtils.rounded(blinkingRate, 4));
+        MathUtils.rounded(peakDensity, 4), MathUtils.rounded(settings.blinkingRate, 4));
 
-    createResultsTable();
+    resultsTable = createResultsTable();
 
     // Get the protein density in nm^2.
     peakDensity /= 1e6;
 
     // Use the blinking rate estimate to estimate the density
     // (factors in the over-counting of the same molecules)
-    final double proteinDensity = peakDensity / blinkingRate;
+    final double proteinDensity = peakDensity / settings.blinkingRate;
 
     final ArrayList<double[]> curves = new ArrayList<>();
 
     // Fit the g(r) curve for r>0 to equation 2
     Color color = Color.red;
     String resultColour = "Red";
-    double[] parameters = fitRandomModel(gr, estimatedPrecision, proteinDensity, resultColour);
+    double[] parameters =
+        fitRandomModel(gr, settings.estimatedPrecision, proteinDensity, resultColour);
     if (parameters != null) {
       log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
           MathUtils.rounded(peakDensity / parameters[1], 4));
@@ -528,17 +624,17 @@ public class PcPalmFitting implements PlugIn {
       plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
       addNonFittedPoints(plot, gr, randomModel, parameters);
       ImageJUtils.display(title, plot);
-      if (saveCorrelationCurve) {
+      if (settings.saveCorrelationCurve) {
         curves.add(extractCurve(gr, randomModel, parameters));
       }
     }
 
     // Fit the clustered models if the random model fails or if chosen as an option
-    if (!valid1 || fitClusteredModels) {
+    if (!valid1 || settings.fitClusteredModels) {
       // Fit the g(r) curve for r>0 to equation 3
       color = Color.blue;
       resultColour = "Blue";
-      parameters = fitClusteredModel(gr, estimatedPrecision, proteinDensity, resultColour);
+      parameters = fitClusteredModel(gr, settings.estimatedPrecision, proteinDensity, resultColour);
 
       if (parameters != null) {
         log("  Plot %s: Over-counting estimate = %s", clusteredModel.getName(),
@@ -548,7 +644,7 @@ public class PcPalmFitting implements PlugIn {
         plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
         addNonFittedPoints(plot, gr, clusteredModel, parameters);
         ImageJUtils.display(title, plot);
-        if (saveCorrelationCurve) {
+        if (settings.saveCorrelationCurve) {
           curves.add(extractCurve(gr, clusteredModel, parameters));
         }
       }
@@ -556,7 +652,7 @@ public class PcPalmFitting implements PlugIn {
       // Fit to an emulsion model for a distribution confined to circles
       color = Color.magenta;
       resultColour = "Magenta";
-      parameters = fitEmulsionModel(gr, estimatedPrecision, proteinDensity, resultColour);
+      parameters = fitEmulsionModel(gr, settings.estimatedPrecision, proteinDensity, resultColour);
 
       if (parameters != null) {
         log("  Plot %s: Over-counting estimate = %s", emulsionModel.getName(),
@@ -566,7 +662,7 @@ public class PcPalmFitting implements PlugIn {
         plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
         addNonFittedPoints(plot, gr, emulsionModel, parameters);
         ImageJUtils.display(title, plot);
-        if (saveCorrelationCurve) {
+        if (settings.saveCorrelationCurve) {
           curves.add(extractCurve(gr, emulsionModel, parameters));
         }
       }
@@ -603,9 +699,9 @@ public class PcPalmFitting implements PlugIn {
 
   private static double[][] combineCurves(ArrayList<CorrelationResult> results, int maxSize) {
     final double[][] gr = new double[3][maxSize];
-    final Statistics[] gr_ = new Statistics[maxSize];
+    final Statistics[] grStats = new Statistics[maxSize];
     for (int i = 0; i < maxSize; i++) {
-      gr_[i] = new Statistics();
+      grStats[i] = new Statistics();
     }
 
     for (final CorrelationResult r : results) {
@@ -617,28 +713,29 @@ public class PcPalmFitting implements PlugIn {
 
         // NaN values can be generated so ignore them
         if (!Double.isNaN(r.gr[1][i])) {
-          gr_[i].add(r.gr[1][i]);
+          grStats[i].add(r.gr[1][i]);
         }
       }
     }
     for (int i = 0; i < maxSize; i++) {
-      gr[1][i] = gr_[i].getMean();
-      gr[2][i] = gr_[i].getStandardError();
+      gr[1][i] = grStats[i].getMean();
+      gr[2][i] = grStats[i].getStandardError();
     }
     return gr;
   }
 
   private void saveCorrelationCurve(double[][] gr, double[]... curves) {
-    if (!saveCorrelationCurve) {
+    if (!settings.saveCorrelationCurve) {
       return;
     }
-    outputFilename = ImageJUtils.getFilename("Output_Correlation_File", outputFilename);
-    if (outputFilename != null) {
-      outputFilename = FileUtils.replaceExtension(outputFilename, "xls");
+    settings.outputFilename =
+        ImageJUtils.getFilename("Output_Correlation_File", settings.outputFilename);
+    if (settings.outputFilename != null) {
+      settings.outputFilename = FileUtils.replaceExtension(settings.outputFilename, "xls");
 
-      try (BufferedWriter output = Files.newBufferedWriter(Paths.get(outputFilename))) {
-        writeHeader(output, HEADER_PEAK_DENSITY, Double.toString(previous_peakDensity));
-        writeHeader(output, HEADER_SPATIAL_DOMAIN, Boolean.toString(previous_spatialDomain));
+      try (BufferedWriter output = Files.newBufferedWriter(Paths.get(settings.outputFilename))) {
+        writeHeader(output, HEADER_PEAK_DENSITY, Double.toString(peakDensity));
+        writeHeader(output, HEADER_SPATIAL_DOMAIN, Boolean.toString(spatialDomain));
         output.write("#r\tg(r)\tS.E.");
         for (int j = 0; j < curves.length; j++) {
           output.write(String.format("\tModel %d", j + 1));
@@ -652,10 +749,9 @@ public class PcPalmFitting implements PlugIn {
           }
           output.newLine();
         }
-      } catch (final Exception ex) {
-        // Q. Add better handling of errors?
-        ex.printStackTrace();
-        IJ.log("Failed to save correlation curve to file: " + outputFilename);
+      } catch (final IOException ex) {
+        IJ.log("Failed to save correlation curve to file: " + settings.outputFilename + ". "
+            + ex.getMessage());
       }
     }
   }
@@ -676,8 +772,9 @@ public class PcPalmFitting implements PlugIn {
    * @return True if loaded
    */
   private boolean loadCorrelationCurve() {
-    inputFilename = ImageJUtils.getFilename("Input_Correlation_File", inputFilename);
-    if (inputFilename == null) {
+    settings.inputFilename =
+        ImageJUtils.getFilename("Input_Correlation_File", settings.inputFilename);
+    if (settings.inputFilename == null) {
       return false;
     }
 
@@ -685,7 +782,7 @@ public class PcPalmFitting implements PlugIn {
     boolean spatialDomainSet = false;
     boolean peakDensitySet = false;
 
-    try (BufferedReader input = Files.newBufferedReader(Paths.get(inputFilename))) {
+    try (BufferedReader input = Files.newBufferedReader(Paths.get(settings.inputFilename))) {
       String line;
       int count = 0;
 
@@ -730,11 +827,13 @@ public class PcPalmFitting implements PlugIn {
       }
 
       if (!peakDensitySet) {
-        IJ.error(TITLE, "No valid " + HEADER_PEAK_DENSITY + " record in file " + inputFilename);
+        IJ.error(TITLE,
+            "No valid " + HEADER_PEAK_DENSITY + " record in file " + settings.inputFilename);
         return false;
       }
       if (!spatialDomainSet) {
-        IJ.error(TITLE, "No valid " + HEADER_SPATIAL_DOMAIN + " record in file " + inputFilename);
+        IJ.error(TITLE,
+            "No valid " + HEADER_SPATIAL_DOMAIN + " record in file " + settings.inputFilename);
         return false;
       }
 
@@ -777,7 +876,7 @@ public class PcPalmFitting implements PlugIn {
       }
 
       if (data.isEmpty()) {
-        IJ.error(TITLE, "No data in file " + inputFilename);
+        IJ.error(TITLE, "No data in file " + settings.inputFilename);
         return false;
       }
 
@@ -789,7 +888,7 @@ public class PcPalmFitting implements PlugIn {
         gr[2][i] = d[2];
       }
     } catch (final IOException ex) {
-      IJ.error(TITLE, "Unable to read from file " + inputFilename);
+      IJ.error(TITLE, "Unable to read from file " + settings.inputFilename);
       return false;
     }
 
@@ -806,6 +905,7 @@ public class PcPalmFitting implements PlugIn {
    * @param resultColour the result colour
    * @return The fitted parameters [precision, density]
    */
+  @Nullable
   private double[] fitRandomModel(double[][] gr, double sigmaS, double proteinDensity,
       String resultColour) {
     final RandomModelFunction function = new RandomModelFunction();
@@ -819,7 +919,7 @@ public class PcPalmFitting implements PlugIn {
     for (int i = offset; i < gr[0].length; i++) {
       // Only fit the curve above the estimated resolution (points below it will be subject to
       // error)
-      if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision) {
+      if (gr[0][i] > sigmaS * settings.fitAboveEstimatedPrecision) {
         randomModel.addPoint(gr[0][i], gr[1][i]);
       }
     }
@@ -834,12 +934,7 @@ public class PcPalmFitting implements PlugIn {
           .start(new double[] { sigmaS, proteinDensity })
           .target(function.getY())
           .weight(new DiagonalMatrix(function.getWeights()))
-          .model(function, new MultivariateMatrixFunction() {
-            @Override
-            public double[][] value(double[] point) throws IllegalArgumentException
-            {
-              return function.jacobian(point);
-            }} )
+          .model(function, function::jacobian)
           .build();
       //@formatter:on
 
@@ -878,11 +973,11 @@ public class PcPalmFitting implements PlugIn {
         MathUtils.rounded(fitProteinDensity * 1e6, 4), MathUtils.rounded(e2, 4));
 
     valid1 = true;
-    if (fittingTolerance > 0
-        && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
+    if (settings.fittingTolerance > 0
+        && (Math.abs(e1) > settings.fittingTolerance || Math.abs(e2) > settings.fittingTolerance)) {
       log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
           + " average protein density = %g um^-2 (%s%%)", randomModel.getName(),
-          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          MathUtils.rounded(settings.fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
           fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid1 = false;
     }
@@ -891,8 +986,7 @@ public class PcPalmFitting implements PlugIn {
       // ---------
       // TODO - My data does not comply with this criteria.
       // This could be due to the PC-PALM Molecule code limiting the nmPerPixel to fit the images in
-      // memory
-      // thus removing correlations at small r.
+      // memory thus removing correlations at small r.
       // It could also be due to the nature of the random simulations being 3D not 2D membranes
       // as per the PC-PALM paper.
       // ---------
@@ -900,29 +994,26 @@ public class PcPalmFitting implements PlugIn {
       // g(r)peaks = g(r)protein + g(r)stoch
       // g(r)peaks ~ 1 + g(r)stoch
       // Verify g(r)protein should be <1.5 for all r>0
-      final double[] gr_stoch = randomModel.value(parameters);
-      final double[] gr_peaks = randomModel.getY();
-      final double[] gr_ = randomModel.getX();
+      final double[] grStoch = randomModel.value(parameters);
+      final double[] grPeaks = randomModel.getY();
+      final double[] radius = randomModel.getX();
 
-      // SummaryStatistics stats = new SummaryStatistics();
-      for (int i = 0; i < gr_peaks.length; i++) {
+      for (int i = 0; i < grPeaks.length; i++) {
         // Only evaluate above the fitted average precision
-        if (gr_[i] < fitSigmaS) {
+        if (radius[i] < fitSigmaS) {
           continue;
         }
 
-        // Note the RandomModelFunction evaluates g(r)stoch + 1;
-        final double gr_protein_i = gr_peaks[i] - (gr_stoch[i] - 1);
+        // Note the RandomModelFunction evaluates g(r)stoch + 1
+        final double gr_protein_i = grPeaks[i] - (grStoch[i] - 1);
 
-        if (gr_protein_i > gr_protein_threshold) {
+        if (gr_protein_i > settings.grProteinThreshold) {
           // Failed fit
           log("  Failed to fit %s: g(r)protein %s > %s @ r=%s", randomModel.getName(),
-              MathUtils.rounded(gr_protein_i, 4), MathUtils.rounded(gr_protein_threshold, 4),
-              MathUtils.rounded(gr_[i], 4));
+              MathUtils.rounded(gr_protein_i, 4), MathUtils.rounded(settings.grProteinThreshold, 4),
+              MathUtils.rounded(radius[i], 4));
           valid1 = false;
         }
-        // stats.addValue(gr_i);
-        // System.out.printf("g(r)protein @ %f = %f\n", gr[0][i], gr_protein_i);
       }
     }
 
@@ -949,6 +1040,7 @@ public class PcPalmFitting implements PlugIn {
    * @param resultColour the result colour
    * @return The fitted parameters [precision, density, clusterRadius, clusterDensity]
    */
+  @Nullable
   private double[] fitClusteredModel(double[][] gr, double sigmaS, double proteinDensity,
       String resultColour) {
     final ClusteredModelFunctionGradient function = new ClusteredModelFunctionGradient();
@@ -960,7 +1052,7 @@ public class PcPalmFitting implements PlugIn {
     for (int i = offset; i < gr[0].length; i++) {
       // Only fit the curve above the estimated resolution (points below it will be subject to
       // error)
-      if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision) {
+      if (gr[0][i] > sigmaS * settings.fitAboveEstimatedPrecision) {
         clusteredModel.addPoint(gr[0][i], gr[1][i]);
       }
     }
@@ -976,7 +1068,7 @@ public class PcPalmFitting implements PlugIn {
     final double[] x = clusteredModelMulti.x;
 
     // Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
-    final double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
+    final double limit = (settings.fittingTolerance > 0) ? 1 + settings.fittingTolerance / 100 : 2;
     final double[] lB = new double[] {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0};
     // The amplitude and range should not extend beyond the limits of the g(r) curve.
     final double[] uB = new double[] {initialSolution[0] * limit, initialSolution[1] * limit,
@@ -996,7 +1088,7 @@ public class PcPalmFitting implements PlugIn {
     int evaluations = boundedEvaluations;
 
     // Refit using a LVM
-    if (useLSE) {
+    if (settings.useLse) {
       log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
       final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
       Optimum lvmSolution;
@@ -1039,7 +1131,6 @@ public class PcPalmFitting implements PlugIn {
 
     // Ensure the width is positive
     parameters[0] = Math.abs(parameters[0]);
-    // parameters[2] = Math.abs(parameters[2]);
 
     double ss = 0;
     final double[] obs = clusteredModel.getY();
@@ -1047,8 +1138,8 @@ public class PcPalmFitting implements PlugIn {
     for (int i = 0; i < obs.length; i++) {
       ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
     }
-    ic2 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, clusteredModel.size(),
-        parameters.length);
+    final double ic2 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss,
+        clusteredModel.size(), parameters.length);
 
     final double fitSigmaS = parameters[0];
     final double fitProteinDensity = parameters[1];
@@ -1077,11 +1168,11 @@ public class PcPalmFitting implements PlugIn {
 
     // Check the fitted parameters are within tolerance of the initial estimates
     valid2 = true;
-    if (fittingTolerance > 0
-        && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
+    if (settings.fittingTolerance > 0
+        && (Math.abs(e1) > settings.fittingTolerance || Math.abs(e2) > settings.fittingTolerance)) {
       log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
           + " average protein density = %g um^-2 (%s%%)", clusteredModel.getName(),
-          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          MathUtils.rounded(settings.fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
           fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid2 = false;
     }
@@ -1127,7 +1218,7 @@ public class PcPalmFitting implements PlugIn {
     boundedEvaluations = 0;
     final MaxEval maxEvaluations = new MaxEval(2000);
     MultivariateOptimizer opt = null;
-    for (int iteration = 0; iteration <= fitRestarts; iteration++) {
+    for (int iteration = 0; iteration <= settings.fitRestarts; iteration++) {
       try {
         opt = new BfgsOptimizer();
         final double relativeThreshold = 1e-6;
@@ -1148,8 +1239,6 @@ public class PcPalmFitting implements PlugIn {
           System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(),
               opt.getEvaluations());
         }
-      } catch (final TooManyEvaluationsException ex) {
-        break; // No need to restart
       } catch (final RuntimeException ex) {
         break; // No need to restart
       } finally {
@@ -1164,11 +1253,11 @@ public class PcPalmFitting implements PlugIn {
     // CMAESOptimiser based on Matlab code:
     // https://www.lri.fr/~hansen/cmaes.m
     // Take the defaults from the Matlab documentation
-    final double stopFitness = 0; // Double.NEGATIVE_INFINITY;
+    final double stopFitness = 0;
     final boolean isActiveCma = true;
     final int diagonalOnly = 0;
     final int checkFeasableCount = 1;
-    final RandomGenerator random = new Well44497b(); // Well19937c();
+    final RandomGenerator random = new Well44497b();
     final boolean generateStatistics = false;
     final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
     // The sigma determines the search range for the variables. It should be 1/3 of the initial
@@ -1185,7 +1274,7 @@ public class PcPalmFitting implements PlugIn {
     opt = new CMAESOptimizer(maxEvaluations.getMaxEval(), stopFitness, isActiveCma, diagonalOnly,
         checkFeasableCount, random, generateStatistics, checker);
     // Restart the optimiser several times and take the best answer.
-    for (int iteration = 0; iteration <= fitRestarts; iteration++) {
+    for (int iteration = 0; iteration <= settings.fitRestarts; iteration++) {
       try {
         // Start from the initial solution
         final PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
@@ -1248,7 +1337,7 @@ public class PcPalmFitting implements PlugIn {
     for (int i = offset; i < gr[0].length; i++) {
       // Only fit the curve above the estimated resolution (points below it will be subject to
       // error)
-      if (gr[0][i] > sigmaS * fitAboveEstimatedPrecision) {
+      if (gr[0][i] > sigmaS * settings.fitAboveEstimatedPrecision) {
         emulsionModel.addPoint(gr[0][i], gr[1][i]);
       }
     }
@@ -1273,7 +1362,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     // Put some bounds around the initial guess. Use the fitting tolerance (in %) if provided.
-    final double limit = (fittingTolerance > 0) ? 1 + fittingTolerance / 100 : 2;
+    final double limit = (settings.fittingTolerance > 0) ? 1 + settings.fittingTolerance / 100 : 2;
     final double[] lB =
         new double[] {initialSolution[0] / limit, initialSolution[1] / limit, 0, 0, 0};
     // The amplitude and range should not extend beyond the limits of the g(r) curve.
@@ -1295,7 +1384,7 @@ public class PcPalmFitting implements PlugIn {
     int evaluations = boundedEvaluations;
 
     // Refit using a LVM
-    if (useLSE) {
+    if (settings.useLse) {
       log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
       final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
       Optimum lvmSolution;
@@ -1307,11 +1396,7 @@ public class PcPalmFitting implements PlugIn {
             .start(parameters)
             .target(function.getY())
             .weight(new DiagonalMatrix(function.getWeights()))
-            .model(function, new MultivariateMatrixFunction() {
-              @Override
-              public double[][] value(double[] point) {
-                return function.jacobian(point);
-              }} )
+            .model(function, function::jacobian)
             .build();
         //@formatter:on
 
@@ -1338,7 +1423,6 @@ public class PcPalmFitting implements PlugIn {
 
     // Ensure the width is positive
     parameters[0] = Math.abs(parameters[0]);
-    // parameters[2] = Math.abs(parameters[2]);
 
     double ss = 0;
     final double[] obs = emulsionModel.getY();
@@ -1346,8 +1430,8 @@ public class PcPalmFitting implements PlugIn {
     for (int i = 0; i < obs.length; i++) {
       ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
     }
-    ic3 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, emulsionModel.size(),
-        parameters.length);
+    final double ic3 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss,
+        emulsionModel.size(), parameters.length);
 
     final double fitSigmaS = parameters[0];
     final double fitProteinDensity = parameters[1];
@@ -1376,11 +1460,11 @@ public class PcPalmFitting implements PlugIn {
 
     // Check the fitted parameters are within tolerance of the initial estimates
     valid2 = true;
-    if (fittingTolerance > 0
-        && (Math.abs(e1) > fittingTolerance || Math.abs(e2) > fittingTolerance)) {
+    if (settings.fittingTolerance > 0
+        && (Math.abs(e1) > settings.fittingTolerance || Math.abs(e2) > settings.fittingTolerance)) {
       log("  Failed to fit %s within tolerance (%s%%): Average precision = %f nm (%s%%),"
           + " average protein density = %g um^-2 (%s%%)", emulsionModel.getName(),
-          MathUtils.rounded(fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
+          MathUtils.rounded(settings.fittingTolerance, 4), fitSigmaS, MathUtils.rounded(e1, 4),
           fitProteinDensity * 1e6, MathUtils.rounded(e2, 4));
       valid2 = false;
     }
@@ -1505,17 +1589,6 @@ public class PcPalmFitting implements PlugIn {
         // => value' = a' * c
         jacobian[i][1] = (-a / density) * c;
       }
-
-      //// Check numerically ...
-      // double[][] jacobian2 = jacobian2(variables);
-      // for (int i = 0; i < jacobian.length; i++)
-      // {
-      // System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g\n", jacobian[i][0],
-      //// jacobian2[i][0],
-      // DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]), jacobian[i][1],
-      //// jacobian2[i][1],
-      // DoubleEquality.relativeError(jacobian[i][1], jacobian2[i][1]));
-      // }
 
       return jacobian;
     }
@@ -1664,23 +1737,6 @@ public class PcPalmFitting implements PlugIn {
         // Differentiate with respect to amplitude:
         jacobian[i][3] = e;
       }
-
-      //// Check numerically ...
-      // double[][] jacobian2 = jacobian2(variables);
-      // for (int i = 0; i < jacobian.length; i++)
-      // {
-      // System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g. dRange = %g : %g = %g.
-      //// dAmplitude = %g : %g = %g\n",
-      // jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0],
-      //// jacobian2[i][0]),
-      // jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1],
-      //// jacobian2[i][1]),
-      // jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2],
-      //// jacobian2[i][2]),
-      // jacobian[i][3], jacobian2[i][3], DoubleEquality.relativeError(jacobian[i][3],
-      //// jacobian2[i][3])
-      // );
-      // }
 
       return jacobian;
     }
@@ -1948,7 +2004,6 @@ public class PcPalmFitting implements PlugIn {
         // value' = amplitude * e * g'
         // g = Math.cos(f)
         // g' = f' * -Math.sin(f) [ Chain rule ]
-        // jacobian[i][2] = amplitude * e * (-f / range) * -Math.sin(f);
         jacobian[i][2] = amplitude * e * (f / range) * Math.sin(f);
 
         // Differentiate with respect to amplitude:
@@ -1961,24 +2016,6 @@ public class PcPalmFitting implements PlugIn {
         // e' = d' * e
         jacobian[i][4] = amplitude * (-1 * d / alpha) * e * g;
       }
-
-      //// Check numerically ...
-      // double[][] jacobian2 = jacobian2(variables);
-      // for (int i = 0; i < jacobian.length; i++)
-      // {
-      // System.out.printf("dSigma = %g : %g = %g. dDensity = %g : %g = %g. dRange = %g : %g = %g.
-      //// dAmplitude = %g : %g = %g. dAlpha = %g : %g = %g\n",
-      // jacobian[i][0], jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0],
-      //// jacobian2[i][0]),
-      // jacobian[i][1], jacobian2[i][1], DoubleEquality.relativeError(jacobian[i][1],
-      //// jacobian2[i][1]),
-      // jacobian[i][2], jacobian2[i][2], DoubleEquality.relativeError(jacobian[i][2],
-      //// jacobian2[i][2]),
-      // jacobian[i][3], jacobian2[i][3], DoubleEquality.relativeError(jacobian[i][3],
-      //// jacobian2[i][3]),
-      // jacobian[i][4], jacobian2[i][4], DoubleEquality.relativeError(jacobian[i][4],
-      //// jacobian2[i][4]));
-      // }
 
       return jacobian;
     }
@@ -2063,8 +2100,8 @@ public class PcPalmFitting implements PlugIn {
     }
   }
 
-  private static void createResultsTable() {
-    if (resultsTable == null || !resultsTable.isVisible()) {
+  private static TextWindow createResultsTable() {
+    return ImageJUtils.refresh(resultsTableRef, () -> {
       final StringBuilder sb = new StringBuilder();
       sb.append("Model\t");
       sb.append("Colour\t");
@@ -2077,11 +2114,11 @@ public class PcPalmFitting implements PlugIn {
       sb.append("N-cluster\t");
       sb.append("Coherence\t");
       sb.append("cAIC\t");
-      resultsTable = new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
-    }
+      return new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
+    });
   }
 
-  private static void addResult(String model, String resultColour, boolean valid, double precision,
+  private void addResult(String model, String resultColour, boolean valid, double precision,
       double density, double domainRadius, double domainDensity, double ncluster, double coherence,
       double ic) {
     final StringBuilder sb = new StringBuilder();
@@ -2100,5 +2137,12 @@ public class PcPalmFitting implements PlugIn {
 
   private static String getString(double value) {
     return (value == 0) ? "-" : MathUtils.rounded(value, 4);
+  }
+
+  /**
+   * Clear the current results.
+   */
+  static void clearResults() {
+    latestResult.set(null);
   }
 }

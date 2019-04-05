@@ -51,13 +51,14 @@ import ij.process.ImageProcessor;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.
  */
 public class FilterResults implements PlugIn {
   private static final String TITLE = "Filter Results";
-  private static String inputOption = "";
+  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
 
   private MemoryPeakResults results;
 
@@ -90,6 +91,8 @@ public class FilterResults implements PlugIn {
       return;
     }
 
+    String inputOption = inputOptionRef.get();
+
     // Show a dialog allowing the results set to be filtered
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Select a dataset to filter");
@@ -99,6 +102,8 @@ public class FilterResults implements PlugIn {
       return;
     }
     inputOption = ResultsManager.getInputSource(gd);
+    inputOptionRef.set(inputOption);
+
     results = ResultsManager.loadInputResults(inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");

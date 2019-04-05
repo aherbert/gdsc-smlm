@@ -38,7 +38,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
@@ -51,19 +50,16 @@ import java.awt.Color;
 import java.awt.SystemColor;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Adjust the configuration used for fitting.
  */
-public class Configuration
-    implements PlugIn, ItemListener, FitConfigurationProvider, FitEngineConfigurationProvider {
+public class Configuration implements PlugIn {
   private static final String TITLE = "Fit Configuration";
-  private static String templateFilename = "";
-  private static String notes = "";
 
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
@@ -95,6 +91,52 @@ public class Configuration
   private TextField textMinWidthFactor;
   private TextField textWidthFactor;
 
+  /** The plugin settings. */
+  private Settings pluginSettings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String templateFilename = "";
+    String notes = "";
+
+    Settings() {
+      // Set defaults
+      templateFilename = "";
+      notes = "";
+    }
+
+    Settings(Settings source) {
+      templateFilename = source.templateFilename;
+      notes = source.notes;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -123,6 +165,9 @@ public class Configuration
   public boolean showDialog(FitEngineConfiguration fitEngineConfiguration, boolean save) {
     this.config = fitEngineConfiguration;
     fitConfig = config.getFitConfiguration();
+    pluginSettings = Settings.load();
+    pluginSettings.save();
+
     final CalibrationReader calibrationReader = fitConfig.getCalibrationReader();
 
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -140,7 +185,7 @@ public class Configuration
     PeakFit.addPsfOptions(gd, fitConfig);
 
     gd.addMessage("--- Maxima identification ---");
-    final FitEngineConfigurationProvider provider = this;
+    final FitEngineConfigurationProvider provider = this::getFitEngineConfiguration;
     PeakFit.addDataFilterOptions(gd, provider);
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);
@@ -171,7 +216,7 @@ public class Configuration
     gd.addNumericField("Min_photons", fitConfig.getMinPhotons(), 0);
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
     gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
-    PeakFit.addPrecisionOptions(gd, this);
+    PeakFit.addPrecisionOptions(gd, this::getFitConfiguration);
 
     // Add a mouse listener to the config file field
     if (ImageJUtils.isShowGenericDialog()) {
@@ -184,7 +229,7 @@ public class Configuration
       final Iterator<Choice> ch = choices.iterator();
 
       final Choice textTemplate = ch.next();
-      textTemplate.addItemListener(this);
+      textTemplate.addItemListener(this::itemStateChanged);
 
       textCameraType = ch.next();
       textNmPerPixel = nu.next();
@@ -213,13 +258,12 @@ public class Configuration
       textPrecisionThreshold = nu.next();
 
       updateFilterInput();
-      textSmartFilter.addItemListener(this);
-      textDisableSimpleFilter.addItemListener(this);
+      textSmartFilter.addItemListener(this::itemStateChanged);
+      textDisableSimpleFilter.addItemListener(this::itemStateChanged);
     }
 
     if (save) {
       gd.enableYesNoCancel("Save", "Save template");
-      // gd.setCancelLabel("Close");
     }
 
     gd.showDialog();
@@ -278,8 +322,6 @@ public class Configuration
       }
       ParameterUtils.isAboveZero("Search_width", config.getSearch());
       ParameterUtils.isAboveZero("Fitting_width", config.getFitting());
-      // Can be negative to disable
-      // Parameters.isPositive("Failures limit", config.getFailuresLimit());
       ParameterUtils.isPositive("Neighbour height threshold", config.getNeighbourHeightThreshold());
       ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
       ParameterUtils.isPositive("Duplicate distance", config.getDuplicateDistance());
@@ -317,28 +359,29 @@ public class Configuration
       final boolean saveToFile = !gd.wasOKed();
       if (saveToFile) {
         gd = new ExtendedGenericDialog(TITLE);
-        gd.addFilenameField("Template_filename", templateFilename);
+        gd.addFilenameField("Template_filename", pluginSettings.templateFilename);
         gd.addMessage("Add notes to the template ...");
-        gd.addTextAreas(notes, null, 10, 60);
+        gd.addTextAreas(pluginSettings.notes, null, 10, 60);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
         }
+        pluginSettings.save();
         final String filename = gd.getNextString();
-        notes = gd.getNextText();
+        pluginSettings.notes = gd.getNextText();
 
         if (filename != null) {
-          templateFilename = FileUtils.replaceExtension(filename, ".txt");
-          final File file = new File(templateFilename);
+          pluginSettings.templateFilename = FileUtils.replaceExtension(filename, ".txt");
+          final File file = new File(pluginSettings.templateFilename);
           final String name = FileUtils.removeExtension(file.getName());
           final TemplateSettings.Builder settings = TemplateSettings.newBuilder();
-          settings.addNotes(notes);
+          settings.addNotes(pluginSettings.notes);
           settings.setCalibration(fitConfig.getCalibration());
           settings.setFitEngineSettings(config.getFitEngineSettings());
           // Note: No results settings are currently supported
           settings.setPsf(fitConfig.getPsf());
           if (!ConfigurationTemplate.saveTemplate(name, settings.build(), file)) {
-            IJ.error(TITLE, "Failed to save to file: " + templateFilename);
+            IJ.error(TITLE, "Failed to save to file: " + pluginSettings.templateFilename);
           }
         }
       } else {
@@ -349,23 +392,24 @@ public class Configuration
     return true;
   }
 
-  @Override
-  public FitEngineConfiguration getFitEngineConfiguration() {
+  /**
+   * Gets the fit engine configuration.
+   *
+   * @return the fit engine configuration
+   */
+  FitEngineConfiguration getFitEngineConfiguration() {
     return config;
   }
 
-  @Override
-  public FitConfiguration getFitConfiguration() {
+  private FitConfiguration getFitConfiguration() {
     return config.getFitConfiguration();
   }
 
-  @Override
-  public void itemStateChanged(ItemEvent event) {
+  private void itemStateChanged(ItemEvent event) {
     if (event.getSource() instanceof Choice) {
       // Update the settings from the template
       final Choice choice = (Choice) event.getSource();
       final String templateName = choice.getSelectedItem();
-      // System.out.println("Update to " + templateName);
 
       // Get the configuration template
       final TemplateSettings template = ConfigurationTemplate.getTemplate(templateName);
@@ -374,7 +418,7 @@ public class Configuration
         IJ.log("Applying template: " + templateName);
         final File file = ConfigurationTemplate.getTemplateFile(templateName);
         if (file != null) {
-          templateFilename = file.getPath();
+          pluginSettings.templateFilename = file.getPath();
         }
 
         final StringBuilder sb = new StringBuilder();
@@ -385,7 +429,7 @@ public class Configuration
           }
           IJ.log(note);
         }
-        notes = sb.toString();
+        pluginSettings.notes = sb.toString();
 
         final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
         if (template.hasCalibration()) {
@@ -395,7 +439,7 @@ public class Configuration
           refreshSettings(template.getPsf(), custom);
         }
         if (template.hasFitEngineSettings()) {
-          refreshSettings(template.getFitEngineSettings(), custom);
+          refreshSettings(template.getFitEngineSettings());
         }
       }
     } else if (event.getSource() instanceof Checkbox) {
@@ -411,16 +455,14 @@ public class Configuration
       disableEditing(textCoordinateShiftFactor);
       disableEditing(textSignalStrength);
       disableEditing(textMinPhotons);
-      // These are used to set bounds
-      // disableEditing(textMinWidthFactor);
-      // disableEditing(textWidthFactor);
+      // These are used to set bounds:
+      // - textMinWidthFactor
+      // - textWidthFactor
       disableEditing(textPrecisionThreshold);
     } else {
       enableEditing(textCoordinateShiftFactor);
       enableEditing(textSignalStrength);
       enableEditing(textMinPhotons);
-      // enableEditing(textMinWidthFactor);
-      // enableEditing(textWidthFactor);
       enableEditing(textPrecisionThreshold);
     }
   }
@@ -471,9 +513,8 @@ public class Configuration
    * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
    *
    * @param fitEngineSettings the config
-   * @param isCustomTemplate True if a custom template.
    */
-  private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate) {
+  private void refreshSettings(FitEngineSettings fitEngineSettings) {
     // Set the configuration
     // This will clear everything and merge the configuration
     this.config.setFitEngineSettings(fitEngineSettings);

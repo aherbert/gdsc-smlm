@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -41,6 +42,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -71,6 +73,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -91,34 +94,111 @@ public class PcPalmClusters implements PlugIn {
   /** The title. */
   static final String TITLE = "PC-PALM Clusters";
 
-  private static int runMode;
-  private static double distance = 50;
-  private static ClusteringAlgorithm sClusteringAlgorithm =
-      ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
-  private static int minN = 1;
-  private static int maxN;
-  private static boolean maximumLikelihood;
-  private static boolean showCumulativeHistogram;
-  private static boolean multiThread = true;
-  private static boolean sWeightedClustering;
-  private static boolean saveHistogram;
-  private static String histogramFile = "";
-  private static String noiseFile = "";
-  private static boolean sAutoSave = true;
+  /**
+   * The auto save is only set if the histogram data file already exists. The option to save is then
+   * a choice of the user. Otherwise default to true.
+   */
   private boolean autoSave = true;
-  private static boolean calibrateHistogram;
-  private static int frames = 1;
-  private static double area = 1;
-  private static final String[] UNITS = {"pixels^2", "um^2"};
-  private static String units = UNITS[0];
-
+  /**
+   * The clustering algorithm is only set when not running in file input mode.
+   */
   private ClusteringAlgorithm clusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
+  /**
+   * The weighted clustering flag is only set if there are weights.
+   */
   private boolean weightedClustering;
 
   private boolean fileInput;
 
   private int numberOfMolecules;
   private double count;
+
+  /** The plugin settings. */
+  private Settings settings;
+  /** The results from PC-PALM molecules. */
+  private MoleculesResults moleculesResults;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    private static final String[] UNITS = {"pixels^2", "um^2"};
+
+    int runMode;
+    double distance;
+    ClusteringAlgorithm clusteringAlgorithm;
+    int minN;
+    int maxN;
+    boolean maximumLikelihood;
+    boolean showCumulativeHistogram;
+    boolean multiThread;
+    boolean weightedClustering;
+    boolean saveHistogram;
+    String histogramFile;
+    String noiseFile;
+    boolean autoSave;
+    boolean calibrateHistogram;
+    int frames;
+    double area;
+    int units;
+
+    Settings() {
+      // Set defaults
+      distance = 50;
+      clusteringAlgorithm = ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE;
+      minN = 1;
+      multiThread = true;
+      histogramFile = "";
+      noiseFile = "";
+      autoSave = true;
+      frames = 1;
+      area = 1;
+    }
+
+    Settings(Settings source) {
+      runMode = source.runMode;
+      distance = source.distance;
+      clusteringAlgorithm = source.clusteringAlgorithm;
+      minN = source.minN;
+      maxN = source.maxN;
+      maximumLikelihood = source.maximumLikelihood;
+      showCumulativeHistogram = source.showCumulativeHistogram;
+      multiThread = source.multiThread;
+      weightedClustering = source.weightedClustering;
+      saveHistogram = source.saveHistogram;
+      histogramFile = source.histogramFile;
+      noiseFile = source.noiseFile;
+      autoSave = source.autoSave;
+      calibrateHistogram = source.calibrateHistogram;
+      frames = source.frames;
+      area = source.area;
+      units = source.units;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class HistogramData {
     float[][] histogram;
@@ -159,7 +239,7 @@ public class PcPalmClusters implements PlugIn {
 
     HistogramData histogramData;
     if (fileInput) {
-      histogramData = loadHistogram(histogramFile);
+      histogramData = loadHistogram(settings.histogramFile);
     } else {
       histogramData = doClustering();
     }
@@ -188,28 +268,25 @@ public class PcPalmClusters implements PlugIn {
     ImageJUtils.display(title, plot);
 
     final HistogramData noiseData = loadNoiseHistogram(histogramData);
-    if (noiseData != null) {
-      if (subtractNoise(histogramData, noiseData)) {
-        // Update the histogram
-        title += " (noise subtracted)";
-        xValues = HistogramPlot.createHistogramAxis(hist[0]);
-        yValues = HistogramPlot.createHistogramValues(hist[1]);
-        yMax = MathUtils.max(yValues);
-        plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
-        if (xValues.length > 0) {
-          final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-          plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-              yMax * 1.05);
-        }
-        ImageJUtils.display(title, plot);
+    if (noiseData != null && subtractNoise(histogramData, noiseData)) {
+      // Update the histogram
+      title += " (noise subtracted)";
+      xValues = HistogramPlot.createHistogramAxis(hist[0]);
+      yValues = HistogramPlot.createHistogramValues(hist[1]);
+      yMax = MathUtils.max(yValues);
+      plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
+      if (xValues.length > 0) {
+        final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
+        plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
+            yMax * 1.05);
+      }
+      ImageJUtils.display(title, plot);
 
-        // Automatically save
-        if (autoSave) {
-          final String newFilename =
-              FileUtils.replaceExtension(histogramData.filename, ".noise.tsv");
-          if (saveHistogram(histogramData, newFilename)) {
-            ImageJUtils.log("Saved noise-subtracted histogram to " + newFilename);
-          }
+      // Automatically save
+      if (autoSave) {
+        final String newFilename = FileUtils.replaceExtension(histogramData.filename, ".noise.tsv");
+        if (saveHistogram(histogramData, newFilename)) {
+          ImageJUtils.log("Saved noise-subtracted histogram to " + newFilename);
         }
       }
     }
@@ -265,7 +342,6 @@ public class PcPalmClusters implements PlugIn {
     final String msg = TITLE + " complete : " + seconds + "s";
     IJ.showStatus(msg);
     ImageJUtils.log(msg);
-    return;
   }
 
   /**
@@ -285,17 +361,19 @@ public class PcPalmClusters implements PlugIn {
     }
 
     ImageJUtils.log("Using %d molecules (Density = %s um^-2) @ %s nm", molecules.size(),
-        MathUtils.rounded(molecules.size() / analysis.croppedArea), MathUtils.rounded(distance));
+        MathUtils.rounded(molecules.size() / analysis.croppedArea),
+        MathUtils.rounded(settings.distance));
 
     final long s1 = System.nanoTime();
     final ClusteringEngine engine =
         new ClusteringEngine(1, clusteringAlgorithm, SimpleImageJTrackProgress.getInstance());
-    if (multiThread) {
+    if (settings.multiThread) {
       engine.setThreadCount(Prefs.getThreads());
     }
     engine.setTracker(SimpleImageJTrackProgress.getInstance());
     IJ.showStatus("Clustering ...");
-    final List<Cluster> clusters = engine.findClusters(convertToPoint(molecules), distance);
+    final List<Cluster> clusters =
+        engine.findClusters(convertToPoint(molecules), settings.distance);
     IJ.showStatus("");
 
     if (clusters == null) {
@@ -312,7 +390,7 @@ public class PcPalmClusters implements PlugIn {
     // Set an arbitrary calibration so that the lifetime of the results is stored in the exposure
     // time
     // The results will be handled as a single mega-frame containing all localisation.
-    results.setCalibration(CalibrationHelper.create(100, 1, PcPalmMolecules.seconds * 1000));
+    results.setCalibration(CalibrationHelper.create(100, 1, moleculesResults.seconds * 1000));
     int id = 0;
     for (final Cluster c : clusters) {
       results.add(new ExtendedPeakResult((float) c.getX(), (float) c.getY(), c.getSize(), ++id));
@@ -328,9 +406,9 @@ public class PcPalmClusters implements PlugIn {
     final int nBins = (int) (yMax + 1);
     final float[][] hist = HistogramPlot.calcHistogram(values, 0, yMax, nBins);
 
-    final HistogramData histogramData =
-        (calibrateHistogram) ? new HistogramData(hist, frames, area, units)
-            : new HistogramData(hist);
+    final HistogramData histogramData = (settings.calibrateHistogram)
+        ? new HistogramData(hist, settings.frames, settings.area, Settings.UNITS[settings.units])
+        : new HistogramData(hist);
 
     saveHistogram(histogramData);
 
@@ -359,12 +437,12 @@ public class PcPalmClusters implements PlugIn {
    * @param histogramData the histogram data
    * @return true, if successful
    */
-  private static boolean saveHistogram(HistogramData histogramData) {
-    if (!saveHistogram) {
+  private boolean saveHistogram(HistogramData histogramData) {
+    if (!settings.saveHistogram) {
       return false;
     }
-    histogramFile = ImageJUtils.getFilename("Histogram_file", histogramFile);
-    return saveHistogram(histogramData, histogramFile);
+    settings.histogramFile = ImageJUtils.getFilename("Histogram_file", settings.histogramFile);
+    return saveHistogram(histogramData, settings.histogramFile);
   }
 
   /**
@@ -401,9 +479,8 @@ public class PcPalmClusters implements PlugIn {
 
       histogramData.filename = filename;
       return true;
-    } catch (final Exception ex) {
-      ex.printStackTrace();
-      IJ.log("Failed to save histogram to file: " + filename);
+    } catch (final IOException ex) {
+      IJ.log("Failed to save histogram to file: " + filename + ". " + ex.getMessage());
     }
     return false;
   }
@@ -536,7 +613,7 @@ public class PcPalmClusters implements PlugIn {
         + "Do you want to subtract a noise histogram before fitting?");
     final boolean allowSave = new File(histogramData.filename).exists();
     if (allowSave) {
-      gd.addCheckbox("Auto_save noise-subtracted histogram", sAutoSave);
+      gd.addCheckbox("Auto_save noise-subtracted histogram", settings.autoSave);
     }
 
     // If this is a macro then the dialog will not have Yes or No pressed.
@@ -551,7 +628,7 @@ public class PcPalmClusters implements PlugIn {
       return null;
     }
     if (allowSave) {
-      autoSave = sAutoSave = gd.getNextBoolean();
+      autoSave = settings.autoSave = gd.getNextBoolean();
     }
 
     if (IJ.isMacro()) {
@@ -564,9 +641,9 @@ public class PcPalmClusters implements PlugIn {
       Recorder.recordOption(macroOption);
     }
 
-    noiseFile = ImageJUtils.getFilename("Noise_file", noiseFile);
-    if (noiseFile != null) {
-      final HistogramData data = loadHistogram(noiseFile);
+    settings.noiseFile = ImageJUtils.getFilename("Noise_file", settings.noiseFile);
+    if (settings.noiseFile != null) {
+      final HistogramData data = loadHistogram(settings.noiseFile);
       // Check the data is calibrated with the same units
       if (data.isCalibrated() && data.units.equalsIgnoreCase(histogramData.units)) {
         return data;
@@ -576,7 +653,9 @@ public class PcPalmClusters implements PlugIn {
   }
 
   private boolean showDialog() {
-    if (PcPalmMolecules.molecules == null || PcPalmMolecules.molecules.size() < 2) {
+    moleculesResults = PcPalmMolecules.getMoleculesResults();
+    settings = Settings.load();
+    if (moleculesResults.molecules == null || moleculesResults.molecules.size() < 2) {
       ImageJUtils.log(TITLE + " defaulting to File mode");
       fileInput = true;
       // Ensure this gets recorded
@@ -587,22 +666,26 @@ public class PcPalmClusters implements PlugIn {
 
       gd.addMessage("Fit a Binomial distribution to a histogram of cluster sizes.\n \n"
           + "Select the method to generate the histogram:");
-      gd.addChoice("Method", items, items[runMode]);
+      gd.addChoice("Method", items, items[settings.runMode]);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
       }
-      runMode = gd.getNextChoiceIndex();
-      fileInput = (runMode == 1);
+      settings.runMode = gd.getNextChoiceIndex();
+      fileInput = (settings.runMode == 1);
     }
+
+    settings.save();
 
     if (fileInput) {
-      if ((histogramFile = ImageJUtils.getFilename("Histogram_file", histogramFile)) == null) {
+      final String newFile = ImageJUtils.getFilename("Histogram_file", settings.histogramFile);
+      if (newFile == null) {
         return false;
       }
+      settings.histogramFile = newFile;
     }
 
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     // Check if the molecules have weights
@@ -612,29 +695,28 @@ public class PcPalmClusters implements PlugIn {
 
       gd.addMessage("Find clusters using centroid-linkage clustering.");
 
-      gd.addNumericField("Distance (nm)", distance, 0);
+      gd.addNumericField("Distance", settings.distance, 0, 6, "nm");
       final String[] clusteringAlgorithmNames =
           SettingsManager.getNames((Object[]) ClusteringAlgorithm.values());
-      gd.addChoice("Algorithm", clusteringAlgorithmNames,
-          clusteringAlgorithmNames[sClusteringAlgorithm.ordinal()]);
-      gd.addCheckbox("Multi_thread", multiThread);
+      gd.addChoice("Algorithm", clusteringAlgorithmNames, settings.clusteringAlgorithm.ordinal());
+      gd.addCheckbox("Multi_thread", settings.multiThread);
       if (haveWeights) {
-        gd.addCheckbox("Weighted_clustering", sWeightedClustering);
+        gd.addCheckbox("Weighted_clustering", settings.weightedClustering);
       }
     }
 
-    gd.addSlider("Min_N", 1, 10, minN);
-    gd.addSlider("Max_N", 0, 10, maxN);
-    gd.addCheckbox("Show_cumulative_histogram", showCumulativeHistogram);
-    gd.addCheckbox("Maximum_likelihood", maximumLikelihood);
+    gd.addSlider("Min_N", 1, 10, settings.minN);
+    gd.addSlider("Max_N", 0, 10, settings.maxN);
+    gd.addCheckbox("Show_cumulative_histogram", settings.showCumulativeHistogram);
+    gd.addCheckbox("Maximum_likelihood", settings.maximumLikelihood);
 
     if (!fileInput) {
-      gd.addCheckbox("Save_histogram", saveHistogram);
+      gd.addCheckbox("Save_histogram", settings.saveHistogram);
       gd.addMessage("Histogram calibration (optional)");
-      gd.addCheckbox("Calibrate_histogram", calibrateHistogram);
-      gd.addNumericField("Frames", frames, 0);
-      gd.addNumericField("Area", area, 2);
-      gd.addChoice("Units", UNITS, units);
+      gd.addCheckbox("Calibrate_histogram", settings.calibrateHistogram);
+      gd.addNumericField("Frames", settings.frames, 0);
+      gd.addNumericField("Area", settings.area, 2);
+      gd.addChoice("Units", Settings.UNITS, settings.units);
     }
 
     gd.showDialog();
@@ -644,33 +726,33 @@ public class PcPalmClusters implements PlugIn {
     }
 
     if (!fileInput) {
-      distance = gd.getNextNumber();
+      settings.distance = gd.getNextNumber();
       clusteringAlgorithm =
-          sClusteringAlgorithm = ClusteringAlgorithm.values()[gd.getNextChoiceIndex()];
-      multiThread = gd.getNextBoolean();
+          settings.clusteringAlgorithm = ClusteringAlgorithm.values()[gd.getNextChoiceIndex()];
+      settings.multiThread = gd.getNextBoolean();
       if (haveWeights) {
-        weightedClustering = sWeightedClustering = gd.getNextBoolean();
+        weightedClustering = settings.weightedClustering = gd.getNextBoolean();
       }
     }
-    minN = (int) Math.abs(gd.getNextNumber());
-    maxN = (int) Math.abs(gd.getNextNumber());
-    showCumulativeHistogram = gd.getNextBoolean();
-    maximumLikelihood = gd.getNextBoolean();
+    settings.minN = (int) Math.abs(gd.getNextNumber());
+    settings.maxN = (int) Math.abs(gd.getNextNumber());
+    settings.showCumulativeHistogram = gd.getNextBoolean();
+    settings.maximumLikelihood = gd.getNextBoolean();
     if (!fileInput) {
-      saveHistogram = gd.getNextBoolean();
-      calibrateHistogram = gd.getNextBoolean();
-      frames = (int) Math.abs(gd.getNextNumber());
-      area = Math.abs(gd.getNextNumber());
-      units = gd.getNextChoice();
+      settings.saveHistogram = gd.getNextBoolean();
+      settings.calibrateHistogram = gd.getNextBoolean();
+      settings.frames = (int) Math.abs(gd.getNextNumber());
+      settings.area = Math.abs(gd.getNextNumber());
+      settings.units = gd.getNextChoiceIndex();
     }
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Min N", minN);
+      ParameterUtils.isAboveZero("Min N", settings.minN);
       if (!fileInput) {
-        ParameterUtils.isAboveZero("Distance", distance);
-        ParameterUtils.isAboveZero("Frames", frames);
-        ParameterUtils.isAboveZero("Area", area);
+        ParameterUtils.isAboveZero("Distance", settings.distance);
+        ParameterUtils.isAboveZero("Frames", settings.frames);
+        ParameterUtils.isAboveZero("Area", settings.area);
       }
     } catch (final IllegalArgumentException ex) {
       error(ex.getMessage());
@@ -685,8 +767,8 @@ public class PcPalmClusters implements PlugIn {
    *
    * @return True if all the molecules have weights (allowing weighted clustering).
    */
-  private static boolean checkForWeights() {
-    for (final Molecule m : PcPalmMolecules.molecules) {
+  private boolean checkForWeights() {
+    for (final Molecule m : moleculesResults.molecules) {
       if (m.photons <= 0) {
         return false;
       }
@@ -710,7 +792,7 @@ public class PcPalmClusters implements PlugIn {
   private static boolean subtractNoise(HistogramData histogramData, HistogramData noiseData) {
     final float[] v1 = normalise(histogramData);
     final float[] v2 = normalise(noiseData);
-    final int length = v1.length; // FastMath.max(v1.length, v2.length);
+    final int length = v1.length; // FastMath.max(v1.length, v2.length)
     final double factor = (histogramData.frames * histogramData.area);
     for (int i = 0; i < length; i++) {
       histogramData.histogram[1][i] =
@@ -764,7 +846,7 @@ public class PcPalmClusters implements PlugIn {
     // Plot the cumulative histogram
     final String title = TITLE + " Cumulative Distribution";
     Plot2 plot = null;
-    if (showCumulativeHistogram) {
+    if (settings.showCumulativeHistogram) {
       // Create a cumulative histogram for fitting
       final double[] cumulativeHistogram = new double[histogram.length];
       sum = 0;
@@ -785,13 +867,13 @@ public class PcPalmClusters implements PlugIn {
     double[] parameters = null;
     int worse = 0;
     int countN = histogram.length - 1;
-    int min = minN;
-    final boolean customRange = (minN > 1) || (maxN > 0);
+    int min = settings.minN;
+    final boolean customRange = (settings.minN > 1) || (settings.maxN > 0);
     if (min > countN) {
       min = countN;
     }
-    if (maxN > 0 && countN > maxN) {
-      countN = maxN;
+    if (settings.maxN > 0 && countN > settings.maxN) {
+      countN = settings.maxN;
     }
 
     ImageJUtils.log("Fitting N from %d to %d%s", min, countN,
@@ -801,7 +883,7 @@ public class PcPalmClusters implements PlugIn {
     // for n=1,2,3,... until the SS peaks then falls off (is worse then the best
     // score several times in succession)
     final BinomialFitter bf = new BinomialFitter(ImageJPluginLoggerHelper.getLogger(getClass()));
-    bf.setMaximumLikelihood(maximumLikelihood);
+    bf.setMaximumLikelihood(settings.maximumLikelihood);
     for (int n = min; n <= countN; n++) {
       final PointValuePair solution = bf.fitBinomial(histogram, mean, n, true);
       if (solution == null) {
@@ -821,13 +903,13 @@ public class PcPalmClusters implements PlugIn {
         break;
       }
 
-      if (showCumulativeHistogram) {
+      if (settings.showCumulativeHistogram) {
         addToPlot(n, p, title, plot, new Color((float) n / countN, 0, 1f - (float) n / countN));
       }
     }
 
     // Add best it in magenta
-    if (showCumulativeHistogram && parameters != null) {
+    if (settings.showCumulativeHistogram && parameters != null) {
       addToPlot((int) parameters[0], parameters[1], title, plot, Color.magenta);
     }
 

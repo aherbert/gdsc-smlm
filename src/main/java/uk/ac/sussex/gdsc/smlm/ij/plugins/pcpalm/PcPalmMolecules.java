@@ -112,6 +112,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Use the PC-PALM protocol to prepare a set of localisations into molecules. This can be used for
@@ -126,87 +127,244 @@ import java.util.List;
 public class PcPalmMolecules implements PlugIn {
   /** The title. */
   static final String TITLE = "PC-PALM Molecules";
-  private static String inputOption = "";
-  private static boolean chooseRoi;
-  private static double nmPerPixelLimit;
-
-  private static final String[] RUN_MODE =
-      {"PC-PALM", "Manual Tracing", "In-memory results", "Simulation"};
-  private static int runMode;
-
-  // Mode 0: PC-PALM protocol for estimating localisation precision and then tracing molecules
-  private static String roiImage = "";
-  private static int histogramBins = 50;
-  private static String[] singlesMode =
-      new String[] {"Ignore", "Include in molecules histogram", "Include in final filtering"};
-  private static int singlesModeIndex = 1;
-  private static boolean simplexFitting;
-  private static boolean showHistograms = true;
-  private static boolean binaryImage = true;
-  /** The blinking rate. */
-  static double blinkingRate = 2;
-  private static double p = 0.6;
-  private static final String[] BLINKING_DISTRIBUTION =
-      new String[] {"Poisson", "Geometric", "None", "Binomial"};
-  private static int blinkingDistribution;
-  private static boolean clearResults;
-
-  // Mode 1. Manual tracing of molecules
-  private static double dThreshold = 150;
-  private static double tThreshold = 1;
-
-  // Mode 2. Direct use of in-memory results
-  // - No parameters needed
-
-  // Mode 3. Random simulation of molecules
-  private static int nMolecules = 2000;
-  private static double simulationSize = 16;
-  private static boolean distanceAnalysis;
-
-  private static final String[] CLUSTER_SIMULATION =
-      new String[] {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
-  private static int clusterSimulation;
-  private static double clusterNumber = 3;
-  private static double clusterNumberSD;
-  private static double clusterRadius = 50;
-  private static boolean showClusterMask;
-
-  // Low resolution image construction
-  private static int lowResolutionImageSize = 1024;
-  private static double roiSizeInUm = 4;
-  private static boolean showHighResolutionImage;
 
   private Rectangle roiBounds;
   private int roiImageWidth;
   private int roiImageHeight;
   private long start;
 
-  // These package level variables are used by the PCPALMAnalysis plugin.
+  /** The plugin settings. */
+  private Settings settings;
 
-  /** The results. */
-  static MemoryPeakResults results;
-  /** The minx. */
-  static double minx;
-  /** The miny. */
-  static double miny;
-  /** The maxx. */
-  static double maxx;
-  /** The maxy. */
-  static double maxy;
-  /** The nm per pixel. */
-  static double nmPerPixel;
-  /** The molecules. */
-  static List<Molecule> molecules;
-  /** The sigma S. */
-  static double sigmaS = 20;
-  /** The peak density. */
-  static double densityPeaks;
-  /** The protein density. */
-  static double densityProtein;
-  /** The seconds. */
-  static double seconds;
-  /** The area. */
-  static double area;
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    static final String[] RUN_MODE =
+        {"PC-PALM", "Manual Tracing", "In-memory results", "Simulation"};
+    static String[] singlesMode =
+        new String[] {"Ignore", "Include in molecules histogram", "Include in final filtering"};
+    static final String[] BLINKING_DISTRIBUTION =
+        new String[] {"Poisson", "Geometric", "None", "Binomial"};
+    static final String[] CLUSTER_SIMULATION =
+        new String[] {"None", "Circles", "Non-overlapping circles", "Circles Mask"};
+
+    String inputOption;
+    boolean chooseRoi;
+    double nmPerPixelLimit;
+
+    int runMode;
+
+    // Mode 0: PC-PALM protocol for estimating localisation precision and then tracing molecules
+    String roiImage;
+    int histogramBins;
+    int singlesModeIndex;
+    boolean simplexFitting;
+    boolean showHistograms;
+    boolean binaryImage;
+    /** The blinking rate. */
+    double blinkingRate;
+    double pvalue;
+    int blinkingDistribution;
+    boolean clearResults;
+
+    // Mode 1. Manual tracing of molecules
+    double distanceThreshold;
+    double timeThreshold;
+
+    // Mode 2. Direct use of in-memory results
+    // - No parameters needed
+
+    // Mode 3. Random simulation of molecules
+    int numberOfMolecules;
+    double simulationSize;
+    boolean distanceAnalysis;
+
+    int clusterSimulation;
+    double clusterNumber;
+    double clusterNumberStdDev;
+    double clusterRadius;
+    boolean showClusterMask;
+
+    // Low resolution image construction
+    int lowResolutionImageSize;
+    double roiSizeInUm;
+    boolean showHighResolutionImage;
+
+    /** The results. */
+    MemoryPeakResults results;
+    /** The minx. */
+    double minx;
+    /** The miny. */
+    double miny;
+    /** The maxx. */
+    double maxx;
+    /** The maxy. */
+    double maxy;
+    /** The nm per pixel. */
+    double nmPerPixel;
+    /** The molecules. */
+    List<Molecule> molecules;
+    /** The sigma S. */
+    double sigmaS;
+    /** The peak density. */
+    double densityPeaks;
+    /** The protein density. */
+    double densityProtein;
+    /** The seconds. */
+    double seconds;
+    /** The area. */
+    double area;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      roiImage = "";
+      histogramBins = 50;
+      singlesModeIndex = 1;
+      showHistograms = true;
+      binaryImage = true;
+      blinkingRate = 2;
+      pvalue = 0.6;
+      distanceThreshold = 150;
+      timeThreshold = 1;
+      numberOfMolecules = 2000;
+      simulationSize = 16;
+      clusterNumber = 3;
+      clusterRadius = 50;
+      lowResolutionImageSize = 1024;
+      roiSizeInUm = 4;
+      sigmaS = 20;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      chooseRoi = source.chooseRoi;
+      nmPerPixelLimit = source.nmPerPixelLimit;
+      runMode = source.runMode;
+      roiImage = source.roiImage;
+      histogramBins = source.histogramBins;
+      singlesModeIndex = source.singlesModeIndex;
+      simplexFitting = source.simplexFitting;
+      showHistograms = source.showHistograms;
+      binaryImage = source.binaryImage;
+      blinkingRate = source.blinkingRate;
+      pvalue = source.pvalue;
+      blinkingDistribution = source.blinkingDistribution;
+      clearResults = source.clearResults;
+      distanceThreshold = source.distanceThreshold;
+      timeThreshold = source.timeThreshold;
+      numberOfMolecules = source.numberOfMolecules;
+      simulationSize = source.simulationSize;
+      distanceAnalysis = source.distanceAnalysis;
+      clusterSimulation = source.clusterSimulation;
+      clusterNumber = source.clusterNumber;
+      clusterNumberStdDev = source.clusterNumberStdDev;
+      clusterRadius = source.clusterRadius;
+      showClusterMask = source.showClusterMask;
+      lowResolutionImageSize = source.lowResolutionImageSize;
+      roiSizeInUm = source.roiSizeInUm;
+      showHighResolutionImage = source.showHighResolutionImage;
+      results = source.results;
+      minx = source.minx;
+      miny = source.miny;
+      maxx = source.maxx;
+      maxy = source.maxy;
+      nmPerPixel = source.nmPerPixel;
+      molecules = source.molecules;
+      sigmaS = source.sigmaS;
+      densityPeaks = source.densityPeaks;
+      densityProtein = source.densityProtein;
+      seconds = source.seconds;
+      area = source.area;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
+  /**
+   * Contains the results that are the used by other PC-PALM plugins.
+   */
+  static class MoleculesResults {
+    /** The blinking rate. */
+    final double blinkingRate;
+    /** The results. */
+    final MemoryPeakResults results;
+    /** The minx. */
+    final double minx;
+    /** The miny. */
+    final double miny;
+    /** The maxx. */
+    final double maxx;
+    /** The maxy. */
+    final double maxy;
+    /** The nm per pixel. */
+    final double nmPerPixel;
+    /** The molecules. */
+    final List<Molecule> molecules;
+    /** The sigma S. */
+    final double sigmaS;
+    /** The peak density. */
+    final double densityPeaks;
+    /** The protein density. */
+    final double densityProtein;
+    /** The seconds. */
+    final double seconds;
+    /** The area. */
+    final double area;
+
+    /**
+     * Instantiates a new molecules results.
+     *
+     * @param source the source
+     */
+    MoleculesResults(Settings source) {
+      blinkingRate = source.blinkingRate;
+      results = source.results;
+      minx = source.minx;
+      miny = source.miny;
+      maxx = source.maxx;
+      maxy = source.maxy;
+      nmPerPixel = source.nmPerPixel;
+      molecules = source.molecules;
+      sigmaS = source.sigmaS;
+      densityPeaks = source.densityPeaks;
+      densityProtein = source.densityProtein;
+      seconds = source.seconds;
+      area = source.area;
+    }
+  }
+
+  /**
+   * Gets the last used analysis settings.
+   *
+   * @return the analysis settings
+   */
+  static MoleculesResults getMoleculesResults() {
+    return new MoleculesResults(Settings.load());
+  }
 
   @Override
   public void run(String arg) {
@@ -219,14 +377,14 @@ public class PcPalmMolecules implements PlugIn {
       return;
     }
 
-    if (runMode != 3) {
-      results = ResultsManager.loadInputResults(inputOption, true, null, null);
-      if (MemoryPeakResults.isEmpty(results)) {
+    if (settings.runMode != 3) {
+      settings.results = ResultsManager.loadInputResults(settings.inputOption, true, null, null);
+      if (MemoryPeakResults.isEmpty(settings.results)) {
         IJ.error(TITLE, "No results could be loaded");
         return;
       }
 
-      if (results.getCalibration() == null) {
+      if (settings.results.getCalibration() == null) {
         IJ.error(TITLE, "Results are not calibrated");
         return;
       }
@@ -237,18 +395,18 @@ public class PcPalmMolecules implements PlugIn {
       // acquisition lifetime
       getLifetime();
 
-      results = cropToRoi(results);
-      if (results.size() == 0) {
+      settings.results = cropToRoi(settings.results);
+      if (settings.results.size() == 0) {
         IJ.error(TITLE, "No results within the crop region");
         return;
       }
     }
 
     // Clear cached results
-    molecules = null;
+    settings.molecules = null;
 
     // Different run-modes for generating the set of molecules for analysis
-    switch (runMode) {
+    switch (settings.runMode) {
       case 0:
         runPcPalm();
         break;
@@ -261,45 +419,46 @@ public class PcPalmMolecules implements PlugIn {
       case 3:
       default:
         runSimulation(resultsAvailable);
-        area = simulationSize * simulationSize;
-        seconds = 100; // Use an arbitrary lifetime
+        settings.area = settings.simulationSize * settings.simulationSize;
+        settings.seconds = 100; // Use an arbitrary lifetime
         break;
     }
 
-    if (molecules == null) {
+    if (settings.molecules == null) {
       return;
     }
-    if (molecules.size() < 2) {
+    if (settings.molecules.size() < 2) {
       IJ.error(TITLE, "Not enough molecules to construct a binary image");
       return;
     }
 
     // Generate binary PALM image
-    if (!createImage(molecules)) {
+    if (!createImage(settings.molecules)) {
       return;
     }
 
     // Density is required for the PC analysis
-    densityPeaks = calculatePeakDensity();
-    if (runMode == 0 || runMode == 3) {
+    settings.densityPeaks = calculatePeakDensity();
+    if (settings.runMode == 0 || settings.runMode == 3) {
       // Blinking rate is mentioned in the PC-PALM protocol and so we include it here.
       // TODO - Add automated estimation of the blinking rate from the data using the method of
       // Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling
       // the
       // effects of photoblinking. PLoS One, 6(7): e22678
       // (http://dx.doi.org/10.1371%2Fjournal.pone.0022678)
-      densityProtein = densityPeaks / blinkingRate;
+      settings.densityProtein = settings.densityPeaks / settings.blinkingRate;
       log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)",
-          MathUtils.rounded(densityPeaks * 1e6), MathUtils.rounded(densityProtein * 1e6));
+          MathUtils.rounded(settings.densityPeaks * 1e6),
+          MathUtils.rounded(settings.densityProtein * 1e6));
     } else {
       // No blinking rate for non PC-PALM methods. This can be configured in later plugins if
       // required.
-      blinkingRate = 1;
-      densityProtein = densityPeaks;
-      log("Molecule Density = %s (um^-2)", MathUtils.rounded(densityPeaks * 1e6));
+      settings.blinkingRate = 1;
+      settings.densityProtein = settings.densityPeaks;
+      log("Molecule Density = %s (um^-2)", MathUtils.rounded(settings.densityPeaks * 1e6));
     }
 
-    log("Results lifetime = %s s", MathUtils.rounded(seconds));
+    log("Results lifetime = %s s", MathUtils.rounded(settings.seconds));
 
     // Use a second plugin filter that will work on a region drawn on the binary image
     // and compute the PALM analysis
@@ -323,45 +482,47 @@ public class PcPalmMolecules implements PlugIn {
       }
     }
 
+    settings = Settings.load();
+
     if (!resultsAvailable) {
-      runMode = 3;
+      settings.runMode = 3;
 
       gd.addMessage("Simulate molecules for cluster analysis.\n"
           + "Computes a binary image from localisation data");
 
-      gd.addNumericField("Molecules", nMolecules, 0);
-      gd.addNumericField("Simulation_size (um)", simulationSize, 2);
-      gd.addNumericField("Blinking_rate", blinkingRate, 2);
-      gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION,
-          BLINKING_DISTRIBUTION[blinkingDistribution]);
-      gd.addNumericField("Average_precision (nm)", sigmaS, 2);
-      gd.addCheckbox("Show_histograms", showHistograms);
-      gd.addCheckbox("Distance_analysis", distanceAnalysis);
-      gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
-      gd.addNumericField("Cluster_number", clusterNumber, 2);
-      gd.addNumericField("Cluster_variation (SD)", clusterNumberSD, 2);
-      gd.addNumericField("Cluster_radius", clusterRadius, 2);
-      gd.addCheckbox("Show_cluster_mask", showClusterMask);
+      gd.addNumericField("Molecules", settings.numberOfMolecules, 0);
+      gd.addNumericField("Simulation_size (um)", settings.simulationSize, 2);
+      gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
+      gd.addChoice("Blinking_distribution", Settings.BLINKING_DISTRIBUTION,
+          settings.blinkingDistribution);
+      gd.addNumericField("Average_precision (nm)", settings.sigmaS, 2);
+      gd.addCheckbox("Show_histograms", settings.showHistograms);
+      gd.addCheckbox("Distance_analysis", settings.distanceAnalysis);
+      gd.addChoice("Cluster_simulation", Settings.CLUSTER_SIMULATION, settings.clusterSimulation);
+      gd.addNumericField("Cluster_number", settings.clusterNumber, 2);
+      gd.addNumericField("Cluster_variation (SD)", settings.clusterNumberStdDev, 2);
+      gd.addNumericField("Cluster_radius", settings.clusterRadius, 2);
+      gd.addCheckbox("Show_cluster_mask", settings.showClusterMask);
 
-      Recorder.recordOption("Run_mode", RUN_MODE[runMode]);
+      Recorder.recordOption("Run_mode", Settings.RUN_MODE[settings.runMode]);
     } else {
       gd.addMessage("Prepare molecules for cluster analysis.\n"
           + "Computes a binary image from raw localisation data");
-      ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+      ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
       if (!titles.isEmpty()) {
-        gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+        gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", settings.chooseRoi);
       }
-      gd.addChoice("Run_mode", RUN_MODE, RUN_MODE[runMode]);
+      gd.addChoice("Run_mode", Settings.RUN_MODE, settings.runMode);
     }
 
     gd.addMessage("Select options for low resolution image:");
-    gd.addSlider("Image_size (px)", 512, 2048, lowResolutionImageSize);
-    gd.addSlider("ROI_size (um)", 1.5, 4, roiSizeInUm);
+    gd.addSlider("Image_size (px)", 512, 2048, settings.lowResolutionImageSize);
+    gd.addSlider("ROI_size (um)", 1.5, 4, settings.roiSizeInUm);
     gd.addMessage("Select options for high resolution image:");
-    gd.addCheckbox("Show_high_res_image", showHighResolutionImage);
-    gd.addSlider("nm_per_pixel_limit", 0, 20, nmPerPixelLimit);
+    gd.addCheckbox("Show_high_res_image", settings.showHighResolutionImage);
+    gd.addSlider("nm_per_pixel_limit", 0, 20, settings.nmPerPixelLimit);
     gd.addMessage("Optionally remove all analysis results from memory");
-    gd.addCheckbox("Clear_results", clearResults);
+    gd.addCheckbox("Clear_results", settings.clearResults);
 
     gd.showDialog();
 
@@ -370,62 +531,64 @@ public class PcPalmMolecules implements PlugIn {
     }
 
     if (!resultsAvailable) {
-      nMolecules = (int) Math.abs(gd.getNextNumber());
-      simulationSize = Math.abs(gd.getNextNumber());
-      blinkingRate = Math.abs(gd.getNextNumber());
-      blinkingDistribution = gd.getNextChoiceIndex();
-      sigmaS = Math.abs(gd.getNextNumber());
-      showHistograms = gd.getNextBoolean();
-      distanceAnalysis = gd.getNextBoolean();
-      clusterSimulation = gd.getNextChoiceIndex();
-      clusterNumber = Math.abs(gd.getNextNumber());
-      clusterNumberSD = Math.abs(gd.getNextNumber());
-      clusterRadius = Math.abs(gd.getNextNumber());
-      showClusterMask = gd.getNextBoolean();
+      settings.numberOfMolecules = (int) Math.abs(gd.getNextNumber());
+      settings.simulationSize = Math.abs(gd.getNextNumber());
+      settings.blinkingRate = Math.abs(gd.getNextNumber());
+      settings.blinkingDistribution = gd.getNextChoiceIndex();
+      settings.sigmaS = Math.abs(gd.getNextNumber());
+      settings.showHistograms = gd.getNextBoolean();
+      settings.distanceAnalysis = gd.getNextBoolean();
+      settings.clusterSimulation = gd.getNextChoiceIndex();
+      settings.clusterNumber = Math.abs(gd.getNextNumber());
+      settings.clusterNumberStdDev = Math.abs(gd.getNextNumber());
+      settings.clusterRadius = Math.abs(gd.getNextNumber());
+      settings.showClusterMask = gd.getNextBoolean();
     } else {
-      inputOption = ResultsManager.getInputSource(gd);
+      settings.inputOption = ResultsManager.getInputSource(gd);
       if (!titles.isEmpty()) {
-        chooseRoi = gd.getNextBoolean();
+        settings.chooseRoi = gd.getNextBoolean();
       }
-      runMode = gd.getNextChoiceIndex();
+      settings.runMode = gd.getNextChoiceIndex();
     }
-    lowResolutionImageSize = (int) gd.getNextNumber();
-    roiSizeInUm = gd.getNextNumber();
-    showHighResolutionImage = gd.getNextBoolean();
-    nmPerPixelLimit = Math.abs(gd.getNextNumber());
-    clearResults = gd.getNextBoolean();
+    settings.lowResolutionImageSize = (int) gd.getNextNumber();
+    settings.roiSizeInUm = gd.getNextNumber();
+    settings.showHighResolutionImage = gd.getNextBoolean();
+    settings.nmPerPixelLimit = Math.abs(gd.getNextNumber());
+    settings.clearResults = gd.getNextBoolean();
+
+    settings.save();
 
     // Check arguments
     try {
       if (!resultsAvailable) {
-        ParameterUtils.isAboveZero("Molecules", nMolecules);
-        ParameterUtils.isAboveZero("Simulation size", simulationSize);
-        ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
-        ParameterUtils.isEqualOrAbove("Cluster number", clusterNumber, 1);
+        ParameterUtils.isAboveZero("Molecules", settings.numberOfMolecules);
+        ParameterUtils.isAboveZero("Simulation size", settings.simulationSize);
+        ParameterUtils.isEqualOrAbove("Blinking rate", settings.blinkingRate, 1);
+        ParameterUtils.isEqualOrAbove("Cluster number", settings.clusterNumber, 1);
       }
-      ParameterUtils.isAbove("Image scale", lowResolutionImageSize, 1);
-      ParameterUtils.isAboveZero("ROI size", roiSizeInUm);
+      ParameterUtils.isAbove("Image scale", settings.lowResolutionImageSize, 1);
+      ParameterUtils.isAboveZero("ROI size", settings.roiSizeInUm);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
-    if (!titles.isEmpty() && chooseRoi && resultsAvailable) {
+    if (!titles.isEmpty() && settings.chooseRoi && resultsAvailable) {
       if (titles.size() == 1) {
-        roiImage = titles.get(0);
-        Recorder.recordOption("Image", roiImage);
+        settings.roiImage = titles.get(0);
+        Recorder.recordOption("Image", settings.roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
         gd = new ExtendedGenericDialog(TITLE);
         gd.addMessage("Select the source image for the ROI");
-        gd.addChoice("Image", items, roiImage);
+        gd.addChoice("Image", items, settings.roiImage);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
         }
-        roiImage = gd.getNextChoice();
+        settings.roiImage = gd.getNextChoice();
       }
-      final ImagePlus imp = WindowManager.getImage(roiImage);
+      final ImagePlus imp = WindowManager.getImage(settings.roiImage);
 
       roiBounds = imp.getRoi().getBounds();
       roiImageWidth = imp.getWidth();
@@ -434,15 +597,13 @@ public class PcPalmMolecules implements PlugIn {
       roiBounds = null;
     }
 
-    if (!resultsAvailable) {
-      if (!getPValue()) {
-        return false;
-      }
+    if (!resultsAvailable && !getPValue()) {
+      return false;
     }
 
-    if (clearResults) {
-      PcPalmAnalysis.results.clear();
-      PcPalmFitting.previous_gr = null;
+    if (settings.clearResults) {
+      PcPalmAnalysis.clearResults();
+      PcPalmFitting.clearResults();
     }
 
     return true;
@@ -450,7 +611,8 @@ public class PcPalmMolecules implements PlugIn {
 
   private MemoryPeakResults cropToRoi(MemoryPeakResults results) {
     final Rectangle bounds = results.getBounds(true);
-    area = (bounds.width * bounds.height * results.getNmPerPixel() * results.getNmPerPixel()) / 1e6;
+    settings.area =
+        (bounds.width * bounds.height * results.getNmPerPixel() * results.getNmPerPixel()) / 1e6;
     if (roiBounds == null) {
       return results;
     }
@@ -465,8 +627,8 @@ public class PcPalmMolecules implements PlugIn {
     final float maxY = (float) Math.ceil((roiBounds.y + roiBounds.height) / yscale);
 
     // Update the area with the cropped region
-    area *= (maxX - minX) / bounds.width;
-    area *= (maxY - minY) / bounds.height;
+    settings.area *= (maxX - minX) / bounds.width;
+    settings.area *= (maxY - minY) / bounds.height;
 
     // Create a new set of results within the bounds
     final MemoryPeakResults newResults = new MemoryPeakResults();
@@ -492,25 +654,26 @@ public class PcPalmMolecules implements PlugIn {
 
     // Follow the PC-PALM protocol
     log("Fitting localisation precision...");
-    final List<Molecule> localisations = extractLocalisations(results);
+    final List<Molecule> localisations = extractLocalisations(settings.results);
     final double sigmaRaw = calculateAveragePrecision(localisations, "Localisations");
-    log("%d localisations with an average precision of %.2f", results.size(), sigmaRaw);
+    log("%d localisations with an average precision of %.2f", settings.results.size(), sigmaRaw);
 
     log("Fitting molecule precision...");
     final ArrayList<Molecule> singles = new ArrayList<>();
-    molecules = extractMolecules(results, sigmaRaw, singles);
-    if (singlesModeIndex == 1) {
-      molecules.addAll(singles);
+    settings.molecules = extractMolecules(settings.results, sigmaRaw, singles);
+    if (settings.singlesModeIndex == 1) {
+      settings.molecules.addAll(singles);
     }
-    sigmaS = calculateAveragePrecision(molecules, "Molecules");
-    log("%d molecules with an average precision of %.2f", molecules.size(), sigmaS);
+    settings.sigmaS = calculateAveragePrecision(settings.molecules, "Molecules");
+    log("%d molecules with an average precision of %.2f", settings.molecules.size(),
+        settings.sigmaS);
 
     // Q. Should this filter the original localisations or just the grouped peaks?
-    if (singlesModeIndex == 2) {
-      molecules.addAll(singles);
+    if (settings.singlesModeIndex == 2) {
+      settings.molecules.addAll(singles);
     }
-    molecules = filterMolecules(molecules, sigmaS);
-    log("%d molecules within precision %.2f", molecules.size(), 3 * sigmaS);
+    settings.molecules = filterMolecules(settings.molecules, settings.sigmaS);
+    log("%d molecules within precision %.2f", settings.molecules.size(), 3 * settings.sigmaS);
   }
 
   private void startLog() {
@@ -520,19 +683,19 @@ public class PcPalmMolecules implements PlugIn {
     start = System.currentTimeMillis();
   }
 
-  private static boolean showPcPalmDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+  private boolean showPcPalmDialog() {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Estimate the average localisation precision by fitting histograms.\n"
         + "Use the precision to trace localisations into molecule pulses.");
 
-    gd.addNumericField("Histogram_bins", histogramBins, 0);
-    gd.addChoice("Singles_mode", singlesMode, singlesMode[singlesModeIndex]);
-    gd.addCheckbox("Simplex_fit", simplexFitting);
-    gd.addCheckbox("Show_histograms", showHistograms);
-    gd.addCheckbox("Binary_image", binaryImage);
-    gd.addNumericField("Blinking_rate", blinkingRate, 2);
+    gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
+    gd.addChoice("Singles_mode", Settings.singlesMode, settings.singlesModeIndex);
+    gd.addCheckbox("Simplex_fit", settings.simplexFitting);
+    gd.addCheckbox("Show_histograms", settings.showHistograms);
+    gd.addCheckbox("Binary_image", settings.binaryImage);
+    gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
 
     gd.showDialog();
 
@@ -540,17 +703,17 @@ public class PcPalmMolecules implements PlugIn {
       return false;
     }
 
-    histogramBins = (int) gd.getNextNumber();
-    singlesModeIndex = gd.getNextChoiceIndex();
-    simplexFitting = gd.getNextBoolean();
-    showHistograms = gd.getNextBoolean();
-    binaryImage = gd.getNextBoolean();
-    blinkingRate = gd.getNextNumber();
+    settings.histogramBins = (int) gd.getNextNumber();
+    settings.singlesModeIndex = gd.getNextChoiceIndex();
+    settings.simplexFitting = gd.getNextBoolean();
+    settings.showHistograms = gd.getNextBoolean();
+    settings.binaryImage = gd.getNextBoolean();
+    settings.blinkingRate = gd.getNextNumber();
 
     // Check arguments
     try {
-      ParameterUtils.isAbove("Histogram bins", histogramBins, 1);
-      ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
+      ParameterUtils.isAbove("Histogram bins", settings.histogramBins, 1);
+      ParameterUtils.isEqualOrAbove("Blinking rate", settings.blinkingRate, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -595,8 +758,8 @@ public class PcPalmMolecules implements PlugIn {
    * @return The average precision
    */
   private double calculateAveragePrecision(List<Molecule> molecules, String subTitle) {
-    final String title = (showHistograms) ? TITLE + " Histogram " + subTitle : null;
-    return calculateAveragePrecision(molecules, title, histogramBins, true, true);
+    final String title = (settings.showHistograms) ? TITLE + " Histogram " + subTitle : null;
+    return calculateAveragePrecision(molecules, title, settings.histogramBins, true, true);
   }
 
   /**
@@ -788,7 +951,7 @@ public class PcPalmMolecules implements PlugIn {
   @Nullable
   private double[] fitSkewGaussian(float[] x, float[] y, double[] initialSolution) {
     try {
-      return (simplexFitting) ? optimiseSimplex(x, y, initialSolution)
+      return (settings.simplexFitting) ? optimiseSimplex(x, y, initialSolution)
           : optimiseLeastSquares(x, y, initialSolution);
     } catch (final TooManyEvaluationsException ex) {
       return null;
@@ -904,12 +1067,9 @@ public class PcPalmMolecules implements PlugIn {
    *
    * @return The peak density
    */
-  private static double calculatePeakDensity() {
-    // double pcw = PCPALMMolecules.maxx - PCPALMMolecules.minx
-    // double pch = PCPALMMolecules.maxy - PCPALMMolecules.miny
-    // double area = pcw * pch;
+  private double calculatePeakDensity() {
     // Use the area from the source of the molecules
-    return molecules.size() / (area * 1E6);
+    return settings.molecules.size() / (settings.area * 1E6);
   }
 
   /**
@@ -938,22 +1098,23 @@ public class PcPalmMolecules implements PlugIn {
     startLog();
 
     // Convert seconds to frames
-    final int timeInFrames = FastMath.max(1,
-        (int) Math.round(tThreshold * 1000.0 / results.getCalibrationReader().getExposureTime()));
+    final int timeInFrames = FastMath.max(1, (int) Math.round(settings.timeThreshold * 1000.0
+        / settings.results.getCalibrationReader().getExposureTime()));
 
     final ArrayList<Molecule> singles = new ArrayList<>();
-    molecules = traceMolecules(results, dThreshold, timeInFrames, singles);
-    molecules.addAll(singles);
+    settings.molecules =
+        traceMolecules(settings.results, settings.distanceThreshold, timeInFrames, singles);
+    settings.molecules.addAll(singles);
   }
 
-  private static boolean showManualTracingDialog() {
+  private boolean showManualTracingDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Use distance and time thresholds to trace localisations into molecules.");
 
-    gd.addNumericField("Distance (nm)", dThreshold, 0);
-    gd.addNumericField("Time (seconds)", tThreshold, 2);
+    gd.addNumericField("Distance (nm)", settings.distanceThreshold, 0);
+    gd.addNumericField("Time (seconds)", settings.timeThreshold, 2);
 
     gd.showDialog();
 
@@ -961,13 +1122,13 @@ public class PcPalmMolecules implements PlugIn {
       return false;
     }
 
-    dThreshold = Math.abs(gd.getNextNumber());
-    tThreshold = Math.abs(gd.getNextNumber());
+    settings.distanceThreshold = Math.abs(gd.getNextNumber());
+    settings.timeThreshold = Math.abs(gd.getNextNumber());
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Distance threshold", dThreshold);
-      ParameterUtils.isAboveZero("Time threshold", tThreshold);
+      ParameterUtils.isAboveZero("Distance threshold", settings.distanceThreshold);
+      ParameterUtils.isAboveZero("Time threshold", settings.timeThreshold);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -978,7 +1139,7 @@ public class PcPalmMolecules implements PlugIn {
 
   private void runInMemoryResults() {
     startLog();
-    molecules = extractLocalisations(results);
+    settings.molecules = extractLocalisations(settings.results);
   }
 
   private void runSimulation(boolean resultsAvailable) {
@@ -989,47 +1150,48 @@ public class PcPalmMolecules implements PlugIn {
     startLog();
 
     log("Simulation parameters");
-    if (blinkingDistribution == 3) {
-      log("  - Clusters = %d", nMolecules);
-      log("  - Simulation size = %s um", MathUtils.rounded(simulationSize, 4));
-      log("  - Molecules/cluster = %s", MathUtils.rounded(blinkingRate, 4));
-      log("  - Blinking distribution = %s", BLINKING_DISTRIBUTION[blinkingDistribution]);
-      log("  - p-Value = %s", MathUtils.rounded(p, 4));
+    if (settings.blinkingDistribution == 3) {
+      log("  - Clusters = %d", settings.numberOfMolecules);
+      log("  - Simulation size = %s um", MathUtils.rounded(settings.simulationSize, 4));
+      log("  - Molecules/cluster = %s", MathUtils.rounded(settings.blinkingRate, 4));
+      log("  - Blinking distribution = %s",
+          Settings.BLINKING_DISTRIBUTION[settings.blinkingDistribution]);
+      log("  - p-Value = %s", MathUtils.rounded(settings.pvalue, 4));
     } else {
-      log("  - Molecules = %d", nMolecules);
-      log("  - Simulation size = %s um", MathUtils.rounded(simulationSize, 4));
-      log("  - Blinking rate = %s", MathUtils.rounded(blinkingRate, 4));
-      log("  - Blinking distribution = %s", BLINKING_DISTRIBUTION[blinkingDistribution]);
+      log("  - Molecules = %d", settings.numberOfMolecules);
+      log("  - Simulation size = %s um", MathUtils.rounded(settings.simulationSize, 4));
+      log("  - Blinking rate = %s", MathUtils.rounded(settings.blinkingRate, 4));
+      log("  - Blinking distribution = %s",
+          Settings.BLINKING_DISTRIBUTION[settings.blinkingDistribution]);
     }
-    log("  - Average precision = %s nm", MathUtils.rounded(sigmaS, 4));
-    log("  - Clusters simulation = " + CLUSTER_SIMULATION[clusterSimulation]);
-    if (clusterSimulation > 0) {
-      log("  - Cluster number = %s +/- %s", MathUtils.rounded(clusterNumber, 4),
-          MathUtils.rounded(clusterNumberSD, 4));
-      log("  - Cluster radius = %s nm", MathUtils.rounded(clusterRadius, 4));
+    log("  - Average precision = %s nm", MathUtils.rounded(settings.sigmaS, 4));
+    log("  - Clusters simulation = " + Settings.CLUSTER_SIMULATION[settings.clusterSimulation]);
+    if (settings.clusterSimulation > 0) {
+      log("  - Cluster number = %s +/- %s", MathUtils.rounded(settings.clusterNumber, 4),
+          MathUtils.rounded(settings.clusterNumberStdDev, 4));
+      log("  - Cluster radius = %s nm", MathUtils.rounded(settings.clusterRadius, 4));
     }
 
     final double nmPerPixel = 100;
-    double width = simulationSize * 1000.0;
+    double width = settings.simulationSize * 1000.0;
     // Allow a border of 3 x sigma for +/- precision
-    // if (blinkingRate > 1)
-    width -= 3 * sigmaS;
+    width -= 3 * settings.sigmaS;
     final RandomGenerator randomGenerator =
         new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
     final RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
     final UniformDistribution dist =
         new UniformDistribution(null, new double[] {width, width, 0}, randomGenerator.nextInt());
 
-    molecules = new ArrayList<>(nMolecules);
+    settings.molecules = new ArrayList<>(settings.numberOfMolecules);
     // Create some dummy results since the calibration is required for later analysis
-    results = new MemoryPeakResults(PsfHelper.create(PSFType.CUSTOM));
-    results.setCalibration(CalibrationHelper.create(nmPerPixel, 1, 100));
-    results.setSource(new NullSource("Molecule Simulation"));
-    results.begin();
+    settings.results = new MemoryPeakResults(PsfHelper.create(PSFType.CUSTOM));
+    settings.results.setCalibration(CalibrationHelper.create(nmPerPixel, 1, 100));
+    settings.results.setSource(new NullSource("Molecule Simulation"));
+    settings.results.begin();
     int count = 0;
 
     // Generate a sequence of coordinates
-    final ArrayList<double[]> xyz = new ArrayList<>((int) (nMolecules * 1.1));
+    final ArrayList<double[]> xyz = new ArrayList<>((int) (settings.numberOfMolecules * 1.1));
 
     final Statistics statsRadius = new Statistics();
     final Statistics statsSize = new Statistics();
@@ -1039,7 +1201,7 @@ public class PcPalmMolecules implements PlugIn {
 
     // TODO - Add a fluctuations model to this.
 
-    if (clusterSimulation > 0) {
+    if (settings.clusterSimulation > 0) {
       // Simulate clusters.
 
       // Note: In the Veatch et al. paper (Plos 1, e31457) correlation functions are built using
@@ -1064,13 +1226,13 @@ public class PcPalmMolecules implements PlugIn {
       // parameter (which
       // is a hard upper limit on the distance to centre).
 
-      final int maskSize = lowResolutionImageSize;
+      final int maskSize = settings.lowResolutionImageSize;
       int[] mask = null;
       maskScale = width / maskSize; // scale is in nm/pixel
 
       final ArrayList<double[]> clusterCentres = new ArrayList<>();
-      int totalSteps = 1 + (int) Math.ceil(nMolecules / clusterNumber);
-      if (clusterSimulation == 2 || clusterSimulation == 3) {
+      int totalSteps = 1 + (int) Math.ceil(settings.numberOfMolecules / settings.clusterNumber);
+      if (settings.clusterSimulation == 2 || settings.clusterSimulation == 3) {
         // Clusters are non-overlapping circles
 
         // Ensure the circles do not overlap by using an exclusion mask that accumulates
@@ -1087,14 +1249,14 @@ public class PcPalmMolecules implements PlugIn {
             maskScale, maskScale, randomGenerator);
         double[] centre;
         IJ.showStatus("Computing clusters mask");
-        final int roiRadius = (int) Math.round((clusterRadius * 2) / maskScale);
+        final int roiRadius = (int) Math.round((settings.clusterRadius * 2) / maskScale);
 
-        if (clusterSimulation == 3) {
+        if (settings.clusterSimulation == 3) {
           // Generate a mask of circles then sample from that.
           // If we want to fill the mask completely then adjust the total steps to be the number of
           // circles that can fit inside the mask.
-          totalSteps =
-              (int) (maskSize * maskSize / (Math.PI * MathUtils.pow2(clusterRadius / maskScale)));
+          totalSteps = (int) (maskSize * maskSize
+              / (Math.PI * MathUtils.pow2(settings.clusterRadius / maskScale)));
         }
 
         while ((centre = maskDistribution.next()) != null && clusterCentres.size() < totalSteps) {
@@ -1108,8 +1270,6 @@ public class PcPalmMolecules implements PlugIn {
           final double cx = centre[0] / maskScale;
           final double cy = centre[1] / maskScale;
           fillMask(mask, maskSize, (int) cx, (int) cy, roiRadius, 0);
-          // log("[%.1f,%.1f] @ [%.1f,%.1f]", centre[0], centre[1], cx, cy);
-          // Utils.display("Mask", new ColorProcessor(maskSize, maskSize, mask));
           try {
             maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
                 maskScale, randomGenerator);
@@ -1128,21 +1288,21 @@ public class PcPalmMolecules implements PlugIn {
         }
       }
 
-      if (showClusterMask || clusterSimulation == 3) {
+      if (settings.showClusterMask || settings.clusterSimulation == 3) {
         // Show the mask for the clusters
         if (mask == null) {
           mask = new int[maskSize * maskSize];
         } else {
           Arrays.fill(mask, 0);
         }
-        final int roiRadius = (int) Math.round((clusterRadius) / maskScale);
+        final int roiRadius = (int) Math.round((settings.clusterRadius) / maskScale);
         for (final double[] c : clusterCentres) {
           final double cx = c[0] / maskScale;
           final double cy = c[1] / maskScale;
           fillMask(mask, maskSize, (int) cx, (int) cy, roiRadius, 1);
         }
 
-        if (clusterSimulation == 3) {
+        if (settings.clusterSimulation == 3) {
           // We have the mask. Now pick points at random from the mask.
           final MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize,
               0, maskScale, maskScale, randomGenerator);
@@ -1151,7 +1311,7 @@ public class PcPalmMolecules implements PlugIn {
           final int[][] clusters = new int[clusterCentres.size()][];
           final int[] clusterSize = new int[clusters.length];
 
-          for (int i = 0; i < nMolecules; i++) {
+          for (int i = 0; i < settings.numberOfMolecules; i++) {
             final double[] centre = maskDistribution.next();
             // The mask returns the coordinates with the centre of the image at 0,0
             centre[0] += width / 2;
@@ -1216,7 +1376,7 @@ public class PcPalmMolecules implements PlugIn {
           }
         }
 
-        if (showClusterMask) {
+        if (settings.showClusterMask) {
           bp = new ByteProcessor(maskSize, maskSize);
           for (int i = 0; i < mask.length; i++) {
             if (mask[i] != 0) {
@@ -1228,15 +1388,14 @@ public class PcPalmMolecules implements PlugIn {
       }
 
       // Use the simulated cluster centres to create clusters of the desired size
-      if (clusterSimulation == 1 || clusterSimulation == 2) {
+      if (settings.clusterSimulation == 1 || settings.clusterSimulation == 2) {
         for (final double[] clusterCentre : clusterCentres) {
-          final int clusterN = (int) Math.round(
-              (clusterNumberSD > 0) ? dataGenerator.nextGaussian(clusterNumber, clusterNumberSD)
-                  : clusterNumber);
+          final int clusterN = (int) Math.round((settings.clusterNumberStdDev > 0)
+              ? dataGenerator.nextGaussian(settings.clusterNumber, settings.clusterNumberStdDev)
+              : settings.clusterNumber);
           if (clusterN < 1) {
             continue;
           }
-          // double[] clusterCentre = dist.next();
           if (clusterN == 1) {
             // No need for a cluster around a point
             xyz.add(clusterCentre);
@@ -1252,7 +1411,7 @@ public class PcPalmMolecules implements PlugIn {
               // http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
               final double t = 2.0 * Math.PI * randomGenerator.nextDouble();
               final double u = randomGenerator.nextDouble() + randomGenerator.nextDouble();
-              final double r = clusterRadius * ((u > 1) ? 2 - u : u);
+              final double r = settings.clusterRadius * ((u > 1) ? 2 - u : u);
               final double x = r * Math.cos(t);
               final double y = r * Math.sin(t);
               final double[] xy = new double[] {clusterCentre[0] + x, clusterCentre[1] + y};
@@ -1283,32 +1442,32 @@ public class PcPalmMolecules implements PlugIn {
       }
     } else {
       // Random distribution
-      for (int i = 0; i < nMolecules; i++) {
+      for (int i = 0; i < settings.numberOfMolecules; i++) {
         xyz.add(dist.next());
       }
     }
 
     // The Gaussian sigma should be applied so the overall distance from the centre
     // ( sqrt(x^2+y^2) ) has a standard deviation of sigmaS?
-    final double sigma1D = sigmaS / Math.sqrt(2);
+    final double sigma1D = settings.sigmaS / Math.sqrt(2);
 
     // Show optional histograms
     StoredDataStatistics intraDistances = null;
     StoredData blinks = null;
-    if (showHistograms) {
-      final int capacity = (int) (xyz.size() * blinkingRate);
+    if (settings.showHistograms) {
+      final int capacity = (int) (xyz.size() * settings.blinkingRate);
       intraDistances = new StoredDataStatistics(capacity);
       blinks = new StoredData(capacity);
     }
 
     final Statistics statsSigma = new Statistics();
     for (int i = 0; i < xyz.size(); i++) {
-      int occurrences = getBlinks(dataGenerator, blinkingRate);
+      int occurrences = getBlinks(dataGenerator, settings.blinkingRate);
       if (blinks != null) {
         blinks.add(occurrences);
       }
 
-      final int size = molecules.size();
+      final int size = settings.molecules.size();
 
       // Get coordinates in nm
       final double[] moleculeXyz = xyz.get(i);
@@ -1334,30 +1493,29 @@ public class PcPalmMolecules implements PlugIn {
         }
         final double x = localisationXy[0];
         final double y = localisationXy[1];
-        molecules.add(new Molecule(x, y, i, 1));
+        settings.molecules.add(new Molecule(x, y, i, 1));
 
         // Store in pixels
         final float xx = (float) (x / nmPerPixel);
         final float yy = (float) (y / nmPerPixel);
         final float[] params = PeakResult.createParams(0, 0, xx, yy, 0);
-        results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, 0, params, null);
+        settings.results.add(i + 1, (int) xx, (int) yy, 0, 0, 0, 0, params, null);
       }
 
-      if (molecules.size() > size) {
+      if (settings.molecules.size() > size) {
         count++;
         if (intraDistances != null) {
-          final int newCount = molecules.size() - size;
+          final int newCount = settings.molecules.size() - size;
           if (newCount == 1) {
             // No intra-molecule distances
-            // intraDistances.add(0);
             continue;
           }
 
           // Get the distance matrix between these molecules
           final double[][] matrix = new double[newCount][newCount];
-          for (int ii = size, x = 0; ii < molecules.size(); ii++, x++) {
-            for (int jj = size + 1, y = 1; jj < molecules.size(); jj++, y++) {
-              final double d2 = molecules.get(ii).distance2(molecules.get(jj));
+          for (int ii = size, x = 0; ii < settings.molecules.size(); ii++, x++) {
+            for (int jj = size + 1, y = 1; jj < settings.molecules.size(); jj++, y++) {
+              final double d2 = settings.molecules.get(ii).distance2(settings.molecules.get(jj));
               matrix[x][y] = matrix[y][x] = d2;
             }
           }
@@ -1385,24 +1543,16 @@ public class PcPalmMolecules implements PlugIn {
         }
       }
     }
-    results.end();
+    settings.results.end();
 
     if (bp != null) {
       ImageJUtils.display(maskTitle, bp);
     }
 
-    // Used for debugging
-    // System.out.printf(" * Molecules = %d (%d activated)\n", xyz.size(), count);
-    // if (clusterSimulation > 0)
-    // System.out.printf(" * Cluster number = %s +/- %s. Radius = %s +/- %s\n",
-    // MathUtils.rounded(statsSize.getMean(), 4),
-    // MathUtils.rounded(statsSize.getStandardDeviation(), 4),
-    // MathUtils.rounded(statsRadius.getMean(), 4),
-    // MathUtils.rounded(statsRadius.getStandardDeviation(), 4));
-
     log("Simulation results");
     log("  * Molecules = %d (%d activated)", xyz.size(), count);
-    log("  * Blinking rate = %s", MathUtils.rounded((double) molecules.size() / xyz.size(), 4));
+    log("  * Blinking rate = %s",
+        MathUtils.rounded((double) settings.molecules.size() / xyz.size(), 4));
     log("  * Precision (Mean-displacement) = %s nm",
         (statsSigma.getN() > 0) ? MathUtils.rounded(Math.sqrt(statsSigma.getMean()), 4) : "0");
     if (intraDistances != null) {
@@ -1415,6 +1565,8 @@ public class PcPalmMolecules implements PlugIn {
             plot(intraDistances, "Intra-molecule particle linkage distance", false);
 
         // Determine 95th and 99th percentile
+        // Will not be null as we requested a non-integer histogram.
+        @SuppressWarnings("null")
         int p99 = intraHist[0].length - 1;
         final double limit1 = 0.99 * intraHist[1][p99];
         final double limit2 = 0.95 * intraHist[1][p99];
@@ -1431,12 +1583,12 @@ public class PcPalmMolecules implements PlugIn {
             MathUtils.rounded(intraHist[0][p95], 4), MathUtils.rounded(intraHist[0][p99], 4),
             MathUtils.rounded(intraHist[0][intraHist[0].length - 1], 4));
 
-        if (distanceAnalysis) {
+        if (settings.distanceAnalysis) {
           performDistanceAnalysis(intraHist, p99);
         }
       }
     }
-    if (clusterSimulation > 0) {
+    if (settings.clusterSimulation > 0) {
       log("  * Cluster number = %s +/- %s", MathUtils.rounded(statsSize.getMean(), 4),
           MathUtils.rounded(statsSize.getStandardDeviation(), 4));
       log("  * Cluster radius = %s +/- %s nm (mean distance to centre-of-mass)",
@@ -1445,6 +1597,7 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
+  @Nullable
   private static double[][] plot(DoubleData stats, String label, boolean integerBins) {
     final String title = TITLE + " " + label;
 
@@ -1468,15 +1621,15 @@ public class PcPalmMolecules implements PlugIn {
     return hist;
   }
 
-  private static void performDistanceAnalysis(double[][] intraHist, int p99) {
+  private void performDistanceAnalysis(double[][] intraHist, int p99) {
     // We want to know the fraction of distances between molecules at the 99th percentile
     // that are intra- rather than inter-molecule.
     // Do single linkage clustering of closest pair at this distance and count the number of
     // links that are inter and intra.
 
     // Convert molecules for clustering
-    final ArrayList<ClusterPoint> points = new ArrayList<>(molecules.size());
-    for (final Molecule m : molecules) {
+    final ArrayList<ClusterPoint> points = new ArrayList<>(settings.molecules.size());
+    for (final Molecule m : settings.molecules) {
       // Precision was used to store the molecule ID
       points.add(ClusterPoint.newClusterPoint((int) m.precision, m.x, m.y, m.photons));
     }
@@ -1585,11 +1738,11 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
-  private static int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks) {
-    switch (blinkingDistribution) {
+  private int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks) {
+    switch (settings.blinkingDistribution) {
       case 3:
         // Binomial distribution
-        return dataGenerator.nextBinomial((int) Math.round(averageBlinks), p);
+        return dataGenerator.nextBinomial((int) Math.round(averageBlinks), settings.pvalue);
 
       case 2:
         return (int) Math.round(averageBlinks);
@@ -1600,26 +1753,26 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
-  private static boolean showSimulationDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+  private boolean showSimulationDialog() {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Simulate a random distribution of molecules.");
 
-    gd.addNumericField("Molecules", nMolecules, 0);
-    gd.addNumericField("Simulation_size (um)", simulationSize, 2);
-    gd.addNumericField("Blinking_rate", blinkingRate, 2);
-    gd.addChoice("Blinking_distribution", BLINKING_DISTRIBUTION,
-        BLINKING_DISTRIBUTION[blinkingDistribution]);
-    gd.addNumericField("Average_precision (nm)", sigmaS, 2);
-    gd.addCheckbox("Show_histograms", showHistograms);
-    gd.addCheckbox("Distance_analysis", distanceAnalysis);
+    gd.addNumericField("Molecules", settings.numberOfMolecules, 0);
+    gd.addNumericField("Simulation_size (um)", settings.simulationSize, 2);
+    gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
+    gd.addChoice("Blinking_distribution", Settings.BLINKING_DISTRIBUTION,
+        settings.blinkingDistribution);
+    gd.addNumericField("Average_precision (nm)", settings.sigmaS, 2);
+    gd.addCheckbox("Show_histograms", settings.showHistograms);
+    gd.addCheckbox("Distance_analysis", settings.distanceAnalysis);
 
-    gd.addChoice("Cluster_simulation", CLUSTER_SIMULATION, CLUSTER_SIMULATION[clusterSimulation]);
-    gd.addNumericField("Cluster_number", clusterNumber, 2);
-    gd.addNumericField("Cluster_variation (SD)", clusterNumberSD, 2);
-    gd.addNumericField("Cluster_radius", clusterRadius, 2);
-    gd.addCheckbox("Show_cluster_mask", showClusterMask);
+    gd.addChoice("Cluster_simulation", Settings.CLUSTER_SIMULATION, settings.clusterSimulation);
+    gd.addNumericField("Cluster_number", settings.clusterNumber, 2);
+    gd.addNumericField("Cluster_variation (SD)", settings.clusterNumberStdDev, 2);
+    gd.addNumericField("Cluster_radius", settings.clusterRadius, 2);
+    gd.addCheckbox("Show_cluster_mask", settings.showClusterMask);
 
     gd.showDialog();
 
@@ -1627,25 +1780,25 @@ public class PcPalmMolecules implements PlugIn {
       return false;
     }
 
-    nMolecules = (int) Math.abs(gd.getNextNumber());
-    simulationSize = Math.abs(gd.getNextNumber());
-    blinkingRate = Math.abs(gd.getNextNumber());
-    blinkingDistribution = gd.getNextChoiceIndex();
-    sigmaS = Math.abs(gd.getNextNumber());
-    showHistograms = gd.getNextBoolean();
-    distanceAnalysis = gd.getNextBoolean();
-    clusterSimulation = gd.getNextChoiceIndex();
-    clusterNumber = Math.abs(gd.getNextNumber());
-    clusterNumberSD = Math.abs(gd.getNextNumber());
-    clusterRadius = Math.abs(gd.getNextNumber());
-    showClusterMask = gd.getNextBoolean();
+    settings.numberOfMolecules = (int) Math.abs(gd.getNextNumber());
+    settings.simulationSize = Math.abs(gd.getNextNumber());
+    settings.blinkingRate = Math.abs(gd.getNextNumber());
+    settings.blinkingDistribution = gd.getNextChoiceIndex();
+    settings.sigmaS = Math.abs(gd.getNextNumber());
+    settings.showHistograms = gd.getNextBoolean();
+    settings.distanceAnalysis = gd.getNextBoolean();
+    settings.clusterSimulation = gd.getNextChoiceIndex();
+    settings.clusterNumber = Math.abs(gd.getNextNumber());
+    settings.clusterNumberStdDev = Math.abs(gd.getNextNumber());
+    settings.clusterRadius = Math.abs(gd.getNextNumber());
+    settings.showClusterMask = gd.getNextBoolean();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Molecules", nMolecules);
-      ParameterUtils.isAboveZero("Simulation size", simulationSize);
-      ParameterUtils.isEqualOrAbove("Blinking rate", blinkingRate, 1);
-      ParameterUtils.isEqualOrAbove("Cluster number", clusterNumber, 1);
+      ParameterUtils.isAboveZero("Molecules", settings.numberOfMolecules);
+      ParameterUtils.isAboveZero("Simulation size", settings.simulationSize);
+      ParameterUtils.isEqualOrAbove("Blinking rate", settings.blinkingRate, 1);
+      ParameterUtils.isEqualOrAbove("Cluster number", settings.clusterNumber, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -1654,16 +1807,16 @@ public class PcPalmMolecules implements PlugIn {
     return getPValue();
   }
 
-  private static boolean getPValue() {
-    if (blinkingDistribution == 3) {
+  private boolean getPValue() {
+    if (settings.blinkingDistribution == 3) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Binomial distribution requires a p-value");
-      gd.addSlider("p-Value (%)", 0, 100, 100 * p);
+      gd.addSlider("p-Value (%)", 0, 100, 100 * settings.pvalue);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
       }
-      p = FastMath.max(FastMath.min(gd.getNextNumber(), 100), 0) / 100;
+      settings.pvalue = FastMath.max(FastMath.min(gd.getNextNumber(), 100), 0) / 100;
     }
     return true;
   }
@@ -1693,68 +1846,54 @@ public class PcPalmMolecules implements PlugIn {
    * exposure time.
    */
   private void getLifetime() {
-    if (results.isEmpty()) {
-      seconds = 0;
+    if (settings.results.isEmpty()) {
+      settings.seconds = 0;
       return;
     }
-    int start = results.getFirstFrame();
+    int start = settings.results.getFirstFrame();
     int end = start;
     final FrameProcedure p = new FrameProcedure(start, end);
-    results.forEach(p);
+    settings.results.forEach(p);
     start = p.start;
     end = p.end;
-    seconds = (end - start + 1) * results.getCalibrationReader().getExposureTime() / 1000;
+    settings.seconds =
+        (end - start + 1) * settings.results.getCalibrationReader().getExposureTime() / 1000;
   }
 
-  private static boolean createImage(List<Molecule> molecules) {
+  private boolean createImage(List<Molecule> molecules) {
     if (molecules.isEmpty()) {
       return false;
     }
 
     // Find the limits of the image
-    minx = maxx = molecules.get(0).x;
-    miny = maxy = molecules.get(0).y;
+    settings.minx = settings.maxx = molecules.get(0).x;
+    settings.miny = settings.maxy = molecules.get(0).y;
 
     // Compute limits
     for (int i = molecules.size(); i-- > 0;) {
       final Molecule m1 = molecules.get(i);
-      if (minx > m1.x) {
-        minx = m1.x;
-      } else if (maxx < m1.x) {
-        maxx = m1.x;
+      if (settings.minx > m1.x) {
+        settings.minx = m1.x;
+      } else if (settings.maxx < m1.x) {
+        settings.maxx = m1.x;
       }
-      if (miny > m1.y) {
-        miny = m1.y;
-      } else if (maxy < m1.y) {
-        maxy = m1.y;
+      if (settings.miny > m1.y) {
+        settings.miny = m1.y;
+      } else if (settings.maxy < m1.y) {
+        settings.maxy = m1.y;
       }
     }
 
-    // // Debug all-vs-all comparison
-    // long start = System.nanoTime();
-    // double dMin2 = Double.POSITIVE_INFINITY;
-    // for (int i = molecules.size(); i-- > 0;)
-    // {
-    // final Molecule m1 = molecules.get(i);
-    // for (int j = i; j-- > 0;)
-    // {
-    // final Molecule m2 = molecules.get(j);
-    // if (dMin2 > m1.distance2(m2))
-    // dMin2 = m1.distance2(m2);
-    // }
-    // }
-    // long t1 = System.nanoTime() - start;
-
     // Assign to a grid
     final int gridSize = 500;
-    final double xBinSize = (maxx - minx) / gridSize;
-    final double yBinSize = (maxy - miny) / gridSize;
-    final int nXBins = 1 + (int) ((maxx - minx) / xBinSize);
-    final int nybins = 1 + (int) ((maxy - miny) / yBinSize);
+    final double xBinSize = (settings.maxx - settings.minx) / gridSize;
+    final double yBinSize = (settings.maxy - settings.miny) / gridSize;
+    final int nXBins = 1 + (int) ((settings.maxx - settings.minx) / xBinSize);
+    final int nybins = 1 + (int) ((settings.maxy - settings.miny) / yBinSize);
     final Molecule[][] grid = new Molecule[nXBins][nybins];
     for (final Molecule m : molecules) {
-      final int xbin = (int) ((m.x - minx) / xBinSize);
-      final int ybin = (int) ((m.y - miny) / yBinSize);
+      final int xbin = (int) ((m.x - settings.minx) / xBinSize);
+      final int ybin = (int) ((m.y - settings.miny) / yBinSize);
       // Build a single linked list
       m.next = grid[xbin][ybin];
       grid[xbin][ybin] = m;
@@ -1808,57 +1947,58 @@ public class PcPalmMolecules implements PlugIn {
     IJ.showStatus("");
     IJ.showProgress(1);
 
-    nmPerPixel = Math.sqrt(distanceMin);
-    log("Minimum distance between molecules = %g nm", nmPerPixel);
-    if (nmPerPixel == 0 && nmPerPixelLimit == 0) {
+    settings.nmPerPixel = Math.sqrt(distanceMin);
+    log("Minimum distance between molecules = %g nm", settings.nmPerPixel);
+    if (settings.nmPerPixel == 0 && settings.nmPerPixelLimit == 0) {
       IJ.error(TITLE, "Zero minimum distance between molecules - please enter a nm/pixel limit "
           + "for image reconstruction");
       return false;
     }
 
-    if (nmPerPixel < nmPerPixelLimit) {
-      log("Minimum distance adjusted to user defined limit %.2f nm", nmPerPixelLimit);
-      nmPerPixel = nmPerPixelLimit;
+    if (settings.nmPerPixel < settings.nmPerPixelLimit) {
+      log("Minimum distance adjusted to user defined limit %.2f nm", settings.nmPerPixelLimit);
+      settings.nmPerPixel = settings.nmPerPixelLimit;
     }
 
     // Compute the minimum size we can use and stay within memory.
     // Assume a 4um x 4um analysis section with 800nm feature radius.
     final double limit = (4000.0 + 800.0 + 1) / 4096;
-    if (nmPerPixel < limit) {
+    if (settings.nmPerPixel < limit) {
       log("Minimum distance adjusted to %.2f nm to fit in memory", limit);
-      nmPerPixel = limit;
+      settings.nmPerPixel = limit;
     }
-    log("X-range %.2f - %.2f : Y-range %.2f - %.2f (nm)", minx, maxx, miny, maxy);
+    log("X-range %.2f - %.2f : Y-range %.2f - %.2f (nm)", settings.minx, settings.maxx,
+        settings.miny, settings.maxy);
 
     // Construct a binary representation
 
     final String namePrefix =
-        results.getName() + " " + ((binaryImage) ? "Binary" : "Count") + " Image";
+        settings.results.getName() + " " + ((settings.binaryImage) ? "Binary" : "Count") + " Image";
 
     double lowResNmPerPixel;
-    final double xrange = maxx - minx;
-    final double yrange = maxy - miny;
+    final double xrange = settings.maxx - settings.minx;
+    final double yrange = settings.maxy - settings.miny;
     if (xrange > 0 || yrange > 0) {
-      lowResNmPerPixel = FastMath.max(xrange, yrange) / lowResolutionImageSize;
+      lowResNmPerPixel = FastMath.max(xrange, yrange) / settings.lowResolutionImageSize;
     } else {
       // The resolution does not matter
       lowResNmPerPixel = 100;
     }
-    final ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, minx, miny, maxx, maxy,
-        lowResNmPerPixel, false, binaryImage);
+    final ImagePlus imp = displayImage(namePrefix + " (low res)", molecules, settings.minx,
+        settings.miny, settings.maxx, settings.maxy, lowResNmPerPixel, false, settings.binaryImage);
 
     // Add an ROI to allow the user to select regions. PC-PALM recommends 2x2 to 4x4 um^2
-    final int size = (int) (roiSizeInUm * 1000.0 / lowResNmPerPixel);
+    final int size = (int) (settings.roiSizeInUm * 1000.0 / lowResNmPerPixel);
     imp.setRoi(new Rectangle(0, 0, size, size));
 
-    if (showHighResolutionImage) {
-      displayImage(namePrefix + " (high res)", molecules, minx, miny, maxx, maxy, nmPerPixel, false,
-          binaryImage);
+    if (settings.showHighResolutionImage) {
+      displayImage(namePrefix + " (high res)", molecules, settings.minx, settings.miny,
+          settings.maxx, settings.maxy, settings.nmPerPixel, false, settings.binaryImage);
     }
 
     // Store the molecules, the data range and the dMin.
     // This will be used by a filter plugin that crops sections from the image for PC analysis
-    PcPalmMolecules.molecules = molecules;
+    this.settings.molecules = molecules;
 
     return true;
   }
@@ -1876,8 +2016,8 @@ public class PcPalmMolecules implements PlugIn {
    * @param binary the binary
    * @return the image
    */
-  static ImageProcessor drawImage(List<Molecule> molecules, double minx, double miny,
-      double maxx, double maxy, double nmPerPixel, boolean checkBounds, boolean binary) {
+  static ImageProcessor drawImage(List<Molecule> molecules, double minx, double miny, double maxx,
+      double maxy, double nmPerPixel, boolean checkBounds, boolean binary) {
     final double scalex = maxx - minx;
     final double scaley = maxy - miny;
     final int width = (int) Math.round(scalex / nmPerPixel) + 1;
@@ -1963,9 +2103,8 @@ public class PcPalmMolecules implements PlugIn {
    * @param binary the binary
    * @return the image
    */
-  static ImagePlus displayImage(String title, List<Molecule> molecules, double minx,
-      double miny, double maxx, double maxy, double nmPerPixel, boolean checkBounds,
-      boolean binary) {
+  static ImagePlus displayImage(String title, List<Molecule> molecules, double minx, double miny,
+      double maxx, double maxy, double nmPerPixel, boolean checkBounds, boolean binary) {
     final ImageProcessor ip =
         drawImage(molecules, minx, miny, maxx, maxy, nmPerPixel, checkBounds, binary);
     return displayImage(title, ip, nmPerPixel);

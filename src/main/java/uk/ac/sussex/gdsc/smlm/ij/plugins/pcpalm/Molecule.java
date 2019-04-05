@@ -29,16 +29,16 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
  */
 public class Molecule {
   /** The x. */
-  public double x;
+  public final double x;
   /** The y. */
-  public double y;
+  public final double y;
   /** The precision. */
-  public double precision;
+  public final double precision;
   /** The photons. */
-  public double photons;
+  public final double photons;
 
   /** Used to construct a single linked list of molecules. */
-  public Molecule next;
+  Molecule next;
 
   /**
    * Instantiates a new molecule.

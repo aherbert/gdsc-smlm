@@ -489,7 +489,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private void calculatePrecision(Trace[] traces, boolean multi) {
     // Check the diffusion simulation for a precision
     if (DiffusionRateTest.isSimulated(results.getName()) && !multi) {
-      precision = DiffusionRateTest.lastSimulatedPrecision;
+      precision = DiffusionRateTest.getLastSimulationPrecision();
     } else {
       precision = 999;
       try {
