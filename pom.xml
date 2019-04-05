@@ -194,6 +194,7 @@ Software for single molecule localisation microscopy (SMLM)
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <version>5.4.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
