@@ -156,11 +156,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.DefaultListSelectionModel;
@@ -195,19 +198,22 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static final String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
 
   /** The executor service for message digests. */
-  private static final ExecutorService executorService = Executors.newFixedThreadPool(1);
+  private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
+  /** The identity transform. */
   private static final Transform3D IDENTITY = new Transform3D();
 
-  // No ned to store this in settings as when the plugin is first run there are no windows
-  private static String lastWindow = "";
+  // No need to store this in settings as when the plugin is first run there are no windows
+  private static AtomicReference<String> lastWindow = new AtomicReference<>("");
 
-  private static HashMap<PeakResultsDigest,
+  private static final Map<PeakResultsDigest,
       Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
-          new HashMap<>();
-  private static ResultsTableSettings.Builder resultsTableSettings;
-  private static boolean addToSelection;
-  private static Color3f highlightColor;
+          new ConcurrentHashMap<>();
+
+  private static final AtomicReference<ResultsTableSettings> resultsTableSettings =
+      new AtomicReference<>();
+  private static final AtomicBoolean addToSelection = new AtomicBoolean();
+  private static final AtomicReference<Color3f> highlightColor = new AtomicReference<>();
 
   private Image3DUniverse univ;
   private JMenuItem resetRotation;
@@ -573,7 +579,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     void highlightColourUpdated() {
-      this.highlightColor = ImageJ3DResultsViewer.highlightColor;
+      this.highlightColor = ImageJ3DResultsViewer.highlightColor.get();
       if (outline != null) {
         outline.setColor(highlightColor);
       }
@@ -694,7 +700,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // If the selection is output to a table then it may have been sorted
       // and we map the index from the data to the table
       PeakResultTableModelFrame table;
-      if (resultsTableSettings.getShowTable()) {
+      if (resultsTableSettings.get().getShowTable()) {
         table = createTable(results, this);
       } else {
         table = findTable(this);
@@ -706,7 +712,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Highlight the localisation using an outline.
       // Add to or replace previous selection.
-      if (addToSelection) {
+      if (addToSelection.get()) {
         listSelectionModel.addSelectionInterval(index, index);
       } else {
         listSelectionModel.setSelectionInterval(index, index);
@@ -914,7 +920,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final ImageJ3DResultsViewerSettings.Builder settings =
         SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
 
-    addToSelection = settings.getAddToSelection();
+    addToSelection.set(settings.getAddToSelection());
 
     // Get a list of the window titles available. Allow the user to select
     // an existing window or a new one.
@@ -932,7 +938,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // or to reuse an existing window. If 'new window' then a new window should always
     // be selected. Otherwise open in the same window as last time. If there was no last
     // window then the settings will carried over from the last ImageJ session.
-    final String window = (settings.getNewWindow()) ? "" : lastWindow;
+    final String window = (settings.getNewWindow()) ? "" : lastWindow.get();
     gd.addChoice("Window", titles, window);
     gd.addSlider("Transparancy", 0, 0.9, settings.getTransparency(), new OptionListener<Double>() {
       @Override
@@ -1143,7 +1149,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
     final String name = ResultsManager.getInputSource(gd);
     final int windowChoice = gd.getNextChoiceIndex();
-    lastWindow = titles[windowChoice];
+    lastWindow.set(titles[windowChoice]);
     settings.setInputOption(name);
     settings.setTransparency(gd.getNextNumber());
     settings.setLut(gd.getNextChoiceIndex());
@@ -1180,7 +1186,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // Cache the table settings
-    resultsTableSettings = settings.getResultsTableSettingsBuilder();
+    resultsTableSettings.set(settings.getResultsTableSettings());
 
     // Create a 3D viewer.
     if (windowChoice == 0) {
@@ -1189,7 +1195,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       univ = univList.get(windowChoice - 1); // Ignore the new window
     }
 
-    lastWindow = univ.getWindow().getTitle();
+    lastWindow.set(univ.getWindow().getTitle());
 
     results = results.copy();
 
@@ -1275,7 +1281,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     if (triplet == null) {
       triplet = Triple.of(new PeakResultTableModel(results, false,
           // Note the settings do not matter until the table is set live
-          resultsTableSettings.build()), new DefaultListSelectionModel(), null);
+          resultsTableSettings.get()), new DefaultListSelectionModel(), null);
       triplet.getLeft().setCheckDuplicates(true);
       resultsTables.put(data.digest, triplet);
     }
@@ -1834,7 +1840,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static void createHighlightColour(String highlightColour) {
-    highlightColor = null;
+    highlightColor.set(null);
     for (int i = 0; i < highlightColour.length(); i++) {
       if (Character.isDigit(highlightColour.charAt(i))) {
         // Try and extract RGB
@@ -1845,7 +1851,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             final int red = Integer.parseInt(split[0]);
             final int green = Integer.parseInt(split[1]);
             final int blue = Integer.parseInt(split[2]);
-            highlightColor = new Color3f(new Color(red, green, blue));
+            highlightColor.set(new Color3f(new Color(red, green, blue)));
             return;
           } catch (final NumberFormatException ex) {
             // Ignore
@@ -1853,7 +1859,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
     }
-    highlightColor = colours.get(highlightColour.toLowerCase(Locale.US));
+    highlightColor.set(colours.get(highlightColour.toLowerCase(Locale.US)));
   }
 
   @SuppressWarnings("null")
@@ -3105,7 +3111,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       final ResultsSettings.Builder s = ResultsSettings.newBuilder();
-      s.setResultsTableSettings(resultsTableSettings); // This is from the cache
+      ResultsTableSettings localResultsTableSettings = resultsTableSettings.get();
+      s.setResultsTableSettings(localResultsTableSettings);
       gd.addMessage("Click on the image to view localisation data.\nCtrl/Alt key must be pressed.");
       final TextField[] tf = new TextField[1];
       gd.addStringField("Highlight_colour", settings.getHighlightColour(),
@@ -3116,13 +3123,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
               int red;
               int green;
               int blue;
-              if (highlightColor == null) {
+              final Color3f color = highlightColor.get();
+              if (color == null) {
                 red = blue = 0;
                 green = 255;
               } else {
-                red = (int) (highlightColor.x * 255);
-                green = (int) (highlightColor.y * 255);
-                blue = (int) (highlightColor.z * 255);
+                red = (int) (color.x * 255);
+                green = (int) (color.y * 255);
+                blue = (int) (color.z * 255);
               }
               final ExtendedGenericDialog egd = new ExtendedGenericDialog("Highlight colour", null);
               egd.addSlider("Red", 0, 255, red);
@@ -3136,9 +3144,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
               green = (int) egd.getNextNumber();
               blue = (int) egd.getNextNumber();
               final Color c = new Color(red, green, blue);
-              // highlightColor = new Color3f();
               final String cvalue = c.getRed() + "," + c.getGreen() + "," + c.getBlue();
-              // settings.setHighlightColour(cvalue);
               tf[0].setText(cvalue);
               return true;
             }
@@ -3196,31 +3202,33 @@ public class ImageJ3DResultsViewer implements PlugIn {
               return false;
             }
           });
-      gd.addCheckbox("Update_existing_tables", resultsTableSettings.getUpdateExistingTables());
+      gd.addCheckbox("Update_existing_tables", localResultsTableSettings.getUpdateExistingTables());
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
       }
       settings.setHighlightColour(gd.getNextString());
-      addToSelection = gd.getNextBoolean();
-      settings.setAddToSelection(addToSelection);
-      resultsTableSettings = s.getResultsTableSettingsBuilder();
-      resultsTableSettings.setShowTable(gd.getNextBoolean());
+      boolean add = gd.getNextBoolean();
+      addToSelection.set(add);
+      settings.setAddToSelection(add);
+      final ResultsTableSettings.Builder resultsTableSettingsBuilder =
+          s.getResultsTableSettingsBuilder();
+      resultsTableSettingsBuilder.setShowTable(gd.getNextBoolean());
       settings.setSaveEyePoint(gd.getNextBoolean());
       settings.setNameOption(gd.getNextChoiceIndex());
-      resultsTableSettings.setUpdateExistingTables(gd.getNextBoolean());
+      resultsTableSettingsBuilder.setUpdateExistingTables(gd.getNextBoolean());
 
       createHighlightColour(settings.getHighlightColour());
 
       // Save updated settings
-      settings.setResultsTableSettings(resultsTableSettings);
+      localResultsTableSettings = resultsTableSettingsBuilder.build();
+      settings.setResultsTableSettings(localResultsTableSettings);
       SettingsManager.writeSettings(settings);
 
       // Update the table settings for all the selection models
-      if (resultsTableSettings.getUpdateExistingTables()) {
-        final ResultsTableSettings ts = resultsTableSettings.build();
+      if (resultsTableSettingsBuilder.getUpdateExistingTables()) {
         for (final Triple<PeakResultTableModel, ?, ?> t : resultsTables.values()) {
-          t.getLeft().setTableSettings(ts);
+          t.getLeft().setTableSettings(localResultsTableSettings);
         }
       }
 
