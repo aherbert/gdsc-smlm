@@ -414,8 +414,7 @@ public class FilterAnalysis implements PlugIn {
         }
       }
     }
-    IJ.showStatus("");
-    IJ.showProgress(1);
+    ImageJUtils.finished();
     lastResults.set(new LastResults(list, inputDirectory));
 
     return list;
@@ -670,8 +669,7 @@ public class FilterAnalysis implements PlugIn {
       IJ.showStatus("Analysing " + filterSet.getName() + " ...");
       count = runAnalysis(output, filterSet, resultsList, count, total);
     }
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     showPlots();
     calculateSensitivity(resultsList);
@@ -755,8 +753,7 @@ public class FilterAnalysis implements PlugIn {
 
       output.accept("-=-=-=-");
 
-      IJ.showProgress(1);
-      IJ.showStatus("");
+      ImageJUtils.finished();
     }
   }
 

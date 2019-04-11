@@ -1944,8 +1944,7 @@ public class PcPalmMolecules implements PlugIn {
         }
       }
     }
-    IJ.showStatus("");
-    IJ.showProgress(1);
+    ImageJUtils.finished();
 
     settings.nmPerPixel = Math.sqrt(distanceMin);
     log("Minimum distance between molecules = %g nm", settings.nmPerPixel);

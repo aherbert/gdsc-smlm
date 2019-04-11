@@ -56,6 +56,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Opens a folder of images and computes a Mean-Variance Test.
@@ -70,13 +71,60 @@ import java.util.List;
  */
 public class MeanVarianceTest implements PlugIn {
   private static final String TITLE = "Mean Variance Test";
-  private static double cameraGain;
-  private static double _bias = 500;
-  private static boolean showTable = true;
-  private static boolean showCharts = true;
 
   private int exposureCounter;
   private boolean singleImage;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    double cameraGain;
+    double bias;
+    boolean showTable;
+    boolean showCharts;
+
+    Settings() {
+      // Set defaults
+      bias = 500;
+      showTable = true;
+      showCharts = true;
+    }
+
+    Settings(Settings source) {
+      cameraGain = source.cameraGain;
+      bias = source.bias;
+      showTable = source.showTable;
+      showCharts = source.showCharts;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class PairSample {
     int slice1;
@@ -224,18 +272,21 @@ public class MeanVarianceTest implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    settings = Settings.load();
+    settings.save();
+
     if (ImageJUtils.isExtraOptions()) {
       final ImagePlus imp = WindowManager.getCurrentImage();
       if (imp.getStackSize() > 1) {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage("Perform single image analysis on the current image?");
-        gd.addNumericField("Bias", _bias, 0);
+        gd.addNumericField("Bias", settings.bias, 0);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return;
         }
         singleImage = true;
-        _bias = Math.abs(gd.getNextNumber());
+        settings.bias = Math.abs(gd.getNextNumber());
       } else {
         IJ.error(TITLE, "Single-image mode requires a stack");
         return;
@@ -285,21 +336,21 @@ public class MeanVarianceTest implements PlugIn {
 
     GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Set the output options:");
-    gd.addCheckbox("Show_table", showTable);
-    gd.addCheckbox("Show_charts", showCharts);
+    gd.addCheckbox("Show_table", settings.showTable);
+    gd.addCheckbox("Show_charts", settings.showCharts);
     if (emMode) {
       // Ask the user for the camera gain ...
       gd.addMessage("Estimating the EM-gain requires the camera gain without EM readout enabled");
-      gd.addNumericField("Camera_gain (Count/e-)", cameraGain, 4);
+      gd.addNumericField("Camera_gain (Count/e-)", settings.cameraGain, 4);
     }
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
-    showTable = gd.getNextBoolean();
-    showCharts = gd.getNextBoolean();
+    settings.showTable = gd.getNextBoolean();
+    settings.showCharts = gd.getNextBoolean();
     if (emMode) {
-      cameraGain = gd.getNextNumber();
+      settings.cameraGain = gd.getNextNumber();
     }
 
     IJ.showStatus("Computing mean & variance");
@@ -318,7 +369,7 @@ public class MeanVarianceTest implements PlugIn {
     final Statistics noiseStats = new Statistics();
     final double bias;
     if (singleImage) {
-      bias = _bias;
+      bias = settings.bias;
     } else {
       while (start < images.size()) {
         final ImageSample sample = images.get(start);
@@ -341,26 +392,26 @@ public class MeanVarianceTest implements PlugIn {
       total += images.get(i).samples.size();
     }
 
-    if (showTable && total > 2000) {
+    if (settings.showTable && total > 2000) {
       gd = new GenericDialog(TITLE);
       gd.addMessage(
           "Table output requires " + total + " entries.\n \nYou may want to disable the table.");
-      gd.addCheckbox("Show_table", showTable);
+      gd.addCheckbox("Show_table", settings.showTable);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
       }
-      showTable = gd.getNextBoolean();
+      settings.showTable = gd.getNextBoolean();
     }
 
-    final TextWindow results = (showTable) ? createResultsWindow() : null;
+    final TextWindow results = (settings.showTable) ? createResultsWindow() : null;
 
     double[] mean = new double[total];
     double[] variance = new double[mean.length];
     final Statistics gainStats = (singleImage) ? new StoredDataStatistics(total) : new Statistics();
     final WeightedObservedPoints obs = new WeightedObservedPoints();
     for (int i = (singleImage) ? 0 : start, j = 0; i < images.size(); i++) {
-      final StringBuilder sb = (showTable) ? new StringBuilder() : null;
+      final StringBuilder sb = (settings.showTable) ? new StringBuilder() : null;
       final ImageSample sample = images.get(i);
       for (final PairSample pair : sample.samples) {
         if (j % 16 == 0) {
@@ -375,7 +426,7 @@ public class MeanVarianceTest implements PlugIn {
         obs.add(mean[j], variance[j]);
 
         if (emMode) {
-          gain /= (2 * cameraGain);
+          gain /= (2 * settings.cameraGain);
         }
 
         if (sb != null) {
@@ -406,7 +457,7 @@ public class MeanVarianceTest implements PlugIn {
         stats = StoredDataStatistics.create(values);
       }
 
-      if (showCharts) {
+      if (settings.showCharts) {
         // Plot the gain over time
         final String title = TITLE + " Gain vs Frame";
         final Plot2 plot = new Plot2(title, "Slice", "Gain",
@@ -432,13 +483,13 @@ public class MeanVarianceTest implements PlugIn {
 
       if (emMode) {
         final double totalGain = gain;
-        final double emGain = totalGain / cameraGain;
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(cameraGain, 4));
+        final double emGain = totalGain / settings.cameraGain;
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(settings.cameraGain, 4));
         ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
         ImageJUtils.log("  Total Gain = %s (Count/e-)", MathUtils.rounded(totalGain, 4));
       } else {
-        cameraGain = gain;
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(cameraGain, 4));
+        settings.cameraGain = gain;
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(settings.cameraGain, 4));
       }
     } else {
       IJ.showStatus("Computing fit");
@@ -456,7 +507,7 @@ public class MeanVarianceTest implements PlugIn {
       // Construct the polynomial that best fits the data.
       final PolynomialFunction fitted = new PolynomialFunction(best);
 
-      if (showCharts) {
+      if (settings.showCharts) {
         // Plot mean verses variance. Gradient is gain in Count/e.
         final String title = TITLE + " results";
         final Plot2 plot = new Plot2(title, "Mean", "Variance");
@@ -495,32 +546,34 @@ public class MeanVarianceTest implements PlugIn {
         // double noiseFactor = (Read Noise EM-CCD) / (Read Noise CCD)
 
         // Em-gain is the observed gain divided by the noise factor multiplied by camera gain
-        final double emGain = best[1] / (2 * cameraGain);
+        final double emGain = best[1] / (2 * settings.cameraGain);
 
         // Compute total gain
-        final double totalGain = emGain * cameraGain;
+        final double totalGain = emGain * settings.cameraGain;
 
-        final double readNoise = avBiasNoise / cameraGain;
+        final double readNoise = avBiasNoise / settings.cameraGain;
         // Effective noise is standard deviation of the bias image divided by the total gain (in
         // Count/e-)
         final double readNoiseE = avBiasNoise / totalGain;
         ImageJUtils.log("  Read Noise = %s (e-) [%s (Count)]", MathUtils.rounded(readNoise, 4),
             MathUtils.rounded(avBiasNoise, 4));
 
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(1 / cameraGain, 4));
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)",
+            MathUtils.rounded(1 / settings.cameraGain, 4));
         ImageJUtils.log("  EM-Gain = %s", MathUtils.rounded(emGain, 4));
         ImageJUtils.log("  Total Gain = %s (Count/e-)", MathUtils.rounded(totalGain, 4));
         ImageJUtils.log("  Effective Read Noise = %s (e-) (Read Noise/Total Gain)",
             MathUtils.rounded(readNoiseE, 4));
       } else {
         // The gradient is the observed gain of the noise.
-        cameraGain = best[1];
+        settings.cameraGain = best[1];
         // Noise is standard deviation of the bias image divided by the gain (in Count/e-)
-        final double readNoise = avBiasNoise / cameraGain;
+        final double readNoise = avBiasNoise / settings.cameraGain;
         ImageJUtils.log("  Read Noise = %s (e-) [%s (Count)]", MathUtils.rounded(readNoise, 4),
             MathUtils.rounded(avBiasNoise, 4));
 
-        ImageJUtils.log("  Gain = 1 / %s (Count/e-)", MathUtils.rounded(1 / cameraGain, 4));
+        ImageJUtils.log("  Gain = 1 / %s (Count/e-)",
+            MathUtils.rounded(1 / settings.cameraGain, 4));
       }
     }
     IJ.showStatus("");

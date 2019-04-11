@@ -658,8 +658,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     // End now if we have enough samples
     engine.end(sampleSizeReached());
 
-    IJ.showStatus("");
-    IJ.showProgress(1);
+    ImageJUtils.finished();
 
     // This count will be an over-estimate given that the provider is ahead of the consumer
     // in this multi-threaded system

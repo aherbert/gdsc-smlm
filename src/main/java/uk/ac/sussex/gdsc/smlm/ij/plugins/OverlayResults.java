@@ -58,6 +58,7 @@ import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,8 +67,6 @@ import java.util.logging.Logger;
  */
 public class OverlayResults implements PlugIn {
   private static final String TITLE = "Overlay Results";
-  private static String name = "";
-  private static boolean showTable;
 
   private String[] names;
   private int[] ids;
@@ -76,6 +75,51 @@ public class OverlayResults implements PlugIn {
   private Label label;
 
   private final ConcurrentMonoStack<Integer> inbox = new ConcurrentMonoStack<>();
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String name;
+    boolean showTable;
+
+    Settings() {
+      // Set defaults
+      name = "";
+    }
+
+    Settings(Settings source) {
+      name = source.name;
+      showTable = source.showTable;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private class Worker extends ImageAdapter implements ItemListener, Runnable {
     private boolean running = true;
@@ -96,7 +140,7 @@ public class OverlayResults implements PlugIn {
     @Override
     public void itemStateChanged(ItemEvent event) {
       // Read other options from the dialog
-      showTable = checkbox.getState();
+      settings.showTable = checkbox.getState();
       refresh();
     }
 
@@ -190,7 +234,7 @@ public class OverlayResults implements PlugIn {
       final int newSlice = imp.getCurrentSlice();
       if (currentSlice == newSlice) {
         final boolean isShowing = tw != null;
-        if (showTable == isShowing) {
+        if (settings.showTable == isShowing) {
           // No change from last time
           return;
         }
@@ -207,7 +251,7 @@ public class OverlayResults implements PlugIn {
 
       final ImageJTablePeakResults table;
       TIntHashSet selectedId = null;
-      if (showTable) {
+      if (settings.showTable) {
         final boolean hasId = results.hasId();
 
         // Old selected item
@@ -344,9 +388,11 @@ public class OverlayResults implements PlugIn {
     Thread thread = null;
     Worker worker = null;
     final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
+    settings = Settings.load();
+    settings.save();
     gd.addMessage("Overlay results on current image frame");
-    gd.addChoice("Results", names, (name == null) ? "" : name);
-    gd.addCheckbox("Show_table", showTable);
+    gd.addChoice("Results", names, (settings.name == null) ? "" : settings.name);
+    gd.addCheckbox("Show_table", settings.showTable);
     gd.addMessage("");
     gd.addHelp(About.HELP_URL);
     gd.hideCancelButton();
@@ -372,8 +418,8 @@ public class OverlayResults implements PlugIn {
       ImagePlus.removeImageListener(worker);
     }
     if (!gd.wasCanceled()) {
-      name = gd.getNextChoice();
-      showTable = gd.getNextBoolean();
+      settings.name = gd.getNextChoice();
+      settings.showTable = gd.getNextBoolean();
     }
     if (thread != null && worker != null) {
       worker.running = false;

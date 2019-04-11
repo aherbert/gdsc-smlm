@@ -2633,8 +2633,7 @@ public class BenchmarkFilterAnalysis
       }
     }
     filterAnalysisStopWatch.stop();
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     final String timeString = filterAnalysisStopWatch.toString();
     IJ.log("Filter analysis time : " + timeString);
@@ -2657,8 +2656,7 @@ public class BenchmarkFilterAnalysis
     IJ.showStatus("Analysing parameters ...");
     optimum = parameterAnalysis(nonInteractive, optimum, rangeReduction);
     parameterAnalysisStopWatch.stop();
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     final String timeString = parameterAnalysisStopWatch.toString();
     IJ.log("Parameter analysis time : " + timeString);

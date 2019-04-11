@@ -46,6 +46,7 @@ import ij.process.ImageProcessor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces an average PSF image from multiple PSF images.
@@ -56,7 +57,7 @@ import java.util.List;
 public class PsfCombiner implements PlugIn {
   private static final String TITLE = "PSF Combiner";
 
-  private static List<String> selected;
+  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
   private final List<Psf> input = new LinkedList<>();
 
   @Override
@@ -81,7 +82,7 @@ public class PsfCombiner implements PlugIn {
         return titles.get(index);
       }
     });
-    md.addSelected(selected);
+    md.addSelected(lastSelected.get());
 
     md.showDialog();
 
@@ -95,7 +96,7 @@ public class PsfCombiner implements PlugIn {
       return;
     }
 
-    PsfCombiner.selected = selected;
+    lastSelected.set(selected);
 
     for (final String title : selected) {
       input.add(new Psf(title));
@@ -288,11 +289,7 @@ public class PsfCombiner implements PlugIn {
       stack.getProcessor(n).copyBits(stackW.getProcessor(n), 0, 0, Blitter.DIVIDE);
     }
 
-    // IJ.showStatus("Normalising ...");
-    // PSFCreator.normalise(stack, 1 + shift);
-
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     final ImagePlus imp = ImageJUtils.display("Combined PSF", stack);
     imp.setSlice(1 + shift);

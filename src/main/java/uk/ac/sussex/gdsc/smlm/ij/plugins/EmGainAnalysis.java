@@ -472,8 +472,7 @@ public class EmGainAnalysis implements PlugInFilter {
       }
     }
 
-    IJ.showStatus("");
-    IJ.showProgress(1);
+    ImageJUtils.finished();
 
     if (solution == null) {
       ImageJUtils.log("Failed to fit the distribution");

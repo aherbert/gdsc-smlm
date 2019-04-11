@@ -591,8 +591,7 @@ public class PsfDrift implements PlugIn {
     }
     threads.clear();
 
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     // Plot the average and SE for the drift curve
     // Plot the recall

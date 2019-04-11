@@ -215,8 +215,7 @@ public class FilterResults implements PlugIn {
       return false;
     }
 
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
     return true;
   }
 

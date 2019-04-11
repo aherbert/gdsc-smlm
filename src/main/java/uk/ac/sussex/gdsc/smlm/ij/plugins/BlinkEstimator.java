@@ -365,8 +365,7 @@ public class BlinkEstimator implements PlugIn {
       IJ.showProgress(td, maxDarkTime);
       ntd[td] = tm.traceMolecules(distanceThreshold, td + 1);
     }
-    IJ.showProgress(1);
-    IJ.showStatus("");
+    ImageJUtils.finished();
 
     return ntd;
   }
