@@ -29,6 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -63,12 +64,15 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -82,6 +86,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,40 +99,106 @@ import java.util.logging.Logger;
 public class PsfDrift implements PlugIn {
   private static final String TITLE = "PSF Drift";
 
-  private static String title = "";
-  private static boolean useOffset;
-  private static double scale = 10;
-  private static double zDepth = 1000;
-  private static int gridSize = 10;
-  private static double recallLimit = 0.25;
-  private static int regionSize = 5;
-  private static boolean backgroundFitting;
-  private static boolean offsetFitting = true;
-  private static double startOffset = 0.5;
-  private static boolean comFitting = true;
-  private static boolean useSampling;
-  private static double photons = 1000;
-  private static double photonLimit = 0.25;
-  private static int positionsToAverage = 5;
-  private static double smoothing = 0.1;
-
-  private static boolean updateCentre = true;
-  private static boolean updateHWHM = true;
-
   private ImagePlus imp;
   private ImagePSF psfSettings;
-  private static FitConfiguration fitConfig;
-
-  static {
-    // Initialise for fitting
-    fitConfig = new FitConfiguration();
-  }
+  private static FitConfiguration fitConfig = new FitConfiguration();
 
   private int centrePixel;
   private int total;
   private double[][] results;
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String title;
+    boolean useOffset;
+    double scale;
+    double zDepth;
+    int gridSize;
+    double recallLimit;
+    int regionSize;
+    boolean backgroundFitting;
+    boolean offsetFitting;
+    double startOffset;
+    boolean comFitting;
+    boolean useSampling;
+    double photons;
+    double photonLimit;
+    int positionsToAverage;
+    double smoothing;
+    boolean updateCentre;
+    boolean updateHwhm;
+
+    Settings() {
+      // Set defaults
+      title = "";
+      scale = 10;
+      zDepth = 1000;
+      gridSize = 10;
+      recallLimit = 0.25;
+      regionSize = 5;
+      offsetFitting = true;
+      startOffset = 0.5;
+      comFitting = true;
+      photons = 1000;
+      photonLimit = 0.25;
+      positionsToAverage = 5;
+      smoothing = 0.1;
+      updateCentre = true;
+      updateHwhm = true;
+    }
+
+    Settings(Settings source) {
+      title = source.title;
+      useOffset = source.useOffset;
+      scale = source.scale;
+      zDepth = source.zDepth;
+      gridSize = source.gridSize;
+      recallLimit = source.recallLimit;
+      regionSize = source.regionSize;
+      backgroundFitting = source.backgroundFitting;
+      offsetFitting = source.offsetFitting;
+      startOffset = source.startOffset;
+      comFitting = source.comFitting;
+      useSampling = source.useSampling;
+      photons = source.photons;
+      photonLimit = source.photonLimit;
+      positionsToAverage = source.positionsToAverage;
+      smoothing = source.smoothing;
+      updateCentre = source.updateCentre;
+      updateHwhm = source.updateHwhm;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings. This can be called only once as it saves via a reference.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class Job {
     final int z;
@@ -160,35 +231,36 @@ public class PsfDrift implements PlugIn {
     final ImagePsfModel psf;
     final BlockingQueue<Job> jobs;
     final FitConfiguration fitConfig2;
+    final Ticker ticker;
     final double sx;
     final double sy;
     final double pixelPitch;
     final double[][] xy;
     final int width;
     final int w2;
-    final RandomDataGenerator random;
+    PoissonSampler poissonSampler;
 
     private double[] lb;
     private double[] ub;
     private double[] lc;
     private double[] uc;
 
-    public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width,
-        FitConfiguration fitConfig) {
-      final RandomGenerator rng = new Well19937c();
+    public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width, FitConfiguration fitConfig,
+        Ticker ticker) {
       this.jobs = jobs;
-      this.psf = psf.copy(rng);
+      this.psf = psf.copy(null);
       this.fitConfig2 = fitConfig.createCopy();
+      this.ticker = ticker;
       sx = fitConfig.getInitialXSd();
       sy = fitConfig.getInitialYSd();
-      pixelPitch = psfSettings.getPixelSize() * scale;
-      xy = PsfDrift.getStartPoints();
+      pixelPitch = psfSettings.getPixelSize() * settings.scale;
+      xy = getStartPoints();
       this.width = width;
       w2 = width * width;
-      if (useSampling) {
-        random = new RandomDataGenerator(rng);
-      } else {
-        random = null;
+      if (settings.useSampling) {
+        // TOOD: This could be updated to use an input RNG
+        poissonSampler =
+            new PoissonSampler(RandomSource.create(RandomSource.SPLIT_MIX_64), settings.photons);
       }
 
       createBounds();
@@ -205,6 +277,7 @@ public class PsfDrift implements PlugIn {
           if (!finished) {
             // Only run if not finished to allow queue to be emptied
             run(job);
+            ticker.tick();
           }
         }
       } catch (final InterruptedException ex) {
@@ -225,23 +298,21 @@ public class PsfDrift implements PlugIn {
 
       // Draw the PSF
       final double[] data = new double[w2];
-      if (useSampling) {
-        final int p = (int) random.nextPoisson(photons);
+      if (poissonSampler != null) {
+        final int p = poissonSampler.sample();
         psf.sample3D(data, width, width, p, cx, cy, job.z);
       } else {
-        psf.create3D(data, width, width, photons, cx, cy, job.z, false);
+        psf.create3D(data, width, width, settings.photons, cx, cy, job.z, false);
       }
-
-      // Utils.display("Data", data, w, w);
 
       // Fit the PSF. Do this from different start positions.
 
       // Get the background and signal estimate
       final double background =
-          (backgroundFitting) ? Gaussian2DFitter.getBackground(data, width, width, 1) : 0;
+          (settings.backgroundFitting) ? Gaussian2DFitter.getBackground(data, width, width, 1) : 0;
       final double signal = BenchmarkFit.getSignal(data, background);
 
-      if (comFitting) {
+      if (settings.comFitting) {
         // Get centre-of-mass estimate, then subtract the centre that will be added later
         BenchmarkFit.getCentreOfMass(data, width, width, xy[xy.length - 1]);
         xy[xy.length - 1][0] -= cx;
@@ -299,8 +370,8 @@ public class PsfDrift implements PlugIn {
 
         // Background could be zero so always have an upper limit
         ub[Gaussian2DFunction.BACKGROUND] = 1;
-        lb[Gaussian2DFunction.SIGNAL] = photons * photonLimit;
-        ub[Gaussian2DFunction.SIGNAL] = photons * 2;
+        lb[Gaussian2DFunction.SIGNAL] = settings.photons * settings.photonLimit;
+        ub[Gaussian2DFunction.SIGNAL] = settings.photons * 2;
         ub[Gaussian2DFunction.X_POSITION] = width;
         ub[Gaussian2DFunction.Y_POSITION] = width;
         lb[Gaussian2DFunction.ANGLE] = -Math.PI;
@@ -329,7 +400,6 @@ public class PsfDrift implements PlugIn {
 
     private boolean isValid(FitStatus status, double[] params, int size) {
       if (status != FitStatus.OK) {
-        // System.out.println("Failed to fit: " + status);
         return false;
       }
 
@@ -337,16 +407,12 @@ public class PsfDrift implements PlugIn {
       if (params[Gaussian2DFunction.X_POSITION] < 0 || params[Gaussian2DFunction.Y_POSITION] < 0
           || params[Gaussian2DFunction.X_POSITION] > size
           || params[Gaussian2DFunction.Y_POSITION] > size) {
-        // System.out.printf("Failed to fit position: x=%f,y=%f\n",
-        // params[Gaussian2DFunction.X_POSITION],
-        // params[Gaussian2DFunction.Y_POSITION]);
         return false;
       }
 
       // Reject fits that do not correctly estimate the signal
       if (params[Gaussian2DFunction.SIGNAL] < lb[Gaussian2DFunction.SIGNAL]
           || params[Gaussian2DFunction.SIGNAL] > ub[Gaussian2DFunction.SIGNAL]) {
-        // System.out.printf("Failed to fit signal: %f\n", params[Gaussian2DFunction.SIGNAL]);
         return false;
       }
 
@@ -359,22 +425,14 @@ public class PsfDrift implements PlugIn {
       // }
 
       // Q. Should we do width bounds checking?
-      if (fitConfig2.isXSdFitting()) {
-        if (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD]
-            || params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD]) {
-          // System.out.printf("Failed to fit x-width: %f\n", params[Gaussian2DFunction.X_SD]);
-          return false;
-        }
+      if (fitConfig2.isXSdFitting()
+          && (params[Gaussian2DFunction.X_SD] < lb[Gaussian2DFunction.X_SD]
+              || params[Gaussian2DFunction.X_SD] > ub[Gaussian2DFunction.X_SD])) {
+        return false;
       }
-      if (fitConfig2.isYSdFitting()) {
-        if (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD]
-            || params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD]) {
-          // System.out.printf("Failed to fit y-width: %f\n", params[Gaussian2DFunction.Y_SD]);
-          return false;
-        }
-      }
-
-      return true;
+      return !(fitConfig2.isYSdFitting()
+          && (params[Gaussian2DFunction.Y_SD] < lb[Gaussian2DFunction.Y_SD]
+              || params[Gaussian2DFunction.Y_SD] > ub[Gaussian2DFunction.Y_SD]));
     }
   }
 
@@ -396,78 +454,80 @@ public class PsfDrift implements PlugIn {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    settings = Settings.load();
     gd.addMessage("Select the input PSF image");
-    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
-    gd.addCheckbox("Use_offset", useOffset);
-    gd.addNumericField("Scale", scale, 2);
-    gd.addNumericField("z_depth", zDepth, 2, 6, "nm");
-    gd.addNumericField("Grid_size", gridSize, 0);
-    gd.addSlider("Recall_limit", 0.01, 1, recallLimit);
+    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), settings.title);
+    gd.addCheckbox("Use_offset", settings.useOffset);
+    gd.addNumericField("Scale", settings.scale, 2);
+    gd.addNumericField("z_depth", settings.zDepth, 2, 6, "nm");
+    gd.addNumericField("Grid_size", settings.gridSize, 0);
+    gd.addSlider("Recall_limit", 0.01, 1, settings.recallLimit);
 
-    gd.addSlider("Region_size", 2, 20, regionSize);
-    gd.addCheckbox("Background_fitting", backgroundFitting);
+    gd.addSlider("Region_size", 2, 20, settings.regionSize);
+    gd.addCheckbox("Background_fitting", settings.backgroundFitting);
     PeakFit.addPsfOptions(gd, fitConfig);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
         fitConfig.getFitSolver().ordinal());
     // We need these to set bounds for any bounded fitters
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
     gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
-    gd.addCheckbox("Offset_fit", offsetFitting);
-    gd.addNumericField("Start_offset", startOffset, 3);
-    gd.addCheckbox("Include_CoM_fit", comFitting);
-    gd.addCheckbox("Use_sampling", useSampling);
-    gd.addNumericField("Photons", photons, 0);
-    gd.addSlider("Photon_limit", 0, 1, photonLimit);
-    gd.addSlider("Smoothing", 0, 0.5, smoothing);
+    gd.addCheckbox("Offset_fit", settings.offsetFitting);
+    gd.addNumericField("Start_offset", settings.startOffset, 3);
+    gd.addCheckbox("Include_CoM_fit", settings.comFitting);
+    gd.addCheckbox("Use_sampling", settings.useSampling);
+    gd.addNumericField("Photons", settings.photons, 0);
+    gd.addSlider("Photon_limit", 0, 1, settings.photonLimit);
+    gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
 
-    title = gd.getNextChoice();
-    useOffset = gd.getNextBoolean();
-    scale = gd.getNextNumber();
-    zDepth = gd.getNextNumber();
-    gridSize = (int) gd.getNextNumber();
-    recallLimit = gd.getNextNumber();
-    regionSize = (int) Math.abs(gd.getNextNumber());
-    backgroundFitting = gd.getNextBoolean();
+    settings.title = gd.getNextChoice();
+    settings.useOffset = gd.getNextBoolean();
+    settings.scale = gd.getNextNumber();
+    settings.zDepth = gd.getNextNumber();
+    settings.gridSize = (int) gd.getNextNumber();
+    settings.recallLimit = gd.getNextNumber();
+    settings.regionSize = (int) Math.abs(gd.getNextNumber());
+    settings.backgroundFitting = gd.getNextBoolean();
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
     fitConfig.setMinWidthFactor(gd.getNextNumber());
     fitConfig.setMaxWidthFactor(gd.getNextNumber());
-    offsetFitting = gd.getNextBoolean();
-    startOffset = Math.abs(gd.getNextNumber());
-    comFitting = gd.getNextBoolean();
-    useSampling = gd.getNextBoolean();
-    photons = Math.abs(gd.getNextNumber());
-    photonLimit = Math.abs(gd.getNextNumber());
-    smoothing = Math.abs(gd.getNextNumber());
+    settings.offsetFitting = gd.getNextBoolean();
+    settings.startOffset = Math.abs(gd.getNextNumber());
+    settings.comFitting = gd.getNextBoolean();
+    settings.useSampling = gd.getNextBoolean();
+    settings.photons = Math.abs(gd.getNextNumber());
+    settings.photonLimit = Math.abs(gd.getNextNumber());
+    settings.smoothing = Math.abs(gd.getNextNumber());
+    settings.save();
 
     gd.collectOptions();
 
-    if (!comFitting && !offsetFitting) {
+    if (!settings.comFitting && !settings.offsetFitting) {
       IJ.error(TITLE, "No initial fitting positions");
       return;
     }
 
-    if (regionSize < 1) {
-      regionSize = 1;
+    if (settings.regionSize < 1) {
+      settings.regionSize = 1;
     }
 
     if (gd.invalidNumber()) {
       return;
     }
 
-    imp = WindowManager.getImage(title);
+    imp = WindowManager.getImage(settings.title);
     if (imp == null) {
-      IJ.error(TITLE, "No PSF image for image: " + title);
+      IJ.error(TITLE, "No PSF image for image: " + settings.title);
       return;
     }
     psfSettings = getPsfSettings(imp);
     if (psfSettings == null) {
-      IJ.error(TITLE, "No PSF settings for image: " + title);
+      IJ.error(TITLE, "No PSF settings for image: " + settings.title);
       return;
     }
 
@@ -491,42 +551,42 @@ public class PsfDrift implements PlugIn {
 
   private void computeDrift() {
     // Create a grid of XY offset positions between 0-1 for PSF insert
-    final double[] grid = new double[gridSize];
+    final double[] grid = new double[settings.gridSize];
     for (int i = 0; i < grid.length; i++) {
-      grid[i] = (double) i / gridSize;
+      grid[i] = (double) i / settings.gridSize;
     }
 
     // Configure fitting region
-    final int w = 2 * regionSize + 1;
+    final int w = 2 * settings.regionSize + 1;
     centrePixel = w / 2;
 
     // Check region size using the image PSF
-    final double newPsfWidth = imp.getWidth() / scale;
+    final double newPsfWidth = imp.getWidth() / settings.scale;
     if (Math.ceil(newPsfWidth) > w) {
       ImageJUtils.log(TITLE + ": Fitted region size (%d) is smaller than the scaled PSF (%.1f)", w,
           newPsfWidth);
     }
 
     // Create robust PSF fitting settings
-    final double a = psfSettings.getPixelSize() * scale;
+    final double a = psfSettings.getPixelSize() * settings.scale;
     final double sa = PsfCalculator.squarePixelAdjustment(
         psfSettings.getPixelSize() * (psfSettings.getFwhm() / Gaussian2DFunction.SD_TO_FWHM_FACTOR),
         a);
     fitConfig.setInitialPeakStdDev(sa / a);
-    fitConfig.setBackgroundFitting(backgroundFitting);
+    fitConfig.setBackgroundFitting(settings.backgroundFitting);
     fitConfig.setNotSignalFitting(false);
     fitConfig.setComputeDeviations(false);
     fitConfig.setDisableSimpleFilter(true);
 
     // Create the PSF over the desired z-depth
-    final int depth = (int) Math.round(zDepth / psfSettings.getPixelDepth());
+    final int depth = (int) Math.round(settings.zDepth / psfSettings.getPixelDepth());
     int startSlice = psfSettings.getCentreImage() - depth;
     int endSlice = psfSettings.getCentreImage() + depth;
     final int nSlices = imp.getStackSize();
-    startSlice = (startSlice < 1) ? 1 : (startSlice > nSlices) ? nSlices : startSlice;
-    endSlice = (endSlice < 1) ? 1 : (endSlice > nSlices) ? nSlices : endSlice;
+    startSlice = MathUtils.clip(1, nSlices, startSlice);
+    endSlice = MathUtils.clip(1, nSlices, endSlice);
 
-    final ImagePsfModel psf = createImagePsf(startSlice, endSlice, scale);
+    final ImagePsfModel psf = createImagePsf(startSlice, endSlice, settings.scale);
 
     final int minz = startSlice - psfSettings.getCentreImage();
     final int maxz = endSlice - psfSettings.getCentreImage();
@@ -543,19 +603,18 @@ public class PsfDrift implements PlugIn {
     // each iteration
 
     // Create a pool of workers
-    final int nThreads = Prefs.getThreads();
-    final BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(nThreads * 2);
+    final int threadCount = Prefs.getThreads();
+    final Ticker ticker = ImageJUtils.createTicker(total, threadCount, "Fitting...");
+    final BlockingQueue<Job> jobs = new ArrayBlockingQueue<>(threadCount * 2);
     final List<Thread> threads = new LinkedList<>();
-    for (int i = 0; i < nThreads; i++) {
-      final Worker worker = new Worker(jobs, psf, w, fitConfig);
+    for (int i = 0; i < threadCount; i++) {
+      final Worker worker = new Worker(jobs, psf, w, fitConfig, ticker);
       final Thread t = new Thread(worker);
       threads.add(t);
       t.start();
     }
 
     // Fit
-    ImageJUtils.showStatus("Fitting ...");
-    final int step = ImageJUtils.getProgressInterval(total);
     outer: for (int z = minz, i = 0; z <= maxz; z++) {
       for (int x = 0; x < grid.length; x++) {
         for (int y = 0; y < grid.length; y++, i++) {
@@ -563,16 +622,13 @@ public class PsfDrift implements PlugIn {
             break outer;
           }
           put(jobs, new Job(z, grid[x], grid[y], i));
-          if (i % step == 0) {
-            IJ.showProgress(i, total);
-          }
         }
       }
     }
 
     // If escaped pressed then do not need to stop the workers, just return
     if (ImageJUtils.isInterrupted()) {
-      IJ.showProgress(1);
+      ImageJUtils.finished();
       return;
     }
 
@@ -586,7 +642,8 @@ public class PsfDrift implements PlugIn {
       try {
         threads.get(i).join();
       } catch (final InterruptedException ex) {
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException("Unexpected interrupt", ex);
       }
     }
     threads.clear();
@@ -631,19 +688,19 @@ public class PsfDrift implements PlugIn {
         break;
       }
     }
-    if (recall[centre] < recallLimit) {
+    if (recall[centre] < settings.recallLimit) {
       return;
     }
     int start = centre;
     int end = centre;
     for (int i = centre; i-- > 0;) {
-      if (recall[i] < recallLimit) {
+      if (recall[i] < settings.recallLimit) {
         break;
       }
       start = i;
     }
     for (int i = centre; ++i < recall.length;) {
-      if (recall[i] < recallLimit) {
+      if (recall[i] < settings.recallLimit) {
         break;
       }
       end = i;
@@ -651,8 +708,8 @@ public class PsfDrift implements PlugIn {
 
     final int iterations = 1;
     LoessInterpolator loess = null;
-    if (smoothing > 0) {
-      loess = new LoessInterpolator(smoothing, iterations);
+    if (settings.smoothing > 0) {
+      loess = new LoessInterpolator(settings.smoothing, iterations);
     }
 
     final double[][] smoothx =
@@ -675,12 +732,12 @@ public class PsfDrift implements PlugIn {
         MathUtils.rounded(zPosition[end]));
     gd.addMessage("Optionally average the end points to set drift outside the limits.\n"
         + "(Select zero to ignore)");
-    gd.addSlider("Number_of_points", 0, 10, positionsToAverage);
+    gd.addSlider("Number_of_points", 0, 10, settings.positionsToAverage);
     gd.showDialog();
     if (gd.wasOKed()) {
-      positionsToAverage = Math.abs((int) gd.getNextNumber());
+      settings.positionsToAverage = Math.abs((int) gd.getNextNumber());
       final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
-      final boolean useOldOffset = useOffset && !oldOffset.isEmpty();
+      final boolean useOldOffset = settings.useOffset && !oldOffset.isEmpty();
       final TurboList<double[]> offset = new TurboList<>();
       final double pitch = psfSettings.getPixelSize();
       int index = 0;
@@ -712,8 +769,8 @@ public class PsfDrift implements PlugIn {
         offsetBuilder.setCy(o[2]);
         imagePsfBuilder.putOffsets(slice, offsetBuilder.build());
       }
-      imagePsfBuilder.putNotes(TITLE,
-          String.format("Solver=%s, Region=%d", PeakFit.getSolverName(fitConfig), regionSize));
+      imagePsfBuilder.putNotes(TITLE, String.format("Solver=%s, Region=%d",
+          PeakFit.getSolverName(fitConfig), settings.regionSize));
       imp.setProperty("Info", ImagePsfHelper.toString(imagePsfBuilder));
     }
   }
@@ -728,14 +785,14 @@ public class PsfDrift implements PlugIn {
     return -1;
   }
 
-  private static void addMissingOffsets(int startSlice, int endSlice, int slices,
+  private void addMissingOffsets(int startSlice, int endSlice, int slices,
       TurboList<double[]> offset) {
     // Add an offset for the remaining slices
-    if (positionsToAverage > 0) {
+    if (settings.positionsToAverage > 0) {
       double cx = 0;
       double cy = 0;
       int count = 0;
-      for (int i = 0; count < positionsToAverage && i < offset.size(); i++, count++) {
+      for (int i = 0; count < settings.positionsToAverage && i < offset.size(); i++, count++) {
         cx += offset.get(i)[1];
         cy += offset.get(i)[2];
       }
@@ -744,7 +801,7 @@ public class PsfDrift implements PlugIn {
       double cx2 = 0;
       double cy2 = 0;
       double n2 = 0;
-      for (int i = offset.size(); n2 < positionsToAverage && i-- > 0;) {
+      for (int i = offset.size(); n2 < settings.positionsToAverage && i-- > 0;) {
         cx2 += offset.get(i)[1];
         cy2 += offset.get(i)[2];
         n2++;
@@ -820,7 +877,8 @@ public class PsfDrift implements PlugIn {
     } else {
       // draw a line for the recall limit
       plot.setColor(Color.magenta);
-      plot.drawLine(limitsx[0] - rangex, recallLimit, limitsx[1] + rangex, recallLimit);
+      plot.drawLine(limitsx[0] - rangex, settings.recallLimit, limitsx[1] + rangex,
+          settings.recallLimit);
     }
     ImageJUtils.display(title, plot, windowOrganiser);
 
@@ -879,7 +937,7 @@ public class PsfDrift implements PlugIn {
 
     // Add the calibrated centres
     final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
-    if (useOffset && !oldOffset.isEmpty()) {
+    if (settings.useOffset && !oldOffset.isEmpty()) {
       final int sliceOffset = lower;
       for (final Entry<Integer, Offset> entry : oldOffset.entrySet()) {
         model.setRelativeCentre(entry.getKey() - sliceOffset, entry.getValue().getCx(),
@@ -913,17 +971,17 @@ public class PsfDrift implements PlugIn {
    *
    * @return The starting points for the fitting
    */
-  private static double[][] getStartPoints() {
+  private double[][] getStartPoints() {
     final double[][] xy = new double[getNumberOfStartPoints()][];
     int ii = 0;
 
-    if (offsetFitting) {
-      if (startOffset == 0) {
+    if (settings.offsetFitting) {
+      if (settings.startOffset == 0) {
         xy[ii++] = new double[] {0, 0};
       } else {
         // Fit using region surrounding the point. Use -1,-1 : -1:1 : 1,-1 : 1,1 directions at
         // startOffset pixels total distance
-        final double distance = Math.sqrt(startOffset * startOffset * 0.5);
+        final double distance = Math.sqrt(settings.startOffset * settings.startOffset * 0.5);
 
         for (int x = -1; x <= 1; x += 2) {
           for (int y = -1; y <= 1; y += 2) {
@@ -933,18 +991,18 @@ public class PsfDrift implements PlugIn {
       }
     }
     // Add space for centre-of-mass at the end of the array
-    if (comFitting) {
+    if (settings.comFitting) {
       xy[ii] = new double[2];
     }
     return xy;
   }
 
-  private static int getNumberOfStartPoints() {
-    int points = (offsetFitting) ? 1 : 0;
-    if (startOffset > 0) {
+  private int getNumberOfStartPoints() {
+    int points = (settings.offsetFitting) ? 1 : 0;
+    if (settings.startOffset > 0) {
       points *= 4;
     }
-    return (comFitting) ? points + 1 : points;
+    return (settings.comFitting) ? points + 1 : points;
   }
 
   private static List<String> createImageList(boolean requireFwhm) {
@@ -1020,27 +1078,29 @@ public class PsfDrift implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Approximate the volume of the PSF as a Gaussian and\n"
         + "compute the equivalent Gaussian width.");
-    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), title);
-    gd.addCheckbox("Use_offset", useOffset);
-    gd.addSlider("Smoothing", 0, 0.5, smoothing);
+    settings = Settings.load();
+    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), settings.title);
+    gd.addCheckbox("Use_offset", settings.useOffset);
+    gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
 
-    title = gd.getNextChoice();
-    useOffset = gd.getNextBoolean();
-    smoothing = gd.getNextNumber();
+    settings.title = gd.getNextChoice();
+    settings.useOffset = gd.getNextBoolean();
+    settings.smoothing = gd.getNextNumber();
+    settings.save();
 
-    imp = WindowManager.getImage(title);
+    imp = WindowManager.getImage(settings.title);
     if (imp == null) {
-      IJ.error(TITLE, "No PSF image for image: " + title);
+      IJ.error(TITLE, "No PSF image for image: " + settings.title);
       return;
     }
     psfSettings = getPsfSettings(imp);
     if (psfSettings == null) {
-      IJ.error(TITLE, "No PSF settings for image: " + title);
+      IJ.error(TITLE, "No PSF settings for image: " + settings.title);
       return;
     }
 
@@ -1074,7 +1134,7 @@ public class PsfDrift implements PlugIn {
         }
       }
       if (c0 == 0 && c1 == 0) {
-        IJ.error(TITLE, "No computed HWHM for image: " + title);
+        IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
         return;
       }
       slice0 = s0.toArray();
@@ -1084,8 +1144,8 @@ public class PsfDrift implements PlugIn {
     }
 
     // Smooth
-    if (smoothing > 0) {
-      final LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+    if (settings.smoothing > 0) {
+      final LoessInterpolator loess = new LoessInterpolator(settings.smoothing, 1);
       sw0 = loess.smooth(slice0, sw0);
       sw1 = loess.smooth(slice1, sw1);
     }
@@ -1115,8 +1175,8 @@ public class PsfDrift implements PlugIn {
     // Smooth the combined line
     final double[] cx = minWx.toArray();
     double[] cy = minWy.toArray();
-    if (smoothing > 0) {
-      final LoessInterpolator loess = new LoessInterpolator(smoothing, 1);
+    if (settings.smoothing > 0) {
+      final LoessInterpolator loess = new LoessInterpolator(settings.smoothing, 1);
       cy = loess.smooth(cx, cy);
     }
     final int newCentre = SimpleArrayUtils.findMinIndex(cy);
@@ -1156,20 +1216,20 @@ public class PsfDrift implements PlugIn {
     gd2.addMessage("");
     gd2.addAndGetButton("Reset", event -> tf.setText(Integer.toString(newCentre)));
     final Label label = gd2.getLastLabel();
-    gd2.addCheckbox("Update_centre", updateCentre);
-    gd2.addCheckbox("Update_HWHM", updateHWHM);
+    gd2.addCheckbox("Update_centre", settings.updateCentre);
+    gd2.addCheckbox("Update_HWHM", settings.updateHwhm);
     gd2.enableYesNoCancel();
     gd2.hideCancelButton();
     final UpdateDialogListener dl =
         new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
     gd2.addDialogListener(dl);
     gd2.showDialog();
-    if (gd2.wasOKed() && (updateCentre || updateHWHM)) {
+    if (gd2.wasOKed() && (settings.updateCentre || settings.updateHwhm)) {
       final ImagePSF.Builder b = psfSettings.toBuilder();
-      if (updateCentre) {
+      if (settings.updateCentre) {
         b.setCentreImage(dl.centre);
       }
-      if (updateHWHM) {
+      if (settings.updateHwhm) {
         b.setFwhm(dl.getFwhm());
       }
       imp.setProperty("Info", ImagePsfHelper.toString(b));
@@ -1239,8 +1299,8 @@ public class PsfDrift implements PlugIn {
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       centre = (int) gd.getNextNumber();
-      updateCentre = gd.getNextBoolean();
-      updateHWHM = gd.getNextBoolean();
+      settings.updateCentre = gd.getNextBoolean();
+      settings.updateHwhm = gd.getNextBoolean();
       update();
       return true;
     }
