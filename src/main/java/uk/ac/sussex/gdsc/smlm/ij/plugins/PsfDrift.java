@@ -68,9 +68,7 @@ import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.simple.RandomSource;
 
@@ -238,6 +236,7 @@ public class PsfDrift implements PlugIn {
     final double[][] xy;
     final int width;
     final int w2;
+    UniformRandomProvider rng;
     PoissonSampler poissonSampler;
 
     private double[] lb;
@@ -248,7 +247,7 @@ public class PsfDrift implements PlugIn {
     public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width, FitConfiguration fitConfig,
         Ticker ticker) {
       this.jobs = jobs;
-      this.psf = psf.copy(null);
+      this.psf = psf.copy();
       this.fitConfig2 = fitConfig.createCopy();
       this.ticker = ticker;
       sx = fitConfig.getInitialXSd();
@@ -259,8 +258,8 @@ public class PsfDrift implements PlugIn {
       w2 = width * width;
       if (settings.useSampling) {
         // TOOD: This could be updated to use an input RNG
-        poissonSampler =
-            new PoissonSampler(RandomSource.create(RandomSource.SPLIT_MIX_64), settings.photons);
+        rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+        poissonSampler = new PoissonSampler(rng, settings.photons);
       }
 
       createBounds();
@@ -300,9 +299,9 @@ public class PsfDrift implements PlugIn {
       final double[] data = new double[w2];
       if (poissonSampler != null) {
         final int p = poissonSampler.sample();
-        psf.sample3D(data, width, width, p, cx, cy, job.z);
+        psf.sample3D(data, width, width, p, cx, cy, job.z, rng);
       } else {
-        psf.create3D(data, width, width, settings.photons, cx, cy, job.z, false);
+        psf.create3D(data, width, width, settings.photons, cx, cy, job.z, null);
       }
 
       // Fit the PSF. Do this from different start positions.

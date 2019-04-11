@@ -1568,7 +1568,7 @@ public class AstigmatismModelManager implements PlugIn {
       lastZ = z;
       final int calibratedImage = getCalibratedImage();
       final float[] data = new float[width * width];
-      psf.create3D(data, width, width, 1, cx, cx, lastZ, false);
+      psf.create3D(data, width, width, 1, cx, cx, lastZ, null);
       final ImagePlus imp =
           ImageJUtils.display(TITLE + " PSF", new FloatProcessor(width, width, data));
       if (lastCalibratedImage != calibratedImage) {

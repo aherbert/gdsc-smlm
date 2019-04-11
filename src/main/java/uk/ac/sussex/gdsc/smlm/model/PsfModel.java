@@ -24,13 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Precision;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
 
 import java.util.Arrays;
 
@@ -38,8 +38,6 @@ import java.util.Arrays;
  * Contains methods for generating models of a Point Spread Function.
  */
 public abstract class PsfModel {
-  /** The random data generator. */
-  protected RandomDataGenerator rand;
   private double[] psf;
   private int x0min;
   private int x1min;
@@ -51,29 +49,14 @@ public abstract class PsfModel {
    * Instantiates a new PSF model.
    */
   public PsfModel() {
-    setRandomGenerator(new RandomDataGenerator());
-  }
-
-  /**
-   * Instantiates a new PSF model.
-   *
-   * @param randomGenerator the random generator
-   */
-  public PsfModel(RandomGenerator randomGenerator) {
-    setRandomGenerator(randomGenerator);
-  }
-
-  /**
-   * Instantiates a new PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   */
-  public PsfModel(RandomDataGenerator randomDataGenerator) {
-    setRandomGenerator(randomDataGenerator);
+    super();
   }
 
   /**
    * Construct a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -82,14 +65,17 @@ public abstract class PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public abstract double create3D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise);
+      double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
    * Construct a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -98,14 +84,17 @@ public abstract class PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public abstract double create3D(double[] data, final int width, final int height,
-      final double sum, double x0, double x1, double x2, boolean poissonNoise);
+      final double sum, double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
    * Construct a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -113,29 +102,32 @@ public abstract class PsfModel {
    * @param sum The integral
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double create2D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, boolean poissonNoise) {
-    return create3D(data, width, height, sum, x0, x1, 0, poissonNoise);
+      double x0, double x1, UniformRandomProvider rng) {
+    return create3D(data, width, height, sum, x0, x1, 0, rng);
   }
 
   /**
    * Construct a PSF function on the provided data.
    *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
+   *
    * @param data The data (can be null)
    * @param width The data width
    * @param height The data height
    * @param sum The integral
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double create2D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, boolean poissonNoise) {
-    return create3D(data, width, height, sum, x0, x1, 0, poissonNoise);
+      double x0, double x1, UniformRandomProvider rng) {
+    return create3D(data, width, height, sum, x0, x1, 0, rng);
   }
 
   /**
@@ -193,39 +185,22 @@ public abstract class PsfModel {
    * @param x1max The maximum position to insert in dimension 1
    * @param width The width of the input data
    * @param psf The PSF data
-   * @param poissonNoise Set to true to add Poisson noise to the PSF
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The sum of the PSF inserted
    */
   protected double insert(float[] data, int x0min, int x1min, int x0max, int x1max, int width,
-      double[] psf, boolean poissonNoise) {
+      double[] psf, UniformRandomProvider rng) {
     final int x0range = x0max - x0min;
     final int x1range = x1max - x1min;
 
     if (x0range < 1 || x1range < 1) {
-      this.psf = null;
-      this.x0min = 0;
-      this.x0max = 0;
-      this.x1min = 0;
-      this.x1max = 0;
+      resetInsert();
       return 0;
     }
 
-    this.psf = psf;
-    this.x0min = x0min;
-    this.x0max = x0max;
-    this.x1min = x1min;
-    this.x1max = x1max;
+    setInsert(x0min, x1min, x0max, x1max, psf);
 
-    if (poissonNoise) {
-      final CustomPoissonDistribution pd =
-          new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
-      for (int i = 0; i < psf.length; i++) {
-        if (psf[i] > 0) {
-          pd.setMeanUnsafe(psf[i]);
-          psf[i] = pd.sample();
-        }
-      }
-    }
+    addPoissonNoise(psf, rng);
 
     // Insert the function into the input data
     for (int y = 0; y < x1range; y++) {
@@ -237,11 +212,7 @@ public abstract class PsfModel {
       }
     }
 
-    double total = 0;
-    for (final double d : psf) {
-      total += d;
-    }
-    return total;
+    return MathUtils.sum(psf);
   }
 
   /**
@@ -254,39 +225,22 @@ public abstract class PsfModel {
    * @param x1max The maximum position to insert in dimension 1
    * @param width The width of the input data
    * @param psf The PSF data
-   * @param poissonNoise Set to true to add Poisson noise to the PSF
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The sum of the PSF inserted
    */
   protected double insert(double[] data, int x0min, int x1min, int x0max, int x1max, int width,
-      double[] psf, boolean poissonNoise) {
+      double[] psf, UniformRandomProvider rng) {
     final int x0range = x0max - x0min;
     final int x1range = x1max - x1min;
 
     if (x0range < 1 || x1range < 1) {
-      this.psf = null;
-      this.x0min = 0;
-      this.x0max = 0;
-      this.x1min = 0;
-      this.x1max = 0;
+      resetInsert();
       return 0;
     }
 
-    this.psf = psf;
-    this.x0min = x0min;
-    this.x0max = x0max;
-    this.x1min = x1min;
-    this.x1max = x1max;
+    setInsert(x0min, x1min, x0max, x1max, psf);
 
-    if (poissonNoise) {
-      final CustomPoissonDistribution pd =
-          new CustomPoissonDistribution(rand.getRandomGenerator(), 1);
-      for (int i = 0; i < psf.length; i++) {
-        if (psf[i] > 0) {
-          pd.setMeanUnsafe(psf[i]);
-          psf[i] = pd.sample();
-        }
-      }
-    }
+    addPoissonNoise(psf, rng);
 
     // Insert the function into the input data
     for (int y = 0; y < x1range; y++) {
@@ -298,11 +252,34 @@ public abstract class PsfModel {
       }
     }
 
-    double total = 0;
-    for (final double d : psf) {
-      total += d;
+    return MathUtils.sum(psf);
+  }
+
+  private void resetInsert() {
+    this.psf = null;
+    this.x0min = 0;
+    this.x0max = 0;
+    this.x1min = 0;
+    this.x1max = 0;
+  }
+
+  private void setInsert(int x0min, int x1min, int x0max, int x1max, double[] psf) {
+    this.psf = psf;
+    this.x0min = x0min;
+    this.x0max = x0max;
+    this.x1min = x1min;
+    this.x1max = x1max;
+  }
+
+  private static void addPoissonNoise(double[] psf, UniformRandomProvider rng) {
+    if (rng != null) {
+      final PoissonSamplerCache cache = new PoissonSamplerCache(0, MathUtils.max(psf));
+      for (int i = 0; i < psf.length; i++) {
+        if (psf[i] > 0) {
+          psf[i] = cache.createPoissonSampler(rng, psf[i]).sample();
+        }
+      }
     }
-    return total;
   }
 
   /**
@@ -417,13 +394,15 @@ public abstract class PsfModel {
    *
    * <p>Upon initialisation the copy will not have a most recently created PSF.
    *
-   * @param rng the random generator
    * @return A shallow copy of this object
    */
-  public abstract PsfModel copy(RandomGenerator rng);
+  public abstract PsfModel copy();
 
   /**
    * Sample a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -432,14 +411,18 @@ public abstract class PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
+   * @param rng The random generator to use for sampling
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
   public abstract int sample3D(float[] data, final int width, final int height, final int n,
-      double x0, double x1, double x2);
+      double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
    * Sample a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -448,14 +431,18 @@ public abstract class PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
+   * @param rng The random generator to use for sampling
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
   public abstract int sample3D(double[] data, final int width, final int height, final int n,
-      double x0, double x1, double x2);
+      double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
    * Sample a PSF function on the provided data.
+   *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
    *
    * @param data The data (can be null)
    * @param width The data width
@@ -463,29 +450,34 @@ public abstract class PsfModel {
    * @param n The number of samples
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
+   * @param rng The random generator to use for sampling
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
   public double sample2D(float[] data, final int width, final int height, final int n, double x0,
-      double x1) {
-    return sample3D(data, width, height, n, x0, x1, 0);
+      double x1, UniformRandomProvider rng) {
+    return sample3D(data, width, height, n, x0, x1, 0, rng);
   }
 
   /**
    * Sample a PSF function on the provided data.
    *
+   * <p>The PSF data is saved locally and can be queried through class methods, for example the
+   * width and height, or erased from a provided data array.
+   *
    * @param data The data (can be null)
    * @param width The data width
    * @param height The data height
    * @param n The number of samples
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
+   * @param rng The random generator to use for sampling
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
   public double sample2D(double[] data, final int width, final int height, final int n, double x0,
-      double x1) {
-    return sample3D(data, width, height, n, x0, x1, 0);
+      double x1, UniformRandomProvider rng) {
+    return sample3D(data, width, height, n, x0, x1, 0, rng);
   }
 
   /**
@@ -503,26 +495,14 @@ public abstract class PsfModel {
     int count = 0;
     samplePositions = new int[ArrayUtils.getLength(x)];
 
-    x0max = x1max = 0;
-    x0min = x1min = width;
+    resetSampleRange(width);
     for (int i = 0; i < samplePositions.length; i++) {
       if (x[i] < 0 || x[i] >= width || y[i] < 0 || y[i] >= height) {
         continue;
       }
       final int xp = (int) x[i];
       final int yp = (int) y[i];
-      if (x0min > xp) {
-        x0min = xp;
-      }
-      if (x0max < xp) {
-        x0max = xp;
-      }
-      if (x1min > yp) {
-        x1min = yp;
-      }
-      if (x1max < yp) {
-        x1max = yp;
-      }
+      updateSampleRange(xp, yp);
       final int index = yp * width + xp;
       samplePositions[count++] = index;
       data[index] += 1;
@@ -549,26 +529,14 @@ public abstract class PsfModel {
     int count = 0;
     samplePositions = new int[ArrayUtils.getLength(x)];
 
-    x0max = x1max = 0;
-    x0min = x1min = width;
+    resetSampleRange(width);
     for (int i = 0; i < samplePositions.length; i++) {
       if (x[i] < 0 || x[i] >= width || y[i] < 0 || y[i] >= height) {
         continue;
       }
       final int xp = (int) x[i];
       final int yp = (int) y[i];
-      if (x0min > xp) {
-        x0min = xp;
-      }
-      if (x0max < xp) {
-        x0max = xp;
-      }
-      if (x1min > yp) {
-        x1min = yp;
-      }
-      if (x1max < yp) {
-        x1max = yp;
-      }
+      updateSampleRange(xp, yp);
       final int index = yp * width + xp;
       samplePositions[count++] = index;
       data[index] += 1;
@@ -578,6 +546,26 @@ public abstract class PsfModel {
       samplePositions = Arrays.copyOf(samplePositions, count);
     }
     return samplePositions.length;
+  }
+
+  private void resetSampleRange(final int width) {
+    x0max = x1max = 0;
+    x0min = x1min = width;
+  }
+
+  private void updateSampleRange(final int xp, final int yp) {
+    if (x0min > xp) {
+      x0min = xp;
+    }
+    if (x0max < xp) {
+      x0max = xp;
+    }
+    if (x1min > yp) {
+      x1min = yp;
+    }
+    if (x1max < yp) {
+      x1max = yp;
+    }
   }
 
   /**
@@ -655,25 +643,6 @@ public abstract class PsfModel {
   }
 
   /**
-   * Set the random generator used for the random data generator to create data.
-   *
-   * @param randomGenerator the new random generator
-   */
-  public void setRandomGenerator(RandomGenerator randomGenerator) {
-    ValidationUtils.checkNotNull(randomGenerator, "Random generator was null");
-    rand = new RandomDataGenerator(randomGenerator);
-  }
-
-  /**
-   * Set the random data generator used to create data.
-   *
-   * @param randomDataGenerator the new random generator
-   */
-  public void setRandomGenerator(RandomDataGenerator randomDataGenerator) {
-    rand = ValidationUtils.checkNotNull(randomDataGenerator, "Random generator was null");
-  }
-
-  /**
    * Get the value of the PSF function.
    *
    * @param width The data width
@@ -701,26 +670,26 @@ public abstract class PsfModel {
    *
    * @param width the width
    * @param height the height
-   * @throws IllegalArgumentException If width * height is too large for an array
+   * @return the size
+   * @throws IllegalArgumentException If width or height are not strictly positive
+   * @throws IllegalArgumentException If width * height is too large for an integer
    */
-  protected void checkSize(int width, int height) {
-    if (width < 1) {
-      throw new IllegalArgumentException("Width cannot be less than 1");
-    }
-    if (height < 1) {
-      throw new IllegalArgumentException("Height cannot be less than 1");
-    }
+  protected int checkSize(int width, int height) {
+    ValidationUtils.checkStrictlyPositive(width, "Width");
+    ValidationUtils.checkStrictlyPositive(height, "Height");
+    final long size = (long) width * height;
     if ((long) width * height > Integer.MAX_VALUE) {
       throw new IllegalArgumentException("width*height is too large");
     }
+    return (int) size;
   }
 
   /**
    * Compute the value of the PSF function.
    *
    * <p>This can be over-ridden if the result is different from
-   * {@link #create3D(double[], int, int, double, double, double, double, boolean)} using a sum of 1
-   * and no Poisson noise.
+   * {@link #create3D(double[], int, int, double, double, double, double, UniformRandomProvider)}
+   * using a sum of 1 and a null generator.
    *
    * @param width The data width
    * @param height The data height
@@ -733,7 +702,7 @@ public abstract class PsfModel {
   protected boolean computeValue(final int width, final int height, double x0, double x1, double x2,
       double[] value) {
     // Default implementation. Allow this to be overridden.
-    return create3D(value, width, height, 1, x0, x1, x2, false) != 0;
+    return create3D(value, width, height, 1, x0, x1, x2, null) != 0;
   }
 
   /**

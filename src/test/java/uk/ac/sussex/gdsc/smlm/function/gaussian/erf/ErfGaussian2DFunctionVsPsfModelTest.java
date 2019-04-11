@@ -72,7 +72,7 @@ public class ErfGaussian2DFunctionVsPsfModelTest {
     final double[] e = new double[o.length];
     // Note that the Gaussian2DFunction has 0,0 at the centre of a pixel.
     // The model has 0.5,0.5 at the centre so add an offset.
-    m.create2D(e, width, height, sum, x0 + 0.5, x1 + 0.5, false);
+    m.create2D(e, width, height, sum, x0 + 0.5, x1 + 0.5, null);
 
     // Since the model only computes within +/- 5 sd only check for equality
     // when the model is not zero (and there is a reasonable amount of signal)

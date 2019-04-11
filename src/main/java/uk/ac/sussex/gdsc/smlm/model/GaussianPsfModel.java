@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -32,9 +33,10 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.special.Erf;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 
 /**
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation.
@@ -52,7 +54,6 @@ public class GaussianPsfModel extends PsfModel {
    * @param s1 The Gaussian standard deviation dimension 1
    */
   public GaussianPsfModel(double s0, double s1) {
-    super();
     zModel = new NullAstigmatismZModel(s0, s1);
   }
 
@@ -62,53 +63,6 @@ public class GaussianPsfModel extends PsfModel {
    * @param zModel the z model
    */
   public GaussianPsfModel(AstigmatismZModel zModel) {
-    super();
-    this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
-  }
-
-  /**
-   * Instantiates a new gaussian PSF model.
-   *
-   * @param randomGenerator the random generator
-   * @param s0 The Gaussian standard deviation dimension 0
-   * @param s1 The Gaussian standard deviation dimension 1
-   */
-  public GaussianPsfModel(RandomGenerator randomGenerator, double s0, double s1) {
-    super(randomGenerator);
-    zModel = new NullAstigmatismZModel(s0, s1);
-  }
-
-  /**
-   * Instantiates a new gaussian PSF model.
-   *
-   * @param randomGenerator the random generator
-   * @param zModel the z model
-   */
-  public GaussianPsfModel(RandomGenerator randomGenerator, AstigmatismZModel zModel) {
-    super(randomGenerator);
-    this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
-  }
-
-  /**
-   * Instantiates a new gaussian PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param s0 The Gaussian standard deviation dimension 0
-   * @param s1 The Gaussian standard deviation dimension 1
-   */
-  public GaussianPsfModel(RandomDataGenerator randomDataGenerator, double s0, double s1) {
-    super(randomDataGenerator);
-    zModel = new NullAstigmatismZModel(s0, s1);
-  }
-
-  /**
-   * Instantiates a new gaussian PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param zModel the z model
-   */
-  public GaussianPsfModel(RandomDataGenerator randomDataGenerator, AstigmatismZModel zModel) {
-    super(randomDataGenerator);
     this.zModel = ValidationUtils.checkNotNull(zModel, "Model must not be null");
   }
 
@@ -116,51 +70,39 @@ public class GaussianPsfModel extends PsfModel {
    * Copy constructor.
    *
    * @param source the source
-   * @param rng the random generator
    */
-  protected GaussianPsfModel(GaussianPsfModel source, RandomGenerator rng) {
-    super(rng);
+  protected GaussianPsfModel(GaussianPsfModel source) {
     this.zModel = source.zModel;
     this.range = source.range;
   }
 
   @Override
-  public GaussianPsfModel copy(RandomGenerator rng) {
-    return new GaussianPsfModel(this, rng);
+  public GaussianPsfModel copy() {
+    return new GaussianPsfModel(this);
   }
 
   @Override
   public double create3D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     try {
-      final double d =
-          gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), poissonNoise);
-      // if (d == 0)
-      // {
-      // System.out.printf("No data inserted: %f @ %f %f %f (%f x %f)\n", sum, x0, x1, x2, scale *
-      // zeroS0,
-      // scale * zeroS1);
-      // }
-      return d;
+      return gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), rng);
     } catch (final IllegalArgumentException ex) {
-      // System.out.println(ex.getMessage());
       return 0;
     }
   }
 
   @Override
   public double create3D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     try {
-      return gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), poissonNoise);
+      return gaussian2D(data, width, height, sum, x0, x1, getS0(x2), getS1(x2), rng);
     } catch (final IllegalArgumentException ex) {
-      // System.out.println(ex.getMessage());
       return 0;
     }
   }
@@ -219,19 +161,19 @@ public class GaussianPsfModel extends PsfModel {
    * @param x1 The Gaussian centre in dimension 1
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double gaussian2D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double s0, double s1, boolean poissonNoise) {
+      double x0, double x1, double s0, double s1, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new float[width * height];
-    } else if (data.length < width * height) {
+      data = new float[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -248,17 +190,13 @@ public class GaussianPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and compute gaussian
     final double[] gauss = gaussian2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, s0, s1);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, gauss, rng);
   }
 
   /**
@@ -277,19 +215,19 @@ public class GaussianPsfModel extends PsfModel {
    * @param x1 The Gaussian centre in dimension 1
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double gaussian2D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double s0, double s1, boolean poissonNoise) {
+      double x0, double x1, double s0, double s1, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new double[width * height];
-    } else if (data.length < width * height) {
+      data = new double[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -306,17 +244,13 @@ public class GaussianPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and compute gaussian
     final double[] gauss = gaussian2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, s0, s1);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, gauss, rng);
   }
 
   private static final double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
@@ -386,31 +320,26 @@ public class GaussianPsfModel extends PsfModel {
   }
 
   private static int clip(int x, int max) {
-    if (x < 0) {
-      x = 0;
-    }
-    if (x > max) {
-      x = max;
-    }
-    return x;
+    return MathUtils.clip(0, max, x);
   }
 
   @Override
-  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2) {
+  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
-    final double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2));
+    final double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2), rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
   @Override
-  public int sample3D(double[] data, int width, int height, int n, double x0, double x1,
-      double x2) {
+  public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
-    final double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2));
+    final double[][] sample = sample(n, x0, x1, getS0(x2), getS1(x2), rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
@@ -422,22 +351,24 @@ public class GaussianPsfModel extends PsfModel {
    * @param x1 The Gaussian centre in dimension 1
    * @param s0 The Gaussian standard deviation dimension 0
    * @param s1 The Gaussian standard deviation dimension 1
+   * @param rng The random generator to use for sampling
    * @return The sample x and y values
    */
   public double[][] sample(final int n, final double x0, final double x1, final double s0,
-      final double s1) {
+      final double s1, UniformRandomProvider rng) {
     this.s0 = s0;
     this.s1 = s1;
-    final double[] x = sample(n, x0, s0);
-    final double[] y = sample(n, x1, s1);
+    final ZigguratNormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
+    final double[] x = sample(n, x0, s0, gauss);
+    final double[] y = sample(n, x1, s1, gauss);
     return new double[][] {x, y};
   }
 
-  private double[] sample(final int n, final double mu, final double sigma) {
+  private static double[] sample(final int n, final double mu, final double sigma,
+      NormalizedGaussianSampler gauss) {
     final double[] x = new double[n];
-    final RandomGenerator random = rand.getRandomGenerator();
     for (int i = 0; i < n; i++) {
-      x[i] = sigma * random.nextGaussian() + mu;
+      x[i] = sigma * gauss.sample() + mu;
     }
     return x;
   }
@@ -458,12 +389,8 @@ public class GaussianPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Evaluate using a function.
     // This allows testing the function verses the default gaussian2D() method
@@ -511,12 +438,8 @@ public class GaussianPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Gaussian dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Evaluate using a function.
     // This allows testing the function verses the default gaussian2D() method

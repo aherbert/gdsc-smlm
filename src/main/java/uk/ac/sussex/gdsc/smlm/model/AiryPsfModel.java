@@ -27,16 +27,16 @@ package uk.ac.sussex.gdsc.smlm.model;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.UnitSphereRandomVectorGenerator;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.UnitSphereSampler;
 
 import java.util.Arrays;
 
@@ -85,7 +85,6 @@ public class AiryPsfModel extends PsfModel {
    * @param w1 The Airy width for dimension 1
    */
   public AiryPsfModel(double w0, double w1) {
-    super();
     this.zeroW0 = w0;
     this.zeroW1 = w1;
   }
@@ -93,55 +92,11 @@ public class AiryPsfModel extends PsfModel {
   /**
    * Instantiates a new airy PSF model.
    *
-   * @param randomGenerator the random generator
-   * @param w0 The Airy width for dimension 0
-   * @param w1 The Airy width for dimension 1
-   */
-  public AiryPsfModel(RandomGenerator randomGenerator, double w0, double w1) {
-    super(randomGenerator);
-    this.zeroW0 = w0;
-    this.zeroW1 = w1;
-  }
-
-  /**
-   * Instantiates a new airy PSF model.
-   *
-   * @param randomGenerator the random generator
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
    * @param zDepth the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
    */
-  public AiryPsfModel(RandomGenerator randomGenerator, double w0, double w1, double zDepth) {
-    super(randomGenerator);
-    this.zeroW0 = w0;
-    this.zeroW1 = w1;
-    setzDepth(zDepth);
-  }
-
-  /**
-   * Instantiates a new airy PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param w0 The Airy width for dimension 0
-   * @param w1 The Airy width for dimension 1
-   */
-  public AiryPsfModel(RandomDataGenerator randomDataGenerator, double w0, double w1) {
-    super(randomDataGenerator);
-    this.zeroW0 = w0;
-    this.zeroW1 = w1;
-  }
-
-  /**
-   * Instantiates a new airy PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param w0 The Airy width for dimension 0
-   * @param w1 The Airy width for dimension 1
-   * @param zDepth the Z-depth where the 3D PSF is sqrt(2) the width (1.41 x FWHM)
-   */
-  public AiryPsfModel(RandomDataGenerator randomDataGenerator, double w0, double w1,
-      double zDepth) {
-    super(randomDataGenerator);
+  public AiryPsfModel(double w0, double w1, double zDepth) {
     this.zeroW0 = w0;
     this.zeroW1 = w1;
     setzDepth(zDepth);
@@ -151,10 +106,8 @@ public class AiryPsfModel extends PsfModel {
    * Copy constructor.
    *
    * @param source the source
-   * @param rng the random generator
    */
-  protected AiryPsfModel(AiryPsfModel source, RandomGenerator rng) {
-    super(rng);
+  protected AiryPsfModel(AiryPsfModel source) {
     this.zeroW0 = source.zeroW0;
     this.zeroW1 = source.zeroW1;
     this.zDepth = source.zDepth;
@@ -165,38 +118,34 @@ public class AiryPsfModel extends PsfModel {
   }
 
   @Override
-  public AiryPsfModel copy(RandomGenerator rng) {
-    return new AiryPsfModel(this, rng);
+  public AiryPsfModel copy() {
+    return new AiryPsfModel(this);
   }
 
   @Override
   public double create3D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     final double scale = createWidthScale(x2);
     try {
-      final double d =
-          airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
-      return d;
+      return airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, rng);
     } catch (final IllegalArgumentException ex) {
-      // System.out.println(ex.getMessage());
       return 0;
     }
   }
 
   @Override
   public double create3D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     final double scale = createWidthScale(x2);
     try {
-      return airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, poissonNoise);
+      return airy2D(data, width, height, sum, x0, x1, scale * zeroW0, scale * zeroW1, rng);
     } catch (final IllegalArgumentException ex) {
-      // System.out.println(ex.getMessage());
       return 0;
     }
   }
@@ -234,19 +183,19 @@ public class AiryPsfModel extends PsfModel {
    * @param x1 The centre in dimension 1
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double airy2D(float[] data, final int width, final int height, final double sum, double x0,
-      double x1, double w0, double w1, boolean poissonNoise) {
+      double x1, double w0, double w1, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new float[width * height];
-    } else if (data.length < width * height) {
+      data = new float[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -263,17 +212,13 @@ public class AiryPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and compute gaussian
     final double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, gauss, rng);
   }
 
   /**
@@ -288,19 +233,19 @@ public class AiryPsfModel extends PsfModel {
    * @param x1 The centre in dimension 1
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double airy2D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double w0, double w1, boolean poissonNoise) {
+      double x0, double x1, double w0, double w1, UniformRandomProvider rng) {
     if (sum == 0) {
       return 0;
     }
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new double[width * height];
-    } else if (data.length < width * height) {
+      data = new double[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -317,17 +262,13 @@ public class AiryPsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and compute gaussian
     final double[] gauss = airy2D(x0range, x1range, sum, x0 - x0min, x1 - x1min, w0, w1);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, gauss, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, gauss, rng);
   }
 
   /**
@@ -379,8 +320,7 @@ public class AiryPsfModel extends PsfModel {
       // a different equation, e.g. Born-Wolf model.
       // Note that the pixel width for evaluation (e.g. the dark rings) would need to be calculated
       // and a different normalisation factor would have to be calculated for clipped data. This may
-      // be
-      // achieved by pre-calculation of widths and normalisation factors for different z-depths.
+      // be achieved by pre-calculation of widths and normalisation factors for different z-depths.
       intensity[r] = AiryPattern.intensity(r / samplesPerPixel);
       radius[r] = r / samplesPerPixel;
     }
@@ -485,7 +425,6 @@ public class AiryPsfModel extends PsfModel {
     final double distance2 = d0 + d1;
     if (distance2 < limit) {
       final double r = Math.sqrt(distance2);
-      // return AiryPattern.intensity(r);
 
       // Interpolate the intensity at this pixel
       final int index = (int) (r * samplesPerPixel);
@@ -692,23 +631,24 @@ public class AiryPsfModel extends PsfModel {
   }
 
   @Override
-  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2) {
+  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
     final double scale = createWidthScale(x2);
-    final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+    final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1, rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
   @Override
-  public int sample3D(double[] data, int width, int height, int n, double x0, double x1,
-      double x2) {
+  public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
     final double scale = createWidthScale(x2);
-    final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1);
+    final double[][] sample = sample(n, x0, x1, scale * zeroW0, scale * zeroW1, rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
@@ -720,10 +660,11 @@ public class AiryPsfModel extends PsfModel {
    * @param x1 The centre in dimension 1
    * @param w0 The Airy width for dimension 0
    * @param w1 The Airy width for dimension 1
+   * @param rng The random generator to use for sampling
    * @return The sample x and y values
    */
   public double[][] sample(final int n, final double x0, final double x1, final double w0,
-      final double w1) {
+      final double w1, UniformRandomProvider rng) {
     this.w0 = w0;
     this.w1 = w1;
     if (spline == null) {
@@ -732,11 +673,11 @@ public class AiryPsfModel extends PsfModel {
     double[] x = new double[n];
     double[] y = new double[n];
 
-    final RandomGenerator random = rand.getRandomGenerator();
-    final UnitSphereRandomVectorGenerator vg = new UnitSphereRandomVectorGenerator(2, random);
+    final UnitSphereSampler vg = new UnitSphereSampler(2, rng);
+
     int count = 0;
     for (int i = 0; i < n; i++) {
-      final double p = random.nextDouble();
+      final double p = rng.nextDouble();
       if (p > POWER[SAMPLE_RINGS]) {
         // TODO - We could add a simple interpolation here using a spline from AiryPattern.power()
         continue;

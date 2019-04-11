@@ -83,7 +83,7 @@ public class GaussianPsfModelTest {
         for (int k = -1; k <= 1; k++) {
           final double x2 = k * 0.33;
           Arrays.fill(e, 0);
-          psf.create3D(e, maxx, maxy, 1, x0, x1, x2, false);
+          psf.create3D(e, maxx, maxy, 1, x0, x1, x2, null);
           psf.getValue(maxx, maxy, x0, x1, x2, o);
           Assertions.assertEquals(1, MathUtils.sum(o), 1e-3);
           psf.getValueAndGradient(maxx, maxy, x0, x1, x2, o2, g);

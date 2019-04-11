@@ -25,12 +25,12 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Arrays;
 
@@ -97,45 +97,12 @@ public class ImagePsfModel extends PsfModel {
   }
 
   /**
-   * Instantiates a new image PSF model.
-   *
-   * @param randomGenerator the random generator
-   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
-   *        YX order.
-   * @param zCentre The centre of the PSF image
-   * @param unitsPerPixel The distance between adjacent X/Y pixels
-   * @param unitsPerSlice The distance between adjacent Z pixels
-   */
-  public ImagePsfModel(RandomGenerator randomGenerator, float[][] image, int zCentre,
-      double unitsPerPixel, double unitsPerSlice) {
-    super(randomGenerator);
-    init(image, zCentre, unitsPerPixel, unitsPerSlice, DEFAULT_NOISE_FRACTION);
-  }
-
-  /**
-   * Instantiates a new image PSF model.
-   *
-   * @param randomDataGenerator the random data generator
-   * @param image The image consisting of a stack of square pixel buffers. The buffers are stored in
-   *        YX order.
-   * @param zCentre The centre of the PSF image
-   * @param unitsPerPixel The distance between adjacent X/Y pixels
-   * @param unitsPerSlice The distance between adjacent Z pixels
-   */
-  public ImagePsfModel(RandomDataGenerator randomDataGenerator, float[][] image, int zCentre,
-      double unitsPerPixel, double unitsPerSlice) {
-    super(randomDataGenerator);
-    init(image, zCentre, unitsPerPixel, unitsPerSlice, DEFAULT_NOISE_FRACTION);
-  }
-
-  /**
    * Copy constructor.
    *
    * @param source the source
    * @param rng the random generator
    */
-  private ImagePsfModel(ImagePsfModel source, RandomGenerator rng) {
-    super(rng);
+  private ImagePsfModel(ImagePsfModel source) {
     this.sumImage = source.sumImage;
     this.cumulativeImage = source.cumulativeImage;
     this.psfWidth = source.psfWidth;
@@ -148,8 +115,8 @@ public class ImagePsfModel extends PsfModel {
   }
 
   @Override
-  public ImagePsfModel copy(RandomGenerator rng) {
-    return new ImagePsfModel(this, rng);
+  public ImagePsfModel copy() {
+    return new ImagePsfModel(this);
   }
 
   private void init(float[][] image, int zCentre, double unitsPerPixel, double unitsPerSlice,
@@ -249,8 +216,12 @@ public class ImagePsfModel extends PsfModel {
     double sum2 = 0;
     for (int i = 0; i < image.length; i++) {
       final double newValue = image[i] - floor;
-      image[i] = (newValue > 0) ? newValue : 0;
-      sum2 += image[i];
+      if (newValue > 0) {
+        image[i] = newValue;
+        sum += newValue;
+      } else {
+        image[i] = 0;
+      }
     }
     // Re-normalise to the same intensity
     final double scale = sum / sum2;
@@ -342,9 +313,9 @@ public class ImagePsfModel extends PsfModel {
 
   @Override
   public double create3D(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     try {
-      return drawPsf(data, width, height, sum, x0, x1, x2, poissonNoise);
+      return drawPsf(data, width, height, sum, x0, x1, x2, rng);
     } catch (final IllegalArgumentException ex) {
       return 0;
     }
@@ -352,9 +323,9 @@ public class ImagePsfModel extends PsfModel {
 
   @Override
   public double create3D(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     try {
-      return drawPsf(data, width, height, sum, x0, x1, x2, poissonNoise);
+      return drawPsf(data, width, height, sum, x0, x1, x2, rng);
     } catch (final IllegalArgumentException ex) {
       return 0;
     }
@@ -370,21 +341,21 @@ public class ImagePsfModel extends PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double drawPsf(float[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     final int slice = getSlice(x2);
     if (slice < 0 || slice >= xyCentre.length) {
-      return insert(data, 0, 0, 0, 0, 0, null, false);
+      return insert(data, 0, 0, 0, 0, 0, null, null);
     }
 
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new float[width * height];
-    } else if (data.length < width * height) {
+      data = new float[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -400,17 +371,13 @@ public class ImagePsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and draw the PSF
     final double[] psf = drawPsf(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, psf, rng);
   }
 
   /**
@@ -423,21 +390,21 @@ public class ImagePsfModel extends PsfModel {
    * @param x0 The centre in dimension 0
    * @param x1 The centre in dimension 1
    * @param x2 The centre in dimension 2
-   * @param poissonNoise Add Poisson noise
+   * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
   public double drawPsf(double[] data, final int width, final int height, final double sum,
-      double x0, double x1, double x2, boolean poissonNoise) {
+      double x0, double x1, double x2, UniformRandomProvider rng) {
     final int slice = getSlice(x2);
     if (slice < 0 || slice >= xyCentre.length) {
-      return insert(data, 0, 0, 0, 0, 0, null, false);
+      return insert(data, 0, 0, 0, 0, 0, null, null);
     }
 
     // Parameter check
-    checkSize(width, height);
+    final int size = checkSize(width, height);
     if (data == null) {
-      data = new double[width * height];
-    } else if (data.length < width * height) {
+      data = new double[size];
+    } else if (data.length < size) {
       throw new IllegalArgumentException("Data length cannot be smaller than width * height");
     }
 
@@ -453,17 +420,13 @@ public class ImagePsfModel extends PsfModel {
     final int x1range = x1max - x1min;
 
     // min should always be less than max
-    if (x0range < 1) {
-      throw new IllegalArgumentException("Dimension 0 range not within data bounds");
-    }
-    if (x1range < 1) {
-      throw new IllegalArgumentException("Dimension 1 range not within data bounds");
-    }
+    ValidationUtils.checkStrictlyPositive(x0range, "Range0");
+    ValidationUtils.checkStrictlyPositive(x1range, "Range1");
 
     // Shift centre to origin and draw the PSF
     final double[] psf = drawPsf(x0range, x1range, sum, x0 - x0min, x1 - x1min, x2, true);
 
-    return insert(data, x0min, x1min, x0max, x1max, width, psf, poissonNoise);
+    return insert(data, x0min, x1min, x0max, x1max, width, psf, rng);
   }
 
   /**
@@ -714,38 +677,33 @@ public class ImagePsfModel extends PsfModel {
   }
 
   @Override
-  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2) {
+  public int sample3D(float[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
-    final double[][] sample = sample(n, x0, x1, x2);
+    final double[][] sample = sample(n, x0, x1, x2, rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
   @Override
-  public int sample3D(double[] data, int width, int height, int n, double x0, double x1,
-      double x2) {
+  public int sample3D(double[] data, int width, int height, int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     if (n <= 0) {
       return insertSample(data, width, height, null, null);
     }
-    final double[][] sample = sample(n, x0, x1, x2);
+    final double[][] sample = sample(n, x0, x1, x2, rng);
     return insertSample(data, width, height, sample[0], sample[1]);
   }
 
-  private double[][] sample(final int n, double x0, double x1, double x2) {
+  private double[][] sample(final int n, double x0, double x1, double x2,
+      UniformRandomProvider rng) {
     final int slice = getSlice(x2);
     if (slice < 0 || slice >= sumImage.length) {
       return new double[][] {null, null};
     }
 
     final double[] sumPsf = cumulativeImage[slice];
-
-    final RandomGenerator randomX;
-    final RandomGenerator randomY;
-
-    // Use the input generator
-    randomX = rand.getRandomGenerator();
-    randomY = rand.getRandomGenerator();
 
     // Ensure the generated index is adjusted to the correct position
     // The index will be generated at 0,0 of a pixel in the PSF image.
@@ -759,7 +717,7 @@ public class ImagePsfModel extends PsfModel {
     double[] y = new double[n];
     int count = 0;
     for (int i = 0; i < n; i++) {
-      final double p = randomX.nextDouble();
+      final double p = rng.nextDouble();
       // If outside the observed PSF then skip
       if (p > max) {
         continue;
@@ -771,7 +729,7 @@ public class ImagePsfModel extends PsfModel {
       final int ypos = index / psfWidth;
       final double xi = xpos + (p - sumPsf[index]) / (sumPsf[index + 1] - sumPsf[index]);
       // Add random dither within pixel for y
-      final double yi = ypos + randomY.nextDouble();
+      final double yi = ypos + rng.nextDouble();
 
       x[count] = x0 + (xi * this.unitsPerPixel);
       y[count] = x1 + (yi * this.unitsPerPixel);
