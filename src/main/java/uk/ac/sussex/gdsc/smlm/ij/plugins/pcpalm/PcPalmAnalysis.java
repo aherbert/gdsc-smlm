@@ -53,6 +53,7 @@ import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.core.source64.SplitMix64;
 import org.jtransforms.fft.DoubleFFT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 
@@ -510,9 +511,11 @@ public class PcPalmAnalysis implements PlugIn {
     final double scaleX = roix / w;
     final double scaleY = roiy / h;
 
-    // Use an image for the distribution
+    // Use an image for the distribution.
+    // Note: The sampling functionality of the MaskDistribution is not used but it requires
+    // a RNG so create one.
     final int[] mask = extractMask(ip);
-    return new MaskDistribution(mask, w, h, 0, scaleX, scaleY);
+    return new MaskDistribution(mask, w, h, 0, scaleX, scaleY, new SplitMix64(0L));
   }
 
   private static int[] extractMask(ImageProcessor ip) {

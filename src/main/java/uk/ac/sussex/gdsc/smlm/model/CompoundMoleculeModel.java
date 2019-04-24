@@ -24,7 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.UnitSphereSampler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,7 +212,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param maxAngle The maximum angle to rotate (in either direction) in degrees
    * @param random the random
    */
-  public void rotateRandom(double maxAngle, RandomGenerator random) {
+  public void rotateRandom(double maxAngle, UniformRandomProvider random) {
     if (maxAngle == 0 || getSize() < 2) {
       return;
     }
@@ -219,10 +220,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double[] axis = new double[3];
-    for (int i = 0; i < 3; i++) {
-      axis[i] = random.nextGaussian();
-    }
+    final double[] axis = new UnitSphereSampler(3, random).nextVector();
 
     final double angle = (-maxAngle + random.nextDouble() * 2.0 * maxAngle);
     if (angle == 0) {
@@ -240,7 +238,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param maxAngle The maximum angle to rotate (in either direction) in degrees
    * @param random the random
    */
-  public void rotateRandomAngle(double[] axis, double maxAngle, RandomGenerator random) {
+  public void rotateRandomAngle(double[] axis, double maxAngle, UniformRandomProvider random) {
     if (maxAngle == 0 || getSize() < 2) {
       return;
     }
@@ -263,7 +261,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param angle The angle to rotate (in either direction) in degrees
    * @param random the random
    */
-  public void rotateRandomAxis(double angle, RandomGenerator random) {
+  public void rotateRandomAxis(double angle, UniformRandomProvider random) {
     if (angle == 0 || getSize() < 2) {
       return;
     }
@@ -271,10 +269,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double[] axis = new double[3];
-    for (int i = 0; i < 3; i++) {
-      axis[i] = random.nextGaussian();
-    }
+    final double[] axis = new UnitSphereSampler(3, random).nextVector();
 
     rotateMolecules(axis, angle);
   }

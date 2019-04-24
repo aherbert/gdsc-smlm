@@ -25,8 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.function.Supplier;
 
@@ -42,20 +42,22 @@ public class UniformDistribution implements SpatialDistribution {
    * Wrap a standard random generator to create a vector generator for 3 dimensions.
    */
   private static class VectorGeneratorWrapper implements RandomVectorGenerator {
-    private final RandomGenerator rng1;
-    private final RandomGenerator rng2;
-    private final RandomGenerator rng3;
+    private final UniformRandomProvider rng1;
+    private final UniformRandomProvider rng2;
+    private final UniformRandomProvider rng3;
 
-    VectorGeneratorWrapper(Supplier<RandomGenerator> randomGeneratorFactory) {
+    VectorGeneratorWrapper(Supplier<UniformRandomProvider> randomGeneratorFactory) {
       rng1 = create(randomGeneratorFactory);
       rng2 = create(randomGeneratorFactory);
       rng3 = create(randomGeneratorFactory);
     }
 
-    private RandomGenerator create(Supplier<RandomGenerator> randomGeneratorFactory) {
-      final RandomGenerator rng = randomGeneratorFactory.get();
+    private static UniformRandomProvider
+        create(Supplier<UniformRandomProvider> randomGeneratorFactory) {
+      final UniformRandomProvider rng = randomGeneratorFactory.get();
       if (rng == null) {
-        throw new NullPointerException("RandomGeneratorFactory created null RandomGenerator");
+        throw new NullPointerException(
+            "UniformRandomProviderFactory created null UniformRandomProvider");
       }
       return rng;
     }
@@ -130,7 +132,7 @@ public class UniformDistribution implements SpatialDistribution {
    *        in the domain [0,1]
    */
   public UniformDistribution(double[] min, double[] max,
-      Supplier<RandomGenerator> randomGeneratorFactory) {
+      Supplier<UniformRandomProvider> randomGeneratorFactory) {
     final RandomVectorGenerator randomVectorGenerator =
         new VectorGeneratorWrapper(randomGeneratorFactory);
     init(min, max, randomVectorGenerator);

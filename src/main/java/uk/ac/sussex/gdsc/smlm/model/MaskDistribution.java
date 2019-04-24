@@ -24,8 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
 
 /**
  * Samples uniformly from the specified mask. All non-zero pixels are sampled. The centre of the
@@ -45,7 +46,7 @@ public class MaskDistribution implements SpatialDistribution {
   private static final int[] DIR_X_OFFSET = {0, 1, 1, 1, 0, -1, -1, -1};
   private static final int[] DIR_Y_OFFSET = {-1, -1, 0, 1, 1, 1, 0, -1};
 
-  private final RandomGenerator randomGenerator;
+  private final UniformRandomProvider randomGenerator;
   private UniformDistribution uniformDistribution;
   private final int[] mask;
   private final int[] indices;
@@ -73,40 +74,10 @@ public class MaskDistribution implements SpatialDistribution {
    * @param depth The mask depth
    * @param scaleX Used to scale the mask X-coordinate to a new value
    * @param scaleY Used to scale the mask Y-coordinate to a new value
-   */
-  public MaskDistribution(byte[] mask, int width, int height, double depth, double scaleX,
-      double scaleY) {
-    this(mask, width, height, depth, scaleX, scaleY, null);
-  }
-
-  /**
-   * Create a distribution from the mask image (packed in YX order).
-   *
-   * @param mask the mask
-   * @param width The width of the mask in pixels
-   * @param height the height of the mask in pixels
-   * @param depth The mask depth
-   * @param scaleX Used to scale the mask X-coordinate to a new value
-   * @param scaleY Used to scale the mask Y-coordinate to a new value
-   */
-  public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX,
-      double scaleY) {
-    this(mask, width, height, depth, scaleX, scaleY, null);
-  }
-
-  /**
-   * Create a distribution from the mask image (packed in YX order).
-   *
-   * @param mask the mask
-   * @param width The width of the mask in pixels
-   * @param height the height of the mask in pixels
-   * @param depth The mask depth
-   * @param scaleX Used to scale the mask X-coordinate to a new value
-   * @param scaleY Used to scale the mask Y-coordinate to a new value
    * @param randomGenerator Used to pick random pixels in the mask
    */
   public MaskDistribution(byte[] mask, int width, int height, double depth, double scaleX,
-      double scaleY, RandomGenerator randomGenerator) {
+      double scaleY, UniformRandomProvider randomGenerator) {
     this(convert(mask), width, height, depth, scaleX, scaleY, randomGenerator);
   }
 
@@ -132,7 +103,7 @@ public class MaskDistribution implements SpatialDistribution {
    * @param randomGenerator Used to pick random pixels in the mask
    */
   public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX,
-      double scaleY, RandomGenerator randomGenerator) {
+      double scaleY, UniformRandomProvider randomGenerator) {
     this(mask, width, height, depth, scaleX, scaleY, randomGenerator, null);
   }
 
@@ -149,7 +120,8 @@ public class MaskDistribution implements SpatialDistribution {
    * @param uniformDistribution Used for sub-pixel location and z-depth
    */
   public MaskDistribution(int[] mask, int width, int height, double depth, double scaleX,
-      double scaleY, RandomGenerator randomGenerator, UniformDistribution uniformDistribution) {
+      double scaleY, UniformRandomProvider randomGenerator,
+      UniformDistribution uniformDistribution) {
     this(mask, width, height, depth, scaleX, scaleY, randomGenerator, uniformDistribution, false);
   }
 
@@ -169,7 +141,7 @@ public class MaskDistribution implements SpatialDistribution {
    * @param allowZeroMask Set to true to allow a mask with no non-zero pixels
    */
   MaskDistribution(int[] mask, int width, int height, double depth, double scaleX, double scaleY,
-      RandomGenerator randomGenerator, UniformDistribution uniformDistribution,
+      UniformRandomProvider randomGenerator, UniformDistribution uniformDistribution,
       boolean allowZeroMask) {
     if (width < 1 || height < 1) {
       throw new IllegalArgumentException("Dimensions must be above zero");
@@ -181,11 +153,8 @@ public class MaskDistribution implements SpatialDistribution {
       throw new IllegalArgumentException(
           "Mask must not be null and must at least (width * height) in size");
     }
-    if (randomGenerator == null) {
-      randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-    }
-
-    this.randomGenerator = randomGenerator;
+    this.randomGenerator =
+        ValidationUtils.checkNotNull(randomGenerator, "Random generator must not be null");
     setUniformDistribution(uniformDistribution);
     this.mask = mask;
     maxx = width;

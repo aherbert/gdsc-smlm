@@ -24,7 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 
 /**
  * Contains a model for a moving molecule.
@@ -191,38 +194,13 @@ public class MoleculeModel {
    * @param random Random generator
    * @return The new coordinates
    */
-  public double[] move(double diffusionRate, RandomGenerator random) {
+  public double[] move(double diffusionRate, UniformRandomProvider random) {
     final double[] xyz = getCoordinates();
     if (diffusionRate > 0) {
+      final NormalizedGaussianSampler gauss =
+          GaussianSamplerUtils.createNormalizedGaussianSampler(random);
       for (int i = 0; i < 3; i++) {
-        final double shift = random.nextGaussian() * diffusionRate;
-        // Clip the movement
-        // if (shift > 5*diffusionRate)
-        // xyz[i] += 5*diffusionRate;
-        // else if (shift < -5*diffusionRate)
-        // xyz[i] -= 5*diffusionRate;
-        // else
-        xyz[i] += shift;
-      }
-    }
-    return xyz;
-  }
-
-  /**
-   * Move the molecule using a random Gaussian shift with standard deviation of the given diffusion
-   * rate.
-   *
-   * <p>Note: The array provided by {@link #getCoordinates()} is updated and returned.
-   *
-   * @param diffusionRate Diffusion rate for each dimension
-   * @param random Random generator (one per dimension)
-   * @return The new coordinates
-   */
-  public double[] move(double diffusionRate, RandomGenerator[] random) {
-    final double[] xyz = getCoordinates();
-    if (diffusionRate > 0) {
-      for (int i = 0; i < 3; i++) {
-        final double shift = random[i].nextGaussian() * diffusionRate;
+        final double shift = gauss.sample() * diffusionRate;
         // Clip the movement
         // if (shift > 5*diffusionRate)
         // xyz[i] += 5*diffusionRate;
@@ -244,7 +222,7 @@ public class MoleculeModel {
    * @param random Random generator
    * @return The new coordinates
    */
-  public double[] walk(double stepSize, RandomGenerator random) {
+  public double[] walk(double stepSize, UniformRandomProvider random) {
     final double[] xyz = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
@@ -267,7 +245,7 @@ public class MoleculeModel {
    * @param random Random generator (one per dimension)
    * @return The new coordinates
    */
-  public double[] walk(double stepSize, RandomGenerator[] random) {
+  public double[] walk(double stepSize, UniformRandomProvider[] random) {
     final double[] xyz = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
@@ -292,12 +270,12 @@ public class MoleculeModel {
    * @param random Random number generator
    * @return The new coordinates
    */
-  public double[] slide(double diffusionRate, double[] axis, RandomGenerator random) {
+  public double[] slide(double diffusionRate, double[] axis, UniformRandomProvider random) {
     final double[] xyz = getCoordinates();
     if (diffusionRate > 0) {
-      final double shift;
       // Sample from a Gaussian - This may only be relevant for 1D diffusion
-      shift = random.nextGaussian() * diffusionRate;
+      final double shift =
+          GaussianSamplerUtils.createNormalizedGaussianSampler(random).sample() * diffusionRate;
 
       // Sample from the cumulative probability distribution for the MSD.
       // Then get a square root to find the shift and assign a direction

@@ -29,7 +29,9 @@ import uk.ac.sussex.gdsc.core.utils.rng.GeometricSampler.GeometricDiscreteInvers
 
 import gnu.trove.list.array.TDoubleArrayList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 
 /**
  * Contains a continuous-time model for a blinking fluorophore. Assumes a constant activation laser
@@ -53,36 +55,14 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
+   * @param rng the random generator
    */
   public StandardFluorophoreSequenceModel(double averageActivationTime, int id, double[] xyz,
       double onTime, double offTime, double offTime2, double blinks1, double blinks2,
-      boolean useGeometricBlinkingDistribution) {
-    this(averageActivationTime, id, xyz, onTime, offTime, offTime2, blinks1, blinks2,
-        useGeometricBlinkingDistribution, new RandomDataGenerator());
-  }
-
-  /**
-   * Construct a new flourophore.
-   *
-   * @param averageActivationTime Average time for activation
-   * @param id The identifier
-   * @param xyz The [x,y,z] coordinates
-   * @param onTime Average on-state time
-   * @param offTime Average off-state time for the first dark state
-   * @param offTime2 Average off-state time for the second dark state
-   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
-   *        second dark states)
-   * @param blinks2 Average number of blinks into the second dark state
-   * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
-   *        is Poisson)
-   * @param randomGenerator the random generator
-   */
-  public StandardFluorophoreSequenceModel(double averageActivationTime, int id, double[] xyz,
-      double onTime, double offTime, double offTime2, double blinks1, double blinks2,
-      boolean useGeometricBlinkingDistribution, RandomDataGenerator randomGenerator) {
+      boolean useGeometricBlinkingDistribution, UniformRandomProvider rng) {
     super(id, xyz);
-    init(randomGenerator.nextExponential(averageActivationTime), onTime, offTime, offTime2, blinks1,
-        blinks2, useGeometricBlinkingDistribution, randomGenerator);
+    init(new AhrensDieterExponentialSampler(rng, averageActivationTime).sample(), onTime, offTime,
+        offTime2, blinks1, blinks2, useGeometricBlinkingDistribution, rng);
   }
 
   /**
@@ -99,41 +79,18 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param blinks2 Average number of blinks into the second dark state
    * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
    *        is Poisson)
+   * @param rng the random generator
    */
   public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double onTime,
       double offTime, double offTime2, double blinks1, double blinks2,
-      boolean useGeometricBlinkingDistribution) {
+      boolean useGeometricBlinkingDistribution, UniformRandomProvider rng) {
     super(id, xyz);
     init(startT, onTime, offTime, offTime2, blinks1, blinks2, useGeometricBlinkingDistribution,
-        new RandomDataGenerator());
-  }
-
-  /**
-   * Construct a new flourophore.
-   *
-   * @param id The identifier
-   * @param xyz The [x,y,z] coordinates
-   * @param startT The activation time
-   * @param onTime Average on-state time
-   * @param offTime Average off-state time for the first dark state
-   * @param offTime2 Average off-state time for the second dark state
-   * @param blinks1 Average number of blinks int the first dark state (used for each burst between
-   *        second dark states)
-   * @param blinks2 Average number of blinks into the second dark state
-   * @param useGeometricBlinkingDistribution Set to true to use the geometric distribution (default
-   *        is Poisson)
-   * @param randomGenerator the random generator
-   */
-  public StandardFluorophoreSequenceModel(int id, double[] xyz, double startT, double onTime,
-      double offTime, double offTime2, double blinks1, double blinks2,
-      boolean useGeometricBlinkingDistribution, RandomDataGenerator randomGenerator) {
-    super(id, xyz);
-    init(startT, onTime, offTime, offTime2, blinks1, blinks2, useGeometricBlinkingDistribution,
-        randomGenerator);
+        rng);
   }
 
   private void init(double startT, double onTime, double offTime, double offTime2, double blinks1,
-      double blinks2, boolean useGeometricBlinkingDistribution, RandomDataGenerator rand) {
+      double blinks2, boolean useGeometricBlinkingDistribution, UniformRandomProvider rand) {
     // Model two dark states: short and long. The second offTime and blinks1 is for the long dark
     // state:
     //
@@ -147,6 +104,9 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
 
     final TDoubleArrayList sequence = new TDoubleArrayList();
 
+    // The exponential distribution is just scaled by the mean
+    final AhrensDieterExponentialSampler sampler = new AhrensDieterExponentialSampler(rand, 1);
+
     // Perform a set number of long blinks
     final int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, blinks2);
     double time = startT;
@@ -157,21 +117,21 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
       // Starts on the current time
       sequence.add(time);
       // Stops after the on-time
-      time += rand.nextExponential(onTime);
+      time += sampler.sample() * onTime;
       sequence.add(time);
 
       // Remaining bursts
       for (int i = 0; i < nShortBlinks; i++) {
         // Next burst starts after the short off-time
-        time += rand.nextExponential(offTime);
+        time += sampler.sample() * offTime;
         sequence.add(time);
         // Stops after the on-time
-        time += rand.nextExponential(onTime);
+        time += sampler.sample() * onTime;
         sequence.add(time);
       }
 
       // Add the long dark state if there are more bursts.
-      time += rand.nextExponential(offTime2);
+      time += sampler.sample() * offTime2;
     }
 
     // Convert the sequence to the burst sequence array
@@ -188,21 +148,21 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
    * @param mean the mean
    * @return The number of blinks
    */
-  public static int getBlinks(boolean useGeometricBlinkingDistribution, RandomDataGenerator rand,
+  public static int getBlinks(boolean useGeometricBlinkingDistribution, UniformRandomProvider rand,
       double mean) {
     if (mean > 0) {
       return (useGeometricBlinkingDistribution) ? nextGeometric(rand, mean)
-          : (int) rand.nextPoisson(mean);
+          : new PoissonSampler(rand, mean).sample();
     }
     return 0;
   }
 
-  private static int nextGeometric(RandomDataGenerator rand, double mean) {
+  private static int nextGeometric(UniformRandomProvider rand, double mean) {
     // Use methods from the GeometricSampler
     final double probabilityOfSuccess = GeometricSampler.getProbabilityOfSuccess(mean);
     final GeometricDiscreteInverseCumulativeProbabilityFunction fun =
         new GeometricDiscreteInverseCumulativeProbabilityFunction(probabilityOfSuccess);
-    final double cumulativeProbability = rand.getRandomGenerator().nextDouble();
+    final double cumulativeProbability = rand.nextDouble();
     return fun.inverseCumulativeProbability(cumulativeProbability);
   }
 }

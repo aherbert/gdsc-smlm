@@ -39,6 +39,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -46,6 +47,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -83,8 +85,6 @@ import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.model.ActivationEnergyImageModel;
 import uk.ac.sussex.gdsc.smlm.model.AiryPattern;
 import uk.ac.sussex.gdsc.smlm.model.AiryPsfModel;
@@ -154,18 +154,22 @@ import ij.text.TextWindow;
 
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
-import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.core.source64.SplitMix64;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterMarsagliaTsangGammaSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
+import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Checkbox;
@@ -817,8 +821,7 @@ public class CreateData implements PlugIn {
               return;
             }
           }
-          final PoissonDistribution poisson = new PoissonDistribution(createRandomGenerator(), mean,
-              PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+          final PoissonSampler poisson = new PoissonSampler(createRandomGenerator(), mean);
           final StoredDataStatistics samples = new StoredDataStatistics(settings.getParticles());
           while (samples.getSum() < settings.getParticles()) {
             samples.add(poisson.sample());
@@ -833,15 +836,14 @@ public class CreateData implements PlugIn {
         }
       }
 
-      RandomGenerator random = null;
+      UniformRandomProvider rng = null;
 
-      // List<LocalisationModel> localisations = new ArrayList<>(settings.getParticles());
       localisationSets = new ArrayList<>(settings.getParticles());
 
       final int minPhotons = (int) settings.getPhotonsPerSecond();
       final int range = (int) settings.getPhotonsPerSecondMaximum() - minPhotons + 1;
       if (range > 1) {
-        random = createRandomGenerator();
+        rng = createRandomGenerator();
       }
 
       // Add frames at the specified density until the number of particles has been reached
@@ -866,7 +868,7 @@ public class CreateData implements PlugIn {
           // continue;
 
           // Simulate random photons
-          final int intensity = minPhotons + ((random != null) ? random.nextInt(range) : 0);
+          final int intensity = minPhotons + ((rng != null) ? rng.nextInt(range) : 0);
 
           final LocalisationModel m =
               new LocalisationModel(id, time, xyz, intensity, LocalisationModel.CONTINUOUS);
@@ -906,8 +908,9 @@ public class CreateData implements PlugIn {
 
         final double simulationStepsPerFrame =
             (settings.getStepsPerSecond() * settings.getExposureTime()) / 1000.0;
-        imageModel = new FixedLifetimeImageModel(
-            settings.getStepsPerSecond() * settings.getTOn() / 1000.0, simulationStepsPerFrame);
+        imageModel =
+            new FixedLifetimeImageModel(settings.getStepsPerSecond() * settings.getTOn() / 1000.0,
+                simulationStepsPerFrame, createRandomGenerator());
       } else {
         // ---------------
         // FULL SIMULATION
@@ -935,7 +938,7 @@ public class CreateData implements PlugIn {
             settings.getStepsPerSecond() * settings.getTOn() / 1000.0,
             settings.getStepsPerSecond() * settings.getTOffShort() / 1000.0,
             settings.getStepsPerSecond() * settings.getTOffLong() / 1000.0,
-            settings.getNBlinksShort(), settings.getNBlinksLong());
+            settings.getNBlinksShort(), settings.getNBlinksLong(), createRandomGenerator());
         imageModel.setUseGeometricDistribution(settings.getNBlinksGeometricDistribution());
 
         // Only use the correlation if selected for the distribution
@@ -944,7 +947,6 @@ public class CreateData implements PlugIn {
         }
       }
 
-      imageModel.setRandomGenerator(createRandomGenerator());
       imageModel.setPhotonBudgetPerFrame(true);
       imageModel.setDiffusion2D(settings.getDiffuse2D());
       imageModel.setRotation2D(settings.getRotate2D());
@@ -1081,11 +1083,11 @@ public class CreateData implements PlugIn {
       sd0 = ((GaussianPsfModel) psf).getS0(xyz[2]);
       sd1 = ((GaussianPsfModel) psf).getS1(xyz[2]);
     } else if (psf instanceof AiryPsfModel) {
-      psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
+      psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], null);
       sd0 = ((AiryPsfModel) psf).getW0() * AiryPattern.FACTOR;
       sd1 = ((AiryPsfModel) psf).getW1() * AiryPattern.FACTOR;
     } else if (psf instanceof ImagePsfModel) {
-      psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], false);
+      psf.create3D((double[]) null, size, size, 1, xyz[0], xyz[1], xyz[2], null);
       sd0 = ((ImagePsfModel) psf).getHwhm0() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
       sd1 = ((ImagePsfModel) psf).getHwhm1() / Gaussian2DFunction.SD_TO_HWHM_FACTOR;
     } else {
@@ -1716,15 +1718,13 @@ public class CreateData implements PlugIn {
     }
 
     // Try using different distributions:
-    final RandomGenerator rand1 = createRandomGenerator();
-
     if (settings.getDistribution().equals(DISTRIBUTION[UNIFORM_HALTON])) {
-      return new UniformDistribution(min, max, rand1.nextInt());
+      return new UniformDistribution(min, max, createRandomGenerator().nextInt());
     }
 
     if (settings.getDistribution().equals(DISTRIBUTION[UNIFORM_SOBOL])) {
       final SobolSequenceGenerator rvg = new SobolSequenceGenerator(3);
-      rvg.skipTo(rand1.nextInt());
+      rvg.skipTo(createRandomGenerator().nextInt());
       return new UniformDistribution(min, max, rvg);
     }
 
@@ -1862,16 +1862,14 @@ public class CreateData implements PlugIn {
 
             // Create the distribution using the recommended number of bins
             final int binCount = stats.getN() / 10;
-            final EmpiricalDistribution dist =
-                new EmpiricalDistribution(binCount, createRandomGenerator());
+
+
+            final EmpiricalDistribution dist = new EmpiricalDistribution(binCount,
+                new RandomGeneratorAdapter(createRandomGenerator()));
             dist.load(values);
             return dist;
           }
-        } catch (final IOException ex) {
-          // Ignore
-        } catch (final NullArgumentException ex) {
-          // Ignore
-        } catch (final NumberFormatException ex) {
+        } catch (final IOException | NullArgumentException | NumberFormatException ex) {
           // Ignore
         }
       }
@@ -1879,16 +1877,14 @@ public class CreateData implements PlugIn {
           settings.getPhotonDistributionFile());
     } else if (PHOTON_DISTRIBUTION[PHOTON_UNIFORM].equals(settings.getPhotonDistribution())) {
       if (settings.getPhotonsPerSecond() < settings.getPhotonsPerSecondMaximum()) {
-        final UniformRealDistribution dist = new UniformRealDistribution(createRandomGenerator(),
+        return new UniformRealDistribution(new RandomGeneratorAdapter(createRandomGenerator()),
             settings.getPhotonsPerSecond(), settings.getPhotonsPerSecondMaximum());
-        return dist;
       }
     } else if (PHOTON_DISTRIBUTION[PHOTON_GAMMA].equals(settings.getPhotonDistribution())) {
       final double scaleParameter = settings.getPhotonsPerSecond() / settings.getPhotonShape();
-      final GammaDistribution dist =
-          new GammaDistribution(createRandomGenerator(), settings.getPhotonShape(), scaleParameter,
-              ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-      return dist;
+      return new GammaDistribution(new RandomGeneratorAdapter(createRandomGenerator()),
+          settings.getPhotonShape(), scaleParameter,
+          ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
     } else if (PHOTON_DISTRIBUTION[PHOTON_CORRELATED].equals(settings.getPhotonDistribution())) {
       // No distribution required
       return null;
@@ -2216,6 +2212,8 @@ public class CreateData implements PlugIn {
 
     // Collect statistics on the number of photons actually simulated
 
+
+
     // Process all frames
     int index = 0;
     int lastT = -1;
@@ -2225,9 +2223,9 @@ public class CreateData implements PlugIn {
       }
       if (l.getTime() != lastT) {
         lastT = l.getTime();
-        futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, index,
-            lastT, copyPsfModel(psfModel), syncResults, stack, poissonNoise,
-            new RandomDataGenerator(createRandomGenerator()), ticker)));
+        futures.add(threadPool.submit(
+            new ImageGenerator(localisationSets, newLocalisations, index, lastT, psfModel.copy(),
+                syncResults, stack, poissonNoise, createRandomGenerator(), ticker)));
       }
       index++;
     }
@@ -2247,9 +2245,8 @@ public class CreateData implements PlugIn {
       }
       final Object pixels = stack.getPixels(t);
       if (pixels == null) {
-        futures.add(threadPool.submit(
-            new ImageGenerator(localisationSets, newLocalisations, maxT, t, null, syncResults,
-                stack, poissonNoise, new RandomDataGenerator(createRandomGenerator()), ticker)));
+        futures.add(threadPool.submit(new ImageGenerator(localisationSets, newLocalisations, maxT,
+            t, null, syncResults, stack, poissonNoise, createRandomGenerator(), ticker)));
       } else if (limits == null) {
         limits = MathUtils.limits((float[]) pixels);
       }
@@ -2589,14 +2586,14 @@ public class CreateData implements PlugIn {
       final double gamma = 0;
       final HoltzerAstigmatismZModel zModel =
           HoltzerAstigmatismZModel.create(sd, sd, gamma, d, 0, 0, 0, 0);
-      final GaussianPsfModel m = new GaussianPsfModel(createRandomGenerator(), zModel);
+      final GaussianPsfModel m = new GaussianPsfModel(zModel);
       // m.setRange(10);
       return m;
     }
 
     // Default to Airy pattern
     final double width = getPsfSd() / PsfCalculator.AIRY_TO_GAUSSIAN;
-    final AiryPsfModel m = new AiryPsfModel(createRandomGenerator(), width, width, d);
+    final AiryPsfModel m = new AiryPsfModel(width, width, d);
     m.setRing(2);
     return m;
   }
@@ -2609,10 +2606,6 @@ public class CreateData implements PlugIn {
     set.add(m);
     localisationSets.add(set);
     return createPsfModel(localisationSets);
-  }
-
-  private PsfModel copyPsfModel(PsfModel psfModel) {
-    return psfModel.copy(createRandomGenerator());
   }
 
   private static class Spot {
@@ -2714,14 +2707,14 @@ public class CreateData implements PlugIn {
     final PeakResults results;
     final ImageStack stack;
     final boolean poissonNoise;
-    final RandomDataGenerator random;
+    final UniformRandomProvider rng;
     final Ticker ticker;
     final double emGain;
     final double qe;
 
     public ImageGenerator(final List<LocalisationModelSet> localisationSets,
         List<LocalisationModelSet> newLocalisations, int startIndex, int time, PsfModel psfModel,
-        PeakResults results, ImageStack stack, boolean poissonNoise, RandomDataGenerator random,
+        PeakResults results, ImageStack stack, boolean poissonNoise, UniformRandomProvider rng,
         Ticker ticker) {
       this.localisations = localisationSets;
       this.newLocalisations = newLocalisations;
@@ -2731,7 +2724,7 @@ public class CreateData implements PlugIn {
       this.results = results;
       this.stack = stack;
       this.poissonNoise = poissonNoise;
-      this.random = random;
+      this.rng = rng;
       this.ticker = ticker;
       // This could be >=1 but the rest of the code ignores EM-gain if it is <=1
       emGain = (settings.getCameraType() == CameraType.EMCCD && settings.getEmGain() > 1)
@@ -2770,7 +2763,7 @@ public class CreateData implements PlugIn {
       // Gamma(a+b,scale) = Gamma(a,scale) + Gamma(b,scale)
       // See: https://en.wikipedia.org/wiki/Gamma_distribution#Summation
 
-      final float[] background = createBackground(random);
+      final float[] background = createBackground(rng);
       if (settings.getBackground() > 0) {
         amplify(background);
       }
@@ -2780,9 +2773,9 @@ public class CreateData implements PlugIn {
       // Create read noise now so that we can calculate the true background noise.
       // Note: The read noise is in electrons.
       if (readNoise != null) {
-        final RandomGenerator r = random.getRandomGenerator();
+        final NormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
         for (int i = 0; i < background.length; i++) {
-          background[i] += (float) (readNoise[i] * r.nextGaussian());
+          background[i] += (float) (readNoise[i] * gauss.sample());
         }
       }
 
@@ -2820,15 +2813,13 @@ public class CreateData implements PlugIn {
               // TODO record all the positions we draw and the number of photons.
               // This can be used later to compute the Fisher information for each spot.
               if (poissonNoise) {
-                final int samples = (int) random.nextPoisson(intensity);
-                intensity = samples;
+                final int samples = cache.createPoissonSampler(rng, intensity).sample();
                 photonsRendered = psfModel.sample3D(data, settings.getSize(), settings.getSize(),
-                    samples, localisation.getX(), localisation.getY(), localisation.getZ());
+                    samples, localisation.getX(), localisation.getY(), localisation.getZ(), rng);
                 samplePositions = psfModel.getSamplePositions();
               } else {
-                photonsRendered =
-                    psfModel.create3D(data, settings.getSize(), settings.getSize(), intensity,
-                        localisation.getX(), localisation.getY(), localisation.getZ(), false);
+                photonsRendered = psfModel.create3D(data, settings.getSize(), settings.getSize(),
+                    intensity, localisation.getX(), localisation.getY(), localisation.getZ(), null);
               }
             }
             // addDraw(photons);
@@ -2984,9 +2975,14 @@ public class CreateData implements PlugIn {
     private void amplify(float[] image) {
       // Quantum efficiency: Model using binomial distribution
       if (qe < 1) {
+        final BinomialDiscreteInverseCumulativeProbabilityFunction fun =
+            new BinomialDiscreteInverseCumulativeProbabilityFunction(0, qe);
+        final InverseTransformDiscreteSampler sampler =
+            new InverseTransformDiscreteSampler(rng, fun);
         for (int i = 0; i < image.length; i++) {
           if (image[i] != 0) {
-            image[i] = random.nextBinomial((int) image[i], qe);
+            fun.setTrials((int) image[i]);
+            image[i] = sampler.sample();
           }
         }
       }
@@ -2996,25 +2992,19 @@ public class CreateData implements PlugIn {
         final boolean tubbsModel = false;
         // See: https://www.andor.com/learning-academy/sensitivity-making-sense-of-sensitivity
         // there is a statistical variation in the overall number of electrons generated from an
-        // initial
-        // charge packet by the gain register. This uncertainty is quantified by a parameter called
-        // "Noise Factor"
-        // and detailed theoretical and measured analysis has placed this Noise Factor at a value of
-        // √2 (or 1.41)
-        // for EMCCD technology.
+        // initial charge packet by the gain register. This uncertainty is quantified by a parameter
+        // called "Noise Factor" and detailed theoretical and measured analysis has placed this
+        // Noise Factor at a value of √2 (or 1.41) for EMCCD technology.
 
         // A Stochastic Model for Electron Multiplication Charge-Coupled Devices – From Theory to
-        // Practice
-        // (PLoS One. 2013; 8(1): e53671)
+        // Practice (PLoS One. 2013; 8(1): e53671)
         // PGN model:
         // - Poisson for photon shot noise
         // - Gamma for EM gain
         // - Normal for read noise
         // EM gain is essentially a repeated loop of input N and get out M where the each N has a
-        // probability of
-        // being amplified. This has been modelled as a series of Poisson or Binomial trials and
-        // then the curve
-        // fitted.
+        // probability of being amplified. This has been modelled as a series of Poisson or Binomial
+        // trials and then the curve fitted.
 
         if (tubbsModel) {
           // Tubbs's model
@@ -3024,28 +3014,27 @@ public class CreateData implements PlugIn {
               continue;
             }
             final double scale = emGain - 1 + 1 / image[i];
-            final double electrons = Math.round(random.nextGamma(image[i], scale) - 1);
+            final double shape = image[i];
+            final double electrons = Math
+                .round(new AhrensDieterMarsagliaTsangGammaSampler(rng, scale, shape).sample() - 1);
             image[i] += electrons;
           }
         } else {
           // Standard gamma distribution
           // This is what is modelled in the Poisson-Gamma-Gaussian likelihood model
 
-          // Since the call random.nextGamma(...) creates a Gamma distribution
-          // which pre-calculates factors only using the scale parameter we
-          // create a custom gamma distribution where the shape can be set as a property.
-          final double shape = 1;
-          final CustomGammaDistribution dist =
-              new CustomGammaDistribution(random.getRandomGenerator(), shape, emGain,
-                  GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+          // TODO - Creates a custom gamma distribution where the shape can be set as a property.
+          // This allows the other set-up cost of the sampler to be removed.
+          final double scale = emGain;
 
           for (int i = 0; i < image.length; i++) {
             if (image[i] <= 0) {
               // What about modelling spontaneous electron events?
               continue;
             }
-            dist.setShapeUnsafe(image[i]);
-            image[i] = Math.round(dist.sample());
+            final double shape = image[i];
+            image[i] = Math.round(
+                new AhrensDieterMarsagliaTsangGammaSampler(rng, scale, shape).sample() * image[i]);
           }
         }
       }
@@ -3162,13 +3151,15 @@ public class CreateData implements PlugIn {
 
   private float[] backgroundPixels;
   private boolean uniformBackground;
+  // TODO - create this using the range expected
+  private PoissonSamplerCache cache = new PoissonSamplerCache(0, 10000);
 
-  private float[] createBackground(RandomDataGenerator random) {
+  private float[] createBackground(UniformRandomProvider rng) {
     float[] pixels2 = null;
 
     if (settings.getBackground() > 0) {
-      if (random == null) {
-        random = new RandomDataGenerator(createRandomGenerator());
+      if (rng == null) {
+        rng = createRandomGenerator();
       }
       pixels2 = new float[backgroundPixels.length];
 
@@ -3180,31 +3171,17 @@ public class CreateData implements PlugIn {
         // the mean for each pixel multiplied by the number of pixels.
         // Note: The number of samples (N) must be Poisson distributed, i.e.
         // the total amount of photons per frame is Poisson noise.
-        long samples = random.nextPoisson(mean * backgroundPixels.length);
+        // The alternative is to sample each pixel from a Poisson distribution. This is slow!
+        int samples = new PoissonSampler(rng, mean * backgroundPixels.length).sample();
 
-        final int upper = pixels2.length - 1;
-        final UniformIntegerDistribution d =
-            new UniformIntegerDistribution(random.getRandomGenerator(), 0, upper);
+        final int upper = pixels2.length;
         while (samples-- > 0) {
-          pixels2[d.sample()] += 1;
+          pixels2[rng.nextInt(upper)] += 1;
         }
-
-        //// Alternative is to sample each pixel from a Poisson distribution. This is slow
-        // PoissonDistribution dist = new PoissonDistribution(random.getRandomGenerator(),
-        //// backgroundPixels[0],
-        // PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-        // for (int i = 0; i < pixels2.length; i++)
-        // {
-        // pixels2[i] = dist.sample();
-        // }
       } else {
-        final CustomPoissonDistribution dist =
-            new CustomPoissonDistribution(random.getRandomGenerator(), 1,
-                PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
         for (int i = 0; i < pixels2.length; i++) {
           if (backgroundPixels[i] > 0) {
-            dist.setMeanUnsafe(backgroundPixels[i]);
-            pixels2[i] = dist.sample();
+            pixels2[i] = cache.createPoissonSampler(rng, backgroundPixels[i]).sample();
           }
         }
       }
@@ -4527,9 +4504,9 @@ public class CreateData implements PlugIn {
         int ox;
         int oy;
         if (settings.getRandomCrop()) {
-          final RandomDataGenerator rg = new RandomDataGenerator(createRandomGenerator());
-          ox = rg.nextInt(modelBounds.x, upperx);
-          oy = rg.nextInt(modelBounds.y, uppery);
+          UniformRandomProvider rng = createRandomGenerator();
+          ox = new DiscreteUniformSampler(rng, modelBounds.x, upperx).sample();
+          oy = new DiscreteUniformSampler(rng, modelBounds.y, uppery).sample();
         } else {
           ox = settings.getOriginX();
           oy = settings.getOriginY();
@@ -5335,7 +5312,7 @@ public class CreateData implements PlugIn {
     return compounds;
   }
 
-  private static int seedAddition;
+  private static AtomicInteger seedAddition = new AtomicInteger();
   private boolean resetSeed = true;
 
   private enum SeedMode {
@@ -5379,10 +5356,10 @@ public class CreateData implements PlugIn {
     if (seedMode.identicalAddition() && resetSeed) {
       // Reset only once per plugin execution
       resetSeed = false;
-      seedAddition = 0;
+      seedAddition.set(0);
     }
     // Increment the seed to ensure that new generators are created at the same system time point
-    return seedAddition++;
+    return seedAddition.getAndIncrement();
   }
 
   /**
@@ -5390,8 +5367,8 @@ public class CreateData implements PlugIn {
    *
    * <p>The generators used in the simulation can be adjusted by changing this method.
    */
-  private RandomGenerator createRandomGenerator() {
-    return new Well44497b(getSeedOffset() + getSeedAddition());
+  private UniformRandomProvider createRandomGenerator() {
+    return new SplitMix64(getSeedOffset() + getSeedAddition());
   }
 
   private static void setBenchmarkResults(ImagePlus imp, MemoryPeakResults results) {

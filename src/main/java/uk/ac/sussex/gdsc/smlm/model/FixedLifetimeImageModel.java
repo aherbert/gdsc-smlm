@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import org.apache.commons.rng.UniformRandomProvider;
+
 /**
  * Contains a model for an image of fixed lifetime fluorophores. All fluorphores will have the same
  * on time. The activation time will be the incremented by the on-time plus the dark time between
@@ -37,14 +39,15 @@ public class FixedLifetimeImageModel extends ImageModel {
    *
    * @param onTime Fixed on-state time
    * @param offTime1 Dark time between successive fluorophores
+   * @param rng the random generator for creating the image
    */
-  public FixedLifetimeImageModel(double onTime, double offTime1) {
-    super(onTime, offTime1, 0, 0, 0);
+  public FixedLifetimeImageModel(double onTime, double offTime1, UniformRandomProvider rng) {
+    super(onTime, offTime1, 0, 0, 0, rng);
   }
 
   @Override
   protected double createActivationTime(double[] xyz) {
-    final double timeAct = next + getRandom().getRandomGenerator().nextDouble();
+    final double timeAct = next + getRandom().nextDouble();
     // @formatter:off
     // Ensure at least offTime1 full dark frames between lifetimes:
     // Frames:    |      |      |      |

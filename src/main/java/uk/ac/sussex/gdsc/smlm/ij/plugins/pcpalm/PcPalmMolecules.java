@@ -42,6 +42,8 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
@@ -99,11 +101,12 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -1176,11 +1179,11 @@ public class PcPalmMolecules implements PlugIn {
     double width = settings.simulationSize * 1000.0;
     // Allow a border of 3 x sigma for +/- precision
     width -= 3 * settings.sigmaS;
-    final RandomGenerator randomGenerator =
-        new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-    final RandomDataGenerator dataGenerator = new RandomDataGenerator(randomGenerator);
+    final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
     final UniformDistribution dist =
-        new UniformDistribution(null, new double[] {width, width, 0}, randomGenerator.nextInt());
+        new UniformDistribution(null, new double[] {width, width, 0}, rng.nextInt());
+    final NormalizedGaussianSampler gauss =
+        GaussianSamplerUtils.createNormalizedGaussianSampler(rng);
 
     settings.molecules = new ArrayList<>(settings.numberOfMolecules);
     // Create some dummy results since the calibration is required for later analysis
@@ -1245,8 +1248,8 @@ public class PcPalmMolecules implements PlugIn {
 
         mask = new int[maskSize * maskSize];
         Arrays.fill(mask, 255);
-        MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0,
-            maskScale, maskScale, randomGenerator);
+        MaskDistribution maskDistribution =
+            new MaskDistribution(mask, maskSize, maskSize, 0, maskScale, maskScale, rng);
         double[] centre;
         IJ.showStatus("Computing clusters mask");
         final int roiRadius = (int) Math.round((settings.clusterRadius * 2) / maskScale);
@@ -1271,8 +1274,8 @@ public class PcPalmMolecules implements PlugIn {
           final double cy = centre[1] / maskScale;
           fillMask(mask, maskSize, (int) cx, (int) cy, roiRadius, 0);
           try {
-            maskDistribution = new MaskDistribution(mask, maskSize, maskSize, 0, maskScale,
-                maskScale, randomGenerator);
+            maskDistribution =
+                new MaskDistribution(mask, maskSize, maskSize, 0, maskScale, maskScale, rng);
           } catch (final IllegalArgumentException ex) {
             // This can happen when there are no more non-zero pixels
             log("WARNING: No more room for clusters on the mask area (created %d of estimated %d)",
@@ -1304,8 +1307,8 @@ public class PcPalmMolecules implements PlugIn {
 
         if (settings.clusterSimulation == 3) {
           // We have the mask. Now pick points at random from the mask.
-          final MaskDistribution maskDistribution = new MaskDistribution(mask, maskSize, maskSize,
-              0, maskScale, maskScale, randomGenerator);
+          final MaskDistribution maskDistribution =
+              new MaskDistribution(mask, maskSize, maskSize, 0, maskScale, maskScale, rng);
 
           // Allocate each molecule position to a parent circle so defining clusters.
           final int[][] clusters = new int[clusterCentres.size()][];
@@ -1391,7 +1394,7 @@ public class PcPalmMolecules implements PlugIn {
       if (settings.clusterSimulation == 1 || settings.clusterSimulation == 2) {
         for (final double[] clusterCentre : clusterCentres) {
           final int clusterN = (int) Math.round((settings.clusterNumberStdDev > 0)
-              ? dataGenerator.nextGaussian(settings.clusterNumber, settings.clusterNumberStdDev)
+              ? settings.clusterNumber + gauss.sample() * settings.clusterNumberStdDev
               : settings.clusterNumber);
           if (clusterN < 1) {
             continue;
@@ -1409,8 +1412,8 @@ public class PcPalmMolecules implements PlugIn {
             while (size < clusterN) {
               // Generate a random point within a circle uniformly
               // http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
-              final double t = 2.0 * Math.PI * randomGenerator.nextDouble();
-              final double u = randomGenerator.nextDouble() + randomGenerator.nextDouble();
+              final double t = 2.0 * Math.PI * rng.nextDouble();
+              final double u = rng.nextDouble() + rng.nextDouble();
               final double r = settings.clusterRadius * ((u > 1) ? 2 - u : u);
               final double x = r * Math.cos(t);
               final double y = r * Math.sin(t);
@@ -1462,7 +1465,7 @@ public class PcPalmMolecules implements PlugIn {
 
     final Statistics statsSigma = new Statistics();
     for (int i = 0; i < xyz.size(); i++) {
-      int occurrences = getBlinks(dataGenerator, settings.blinkingRate);
+      int occurrences = getBlinks(rng, settings.blinkingRate);
       if (blinks != null) {
         blinks.add(occurrences);
       }
@@ -1481,8 +1484,8 @@ public class PcPalmMolecules implements PlugIn {
         final double[] localisationXy = Arrays.copyOf(moleculeXyz, 2);
         // Add random precision
         if (sigma1D > 0) {
-          final double dx = dataGenerator.nextGaussian(0, sigma1D);
-          final double dy = dataGenerator.nextGaussian(0, sigma1D);
+          final double dx = gauss.sample() * sigma1D;
+          final double dy = gauss.sample() * sigma1D;
           localisationXy[0] += dx;
           localisationXy[1] += dy;
           if (!dist.isWithinXy(localisationXy)) {
@@ -1738,18 +1741,21 @@ public class PcPalmMolecules implements PlugIn {
     }
   }
 
-  private int getBlinks(RandomDataGenerator dataGenerator, double averageBlinks) {
+  private int getBlinks(UniformRandomProvider rng, double averageBlinks) {
     switch (settings.blinkingDistribution) {
       case 3:
         // Binomial distribution
-        return dataGenerator.nextBinomial((int) Math.round(averageBlinks), settings.pvalue);
+        final int trials = (int) Math.round(averageBlinks);
+        return new InverseTransformDiscreteSampler(rng,
+            new BinomialDiscreteInverseCumulativeProbabilityFunction(trials, settings.pvalue))
+                .sample();
 
       case 2:
         return (int) Math.round(averageBlinks);
       case 1:
-        return StandardFluorophoreSequenceModel.getBlinks(true, dataGenerator, averageBlinks);
+        return StandardFluorophoreSequenceModel.getBlinks(true, rng, averageBlinks);
       default:
-        return StandardFluorophoreSequenceModel.getBlinks(false, dataGenerator, averageBlinks);
+        return StandardFluorophoreSequenceModel.getBlinks(false, rng, averageBlinks);
     }
   }
 

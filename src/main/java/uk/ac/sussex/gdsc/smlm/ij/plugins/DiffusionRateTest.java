@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
@@ -68,6 +69,9 @@ import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.io.File;
@@ -315,13 +319,7 @@ public class DiffusionRateTest implements PlugIn {
     // Move the molecules and get the diffusion rate
     IJ.showStatus("Simulating ...");
     final long start = System.nanoTime();
-    final long seed = System.currentTimeMillis() + System.identityHashCode(this);
-    final RandomGenerator[] random = new RandomGenerator[3];
-    final RandomGenerator[] random2 = new RandomGenerator[3];
-    for (int i = 0; i < 3; i++) {
-      random[i] = new Well19937c(seed + i * 12436L);
-      random2[i] = new Well19937c(seed + i * 678678L + 3);
-    }
+    final UniformRandomProvider random = RandomSource.create(RandomSource.SPLIT_MIX_64);
     final Statistics[] stats2D = new Statistics[totalSteps];
     final Statistics[] stats3D = new Statistics[totalSteps];
     final StoredDataStatistics jumpDistances2D = new StoredDataStatistics(totalSteps);
@@ -348,6 +346,9 @@ public class DiffusionRateTest implements PlugIn {
     final StoredData totalJumpDistances2D = new StoredData(settings.getParticles());
     final StoredData totalJumpDistances3D = new StoredData(settings.getParticles());
 
+    final NormalizedGaussianSampler gauss =
+        GaussianSamplerUtils.createNormalizedGaussianSampler(random);
+
     for (int i = 0; i < settings.getParticles(); i++) {
       if (i % 16 == 0) {
         IJ.showProgress(i, settings.getParticles());
@@ -361,7 +362,7 @@ public class DiffusionRateTest implements PlugIn {
       final int id = i + 1;
       final MoleculeModel m = new MoleculeModel(id, origin.clone());
       if (addError) {
-        origin = addError(origin, precisionInPixels, random);
+        origin = addError(origin, precisionInPixels, gauss);
       }
       if (pluginSettings.useConfinement) {
         // Note: When using confinement the average displacement should asymptote
@@ -379,7 +380,7 @@ public class DiffusionRateTest implements PlugIn {
             if (diffusionType == DiffusionType.GRID_WALK) {
               m.walk(diffusionSigma, random);
             } else if (diffusionType == DiffusionType.LINEAR_WALK) {
-              m.slide(diffusionSigma, axis, random[0]);
+              m.slide(diffusionSigma, axis, random);
             } else {
               m.move(diffusionSigma, random);
             }
@@ -398,7 +399,7 @@ public class DiffusionRateTest implements PlugIn {
           points.add(new Point(id, xyz));
 
           if (addError) {
-            xyz = addError(xyz, precisionInPixels, random2);
+            xyz = addError(xyz, precisionInPixels, gauss);
           }
 
           peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances2D, jumpDistances3D,
@@ -411,7 +412,7 @@ public class DiffusionRateTest implements PlugIn {
           double[] xyz = m.getCoordinates();
           points.add(new Point(id, xyz));
           if (addError) {
-            xyz = addError(xyz, precisionInPixels, random2);
+            xyz = addError(xyz, precisionInPixels, gauss);
           }
           peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances2D, jumpDistances3D,
               origin, results);
@@ -419,11 +420,11 @@ public class DiffusionRateTest implements PlugIn {
       } else if (diffusionType == DiffusionType.LINEAR_WALK) {
         final double[] axis = nextVector();
         for (int j = 0; j < totalSteps; j++) {
-          m.slide(diffusionSigma, axis, random[0]);
+          m.slide(diffusionSigma, axis, random);
           double[] xyz = m.getCoordinates();
           points.add(new Point(id, xyz));
           if (addError) {
-            xyz = addError(xyz, precisionInPixels, random2);
+            xyz = addError(xyz, precisionInPixels, gauss);
           }
           peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances2D, jumpDistances3D,
               origin, results);
@@ -434,7 +435,7 @@ public class DiffusionRateTest implements PlugIn {
           double[] xyz = m.getCoordinates();
           points.add(new Point(id, xyz));
           if (addError) {
-            xyz = addError(xyz, precisionInPixels, random2);
+            xyz = addError(xyz, precisionInPixels, gauss);
           }
           peak = record(xyz, id, peak, stats2D[j], stats3D[j], jumpDistances2D, jumpDistances3D,
               origin, results);
@@ -469,7 +470,7 @@ public class DiffusionRateTest implements PlugIn {
         MathUtils.rounded(jumpDistances2D.getMean() / conversionFactor), MathUtils.rounded(msd2D),
         MathUtils.rounded(jumpDistances3D.getMean() / conversionFactor), MathUtils.rounded(msd3D));
 
-    aggregateIntoFrames(points, addError, precisionInPixels, random2);
+    aggregateIntoFrames(points, addError, precisionInPixels, gauss);
 
     IJ.showStatus("Analysing results ...");
 
@@ -786,13 +787,14 @@ public class DiffusionRateTest implements PlugIn {
    *
    * @param xyz the xyz
    * @param precision the precision
-   * @param random the random
+   * @param gauss the random
    * @return The new xyz
    */
-  private static double[] addError(double[] xyz, double precision, RandomGenerator[] random) {
+  private static double[] addError(double[] xyz, double precision,
+      NormalizedGaussianSampler gauss) {
     final double[] xy = xyz.clone();
     for (int i = 0; i < 2; i++) {
-      final double shift = random[i].nextGaussian() * precision;
+      final double shift = gauss.sample() * precision;
       xy[i] += shift;
     }
     return xy;
@@ -957,7 +959,7 @@ public class DiffusionRateTest implements PlugIn {
     return v;
   }
 
-  private void showExample(int totalSteps, double diffusionSigma, RandomGenerator[] random) {
+  private void showExample(int totalSteps, double diffusionSigma, UniformRandomProvider random) {
     final MoleculeModel m = new MoleculeModel(0, new double[3]);
     final float[] xValues = new float[totalSteps];
     final float[] x = new float[totalSteps];
@@ -969,7 +971,7 @@ public class DiffusionRateTest implements PlugIn {
       if (diffusionType == DiffusionType.GRID_WALK) {
         m.walk(diffusionSigma, random);
       } else if (diffusionType == DiffusionType.LINEAR_WALK) {
-        m.slide(diffusionSigma, axis, random[0]);
+        m.slide(diffusionSigma, axis, random);
       } else {
         m.move(diffusionSigma, random);
       }
@@ -1063,7 +1065,7 @@ public class DiffusionRateTest implements PlugIn {
   }
 
   private void aggregateIntoFrames(ArrayList<Point> points, boolean addError,
-      double precisionInPixels, RandomGenerator[] random) {
+      double precisionInPixels, NormalizedGaussianSampler gauss) {
     if (myAggregateSteps < 1) {
       return;
     }
@@ -1090,7 +1092,7 @@ public class DiffusionRateTest implements PlugIn {
         if (number != 0) {
           double[] xyz = new double[] {cx / number, cy / number};
           if (addError) {
-            xyz = addError(xyz, precisionInPixels, random);
+            xyz = addError(xyz, precisionInPixels, gauss);
           }
           final float[] params =
               PeakResult.createParams(0, number, (float) xyz[0], (float) xyz[1], 0);
@@ -1122,7 +1124,7 @@ public class DiffusionRateTest implements PlugIn {
     if (number != 0) {
       double[] xyz = new double[] {cx / number, cy / number};
       if (addError) {
-        xyz = addError(xyz, precisionInPixels, random);
+        xyz = addError(xyz, precisionInPixels, gauss);
       }
       final float[] params = PeakResult.createParams(0, number, (float) xyz[0], (float) xyz[1], 0);
       final float noise = 0.1f;

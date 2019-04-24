@@ -26,11 +26,12 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
 
 import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,8 +70,7 @@ public abstract class ImageModel {
    */
   protected int frameLimit;
 
-  private RandomGenerator random;
-  private RandomDataGenerator randomGenerator;
+  private UniformRandomProvider random;
   private RealDistribution photonDistribution;
   private SpatialDistribution confinementDistribution;
   private int confinementAttempts = 5;
@@ -88,15 +88,10 @@ public abstract class ImageModel {
    * @param blinks1 Average number of blinks in the first dark state (used for each burst between
    *        second dark states)
    * @param blinks2 Average number of blinks in the second dark state
+   * @param rng the random generator for creating the image
    */
-  public ImageModel(double onTime, double offTime1, double offTime2, double blinks1,
-      double blinks2) {
-    init(onTime, offTime1, offTime2, blinks1, blinks2,
-        new Well19937c(System.currentTimeMillis() + System.identityHashCode(this)));
-  }
-
-  private void init(double onTime, double offTime1, double offTime2, double blinks1, double blinks2,
-      RandomGenerator rand) {
+  public ImageModel(double onTime, double offTime1, double offTime2, double blinks1, double blinks2,
+      UniformRandomProvider rng) {
     checkParameter("onTime", onTime);
     checkParameter("offTime1", offTime1);
     checkParameter("offTime2", offTime2);
@@ -107,7 +102,7 @@ public abstract class ImageModel {
     this.offTime2 = offTime2;
     this.blinks1 = blinks1;
     this.blinks2 = blinks2;
-    setRandomGenerator(rand);
+    setUniformRandomProvider(rng);
   }
 
   /**
@@ -173,8 +168,8 @@ public abstract class ImageModel {
    *
    * @return The random data generator.
    */
-  protected RandomDataGenerator getRandom() {
-    return randomGenerator;
+  protected UniformRandomProvider getRandom() {
+    return random;
   }
 
   /**
@@ -710,12 +705,14 @@ public abstract class ImageModel {
       // Create a random unit vector using 2/3 Gaussian variables
       axis = new double[3];
       double length = 0;
+      final NormalizedGaussianSampler gauss =
+          GaussianSamplerUtils.createNormalizedGaussianSampler(random);
       // Check the vector has a length
       while (length == 0) {
-        axis[0] = random.nextGaussian();
-        axis[1] = random.nextGaussian();
+        axis[0] = gauss.sample();
+        axis[1] = gauss.sample();
         if (!diffusion2D) {
-          axis[2] = random.nextGaussian();
+          axis[2] = gauss.sample();
         }
         length = axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2];
       }
@@ -742,14 +739,15 @@ public abstract class ImageModel {
           if (photonBudgetPerFrame) {
             // Ignore the time that the fluorophore is on and simply use the random sample.
             // This allows the simulation to match observed experimental data.
-            intensity = randomGenerator.nextPoisson(photonBudget[i]);
+            intensity = new PoissonSampler(getRandom(), photonBudget[i]).sample();
           } else {
             // -=-=-
             // When photon budget is for the entire lifetime then allocate proportionately
             // using the time fraction
             // -=-=-
             intensity =
-                randomGenerator.nextPoisson(photonBudget[i] * onTime[i][step] / totalOnTime[i]);
+                new PoissonSampler(getRandom(), photonBudget[i] * onTime[i][step] / totalOnTime[i])
+                    .sample();
           }
 
           // TODO - Is this useful? Add orientation brightness
@@ -809,12 +807,11 @@ public abstract class ImageModel {
    *
    * @param random the new random generator
    */
-  public void setRandomGenerator(RandomGenerator random) {
+  public void setUniformRandomProvider(UniformRandomProvider random) {
     if (random == null) {
       throw new NullPointerException("Random generator must not be null");
     }
     this.random = random;
-    this.randomGenerator = new RandomDataGenerator(random);
   }
 
   /**
@@ -823,8 +820,8 @@ public abstract class ImageModel {
    *
    * @param diffusionRateInPixelsPerStep the diffusion rate in pixels per step
    * @return The step size
-   * @see MoleculeModel#move(double, RandomGenerator)
-   * @see MoleculeModel#walk(double, RandomGenerator)
+   * @see MoleculeModel#move(double, UniformRandomProvider)
+   * @see MoleculeModel#walk(double, UniformRandomProvider)
    */
   public static double getRandomMoveDistance(double diffusionRateInPixelsPerStep) {
     // Convert diffusion co-efficient into the standard deviation for the random move in each
@@ -841,7 +838,7 @@ public abstract class ImageModel {
    *
    * @param diffusionRateInPixelsPerStep the diffusion rate in pixels per step
    * @return The step size
-   * @see MoleculeModel#slide(double, double[], RandomGenerator)
+   * @see MoleculeModel#slide(double, double[], UniformRandomProvider)
    */
   public static double getRandomMoveDistance2D(double diffusionRateInPixelsPerStep) {
     // Convert diffusion co-efficient into the standard deviation for the random move
@@ -856,7 +853,7 @@ public abstract class ImageModel {
    *
    * @param diffusionRateInPixelsPerStep the diffusion rate in pixels per step
    * @return The step size
-   * @see MoleculeModel#slide(double, double[], RandomGenerator)
+   * @see MoleculeModel#slide(double, double[], UniformRandomProvider)
    */
   public static double getRandomMoveDistance3D(double diffusionRateInPixelsPerStep) {
     // Convert diffusion co-efficient into the standard deviation for the random move

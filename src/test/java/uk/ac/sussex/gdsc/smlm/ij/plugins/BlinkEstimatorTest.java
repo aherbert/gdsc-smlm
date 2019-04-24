@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -242,9 +241,8 @@ public class BlinkEstimatorTest {
     int totalSteps = 100;
     final double eAct = totalSteps * 0.3 * activationIllumination.getAveragePhotons();
 
-    final ImageModel imageModel =
-        new ActivationEnergyImageModel(eAct, activationIllumination, ton, 0, toff, 0, blinkingRate);
-    imageModel.setRandomGenerator(new RandomGeneratorAdapter(rg));
+    final ImageModel imageModel = new ActivationEnergyImageModel(eAct, activationIllumination, ton,
+        0, toff, 0, blinkingRate, rg);
 
     final double[] max = new double[] {256, 256, 32};
     final double[] min = new double[3];

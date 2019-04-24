@@ -24,8 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,7 @@ public class MaskDistribution3D implements SpatialDistribution {
   private static final int[] DIR_Z_OFFSET =
       {0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-  private final RandomGenerator randomGenerator;
+  private final UniformRandomProvider randomGenerator;
   private UniformDistribution uniformDistribution;
   private final int[] mask;
   private int[] indices;
@@ -86,25 +87,10 @@ public class MaskDistribution3D implements SpatialDistribution {
    * @param sliceDepth The depth of each slice
    * @param scaleX Used to scale the mask X-coordinate to a new value
    * @param scaleY Used to scale the mask Y-coordinate to a new value
-   */
-  public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth,
-      double scaleX, double scaleY) {
-    this(masks, width, height, sliceDepth, scaleX, scaleY, null);
-  }
-
-  /**
-   * Create a distribution from the stack of mask images (packed in YX order).
-   *
-   * @param masks the masks
-   * @param width The width of the mask in pixels
-   * @param height the height of the mask in pixels
-   * @param sliceDepth The depth of each slice
-   * @param scaleX Used to scale the mask X-coordinate to a new value
-   * @param scaleY Used to scale the mask Y-coordinate to a new value
    * @param randomGenerator Used to pick random pixels in the mask
    */
   public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth,
-      double scaleX, double scaleY, RandomGenerator randomGenerator) {
+      double scaleX, double scaleY, UniformRandomProvider randomGenerator) {
     this(masks, width, height, sliceDepth, scaleX, scaleY, randomGenerator, null);
   }
 
@@ -121,7 +107,7 @@ public class MaskDistribution3D implements SpatialDistribution {
    * @param uniformDistribution Used for sub-pixel location and slice z-depth
    */
   public MaskDistribution3D(List<int[]> masks, int width, int height, double sliceDepth,
-      double scaleX, double scaleY, RandomGenerator randomGenerator,
+      double scaleX, double scaleY, UniformRandomProvider randomGenerator,
       UniformDistribution uniformDistribution) {
     if (width < 1 || height < 1) {
       throw new IllegalArgumentException("Dimensions must be above zero");
@@ -132,11 +118,9 @@ public class MaskDistribution3D implements SpatialDistribution {
     if (masks == null || masks.isEmpty()) {
       throw new IllegalArgumentException("Mask must not be null or empty");
     }
-    if (randomGenerator == null) {
-      randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
-    }
+    this.randomGenerator =
+        ValidationUtils.checkNotNull(randomGenerator, "Random generator must not be null");
 
-    this.randomGenerator = randomGenerator;
     setUniformDistribution(uniformDistribution);
     maxx = width;
     maxy = height;

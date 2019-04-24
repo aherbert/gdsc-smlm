@@ -24,6 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+
 /**
  * Contains a model for an image of blinking fluorophores under pulsed activation illumination.
  * Activation energy is sampled from an exponential distribution. Fluorophores are created when the
@@ -47,10 +50,12 @@ public class ActivationEnergyImageModel extends ImageModel {
    * @param blinks1 Average number of blinks int the first dark state (used for each burst between
    *        second dark states)
    * @param blinks2 Average number of blinks into the second dark state
+   * @param rng the random generator for creating the image
    */
   public ActivationEnergyImageModel(double activationEnergy, SpatialIllumination illumination,
-      double onTime, double offTime1, double offTime2, double blinks1, double blinks2) {
-    super(onTime, offTime1, offTime2, blinks1, blinks2);
+      double onTime, double offTime1, double offTime2, double blinks1, double blinks2,
+      UniformRandomProvider rng) {
+    super(onTime, offTime1, offTime2, blinks1, blinks2, rng);
     init(activationEnergy, illumination);
   }
 
@@ -84,7 +89,8 @@ public class ActivationEnergyImageModel extends ImageModel {
   }
 
   private double getimeActivationTime(double[] xyz, int frames) {
-    final double activation = getRandom().nextExponential(activationEnergy);
+    final double activation =
+        new AhrensDieterExponentialSampler(getRandom(), activationEnergy).sample();
     double energy = 0;
     for (int t = 0; t < frames; t++) {
       // Q. Should the molecule be moving during the activation phase?
