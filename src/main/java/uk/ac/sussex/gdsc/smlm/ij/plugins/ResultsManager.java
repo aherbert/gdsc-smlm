@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -32,6 +33,7 @@ import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -95,6 +97,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 
@@ -104,6 +107,7 @@ import javax.swing.JFileChooser;
 public class ResultsManager implements PlugIn {
 
   private static final String TITLE = "Peak Results Manager";
+  private static final Logger logger = ImageJPluginLoggerHelper.getLogger(ResultsManager.class);
 
   /** The input file. */
   static final String INPUT_FILE = "File";
@@ -1361,6 +1365,8 @@ public class ResultsManager implements PlugIn {
   /**
    * Check the calibration of the results exists, if not then prompt for it with a dialog.
    *
+   * <p>Missing calibration is written to the Logger for the the class.
+   *
    * @param results The results
    * @return True if OK; false if calibration dialog cancelled
    */
@@ -1373,22 +1379,21 @@ public class ResultsManager implements PlugIn {
    *
    * <p>The calibration is rechecked after the dialog is shown.
    *
+   * <p>Missing calibration is written to the Logger for the the class.
+   *
    * @param results The results
    * @param reader Used to determine the file type
    * @return True if OK; false if calibration is missing
    */
   private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader) {
     // Check for Calibration
+    String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
     final CalibrationWriter calibration = results.getCalibrationWriterSafe();
-    String msg = "partially calibrated";
-    if (!results.hasCalibration()) {
-      // Make sure the user knows all the values have not been set
-      msg = "uncalibrated";
-    }
 
     boolean missing = isEssentialCalibrationMissing(calibration);
 
     if (missing) {
+      logger.info(() -> "Results are " + msg + ". Requesting input.");
       final Rectangle2D.Float dataBounds = results.getDataBounds(null);
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -1446,27 +1451,29 @@ public class ResultsManager implements PlugIn {
    * @return true, if calibration is missing
    */
   private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration) {
-    boolean missing = false;
+    TurboList<String> missing = new TurboList<>();
     if (!calibration.hasNmPerPixel()) {
-      missing = true;
+      missing.add("nm/pixel");
       calibration.setNmPerPixel(inputNmPerPixel);
     }
     if (!calibration.hasExposureTime()) {
-      missing = true;
+      missing.add("Exposure time");
       calibration.setExposureTime(inputExposureTime);
     }
     if (!calibration.hasDistanceUnit()) {
-      missing = true;
+      missing.add("Distance unit");
     }
     if (!calibration.hasIntensityUnit()) {
-      missing = true;
+      missing.add("Intensity unit");
     }
 
     switch (calibration.getCameraType()) {
       case CCD:
       case EMCCD:
         // Count-per-photon is required for CCD camera types
-        missing |= !calibration.hasCountPerPhoton();
+        if (!calibration.hasCountPerPhoton()) {
+          missing.add("Count-per-photon");
+        }
         calibration.setCountPerPhoton(inputGain);
         break;
       case SCMOS:
@@ -1474,9 +1481,25 @@ public class ResultsManager implements PlugIn {
       case CAMERA_TYPE_NA:
       case UNRECOGNIZED:
       default:
-        missing = true;
+        missing.add("Camera type");
     }
-    return missing;
+
+    if (missing.isEmpty()) {
+      return false;
+    }
+
+    logger.info(() -> {
+      final StringBuilder sb = new StringBuilder();
+      sb.append("Calibration missing: ");
+      for (int i = 0; i < missing.size(); i++) {
+        if (i != 0) {
+          sb.append("; ");
+        }
+        sb.append(missing.getf(i));
+      }
+      return sb.toString();
+    });
+    return true;
   }
 
   /**

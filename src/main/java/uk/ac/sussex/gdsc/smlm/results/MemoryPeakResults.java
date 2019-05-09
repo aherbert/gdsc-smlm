@@ -658,7 +658,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return true if {@code null} or empty
    */
   public static boolean isEmpty(MemoryPeakResults results) {
-    return results != null && results.isEmpty();
+    return results == null || results.isEmpty();
   }
 
   /**

@@ -2137,15 +2137,27 @@ public class PeakResultsReader {
       String line;
       int errors = 0;
 
-      // Skip the single line header
-      input.readLine();
+      // The single line header
+      final String header = input.readLine();
+
+      // NStorm files added more column fields for later formats.
+      // If the header contains 'Photons' then this can be used to determine the gain
+      boolean readPhotons = header.contains("\tPhotons\t");
 
       while ((line = input.readLine()) != null) {
         if (line.isEmpty()) {
           continue;
         }
 
-        if (!addNStormResult(results, line) && ++errors >= 10) {
+        final PeakResult result = createNStormResult(line, readPhotons);
+        if (result != null) {
+          results.add(result);
+
+          // Just read the photons from the first 100
+          if (readPhotons) {
+            readPhotons = results.size() < 100;
+          }
+        } else if (++errors >= 10) {
           break;
         }
 
@@ -2178,6 +2190,21 @@ public class PeakResultsReader {
       }
     });
 
+    // Determine the gain using the photons column
+    final Statistics gain = new Statistics();
+    results.forEach(new PeakResultProcedureX() {
+      @Override
+      public boolean execute(PeakResult peakResult) {
+        double photons = peakResult.getError();
+        if (photons != 0) {
+          peakResult.setError(0);
+          gain.add(peakResult.getIntensity() / photons);
+          return false;
+        }
+        return true;
+      }
+    });
+
     // TODO - Support all the NSTORM formats: one-axis, two-axis, rotated, 3D.
     // Is this information in the header?
     // We could support setting the PSF as a Gaussian2D with one/two axis SD.
@@ -2187,7 +2214,8 @@ public class PeakResultsReader {
     // Create a calibration
     calibration = new CalibrationWriter();
 
-    // Q. Is NSTORM in photons?
+    // NSTORM data is in counts when the Photons column is present.
+    // Q. Is it in counts when this column is not present?
     calibration.setIntensityUnit(IntensityUnit.COUNT);
     calibration.setDistanceUnit(DistanceUnit.NM);
 
@@ -2196,22 +2224,23 @@ public class PeakResultsReader {
       calibration.setNmPerPixel(nmPerPixel);
     }
 
-    results.setCalibration(getCalibration());
+    if (gain.getN() > 0 && gain.getStandardError() < 1e-3) {
+      calibration.setCountPerPhoton(gain.getMean());
+    }
+
+    results.setCalibration(calibration.getCalibration());
 
     return results;
   }
 
-  private static boolean addNStormResult(MemoryPeakResults results, String line) {
-    final PeakResult result = createNStormResult(line);
-    if (result != null) {
-      results.add(result);
-      return true;
-    }
-    return false;
-  }
-
-  // So that the fields can be named
-  private static @Nullable PeakResult createNStormResult(String line) {
+  /**
+   * Creates the NStorm result.
+   *
+   * @param line the line
+   * @param readPhotons Set to {@code true} if there is a Photons field
+   * @return the peak result
+   */
+  private static @Nullable PeakResult createNStormResult(String line, boolean readPhotons) {
     // Note that the NSTORM file contains traced molecules hence the Frame
     // and Length fields.
 
@@ -2253,6 +2282,16 @@ public class PeakResultsReader {
     // Zc: The Z position of the molecule (in nanometers) with drift
     // correction applied. If no drift correction was applied to this
     // data then Zc= Z.
+    //
+    // Additional data
+    // Photons - Can be used to determine the gain = Area/Photons
+    // Lateral
+    // Localization
+    // Accuracy
+    // Xw
+    // Yw
+    // Xwc
+    // Ywc
     try (Scanner scanner = new Scanner(line)) {
       scanner.useDelimiter(tabPattern);
       scanner.useLocale(Locale.US);
@@ -2270,11 +2309,15 @@ public class PeakResultsReader {
       scanner.nextFloat(); // intensity
       final int frame = scanner.nextInt();
       final int length = scanner.nextInt();
-      // These are not needed
-      // float link = scanner.nextFloat()
-      // float valid = scanner.nextFloat()
-      // float z = scanner.nextFloat()
-      // float zc = scanner.nextFloat()
+      double photons = 0;
+      if (readPhotons) {
+        // These are not needed
+        scanner.next(); // Link
+        scanner.next(); // Valid
+        scanner.next(); // Z
+        scanner.next(); // Zc
+        photons = scanner.nextDouble();
+      }
 
       // The coordinates are in nm
       // The values are in ADUs. The area value is the signal.
@@ -2305,8 +2348,9 @@ public class PeakResultsReader {
       }
 
       // Store the signal as the original value
-      return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, 0.0, 0.0f, 0, params, null,
-          frame + length - 1, 0);
+      // Store the photons in the error value
+      return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, photons, 0.0f, 0, params,
+          null, frame + length - 1, 0);
     } catch (final NoSuchElementException ex) {
       // Ignore
     }
