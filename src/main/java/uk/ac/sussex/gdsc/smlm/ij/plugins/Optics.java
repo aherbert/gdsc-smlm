@@ -1135,13 +1135,14 @@ public class Optics implements PlugIn {
      */
     Rectangle2D[] getBounds() {
       Rectangle2D[] localBounds = bounds;
-      if (bounds == null) {
+      if (localBounds == null) {
+        // Double Checked Locking ...
         synchronized (clusteringResult) {
           localBounds = bounds;
           if (localBounds == null) {
             clusteringResult.computeConvexHulls();
             localBounds = new Rectangle2D[getMaxClusterId() + 1];
-            hulls = new ConvexHull[bounds.length];
+            hulls = new ConvexHull[localBounds.length];
             for (int c = 1; c <= max; c++) {
               localBounds[c] = clusteringResult.getBounds(c);
               hulls[c] = clusteringResult.getConvexHull(c);
@@ -1709,7 +1710,9 @@ public class Optics implements PlugIn {
         final int maxColour = MathUtils.max(profileColourTo);
         if (mapper == null) {
           // Make zero black
-          mapper = new LutHelper.NonZeroLutMapper(1, maxColour);
+          mapper = (maxColour >= 1) ? new LutHelper.NonZeroLutMapper(1, maxColour) :
+            // It should not matter when there are no clusters.
+            new LutHelper.DefaultLutMapper(0, 255);
         }
 
         // Cache all the colours
