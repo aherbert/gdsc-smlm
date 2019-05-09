@@ -79,7 +79,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * point-localisation superresolution images using pair correlation analysis. Nature Protocols 8,
  * pp345-354.
  *
- * <p>Spatial domain analysis see Puchnar, et al (2013). Counting molecules in single organelles
+ * <p>Spatial domain analysis see Puchner, et al (2013). Counting molecules in single organelles
  * with superresolution microscopy allows tracking of the endosome maturation trajectory. PNAS.
  * doi:10.1073/pnas.1309676110
  */
