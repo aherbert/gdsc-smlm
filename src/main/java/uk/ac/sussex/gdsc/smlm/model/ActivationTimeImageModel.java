@@ -71,7 +71,7 @@ public class ActivationTimeImageModel extends ImageModel {
 
   @Override
   protected double createActivationTime(double[] xyz) {
-    return new AhrensDieterExponentialSampler(getRandom(), activationTime).sample(); 
+    return new AhrensDieterExponentialSampler(getRandom(), activationTime).sample();
   }
 
   @Override

@@ -134,7 +134,9 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
   }
 
   @Override
-  public void trimToSize() {}
+  public void trimToSize() {
+    // Not currently supported
+  }
 
   @Override
   public PeakResult[] toArray() {
