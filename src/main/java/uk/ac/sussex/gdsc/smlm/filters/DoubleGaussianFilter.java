@@ -539,11 +539,12 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
 
   /**
    * Create a 1-dimensional normalized Gaussian kernel with standard deviation sigma and the running
-   * sum over the kernel Note: this is one side of the kernel only, not the full kernel as used by
-   * the Convolver class of ImageJ. To avoid a step due to the cutoff at a finite value, the
-   * near-edge values are replaced by a 2nd-order polynomial with its minimum=0 at the first
-   * out-of-kernel pixel. Thus, the kernel function has a smooth 1st derivative in spite of finite
-   * length.
+   * sum over the kernel
+   *
+   * <p>Note: this is one side of the kernel only, not the full kernel as used by the Convolver
+   * class of ImageJ. To avoid a step due to the cutoff at a finite value, the near-edge values are
+   * replaced by a 2nd-order polynomial with its minimum=0 at the first out-of-kernel pixel. Thus,
+   * the kernel function has a smooth 1st derivative in spite of finite length.
    *
    * @param sigma Standard deviation, i.e. radius of decay to 1/sqrt(e), in pixels.
    * @param maxRadius Maximum radius of the kernel: Limits kernel size in case of large sigma,
