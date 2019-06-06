@@ -54,8 +54,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.awt.Choice;
 import java.awt.Font;
 import java.awt.Label;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -139,12 +137,9 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
     label = gd.getLastLabel();
     if (ImageJUtils.isShowGenericDialog()) {
       final Choice choice = gd.getLastChoice();
-      choice.addItemListener(new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent event) {
-          inputMode = choice.getSelectedIndex();
-          updateLabel();
-        }
+      choice.addItemListener(event -> {
+        inputMode = choice.getSelectedIndex();
+        updateLabel();
       });
       updateLabel();
     }
@@ -184,12 +179,9 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
     label2 = gd.getLastLabel();
     if (ImageJUtils.isShowGenericDialog()) {
       final Choice choice = gd.getLastChoice();
-      choice.addItemListener(new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent event) {
-          outputMode = choice.getSelectedIndex();
-          updateLabel2();
-        }
+      choice.addItemListener(event -> {
+        outputMode = choice.getSelectedIndex();
+        updateLabel2();
       });
       updateLabel2();
     }
