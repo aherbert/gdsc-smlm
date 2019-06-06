@@ -49,6 +49,7 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.awt.Choice;
@@ -359,7 +360,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
       // Get metadata from the source
       final ExtendedFileInfo[] fileInfo = source.getFileInfo(0);
-      if (fileInfo != null && fileInfo[0] != null) {
+      if (ArrayUtils.getLength(fileInfo) > 0) {
         final ExtendedFileInfo efi = fileInfo[0];
         if (efi.getExtendedMetaData() != null) {
           imp.setProperty("Info", efi.getExtendedMetaData());
