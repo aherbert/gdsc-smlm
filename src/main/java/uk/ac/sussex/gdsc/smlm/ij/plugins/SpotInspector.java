@@ -67,6 +67,8 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Extract the spots from the original image into a stack, ordering the spots by various rankings.
@@ -74,23 +76,79 @@ import java.util.List;
 public class SpotInspector implements PlugIn, MouseListener {
   private static final String TITLE = "Spot Inspector";
 
-  private static String inputOption = "";
-  private static String[] SORT_ORDER = new String[] {"SNR", "Precision", "Amplitude", "Signal",
-      "Error", "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
-  private static int sortOrderIndex = 1;
-  private static int radius = 5;
-  private static boolean showCalibratedValues = true;
-  private static boolean plotScore = true;
-  private static boolean plotHistogram = true;
-  private static int histogramBins = 100;
-  private static boolean removeOutliers = true;
-
   private MemoryPeakResults results;
   private TextPanel textPanel;
   private List<PeakResultRank> rankedResults;
 
-  private static int currentId;
+  private AtomicInteger currentId = new AtomicInteger();
   private int id;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    static String[] SORT_ORDER = new String[] {"SNR", "Precision", "Amplitude", "Signal", "Error",
+        "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    int sortOrderIndex;
+    int radius;
+    boolean showCalibratedValues;
+    boolean plotScore;
+    boolean plotHistogram;
+    int histogramBins;
+    boolean removeOutliers;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      sortOrderIndex = 1;
+      radius = 5;
+      showCalibratedValues = true;
+      plotScore = true;
+      plotHistogram = true;
+      histogramBins = 100;
+      removeOutliers = true;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      sortOrderIndex = source.sortOrderIndex;
+      radius = source.radius;
+      showCalibratedValues = source.showCalibratedValues;
+      plotScore = source.plotScore;
+      plotHistogram = source.plotHistogram;
+      histogramBins = source.histogramBins;
+      removeOutliers = source.removeOutliers;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class PeakResultRank {
     int rank;
@@ -124,7 +182,8 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
 
     // Load the results
-    results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
+    results =
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
@@ -154,7 +213,7 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // Data for the sorting
     final PrecisionResultProcedure pp;
-    if (sortOrderIndex == 1) {
+    if (settings.sortOrderIndex == 1) {
       pp = new PrecisionResultProcedure(results);
       pp.getPrecision();
     } else {
@@ -164,7 +223,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     // Build procedures to get:
     // Shift = position in pixels - originXY
     final StandardResultProcedure sp;
-    if (sortOrderIndex == 9) {
+    if (settings.sortOrderIndex == 9) {
       sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
       sp.getXyr();
     } else {
@@ -173,7 +232,7 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // SD = gaussian widths only for Gaussian PSFs
     final WidthResultProcedure wp;
-    if (sortOrderIndex >= 6 && sortOrderIndex <= 8) {
+    if (settings.sortOrderIndex >= 6 && settings.sortOrderIndex <= 8) {
       wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
       wp.getWxWy();
     } else {
@@ -182,7 +241,7 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // Amplitude for Gaussian PSFs
     final HeightResultProcedure hp;
-    if (sortOrderIndex == 2) {
+    if (settings.sortOrderIndex == 2) {
       hp = new HeightResultProcedure(results, IntensityUnit.PHOTON);
       hp.getH();
     } else {
@@ -206,7 +265,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     table.setShowFittingData(true);
     table.setShowNoiseData(true);
 
-    if (showCalibratedValues) {
+    if (settings.showCalibratedValues) {
       table.setDistanceUnit(DistanceUnit.NM);
       table.setIntensityUnit(IntensityUnit.PHOTON);
     } else {
@@ -219,7 +278,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     textPanel = table.getResultsWindow().getTextPanel();
 
     // We must ignore old instances of this class from the mouse listeners
-    id = ++currentId;
+    id = currentId.incrementAndGet();
     textPanel.addMouseListener(this);
 
     // Add results to the table
@@ -230,7 +289,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
     table.end();
 
-    if (plotScore || plotHistogram) {
+    if (settings.plotScore || settings.plotHistogram) {
       // Get values for the plots
       float[] xValues = null;
       float[] yValues = null;
@@ -250,7 +309,7 @@ public class SpotInspector implements PlugIn, MouseListener {
       for (final float v : yValues) {
         stats.addValue(v);
       }
-      if (removeOutliers) {
+      if (settings.removeOutliers) {
         final double lower = stats.getPercentile(25);
         final double upper = stats.getPercentile(75);
         final double iqr = upper - lower;
@@ -274,7 +333,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     // Extract spots into a stack
     final int w = source.getWidth();
     final int h = source.getHeight();
-    final int size = 2 * radius + 1;
+    final int size = 2 * settings.radius + 1;
     final ImageStack spots = new ImageStack(size, size, rankedResults.size());
 
     // To assist the extraction of data from the image source, process them in time order to allow
@@ -292,10 +351,10 @@ public class SpotInspector implements PlugIn, MouseListener {
       final int y = (int) (r.getYPosition());
 
       // Extract a region but crop to the image bounds
-      int minX = x - radius;
-      int minY = y - radius;
-      final int maxX = FastMath.min(x + radius + 1, w);
-      final int maxY = FastMath.min(y + radius + 1, h);
+      int minX = x - settings.radius;
+      int minY = y - settings.radius;
+      final int maxX = FastMath.min(x + settings.radius + 1, w);
+      final int maxY = FastMath.min(y + settings.radius + 1, h);
 
       int padX = 0;
       int padY = 0;
@@ -339,9 +398,9 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
   }
 
-  private static float getStandardDeviation(MemoryPeakResults results2) {
+  private float getStandardDeviation(MemoryPeakResults results2) {
     // Standard deviation is only needed for the width filtering
-    if (sortOrderIndex != 8) {
+    if (settings.sortOrderIndex != 8) {
       return 0;
     }
     final PSF psf = results2.getPsf();
@@ -353,31 +412,34 @@ public class SpotInspector implements PlugIn, MouseListener {
     return (float) MathUtils.max(1, fitConfig.getInitialXSd(), fitConfig.getInitialYSd());
   }
 
-  private static void plotScore(float[] xValues, float[] yValues, double yMin, double yMax) {
-    if (plotScore) {
+  private void plotScore(float[] xValues, float[] yValues, double yMin, double yMax) {
+    if (settings.plotScore) {
       final String title = TITLE + " Score";
-      final Plot2 plot = new Plot2(title, "Rank", SORT_ORDER[sortOrderIndex], xValues, yValues);
+      final Plot2 plot =
+          new Plot2(title, "Rank", Settings.SORT_ORDER[settings.sortOrderIndex], xValues, yValues);
       plot.setLimits(1, xValues.length, yMin, yMax);
 
       ImageJUtils.display(title, plot);
     }
   }
 
-  private static void plotHistogram(float[] data) {
-    if (plotHistogram) {
+  private void plotHistogram(float[] data) {
+    if (settings.plotHistogram) {
       final String title = TITLE + " Histogram";
-      new HistogramPlotBuilder(title, StoredDataStatistics.create(data), SORT_ORDER[sortOrderIndex])
-          .setRemoveOutliersOption((removeOutliers) ? 1 : 0).setNumberOfBins(histogramBins).show();
+      new HistogramPlotBuilder(title, StoredDataStatistics.create(data),
+          Settings.SORT_ORDER[settings.sortOrderIndex])
+              .setRemoveOutliersOption((settings.removeOutliers) ? 1 : 0)
+              .setNumberOfBins(settings.histogramBins).show();
     }
   }
 
-  private static float[] getScore(PeakResult result, int index, PrecisionResultProcedure pp,
+  private float[] getScore(PeakResult result, int index, PrecisionResultProcedure pp,
       StandardResultProcedure sp, WidthResultProcedure wp, HeightResultProcedure hp,
       float stdDevMax) {
     // Return score so high is better
     float score;
     boolean negative = false;
-    switch (sortOrderIndex) {
+    switch (settings.sortOrderIndex) {
       case 9: // Shift
         // We do not have the original centroid so use the original X/Y
         score = FastMath.max(sp.x[index] - result.getOrigX() + 0.5f,
@@ -419,9 +481,9 @@ public class SpotInspector implements PlugIn, MouseListener {
     return new float[] {(negative) ? -score : score, score};
   }
 
-  private static float recoverScore(float score) {
+  private float recoverScore(float score) {
     // Reset the sign of the score
-    switch (sortOrderIndex) {
+    switch (settings.sortOrderIndex) {
       case 9: // Shift
         return -score;
       case 8: // Width factor
@@ -459,19 +521,21 @@ public class SpotInspector implements PlugIn, MouseListener {
     return v2 / v1;
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    settings = Settings.load();
 
-    gd.addChoice("Ranking", SORT_ORDER, SORT_ORDER[sortOrderIndex]);
-    gd.addSlider("Radius", 1, 15, radius);
-    gd.addCheckbox("Calibrated_table", showCalibratedValues);
-    gd.addCheckbox("Plot_score", plotScore);
-    gd.addCheckbox("Plot_histogram", plotHistogram);
-    gd.addNumericField("Histogram_bins", histogramBins, 0);
-    gd.addCheckbox("Remove_outliers", removeOutliers);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
+
+    gd.addChoice("Ranking", Settings.SORT_ORDER, settings.sortOrderIndex);
+    gd.addSlider("Radius", 1, 15, settings.radius);
+    gd.addCheckbox("Calibrated_table", settings.showCalibratedValues);
+    gd.addCheckbox("Plot_score", settings.plotScore);
+    gd.addCheckbox("Plot_histogram", settings.plotHistogram);
+    gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
+    gd.addCheckbox("Remove_outliers", settings.removeOutliers);
 
     gd.showDialog();
 
@@ -479,19 +543,20 @@ public class SpotInspector implements PlugIn, MouseListener {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    sortOrderIndex = gd.getNextChoiceIndex();
-    radius = (int) gd.getNextNumber();
-    showCalibratedValues = gd.getNextBoolean();
-    plotScore = gd.getNextBoolean();
-    plotHistogram = gd.getNextBoolean();
-    histogramBins = (int) gd.getNextNumber();
-    removeOutliers = gd.getNextBoolean();
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.sortOrderIndex = gd.getNextChoiceIndex();
+    settings.radius = (int) gd.getNextNumber();
+    settings.showCalibratedValues = gd.getNextBoolean();
+    settings.plotScore = gd.getNextBoolean();
+    settings.plotHistogram = gd.getNextBoolean();
+    settings.histogramBins = (int) gd.getNextNumber();
+    settings.removeOutliers = gd.getNextBoolean();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Radius", radius);
-      ParameterUtils.isAbove("Histogram bins", histogramBins, 1);
+      ParameterUtils.isAboveZero("Radius", settings.radius);
+      ParameterUtils.isAbove("Histogram bins", settings.histogramBins, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -502,7 +567,7 @@ public class SpotInspector implements PlugIn, MouseListener {
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    if (id != currentId) {
+    if (id != currentId.get()) {
       return;
     }
     // Show the result that was double clicked in the result table
@@ -524,10 +589,10 @@ public class SpotInspector implements PlugIn, MouseListener {
         final int y = (int) (r.getYPosition());
 
         // Find bounds
-        final int minX = x - radius;
-        final int minY = y - radius;
-        final int maxX = x + radius + 1;
-        final int maxY = y + radius + 1;
+        final int minX = x - settings.radius;
+        final int minY = y - settings.radius;
+        final int maxX = x + settings.radius + 1;
+        final int maxY = y + settings.radius + 1;
 
         // Create ROIs
         final ArrayList<float[]> spots = new ArrayList<>();

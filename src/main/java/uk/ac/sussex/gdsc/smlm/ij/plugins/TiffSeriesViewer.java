@@ -60,6 +60,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack
@@ -67,28 +68,92 @@ import java.io.IOException;
  */
 public class TiffSeriesViewer implements PlugIn, TrackProgress {
   private static final String TITLE = "Tiff Series Viewer";
-  private static final String[] MODE = {"Directory", "File"};
-  private static int inputMode = (int) Prefs.get(Constants.tiffSeriesMode, 0);
-  private static String inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
-  private static String inputFile = Prefs.get(Constants.tiffSeriesFile, "");
-  private static boolean logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
-  private static final String[] OUTPUT_MODE = {"Image", "Files"};
-  private static int outputMode = (int) Prefs.get(Constants.tiffSeriesOutputMode, 0);
-  private static int nImages = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
-  private static String outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
 
   private Label label;
   private Label label2;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    private static final String[] MODE = {"Directory", "File"};
+    private static final String[] OUTPUT_MODE = {"Image", "Files"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    private int inputMode;
+    private String inputDirectory;
+    private String inputFile;
+    private boolean logProgress;
+    private int outputMode;
+    private int imageCount;
+    private String outputDirectory;
+
+    Settings() {
+      // Set defaults
+      inputMode = (int) Prefs.get(Constants.tiffSeriesMode, 0);
+      inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
+      inputFile = Prefs.get(Constants.tiffSeriesFile, "");
+      logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
+      outputMode = (int) Prefs.get(Constants.tiffSeriesOutputMode, 0);
+      imageCount = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
+      outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
+    }
+
+    Settings(Settings source) {
+      inputMode = source.inputMode;
+      inputDirectory = source.inputDirectory;
+      inputFile = source.inputFile;
+      logProgress = source.logProgress;
+      outputMode = source.outputMode;
+      imageCount = source.imageCount;
+      outputDirectory = source.outputDirectory;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+      Prefs.set(Constants.tiffSeriesMode, inputMode);
+      Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
+      Prefs.set(Constants.tiffSeriesFile, inputFile);
+      Prefs.set(Constants.tiffSeriesLogProgress, logProgress);
+      Prefs.set(Constants.tiffSeriesOutputMode, outputMode);
+      Prefs.set(Constants.tiffSeriesOutputNImages, imageCount);
+      Prefs.set(Constants.tiffSeriesOutputDirectory, outputDirectory);
+    }
+  }
 
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addChoice("Mode", MODE, inputMode, new OptionListener<Integer>() {
+    gd.addChoice("Mode", Settings.MODE, settings.inputMode, new OptionListener<Integer>() {
       @Override
       public boolean collectOptions(Integer value) {
-        inputMode = value;
+        settings.inputMode = value;
         return collectOptions(false);
       }
 
@@ -99,7 +164,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
       private boolean collectOptions(boolean silent) {
         // This has limited silent support to fake running in a macro
-        if (inputMode == 0) {
+        if (settings.inputMode == 0) {
           String dir = null;
           final String title = "Select image series ...";
           if (silent) {
@@ -108,12 +173,12 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
               dir = Macro.getValue(macroOptions, title, null);
             }
           } else {
-            dir = ImageJUtils.getDirectory(title, inputDirectory);
+            dir = ImageJUtils.getDirectory(title, settings.inputDirectory);
           }
           if (TextUtils.isNullOrEmpty(dir)) {
             return false;
           }
-          inputDirectory = dir;
+          settings.inputDirectory = dir;
         } else {
           String file = null;
           final String title = "Select image ...";
@@ -123,12 +188,12 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
               file = Macro.getValue(macroOptions, title, null);
             }
           } else {
-            file = ImageJUtils.getFilename(title, inputFile);
+            file = ImageJUtils.getFilename(title, settings.inputFile);
           }
           if (TextUtils.isNullOrEmpty(file)) {
             return false;
           }
-          inputFile = file;
+          settings.inputFile = file;
         }
         updateLabel();
         return true;
@@ -139,49 +204,50 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
     if (ImageJUtils.isShowGenericDialog()) {
       final Choice choice = gd.getLastChoice();
       choice.addItemListener(event -> {
-        inputMode = choice.getSelectedIndex();
+        settings.inputMode = choice.getSelectedIndex();
         updateLabel();
       });
       updateLabel();
     }
-    gd.addCheckbox("Log_progress", logProgress);
-    gd.addChoice("Output_mode", OUTPUT_MODE, outputMode, new OptionListener<Integer>() {
-      @Override
-      public boolean collectOptions(Integer value) {
-        outputMode = value;
-        return collectOptions(false);
-      }
+    gd.addCheckbox("Log_progress", settings.logProgress);
+    gd.addChoice("Output_mode", Settings.OUTPUT_MODE, settings.outputMode,
+        new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            settings.outputMode = value;
+            return collectOptions(false);
+          }
 
-      @Override
-      public boolean collectOptions() {
-        return collectOptions(true);
-      }
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
 
-      private boolean collectOptions(boolean silent) {
-        if (outputMode == 0) {
-          // Nothing to do
-          return false;
-        }
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
-        egd.addNumericField("Slices_per_image", nImages, 0);
-        egd.addDirectoryField("Output_directory", outputDirectory);
-        egd.setSilent(silent);
-        egd.showDialog(true, gd);
-        if (egd.wasCanceled()) {
-          return false;
-        }
-        nImages = (int) egd.getNextNumber();
-        outputDirectory = egd.getNextString();
-        updateLabel2();
-        return true;
-      }
-    });
+          private boolean collectOptions(boolean silent) {
+            if (settings.outputMode == 0) {
+              // Nothing to do
+              return false;
+            }
+            final ExtendedGenericDialog egd = new ExtendedGenericDialog("Output Options");
+            egd.addNumericField("Slices_per_image", settings.imageCount, 0);
+            egd.addDirectoryField("Output_directory", settings.outputDirectory);
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+            settings.imageCount = (int) egd.getNextNumber();
+            settings.outputDirectory = egd.getNextString();
+            updateLabel2();
+            return true;
+          }
+        });
     gd.addMessage("");
     label2 = gd.getLastLabel();
     if (ImageJUtils.isShowGenericDialog()) {
       final Choice choice = gd.getLastChoice();
       choice.addItemListener(event -> {
-        outputMode = choice.getSelectedIndex();
+        settings.outputMode = choice.getSelectedIndex();
         updateLabel2();
       });
       updateLabel2();
@@ -192,28 +258,23 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       return;
     }
 
-    inputMode = gd.getNextChoiceIndex();
-    logProgress = gd.getNextBoolean();
-    outputMode = gd.getNextChoiceIndex();
+    settings.inputMode = gd.getNextChoiceIndex();
+    settings.logProgress = gd.getNextBoolean();
+    settings.outputMode = gd.getNextChoiceIndex();
 
-    Prefs.set(Constants.tiffSeriesMode, inputMode);
-    Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
-    Prefs.set(Constants.tiffSeriesFile, inputFile);
-    Prefs.set(Constants.tiffSeriesLogProgress, logProgress);
-    Prefs.set(Constants.tiffSeriesOutputMode, outputMode);
-    Prefs.set(Constants.tiffSeriesOutputNImages, nImages);
-    Prefs.set(Constants.tiffSeriesOutputDirectory, outputDirectory);
+    settings.save();
 
     SeriesImageSource source;
-    if (inputMode == 0) {
-      final SeriesOpener series = new SeriesOpener(inputDirectory);
+    if (settings.inputMode == 0) {
+      final SeriesOpener series = new SeriesOpener(settings.inputDirectory);
       if (series.getNumberOfImages() == 0) {
-        IJ.error(TITLE, "No images in the selected directory:\n" + inputDirectory);
+        IJ.error(TITLE, "No images in the selected directory:\n" + settings.inputDirectory);
         return;
       }
       source = new SeriesImageSource(PeakFit.getName(series.getImageList()), series);
     } else {
-      source = new SeriesImageSource(FileUtils.getName(inputFile), new String[] {inputFile});
+      source = new SeriesImageSource(FileUtils.getName(settings.inputFile),
+          new String[] {settings.inputFile});
     }
 
     source.setBufferLimit(0); // No memory buffer
@@ -233,10 +294,10 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
     // Create a virtual stack
     final TiffSeriesVirtualStack stack = new TiffSeriesVirtualStack(source);
-    if (outputMode == 0) {
+    if (settings.outputMode == 0) {
       stack.show();
     } else {
-      final int nImages = Math.max(1, TiffSeriesViewer.nImages);
+      final int nImages = Math.max(1, settings.imageCount);
       final ImagePlus imp = stack.createImp();
       // The calibration only has the offset so ignore for speed.
       // Calibration cal = imp.getCalibration();
@@ -245,7 +306,8 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       // Create the format string
       final int digits = String.format("%d", size).length();
       final String format =
-          new File(outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif").getPath();
+          new File(settings.outputDirectory, imp.getShortTitle() + "%0" + digits + "d.tif")
+              .getPath();
 
       IJ.showStatus("Saving image ...");
       try {
@@ -255,7 +317,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
           }
           ImageJUtils.showSlowProgress(i, size);
           final String path = String.format(format, i);
-          // System.out.println(path);
           final ImageStack out = new ImageStack(source.getWidth(), source.getHeight());
           for (int j = 0, k = i; j < nImages && k <= size; j++, k++) {
             out.addSlice(null, stack.getPixels(k));
@@ -277,8 +338,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
   }
 
   private static void saveAsTiff(ImagePlus imp, String path) throws IOException {
-    // IJ.saveAsTiff(imp, path);
-
     final FileInfo fi = imp.getFileInfo();
     fi.nImages = imp.getStackSize();
     try (DataOutputStream out =
@@ -288,18 +347,19 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
   }
 
   private void updateLabel() {
-    if (inputMode == 0) {
-      label.setText(inputDirectory);
+    if (settings.inputMode == 0) {
+      label.setText(settings.inputDirectory);
     } else {
-      label.setText(inputFile);
+      label.setText(settings.inputFile);
     }
   }
 
   private void updateLabel2() {
-    if (outputMode == 0) {
+    if (settings.outputMode == 0) {
       label2.setText("");
     } else {
-      label2.setText(String.format("Slices per image = %d : %s", nImages, outputDirectory));
+      label2.setText(String.format("Slices per image = %d : %s", settings.imageCount,
+          settings.outputDirectory));
     }
   }
 
@@ -354,8 +414,6 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
     private void addInfo(ImagePlus imp) {
       // So the FileSaver can save the stack make sure the FileInfo is not null
-      // FileInfo fi = new FileInfo();
-      // imp.setFileInfo(fi);
       imp.getFileInfo();
 
       // Get metadata from the source
@@ -412,7 +470,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
         ip.drawString("Error opening frame " + n, size, size * 2);
         depthThisImage = 8;
       }
-      // Convert to the corect bit depth
+      // Convert to the correct bit depth
       if (depthThisImage != getBitDepth()) {
         switch (getBitDepth()) {
           case 8:
@@ -485,7 +543,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
   @Override
   public void log(String format, Object... args) {
-    if (logProgress) {
+    if (settings.logProgress) {
       ImageJUtils.log(format, args);
     }
   }
@@ -508,7 +566,7 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
 
   @Override
   public boolean isLog() {
-    return logProgress;
+    return settings.logProgress;
   }
 
   @Override
