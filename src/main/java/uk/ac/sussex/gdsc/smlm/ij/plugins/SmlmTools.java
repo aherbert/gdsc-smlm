@@ -37,6 +37,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
@@ -62,7 +64,7 @@ public class SmlmTools extends PlugInFrame {
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   private static final String OPT_LOCATION = "SMLM_Plugins.location";
 
-  private static PlugInFrame instance;
+  private static final AtomicReference<PlugInFrame> instance = new AtomicReference<>();
 
   // Store the screen dimension
   private static Dimension screenDimension;
@@ -84,20 +86,18 @@ public class SmlmTools extends PlugInFrame {
     super(TITLE);
 
     // Only allow one instance to run
-    if (isFrameVisible()) {
-      if (!(instance.getTitle().equals(getTitle()))) {
-        closeFrame();
-      } else {
-        instance.toFront();
-        return;
-      }
+    final Frame frame = instance.get();
+
+    if (frame != null) {
+      frame.toFront();
+      return;
     }
 
     if (!createFrame()) {
       return;
     }
 
-    instance = this;
+    instance.set(this);
     WindowManager.addWindow(this);
 
     pack();
@@ -114,29 +114,19 @@ public class SmlmTools extends PlugInFrame {
   }
 
   @Override
-  public void windowClosing(WindowEvent event) {
+  public void close() {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
-    instance = null;
-    close();
-  }
-
-  /**
-   * Checks if the instance of the SMLM Tools Frame is visible.
-   *
-   * @return True if the instance of the SMLM Tools Frame is visible.
-   */
-  public static boolean isFrameVisible() {
-    return (instance != null && instance.isVisible());
+    instance.compareAndSet(this, null);
+    super.close();
   }
 
   /**
    * Close the instance of the SMLM Tools Frame.
    */
   public static void closeFrame() {
-    if (instance != null) {
-      Prefs.saveLocation(OPT_LOCATION, instance.getLocation());
-      instance.close();
-      instance = null;
+    final PlugInFrame frame = instance.getAndUpdate(fr -> null);
+    if (frame != null) {
+      frame.close();
     }
   }
 
