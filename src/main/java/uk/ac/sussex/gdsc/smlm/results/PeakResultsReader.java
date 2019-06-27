@@ -2139,6 +2139,9 @@ public class PeakResultsReader {
 
       // The single line header
       final String header = input.readLine();
+      if (header == null) {
+        throw new IOException("NStorm header missing");
+      }
 
       // NStorm files added more column fields for later formats.
       // If the header contains 'Photons' then this can be used to determine the gain
@@ -2192,17 +2195,14 @@ public class PeakResultsReader {
 
     // Determine the gain using the photons column
     final Statistics gain = new Statistics();
-    results.forEach(new PeakResultProcedureX() {
-      @Override
-      public boolean execute(PeakResult peakResult) {
-        double photons = peakResult.getError();
-        if (photons != 0) {
-          peakResult.setError(0);
-          gain.add(peakResult.getIntensity() / photons);
-          return false;
-        }
-        return true;
+    results.forEach((PeakResultProcedureX) peakResult -> {
+      double photons = peakResult.getError();
+      if (photons != 0) {
+        peakResult.setError(0);
+        gain.add(peakResult.getIntensity() / photons);
+        return false;
       }
+      return true;
     });
 
     // TODO - Support all the NSTORM formats: one-axis, two-axis, rotated, 3D.
