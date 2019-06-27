@@ -36,41 +36,88 @@ import ij.IJ;
 import ij.Prefs;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * This plugin allows the header to be displayed from a PeakFit results file.
  */
 public class ShowResultsHeader implements PlugIn {
   private static final String TITLE = "Show Results Header";
 
-  private static String inputFilename = Prefs.get(Constants.inputFilename, "");
-  private static boolean raw;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputFilename;
+    boolean raw;
+
+    Settings() {
+      // Set defaults
+      inputFilename = Prefs.get(Constants.inputFilename, "");
+    }
+
+    Settings(Settings source) {
+      inputFilename = source.inputFilename;
+      raw = source.raw;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+      Prefs.set(Constants.inputFilename, inputFilename);
+    }
+  }
 
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Show the results header in the ImageJ log");
-    gd.addFilenameField("Filename", inputFilename, 30);
-    gd.addCheckbox("Raw", raw);
+    gd.addFilenameField("Filename", settings.inputFilename, 30);
+    gd.addCheckbox("Raw", settings.raw);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
 
-    inputFilename = gd.getNextString();
-    raw = gd.getNextBoolean();
+    settings.inputFilename = gd.getNextString();
+    settings.raw = gd.getNextBoolean();
 
-    Prefs.set(Constants.inputFilename, inputFilename);
+    settings.save();
 
-    final PeakResultsReader reader = new PeakResultsReader(inputFilename);
+    final PeakResultsReader reader = new PeakResultsReader(settings.inputFilename);
     final String header = reader.getHeader();
     if (header == null) {
-      IJ.error(TITLE, "No header found in file: " + inputFilename);
+      IJ.error(TITLE, "No header found in file: " + settings.inputFilename);
       return;
     }
-    if (raw) {
+    if (settings.raw) {
       // The ImageJ TextPanel class correctly stores lines with tab characters.
       // However when it is drawn in ij.text.TextCanvas using java.awt.Graphics.drawChars(...)
       // the instance of this class is sun.java2d.SunGraphics2D which omits '\t' chars.
@@ -93,7 +140,7 @@ public class ShowResultsHeader implements PlugIn {
     found |= show("PSF", reader.getPsf());
     found |= show("Configuration", reader.getConfiguration());
     if (!found) {
-      IJ.error(TITLE, "No header information found in file: " + inputFilename);
+      IJ.error(TITLE, "No header information found in file: " + settings.inputFilename);
     }
   }
 
