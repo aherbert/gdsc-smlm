@@ -121,6 +121,16 @@ public class SmlmTools extends PlugInFrame {
   }
 
   /**
+   * Checks if the instance of the SMLM Tools Frame is visible.
+   *
+   * @return True if the instance of the SMLM Tools Frame is visible.
+   */
+  public static boolean isFrameVisible() {
+    final Frame frame = instance.get();
+    return (frame != null && frame.isVisible());
+  }
+
+  /**
    * Close the instance of the SMLM Tools Frame.
    */
   public static void closeFrame() {
