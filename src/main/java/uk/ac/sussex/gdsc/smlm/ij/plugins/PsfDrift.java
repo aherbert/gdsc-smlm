@@ -99,7 +99,9 @@ public class PsfDrift implements PlugIn {
 
   private ImagePlus imp;
   private ImagePSF psfSettings;
-  private static FitConfiguration fitConfig = new FitConfiguration();
+  private static AtomicReference<FitConfiguration> fitConfigRef =
+      new AtomicReference<>(new FitConfiguration());
+  private FitConfiguration fitConfig = new FitConfiguration();
 
   private int centrePixel;
   private int total;
@@ -454,6 +456,7 @@ public class PsfDrift implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     settings = Settings.load();
+    fitConfig = fitConfigRef.get().createCopy();
     gd.addMessage("Select the input PSF image");
     gd.addChoice("PSF", titles.toArray(new String[titles.size()]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
@@ -503,6 +506,7 @@ public class PsfDrift implements PlugIn {
     settings.photonLimit = Math.abs(gd.getNextNumber());
     settings.smoothing = Math.abs(gd.getNextNumber());
     settings.save();
+    fitConfigRef.set(fitConfig);
 
     gd.collectOptions();
 
@@ -543,7 +547,10 @@ public class PsfDrift implements PlugIn {
         PeakFit.FLAG_NO_SAVE)) {
       return;
     }
+
+    // Update configuration
     fitConfig = config.getFitConfiguration();
+    fitConfigRef.set(fitConfig);
 
     computeDrift();
   }
