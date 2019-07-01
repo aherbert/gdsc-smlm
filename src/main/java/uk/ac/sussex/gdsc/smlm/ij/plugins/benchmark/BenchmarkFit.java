@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -50,7 +50,11 @@ import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.CreateData.BenchmarkParameters;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData.BenchmarkParameters;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;

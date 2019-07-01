@@ -22,8 +22,9 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -65,7 +66,15 @@ import uk.ac.sussex.gdsc.smlm.ga.SimpleMutator;
 import uk.ac.sussex.gdsc.smlm.ga.SimpleRecombiner;
 import uk.ac.sussex.gdsc.smlm.ga.SimpleSelectionStrategy;
 import uk.ac.sussex.gdsc.smlm.ga.ToleranceChecker;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFit.FilterCandidates;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SpotFinderPreview;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFit.BenchmarkSpotFitResults;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFit.FilterCandidates;
 import uk.ac.sussex.gdsc.smlm.ij.results.ResultsImageSampler;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
@@ -349,6 +358,13 @@ public class BenchmarkFilterAnalysis
   private boolean debug;
   private CoordinateStore coordinateStore;
 
+  // TODO - Store the latest results from the BenchmarkSpotFit all at once.
+
+  /** Set to true if the BenchmarkSpotFit plugin computed doublets. */
+  private boolean computeDoublets;
+  /** The signal factor from the BenchmarkSpotFit plugin. */
+  private double fitSignalFactor;
+
   // Used to tile plot windows
   private final WindowOrganiser wo = new WindowOrganiser();
 
@@ -425,7 +441,7 @@ public class BenchmarkFilterAnalysis
   }
 
   /**
-   * Used to allow multi-threading of the scoring the fit results.
+   * Used to allow multi-threading of scoring the fit results.
    */
   private class FitResultsWorker implements Runnable {
 
@@ -807,18 +823,22 @@ public class BenchmarkFilterAnalysis
       }
       return true;
     }
-    if (BenchmarkSpotFit.lastId != simulationParameters.id) {
+    if (BenchmarkSpotFit.lastId.get() != simulationParameters.id) {
       if (!silent) {
         IJ.error(TITLE, "Update the benchmark spot fitting for the latest simulation");
       }
       return true;
     }
-    if (BenchmarkSpotFit.lastFilterId != BenchmarkSpotFilter.filterResult.id) {
+    if (BenchmarkSpotFit.lastFilterId.get() != BenchmarkSpotFilter.filterResult.id) {
       if (!silent) {
         IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
       }
       return true;
     }
+
+    computeDoublets = BenchmarkSpotFit.getComputeDoublets();
+    fitSignalFactor = BenchmarkSpotFit.getSignalFactor();
+
     return false;
   }
 
@@ -1010,11 +1030,13 @@ public class BenchmarkFilterAnalysis
   }
 
   private void resetParametersFromFitting() {
-    failCount = BenchmarkSpotFit.config.getFailuresLimit();
-    duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
-    duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
-    residualsThreshold = sResidualsThreshold =
-        (BenchmarkSpotFit.computeDoublets) ? BenchmarkSpotFit.multiFilter.residualsThreshold : 1;
+    FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
+    failCount = config.getFailuresLimit();
+    duplicateDistance = config.getDuplicateDistance();
+    duplicateDistanceAbsolute = config.getDuplicateDistanceAbsolute();
+    residualsThreshold = sResidualsThreshold = (BenchmarkSpotFit.getComputeDoublets())
+        ? BenchmarkSpotFit.getMultiFilter().residualsThreshold
+        : 1;
   }
 
   private double[] createParameters() {
@@ -1127,24 +1149,27 @@ public class BenchmarkFilterAnalysis
 
   @SuppressWarnings("unchecked")
   private List<FilterSet> readFilterSets() {
-    if (extraOptions && BenchmarkSpotFit.multiFilter != null) {
-      final IDirectFilter f = BenchmarkSpotFit.multiFilter.getFilter();
-      if (f instanceof DirectFilter) {
-        final GenericDialog gd = new GenericDialog(TITLE);
-        gd.addMessage("Use an identical filter to " + BenchmarkSpotFit.TITLE);
-        gd.enableYesNoCancel();
-        gd.hideCancelButton();
-        gd.showDialog();
-        if (gd.wasOKed()) {
-          setLastFile(null);
-          final List<FilterSet> filterSets = new ArrayList<>(1);
-          final List<Filter> filters = new ArrayList<>(1);
-          filters.add((DirectFilter) f);
-          final FilterSet filterSet = new FilterSet(filters);
-          filterSets.add(filterSet);
-          resetParametersFromFitting();
-          createResultsPrefix2();
-          return filterSets;
+    if (extraOptions) {
+      MultiPathFilter multiFilter = BenchmarkSpotFit.getMultiFilter();
+      if (multiFilter != null) {
+        final IDirectFilter f = multiFilter.getFilter();
+        if (f instanceof DirectFilter) {
+          final GenericDialog gd = new GenericDialog(TITLE);
+          gd.addMessage("Use an identical filter to " + BenchmarkSpotFit.TITLE);
+          gd.enableYesNoCancel();
+          gd.hideCancelButton();
+          gd.showDialog();
+          if (gd.wasOKed()) {
+            setLastFile(null);
+            final List<FilterSet> filterSets = new ArrayList<>(1);
+            final List<Filter> filters = new ArrayList<>(1);
+            filters.add((DirectFilter) f);
+            final FilterSet filterSet = new FilterSet(filters);
+            filterSets.add(filterSet);
+            resetParametersFromFitting();
+            createResultsPrefix2();
+            return filterSets;
+          }
         }
       }
     }
@@ -1510,17 +1535,19 @@ public class BenchmarkFilterAnalysis
 
   private MultiPathFitResults[] readResults() {
     boolean update = resultsList == null; // XXX set to true when debugging
-    if (lastId != BenchmarkSpotFit.fitResultsId) {
+    BenchmarkSpotFitResults fitResults = BenchmarkSpotFit.resultsCacheRef.get();
+    if (lastId != fitResults.id) {
       if (lastId == 0) {
         // Copy the settings from the fitter if this is the first run
-        failCount = BenchmarkSpotFit.config.getFailuresLimit();
-        duplicateDistance = BenchmarkSpotFit.config.getDuplicateDistance();
-        duplicateDistanceAbsolute = BenchmarkSpotFit.config.getDuplicateDistanceAbsolute();
-        sResidualsThreshold =
-            (BenchmarkSpotFit.computeDoublets) ? BenchmarkSpotFit.multiFilter.residualsThreshold
-                : 1;
+        FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
+        failCount = config.getFailuresLimit();
+        duplicateDistance = config.getDuplicateDistance();
+        duplicateDistanceAbsolute = config.getDuplicateDistanceAbsolute();
+        sResidualsThreshold = (BenchmarkSpotFit.getComputeDoublets())
+            ? BenchmarkSpotFit.getMultiFilter().residualsThreshold
+            : 1;
       }
-      lastId = BenchmarkSpotFit.fitResultsId;
+      lastId = fitResults.id;
       update = true;
       actualCoordinates = getCoordinates(results);
     }
@@ -1634,9 +1661,10 @@ public class BenchmarkFilterAnalysis
 
       // Signal factor must be greater than 1
       final RampedScore signalScore;
-      if (BenchmarkSpotFit.signalFactor > 0 && upperSignalFactor > 0) {
-        signalScore = new RampedScore(BenchmarkSpotFit.signalFactor * partialSignalFactor / 100.0,
-            BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0);
+      double signalFactor = BenchmarkSpotFit.getSignalFactor();
+      if (signalFactor > 0 && upperSignalFactor > 0) {
+        signalScore = new RampedScore(signalFactor * partialSignalFactor / 100.0,
+            signalFactor * upperSignalFactor / 100.0);
         lowerSignalFactor = signalScore.lower;
         signalFactor = signalScore.upper;
         resultsPrefix3 += "\t" + MathUtils.rounded(signalScore.lower) + "\t"
@@ -1704,7 +1732,8 @@ public class BenchmarkFilterAnalysis
             distanceStats.add(worker.distanceStats);
           }
         } catch (final InterruptedException ex) {
-          ex.printStackTrace();
+          Thread.currentThread().interrupt();
+          throw new ConcurrentRuntimeException("Unexpected interrupt", ex);
         }
       }
       threads.clear();
@@ -1714,12 +1743,7 @@ public class BenchmarkFilterAnalysis
 
       resultsList = results.toArray(new MultiPathFitResults[results.size()]);
 
-      Arrays.sort(resultsList, new Comparator<MultiPathFitResults>() {
-        @Override
-        public int compare(MultiPathFitResults o1, MultiPathFitResults o2) {
-          return o1.getFrame() - o2.getFrame();
-        }
-      });
+      Arrays.sort(resultsList, (o1, o2) -> Integer.compare(o1.getFrame(), o2.getFrame()));
     }
 
     // In case a previous run was interrupted
@@ -1776,7 +1800,7 @@ public class BenchmarkFilterAnalysis
       gd.addNumericField("Min_fail_count", minFailCount, 0);
       gd.addNumericField("Max_fail_count", maxFailCount, 0);
     }
-    if (BenchmarkSpotFit.computeDoublets) {
+    if (computeDoublets) {
       gd.addSlider("Residuals_threshold", 0.01, 1, sResidualsThreshold);
       if (showOptimiseParams) {
         gd.addNumericField("Min_residuals_threshold", minResidualsThreshold, 2);
@@ -1808,7 +1832,7 @@ public class BenchmarkFilterAnalysis
     gd.addChoice("Score", COLUMNS, COLUMNS[scoreIndex]);
     ImageJUtils.addMessage(gd, "Fitting match distance = %s nm; signal factor = %s",
         MathUtils.rounded(BenchmarkSpotFit.distanceInPixels * simulationParameters.pixelPitch),
-        MathUtils.rounded(BenchmarkSpotFit.signalFactor));
+        MathUtils.rounded(fitSignalFactor));
     gd.addSlider("Upper_match_distance (%)", 0, 100, upperMatchDistance);
     gd.addSlider("Partial_match_distance (%)", 0, 100, partialMatchDistance);
     gd.addSlider("Upper_signal_factor (%)", 0, 100, upperSignalFactor);
@@ -1921,7 +1945,7 @@ public class BenchmarkFilterAnalysis
       minFailCount = (int) Math.abs(gd.getNextNumber());
       maxFailCount = (int) Math.abs(gd.getNextNumber());
     }
-    if (BenchmarkSpotFit.computeDoublets) {
+    if (computeDoublets) {
       // Round to the precision of the min/max
       residualsThreshold = sResidualsThreshold = MathUtils.round(Math.abs(gd.getNextNumber()), 4);
       if (showOptimiseParams) {
@@ -1997,7 +2021,7 @@ public class BenchmarkFilterAnalysis
       if (showOptimiseParams) {
         ParameterUtils.isEqualOrBelow("Fail count", failCount, maxFailCount);
         ParameterUtils.isEqualOrAbove("Fail count", failCount, minFailCount);
-        if (BenchmarkSpotFit.computeDoublets) {
+        if (computeDoublets) {
           ParameterUtils.isEqualOrBelow("Residuals threshold", sResidualsThreshold,
               maxResidualsThreshold);
           ParameterUtils.isEqualOrAbove("Residuals threshold", sResidualsThreshold,
@@ -2166,7 +2190,8 @@ public class BenchmarkFilterAnalysis
     getScoreFilter();
 
     gd.addSlider("Fail_count", 0, 20, scoreFailCount);
-    if (BenchmarkSpotFit.computeDoublets) {
+    computeDoublets = BenchmarkSpotFit.getComputeDoublets();
+    if (computeDoublets) {
       gd.addSlider("Residuals_threshold", 0.01, 1, scoreResidualsThreshold);
     }
     gd.addNumericField("Duplicate_distance", scoreDuplicateDistance, 2);
@@ -2203,7 +2228,7 @@ public class BenchmarkFilterAnalysis
           getScoreFilter();
           int index = 0;
           v.get(index++).setText(Integer.toString(scoreFailCount));
-          if (BenchmarkSpotFit.computeDoublets) {
+          if (computeDoublets) {
             v.get(index++).setText(Double.toString(scoreResidualsThreshold));
           }
           v.get(index++).setText(Double.toString(scoreDuplicateDistance));
@@ -2219,7 +2244,7 @@ public class BenchmarkFilterAnalysis
     }
 
     scoreFailCount = (int) Math.abs(gd.getNextNumber());
-    if (BenchmarkSpotFit.computeDoublets) {
+    if (computeDoublets) {
       scoreResidualsThreshold = Math.abs(gd.getNextNumber());
     }
     scoreDuplicateDistance = Math.abs(gd.getNextNumber());
@@ -2278,11 +2303,7 @@ public class BenchmarkFilterAnalysis
       return false;
     }
 
-    if (!selectTableColumns()) {
-      return false;
-    }
-
-    return true;
+    return selectTableColumns();
   }
 
   private static SettingsList lastAnalyseSettings;
@@ -2353,8 +2374,6 @@ public class BenchmarkFilterAnalysis
 
       createResultsWindow();
 
-      final boolean debugSpeed = false;
-
       // Only repeat analysis if necessary
       double evolveSetting = evolve;
       if (evolve == 1) {
@@ -2367,7 +2386,7 @@ public class BenchmarkFilterAnalysis
 
       final boolean equalSettings = settings.equals(lastAnalyseSettings);
 
-      if (debugSpeed || !equalSettings || (evolve != 0 && repeatEvolve)) {
+      if (!equalSettings || (evolve != 0 && repeatEvolve)) {
         newResults = true;
         lastAnalyseSettings = settings;
 
@@ -2429,7 +2448,7 @@ public class BenchmarkFilterAnalysis
       // Only repeat analysis if necessary
       double min = minResidualsThreshold;
       double max = maxResidualsThreshold;
-      if (BenchmarkSpotFit.computeDoublets) {
+      if (computeDoublets) {
         min = max = 0;
       }
       final SettingsList settings = new SettingsList(optimum, resultsList, failCount, minFailCount,
@@ -3967,7 +3986,7 @@ public class BenchmarkFilterAnalysis
     try {
       originalDimensions[++index] = new FixedDimension(minFailCount, maxFailCount, 1);
       // TODO - let the min intervals be configured, maybe via extra options
-      if (BenchmarkSpotFit.computeDoublets) {
+      if (computeDoublets) {
         originalDimensions[++index] =
             new FixedDimension(minResidualsThreshold, maxResidualsThreshold, 0.05);
       } else {
@@ -5314,6 +5333,7 @@ public class BenchmarkFilterAnalysis
    * @param filter the filter
    * @return the assignments
    */
+  @Nullable
   private ArrayList<FractionalAssignment[]>
       scoreAnalysis(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
     if (!scoreAnalysis) {
@@ -5325,8 +5345,8 @@ public class BenchmarkFilterAnalysis
     final double[] distance = distanceStats.getValues();
 
     double[] limits1;
-    if (BenchmarkSpotFit.signalFactor > 0 && upperSignalFactor > 0) {
-      final double range = BenchmarkSpotFit.signalFactor * upperSignalFactor / 100.0;
+    if (fitSignalFactor > 0 && upperSignalFactor > 0) {
+      final double range = fitSignalFactor * upperSignalFactor / 100.0;
       limits1 = new double[] {-range, range};
     } else {
       limits1 = MathUtils.limits(signal);
@@ -7398,7 +7418,7 @@ public class BenchmarkFilterAnalysis
         distanceScallingFactor = 1;
       } else {
         // The duplicate distance is scaled
-        distanceScallingFactor = BenchmarkSpotFit.config.getHwhmMax();
+        distanceScallingFactor = BenchmarkSpotFit.getFitEngineConfiguration().getHwhmMax();
       }
 
       final ImagePlus imp = CreateData.getImage();

@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -61,13 +61,20 @@ import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfSpot;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SpotFinderPreview;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -96,6 +103,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -197,6 +205,10 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private WindowOrganiser windowOrganiser;
 
+  // TODO:
+  // Convert all static settings fields to be stored in a single class.
+  // Convert all static results fields to be stored in a single class.
+
   /**
    * The prefix for the results table header. Contains all the standard header data about the input
    * results data.
@@ -210,7 +222,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   static String resultPrefix;
 
   // Used by the Benchmark Spot Fit plugin
-  private static int filterResultsId;
+  private static AtomicInteger filterResultsId = new AtomicInteger();
 
   /** The filter result. */
   static BenchmarkFilterResult filterResult;
@@ -223,7 +235,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     public final int simulationId;
 
     /** The id. */
-    public final int id = ++filterResultsId;
+    public final int id = filterResultsId.incrementAndGet();
 
     /** The filter results. */
     public TIntObjectHashMap<FilterResult> filterResults;
@@ -696,7 +708,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         int index = 0;
         for (final Coordinate c : list1) {
           final PeakResultPoint p = (PeakResultPoint) c;
-          final PsfSpot spot = new PsfSpot(p.getTime(), p.getX(), p.getY(), p.peakResult);
+          final PsfSpot spot = new PsfSpot(p.getTime(), p.getX(), p.getY(), p.getPeakResult());
           list2[index++] = spot;
 
           // Compute the amplitude.

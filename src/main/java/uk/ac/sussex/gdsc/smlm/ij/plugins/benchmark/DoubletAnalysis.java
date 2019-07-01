@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -64,10 +64,16 @@ import uk.ac.sussex.gdsc.smlm.fitting.LseFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.MleFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -1362,7 +1368,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       double matchScore = rampedScore.scoreAndFlatten(d2, 256);
       if (signalScore != null) {
         final PeakResultPoint p = (PeakResultPoint) coord;
-        final double s1 = p.peakResult.getIntensity();
+        final double s1 = p.getPeakResult().getIntensity();
         double s2;
         switch (id) {
           case -1:
@@ -1831,7 +1837,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       // Use the fit analysis distance if no filter analysis has been run
       settings.matchDistance = BenchmarkSpotFit.distanceInPixels;
       settings.lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
-      settings.signalFactor = settings.lowerSignalFactor = BenchmarkSpotFit.signalFactor;
+      settings.signalFactor = settings.lowerSignalFactor = BenchmarkSpotFit.getSignalFactor();
     }
 
     return true;

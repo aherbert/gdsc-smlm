@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -43,12 +43,16 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFilter.FilterResult;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkSpotFilter.ScoredSpot;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator.PeakResultPoint;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.FilterResult;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -378,7 +382,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       final double[] zPosition = new double[actual.length];
       for (int i = 0; i < actual.length; i++) {
         final PeakResultPoint p = (PeakResultPoint) actual[i];
-        zPosition[i] = p.peakResult.getZPosition();
+        zPosition[i] = p.getPeakResult().getZPosition();
       }
 
       final RankResults results = new RankResults(spots, zPosition);

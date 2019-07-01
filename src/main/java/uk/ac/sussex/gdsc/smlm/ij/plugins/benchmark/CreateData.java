@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -82,7 +82,17 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.AstigmatismModelManager;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.CameraModelFisherInformationAnalysis;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.CameraModelManager;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCombiner;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.ActivationEnergyImageModel;

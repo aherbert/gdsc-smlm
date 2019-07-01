@@ -287,7 +287,7 @@ public class LoadLocalisations implements PlugIn {
    * @param settings the settings
    * @return the localisation list
    */
-  static LocalisationList loadLocalisations(LoadLocalisationsSettings.Builder settings) {
+  public static LocalisationList loadLocalisations(LoadLocalisationsSettings.Builder settings) {
     if (!getFields(settings)) {
       return null;
     }

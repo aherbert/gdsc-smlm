@@ -61,6 +61,7 @@ import uk.ac.sussex.gdsc.smlm.filters.SpotFilterHelper;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.RelativeParameterProvider;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.FakePerPixelCameraModel;

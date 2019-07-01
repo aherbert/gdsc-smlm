@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterScore;

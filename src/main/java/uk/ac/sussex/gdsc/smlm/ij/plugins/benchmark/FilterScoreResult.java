@@ -22,33 +22,35 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.ij.plugins;
+package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
+
+import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 
 /**
- * Store the score from analysis of the non-filter parameters during direct filter analysis.
+ * Store the score from analysis of the direct filter.
  */
-public class ParameterScoreResult {
+public class FilterScoreResult {
   /** The score. */
   final double score;
   /** The criteria. */
   final double criteria;
-  /** The parameters. */
-  final double[] parameters;
+  /** The filter. */
+  final DirectFilter filter;
   /** The text. */
   final String text;
 
   /**
-   * Instantiates a new parameter score result.
+   * Instantiates a new filter score result.
    *
    * @param score the score
    * @param criteria the criteria
-   * @param parameters the parameters
+   * @param filter the filter
    * @param text the text
    */
-  public ParameterScoreResult(double score, double criteria, double[] parameters, String text) {
+  public FilterScoreResult(double score, double criteria, DirectFilter filter, String text) {
     this.score = score;
     this.criteria = criteria;
-    this.parameters = parameters;
+    this.filter = filter;
     this.text = text;
   }
 }

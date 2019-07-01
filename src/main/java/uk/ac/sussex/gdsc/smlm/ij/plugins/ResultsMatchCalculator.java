@@ -31,7 +31,6 @@ import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
@@ -44,6 +43,7 @@ import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
@@ -63,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -320,67 +319,6 @@ public class ResultsMatchCalculator implements PlugIn {
     }
   }
 
-  /**
-   * A point that holds a reference to a PeakResult.
-   */
-  public static class PeakResultPoint extends BasePoint {
-    /** The time. */
-    final int time;
-
-    /** The peak result. */
-    final PeakResult peakResult;
-
-    /**
-     * Instantiates a new peak result point.
-     *
-     * @param time the time
-     * @param x the x
-     * @param y the y
-     * @param z the z
-     * @param peakResult the peak result
-     */
-    public PeakResultPoint(int time, float x, float y, float z, PeakResult peakResult) {
-      super(x, y, z);
-      this.time = time;
-      this.peakResult = peakResult;
-    }
-
-    /**
-     * Gets the time.
-     *
-     * @return the time
-     */
-    public int getTime() {
-      return time;
-    }
-
-    /**
-     * Gets the peak result.
-     *
-     * @return the peak result
-     */
-    public PeakResult getPeakResult() {
-      return peakResult;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-      if (super.equals(object)) {
-        // Super-class ensures the class is the same.
-        // Compare new fields.
-        final PeakResultPoint other = (PeakResultPoint) object;
-        return time == other.time && peakResult == other.peakResult;
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return Arrays.hashCode(new int[] {super.hashCode(), time, Objects.hashCode(peakResult)});
-    }
-
-  }
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -543,7 +481,7 @@ public class ResultsMatchCalculator implements PlugIn {
         // Matches are marked in the original value with 1 for true, 0 for false
         if (saveMatched) {
           for (final PointPair pair : matches) {
-            PeakResult result = ((PeakResultPoint) pair.getPoint2()).peakResult;
+            PeakResult result = ((PeakResultPoint) pair.getPoint2()).getPeakResult();
             result = result.copy();
             result.setOrigValue(1);
             fileResults.add(result);
@@ -551,7 +489,7 @@ public class ResultsMatchCalculator implements PlugIn {
         }
         if (saveUnmatched) {
           for (final Coordinate c : fp) {
-            PeakResult result = ((PeakResultPoint) c).peakResult;
+            PeakResult result = ((PeakResultPoint) c).getPeakResult();
             result = result.copy();
             result.setOrigValue(0);
             fileResults.add(result);
@@ -687,10 +625,10 @@ public class ResultsMatchCalculator implements PlugIn {
         for (final PointPair pair : allMatches) {
           if (pairDistances[index++] <= d2) {
             if (doIdAnalysis1) {
-              matchId1.add(((PeakResultPoint) pair.getPoint1()).peakResult.getId());
+              matchId1.add(((PeakResultPoint) pair.getPoint1()).getPeakResult().getId());
             }
             if (doIdAnalysis2) {
-              matchId2.add(((PeakResultPoint) pair.getPoint2()).peakResult.getId());
+              matchId2.add(((PeakResultPoint) pair.getPoint2()).getPeakResult().getId());
             }
           }
         }
@@ -1119,8 +1057,8 @@ public class ResultsMatchCalculator implements PlugIn {
     for (final PointPair pair : allMatches) {
       final int insert = search(distanceThresholds, pairDistances[index++]);
       if (insert != -1) {
-        final PeakResult r1 = ((PeakResultPoint) pair.getPoint1()).peakResult;
-        final PeakResult r2 = ((PeakResultPoint) pair.getPoint2()).peakResult;
+        final PeakResult r1 = ((PeakResultPoint) pair.getPoint1()).getPeakResult();
+        final PeakResult r2 = ((PeakResultPoint) pair.getPoint2()).getPeakResult();
         output1[insert].add(r1);
         output2[insert].add(r2);
       }

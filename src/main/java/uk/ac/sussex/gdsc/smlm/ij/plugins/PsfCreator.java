@@ -87,6 +87,7 @@ import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePsf;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.Image2DAligner;

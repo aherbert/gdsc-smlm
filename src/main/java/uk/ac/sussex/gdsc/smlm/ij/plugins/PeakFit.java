@@ -1560,6 +1560,7 @@ public class PeakFit implements PlugInFilter {
   /**
    * Allow the latest fitEngineConfiguration to be provided for update.
    */
+  @FunctionalInterface
   public interface FitEngineConfigurationProvider {
     /**
      * Gets the fitEngineConfiguration.
@@ -1572,6 +1573,7 @@ public class PeakFit implements PlugInFilter {
   /**
    * Allow the latest fitConfiguration to be provided for update.
    */
+  @FunctionalInterface
   public interface FitConfigurationProvider {
     /**
      * Gets the fitConfiguration.
@@ -1594,7 +1596,7 @@ public class PeakFit implements PlugInFilter {
      *
      * @param config the configuration
      */
-    SimpleFitEngineConfigurationProvider(FitEngineConfiguration config) {
+    public SimpleFitEngineConfigurationProvider(FitEngineConfiguration config) {
       this.config = config;
     }
 
@@ -1616,7 +1618,7 @@ public class PeakFit implements PlugInFilter {
      *
      * @param fitConfig the configuration
      */
-    SimpleFitConfigurationProvider(FitConfiguration fitConfig) {
+    public SimpleFitConfigurationProvider(FitConfiguration fitConfig) {
       this.fitConfig = fitConfig;
     }
 
