@@ -567,7 +567,7 @@ public class BenchmarkFit implements PlugIn {
       }
       runAnalysis();
     } else {
-      if (CreateData.benchmarkParameters == null) {
+      if (CreateData.getBenchmarkParameters() == null) {
         IJ.error(TITLE,
             "No benchmark parameters in memory.\n \n" + TextUtils.wrap(
                 "Run the " + CreateData.TITLE
@@ -575,7 +575,7 @@ public class BenchmarkFit implements PlugIn {
                 60));
         return;
       }
-      benchmarkParameters = CreateData.benchmarkParameters;
+      benchmarkParameters = CreateData.getBenchmarkParameters();
       imp = CreateData.getImage();
       if (imp == null || imp.getStackSize() != benchmarkParameters.frames) {
         IJ.error(TITLE, "No benchmark image to match the parameters in memory");

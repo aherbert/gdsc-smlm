@@ -1583,7 +1583,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     if ("analysis".equals(arg)) {
       runAnalysis();
     } else {
-      simulationParameters = CreateData.simulationParameters;
+      simulationParameters = CreateData.getSimulationParameters();
       if (simulationParameters == null) {
         IJ.error(TITLE, "No simulation parameters in memory");
         return;

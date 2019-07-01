@@ -512,7 +512,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     extraOptions = ImageJUtils.isExtraOptions();
 
-    simulationParameters = CreateData.simulationParameters;
+    simulationParameters = CreateData.getSimulationParameters();
     if (simulationParameters == null) {
       IJ.error(TITLE, "No benchmark spot parameters in memory");
       return;

@@ -1176,7 +1176,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private boolean initialise() {
-    simulationParameters = CreateData.simulationParameters;
+    simulationParameters = CreateData.getSimulationParameters();
     if (simulationParameters == null) {
       if (!silent) {
         IJ.error(TITLE, "No benchmark spot parameters in memory");

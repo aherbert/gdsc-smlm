@@ -390,7 +390,7 @@ public class CreateData implements PlugIn {
 
   /** Store the parameters. */
   public static class BaseParameters {
-    private static int nextId = 1;
+    private static AtomicInteger nextId = new AtomicInteger(1);
 
     /**
      * The parameter set identifier.
@@ -479,7 +479,7 @@ public class CreateData implements PlugIn {
         double averageSignal, double bias, double gain, double qe, double readNoise,
         CameraType cameraType, String cameraModelName, Rectangle cameraBounds, double background,
         double noise, PSF psf) {
-      id = nextId++;
+      id = nextId.getAndIncrement();
       this.sd = sd;
       this.pixelPitch = pixelPitch;
       this.minSignal = minSignal;
@@ -727,10 +727,10 @@ public class CreateData implements PlugIn {
   }
 
   /** The last benchmark parameters. */
-  static BenchmarkParameters benchmarkParameters;
+  private static BenchmarkParameters benchmarkParameters;
 
   /** The last simulation parameters. */
-  static SimulationParameters simulationParameters;
+  private static SimulationParameters simulationParameters;
 
   private static String benchmarkFile = "";
   private static LoadLocalisationsSettings.Builder loadSettings;
@@ -5390,6 +5390,24 @@ public class CreateData implements PlugIn {
       benchmarkImageId = 0;
       benchmarkResultsName = "";
     }
+  }
+
+  /**
+   * Gets the benchmark parameters from the latest benchmark.
+   *
+   * @return the benchmark parameters
+   */
+  static BenchmarkParameters getBenchmarkParameters() {
+    return benchmarkParameters;
+  }
+
+  /**
+   * Gets the simulation parameters from the latest simulation.
+   *
+   * @return the simulation parameters
+   */
+  static SimulationParameters getSimulationParameters() {
+    return simulationParameters;
   }
 
   /**
