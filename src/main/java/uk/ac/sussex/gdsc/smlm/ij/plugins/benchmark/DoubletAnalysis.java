@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -174,16 +175,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     filterFitConfigRef = new AtomicReference<>(filterFitConfig);
   }
 
-  private static TextWindow summaryTable;
-  private static TextWindow resultsTable;
-  private static TextWindow analysisTable;
-
-  /** Updated each time the score is computed (thus it hold the latest score). */
-  private ResidualsScore residualsScore;
+  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> resultsTableRef = new AtomicReference<>();
+  private static AtomicReference<TextWindow> analysisTableRef = new AtomicReference<>();
 
   // These are set during the initial analysis of fitted results.
   // They are used as a reference for subsequent analysis.
   private static AtomicReference<ReferenceResults> referenceResults = new AtomicReference<>();
+
+  /** Updated each time the score is computed (thus it hold the latest score). */
+  private ResidualsScore residualsScore;
 
   private ImagePlus imp;
   private MemoryPeakResults results;
@@ -2068,8 +2069,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     showResults(results, settings.showResults);
 
-    createSummaryTable();
-
     sb.setLength(0);
 
     final int n = countN(results);
@@ -2245,7 +2244,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     sb.append('\t').append(TextUtils.nanosToString(runTime));
 
-    summaryTable.append(sb.toString());
+    createSummaryTable().append(sb.toString());
 
     // Store results in memory for later analysis
     referenceResults.set(new ReferenceResults(results, residualsScoreMax, residualsScoreAv,
@@ -2415,11 +2414,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   /**
    * Creates the summary table.
    */
-  private static void createSummaryTable() {
-    if (summaryTable == null || !summaryTable.isVisible()) {
-      summaryTable = new TextWindow(TITLE + " Summary", createSummaryHeader(), "", 1000, 300);
-      summaryTable.setVisible(true);
-    }
+  private static TextWindow createSummaryTable() {
+    return ImageJUtils.refresh(summaryTableRef,
+        () -> new TextWindow(TITLE + " Summary", createSummaryHeader(), "", 1000, 300));
   }
 
   /**
@@ -2450,63 +2447,55 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       return;
     }
 
-    createResultsTable();
+    try (BufferedTextWindow tw = new BufferedTextWindow(createResultsTable())) {
+      tw.setIncrement(0);
+      final StringBuilder sb = new StringBuilder();
+      for (final DoubletResult result : results) {
+        sb.setLength(0);
+        sb.append(result.frame).append('\t');
+        sb.append(result.spot.x).append('\t');
+        sb.append(result.spot.y).append('\t');
+        sb.append(IJ.d2s(result.spot.intensity, 1)).append('\t');
+        sb.append(result.matchCount).append('\t');
+        sb.append(result.neighbours).append('\t');
+        sb.append(result.almostNeighbours).append('\t');
+        sb.append(MathUtils.rounded(result.score1)).append('\t');
+        sb.append(MathUtils.rounded(result.score2)).append('\t');
+        add(sb, result.fitResult1);
+        add(sb, result.fitResult2);
+        sb.append(IJ.d2s(result.sumOfSquares1, 1)).append('\t');
+        sb.append(IJ.d2s(result.sumOfSquares2, 1)).append('\t');
+        sb.append(IJ.d2s(result.ll1, 1)).append('\t');
+        sb.append(IJ.d2s(result.ll2, 1)).append('\t');
+        sb.append(IJ.d2s(result.value1, 1)).append('\t');
+        sb.append(IJ.d2s(result.value2, 1)).append('\t');
+        sb.append(MathUtils.rounded(result.r1)).append('\t');
+        sb.append(MathUtils.rounded(result.r2)).append('\t');
+        sb.append(MathUtils.rounded(result.aic1)).append('\t');
+        sb.append(MathUtils.rounded(result.aic2)).append('\t');
+        sb.append(MathUtils.rounded(result.bic1)).append('\t');
+        sb.append(MathUtils.rounded(result.bic2)).append('\t');
+        sb.append(MathUtils.rounded(result.maic1)).append('\t');
+        sb.append(MathUtils.rounded(result.maic2)).append('\t');
+        sb.append(MathUtils.rounded(result.mbic1)).append('\t');
+        sb.append(MathUtils.rounded(result.mbic2)).append('\t');
+        sb.append(MathUtils.rounded(result.angle[0])).append('\t');
+        sb.append(MathUtils.rounded(result.angle[1])).append('\t');
+        sb.append(MathUtils.rounded(result.gap)).append('\t');
+        sb.append(MathUtils.rounded(result.xshift[0])).append('\t');
+        sb.append(MathUtils.rounded(result.yshift[0])).append('\t');
+        sb.append(MathUtils.rounded(result.xshift[1])).append('\t');
+        sb.append(MathUtils.rounded(result.yshift[1])).append('\t');
+        sb.append(result.iter1).append('\t');
+        sb.append(result.iter2).append('\t');
+        sb.append(result.eval1).append('\t');
+        sb.append(result.eval2).append('\t');
+        addParams(sb, result.fitResult1);
+        addParams(sb, result.fitResult2);
 
-    final ArrayList<String> list = new ArrayList<>(results.size());
-    int flush = 9;
-    final StringBuilder sb = new StringBuilder();
-    for (final DoubletResult result : results) {
-      sb.append(result.frame).append('\t');
-      sb.append(result.spot.x).append('\t');
-      sb.append(result.spot.y).append('\t');
-      sb.append(IJ.d2s(result.spot.intensity, 1)).append('\t');
-      sb.append(result.matchCount).append('\t');
-      sb.append(result.neighbours).append('\t');
-      sb.append(result.almostNeighbours).append('\t');
-      sb.append(MathUtils.rounded(result.score1)).append('\t');
-      sb.append(MathUtils.rounded(result.score2)).append('\t');
-      add(sb, result.fitResult1);
-      add(sb, result.fitResult2);
-      sb.append(IJ.d2s(result.sumOfSquares1, 1)).append('\t');
-      sb.append(IJ.d2s(result.sumOfSquares2, 1)).append('\t');
-      sb.append(IJ.d2s(result.ll1, 1)).append('\t');
-      sb.append(IJ.d2s(result.ll2, 1)).append('\t');
-      sb.append(IJ.d2s(result.value1, 1)).append('\t');
-      sb.append(IJ.d2s(result.value2, 1)).append('\t');
-      sb.append(MathUtils.rounded(result.r1)).append('\t');
-      sb.append(MathUtils.rounded(result.r2)).append('\t');
-      sb.append(MathUtils.rounded(result.aic1)).append('\t');
-      sb.append(MathUtils.rounded(result.aic2)).append('\t');
-      sb.append(MathUtils.rounded(result.bic1)).append('\t');
-      sb.append(MathUtils.rounded(result.bic2)).append('\t');
-      sb.append(MathUtils.rounded(result.maic1)).append('\t');
-      sb.append(MathUtils.rounded(result.maic2)).append('\t');
-      sb.append(MathUtils.rounded(result.mbic1)).append('\t');
-      sb.append(MathUtils.rounded(result.mbic2)).append('\t');
-      sb.append(MathUtils.rounded(result.angle[0])).append('\t');
-      sb.append(MathUtils.rounded(result.angle[1])).append('\t');
-      sb.append(MathUtils.rounded(result.gap)).append('\t');
-      sb.append(MathUtils.rounded(result.xshift[0])).append('\t');
-      sb.append(MathUtils.rounded(result.yshift[0])).append('\t');
-      sb.append(MathUtils.rounded(result.xshift[1])).append('\t');
-      sb.append(MathUtils.rounded(result.yshift[1])).append('\t');
-      sb.append(result.iter1).append('\t');
-      sb.append(result.iter2).append('\t');
-      sb.append(result.eval1).append('\t');
-      sb.append(result.eval2).append('\t');
-      addParams(sb, result.fitResult1);
-      addParams(sb, result.fitResult2);
-
-      list.add(sb.toString());
-      sb.setLength(0);
-      // Flush below 10 lines so ImageJ will layout the columns
-      if (--flush == 0) {
-        resultsTable.getTextPanel().append(list);
-        list.clear();
+        tw.append(sb.toString());
       }
     }
-
-    resultsTable.getTextPanel().append(list);
   }
 
   /**
@@ -2540,11 +2529,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   /**
    * Creates the results table.
    */
-  private static void createResultsTable() {
-    if (resultsTable == null || !resultsTable.isVisible()) {
-      resultsTable = new TextWindow(TITLE + " Results", createResultsHeader(), "", 1000, 300);
-      resultsTable.setVisible(true);
-    }
+  private static TextWindow createResultsTable() {
+    return ImageJUtils.refresh(resultsTableRef,
+        () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 1000, 300));
   }
 
   /**
@@ -2758,8 +2745,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           (settings.useMaxResiduals) ? results.residualsScoreMax : results.residualsScoreAv);
     }
 
-    createAnalysisTable();
-
     final StringBuilder sb = new StringBuilder(results.analysisPrefix);
     sb.append(settings.analysisTitle).append('\t');
     sb.append((settings.useMaxResiduals) ? "Max" : "Average").append('\t');
@@ -2781,7 +2766,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     addJaccardScores(sb);
 
-    analysisTable.append(sb.toString());
+    createAnalysisTable().append(sb.toString());
 
     saveTemplate(sb.toString());
   }
@@ -3131,11 +3116,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   /**
    * Creates the analysis table.
    */
-  private static void createAnalysisTable() {
-    if (analysisTable == null || !analysisTable.isVisible()) {
-      analysisTable = new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1200, 300);
-      analysisTable.setVisible(true);
-    }
+  private static TextWindow createAnalysisTable() {
+    return ImageJUtils.refresh(analysisTableRef,
+        () -> new TextWindow(TITLE + " Analysis", createAnalysisHeader(), "", 1200, 300));
   }
 
   /**
