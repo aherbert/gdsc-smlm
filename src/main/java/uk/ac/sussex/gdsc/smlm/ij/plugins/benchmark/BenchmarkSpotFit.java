@@ -72,6 +72,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.BenchmarkFilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.FilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -384,6 +385,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private ImagePlus imp;
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
+  private BenchmarkFilterResult filterResult;
+
   private MaximaSpotFilter spotFilter;
 
   private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
@@ -1058,7 +1061,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
                 final double a = p3.getPeakResult().getIntensity(); // Should be in photons
                 final double p = point.result.getSignal();
 
-                match[matchCount++] = new FitMatch(point, d, p3.getPeakResult().getZPosition(), p, a);
+                match[matchCount++] =
+                    new FitMatch(point, d, p3.getPeakResult().getZPosition(), p, a);
               } else {
                 // This is a candidate that could not be fitted
                 match[matchCount++] =
@@ -1193,20 +1197,21 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
       return false;
     }
-    if (BenchmarkSpotFilter.filterResult == null) {
+    filterResult = BenchmarkSpotFilter.getBenchmarkFilterResult();
+    if (filterResult == null) {
       if (!silent) {
         IJ.error(TITLE, "No benchmark spot candidates in memory");
       }
       return false;
     }
-    if (BenchmarkSpotFilter.filterResult.simulationId != simulationParameters.id) {
+    if (filterResult.simulationId != simulationParameters.id) {
       if (!silent) {
         IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
       }
       return false;
     }
     // This is required to initialise the FitWorker
-    spotFilter = BenchmarkSpotFilter.filterResult.spotFilter;
+    spotFilter = filterResult.spotFilter;
     config = configRef.get().createCopy();
     multiFilter = multiFilterRef.get().copy();
     return true;
@@ -1438,13 +1443,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
     final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
-    final SettingsList settingsList = new SettingsList(BenchmarkSpotFilter.filterResult.id,
-        settings.fractionPositives, settings.fractionNegativesAfterAllPositives,
-        settings.negativesAfterAllPositives, width);
+    final SettingsList settingsList = new SettingsList(filterResult.id, settings.fractionPositives,
+        settings.fractionNegativesAfterAllPositives, settings.negativesAfterAllPositives, width);
     if (refresh || !settingsList.equals(lastSettings)) {
-      filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults, width);
+      filterCandidates = subsetFilterResults(filterResult.filterResults, width);
       lastSettings = settingsList;
-      lastFilterId.set(BenchmarkSpotFilter.filterResult.id);
+      lastFilterId.set(filterResult.id);
     }
 
     stopWatch = StopWatch.createStarted();

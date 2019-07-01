@@ -47,6 +47,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.BenchmarkFilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.FilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -65,6 +66,8 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -85,6 +88,11 @@ import java.util.logging.Logger;
  */
 public class BenchmarkSmartSpotRanking implements PlugIn {
   private static final String TITLE = "Smart Spot Ranking";
+
+  private static final byte TP = (byte) 1;
+  private static final byte FP = (byte) 2;
+  private static final byte TN = (byte) 3;
+  private static final byte FN = (byte) 4;
 
   /** The fit config. */
   static FitConfiguration fitConfig;
@@ -155,6 +163,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
+  private BenchmarkFilterResult filterResult;
 
   private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
   private static TIntObjectHashMap<FilterCandidates> filterCandidates;
@@ -205,11 +214,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       this.spots = spots;
     }
   }
-
-  private static final byte TP = (byte) 1;
-  private static final byte FP = (byte) 2;
-  private static final byte TN = (byte) 3;
-  private static final byte FN = (byte) 4;
 
   private static class RankResult {
     final float frame;
@@ -523,11 +527,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       IJ.error(TITLE, "No benchmark results in memory");
       return;
     }
-    if (BenchmarkSpotFilter.filterResult == null) {
+    filterResult = BenchmarkSpotFilter.getBenchmarkFilterResult();
+    if (filterResult == null) {
       IJ.error(TITLE, "No benchmark spot candidates in memory");
       return;
     }
-    if (BenchmarkSpotFilter.filterResult.simulationId != simulationParameters.id) {
+    if (filterResult.simulationId != simulationParameters.id) {
       IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
       return;
     }
@@ -667,13 +672,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
-    if (refresh || lastFilterId != BenchmarkSpotFilter.filterResult.id
-        || lastFractionPositives != fractionPositives
+    if (refresh || lastFilterId != filterResult.id || lastFractionPositives != fractionPositives
         || lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives
         || lastNegativesAfterAllPositives != negativesAfterAllPositives) {
-      filterCandidates = subsetFilterResults(BenchmarkSpotFilter.filterResult.filterResults);
+      filterCandidates = subsetFilterResults(filterResult.filterResults);
 
-      lastFilterId = BenchmarkSpotFilter.filterResult.id;
+      lastFilterId = filterResult.id;
       lastFractionPositives = fractionPositives;
       lastFractionNegativesAfterAllPositives = fractionNegativesAfterAllPositives;
       lastNegativesAfterAllPositives = negativesAfterAllPositives;
@@ -710,7 +714,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       try {
         threads.get(i).join();
       } catch (final InterruptedException ex) {
-        ex.printStackTrace();
+        Thread.currentThread().interrupt();
+        throw new ConcurrentRuntimeException("Unexpected interrupt", ex);
       }
     }
     threads.clear();
@@ -789,9 +794,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             }
           }
         }
-
-        // if (targetP < np2)
-        // System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
       }
 
       // Count the number of positive & negatives
@@ -886,10 +888,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     createTable();
 
     // Summarise the ranking results.
-    final StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.resultPrefix);
+    final StringBuilder sb = new StringBuilder(filterResult.resultPrefix);
 
     // nP and nN is the fractional score of the spot candidates
-    addCount(sb, nP + nN);
+    addCount(sb, (double) nP + nN);
     addCount(sb, nP);
     addCount(sb, nN);
     addCount(sb, fP);
@@ -1153,7 +1155,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static String createHeader() {
-    final StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.tablePrefix);
+    final StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.getTablePrefix());
     sb.append('\t');
     sb.append("Spots\t");
     sb.append("nP\t");

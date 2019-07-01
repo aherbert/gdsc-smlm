@@ -486,10 +486,9 @@ public class BenchmarkFilterAnalysis
       signalFactorStats = new StoredDataStatistics();
       distanceStats = new StoredDataStatistics();
 
-      checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null
-          && BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
+      checkBorder = (filterResult.analysisBorder != null && filterResult.analysisBorder.x != 0);
       if (checkBorder) {
-        final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+        final Rectangle lastAnalysisBorder = filterResult.analysisBorder;
         border = lastAnalysisBorder.x;
         xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
         ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
@@ -759,6 +758,7 @@ public class BenchmarkFilterAnalysis
   }
 
   private CreateData.SimulationParameters simulationParameters;
+  private BenchmarkSpotFilter.BenchmarkFilterResult filterResult;
   private MemoryPeakResults results;
   private boolean extraOptions;
 
@@ -829,7 +829,7 @@ public class BenchmarkFilterAnalysis
       }
       return true;
     }
-    if (BenchmarkSpotFit.lastFilterId.get() != BenchmarkSpotFilter.filterResult.id) {
+    if (BenchmarkSpotFit.lastFilterId.get() != filterResult.id) {
       if (!silent) {
         IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
       }
@@ -7174,13 +7174,13 @@ public class BenchmarkFilterAnalysis
 
     // Do TN (all remaining peaks that have not been matched)
     if (showFN) {
-      final boolean checkBorder = (BenchmarkSpotFilter.lastAnalysisBorder != null
-          && BenchmarkSpotFilter.lastAnalysisBorder.x != 0);
+      final boolean checkBorder =
+          (filterResult.analysisBorder != null && filterResult.analysisBorder.x != 0);
       final float border;
       final float xlimit;
       final float ylimit;
       if (checkBorder) {
-        final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+        final Rectangle lastAnalysisBorder = filterResult.analysisBorder;
         border = lastAnalysisBorder.x;
         xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
         ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
@@ -7242,17 +7242,16 @@ public class BenchmarkFilterAnalysis
    * @param results the results
    * @return the results that are inside the border
    */
-  private static UniqueIdPeakResult[] filterUsingBorder(UniqueIdPeakResult[] results) {
+  private UniqueIdPeakResult[] filterUsingBorder(UniqueIdPeakResult[] results) {
     // Respect the border used in BenchmarkSpotFilter?
-    if (BenchmarkSpotFilter.lastAnalysisBorder == null
-        || BenchmarkSpotFilter.lastAnalysisBorder.x == 0) {
+    if (filterResult.analysisBorder == null || filterResult.analysisBorder.x == 0) {
       return results;
     }
     // Just implement a hard border
     // Note: This is mainly relevant when loading in simulated ground truth data.
     // The simulations performed by Create Data already use a border when doing a
     // random distribution.
-    final Rectangle lastAnalysisBorder = BenchmarkSpotFilter.lastAnalysisBorder;
+    final Rectangle lastAnalysisBorder = filterResult.analysisBorder;
     final float border = lastAnalysisBorder.x;
     final float xlimit = lastAnalysisBorder.x + lastAnalysisBorder.width;
     final float ylimit = lastAnalysisBorder.y + lastAnalysisBorder.height;
@@ -7266,7 +7265,6 @@ public class BenchmarkFilterAnalysis
       results2[count++] = p;
     }
     if (count < results.length) {
-      // System.out.printf("Removed %d\n", results.length - j);
       return Arrays.copyOf(results2, count);
     }
     return results;
