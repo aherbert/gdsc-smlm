@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -38,7 +39,6 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
@@ -68,6 +68,7 @@ import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -78,6 +79,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,108 +96,176 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static final byte TN = (byte) 3;
   private static final byte FN = (byte) 4;
 
-  /** The fit config. */
-  static FitConfiguration fitConfig;
-  private static FitEngineConfiguration config;
+  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
 
-  static {
-    config = new FitEngineConfiguration();
-    fitConfig = config.getFitConfiguration();
-  }
+  /** The reference to the latest fit engine configuration. */
+  private static AtomicReference<FitEngineConfiguration> configRef;
 
-  private static AutoThreshold.Method[] thresholdMethods;
-  private static double[] snrLevels;
-  private static boolean[] thresholdMethodOptions;
-  private static String[] thresholdMethodNames;
+  /** The coordinate cache. This stores the coordinates for a simulation Id. */
+  private static AtomicReference<
+      Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>>> coordinateCache =
+          new AtomicReference<>(Pair.of(-1, null));
 
-  static {
-    final TDoubleArrayList list = new TDoubleArrayList();
-    for (int snr = 20; snr <= 70; snr += 5) {
-      list.add(snr);
-    }
-    snrLevels = list.toArray();
+  private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
 
-    thresholdMethods = AutoThreshold.Method.values();
-    thresholdMethodOptions = new boolean[thresholdMethods.length + snrLevels.length];
-    thresholdMethodNames = new String[thresholdMethodOptions.length];
-
-    // Enable all methods
-    int count = 0;
-    while (count < thresholdMethods.length) {
-      thresholdMethodNames[count] = thresholdMethods[count].toString();
-      thresholdMethodOptions[count] = true;
-      count++;
-    }
-    // Add signal-to-noise threshold methods
-    for (int j = 0; j < snrLevels.length; j++) {
-      thresholdMethodNames[count] = "SNR" + snrLevels[j];
-      thresholdMethodOptions[count] = true;
-      count++;
-    }
-
-    // Turn some off
-    // These often fail to converge
-    thresholdMethodOptions[AutoThreshold.Method.INTERMODES.ordinal()] = false;
-    thresholdMethodOptions[AutoThreshold.Method.MINIMUM.ordinal()] = false;
-    // These are slow
-    thresholdMethodOptions[AutoThreshold.Method.SHANBHAG.ordinal()] = false;
-    thresholdMethodOptions[AutoThreshold.Method.RENYI_ENTROPY.ordinal()] = false;
-  }
-
+  private FitEngineConfiguration config = new FitEngineConfiguration();
   private AutoThreshold.Method[] methods;
   private double[] levels;
   private String[] methodNames;
 
-  private static double fractionPositives = 100;
-  private static double fractionNegativesAfterAllPositives = 50;
-  private static int negativesAfterAllPositives = 10;
-  private static boolean selectMethods = true;
-  private static int compactBins = 1024;
-  private static String[] sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision",
-      "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
-  private static int sortIndex = sortMethods.length - 3; // F2 to favour recall
-  private static boolean useFractionScores = true;
-  private static boolean showOverlay;
-
   private boolean extraOptions;
-
-  private static TextWindow summaryTable;
 
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
   private BenchmarkFilterResult filterResult;
 
-  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
-  private static TIntObjectHashMap<FilterCandidates> filterCandidates;
-  private static double fP;
-  private static double fN;
-  private static int nP;
-  private static int nN;
-
-  /** The last id. */
-  static int lastId = -1;
-  /** The last filter id. */
-  static int lastFilterId = -1;
-  private static double lastFractionPositives = -1;
-  private static double lastFractionNegativesAfterAllPositives = -1;
-  private static int lastNegativesAfterAllPositives = -1;
-
   private ImagePlus imp;
 
-  // Allow other plugins to access the results
+  /** The plugin settings. */
+  private Settings settings;
 
-  /** The rank results id. */
-  static int rankResultsId;
-  /** The rank results. */
-  static TIntObjectHashMap<RankResults> rankResults;
-  /** The distance in pixels. */
-  static double distanceInPixels;
-  /** The lower distance in pixels. */
-  static double lowerDistanceInPixels;
-  /** The candidate TN. */
-  static double candidateTN;
-  /** The candidate FN. */
-  static double candidateFN;
+  /**
+   * Store the filter candidates data.
+   */
+  private static class CandidateData {
+    final TIntObjectHashMap<FilterCandidates> filterCandidates;
+    final double fractionPositive;
+    final double fractionNegative;
+    final int countPositive;
+    final int countNegative;
+
+    final int filterId;
+    final double fractionPositives;
+    final double fractionNegativesAfterAllPositives;
+    final int negativesAfterAllPositives;
+
+    CandidateData(TIntObjectHashMap<FilterCandidates> filterCandidates, int filterId,
+        double fractionPositive, double fractionNegative, int countPositive, int countNegative,
+        Settings settings) {
+      this.filterCandidates = filterCandidates;
+      this.filterId = filterId;
+      this.fractionPositive = fractionPositive;
+      this.fractionNegative = fractionNegative;
+      this.countPositive = countPositive;
+      this.countNegative = countNegative;
+      fractionPositives = settings.fractionPositives;
+      fractionNegativesAfterAllPositives = settings.fractionNegativesAfterAllPositives;
+      negativesAfterAllPositives = settings.negativesAfterAllPositives;
+    }
+
+    /**
+     * Return true if the settings used in the candidate data are different.
+     *
+     * @param filterId the filter id
+     * @param settings the settings
+     * @return true if different
+     */
+    boolean differentSettings(int filterId, Settings settings) {
+      return this.filterId != filterId || fractionPositives != settings.fractionPositives
+          || fractionNegativesAfterAllPositives != settings.fractionNegativesAfterAllPositives
+          || negativesAfterAllPositives != settings.negativesAfterAllPositives;
+    }
+  }
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    private static AutoThreshold.Method[] thresholdMethods;
+    private static double[] snrLevels;
+    private static String[] thresholdMethodNames;
+    private static String[] sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn",
+        "Precision", "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
+
+    static {
+      final TDoubleArrayList list = new TDoubleArrayList();
+      for (int snr = 20; snr <= 70; snr += 5) {
+        list.add(snr);
+      }
+      snrLevels = list.toArray();
+
+      thresholdMethods = AutoThreshold.Method.values();
+      thresholdMethodNames = new String[thresholdMethods.length + snrLevels.length];
+
+      // Enable all methods
+      int count = 0;
+      while (count < thresholdMethods.length) {
+        thresholdMethodNames[count] = thresholdMethods[count].toString();
+        count++;
+      }
+      // Add signal-to-noise threshold methods
+      for (int j = 0; j < snrLevels.length; j++) {
+        thresholdMethodNames[count] = "SNR" + snrLevels[j];
+        count++;
+      }
+    }
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    boolean[] thresholdMethodOptions;
+    double fractionPositives;
+    double fractionNegativesAfterAllPositives;
+    int negativesAfterAllPositives;
+    boolean selectMethods;
+    int compactBins;
+    int sortIndex;
+    boolean useFractionScores;
+    boolean showOverlay;
+
+    Settings() {
+      // Set defaults
+      thresholdMethodOptions = new boolean[thresholdMethodNames.length];
+      Arrays.fill(thresholdMethodOptions, true);
+      // Turn some off
+      // These often fail to converge
+      thresholdMethodOptions[AutoThreshold.Method.INTERMODES.ordinal()] = false;
+      thresholdMethodOptions[AutoThreshold.Method.MINIMUM.ordinal()] = false;
+      // These are slow
+      thresholdMethodOptions[AutoThreshold.Method.SHANBHAG.ordinal()] = false;
+      thresholdMethodOptions[AutoThreshold.Method.RENYI_ENTROPY.ordinal()] = false;
+      fractionPositives = 100;
+      fractionNegativesAfterAllPositives = 50;
+      negativesAfterAllPositives = 10;
+      selectMethods = true;
+      compactBins = 1024;
+      sortIndex = sortMethods.length - 3; // F2 to favour recall
+      useFractionScores = true;
+    }
+
+    Settings(Settings source) {
+      thresholdMethodOptions = source.thresholdMethodOptions.clone();
+      fractionPositives = source.fractionPositives;
+      fractionNegativesAfterAllPositives = source.fractionNegativesAfterAllPositives;
+      negativesAfterAllPositives = source.negativesAfterAllPositives;
+      selectMethods = source.selectMethods;
+      compactBins = source.compactBins;
+      sortIndex = source.sortIndex;
+      useFractionScores = source.useFractionScores;
+      showOverlay = source.showOverlay;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private static class FilterCandidates {
     // Integer counts of positives (matches) and negatives
@@ -374,8 +444,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             b = sumB / (count * 2);// Account for averaging
           }
 
-          // System.out.printf("%d (%d,%d) %f %f\n", frame, spot.x, spot.y, b);
-
           final double signal = sum - b * size;
           snr[i] = signal / noise;
         }
@@ -389,13 +457,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         zPosition[i] = p.getPeakResult().getZPosition();
       }
 
-      final RankResults results = new RankResults(spots, zPosition);
-      this.results.put(frame, results);
+      final RankResults rankResults = new RankResults(spots, zPosition);
+      this.results.put(frame, rankResults);
 
       long t1 = System.nanoTime();
       final FloatHistogram histogram = FloatHistogram.buildHistogram(intensity.clone(), true);
       // Only compact once
-      final Histogram histogram2 = histogram.compact(compactBins);
+      final Histogram histogram2 = histogram.compact(settings.compactBins);
       t1 = System.nanoTime() - t1;
 
       for (final AutoThreshold.Method m : methods) {
@@ -441,7 +509,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
         // Store the results using a copy of the original (to preserve the candidates for repeat
         // analysis)
-        results.results.add(new RankResult(t, new FractionClassificationResult(tp, fp, tn, fn),
+        rankResults.results.add(new RankResult(t, new FractionClassificationResult(tp, fp, tn, fn),
             new ClassificationResult(itp, ifp, itn, ifn), category, time));
       }
 
@@ -488,21 +556,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
         // Store the results using a copy of the original (to preserve the candidates for repeat
         // analysis)
-        results.results.add(
+        rankResults.results.add(
             new RankResult((float) minIntensity, new FractionClassificationResult(tp, fp, tn, fn),
                 new ClassificationResult(itp, ifp, itn, ifn), category, timeSnr));
       }
-
-      //// Testing: Correlation between intensity and SNR
-      // FastCorrelator c = new FastCorrelator();
-      // double[] i2 = new double[spots.length];
-      // for (int i = 0; i < spots.length; i++)
-      // {
-      // i2[i] = intensity[i];
-      // c.add(Math.round(intensity[i]), Math.round(snr[i]));
-      // }
-      // System.out.printf("%d = %.2f (%d)\n", frame, c.getCorrelation(), c.getN());
-      //// Utils.display("I vs SNR", new Plot("I vs SNR", "Intensity", "SNR", i2, snr));
     }
   }
 
@@ -548,6 +605,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
+    settings = Settings.load();
+    config = configRef.get().createCopy();
+
     ImageJUtils.addMessage(gd,
         "Rank candidate spots in the benchmark image created by " + CreateData.TITLE
             + " plugin\nand identified by the " + BenchmarkSpotFilter.TITLE
@@ -555,23 +615,22 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
             + "Configure the fitting:",
         MathUtils.rounded(simulationParameters.sd), MathUtils.rounded(getSa()));
 
-    gd.addSlider("Fraction_positives", 50, 100, fractionPositives);
-    gd.addSlider("Fraction_negatives_after_positives", 0, 100, fractionNegativesAfterAllPositives);
-    gd.addSlider("Min_negatives_after_positives", 0, 10, negativesAfterAllPositives);
-    gd.addCheckbox("Select_methods", selectMethods);
-    gd.addNumericField("Compact_bins", compactBins, 0);
-    gd.addChoice("Sort", sortMethods, sortMethods[sortIndex]);
-    gd.addCheckbox("Use_fraction_scores", useFractionScores);
+    gd.addSlider("Fraction_positives", 50, 100, settings.fractionPositives);
+    gd.addSlider("Fraction_negatives_after_positives", 0, 100,
+        settings.fractionNegativesAfterAllPositives);
+    gd.addSlider("Min_negatives_after_positives", 0, 10, settings.negativesAfterAllPositives);
+    gd.addCheckbox("Select_methods", settings.selectMethods);
+    gd.addNumericField("Compact_bins", settings.compactBins, 0);
+    gd.addChoice("Sort", Settings.sortMethods, settings.sortIndex);
+    gd.addCheckbox("Use_fraction_scores", settings.useFractionScores);
 
     // Collect options for fitting that may effect ranking
     final double sa = getSa();
     gd.addNumericField("Initial_StdDev", sa / simulationParameters.pixelPitch, 3);
     gd.addSlider("Fitting_width", 2, 4.5, config.getFitting());
-    // gd.addCheckbox("Include_neighbours", config.isIncludeNeighbours());
-    // gd.addSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
 
     // Output options
-    gd.addCheckbox("Show_overlay", showOverlay);
+    gd.addCheckbox("Show_overlay", settings.showOverlay);
 
     if (extraOptions) {
       gd.addChoice("Noise_method", SettingsManager.getNoiseEstimatorMethodNames(),
@@ -584,43 +643,44 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return false;
     }
 
-    fractionPositives = Math.abs(gd.getNextNumber());
-    fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
-    negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
-    selectMethods = gd.getNextBoolean();
-    compactBins = (int) Math.abs(gd.getNextNumber());
-    sortIndex = gd.getNextChoiceIndex();
-    useFractionScores = gd.getNextBoolean();
+    settings.fractionPositives = Math.abs(gd.getNextNumber());
+    settings.fractionNegativesAfterAllPositives = Math.abs(gd.getNextNumber());
+    settings.negativesAfterAllPositives = (int) Math.abs(gd.getNextNumber());
+    settings.selectMethods = gd.getNextBoolean();
+    settings.compactBins = (int) Math.abs(gd.getNextNumber());
+    settings.sortIndex = gd.getNextChoiceIndex();
+    settings.useFractionScores = gd.getNextBoolean();
 
     // Collect options for fitting that may effect ranking
-    fitConfig.setInitialPeakStdDev(gd.getNextNumber());
+    config.getFitConfiguration().setInitialPeakStdDev(gd.getNextNumber());
     config.setFitting(gd.getNextNumber());
-    // config.setIncludeNeighbours(gd.getNextBoolean());
-    // config.setNeighbourHeightThreshold(gd.getNextNumber());
 
-    showOverlay = gd.getNextBoolean();
+    settings.showOverlay = gd.getNextBoolean();
 
     if (extraOptions) {
       config
           .setNoiseMethod(SettingsManager.getNoiseEstimatorMethodValues()[gd.getNextChoiceIndex()]);
     }
 
+    settings.save();
+    configRef.set(config);
+
     if (gd.invalidNumber()) {
       return false;
     }
 
-    methodNames = thresholdMethodNames.clone();
-    if (selectMethods) {
+    methodNames = Settings.thresholdMethodNames.clone();
+    if (settings.selectMethods) {
       int count = 0;
       int count1 = 0;
       int count2 = 0;
-      methods = new AutoThreshold.Method[thresholdMethods.length];
-      levels = new double[snrLevels.length];
+      methods = new AutoThreshold.Method[Settings.thresholdMethods.length];
+      levels = new double[Settings.snrLevels.length];
 
       gd = new ExtendedGenericDialog(TITLE);
       gd.addHelp(About.HELP_URL);
-      for (int i = 0; i < thresholdMethodNames.length; i++) {
-        gd.addCheckbox(thresholdMethodNames[i], thresholdMethodOptions[i]);
+      for (int i = 0; i < Settings.thresholdMethodNames.length; i++) {
+        gd.addCheckbox(Settings.thresholdMethodNames[i], settings.thresholdMethodOptions[i]);
       }
 
       gd.showDialog();
@@ -629,14 +689,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         return false;
       }
 
-      for (int i = 0, j = 0; i < thresholdMethodNames.length; i++) {
-        thresholdMethodOptions[i] = gd.getNextBoolean();
-        if (thresholdMethodOptions[i]) {
-          methodNames[count++] = thresholdMethodNames[i];
-          if (i < thresholdMethods.length) {
-            methods[count1++] = thresholdMethods[i];
+      for (int i = 0, j = 0; i < Settings.thresholdMethodNames.length; i++) {
+        settings.thresholdMethodOptions[i] = gd.getNextBoolean();
+        if (settings.thresholdMethodOptions[i]) {
+          methodNames[count++] = Settings.thresholdMethodNames[i];
+          if (i < Settings.thresholdMethods.length) {
+            methods[count1++] = Settings.thresholdMethods[i];
           } else {
-            levels[count2++] = snrLevels[j++];
+            levels[count2++] = Settings.snrLevels[j++];
           }
         }
       }
@@ -646,8 +706,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       levels = Arrays.copyOf(levels, count2);
     } else {
       // Do them all
-      methods = thresholdMethods.clone();
-      levels = snrLevels.clone();
+      methods = Settings.thresholdMethods.clone();
+      levels = Settings.snrLevels.clone();
     }
 
     if (methodNames.length == 0) {
@@ -661,28 +721,30 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    if (lastId != simulationParameters.id) {
+    Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+
+    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
       // from the MemoryPeakResults
       actualCoordinates = ResultsMatchCalculator.getCoordinates(results, false);
-      lastId = simulationParameters.id;
+      coordinateCache.set(Pair.of(simulationParameters.id, actualCoordinates));
       refresh = true;
+    } else {
+      actualCoordinates = coords.getValue();
     }
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
-    // changed
-    if (refresh || lastFilterId != filterResult.id || lastFractionPositives != fractionPositives
-        || lastFractionNegativesAfterAllPositives != fractionNegativesAfterAllPositives
-        || lastNegativesAfterAllPositives != negativesAfterAllPositives) {
-      filterCandidates = subsetFilterResults(filterResult.filterResults);
-
-      lastFilterId = filterResult.id;
-      lastFractionPositives = fractionPositives;
-      lastFractionNegativesAfterAllPositives = fractionNegativesAfterAllPositives;
-      lastNegativesAfterAllPositives = negativesAfterAllPositives;
+    // changed.
+    CandidateData candidateData = candidateDataCache.get();
+    if (refresh || candidateData == null
+        || candidateData.differentSettings(filterResult.id, settings)) {
+      candidateData = subsetFilterResults(filterResult.filterResults);
+      candidateDataCache.set(candidateData);
     }
 
+    final TIntObjectHashMap<FilterCandidates> filterCandidates = candidateData.filterCandidates;
     final ImageStack stack = imp.getImageStack();
 
     // Create a pool of workers
@@ -729,13 +791,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     IJ.showStatus("Collecting results ...");
 
-    rankResultsId++;
-    rankResults = new TIntObjectHashMap<>();
+    final TIntObjectHashMap<RankResults> rankResults = new TIntObjectHashMap<>();
     for (final Worker w : workers) {
       rankResults.putAll(w.results);
     }
 
-    summariseResults(rankResults);
+    summariseResults(rankResults, candidateData);
 
     IJ.showStatus("");
   }
@@ -745,17 +806,14 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * reached and the number of negatives matches the configured parameters.
    *
    * @param filterResults the filter results
-   * @return The filter candidates
+   * @return The filter candidate data
    */
-  private static TIntObjectHashMap<FilterCandidates>
-      subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults) {
+  private CandidateData subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
-    final double f1 = Math.min(1, fractionPositives / 100.0);
-    final double f2 = fractionNegativesAfterAllPositives / 100.0;
+    final double f1 = Math.min(1, settings.fractionPositives / 100.0);
+    final double f2 = settings.fractionNegativesAfterAllPositives / 100.0;
 
     final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
-    fP = fN = 0;
-    nP = nN = 0;
     final double[] fX = new double[2];
     final int[] nX = new int[2];
     filterResults.forEachEntry((frame, result) -> {
@@ -824,17 +882,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
         if (reachedTarget
             // Check if we have reached both the limits
-            && negAfter >= negativesAfterAllPositives && (double) neg / (neg + pos) >= f2) {
+            && negAfter >= settings.negativesAfterAllPositives
+            && (double) neg / (neg + pos) >= f2) {
           break;
         }
       }
-
-      // Debug
-      // System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n",
-      // result.getKey().intValue(),
-      // r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(),
-      // p, n,
-      // nAfter, (double) n / (n + p));
 
       // TODO - This is different from BenchmarkSpotFit where all the candidates are
       // included but only the first N are processed. Should this be changed here too.
@@ -843,12 +895,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       return true;
     });
 
-    fP = fX[0];
-    fN = fX[1];
-    nP = nX[0];
-    nN = nX[1];
-
-    return subset;
+    return new CandidateData(subset, filterResult.id, fX[0], fX[1], nX[0], nX[1], settings);
   }
 
   private static void put(BlockingQueue<Integer> jobs, int index) {
@@ -884,22 +931,21 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private void summariseResults(TIntObjectHashMap<RankResults> rankResults) {
-    createTable();
-
+  private void summariseResults(TIntObjectHashMap<RankResults> rankResults,
+      CandidateData candidateData) {
     // Summarise the ranking results.
     final StringBuilder sb = new StringBuilder(filterResult.resultPrefix);
 
-    // nP and nN is the fractional score of the spot candidates
-    addCount(sb, (double) nP + nN);
-    addCount(sb, nP);
-    addCount(sb, nN);
-    addCount(sb, fP);
-    addCount(sb, fN);
+    // countPositive and countNegative is the fractional score of the spot candidates
+    addCount(sb, (double) candidateData.countPositive + candidateData.countNegative);
+    addCount(sb, candidateData.countPositive);
+    addCount(sb, candidateData.countNegative);
+    addCount(sb, candidateData.fractionPositive);
+    addCount(sb, candidateData.fractionNegative);
 
     final double[] counter1 = new double[2];
     final int[] counter2 = new int[2];
-    filterCandidates.forEachValue(result -> {
+    candidateData.filterCandidates.forEachValue(result -> {
       counter1[0] += result.np;
       counter1[1] += result.nn;
       counter2[0] += result.pos;
@@ -910,8 +956,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final int countFp = counter2[1];
 
     // The fraction of positive and negative candidates that were included
-    add(sb, (100.0 * countTp) / nP);
-    add(sb, (100.0 * countFp) / nN);
+    add(sb, (100.0 * countTp) / candidateData.countPositive);
+    add(sb, (100.0 * countFp) / candidateData.countNegative);
 
     // Add counts of the the candidates
     add(sb, countTp + countFp);
@@ -927,11 +973,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     // Materialise rankeResults
     final int[] frames = new int[rankResults.size()];
-    final RankResults[] results = new RankResults[rankResults.size()];
+    final RankResults[] rankResultsArray = new RankResults[rankResults.size()];
     final int[] counter = new int[1];
     rankResults.forEachEntry((frame, result) -> {
       frames[counter[0]] = frame;
-      results[counter[0]] = result;
+      rankResultsArray[counter[0]] = result;
       counter[0]++;
       return true;
     });
@@ -939,7 +985,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     // Summarise actual and candidate spots per frame
     final Statistics actual = new Statistics();
     final Statistics candidates = new Statistics();
-    for (final RankResults rr : results) {
+    for (final RankResults rr : rankResultsArray) {
       actual.add(rr.zPosition.length);
       candidates.add(rr.spots.length);
     }
@@ -1004,7 +1050,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       final Statistics s = new Statistics();
       long time = 0;
 
-      for (final RankResults rr : results) {
+      for (final RankResults rr : rankResultsArray) {
         final RankResult r = rr.results.get(i);
         // Some results will not have a threshold
         if (!Float.isInfinite(r.frame)) {
@@ -1025,7 +1071,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       if (methodNames[i].startsWith("SNR")) {
         sb.append('\t');
       } else {
-        add(sb, compactBins);
+        add(sb, settings.compactBins);
       }
       add(sb, s.getMean());
       add(sb, s.getStandardDeviation());
@@ -1047,7 +1093,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       final double s2 = addScores(sb, f2);
 
       // Store for sorting
-      list.add(new ScoredResult(i, (useFractionScores) ? s2 : s1, sb.toString()));
+      list.add(new ScoredResult(i, (settings.useFractionScores) ? s2 : s1, sb.toString()));
     }
 
     if (list.isEmpty()) {
@@ -1056,19 +1102,23 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     Collections.sort(list, ScoredResult::compare);
 
+    final TextWindow summaryTable = createTable();
     if (summaryTable.getTextPanel().getLineCount() > 0) {
       summaryTable.append("");
     }
-    for (final ScoredResult r : list) {
-      summaryTable.append(r.result);
+    try (BufferedTextWindow tw = new BufferedTextWindow(summaryTable)) {
+      tw.setIncrement(0);
+      for (final ScoredResult r : list) {
+        tw.append(r.result);
+      }
     }
 
-    if (showOverlay) {
+    if (settings.showOverlay) {
       final int bestMethod = list.get(0).index;
       final Overlay o = new Overlay();
-      for (int j = 0; j < results.length; j++) {
+      for (int j = 0; j < rankResultsArray.length; j++) {
         final int frame = frames[j];
-        final RankResults rr = results[j];
+        final RankResults rr = rankResultsArray[j];
         final RankResult r = rr.results.get(bestMethod);
         final int[] x1 = new int[r.good.length];
         final int[] y1 = new int[r.good.length];
@@ -1147,19 +1197,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private static void createTable() {
-    if (summaryTable == null || !summaryTable.isVisible()) {
-      summaryTable = new TextWindow(TITLE, createHeader(), "", 1000, 300);
-      summaryTable.setVisible(true);
-    }
+  private static TextWindow createTable() {
+    return ImageJUtils.refresh(summaryTableRef,
+        () -> new TextWindow(TITLE, createHeader(), "", 1000, 300));
   }
 
   private static String createHeader() {
     final StringBuilder sb = new StringBuilder(BenchmarkSpotFilter.getTablePrefix());
     sb.append('\t');
     sb.append("Spots\t");
-    sb.append("nP\t");
-    sb.append("nN\t");
+    sb.append("countPositive\t");
+    sb.append("countNegative\t");
     sb.append("fP\t");
     sb.append("fN\t");
 
@@ -1192,15 +1240,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static void addScoreColumns(StringBuilder sb, String prefix) {
-    sortMethods = new String[] {"(None)", "tp", "fp", "tn", "fn", "Precision", "Recall", "F0.5",
-        "F1", "F2", "Jaccard", "MCC"};
-    for (int i = 1; i < sortMethods.length; i++) {
-      addScoreColumn(sb, prefix, sortMethods[i]);
+    for (int i = 1; i < Settings.sortMethods.length; i++) {
+      addScoreColumn(sb, prefix, Settings.sortMethods[i]);
     }
   }
 
-  private static double addScores(StringBuilder sb, FractionClassificationResult result) {
-    final double[] scores = new double[sortMethods.length - 1];
+  private double addScores(StringBuilder sb, FractionClassificationResult result) {
+    final double[] scores = new double[Settings.sortMethods.length - 1];
     int index = 0;
     scores[index++] = result.getTruePositives();
     scores[index++] = result.getFalsePositives();
@@ -1216,7 +1262,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     for (final double s : scores) {
       add(sb, s);
     }
-    return (sortIndex != 0) ? scores[sortIndex - 1] : 0;
+    return (settings.sortIndex != 0) ? scores[settings.sortIndex - 1] : 0;
   }
 
   private static void addScoreColumn(StringBuilder sb, String prefix, String name) {
