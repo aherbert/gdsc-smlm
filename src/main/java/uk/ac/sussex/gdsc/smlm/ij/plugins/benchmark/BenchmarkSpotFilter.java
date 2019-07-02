@@ -122,7 +122,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    */
   private static SettingsList batchSettings;
   /** The cached batch results. This is atomically updated in a synchronized method. */
-  private static ArrayList<BatchResult[]> cachedBatchResults1 = new ArrayList<>();
+  private static ArrayList<BatchResult[]> cachedBatchResults = new ArrayList<>();
 
   /**
    * The true positives results set id. This is incremented for each new results set added to
@@ -195,7 +195,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
 
-    FitEngineConfiguration config = new FitEngineConfiguration();
+    FitEngineConfiguration config;
 
     double search;
     boolean differenceFilter;
@@ -233,6 +233,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     Settings() {
       // Set defaults
+      config = new FitEngineConfiguration();
       search = 1;
       differenceSmooth = 3;
       minSearch = 1;
@@ -1867,7 +1868,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static synchronized ArrayList<BatchResult[]>
       getCachedBatchResults(final SettingsList settingList) {
     if (settingList.equals(batchSettings)) {
-      return new ArrayList<>(cachedBatchResults1);
+      return new ArrayList<>(cachedBatchResults);
     }
     return new ArrayList<>();
   }
@@ -1881,7 +1882,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static synchronized void setCachedBatchResults(final SettingsList settingList,
       ArrayList<BatchResult[]> batchResults) {
     batchSettings = settingList;
-    cachedBatchResults1 = batchResults;
+    cachedBatchResults = batchResults;
   }
 
   private double getSa() {
