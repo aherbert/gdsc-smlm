@@ -1836,8 +1836,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       settings.lowerSignalFactor = BenchmarkFilterAnalysis.lowerSignalFactor;
     } else {
       // Use the fit analysis distance if no filter analysis has been run
-      settings.matchDistance = BenchmarkSpotFit.distanceInPixels;
-      settings.lowerDistance = BenchmarkSpotFit.lowerDistanceInPixels;
+      settings.matchDistance = BenchmarkSpotFit.getDistanceInPixels();
+      settings.lowerDistance = BenchmarkSpotFit.getLowerDistanceInPixels();
       settings.signalFactor = settings.lowerSignalFactor = BenchmarkSpotFit.getSignalFactor();
     }
 

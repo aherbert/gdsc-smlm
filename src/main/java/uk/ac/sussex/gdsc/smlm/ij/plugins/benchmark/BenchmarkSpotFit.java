@@ -44,7 +44,6 @@ import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
-import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
@@ -121,6 +120,7 @@ import ij.text.TextWindow;
 
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.OutOfRangeException;
@@ -150,8 +150,71 @@ import java.util.concurrent.atomic.AtomicReference;
  * Fits all the candidate spots identified by the benchmark spot filter plugin.
  */
 public class BenchmarkSpotFit implements PlugIn, ItemListener {
+  // TODO - Add support for optimising z-depth during 3D fitting
+
   /** The title. */
   static final String TITLE = "Fit Spot Data";
+
+  private static FilterCriteria[] filterCriteria;
+  private static final int FILTER_SIGNAL = 0;
+  private static final int FILTER_SNR = 1;
+  private static final int FILTER_MIN_WIDTH = 2;
+  private static final int FILTER_MAX_WIDTH = 3;
+  private static final int FILTER_SHIFT = 4;
+  private static final int FILTER_ESHIFT = 5;
+  private static final int FILTER_PRECISION = 6;
+  private static final int FILTER_ITERATIONS = 7;
+  private static final int FILTER_EVALUATIONS = 8;
+
+  /** The coordinate cache. This stores the coordinates for a simulation Id. */
+  private static AtomicReference<
+      Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>>> coordinateCache =
+          new AtomicReference<>(Pair.of(-1, null));
+
+  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
+
+  /**
+   * The prefix for the results table header. Contains all the standard header data about the input
+   * results data. This is effectively immutable.
+   */
+  private static String tablePrefix;
+
+  private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
+
+  /** A reference to the most recent results. */
+  private static AtomicReference<BenchmarkSpotFitResults> spotFitResults = new AtomicReference<>();
+
+  private final FitEngineConfiguration config;
+  private MultiPathFilter multiFilter;
+
+  private TextArea taFilterXml;
+  private TextField textFailLimit;
+  private Checkbox cbIncludeNeighbours;
+  private TextField textNeighbourHeight;
+  private Checkbox cbComputeDoublets;
+
+  private boolean extraOptions;
+  /** Flag used when being called by another plugin to suppress dialogs. */
+  private boolean silent;
+  /** Flag used when being called by another plugin to indicate success. */
+  private boolean finished;
+
+  private ImagePlus imp;
+  private MemoryPeakResults results;
+  private CreateData.SimulationParameters simulationParameters;
+  private BenchmarkFilterResult filterResult;
+
+  private MaximaSpotFilter spotFilter;
+
+  /** The distance in pixels. */
+  private double distanceInPixels;
+
+  /** The lower distance in pixels. */
+  private double lowerDistanceInPixels;
+
+
+  /** The plugin settings. */
+  private final Settings settings;
 
   // Used to try and guess the range for filtering the results
   private enum LowerLimit {
@@ -205,11 +268,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final boolean restrictRange;
     final boolean requireLabel;
 
-    public FilterCriteria(ParameterType type, LowerLimit lower, UpperLimit upper) {
+    FilterCriteria(ParameterType type, LowerLimit lower, UpperLimit upper) {
       this(type, type.toString(), lower, upper, 0, true, true);
     }
 
-    public FilterCriteria(ParameterType type, String name, LowerLimit lower, UpperLimit upper,
+    FilterCriteria(ParameterType type, String name, LowerLimit lower, UpperLimit upper,
         int minBinWidth, boolean restrictRange, boolean requireLabel) {
       this.type = type;
       this.name = name;
@@ -221,236 +284,98 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private static FilterCriteria[] filterCriteria;
-  private static final int FILTER_SIGNAL = 0;
-  private static final int FILTER_SNR = 1;
-  private static final int FILTER_MIN_WIDTH = 2;
-  private static final int FILTER_MAX_WIDTH = 3;
-  private static final int FILTER_SHIFT = 4;
-  private static final int FILTER_ESHIFT = 5;
-  private static final int FILTER_PRECISION = 6;
-  private static final int FILTER_ITERATIONS = 7;
-  private static final int FILTER_EVALUATIONS = 8;
-
-  // TODO - Add support for optimising z-depth during 3D fitting
-
-  private static FilterCriteria[] createFilterCriteria() {
-    FilterCriteria[] criteria = filterCriteria;
-    if (criteria == null) {
-      criteria = new FilterCriteria[9];
-      int index = 0;
-      //@formatter:off
-      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
-      criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
-      criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-      criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
-      // Precision has enough discrimination power to be able to use the Jaccard score
-      criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
-      // These are not filters but are used for stats analysis
-      criteria[index++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-      criteria[index] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-      //@formatter:on
-
-      // Some parameter types may not be for DirectFilters so ignore this check...
-      // We just have to be sure that we support all the types produced by any DirectFilter.
-
-      // // Do a check to ensure we have all the parameter types in the correct order.
-      // // This is needed so that all possible filters can be processed.
-      // ParameterType[] types = ParameterType.values();
-      // NEXT_TYPE: for (int k = 0; k < types.length; k++)
-      // {
-      // for (int j = 0; j < criteria.length; j++)
-      // if (criteria[j].type == types[k])
-      // continue NEXT_TYPE;
-      // throw new RuntimeException("Missing parameter type: " + types[k].toString());
-      // }
-      filterCriteria = criteria;
-    }
-    return filterCriteria;
-  }
-
-  private static double[] min;
-  private static double[] max;
-
   /**
-   * Gets the min value of the most recent fit data for the given parameter name.
-   *
-   * @param type the type
-   * @return the min
+   * Store the filter candidates data.
    */
-  public static double getMin(ParameterType type) {
-    return getValue(type, min, 0);
-  }
+  private static class CandidateData {
+    final TIntObjectHashMap<FilterCandidates> filterCandidates;
+    final double fractionPositive;
+    final double fractionNegative;
+    final int countPositive;
+    final int countNegative;
 
-  /**
-   * Gets the max value of the most recent fit data for the given parameter name.
-   *
-   * @param type the type
-   * @return the max
-   */
-  public static double getMax(ParameterType type) {
-    return getValue(type, max, Double.MAX_VALUE);
-  }
+    final int filterId;
+    final double fractionPositives;
+    final double fractionNegativesAfterAllPositives;
+    final int negativesAfterAllPositives;
+    final int width;
 
-  private static double getValue(ParameterType type, double[] array, double defaultValue) {
-    if (type == null || array == null || filterCriteria == null) {
-      return defaultValue;
+    CandidateData(TIntObjectHashMap<FilterCandidates> filterCandidates, int filterId,
+        double fractionPositive, double fractionNegative, int countPositive, int countNegative,
+        Settings settings, int width) {
+      this.filterCandidates = filterCandidates;
+      this.filterId = filterId;
+      this.fractionPositive = fractionPositive;
+      this.fractionNegative = fractionNegative;
+      this.countPositive = countPositive;
+      this.countNegative = countNegative;
+      fractionPositives = settings.fractionPositives;
+      fractionNegativesAfterAllPositives = settings.fractionNegativesAfterAllPositives;
+      negativesAfterAllPositives = settings.negativesAfterAllPositives;
+      this.width = width;
     }
 
-    // Assume these are roughly the same
-    if (type == ParameterType.PRECISION2 || type == ParameterType.PRECISION_CRLB) {
-      type = ParameterType.PRECISION;
+    /**
+     * Return true if the settings used in the candidate data are different.
+     *
+     * @param filterId the filter id
+     * @param settings the settings
+     * @param width the width
+     * @return true if different
+     */
+    boolean differentSettings(int filterId, Settings settings, int width) {
+      return this.filterId != filterId || fractionPositives != settings.fractionPositives
+          || fractionNegativesAfterAllPositives != settings.fractionNegativesAfterAllPositives
+          || negativesAfterAllPositives != settings.negativesAfterAllPositives
+          || this.width != width;
     }
-
-    for (int j = 0; j < filterCriteria.length; j++) {
-      if (filterCriteria[j].type == type) {
-        return array[j];
-      }
-    }
-
-    // All other types will have a default value
-    return defaultValue;
   }
-
-  /** The fit engine config used for the most recent fit. */
-  private static AtomicReference<FitEngineConfiguration> configRef;
-
-  /** The multi filter used for the most recent fit. */
-  private static AtomicReference<MultiPathFilter> multiFilterRef;
-
-  private static final MultiPathFilter defaultMultiFilter;
-  private static final double[] defaultParameters;
-  private static final IDirectFilter defaultMinimalFilter;
-
-  static {
-    FitEngineConfiguration config = new FitEngineConfiguration();
-    final FitConfiguration fitConfig = config.getFitConfiguration();
-    // Set some default fit settings here ...
-    fitConfig.setDisableSimpleFilter(false);
-    fitConfig.setMinPhotons(1); // Do not allow negative photons
-    fitConfig.setCoordinateShiftFactor(0);
-    fitConfig.setPrecisionThreshold(0);
-    fitConfig.setMinWidthFactor(0);
-    fitConfig.setMaxWidthFactor(0);
-
-    fitConfig.setBackgroundFitting(true);
-    fitConfig.setNoise(0);
-    config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
-
-    // Use bounded so that we can fit the neighbours
-    config.setIncludeNeighbours(true);
-    fitConfig.setFitSolver(FitSolver.LVM_LSE);
-
-    // Add a filter to use for storing the slice results:
-    // Use the standard configuration to ensure sensible fits are stored as the current slice
-    // results.
-    final FitConfiguration tmp = new FitConfiguration();
-    final PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
-    tmp.setPrecisionMethod(precisionMethod);
-
-    // Add a minimum filter to use for storing estimates
-    defaultMinimalFilter = FitWorker.createMinimalFilter(precisionMethod);
-
-    final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
-
-    // We might as well use the doublet fits given we will compute them.
-    final double residualsThreshold = 0.4;
-    defaultMultiFilter =
-        new MultiPathFilter(primaryFilter, defaultMinimalFilter, residualsThreshold);
-    defaultParameters = createParameters(config);
-
-    configRef = new AtomicReference<>(config);
-    multiFilterRef = new AtomicReference<>(defaultMultiFilter);
-  }
-
-  private FitEngineConfiguration config;
-  private MultiPathFilter multiFilter;
-
-  private TextArea taFilterXml;
-  private TextField textFailLimit;
-  private Checkbox cbIncludeNeighbours;
-  private TextField textNeighbourHeight;
-  private Checkbox cbComputeDoublets;
-
-  private boolean extraOptions;
-  // Flag used when being called by another plugin to suppress dialogs
-  private boolean silent;
-  /** Flag used when being called by another plugin to indicate success. */
-  boolean finished;
-
-  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
-
-  private ImagePlus imp;
-  private MemoryPeakResults results;
-  private CreateData.SimulationParameters simulationParameters;
-  private BenchmarkFilterResult filterResult;
-
-  private MaximaSpotFilter spotFilter;
-
-  private static TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
-  private static TIntObjectHashMap<FilterCandidates> filterCandidates;
-  private static double fP;
-  private static double fN;
-  private static int nP;
-  private static int nN;
-
-  /** The last id. */
-  static AtomicInteger lastId = new AtomicInteger(-1);
-  /** The last filter id. */
-  static AtomicInteger lastFilterId = new AtomicInteger(-1);
-
-  private static SettingsList lastSettings;
-
-  /** The plugin settings. */
-  private Settings settings;
-
-  // Allow other plugins to access the results
-
-  /** The fit results id. */
-  private static AtomicInteger fitResultsId = new AtomicInteger();
-
-  /** A reference to the most recent results. */
-  static AtomicReference<BenchmarkSpotFitResults> resultsCacheRef = new AtomicReference<>();
-
-  /** The fit results. */
-  static TIntObjectHashMap<FilterCandidates> fitResults;
-
-  /** The distance in pixels. */
-  static double distanceInPixels;
-
-  /** The lower distance in pixels. */
-  static double lowerDistanceInPixels;
-
-  /** Allow access to the time. */
-  static StopWatch stopWatch;
-
-  /** The table prefix. */
-  static String tablePrefix;
-
-  /** The result prefix. */
-  static String resultPrefix;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
+    /** The default MultiPathFilter. */
+    static final MultiPathFilter defaultMultiFilter;
+    /** The default parameters. */
+    static final double[] defaultParameters;
+    /** The default minimal filter. */
+    static final IDirectFilter defaultMinimalFilter;
+
+    static {
+      // Add a filter to use for storing the slice results:
+      // Use the standard configuration to ensure sensible fits are stored as the current slice
+      // results.
+      final FitConfiguration tmp = new FitConfiguration();
+      final PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
+      tmp.setPrecisionMethod(precisionMethod);
+
+      // Add a minimum filter to use for storing estimates
+      defaultMinimalFilter = FitWorker.createMinimalFilter(precisionMethod);
+
+      final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
+
+      // We might as well use the doublet fits given we will compute them.
+      final double residualsThreshold = 0.4;
+      defaultMultiFilter =
+          new MultiPathFilter(primaryFilter, defaultMinimalFilter, residualsThreshold);
+      defaultParameters = createParameters(createDefaultConfig());
+    }
+
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
+
+    FitEngineConfiguration config;
+    MultiPathFilter multiFilter;
 
     double fractionPositives;
     double fractionNegativesAfterAllPositives;
     int negativesAfterAllPositives;
     double distance;
     double lowerDistance;
-    /** The signal factor. */
     double signalFactor;
-    /** The lower signal factor. */
     double lowerSignalFactor;
-
-    /** The compute doublets option. */
     boolean computeDoublets;
     boolean showFilterScoreHistograms;
     boolean saveFilterRange;
@@ -459,6 +384,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     Settings() {
       // Set defaults
+      config = createDefaultConfig();
+      multiFilter = defaultMultiFilter.copy();
       fractionPositives = 100;
       fractionNegativesAfterAllPositives = 50;
       negativesAfterAllPositives = 10;
@@ -471,6 +398,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     Settings(Settings source) {
+      config = source.config.createCopy();
+      multiFilter = source.multiFilter.copy();
       fractionPositives = source.fractionPositives;
       fractionNegativesAfterAllPositives = source.fractionNegativesAfterAllPositives;
       negativesAfterAllPositives = source.negativesAfterAllPositives;
@@ -504,6 +433,27 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     void save() {
       lastSettings.set(this);
     }
+
+    private static FitEngineConfiguration createDefaultConfig() {
+      final FitEngineConfiguration config = new FitEngineConfiguration();
+      final FitConfiguration fitConfig = config.getFitConfiguration();
+      // Set some default fit settings here ...
+      fitConfig.setDisableSimpleFilter(false);
+      fitConfig.setMinPhotons(1); // Do not allow negative photons
+      fitConfig.setCoordinateShiftFactor(0);
+      fitConfig.setPrecisionThreshold(0);
+      fitConfig.setMinWidthFactor(0);
+      fitConfig.setMaxWidthFactor(0);
+
+      fitConfig.setBackgroundFitting(true);
+      fitConfig.setNoise(0);
+      config.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_MEAN_OF_SQUARES);
+
+      // Use bounded so that we can fit the neighbours
+      config.setIncludeNeighbours(true);
+      fitConfig.setFitSolver(FitSolver.LVM_LSE);
+      return config;
+    }
   }
 
   //////////////////////
@@ -519,8 +469,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * Contains the results from the latest execution.
    */
   static class BenchmarkSpotFitResults {
+    // Used by the Benchmark Spot Fit plugin
+    private static AtomicInteger fitResultsId = new AtomicInteger(1);
+
+    /** The simulation id. */
+    final int simulationId;
+
     /** The fit results id. */
-    int id;
+    final int id;
 
     /** The fit results. */
     TIntObjectHashMap<FilterCandidates> fitResults;
@@ -531,17 +487,30 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     /** The lower distance in pixels. */
     double lowerDistanceInPixels;
 
-    /** Allow access to the time. */
+    /** Allow access to the analysis time. */
     StopWatch stopWatch;
 
-    /** The table prefix. */
-    String tablePrefix;
-
-    /** The result prefix. */
+    /**
+     * The prefix for the results table entry. Contains all the standard data about the input
+     * results data. This is constructed using all the settings.
+     */
     String resultPrefix;
 
-    BenchmarkSpotFitResults(TIntObjectHashMap<FilterCandidates> fitResults) {
+    /** The minimum for each spot parameter. Use to set limits for spot filters. */
+    double[] min;
+
+    /** The maximum for each spot parameter. Use to set limits for spot filters. */
+    double[] max;
+
+    /**
+     * Instantiates a new benchmark spot fit results.
+     *
+     * @param simulationId the simulation id
+     * @param fitResults the fit results
+     */
+    BenchmarkSpotFitResults(int simulationId, TIntObjectHashMap<FilterCandidates> fitResults) {
       id = fitResultsId.incrementAndGet();
+      this.simulationId = simulationId;
       this.fitResults = fitResults;
     }
   }
@@ -680,7 +649,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       this.point = point;
       this.predictedSignal = predictedSignal;
       this.actualSignal = actualSignal;
-      this.sf = BenchmarkSpotFit.getSignalFactor(predictedSignal, actualSignal);
+      this.sf = BenchmarkSpotFit.computeSignalFactor(predictedSignal, actualSignal);
     }
 
     @Override
@@ -695,13 +664,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   /**
-   * Gets the signal factor.
+   * Computes the signal factor.
    *
    * @param predictedSignal the predicted signal
    * @param actualSignal the actual signal
    * @return the signal factor
    */
-  static double getSignalFactor(double predictedSignal, double actualSignal) {
+  static double computeSignalFactor(double predictedSignal, double actualSignal) {
     final double rsf = predictedSignal / actualSignal;
     // The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for
     // above.
@@ -984,7 +953,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
                   if (signalScore != null) {
                     final PeakResultPoint p3 = (PeakResultPoint) actual[ii];
                     // Assume the simulation is in photons
-                    final double sf = getSignalFactor(predicted.get(jj).result.getSignal(),
+                    final double sf = computeSignalFactor(predicted.get(jj).result.getSignal(),
                         p3.getPeakResult().getIntensity());
                     score *= signalScore.score(Math.abs(sf));
 
@@ -1127,6 +1096,18 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
+  /**
+   * Create a new instance.
+   */
+  public BenchmarkSpotFit() {
+    // Get the latest setting (by copy)
+    settings = Settings.load();
+    config = settings.config;
+    multiFilter = settings.multiFilter;
+    // Save (by reference)
+    settings.save();
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -1161,18 +1142,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     clearFitResults();
 
     silent = true;
+    finished = false;
     if (!initialise()) {
       return;
     }
 
     // Reset the filter
-    multiFilter = new MultiPathFilter(filter, defaultMinimalFilter, residualsThreshold);
+    multiFilter = new MultiPathFilter(filter, Settings.defaultMinimalFilter, residualsThreshold);
     // Update the appropriate fitting settings
     config.setFailuresLimit(failuresLimit);
     config.setDuplicateDistance(duplicateDistance);
     config.setDuplicateDistanceAbsolute(duplicateDistanceAbsolute);
 
     runFitting();
+    finished = true;
   }
 
   private boolean initialise() {
@@ -1212,16 +1195,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
     // This is required to initialise the FitWorker
     spotFilter = filterResult.spotFilter;
-    config = configRef.get().createCopy();
-    multiFilter = multiFilterRef.get().copy();
     return true;
   }
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
-
-    settings = Settings.load();
 
     ImageJUtils.addMessage(gd,
         "Fit candidate spots in the benchmark image created by " + CreateData.TITLE
@@ -1254,7 +1233,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
     // Allow loading the best filter for these results
-    final boolean benchmarkSettingsCheckbox = fitResultsId.get() == BenchmarkFilterAnalysis.lastId;
+    final boolean benchmarkSettingsCheckbox =
+        BenchmarkSpotFitResults.fitResultsId.get() == BenchmarkFilterAnalysis.lastId;
 
     Checkbox cbBenchmark = null;
     if (benchmarkSettingsCheckbox) {
@@ -1269,7 +1249,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     cbIncludeNeighbours = gd.addAndGetCheckbox("Include_neighbours", config.isIncludeNeighbours());
     gd.addAndGetSlider("Neighbour_height", 0.01, 1, config.getNeighbourHeightThreshold());
     textNeighbourHeight = gd.getLastTextField();
-    // gd.addSlider("Residuals_threshold", 0.01, 1, config.getResidualsThreshold());
     cbComputeDoublets = gd.addAndGetCheckbox("Compute_doublets", settings.computeDoublets);
     PeakFit.addDuplicateDistanceOptions(gd, fitEngineConfigurationProvider);
     gd.addCheckbox("Show_score_histograms", settings.showFilterScoreHistograms);
@@ -1300,7 +1279,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     settings.lowerDistance = Math.abs(gd.getNextNumber());
     settings.signalFactor = Math.abs(gd.getNextNumber());
     settings.lowerSignalFactor = Math.abs(gd.getNextNumber());
-    settings.save();
 
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
@@ -1339,7 +1317,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
         final double residualsThreshold = tmp.getResidualsThreshold();
         myMultiFilter =
-            new MultiPathFilter(primaryFilter, defaultMinimalFilter, residualsThreshold);
+            new MultiPathFilter(primaryFilter, Settings.defaultMinimalFilter, residualsThreshold);
       }
     } else {
       myMultiFilter = MultiPathFilter.fromXml(xml);
@@ -1365,7 +1343,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     if (settings.computeDoublets) {
-      // config.setComputeResiduals(true);
       config.setResidualsThreshold(0);
       fitConfig.setComputeResiduals(true);
     } else {
@@ -1410,17 +1387,17 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     distanceInPixels = settings.distance * sa / simulationParameters.pixelPitch;
     lowerDistanceInPixels = settings.lowerDistance * sa / simulationParameters.pixelPitch;
 
-    // Copy simulation defaults if a new simulation
-    if (lastId.get() != simulationParameters.id) {
-      // This is needed to configure the fit solver
-      fitConfig.setNmPerPixel(simulationParameters.pixelPitch);
-      fitConfig.setGain(simulationParameters.gain);
-      fitConfig.setQuantumEfficiency(simulationParameters.qe);
-      fitConfig.setReadNoise(simulationParameters.readNoise);
-      fitConfig.setBias(simulationParameters.bias);
-      fitConfig.setCameraType(simulationParameters.cameraType);
-      fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
-    }
+    // Copy simulation defaults if a new simulation.
+    // if (lastSimulationId.get() != simulationParameters.id) {
+    // This is needed to configure the fit solver.
+    fitConfig.setNmPerPixel(simulationParameters.pixelPitch);
+    fitConfig.setGain(simulationParameters.gain);
+    fitConfig.setQuantumEfficiency(simulationParameters.qe);
+    fitConfig.setReadNoise(simulationParameters.readNoise);
+    fitConfig.setBias(simulationParameters.bias);
+    fitConfig.setCameraType(simulationParameters.cameraType);
+    fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
+    // }
     if (!PeakFit.configurePsfModel(config)) {
       return false;
     }
@@ -1428,30 +1405,34 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0);
   }
 
-  private void runFitting() {
+  private BenchmarkSpotFitResults runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    if (lastId.get() != simulationParameters.id) {
+    final Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+
+    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
       // from the MemoryPeakResults
       actualCoordinates = ResultsMatchCalculator.getCoordinates(results, false);
-      lastId.set(simulationParameters.id);
+      coordinateCache.set(Pair.of(simulationParameters.id, actualCoordinates));
       refresh = true;
+    } else {
+      actualCoordinates = coords.getValue();
     }
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
     final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
-    final SettingsList settingsList = new SettingsList(filterResult.id, settings.fractionPositives,
-        settings.fractionNegativesAfterAllPositives, settings.negativesAfterAllPositives, width);
-    if (refresh || !settingsList.equals(lastSettings)) {
-      filterCandidates = subsetFilterResults(filterResult.filterResults, width);
-      lastSettings = settingsList;
-      lastFilterId.set(filterResult.id);
+    CandidateData candidateData = candidateDataCache.get();
+    if (refresh || candidateData == null
+        || candidateData.differentSettings(filterResult.id, settings, width)) {
+      candidateData = subsetFilterResults(filterResult.filterResults, width);
+      candidateDataCache.set(candidateData);
     }
 
-    stopWatch = StopWatch.createStarted();
+    final StopWatch stopWatch = StopWatch.createStarted();
     final ImageStack stack = imp.getImageStack();
 
     clearFitResults();
@@ -1473,8 +1454,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final Ticker ticker = ImageJUtils.createTicker(stack.getSize(), nThreads, "Fitting frames ...");
     final PeakResults syncResults = SynchronizedPeakResults.create(peakResults, nThreads);
     for (int i = 0; i < nThreads; i++) {
-      final Worker worker =
-          new Worker(jobs, stack, actualCoordinates, filterCandidates, syncResults, ticker);
+      final Worker worker = new Worker(jobs, stack, actualCoordinates,
+          candidateData.filterCandidates, syncResults, ticker);
       final Thread t = new Thread(worker);
       workers.add(worker);
       threads.add(t);
@@ -1507,7 +1488,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     ImageJUtils.finished();
 
     if (ImageJUtils.isInterrupted()) {
-      return;
+      return null;
     }
 
     stopWatch.stop();
@@ -1521,8 +1502,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       results.convertToPreferredUnits();
     }
 
-    fitResultsId.incrementAndGet();
-    fitResults = new TIntObjectHashMap<>();
+    final TIntObjectHashMap<FilterCandidates> fitResults = new TIntObjectHashMap<>();
     for (final Worker w : workers) {
       fitResults.putAll(w.results);
     }
@@ -1553,19 +1533,28 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
     }
 
-    summariseResults(fitResults, runTime, preprocessedPeakResults, count);
+    final BenchmarkSpotFitResults newSpotFitResults =
+        new BenchmarkSpotFitResults(simulationParameters.id, fitResults);
+
+    newSpotFitResults.distanceInPixels = distanceInPixels;
+    newSpotFitResults.lowerDistanceInPixels = lowerDistanceInPixels;
+    newSpotFitResults.stopWatch = stopWatch;
+
+    summariseResults(newSpotFitResults, runTime, preprocessedPeakResults, count, candidateData,
+        actualCoordinates);
 
     IJ.showStatus("");
+
+    spotFitResults.set(newSpotFitResults);
+
+    return newSpotFitResults;
   }
 
   /**
    * Clear old results to free memory.
    */
   private static void clearFitResults() {
-    if (fitResults != null) {
-      fitResults.clear();
-    }
-    fitResults = null;
+    spotFitResults.set(null);
   }
 
   private static int
@@ -1606,10 +1595,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    *
    * @param filterResults the filter results
    * @param fitting the fitting
-   * @return The filter candidates
+   * @return The filter candidate data
    */
-  private TIntObjectHashMap<FilterCandidates>
-      subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults, int fitting) {
+  private CandidateData subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,
+      int fitting) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
     final double f2 = settings.fractionNegativesAfterAllPositives / 100.0;
@@ -1617,8 +1606,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int[] counter = new int[2];
 
     final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
-    fP = fN = 0;
-    nP = nN = 0;
     final double[] fX = new double[2];
     final int[] nX = new int[2];
     filterResults.forEachEntry((frame, result) -> {
@@ -1657,9 +1644,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
             }
           }
         }
-
-        // if (targetP < np2)
-        // System.out.printf("np2 = %.2f, targetP = %.2f\n", np2, targetP);
       }
 
       // Count the number of positive & negatives
@@ -1698,22 +1682,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       counter[0] += count;
       counter[1] += result.spots.length;
 
-      // Debug
-      // System.out.printf("Frame %d : %.1f / (%.1f + %.1f). p=%d, n=%d, after=%d, f=%.1f\n",
-      // result.getKey().intValue(),
-      // r.result.getTruePositives(), r.result.getTruePositives(), r.result.getFalsePositives(),
-      // p, n,
-      // nAfter, (double) n / (n + p));
-
       // We can use all the candidates but only fit up to count
       subset.put(frame, new FilterCandidates(pos, neg, np, nn, result.spots, count));
       return true;
     });
-
-    fP = fX[0];
-    fN = fX[1];
-    nP = nX[0];
-    nN = nX[1];
 
     // We now add all the candidates but only fit the first N
     final int target = counter[0];
@@ -1725,7 +1697,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           TextUtils.pleural(target, "candidate"), total);
     }
 
-    return subset;
+    return new CandidateData(subset, filterResult.id, fX[0], fX[1], nX[0], nX[1], settings,
+        fitting);
   }
 
   private static void put(BlockingQueue<Integer> jobs, int slice) {
@@ -1749,8 +1722,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private void summariseResults(TIntObjectHashMap<FilterCandidates> filterCandidates, long runTime,
-      final PreprocessedPeakResult[] preprocessedPeakResults, int uniqueIdCount) {
+  private void summariseResults(BenchmarkSpotFitResults spotFitResults, long runTime,
+      final PreprocessedPeakResult[] preprocessedPeakResults, int uniqueIdCount,
+      CandidateData candidateData, TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates) {
 
     // Summarise the fitting results. N fits, N failures.
     // Optimal match statistics if filtering is perfect (since fitting is not perfect).
@@ -1780,10 +1754,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
-    final int[] frames = new int[filterCandidates.size()];
-    final FilterCandidates[] candidates = new FilterCandidates[filterCandidates.size()];
+    final TIntObjectHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
+    final int[] frames = new int[fitResults.size()];
+    final FilterCandidates[] candidates = new FilterCandidates[fitResults.size()];
     final int[] counter = new int[1];
-    filterCandidates.forEachEntry((frame, candidate) -> {
+    fitResults.forEachEntry((frame, candidate) -> {
       frames[counter[0]] = frame;
       candidates[counter[0]] = candidate;
       counter[0]++;
@@ -1872,8 +1847,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // We want to compute the Jaccard against the spot metric
 
     // Filter the results using the multi-path filter
-    final ArrayList<MultiPathFitResults> multiPathResults =
-        new ArrayList<>(filterCandidates.size());
+    final ArrayList<MultiPathFitResults> multiPathResults = new ArrayList<>(fitResults.size());
     for (int i = 0; i < frames.length; i++) {
       final int frame = frames[i];
       final MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
@@ -2012,11 +1986,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     sb.append(spotFilter.getDescription());
 
     // nP and nN is the fractional score of the spot candidates
-    addCount(sb, (double) nP + nN);
-    addCount(sb, nP);
-    addCount(sb, nN);
-    addCount(sb, fP);
-    addCount(sb, fN);
+    addCount(sb, (double) candidateData.countPositive + candidateData.countNegative);
+    addCount(sb, candidateData.countPositive);
+    addCount(sb, candidateData.countNegative);
+    addCount(sb, candidateData.fractionPositive);
+    addCount(sb, candidateData.fractionNegative);
     String name = PeakFit.getSolverName(fitConfig);
     if (fitConfig.getFitSolver() == FitSolver.MLE && fitConfig.isModelCamera()) {
       name += " Camera";
@@ -2024,13 +1998,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     add(sb, name);
     add(sb, config.getFitting());
 
-    resultPrefix = sb.toString();
+    spotFitResults.resultPrefix = sb.toString();
 
     // Q. Should I add other fit configuration here?
 
     // The fraction of positive and negative candidates that were included
-    add(sb, (100.0 * ctp) / nP);
-    add(sb, (100.0 * cfp) / nN);
+    add(sb, (100.0 * ctp) / candidateData.countPositive);
+    add(sb, (100.0 * cfp) / candidateData.countNegative);
 
     // Score the fitting results compared to the original simulation.
 
@@ -2176,8 +2150,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Plot histograms of the stats on the same window
     final double[] lower = new double[filterCriteria.length];
     final double[] upper = new double[lower.length];
-    min = new double[lower.length];
-    max = new double[lower.length];
+    final double[] min = new double[lower.length];
+    final double[] max = new double[lower.length];
     for (int i = 0; i < stats[0].length; i++) {
       final double[] limits = showDoubleHistogram(stats, i, wo, matchScores);
       lower[i] = limits[0];
@@ -2292,6 +2266,33 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       filters.add(mf.create(max));
       saveFilters(FileUtils.replaceExtension(filename, ".4.xml"), filters);
     }
+
+    spotFitResults.min = min;
+    spotFitResults.max = max;
+  }
+
+  private static FilterCriteria[] createFilterCriteria() {
+    FilterCriteria[] criteria = filterCriteria;
+    if (criteria == null) {
+      criteria = new FilterCriteria[9];
+      int index = 0;
+      //@formatter:off
+      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+      criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+      criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
+      // Precision has enough discrimination power to be able to use the Jaccard score
+      criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
+      // These are not filters but are used for stats analysis
+      criteria[index++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      //@formatter:on
+
+      filterCriteria = criteria;
+    }
+    return filterCriteria;
   }
 
   private static boolean saveFilters(String filename, ArrayList<Filter> filters) {
@@ -2856,7 +2857,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     fitConfiguration.setFilterSettings(fitConfiguration.getFilterSettings());
 
     // Set the fit engine settings manually to avoid merging all child settings
-    FitEngineConfiguration config = configRef.get();
+    final FitEngineConfiguration config = Settings.lastSettings.get().config;
     configuration.setFitting(config.getFitting());
     configuration.setIncludeNeighbours(config.isIncludeNeighbours());
     configuration.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
@@ -2864,7 +2865,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     configuration.setDuplicateDistanceAbsolute(config.getDuplicateDistanceAbsolute());
 
     if (getComputeDoublets()) {
-      // config.setComputeResiduals(true);
       configuration.setResidualsThreshold(0);
       fitConfiguration.setComputeResiduals(true);
     } else {
@@ -2902,7 +2902,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
           final double residualsThreshold = tmp.getResidualsThreshold();
           myMultiFilter =
-              new MultiPathFilter(primaryFilter, defaultMinimalFilter, residualsThreshold);
+              new MultiPathFilter(primaryFilter, Settings.defaultMinimalFilter, residualsThreshold);
         } else {
           IJ.log("Failed to update settings using the filter analysis");
           checkbox.setState(false);
@@ -2932,16 +2932,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return true, if a reset was required
    */
   boolean resetMultiPathFilter() {
-    if (defaultMultiFilter.equals(multiFilter)
-        && equals(createParameters(config), defaultParameters)) {
+    if (Settings.defaultMultiFilter.equals(multiFilter)
+        && equals(createParameters(config), Settings.defaultParameters)) {
       return false;
     }
-    multiFilter = defaultMultiFilter;
-    config.setFailuresLimit((int) defaultParameters[0]);
+    multiFilter = Settings.defaultMultiFilter;
+    config.setFailuresLimit((int) Settings.defaultParameters[0]);
     // Note we are not resetting the residuals threshold in the config.
     // Only the threshold in the multi-filter matters.
-    config.setDuplicateDistance(defaultParameters[1]);
-    config.setDuplicateDistanceAbsolute(defaultParameters[2] != 0);
+    config.setDuplicateDistance(Settings.defaultParameters[1]);
+    config.setDuplicateDistanceAbsolute(Settings.defaultParameters[2] != 0);
     return true;
   }
 
@@ -2965,7 +2965,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the fit engine configuration
    */
   static FitEngineConfiguration getFitEngineConfiguration() {
-    return configRef.get().createCopy();
+    return Settings.lastSettings.get().config.createCopy();
   }
 
   /**
@@ -2974,7 +2974,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the multi filter
    */
   static MultiPathFilter getMultiFilter() {
-    return multiFilterRef.get().copy();
+    return Settings.lastSettings.get().multiFilter.copy();
   }
 
   /**
@@ -3002,5 +3002,95 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    */
   static boolean getComputeDoublets() {
     return Settings.lastSettings.get().computeDoublets;
+  }
+
+  /**
+   * Gets the min value of the most recent fit data for the given parameter name.
+   *
+   * @param type the type
+   * @return the min
+   */
+  static double getMin(ParameterType type) {
+    final BenchmarkSpotFitResults results = spotFitResults.get();
+    return results == null ? 0 : getValue(type, results.min, 0);
+  }
+
+  /**
+   * Gets the max value of the most recent fit data for the given parameter name.
+   *
+   * @param type the type
+   * @return the max
+   */
+  static double getMax(ParameterType type) {
+    final BenchmarkSpotFitResults results = spotFitResults.get();
+    return results == null ? Double.MAX_VALUE : getValue(type, results.max, Double.MAX_VALUE);
+  }
+
+  private static double getValue(ParameterType type, double[] array, double defaultValue) {
+    if (type == null || array == null || filterCriteria == null) {
+      return defaultValue;
+    }
+
+    // Assume these are roughly the same
+    if (type == ParameterType.PRECISION2 || type == ParameterType.PRECISION_CRLB) {
+      type = ParameterType.PRECISION;
+    }
+
+    for (int j = 0; j < filterCriteria.length; j++) {
+      if (filterCriteria[j].type == type) {
+        return array[j];
+      }
+    }
+
+    // All other types will have a default value
+    return defaultValue;
+  }
+
+  /**
+   * Checks if the plugin finished successfully.
+   *
+   * @return true if finished
+   */
+  boolean isFinished() {
+    return finished;
+  }
+
+  /**
+   * Gets the prefix for the results table header. Contains all the standard header data about the
+   * input results data.
+   *
+   * @return the table prexix
+   */
+  static String getTablePrefix() {
+    return tablePrefix;
+  }
+
+  /**
+   * Gets the benchmark spot fit results.
+   *
+   * @return the benchmark spot fit results
+   */
+  static BenchmarkSpotFitResults getBenchmarkSpotFitResults() {
+    return spotFitResults.get();
+  }
+
+  /**
+   * Gets the distance in pixels from the last analysis.
+   *
+   * @return the distance in pixels
+   */
+  static double getDistanceInPixels() {
+    final BenchmarkSpotFitResults results = spotFitResults.get();
+    return results == null ? 0 : results.distanceInPixels;
+  }
+
+  /**
+   * Gets the lower distance in pixels from the last analysis.
+   *
+   * @return the lower distance in pixels
+   */
+  static double getLowerDistanceInPixels() {
+    final BenchmarkSpotFitResults results = spotFitResults.get();
+    return results == null ? 0 : results.lowerDistanceInPixels;
   }
 }
