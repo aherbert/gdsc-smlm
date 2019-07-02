@@ -71,7 +71,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.BenchmarkFilterResult;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.BenchmarkSpotFilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.FilterResult;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFilter.ScoredSpot;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -182,7 +182,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
 
   /** A reference to the most recent results. */
-  private static AtomicReference<BenchmarkSpotFitResults> spotFitResults = new AtomicReference<>();
+  private static AtomicReference<BenchmarkSpotFitResult> spotFitResults = new AtomicReference<>();
 
   private final FitEngineConfiguration config;
   private MultiPathFilter multiFilter;
@@ -202,7 +202,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private ImagePlus imp;
   private MemoryPeakResults results;
   private CreateData.SimulationParameters simulationParameters;
-  private BenchmarkFilterResult filterResult;
+  private BenchmarkSpotFilterResult filterResult;
 
   private MaximaSpotFilter spotFilter;
 
@@ -468,7 +468,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Contains the results from the latest execution.
    */
-  static class BenchmarkSpotFitResults {
+  static class BenchmarkSpotFitResult {
     // Used by the Benchmark Spot Fit plugin
     private static AtomicInteger fitResultsId = new AtomicInteger(1);
 
@@ -508,7 +508,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param simulationId the simulation id
      * @param fitResults the fit results
      */
-    BenchmarkSpotFitResults(int simulationId, TIntObjectHashMap<FilterCandidates> fitResults) {
+    BenchmarkSpotFitResult(int simulationId, TIntObjectHashMap<FilterCandidates> fitResults) {
       id = fitResultsId.incrementAndGet();
       this.simulationId = simulationId;
       this.fitResults = fitResults;
@@ -1234,7 +1234,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     // Allow loading the best filter for these results
     final boolean benchmarkSettingsCheckbox =
-        BenchmarkSpotFitResults.fitResultsId.get() == BenchmarkFilterAnalysis.lastId;
+        BenchmarkSpotFitResult.fitResultsId.get() == BenchmarkFilterAnalysis.getLastFittingId();
 
     Checkbox cbBenchmark = null;
     if (benchmarkSettingsCheckbox) {
@@ -1405,22 +1405,21 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         (extraOptions) ? PeakFit.FLAG_EXTRA_OPTIONS : 0);
   }
 
-  private BenchmarkSpotFitResults runFitting() {
+  private BenchmarkSpotFitResult runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
     final Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
 
-    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
       // from the MemoryPeakResults
-      actualCoordinates = ResultsMatchCalculator.getCoordinates(results, false);
-      coordinateCache.set(Pair.of(simulationParameters.id, actualCoordinates));
+      coordinateCache.set(
+          Pair.of(simulationParameters.id, ResultsMatchCalculator.getCoordinates(results, false)));
       refresh = true;
-    } else {
-      actualCoordinates = coords.getValue();
     }
+
+    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = coords.getValue();
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
@@ -1533,8 +1532,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
     }
 
-    final BenchmarkSpotFitResults newSpotFitResults =
-        new BenchmarkSpotFitResults(simulationParameters.id, fitResults);
+    final BenchmarkSpotFitResult newSpotFitResults =
+        new BenchmarkSpotFitResult(simulationParameters.id, fitResults);
 
     newSpotFitResults.distanceInPixels = distanceInPixels;
     newSpotFitResults.lowerDistanceInPixels = lowerDistanceInPixels;
@@ -1722,7 +1721,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
   }
 
-  private void summariseResults(BenchmarkSpotFitResults spotFitResults, long runTime,
+  private void summariseResults(BenchmarkSpotFitResult spotFitResults, long runTime,
       final PreprocessedPeakResult[] preprocessedPeakResults, int uniqueIdCount,
       CandidateData candidateData, TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates) {
 
@@ -3011,7 +3010,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the min
    */
   static double getMin(ParameterType type) {
-    final BenchmarkSpotFitResults results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = spotFitResults.get();
     return results == null ? 0 : getValue(type, results.min, 0);
   }
 
@@ -3022,7 +3021,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the max
    */
   static double getMax(ParameterType type) {
-    final BenchmarkSpotFitResults results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = spotFitResults.get();
     return results == null ? Double.MAX_VALUE : getValue(type, results.max, Double.MAX_VALUE);
   }
 
@@ -3070,7 +3069,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    *
    * @return the benchmark spot fit results
    */
-  static BenchmarkSpotFitResults getBenchmarkSpotFitResults() {
+  static BenchmarkSpotFitResult getBenchmarkSpotFitResults() {
     return spotFitResults.get();
   }
 
@@ -3080,7 +3079,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the distance in pixels
    */
   static double getDistanceInPixels() {
-    final BenchmarkSpotFitResults results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = spotFitResults.get();
     return results == null ? 0 : results.distanceInPixels;
   }
 
@@ -3090,7 +3089,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the lower distance in pixels
    */
   static double getLowerDistanceInPixels() {
-    final BenchmarkSpotFitResults results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = spotFitResults.get();
     return results == null ? 0 : results.lowerDistanceInPixels;
   }
 }

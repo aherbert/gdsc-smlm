@@ -141,7 +141,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       new AtomicReference<>(Pair.of(-1, null));
 
   /** The filter result from the most recent benchmark analysis. */
-  private static final AtomicReference<BenchmarkFilterResult> filterResult =
+  private static final AtomicReference<BenchmarkSpotFilterResult> filterResult =
       new AtomicReference<>();
 
   /** The actual coordinates for the simulation. */
@@ -315,7 +315,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   /**
    * Store the benchmark filter result.
    */
-  static class BenchmarkFilterResult {
+  static class BenchmarkSpotFilterResult {
     // Used by the Benchmark Spot Fit plugin
     private static AtomicInteger filterResultsId = new AtomicInteger(1);
 
@@ -401,7 +401,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param config the config
      * @param spotFilter the spot filter
      */
-    BenchmarkFilterResult(int simulationId, TIntObjectHashMap<FilterResult> filterResults,
+    BenchmarkSpotFilterResult(int simulationId, TIntObjectHashMap<FilterResult> filterResults,
         FitEngineConfiguration config, MaximaSpotFilter spotFilter) {
       id = filterResultsId.getAndIncrement();
       this.simulationId = simulationId;
@@ -425,7 +425,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final double param2;
     final double hwhmMin;
 
-    BatchResult(BenchmarkFilterResult filterResult, DataFilterMethod dataFilter, double param,
+    BatchResult(BenchmarkSpotFilterResult filterResult, DataFilterMethod dataFilter, double param,
         int search, double param2, double hwhmMin) {
       if (filterResult != null) {
         this.auc = filterResult.auc;
@@ -1293,7 +1293,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     simulationCoords = getSimulationCoordinates();
 
     // Clear old results to free memory
-    BenchmarkFilterResult localFilterResult;
+    BenchmarkSpotFilterResult localFilterResult;
     filterResult.set(null);
 
     // For graphs
@@ -1531,7 +1531,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     return data;
   }
 
-  private BenchmarkFilterResult analyse(ArrayList<BatchResult[]> batchResults) {
+  private BenchmarkSpotFilterResult analyse(ArrayList<BatchResult[]> batchResults) {
     // Support z-score of AUC and Max. Jaccard combined.
     // For this wee need the statistics of the population of scores.
     final double[][] stats = getStats(batchResults);
@@ -1658,7 +1658,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     for (int i = 0; i < param.length; i++) {
       config.setDataFilter(dataFilter, param[i], true, 0);
       try {
-        final BenchmarkFilterResult localFilterResult = runAnalysis(config, false);
+        final BenchmarkSpotFilterResult localFilterResult = runAnalysis(config, false);
         if (localFilterResult != null) {
           result.add(
               new BatchResult(localFilterResult, dataFilter, param[i], search, param2, hwhmMin));
@@ -1900,11 +1900,11 @@ public class BenchmarkSpotFilter implements PlugIn {
     ticker = ImageJUtils.createTicker(total, 2, progressPrefix);
   }
 
-  private BenchmarkFilterResult runAnalysis(FitEngineConfiguration config) {
+  private BenchmarkSpotFilterResult runAnalysis(FitEngineConfiguration config) {
     return runAnalysis(config, false);
   }
 
-  private BenchmarkFilterResult runAnalysis(FitEngineConfiguration config, boolean batchSummary) {
+  private BenchmarkSpotFilterResult runAnalysis(FitEngineConfiguration config, boolean batchSummary) {
     if (ImageJUtils.isInterrupted()) {
       return null;
     }
@@ -2001,7 +2001,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
 
     // Show a table of the results
-    final BenchmarkFilterResult filterResult =
+    final BenchmarkSpotFilterResult filterResult =
         summariseResults(filterResults, config, spotFilter, batchSummary);
 
     if (!batchMode) {
@@ -2113,7 +2113,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * @param benchmarkFilterResult the filter result
    * @return the cumulative histogram
    */
-  private static double[][] histogramFailures(BenchmarkFilterResult benchmarkFilterResult) {
+  private static double[][] histogramFailures(BenchmarkSpotFilterResult benchmarkFilterResult) {
     final StoredData data = new StoredData();
     benchmarkFilterResult.filterResults
         .forEachEntry((TIntObjectProcedure<FilterResult>) (peak, filterResult) -> {
@@ -2133,7 +2133,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     return h;
   }
 
-  private void showFailuresPlot(BenchmarkFilterResult filterResult) {
+  private void showFailuresPlot(BenchmarkSpotFilterResult filterResult) {
     final double[][] h = filterResult.cumul;
     final StoredData data = filterResult.stats;
 
@@ -2161,10 +2161,10 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
   }
 
-  private BenchmarkFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
+  private BenchmarkSpotFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
       FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean batchSummary) {
-    final BenchmarkFilterResult filterResult =
-        new BenchmarkFilterResult(simulationParameters.id, filterResults, config, spotFilter);
+    final BenchmarkSpotFilterResult filterResult =
+        new BenchmarkSpotFilterResult(simulationParameters.id, filterResults, config, spotFilter);
 
     // Note:
     // Although we can compute the TP/FP score as each additional spot is added
@@ -2403,7 +2403,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   }
 
   @SuppressWarnings("null")
-  private void showOverlay(ImagePlus imp, BenchmarkFilterResult filterResult) {
+  private void showOverlay(ImagePlus imp, BenchmarkSpotFilterResult filterResult) {
     final Overlay o = new Overlay();
     filterResult.filterResults.forEachValue(result -> {
       final int size = result.spots.length;
@@ -2460,7 +2460,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     imp.setOverlay(o);
   }
 
-  private void showPlot(BenchmarkFilterResult filterResult) {
+  private void showPlot(BenchmarkSpotFilterResult filterResult) {
     final double[] r = filterResult.recall;
     final double[] p = filterResult.precision;
     final double[] j = filterResult.jaccard;
@@ -2608,7 +2608,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * @return true, if successful
    */
   public static boolean updateConfiguration(FitEngineConfiguration config) {
-    final BenchmarkFilterResult result = filterResult.get();
+    final BenchmarkSpotFilterResult result = filterResult.get();
     if (result == null) {
       return false;
     }
@@ -2642,7 +2642,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    *
    * @return the benchmark filter result
    */
-  static BenchmarkFilterResult getBenchmarkFilterResult() {
+  static BenchmarkSpotFilterResult getBenchmarkFilterResult() {
     return filterResult.get();
   }
 }

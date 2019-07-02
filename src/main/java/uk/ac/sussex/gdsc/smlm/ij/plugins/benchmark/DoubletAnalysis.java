@@ -1829,11 +1829,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Get the distance from the filter analysis. This ensures that we compute scores the
     // same as the filter analysis
-    if (BenchmarkFilterAnalysis.distanceInPixels > 0) {
-      settings.matchDistance = BenchmarkFilterAnalysis.distanceInPixels;
-      settings.lowerDistance = BenchmarkFilterAnalysis.lowerDistanceInPixels;
-      settings.signalFactor = BenchmarkFilterAnalysis.signalFactor;
-      settings.lowerSignalFactor = BenchmarkFilterAnalysis.lowerSignalFactor;
+    if (BenchmarkFilterAnalysis.getDistanceInPixels() > 0) {
+      settings.matchDistance = BenchmarkFilterAnalysis.getDistanceInPixels();
+      settings.lowerDistance = BenchmarkFilterAnalysis.getLowerDistanceInPixels();
+      settings.signalFactor = BenchmarkFilterAnalysis.getSignalFactor();
+      settings.lowerSignalFactor = BenchmarkFilterAnalysis.getLowerSignalFactor();
     } else {
       // Use the fit analysis distance if no filter analysis has been run
       settings.matchDistance = BenchmarkSpotFit.getDistanceInPixels();
