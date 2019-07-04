@@ -2199,7 +2199,7 @@ public class CreateData implements PlugIn {
     if (psfSd <= 0) {
       return null;
     }
-    PsfModel psfModel = createPsfModel(localisationSets);
+    final PsfModel psfModel = createPsfModel(localisationSets);
     if (psfModel == null) {
       return null;
     }
@@ -2214,8 +2214,8 @@ public class CreateData implements PlugIn {
 
     // Multi-thread for speed
     final PeakResults syncResults = SynchronizedPeakResults.create(results, threadCount);
-    ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-    List<Future<?>> futures = new LinkedList<>();
+    final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
+    final List<Future<?>> futures = new LinkedList<>();
 
     // Count all the frames to process
     final Ticker ticker = ImageJUtils.createTicker(maxT, threadCount);
@@ -2817,7 +2817,7 @@ public class CreateData implements PlugIn {
             // addRaw(localisation.getIntensity());
 
             double photonsRendered = 0;
-            double intensity = localisation.getIntensity();
+            final double intensity = localisation.getIntensity();
             int[] samplePositions = null;
             if (intensity > 0) {
               // TODO record all the positions we draw and the number of photons.
@@ -3162,7 +3162,7 @@ public class CreateData implements PlugIn {
   private float[] backgroundPixels;
   private boolean uniformBackground;
   // TODO - create this using the range expected
-  private PoissonSamplerCache cache = new PoissonSamplerCache(0, 10000);
+  private final PoissonSamplerCache cache = new PoissonSamplerCache(0, 10000);
 
   private float[] createBackground(UniformRandomProvider rng) {
     float[] pixels2 = null;
@@ -4514,7 +4514,7 @@ public class CreateData implements PlugIn {
         int ox;
         int oy;
         if (settings.getRandomCrop()) {
-          UniformRandomProvider rng = createRandomGenerator();
+          final UniformRandomProvider rng = createRandomGenerator();
           ox = new DiscreteUniformSampler(rng, modelBounds.x, upperx).sample();
           oy = new DiscreteUniformSampler(rng, modelBounds.y, uppery).sample();
         } else {

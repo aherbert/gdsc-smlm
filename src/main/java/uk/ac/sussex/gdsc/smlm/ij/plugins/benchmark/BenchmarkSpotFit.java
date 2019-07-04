@@ -1419,7 +1419,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       refresh = true;
     }
 
-    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = coords.getValue();
+    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = coords.getValue();
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed

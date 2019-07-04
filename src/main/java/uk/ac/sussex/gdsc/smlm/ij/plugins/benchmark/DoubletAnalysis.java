@@ -139,8 +139,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static AtomicInteger lastId = new AtomicInteger();
 
   static {
-    FitEngineConfiguration config = new FitEngineConfiguration();
-    FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
 
     // Set some default fit settings here ...
     // Ensure all candidates are fitted
@@ -161,7 +161,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     fitConfig.setComputeDeviations(false);
     fitConfig.setComputeResiduals(true);
 
-    FitConfiguration filterFitConfig = new FitConfiguration();
+    final FitConfiguration filterFitConfig = new FitConfiguration();
     filterFitConfig.setSmartFilter(false);
     filterFitConfig.setDisableSimpleFilter(false);
     filterFitConfig.setMinPhotons(0);
@@ -1619,7 +1619,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     settings = Settings.load();
     config = configRef.get().createCopy();
-    FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
 
     final double sa = getSa();
     ImageJUtils.addMessage(gd,
@@ -1807,7 +1807,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       return false;
     }
 
-    FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
     final CalibrationWriter cal = new CalibrationWriter(fitConfig.getCalibration());
 
     cal.setNmPerPixel(simulationParameters.pixelPitch);
@@ -2228,8 +2228,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Initialise the score for residuals 0
     // Store this as it serves as a baseline for the filtering analysis
-    ResidualsScore residualsScoreMax = computeScores(data, tp, fp, numberOfMolecules, true);
-    ResidualsScore residualsScoreAv = computeScores(data, tp, fp, numberOfMolecules, false);
+    final ResidualsScore residualsScoreMax = computeScores(data, tp, fp, numberOfMolecules, true);
+    final ResidualsScore residualsScoreAv = computeScores(data, tp, fp, numberOfMolecules, false);
 
     residualsScore = (settings.useMaxResiduals) ? residualsScoreMax : residualsScoreAv;
     if (settings.showJaccardPlot) {
@@ -2549,7 +2549,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    * Run analysis.
    */
   private void runAnalysis() {
-    ReferenceResults results = referenceResults.get();
+    final ReferenceResults results = referenceResults.get();
     if (results == null) {
       IJ.error(TITLE, "No doublet results in memory");
       return;
@@ -2581,7 +2581,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int size = 2 * config.getFittingWidth() + 1;
     final Rectangle regionBounds = new Rectangle(0, 0, size, size);
     final double otherDriftAngle = 180 - settings.analysisDriftAngle;
-    FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
 
     // Process all the results
     for (final DoubletResult result : results.doubletResults) {
@@ -2995,7 +2995,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         new StringBuilder("Filters the doublet fits and reports the performance increase\n");
 
     // Show the fitting settings that will effect filters, i.e. fit standard deviation, fit width
-    FitConfiguration fitConfig = config.getFitConfiguration();
+    final FitConfiguration fitConfig = config.getFitConfiguration();
     sb.append("SD0 = ").append(MathUtils.rounded(fitConfig.getInitialXSd())).append("\n");
     // sb.append("SD1 =
     // ").append(MathUtils.rounded(fitConfig.getInitialPeakStdDev1())).append("\n");
@@ -3177,7 +3177,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
               .select(SettingsManager.getFitSolverNames()[fitConfig2.getFitSolver().ordinal()]);
 
           // Copy settings not in the dialog for the fit solver
-          FitConfiguration fitConfig = config.getFitConfiguration();
+          final FitConfiguration fitConfig = config.getFitConfiguration();
           if (custom) {
             fitConfig.setPsf(fitConfig2.getPsf());
           }
@@ -3210,7 +3210,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           return;
         }
 
-        FitConfiguration fitConfig = config.getFitConfiguration();
+        final FitConfiguration fitConfig = config.getFitConfiguration();
         textPsf.select(PeakFit.getPsfTypeNames()[fitConfig.getPsfType().ordinal()]);
         textDataFilterType.select(config.getDataFilterType().ordinal());
         textDataFilter.select(config.getDataFilterMethod(0).ordinal());

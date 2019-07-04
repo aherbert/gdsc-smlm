@@ -25,9 +25,9 @@
 /**
  * Provides benchmark plugins to execute within <a href="https://imagej.nih.gov/ij/">ImageJ</a>.
  *
- * <p>These plugins perform benchmarking of the spot filtering and fitting functionality within
- * the Single Molecule Localisation Microscopy (SMLM) project. The plugins are experimental and
- * subject to change without notice. 
+ * <p>These plugins perform benchmarking of the spot filtering and fitting functionality within the
+ * Single Molecule Localisation Microscopy (SMLM) project. The plugins are experimental and subject
+ * to change without notice.
  *
  * @since 1.0.0
  */

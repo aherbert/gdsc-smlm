@@ -1308,7 +1308,7 @@ public class BenchmarkSpotFilter implements PlugIn {
               settings.hardBorder, settings.matchingMethod, settings.upperDistance,
               settings.lowerDistance, settings.upperSignalFactor, settings.lowerSignalFactor,
               settings.recallFraction);
-      ArrayList<BatchResult[]> cachedResults = getCachedBatchResults(settingList);
+      final ArrayList<BatchResult[]> cachedResults = getCachedBatchResults(settingList);
 
       // Batch mode to test enumeration of filters
       final double sd = simulationParameters.sd / simulationParameters.pixelPitch;
@@ -1904,7 +1904,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     return runAnalysis(config, false);
   }
 
-  private BenchmarkSpotFilterResult runAnalysis(FitEngineConfiguration config, boolean batchSummary) {
+  private BenchmarkSpotFilterResult runAnalysis(FitEngineConfiguration config,
+      boolean batchSummary) {
     if (ImageJUtils.isInterrupted()) {
       return null;
     }

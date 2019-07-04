@@ -1244,7 +1244,7 @@ public class BenchmarkFilterAnalysis
 
   private void iterate() {
     // If this is run again immediately then provide options for reporting the results
-    Map<String, ComplexFilterScore> localIterBestFilter = iterBestFilter.get();
+    final Map<String, ComplexFilterScore> localIterBestFilter = iterBestFilter.get();
     // The result best filter will never be null
     if (filterAnalysisResult.bestFilter == filterAnalysisResult.bestFilter) {
       final GenericDialog gd = new GenericDialog(TITLE);
@@ -1422,7 +1422,7 @@ public class BenchmarkFilterAnalysis
   }
 
   private void resetParametersFromFitting() {
-    FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
+    final FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
     settings.failCount = config.getFailuresLimit();
     settings.duplicateDistance = config.getDuplicateDistance();
     settings.duplicateDistanceAbsolute = config.getDuplicateDistanceAbsolute();
@@ -1548,7 +1548,7 @@ public class BenchmarkFilterAnalysis
   @SuppressWarnings("unchecked")
   private List<FilterSet> readFilterSets() {
     if (extraOptions) {
-      MultiPathFilter multiFilter = BenchmarkSpotFit.getMultiFilter();
+      final MultiPathFilter multiFilter = BenchmarkSpotFit.getMultiFilter();
       if (multiFilter != null) {
         final IDirectFilter f = multiFilter.getFilter();
         if (f instanceof DirectFilter) {
@@ -1580,7 +1580,7 @@ public class BenchmarkFilterAnalysis
       filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
       // Allow the filters to be cached
-      Triple<String, Long, List<FilterSet>> filterCache = lastFilterList.get();
+      final Triple<String, Long, List<FilterSet>> filterCache = lastFilterList.get();
       if (isSameFile(filename, filterCache)) {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.hideCancelButton();
@@ -1596,7 +1596,7 @@ public class BenchmarkFilterAnalysis
         }
       }
 
-      File file = new File(filename);
+      final File file = new File(filename);
       try (BufferedReader input =
           new BufferedReader(new UnicodeReader(new FileInputStream(file), null))) {
         // Use the instance so we can catch the exception
@@ -1907,8 +1907,8 @@ public class BenchmarkFilterAnalysis
       return false;
     }
     if (filename.equals(filterCache.getLeft())) {
-      File file = new File(filename);
-      long timeStamp = getLastModified(file);
+      final File file = new File(filename);
+      final long timeStamp = getLastModified(file);
       return timeStamp == filterCache.getMiddle();
     }
     return false;
@@ -1955,7 +1955,7 @@ public class BenchmarkFilterAnalysis
         // Copy the settings from the fitter if this is the first run.
         // This just starts the plugin with sensible settings.
         // Q. Should this be per new simulation or fitting result instead?
-        FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
+        final FitEngineConfiguration config = BenchmarkSpotFit.getFitEngineConfiguration();
         settings.failCount = config.getFailuresLimit();
         settings.duplicateDistance = config.getDuplicateDistance();
         settings.duplicateDistanceAbsolute = config.getDuplicateDistanceAbsolute();
@@ -2053,7 +2053,7 @@ public class BenchmarkFilterAnalysis
 
       // Signal factor must be greater than 1
       final RampedScore signalScore;
-      double spotSignalFactor = BenchmarkSpotFit.getSignalFactor();
+      final double spotSignalFactor = BenchmarkSpotFit.getSignalFactor();
       if (spotSignalFactor > 0 && settings.upperSignalFactor > 0) {
         signalScore = new RampedScore(spotSignalFactor * settings.partialSignalFactor / 100.0,
             spotSignalFactor * settings.upperSignalFactor / 100.0);
@@ -4210,7 +4210,7 @@ public class BenchmarkFilterAnalysis
         final String title = filterSet.getName();
 
         // Check if a previous filter set had the same name, update if necessary
-        NamedPlot plot = getNamedPlot(title);
+        final NamedPlot plot = getNamedPlot(title);
         if (plot == null) {
           filterAnalysisResult.plots.add(new NamedPlot(title, xAxisName, xValues, yValues));
         } else {
@@ -5434,7 +5434,8 @@ public class BenchmarkFilterAnalysis
     Pair<Integer, ResultsImageSampler> sampler = samplerRef.get();
     if (sampler == null || imp.getID() != sampler.getKey()
         || sampler.getValue().getResults() != results) {
-      ResultsImageSampler imageSampler = new ResultsImageSampler(results, imp.getImageStack(), 32);
+      final ResultsImageSampler imageSampler =
+          new ResultsImageSampler(results, imp.getImageStack(), 32);
       imageSampler.analyse();
       sampler = Pair.of(imp.getID(), imageSampler);
       samplerRef.set(sampler);
@@ -7278,7 +7279,7 @@ public class BenchmarkFilterAnalysis
    * @return true, if successful
    */
   public static boolean updateConfiguration(FitEngineConfiguration config, boolean useLatest) {
-    BenchmarkFilterAnalysisResult lastResult = BenchmarkFilterAnalysisResult.lastResult.get();
+    final BenchmarkFilterAnalysisResult lastResult = BenchmarkFilterAnalysisResult.lastResult.get();
     if (lastResult.scores.isEmpty()) {
       return false;
     }

@@ -721,7 +721,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+    final Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
 
     TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
     if (coords.getKey() != simulationParameters.id) {
