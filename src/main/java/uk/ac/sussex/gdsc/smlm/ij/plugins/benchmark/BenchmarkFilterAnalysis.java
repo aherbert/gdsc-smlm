@@ -124,7 +124,6 @@ import ij.ImageListener;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.Prefs;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -148,7 +147,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
 
-import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -937,10 +935,10 @@ public class BenchmarkFilterAnalysis
 
         // Score the results. Do in order of those likely to be in the same position
         // thus the grid manager can cache the neighbours
-        boolean fitted = score(index, 1, fitResult.getSingleFitResult(), resultGrid, matched);
-        fitted |= score(index, 2, fitResult.getDoubletFitResult(), resultGrid, matched);
-        fitted |= score(index, 3, fitResult.getMultiFitResult(), resultGrid, matched);
-        fitted |= score(index, 4, fitResult.getMultiDoubletFitResult(), resultGrid, matched);
+        boolean fitted = score(1, fitResult.getSingleFitResult(), resultGrid, matched);
+        fitted |= score(2, fitResult.getDoubletFitResult(), resultGrid, matched);
+        fitted |= score(3, fitResult.getMultiFitResult(), resultGrid, matched);
+        fitted |= score(4, fitResult.getMultiDoubletFitResult(), resultGrid, matched);
 
         coordinateStore.flush();
 
@@ -1004,14 +1002,13 @@ public class BenchmarkFilterAnalysis
     /**
      * Score the new results in the fit result.
      *
-     * @param n the n
      * @param set the set
      * @param fitResult the fit result
      * @param resultGrid the result grid
      * @param matched array of actual results that have been matched
      * @return true, if the fit status was ok
      */
-    private boolean score(int n, int set,
+    private boolean score(int set,
         final uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult fitResult,
         final PeakResultGridManager resultGrid, final boolean[] matched) {
       if (fitResult != null && fitResult.status == 0) {
@@ -1148,6 +1145,649 @@ public class BenchmarkFilterAnalysis
     }
   }
 
+  private static class FilterScoreCompararor
+      implements Comparator<ComplexFilterScore>, Serializable {
+    private static final long serialVersionUID = 1L;
+    /** The instance. */
+    static final FilterScoreCompararor INSTANCE = new FilterScoreCompararor();
+
+    @Override
+    public int compare(ComplexFilterScore o1, ComplexFilterScore o2) {
+      // Sort by size, smallest first
+      final int result = o1.size - o2.size;
+      if (result != 0) {
+        return result;
+      }
+      return o1.compareTo(o2);
+    }
+  }
+
+  private class ComplexFilterScore extends SimpleFilterScore {
+    static final char WITHIN = '-';
+    static final char BELOW = '<';
+    static final char FLOOR = 'L';
+    static final char ABOVE = '>';
+    static final char CEIL = 'U';
+
+    int index;
+    final ClassificationResult result2;
+    final int size;
+    final int[] combinations;
+    final boolean[] enable;
+    char[] atLimit;
+    String algorithm;
+    long time;
+    String paramAlgorithm;
+    long paramTime;
+
+    private ComplexFilterScore(FilterScoreResult result, boolean allSameType, char[] atLimit,
+        int index, long time, ClassificationResult result2, int size, int[] combinations,
+        boolean[] enable) {
+      super(result, allSameType, result.criteria >= minCriteria);
+      this.index = index;
+      this.time = time;
+      this.result2 = result2;
+      this.size = size;
+      this.combinations = combinations;
+      this.enable = enable;
+      this.atLimit = atLimit;
+    }
+
+    public ComplexFilterScore(FilterScoreResult result, boolean allSameType, int index, long time,
+        ClassificationResult result2, int size, int[] combinations, boolean[] enable) {
+      this(result, allSameType, null, index, time, result2, size, combinations, enable);
+    }
+
+    public ComplexFilterScore(FilterScoreResult result, char[] atLimit, String algorithm, long time,
+        String paramAlgorithm, long paramTime) {
+      // This may be used in comparisons of different type so set allSameType to false
+      this(result, false, atLimit, 0, time, null, 0, null, null);
+      this.algorithm = algorithm;
+      this.paramAlgorithm = paramAlgorithm;
+      this.paramTime = paramTime;
+    }
+
+    public DirectFilter getFilter() {
+      return result.filter;
+    }
+
+    public char atLimit(int index) {
+      return atLimit[index];
+    }
+
+    public char[] atLimit() {
+      return atLimit;
+    }
+
+    String getParamAlgorithm() {
+      return (paramAlgorithm == null) ? "" : paramAlgorithm;
+    }
+  }
+
+  private static class NamedPlot {
+    String name;
+    String xAxisName;
+    double[] xValues;
+    double[] yValues;
+    double score;
+
+    public NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
+      this.name = name;
+      updateValues(xAxisName, xValues, yValues);
+    }
+
+    public void updateValues(String xAxisName, double[] xValues, double[] yValues) {
+      this.xAxisName = xAxisName;
+      this.xValues = xValues;
+      this.yValues = yValues;
+      this.score = getMaximum(yValues);
+    }
+
+    /**
+     * Compare the two results.
+     *
+     * @param r1 the first result
+     * @param r2 the second result
+     * @return -1, 0 or 1
+     */
+    static int compare(NamedPlot r1, NamedPlot r2) {
+      return Double.compare(r2.score, r1.score);
+    }
+  }
+
+  /**
+   * Allow the genetic algorithm to be stopped using the escape key.
+   */
+  private class InterruptChecker extends ToleranceChecker<FilterScore> {
+    final int convergedCount;
+    int count;
+
+    public InterruptChecker(double relative, double absolute, int convergedCount) {
+      super(relative, absolute);
+      this.convergedCount = convergedCount;
+    }
+
+    @Override
+    public boolean converged(Chromosome<FilterScore> previous, Chromosome<FilterScore> current) {
+      if (super.converged(previous, current)) {
+        count++;
+      } else {
+        count = 0;
+      }
+      // Allow no convergence except when escape is pressed
+      if (convergedCount >= 0 && count > convergedCount) {
+        return true;
+      }
+      if (IJ.escapePressed()) {
+        ImageJUtils.log("STOPPED " + gaStatusPrefix);
+        IJ.resetEscape(); // Allow the plugin to continue processing
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    protected boolean converged(FilterScore previous, FilterScore current) {
+      // Check the score only if both have criteria achieved
+      if (current.criteriaPassed) {
+        if (previous.criteriaPassed) {
+          return converged(previous.score, current.score);
+        }
+        return false;
+      }
+      if (previous.criteriaPassed) {
+        // This should not happen as current should be better than previous
+        return false;
+      }
+
+      return converged(previous.criteria, current.criteria);
+    }
+  }
+
+  /**
+   * Allow the range search to be stopped using the escape key.
+   */
+  private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<FilterScore> {
+    /**
+     * The number of times it must have already converged before convergence is achieved.
+     */
+    final int convergedCount;
+    int count;
+
+    public InterruptConvergenceChecker(double relative, double absolute, int maxIterations) {
+      super(relative, absolute, false, false, maxIterations);
+      this.convergedCount = 0;
+    }
+
+    /**
+     * Instantiates a new interrupt convergence checker.
+     *
+     * @param relative the relative
+     * @param absolute the absolute
+     * @param maxIterations the max iterations
+     * @param convergedCount The number of times it must have already converged before convergence
+     *        is achieved. Set to negative to disable point coordinate comparison.
+     */
+    public InterruptConvergenceChecker(double relative, double absolute, int maxIterations,
+        int convergedCount) {
+      super(relative, absolute, false, convergedCount >= 0, maxIterations);
+      this.convergedCount = Math.max(0, convergedCount);
+    }
+
+    /**
+     * Instantiates a new interrupt convergence checker.
+     *
+     * @param relative the relative
+     * @param absolute the absolute
+     * @param checkScore the check score
+     * @param checkSequence the check sequence
+     * @param maxIterations the max iterations
+     */
+    public InterruptConvergenceChecker(double relative, double absolute, boolean checkScore,
+        boolean checkSequence, int maxIterations) {
+      super(relative, absolute, checkScore, checkSequence, maxIterations);
+      this.convergedCount = 0;
+    }
+
+    @Override
+    protected void noConvergenceCriteria() {
+      // Ignore this as we can stop using interrupt
+    }
+
+    @Override
+    public boolean converged(SearchResult<FilterScore> previous,
+        SearchResult<FilterScore> current) {
+      if (super.converged(previous, current)) {
+        // Max iterations is a hard limit even if we have a converged count configured
+        if (maxIterations != 0 && getIterations() >= maxIterations) {
+          return true;
+        }
+
+        count++;
+      } else {
+        count = 0;
+      }
+
+      // Note: if the converged count was negative then no convergence can be achieved
+      // using the point coordinates as this is disabled. So the code only reaches here with
+      // a count of zero, effectively skipping this as it is always false.
+      if (count > convergedCount) {
+        return true;
+      }
+      // Stop if interrupted
+      if (IJ.escapePressed()) {
+        ImageJUtils.log("STOPPED " + gaStatusPrefix);
+        IJ.resetEscape(); // Allow the plugin to continue processing
+        return true;
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Configure the convergence for iterative optimisation.
+   */
+  private class IterationConvergenceChecker {
+    InterruptChecker scoreChecker;
+    InterruptConvergenceChecker filterChecker;
+    TIntObjectHashMap<ArrayList<Coordinate>> previousResults;
+    boolean canContinue = true;
+
+    public IterationConvergenceChecker(FilterScore current) {
+      // We have two different relative thresholds so use 2 convergence checkers,
+      // one for the score and one for the filter sequence
+      scoreChecker = new InterruptChecker(settings.iterationScoreTolerance,
+          settings.iterationScoreTolerance * 1e-3, 0);
+      filterChecker = new InterruptConvergenceChecker(settings.iterationFilterTolerance,
+          settings.iterationFilterTolerance * 1e-3, false, true, settings.iterationMaxIterations);
+      if (settings.iterationCompareResults) {
+        previousResults = getResults(current);
+      }
+    }
+
+    private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current) {
+      return ResultsMatchCalculator
+          .getCoordinates(createResults(null, (DirectFilter) current.filter, false));
+    }
+
+    public boolean converged(String prefix, FilterScore previous, FilterScore current,
+        double[] previousParameters, double[] currentParameters) {
+      // Stop if interrupted
+      if (IJ.escapePressed()) {
+        ImageJUtils.log("STOPPED");
+        // Do not reset escape: IJ.resetEscape()
+        canContinue = false;
+        return true;
+      }
+
+      // Must converge on the non-filter parameters
+      if (!converged(previousParameters, currentParameters)) {
+        if (settings.iterationCompareResults) {
+          previousResults = getResults(current);
+        }
+        return false;
+      }
+
+      final SearchResult<FilterScore> p =
+          new SearchResult<>(previous.filter.getParameters(), previous);
+      final SearchResult<FilterScore> c =
+          new SearchResult<>(current.filter.getParameters(), current);
+
+      if (filterChecker.converged(p, c)) {
+        logConvergence(prefix, "filter parameters");
+        return true;
+      }
+      // Directly call the method with the scores
+      if (scoreChecker.converged(p.getScore(), c.getScore())) {
+        logConvergence(prefix, "score");
+        return true;
+      }
+
+      if (settings.iterationCompareResults) {
+        final TIntObjectHashMap<ArrayList<Coordinate>> currentResults = getResults(current);
+        final MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults,
+            previousResults, settings.iterationCompareDistance);
+        if (r.getJaccard() == 1) {
+          logConvergence(prefix, "results coordinates");
+          return true;
+        }
+        previousResults = currentResults;
+      }
+
+      return false;
+    }
+
+    private boolean converged(double[] previousParameters, double[] currentParameters) {
+      for (int i = 0; i < previousParameters.length; i++) {
+        if (previousParameters[i] != currentParameters[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    private void logConvergence(String prefix, String component) {
+      if (settings.iterationMaxIterations != 0
+          && getIterations() >= settings.iterationMaxIterations) {
+        component = "iterations";
+        canContinue = false;
+      }
+      ImageJUtils.log(prefix + " converged on " + component);
+    }
+
+    public int getIterations() {
+      return filterChecker.getIterations();
+    }
+  }
+
+  private static class ScoreJob {
+    final DirectFilter filter;
+    final int index;
+
+    ScoreJob(DirectFilter filter, int index) {
+      this.filter = filter;
+      this.index = index;
+    }
+  }
+
+  private static class ParameterScoreJob {
+    final double[] point;
+    final int index;
+
+    ParameterScoreJob(double[] point, int index) {
+      this.point = point;
+      this.index = index;
+    }
+  }
+
+  /**
+   * Used to allow multi-threading of the scoring the filters.
+   */
+  private class ScoreWorker implements Runnable {
+    volatile boolean finished;
+    final BlockingQueue<ScoreJob> jobs;
+    final FilterScoreResult[] scoreResults;
+    final boolean createTextResult;
+    final DirectFilter minFilter;
+    final CoordinateStore coordinateStore;
+    final Ticker ticker;
+
+    public ScoreWorker(BlockingQueue<ScoreJob> jobs, FilterScoreResult[] scoreResults,
+        boolean createTextResult, CoordinateStore coordinateStore, Ticker ticker) {
+      this.jobs = jobs;
+      this.scoreResults = scoreResults;
+      this.createTextResult = createTextResult;
+      this.minFilter =
+          (defaultMinimalFilter != null) ? (DirectFilter) defaultMinimalFilter.clone() : null;
+      this.coordinateStore = coordinateStore;
+      this.ticker = ticker;
+    }
+
+    @Override
+    public void run() {
+      try {
+        while (true) {
+          final ScoreJob job = jobs.take();
+          if (job == null || job.index == -1) {
+            break;
+          }
+          if (!finished) {
+            // Only run jobs when not finished. This allows the queue to be emptied.
+            run(job);
+          }
+        }
+      } catch (final InterruptedException ex) {
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
+      } finally {
+        finished = true;
+      }
+    }
+
+    private void run(ScoreJob job) {
+      if (ImageJUtils.isInterrupted()) {
+        finished = true;
+        return;
+      }
+      // Directly write to the result array, this is thread safe
+      scoreResults[job.index] =
+          scoreFilter(job.filter, minFilter, createTextResult, coordinateStore);
+      ticker.tick();
+    }
+  }
+
+  /**
+   * Used to allow multi-threading of the scoring the filters.
+   */
+  private class ParameterScoreWorker implements Runnable {
+    volatile boolean finished;
+    final BlockingQueue<ParameterScoreJob> jobs;
+    final ParameterScoreResult[] scoreResults;
+    final boolean createTextResult;
+    final DirectFilter filter;
+    final DirectFilter minFilter;
+    final GridCoordinateStore gridCoordinateStore;
+    final Ticker ticker;
+
+    public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs,
+        ParameterScoreResult[] scoreResults, boolean createTextResult, Ticker ticker) {
+      this.jobs = jobs;
+      this.scoreResults = scoreResults;
+      this.createTextResult = createTextResult;
+      this.filter = (DirectFilter) searchScoreFilter.clone();
+      this.minFilter =
+          (defaultMinimalFilter != null) ? (DirectFilter) defaultMinimalFilter.clone() : null;
+      getBounds();
+      this.gridCoordinateStore =
+          new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
+      this.ticker = ticker;
+    }
+
+    @Override
+    public void run() {
+      try {
+        while (true) {
+          final ParameterScoreJob job = jobs.take();
+          if (job == null || job.index == -1) {
+            break;
+          }
+          if (!finished) {
+            // Only run jobs when not finished. This allows the queue to be emptied.
+            run(job);
+          }
+        }
+      } catch (final InterruptedException ex) {
+        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
+      } finally {
+        finished = true;
+      }
+    }
+
+    private void run(ParameterScoreJob job) {
+      if (ImageJUtils.isInterrupted()) {
+        finished = true;
+        return;
+      }
+
+      final double[] point = job.point;
+      final int failCount = (int) Math.round(point[0]);
+      final double localResidualsThreshold = point[1];
+      final double duplicateDistance = point[2];
+      CoordinateStore coordinateStore2;
+
+      // Re-use
+      gridCoordinateStore.changeXyResolution(duplicateDistance * distanceScallingFactor);
+      coordinateStore2 = gridCoordinateStore;
+
+      // New
+      // coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance *
+      // distanceScallingFactor);
+
+      // From factory
+      // coordinateStore2 = createCoordinateStore(duplicateDistance);
+
+      // Directly write to the result array, this is thread safe
+      scoreResults[job.index] = scoreFilter(filter, minFilter, failCount, localResidualsThreshold,
+          duplicateDistance, coordinateStore2, createTextResult);
+
+      // Allow debugging the score
+      // if (failCount == 3 && DoubleEquality.almostEqualRelativeOrAbsolute(residualsThreshold,
+      // 0.35, 0, 0.01) &&
+      // DoubleEquality.almostEqualRelativeOrAbsolute(duplicateDistance, 2.5, 0, 0.01))
+      // {
+      // System.out.printf("%s @ %s : %d %f %f \n", Double.toString(scoreResults[job.index].score),
+      // Double.toString(scoreResults[job.index].criteria), failCount, residualsThreshold,
+      // duplicateDistance);
+      // }
+
+      ticker.tick();
+    }
+  }
+
+  private class ParameterScoreFunction implements FullScoreFunction<FilterScore> {
+    @Override
+    public SearchResult<FilterScore> findOptimum(double[][] points) {
+      gaIteration++;
+      SimpleParameterScore max = parameterScoreOptimum;
+
+      // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
+      Arrays.sort(points, (o1, o2) -> Double.compare(o1[2], o2[2]));
+
+      final ParameterScoreResult[] scoreResults = scoreFilters(points, settings.showResultsTable);
+
+      if (scoreResults == null) {
+        return null;
+      }
+
+      for (int index = 0; index < scoreResults.length; index++) {
+        final ParameterScoreResult scoreResult = scoreResults[index];
+        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
+            scoreResult.criteria >= minCriteria);
+        if (result.compareTo(max) < 0) {
+          max = result;
+        }
+      }
+
+      if (settings.showResultsTable) {
+        addToResultsWindow(scoreResults);
+      }
+
+      parameterScoreOptimum = max;
+
+      // Add the best filter to the table
+      // This filter may not have been part of the scored subset so use the entire results set for
+      // reporting
+      final double[] parameters = max.result.parameters;
+      final int failCount = (int) Math.round(parameters[0]);
+      final double localResidualsThreshold = parameters[1];
+      final double duplicateDistance = parameters[2];
+
+      final MultiPathFilter multiPathFilter =
+          new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, localResidualsThreshold);
+      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
+          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
+          null, null, createCoordinateStore(duplicateDistance));
+
+      final StringBuilder text = createResult(searchScoreFilter, r,
+          buildResultsPrefix2(failCount, localResidualsThreshold, duplicateDistance));
+      add(text, gaIteration);
+      gaWindow.accept(text.toString());
+
+      return new SearchResult<>(parameters, max);
+    }
+
+    private void addToResultsWindow(ParameterScoreResult[] scoreResults) {
+      if (resultsWindow != null) {
+        try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+          tw.setIncrement(0);
+          for (int index = 0; index < scoreResults.length; index++) {
+            addToResultsOutput(tw::append, scoreResults[index].text);
+          }
+        }
+      } else {
+        for (int index = 0; index < scoreResults.length; index++) {
+          addToResultsOutput(IJ::log, scoreResults[index].text);
+        }
+      }
+    }
+
+    @Nullable
+    @Override
+    public SearchResult<FilterScore>[] score(double[][] points) {
+      gaIteration++;
+      SimpleParameterScore max = parameterScoreOptimum;
+
+      // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
+      Arrays.sort(points, (o1, o2) -> Double.compare(o1[2], o2[2]));
+
+      final ParameterScoreResult[] scoreResults = scoreFilters(points, settings.showResultsTable);
+
+      if (scoreResults == null) {
+        return null;
+      }
+
+      @SuppressWarnings("unchecked")
+      final SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
+      for (int index = 0; index < scoreResults.length; index++) {
+        final ParameterScoreResult scoreResult = scoreResults[index];
+        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
+            scoreResult.criteria >= minCriteria);
+        if (result.compareTo(max) < 0) {
+          max = result;
+        }
+        scores[index] = new SearchResult<>(points[index], result);
+      }
+
+      if (settings.showResultsTable) {
+        addToResultsWindow(scoreResults);
+      }
+
+      parameterScoreOptimum = max;
+
+      // Add the best filter to the table
+      // This filter may not have been part of the scored subset so use the entire results set for
+      // reporting
+      final double[] parameters = max.result.parameters;
+      final int failCount = (int) Math.round(parameters[0]);
+      final double residualsThreshold = parameters[1];
+      final double duplicateDistance = parameters[2];
+      final MultiPathFilter multiPathFilter =
+          new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, residualsThreshold);
+      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
+          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
+          null, null, createCoordinateStore(duplicateDistance));
+
+      final StringBuilder text = createResult(searchScoreFilter, r,
+          buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
+      add(text, gaIteration);
+      gaWindow.accept(text.toString());
+
+      return scores;
+    }
+
+    @Override
+    public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size) {
+      return ScoreFunctionHelper.cut(scores, size);
+    }
+  }
+
+  /**
+   * Abstract class to allow the array storage to be reused.
+   */
+  private abstract class CustomTIntObjectProcedure
+      implements TIntObjectProcedure<UniqueIdPeakResult[]> {
+    float[] x;
+    float[] y;
+    float[] x2;
+    float[] y2;
+
+    CustomTIntObjectProcedure(float[] x, float[] y, float[] x2, float[] y2) {
+      this.x = x;
+      this.y = y;
+      this.x2 = x2;
+      this.y2 = y2;
+    }
+  }
+
   /**
    * Instantiates a new benchmark filter analysis.
    */
@@ -1245,8 +1885,9 @@ public class BenchmarkFilterAnalysis
   private void iterate() {
     // If this is run again immediately then provide options for reporting the results
     final Map<String, ComplexFilterScore> localIterBestFilter = iterBestFilter.get();
-    // The result best filter will never be null
-    if (filterAnalysisResult.bestFilter == filterAnalysisResult.bestFilter) {
+    // The result best filter will never be a null reference. If it the same reference then
+    // the result is from an iteration analysis.
+    if (localIterBestFilter == filterAnalysisResult.bestFilter) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.addMessage("Iteration results are held in memory.\n \nReport these results?");
@@ -1337,14 +1978,19 @@ public class BenchmarkFilterAnalysis
         // Optional inner loop so that the non-filter and filter parameters converge
         // before a refit
         boolean innerConverged = false;
-        int innerIteration = 0;
         double innerRangeReduction = 1;
-        if (settings.iterationMinRangeReduction < 1) {
-          // Linear interpolate down to the min range reduction
-          innerRangeReduction = MathUtils.max(settings.iterationMinRangeReduction,
-              MathUtils.interpolateY(0, 1, settings.iterationMinRangeReductionIteration,
-                  settings.iterationMinRangeReduction, innerIteration++));
-        }
+        // -------
+        // TODO: Check this. The code does not do anything as the interpolation using x=0
+        // so there is no interpolation.
+        // int innerIteration = 0;
+        // if (settings.iterationMinRangeReduction < 1) {
+        // // Linear interpolate down to the min range reduction
+        // innerRangeReduction = Math.max(settings.iterationMinRangeReduction,
+        // MathUtils.interpolateY(0, 1, settings.iterationMinRangeReductionIteration,
+        // settings.iterationMinRangeReduction, innerIteration++));
+        // }
+        // -------
+
         // This would make the range too small...
         // innerRangeReduction *= outerRangeReduction
         while (!innerConverged) {
@@ -1418,7 +2064,7 @@ public class BenchmarkFilterAnalysis
     time += iterationStopWatch.getTime();
     IJ.log("Iteration analysis time : " + TextUtils.millisToString(time));
 
-    IJ.showStatus("Finished");
+    showFinished();
   }
 
   private void resetParametersFromFitting() {
@@ -1525,7 +2171,7 @@ public class BenchmarkFilterAnalysis
 
     analyse(filterSets);
 
-    IJ.showStatus("Finished");
+    showFinished();
   }
 
   private void optimiseParameters() {
@@ -1541,6 +2187,10 @@ public class BenchmarkFilterAnalysis
 
     analyseParameters(false, fr.filterScore, 0);
 
+    showFinished();
+  }
+
+  private static void showFinished() {
     IJ.showStatus("Finished");
   }
 
@@ -1864,16 +2514,8 @@ public class BenchmarkFilterAnalysis
       final double inc = increment[i];
       increment[i] = 0;
 
-      if (Double.isNaN(inc) || Double.isInfinite(inc)) {
-        continue;
-      }
-      if (Double.isNaN(parameters[i]) || Double.isInfinite(parameters[i])) {
-        continue;
-      }
-      if (Double.isNaN(parameters2[i]) || Double.isInfinite(parameters2[i])) {
-        continue;
-      }
-      if (parameters[i] > parameters2[i]) {
+      if (!Double.isFinite(inc) || !Double.isFinite(parameters[i])
+          || !Double.isFinite(parameters2[i]) || parameters[i] > parameters2[i]) {
         continue;
       }
 
@@ -2839,9 +3481,6 @@ public class BenchmarkFilterAnalysis
 
     if (!iterative) {
       // Interactive run, this may be the first run during iterative optimisation
-      // if (reset)
-      // filterAnalysisResult.scores.clear();
-
       createResultsWindow();
 
       // Only repeat analysis if necessary
@@ -4157,17 +4796,15 @@ public class BenchmarkFilterAnalysis
       return 0;
     }
 
-    final boolean allowDuplicates = true; // This could be an option?
+    // This could be an option?
+    final boolean allowDuplicates = true;
 
-    // XXX - Commented out the requirement to be the same type to store for later analysis.
-    // This may break the code, however I think that all filter sets should be able to have a best
+    // No requirement to be the same type to store for later analysis.
+    // All filter sets should be able to have a best
     // filter irrespective of whether they were the same type or not.
-    // if (allSameType)
-    // {
     final ComplexFilterScore newFilterScore =
         new ComplexFilterScore(max.result, atLimit, algorithm, analysisStopWatch.getTime(), "", 0);
     addBestFilter(type, allowDuplicates, newFilterScore);
-    // }
 
     // Add spacer at end of each result set
     if (isHeadless) {
@@ -4231,7 +4868,7 @@ public class BenchmarkFilterAnalysis
    * Adds the filter score for the given type to the best filters.
    *
    * <p>This method is called in filter analysis and parameter analysis to update the best result
-   * for the filter type.</p>
+   * for the filter type.
    *
    * @param type the type
    * @param allowDuplicates the allow duplicates
@@ -4254,7 +4891,6 @@ public class BenchmarkFilterAnalysis
         // Replace (even if the same so that the latest results settings are stored)
       } else if (newFilterScore.compareTo(filterScore) <= 0) {
         filterAnalysisResult.bestFilter.put(type, newFilterScore);
-        // filterScore.update(max.r, atLimit, algorithm, filterSetStopWatch.getTime());
       }
     } else {
       filterAnalysisResult.bestFilter.put(type, newFilterScore);
@@ -4833,21 +5469,6 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private void addToResultsWindow(ParameterScoreResult[] scoreResults) {
-    if (resultsWindow != null) {
-      try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
-        tw.setIncrement(0);
-        for (int index = 0; index < scoreResults.length; index++) {
-          addToResultsOutput(tw::append, scoreResults[index].text);
-        }
-      }
-    } else {
-      for (int index = 0; index < scoreResults.length; index++) {
-        addToResultsOutput(IJ::log, scoreResults[index].text);
-      }
-    }
-  }
-
   private void addToResultsWindow(FilterScoreResult[] scoreResults) {
     if (resultsWindow != null) {
       try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
@@ -5129,19 +5750,19 @@ public class BenchmarkFilterAnalysis
    * @param result the result
    * @return the original score
    */
-  private static FractionClassificationResult
-      getOriginalScore(FractionClassificationResult result) {
-    throw new IllegalStateException("fix this");
+  private FractionClassificationResult getOriginalScore(FractionClassificationResult result) {
+    // TODO: There was a note to fix this function.
+    // Determine if the code below is not adequate.
 
-    // // Score the fitting results against the original simulated data:
-    // // TP are all fit results that can be matched to a spot
-    // // FP are all fit results that cannot be matched to a spot
-    // // FN are the number of missed spots
-    // // Note: We cannot calculate TN since this is the number of fit candidates that are
-    // // filtered after fitting that do not match a spot or were not fitted.
-    // final double fp = result.getPositives() - result.getTruePositives();
-    // final double fn = nActual - result.getTruePositives();
-    // return new FractionClassificationResult(result.getTruePositives(), fp, 0, fn);
+    // Score the fitting results against the original simulated data:
+    // TP are all fit results that can be matched to a spot
+    // FP are all fit results that cannot be matched to a spot
+    // FN are the number of missed spots
+    // Note: We cannot calculate TN since this is the number of fit candidates that are
+    // filtered after fitting that do not match a spot or were not fitted.
+    final double fp = result.getPositives() - result.getTruePositives();
+    final double fn = fitResultData.countActual - result.getTruePositives();
+    return new FractionClassificationResult(result.getTruePositives(), fp, 0, fn);
   }
 
   private static void add(StringBuilder sb, int value) {
@@ -5363,38 +5984,34 @@ public class BenchmarkFilterAnalysis
         Recorder.record = false;
         final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
         gd.addMessage(msg);
-        // gd.enableYesNoCancel(" Save ", " Resample ");
         gd.addSlider(keyNo, 0, 10, settings.countNo);
         gd.addSlider(keyLow, 0, 10, settings.countLow);
         gd.addSlider(keyHigh, 0, 10, settings.countHigh);
-        gd.addDialogListener(new DialogListener() {
-          @Override
-          public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-            // If the event is null then this is the final call when the
-            // dialog has been closed. We ignore this to prevent generating a
-            // image the user has not seen.
-            if (event == null) {
-              return true;
-            }
-            settings.countNo = (int) gd.getNextNumber();
-            settings.countLow = (int) gd.getNextNumber();
-            settings.countHigh = (int) gd.getNextNumber();
-            out[0] = sampler.getSample(settings.countNo, settings.countLow, settings.countHigh);
-            if (out[0] != null) {
-              final WindowOrganiser windowOrganiser = new WindowOrganiser();
-              outImp[0] = display(out[0], windowOrganiser);
-              if (windowOrganiser.isNotEmpty()) {
-                close[0] = true;
-                // Zoom a bit
-                final ImageWindow iw = outImp[0].getWindow();
-                for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;) {
-                  iw.getCanvas().zoomIn(0, 0);
-                }
-              }
-              configTemplate.createResults(outImp[0]);
-            }
+        gd.addDialogListener((genDialog, event) -> {
+          // If the event is null then this is the final call when the
+          // dialog has been closed. We ignore this to prevent generating a
+          // image the user has not seen.
+          if (event == null) {
             return true;
           }
+          settings.countNo = (int) genDialog.getNextNumber();
+          settings.countLow = (int) genDialog.getNextNumber();
+          settings.countHigh = (int) genDialog.getNextNumber();
+          out[0] = sampler.getSample(settings.countNo, settings.countLow, settings.countHigh);
+          if (out[0] != null) {
+            final WindowOrganiser windowOrganiser = new WindowOrganiser();
+            outImp[0] = display(out[0], windowOrganiser);
+            if (windowOrganiser.isNotEmpty()) {
+              close[0] = true;
+              // Zoom a bit
+              final ImageWindow iw = outImp[0].getWindow();
+              for (int i = 7; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 512;) {
+                iw.getCanvas().zoomIn(0, 0);
+              }
+            }
+            configTemplate.createResults(outImp[0]);
+          }
+          return true;
         });
         gd.showDialog();
         if (gd.wasCanceled()) {
@@ -5521,6 +6138,7 @@ public class BenchmarkFilterAnalysis
    * @param filter the filter
    * @return the assignments
    */
+  @Nullable
   private ArrayList<FractionalAssignment[]>
       depthAnalysis(ArrayList<FractionalAssignment[]> allAssignments, DirectFilter filter) {
     // TODO : This analysis ignores the partial match distance.
@@ -5534,8 +6152,6 @@ public class BenchmarkFilterAnalysis
     final double[] depths = fitResultData.depthStats.getValues();
     double[] limits = MathUtils.limits(depths);
 
-    // final int bins = Math.max(10, nActual / 100);
-    // final int bins = HistogramPlot.getBinsSturges(depths.length);
     final int bins = HistogramPlot.getBinsSqrtRule(depths.length);
     final double[][] h1 = HistogramPlot.calcHistogram(depths, limits[0], limits[1], bins);
     final double[][] h2 = HistogramPlot.calcHistogram(fitResultData.depthFitStats.getValues(),
@@ -5896,11 +6512,10 @@ public class BenchmarkFilterAnalysis
               // Find the additional parameter added
               for (int l = 0; l < enable.length; l++) {
                 if (localScores[i].enable[l]) {
-                  if (localScores[ii].enable[l]) {
-                    continue;
+                  if (!localScores[ii].enable[l]) {
+                    add = l;
+                    break;
                   }
-                  add = l;
-                  break;
                 }
               }
               break;
@@ -6050,11 +6665,11 @@ public class BenchmarkFilterAnalysis
   private static long countComponentCombinations(int n) {
     return (long) FastMath.pow(2, n) - 1;
 
-    // This returns the same as (2^n)-1
-    // long total = 0;
-    // for (int k = 1; k <= n; k++)
-    // total += CombinatoricsUtils.binomialCoefficient(n, k);
-    // return total;
+    // This returns the same as (2^n)-1:
+    // long total = 0
+    // for k : 1 <= n
+    // total += CombinatoricsUtils.binomialCoefficient(n, k)
+    // return total
   }
 
   private void setupFractionScoreStore() {
@@ -6068,342 +6683,6 @@ public class BenchmarkFilterAnalysis
     scoreStore = null;
     if (uniqueIdCount != 0) {
       Arrays.sort(uniqueIds, 0, uniqueIdCount);
-    }
-  }
-
-  private static class FilterScoreCompararor
-      implements Comparator<ComplexFilterScore>, Serializable {
-    private static final long serialVersionUID = 1L;
-    /** The instance. */
-    static final FilterScoreCompararor INSTANCE = new FilterScoreCompararor();
-
-    @Override
-    public int compare(ComplexFilterScore o1, ComplexFilterScore o2) {
-      // Sort by size, smallest first
-      final int result = o1.size - o2.size;
-      if (result != 0) {
-        return result;
-      }
-      return o1.compareTo(o2);
-    }
-  }
-
-  private class ComplexFilterScore extends SimpleFilterScore {
-    static final char WITHIN = '-';
-    static final char BELOW = '<';
-    static final char FLOOR = 'L';
-    static final char ABOVE = '>';
-    static final char CEIL = 'U';
-
-    int index;
-    final ClassificationResult result2;
-    final int size;
-    final int[] combinations;
-    final boolean[] enable;
-    char[] atLimit;
-    String algorithm;
-    long time;
-    String paramAlgorithm;
-    long paramTime;
-
-    private ComplexFilterScore(FilterScoreResult result, boolean allSameType, char[] atLimit,
-        int index, long time, ClassificationResult result2, int size, int[] combinations,
-        boolean[] enable) {
-      super(result, allSameType, result.criteria >= minCriteria);
-      this.index = index;
-      this.time = time;
-      this.result2 = result2;
-      this.size = size;
-      this.combinations = combinations;
-      this.enable = enable;
-      this.atLimit = atLimit;
-    }
-
-    public ComplexFilterScore(FilterScoreResult result, boolean allSameType, int index, long time,
-        ClassificationResult result2, int size, int[] combinations, boolean[] enable) {
-      this(result, allSameType, null, index, time, result2, size, combinations, enable);
-    }
-
-    public ComplexFilterScore(FilterScoreResult result, char[] atLimit, String algorithm, long time,
-        String paramAlgorithm, long paramTime) {
-      // This may be used in comparisons of different type so set allSameType to false
-      this(result, false, atLimit, 0, time, null, 0, null, null);
-      this.algorithm = algorithm;
-      this.paramAlgorithm = paramAlgorithm;
-      this.paramTime = paramTime;
-    }
-
-    public DirectFilter getFilter() {
-      return result.filter;
-    }
-
-    public char atLimit(int index) {
-      return atLimit[index];
-    }
-
-    public char[] atLimit() {
-      return atLimit;
-    }
-
-    String getParamAlgorithm() {
-      return (paramAlgorithm == null) ? "" : paramAlgorithm;
-    }
-  }
-
-  private static class NamedPlot {
-    String name;
-    String xAxisName;
-    double[] xValues;
-    double[] yValues;
-    double score;
-
-    public NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
-      this.name = name;
-      updateValues(xAxisName, xValues, yValues);
-    }
-
-    public void updateValues(String xAxisName, double[] xValues, double[] yValues) {
-      this.xAxisName = xAxisName;
-      this.xValues = xValues;
-      this.yValues = yValues;
-      this.score = getMaximum(yValues);
-    }
-
-    /**
-     * Compare the two results.
-     *
-     * @param r1 the first result
-     * @param r2 the second result
-     * @return -1, 0 or 1
-     */
-    static int compare(NamedPlot r1, NamedPlot r2) {
-      return Double.compare(r2.score, r1.score);
-    }
-  }
-
-  /**
-   * Allow the genetic algorithm to be stopped using the escape key.
-   */
-  private class InterruptChecker extends ToleranceChecker<FilterScore> {
-    final int convergedCount;
-    int count;
-
-    public InterruptChecker(double relative, double absolute, int convergedCount) {
-      super(relative, absolute);
-      this.convergedCount = convergedCount;
-    }
-
-    @Override
-    public boolean converged(Chromosome<FilterScore> previous, Chromosome<FilterScore> current) {
-      if (super.converged(previous, current)) {
-        count++;
-      } else {
-        count = 0;
-      }
-      // Allow no convergence except when escape is pressed
-      if (convergedCount >= 0 && count > convergedCount) {
-        return true;
-      }
-      if (IJ.escapePressed()) {
-        ImageJUtils.log("STOPPED " + gaStatusPrefix);
-        IJ.resetEscape(); // Allow the plugin to continue processing
-        return true;
-      }
-      return false;
-    }
-
-    @Override
-    protected boolean converged(FilterScore previous, FilterScore current) {
-      // Check the score only if both have criteria achieved
-      if (current.criteriaPassed) {
-        if (previous.criteriaPassed) {
-          return converged(previous.score, current.score);
-        }
-        return false;
-      }
-      if (previous.criteriaPassed) {
-        // This should not happen as current should be better than previous
-        return false;
-      }
-
-      return converged(previous.criteria, current.criteria);
-    }
-  }
-
-  /**
-   * Allow the range search to be stopped using the escape key.
-   */
-  private class InterruptConvergenceChecker extends ConvergenceToleranceChecker<FilterScore> {
-    /**
-     * The number of times it must have already converged before convergence is achieved.
-     */
-    final int convergedCount;
-    int count;
-
-    public InterruptConvergenceChecker(double relative, double absolute, int maxIterations) {
-      super(relative, absolute, false, false, maxIterations);
-      this.convergedCount = 0;
-    }
-
-    /**
-     * Instantiates a new interrupt convergence checker.
-     *
-     * @param relative the relative
-     * @param absolute the absolute
-     * @param maxIterations the max iterations
-     * @param convergedCount The number of times it must have already converged before convergence
-     *        is achieved. Set to negative to disable point coordinate comparison.
-     */
-    public InterruptConvergenceChecker(double relative, double absolute, int maxIterations,
-        int convergedCount) {
-      super(relative, absolute, false, convergedCount >= 0, maxIterations);
-      this.convergedCount = Math.max(0, convergedCount);
-    }
-
-    /**
-     * Instantiates a new interrupt convergence checker.
-     *
-     * @param relative the relative
-     * @param absolute the absolute
-     * @param checkScore the check score
-     * @param checkSequence the check sequence
-     * @param maxIterations the max iterations
-     */
-    public InterruptConvergenceChecker(double relative, double absolute, boolean checkScore,
-        boolean checkSequence, int maxIterations) {
-      super(relative, absolute, checkScore, checkSequence, maxIterations);
-      this.convergedCount = 0;
-    }
-
-    @Override
-    protected void noConvergenceCriteria() {
-      // Ignore this as we can stop using interrupt
-    }
-
-    @Override
-    public boolean converged(SearchResult<FilterScore> previous,
-        SearchResult<FilterScore> current) {
-      if (super.converged(previous, current)) {
-        // Max iterations is a hard limit even if we have a converged count configured
-        if (maxIterations != 0 && getIterations() >= maxIterations) {
-          return true;
-        }
-
-        count++;
-      } else {
-        count = 0;
-      }
-
-      // Note: if the converged count was negative then no convergence can be achieved
-      // using the point coordinates as this is disabled. So the code only reaches here with
-      // a count of zero, effectively skipping this as it is always false.
-      if (count > convergedCount) {
-        return true;
-      }
-      // Stop if interrupted
-      if (IJ.escapePressed()) {
-        ImageJUtils.log("STOPPED " + gaStatusPrefix);
-        IJ.resetEscape(); // Allow the plugin to continue processing
-        return true;
-      }
-      return false;
-    }
-  }
-
-  /**
-   * Configure the convergence for iterative optimisation.
-   */
-  private class IterationConvergenceChecker {
-    InterruptChecker scoreChecker;
-    InterruptConvergenceChecker filterChecker;
-    TIntObjectHashMap<ArrayList<Coordinate>> previousResults;
-    boolean canContinue = true;
-
-    public IterationConvergenceChecker(FilterScore current) {
-      // We have two different relative thresholds so use 2 convergence checkers,
-      // one for the score and one for the filter sequence
-      scoreChecker = new InterruptChecker(settings.iterationScoreTolerance,
-          settings.iterationScoreTolerance * 1e-3, 0);
-      filterChecker = new InterruptConvergenceChecker(settings.iterationFilterTolerance,
-          settings.iterationFilterTolerance * 1e-3, false, true, settings.iterationMaxIterations);
-      if (settings.iterationCompareResults) {
-        previousResults = getResults(current);
-      }
-    }
-
-    private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current) {
-      return ResultsMatchCalculator
-          .getCoordinates(createResults(null, (DirectFilter) current.filter, false));
-    }
-
-    public boolean converged(String prefix, FilterScore previous, FilterScore current,
-        double[] previousParameters, double[] currentParameters) {
-      // Stop if interrupted
-      if (IJ.escapePressed()) {
-        ImageJUtils.log("STOPPED");
-        // Do not reset escape
-        // IJ.resetEscape();
-        canContinue = false;
-        return true;
-      }
-
-      // Must converge on the non-filter parameters
-      if (!converged(previousParameters, currentParameters)) {
-        if (settings.iterationCompareResults) {
-          previousResults = getResults(current);
-        }
-        return false;
-      }
-
-      final SearchResult<FilterScore> p =
-          new SearchResult<>(previous.filter.getParameters(), previous);
-      final SearchResult<FilterScore> c =
-          new SearchResult<>(current.filter.getParameters(), current);
-
-      if (filterChecker.converged(p, c)) {
-        logConvergence(prefix, "filter parameters");
-        return true;
-      }
-      // Directly call the method with the scores
-      if (scoreChecker.converged(p.getScore(), c.getScore())) {
-        logConvergence(prefix, "score");
-        return true;
-      }
-
-      if (settings.iterationCompareResults) {
-        final TIntObjectHashMap<ArrayList<Coordinate>> currentResults = getResults(current);
-        final MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults,
-            previousResults, settings.iterationCompareDistance);
-        if (r.getJaccard() == 1) {
-          logConvergence(prefix, "results coordinates");
-          return true;
-        }
-        previousResults = currentResults;
-      }
-
-      return false;
-    }
-
-    private boolean converged(double[] previousParameters, double[] currentParameters) {
-      for (int i = 0; i < previousParameters.length; i++) {
-        if (previousParameters[i] != currentParameters[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    private void logConvergence(String prefix, String component) {
-      if (settings.iterationMaxIterations != 0
-          && getIterations() >= settings.iterationMaxIterations) {
-        component = "iterations";
-        canContinue = false;
-      }
-      ImageJUtils.log(prefix + " converged on " + component);
-    }
-
-    public int getIterations() {
-      return filterChecker.getIterations();
     }
   }
 
@@ -6439,169 +6718,6 @@ public class BenchmarkFilterAnalysis
       }
     }
     return filterSet;
-  }
-
-  private static class ScoreJob {
-    final DirectFilter filter;
-    final int index;
-
-    ScoreJob(DirectFilter filter, int index) {
-      this.filter = filter;
-      this.index = index;
-    }
-  }
-
-  private static class ParameterScoreJob {
-    final double[] point;
-    final int index;
-
-    ParameterScoreJob(double[] point, int index) {
-      this.point = point;
-      this.index = index;
-    }
-  }
-
-  /**
-   * Used to allow multi-threading of the scoring the filters.
-   */
-  private class ScoreWorker implements Runnable {
-    volatile boolean finished;
-    final BlockingQueue<ScoreJob> jobs;
-    final FilterScoreResult[] scoreResults;
-    final boolean createTextResult;
-    final DirectFilter minFilter;
-    final CoordinateStore coordinateStore;
-    final Ticker ticker;
-
-    public ScoreWorker(BlockingQueue<ScoreJob> jobs, FilterScoreResult[] scoreResults,
-        boolean createTextResult, CoordinateStore coordinateStore, Ticker ticker) {
-      this.jobs = jobs;
-      this.scoreResults = scoreResults;
-      this.createTextResult = createTextResult;
-      this.minFilter =
-          (defaultMinimalFilter != null) ? (DirectFilter) defaultMinimalFilter.clone() : null;
-      this.coordinateStore = coordinateStore;
-      this.ticker = ticker;
-    }
-
-    @Override
-    public void run() {
-      try {
-        while (true) {
-          final ScoreJob job = jobs.take();
-          if (job == null || job.index == -1) {
-            break;
-          }
-          if (!finished) {
-            // Only run jobs when not finished. This allows the queue to be emptied.
-            run(job);
-          }
-        }
-      } catch (final InterruptedException ex) {
-        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
-      } finally {
-        finished = true;
-      }
-    }
-
-    private void run(ScoreJob job) {
-      if (ImageJUtils.isInterrupted()) {
-        finished = true;
-        return;
-      }
-      // Directly write to the result array, this is thread safe
-      scoreResults[job.index] =
-          scoreFilter(job.filter, minFilter, createTextResult, coordinateStore);
-      ticker.tick();
-    }
-  }
-
-  /**
-   * Used to allow multi-threading of the scoring the filters.
-   */
-  private class ParameterScoreWorker implements Runnable {
-    volatile boolean finished;
-    final BlockingQueue<ParameterScoreJob> jobs;
-    final ParameterScoreResult[] scoreResults;
-    final boolean createTextResult;
-    final DirectFilter filter;
-    final DirectFilter minFilter;
-    final GridCoordinateStore gridCoordinateStore;
-    final Ticker ticker;
-
-    public ParameterScoreWorker(BlockingQueue<ParameterScoreJob> jobs,
-        ParameterScoreResult[] scoreResults, boolean createTextResult, Ticker ticker) {
-      this.jobs = jobs;
-      this.scoreResults = scoreResults;
-      this.createTextResult = createTextResult;
-      this.filter = (DirectFilter) searchScoreFilter.clone();
-      this.minFilter =
-          (defaultMinimalFilter != null) ? (DirectFilter) defaultMinimalFilter.clone() : null;
-      getBounds();
-      this.gridCoordinateStore =
-          new GridCoordinateStore(bounds.x, bounds.y, bounds.width, bounds.height, 0, 0);
-      this.ticker = ticker;
-    }
-
-    @Override
-    public void run() {
-      try {
-        while (true) {
-          final ParameterScoreJob job = jobs.take();
-          if (job == null || job.index == -1) {
-            break;
-          }
-          if (!finished) {
-            // Only run jobs when not finished. This allows the queue to be emptied.
-            run(job);
-          }
-        }
-      } catch (final InterruptedException ex) {
-        ConcurrencyUtils.interruptAndThrowUncheckedIf(!finished, ex);
-      } finally {
-        finished = true;
-      }
-    }
-
-    private void run(ParameterScoreJob job) {
-      if (ImageJUtils.isInterrupted()) {
-        finished = true;
-        return;
-      }
-
-      final double[] point = job.point;
-      final int failCount = (int) Math.round(point[0]);
-      final double residualsThreshold = point[1];
-      final double duplicateDistance = point[2];
-      CoordinateStore coordinateStore2;
-
-      // Re-use
-      gridCoordinateStore.changeXyResolution(duplicateDistance * distanceScallingFactor);
-      coordinateStore2 = gridCoordinateStore;
-
-      // New
-      // coordinateStore2 = new GridCoordinateStore(bounds[0], bounds[1], duplicateDistance *
-      // distanceScallingFactor);
-
-      // From factory
-      // coordinateStore2 = createCoordinateStore(duplicateDistance);
-
-      // Directly write to the result array, this is thread safe
-      scoreResults[job.index] = scoreFilter(filter, minFilter, failCount, residualsThreshold,
-          duplicateDistance, coordinateStore2, createTextResult);
-
-      // Allow debugging the score
-      // if (failCount == 3 && DoubleEquality.almostEqualRelativeOrAbsolute(residualsThreshold,
-      // 0.35, 0, 0.01) &&
-      // DoubleEquality.almostEqualRelativeOrAbsolute(duplicateDistance, 2.5, 0, 0.01))
-      // {
-      // System.out.printf("%s @ %s : %d %f %f \n", Double.toString(scoreResults[job.index].score),
-      // Double.toString(scoreResults[job.index].criteria), failCount, residualsThreshold,
-      // duplicateDistance);
-      // }
-
-      ticker.tick();
-    }
   }
 
   @Nullable
@@ -6677,6 +6793,7 @@ public class BenchmarkFilterAnalysis
    * @param createTextResult set to true to create the text result
    * @return the score results
    */
+  @Nullable
   private ParameterScoreResult[] scoreFilters(double[][] points, boolean createTextResult) {
     if (points == null || points.length == 0) {
       return null;
@@ -6938,119 +7055,7 @@ public class BenchmarkFilterAnalysis
     gaWindow.accept(text.toString());
   }
 
-  private class ParameterScoreFunction implements FullScoreFunction<FilterScore> {
-    @Override
-    public SearchResult<FilterScore> findOptimum(double[][] points) {
-      gaIteration++;
-      SimpleParameterScore max = parameterScoreOptimum;
-
-      // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
-      Arrays.sort(points, (o1, o2) -> Double.compare(o1[2], o2[2]));
-
-      final ParameterScoreResult[] scoreResults = scoreFilters(points, settings.showResultsTable);
-
-      if (scoreResults == null) {
-        return null;
-      }
-
-      for (int index = 0; index < scoreResults.length; index++) {
-        final ParameterScoreResult scoreResult = scoreResults[index];
-        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
-            scoreResult.criteria >= minCriteria);
-        if (result.compareTo(max) < 0) {
-          max = result;
-        }
-      }
-
-      if (settings.showResultsTable) {
-        addToResultsWindow(scoreResults);
-      }
-
-      parameterScoreOptimum = max;
-
-      // Add the best filter to the table
-      // This filter may not have been part of the scored subset so use the entire results set for
-      // reporting
-      final double[] parameters = max.result.parameters;
-      final int failCount = (int) Math.round(parameters[0]);
-      final double residualsThreshold = parameters[1];
-      final double duplicateDistance = parameters[2];
-
-      // System.out.println(Arrays.toString(parameters));
-
-      final MultiPathFilter multiPathFilter =
-          new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, residualsThreshold);
-      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
-          null, null, createCoordinateStore(duplicateDistance));
-
-      final StringBuilder text = createResult(searchScoreFilter, r,
-          buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
-      add(text, gaIteration);
-      gaWindow.accept(text.toString());
-
-      return new SearchResult<>(parameters, max);
-    }
-
-    @Override
-    public SearchResult<FilterScore>[] score(double[][] points) {
-      gaIteration++;
-      SimpleParameterScore max = parameterScoreOptimum;
-
-      // Sort points to allow the CoordinateStore to be reused with the same duplicate distance
-      Arrays.sort(points, (o1, o2) -> Double.compare(o1[2], o2[2]));
-
-      final ParameterScoreResult[] scoreResults = scoreFilters(points, settings.showResultsTable);
-
-      if (scoreResults == null) {
-        return null;
-      }
-
-      @SuppressWarnings("unchecked")
-      final SearchResult<FilterScore>[] scores = new SearchResult[scoreResults.length];
-      for (int index = 0; index < scoreResults.length; index++) {
-        final ParameterScoreResult scoreResult = scoreResults[index];
-        final SimpleParameterScore result = new SimpleParameterScore(searchScoreFilter, scoreResult,
-            scoreResult.criteria >= minCriteria);
-        if (result.compareTo(max) < 0) {
-          max = result;
-        }
-        scores[index] = new SearchResult<>(points[index], result);
-      }
-
-      if (settings.showResultsTable) {
-        addToResultsWindow(scoreResults);
-      }
-
-      parameterScoreOptimum = max;
-
-      // Add the best filter to the table
-      // This filter may not have been part of the scored subset so use the entire results set for
-      // reporting
-      final double[] parameters = max.result.parameters;
-      final int failCount = (int) Math.round(parameters[0]);
-      final double residualsThreshold = parameters[1];
-      final double duplicateDistance = parameters[2];
-      final MultiPathFilter multiPathFilter =
-          new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, residualsThreshold);
-      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
-          null, null, createCoordinateStore(duplicateDistance));
-
-      final StringBuilder text = createResult(searchScoreFilter, r,
-          buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
-      add(text, gaIteration);
-      gaWindow.accept(text.toString());
-
-      return scores;
-    }
-
-    @Override
-    public SearchResult<FilterScore>[] cut(SearchResult<FilterScore>[] scores, int size) {
-      return ScoreFunctionHelper.cut(scores, size);
-    }
-  }
-
+  @Nullable
   @Override
   public SearchResult<FilterScore> findOptimum(double[][] points) {
     gaIteration++;
@@ -7088,6 +7093,7 @@ public class BenchmarkFilterAnalysis
     return new SearchResult<>(filter.getParameters(), max);
   }
 
+  @Nullable
   @Override
   public SearchResult<FilterScore>[] score(double[][] points) {
     gaIteration++;
@@ -7346,24 +7352,6 @@ public class BenchmarkFilterAnalysis
 
   private boolean isShowOverlay() {
     return (settings.showTP || settings.showFP || settings.showFN);
-  }
-
-  /**
-   * Abstract class to allow the array storage to be reused.
-   */
-  private abstract class CustomTIntObjectProcedure
-      implements TIntObjectProcedure<UniqueIdPeakResult[]> {
-    float[] x;
-    float[] y;
-    float[] x2;
-    float[] y2;
-
-    CustomTIntObjectProcedure(float[] x, float[] y, float[] x2, float[] y2) {
-      this.x = x;
-      this.y = y;
-      this.x2 = x2;
-      this.y2 = y2;
-    }
   }
 
   /**
