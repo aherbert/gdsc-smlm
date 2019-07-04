@@ -2928,7 +2928,8 @@ public class BenchmarkFilterAnalysis
     final double pMle = Gaussian2DPeakResultHelper.getMLPrecision(simulationParameters.pixelPitch,
         simulationParameters.sd, signal, simulationParameters.noise,
         simulationParameters.isEmCcd());
-    String msg = String.format(
+    StringBuilder msg = new StringBuilder();
+    TextUtils.formatTo(msg,
         "Fit %d/%d results, %d True-Positives, %d unique\nExpected signal = %.3f +/- %.3f\n"
             + "Expected X precision = %.3f (LSE), %.3f (MLE)\nNot duplicates : %d / %d (%.2f%%)",
         fitResultData.fittedResults, fitResultData.totalResults, fitResultData.matches,
@@ -2938,10 +2939,10 @@ public class BenchmarkFilterAnalysis
 
     final FilterResult best = getBestResult(filterAnalysisResult.scores);
     if (best != null) {
-      msg += String.format("\nCurrent Best=%s, FailCount=%d", MathUtils.rounded(best.score),
+      TextUtils.formatTo(msg, "\nCurrent Best=%s, FailCount=%d", MathUtils.rounded(best.score),
           best.failCount);
     }
-    gd.addMessage(msg);
+    gd.addMessage(msg.toString());
   }
 
   private boolean selectTableColumns() {
@@ -5972,18 +5973,15 @@ public class BenchmarkFilterAnalysis
         };
         ImagePlus.addImageListener(listener);
 
-        // For the dialog
-        final String msg = String.format(
-            "Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\n"
-                + "Lower density = %d\nHigher density = %d\n",
-            sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(),
-            sampler.getNumberOfHighDensitySamples());
-
         // Turn off the recorder when the dialog is showing
         final boolean record = Recorder.record;
         Recorder.record = false;
         final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
-        gd.addMessage(msg);
+        ImageJUtils.addMessage(gd,
+            "Showing image data for the template example.\n \nSample Frames:\nEmpty = %d\n"
+                + "Lower density = %d\nHigher density = %d\n",
+            sampler.getNumberOfEmptySamples(), sampler.getNumberOfLowDensitySamples(),
+            sampler.getNumberOfHighDensitySamples());
         gd.addSlider(keyNo, 0, 10, settings.countNo);
         gd.addSlider(keyLow, 0, 10, settings.countLow);
         gd.addSlider(keyHigh, 0, 10, settings.countHigh);
