@@ -47,7 +47,6 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction.Size;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
-import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
@@ -248,6 +247,14 @@ public class PsfCreator implements PlugInFilter {
   private final SoftLock plotLock2 = new SoftLock();
   private final SoftLock plotLock3 = new SoftLock();
   private final SoftLock plotLock4 = new SoftLock();
+
+  private boolean[] dmap;
+  private int lastWidth;
+  private int lastHeight;
+  private int minx;
+  private int maxx;
+  private int miny;
+  private int maxy;
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -1102,26 +1109,6 @@ public class PsfCreator implements PlugInFilter {
         last.getMean(), av);
     return av;
   }
-
-  @SuppressWarnings("unused")
-  private static float getBackground(final double fraction, DoubleData all) {
-    final double[] allValues = all.values();
-    Arrays.sort(allValues);
-    final int fractionIndex = (int) (allValues.length * fraction);
-    double sum = 0;
-    for (int i = 0; i <= fractionIndex; i++) {
-      sum += allValues[i];
-    }
-    return (float) (sum / (fractionIndex + 1));
-  }
-
-  private boolean[] dmap;
-  private int lastWidth;
-  private int lastHeight;
-  private int minx;
-  private int maxx;
-  private int miny;
-  private int maxy;
 
   /**
    * Subtract the background from the spot, compute the intensity within half the box region

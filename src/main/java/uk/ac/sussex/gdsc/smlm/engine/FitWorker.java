@@ -92,7 +92,6 @@ import org.apache.commons.math3.util.FastMath;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -3892,12 +3891,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     return (x < xmin || x > xmax || y < ymin || y > ymax || height < heightThreshold);
   }
 
-  @SuppressWarnings("unused")
-  private static boolean canIgnore(float x, float y, float xmin, float xmax, float ymin,
-      float ymax) {
-    return (x < xmin || x > xmax || y < ymin || y > ymax);
-  }
-
   /**
    * Get an estimate of the background level using the median of the image.
    *
@@ -3907,41 +3900,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     createDataEstimator();
     // Use the median
     return dataEstimator.getPercentile(50);
-  }
-
-  /**
-   * Get an estimate of the background level using the fitted peaks. If no fits available then
-   * estimate background using mean of image.
-   *
-   * @param peakResults the peak results
-   * @param width the width
-   * @param height the height
-   * @return the float
-   */
-  @SuppressWarnings("unused")
-  private float estimateBackground(LinkedList<PeakResult> peakResults, int width, int height) {
-    if (!peakResults.isEmpty()) {
-      // Compute average background of the fitted peaks
-      double sum = 0;
-      for (final PeakResult result : peakResults) {
-        sum += result.getBackground();
-      }
-      final float av = (float) sum / peakResults.size();
-      if (logger != null) {
-        LoggerUtils.log(logger, Level.INFO, "Average background %f", av);
-      }
-      return av;
-    }
-    // Compute average of the entire image
-    double sum = 0;
-    for (int i = width * height; i-- > 0;) {
-      sum += data[i];
-    }
-    final float av = (float) sum / (width * height);
-    if (logger != null) {
-      LoggerUtils.log(logger, Level.INFO, "Image background %f", av);
-    }
-    return av;
   }
 
   private float estimateNoise() {

@@ -307,26 +307,6 @@ public class GaussianKernel {
     }
   }
 
-  @SuppressWarnings("unused")
-  private void increaseKernel(int scale, int kradius) {
-    if (currentScale < scale) {
-      currentScale = scale;
-      halfKernel.resetQuick();
-      halfKernel.add(1);
-    }
-
-    if (halfKernel.size() < kradius) {
-      final double step = 1.0 / currentScale;
-      for (int i = halfKernel.size(); i < kradius; i++) {
-        final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
-        if (v == 0) {
-          break;
-        }
-        halfKernel.add(v);
-      }
-    }
-  }
-
   private static double[] buildKernel(double[] kernel, int kradius, boolean edgeCorrection) {
     // Clip in the event that zeros occurred during computation
     if (kernel[kradius - 1] == 0) {

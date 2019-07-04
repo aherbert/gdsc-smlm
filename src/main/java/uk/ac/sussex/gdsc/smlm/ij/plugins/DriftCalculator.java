@@ -1009,20 +1009,6 @@ public class DriftCalculator implements PlugIn {
     av1 /= count;
 
     for (int i = 0; i < data.length; i++) {
-      // if (toProcess[i] != 0)
-      data[i] -= av1;
-    }
-  }
-
-  @SuppressWarnings("unused")
-  private static void normalise(double[] data) {
-    double av1 = 0;
-    for (int i = 0; i < data.length; i++) {
-      av1 += data[i];
-    }
-    av1 /= data.length;
-
-    for (int i = 0; i < data.length; i++) {
       data[i] -= av1;
     }
   }
