@@ -70,7 +70,7 @@
 
   <!-- Allow use of "\n" in String.format when building messages for GenericDialog  -->
   <Match>
-    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkFilterAnalysis" />
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkFilterAnalysis" />
     <Or>
       <Method name="addSimulationData" />
       <Method name="saveTemplate" />
@@ -149,7 +149,7 @@
 
   <Match>
     <!-- False positive. -->
-    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.BenchmarkFilterAnalysis" />
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkFilterAnalysis" />
     <Method name="calculateSensitivity" />
     <Bug pattern="DLS_DEAD_LOCAL_STORE" />
   </Match>
@@ -186,6 +186,12 @@
       <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PsfDrift$UpdateDialogListener" />
     </Or>
     <Bug pattern="FE_FLOATING_POINT_EQUALITY" />
+  </Match>
+
+  <Match>
+    <!-- False positive. -->
+    <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.BenchmarkSpotFit$FilterCandidates" />
+    <Bug pattern="URF_UNREAD_FIELD" />
   </Match>
 
 </FindBugsFilter>

@@ -477,8 +477,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     boolean good1;
     boolean good2;
     boolean valid;
-    @SuppressWarnings("unused")
-    boolean valid2;
     double tp1;
     double fp1;
     double tp2a;
@@ -983,9 +981,6 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           // doublet
           if (result.good1 && result.good2 && result.neighbours == 0) {
             result.valid = true;
-            if (result.almostNeighbours == 0) {
-              result.valid2 = true;
-            }
           }
 
           frameResults.add(result);

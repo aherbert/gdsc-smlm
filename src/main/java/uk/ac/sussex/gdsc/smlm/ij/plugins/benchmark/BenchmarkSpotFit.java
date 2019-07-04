@@ -616,6 +616,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     public double getAbsoluteSignalFactor() {
       return Math.abs(getSignalFactor());
     }
+
+    /**
+     * Gets the score.
+     *
+     * @return the score
+     */
+    public double getScore() {
+      return score;
+    }
   }
 
   /**
@@ -708,7 +717,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Store the filter candidates.
    */
-  public static class FilterCandidates implements Cloneable {
+  static class FilterCandidates implements Cloneable {
     /** Integer counts of positives (matches). */
     final int pos;
     /** Integer counts of negatives. */
@@ -760,7 +769,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param spots the spots
      * @param maxCandidate the max candidate
      */
-    public FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots,
+    FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots,
         int maxCandidate) {
       this.pos = pos;
       this.neg = neg;
