@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
@@ -47,7 +47,7 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest {
     final DataFilter filter = createDataFilter();
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, 2, 0.2);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     final float[] offsets = getOffsets(filter);
     final int[] boxSizes = getBoxSizes(filter);

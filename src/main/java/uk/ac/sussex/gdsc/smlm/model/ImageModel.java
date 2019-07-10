@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -706,7 +706,7 @@ public abstract class ImageModel {
       axis = new double[3];
       double length = 0;
       final NormalizedGaussianSampler gauss =
-          GaussianSamplerUtils.createNormalizedGaussianSampler(random);
+          SamplerUtils.createNormalizedGaussianSampler(random);
       // Check the vector has a length
       while (length == 0) {
         axis[0] = gauss.sample();

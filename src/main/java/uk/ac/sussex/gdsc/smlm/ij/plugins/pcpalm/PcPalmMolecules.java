@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
@@ -1183,7 +1183,7 @@ public class PcPalmMolecules implements PlugIn {
     final UniformDistribution dist =
         new UniformDistribution(null, new double[] {width, width, 0}, rng.nextInt());
     final NormalizedGaussianSampler gauss =
-        GaussianSamplerUtils.createNormalizedGaussianSampler(rng);
+        SamplerUtils.createNormalizedGaussianSampler(rng);
 
     settings.molecules = new ArrayList<>(settings.numberOfMolecules);
     // Create some dummy results since the calibration is required for later analysis

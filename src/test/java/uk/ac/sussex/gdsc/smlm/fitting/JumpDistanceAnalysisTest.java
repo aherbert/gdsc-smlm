@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
@@ -569,7 +569,7 @@ public class JumpDistanceAnalysisTest {
 
     double[][] getSample(UniformRandomProvider random, int size) {
       if (size > getSize()) {
-        final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(random, 0, 1);
+        final GaussianSampler gs = SamplerUtils.createGaussianSampler(random, 0, 1);
         final int extra = size - getSize();
 
         // Get cumulative fraction

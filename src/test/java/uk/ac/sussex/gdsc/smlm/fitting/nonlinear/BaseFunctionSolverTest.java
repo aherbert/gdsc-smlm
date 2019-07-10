@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -236,7 +236,7 @@ public abstract class BaseFunctionSolverTest {
     // This is generated once so create the randon generator here.
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, gain, gainSD);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
     final double[] w = new double[size * size];
     final double[] n = new double[size * size];
     for (int i = 0; i < w.length; i++) {
@@ -612,7 +612,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Read-noise
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, 0, 1);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 0, 1);
     if (noise != null) {
       for (int i = 0; i < data.length; i++) {
         data[i] += gs.sample() * noise[i];

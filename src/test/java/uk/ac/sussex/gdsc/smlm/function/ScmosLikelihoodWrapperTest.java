@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
@@ -154,7 +154,7 @@ public class ScmosLikelihoodWrapperTest {
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final CustomPoissonDistribution pd =
         new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rg, G, G_SD);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
     for (int i = 0; i < n; i++) {
       data.offset[i] = pd.sample();
@@ -289,7 +289,7 @@ public class ScmosLikelihoodWrapperTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
         new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {
@@ -499,7 +499,7 @@ public class ScmosLikelihoodWrapperTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
         new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {
@@ -850,7 +850,7 @@ public class ScmosLikelihoodWrapperTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final CustomPoissonDistribution pd =
         new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 1);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
     for (int i = 0; i < n; i++) {

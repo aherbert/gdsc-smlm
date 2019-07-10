@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
@@ -346,8 +346,7 @@ public class DiffusionRateTest implements PlugIn {
     final StoredData totalJumpDistances2D = new StoredData(settings.getParticles());
     final StoredData totalJumpDistances3D = new StoredData(settings.getParticles());
 
-    final NormalizedGaussianSampler gauss =
-        GaussianSamplerUtils.createNormalizedGaussianSampler(random);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
     for (int i = 0; i < settings.getParticles(); i++) {
       if (i % 16 == 0) {

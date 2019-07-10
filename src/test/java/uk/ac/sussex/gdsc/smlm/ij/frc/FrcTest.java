@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.frc;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -89,7 +89,7 @@ public class FrcTest {
     final int size = 1024;
     final double[][] data = new double[size * 2][];
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 5);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
       data[i++] = new double[] {x + gs.sample(), y2 + gs.sample()};
@@ -272,7 +272,7 @@ public class FrcTest {
     final int N = 2048;
     final double[][] data = new double[N * 2][];
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(r, 0, 5);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
       data[i++] = new double[] {x + gs.sample(), y2 + gs.sample()};

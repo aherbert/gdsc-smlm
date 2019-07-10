@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.LvmGradientProcedureUtils.Type;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -841,7 +841,7 @@ public class LvmGradientProcedureTest {
       boolean checkGradients) {
     final int iter = 10;
     final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
-    final GaussianSampler gs = GaussianSamplerUtils.createGaussianSampler(rng, 0, noise);
+    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rng, 0, noise);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);

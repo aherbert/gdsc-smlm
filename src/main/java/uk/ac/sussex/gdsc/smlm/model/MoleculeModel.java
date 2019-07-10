@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.rng.GaussianSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -198,7 +198,7 @@ public class MoleculeModel {
     final double[] xyz = getCoordinates();
     if (diffusionRate > 0) {
       final NormalizedGaussianSampler gauss =
-          GaussianSamplerUtils.createNormalizedGaussianSampler(random);
+          SamplerUtils.createNormalizedGaussianSampler(random);
       for (int i = 0; i < 3; i++) {
         final double shift = gauss.sample() * diffusionRate;
         // Clip the movement
@@ -275,7 +275,7 @@ public class MoleculeModel {
     if (diffusionRate > 0) {
       // Sample from a Gaussian - This may only be relevant for 1D diffusion
       final double shift =
-          GaussianSamplerUtils.createNormalizedGaussianSampler(random).sample() * diffusionRate;
+          SamplerUtils.createNormalizedGaussianSampler(random).sample() * diffusionRate;
 
       // Sample from the cumulative probability distribution for the MSD.
       // Then get a square root to find the shift and assign a direction
