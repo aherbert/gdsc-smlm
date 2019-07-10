@@ -26,11 +26,15 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
+import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /**
- * Set the display values of an image to render it as a binary mask, all non-zero values are white.
+ * Set the display values of an image to render it as a binary mask, all values above zero are
+ * white.
+ *
+ * <p>This does not support 32-bit images with negative values.</p>
  */
 public class BinaryDisplay implements PlugInFilter {
   private ImagePlus imp;
@@ -46,43 +50,46 @@ public class BinaryDisplay implements PlugInFilter {
     if ("reset".equals(arg)) {
       final ImageProcessor ip = imp.getProcessor();
       ip.reset();
-      imp.setProcessor(ip);
-      imp.resetDisplayRange();
+      if (ip instanceof ByteProcessor) {
+        // Reset to the entire range
+        ip.resetMinAndMax();
+      } else {
+        // Short and FloatProcessor store the min and max in the snapshot
+        // so restore it from the reset values.
+        ip.setMinAndMax(ip.getMin(), ip.getMax());
+      }
       imp.updateAndDraw();
       return DONE;
     }
 
     this.imp = imp;
-    return DOES_ALL;
+    return DOES_8G | DOES_16 | DOES_32;
   }
 
   @Override
   public void run(ImageProcessor ip) {
-    // float min = Float.POSITIVE_INFINITY;
-    // for (int i=0; i<ip.getPixelCount(); i++)
-    // {
-    // final float value = ip.getf(i);
-    // if (value == 0)
-    // continue;
-    // if (value < min)
-    // min = value;
-    // }
-    // ip.setMinAndMax(0, min);
-    // imp.updateAndDraw();
-
-    final FloatProcessor fp = new FloatProcessor(ip.getWidth(), ip.getHeight());
-    final float[] data = (float[]) fp.getPixels();
-    for (int i = 0; i < ip.getPixelCount(); i++) {
-      final float value = ip.getf(i);
-      if (value == 0) {
-        continue;
+    double max;
+    if (ip instanceof ByteProcessor) {
+      max = 1;
+    } else {
+      // Short and FloatProcessor store the current min and max in the snapshot
+      ip.snapshot();
+      if (ip instanceof FloatProcessor) {
+        // Compute the lowest value above zero
+        float min = Float.POSITIVE_INFINITY;
+        for (int i = 0; i < ip.getPixelCount(); i++) {
+          final float value = ip.getf(i);
+          if (value > 0 && value < min) {
+            min = value;
+          }
+        }
+        max = min;
+      } else {
+        max = 1;
       }
-      data[i] = 1;
     }
 
-    ip.snapshot();
-    ip.setPixels(0, fp);
-    ip.setMinAndMax(0, 1);
+    ip.setMinAndMax(0, max);
     imp.updateAndDraw();
   }
 }
