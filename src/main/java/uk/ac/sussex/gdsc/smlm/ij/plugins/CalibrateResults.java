@@ -34,14 +34,57 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Allows results held in memory to be calibrated.
  */
 public class CalibrateResults implements PlugIn {
   private static final String TITLE = "Calibrate Results";
 
-  private static String inputOption = "";
-  private static boolean updateAll;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    boolean updateAll;
+
+    Settings() {
+      inputOption = "";
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      updateAll = source.updateAll;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -52,7 +95,7 @@ public class CalibrateResults implements PlugIn {
     }
 
     final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
@@ -65,7 +108,7 @@ public class CalibrateResults implements PlugIn {
     IJ.showStatus("Calibrated " + results.getName());
   }
 
-  private static boolean showInputDialog() {
+  private boolean showInputDialog() {
     final int size = MemoryPeakResults.countMemorySize();
     if (size == 0) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -76,7 +119,9 @@ public class CalibrateResults implements PlugIn {
     gd.addHelp(About.HELP_URL);
     gd.addMessage("Select results to calibrate");
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    settings = Settings.load();
+
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
 
     gd.showDialog();
 
@@ -84,12 +129,13 @@ public class CalibrateResults implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.save();
 
     return true;
   }
 
-  private static boolean showDialog(MemoryPeakResults results) {
+  private boolean showDialog(MemoryPeakResults results) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -105,7 +151,7 @@ public class CalibrateResults implements PlugIn {
     gd.addStringField("Name", results.getName(),
         Math.max(Math.min(results.getName().length(), 60), 20));
     if (existingCalibration) {
-      gd.addCheckbox("Update_all_linked_results", updateAll);
+      gd.addCheckbox("Update_all_linked_results", settings.updateAll);
     }
     PeakFit.addCameraOptions(gd, PeakFit.FLAG_QUANTUM_EFFICIENCY, cw);
     gd.addNumericField("Calibration (nm/px)", cw.getNmPerPixel(), 2);
@@ -128,7 +174,7 @@ public class CalibrateResults implements PlugIn {
     }
 
     if (existingCalibration) {
-      updateAll = gd.getNextBoolean();
+      settings.updateAll = gd.getNextBoolean();
     }
 
     cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
@@ -140,7 +186,7 @@ public class CalibrateResults implements PlugIn {
     final Calibration newCalibration = cw.getCalibration();
     results.setCalibration(newCalibration);
 
-    if (updateAll) {
+    if (settings.updateAll) {
       // Calibration is stored as a reference to an immutable object.
       // Update any in memory results with the same object.
       // Note that if any plugins have modified the calibration (rather
