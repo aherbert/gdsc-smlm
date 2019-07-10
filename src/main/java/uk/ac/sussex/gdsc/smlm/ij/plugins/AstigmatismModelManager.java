@@ -98,8 +98,6 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -116,7 +114,16 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AstigmatismModelManager implements PlugIn {
   private static final String TITLE = "Astigmatism Model Manager";
 
-  private static AstigmatismModelSettings.Builder settings;
+  private static final int P_GAMMA = 0;
+  private static final int P_D = 1;
+  private static final int P_S0X = 2;
+  private static final int P_AX = 3;
+  private static final int P_BX = 4;
+  private static final int P_S0Y = 5;
+  private static final int P_AY = 6;
+  private static final int P_BY = 7;
+  private static final int P_Z0 = 8;
+
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private AstigmatismModelManagerSettings.Builder pluginSettings;
@@ -141,15 +148,35 @@ public class AstigmatismModelManager implements PlugIn {
   private double[] fitSy;
   private double[] parameters;
 
-  private static AstigmatismModelSettings.Builder getSettings() {
-    return getSettings(0);
-  }
+  /**
+   * Provide a lazy initialisation holder for the AstigmatismModelSettings.
+   */
+  private static class AstigmatismModelSettingsHolder {
+    private static AstigmatismModelSettings settings;
 
-  private static AstigmatismModelSettings.Builder getSettings(int flags) {
-    if (settings == null) {
-      settings = SettingsManager.readAstigmatismModelSettings(flags).toBuilder();
+    static {
+      settings = SettingsManager.readAstigmatismModelSettings(0);
     }
-    return settings;
+
+    /**
+     * Gets the settings held in memory.
+     *
+     * @return the settings
+     */
+    static AstigmatismModelSettings getSettings() {
+      return settings;
+    }
+
+    /**
+     * Sets the settings to memory and save them to file.
+     *
+     * @param settings the settings
+     * @return true, if successful writing to file
+     */
+    static boolean setSettings(AstigmatismModelSettings settings) {
+      AstigmatismModelSettingsHolder.settings = settings;
+      return SettingsManager.writeSettings(settings);
+    }
   }
 
   /**
@@ -159,10 +186,10 @@ public class AstigmatismModelManager implements PlugIn {
    * @return the list
    */
   public static String[] listAstigmatismModels(boolean includeNone) {
-    final AstigmatismModelSettings.Builder settings = getSettings();
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     list.addAll(settings.getAstigmatismModelResourcesMap().keySet());
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   /**
@@ -186,7 +213,7 @@ public class AstigmatismModelManager implements PlugIn {
    */
   public static String[] listAstigmatismModels(boolean includeNone, double nmPerPixel,
       double error) {
-    final AstigmatismModelSettings.Builder settings = getSettings();
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     error = Math.abs(error);
     final double low = nmPerPixel - error;
@@ -198,7 +225,7 @@ public class AstigmatismModelManager implements PlugIn {
         list.add(entry.getKey());
       }
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   /**
@@ -209,7 +236,7 @@ public class AstigmatismModelManager implements PlugIn {
    * @return the list
    */
   public static String[] listAstigmatismModels(boolean includeNone, boolean withNmPerPixel) {
-    final AstigmatismModelSettings.Builder settings = getSettings();
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     for (final Map.Entry<String, AstigmatismModel> entry : settings
         .getAstigmatismModelResourcesMap().entrySet()) {
@@ -221,7 +248,7 @@ public class AstigmatismModelManager implements PlugIn {
         list.add(entry.getKey());
       }
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   private static List<String> createList(boolean includeNone) {
@@ -253,7 +280,7 @@ public class AstigmatismModelManager implements PlugIn {
    * @return the model (or null)
    */
   public static AstigmatismModel getModel(String name) {
-    return getSettings().getAstigmatismModelResourcesMap().get(name);
+    return AstigmatismModelSettingsHolder.getSettings().getAstigmatismModelResourcesMap().get(name);
   }
 
   /**
@@ -268,7 +295,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   //@formatter:off
-  private static String[] OPTIONS = {
+  private static final String[] OPTIONS = {
       "Create model",
       "Import model",
       // All option below require models
@@ -278,7 +305,7 @@ public class AstigmatismModelManager implements PlugIn {
       "Export model",
       };
   //@formatter:on
-  private static String[] OPTIONS2;
+  private static final String[] OPTIONS2;
 
   static {
     OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
@@ -289,7 +316,7 @@ public class AstigmatismModelManager implements PlugIn {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     String[] options = OPTIONS;
-    final AstigmatismModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     if (settings.getAstigmatismModelResourcesCount() == 0) {
       options = OPTIONS2;
     }
@@ -997,16 +1024,6 @@ public class AstigmatismModelManager implements PlugIn {
     return w;
   }
 
-  private static final int P_GAMMA = 0;
-  private static final int P_D = 1;
-  private static final int P_S0X = 2;
-  private static final int P_AX = 3;
-  private static final int P_BX = 4;
-  private static final int P_S0Y = 5;
-  private static final int P_AY = 6;
-  private static final int P_BY = 7;
-  private static final int P_Z0 = 8;
-
   /**
    * Gets the standard deviation for the z-depth.
    *
@@ -1184,8 +1201,6 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private void plotFit(final double[] parameters) {
-    // System.out.println(Arrays.toString(parameters));
-
     final double gamma = parameters[P_GAMMA];
     final double d = parameters[P_D];
     final double s0x = parameters[P_S0X];
@@ -1214,13 +1229,6 @@ public class AstigmatismModelManager implements PlugIn {
     plot.addPoints(z, sx1, Plot.LINE);
     plot.setColor(Color.BLUE);
     plot.addPoints(z, sy1, Plot.LINE);
-
-    // double[] y = new AstigmatismVectorFunction().value(parameters);
-    // plot.setColor(Color.MAGENTA);
-    // plot.addPoints(fitZ, Arrays.copyOf(y, fitZ.length), Plot.BOX);
-    // plot.setColor(Color.YELLOW);
-    // plot.addPoints(fitZ, Arrays.copyOfRange(y, fitZ.length, y.length), Plot.BOX);
-
     plot.setColor(Color.BLACK);
     plot.updateImage();
   }
@@ -1258,7 +1266,6 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addMessage("Save the model width to this plugin's settings, e.g. to use\n"
         + "on another selected PSF when creating a model.");
     gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
-    // gd.setCancelLabel(" No ");
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -1298,7 +1305,7 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setModelName(name);
 
     // Check existing names
-    final AstigmatismModelSettings.Builder settings = getSettings();
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final Map<String, AstigmatismModel> map = settings.getAstigmatismModelResourcesMap();
     if (map.containsKey(name)) {
       name = suggest(map, name);
@@ -1318,8 +1325,8 @@ public class AstigmatismModelManager implements PlugIn {
     }
 
     // Save the model
-    settings.putAstigmatismModelResources(pluginSettings.getModelName(), model.build());
-    if (!SettingsManager.writeSettings(settings.build())) {
+    if (!AstigmatismModelSettingsHolder.setSettings(settings.toBuilder()
+        .putAstigmatismModelResources(pluginSettings.getModelName(), model.build()).build())) {
       IJ.error(TITLE, "Failed to save the model");
       return false;
     }
@@ -1372,7 +1379,8 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setFilename(gd.getNextString());
 
     // Try and get the named resource
-    final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+    final AstigmatismModel model =
+        AstigmatismModelSettingsHolder.getSettings().getAstigmatismModelResourcesMap().get(name);
     if (model == null) {
       IJ.error(TITLE, "Failed to find astigmatism model: " + name);
       return;
@@ -1410,7 +1418,8 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setShowPsf(gd.getNextBoolean());
 
     // Try and get the named resource
-    AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
+    AstigmatismModel model =
+        AstigmatismModelSettingsHolder.getSettings().getAstigmatismModelResourcesMap().get(name);
     if (model == null) {
       IJ.error(TITLE, "Failed to find astigmatism model: " + name);
       return;
@@ -1538,13 +1547,10 @@ public class AstigmatismModelManager implements PlugIn {
       if (ImageJUtils.isShowGenericDialog()) {
         gd.hideCancelButton();
         gd.setOKLabel(" Close ");
-        gd.addAndGetButton("Reset", new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent event) {
-            update();
-            // The events triggered by setting these should be ignored now
-            tfz.setText("0");
-          }
+        gd.addAndGetButton("Reset", event -> {
+          update();
+          // The events triggered by setting these should be ignored now
+          tfz.setText("0");
         });
         draw();
       }
@@ -1597,18 +1603,15 @@ public class AstigmatismModelManager implements PlugIn {
     private void update() {
       if (lock.acquire()) {
         // Run in a new thread to allow the GUI to continue updating
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              // Continue while the parameter is changing
-              while (lastZ != z || lastCalibratedImage != getCalibratedImage()) {
-                draw();
-              }
-            } finally {
-              // Ensure the running flag is reset
-              lock.release();
+        new Thread(() -> {
+          try {
+            // Continue while the parameter is changing
+            while (lastZ != z || lastCalibratedImage != getCalibratedImage()) {
+              draw();
             }
+          } finally {
+            // Ensure the running flag is reset
+            lock.release();
           }
         }).start();
       }
@@ -1617,6 +1620,7 @@ public class AstigmatismModelManager implements PlugIn {
     private int getCalibratedImage() {
       return pluginSettings.getCalibratedImage() ? 1 : 0;
     }
+
   }
 
   /**
@@ -1644,14 +1648,15 @@ public class AstigmatismModelManager implements PlugIn {
     final String name = gd.getNextChoice();
     pluginSettings.setSelected(name);
 
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
     if (model == null) {
       IJ.error(TITLE, "Failed to find astigmatism model: " + name);
       return;
     }
 
-    settings.removeAstigmatismModelResources(name);
-    SettingsManager.writeSettings(settings.build());
+    AstigmatismModelSettingsHolder
+        .setSettings(settings.toBuilder().removeAstigmatismModelResources(name).build());
 
     ImageJUtils.log("Deleted astigmatism model: %s", name);
   }
@@ -1675,6 +1680,7 @@ public class AstigmatismModelManager implements PlugIn {
     final String name = gd.getNextChoice();
     pluginSettings.setSelected(name);
 
+    final AstigmatismModelSettings settings = AstigmatismModelSettingsHolder.getSettings();
     final AstigmatismModel model = settings.getAstigmatismModelResourcesMap().get(name);
     if (model == null) {
       IJ.error(TITLE, "Failed to find astigmatism model: " + name);
@@ -1690,8 +1696,8 @@ public class AstigmatismModelManager implements PlugIn {
     // The constants of z^4 have a symmetric effect on the curve
     // builder.setBx(-model.getBx());
     // builder.setBy(-model.getBy());
-    settings.putAstigmatismModelResources(name, builder.build());
-    SettingsManager.writeSettings(settings.build());
+    AstigmatismModelSettingsHolder.setSettings(
+        settings.toBuilder().putAstigmatismModelResources(name, builder.build()).build());
 
     ImageJUtils.log("Inverted astigmatism model: %s", name);
   }
