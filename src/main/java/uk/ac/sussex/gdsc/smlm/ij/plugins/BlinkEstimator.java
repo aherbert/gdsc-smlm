@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -99,39 +100,39 @@ public class BlinkEstimator implements PlugIn {
         new AtomicReference<>(new Settings());
 
     String inputOption;
-    int maxDarkTimeSetting;
-    boolean relativeDistanceSetting;
+    int maxDarkTime;
+    boolean relativeDistance;
     int histogramBins;
     boolean showHistogram;
-    double searchDistanceSetting;
-    int numberOfFittedPointsSetting;
+    double searchDistance;
+    int numberOfFittedPoints;
     int rangeFittedPoints;
     boolean fitIntercept;
-    boolean timeAtLowerBoundSetting;
+    boolean timeAtLowerBound;
 
     Settings() {
       inputOption = "";
-      maxDarkTimeSetting = 80;
-      relativeDistanceSetting = true;
+      maxDarkTime = 80;
+      relativeDistance = true;
       histogramBins = 50;
       showHistogram = true;
-      searchDistanceSetting = 2.5;
-      numberOfFittedPointsSetting = 5;
+      searchDistance = 2.5;
+      numberOfFittedPoints = 5;
       fitIntercept = true;
-      timeAtLowerBoundSetting = true;
+      timeAtLowerBound = true;
     }
 
     Settings(Settings source) {
       inputOption = source.inputOption;
-      maxDarkTimeSetting = source.maxDarkTimeSetting;
-      relativeDistanceSetting = source.relativeDistanceSetting;
+      maxDarkTime = source.maxDarkTime;
+      relativeDistance = source.relativeDistance;
       histogramBins = source.histogramBins;
       showHistogram = source.showHistogram;
-      searchDistanceSetting = source.searchDistanceSetting;
-      numberOfFittedPointsSetting = source.numberOfFittedPointsSetting;
+      searchDistance = source.searchDistance;
+      numberOfFittedPoints = source.numberOfFittedPoints;
       rangeFittedPoints = source.rangeFittedPoints;
       fitIntercept = source.fitIntercept;
-      timeAtLowerBoundSetting = source.timeAtLowerBoundSetting;
+      timeAtLowerBound = source.timeAtLowerBound;
     }
 
     Settings copy() {
@@ -197,14 +198,14 @@ public class BlinkEstimator implements PlugIn {
         + "See Annibale et al (2011) PLos ONE 6, e22678.");
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
 
-    gd.addNumericField("Max_dark_time (frames)", settings.maxDarkTimeSetting, 0);
+    gd.addNumericField("Max_dark_time (frames)", settings.maxDarkTime, 0);
     gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
     gd.addCheckbox("Show_histogram", settings.showHistogram);
-    gd.addSlider("Search_distance", 0.5, 5, settings.searchDistanceSetting);
-    gd.addCheckbox("Relative_distance", settings.relativeDistanceSetting);
-    gd.addSlider("Fitted_points", 4, 15, settings.numberOfFittedPointsSetting);
+    gd.addSlider("Search_distance", 0.5, 5, settings.searchDistance);
+    gd.addCheckbox("Relative_distance", settings.relativeDistance);
+    gd.addSlider("Fitted_points", 4, 15, settings.numberOfFittedPoints);
     gd.addSlider("Range_of_fitted_points", 0, 15, settings.rangeFittedPoints);
-    gd.addCheckbox("Time_at_lower_bound", settings.timeAtLowerBoundSetting);
+    gd.addCheckbox("Time_at_lower_bound", settings.timeAtLowerBound);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -212,22 +213,22 @@ public class BlinkEstimator implements PlugIn {
     }
 
     settings.inputOption = gd.getNextChoice();
-    settings.maxDarkTimeSetting = (int) gd.getNextNumber();
+    settings.maxDarkTime = (int) gd.getNextNumber();
     settings.histogramBins = (int) gd.getNextNumber();
     settings.showHistogram = gd.getNextBoolean();
-    settings.searchDistanceSetting = gd.getNextNumber();
-    settings.relativeDistanceSetting = gd.getNextBoolean();
-    settings.numberOfFittedPointsSetting = (int) gd.getNextNumber();
+    settings.searchDistance = gd.getNextNumber();
+    settings.relativeDistance = gd.getNextBoolean();
+    settings.numberOfFittedPoints = (int) gd.getNextNumber();
     settings.rangeFittedPoints = (int) gd.getNextNumber();
-    settings.timeAtLowerBoundSetting = gd.getNextBoolean();
+    settings.timeAtLowerBound = gd.getNextBoolean();
     settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAbove("Max dark time", settings.maxDarkTimeSetting, 3);
+      ParameterUtils.isAbove("Max dark time", settings.maxDarkTime, 3);
       ParameterUtils.isAbove("Histogram bins", settings.histogramBins, 1);
-      ParameterUtils.isAboveZero("Search distance", settings.searchDistanceSetting);
-      ParameterUtils.isAbove("n-Fitted points", settings.numberOfFittedPointsSetting, 3);
+      ParameterUtils.isAboveZero("Search distance", settings.searchDistance);
+      ParameterUtils.isAbove("n-Fitted points", settings.numberOfFittedPoints, 3);
       ParameterUtils.isPositive("Range of fitted points", settings.rangeFittedPoints);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -239,8 +240,8 @@ public class BlinkEstimator implements PlugIn {
 
   private void computeFitCurves(MemoryPeakResults results, boolean verbose) {
     // Calculate the counts verses dark time curve
-    double[] ntd = calculateCounts(results, settings.maxDarkTimeSetting,
-        settings.searchDistanceSetting, settings.relativeDistanceSetting, verbose);
+    double[] ntd = calculateCounts(results, settings.maxDarkTime, settings.searchDistance,
+        settings.relativeDistance, verbose);
     double[] td = calculateTd(ntd);
 
     ntd = shift(ntd);
@@ -252,7 +253,7 @@ public class BlinkEstimator implements PlugIn {
     final double[] r2 = new double[settings.rangeFittedPoints + 1];
     final double[] adjustedR2 = new double[settings.rangeFittedPoints + 1];
     for (int n = 0; n <= settings.rangeFittedPoints; n++) {
-      npoints[n] = n + settings.numberOfFittedPointsSetting;
+      npoints[n] = n + settings.numberOfFittedPoints;
       final double[] p = fit(td, ntd, (int) npoints[n], false);
       if (p == null) {
         // Leave as empty in the output plots
@@ -310,8 +311,8 @@ public class BlinkEstimator implements PlugIn {
     increaseNFittedPoints = false;
 
     // Calculate the counts verses dark time curve
-    double[] ntd = calculateCounts(results, settings.maxDarkTimeSetting,
-        settings.searchDistanceSetting, settings.relativeDistanceSetting, verbose);
+    double[] ntd = calculateCounts(results, settings.maxDarkTime, settings.searchDistance,
+        settings.relativeDistance, verbose);
     double[] td = calculateTd(ntd);
 
     if (verbose) {
@@ -322,7 +323,7 @@ public class BlinkEstimator implements PlugIn {
     td = shift(td);
 
     // Fit curve
-    parameters = fit(td, ntd, settings.numberOfFittedPointsSetting, verbose);
+    parameters = fit(td, ntd, settings.numberOfFittedPoints, verbose);
     if (parameters == null) {
       return 0;
     }
@@ -431,9 +432,9 @@ public class BlinkEstimator implements PlugIn {
    *
    * <p>The returned Td values are the lower bounds of the dark time, i.e. t-threshold 1 equals 0
    * dark frames (0ms), t-threshold 2 equals 1 dark frame (n ms per frame), etc. This behaviour can
-   * be changed by setting the {@link Settings#timeAtLowerBoundSetting} flag to false. Then the
-   * time will reflect the upper bounds of the dark time, i.e. t-threshold 1 equals 1 dark frames (n
-   * ms per frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
+   * be changed by setting the {@link Settings#timeAtLowerBound} flag to false. Then the time will
+   * reflect the upper bounds of the dark time, i.e. t-threshold 1 equals 1 dark frames (n ms per
+   * frame), t-threshold 2 equals 2 dark frames (2n ms per frame), etc.
    *
    * @param ntd the ntd
    * @return the dark time
@@ -441,7 +442,7 @@ public class BlinkEstimator implements PlugIn {
   private double[] calculateTd(double[] ntd) {
     final double[] td = new double[ntd.length];
     for (int t = 0; t < td.length; t++) {
-      if (settings.timeAtLowerBoundSetting) {
+      if (settings.timeAtLowerBound) {
         // Using the lower bounds of the dark time allows the blink estimator to predict the sampled
         // blinks statistic produced by the Create Data plugin.
         td[t] = t * msPerFrame;
@@ -782,5 +783,79 @@ public class BlinkEstimator implements PlugIn {
       }
       return values;
     }
+  }
+
+  /**
+   * Gets the settings, loading them if needed.
+   *
+   * @return the settings
+   */
+  private Settings getSettings() {
+    Settings result = settings;
+    if (result == null) {
+      result = Settings.load();
+      settings = result;
+    }
+    return result;
+  }
+
+  /**
+   * Sets the max dark time.
+   *
+   * @param maxDarkTime the new max dark time
+   */
+  @VisibleForTesting
+  void setMaxDarkTime(int maxDarkTime) {
+    getSettings().maxDarkTime = maxDarkTime;
+  }
+
+  /**
+   * Sets the ms per frame.
+   *
+   * @param msPerFrame the new ms per frame
+   */
+  @VisibleForTesting
+  void setMsPerFrame(int msPerFrame) {
+    this.msPerFrame = msPerFrame;
+  }
+
+  /**
+   * Sets the relative distance.
+   *
+   * @param relativeDistance the new relative distance
+   */
+  @VisibleForTesting
+  void setRelativeDistance(boolean relativeDistance) {
+    getSettings().relativeDistance = relativeDistance;
+  }
+
+  /**
+   * Sets the search distance.
+   *
+   * @param searchDistance the new search distance
+   */
+  @VisibleForTesting
+  void setSearchDistance(double searchDistance) {
+    getSettings().searchDistance = searchDistance;
+  }
+
+  /**
+   * Sets the time at lower bound.
+   *
+   * @param timeAtLowerBound the new time at lower bound
+   */
+  @VisibleForTesting
+  void setTimeAtLowerBound(boolean timeAtLowerBound) {
+    getSettings().timeAtLowerBound = timeAtLowerBound;
+  }
+
+  /**
+   * Sets the number of fitted points.
+   *
+   * @param numberOfFittedPoints the new number of fitted points
+   */
+  @VisibleForTesting
+  void setNumberOfFittedPoints(int numberOfFittedPoints) {
+    getSettings().numberOfFittedPoints = numberOfFittedPoints;
   }
 }

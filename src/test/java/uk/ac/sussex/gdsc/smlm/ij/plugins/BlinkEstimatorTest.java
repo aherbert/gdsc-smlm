@@ -357,13 +357,12 @@ public class BlinkEstimatorTest {
     logger.info("-=-=--=-");
 
     final BlinkEstimator be = new BlinkEstimator();
-    be.maxDarkTime = (int) (toff * 10);
-    be.msPerFrame = msPerFrame;
-    be.relativeDistance = false;
+    be.setMaxDarkTime((int) (toff * 10));
+    be.setMsPerFrame(msPerFrame);
+    be.setRelativeDistance(false);
     final double d = ImageModel.getRandomMoveDistance(diffusionRate);
-    be.searchDistance = (fixedFraction < 1) ? Math.sqrt(2 * d * d) * 3 : 0;
-    be.timeAtLowerBound = timeAtLowerBound;
-    be.showPlots = false;
+    be.setSearchDistance((fixedFraction < 1) ? Math.sqrt(2 * d * d) * 3 : 0);
+    be.setTimeAtLowerBound(timeAtLowerBound);
 
     // Assertions.assertTrue("Max dark time must exceed the dark time of the data (otherwise no
     // plateau)",
@@ -382,7 +381,7 @@ public class BlinkEstimatorTest {
     final TIntHashSet ok = new TIntHashSet();
     for (int numberOfFittedPoints = MIN_FITTED_POINTS; numberOfFittedPoints <= MAX_FITTED_POINTS;
         numberOfFittedPoints++) {
-      be.numberOfFittedPoints = numberOfFittedPoints;
+      be.setNumberOfFittedPoints(numberOfFittedPoints);
       be.computeBlinkingRate(results, true);
 
       final double moleculesError = DoubleEquality.relativeError(nMolecules, be.getNMolecules());
