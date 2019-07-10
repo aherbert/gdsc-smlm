@@ -34,10 +34,9 @@ import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.math.GeometryUtils;
 import uk.ac.sussex.gdsc.core.threshold.IntHistogram;
-import uk.ac.sussex.gdsc.core.utils.CachedRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.function.InterpolatedPoissonFunction;
@@ -53,7 +52,6 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
 import uk.ac.sussex.gdsc.smlm.function.PoissonPoissonFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 
@@ -77,10 +75,13 @@ import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -114,6 +115,13 @@ public class CameraModelAnalysis
   private static final int SIMPSON_N_2 = SIMPSON_N / 2;
   private static final double SIMPSON_H = 1.0 / SIMPSON_N;
 
+  private static final String[] MODE = {"CCD", "EM-CCD", "sCMOS"};
+  private static final int MODE_CCD = 0;
+  private static final int MODE_EM_CCD = 1;
+  private static final int MODE_SCMOS = 2;
+
+  private static final String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
+
   private CameraModelAnalysisSettings.Builder settings;
 
   private boolean extraOptions;
@@ -124,17 +132,12 @@ public class CameraModelAnalysis
   private double[][] floatHistogram;
   private CameraModelAnalysisSettings lastSimulationSettings;
 
-  private static final String[] MODE = {"CCD", "EM-CCD", "sCMOS"};
-  private static final int MODE_CCD = 0;
-  private static final int MODE_EM_CCD = 1;
-  private static final int MODE_SCMOS = 2;
-
-  //@formatter:off
-  private enum Model implements NamedObject
-  {
+  private enum Model implements NamedObject {
     ///////////////
     // CCD / sCMOS
     ///////////////
+
+    //@formatter:off
 
     POISSON_PMF { @Override
     public String getName() { return "Poisson PMF"; } },
@@ -194,16 +197,14 @@ public class CameraModelAnalysis
     POISSON_GAMMA_GAUSSIAN_PDF_CONVOLUTION { @Override
     public String getName() { return "Poisson+Gamma*Gaussian convolution"; } },
     ;
-
+    //@formatter:on
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static Model forNumber(int number)
-    {
+    public static Model forNumber(int number) {
       final Model[] values = Model.values();
       if (number < 0 || number >= values.length) {
         number = 0;
@@ -212,41 +213,34 @@ public class CameraModelAnalysis
     }
   }
 
-  private static String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
-
-  private abstract static class Round
-  {
-    abstract int round(double d);
+  private static interface Round {
+    int round(double value);
   }
-  private static class RoundDown extends Round
-  {
+
+  private static class RoundDown implements Round {
+    private static final Round INSTANCE = new RoundDown();
+
     @Override
-    int round(double d) { return (int) Math.floor(d); }
-  }
-  private static class RoundUpDown extends Round
-  {
-    @Override
-    int round(double d) { return (int) Math.round(d); }
-  }
-  private static Round ROUND_DOWN = new RoundDown();
-  private static Round ROUND_UP_DOWN = new RoundUpDown();
-  private static Round getRound(CameraModelAnalysisSettings settings)
-  {
-    return (settings.getRoundDown()) ? ROUND_DOWN : ROUND_UP_DOWN;
-  }
-  //@formatter:on
-
-  private static CachedRandomGenerator random;
-  private static int currentSeed;
-
-  private CachedRandomGenerator getRandomGenerator() {
-    if (random == null || currentSeed != settings.getSeed()) {
-      currentSeed = settings.getSeed();
-      // Ensure some bits are set in the default seed of zero
-      final long seed = (currentSeed == 0) ? Double.doubleToRawLongBits(Math.PI) : currentSeed;
-      random = new CachedRandomGenerator(settings.getSamples(), new Well19937c(seed));
+    public int round(double value) {
+      return (int) Math.floor(value);
     }
-    return random;
+  }
+
+  private static class RoundUpDown implements Round {
+    private static final Round INSTANCE = new RoundUpDown();
+
+    @Override
+    public int round(double value) {
+      return (int) Math.round(value);
+    }
+  }
+
+  private static Round getRound(CameraModelAnalysisSettings settings) {
+    return (settings.getRoundDown()) ? RoundDown.INSTANCE : RoundUpDown.INSTANCE;
+  }
+
+  private UniformRandomProvider getRandomGenerator() {
+    return RandomSource.create(RandomSource.SPLIT_MIX_64, settings.getSeed());
   }
 
   @Override
@@ -460,10 +454,8 @@ public class CameraModelAnalysis
     final double max = 1.05 * MathUtils.maxDefault(1, y2);
     plot.setLimits(x2[0], x2[x2.length - 1], 0, max);
     plot.setColor(Color.blue);
-    // plot.addPoints(x2, y1b, Plot2.LINE);
     plot.addPoints(x2, y1b, Plot2.BAR);
     plot.setColor(Color.red);
-    // plot.addPoints(x2, y2, Plot2.LINE);
     plot.addPoints(x2, y2, Plot2.BAR);
     plot.setColor(Color.magenta);
     plot.drawLine(value, 0, value, max);
@@ -483,7 +475,6 @@ public class CameraModelAnalysis
     plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0,
         MathUtils.max(h.histogramCounts) * 1.05);
     plot.setColor(Color.blue);
-    // plot.addPoints(x2, y1b, Plot2.LINE);
     plot.addPoints(x1, SimpleArrayUtils.toDouble(h.histogramCounts), Plot2.BAR);
 
     plot.setColor(Color.red);
@@ -508,15 +499,12 @@ public class CameraModelAnalysis
     if (lastHistogram == null || newSimulationSettings(settings, lastSimulationSettings)) {
       IJ.showStatus("Simulating histogram ...");
       final StopWatch sw = StopWatch.createStarted();
-      final CachedRandomGenerator random = getRandomGenerator();
-      lastHistogram = simulateHistogram(settings, random);
+      lastHistogram = simulateHistogram(settings, getRandomGenerator());
       lastSimulationSettings = settings;
       IJ.showStatus("Simulated in " + sw.toString());
 
       // Convolve
-      // sw.reset();
       floatHistogram = convolveHistogram(settings);
-      // IJ.log("Computed histogram ... " + sw.toString());
     }
     return lastHistogram;
   }
@@ -524,51 +512,19 @@ public class CameraModelAnalysis
   private static boolean newSimulationSettings(CameraModelAnalysisSettings s1,
       CameraModelAnalysisSettings s2) {
     // Check those settings for the simulation
-    if (s1.getPhotons() != s2.getPhotons()) {
-      return true;
-    }
-    if (s1.getMode() != s2.getMode()) {
-      return true;
-    }
-    if (s1.getSamples() != s2.getSamples()) {
-      return true;
-    }
-    if (s1.getNoiseSamples() != s2.getNoiseSamples()) {
-      return true;
-    }
-    if (s1.getSeed() != s2.getSeed()) {
-      return true;
-    }
-    if (s1.getRoundDown() != s2.getRoundDown()) {
+    if (s1.getPhotons() != s2.getPhotons() || s1.getMode() != s2.getMode()
+        || s1.getSamples() != s2.getSamples() || s1.getNoiseSamples() != s2.getNoiseSamples()
+        || s1.getSeed() != s2.getSeed() || s1.getRoundDown() != s2.getRoundDown()) {
       return true;
     }
     if (s1.getMode() == MODE_CCD) {
-      if (s1.getGain() != s2.getGain()) {
-        return true;
-      }
-      if (s1.getNoise() != s2.getNoise()) {
-        return true;
-      }
+      return (s1.getGain() != s2.getGain() || s1.getNoise() != s2.getNoise());
     } else if (s1.getMode() == MODE_SCMOS) {
-      if (s1.getCmosGain() != s2.getCmosGain()) {
-        return true;
-      }
-      if (s1.getCmosNoise() != s2.getCmosNoise()) {
-        return true;
-      }
-    } else {
-      // MODE_EM_CCD
-      if (s1.getEmGain() != s2.getEmGain()) {
-        return true;
-      }
-      if (s1.getEmNoise() != s2.getEmNoise()) {
-        return true;
-      }
-      if (s1.getEmSamples() != s2.getEmSamples()) {
-        return true;
-      }
+      return (s1.getCmosGain() != s2.getCmosGain() || s1.getCmosNoise() != s2.getCmosNoise());
     }
-    return false;
+    // MODE_EM_CCD
+    return (s1.getEmGain() != s2.getEmGain() || s1.getEmNoise() != s2.getEmNoise()
+        || s1.getEmSamples() != s2.getEmSamples());
   }
 
   /**
@@ -579,7 +535,7 @@ public class CameraModelAnalysis
    * @return The histogram
    */
   private static IntHistogram simulateHistogram(CameraModelAnalysisSettings settings,
-      CachedRandomGenerator random) {
+      UniformRandomProvider random) {
     switch (settings.getMode()) {
       // EM-CCD
       case 1:
@@ -603,20 +559,18 @@ public class CameraModelAnalysis
    * @return The histogram
    */
   private static IntHistogram simulatePoissonGammaGaussian(CameraModelAnalysisSettings settings,
-      CachedRandomGenerator random) {
+      UniformRandomProvider random) {
     final int[] poissonSample = simulatePoisson(settings, random);
 
-    // Randomly sample re-using the sequence
-    final RandomGenerator random2 = random.getPseudoRandomGenerator();
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
     final double gain = getGain(settings);
 
-    // Note that applying a separate EM-gain and then the camera gain later (as per Create Data)
+    // Note that applying a separate EM-gain and then the camera gain later
     // is the same as applying the total gain in the gamma distribution and no camera gain
     // later, i.e. the Gamma distribution is just squeezed.
-    final CustomGammaDistribution gamma =
-        new CustomGammaDistribution(random.getPseudoRandomGenerator(), 1, gain,
-            GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+    // Thus we sample from a Gamma distribution with a fixed gain (the scale) and the
+    // number of photons is the shape.
 
     final double noise = getReadNoise(settings);
     final int samples = settings.getSamples();
@@ -628,7 +582,8 @@ public class CameraModelAnalysis
     for (int n = poissonSample.length; n-- > 0;) {
       if (poissonSample[n] != 0) {
         // Gamma
-        gamma.setShapeUnsafe(poissonSample[n]);
+        final ContinuousSampler gamma =
+            SamplerUtils.createGammaSampler(random, poissonSample[n], gain);
 
         // Q. The Poisson-Gamma Function does not exactly match this
         // when the mean is around 1. The model from Ulbrich+Isacoff
@@ -640,10 +595,10 @@ public class CameraModelAnalysis
         // This would fix the function.
 
         // Should we use the Tubb's model which uses:
-        // final double shape = count;
-        // final double scale = gain - 1 + 1 / shape;
-        // final double electrons = random.nextGamma(shape, scale) - 1;
-        // final double output = count + electrons;
+        // final double shape = count
+        // final double scale = gain - 1 + 1 / shape
+        // final double electrons = random.nextGamma(shape, scale) - 1
+        // final double output = count + electrons
 
         // The Tubb's model is for additional electrons. So a count of 1
         // can never generate an output of 0. This does not fit the
@@ -652,15 +607,13 @@ public class CameraModelAnalysis
 
         // Over-sample the Gamma
         for (int k = emSamples; k-- > 0;) {
-          // final double d2 = gamma.sample();
           // Do rounding to simulate a discrete PMF.
           final double d2 = round.round(gamma.sample());
-          // final double d2 = (int)(gamma.sample());
 
           // Over-sample the Gaussian
           for (int j = noiseSamples; j-- > 0;) {
             // Convert the sample to a count
-            sample[count++] = round.round(d2 + noise * random2.nextGaussian());
+            sample[count++] = round.round(d2 + noise * gauss.sample());
           }
         }
       } else {
@@ -669,7 +622,7 @@ public class CameraModelAnalysis
           // Over-sample the Gaussian
           for (int j = noiseSamples; j-- > 0;) {
             // Convert the sample to a count
-            sample[count++] = round.round(noise * random2.nextGaussian());
+            sample[count++] = round.round(noise * gauss.sample());
           }
         }
       }
@@ -679,12 +632,9 @@ public class CameraModelAnalysis
   }
 
   private static int[] simulatePoisson(CameraModelAnalysisSettings settings,
-      CachedRandomGenerator random) {
-    // Ensure we reuse random numbers if possible
-    random.reset();
-    final PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
-        PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-    return poisson.sample(settings.getSamples());
+      UniformRandomProvider random) {
+    return SamplerUtils.createSamples(settings.getSamples(),
+        new PoissonSampler(random, settings.getPhotons()));
   }
 
   /**
@@ -695,11 +645,10 @@ public class CameraModelAnalysis
    * @return The histogram
    */
   private static IntHistogram simulatePoissonGaussian(CameraModelAnalysisSettings settings,
-      CachedRandomGenerator random) {
+      UniformRandomProvider random) {
     final int[] poissonSample = simulatePoisson(settings, random);
 
-    // Randomly sample re-using the sequence
-    final PseudoRandomGenerator random2 = random.getPseudoRandomGenerator();
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
     final double gain = getGain(settings);
     final double noise = getReadNoise(settings);
@@ -715,7 +664,7 @@ public class CameraModelAnalysis
       // Over-sample the Gaussian
       for (int j = noiseSamples; j-- > 0;) {
         // Convert the sample to a count
-        sample[count++] = round.round(d + noise * random2.nextGaussian());
+        sample[count++] = round.round(d + noise * gauss.sample());
       }
     }
 
@@ -743,7 +692,7 @@ public class CameraModelAnalysis
   private static double[][] convolveHistogram(CameraModelAnalysisSettings settings) {
 
     // Find the range of the Poisson
-    final PoissonDistribution poisson = new PoissonDistribution(random, settings.getPhotons(),
+    final PoissonDistribution poisson = new PoissonDistribution(null, settings.getPhotons(),
         PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
     final int maxn = poisson.inverseCumulativeProbability(UPPER);
 
@@ -788,18 +737,16 @@ public class CameraModelAnalysis
 
         step = 1.0;
 
-        final CustomGammaDistribution gamma = new CustomGammaDistribution(random,
-            settings.getPhotons(), gain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
-
         double upper;
         if (settings.getPhotons() < 20) {
           upper = maxn;
         } else {
           // Approximate reasonable range of Poisson as a Gaussian
-          upper = settings.getPhotons() + Math.sqrt(settings.getPhotons());
+          upper = settings.getPhotons() + 3 * Math.sqrt(settings.getPhotons());
         }
 
-        gamma.setShapeUnsafe(upper);
+        final GammaDistribution gamma = new GammaDistribution(null,
+            upper, gain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
         final int maxc = (int) gamma.inverseCumulativeProbability(0.999);
 
         final int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
@@ -818,7 +765,7 @@ public class CameraModelAnalysis
         if (total < 1000000) {
           // Full computation
 
-          // G(c) = sum n { (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m };
+          // G(c) = sum n { (1 / n!) p^n e^-p (1 / ((n-1!)m^n)) c^n-1 e^-c/m }
           // Compute as a log
           // - log(n!) + n*log(p)-p -log((n-1)!) - n * log(m) + (n-1) * log(c) -c/m
 
@@ -943,8 +890,8 @@ public class CameraModelAnalysis
     // Debug
     if (debug) {
       final String title = name;
-      final Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(list.size(), 0, step),
-          list.toArray());
+      final Plot plot = new Plot(title, "x", "y");
+      plot.addPoints(SimpleArrayUtils.newArray(list.size(), 0, step), list.toArray(), Plot.LINE);
       ImageJUtils.display(title, plot);
     }
 
@@ -986,12 +933,14 @@ public class CameraModelAnalysis
       // Debug
       if (debug) {
         String title = "Gaussian";
-        Plot plot = new Plot(title, "x", "y",
-            SimpleArrayUtils.newArray(kernel.length, -radius * step, step), kernel);
+        Plot plot = new Plot(title, "x", "y");
+        plot.addPoints(SimpleArrayUtils.newArray(kernel.length, -radius * step, step), kernel,
+            Plot.LINE);
         ImageJUtils.display(title, plot);
 
         title = name + "-Gaussian";
-        plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(pg.length, zero, step), pg);
+        plot = new Plot(title, "x", "y");
+        plot.addPoints(SimpleArrayUtils.newArray(pg.length, zero, step), pg, Plot.LINE);
         ImageJUtils.display(title, plot);
       }
 
@@ -1061,9 +1010,7 @@ public class CameraModelAnalysis
       lowerSum += pg[i];
       pg[i] = lowerSum;
     }
-    for (int i = 0; i < pg.length; i++) {
-      pg[i] *= sum / lowerSum;
-    }
+    SimpleArrayUtils.multiply(pg, sum / lowerSum);
     pg[pg.length - 1] = sum;
 
     final double offset = (settings.getRoundDown()) ? 0 : -0.5;
@@ -1244,9 +1191,7 @@ public class CameraModelAnalysis
       sum += h[i];
       y[i] = sum;
     }
-    for (int i = 0; i < y.length; i++) {
-      y[i] /= sum;
-    }
+    SimpleArrayUtils.multiply(y, 1.0 / sum);
     y[y.length - 1] = 1; // Ensure total is 1
     return new double[][] {x, y};
   }
@@ -1512,7 +1457,7 @@ public class CameraModelAnalysis
       // This assumes both are discrete distributions
       area += d;
 
-      // Note: This assumes but distributions are continuous between the values
+      // Note: This assumes both distributions are continuous between the values
       // and computes the actual area, including intersecting lines.
       // if (i != 0)
       // {
