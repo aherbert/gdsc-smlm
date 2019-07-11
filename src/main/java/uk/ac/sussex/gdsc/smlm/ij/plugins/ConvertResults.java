@@ -40,13 +40,17 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Allows results held in memory to be converted to different units.
  */
 public class ConvertResults implements PlugIn {
   private static final String TITLE = "Convert Results";
 
-  private static String inputOption = "";
+  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
+
+  private String inputOption;
 
   @Override
   public void run(String arg) {
@@ -70,7 +74,7 @@ public class ConvertResults implements PlugIn {
     IJ.showStatus("Converted " + results.getName());
   }
 
-  private static boolean showInputDialog() {
+  private boolean showInputDialog() {
     final int size = MemoryPeakResults.countMemorySize();
     if (size == 0) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -81,6 +85,8 @@ public class ConvertResults implements PlugIn {
     gd.addHelp(About.HELP_URL);
     gd.addMessage("Select results to convert");
 
+    inputOption = inputOptionRef.get();
+
     ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
 
     gd.showDialog();
@@ -90,6 +96,7 @@ public class ConvertResults implements PlugIn {
     }
 
     inputOption = ResultsManager.getInputSource(gd);
+    inputOptionRef.set(inputOption);
 
     return true;
   }
