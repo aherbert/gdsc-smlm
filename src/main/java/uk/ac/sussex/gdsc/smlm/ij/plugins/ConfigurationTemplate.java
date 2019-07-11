@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -49,7 +50,6 @@ import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -57,6 +57,8 @@ import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import ij.util.StringSorter;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.awt.AWTEvent;
 import java.awt.Choice;
@@ -69,6 +71,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -80,7 +83,30 @@ import java.util.Map.Entry;
 /**
  * This plugin loads configuration templates for the localisation fitting settings.
  */
-public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListener {
+public class ConfigurationTemplate implements PlugIn {
+  /** A set of inline templates. These can be loaded. */
+  private static Map<String, Template> inlineTemplates;
+  /** The current set of templates that will be listed as loaded. */
+  private static Map<String, Template> templates;
+
+  private String title;
+  private ImagePlus imp;
+  private int currentSlice;
+  private TextWindow resultsWindow;
+  private TextWindow infoWindow;
+  private int templateId;
+  private String headings;
+  private TIntObjectHashMap<String> text;
+  private boolean templateImage;
+
+  static {
+    final Map<String, Template> localInlineTemplates = createInlineTemplates();
+
+    // Make maps synchronized
+    inlineTemplates = Collections.synchronizedMap(localInlineTemplates);
+    templates = Collections.synchronizedMap(restoreLoadedTemplates(localInlineTemplates));
+  }
+
   /**
    * Describes the details of a template that can be loaded from the JAR resources folder.
    */
@@ -248,33 +274,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
   }
 
-  /** A set of inline templates. These can be loaded. */
-  private static LinkedHashMap<String, Template> inlineTemplates;
-  /** The current set of templates that will be listed as loaded. */
-  private static LinkedHashMap<String, Template> map;
-  private String title;
-  private ImagePlus imp;
-  private int currentSlice;
-  private TextWindow resultsWindow;
-  private TextWindow infoWindow;
-  private int templateId;
-  private String headings;
-  private TIntObjectHashMap<String> text;
-  private boolean templateImage;
+  private static Map<String, Template> createInlineTemplates() {
+    final Map<String, Template> inlineTemplates = new LinkedHashMap<>();
 
-  static {
-    // Maintain the names in the order they are added
-    map = new LinkedHashMap<>();
-
-    createInlineTemplates();
-
-    restoreLoadedTemplates();
-  }
-
-  private static void createInlineTemplates() {
     // Q. What settings should be in the template?
-    inlineTemplates = new LinkedHashMap<>();
-
     final FitEngineConfiguration config = new FitEngineConfiguration();
     final FitConfiguration fitConfig = config.getFitConfiguration();
 
@@ -290,12 +293,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
     fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(45);
-    addInlineTemplate("PALM LSE", config);
+    addInlineTemplate(inlineTemplates, "PALM LSE", config);
 
     // Add settings for STORM ...
     config.setResidualsThreshold(0.4);
     config.setFailuresLimit(3);
-    addInlineTemplate("STORM LSE", config);
+    addInlineTemplate(inlineTemplates, "STORM LSE", config);
     config.setResidualsThreshold(1);
     config.setFailuresLimit(1);
 
@@ -308,12 +311,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
     fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(47);
-    addInlineTemplate("PALM MLE", config);
+    addInlineTemplate(inlineTemplates, "PALM MLE", config);
 
     // Add settings for STORM ...
     config.setResidualsThreshold(0.4);
     config.setFailuresLimit(3);
-    addInlineTemplate("STORM MLE", config);
+    addInlineTemplate(inlineTemplates, "STORM MLE", config);
     config.setResidualsThreshold(1);
     config.setFailuresLimit(1);
 
@@ -324,23 +327,27 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
     fitConfig.setMaxWidthFactor(1.8);
     fitConfig.setPrecisionThreshold(50);
-    addInlineTemplate("PALM MLE Camera", config);
+    addInlineTemplate(inlineTemplates, "PALM MLE Camera", config);
 
     // Add settings for STORM ...
     config.setResidualsThreshold(0.4);
     config.setFailuresLimit(3);
-    addInlineTemplate("STORM MLE Camera", config);
+    addInlineTemplate(inlineTemplates, "STORM MLE Camera", config);
+
+    return inlineTemplates;
   }
 
   /**
    * Adds the template using the configuration. This should be used to add templates that have not
    * been produced using benchmarking on a specific image. Those can be added to the
-   * /uk/ac/sussex/gdsc/smlm/templates/ resources directory.
+   * {@code /uk/ac/sussex/gdsc/smlm/templates/} resources directory.
    *
+   * @param inlineTemplates the inline templates
    * @param name the name
    * @param config the config
    */
-  private static void addInlineTemplate(String name, FitEngineConfiguration config) {
+  private static void addInlineTemplate(Map<String, Template> inlineTemplates, String name,
+      FitEngineConfiguration config) {
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     builder.setFitEngineSettings(config.getFitEngineSettings());
     final Template template = new Template(builder.build(), TemplateType.INLINE, null, null);
@@ -349,22 +356,27 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
 
   private static String[] listInlineTemplates() {
     // Turn the keys into an array
-    final ArrayList<String> names = new ArrayList<>(inlineTemplates.keySet());
-    return names.toArray(new String[inlineTemplates.size()]);
+    return inlineTemplates.keySet().toArray(new String[0]);
   }
 
   /**
    * Restore the templates that were loaded.
    *
    * <p>Given the list of standard templates is manipulated only by this plugin this should be the
-   * same set of templates as that used last time by the user.
+   * same set of templates used last time by the user.
+   *
+   * @param inlineTemplates the inline templates
+   * @return the templates
    */
-  private static void restoreLoadedTemplates() {
+  private static Map<String, Template>
+      restoreLoadedTemplates(Map<String, Template> inlineTemplates) {
+    Map<String, Template> map = new LinkedHashMap<>();
+
     // Allow this to fail silently
     final DefaultTemplateSettings settings =
         SettingsManager.readDefaultTemplateSettings(SettingsManager.FLAG_SILENT);
     if (settings.getDefaultTemplatesCount() == 0) {
-      return;
+      return map;
     }
 
     HashMap<String, TemplateResource> templateResources = null;
@@ -373,7 +385,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     for (final DefaultTemplate d : settings.getDefaultTemplatesList()) {
       switch (d.getTemplateType()) {
         case CUSTOM_TEMPLATE:
-          loadCustomTemplate(d.getName(), d.getFilename(), d.getTifFilename());
+          loadCustomTemplate(map, d.getName(), d.getFilename(), d.getTifFilename());
           break;
 
         case INLINE_TEMPLATE:
@@ -391,7 +403,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
               templateResources.put(r.name, r);
             }
           }
-          loadTemplateResource(templateResources.get(d.getName()));
+          loadTemplateResource(map, templateResources.get(d.getName()));
           break;
 
         default:
@@ -402,22 +414,25 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     if (map.size() != settings.getDefaultTemplatesCount()) {
       // This occurs if we cannot reload some of the templates.
       // Prevent this from happening again.
-      saveLoadedTemplates();
+      saveLoadedTemplates(map);
     }
+
+    return map;
   }
 
-  private static void loadCustomTemplate(String name, String path, String tifPath) {
+  private static void loadCustomTemplate(Map<String, Template> map, String name, String path,
+      String tifPath) {
     if (TextUtils.isNullOrEmpty(path)) {
       return;
     }
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     final File file = new File(path);
     if (SettingsManager.fromJson(file, builder, 0)) {
-      addTemplate(name, builder.build(), TemplateType.CUSTOM, file, tifPath);
+      addTemplate(map, name, builder.build(), TemplateType.CUSTOM, file, tifPath);
     }
   }
 
-  private static void loadTemplateResource(TemplateResource template) {
+  private static void loadTemplateResource(Map<String, Template> map, TemplateResource template) {
     if (template == null) {
       return;
     }
@@ -432,7 +447,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       if (SettingsManager.fromJson(reader, builder, 0
       // SettingsManager.FLAG_SILENT
       )) {
-        addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null, template.tifPath);
+        addTemplate(map, template.name, builder.build(), TemplateType.RESOURCE, null,
+            template.tifPath);
       }
     } catch (final IOException ex) {
       // Ignore
@@ -440,9 +456,11 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   }
 
   /**
-   * Save the templates currently available in memory as the default templates to load on start-up.
+   * Save the provided templates as the default templates to load on start-up.
+   *
+   * @param map the template map
    */
-  private static void saveLoadedTemplates() {
+  private static void saveLoadedTemplates(Map<String, Template> map) {
     final DefaultTemplateSettings.Builder settings = DefaultTemplateSettings.newBuilder();
     final DefaultTemplate.Builder defaultTemplate = DefaultTemplate.newBuilder();
     for (final Entry<String, Template> entry : map.entrySet()) {
@@ -528,19 +546,19 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   /**
    * Load templates from package resources.
    *
-   * @param templates the templates
+   * @param templateResources the template resources
    * @return the number loaded
    */
-  static int loadTemplateResources(TemplateResource[] templates) {
-    if (templates == null || templates.length == 0) {
+  static int loadTemplateResources(TemplateResource[] templateResources) {
+    if (ArrayUtils.getLength(templateResources) == 0) {
       return 0;
     }
     int count = 0;
     final Class<ConfigurationTemplate> resourceClass = ConfigurationTemplate.class;
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
-    for (final TemplateResource template : templates) {
+    for (final TemplateResource template : templateResources) {
       // Skip those already done
-      if (map.containsKey(template.name)) {
+      if (templates.containsKey(template.name)) {
         continue;
       }
 
@@ -556,7 +574,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         // SettingsManager.FLAG_SILENT
         )) {
           count++;
-          addTemplate(template.name, builder.build(), TemplateType.RESOURCE, null,
+          addTemplate(templates, template.name, builder.build(), TemplateType.RESOURCE, null,
               template.tifPath);
         }
       } catch (final IOException ex) {
@@ -569,6 +587,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   /**
    * Adds the template.
    *
+   * @param map the map
    * @param name the name
    * @param settings the settings
    * @param templateType the template type
@@ -576,8 +595,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @param tifPath the tif path
    * @return the template
    */
-  private static Template addTemplate(String name, TemplateSettings settings,
-      TemplateType templateType, File file, String tifPath) {
+  private static Template addTemplate(Map<String, Template> map, String name,
+      TemplateSettings settings, TemplateType templateType, File file, String tifPath) {
     final Template template = new Template(settings, templateType, file, tifPath);
     map.put(name, template);
     return template;
@@ -590,7 +609,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return The template
    */
   public static TemplateSettings getTemplate(String name) {
-    final Template template = map.get(name);
+    final Template template = templates.get(name);
     if (template == null) {
       return null;
     }
@@ -607,7 +626,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return the template file
    */
   public static File getTemplateFile(String name) {
-    final Template template = map.get(name);
+    final Template template = templates.get(name);
     if (template == null) {
       return null;
     }
@@ -621,7 +640,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return the template image
    */
   public static ImagePlus getTemplateImage(String name) {
-    final Template template = map.get(name);
+    final Template template = templates.get(name);
     if (template == null) {
       return null;
     }
@@ -632,7 +651,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * Clear templates. Used for testing so made package level.
    */
   static void clearTemplates() {
-    map.clear();
+    templates.clear();
   }
 
   /**
@@ -646,7 +665,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return true, if successful
    */
   public static boolean saveTemplate(String name, TemplateSettings settings, File file) {
-    Template template = map.get(name);
+    Template template = templates.get(name);
     if (template != null
         // Keep the file to allow it to be loaded on start-up
         && file == null) {
@@ -662,10 +681,10 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
     if (result) {
       // Update the loaded templates
-      map.put(name, template);
+      templates.put(name, template);
       // If the template came from a file ensure it can be restored
       if (file != null) {
-        saveLoadedTemplates();
+        saveLoadedTemplates(templates);
       }
     }
     return result;
@@ -678,7 +697,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return True if a custom template
    */
   public static boolean isCustomTemplate(String name) {
-    final Template template = map.get(name);
+    final Template template = templates.get(name);
     return template != null && template.templateType == TemplateType.CUSTOM;
   }
 
@@ -698,16 +717,12 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return The template names
    */
   public static String[] getTemplateNames(boolean includeNone) {
-    final int length = (includeNone) ? map.size() + 1 : map.size();
-    final String[] templateNames = new String[length];
-    int index = 0;
+    final TurboList<String> names = new TurboList<>(templates.size() + 1);
     if (includeNone) {
-      templateNames[index++] = "[None]";
+      names.add("[None]");
     }
-    for (final String name : map.keySet()) {
-      templateNames[index++] = name;
-    }
-    return templateNames;
+    names.addAll(templates.keySet());
+    return names.toArray(new String[0]);
   }
 
   /**
@@ -716,13 +731,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @return The template names
    */
   public static String[] getTemplateNamesWithImage() {
-    final TurboList<String> templateNames = new TurboList<>(map.size());
-    for (final Map.Entry<String, Template> entry : map.entrySet()) {
-      if (entry.getValue().hasImage()) {
-        templateNames.add(entry.getKey());
-      }
-    }
-    return templateNames.toArray(new String[templateNames.size()]);
+    return templates.entrySet().stream().filter(e -> e.getValue().hasImage()).map(Map.Entry::getKey)
+        .toArray(String[]::new);
   }
 
   /**
@@ -814,15 +824,15 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
   private static void
       loadSelectedStandardTemplates(ConfigurationTemplateSettings.Builder settings) {
     final String[] inlineNames = listInlineTemplates();
-    final TemplateResource[] templates = listTemplateResources();
-    if (templates.length + inlineNames.length == 0) {
+    final TemplateResource[] templateResources = listTemplateResources();
+    if (templateResources.length + inlineNames.length == 0) {
       return;
     }
 
     final MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems() {
       @Override
       public int size() {
-        return templates.length + inlineNames.length;
+        return templateResources.length + inlineNames.length;
       }
 
       @Override
@@ -830,7 +840,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         if (index < inlineNames.length) {
           return inlineNames[index];
         }
-        return templates[index - inlineNames.length].name;
+        return templateResources[index - inlineNames.length].name;
       }
     });
     md.addSelected(settings.getSelectedStandardTemplatesList());
@@ -860,7 +870,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       final Template t = inlineTemplates.get(name);
       if (t != null) {
         count++;
-        map.put(name, t);
+        templates.put(name, t);
       } else {
         remaining.add(name);
       }
@@ -869,7 +879,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     if (!remaining.isEmpty()) {
       // Build a list of resources to load
       final TurboList<TemplateResource> list = new TurboList<>(remaining.size());
-      for (final TemplateResource t : templates) {
+      for (final TemplateResource t : templateResources) {
         if (remaining.contains(t.name)) {
           list.add(t);
         }
@@ -878,7 +888,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
 
     if (count > 0) {
-      saveLoadedTemplates();
+      saveLoadedTemplates(templates);
     }
     IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
   }
@@ -958,18 +968,18 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
         count++;
         final String name = FileUtils.removeExtension(file.getName());
         // Assume the Tif image will be detected automatically
-        addTemplate(name, builder.build(), TemplateType.CUSTOM, file, null);
+        addTemplate(templates, name, builder.build(), TemplateType.CUSTOM, file, null);
       }
     }
 
     if (count > 0) {
-      saveLoadedTemplates();
+      saveLoadedTemplates(templates);
     }
     IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
   }
 
   private void removeLoadedTemplates() {
-    if (map.isEmpty()) {
+    if (templates.isEmpty()) {
       IJ.error(title, "No templates are currently loaded");
       return;
     }
@@ -999,14 +1009,14 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       return;
     }
 
-    if (selected.size() == map.size()) {
+    if (selected.size() == templates.size()) {
       clearTemplates();
     } else {
       for (final String name : selected) {
-        map.remove(name);
+        templates.remove(name);
       }
     }
-    saveLoadedTemplates();
+    saveLoadedTemplates(templates);
   }
 
   /**
@@ -1015,7 +1025,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @param settings the settings
    */
   private void showTemplate(ConfigurationTemplateSettings.Builder settings) {
-    if (map.isEmpty()) {
+    if (templates.isEmpty()) {
       IJ.error(title, "No templates are currently loaded");
       return;
     }
@@ -1026,7 +1036,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     gd.addChoice("Template", names, settings.getTemplate());
     gd.addCheckbox("Close_on_exit", settings.getClose());
     gd.hideCancelButton();
-    gd.addDialogListener(this);
+    gd.addDialogListener(this::dialogItemChanged);
 
     // Show the first template
     final String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
@@ -1049,7 +1059,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
    * @param name the name
    */
   private void showTemplate(String name) {
-    final Template template = map.get(name);
+    final Template template = templates.get(name);
     if (template == null) {
       IJ.error(title, "Failed to load template: " + name);
       return;
@@ -1093,7 +1103,20 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     }
 
     // Follow when the image slice is changed
-    ImagePlus.addImageListener(this);
+    ImageListener listener;
+    if (imp != null) {
+      listener = new ImageAdapter() {
+        @Override
+        public void imageUpdated(ImagePlus imp) {
+          if (imp == ConfigurationTemplate.this.imp) {
+            updateResults(imp.getCurrentSlice());
+          }
+        }
+      };
+      ImagePlus.addImageListener(listener);
+    } else {
+      listener = null;
+    }
 
     final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(title);
     gd.addMessage("View the example source image");
@@ -1101,7 +1124,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     gd.addCheckbox("Close_on_exit", settings.getClose());
     gd.hideCancelButton();
     templateImage = true;
-    gd.addDialogListener(this);
+    gd.addDialogListener(this::dialogItemChanged);
 
     // Show the first template
     final String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
@@ -1113,7 +1136,8 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     settings.setTemplate(gd.getNextChoice());
     settings.setClose(gd.getNextBoolean());
 
-    ImagePlus.removeImageListener(this);
+    // This is null safe so always do this
+    ImagePlus.removeImageListener(listener);
 
     if (settings.getClose()) {
       if (imp != null) {
@@ -1167,8 +1191,7 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
     return imp;
   }
 
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+  private boolean dialogItemChanged(@SuppressWarnings("unused") GenericDialog gd, AWTEvent event) {
     if (event != null && event.getSource() instanceof Choice) {
       final String template = ((Choice) (event.getSource())).getSelectedItem();
       if (templateImage) {
@@ -1178,23 +1201,6 @@ public class ConfigurationTemplate implements PlugIn, DialogListener, ImageListe
       }
     }
     return true;
-  }
-
-  @Override
-  public void imageOpened(ImagePlus imp) {
-    // Do nothing
-  }
-
-  @Override
-  public void imageClosed(ImagePlus imp) {
-    // Do nothing
-  }
-
-  @Override
-  public void imageUpdated(ImagePlus imp) {
-    if (imp != null && imp == this.imp) {
-      updateResults(imp.getCurrentSlice());
-    }
   }
 
   /**
