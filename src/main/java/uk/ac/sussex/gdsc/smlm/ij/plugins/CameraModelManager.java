@@ -70,19 +70,51 @@ public class CameraModelManager implements PlugIn {
   private static String directory = "";
   private static String filename = "";
 
-  private static CameraModelSettings.Builder settings;
   // Cache camera models for speed
   private static LinkedHashMap<String, PerPixelCameraModel> map = new LinkedHashMap<>();
 
-  private static CameraModelSettings.Builder getSettings() {
-    return getSettings(0);
-  }
+  //@formatter:off
+  private static final String[] OPTIONS = {
+      "Load a camera model",
+      "Load from directory",
+      "Print all model details",
+      "View a camera model",
+      "Delete a camera model",
+      "Filter an image"
+  };
+  //@formatter:on
 
-  private static CameraModelSettings.Builder getSettings(int flags) {
-    if (settings == null) {
-      settings = SettingsManager.readCameraModelSettings(flags).toBuilder();
+  private CameraModelManagerSettings.Builder pluginSettings;
+
+  /**
+   * Provide a lazy initialisation holder for the CameraModelSettings.
+   */
+  private static class CameraModelSettingsHolder {
+    private static CameraModelSettings settings;
+
+    static {
+      settings = SettingsManager.readCameraModelSettings(SettingsManager.FLAG_SILENT);
     }
-    return settings;
+
+    /**
+     * Gets the settings held in memory.
+     *
+     * @return the settings
+     */
+    static CameraModelSettings getSettings() {
+      return settings;
+    }
+
+    /**
+     * Sets the settings to memory and save them to file.
+     *
+     * @param settings the settings
+     * @return true, if successful writing to file
+     */
+    static synchronized boolean setSettings(CameraModelSettings settings) {
+      CameraModelSettingsHolder.settings = settings;
+      return SettingsManager.writeSettings(settings);
+    }
   }
 
   /**
@@ -133,9 +165,9 @@ public class CameraModelManager implements PlugIn {
     resource.setHeight(cameraModel.getHeight());
     resource.setFilename(filename);
 
-    final CameraModelSettings.Builder settings = getSettings();
-    settings.putCameraModelResources(name, resource.build());
-    SettingsManager.writeSettings(settings.build());
+    final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
+    CameraModelSettingsHolder
+        .setSettings(settings.toBuilder().putCameraModelResources(name, resource.build()).build());
 
     // Cache this
     map.put(name, cameraModel);
@@ -151,7 +183,7 @@ public class CameraModelManager implements PlugIn {
   public static PerPixelCameraModel load(String name) {
     PerPixelCameraModel model = map.get(name);
     if (model == null) {
-      final CameraModelSettings.Builder settings = getSettings();
+      final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
       // Try and get the named resource
       final CameraModelResource resource = settings.getCameraModelResourcesMap().get(name);
       if (resource == null) {
@@ -204,7 +236,7 @@ public class CameraModelManager implements PlugIn {
    * @return the list
    */
   public static String[] listCameraModels(boolean includeNone) {
-    final CameraModelSettings.Builder settings = getSettings();
+    final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     list.addAll(settings.getCameraModelResourcesMap().keySet());
     return list.toArray(new String[list.size()]);
@@ -219,7 +251,7 @@ public class CameraModelManager implements PlugIn {
    * @return the list
    */
   public static String[] listCameraModels(boolean includeNone, int width, int height) {
-    final CameraModelSettings.Builder settings = getSettings();
+    final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     for (final Map.Entry<String, CameraModelResource> entry : settings.getCameraModelResourcesMap()
         .entrySet()) {
@@ -239,28 +271,17 @@ public class CameraModelManager implements PlugIn {
     return list;
   }
 
-  //@formatter:off
-  private static String[] OPTIONS = {
-      "Load a camera model",
-      "Load from directory",
-      "Print all model details",
-      "View a camera model",
-      "Delete a camera model",
-      "Filter an image" };
-  //@formatter:on
-  private CameraModelManagerSettings.Builder pluginSettings;
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     String[] options = OPTIONS;
-    final CameraModelSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+    final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
     if (settings.getCameraModelResourcesCount() == 0) {
       options = Arrays.copyOf(OPTIONS, 2);
     }
 
-    pluginSettings = SettingsManager.readCameraModelManagerSettings(0).toBuilder();
+    pluginSettings = readCameraModelManagerSettings();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", options, pluginSettings.getOption());
@@ -275,13 +296,13 @@ public class CameraModelManager implements PlugIn {
         runFilterImage();
         break;
       case 4:
-        runDeleteCameraModel();
+        runDeleteCameraModel(settings);
         break;
       case 3:
-        runViewCameraModel();
+        runViewCameraModel(settings);
         break;
       case 2:
-        runPrintCameraModels();
+        runPrintCameraModels(settings);
         break;
       case 1:
         runLoadFromDirectory();
@@ -291,6 +312,15 @@ public class CameraModelManager implements PlugIn {
         runLoadFromFile();
     }
 
+    writeCameraModelManagerSettings(pluginSettings);
+  }
+
+  private static synchronized CameraModelManagerSettings.Builder readCameraModelManagerSettings() {
+    return SettingsManager.readCameraModelManagerSettings(0).toBuilder();
+  }
+
+  private static synchronized void
+      writeCameraModelManagerSettings(CameraModelManagerSettings.Builder pluginSettings) {
     SettingsManager.writeSettings(pluginSettings);
   }
 
@@ -364,7 +394,7 @@ public class CameraModelManager implements PlugIn {
     imp2.show();
   }
 
-  private void runDeleteCameraModel() {
+  private void runDeleteCameraModel(CameraModelSettings settings) {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
@@ -381,8 +411,8 @@ public class CameraModelManager implements PlugIn {
       return;
     }
 
-    settings.removeCameraModelResources(name);
-    SettingsManager.writeSettings(settings.build());
+    CameraModelSettingsHolder
+        .setSettings(settings.toBuilder().removeCameraModelResources(name).build());
 
     ImageJUtils.log("Deleted camera model: %s\n%s", name, resource);
   }
@@ -429,7 +459,7 @@ public class CameraModelManager implements PlugIn {
     }
   }
 
-  private void runViewCameraModel() {
+  private void runViewCameraModel(CameraModelSettings settings) {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
@@ -526,7 +556,7 @@ public class CameraModelManager implements PlugIn {
         MathUtils.rounded(stats.getMax()));
   }
 
-  private static void runPrintCameraModels() {
+  private static void runPrintCameraModels(CameraModelSettings settings) {
     IJ.log(settings.toString());
   }
 }

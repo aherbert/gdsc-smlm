@@ -173,7 +173,7 @@ public class AstigmatismModelManager implements PlugIn {
      * @param settings the settings
      * @return true, if successful writing to file
      */
-    static boolean setSettings(AstigmatismModelSettings settings) {
+    static synchronized boolean setSettings(AstigmatismModelSettings settings) {
       AstigmatismModelSettingsHolder.settings = settings;
       return SettingsManager.writeSettings(settings);
     }
@@ -321,7 +321,7 @@ public class AstigmatismModelManager implements PlugIn {
       options = OPTIONS2;
     }
 
-    pluginSettings = SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
+    pluginSettings = readAstigmatismModelManagerSettings();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", options, pluginSettings.getOption());
@@ -351,6 +351,16 @@ public class AstigmatismModelManager implements PlugIn {
         createModel();
     }
 
+    writeAstigmatismModelManagerSettings(pluginSettings);
+  }
+
+  private static synchronized AstigmatismModelManagerSettings.Builder
+      readAstigmatismModelManagerSettings() {
+    return SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
+  }
+
+  private static synchronized void
+      writeAstigmatismModelManagerSettings(AstigmatismModelManagerSettings.Builder pluginSettings) {
     SettingsManager.writeSettings(pluginSettings);
   }
 
@@ -447,24 +457,20 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private boolean showFitDialog() {
-    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
-
     guessScale();
 
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addHelp(About.HELP_URL);
     gd.addMessage("Use Gaussian 2D PSF fitting to create an astigmatism z-model");
-
     gd.addNumericField("nm_per_slice", pluginSettings.getNmPerSlice(), 0);
-
     gd.showDialog();
-
-    SettingsManager.writeSettings(pluginSettings);
 
     if (gd.wasCanceled()) {
       return false;
     }
 
     pluginSettings.setNmPerSlice(gd.getNextNumber());
+    writeAstigmatismModelManagerSettings(pluginSettings);
 
     // Check arguments
     try {
@@ -514,7 +520,7 @@ public class AstigmatismModelManager implements PlugIn {
       return false;
     }
 
-    SettingsManager.writeSettings(pluginSettings);
+    writeAstigmatismModelManagerSettings(pluginSettings);
 
     if (fitConfig.getPsfType() != PSFType.TWO_AXIS_GAUSSIAN_2D) {
       IJ.error(TITLE, "PSF must be " + PsfProtosHelper.getName(PSFType.TWO_AXIS_GAUSSIAN_2D));
@@ -533,7 +539,7 @@ public class AstigmatismModelManager implements PlugIn {
     pluginSettings.setFitEngineSettings(config.getFitEngineSettings());
     pluginSettings.setCalibration(fitConfig.getCalibration());
     pluginSettings.setPsf(fitConfig.getPsf());
-    SettingsManager.writeSettings(pluginSettings);
+    writeAstigmatismModelManagerSettings(pluginSettings);
 
     return true;
   }
@@ -816,7 +822,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.showDialog();
 
     // Save settings
-    SettingsManager.writeSettings(pluginSettings);
+    writeAstigmatismModelManagerSettings(pluginSettings);
 
     if (gd.wasCanceled()) {
       return false;
@@ -1279,8 +1285,9 @@ public class AstigmatismModelManager implements PlugIn {
       fitConfig.setInitialPeakStdDev0(parameters[P_S0X]);
       fitConfig.setInitialPeakStdDev1(parameters[P_S0Y]);
       pluginSettings.setPsf(fitConfig.getPsf());
-      SettingsManager.writeSettings(pluginSettings);
     }
+
+    writeAstigmatismModelManagerSettings(pluginSettings);
 
     if (pluginSettings.getSaveModel()) {
       final AstigmatismModel.Builder model = AstigmatismModel.newBuilder();
@@ -1348,7 +1355,6 @@ public class AstigmatismModelManager implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addStringField("Model_name", pluginSettings.getModelName());
     gd.addFilenameField("Filename", pluginSettings.getFilename());
-    // gd.setCancelLabel(" No ");
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1556,7 +1562,7 @@ public class AstigmatismModelManager implements PlugIn {
       }
       gd.showDialog();
 
-      SettingsManager.writeSettings(pluginSettings);
+      writeAstigmatismModelManagerSettings(pluginSettings);
     }
 
     @Override
