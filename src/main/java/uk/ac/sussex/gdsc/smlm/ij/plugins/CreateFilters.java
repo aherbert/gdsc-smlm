@@ -56,6 +56,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -73,10 +74,12 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 public class CreateFilters implements PlugIn, ItemListener {
   private static final String TITLE = "Create Filters";
 
-  private static boolean enumerateEarly = true;
-  private GUIFilterSettings.Builder filterSettings;
-
   private final Pattern pattern = Pattern.compile("(\\S+)=\"(\\S+):(\\S+):(\\S+)\"(\\S*)");
+  private static AtomicBoolean enumerateEarlySetting = new AtomicBoolean(true);
+
+  private boolean enumerateEarly;
+
+  private GUIFilterSettings.Builder filterSettings;
 
   @Override
   public void run(String arg) {
@@ -255,6 +258,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         + "Attributes will be enumerated if they are of the form 'min:max:increment'");
 
     filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
+    enumerateEarly = enumerateEarlySetting.get();
 
     gd.addTextAreas(filterSettings.getFilterTemplate(), null, 20, 80);
     gd.addCheckbox("Enumerate_early attributes first", enumerateEarly);
@@ -279,6 +283,7 @@ public class CreateFilters implements PlugIn, ItemListener {
       return false;
     }
 
+    enumerateEarlySetting.set(enumerateEarly);
     return SettingsManager.writeSettings(filterSettings.build());
   }
 
