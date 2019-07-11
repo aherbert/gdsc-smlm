@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -62,8 +63,9 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Color;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -82,12 +84,34 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   /** The maximum number of fisher information curves to save to file. */
   private static final int MAX_DATA_TO_FILE = 10;
 
+  private static final CameraType[] cameraTypeValues = CameraType.values();
+
+  private static final String[] cameraTypes = SettingsManager.getNames((Object[]) cameraTypeValues);
+
+  private static Map<FiKey, PoissonFisherInformationData> cache = new ConcurrentHashMap<>();
+
+  /** The debug flag set on start-up by system properties. */
+  private static final boolean debug = System.getProperty("gdsc.smlm.debug") != null;
+
+  static {
+    final PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
+        PoissonFisherInformationCache.getDefaultInstance()).read();
+    if (cacheData != null) {
+      for (final PoissonFisherInformationData data : cacheData.getDataList()) {
+        cache.put(new FiKey(data), data);
+      }
+    }
+  }
+
+  private CameraModelFisherInformationAnalysisSettings.Builder settings;
+
+  private ExecutorService es;
+
   /**
    * The camera type.
    */
-  //@formatter:off
-  public enum CameraType implements NamedObject
-  {
+  public enum CameraType implements NamedObject {
+    //@formatter:off
     /** A camera with pure Poisson shot noise. */
     POISSON { @Override public String getName() { return "Poisson"; } },
     /** CCD camera has Poisson shot noise and Gaussian read noise. */
@@ -106,6 +130,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
      */
     EM_CCD { @Override public String getName() { return "EM-CCD"; }
              @Override public boolean isFast() { return false; } };
+    //@formatter:on
 
     @Override
     public abstract String getName();
@@ -115,30 +140,31 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
      *
      * @return true, if is fast
      */
-    public boolean isFast() { return true; }
+    public boolean isFast() {
+      return true;
+    }
 
     /**
      * Checks if is fixed Fisher information at the lower bound.
      *
      * @return true, if is lower fixed I
      */
-    public boolean isLowerFixedI() { return false; }
+    public boolean isLowerFixedI() {
+      return false;
+    }
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
     /**
      * Get the camera type for the number.
      *
-     * @param number
-     *            the number
+     * @param number the number
      * @return the camera type
      */
-    public static CameraType forNumber(int number)
-    {
+    public static CameraType forNumber(int number) {
       final CameraType[] values = CameraType.values();
       if (number >= 0 && number < values.length) {
         return values[number];
@@ -146,11 +172,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       return values[0];
     }
   }
-
-  //@formatter:on
-  private static final CameraType[] cameraTypeValues = CameraType.values();
-
-  private static final String[] cameraTypes = SettingsManager.getNames((Object[]) cameraTypeValues);
 
   /**
    * Class for hashing the Fisher information settings.
@@ -166,17 +187,17 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final double gain;
     final double noise;
 
-    public FiKey(int type, double gain, double noise) {
+    FiKey(int type, double gain, double noise) {
       this.type = type;
       this.gain = gain;
       this.noise = noise;
     }
 
-    public FiKey(PoissonFisherInformationData data) {
+    FiKey(PoissonFisherInformationData data) {
       this(data.getType(), data.getGain(), data.getNoise());
     }
 
-    public FiKey(CameraType type, double gain, double noise) {
+    FiKey(CameraType type, double gain, double noise) {
       this(type.ordinal(), gain, noise);
     }
 
@@ -206,7 +227,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       return type == key.type && gain == key.gain && noise == key.noise;
     }
 
-    public CameraType getType() {
+    CameraType getType() {
       return cameraTypeValues[type];
     }
 
@@ -221,18 +242,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
           return name + String.format(" g=%s,n=%s", gain, noise);
         default:
           return name;
-      }
-    }
-  }
-
-  private static HashMap<FiKey, PoissonFisherInformationData> cache = new HashMap<>();
-
-  static {
-    final PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
-        PoissonFisherInformationCache.getDefaultInstance()).read();
-    if (cacheData != null) {
-      for (final PoissonFisherInformationData data : cacheData.getDataList()) {
-        cache.put(new FiKey(data), data);
       }
     }
   }
@@ -446,10 +455,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     return new InterpolatedPoissonFisherInformation(means, alphas, type.isLowerFixedI(), upperf);
   }
 
-  private CameraModelFisherInformationAnalysisSettings.Builder settings;
-
-  private ExecutorService es;
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -515,9 +520,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
     return true;
   }
-
-  // Set the debug flag
-  private static final boolean debug = System.getProperty("gdsc.smlm.debug") != null;
 
   private void analyse() {
     final CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
@@ -776,6 +778,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     return fi;
   }
 
+  @Nullable
   private double[] createExponents() {
     final int n = 1 + Math.max(0, settings.getSubDivisions());
     final double h = 1.0 / n;
