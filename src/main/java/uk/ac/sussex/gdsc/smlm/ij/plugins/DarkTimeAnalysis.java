@@ -51,6 +51,7 @@ import org.apache.commons.math3.util.FastMath;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Computes a graph of the dark time and estimates the time threshold for the specified point in the
@@ -59,7 +60,7 @@ import java.util.List;
 public class DarkTimeAnalysis implements PlugIn {
   private static final String TITLE = "Dark-time Analysis";
 
-  private static String[] METHOD;
+  private static final String[] METHOD;
   private static ClusteringAlgorithm[] algorithms =
       new ClusteringAlgorithm[] {ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY,
           ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
@@ -75,13 +76,62 @@ public class DarkTimeAnalysis implements PlugIn {
     METHOD = methods.toArray(new String[methods.size()]);
   }
 
-  private static String inputOption = "";
-  private static int method;
   private double msPerFrame;
-  private static double searchDistance = 100;
-  private static double maxDarkTime;
-  private static double percentile = 99;
-  private static int nBins;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    int method;
+    double searchDistance;
+    double maxDarkTime;
+    double percentile;
+    int histogramBins;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      searchDistance = 100;
+      percentile = 99;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      method = source.method;
+      searchDistance = source.searchDistance;
+      maxDarkTime = source.maxDarkTime;
+      percentile = source.percentile;
+      histogramBins = source.histogramBins;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -99,7 +149,7 @@ public class DarkTimeAnalysis implements PlugIn {
 
     // Assume pixels for now
     final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, true, DistanceUnit.PIXEL);
+        ResultsManager.loadInputResults(settings.inputOption, true, DistanceUnit.PIXEL);
     IJ.showStatus("");
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
@@ -119,35 +169,38 @@ public class DarkTimeAnalysis implements PlugIn {
     analyse(results);
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    gd.addMessage("Compute the cumulative dark-time histogram");
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    settings = Settings.load();
 
-    gd.addChoice("Method", METHOD, METHOD[method]);
-    gd.addSlider("Search_distance (nm)", 5, 150, searchDistance);
-    gd.addNumericField("Max_dark_time (seconds)", maxDarkTime, 2);
-    gd.addSlider("Percentile", 0, 100, percentile);
-    gd.addSlider("Histogram_bins", -1, 100, nBins);
+    gd.addMessage("Compute the cumulative dark-time histogram");
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
+
+    gd.addChoice("Method", METHOD, METHOD[settings.method]);
+    gd.addSlider("Search_distance (nm)", 5, 150, settings.searchDistance);
+    gd.addNumericField("Max_dark_time (seconds)", settings.maxDarkTime, 2);
+    gd.addSlider("Percentile", 0, 100, settings.percentile);
+    gd.addSlider("Histogram_bins", -1, 100, settings.histogramBins);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
       return false;
     }
 
-    inputOption = gd.getNextChoice();
-    method = gd.getNextChoiceIndex();
-    searchDistance = gd.getNextNumber();
-    maxDarkTime = gd.getNextNumber();
-    percentile = gd.getNextNumber();
-    nBins = (int) gd.getNextNumber();
+    settings.inputOption = gd.getNextChoice();
+    settings.method = gd.getNextChoiceIndex();
+    settings.searchDistance = gd.getNextNumber();
+    settings.maxDarkTime = gd.getNextNumber();
+    settings.percentile = gd.getNextNumber();
+    settings.histogramBins = (int) gd.getNextNumber();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Search distance", searchDistance);
-      ParameterUtils.isPositive("Percentile", percentile);
+      ParameterUtils.isAboveZero("Search distance", settings.searchDistance);
+      ParameterUtils.isPositive("Percentile", settings.percentile);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -164,27 +217,27 @@ public class DarkTimeAnalysis implements PlugIn {
 
     // Trace results:
     // TODO - The search distance could have units to avoid assuming the results are in pixels
-    final double d = searchDistance / results.getCalibrationReader().getNmPerPixel();
+    final double d = settings.searchDistance / results.getCalibrationReader().getNmPerPixel();
     int range = max - min + 1;
-    if (maxDarkTime > 0) {
-      range = FastMath.max(1, (int) Math.round(maxDarkTime * 1000 / msPerFrame));
+    if (settings.maxDarkTime > 0) {
+      range = FastMath.max(1, (int) Math.round(settings.maxDarkTime * 1000 / msPerFrame));
     }
 
     final TrackProgress tracker = SimpleImageJTrackProgress.getInstance();
     tracker.status("Analysing ...");
     tracker.log("Analysing (d=%s nm (%s px) t=%s s (%d frames)) ...",
-        MathUtils.rounded(searchDistance), MathUtils.rounded(d),
+        MathUtils.rounded(settings.searchDistance), MathUtils.rounded(d),
         MathUtils.rounded(range * msPerFrame / 1000.0), range);
 
     Trace[] traces;
-    if (method == 0) {
+    if (settings.method == 0) {
       final TraceManager tm = new TraceManager(results);
       tm.setTracker(tracker);
       tm.traceMolecules(d, range);
       traces = tm.getTraces();
     } else {
       final ClusteringEngine engine =
-          new ClusteringEngine(Prefs.getThreads(), algorithms[method - 1], tracker);
+          new ClusteringEngine(Prefs.getThreads(), algorithms[settings.method - 1], tracker);
       final List<Cluster> clusters =
           engine.findClusters(TraceMolecules.convertToClusterPoints(results), d, range);
       traces = TraceMolecules.convertToTraces(results, clusters);
@@ -237,8 +290,8 @@ public class DarkTimeAnalysis implements PlugIn {
 
     // Report percentile
     for (int i = 0; i < y.length; i++) {
-      if (y[i] >= percentile) {
-        ImageJUtils.log("Dark-time Percentile %.1f @ %s ms = %s s", percentile,
+      if (y[i] >= settings.percentile) {
+        ImageJUtils.log("Dark-time Percentile %.1f @ %s ms = %s s", settings.percentile,
             MathUtils.rounded(x[i]), MathUtils.rounded(x[i] / 1000));
         break;
       }
@@ -248,7 +301,7 @@ public class DarkTimeAnalysis implements PlugIn {
   }
 
   private void plotDarkTimeHistogram(StoredData stats) {
-    if (nBins >= 0) {
+    if (settings.histogramBins >= 0) {
       // Convert the X-axis to milliseconds
       final double[] xValues = stats.getValues();
       for (int i = 0; i < xValues.length; i++) {
@@ -257,7 +310,7 @@ public class DarkTimeAnalysis implements PlugIn {
 
       // Ensure the bin width is never less than 1
       new HistogramPlotBuilder("Dark-time", StoredDataStatistics.create(xValues), "Time (ms)")
-          .setIntegerBins(true).setNumberOfBins(nBins).show();
+          .setIntegerBins(true).setNumberOfBins(settings.histogramBins).show();
     }
   }
 }
