@@ -57,9 +57,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This plugin handle the save and load of per-pixel camera models.
@@ -67,11 +69,13 @@ import java.util.Map;
 public class CameraModelManager implements PlugIn {
   private static final String TITLE = "Camera Model Manager";
   private static final String INFO_TAG = "Per-pixel camera model data";
-  private static String directory = "";
-  private static String filename = "";
 
-  // Cache camera models for speed
-  private static LinkedHashMap<String, PerPixelCameraModel> map = new LinkedHashMap<>();
+  private static AtomicReference<String> directory = new AtomicReference<>("");
+  private static AtomicReference<String> filename = new AtomicReference<>("");
+
+  /** Cache camera models for speed. */
+  private static Map<String, PerPixelCameraModel> cameraModels =
+      Collections.synchronizedMap(new LinkedHashMap<>());
 
   //@formatter:off
   private static final String[] OPTIONS = {
@@ -170,7 +174,7 @@ public class CameraModelManager implements PlugIn {
         .setSettings(settings.toBuilder().putCameraModelResources(name, resource.build()).build());
 
     // Cache this
-    map.put(name, cameraModel);
+    cameraModels.put(name, cameraModel);
   }
 
   /**
@@ -181,7 +185,7 @@ public class CameraModelManager implements PlugIn {
    * @return the per pixel camera model (or null)
    */
   public static PerPixelCameraModel load(String name) {
-    PerPixelCameraModel model = map.get(name);
+    PerPixelCameraModel model = cameraModels.get(name);
     if (model == null) {
       final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
       // Try and get the named resource
@@ -192,7 +196,7 @@ public class CameraModelManager implements PlugIn {
       model = loadFromFile(name, resource.getFilename());
 
       // Cache this
-      map.put(name, model);
+      cameraModels.put(name, model);
     }
     return model;
   }
@@ -239,7 +243,7 @@ public class CameraModelManager implements PlugIn {
     final CameraModelSettings settings = CameraModelSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     list.addAll(settings.getCameraModelResourcesMap().keySet());
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   /**
@@ -260,7 +264,7 @@ public class CameraModelManager implements PlugIn {
         list.add(entry.getKey());
       }
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   private static List<String> createList(boolean includeNone) {
@@ -420,15 +424,16 @@ public class CameraModelManager implements PlugIn {
   private static void runLoadFromDirectory() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load camera models from a directory.");
-    egd.addFilenameField("Directory", directory);
+    egd.addDirectoryField("Directory", directory.get());
     egd.showDialog();
     if (egd.wasCanceled()) {
       return;
     }
 
-    directory = egd.getNextString();
+    final String dir = egd.getNextString();
+    directory.set(dir);
 
-    final File[] fileList = (new File(directory)).listFiles(File::isFile);
+    final File[] fileList = (new File(dir)).listFiles(File::isFile);
     if (!ArrayUtils.isEmpty(fileList)) {
       for (final File file : fileList) {
         loadFromFileAndSaveResource(file.getPath());
@@ -439,15 +444,16 @@ public class CameraModelManager implements PlugIn {
   private static void runLoadFromFile() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load a camera model from file.");
-    egd.addFilenameField("Filename", filename);
+    egd.addFilenameField("Filename", filename.get());
     egd.showDialog();
     if (egd.wasCanceled()) {
       return;
     }
 
-    filename = egd.getNextString();
+    final String file = egd.getNextString();
+    filename.set(file);
 
-    loadFromFileAndSaveResource(filename);
+    loadFromFileAndSaveResource(file);
   }
 
   private static void loadFromFileAndSaveResource(String filename) {

@@ -84,6 +84,59 @@ import java.util.concurrent.atomic.AtomicReference;
  * This plugin handle the save and load of per-pixel spline models.
  */
 public class CubicSplineManager implements PlugIn {
+  private static final String TITLE = "Cubic Spline Manager";
+
+  private static AtomicReference<String> directory = new AtomicReference<>("");
+  private static AtomicReference<String> filename = new AtomicReference<>("");
+
+  /** The cache of the last named cubic spline PSF that was either saved or loaded. */
+  private static AtomicReference<Pair<String, CubicSplinePsf>> cache = new AtomicReference<>();
+
+
+  //@formatter:off
+  private static final String[] OPTIONS = {
+      "Print all model details",
+      "View a spline model",
+      "Load a spline model",
+      "Load from directory",
+      "Delete a spline model",
+      "Render the spline function"
+  };
+  //@formatter:on
+
+  private CubicSplineManagerSettings.Builder pluginSettings;
+
+  /**
+   * Provide a lazy initialisation holder for the CubicSplineSettings.
+   */
+  private static class CubicSplineSettingsHolder {
+    private static CubicSplineSettings settings;
+
+    static {
+      settings = SettingsManager.readCubicSplineSettings(SettingsManager.FLAG_SILENT);
+    }
+
+    /**
+     * Gets the settings held in memory.
+     *
+     * @return the settings
+     */
+    static CubicSplineSettings getSettings() {
+      return settings;
+    }
+
+    /**
+     * Sets the settings to memory and save them to file.
+     *
+     * @param settings the settings
+     * @return true, if successful writing to file
+     */
+    static synchronized boolean setSettings(CubicSplineSettings settings) {
+      CubicSplineSettingsHolder.settings = settings;
+      return SettingsManager.writeSettings(settings);
+    }
+  }
+
   /**
    * Contains the information used to represent a point spread function using a cubic spline.
    */
@@ -139,25 +192,6 @@ public class CubicSplineManager implements PlugIn {
     public int getScale(double nmPerPixel) {
       return CubicSplineManager.getScale(imagePsf.getPixelSize(), nmPerPixel);
     }
-  }
-
-  private static final String TITLE = "Cubic Spline Manager";
-  private static String directory = "";
-  private static String filename = "";
-  /** The cache of the last named cubic spline PSF that was either saved or loaded. */
-  private static AtomicReference<Pair<String, CubicSplinePsf>> cache = new AtomicReference<>();
-
-  private static CubicSplineSettings.Builder settings;
-
-  private static CubicSplineSettings.Builder getSettings() {
-    return getSettings(0);
-  }
-
-  private static CubicSplineSettings.Builder getSettings(int flags) {
-    if (settings == null) {
-      settings = SettingsManager.readCubicSplineSettings(flags).toBuilder();
-    }
-    return settings;
   }
 
   /**
@@ -321,9 +355,9 @@ public class CubicSplineManager implements PlugIn {
     resource.setFilename(filename);
     resource.setSplineScale(psfModel.imagePsf.getPixelSize());
 
-    final CubicSplineSettings.Builder settings = getSettings();
-    settings.putCubicSplineResources(name, resource.build());
-    SettingsManager.writeSettings(settings.build());
+    final CubicSplineSettings settings = CubicSplineSettingsHolder.getSettings();
+    CubicSplineSettingsHolder
+        .setSettings(settings.toBuilder().putCubicSplineResources(name, resource.build()).build());
 
     cache.set(Pair.of(name, psfModel));
   }
@@ -341,7 +375,7 @@ public class CubicSplineManager implements PlugIn {
       return previous.getValue();
     }
 
-    final CubicSplineSettings.Builder settings = getSettings();
+    final CubicSplineSettings settings = CubicSplineSettingsHolder.getSettings();
     // Try and get the named resource
     final CubicSplineResource resource = settings.getCubicSplineResourcesMap().get(name);
     if (resource == null) {
@@ -379,10 +413,10 @@ public class CubicSplineManager implements PlugIn {
    * @return the list
    */
   public static String[] listCubicSplines(boolean includeNone) {
-    final CubicSplineSettings.Builder settings = getSettings();
+    final CubicSplineSettings settings = CubicSplineSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     list.addAll(settings.getCubicSplineResourcesMap().keySet());
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   /**
@@ -394,7 +428,7 @@ public class CubicSplineManager implements PlugIn {
    * @return the list
    */
   public static String[] listCubicSplines(boolean includeNone, double nmPerPixel) {
-    final CubicSplineSettings.Builder settings = getSettings();
+    final CubicSplineSettings settings = CubicSplineSettingsHolder.getSettings();
     final List<String> list = createList(includeNone);
     for (final Map.Entry<String, CubicSplineResource> entry : settings.getCubicSplineResourcesMap()
         .entrySet()) {
@@ -405,7 +439,7 @@ public class CubicSplineManager implements PlugIn {
       }
       list.add(entry.getKey());
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   private static List<String> createList(boolean includeNone) {
@@ -427,28 +461,17 @@ public class CubicSplineManager implements PlugIn {
     return 0;
   }
 
-  //@formatter:off
-  private static final String[] OPTIONS = {
-      "Print all model details",
-      "View a spline model",
-      "Load a spline model",
-      "Load from directory",
-      "Delete a spline model",
-      "Render the spline function" };
-  //@formatter:on
-  private CubicSplineManagerSettings.Builder pluginSettings;
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    final CubicSplineSettings.Builder settings = getSettings(SettingsManager.FLAG_SILENT);
+    final CubicSplineSettings settings = CubicSplineSettingsHolder.getSettings();
     if (settings.getCubicSplineResourcesCount() == 0) {
       IJ.error(TITLE, "No spline models found");
       return;
     }
 
-    pluginSettings = SettingsManager.readCubicSplineManagerSettings(0).toBuilder();
+    pluginSettings = readCubicSplineManagerSettings();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", OPTIONS, pluginSettings.getOption());
@@ -463,7 +486,7 @@ public class CubicSplineManager implements PlugIn {
         runRenderCubicSpline();
         break;
       case 4:
-        runDeleteCubicSpline();
+        runDeleteCubicSpline(settings);
         break;
       case 3:
         runLoadFromDirectory();
@@ -475,9 +498,18 @@ public class CubicSplineManager implements PlugIn {
         runViewCubicSpline();
         break;
       default:
-        runPrintCubicSplines();
+        runPrintCubicSplines(settings);
     }
 
+    writeCubicSplineManagerSettings(pluginSettings);
+  }
+
+  private static synchronized CubicSplineManagerSettings.Builder readCubicSplineManagerSettings() {
+    return SettingsManager.readCubicSplineManagerSettings(0).toBuilder();
+  }
+
+  private static synchronized void
+      writeCubicSplineManagerSettings(CubicSplineManagerSettings.Builder pluginSettings) {
     SettingsManager.writeSettings(pluginSettings);
   }
 
@@ -652,7 +684,7 @@ public class CubicSplineManager implements PlugIn {
     }
   }
 
-  private void runDeleteCubicSpline() {
+  private void runDeleteCubicSpline(CubicSplineSettings settings) {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCubicSplines(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
@@ -669,8 +701,8 @@ public class CubicSplineManager implements PlugIn {
       return;
     }
 
-    settings.removeCubicSplineResources(name);
-    SettingsManager.writeSettings(settings.build());
+    CubicSplineSettingsHolder
+        .setSettings(settings.toBuilder().removeCubicSplineResources(name).build());
 
     ImageJUtils.log("Deleted spline model: %s\n%s", name, resource);
   }
@@ -678,15 +710,16 @@ public class CubicSplineManager implements PlugIn {
   private static void runLoadFromDirectory() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load spline models from a directory.");
-    egd.addFilenameField("Directory", directory);
+    egd.addDirectoryField("Directory", directory.get());
     egd.showDialog();
     if (egd.wasCanceled()) {
       return;
     }
 
-    directory = egd.getNextString();
+    final String dir = egd.getNextString();
+    directory.set(dir);
 
-    final File[] fileList = (new File(directory)).listFiles(File::isFile);
+    final File[] fileList = (new File(dir)).listFiles(File::isFile);
     if (!ArrayUtils.isEmpty(fileList)) {
       for (final File file : fileList) {
         loadFromFileAndSaveResource(file.getPath());
@@ -697,15 +730,16 @@ public class CubicSplineManager implements PlugIn {
   private static void runLoadFromFile() {
     final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
     egd.addMessage("Load a spline model from file.");
-    egd.addFilenameField("Filename", filename);
+    egd.addFilenameField("Filename", filename.get());
     egd.showDialog();
     if (egd.wasCanceled()) {
       return;
     }
 
-    filename = egd.getNextString();
+    final String file = egd.getNextString();
+    filename.set(file);
 
-    loadFromFileAndSaveResource(filename);
+    loadFromFileAndSaveResource(file);
   }
 
   private static void loadFromFileAndSaveResource(String filename) {
@@ -761,7 +795,7 @@ public class CubicSplineManager implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void runPrintCubicSplines() {
+  private static void runPrintCubicSplines(CubicSplineSettings settings) {
     IJ.log(settings.toString());
   }
 }
