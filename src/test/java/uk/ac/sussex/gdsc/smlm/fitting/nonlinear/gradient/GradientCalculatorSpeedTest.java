@@ -25,9 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.CameraNoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
@@ -39,7 +39,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFuncti
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNbFixedGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -741,13 +740,10 @@ public class GradientCalculatorSpeedTest {
 
     final double[] y = new double[n];
     func.initialise(params);
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
       final double u = func.eval(i);
-      pd.setMean(u);
-      y[i] = pd.sample();
+      y[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u).sample();
     }
 
     if (randomiseParams) {

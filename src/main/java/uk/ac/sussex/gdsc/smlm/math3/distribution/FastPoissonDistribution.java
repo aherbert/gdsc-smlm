@@ -1,36 +1,27 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2019 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
-import org.apache.commons.math3.exception.NotStrictlyPositiveException;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
+import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.MathUtils;
 
 /**
- * Implementation of the Poisson distribution for fast computation of the probability mass function.
+ * Implementation of the Poisson distribution for computation of the probability mass function.
  *
  * <p>Adapted from org.apache.commons.math3.distribution.PoissonDistribution.
  *
@@ -47,7 +38,7 @@ public final class FastPoissonDistribution {
    * Creates a new Poisson distribution with specified mean.
    *
    * @param mean the Poisson mean
-   * @throws NotStrictlyPositiveException if {@code mean <= 0}.
+   * @throws IllegalArgumentException if {@code mean <= 0}.
    */
   public FastPoissonDistribution(double mean) {
     setMean(mean);
@@ -66,12 +57,10 @@ public final class FastPoissonDistribution {
    * Sets the mean.
    *
    * @param mean Poisson mean.
-   * @throws NotStrictlyPositiveException if {@code mean <= 0}.
+   * @throws IllegalArgumentException if {@code mean <= 0}.
    */
   public void setMean(double mean) {
-    if (mean <= 0) {
-      throw new NotStrictlyPositiveException(LocalizedFormats.MEAN, mean);
-    }
+    ValidationUtils.checkStrictlyPositive(mean, "Mean");
     this.mean = mean;
   }
 
@@ -96,7 +85,7 @@ public final class FastPoissonDistribution {
    */
   public double probability(int x) {
     final double logProbability = logProbability(x);
-    return logProbability == Double.NEGATIVE_INFINITY ? 0 : FastMath.exp(logProbability);
+    return logProbability == Double.NEGATIVE_INFINITY ? 0 : Math.exp(logProbability);
   }
 
   /**
@@ -109,16 +98,98 @@ public final class FastPoissonDistribution {
    * @return the logarithm of the value of the probability mass function at {@code x}
    */
   public double logProbability(int x) {
-    double ret;
     if (x < 0 || x == Integer.MAX_VALUE) {
-      ret = Double.NEGATIVE_INFINITY;
-    } else if (x == 0) {
-      ret = -mean;
-    } else {
-      ret = -SaddlePointExpansionCopy.getStirlingError(x)
-          - SaddlePointExpansionCopy.getDeviancePart(x, mean) - 0.5 * FastMath.log(MathUtils.TWO_PI)
-          - 0.5 * FastMath.log(x);
+      return Double.NEGATIVE_INFINITY;
     }
-    return ret;
+    if (x == 0) {
+      return -mean;
+    }
+    return -SaddlePointExpansionCopy.getStirlingError(x)
+        - SaddlePointExpansionCopy.getDeviancePart(x, mean) - 0.5 * Math.log(MathUtils.TWO_PI)
+        - 0.5 * Math.log(x);
+  }
+
+  /**
+   * For a random variable {@code X} whose values are distributed according to this distribution,
+   * this method returns {@code P(X <= x)}. In other words, this method represents the (cumulative)
+   * distribution function (CDF) for this distribution.
+   *
+   * @param x the point at which the CDF is evaluated
+   * @return the probability that a random variable with this distribution takes a value less than
+   *         or equal to {@code x}
+   */
+  public double cumulativeProbability(int x) {
+    if (x < 0) {
+      return 0;
+    }
+    if (x == Integer.MAX_VALUE) {
+      return 1;
+    }
+    return Gamma.regularizedGammaQ((double) x + 1, mean, 1e-12, Integer.MAX_VALUE);
+  }
+
+  /**
+   * Computes the quantile function of this distribution. For a random variable {@code X}
+   * distributed according to this distribution, the returned value is:
+   *
+   * <ul> <li><code>inf{x in Z | P(X<=x) >= p}</code> for {@code 0 < p <= 1},</li> <li><code>inf{x
+   * in Z | P(X<=x) > 0}</code> for {@code p = 0}.</li> </ul>
+   *
+   * <p>If the result exceeds the range of the data type {@code int}, then {@code 0} or
+   * {@code Integer.MAX_VALUE} is returned.
+   *
+   * @param probability the cumulative probability
+   * @return the smallest {@code p}-quantile of this distribution
+   * @throws IllegalArgumentException if {@code p < 0} or {@code p > 1}
+   */
+  public int inverseCumulativeProbability(final double probability) {
+    ValidationUtils.checkArgument(probability >= 0 && probability <= 1, "Invalid probability: %f",
+        probability);
+    if (probability == 0.0) {
+      return 0;
+    }
+    if (probability == 1.0) {
+      return Integer.MAX_VALUE;
+    }
+
+    // Use the one-sided Chebyshev inequality to narrow the bracket.
+    final double mu = mean;
+    final double sigma = Math.sqrt(mean);
+
+    double range = Math.sqrt((1.0 - probability) / probability);
+    final double tmp = mu - range * sigma;
+
+    // Using -1 ensures cumulativeProbability(lower) < p, which
+    // is required for the solving step.
+    final int lower = (tmp > -1) ? ((int) Math.ceil(tmp)) - 1 : -1;
+
+    range = 1.0 / range;
+    final int upper = (int) Math.floor(mu + range * sigma);
+
+    return solveInverseCumulativeProbability(probability, lower, upper);
+  }
+
+  /**
+   * This is a utility function used by {@link #inverseCumulativeProbability(double)}. It assumes
+   * {@code 0 < p < 1} and that the inverse cumulative probability lies in the bracket {@code
+   * (lower, upper]}. The implementation does simple bisection to find the smallest
+   * {@code p}-quantile <code>inf{x in Z | P(X<=x) >= p}</code>.
+   *
+   * @param probability the cumulative probability
+   * @param lower a value satisfying {@code cumulativeProbability(lower) < p}
+   * @param upper a value satisfying {@code p <= cumulativeProbability(upper)}
+   * @return the smallest {@code p}-quantile of this distribution
+   */
+  private int solveInverseCumulativeProbability(final double probability, int lower, int upper) {
+    while (lower + 1 < upper) {
+      final int mid = (lower + upper) >> 1;
+      final double pm = cumulativeProbability(mid);
+      if (pm >= probability) {
+        upper = mid;
+      } else {
+        lower = mid;
+      }
+    }
+    return upper;
   }
 }

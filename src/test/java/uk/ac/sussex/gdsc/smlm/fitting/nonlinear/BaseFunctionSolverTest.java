@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
@@ -57,7 +58,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,7 +72,6 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings({"javadoc"})
 public abstract class BaseFunctionSolverTest {
-  private static final PoissonSamplerCache POISSON_CACHE = new PoissonSamplerCache(0, 1000);
   protected static Logger logger;
 
   @BeforeAll
@@ -586,7 +585,7 @@ public abstract class BaseFunctionSolverTest {
     // Poisson noise
     for (int i = 0; i < data.length; i++) {
       if (data[i] > 0) {
-        data[i] = POISSON_CACHE.createPoissonSampler(rg, data[i]).sample();
+        data[i] = GdscSmlmTestUtils.createPoissonSampler(rg, data[i]).sample();
       }
     }
 

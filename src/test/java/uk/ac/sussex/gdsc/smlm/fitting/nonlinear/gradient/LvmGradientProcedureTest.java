@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.LvmGradientProcedureUtils.Type;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
@@ -43,7 +43,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -1148,13 +1147,11 @@ public class LvmGradientProcedureTest {
     }
 
     final double[] y = new double[n];
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     func.initialise(params);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
-      pd.setMeanUnsafe(func.eval(i));
-      y[i] = pd.sample();
+      final double u = func.eval(i);
+      y[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u).sample();
     }
 
     if (randomiseParams) {

@@ -25,14 +25,13 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -44,6 +43,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -529,8 +529,7 @@ public class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-        new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1
@@ -546,8 +545,7 @@ public class EjmlLinearSolverTest {
                 @Override
                 public void execute(double value) {
                   // Poisson data
-                  pd.setMeanUnsafe(value);
-                  y[index++] = pd.sample();
+                  y[index++] = GdscSmlmTestUtils.createPoissonSampler(rng, value).sample();
                 }
               });
               final double[][] alpha = new double[np][np];
@@ -830,8 +828,7 @@ public class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-        new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1
@@ -847,8 +844,7 @@ public class EjmlLinearSolverTest {
                 @Override
                 public void execute(double value) {
                   // Poisson data
-                  pd.setMeanUnsafe(value);
-                  y[index++] = pd.sample();
+                  y[index++] = GdscSmlmTestUtils.createPoissonSampler(rng, value).sample();
                 }
               });
               final double[][] alpha = new double[np][np];

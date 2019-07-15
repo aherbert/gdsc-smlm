@@ -28,9 +28,8 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -308,15 +307,13 @@ public class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-        new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
       u[i] = nlf.eval(i);
       if (u[i] > 0) {
-        pd.setMeanUnsafe(u[i]);
-        x[i] = pd.sample();
+        x[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u[i]).sample();
       }
     }
 
@@ -445,15 +442,13 @@ public class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-        new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
       u[i] = nlf.eval(i);
       if (u[i] > 0) {
-        pd.setMeanUnsafe(u[i]);
-        x[i] = pd.sample();
+        x[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u[i]).sample();
       }
     }
 
@@ -522,8 +517,7 @@ public class PoissonCalculatorTest {
     nlf1.initialise(a);
     nlf2.initialise(a);
     nlf3.initialise(a);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(
-        new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())), 1);
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
     final double[] u = new double[x.length];
     final double[] b1 = new double[x.length];
@@ -535,8 +529,7 @@ public class PoissonCalculatorTest {
       b3[i] = nlf3.eval(i);
       u[i] = b1[i] + b2[i] + b3[i];
       if (u[i] > 0) {
-        pd.setMeanUnsafe(u[i]);
-        x[i] = pd.sample();
+        x[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u[i]).sample();
       }
     }
 

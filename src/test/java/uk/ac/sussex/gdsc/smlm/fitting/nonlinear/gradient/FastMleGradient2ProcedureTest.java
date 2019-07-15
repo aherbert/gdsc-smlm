@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
@@ -37,7 +37,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -201,9 +200,6 @@ public class FastMleGradient2ProcedureTest {
     final double[] x = new double[f1.size()];
     final double[] b = new double[f1.size()];
 
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
-
     for (int i = 0; i < iter; i++) {
       final int ii = i;
 
@@ -235,8 +231,7 @@ public class FastMleGradient2ProcedureTest {
         @Override
         public void execute(double value) {
           if (value > 0) {
-            pd.setMeanUnsafe(value);
-            x[index++] = pd.sample();
+            x[index++] = GdscSmlmTestUtils.createPoissonSampler(rng, value).sample();
           } else {
             x[index++] = 0;
           }
@@ -615,13 +610,10 @@ public class FastMleGradient2ProcedureTest {
 
     final double[] y = new double[n];
     func.initialise(params);
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rng), 1);
     for (int i = 0; i < y.length; i++) {
       // Add random Poisson noise
       final double u = func.eval(i);
-      pd.setMean(u);
-      y[i] = pd.sample();
+      y[i] = GdscSmlmTestUtils.createPoissonSampler(rng, u).sample();
     }
 
     if (randomiseParams) {

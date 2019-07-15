@@ -27,12 +27,11 @@ package uk.ac.sussex.gdsc.smlm.function;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -52,6 +51,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -152,8 +152,7 @@ public class ScmosLikelihoodWrapperTest {
     data.offset = new float[n];
     data.sd = new float[n];
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), O);
+    final DiscreteSampler pd = GdscSmlmTestUtils.createPoissonSampler(rg, O);
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
     for (int i = 0; i < n; i++) {
@@ -287,8 +286,6 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -309,8 +306,8 @@ public class ScmosLikelihoodWrapperTest {
                   for (int i = 0; i < n; i++) {
                     // Simulate sCMOS camera
                     final double u = f1.eval(i);
-                    pd.setMeanUnsafe(u);
-                    data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
+                    data[i] = GdscSmlmTestUtils.createPoissonSampler(r, u).sample() * g[i] + o[i]
+                        + gs.sample() * sd[i];
                   }
 
                   ff1 = new ScmosLikelihoodWrapper(f1, params, data, n, var, g, o);
@@ -497,8 +494,6 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -519,8 +514,8 @@ public class ScmosLikelihoodWrapperTest {
                   for (int i = 0; i < n; i++) {
                     // Simulate sCMOS camera
                     final double u = f1.eval(i);
-                    pd.setMeanUnsafe(u);
-                    data[i] = pd.sample() * g[i] + o[i] + gs.sample() * sd[i];
+                    data[i] = GdscSmlmTestUtils.createPoissonSampler(r, u).sample() * g[i] + o[i]
+                        + gs.sample() * sd[i];
                   }
 
                   ff1 = new ScmosLikelihoodWrapper(f1, params, data, n, var, g, o);
@@ -848,16 +843,13 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(r), 1);
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
     for (int i = 0; i < n; i++) {
       double mean = nlf.eval(i);
       if (mean > 0) {
-        pd.setMeanUnsafe(mean);
-        mean = pd.sample();
+        mean = GdscSmlmTestUtils.createPoissonSampler(r, mean).sample();
       }
       k[i] = mean * g[i] + o[i] + gs.sample() * sd[i];
     }

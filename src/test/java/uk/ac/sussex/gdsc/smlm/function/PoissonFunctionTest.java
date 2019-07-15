@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.FastPoissonDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -215,7 +215,7 @@ public class PoissonFunctionTest {
     final double o = mu;
 
     final PoissonFunction f = new PoissonFunction(1.0);
-    final CustomPoissonDistribution pd = new CustomPoissonDistribution(null, mu);
+    final FastPoissonDistribution pd = new FastPoissonDistribution(mu);
 
     final double p = 0;
 
