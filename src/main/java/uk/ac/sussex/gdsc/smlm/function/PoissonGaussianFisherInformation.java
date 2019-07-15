@@ -29,7 +29,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.FastPoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
@@ -97,7 +97,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private static final int[] defaultTinyLimits;
 
   static {
-    final FastPoissonDistribution pd = new FastPoissonDistribution(1);
+    final PoissonDistribution pd = new PoissonDistribution(1);
     defaultLimits = new int[101];
     for (int i = 1; i < defaultLimits.length; i++) {
       defaultLimits[i] = computeLimit(pd, i, DEFAULT_CUMULATIVE_PROBABILITY);
@@ -128,7 +128,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private final int defaultScale;
 
   /** The poisson distribution used to generate the Poisson probabilities. */
-  private final FastPoissonDistribution pd = new FastPoissonDistribution(1);
+  private final PoissonDistribution pd = new PoissonDistribution(1);
 
   /** Working space to store the Poisson probabilities. */
   private final TDoubleArrayList list = new TDoubleArrayList();
@@ -244,7 +244,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @return the limit
    */
   public static int computeLimit(double mean) {
-    final FastPoissonDistribution pd = new FastPoissonDistribution(mean);
+    final PoissonDistribution pd = new PoissonDistribution(mean);
     int x = (int) mean;
     while (pd.logProbability(x + 1) > -709) {
       x++;
@@ -260,7 +260,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @param cumulativeProbability the cumulative probability
    * @return the limit
    */
-  private static int computeLimit(FastPoissonDistribution pd, double mean,
+  private static int computeLimit(PoissonDistribution pd, double mean,
       double cumulativeProbability) {
     pd.setMeanUnsafe(mean);
     return pd.inverseCumulativeProbability(cumulativeProbability);
@@ -274,7 +274,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * @param cumulativeProbability the cumulative probability
    * @return the limit
    */
-  private static int computeTinyLimit(FastPoissonDistribution pd, int exp,
+  private static int computeTinyLimit(PoissonDistribution pd, int exp,
       double cumulativeProbability) {
     // Fill all bits of the mantissa
     final long bits = 0xffffffffffffffL;

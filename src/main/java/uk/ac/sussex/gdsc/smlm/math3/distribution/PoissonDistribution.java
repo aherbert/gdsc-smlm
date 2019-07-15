@@ -23,14 +23,17 @@ import org.apache.commons.math3.util.MathUtils;
 /**
  * Implementation of the Poisson distribution for computation of the probability mass function.
  *
- * <p>Adapted from org.apache.commons.math3.distribution.PoissonDistribution.
+ * <p>Adapted from org.apache.commons.math3.distribution.PoissonDistribution. The code has been
+ * updated to: remove the sampling functionality and requirement for the random generator; allow the
+ * mean to be altered using properties; use {@link java.lang.Math} and remove the {@code FastMath}
+ * dependency.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
  * @see <a href="http://mathworld.wolfram.com/PoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
  */
-public final class FastPoissonDistribution {
+public final class PoissonDistribution {
   /** Mean of the distribution. */
   private double mean;
 
@@ -40,7 +43,7 @@ public final class FastPoissonDistribution {
    * @param mean the Poisson mean
    * @throws IllegalArgumentException if {@code mean <= 0}.
    */
-  public FastPoissonDistribution(double mean) {
+  public PoissonDistribution(double mean) {
     setMean(mean);
   }
 

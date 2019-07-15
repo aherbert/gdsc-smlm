@@ -28,22 +28,21 @@ import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class FastPoissonDistributionTest {
+public class PoissonDistributionTest {
   @SeededTest
   public void canComputeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
 
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(1);
+    final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final PoissonDistribution pd = new PoissonDistribution(null, mean,
-          PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+          createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       final int lower = (int) Math.floor(Math.max(0, mean - 5 * Math.sqrt(mean)));
       final int upper = (int) Math.ceil((mean + 5 * Math.sqrt(mean)));
@@ -57,11 +56,11 @@ public class FastPoissonDistributionTest {
   public void canComputeCumulativeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
 
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(1);
+    final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final PoissonDistribution pd = new PoissonDistribution(null, mean,
-          PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+          createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       final int lower = (int) Math.floor(Math.max(0, mean - 5 * Math.sqrt(mean)));
       final int upper = (int) Math.ceil((mean + 5 * Math.sqrt(mean)));
@@ -75,11 +74,11 @@ public class FastPoissonDistributionTest {
   public void canComputeInverseCumulativeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
 
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(1);
+    final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
       final double mean = rng.nextDouble() * i;
-      final PoissonDistribution pd = new PoissonDistribution(null, mean,
-          PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+      final org.apache.commons.math3.distribution.PoissonDistribution pd =
+          createReferencePoissonDistribution(mean);
       fpd.setMean(mean);
       for (int j = 0; j <= 10; j++) {
         final double p = 0.1 * j;
@@ -89,10 +88,19 @@ public class FastPoissonDistributionTest {
     }
   }
 
+  private static org.apache.commons.math3.distribution.PoissonDistribution
+      createReferencePoissonDistribution(final double mean) {
+    final org.apache.commons.math3.distribution.PoissonDistribution pd =
+        new org.apache.commons.math3.distribution.PoissonDistribution(null, mean,
+            org.apache.commons.math3.distribution.PoissonDistribution.DEFAULT_EPSILON,
+            org.apache.commons.math3.distribution.PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+    return pd;
+  }
+
   @Test
   public void testMeanProperty() {
     final double mean = 1.23;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(mean, fpd.getMean());
     fpd.setMean(mean - 1.0);
     Assertions.assertEquals(mean - 1.0, fpd.getMean());
@@ -104,7 +112,7 @@ public class FastPoissonDistributionTest {
   @Test
   public void testProbabilityEdgeCases() {
     final double mean = 1.23;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.probability(-1));
     Assertions.assertEquals(0, fpd.probability(Integer.MAX_VALUE));
     Assertions.assertEquals(Math.exp(-mean), fpd.probability(0));
@@ -113,7 +121,7 @@ public class FastPoissonDistributionTest {
   @Test
   public void testLogProbabilityEdgeCases() {
     final double mean = 1.23;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(-1));
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(Integer.MAX_VALUE));
     Assertions.assertEquals(-mean, fpd.logProbability(0));
@@ -122,7 +130,7 @@ public class FastPoissonDistributionTest {
   @Test
   public void testCumulativeProbabilityEdgeCases() {
     final double mean = 1.23;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.cumulativeProbability(-1));
     Assertions.assertEquals(1.0, fpd.cumulativeProbability(Integer.MAX_VALUE));
   }
@@ -130,7 +138,7 @@ public class FastPoissonDistributionTest {
   @Test
   public void testInverseCumulativeProbabilityEdgeCases() {
     final double mean = 1.23;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.inverseCumulativeProbability(0));
     Assertions.assertEquals(Integer.MAX_VALUE, fpd.inverseCumulativeProbability(1.0));
     Assertions.assertThrows(IllegalArgumentException.class,
@@ -142,7 +150,7 @@ public class FastPoissonDistributionTest {
   @Test
   public void testLogProbabilityAtExtremeValue() {
     final double mean = Double.MIN_VALUE;
-    final FastPoissonDistribution fpd = new FastPoissonDistribution(mean);
+    final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(Integer.MAX_VALUE - 1));
   }
 

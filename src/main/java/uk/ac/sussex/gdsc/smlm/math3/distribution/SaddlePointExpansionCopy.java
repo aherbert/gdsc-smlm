@@ -45,7 +45,7 @@ import org.apache.commons.math3.util.MathUtils;
  *
  * <p>
  * <strong>Note:</strong> This class has been copied from
- * {@code org.apache.commons.math3.distribution} for use in the {@link FastPoissonDistribution}.
+ * {@code org.apache.commons.math3.distribution} for use in the {@link PoissonDistribution}.
  * A copy is required since the original version is package private.
  * </p>
  */

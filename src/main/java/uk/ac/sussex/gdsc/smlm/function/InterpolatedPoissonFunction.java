@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.FastPoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
@@ -45,7 +45,7 @@ import org.apache.commons.math3.util.FastMath;
  */
 public class InterpolatedPoissonFunction
     implements GradientLikelihoodFunction, LogLikelihoodFunction {
-  private final FastPoissonDistribution pd;
+  private final PoissonDistribution pd;
 
   /**
    * The inverse of the on-chip gain multiplication factor.
@@ -72,7 +72,7 @@ public class InterpolatedPoissonFunction
     this.alpha = Math.abs(alpha);
     logAlpha = Math.log(alpha);
     this.nonInteger = nonInteger;
-    pd = (nonInteger) ? null : new FastPoissonDistribution(1);
+    pd = (nonInteger) ? null : new PoissonDistribution(1);
   }
 
   @Override
