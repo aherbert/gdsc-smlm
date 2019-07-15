@@ -32,12 +32,13 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 
@@ -52,8 +53,6 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
@@ -64,6 +63,10 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -209,8 +212,9 @@ public class EmGainAnalysis implements PlugInFilter {
     // Debug this
     final double[] g = pdf.probability;
     final double[] x = pdf.x;
-    ImageJUtils.display(TITLE + " PDF",
-        new Plot(TITLE + " PDF", "ADU", "P", x, Arrays.copyOf(g, g.length)));
+    final Plot plot = new Plot(TITLE + " PDF", "ADU", "P");
+    plot.addPoints(x, Arrays.copyOf(g, g.length), Plot.LINE);
+    ImageJUtils.display(TITLE + " PDF", plot);
 
     // Get cumulative probability
     double sum = 0;
@@ -280,16 +284,14 @@ public class EmGainAnalysis implements PlugInFilter {
    *
    * @return The histogram
    */
-  private int[] simulateFromPoissonGammaGaussian() {
+  private static int[] simulateFromPoissonGammaGaussian() {
     // Randomly sample
-    final RandomGenerator random =
-        new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+    final UniformRandomProvider random = RandomSource.create(RandomSource.SPLIT_MIX_64);
 
-    final PoissonDistribution poisson = new PoissonDistribution(random, settingPhotons,
-        PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-
-    final CustomGammaDistribution gamma = new CustomGammaDistribution(random, settingPhotons,
-        settingGain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+    final PoissonSampler poisson = new PoissonSampler(random, settingPhotons);
+    final MarsagliaTsangGammaSampler gamma =
+        new MarsagliaTsangGammaSampler(random, settingPhotons, settingGain);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
     final int steps = simulationSize;
     final int[] samples = new int[steps];
@@ -303,12 +305,12 @@ public class EmGainAnalysis implements PlugInFilter {
 
       // Gamma
       if (sample > 0) {
-        gamma.setShapeUnsafe(sample);
+        gamma.setAlpha(sample);
         sample = gamma.sample();
       }
 
       // Gaussian
-      sample += settingNoise * random.nextGaussian();
+      sample += settingNoise * gauss.sample();
 
       // Convert the sample to a count
       samples[n] = (int) Math.round(sample + settingBias);
@@ -670,12 +672,14 @@ public class EmGainAnalysis implements PlugInFilter {
       if (extraOptions) {
         // Debug
         String title = "Poisson-Gamma";
-        Plot plot = new Plot(title, "x", "y", SimpleArrayUtils.newArray(g.length, 0, step), g);
+        Plot plot = new Plot(title, "x", "y");
+        plot.addPoints(SimpleArrayUtils.newArray(g.length, 0, step), g, Plot.LINE);
         ImageJUtils.display(title, plot);
 
         title = "Gaussian";
-        plot = new Plot(title, "x", "y",
-            SimpleArrayUtils.newArray(kernel.length, radius * -step, step), kernel);
+        plot = new Plot(title, "x", "y");
+        plot.addPoints(SimpleArrayUtils.newArray(kernel.length, radius * -step, step), kernel,
+            Plot.LINE);
         ImageJUtils.display(title, plot);
       }
 

@@ -26,10 +26,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -43,8 +43,6 @@ import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomGammaDistribution;
-import uk.ac.sussex.gdsc.smlm.math3.distribution.CustomPoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
@@ -58,6 +56,8 @@ import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,6 +72,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings({"javadoc"})
 public abstract class BaseFunctionSolverTest {
+  private static final PoissonSamplerCache POISSON_CACHE = new PoissonSamplerCache(0, 1000);
   protected static Logger logger;
 
   @BeforeAll
@@ -583,13 +584,9 @@ public abstract class BaseFunctionSolverTest {
     final double[] data = f.computeValues(params);
 
     // Poisson noise
-    final CustomPoissonDistribution pd =
-        new CustomPoissonDistribution(new RandomGeneratorAdapter(rg), 1);
-
     for (int i = 0; i < data.length; i++) {
       if (data[i] > 0) {
-        pd.setMeanUnsafe(data[i]);
-        data[i] = pd.sample();
+        data[i] = POISSON_CACHE.createPoissonSampler(rg, data[i]).sample();
       }
     }
 
@@ -599,12 +596,11 @@ public abstract class BaseFunctionSolverTest {
       // Since the call random.nextGamma(...) creates a Gamma distribution
       // which pre-calculates factors only using the scale parameter we
       // create a custom gamma distribution where the shape can be set as a property.
-      final CustomGammaDistribution gd =
-          new CustomGammaDistribution(new RandomGeneratorAdapter(rg), 1, emGain);
+      final MarsagliaTsangGammaSampler gd = new MarsagliaTsangGammaSampler(rg, 1, emGain);
 
       for (int i = 0; i < data.length; i++) {
         if (data[i] > 0) {
-          gd.setShapeUnsafe(data[i]);
+          gd.setAlpha(data[i]);
           // The sample will amplify the signal so we remap to the original scale
           data[i] = gd.sample() / emGain;
         }
@@ -612,7 +608,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Read-noise
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 0, 1);
+    final NormalizedGaussianSampler gs = SamplerUtils.createNormalizedGaussianSampler(rg);
     if (noise != null) {
       for (int i = 0; i < data.length; i++) {
         data[i] += gs.sample() * noise[i];
