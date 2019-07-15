@@ -61,7 +61,7 @@ public class DarkTimeAnalysis implements PlugIn {
   private static final String TITLE = "Dark-time Analysis";
 
   private static final String[] METHOD;
-  private static ClusteringAlgorithm[] algorithms =
+  private static final ClusteringAlgorithm[] algorithms =
       new ClusteringAlgorithm[] {ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY,
           ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
           ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY,
