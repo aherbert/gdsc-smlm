@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.math.GeometryUtils;
 import uk.ac.sussex.gdsc.core.threshold.IntHistogram;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
@@ -78,7 +79,6 @@ import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.simple.RandomSource;
@@ -579,11 +579,14 @@ public class CameraModelAnalysis
     final int[] sample = new int[samples * emSamples * noiseSamples];
     int count = 0;
     final Round round = getRound(settings);
+    if (gain < 1) {
+      throw new IllegalStateException("EM-gain must be >= 1: " + gain);
+    }
+    final MarsagliaTsangGammaSampler gamma = new MarsagliaTsangGammaSampler(random, 1, gain);
     for (int n = poissonSample.length; n-- > 0;) {
       if (poissonSample[n] != 0) {
         // Gamma
-        final ContinuousSampler gamma =
-            SamplerUtils.createGammaSampler(random, poissonSample[n], gain);
+        gamma.setAlpha(poissonSample[n]);
 
         // Q. The Poisson-Gamma Function does not exactly match this
         // when the mean is around 1. The model from Ulbrich+Isacoff

@@ -48,6 +48,8 @@ import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
+import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -173,7 +175,6 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterMarsagliaTsangGammaSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -3026,25 +3027,25 @@ public class CreateData implements PlugIn {
             final double scale = emGain - 1 + 1 / image[i];
             final double shape = image[i];
             final double electrons = Math
-                .round(new AhrensDieterMarsagliaTsangGammaSampler(rng, scale, shape).sample() - 1);
+                .round(SamplerUtils.createGammaSampler(rng, shape, scale).sample() - 1);
             image[i] += electrons;
           }
         } else {
           // Standard gamma distribution
           // This is what is modelled in the Poisson-Gamma-Gaussian likelihood model
 
-          // TODO - Creates a custom gamma distribution where the shape can be set as a property.
+          // Create a custom gamma distribution where the shape can be set as a property.
           // This allows the other set-up cost of the sampler to be removed.
           final double scale = emGain;
+          final MarsagliaTsangGammaSampler sampler = new MarsagliaTsangGammaSampler(rng, 1, scale);
 
           for (int i = 0; i < image.length; i++) {
             if (image[i] <= 0) {
-              // What about modelling spontaneous electron events?
+              // Q. What about modelling spontaneous electron events?
               continue;
             }
-            final double shape = image[i];
-            image[i] = Math.round(
-                new AhrensDieterMarsagliaTsangGammaSampler(rng, scale, shape).sample() * image[i]);
+            sampler.setAlpha(image[i]);
+            image[i] = Math.round(sampler.sample() * image[i]);
           }
         }
       }
