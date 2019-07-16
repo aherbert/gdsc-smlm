@@ -68,8 +68,6 @@ import ij.text.TextWindow;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -259,12 +257,12 @@ public class DiffusionRateTest implements PlugIn {
      *
      * @param point the point
      * @param error the error
-     * @param rand the rand
+     * @param gauss the Gaussian sampler
      * @return the double
      */
-    public double distance2(Point point, double error, RandomGenerator rand) {
-      final double dx = (x + rand.nextGaussian() * error) - (point.x + rand.nextGaussian() * error);
-      final double dy = (y + rand.nextGaussian() * error) - (point.y + rand.nextGaussian() * error);
+    public double distance2(Point point, double error, NormalizedGaussianSampler gauss) {
+      final double dx = (x + gauss.sample() * error) - (point.x + gauss.sample() * error);
+      final double dy = (y + gauss.sample() * error) - (point.y + gauss.sample() * error);
       return dx * dx + dy * dy;
     }
   }
@@ -390,7 +388,8 @@ public class DiffusionRateTest implements PlugIn {
         // this is a projection of the 3D position onto the plane and so the particles
         // will not be evenly spread (there will be clustering at centre caused by the
         // poles)
-        final double[] axis = (diffusionType == DiffusionType.LINEAR_WALK) ? nextVector() : null;
+        final double[] axis =
+            (diffusionType == DiffusionType.LINEAR_WALK) ? nextVector(gauss) : null;
         for (int j = 0; j < totalSteps; j++) {
           double[] xyz = m.getCoordinates();
           final double[] originalXyz = xyz.clone();
@@ -436,7 +435,7 @@ public class DiffusionRateTest implements PlugIn {
               origin, results);
         }
       } else if (diffusionType == DiffusionType.LINEAR_WALK) {
-        final double[] axis = nextVector();
+        final double[] axis = nextVector(gauss);
         for (int j = 0; j < totalSteps; j++) {
           m.slide(diffusionSigma, axis, random);
           double[] xyz = m.getCoordinates();
@@ -950,13 +949,7 @@ public class DiffusionRateTest implements PlugIn {
     return true;
   }
 
-  private RandomGenerator rg;
-
-  private double[] nextVector() {
-    if (rg == null) {
-      rg = new Well19937c();
-    }
-
+  private static double[] nextVector(NormalizedGaussianSampler gauss) {
     // Allow dimensions to be changed for testing
     double length = 0;
     final double[] v = new double[3];
@@ -964,7 +957,7 @@ public class DiffusionRateTest implements PlugIn {
     final int dim = 3; // Potentially normalise over a different size
     while (length == 0) {
       for (int i = 0; i < size; i++) {
-        v[i] = rg.nextGaussian();
+        v[i] = gauss.sample();
       }
       for (int i = 0; i < dim; i++) {
         length += v[i] * v[i];
@@ -977,21 +970,26 @@ public class DiffusionRateTest implements PlugIn {
     return v;
   }
 
-  private void showExample(int totalSteps, double diffusionSigma, UniformRandomProvider random) {
+  private void showExample(int totalSteps, double diffusionSigma, UniformRandomProvider rng) {
     final MoleculeModel m = new MoleculeModel(0, new double[3]);
     final float[] xValues = new float[totalSteps];
     final float[] x = new float[totalSteps];
     final float[] y = new float[totalSteps];
     final DiffusionType diffusionType =
         CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
-    final double[] axis = (diffusionType == DiffusionType.LINEAR_WALK) ? nextVector() : null;
+    double[] axis;
+    if (diffusionType == DiffusionType.LINEAR_WALK) {
+      axis = nextVector(SamplerUtils.createNormalizedGaussianSampler(rng));
+    } else {
+      axis = null;
+    }
     for (int j = 0; j < totalSteps; j++) {
       if (diffusionType == DiffusionType.GRID_WALK) {
-        m.walk(diffusionSigma, random);
+        m.walk(diffusionSigma, rng);
       } else if (diffusionType == DiffusionType.LINEAR_WALK) {
-        m.slide(diffusionSigma, axis, random);
+        m.slide(diffusionSigma, axis, rng);
       } else {
-        m.move(diffusionSigma, random);
+        m.move(diffusionSigma, rng);
       }
       x[j] = (float) (m.getX());
       y[j] = (float) (m.getY());
@@ -1224,8 +1222,8 @@ public class DiffusionRateTest implements PlugIn {
 
     // Q - is this useful?
     final double p = myPrecision / settings.getPixelPitch();
-    final long seed = System.currentTimeMillis() + System.identityHashCode(this);
-    final RandomGenerator rand = new Well19937c(seed);
+    final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
 
     final int totalSteps = (int) Math
         .ceil(settings.getSeconds() * settings.getStepsPerSecond() - pluginSettings.aggregateSteps);
@@ -1251,7 +1249,7 @@ public class DiffusionRateTest implements PlugIn {
               // This can be varied but the effect on the output with only 1 loop
               // is the same if enough samples are present
               for (int ii = 1; ii-- > 0;) {
-                sum += last.distance2(current, p, rand);
+                sum += last.distance2(current, p, gauss);
                 count++;
               }
             }
@@ -1318,12 +1316,12 @@ public class DiffusionRateTest implements PlugIn {
 
     final StoredDataStatistics[] stats2 = new StoredDataStatistics[3];
     final StoredDataStatistics[] stats = new StoredDataStatistics[3];
-    final RandomGenerator[] random = new RandomGenerator[3];
-    final long seed = System.currentTimeMillis() + System.identityHashCode(this);
+    final NormalizedGaussianSampler[] gauss = new NormalizedGaussianSampler[3];
     for (int i = 0; i < 3; i++) {
       stats2[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
       stats[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
-      random[i] = new Well19937c(seed + i);
+      gauss[i] = SamplerUtils
+          .createNormalizedGaussianSampler(RandomSource.create(RandomSource.SPLIT_MIX_64));
     }
 
     final double scale = Math.sqrt(2 * pluginSettings.simpleD);
@@ -1334,9 +1332,9 @@ public class DiffusionRateTest implements PlugIn {
       }
       final double[] xyz = new double[3];
       if (pluginSettings.linearDiffusion) {
-        final double[] dir = nextVector();
+        final double[] dir = nextVector(gauss[0]);
         for (int step = 0; step < pluginSettings.simpleSteps; step++) {
-          final double d = ((random[1].nextDouble() > 0.5) ? -1 : 1) * random[0].nextGaussian();
+          final double d = gauss[0].sample();
           for (int i = 0; i < 3; i++) {
             xyz[i] += dir[i] * d;
           }
@@ -1344,7 +1342,7 @@ public class DiffusionRateTest implements PlugIn {
       } else {
         for (int step = 0; step < pluginSettings.simpleSteps; step++) {
           for (int i = 0; i < 3; i++) {
-            xyz[i] += random[i].nextGaussian();
+            xyz[i] += gauss[i].sample();
           }
         }
       }
