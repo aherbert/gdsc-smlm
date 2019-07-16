@@ -34,7 +34,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.measure.Calibration;
@@ -47,13 +46,13 @@ import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
 import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /**
  * This plugin creates a mask image stack using an XY and XZ mask image.
  */
-public class NucleusMask implements PlugIn, MouseListener, DialogListener {
+public class NucleusMask implements PlugIn {
   private static final String TITLE = "Nucleus Mask";
 
   private static final String[] MODE = {"Random", "User Input"};
@@ -212,19 +211,20 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
 
     if (settings.getMode() == 1) {
       // Allow mouse click to draw spheres
-      imp.getCanvas().addMouseListener(this);
+      final MouseAdapter ml = createMouseAdapter();
+      imp.getCanvas().addMouseListener(ml);
 
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addHelp(About.HELP_URL);
 
       gd.addMessage("Click the image to add a sphere");
       gd.addNumericField("Diameter", diameter, 2, 6, "um");
-      gd.addDialogListener(this);
+      gd.addDialogListener(this::dialogItemChanged);
       gd.hideCancelButton();
       gd.setOKLabel("Close");
       gd.showDialog();
 
-      imp.getCanvas().removeMouseListener(this);
+      imp.getCanvas().removeMouseListener(ml);
 
       if (diameter != settings.getDiameter()) {
         settings.setDiameter(diameter);
@@ -300,59 +300,42 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
     return s;
   }
 
-  @Override
-  public void mouseClicked(MouseEvent event) {
-    if (event == null) {
-      return;
-    }
-    final ImageCanvas ic = imp.getCanvas();
-    final int cx = ic.offScreenX(event.getX());
-    final int cy = ic.offScreenY(event.getY());
-    final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
-    final int radiusz = (int) Math.ceil(diameter * 500 / nmPerSlice);
-    if (sphere == null) {
-      final int inc = 2 * radius + 1;
-      final int incz = 2 * radiusz + 1;
-      sphere = createEllipsoid(inc, inc, incz);
-    }
-    final int xloc = cx - radius;
-    final int yloc = cy - radius;
-    final int offset = imp.getCurrentSlice() - radiusz;
-    final ImageStack stack = imp.getImageStack();
-    for (int slice = 1; slice <= sphere.getSize(); slice++) {
-      final int i = slice + offset;
-      if (i < 1 || i > stack.getSize()) {
-        continue;
+  private MouseAdapter createMouseAdapter() {
+    return new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent event) {
+        if (event == null) {
+          return;
+        }
+        final ImageCanvas ic = imp.getCanvas();
+        final int cx = ic.offScreenX(event.getX());
+        final int cy = ic.offScreenY(event.getY());
+        final int radius = (int) Math.ceil(diameter * 500 / nmPerPixel);
+        final int radiusz = (int) Math.ceil(diameter * 500 / nmPerSlice);
+        if (sphere == null) {
+          final int inc = 2 * radius + 1;
+          final int incz = 2 * radiusz + 1;
+          sphere = createEllipsoid(inc, inc, incz);
+        }
+        final int xloc = cx - radius;
+        final int yloc = cy - radius;
+        final int offset = imp.getCurrentSlice() - radiusz;
+        final ImageStack stack = imp.getImageStack();
+        for (int slice = 1; slice <= sphere.getSize(); slice++) {
+          final int i = slice + offset;
+          if (i < 1 || i > stack.getSize()) {
+            continue;
+          }
+          final ImageProcessor ip = stack.getProcessor(i);
+          final ImageProcessor ip2 = sphere.getProcessor(slice);
+          ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
+        }
+        imp.updateAndDraw();
       }
-      final ImageProcessor ip = stack.getProcessor(i);
-      final ImageProcessor ip2 = sphere.getProcessor(slice);
-      ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
-    }
-    imp.updateAndDraw();
+    };
   }
 
-  @Override
-  public void mousePressed(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseReleased(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseEntered(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseExited(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+  private boolean dialogItemChanged(GenericDialog gd, @SuppressWarnings("unused") AWTEvent event) {
     final double old = diameter;
     diameter = gd.getNextNumber();
     if (diameter != old) {
