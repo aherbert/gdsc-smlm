@@ -32,12 +32,13 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -78,12 +79,10 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
@@ -1306,7 +1305,7 @@ public class PulseActivationAnalysis implements PlugIn {
           density = dc.countAll(channels);
         }
 
-        long seed = System.currentTimeMillis();
+        final SplitMix sm = new SplitMix(System.currentTimeMillis());
 
         // -=-=-=--=-=-
         // Unmix the specific activations to their correct channel.
@@ -1320,8 +1319,8 @@ public class PulseActivationAnalysis implements PlugIn {
             (int) Math.ceil((double) specificActivations.length / numberOfThreads);
         for (int from = 0; from < specificActivations.length;) {
           final int to = Math.min(from + nPerThread, specificActivations.length);
-          futures.add(executor
-              .submit(new SpecificUnmixWorker(runSettings, density, newChannel, from, to, seed++)));
+          futures.add(executor.submit(new SpecificUnmixWorker(runSettings, density, newChannel,
+              from, to, sm.copyAndJump())));
           from = to;
         }
         waitToFinish();
@@ -1346,7 +1345,7 @@ public class PulseActivationAnalysis implements PlugIn {
       if (runSettings.nonSpecificCorrection != Correction.NONE) {
         createDensityCounter((float) runSettings.densityRadius);
 
-        long seed = System.currentTimeMillis();
+        final SplitMix sm = new SplitMix(System.currentTimeMillis());
 
         IJ.showStatus("Non-specific assignment");
         createThreadPool();
@@ -1357,8 +1356,8 @@ public class PulseActivationAnalysis implements PlugIn {
             (int) Math.ceil((double) nonSpecificActivations.length / numberOfThreads);
         for (int from = 0; from < nonSpecificActivations.length;) {
           final int to = Math.min(from + nPerThread, nonSpecificActivations.length);
-          futures.add(executor
-              .submit(new NonSpecificUnmixWorker(runSettings, dc, newChannel, from, to, seed++)));
+          futures.add(executor.submit(
+              new NonSpecificUnmixWorker(runSettings, dc, newChannel, from, to, sm.copyAndJump())));
           from = to;
         }
         waitToFinish();
@@ -1486,8 +1485,7 @@ public class PulseActivationAnalysis implements PlugIn {
         count = 0;
       }
       found = count > threshold;
-    }
-    while (!found && index < 255);
+    } while (!found && index < 255);
     final int hmin = index;
     index = 256;
     do {
@@ -1497,8 +1495,7 @@ public class PulseActivationAnalysis implements PlugIn {
         count = 0;
       }
       found = count > threshold;
-    }
-    while (!found && index > 0);
+    } while (!found && index > 0);
     final int hmax = index;
     if (hmax >= hmin) {
       double min = stats.histMin + hmin * stats.binSize;
@@ -1554,15 +1551,15 @@ public class PulseActivationAnalysis implements PlugIn {
     final int[] newChannel;
     final int from;
     final int to;
-    RandomGenerator random;
+    UniformRandomProvider rng;
     int[] assignedChannel = new int[channels];
     double[] probability = new double[channels];
 
-    public UnmixWorker(int[] newChannel, int from, int to, long seed) {
+    public UnmixWorker(int[] newChannel, int from, int to, UniformRandomProvider rng) {
       this.newChannel = newChannel;
       this.from = from;
       this.to = to;
-      random = new Well19937c(seed);
+      this.rng = rng;
     }
 
     int weightedRandomSelection(double cutoff) {
@@ -1578,7 +1575,7 @@ public class PulseActivationAnalysis implements PlugIn {
         return 0;
       }
 
-      final double sum2 = sum * random.nextDouble();
+      final double sum2 = sum * rng.nextDouble();
       sum = 0;
       for (int j = channels; j-- > 0;) {
         sum += probability[j];
@@ -1608,7 +1605,7 @@ public class PulseActivationAnalysis implements PlugIn {
         return 0;
       }
 
-      return (size > 1) ? assignedChannel[random.nextInt(size)] + 1 : assignedChannel[0] + 1;
+      return (size > 1) ? assignedChannel[rng.nextInt(size)] + 1 : assignedChannel[0] + 1;
     }
   }
 
@@ -1620,8 +1617,8 @@ public class PulseActivationAnalysis implements PlugIn {
     final int[][] density;
 
     public SpecificUnmixWorker(RunSettings runSettings, int[][] density, int[] newChannel, int from,
-        int to, long seed) {
-      super(newChannel, from, to, seed);
+        int to, UniformRandomProvider rng) {
+      super(newChannel, from, to, rng);
       this.runSettings = runSettings;
       this.density = density;
     }
@@ -1706,8 +1703,8 @@ public class PulseActivationAnalysis implements PlugIn {
     final DensityCounter dc;
 
     public NonSpecificUnmixWorker(RunSettings runSettings, DensityCounter dc, int[] newChannel,
-        int from, int to, long seed) {
-      super(newChannel, from, to, seed);
+        int from, int to, UniformRandomProvider rng) {
+      super(newChannel, from, to, rng);
       this.runSettings = runSettings;
       this.dc = dc;
     }
@@ -2021,10 +2018,9 @@ public class PulseActivationAnalysis implements PlugIn {
     // Assume 10 frames after each channel pulse => 30 frames per cycle
     final double precision = sim_precision[channel] / sim_nmPerPixel;
 
-    final BinomialDistribution[] bd = new BinomialDistribution[4];
-    final RandomGenerator rand = new RandomGeneratorAdapter(rng);
+    final DiscreteSampler[] bd = new DiscreteSampler[4];
     for (int i = 0; i < 3; i++) {
-      bd[i] = createBinomialDistribution(rand, n, p0[i]);
+      bd[i] = createBinomialDistribution(rng, n, p0[i]);
     }
 
     final int[] frames = new int[27];
@@ -2035,7 +2031,7 @@ public class PulseActivationAnalysis implements PlugIn {
       }
       frames[j++] = i;
     }
-    bd[3] = createBinomialDistribution(rand, n, p * sim_nonSpecificFrequency);
+    bd[3] = createBinomialDistribution(rng, n, p * sim_nonSpecificFrequency);
 
     // Count the actual cross talk
     final int[] count = new int[3];
@@ -2062,7 +2058,7 @@ public class PulseActivationAnalysis implements PlugIn {
         MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
   }
 
-  private int simulateActivations(UniformRandomProvider rng, BinomialDistribution bd,
+  private int simulateActivations(UniformRandomProvider rng, DiscreteSampler bd,
       float[][] molecules, MemoryPeakResults results, int time, double precision) {
     if (bd == null) {
       return 0;
@@ -2078,24 +2074,22 @@ public class PulseActivationAnalysis implements PlugIn {
       float y;
       do {
         x = (float) (xy[0] + gauss.sample() * precision);
-      }
-      while (outOfBounds(x));
+      } while (outOfBounds(x));
       do {
         y = (float) (xy[1] + gauss.sample() * precision);
-      }
-      while (outOfBounds(y));
+      } while (outOfBounds(y));
 
       results.add(createResult(time, x, y));
     }
     return samples.length;
   }
 
-  private static BinomialDistribution createBinomialDistribution(RandomGenerator rand, int trials,
+  private static DiscreteSampler createBinomialDistribution(UniformRandomProvider rand, int trials,
       double pvalue) {
     if (pvalue == 0) {
       return null;
     }
-    return new BinomialDistribution(rand, trials, pvalue);
+    return SamplerUtils.createBinomialSampler(rand, trials, pvalue);
   }
 
   private IdPeakResult createResult(int time, float x, float y) {

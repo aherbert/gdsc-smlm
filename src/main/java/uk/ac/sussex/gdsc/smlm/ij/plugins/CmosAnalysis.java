@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -46,6 +46,9 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
@@ -64,14 +67,16 @@ import ij.plugin.PlugIn;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TestUtils;
-import org.apache.commons.math3.util.MathArrays;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -207,7 +212,7 @@ public class CmosAnalysis implements PlugIn {
     static final short MAX_SHORT = (short) 65335;
 
     final Ticker ticker;
-    final RandomGenerator rg;
+    final UniformRandomProvider rg;
     final String out;
     final float[] pixelOffset;
     final float[] pixelVariance;
@@ -216,11 +221,12 @@ public class CmosAnalysis implements PlugIn {
     final int to;
     final int blockSize;
     final int photons;
+    final NormalizedGaussianSampler gauss;
 
-    SimulationWorker(Ticker ticker, long seed, String out, ImageStack stack, int from, int to,
-        int blockSize, int photons) {
+    SimulationWorker(Ticker ticker, UniformRandomProvider rng, String out, ImageStack stack,
+        int from, int to, int blockSize, int photons) {
       this.ticker = ticker;
-      rg = new Well19937c(seed);
+      rg = rng;
       pixelOffset = (float[]) stack.getPixels(1);
       pixelVariance = (float[]) stack.getPixels(2);
       pixelGain = (float[]) stack.getPixels(3);
@@ -229,6 +235,7 @@ public class CmosAnalysis implements PlugIn {
       this.to = to;
       this.blockSize = blockSize;
       this.photons = photons;
+      gauss = SamplerUtils.createNormalizedGaussianSampler(rg);
     }
 
     @Override
@@ -248,9 +255,7 @@ public class CmosAnalysis implements PlugIn {
       int[] poisson = null;
       if (photons != 0) {
         // For speed we can precompute a set of random numbers to reuse
-        final RandomGenerator rg = new PseudoRandomGenerator(pixelVariance.length, this.rg);
-        final PoissonDistribution pd = new PoissonDistribution(rg, photons,
-            PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+        final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, photons);
         poisson = new int[pixelVariance.length];
         for (int i = poisson.length; i-- > 0;) {
           poisson[i] = pd.sample();
@@ -266,7 +271,7 @@ public class CmosAnalysis implements PlugIn {
         if (poisson == null) {
           for (int j = 0; j < pixelOffset.length; j++) {
             // Fixed offset per pixel plus a variance
-            final double p = pixelOffset[j] + rg.nextGaussian() * pixelSd[j];
+            final double p = pixelOffset[j] + gauss.sample() * pixelSd[j];
             pixels[j] = clip16bit(p);
           }
         } else {
@@ -274,14 +279,14 @@ public class CmosAnalysis implements PlugIn {
             // Fixed offset per pixel plus a variance plus a
             // fixed gain multiplied by a Poisson sample of the photons
             final double p =
-                pixelOffset[j] + rg.nextGaussian() * pixelSd[j] + (poisson[j] * pixelGain[j]);
+                pixelOffset[j] + gauss.sample() * pixelSd[j] + (poisson[j] * pixelGain[j]);
             pixels[j] = clip16bit(p);
           }
 
           // Rotate Poisson numbers.
           // Shuffling what we have is faster than generating new values
           // and we should have enough.
-          MathArrays.shuffle(poisson, rg);
+          RandomUtils.shuffle(poisson, rg);
         }
 
         // Save image
@@ -513,17 +518,18 @@ public class CmosAnalysis implements PlugIn {
     IJ.showStatus("Creating random per-pixel readout");
     final long start = System.currentTimeMillis();
 
-    final RandomGenerator rg = new Well19937c();
-    final PoissonDistribution pd = new PoissonDistribution(rg, settings.offset,
-        PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-    final ExponentialDistribution ed = new ExponentialDistribution(rg, settings.variance,
-        ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+    final UniformRandomProvider rg = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+
+    final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, settings.offset);
+    final ContinuousSampler ed = new AhrensDieterExponentialSampler(rg, settings.variance);
+    final GaussianSampler gauss =
+        SamplerUtils.createGaussianSampler(rg, settings.gain, settings.gainStdDev);
     Ticker ticker = ImageJUtils.createTicker(n, 0);
     for (int i = 0; i < n; i++) {
       // Q. Should these be clipped to a sensible range?
       pixelOffset[i] = pd.sample();
       pixelVariance[i] = (float) ed.sample();
-      pixelGain[i] = (float) (settings.gain + rg.nextGaussian() * settings.gainStdDev);
+      pixelGain[i] = (float) gauss.sample();
       ticker.tick();
     }
     IJ.showProgress(1);
@@ -554,8 +560,7 @@ public class CmosAnalysis implements PlugIn {
     int numberPerThread = (int) Math.ceil((double) settings.frames / numberOfThreads);
     // Convert to fit the block size
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
-    long seed = start;
-
+    final SplitMix splitMix = new SplitMix(start);
     ticker = ImageJUtils.createTicker((long) photons.length * settings.frames, threadCount);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
@@ -566,8 +571,8 @@ public class CmosAnalysis implements PlugIn {
 
       for (int from = 0; from < settings.frames;) {
         final int to = Math.min(from + numberPerThread, settings.frames);
-        futures.add(executor.submit(new SimulationWorker(ticker, seed++, out.toString(),
-            simulationStack, from, to, blockSize, p)));
+        futures.add(executor.submit(new SimulationWorker(ticker, splitMix.copyAndJump(),
+            out.toString(), simulationStack, from, to, blockSize, p)));
         from = to;
       }
 

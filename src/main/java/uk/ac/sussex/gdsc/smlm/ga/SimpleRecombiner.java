@@ -25,9 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 
 import java.util.Arrays;
 
@@ -38,9 +39,9 @@ import java.util.Arrays;
  */
 public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implements Recombiner<T> {
   /** The fraction of the sequence positions to mutate on average. */
-  final double fraction;
-  /** The mean number of additional children. */
-  final double meanChildren;
+  private final double fraction;
+  /** The sampler used to select the number of additional children. */
+  private final DiscreteSampler additionalChildrenSampler;
 
   /**
    * Instantiates a new simple recombiner.
@@ -48,11 +49,12 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
    * @param random the random
    * @param fraction The fraction of the sequence positions to recombine on average
    * @param meanChildren The mean number of additional children
+   * @throws IllegalArgumentException if the mean is negative
    */
-  public SimpleRecombiner(RandomDataGenerator random, double fraction, double meanChildren) {
+  public SimpleRecombiner(UniformRandomProvider random, double fraction, double meanChildren) {
     super(random);
     this.fraction = fraction;
-    this.meanChildren = meanChildren;
+    additionalChildrenSampler = PoissonSamplerUtils.createPoissonSampler(random, meanChildren);
   }
 
   /**
@@ -69,10 +71,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
    */
   @Override
   public Chromosome<T>[] cross(Chromosome<T> chromosome1, Chromosome<T> chromosome2) {
-    int childCount = 1;
-    if (meanChildren > 0) {
-      childCount = Math.max(1, (int) random.nextPoisson(meanChildren));
-    }
+    final int childCount = Math.max(1, additionalChildrenSampler.sample());
 
     @SuppressWarnings("unchecked")
     final Chromosome<T>[] children = new Chromosome[childCount];
@@ -95,7 +94,8 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
       double[] s1, double[] s2) {
     int crossoverCount = 1;
     if (fraction > 0) {
-      crossoverCount = Math.max(1, (int) random.nextPoisson(fraction * chromosome1.length()));
+      crossoverCount = Math.max(1,
+          PoissonSamplerUtils.nextPoissonSample(random, fraction * chromosome1.length()));
     }
 
     // Randomly select positions using a partial Fischer-Yates shuffle
@@ -104,9 +104,8 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
       positions[i] = i;
     }
 
-    final RandomGenerator ran = random.getRandomGenerator();
     for (int i = positions.length, n = crossoverCount; i-- > 1 && n-- > 0;) {
-      final int j = (ran.nextInt(i + 1));
+      final int j = random.nextInt(i + 1);
       final int tmp = positions[i];
       positions[i] = positions[j];
       positions[j] = tmp;
@@ -148,6 +147,6 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
     c2 = c2.newChromosome(n2);
 
     // Ensure the child order is random
-    return (ran.nextDouble() < 0.5) ? new ChromosomePair<>(c1, c2) : new ChromosomePair<>(c2, c1);
+    return random.nextBoolean() ? new ChromosomePair<>(c1, c2) : new ChromosomePair<>(c2, c1);
   }
 }

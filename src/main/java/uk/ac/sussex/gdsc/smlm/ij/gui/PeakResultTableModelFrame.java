@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
@@ -51,9 +52,6 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -536,7 +534,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    * @param args the arguments
    */
   public static void main(String[] args) {
-    final RandomGenerator r = new Well19937c();
+    final SplitMix r = new SplitMix(System.currentTimeMillis());
     final int n = 20;
 
     final ListSelectionModel selectionModel = new DefaultListSelectionModel();

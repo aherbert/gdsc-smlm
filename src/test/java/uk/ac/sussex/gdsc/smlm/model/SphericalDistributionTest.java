@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -64,8 +63,7 @@ public class SphericalDistributionTest {
   public void canSampleUsingTransformationMethod(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final double radius = 10 + rg.nextDouble() * 10;
-    final SphericalDistribution dist =
-        new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
+    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(false);
     for (int i = 100; i-- > 0;) {
       dist.next();
@@ -76,8 +74,7 @@ public class SphericalDistributionTest {
   public void canSampleUsingRejectionMethod(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final double radius = 10 + rg.nextDouble() * 10;
-    final SphericalDistribution dist =
-        new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
+    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(true);
     for (int i = 100; i-- > 0;) {
       dist.next();
@@ -90,8 +87,7 @@ public class SphericalDistributionTest {
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
     final double radius = 10 + rg.nextDouble() * 10;
-    final SphericalDistribution dist =
-        new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
+    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(false);
     for (int i = 100; i-- > 0;) {
       dist.next();
@@ -138,8 +134,7 @@ public class SphericalDistributionTest {
     results.setSortAfterEnd(true);
     final int radius = 10;
     final Rectangle bounds = new Rectangle(0, 0, radius * 2, radius * 2);
-    final SphericalDistribution dist =
-        new SphericalDistribution(radius, new RandomGeneratorAdapter(rg));
+    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(useRejctionMethod);
     final float scale = 10;
     results.begin();

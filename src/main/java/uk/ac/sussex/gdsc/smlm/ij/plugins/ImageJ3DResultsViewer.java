@@ -42,6 +42,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
@@ -112,8 +113,6 @@ import ij3d.UniverseSettings;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Canvas3D;
@@ -1588,7 +1587,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         final double min = -settings.getDepthRange() / 2;
         switch (mode) {
           case DITHER:
-            final RandomGenerator r = new Well19937c(settings.getDitherSeed());
+            final SplitMix r = new SplitMix(settings.getDitherSeed());
             for (int i = points.size(); i-- > 0;) {
               points.getf(i).z += (min + r.nextDouble() * range);
             }

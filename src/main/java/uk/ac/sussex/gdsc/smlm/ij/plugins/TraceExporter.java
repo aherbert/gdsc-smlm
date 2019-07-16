@@ -27,6 +27,8 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -45,8 +47,8 @@ import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.internal.SeedFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -228,13 +230,14 @@ public class TraceExporter implements PlugIn {
       // Just leave any exceptions to trickle up and kill the plugin
       final TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
       final double w = c.convertBack(wobble);
-      final RandomGenerator r = new Well19937c();
+      final SplitMix sm = new SplitMix(SeedFactory.createLong());
+      final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(sm);
       final boolean is3D = results.is3D();
       results.forEach((PeakResultProcedure) peakResult -> {
-        peakResult.setXPosition((float) (peakResult.getXPosition() + w * r.nextGaussian()));
-        peakResult.setYPosition((float) (peakResult.getYPosition() + w * r.nextGaussian()));
+        peakResult.setXPosition((float) (peakResult.getXPosition() + w * gauss.sample()));
+        peakResult.setYPosition((float) (peakResult.getYPosition() + w * gauss.sample()));
         if (is3D) {
-          peakResult.setZPosition((float) (peakResult.getZPosition() + w * r.nextGaussian()));
+          peakResult.setZPosition((float) (peakResult.getZPosition() + w * gauss.sample()));
         }
       });
     }

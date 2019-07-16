@@ -24,25 +24,24 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
 
 /**
  * Base class for data generation using randomness.
  */
 public abstract class Randomiser {
-  /** The random data generator. */
-  final RandomDataGenerator random;
+  /** The source of randomness. */
+  final UniformRandomProvider random;
 
   /**
    * Instantiates a new randomiser.
    *
    * @param random the random data generator
-   * @throws IllegalArgumentException if the random generator is null
+   * @throws NullPointerException if the random generator is null
    */
-  public Randomiser(RandomDataGenerator random) {
-    if (random == null) {
-      throw new IllegalArgumentException("Random data generator cannot be null");
-    }
-    this.random = random;
+  public Randomiser(UniformRandomProvider random) {
+    this.random = ValidationUtils.checkNotNull(random, "Random generator cannot be null");
   }
 }

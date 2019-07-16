@@ -25,10 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.data.ComputationException;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
    * @param fraction The fraction of the individuals to select (set between 0 and 1)
    * @param max The maximum number of individuals to select
    */
-  public RampedSelectionStrategy(RandomDataGenerator random, double fraction, int max) {
+  public RampedSelectionStrategy(UniformRandomProvider random, double fraction, int max) {
     super(random, fraction, max);
   }
 
@@ -71,7 +71,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       return individuals;
     }
 
-    final ArrayList<Chromosome<T>> scored = new ArrayList<>(individuals.size());
+    final List<Chromosome<T>> scored = new TurboList<>(individuals.size());
     // Add only those with a fitness score
     for (final Chromosome<T> c : individuals) {
       if (c.getFitness() != null) {
@@ -93,7 +93,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     ChromosomeComparator.sort(scored);
 
     // Create the output subset
-    final ArrayList<Chromosome<T>> subset = new ArrayList<>(size);
+    final List<Chromosome<T>> subset = new TurboList<>(size);
 
     // Get the number of point available for selection:
     // n in this case is (size-1) since we include the top ranking individual.
@@ -121,8 +121,8 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       // Used to check we pick something
       final long previous = cumulative;
 
-      // Generate a random positive within the cumulative range - note the end points are inclusive
-      final long next = random.nextLong(1L, cumulative);
+      // Generate a random positive within the cumulative range [1, cumulative]
+      final long next = 1L + random.nextLong(cumulative);
       // Find the random position
       long total = 0;
       for (int i = 1; i < rank.length; i++) {
@@ -160,7 +160,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
     // This method may be called when fitness is unknown.
     // Only sort those with a fitness score.
-    ArrayList<Chromosome<T>> list = null;
+    List<Chromosome<T>> list = null;
     int count = 0;
     for (final Chromosome<T> c : individuals) {
       if (c.getFitness() == null) {
@@ -176,8 +176,8 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
         return;
       }
       // A mixed population, some of which we can sort and some we cannot.
-      list = new ArrayList<>(toSort);
-      final ArrayList<Chromosome<T>> subset = new ArrayList<>(count);
+      list = new TurboList<>(toSort);
+      final List<Chromosome<T>> subset = new TurboList<>(count);
       for (final Chromosome<T> c : individuals) {
         if (c.getFitness() == null) {
           subset.add(c);
@@ -195,7 +195,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
       list.addAll(subset);
     } else {
-      list = new ArrayList<>(individuals);
+      list = new TurboList<>(individuals);
       ChromosomeComparator.sort(list);
 
       // Build a cumulative array of rank weighting. The highest ranked starts at n.
@@ -207,8 +207,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     // Reset
     numberSelected = 0;
 
-    // Bounds are inclusive so subtract 1
-    upper = sum[sum.length - 1] - 1;
+    upper = sum[sum.length - 1];
   }
 
   /**
@@ -260,14 +259,14 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       second = 1;
     } else {
       // Pick from the first n
-      if (numberSelected == 0) {
+      numberSelected++;
+      if (numberSelected == 1) {
         // This is the first call so select the top individual
         first = 0;
       } else {
         // Restrict the upper limit to the population range
-        first = random.nextInt(0, Math.min(numberSelected, sorted.size() - 1));
+        first = random.nextInt(Math.min(numberSelected, sorted.size()));
       }
-      numberSelected++;
 
       // Select the second from the ramped cumulative
       second = nextSample();
@@ -280,8 +279,9 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
   }
 
   private int nextSample() {
-    final long next = random.nextLong(0, upper);
-    // JUnit test shows that the simple scan through the array is faster for small arrays
+    final long next = random.nextLong(upper);
+    // JUnit test shows that the simple scan through the array is faster than binary search
+    // for small arrays since the ramped sum is heavily weighted to the start.
     if (sum.length < 100) {
       return search(sum, next);
     }

@@ -24,9 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 /**
  * Samples uniformly from the specified spherical volume.
@@ -35,7 +39,8 @@ public class SphericalDistribution implements SpatialDistribution {
   private final double radius;
   private final double r2;
   private final double range;
-  private final RandomGenerator randomGenerator;
+  private final UniformRandomProvider randomGenerator;
+  private final NormalizedGaussianSampler gauss;
   private boolean useRejectionMethod = true;
   private final double[] origin = new double[3];
 
@@ -54,17 +59,16 @@ public class SphericalDistribution implements SpatialDistribution {
    * @param radius the radius
    * @param randomGenerator the random generator
    */
-  public SphericalDistribution(double radius, RandomGenerator randomGenerator) {
+  public SphericalDistribution(double radius, UniformRandomProvider randomGenerator) {
+    ValidationUtils.checkPositive(radius, "Radius");
     if (randomGenerator == null) {
-      randomGenerator = new JDKRandomGenerator();
-    }
-    if (radius < 0) {
-      throw new IllegalArgumentException("Radius must be positive: {0}");
+      randomGenerator = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
     }
     this.radius = radius;
     this.r2 = radius * radius;
     this.range = 2 * radius;
     this.randomGenerator = randomGenerator;
+    gauss = SamplerUtils.createNormalizedGaussianSampler(randomGenerator);
   }
 
   @Override
@@ -85,8 +89,7 @@ public class SphericalDistribution implements SpatialDistribution {
             xyz[i] = randomGenerator.nextDouble() * range - radius;
           }
           d2 = xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2];
-        }
-        while (d2 > r2);
+        } while (d2 > r2);
       } else {
         // -=-=-=-
         // Transformation method:
@@ -95,7 +98,7 @@ public class SphericalDistribution implements SpatialDistribution {
 
         // Generate a random unit vector: X1, X2, X3 sampled with mean 0 and variance 1
         for (int i = 0; i < 3; i++) {
-          xyz[i] = randomGenerator.nextGaussian();
+          xyz[i] = gauss.sample();
         }
 
         // Calculate the distance: RsU^1/3 / length

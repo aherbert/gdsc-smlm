@@ -28,6 +28,7 @@ import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -60,8 +61,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -230,8 +229,7 @@ public class EmGainAnalysis implements PlugInFilter {
     g[g.length - 1] = 1; // Ensure value of 1 at the end
 
     // Randomly sample
-    final RandomGenerator random =
-        new Well44497b(System.currentTimeMillis() + System.identityHashCode(this));
+    final UniformRandomProvider random = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
     final int bias = (int) settingBias;
     final int[] bins = new int[x.length];
     for (int i = 0; i < x.length; i++) {
@@ -239,23 +237,14 @@ public class EmGainAnalysis implements PlugInFilter {
     }
     final int[] h = new int[bins[bins.length - 1] + 1];
     final int steps = simulationSize;
+    final Ticker ticker = ImageJUtils.createTicker(steps, 1);
     for (int n = 0; n < steps; n++) {
-      if (n % 64 == 0) {
-        IJ.showProgress(n, steps);
-      }
-      final double p = random.nextDouble();
-      int index = binarySearch(g, p);
+      int index = binarySearch(g, random.nextDouble());
       if (index < 0) {
         index = -(index + 1);
       }
       h[bins[index]]++;
-
-      // for (int i = 0; i < g.length; i++)
-      // if (p <= g[i])
-      // {
-      // h[i]++;
-      // break;
-      // }
+      ticker.tick();
     }
     return h;
   }

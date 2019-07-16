@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import java.io.Serializable;
@@ -412,17 +411,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
       }
     }
     return list.toArray();
-  }
-
-  @Override
-  public void shuffle(RandomGenerator randomSource) {
-    // Fisher-Yates shuffle
-    for (int i = size; i-- > 1;) {
-      final int j = randomSource.nextInt(i + 1);
-      final PeakResult tmp = results[i];
-      results[i] = results[j];
-      results[j] = tmp;
-    }
   }
 
   @Override

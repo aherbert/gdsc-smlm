@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
@@ -53,8 +54,8 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -1050,7 +1051,8 @@ public class JumpDistanceAnalysis {
     final boolean isActiveCma = true;
     final int diagonalOnly = 20;
     final int checkFeasableCount = 1;
-    final RandomGenerator random = new Well19937c();
+    final RandomGenerator random =
+        new RandomGeneratorAdapter(RandomSource.create(RandomSource.XOR_SHIFT_1024_S));
     final boolean generateStatistics = false;
     final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(rel, abs);
 

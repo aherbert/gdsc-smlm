@@ -24,7 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 
 /**
  * Mutates the sequence by selecting random positions and random shifts.
@@ -35,12 +39,13 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
   /** The fraction of the sequence positions to mutate on average. */
   final double fraction;
 
-  private boolean override;
   private double[] stepSize;
   private double[] lower;
   private double[] upper;
   private int[] positions;
   private int positionsCount;
+
+  private final NormalizedGaussianSampler gauss;
 
   /**
    * Instantiates a new simple mutator.
@@ -48,9 +53,10 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
    * @param random the random data generator
    * @param fraction The fraction of the sequence positions to mutate on average
    */
-  public SimpleMutator(RandomDataGenerator random, double fraction) {
+  public SimpleMutator(UniformRandomProvider random, double fraction) {
     super(random);
     this.fraction = fraction;
+    gauss = SamplerUtils.createNormalizedGaussianSampler(random);
   }
 
   /**
@@ -80,7 +86,6 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
     this.lower = lower;
     this.upper = upper;
     getStepPositions(stepSize);
-    override = true; // (stepSize != null || lower != null || upper != null);
   }
 
   /**
@@ -113,12 +118,12 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 
     final double mean = fraction * chromosome.length();
     if (mean > 0) {
-      int count = (int) random.nextPoisson(mean);
+      int count = PoissonSamplerUtils.nextPoissonSample(random, mean);
       final double[] step;
       final double[] min;
       final double[] max;
       // Only override if the length is correct
-      if (override && stepSize.length == chromosome.length()) {
+      if (stepSize.length == chromosome.length()) {
         step = stepSize;
         min = lower;
         max = upper;
@@ -134,19 +139,15 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
       }
 
       while (count-- > 0) {
-        final int i = positions[random.getRandomGenerator().nextInt(positionsCount)];
+        final int i = positions[random.nextInt(positionsCount)];
 
-        sequence[i] = random.nextGaussian(sequence[i], step[i]);
+        sequence[i] += gauss.sample() * step[i];
         // Check limits
-        if (min != null) {
-          if (sequence[i] < min[i]) {
-            sequence[i] = min[i];
-          }
+        if (min != null && sequence[i] < min[i]) {
+          sequence[i] = min[i];
         }
-        if (max != null) {
-          if (sequence[i] > max[i]) {
-            sequence[i] = max[i];
-          }
+        if (max != null && sequence[i] > max[i]) {
+          sequence[i] = max[i];
         }
       }
     }

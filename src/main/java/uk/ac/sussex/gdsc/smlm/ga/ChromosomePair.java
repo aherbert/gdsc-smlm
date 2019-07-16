@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+
 /**
  * Define a pair of chromosomes.
  *
@@ -40,13 +42,10 @@ public class ChromosomePair<T extends Comparable<T>> {
    *
    * @param c1 the first chromosome
    * @param c2 the second chromosome
-   * @throws IllegalArgumentException if either chromosome is null
+   * @throws NullPointerException if either chromosome is null
    */
   public ChromosomePair(Chromosome<T> c1, Chromosome<T> c2) {
-    if (c1 == null || c2 == null) {
-      throw new IllegalArgumentException("Chromosomes must not be null");
-    }
-    this.c1 = c1;
-    this.c2 = c2;
+    this.c1 = ValidationUtils.checkNotNull(c1, "Chromosome 1 must not be null");
+    this.c2 = ValidationUtils.checkNotNull(c2, "Chromosome 2 must not be null");
   }
 }

@@ -28,8 +28,6 @@ import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.rng.JdkRandomAdaptor;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
-import org.apache.commons.math3.random.RandomAdaptor;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Arrays;
@@ -212,11 +210,6 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
       }
     }
     return list.toArray();
-  }
-
-  @Override
-  public void shuffle(RandomGenerator randomSource) {
-    Collections.shuffle(results, RandomAdaptor.createAdaptor(randomSource));
   }
 
   @Override

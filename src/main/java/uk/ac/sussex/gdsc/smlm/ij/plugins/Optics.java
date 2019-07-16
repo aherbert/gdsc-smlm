@@ -58,6 +58,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
@@ -101,7 +102,6 @@ import ij.text.TextPanel;
 import ij.text.TextWindow;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.awt.AWTEvent;
@@ -3346,7 +3346,7 @@ public class Optics implements PlugIn {
   private static void scrambleClusters(ClusteringResult result) {
     // Scramble to ensure adjacent clusters have different Ids.
     // Same seed for consistency (e.g. in macros on the same data).
-    result.scrambleClusters(new Well19937c(1999));
+    result.scrambleClusters(new SplitMix(1999));
   }
 
   /**

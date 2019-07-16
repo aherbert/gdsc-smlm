@@ -49,8 +49,8 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
-import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.rng.simple.internal.SeedFactory;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -754,8 +754,7 @@ public class DensityImage implements PlugIn {
     final Rectangle bounds = results.getBounds();
     // Use a uniform distribution for the coordinates
     final HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
-    dist.skipTo(
-        new Well19937c(System.currentTimeMillis() + System.identityHashCode(this)).nextInt());
+    dist.skipTo(SeedFactory.createInt());
     for (int i = 0; i < iterations; i++) {
       IJ.showProgress(i, iterations);
       IJ.showStatus(String.format("L-score confidence interval %d / %d", i + 1, iterations));

@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ga;
 
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +55,7 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
    * @param fraction The fraction of the individuals to select (set between 0 and 1)
    * @param max The maximum number of individuals to select
    */
-  public SimpleSelectionStrategy(RandomDataGenerator random, double fraction, int max) {
+  public SimpleSelectionStrategy(UniformRandomProvider random, double fraction, int max) {
     super(random);
     if (fraction > 1) {
       fraction = 1;
@@ -145,13 +145,12 @@ public class SimpleSelectionStrategy<T extends Comparable<T>> extends Randomiser
       first = 0;
       second = 1;
     } else {
-      // Bounds are inclusive so subtract 1
-      final int upper = individuals.size() - 1;
-      first = random.nextInt(0, upper);
-      second = random.nextInt(0, upper);
+      final int upper = individuals.size();
+      first = random.nextInt(upper);
+      second = random.nextInt(upper);
       // Avoid crossover with the same parent
       while (second == first) {
-        second = random.nextInt(0, upper);
+        second = random.nextInt(upper);
       }
     }
     return new ChromosomePair<>(individuals.get(first), individuals.get(second));

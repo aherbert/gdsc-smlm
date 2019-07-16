@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Comparator;
@@ -74,13 +73,6 @@ public interface PeakResultStoreList extends PeakResultStore {
    * @param comparator the comparator
    */
   void sort(Comparator<PeakResult> comparator);
-
-  /**
-   * Shuffle the results.
-   *
-   * @param randomSource the random source
-   */
-  void shuffle(final RandomGenerator randomSource);
 
   /**
    * Shuffle the results.

@@ -141,11 +141,11 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.Well44497b;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Checkbox;
 import java.awt.Color;
@@ -4303,24 +4303,23 @@ public class BenchmarkFilterAnalysis
         }
 
         // Create the genetic algorithm
-        final RandomDataGenerator random = new RandomDataGenerator(new Well44497b());
-        final SimpleMutator<FilterScore> mutator =
-            new SimpleMutator<>(random, settings.mutationRate);
+        final UniformRandomProvider rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+        final SimpleMutator<FilterScore> mutator = new SimpleMutator<>(rng, settings.mutationRate);
         // Override the settings with the step length, a min of zero and the configured upper
         final double[] upper = searchScoreFilter.upperLimit();
         mutator.overrideChromosomeSettings(stepSize, new double[stepSize.length], upper);
         final Recombiner<FilterScore> recombiner =
-            new SimpleRecombiner<>(random, settings.crossoverRate, settings.meanChildren);
+            new SimpleRecombiner<>(rng, settings.crossoverRate, settings.meanChildren);
         SelectionStrategy<FilterScore> selectionStrategy;
         // If the initial population is huge ensure that the first selection culls to the correct
         // size
         final int selectionMax = (int) (settings.selectionFraction * settings.populationSize);
         if (settings.rampedSelection) {
           selectionStrategy =
-              new RampedSelectionStrategy<>(random, settings.selectionFraction, selectionMax);
+              new RampedSelectionStrategy<>(rng, settings.selectionFraction, selectionMax);
         } else {
           selectionStrategy =
-              new SimpleSelectionStrategy<>(random, settings.selectionFraction, selectionMax);
+              new SimpleSelectionStrategy<>(rng, settings.selectionFraction, selectionMax);
         }
         final ToleranceChecker<FilterScore> gaChecker = new InterruptChecker(settings.tolerance,
             settings.tolerance * 1e-3, settings.convergedCount);

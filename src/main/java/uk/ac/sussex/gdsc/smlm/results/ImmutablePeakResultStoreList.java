@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import java.util.Comparator;
@@ -81,11 +80,6 @@ public class ImmutablePeakResultStoreList extends ImmutablePeakResultStore
   @Override
   public PeakResultStoreList copy(boolean deepCopy) {
     return new ImmutablePeakResultStoreList((PeakResultStoreList) store.copy(deepCopy));
-  }
-
-  @Override
-  public void shuffle(final RandomGenerator randomSource) {
-    throw new UnsupportedOperationException(IMMUTABLE_MESSAGE);
   }
 
   @Override
