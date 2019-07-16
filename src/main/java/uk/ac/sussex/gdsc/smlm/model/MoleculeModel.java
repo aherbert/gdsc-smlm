@@ -195,22 +195,17 @@ public class MoleculeModel {
    * @return The new coordinates
    */
   public double[] move(double diffusionRate, UniformRandomProvider random) {
-    final double[] xyz = getCoordinates();
+    final double[] coords = getCoordinates();
     if (diffusionRate > 0) {
-      final NormalizedGaussianSampler gauss =
-          SamplerUtils.createNormalizedGaussianSampler(random);
+      final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
       for (int i = 0; i < 3; i++) {
         final double shift = gauss.sample() * diffusionRate;
-        // Clip the movement
-        // if (shift > 5*diffusionRate)
-        // xyz[i] += 5*diffusionRate;
-        // else if (shift < -5*diffusionRate)
-        // xyz[i] -= 5*diffusionRate;
-        // else
-        xyz[i] += shift;
+        // Clip the movement?
+        // shift = MathUtils.clip(-5*diffusionRate,5*diffusionRate, shift)
+        coords[i] += shift;
       }
     }
-    return xyz;
+    return coords;
   }
 
   /**
@@ -223,17 +218,17 @@ public class MoleculeModel {
    * @return The new coordinates
    */
   public double[] walk(double stepSize, UniformRandomProvider random) {
-    final double[] xyz = getCoordinates();
+    final double[] coords = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
         if (random.nextDouble() < 0.5) {
-          xyz[i] += stepSize;
+          coords[i] += stepSize;
         } else {
-          xyz[i] -= stepSize;
+          coords[i] -= stepSize;
         }
       }
     }
-    return xyz;
+    return coords;
   }
 
   /**
@@ -246,17 +241,17 @@ public class MoleculeModel {
    * @return The new coordinates
    */
   public double[] walk(double stepSize, UniformRandomProvider[] random) {
-    final double[] xyz = getCoordinates();
+    final double[] coords = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
         if (random[i].nextDouble() < 0.5) {
-          xyz[i] += stepSize;
+          coords[i] += stepSize;
         } else {
-          xyz[i] -= stepSize;
+          coords[i] -= stepSize;
         }
       }
     }
-    return xyz;
+    return coords;
   }
 
   /**
@@ -267,32 +262,23 @@ public class MoleculeModel {
    *
    * @param diffusionRate Diffusion rate for 3D diffusion
    * @param axis The linear axis to move along (must be a unit vector)
-   * @param random Random number generator
+   * @param rng Random number generator
    * @return The new coordinates
    */
-  public double[] slide(double diffusionRate, double[] axis, UniformRandomProvider random) {
-    final double[] xyz = getCoordinates();
+  public double[] slide(double diffusionRate, double[] axis, UniformRandomProvider rng) {
+    final double[] coords = getCoordinates();
     if (diffusionRate > 0) {
       // Sample from a Gaussian - This may only be relevant for 1D diffusion
       final double shift =
-          SamplerUtils.createNormalizedGaussianSampler(random).sample() * diffusionRate;
+          SamplerUtils.createNormalizedGaussianSampler(rng).sample() * diffusionRate;
 
-      // Sample from the cumulative probability distribution for the MSD.
-      // Then get a square root to find the shift and assign a direction
-      // RandomDataGenerator r = new RandomDataGenerator(random);
-      // shift = ((random.nextDouble() < 0.5) ? 1 : -1) *
-      // Math.sqrt(r.nextExponential(diffusionRate*diffusionRate));
-
-      // Clip the movement
-      // if (shift > 5*diffusionRate)
-      // shift = 5*diffusionRate;
-      // else if (shift < -5*diffusionRate)
-      // shift = -5*diffusionRate;
+      // Clip the movement?
+      // shift = MathUtils.clip(-5*diffusionRate,5*diffusionRate, shift)
       for (int i = 0; i < 3; i++) {
-        xyz[i] += shift * axis[i];
+        coords[i] += shift * axis[i];
       }
     }
-    return xyz;
+    return coords;
   }
 
   /**

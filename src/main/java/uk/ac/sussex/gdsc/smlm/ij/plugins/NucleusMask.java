@@ -42,7 +42,9 @@ import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.event.MouseEvent;
@@ -173,20 +175,20 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
     if (settings.getMode() == 0) {
       final ImageStack stack2 = createEllipsoid(inc, inc, incz);
 
-      // Utils.display(TITLE + " nucleus", stack2, 0);
-
       // Dither
       int cx = radius;
       final int lowerz = (maxz - ditherDepth) / 2;
       final int upperz = (maxz + ditherDepth) / 2;
-      final RandomDataGenerator r = new RandomDataGenerator();
+      final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+      final DiscreteUniformSampler ditherSampler = new DiscreteUniformSampler(rng, 0, ditherHeight);
+      final DiscreteUniformSampler zSampler = new DiscreteUniformSampler(rng, lowerz, upperz);
 
       while (cx < maxx) {
         final int xloc = cx - radius;
-        int cy = radius + r.nextInt(0, ditherHeight);
+        int cy = radius + ditherSampler.sample();
         while (cy < maxy) {
           final int yloc = cy - radius;
-          final int offset = r.nextInt(lowerz, upperz) - radiusz;
+          final int offset = zSampler.sample() - radiusz;
           for (int slice = 1; slice <= stack2.getSize(); slice++) {
             final int i = slice + offset;
             if (i < 1 || i > maxz) {
@@ -196,7 +198,7 @@ public class NucleusMask implements PlugIn, MouseListener, DialogListener {
             final ImageProcessor ip2 = stack2.getProcessor(slice);
             ip.copyBits(ip2, xloc, yloc, Blitter.MAX);
           }
-          cy += inc + 1 + r.nextInt(0, ditherHeight);
+          cy += inc + 1 + ditherSampler.sample();
         }
         cx += inc + 1;
       }

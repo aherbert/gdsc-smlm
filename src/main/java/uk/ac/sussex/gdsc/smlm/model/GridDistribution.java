@@ -24,9 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomDataGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.simple.RandomSource;
 
 import java.util.Arrays;
 
@@ -39,8 +41,8 @@ import java.util.Arrays;
  * all cells have been sampled then no more localisations are generated.
  */
 public class GridDistribution implements SpatialDistribution {
-  private final RandomGenerator randomGenerator;
-  private final RandomDataGenerator dataGenerator;
+  private final UniformRandomProvider rng;
+  private final NormalizedGaussianSampler gauss;
   private final int size;
   private final int cellSize;
   private final double probBinary;
@@ -95,7 +97,7 @@ public class GridDistribution implements SpatialDistribution {
    * @param randomGenerator the random generator
    */
   public GridDistribution(int size, double depth, int cellSize, double probBinary,
-      double minBinaryDistance, double maxBinaryDistance, RandomGenerator randomGenerator) {
+      double minBinaryDistance, double maxBinaryDistance, UniformRandomProvider randomGenerator) {
     if (size < 1) {
       throw new IllegalArgumentException("Size must be above zero");
     }
@@ -112,11 +114,11 @@ public class GridDistribution implements SpatialDistribution {
       throw new IllegalArgumentException("Min distance must be below max distance");
     }
     if (randomGenerator == null) {
-      randomGenerator = new JDKRandomGenerator();
+      this.rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+    } else {
+      this.rng = randomGenerator;
     }
-
-    this.randomGenerator = randomGenerator;
-    this.dataGenerator = new RandomDataGenerator(randomGenerator);
+    gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     this.size = size;
     this.min = -depth / 2;
     this.depth = depth;
@@ -132,18 +134,19 @@ public class GridDistribution implements SpatialDistribution {
   @Override
   public double[] next() {
     // See if a binary localisation should be created near the previous spot
-    if (previous != null && randomGenerator.nextDouble() < probBinary) {
+    if (previous != null && rng.nextDouble() < probBinary) {
       final double[] xyz = Arrays.copyOf(previous, 3);
 
       // Create a random unit vector
-      double x = dataGenerator.nextGaussian(0, 1);
-      double y = dataGenerator.nextGaussian(0, 1);
-      double z = dataGenerator.nextGaussian(0, 1);
+
+      double x = gauss.sample();
+      double y = gauss.sample();
+      double z = gauss.sample();
       final double length = Math.sqrt(x * x + y * y + z * z);
       if (length != 0) {
         // Shift by a random distance
         final double distance = (maxBinaryDistance == minBinaryDistance) ? maxBinaryDistance
-            : dataGenerator.nextUniform(minBinaryDistance, maxBinaryDistance, true);
+            : nextUniform(minBinaryDistance, maxBinaryDistance);
         final double d = distance / length;
         x *= d;
         y *= d;
@@ -163,11 +166,23 @@ public class GridDistribution implements SpatialDistribution {
 
       previous = new double[3];
       // Ensure the centre of the distribution is [0,0,0]
-      previous[0] = cellx * cellSize - size / 2 + cellSize * dataGenerator.nextUniform(0.25, 0.75);
-      previous[1] = celly * cellSize - size / 2 + cellSize * dataGenerator.nextUniform(0.25, 0.75);
-      previous[2] = min + randomGenerator.nextDouble() * depth;
+      previous[0] = cellx * cellSize - size / 2 + cellSize * nextUniform(0.25, 0.75);
+      previous[1] = celly * cellSize - size / 2 + cellSize * nextUniform(0.25, 0.75);
+      previous[2] = min + rng.nextDouble() * depth;
     }
     return previous;
+  }
+
+  /**
+   * Create a uniform deviate between low and high inclusive.
+   *
+   * @param lo the low
+   * @param hi the high
+   * @return the double
+   */
+  private double nextUniform(double lo, double hi) {
+    final double u = rng.nextDouble();
+    return u * hi + (1 - u) * lo;
   }
 
   @Override

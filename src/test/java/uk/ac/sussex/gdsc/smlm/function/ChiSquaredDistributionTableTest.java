@@ -26,13 +26,14 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Assertions;
@@ -118,14 +119,13 @@ public class ChiSquaredDistributionTableTest {
 
   @SeededTest
   public void canPerformChiSquaredTest(RandomSeed seed) {
-    final RandomDataGenerator rdg =
-        new RandomDataGenerator(new RandomGeneratorAdapter(RngUtils.create(seed.getSeedAsLong())));
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
     final ChiSquareTest test = new ChiSquareTest();
     for (final int n : new int[] {10, 50, 100}) {
       final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);
       final long[] l = new long[x.length];
       for (int i = 0; i < x.length; i++) {
-        l[i] = rdg.nextPoisson(x[i]);
+        l[i] = GdscSmlmTestUtils.createPoissonSampler(rng, x[i]).sample();
       }
       final double chi2 = test.chiSquare(x, l);
       final double ep = test.chiSquareTest(x, l);
