@@ -57,35 +57,13 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces an image on localisation using their density.
  */
 public class DensityImage implements PlugIn {
   private static final String TITLE = "Density Image";
-  private static String inputOption = "";
-  private static float radius = 1.5f;
-  private static boolean chooseRoi;
-  private static String roiImage = "";
-  private static boolean adjustForBorder = true;
-  private static int imageScale = 2;
-  private static boolean cumulativeImage;
-  private static boolean useSquareApproximation;
-  private static int resolution = 10;
-
-  private static final String[] scoreMethods =
-      new String[] {"Density", "Ripley's K", "Ripley's K / Area", "Ripley's L", "Ripley's L - r",
-          "Ripley's L / r", "Ripley's (L - r) / r"};
-  private static int scoreMethodIndex;
-
-  private static boolean filterLocalisations = true;
-  private static double filterThreshold;
-  private static boolean computeRipleysPlot;
-
-  private static double minR = 0.2;
-  private static double maxR = 3;
-  private static double incrementR = 0.2;
-  private static boolean confidenceIntervals;
 
   private Rectangle roiBounds;
   private double scaledRoiMinX;
@@ -94,6 +72,96 @@ public class DensityImage implements PlugIn {
   private double scaledRoiMaxY;
   private int roiImageWidth;
   private int roiImageHeight;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    static final String[] scoreMethods = new String[] {"Density", "Ripley's K", "Ripley's K / Area",
+        "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    float radius;
+    boolean chooseRoi;
+    String roiImage;
+    boolean adjustForBorder;
+    int imageScale;
+    boolean cumulativeImage;
+    boolean useSquareApproximation;
+    int resolution;
+
+    int scoreMethodIndex;
+
+    boolean filterLocalisations;
+    double filterThreshold;
+    boolean computeRipleysPlot;
+
+    double minR;
+    double maxR;
+    double incrementR;
+    boolean confidenceIntervals;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      radius = 1.5f;
+      roiImage = "";
+      adjustForBorder = true;
+      imageScale = 2;
+      resolution = 10;
+      filterLocalisations = true;
+      minR = 0.2;
+      maxR = 3;
+      incrementR = 0.2;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      radius = source.radius;
+      chooseRoi = source.chooseRoi;
+      roiImage = source.roiImage;
+      adjustForBorder = source.adjustForBorder;
+      imageScale = source.imageScale;
+      cumulativeImage = source.cumulativeImage;
+      useSquareApproximation = source.useSquareApproximation;
+      resolution = source.resolution;
+      scoreMethodIndex = source.scoreMethodIndex;
+      filterLocalisations = source.filterLocalisations;
+      filterThreshold = source.filterThreshold;
+      computeRipleysPlot = source.computeRipleysPlot;
+      minR = source.minR;
+      maxR = source.maxR;
+      incrementR = source.incrementR;
+      confidenceIntervals = source.confidenceIntervals;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -111,7 +179,7 @@ public class DensityImage implements PlugIn {
     }
 
     MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
@@ -129,14 +197,14 @@ public class DensityImage implements PlugIn {
     final long start = System.currentTimeMillis();
     IJ.showStatus("Calculating density ...");
 
-    final boolean useAdjustment = adjustForBorder && !isWithin[0];
+    final boolean useAdjustment = settings.adjustForBorder && !isWithin[0];
 
     final DensityManager dm = createDensityManager(results);
     int[] density = null;
-    if (useSquareApproximation) {
-      density = dm.calculateSquareDensity(radius, resolution, useAdjustment);
+    if (settings.useSquareApproximation) {
+      density = dm.calculateSquareDensity(settings.radius, settings.resolution, useAdjustment);
     } else {
-      density = dm.calculateDensity(radius, useAdjustment);
+      density = dm.calculateDensity(settings.radius, useAdjustment);
     }
 
     density = cropBorder(results, density);
@@ -147,9 +215,9 @@ public class DensityImage implements PlugIn {
 
     final int filtered = plotResults(results, densityScore, calc);
 
-    logDensityResults(results, density, radius, filtered);
+    logDensityResults(results, density, settings.radius, filtered);
 
-    if (computeRipleysPlot) {
+    if (settings.computeRipleysPlot) {
       computeRipleysPlot(results);
     }
 
@@ -168,7 +236,7 @@ public class DensityImage implements PlugIn {
   }
 
   private ScoreCalculator createCalculator(MemoryPeakResults results) {
-    switch (scoreMethodIndex) {
+    switch (settings.scoreMethodIndex) {
       case 1:
         // Ripley's K (Density / av. density)
         return new KScoreCalculator(results, 0);
@@ -234,18 +302,19 @@ public class DensityImage implements PlugIn {
 
     protected float getAverageDensity() {
       final Rectangle bounds = results.getBounds();
-      final float area = bounds.width * bounds.height;
+      final float area = (float) bounds.width * bounds.height;
       return results.size() / area;
     }
 
     protected float getRegionArea() {
-      return radius * radius * ((useSquareApproximation) ? 4 : (float) Math.PI);
+      return settings.radius * settings.radius
+          * ((settings.useSquareApproximation) ? 4 : (float) Math.PI);
     }
 
     @Override
     public float getThreshold() {
       final float expected = getAverageDensity() * getRegionArea();
-      return (float) (expected * filterThreshold);
+      return (float) (expected * settings.filterThreshold);
     }
   }
 
@@ -278,11 +347,11 @@ public class DensityImage implements PlugIn {
       // Since K(r) should be equal to the area to make the filter threshold scale appropriately
       // we adjust the threshold by the area
       if (mode == 0) {
-        return (float) filterThreshold * getRegionArea();
+        return (float) settings.filterThreshold * getRegionArea();
       }
       // K(r) / area == 1
       // => no adjustment as this is radius scale independent
-      return (float) filterThreshold;
+      return (float) settings.filterThreshold;
     }
   }
 
@@ -306,7 +375,7 @@ public class DensityImage implements PlugIn {
 
       final float[] score = new float[density.length];
       final float regionDivisor =
-          getAverageDensity() * ((useSquareApproximation) ? 4 : (float) Math.PI);
+          getAverageDensity() * ((settings.useSquareApproximation) ? 4 : (float) Math.PI);
       for (int i = 0; i < score.length; i++) {
         // L(r)
         score[i] = (float) Math.sqrt(density[i] / regionDivisor);
@@ -315,14 +384,14 @@ public class DensityImage implements PlugIn {
         // L(r) - r
         // (L(r) - r) / r
         for (int i = 0; i < score.length; i++) {
-          score[i] -= radius;
+          score[i] -= settings.radius;
         }
       }
       if (mode == 2 || mode == 3) {
         // L(r) / r
         // (L(r) - r) / r
         for (int i = 0; i < score.length; i++) {
-          score[i] /= radius;
+          score[i] /= settings.radius;
         }
       }
       return score;
@@ -336,22 +405,21 @@ public class DensityImage implements PlugIn {
       // To make the filtered results the same to the K(r) function we could use the
       // sqrt of the filterThreshold
 
-      final double threshold = filterThreshold;
-      // double threshold = Math.sqrt(filterThreshold);
+      final double threshold = settings.filterThreshold;
 
       // Note: L(r) ~ r
       // Since L(r) should be equal to the radius to make the filter threshold scale appropriately
       // we adjust the threshold by the radius
       if (mode == 0) {
-        return (float) threshold * radius;
+        return (float) threshold * settings.radius;
       }
       // L(r) - r == 0
       if (mode == 1) {
-        return (float) threshold * radius - radius;
+        return (float) threshold * settings.radius - settings.radius;
       }
       // L(r) - r / r == 0
       if (mode == 3) {
-        return (float) (threshold * radius - radius) / radius;
+        return (float) (threshold * settings.radius - settings.radius) / settings.radius;
       }
       // L(r) / r == 1
       // => no adjustment as this is radius scale independent
@@ -389,20 +457,17 @@ public class DensityImage implements PlugIn {
     scaledRoiMaxY = scaledRoiMinY + roiBounds.height / yscale;
 
     // Allow for the border
-    final float minX = (int) (scaledRoiMinX - radius);
-    final float maxX = (int) Math.ceil(scaledRoiMaxX + radius);
-    final float minY = (int) (scaledRoiMinY - radius);
-    final float maxY = (int) Math.ceil(scaledRoiMaxY + radius);
+    final float minX = (int) (scaledRoiMinX - settings.radius);
+    final float maxX = (int) Math.ceil(scaledRoiMaxX + settings.radius);
+    final float minY = (int) (scaledRoiMinY - settings.radius);
+    final float maxY = (int) Math.ceil(scaledRoiMaxY + settings.radius);
 
     // Create a new set of results within the bounds
     final MemoryPeakResults newResults = new MemoryPeakResults();
     newResults.begin();
-    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-      @Override
-      public void executeXyr(float x, float y, PeakResult result) {
-        if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-          newResults.add(result);
-        }
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
+      if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+        newResults.add(result);
       }
     });
     newResults.end();
@@ -460,12 +525,13 @@ public class DensityImage implements PlugIn {
    * @param filtered the filtered
    * @return the summary statistics
    */
-  private static SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density,
+  private SummaryStatistics logDensityResults(MemoryPeakResults results, int[] density,
       float radius, int filtered) {
-    final float region = (float) (radius * radius * ((useSquareApproximation) ? 4 : Math.PI));
+    final float region =
+        (float) (radius * radius * ((settings.useSquareApproximation) ? 4 : Math.PI));
 
     final Rectangle bounds = results.getBounds();
-    final float area = bounds.width * bounds.height;
+    final float area = (float) bounds.width * bounds.height;
     final float expected = results.size() * region / area;
     final SummaryStatistics summary = new SummaryStatistics();
 
@@ -476,14 +542,14 @@ public class DensityImage implements PlugIn {
     final DensityManager dm = createDensityManager(results);
 
     // Compute this using the input density scores since the radius is the same.
-    final double l = (useSquareApproximation) ? dm.ripleysLFunction(radius)
+    final double l = (settings.useSquareApproximation) ? dm.ripleysLFunction(radius)
         : dm.ripleysLFunction(density, radius);
 
     String msg = String.format(
         "Density %s : N=%d, %.0fpx : Radius=%s : L(r) - r = %s : E = %s, Obs = %s (%sx)",
         results.getName(), summary.getN(), area, rounded(radius), rounded(l - radius),
         rounded(expected), rounded(summary.getMean()), rounded(summary.getMean() / expected));
-    if (filterLocalisations) {
+    if (settings.filterLocalisations) {
       msg += String.format(" : Filtered=%d (%s%%)", filtered,
           rounded(filtered * 100.0 / density.length));
     }
@@ -505,7 +571,7 @@ public class DensityImage implements PlugIn {
    * @param scoreCalculator the score calculator
    * @return the number of localisations drawn
    */
-  private static int plotResults(MemoryPeakResults results, float[] density,
+  private int plotResults(MemoryPeakResults results, float[] density,
       ScoreCalculator scoreCalculator) {
     // Filter results using 5x higher than average density of the sample in a 150nm radius:
     // Annibale, et al (2011). Identification of clustering artifacts in photoactivated localization
@@ -513,7 +579,7 @@ public class DensityImage implements PlugIn {
     // Nature Methods, 8, pp527-528
     MemoryPeakResults newResults = null;
     float densityThreshold = Float.NEGATIVE_INFINITY; // No filtering
-    if (filterLocalisations) {
+    if (settings.filterLocalisations) {
       densityThreshold = scoreCalculator.getThreshold();
       newResults = new MemoryPeakResults();
       newResults.copySettings(results);
@@ -523,8 +589,8 @@ public class DensityImage implements PlugIn {
     // Draw an image - Use error so that a floating point value can be used on a single pixel
     final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
         ResultsImageType.DRAW_INTENSITY, false, false, results.getName() + " Density",
-        results.getBounds(), results.getNmPerPixel(), results.getGain(), imageScale, 0,
-        (cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
+        results.getBounds(), results.getNmPerPixel(), results.getGain(), settings.imageScale, 0,
+        (settings.cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
     image.setDisplayFlags(image.getDisplayFlags() | ImageJImagePeakResults.DISPLAY_NEGATIVES);
     image.setLutName("grays");
     image.begin();
@@ -550,6 +616,8 @@ public class DensityImage implements PlugIn {
   }
 
   private boolean showDialog() {
+    settings = Settings.load();
+
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -564,26 +632,26 @@ public class DensityImage implements PlugIn {
 
     gd.addMessage("Show an image using the localisation density");
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
 
-    gd.addNumericField("Radius", radius, 3);
+    gd.addNumericField("Radius", settings.radius, 3);
     if (!titles.isEmpty()) {
-      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", settings.chooseRoi);
     }
-    gd.addCheckbox("Adjust_for_border", adjustForBorder);
-    gd.addSlider("Image_Scale", 1, 15, imageScale);
-    gd.addCheckbox("Cumulative_image", cumulativeImage);
+    gd.addCheckbox("Adjust_for_border", settings.adjustForBorder);
+    gd.addSlider("Image_Scale", 1, 15, settings.imageScale);
+    gd.addCheckbox("Cumulative_image", settings.cumulativeImage);
 
-    gd.addCheckbox("Use_square_approx", useSquareApproximation);
-    gd.addNumericField("Square_resolution", resolution, 0);
-    gd.addChoice("Score", scoreMethods, scoreMethods[scoreMethodIndex]);
+    gd.addCheckbox("Use_square_approx", settings.useSquareApproximation);
+    gd.addNumericField("Square_resolution", settings.resolution, 0);
+    gd.addChoice("Score", Settings.scoreMethods, settings.scoreMethodIndex);
 
     gd.addMessage("Filter localisations using the L-score / Relative density.\n"
         + "Filtered results will be added to memory:");
-    gd.addCheckbox("Filter_localisations", filterLocalisations);
-    gd.addNumericField("Filter_threshold", filterThreshold, 2);
+    gd.addCheckbox("Filter_localisations", settings.filterLocalisations);
+    gd.addNumericField("Filter_threshold", settings.filterThreshold, 2);
 
-    gd.addCheckbox("Compute_Ripleys_L_plot", computeRipleysPlot);
+    gd.addCheckbox("Compute_Ripleys_L_plot", settings.computeRipleysPlot);
 
     gd.showDialog();
 
@@ -591,51 +659,53 @@ public class DensityImage implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
 
-    radius = (float) gd.getNextNumber();
+    settings.radius = (float) gd.getNextNumber();
     if (!titles.isEmpty()) {
-      chooseRoi = gd.getNextBoolean();
+      settings.chooseRoi = gd.getNextBoolean();
     }
-    adjustForBorder = gd.getNextBoolean();
-    imageScale = (int) gd.getNextNumber();
-    cumulativeImage = gd.getNextBoolean();
+    settings.adjustForBorder = gd.getNextBoolean();
+    settings.imageScale = (int) gd.getNextNumber();
+    settings.cumulativeImage = gd.getNextBoolean();
 
-    useSquareApproximation = gd.getNextBoolean();
-    resolution = (int) gd.getNextNumber();
-    scoreMethodIndex = gd.getNextChoiceIndex();
+    settings.useSquareApproximation = gd.getNextBoolean();
+    settings.resolution = (int) gd.getNextNumber();
+    settings.scoreMethodIndex = gd.getNextChoiceIndex();
 
-    filterLocalisations = gd.getNextBoolean();
-    filterThreshold = gd.getNextNumber();
+    settings.filterLocalisations = gd.getNextBoolean();
+    settings.filterThreshold = gd.getNextNumber();
 
-    computeRipleysPlot = gd.getNextBoolean();
+    settings.computeRipleysPlot = gd.getNextBoolean();
+
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Radius", radius);
-      ParameterUtils.isAboveZero("Image scale", imageScale);
-      ParameterUtils.isAboveZero("Resolution", resolution);
+      ParameterUtils.isAboveZero("Radius", settings.radius);
+      ParameterUtils.isAboveZero("Image scale", settings.imageScale);
+      ParameterUtils.isAboveZero("Resolution", settings.resolution);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
-    if (!titles.isEmpty() && chooseRoi) {
+    if (!titles.isEmpty() && settings.chooseRoi) {
       if (titles.size() == 1) {
-        roiImage = titles.get(0);
-        Recorder.recordOption("Image", roiImage);
+        settings.roiImage = titles.get(0);
+        Recorder.recordOption("Image", settings.roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
         gd = new ExtendedGenericDialog(TITLE);
         gd.addMessage("Select the source image for the ROI");
-        gd.addChoice("Image", items, roiImage);
+        gd.addChoice("Image", items, settings.roiImage);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
         }
-        roiImage = gd.getNextChoice();
+        settings.roiImage = gd.getNextChoice();
       }
-      final ImagePlus imp = WindowManager.getImage(roiImage);
+      final ImagePlus imp = WindowManager.getImage(settings.roiImage);
 
       roiBounds = imp.getRoi().getBounds();
       roiImageWidth = imp.getWidth();
@@ -655,21 +725,21 @@ public class DensityImage implements PlugIn {
   private void computeRipleysPlot(MemoryPeakResults results) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Compute Ripley's L(r) - r plot");
-    gd.addNumericField("Min_radius", minR, 2);
-    gd.addNumericField("Max_radius", maxR, 2);
-    gd.addNumericField("Increment", incrementR, 2);
-    gd.addCheckbox("Confidence_intervals", confidenceIntervals);
+    gd.addNumericField("Min_radius", settings.minR, 2);
+    gd.addNumericField("Max_radius", settings.maxR, 2);
+    gd.addNumericField("Increment", settings.incrementR, 2);
+    gd.addCheckbox("Confidence_intervals", settings.confidenceIntervals);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
-    minR = gd.getNextNumber();
-    maxR = gd.getNextNumber();
-    incrementR = gd.getNextNumber();
-    confidenceIntervals = gd.getNextBoolean();
+    settings.minR = gd.getNextNumber();
+    settings.maxR = gd.getNextNumber();
+    settings.incrementR = gd.getNextNumber();
+    settings.confidenceIntervals = gd.getNextBoolean();
 
-    if (minR > maxR || incrementR < 0 || gd.invalidNumber()) {
+    if (settings.minR > settings.maxR || settings.incrementR < 0 || gd.invalidNumber()) {
       IJ.error(TITLE, "Invalid radius parameters");
       return;
     }
@@ -678,7 +748,7 @@ public class DensityImage implements PlugIn {
     final double[][] values = calculateLScores(dm);
 
     // 99% confidence intervals
-    final int iterations = (confidenceIntervals) ? 99 : 0;
+    final int iterations = (settings.confidenceIntervals) ? 99 : 0;
     double[] upper = null;
     double[] lower = null;
     final Rectangle bounds = results.getBounds();
@@ -752,13 +822,13 @@ public class DensityImage implements PlugIn {
     return max;
   }
 
-  private static double[][] calculateLScores(DensityManager dm) {
+  private double[][] calculateLScores(DensityManager dm) {
     final TDoubleArrayList x = new TDoubleArrayList();
     final TDoubleArrayList y = new TDoubleArrayList();
     x.add(0.0);
     y.add(0.0);
 
-    for (double r = minR; r < maxR; r += incrementR) {
+    for (double r = settings.minR; r < settings.maxR; r += settings.incrementR) {
       final double l = dm.ripleysLFunction(r);
       x.add(r);
       final double score = (r > 0) ? (l - r) / r : 0;

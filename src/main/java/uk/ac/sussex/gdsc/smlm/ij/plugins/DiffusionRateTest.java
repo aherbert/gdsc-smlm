@@ -24,11 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleRollingArray;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -88,7 +90,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
 
-  private static TextWindow msdTable;
+  private static AtomicReference<TextWindow> msdTableRef = new AtomicReference<>();
 
   // Used to allow other plugins to detect if a dataset is simulated
 
@@ -109,6 +111,9 @@ public class DiffusionRateTest implements PlugIn {
   private double myPrecision;
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
+
+  private String prefix;
+  private double exposureTime;
 
   /** The plugin settings. */
   private Settings pluginSettings;
@@ -149,12 +154,21 @@ public class DiffusionRateTest implements PlugIn {
     int msdAnalysisSteps;
     double precision;
 
+    double simpleD;
+    int simpleSteps;
+    int simpleParticles;
+    boolean linearDiffusion;
+    String simpleDir;
+
     Settings() {
       // Set defaults
       confinementAttempts = 5;
       fitN = 20;
       magnification = 5;
       aggregateSteps = 10;
+      simpleD = 0.5;
+      simpleSteps = 1;
+      simpleParticles = 10000;
     }
 
     Settings(Settings source) {
@@ -166,6 +180,11 @@ public class DiffusionRateTest implements PlugIn {
       aggregateSteps = source.aggregateSteps;
       msdAnalysisSteps = source.msdAnalysisSteps;
       precision = source.precision;
+      simpleD = source.simpleD;
+      simpleSteps = source.simpleSteps;
+      simpleParticles = source.simpleParticles;
+      linearDiffusion = source.linearDiffusion;
+      simpleDir = source.simpleDir;
     }
 
     Settings copy() {
@@ -735,7 +754,7 @@ public class DiffusionRateTest implements PlugIn {
     // s^2 * Chi ~ Gamma(k/2, 2*s^2)
     // So if s^2 = 2D:
     // 2D * Chi ~ Gamma(k/2, 4D)
-    final double estimatedD = simpleD * simpleSteps;
+    final double estimatedD = pluginSettings.simpleD * pluginSettings.simpleSteps;
     final double max = MathUtils.max(values);
     final double[] x = SimpleArrayUtils.newArray(1000, 0, max / 1000);
     final double k = dimensions / 2.0;
@@ -1181,7 +1200,6 @@ public class DiffusionRateTest implements PlugIn {
       }
       count++;
     }
-    createMsdTable((sum / count) * settings.getStepsPerSecond() / conversionFactor);
 
     // Create a new set of points that have coordinates that
     // are the rolling average over the number of aggregate steps
@@ -1212,61 +1230,50 @@ public class DiffusionRateTest implements PlugIn {
     final int totalSteps = (int) Math
         .ceil(settings.getSeconds() * settings.getStepsPerSecond() - pluginSettings.aggregateSteps);
     final int limit = Math.min(totalSteps, myMsdAnalysisSteps);
-    final int interval = ImageJUtils.getProgressInterval(limit);
-    final ArrayList<String> results = new ArrayList<>(totalSteps);
-    for (int step = 1; step <= myMsdAnalysisSteps; step++) {
-      if (step % interval == 0) {
-        IJ.showProgress(step, limit);
-      }
+    final Ticker ticker = ImageJUtils.createTicker(limit, 1);
+    final TextWindow msdTable =
+        createMsdTable((sum / count) * settings.getStepsPerSecond() / conversionFactor);
+    try (BufferedTextWindow bw = new BufferedTextWindow(msdTable)) {
+      bw.setIncrement(0);
 
-      sum = 0;
-      count = 0;
-      for (int i = step; i < length; i++) {
-        final Point last = list[i - step];
-        final Point current = list[i];
+      for (int step = 1; step <= myMsdAnalysisSteps; step++) {
+        sum = 0;
+        count = 0;
+        for (int i = step; i < length; i++) {
+          final Point last = list[i - step];
+          final Point current = list[i];
 
-        if (last.id == current.id) {
-          if (p == 0) {
-            sum += last.distance2(current);
-            count++;
-          } else {
-            // This can be varied but the effect on the output with only 1 loop
-            // is the same if enough samples are present
-            for (int ii = 1; ii-- > 0;) {
-              sum += last.distance2(current, p, rand);
+          if (last.id == current.id) {
+            if (p == 0) {
+              sum += last.distance2(current);
               count++;
+            } else {
+              // This can be varied but the effect on the output with only 1 loop
+              // is the same if enough samples are present
+              for (int ii = 1; ii-- > 0;) {
+                sum += last.distance2(current, p, rand);
+                count++;
+              }
             }
           }
         }
-      }
-      if (count == 0) {
-        break;
-      }
-      results.add(addResult(step, sum, count));
+        if (count == 0) {
+          break;
+        }
+        bw.append(addResult(step, sum, count));
 
-      // Flush to auto-space the columns
-      if (step == 9) {
-        msdTable.getTextPanel().append(results);
-        results.clear();
+        ticker.tick();
       }
     }
-    msdTable.getTextPanel().append(results);
 
     IJ.showProgress(1);
   }
 
-  private void createMsdTable(double baseMsd) {
-    final String header = createHeader(baseMsd);
-    if (msdTable == null || !msdTable.isVisible()) {
-      msdTable = new TextWindow("MSD Analysis", header, "", 800, 300);
-      msdTable.setVisible(true);
-    } else {
-      // msdTable.getTextPanel().clear();
-    }
+  private TextWindow createMsdTable(double baseMsd) {
+    return ImageJUtils.refresh(msdTableRef, () -> {
+      return new TextWindow("MSD Analysis", createHeader(baseMsd), "", 800, 300);
+    });
   }
-
-  private String prefix;
-  private double exposureTime;
 
   private String createHeader(double baseMsd) {
     final double apparentD = baseMsd / 4;
@@ -1300,12 +1307,6 @@ public class DiffusionRateTest implements PlugIn {
     return sb.toString();
   }
 
-  private static double simpleD = 0.5;
-  private static int simpleSteps = 1;
-  private static int simpleParticles = 10000;
-  private static boolean linearDiffusion;
-  private static String simpleDir;
-
   /**
    * Perform a simple diffusion test. This can be used to understand the distributions that are
    * generated during 3D diffusion.
@@ -1320,28 +1321,28 @@ public class DiffusionRateTest implements PlugIn {
     final RandomGenerator[] random = new RandomGenerator[3];
     final long seed = System.currentTimeMillis() + System.identityHashCode(this);
     for (int i = 0; i < 3; i++) {
-      stats2[i] = new StoredDataStatistics(simpleParticles);
-      stats[i] = new StoredDataStatistics(simpleParticles);
+      stats2[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
+      stats[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
       random[i] = new Well19937c(seed + i);
     }
 
-    final double scale = Math.sqrt(2 * simpleD);
-    final int report = Math.max(1, simpleParticles / 200);
-    for (int particle = 0; particle < simpleParticles; particle++) {
+    final double scale = Math.sqrt(2 * pluginSettings.simpleD);
+    final int report = Math.max(1, pluginSettings.simpleParticles / 200);
+    for (int particle = 0; particle < pluginSettings.simpleParticles; particle++) {
       if (particle % report == 0) {
-        IJ.showProgress(particle, simpleParticles);
+        IJ.showProgress(particle, pluginSettings.simpleParticles);
       }
       final double[] xyz = new double[3];
-      if (linearDiffusion) {
+      if (pluginSettings.linearDiffusion) {
         final double[] dir = nextVector();
-        for (int step = 0; step < simpleSteps; step++) {
+        for (int step = 0; step < pluginSettings.simpleSteps; step++) {
           final double d = ((random[1].nextDouble() > 0.5) ? -1 : 1) * random[0].nextGaussian();
           for (int i = 0; i < 3; i++) {
             xyz[i] += dir[i] * d;
           }
         }
       } else {
-        for (int step = 0; step < simpleSteps; step++) {
+        for (int step = 0; step < pluginSettings.simpleSteps; step++) {
           for (int i = 0; i < 3; i++) {
             xyz[i] += random[i].nextGaussian();
           }
@@ -1370,39 +1371,38 @@ public class DiffusionRateTest implements PlugIn {
     windowOrganiser.tile();
   }
 
-  private static boolean showSimpleDialog() {
+  private boolean showSimpleDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
 
-    gd.addNumericField("D", simpleD, 2);
-    gd.addNumericField("Steps", simpleSteps, 0);
-    gd.addNumericField("Particles", simpleParticles, 0);
-    gd.addCheckbox("Linear_diffusion", linearDiffusion);
-    gd.addStringField("Directory", simpleDir, 30);
+    gd.addNumericField("D", pluginSettings.simpleD, 2);
+    gd.addNumericField("Steps", pluginSettings.simpleSteps, 0);
+    gd.addNumericField("Particles", pluginSettings.simpleParticles, 0);
+    gd.addCheckbox("Linear_diffusion", pluginSettings.linearDiffusion);
+    gd.addStringField("Directory", pluginSettings.simpleDir, 30);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
 
-    simpleD = gd.getNextNumber();
-    simpleSteps = (int) gd.getNextNumber();
-    simpleParticles = (int) gd.getNextNumber();
-    linearDiffusion = gd.getNextBoolean();
-    simpleDir = gd.getNextString();
-    if (!new File(simpleDir).exists()) {
-      simpleDir = null;
+    pluginSettings.simpleD = gd.getNextNumber();
+    pluginSettings.simpleSteps = (int) gd.getNextNumber();
+    pluginSettings.simpleParticles = (int) gd.getNextNumber();
+    pluginSettings.linearDiffusion = gd.getNextBoolean();
+    pluginSettings.simpleDir = gd.getNextString();
+    if (!new File(pluginSettings.simpleDir).exists()) {
+      pluginSettings.simpleDir = null;
     }
 
     return true;
   }
 
-  private static void save(StoredDataStatistics storedDataStatistics, int dimensions,
-      String prefix) {
-    if (simpleDir == null) {
+  private void save(StoredDataStatistics storedDataStatistics, int dimensions, String prefix) {
+    if (pluginSettings.simpleDir == null) {
       return;
     }
     final String newLine = System.lineSeparator();
-    final File file = new File(simpleDir, prefix + dimensions + "d.txt");
+    final File file = new File(pluginSettings.simpleDir, prefix + dimensions + "d.txt");
     try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
       for (final double d : storedDataStatistics.getValues()) {
         out.write(Double.toString(d));

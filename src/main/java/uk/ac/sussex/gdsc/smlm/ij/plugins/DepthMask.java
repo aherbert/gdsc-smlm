@@ -33,6 +33,8 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * This plugin creates a mask image stack using an XY and XZ mask image.
  */
@@ -41,9 +43,53 @@ public class DepthMask implements PlugIn {
   private static final byte ON = (byte) 255;
   private static final String TITLE = "Depth Mask";
 
-  private static String titleXy = "";
-  private static String titleXz = "";
-  private static String titleYz = "";
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+    String titleXy;
+    String titleXz;
+    String titleYz;
+
+    Settings() {
+      // Set defaults
+      titleXy = "";
+      titleXz = "";
+      titleYz = "";
+    }
+
+    Settings(Settings source) {
+      titleXy = source.titleXy;
+      titleXz = source.titleXz;
+      titleYz = source.titleYz;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -56,16 +102,18 @@ public class DepthMask implements PlugIn {
     createMask();
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
+    settings = Settings.load();
+
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 
     final String[] maskList = ImageJUtils.getImageList(ImageJUtils.SINGLE);
-    gd.addChoice("Mask_XY", maskList, titleXy);
-    gd.addChoice("Mask_XZ", maskList, titleXz);
-    gd.addChoice("Mask_YZ", maskList, titleYz);
+    gd.addChoice("Mask_XY", maskList, settings.titleXy);
+    gd.addChoice("Mask_XZ", maskList, settings.titleXz);
+    gd.addChoice("Mask_YZ", maskList, settings.titleYz);
 
     gd.showDialog();
 
@@ -73,17 +121,18 @@ public class DepthMask implements PlugIn {
       return false;
     }
 
-    titleXy = gd.getNextChoice();
-    titleXz = gd.getNextChoice();
-    titleYz = gd.getNextChoice();
+    settings.titleXy = gd.getNextChoice();
+    settings.titleXz = gd.getNextChoice();
+    settings.titleYz = gd.getNextChoice();
+    settings.save();
 
     return true;
   }
 
-  private static void createMask() {
-    final ImagePlus impXy = WindowManager.getImage(titleXy);
-    final ImagePlus impXz = WindowManager.getImage(titleXz);
-    final ImagePlus impYz = WindowManager.getImage(titleYz);
+  private void createMask() {
+    final ImagePlus impXy = WindowManager.getImage(settings.titleXy);
+    final ImagePlus impXz = WindowManager.getImage(settings.titleXz);
+    final ImagePlus impYz = WindowManager.getImage(settings.titleYz);
     if (impXy == null) {
       IJ.error(TITLE, "No XY mask");
       return;
