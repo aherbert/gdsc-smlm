@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
@@ -41,8 +41,8 @@ public class OffsetFunctionTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final ValueFunction f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
-    final double[] b1 = RandomUtils.generate(size, r);
-    final double[] b2 = RandomUtils.generate(size, r);
+    final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
+    final double[] b2 = GdscSmlmTestUtils.generateDoubles(size, r);
     final ValueFunction f1 = OffsetValueFunction.wrapValueFunction(f0, b1);
     final ValueFunction f2 = OffsetValueFunction.wrapValueFunction(f1, b2);
     final double[] p = new double[n];
@@ -81,8 +81,8 @@ public class OffsetFunctionTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final Gradient1Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
-    final double[] b1 = RandomUtils.generate(size, r);
-    final double[] b2 = RandomUtils.generate(size, r);
+    final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
+    final double[] b2 = GdscSmlmTestUtils.generateDoubles(size, r);
     final Gradient1Function f1 = OffsetGradient1Function.wrapGradient1Function(f0, b1);
     final Gradient1Function f2 = OffsetGradient1Function.wrapGradient1Function(f1, b2);
     final double[] p = new double[n];
@@ -130,8 +130,8 @@ public class OffsetFunctionTest {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final Gradient2Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
-    final double[] b1 = RandomUtils.generate(size, r);
-    final double[] b2 = RandomUtils.generate(size, r);
+    final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
+    final double[] b2 = GdscSmlmTestUtils.generateDoubles(size, r);
     final Gradient2Function f1 = OffsetGradient2Function.wrapGradient2Function(f0, b1);
     final Gradient2Function f2 = OffsetGradient2Function.wrapGradient2Function(f1, b2);
     final double[] p = new double[n];
