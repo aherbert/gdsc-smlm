@@ -60,17 +60,17 @@ import ij.plugin.PlugIn;
 
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Filters PeakFit results that are stored in memory using the configured filters.
  */
-public class FreeFilterResults implements PlugIn, ItemListener {
+public class FreeFilterResults implements PlugIn {
   private static final String TITLE = "Free Filter Results";
-  private static String inputOption = "";
+  private static AtomicReference<String> inputOptionRef = new AtomicReference<>("");
 
+  private String inputOption;
   private GUIFilterSettings.Builder filterSettings;
-  private MemoryPeakResults results;
 
   @Override
   public void run(String arg) {
@@ -93,7 +93,8 @@ public class FreeFilterResults implements PlugIn, ItemListener {
       return;
     }
 
-    results = ResultsManager.loadInputResults(inputOption, false, null, null);
+    final MemoryPeakResults results =
+        ResultsManager.loadInputResults(inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
@@ -119,7 +120,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Select a dataset to filter");
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, inputOptionRef.get(), InputSource.MEMORY);
 
     filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 
@@ -134,7 +135,7 @@ public class FreeFilterResults implements PlugIn, ItemListener {
 
     if (ImageJUtils.isShowGenericDialog()) {
       final Checkbox cb = (Checkbox) gd.getCheckboxes().get(0);
-      cb.addItemListener(this);
+      cb.addItemListener(this::itemStateChanged);
     }
 
     gd.showDialog();
@@ -151,11 +152,11 @@ public class FreeFilterResults implements PlugIn, ItemListener {
       return false;
     }
 
+    inputOptionRef.set(inputOption);
     return SettingsManager.writeSettings(filterSettings.build());
   }
 
-  @Override
-  public void itemStateChanged(ItemEvent event) {
+  private void itemStateChanged(ItemEvent event) {
     // When the checkbox is clicked, output the list of available filters to the ImageJ log
 
     final Checkbox cb = (Checkbox) event.getSource();

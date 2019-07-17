@@ -44,6 +44,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -132,6 +133,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Computes the Fourier Image Resolution of an image
@@ -152,54 +154,189 @@ public class Fire implements PlugIn {
   private static final String KEY_SIGMA = "sigma_estimate";
   private static final String KEY_Q = "q_estimate";
 
-  private static String inputOption = "";
-  private static String inputOption2 = "";
+  /**
+   * Hold a copy of the ImageJ preferences for the number of threads. This is atomically updated
+   * using synchronised methods.
+   */
+  private static int imagejNThreads = Prefs.getThreads();
+  /**
+   * Hold a copy of the user choice for the number of threads. This is atomically updated using
+   * synchronised methods.
+   */
+  private static int lastNThreads = imagejNThreads;
 
-  private static int repeats = 1;
-  private static boolean useSignal;
+  private boolean extraOptions;
   private boolean myUseSignal;
-  private static int maxPerBin; // 5 in the Niewenhuizen paper
-  private static boolean randomSplit = true;
-  private static int blockSize = 50;
-  private static final String[] scaleItems;
-  private static final int[] scaleValues = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
-  private static String[] imageSizeItems;
-  private static int[] imageSizeValues;
-  private static int imageScaleIndex;
-  private static int imageSizeIndex;
+  private Rectangle roiBounds;
+  private int roiImageWidth;
+  private int roiImageHeight;
 
-  // The Q value and the mean and sigma for spurious correlation correction
-  private static boolean spuriousCorrelationCorrection;
-  private static double qvalue;
-  private static double mean;
-  private static double sigma;
+  // Stored in initialisation
+  private MemoryPeakResults results;
+  private MemoryPeakResults results2;
+  private Rectangle2D dataBounds;
+  private String units;
+  private double nmPerUnit = 1;
 
-  static {
-    scaleItems = new String[scaleValues.length];
-    scaleItems[0] = "Auto";
-    for (int i = 1; i < scaleValues.length; i++) {
-      scaleItems[i] = Integer.toString(scaleValues[i]);
-    }
+  // Stored in setCorrectionParameters
+  private double correctionQValue;
+  private double correctionMean;
+  private double correctionSigma;
 
-    // Create size for Fourier transforms. Must be power of 2.
-    imageSizeValues = new int[32];
-    imageSizeItems = new String[imageSizeValues.length];
-    int size = 512; // Start at a reasonable size. Too small does not work.
-    int count = 0;
-    while (size <= 16384) {
-      if (size == 2048) {
-        imageSizeIndex = count;
+  private TrackProgress progress = SimpleImageJTrackProgress.getInstance();
+
+  private int numberOfThreads;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  private FourierMethod fourierMethod;
+  private SamplingMethod samplingMethod;
+  private ThresholdMethod thresholdMethod;
+  private PrecisionMethod precisionMethod;
+
+  private PrecisionResultProcedure pp;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    private static final String[] scaleItems;
+    private static final int[] scaleValues = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
+    private static String[] imageSizeItems;
+    private static int[] imageSizeValues;
+
+    static {
+      scaleItems = new String[scaleValues.length];
+      scaleItems[0] = "Auto";
+      for (int i = 1; i < scaleValues.length; i++) {
+        scaleItems[i] = Integer.toString(scaleValues[i]);
       }
 
-      // Image sizes are 1 smaller so that rounding error when scaling does not create an image too
-      // large for the power of 2
-      imageSizeValues[count] = size - 1;
-      imageSizeItems[count] = Integer.toString(size);
-      size *= 2;
-      count++;
+      // Create size for Fourier transforms. Must be power of 2.
+      imageSizeValues = new int[32];
+      imageSizeItems = new String[imageSizeValues.length];
+      int size = 512; // Start at a reasonable size. Too small does not work.
+      int count = 0;
+      while (size <= 16384) {
+        // Image sizes are 1 smaller so that rounding error when scaling does not create an image
+        // too large for the power of 2
+        imageSizeValues[count] = size - 1;
+        imageSizeItems[count] = Integer.toString(size);
+        size *= 2;
+        count++;
+      }
+      imageSizeValues = Arrays.copyOf(imageSizeValues, count);
+      imageSizeItems = Arrays.copyOf(imageSizeItems, count);
     }
-    imageSizeValues = Arrays.copyOf(imageSizeValues, count);
-    imageSizeItems = Arrays.copyOf(imageSizeItems, count);
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    String inputOption2;
+
+    int repeats;
+    boolean useSignal;
+    int maxPerBin; // 5 in the Niewenhuizen paper
+    boolean randomSplit;
+    int blockSize;
+    int imageScaleIndex;
+    int imageSizeIndex;
+
+    // The Q value and the mean and sigma for spurious correlation correction
+    boolean spuriousCorrelationCorrection;
+    double qvalue;
+    double mean;
+    double sigma;
+
+    double perimeterSamplingFactor;
+    int fourierMethodIndex;
+    int samplingMethodIndex;
+    int thresholdMethodIndex;
+    boolean showFrcCurve;
+    boolean showFrcCurveRepeats;
+    boolean showFrcTimeEvolution;
+    int precisionMethodIndex;
+    boolean sampleDecay;
+    boolean loessSmoothing;
+    boolean fitPrecision;
+    double minQ;
+    double maxQ;
+
+    boolean chooseRoi;
+    String roiImage;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      inputOption2 = "";
+      repeats = 1;
+      randomSplit = true;
+      blockSize = 50;
+      imageSizeIndex = Arrays.binarySearch(imageSizeValues, 2047);
+      perimeterSamplingFactor = 1;
+      fourierMethodIndex = FourierMethod.JTRANSFORMS.ordinal();
+      samplingMethodIndex = SamplingMethod.RADIAL_SUM.ordinal();
+      thresholdMethodIndex = ThresholdMethod.FIXED_1_OVER_7.ordinal();
+      showFrcCurve = true;
+      precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal();
+      minQ = 0.2;
+      maxQ = 0.45;
+      roiImage = "";
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      inputOption2 = source.inputOption2;
+      repeats = source.repeats;
+      useSignal = source.useSignal;
+      maxPerBin = source.maxPerBin; // 5 in the Niewenhuizen paper
+      randomSplit = source.randomSplit;
+      blockSize = source.blockSize;
+      imageScaleIndex = source.imageScaleIndex;
+      imageSizeIndex = source.imageSizeIndex;
+      spuriousCorrelationCorrection = source.spuriousCorrelationCorrection;
+      qvalue = source.qvalue;
+      mean = source.mean;
+      sigma = source.sigma;
+      perimeterSamplingFactor = source.perimeterSamplingFactor;
+      fourierMethodIndex = source.fourierMethodIndex;
+      samplingMethodIndex = source.samplingMethodIndex;
+      thresholdMethodIndex = source.thresholdMethodIndex;
+      showFrcCurve = source.showFrcCurve;
+      showFrcCurveRepeats = source.showFrcCurveRepeats;
+      showFrcTimeEvolution = source.showFrcTimeEvolution;
+      precisionMethodIndex = source.precisionMethodIndex;
+      sampleDecay = source.sampleDecay;
+      loessSmoothing = source.loessSmoothing;
+      fitPrecision = source.fitPrecision;
+      minQ = source.minQ;
+      maxQ = source.maxQ;
+      chooseRoi = source.chooseRoi;
+      roiImage = source.roiImage;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
   }
 
   /**
@@ -241,51 +378,6 @@ public class Fire implements PlugIn {
      */
     public abstract String getName();
   }
-
-  private static double perimeterSamplingFactor = 1;
-  private static int fourierMethodIndex = FourierMethod.JTRANSFORMS.ordinal();
-  private FourierMethod fourierMethod;
-  private static int samplingMethodIndex = SamplingMethod.RADIAL_SUM.ordinal();
-  private SamplingMethod samplingMethod;
-  private static int thresholdMethodIndex = ThresholdMethod.FIXED_1_OVER_7.ordinal();
-  private ThresholdMethod thresholdMethod;
-  private static boolean showFRCCurve = true;
-  private static boolean showFRCCurveRepeats;
-  private static boolean showFRCTimeEvolution;
-  private static int precisionMethodIndex = PrecisionMethod.CALCULATE.ordinal();
-  private PrecisionMethod precisionMethod;
-  private static boolean sampleDecay;
-  private static boolean loessSmoothing;
-  private static boolean fitPrecision;
-  private static double minQ = 0.2;
-  private static double maxQ = 0.45;
-
-  private static boolean chooseRoi;
-  private static String roiImage = "";
-
-  private static int imagejNThreads = Prefs.getThreads();
-  private static int lastNThreads = imagejNThreads;
-
-  private boolean extraOptions;
-  private Rectangle roiBounds;
-  private int roiImageWidth;
-  private int roiImageHeight;
-
-  // Stored in initialisation
-  private MemoryPeakResults results;
-  private MemoryPeakResults results2;
-  private Rectangle2D dataBounds;
-  private String units;
-  private double nmPerUnit = 1;
-
-  // Stored in setCorrectionParameters
-  private double correctionQValue;
-  private double correctionMean;
-  private double correctionSigma;
-
-  private TrackProgress progress = SimpleImageJTrackProgress.getInstance();
-
-  private int numberOfThreads;
 
   /**
    * Store images for FIRE analysis.
@@ -378,9 +470,9 @@ public class Fire implements PlugIn {
       try {
         result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod,
             fourierImageScale, imageSize);
-        if (showFRCCurve) {
+        if (settings.showFrcCurve) {
           plot = createFrcCurve(name, result, thresholdMethod);
-          if (showFRCCurveRepeats) {
+          if (settings.showFrcCurveRepeats) {
             // Do this on the thread
             plot.draw();
           }
@@ -425,6 +517,9 @@ public class Fire implements PlugIn {
       return;
     }
 
+    settings = Settings.load();
+    settings.save();
+
     if ("q".equals(arg)) {
       pluginTitle += " Q estimation";
       runQEstimation();
@@ -437,27 +532,29 @@ public class Fire implements PlugIn {
       return;
     }
 
-    MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
-    if (MemoryPeakResults.isEmpty(results)) {
+    MemoryPeakResults inputResults1 =
+        ResultsManager.loadInputResults(settings.inputOption, false, null, null);
+    if (MemoryPeakResults.isEmpty(inputResults1)) {
       IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
-    MemoryPeakResults results2 = ResultsManager.loadInputResults(inputOption2, false, null, null);
+    MemoryPeakResults inputResults2 =
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
 
-    results = cropToRoi(results);
-    if (results.size() < 2) {
+    inputResults1 = cropToRoi(inputResults1);
+    if (inputResults1.size() < 2) {
       IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
-    if (results2 != null) {
-      results2 = cropToRoi(results2);
-      if (results2.size() < 2) {
+    if (inputResults2 != null) {
+      inputResults2 = cropToRoi(inputResults2);
+      if (inputResults2.size() < 2) {
         IJ.error(pluginTitle, "No results2 within the crop region");
         return;
       }
     }
 
-    initialise(results, results2);
+    initialise(inputResults1, inputResults2);
 
     if (!showDialog()) {
       return;
@@ -467,9 +564,9 @@ public class Fire implements PlugIn {
 
     // Compute FIRE
 
-    String name = results.getName();
-    final double fourierImageScale = scaleValues[imageScaleIndex];
-    final int imageSize = imageSizeValues[imageSizeIndex];
+    String name = inputResults1.getName();
+    final double fourierImageScale = Settings.scaleValues[settings.imageScaleIndex];
+    final int imageSize = Settings.imageSizeValues[settings.imageSizeIndex];
 
     if (this.results2 != null) {
       name += " vs " + this.results2.getName();
@@ -480,14 +577,14 @@ public class Fire implements PlugIn {
       if (result != null) {
         logResult(name, result);
 
-        if (showFRCCurve) {
+        if (settings.showFrcCurve) {
           showFrcCurve(name, result, thresholdMethod);
         }
       }
     } else {
       FireResult result = null;
 
-      final int repeats = (randomSplit) ? Math.max(1, Fire.repeats) : 1;
+      final int repeats = (settings.randomSplit) ? Math.max(1, settings.repeats) : 1;
       if (repeats == 1) {
         result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod,
             fourierImageScale, imageSize);
@@ -495,7 +592,7 @@ public class Fire implements PlugIn {
         if (result != null) {
           logResult(name, result);
 
-          if (showFRCCurve) {
+          if (settings.showFrcCurve) {
             showFrcCurve(name, result, thresholdMethod);
           }
         }
@@ -515,17 +612,7 @@ public class Fire implements PlugIn {
         }
 
         // Wait for all to finish
-        for (int t = futures.size(); t-- > 0;) {
-          try {
-            // The future .get() method will block until completed
-            futures.get(t).get();
-          } catch (final Exception ex) {
-            // This should not happen.
-            // Ignore it and allow processing to continue (the number of neighbour samples will just
-            // be smaller).
-            ex.printStackTrace();
-          }
-        }
+        ConcurrencyUtils.waitForCompletionUnchecked(futures);
         IJ.showProgress(1);
 
         executor.shutdown();
@@ -551,12 +638,12 @@ public class Fire implements PlugIn {
             stats.add(result.fireNumber);
           }
 
-          if (showFRCCurveRepeats) {
+          if (settings.showFrcCurveRepeats) {
             // Output each FRC curve using a suffix.
             logResult(w.name, result);
             wo.add(ImageJUtils.display(w.plot.getTitle(), w.plot));
           }
-          if (showFRCCurve) {
+          if (settings.showFrcCurve) {
             final int index = mapper.map(i + 1);
             curve.add(name, result, thresholdMethod, LutHelper.getColour(valuesLut, index),
                 Color.blue, null);
@@ -567,7 +654,7 @@ public class Fire implements PlugIn {
           wo.cascade();
           final double mean = stats.getMean();
           logResult(name, result, mean, stats);
-          if (showFRCCurve) {
+          if (settings.showFrcCurve) {
             curve.addResolution(mean);
             final Plot2 plot = curve.getPlot();
             ImageJUtils.display(plot.getTitle(), plot);
@@ -589,7 +676,7 @@ public class Fire implements PlugIn {
       }
 
       // Only do this once
-      if (showFRCTimeEvolution && result != null && !Double.isNaN(result.fireNumber)) {
+      if (settings.showFrcTimeEvolution && result != null && !Double.isNaN(result.fireNumber)) {
         showFrcTimeEvolution(name, result.fireNumber, thresholdMethod,
             nmPerUnit / result.getNmPerPixel(), imageSize);
       }
@@ -623,7 +710,6 @@ public class Fire implements PlugIn {
     }
 
     // Adjust bounds relative to input results image
-    // Rectangle2D.Float bounds = results.getDataBounds();
     final Rectangle bounds = results.getBounds(true);
     final double xscale = (double) roiImageWidth / bounds.width;
     final double yscale = (double) roiImageHeight / bounds.height;
@@ -636,14 +722,11 @@ public class Fire implements PlugIn {
     // Create a new set of results within the bounds
     final MemoryPeakResults newResults = new MemoryPeakResults();
     newResults.begin();
-    results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-      @Override
-      public void executeXyr(float x, float y, PeakResult result) {
-        if (x < minX || x > maxX || y < minY || y > maxY) {
-          return;
-        }
-        newResults.add(result);
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
+      if (x < minX || x > maxX || y < minY || y > maxY) {
+        return;
       }
+      newResults.add(result);
     });
     newResults.end();
     newResults.copySettings(results);
@@ -666,11 +749,12 @@ public class Fire implements PlugIn {
       }
     }
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-    ResultsManager.addInput(gd, "Input2", inputOption2, InputSource.NONE, InputSource.MEMORY);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, "Input2", settings.inputOption2, InputSource.NONE,
+        InputSource.MEMORY);
 
     if (!titles.isEmpty()) {
-      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", settings.chooseRoi);
     }
 
     gd.showDialog();
@@ -679,29 +763,29 @@ public class Fire implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    inputOption2 = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption2 = ResultsManager.getInputSource(gd);
 
     if (!titles.isEmpty()) {
-      chooseRoi = gd.getNextBoolean();
+      settings.chooseRoi = gd.getNextBoolean();
     }
 
-    if (!titles.isEmpty() && chooseRoi) {
+    if (!titles.isEmpty() && settings.chooseRoi) {
       if (titles.size() == 1) {
-        roiImage = titles.get(0);
-        Recorder.recordOption("Image", roiImage);
+        settings.roiImage = titles.get(0);
+        Recorder.recordOption("Image", settings.roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
         gd = new ExtendedGenericDialog(pluginTitle);
         gd.addMessage("Select the source image for the ROI");
-        gd.addChoice("Image", items, roiImage);
+        gd.addChoice("Image", items, settings.roiImage);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
         }
-        roiImage = gd.getNextChoice();
+        settings.roiImage = gd.getNextChoice();
       }
-      final ImagePlus imp = WindowManager.getImage(roiImage);
+      final ImagePlus imp = WindowManager.getImage(settings.roiImage);
 
       roiBounds = imp.getRoi().getBounds();
       roiImageWidth = imp.getWidth();
@@ -721,40 +805,42 @@ public class Fire implements PlugIn {
     final boolean single = results2 == null;
 
     gd.addMessage("Image construction options:");
-    gd.addChoice("Image_scale", scaleItems, scaleItems[imageScaleIndex]);
-    gd.addChoice("Auto_image_size", imageSizeItems, imageSizeItems[imageSizeIndex]);
+    gd.addChoice("Image_scale", Settings.scaleItems, settings.imageScaleIndex);
+    gd.addChoice("Auto_image_size", Settings.imageSizeItems, settings.imageSizeIndex);
     if (extraOptions) {
-      gd.addCheckbox("Use_signal (if present)", useSignal);
+      gd.addCheckbox("Use_signal (if present)", settings.useSignal);
     }
-    gd.addNumericField("Max_per_bin", maxPerBin, 0);
+    gd.addNumericField("Max_per_bin", settings.maxPerBin, 0);
 
     gd.addMessage("Fourier options:");
     final String[] fourierMethodNames =
         SettingsManager.getNames((Object[]) Frc.FourierMethod.values());
-    gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
+    gd.addChoice("Fourier_method", fourierMethodNames,
+        fourierMethodNames[settings.fourierMethodIndex]);
     final String[] samplingMethodNames =
         SettingsManager.getNames((Object[]) Frc.SamplingMethod.values());
-    gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
-    gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+    gd.addChoice("Sampling_method", samplingMethodNames,
+        samplingMethodNames[settings.samplingMethodIndex]);
+    gd.addSlider("Sampling_factor", 0.2, 4, settings.perimeterSamplingFactor);
 
     gd.addMessage("FIRE options:");
     final String[] thresholdMethodNames =
         SettingsManager.getNames((Object[]) Frc.ThresholdMethod.values());
     gd.addChoice("Threshold_method", thresholdMethodNames,
-        thresholdMethodNames[thresholdMethodIndex]);
-    gd.addCheckbox("Show_FRC_curve", showFRCCurve);
+        thresholdMethodNames[settings.thresholdMethodIndex]);
+    gd.addCheckbox("Show_FRC_curve", settings.showFrcCurve);
 
     if (single) {
       gd.addMessage("For single datasets:");
-      gd.addNumericField("Block_size", blockSize, 0);
-      gd.addCheckbox("Random_split", randomSplit);
-      gd.addNumericField("Repeats", repeats, 0);
-      gd.addCheckbox("Show_FRC_curve_repeats", showFRCCurveRepeats);
-      gd.addCheckbox("Show_FRC_time_evolution", showFRCTimeEvolution);
-      gd.addCheckbox("Spurious correlation correction", spuriousCorrelationCorrection);
-      gd.addNumericField("Q-value", qvalue, 3);
-      gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
-      gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
+      gd.addNumericField("Block_size", settings.blockSize, 0);
+      gd.addCheckbox("Random_split", settings.randomSplit);
+      gd.addNumericField("Repeats", settings.repeats, 0);
+      gd.addCheckbox("Show_FRC_curve_repeats", settings.showFrcCurveRepeats);
+      gd.addCheckbox("Show_FRC_time_evolution", settings.showFrcTimeEvolution);
+      gd.addCheckbox("Spurious correlation correction", settings.spuriousCorrelationCorrection);
+      gd.addNumericField("Q-value", settings.qvalue, 3);
+      gd.addNumericField("Precision_Mean", settings.mean, 2, 6, "nm");
+      gd.addNumericField("Precision_Sigma", settings.sigma, 2, 6, "nm");
       if (extraOptions) {
         gd.addNumericField("Threads", getLastNThreads(), 0);
       }
@@ -766,48 +852,48 @@ public class Fire implements PlugIn {
       return false;
     }
 
-    imageScaleIndex = gd.getNextChoiceIndex();
-    imageSizeIndex = gd.getNextChoiceIndex();
+    settings.imageScaleIndex = gd.getNextChoiceIndex();
+    settings.imageSizeIndex = gd.getNextChoiceIndex();
     if (extraOptions) {
-      myUseSignal = useSignal = gd.getNextBoolean();
+      myUseSignal = settings.useSignal = gd.getNextBoolean();
     }
-    maxPerBin = Math.abs((int) gd.getNextNumber());
+    settings.maxPerBin = Math.abs((int) gd.getNextNumber());
 
-    fourierMethodIndex = gd.getNextChoiceIndex();
-    fourierMethod = FourierMethod.values()[fourierMethodIndex];
-    samplingMethodIndex = gd.getNextChoiceIndex();
-    samplingMethod = SamplingMethod.values()[samplingMethodIndex];
-    perimeterSamplingFactor = gd.getNextNumber();
+    settings.fourierMethodIndex = gd.getNextChoiceIndex();
+    fourierMethod = FourierMethod.values()[settings.fourierMethodIndex];
+    settings.samplingMethodIndex = gd.getNextChoiceIndex();
+    samplingMethod = SamplingMethod.values()[settings.samplingMethodIndex];
+    settings.perimeterSamplingFactor = gd.getNextNumber();
 
-    thresholdMethodIndex = gd.getNextChoiceIndex();
-    thresholdMethod = Frc.ThresholdMethod.values()[thresholdMethodIndex];
-    showFRCCurve = gd.getNextBoolean();
+    settings.thresholdMethodIndex = gd.getNextChoiceIndex();
+    thresholdMethod = Frc.ThresholdMethod.values()[settings.thresholdMethodIndex];
+    settings.showFrcCurve = gd.getNextBoolean();
 
     if (single) {
-      blockSize = Math.max(1, (int) gd.getNextNumber());
-      randomSplit = gd.getNextBoolean();
-      repeats = Math.max(1, (int) gd.getNextNumber());
-      showFRCCurveRepeats = gd.getNextBoolean();
-      showFRCTimeEvolution = gd.getNextBoolean();
-      spuriousCorrelationCorrection = gd.getNextBoolean();
-      qvalue = Math.abs(gd.getNextNumber());
-      mean = Math.abs(gd.getNextNumber());
-      sigma = Math.abs(gd.getNextNumber());
+      settings.blockSize = Math.max(1, (int) gd.getNextNumber());
+      settings.randomSplit = gd.getNextBoolean();
+      settings.repeats = Math.max(1, (int) gd.getNextNumber());
+      settings.showFrcCurveRepeats = gd.getNextBoolean();
+      settings.showFrcTimeEvolution = gd.getNextBoolean();
+      settings.spuriousCorrelationCorrection = gd.getNextBoolean();
+      settings.qvalue = Math.abs(gd.getNextNumber());
+      settings.mean = Math.abs(gd.getNextNumber());
+      settings.sigma = Math.abs(gd.getNextNumber());
       if (extraOptions) {
         setThreads((int) gd.getNextNumber());
-        lastNThreads = this.numberOfThreads;
+        setLastNThreads(this.numberOfThreads);
       }
     }
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
-      if (single && spuriousCorrelationCorrection) {
-        ParameterUtils.isAboveZero("Q-value", qvalue);
-        ParameterUtils.isAboveZero("Precision Mean", mean);
-        ParameterUtils.isAboveZero("Precision Sigma", sigma);
+      ParameterUtils.isAboveZero("Perimeter sampling factor", settings.perimeterSamplingFactor);
+      if (single && settings.spuriousCorrelationCorrection) {
+        ParameterUtils.isAboveZero("Q-value", settings.qvalue);
+        ParameterUtils.isAboveZero("Precision Mean", settings.mean);
+        ParameterUtils.isAboveZero("Precision Sigma", settings.sigma);
         // Set these for use in FIRE computation
-        setCorrectionParameters(qvalue, mean, sigma);
+        setCorrectionParameters(settings.qvalue, settings.mean, settings.sigma);
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
@@ -921,6 +1007,7 @@ public class Fire implements PlugIn {
     f.correctionQValue = correctionQValue;
     f.correctionMean = correctionMean;
     f.correctionSigma = correctionSigma;
+    f.settings = settings;
     return f;
   }
 
@@ -931,11 +1018,11 @@ public class Fire implements PlugIn {
    * @param results the results
    * @return the memory peak results
    */
-  private static MemoryPeakResults verify(MemoryPeakResults results) {
+  private MemoryPeakResults verify(MemoryPeakResults results) {
     if (results == null || results.size() < 2) {
       return null;
     }
-    if (blockSize > 1) {
+    if (settings.blockSize > 1) {
       // Results must be in time order when processing blocks
       results.sort();
     }
@@ -1042,7 +1129,7 @@ public class Fire implements PlugIn {
     } else {
       // Block sampling.
       // Ensure we have at least 2 even sized blocks.
-      int blockSize = Math.min(results.size() / 2, Math.max(1, Fire.blockSize));
+      int blockSize = Math.min(results.size() / 2, Math.max(1, settings.blockSize));
       int nblocks = (int) Math.ceil((double) results.size() / blockSize);
       while (nblocks <= 1 && blockSize > 1) {
         blockSize /= 2;
@@ -1052,7 +1139,7 @@ public class Fire implements PlugIn {
         // This should not happen since the results should contain at least 2 localisations
         return null;
       }
-      if (blockSize != Fire.blockSize) {
+      if (blockSize != settings.blockSize) {
         IJ.log(pluginTitle + " Warning: Changed block size to " + blockSize);
       }
 
@@ -1071,7 +1158,7 @@ public class Fire implements PlugIn {
       blocks[block.getCount()] = Arrays.copyOf(blocks[block.getCount()], i.getCount());
 
       final int[] indices = SimpleArrayUtils.natural(block.getCount() + 1);
-      if (randomSplit) {
+      if (settings.randomSplit) {
         MathArrays.shuffle(indices);
       }
 
@@ -1094,14 +1181,14 @@ public class Fire implements PlugIn {
     image2.end();
     final ImageProcessor ip2 = image2.getImagePlus().getProcessor();
 
-    if (maxPerBin > 0 && signalProvider instanceof FixedSignalProvider) {
+    if (settings.maxPerBin > 0 && signalProvider instanceof FixedSignalProvider) {
       // We can eliminate over-sampled pixels
       for (int i = ip1.getPixelCount(); i-- > 0;) {
-        if (ip1.getf(i) > maxPerBin) {
-          ip1.setf(i, maxPerBin);
+        if (ip1.getf(i) > settings.maxPerBin) {
+          ip1.setf(i, settings.maxPerBin);
         }
-        if (ip2.getf(i) > maxPerBin) {
-          ip2.setf(i, maxPerBin);
+        if (ip2.getf(i) > settings.maxPerBin) {
+          ip2.setf(i, settings.maxPerBin);
         }
       }
     }
@@ -1335,7 +1422,7 @@ public class Fire implements PlugIn {
     frc.setTrackProgress(progress);
     frc.setFourierMethod(fourierMethod);
     frc.setSamplingMethod(samplingMethod);
-    frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+    frc.setPerimeterSamplingFactor(settings.perimeterSamplingFactor);
     final FrcCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2, images.nmPerPixel);
     if (frcCurve == null) {
       return null;
@@ -1374,23 +1461,24 @@ public class Fire implements PlugIn {
       return;
     }
 
-    MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
-    if (MemoryPeakResults.isEmpty(results)) {
+    MemoryPeakResults inputResults =
+        ResultsManager.loadInputResults(settings.inputOption, false, null, null);
+    if (MemoryPeakResults.isEmpty(inputResults)) {
       IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
-    if (results.getCalibration() == null) {
+    if (inputResults.getCalibration() == null) {
       IJ.error(pluginTitle, "The results are not calibrated");
       return;
     }
 
-    results = cropToRoi(results);
-    if (results.size() < 2) {
+    inputResults = cropToRoi(inputResults);
+    if (inputResults.size() < 2) {
       IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
 
-    initialise(results, null);
+    initialise(inputResults, null);
 
     // We need localisation precision.
     // Build a histogram of the localisation precision.
@@ -1403,9 +1491,8 @@ public class Fire implements PlugIn {
     }
     final StoredDataStatistics precision = histogram.precision;
 
-    // String name = results.getName();
-    final double fourierImageScale = scaleValues[imageScaleIndex];
-    final int imageSize = imageSizeValues[imageSizeIndex];
+    final double fourierImageScale = Settings.scaleValues[settings.imageScaleIndex];
+    final int imageSize = Settings.imageSizeValues[settings.imageSizeIndex];
 
     // Create the image and compute the numerator of FRC.
     // Do not use the signal so results.size() is the number of localisations.
@@ -1421,7 +1508,7 @@ public class Fire implements PlugIn {
     frc.setTrackProgress(progress);
     frc.setFourierMethod(fourierMethod);
     frc.setSamplingMethod(samplingMethod);
-    frc.setPerimeterSamplingFactor(perimeterSamplingFactor);
+    frc.setPerimeterSamplingFactor(settings.perimeterSamplingFactor);
     final FrcCurve frcCurve = frc.calculateFrcCurve(images.ip1, images.ip2, images.nmPerPixel);
     if (frcCurve == null) {
       IJ.error(pluginTitle, "Failed to compute FRC curve");
@@ -1460,10 +1547,10 @@ public class Fire implements PlugIn {
     final double[] q = Frc.computeQ(frcCurve, false);
     int low = 0;
     int high = q.length;
-    while (high > 0 && q[high - 1] > maxQ) {
+    while (high > 0 && q[high - 1] > settings.maxQ) {
       high--;
     }
-    while (low < q.length && q[low] < minQ) {
+    while (low < q.length && q[low] < settings.minQ) {
       low++;
     }
     // Require we fit at least 10% of the curve
@@ -1478,7 +1565,7 @@ public class Fire implements PlugIn {
     // become parameters for fitting.
 
     // Check if we can sample precision values
-    final boolean sampleDecay = precision != null && Fire.sampleDecay;
+    final boolean sampleDecay = precision != null && settings.sampleDecay;
 
     double[] expDecay;
     if (sampleDecay) {
@@ -1523,7 +1610,7 @@ public class Fire implements PlugIn {
 
     // Smoothing
     double[] smooth;
-    if (loessSmoothing) {
+    if (settings.loessSmoothing) {
       // Note: This computes the log then smooths it
       final double bandwidth = 0.1;
       final int robustness = 0;
@@ -1593,7 +1680,7 @@ public class Fire implements PlugIn {
       ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
     }
 
-    if (fitPrecision) {
+    if (settings.fitPrecision) {
       // Q - Should this be optional?
       if (sampleDecay) {
         // If a sample of the precision was used to construct the data for the initial fit
@@ -1880,17 +1967,10 @@ public class Fire implements PlugIn {
       final double eight_pi2_s2 = 2 * FOUR_PI2 * sigma * sigma;
       final double factor = -FOUR_PI2 * mean * mean;
 
-      // Check
-      // double[] hq2 = FRC.computeHq(q, mean, sigma);
-
       double value = 0;
       for (int i = 0; i < pre.length; i++) {
         final double d = 1 + eight_pi2_s2 * q2[i];
         final double hq = FastMath.exp((factor * q2[i]) / d) / Math.sqrt(d);
-
-        // Check
-        // if (hq != hq2[i + low])
-        // System.out.printf("hq error: %f != %f\n", hq, hq2[i + low]);
 
         // Original cost function. Note that each observation has a
         // contribution of 0 to 1.
@@ -1916,44 +1996,45 @@ public class Fire implements PlugIn {
 
     gd.addMessage("Estimate the blinking correction parameter Q for Fourier Ring Correlation");
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
     if (!titles.isEmpty()) {
-      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", chooseRoi);
+      gd.addCheckbox((titles.size() == 1) ? "Use_ROI" : "Choose_ROI", settings.chooseRoi);
     }
 
     gd.addMessage("Image construction options:");
-    // gd.addCheckbox("Use_signal (if present)", useSignal);
-    gd.addChoice("Image_scale", scaleItems, scaleItems[imageScaleIndex]);
-    gd.addChoice("Auto_image_size", imageSizeItems, imageSizeItems[imageSizeIndex]);
-    gd.addNumericField("Block_size", blockSize, 0);
-    gd.addCheckbox("Random_split", randomSplit);
-    gd.addNumericField("Max_per_bin", maxPerBin, 0);
+    gd.addChoice("Image_scale", Settings.scaleItems, settings.imageScaleIndex);
+    gd.addChoice("Auto_image_size", Settings.imageSizeItems, settings.imageSizeIndex);
+    gd.addNumericField("Block_size", settings.blockSize, 0);
+    gd.addCheckbox("Random_split", settings.randomSplit);
+    gd.addNumericField("Max_per_bin", settings.maxPerBin, 0);
 
     gd.addMessage("Fourier options:");
     final String[] fourierMethodNames =
         SettingsManager.getNames((Object[]) Frc.FourierMethod.values());
-    gd.addChoice("Fourier_method", fourierMethodNames, fourierMethodNames[fourierMethodIndex]);
+    gd.addChoice("Fourier_method", fourierMethodNames,
+        fourierMethodNames[settings.fourierMethodIndex]);
     final String[] samplingMethodNames =
         SettingsManager.getNames((Object[]) Frc.SamplingMethod.values());
-    gd.addChoice("Sampling_method", samplingMethodNames, samplingMethodNames[samplingMethodIndex]);
-    gd.addSlider("Sampling_factor", 0.2, 4, perimeterSamplingFactor);
+    gd.addChoice("Sampling_method", samplingMethodNames,
+        samplingMethodNames[settings.samplingMethodIndex]);
+    gd.addSlider("Sampling_factor", 0.2, 4, settings.perimeterSamplingFactor);
 
     gd.addMessage("Estimation options:");
     final String[] thresholdMethodNames =
         SettingsManager.getNames((Object[]) Frc.ThresholdMethod.values());
     gd.addChoice("Threshold_method", thresholdMethodNames,
-        thresholdMethodNames[thresholdMethodIndex]);
+        thresholdMethodNames[settings.thresholdMethodIndex]);
     final String[] precisionMethodNames =
         SettingsManager.getNames((Object[]) PrecisionMethod.values());
     gd.addChoice("Precision_method", precisionMethodNames,
-        precisionMethodNames[precisionMethodIndex]);
-    gd.addNumericField("Precision_Mean", mean, 2, 6, "nm");
-    gd.addNumericField("Precision_Sigma", sigma, 2, 6, "nm");
-    gd.addCheckbox("Sample_decay", sampleDecay);
-    gd.addCheckbox("LOESS_smoothing", loessSmoothing);
-    gd.addCheckbox("Fit_precision", fitPrecision);
-    gd.addSlider("MinQ", 0, 0.4, minQ);
-    gd.addSlider("MaxQ", 0.1, 0.5, maxQ);
+        precisionMethodNames[settings.precisionMethodIndex]);
+    gd.addNumericField("Precision_Mean", settings.mean, 2, 6, "nm");
+    gd.addNumericField("Precision_Sigma", settings.sigma, 2, 6, "nm");
+    gd.addCheckbox("Sample_decay", settings.sampleDecay);
+    gd.addCheckbox("LOESS_smoothing", settings.loessSmoothing);
+    gd.addCheckbox("Fit_precision", settings.fitPrecision);
+    gd.addSlider("MinQ", 0, 0.4, settings.minQ);
+    gd.addSlider("MaxQ", 0.1, 0.5, settings.maxQ);
 
     gd.showDialog();
 
@@ -1961,65 +2042,64 @@ public class Fire implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
     if (!titles.isEmpty()) {
-      chooseRoi = gd.getNextBoolean();
+      settings.chooseRoi = gd.getNextBoolean();
     }
 
-    // useSignal = gd.getNextBoolean();
-    imageScaleIndex = gd.getNextChoiceIndex();
-    imageSizeIndex = gd.getNextChoiceIndex();
-    blockSize = Math.max(1, (int) gd.getNextNumber());
-    randomSplit = gd.getNextBoolean();
-    maxPerBin = Math.abs((int) gd.getNextNumber());
+    settings.imageScaleIndex = gd.getNextChoiceIndex();
+    settings.imageSizeIndex = gd.getNextChoiceIndex();
+    settings.blockSize = Math.max(1, (int) gd.getNextNumber());
+    settings.randomSplit = gd.getNextBoolean();
+    settings.maxPerBin = Math.abs((int) gd.getNextNumber());
 
-    fourierMethodIndex = gd.getNextChoiceIndex();
-    fourierMethod = FourierMethod.values()[fourierMethodIndex];
-    samplingMethodIndex = gd.getNextChoiceIndex();
-    samplingMethod = SamplingMethod.values()[samplingMethodIndex];
-    perimeterSamplingFactor = gd.getNextNumber();
+    settings.fourierMethodIndex = gd.getNextChoiceIndex();
+    fourierMethod = FourierMethod.values()[settings.fourierMethodIndex];
+    settings.samplingMethodIndex = gd.getNextChoiceIndex();
+    samplingMethod = SamplingMethod.values()[settings.samplingMethodIndex];
+    settings.perimeterSamplingFactor = gd.getNextNumber();
 
-    thresholdMethodIndex = gd.getNextChoiceIndex();
-    thresholdMethod = Frc.ThresholdMethod.values()[thresholdMethodIndex];
-    precisionMethodIndex = gd.getNextChoiceIndex();
-    precisionMethod = PrecisionMethod.values()[precisionMethodIndex];
-    mean = Math.abs(gd.getNextNumber());
-    sigma = Math.abs(gd.getNextNumber());
-    sampleDecay = gd.getNextBoolean();
-    loessSmoothing = gd.getNextBoolean();
-    fitPrecision = gd.getNextBoolean();
-    minQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
-    maxQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
+    settings.thresholdMethodIndex = gd.getNextChoiceIndex();
+    thresholdMethod = Frc.ThresholdMethod.values()[settings.thresholdMethodIndex];
+    settings.precisionMethodIndex = gd.getNextChoiceIndex();
+    precisionMethod = PrecisionMethod.values()[settings.precisionMethodIndex];
+    settings.mean = Math.abs(gd.getNextNumber());
+    settings.sigma = Math.abs(gd.getNextNumber());
+    settings.sampleDecay = gd.getNextBoolean();
+    settings.loessSmoothing = gd.getNextBoolean();
+    settings.fitPrecision = gd.getNextBoolean();
+    settings.minQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
+    settings.maxQ = MathUtils.clip(0, 0.5, gd.getNextNumber());
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Perimeter sampling factor", perimeterSamplingFactor);
+      ParameterUtils.isAboveZero("Perimeter sampling factor", settings.perimeterSamplingFactor);
       if (precisionMethod == PrecisionMethod.FIXED) {
-        ParameterUtils.isAboveZero("Precision Mean", mean);
-        ParameterUtils.isAboveZero("Precision Sigma", sigma);
+        ParameterUtils.isAboveZero("Precision Mean", settings.mean);
+        ParameterUtils.isAboveZero("Precision Sigma", settings.sigma);
       }
-      ParameterUtils.isAbove("MaxQ", maxQ, minQ);
+      ParameterUtils.isAbove("MaxQ", settings.maxQ, settings.minQ);
     } catch (final IllegalArgumentException ex) {
       IJ.error(pluginTitle, ex.getMessage());
       return false;
     }
 
-    if (!titles.isEmpty() && chooseRoi) {
+    if (!titles.isEmpty() && settings.chooseRoi) {
       if (titles.size() == 1) {
-        roiImage = titles.get(0);
-        Recorder.recordOption("Image", roiImage);
+        settings.roiImage = titles.get(0);
+        Recorder.recordOption("Image", settings.roiImage);
       } else {
         final String[] items = titles.toArray(new String[titles.size()]);
         gd = new ExtendedGenericDialog(pluginTitle);
         gd.addMessage("Select the source image for the ROI");
-        gd.addChoice("Image", items, roiImage);
+        gd.addChoice("Image", items, settings.roiImage);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
         }
-        roiImage = gd.getNextChoice();
+        settings.roiImage = gd.getNextChoice();
       }
-      final ImagePlus imp = WindowManager.getImage(roiImage);
+      final ImagePlus imp = WindowManager.getImage(settings.roiImage);
 
       roiBounds = imp.getRoi().getBounds();
       roiImageWidth = imp.getWidth();
@@ -2137,9 +2217,9 @@ public class Fire implements PlugIn {
 
       String label = String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qvalue, mean, sigma);
       plot.setColor(Color.red);
-      final double[] vq = makeStrictlyPositive(this.vq, Double.POSITIVE_INFINITY);
-      plot.addPoints(qscaled, vq, Plot.LINE);
-      final double min = MathUtils.min(vq);
+      final double[] plotVq = makeStrictlyPositive(this.vq, Double.POSITIVE_INFINITY);
+      plot.addPoints(qscaled, plotVq, Plot.LINE);
+      final double min = MathUtils.min(plotVq);
       if (qvalue > 0) {
         label += String.format(". Cost = %.3f", plateauness);
         plot.setColor(Color.darkGray);
@@ -2150,8 +2230,8 @@ public class Fire implements PlugIn {
         plot.addLegend("Numerator\nCorrection\nCorrected Numerator", "top-right");
       }
       plot.setColor(Color.magenta);
-      plot.drawLine(qscaled[low], min, qscaled[low], vq[0]);
-      plot.drawLine(qscaled[high], min, qscaled[high], vq[0]);
+      plot.drawLine(qscaled[low], min, qscaled[low], plotVq[0]);
+      plot.drawLine(qscaled[high], min, qscaled[high], plotVq[0]);
       plot.setColor(Color.black);
       plot.addLabel(0, 0, label);
 
@@ -2206,10 +2286,9 @@ public class Fire implements PlugIn {
     }
 
     private double computePlateauness(double qvalue, double mu, double sd) {
-      final double[] exp_decay = computeExpDecay(mu, sd, qvalues);
-      final Plateauness p = new Plateauness(vq, exp_decay, low, high);
-      final double plateauness = p.value(qvalue);
-      return plateauness;
+      final double[] expDecay = computeExpDecay(mu, sd, qvalues);
+      final Plateauness p = new Plateauness(vq, expDecay, low, high);
+      return p.value(qvalue);
     }
 
     private double[] makeStrictlyPositive(double[] data, double min) {
@@ -2311,16 +2390,16 @@ public class Fire implements PlugIn {
             0.5 * Erf.erf((x2[0] - mean) * denom0, (x2[x2.length - 1] - mean) * denom0);
         // Normalise so the integral has the same volume as the histogram
         final Gaussian g = new Gaussian(this.standardAmplitude / (sigma * integral), mean, sigma);
-        final float[] y2 = new float[x2.length];
-        for (int i = 0; i < y2.length; i++) {
-          y2[i] = (float) g.value(x2[i]);
+        final float[] ydata = new float[x2.length];
+        for (int i = 0; i < ydata.length; i++) {
+          ydata[i] = (float) g.value(x2[i]);
         }
         // Normalise
         plot.setColor(Color.red);
-        plot.addPoints(x2, y2, Plot.LINE);
-        float max = MathUtils.max(y2);
+        plot.addPoints(x2, ydata, Plot.LINE);
+        float max = MathUtils.max(ydata);
         max = MathUtils.maxDefault(max, y);
-        final double rangex = 0; // (x2[x2.length - 1] - x2[0]) * 0.025;
+        final double rangex = 0;
         plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
       } else {
         // There is no base histogram.
@@ -2330,15 +2409,15 @@ public class Fire implements PlugIn {
         final double max = mean + 4 * sigma;
         final int n = 100;
         final double dx = (max - min) / n;
-        final float[] x2 = new float[n + 1];
+        final float[] xdata = new float[n + 1];
         final Gaussian g = new Gaussian(1, mean, sigma);
-        final float[] y2 = new float[x2.length];
+        final float[] ydata = new float[xdata.length];
         for (int i = 0; i <= n; i++) {
-          x2[i] = (float) (min + i * dx);
-          y2[i] = (float) g.value(x2[i]);
+          xdata[i] = (float) (min + i * dx);
+          ydata[i] = (float) g.value(xdata[i]);
         }
         plot.setColor(Color.red);
-        plot.addPoints(x2, y2, Plot.LINE);
+        plot.addPoints(xdata, ydata, Plot.LINE);
 
         // Always put min = 0 otherwise the plot does not change.
         plot.setLimits(0, max, 0, 1.05);
@@ -2365,9 +2444,8 @@ public class Fire implements PlugIn {
 
     // Set the method to compute a histogram. Default to the user selected option.
     PrecisionMethod method = null;
-    if (canUseStored && precisionMethod == PrecisionMethod.STORED) {
-      method = precisionMethod;
-    } else if (canCalculatePrecision && precisionMethod == PrecisionMethod.CALCULATE) {
+    if ((canUseStored && precisionMethod == PrecisionMethod.STORED)
+        || (canCalculatePrecision && precisionMethod == PrecisionMethod.CALCULATE)) {
       method = precisionMethod;
     }
 
@@ -2390,8 +2468,8 @@ public class Fire implements PlugIn {
         // This does not matter if the user has provide a fixed input.
         if (precisionMethod == PrecisionMethod.FIXED) {
           final PrecisionHistogram histogram = new PrecisionHistogram(title);
-          histogram.mean = mean;
-          histogram.sigma = sigma;
+          histogram.mean = settings.mean;
+          histogram.sigma = settings.sigma;
           return histogram;
         }
         // No precision
@@ -2459,8 +2537,8 @@ public class Fire implements PlugIn {
     final PrecisionHistogram histogram = new PrecisionHistogram(hist, precision, title);
 
     if (precisionMethod == PrecisionMethod.FIXED) {
-      histogram.mean = mean;
-      histogram.sigma = sigma;
+      histogram.mean = settings.mean;
+      histogram.sigma = settings.sigma;
       return histogram;
     }
 
@@ -2518,8 +2596,6 @@ public class Fire implements PlugIn {
 
     return histogram;
   }
-
-  private PrecisionResultProcedure pp;
 
   private boolean canCalculatePrecision(MemoryPeakResults results) {
     try {
@@ -2625,7 +2701,7 @@ public class Fire implements PlugIn {
     }
   }
 
-  private static class WorkSettings implements Cloneable {
+  private static class WorkSettings {
     double mean;
     double sigma;
     double qvalue;
@@ -2634,15 +2710,6 @@ public class Fire implements PlugIn {
       this.mean = mean;
       this.sigma = sigma;
       this.qvalue = qvalue;
-    }
-
-    @Override
-    public WorkSettings clone() {
-      try {
-        return (WorkSettings) super.clone();
-      } catch (final CloneNotSupportedException ex) {
-        return null; // Shouldn't happen
-      }
     }
   }
 
@@ -2655,13 +2722,7 @@ public class Fire implements PlugIn {
 
     @Override
     public boolean equalSettings(WorkSettings current, WorkSettings previous) {
-      if (current.mean != previous.mean) {
-        return false;
-      }
-      if (current.sigma != previous.sigma) {
-        return false;
-      }
-      return true;
+      return (current.mean == previous.mean && current.sigma == previous.sigma);
     }
 
     @Override
@@ -2711,8 +2772,8 @@ public class Fire implements PlugIn {
     @Override
     public Pair<WorkSettings, Object> doWork(Pair<WorkSettings, Object> work) {
       // Compute Q and then plot the scaled FRC numerator
-      final WorkSettings settings = work.getKey();
-      qplot.plot(settings.mean, settings.sigma, settings.qvalue, wo);
+      final WorkSettings workSettings = work.getKey();
+      qplot.plot(workSettings.mean, workSettings.sigma, workSettings.qvalue, wo);
       return work;
     }
   }
@@ -2797,15 +2858,15 @@ public class Fire implements PlugIn {
     }
 
     // Store the Q value and the mean and sigma
-    qvalue = qplot.qvalue;
-    mean = qplot.mean;
-    sigma = qplot.sigma;
+    settings.qvalue = qplot.qvalue;
+    settings.mean = qplot.mean;
+    settings.sigma = qplot.sigma;
 
     // Record the values for Macros since the NonBlockingDialog doesn't
     if (Recorder.record) {
-      Recorder.recordOption(KEY_MEAN, Double.toString(mean));
-      Recorder.recordOption(KEY_SIGMA, Double.toString(sigma));
-      Recorder.recordOption(KEY_Q, Double.toString(qvalue));
+      Recorder.recordOption(KEY_MEAN, Double.toString(settings.mean));
+      Recorder.recordOption(KEY_SIGMA, Double.toString(settings.sigma));
+      Recorder.recordOption(KEY_Q, Double.toString(settings.qvalue));
     }
 
     return true;
@@ -2880,7 +2941,6 @@ public class Fire implements PlugIn {
         return true;
       }
       if (ignore-- > 0) {
-        // System.out.println("ignored");
         return true;
       }
 
@@ -2893,7 +2953,6 @@ public class Fire implements PlugIn {
 
       // Even events from the slider come through as TextEvent from the TextField
       // since ImageJ captures the slider event as just updates the TextField.
-      // System.out.printf("Event: %s, %f, %f\n", e, mean, sigma);
 
       // Allow reset to default
       if (reset) {
@@ -2948,13 +3007,22 @@ public class Fire implements PlugIn {
    *
    * @return the last N threads
    */
-  private static int getLastNThreads() {
+  private static synchronized int getLastNThreads() {
     // See if ImageJ preference were updated
     if (imagejNThreads != Prefs.getThreads()) {
       lastNThreads = imagejNThreads = Prefs.getThreads();
     }
     // Otherwise use the last user input
     return lastNThreads;
+  }
+
+  /**
+   * SGets the last N threads used in the input dialog.
+   *
+   * @param numberOfThreads the new last N threads
+   */
+  private static synchronized void setLastNThreads(int numberOfThreads) {
+    lastNThreads = numberOfThreads;
   }
 
   /**

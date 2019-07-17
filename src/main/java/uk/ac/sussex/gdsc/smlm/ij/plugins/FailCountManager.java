@@ -81,6 +81,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -91,12 +92,13 @@ import java.util.regex.Pattern;
 public class FailCountManager implements PlugIn {
   private static final String TITLE = "Fail Count Manager";
 
-  private static int maxCounters = 200000;
+  private static AtomicInteger maxCounters = new AtomicInteger(200000);
 
   private static final String[] OPTIONS =
       SettingsManager.getNames((Object[]) FailCountOption.values());
 
-  private static TurboList<FailCountData> failCountData = new TurboList<>(1);
+  private static AtomicReference<TurboList<FailCountData>> failCountDataRef =
+      new AtomicReference<>(new TurboList<>(1));
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private FailCountManagerSettings.Builder settings;
@@ -217,7 +219,7 @@ public class FailCountManager implements PlugIn {
           // Only set this when non-zero
           consFailCount[i] = consFail;
         }
-        candidate[i] = i + 1;
+        candidate[i] = i + 1f;
         passCount[i] = pass;
         passRate[i] = (float) pass / (i + 1);
       }
@@ -400,20 +402,19 @@ public class FailCountManager implements PlugIn {
 
     @Override
     public void run() {
-      // while (!Thread.interrupted())
+      // Run until interrupted or the stack has null data
       while (true) {
         try {
           final PlotData plotData = stack.pop();
           if (plotData == null) {
             break;
           }
-          if (plotData.equalsPlot(lastPlotData)) {
-            continue;
+          if (!plotData.equalsPlot(lastPlotData)) {
+            run(plotData);
+            lastPlotData = plotData;
           }
-          run(plotData);
-          lastPlotData = plotData;
         } catch (final InterruptedException ex) {
-          // Thread.currentThread().interrupt();
+          Thread.currentThread().interrupt();
           break;
         }
       }
@@ -595,7 +596,7 @@ public class FailCountManager implements PlugIn {
         failCountData.add(new FailCountData(job.getSlice(), results));
       }
     }
-    FailCountManager.failCountData = failCountData;
+    failCountDataRef.set(failCountData);
     ImageJUtils.showStatus("");
 
     // Save for the future
@@ -706,7 +707,7 @@ public class FailCountManager implements PlugIn {
       }
 
       IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(countData.size(), "sequence"));
-      FailCountManager.failCountData = countData;
+      failCountDataRef.set(countData);
     } catch (final NumberFormatException | IOException ex) {
       IJ.error(TITLE, "Failed to load data:\n" + ex.getMessage());
     }
@@ -752,7 +753,7 @@ public class FailCountManager implements PlugIn {
    * Save the data in memory to file.
    */
   private void saveData() {
-    final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+    final TurboList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -792,7 +793,7 @@ public class FailCountManager implements PlugIn {
    * Show an interactive plot of the fail count data.
    */
   private void plotData() {
-    final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+    final TurboList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -802,40 +803,44 @@ public class FailCountManager implements PlugIn {
     final int max = getMaxConsecutiveFailCount(failCountData);
 
     final ConcurrentMonoStack<PlotData> stack = new ConcurrentMonoStack<>();
-    new Thread(new PlotWorker(stack, failCountData)).start();
+    boolean clear = true;
+    try {
+      new Thread(new PlotWorker(stack, failCountData)).start();
 
-    final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
-    gd.addCheckbox("Fixed_x_axis", settings.getPlotFixedXAxis());
-    gd.addMessage("Rolling Window Fail Count");
-    gd.addSlider("Rolling_window", 1, 3 * max, settings.getPlotRollingWindow());
-    gd.addMessage("Weighted Fail Count");
-    gd.addSlider("Pass_weight", 1, 20, settings.getPlotPassWeight());
-    gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
-    gd.addMessage("Resetting Fail Count");
-    gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
-    gd.addDialogListener((gd2, event) -> {
-      final int item = (int) gd2.getNextNumber();
-      final boolean fixedXAxis = gd2.getNextBoolean();
-      final int rollingWindow = (int) gd2.getNextNumber();
-      final int passWeight = (int) gd2.getNextNumber();
-      final int failWeight = (int) gd2.getNextNumber();
-      final double resetFraction = gd2.getNextNumber();
-      settings.setPlotItem(item);
-      settings.setPlotRollingWindow(rollingWindow);
-      settings.setPlotPassWeight(passWeight);
-      settings.setPlotFailWeight(failWeight);
-      settings.setPlotResetFraction(resetFraction);
-      stack.insert(
-          new PlotData(item, fixedXAxis, rollingWindow, passWeight, failWeight, resetFraction));
-      return true;
-    });
+      final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
+      gd.addSlider("Item", 1, failCountData.size(), settings.getPlotItem());
+      gd.addCheckbox("Fixed_x_axis", settings.getPlotFixedXAxis());
+      gd.addMessage("Rolling Window Fail Count");
+      gd.addSlider("Rolling_window", 1.0, 3.0 * max, settings.getPlotRollingWindow());
+      gd.addMessage("Weighted Fail Count");
+      gd.addSlider("Pass_weight", 1, 20, settings.getPlotPassWeight());
+      gd.addSlider("Fail_weight", 1, 20, settings.getPlotFailWeight());
+      gd.addMessage("Resetting Fail Count");
+      gd.addSlider("Reset_fraction", 0.05, 0.95, settings.getPlotResetFraction());
+      gd.addDialogListener((gd2, event) -> {
+        final int item = (int) gd2.getNextNumber();
+        final boolean fixedXAxis = gd2.getNextBoolean();
+        final int rollingWindow = (int) gd2.getNextNumber();
+        final int passWeight = (int) gd2.getNextNumber();
+        final int failWeight = (int) gd2.getNextNumber();
+        final double resetFraction = gd2.getNextNumber();
+        settings.setPlotItem(item);
+        settings.setPlotRollingWindow(rollingWindow);
+        settings.setPlotPassWeight(passWeight);
+        settings.setPlotFailWeight(failWeight);
+        settings.setPlotResetFraction(resetFraction);
+        stack.insert(
+            new PlotData(item, fixedXAxis, rollingWindow, passWeight, failWeight, resetFraction));
+        return true;
+      });
 
-    gd.hideCancelButton();
-    gd.setOKLabel("Close");
-    gd.showDialog();
-
-    stack.close(gd.wasCanceled());
+      gd.hideCancelButton();
+      gd.setOKLabel("Close");
+      gd.showDialog();
+      clear = gd.wasCanceled();
+    } finally {
+      stack.close(clear);
+    }
   }
 
   private static int getMaxConsecutiveFailCount(TurboList<FailCountData> failCountData) {
@@ -864,7 +869,7 @@ public class FailCountManager implements PlugIn {
   }
 
   private void analyseData() {
-    final TurboList<FailCountData> failCountData = FailCountManager.failCountData;
+    final TurboList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -876,7 +881,6 @@ public class FailCountManager implements PlugIn {
 
     final int maxCons = getMaxConsecutiveFailCount(failCountData);
     final int maxFail = getMaxFailCount(failCountData);
-    // final int maxPass = getMaxPassCount(failCountData);
 
     // Create a set of fail counters
     final TurboList<FailCounter> counters = new TurboList<>();
@@ -1088,10 +1092,11 @@ public class FailCountManager implements PlugIn {
   }
 
   private static CounterStatus checkCounters(TurboList<FailCounter> counters) {
-    if (counters.size() > maxCounters) {
+    final int localMaxCounters = maxCounters.get();
+    if (counters.size() > localMaxCounters) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Too many counters to analyse: " + counters.size());
-      gd.addNumericField("Max_counters", maxCounters, 0);
+      gd.addNumericField("Max_counters", localMaxCounters, 0);
       gd.enableYesNoCancel(" Analyse ", " Continue ");
       gd.showDialog();
       if (gd.wasCanceled()) {
@@ -1101,11 +1106,11 @@ public class FailCountManager implements PlugIn {
         return CounterStatus.ANALYSE;
       }
       final int newMaxCounters = (int) gd.getNextNumber();
-      if (newMaxCounters <= maxCounters) {
+      if (newMaxCounters <= localMaxCounters) {
         IJ.error(TITLE, "The max counters has not been increased, unable to continue");
         return CounterStatus.RETURN;
       }
-      maxCounters = newMaxCounters;
+      maxCounters.set(newMaxCounters);
     }
     return CounterStatus.CONTINUE;
   }
