@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -71,6 +72,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and
@@ -84,29 +86,94 @@ public class EmGainAnalysis implements PlugInFilter {
   private static final int FLAGS = DOES_8G | DOES_16 | NO_CHANGES | NO_UNDO;
   private static final int MINIMUM_PIXELS = 1000000;
 
-  private static double bias = 500;
-  private static double gain = 40;
-  private static double noise = 3;
-  private static boolean settingSimulate;
-  private static boolean showApproximation;
-  private static boolean relativeDelta;
-  private static final String[] APPROXIMATION_TYPE =
-      {"PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson"};
-  private static int approximationType;
-  private boolean simulate;
   private boolean extraOptions;
-  private static double settingPhotons = 1;
-  private static double settingBias = 500;
-  private static double settingGain = 40;
-  private static double settingNoise = 3;
-  private static double head = 0.01;
-  private static double tail = 0.025;
-  private static double settingOffset;
-  private static int simulationSize = 20000;
-  private static boolean usePdf;
 
   private ImagePlus imp;
-  private double offset;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    static final String[] APPROXIMATION_TYPE =
+        {"PoissonGammaGaussian", "PoissonGamma", "PoissonGaussian", "Poisson"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    double bias;
+    double gain;
+    double noise;
+    boolean settingSimulate;
+    boolean showApproximation;
+    boolean relativeDelta;
+    int approximationType;
+    double settingPhotons;
+    double settingBias;
+    double settingGain;
+    double settingNoise;
+    double head;
+    double tail;
+    double settingOffset;
+    int simulationSize;
+    boolean usePdf;
+
+    Settings() {
+      // Set defaults
+      bias = 500;
+      gain = 40;
+      noise = 3;
+      settingPhotons = 1;
+      settingBias = 500;
+      settingGain = 40;
+      settingNoise = 3;
+      head = 0.01;
+      tail = 0.025;
+      simulationSize = 20000;
+    }
+
+    Settings(Settings source) {
+      bias = source.bias;
+      gain = source.gain;
+      noise = source.noise;
+      settingSimulate = source.settingSimulate;
+      showApproximation = source.showApproximation;
+      relativeDelta = source.relativeDelta;
+      approximationType = source.approximationType;
+      settingPhotons = source.settingPhotons;
+      settingBias = source.settingBias;
+      settingGain = source.settingGain;
+      settingNoise = source.settingNoise;
+      head = source.head;
+      tail = source.tail;
+      settingOffset = source.settingOffset;
+      simulationSize = source.simulationSize;
+      usePdf = source.usePdf;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /**
    * Store the probability density function (PDF).
@@ -134,6 +201,7 @@ public class EmGainAnalysis implements PlugInFilter {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     extraOptions = ImageJUtils.isExtraOptions();
+    settings = Settings.load();
 
     if ("pmf".equals(arg)) {
       plotPmf();
@@ -151,7 +219,8 @@ public class EmGainAnalysis implements PlugInFilter {
   @Override
   public void run(ImageProcessor ip) {
     // Calculate the histogram
-    final int[] histogram = (simulate) ? simulateHistogram(usePdf ? 0 : 1) : buildHistogram(imp);
+    final int[] histogram =
+        (settings.settingSimulate) ? simulateHistogram(settings.usePdf) : buildHistogram(imp);
 
     // We need > 10^7 pixels from flat white-light images under constant exposure ...
     final int size = getSize(histogram);
@@ -176,23 +245,15 @@ public class EmGainAnalysis implements PlugInFilter {
   }
 
   /**
-   * Simulate the histogram for fitting.
+   * Simulate the histogram for fitting. Sample from the fitted PDF or sample from a
+   * Poisson-Gamma-Gaussian.
    *
-   * @param method 0 - sample from the fitted PDF, 1 - sample from a Poisson-Gamma-Gaussian
+   * @param usePdf the use pdf
    * @return The histogram
    */
-  private int[] simulateHistogram(int method) {
+  private int[] simulateHistogram(boolean usePdf) {
     IJ.showStatus("Simulating histogram ...");
-    int[] histogram;
-    switch (method) {
-      case 1:
-        histogram = simulateFromPoissonGammaGaussian();
-        break;
-
-      case 0:
-      default:
-        histogram = simulateFromPdf();
-    }
+    final int[] histogram = usePdf ? simulateFromPdf() : simulateFromPoissonGammaGaussian();
     IJ.showStatus("");
     return histogram;
   }
@@ -204,9 +265,11 @@ public class EmGainAnalysis implements PlugInFilter {
    * @return The histogram
    */
   private int[] simulateFromPdf() {
-    final double step = getStepSize(settingPhotons, settingGain, settingNoise);
+    final double step =
+        getStepSize(settings.settingPhotons, settings.settingGain, settings.settingNoise);
 
-    final Pdf pdf = pdf(0, step, settingPhotons, settingGain, settingNoise);
+    final Pdf pdf =
+        pdf(0, step, settings.settingPhotons, settings.settingGain, settings.settingNoise);
 
     // Debug this
     final double[] g = pdf.probability;
@@ -230,13 +293,13 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Randomly sample
     final UniformRandomProvider random = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
-    final int bias = (int) settingBias;
+    final int bias = (int) settings.settingBias;
     final int[] bins = new int[x.length];
     for (int i = 0; i < x.length; i++) {
       bins[i] = bias + (int) x[i];
     }
     final int[] h = new int[bins[bins.length - 1] + 1];
-    final int steps = simulationSize;
+    final int steps = settings.simulationSize;
     final Ticker ticker = ImageJUtils.createTicker(steps, 1);
     for (int n = 0; n < steps; n++) {
       int index = binarySearch(g, random.nextDouble());
@@ -273,16 +336,16 @@ public class EmGainAnalysis implements PlugInFilter {
    *
    * @return The histogram
    */
-  private static int[] simulateFromPoissonGammaGaussian() {
+  private int[] simulateFromPoissonGammaGaussian() {
     // Randomly sample
     final UniformRandomProvider random = RandomSource.create(RandomSource.SPLIT_MIX_64);
 
-    final PoissonSampler poisson = new PoissonSampler(random, settingPhotons);
+    final PoissonSampler poisson = new PoissonSampler(random, settings.settingPhotons);
     final MarsagliaTsangGammaSampler gamma =
-        new MarsagliaTsangGammaSampler(random, settingPhotons, settingGain);
+        new MarsagliaTsangGammaSampler(random, settings.settingPhotons, settings.settingGain);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
 
-    final int steps = simulationSize;
+    final int steps = settings.simulationSize;
     final int[] samples = new int[steps];
     for (int n = 0; n < steps; n++) {
       if (n % 64 == 0) {
@@ -299,10 +362,10 @@ public class EmGainAnalysis implements PlugInFilter {
       }
 
       // Gaussian
-      sample += settingNoise * gauss.sample();
+      sample += settings.settingNoise * gauss.sample();
 
       // Convert the sample to a count
-      samples[n] = (int) Math.round(sample + settingBias);
+      samples[n] = (int) Math.round(sample + settings.settingBias);
     }
 
     final int max = MathUtils.max(samples);
@@ -353,8 +416,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
   private static int[] getHistogram(ImageProcessor ip, Roi roi) {
     ip.setRoi(roi);
-    final int[] h = ip.getHistogram();
-    return h;
+    return ip.getHistogram();
   }
 
   /**
@@ -378,25 +440,26 @@ public class EmGainAnalysis implements PlugInFilter {
     // Assuming a gamma_distribution(shape,scale) then mean = shape * scale
     // scale = gain
     // shape = Photons = mean / gain
-    double mean = getMean(histogram) - bias;
+    double mean = getMean(histogram) - settings.bias;
     // Note: if the bias is too high then the mean will be negative. Just move the bias.
     while (mean < 0) {
-      bias -= 1;
+      settings.bias -= 1;
       mean += 1;
     }
-    double photons = mean / gain;
+    double photons = mean / settings.gain;
 
-    if (simulate) {
-      ImageJUtils.log("Simulated bias=%d, gain=%s, noise=%s, photons=%s", (int) settingBias,
-          MathUtils.rounded(settingGain), MathUtils.rounded(settingNoise),
-          MathUtils.rounded(settingPhotons));
+    if (settings.settingSimulate) {
+      ImageJUtils.log("Simulated bias=%d, gain=%s, noise=%s, photons=%s",
+          (int) settings.settingBias, MathUtils.rounded(settings.settingGain),
+          MathUtils.rounded(settings.settingNoise), MathUtils.rounded(settings.settingPhotons));
     }
 
-    ImageJUtils.log("Estimate bias=%d, gain=%s, noise=%s, photons=%s", (int) bias,
-        MathUtils.rounded(gain), MathUtils.rounded(noise), MathUtils.rounded(photons));
+    ImageJUtils.log("Estimate bias=%d, gain=%s, noise=%s, photons=%s", (int) settings.bias,
+        MathUtils.rounded(settings.gain), MathUtils.rounded(settings.noise),
+        MathUtils.rounded(photons));
 
     final int max = (int) x[x.length - 1];
-    double[] pg = pdf(max, photons, gain, noise, (int) bias);
+    double[] pg = pdf(max, photons, settings.gain, settings.noise, (int) settings.bias);
 
     plot.setColor(Color.blue);
     plot.addPoints(x, pg, Plot.LINE);
@@ -404,13 +467,15 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Perform a fit
     final CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
-    final double[] startPoint = new double[] {photons, gain, noise, bias};
+    final double[] startPoint =
+        new double[] {photons, settings.gain, settings.noise, settings.bias};
     int maxEval = 3000;
 
     final String[] paramNames = {"Photons", "Gain", "Noise", "Bias"};
     // Set bounds
-    final double[] lower = new double[] {0, 0.5 * gain, 0, bias - noise};
-    final double[] upper = new double[] {2 * photons, 2 * gain, gain, bias + noise};
+    final double[] lower = new double[] {0, 0.5 * settings.gain, 0, settings.bias - settings.noise};
+    final double[] upper = new double[] {2 * photons, 2 * settings.gain, settings.gain,
+        settings.bias + settings.noise};
 
     // Restart until converged.
     // TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
@@ -472,37 +537,37 @@ public class EmGainAnalysis implements PlugInFilter {
 
     final double[] point = solution.getPointRef();
     photons = point[0];
-    gain = point[1];
-    noise = point[2];
-    bias = (int) Math.round(point[3]);
-    final String label = String.format("Fitted bias=%d, gain=%s, noise=%s, photons=%s", (int) bias,
-        MathUtils.rounded(gain), MathUtils.rounded(noise), MathUtils.rounded(photons));
+    settings.gain = point[1];
+    settings.noise = point[2];
+    settings.bias = (int) Math.round(point[3]);
+    final String label = String.format("Fitted bias=%d, gain=%s, noise=%s, photons=%s",
+        (int) settings.bias, MathUtils.rounded(settings.gain), MathUtils.rounded(settings.noise),
+        MathUtils.rounded(photons));
     ImageJUtils.log(label);
 
-    if (simulate) {
+    if (settings.settingSimulate) {
       ImageJUtils.log("Relative Error bias=%s, gain=%s, noise=%s, photons=%s",
-          MathUtils.rounded(relativeError(bias, settingBias)),
-          MathUtils.rounded(relativeError(gain, settingGain)),
-          MathUtils.rounded(relativeError(noise, settingNoise)),
-          MathUtils.rounded(relativeError(photons, settingPhotons)));
+          MathUtils.rounded(relativeError(settings.bias, settings.settingBias)),
+          MathUtils.rounded(relativeError(settings.gain, settings.settingGain)),
+          MathUtils.rounded(relativeError(settings.noise, settings.settingNoise)),
+          MathUtils.rounded(relativeError(photons, settings.settingPhotons)));
     }
 
     // Show the PoissonGammaGaussian approximation
     double[] approxValues = null;
-    if (showApproximation) {
+    if (settings.showApproximation) {
       approxValues = new double[x.length];
-      final PoissonGammaGaussianFunction fun = new PoissonGammaGaussianFunction(1.0 / gain, noise);
-      final double expected = photons * gain;
+      final PoissonGammaGaussianFunction fun =
+          new PoissonGammaGaussianFunction(1.0 / settings.gain, settings.noise);
+      final double expected = photons * settings.gain;
       for (int i = 0; i < approxValues.length; i++) {
-        approxValues[i] = fun.likelihood(x[i] - bias, expected);
+        approxValues[i] = fun.likelihood(x[i] - settings.bias, expected);
       }
-      // System.out.printf("x=%d, g=%f, f=%f, error=%f\n", (int) x[i], g[i], f[i],
-      // uk.ac.sussex.gdsc.smlm.fitting.utils.DoubleEquality.relativeError(g[i], f[i]));
       yMax = MathUtils.maxDefault(yMax, approxValues);
     }
 
     // Replot
-    pg = pdf(max, photons, gain, noise, (int) bias);
+    pg = pdf(max, photons, settings.gain, settings.noise, (int) settings.bias);
     plot = new Plot2(TITLE, "ADU", "Frequency");
     plot.setLimits(limits[0], limits[1], 0, yMax * 1.05);
     plot.setColor(Color.black);
@@ -512,7 +577,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     plot.addLabel(0, 0, label);
 
-    if (showApproximation) {
+    if (settings.showApproximation) {
       plot.setColor(Color.blue);
       plot.addPoints(x, approxValues, Plot.LINE);
     }
@@ -521,8 +586,7 @@ public class EmGainAnalysis implements PlugInFilter {
   }
 
   private static double relativeError(double v1, double v2) {
-    // return uk.ac.sussex.gdsc.smlm.utils.DoubleEquality.relativeError(a, b);
-    final double delta = v1 - v2; // Math.abs(a - b);
+    final double delta = v1 - v2; // Math.abs(v1 - v2)
     return delta / v2;
   }
 
@@ -575,7 +639,6 @@ public class EmGainAnalysis implements PlugInFilter {
         break;
       }
     }
-    // System.out.printf("Sum = %f\n", stats.getSum() * step);
     return stats.getValues();
   }
 
@@ -752,17 +815,17 @@ public class EmGainAnalysis implements PlugInFilter {
   }
 
   private static double[] getX(int[] limits) {
-    final int min = 0; // limits[0];
+    final int min = 0; // limits[0]
     final int range = limits[1] - min + 1;
     final double[] x = new double[range];
     for (int i = 0; i < range; i++) {
-      x[i] = min + i;
+      x[i] = (double) min + i;
     }
     return x;
   }
 
   private static double[] getY(int[] histogram, int[] limits) {
-    final int min = 0; // limits[0];
+    final int min = 0; // limits[0]
     final int range = limits[1] - min + 1;
     final double[] y = new double[range];
     double sum = 0;
@@ -804,49 +867,51 @@ public class EmGainAnalysis implements PlugInFilter {
             + " (Supplementary Information).");
 
     if (extraOptions) {
-      gd.addCheckbox("Simulate", settingSimulate);
-      gd.addNumericField("Bias", settingBias, 0);
-      gd.addNumericField("Gain", settingGain, 2);
-      gd.addNumericField("Noise", settingNoise, 2);
-      gd.addNumericField("Photons", settingPhotons, 2);
-      gd.addNumericField("Samples", simulationSize, 0);
-      gd.addCheckbox("Sample_PDF", usePdf);
+      gd.addCheckbox("Simulate", settings.settingSimulate);
+      gd.addNumericField("Bias", settings.settingBias, 0);
+      gd.addNumericField("Gain", settings.settingGain, 2);
+      gd.addNumericField("Noise", settings.settingNoise, 2);
+      gd.addNumericField("Photons", settings.settingPhotons, 2);
+      gd.addNumericField("Samples", settings.simulationSize, 0);
+      gd.addCheckbox("Sample_PDF", settings.usePdf);
     }
 
-    gd.addNumericField("Bias_estimate", bias, 0);
-    gd.addNumericField("Gain_estimate", gain, 2);
-    gd.addNumericField("Noise_estimate", noise, 2);
-    gd.addCheckbox("Show_approximation", showApproximation);
+    gd.addNumericField("Bias_estimate", settings.bias, 0);
+    gd.addNumericField("Gain_estimate", settings.gain, 2);
+    gd.addNumericField("Noise_estimate", settings.noise, 2);
+    gd.addCheckbox("Show_approximation", settings.showApproximation);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
       return DONE;
     }
 
+    settings.save();
+
     if (extraOptions) {
-      simulate = settingSimulate = gd.getNextBoolean();
-      settingBias = gd.getNextNumber();
-      settingGain = gd.getNextNumber();
-      settingNoise = FastMath.abs(gd.getNextNumber());
-      settingPhotons = FastMath.abs(gd.getNextNumber());
-      simulationSize = (int) FastMath.abs(gd.getNextNumber());
-      usePdf = gd.getNextBoolean();
-      if (gd.invalidNumber() || settingBias < 0 || settingGain < 1 || settingPhotons == 0
-          || simulationSize == 0) {
+      settings.settingSimulate = gd.getNextBoolean();
+      settings.settingBias = gd.getNextNumber();
+      settings.settingGain = gd.getNextNumber();
+      settings.settingNoise = FastMath.abs(gd.getNextNumber());
+      settings.settingPhotons = FastMath.abs(gd.getNextNumber());
+      settings.simulationSize = (int) FastMath.abs(gd.getNextNumber());
+      settings.usePdf = gd.getNextBoolean();
+      if (gd.invalidNumber() || settings.settingBias < 0 || settings.settingGain < 1
+          || settings.settingPhotons == 0 || settings.simulationSize == 0) {
         return DONE;
       }
     }
 
-    bias = gd.getNextNumber();
-    gain = gd.getNextNumber();
-    noise = FastMath.abs(gd.getNextNumber());
-    showApproximation = gd.getNextBoolean();
+    settings.bias = gd.getNextNumber();
+    settings.gain = gd.getNextNumber();
+    settings.noise = FastMath.abs(gd.getNextNumber());
+    settings.showApproximation = gd.getNextBoolean();
 
-    if (gd.invalidNumber() || bias < 0 || gain < 1) {
+    if (gd.invalidNumber() || settings.bias < 0 || settings.gain < 1) {
       return DONE;
     }
 
-    return (simulate) ? NO_IMAGE_REQUIRED : FLAGS;
+    return (settings.settingSimulate) ? NO_IMAGE_REQUIRED : FLAGS;
   }
 
   @SuppressWarnings("unused")
@@ -855,21 +920,24 @@ public class EmGainAnalysis implements PlugInFilter {
       return;
     }
 
-    final double step = getStepSize(settingPhotons, settingGain, settingNoise);
+    final double step =
+        getStepSize(settings.settingPhotons, settings.settingGain, settings.settingNoise);
 
-    final Pdf pdf = pdf(0, step, settingPhotons, settingGain, settingNoise);
+    final Pdf pdf =
+        pdf(0, step, settings.settingPhotons, settings.settingGain, settings.settingNoise);
     double[] pmf = pdf.probability;
     double yMax = MathUtils.max(pmf);
 
     // Get the approximation
     LikelihoodFunction fun;
-    switch (approximationType) {
+    switch (settings.approximationType) {
       case 3:
-        fun = new PoissonFunction(1.0 / settingGain);
+        fun = new PoissonFunction(1.0 / settings.settingGain);
         break;
       case 2:
         // Use adaptive normalisation
-        fun = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / settingGain, settingNoise);
+        fun = PoissonGaussianFunction2.createWithStandardDeviation(1.0 / settings.settingGain,
+            settings.settingNoise);
         break;
       case 1:
         // Create Poisson-Gamma (no Gaussian noise)
@@ -877,11 +945,11 @@ public class EmGainAnalysis implements PlugInFilter {
         break;
       case 0:
       default:
-        fun = createPoissonGammaGaussianFunction(settingNoise);
+        fun = createPoissonGammaGaussianFunction(settings.settingNoise);
     }
-    double expected = settingPhotons;
-    if (offset != 0) {
-      expected += offset * expected / 100.0;
+    double expected = settings.settingPhotons;
+    if (settings.settingOffset != 0) {
+      expected += settings.settingOffset * expected / 100.0;
     }
 
     // Normalise
@@ -896,7 +964,6 @@ public class EmGainAnalysis implements PlugInFilter {
     // Get CDF
     double sum = 0;
     double sum2 = 0;
-    final double prev = 0;
     double[] x = pdf.x;
     double[] fvalues = new double[x.length];
     double[] cdf1 = new double[pmf.length];
@@ -911,7 +978,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Truncate x for plotting
     int max = 0;
-    double plimit = 1 - tail;
+    double plimit = 1 - settings.tail;
     while (sum < plimit && max < pmf.length) {
       sum += pmf[max] * step;
       if (sum > 0.5 && pmf[max] == 0) {
@@ -922,7 +989,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     int min = pmf.length;
     sum = 0;
-    plimit = 1 - head;
+    plimit = 1 - settings.head;
     while (sum < plimit && min > 0) {
       min--;
       sum += pmf[min] * step;
@@ -935,25 +1002,26 @@ public class EmGainAnalysis implements PlugInFilter {
     x = Arrays.copyOfRange(x, min, max);
     fvalues = Arrays.copyOfRange(fvalues, min, max);
 
-    if (showApproximation) {
+    if (settings.showApproximation) {
       yMax = MathUtils.maxDefault(yMax, fvalues);
     }
 
     final String label =
-        String.format("Gain=%s, noise=%s, photons=%s", MathUtils.rounded(settingGain),
-            MathUtils.rounded(settingNoise), MathUtils.rounded(settingPhotons));
+        String.format("Gain=%s, noise=%s, photons=%s", MathUtils.rounded(settings.settingGain),
+            MathUtils.rounded(settings.settingNoise), MathUtils.rounded(settings.settingPhotons));
 
     final Plot2 plot = new Plot2("PMF", "ADUs", "p");
     plot.setLimits(x[0], x[x.length - 1], 0, yMax);
     plot.setColor(Color.red);
     plot.addPoints(x, pmf, Plot.LINE);
-    if (showApproximation) {
+    if (settings.showApproximation) {
       plot.setColor(Color.blue);
       plot.addPoints(x, fvalues, Plot.LINE);
     }
 
     plot.setColor(Color.magenta);
-    plot.drawLine(settingPhotons * settingGain, 0, settingPhotons * settingGain, yMax);
+    plot.drawLine(settings.settingPhotons * settings.settingGain, 0,
+        settings.settingPhotons * settings.settingGain, yMax);
     plot.setColor(Color.black);
     plot.addLabel(0, 0, label);
     final PlotWindow win1 = ImageJUtils.display("PMF", plot);
@@ -964,7 +1032,7 @@ public class EmGainAnalysis implements PlugInFilter {
       if (pmf[i] == 0 && fvalues[i] == 0) {
         continue;
       }
-      if (relativeDelta) {
+      if (settings.relativeDelta) {
         delta[i] =
             DoubleEquality.relativeError(fvalues[i], pmf[i]) * Math.signum(fvalues[i] - pmf[i]);
       } else {
@@ -973,17 +1041,17 @@ public class EmGainAnalysis implements PlugInFilter {
     }
 
     final Plot2 plot2 =
-        new Plot2("PMF delta", "ADUs", (relativeDelta) ? "Relative delta" : "delta");
+        new Plot2("PMF delta", "ADUs", (settings.relativeDelta) ? "Relative delta" : "delta");
     final double[] limits = MathUtils.limits(delta);
     plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
     plot2.setColor(Color.red);
     plot2.addPoints(x, delta, Plot.LINE);
     plot2.setColor(Color.magenta);
-    plot2.drawLine(settingPhotons * settingGain, limits[0], settingPhotons * settingGain,
-        limits[1]);
+    plot2.drawLine(settings.settingPhotons * settings.settingGain, limits[0],
+        settings.settingPhotons * settings.settingGain, limits[1]);
     plot2.setColor(Color.black);
-    plot2.addLabel(0, 0,
-        label + ((offset == 0) ? "" : ", expected = " + MathUtils.rounded(expected / settingGain)));
+    plot2.addLabel(0, 0, label + ((settings.settingOffset == 0) ? ""
+        : ", expected = " + MathUtils.rounded(expected / settings.settingGain)));
     final WindowOrganiser wo = new WindowOrganiser();
     final PlotWindow win2 = ImageJUtils.display("PMF delta", plot2, wo);
 
@@ -1018,7 +1086,8 @@ public class EmGainAnalysis implements PlugInFilter {
     plot3.addPoints(x, cdf2, Plot.LINE);
 
     plot3.setColor(Color.magenta);
-    plot3.drawLine(settingPhotons * settingGain, 0, settingPhotons * settingGain, yMax);
+    plot3.drawLine(settings.settingPhotons * settings.settingGain, 0,
+        settings.settingPhotons * settings.settingGain, yMax);
     plot3.drawDottedLine(xd, 0, xd, yMax, 2);
     plot3.setColor(Color.black);
     plot3.addLabel(0, 0,
@@ -1034,9 +1103,9 @@ public class EmGainAnalysis implements PlugInFilter {
     }
   }
 
-  private static LikelihoodFunction createPoissonGammaGaussianFunction(double noise) {
+  private LikelihoodFunction createPoissonGammaGaussianFunction(double noise) {
     final PoissonGammaGaussianFunction fun =
-        new PoissonGammaGaussianFunction(1.0 / settingGain, noise);
+        new PoissonGammaGaussianFunction(1.0 / settings.settingGain, noise);
     fun.setMinimumProbability(0);
     return fun;
   }
@@ -1073,22 +1142,22 @@ public class EmGainAnalysis implements PlugInFilter {
   }
 
   private boolean showPmfDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Plot the probability mass function for EM-gain");
 
-    gd.addNumericField("Gain", settingGain, 2, 6, "Count/electron");
-    gd.addNumericField("Noise", settingNoise, 2, 6, "Count");
-    gd.addNumericField("Photons", settingPhotons, 2);
-    gd.addChoice("Approx", APPROXIMATION_TYPE, APPROXIMATION_TYPE[approximationType]);
-    gd.addCheckbox("Show_approximation", showApproximation);
+    gd.addNumericField("Gain", settings.settingGain, 2, 6, "Count/electron");
+    gd.addNumericField("Noise", settings.settingNoise, 2, 6, "Count");
+    gd.addNumericField("Photons", settings.settingPhotons, 2);
+    gd.addChoice("Approx", Settings.APPROXIMATION_TYPE, settings.approximationType);
+    gd.addCheckbox("Show_approximation", settings.showApproximation);
     if (extraOptions) {
-      gd.addNumericField("Approximation_offset (%)", settingOffset, 2);
+      gd.addNumericField("Approximation_offset (%)", settings.settingOffset, 2);
     }
-    gd.addNumericField("Remove_head", head, 3);
-    gd.addNumericField("Remove_tail", tail, 3);
-    gd.addCheckbox("Relative_delta", relativeDelta);
+    gd.addNumericField("Remove_head", settings.head, 3);
+    gd.addNumericField("Remove_tail", settings.tail, 3);
+    gd.addCheckbox("Relative_delta", settings.relativeDelta);
 
     gd.showDialog();
 
@@ -1096,23 +1165,20 @@ public class EmGainAnalysis implements PlugInFilter {
       return false;
     }
 
-    settingGain = gd.getNextNumber();
-    settingNoise = FastMath.abs(gd.getNextNumber());
-    settingPhotons = FastMath.abs(gd.getNextNumber());
-    approximationType = gd.getNextChoiceIndex();
-    showApproximation = gd.getNextBoolean();
+    settings.settingGain = gd.getNextNumber();
+    settings.settingNoise = FastMath.abs(gd.getNextNumber());
+    settings.settingPhotons = FastMath.abs(gd.getNextNumber());
+    settings.approximationType = gd.getNextChoiceIndex();
+    settings.showApproximation = gd.getNextBoolean();
     if (extraOptions) {
-      offset = settingOffset = gd.getNextNumber();
+      settings.settingOffset = gd.getNextNumber();
     }
-    head = FastMath.abs(gd.getNextNumber());
-    tail = FastMath.abs(gd.getNextNumber());
-    relativeDelta = gd.getNextBoolean();
+    settings.head = FastMath.abs(gd.getNextNumber());
+    settings.tail = FastMath.abs(gd.getNextNumber());
+    settings.relativeDelta = gd.getNextBoolean();
+    settings.save();
 
-    if (gd.invalidNumber() || settingBias < 0 || settingGain < 1 || settingPhotons == 0
-        || tail > 0.5 || head > 0.5) {
-      return false;
-    }
-
-    return true;
+    return (!gd.invalidNumber() && settings.settingBias >= 0 && settings.settingGain >= 1
+        && settings.settingPhotons != 0 && settings.tail <= 0.5 && settings.head <= 0.5);
   }
 }

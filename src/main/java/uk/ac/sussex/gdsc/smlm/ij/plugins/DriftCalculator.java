@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -92,6 +93,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -101,40 +103,8 @@ import java.util.regex.Pattern;
 public class DriftCalculator implements PlugIn {
   private static final String TITLE = "Drift Calculator";
 
-  private static String driftFilename = "";
-  private static final String SUB_IMAGE_ALIGNMENT = "Localisation Sub-Images";
-  private static final String DRIFT_FILE = "Drift File";
-  private static final String STACK_ALIGNMENT = "Reference Stack Alignment";
-  private static final String MARKED_ROIS = "Marked ROIs";
-  private static String method = "";
-  private static final String[] UPDATE_METHODS =
-      new String[] {"None", "Update", "New dataset", "New truncated dataset"};
-  private static int updateMethod;
-
-  private static String inputOption = "";
-  private static int maxIterations = 50;
-  private static double relativeError = 0.01;
-  private static double smoothing = 0.25;
-  private static boolean limitSmoothing = true;
-  private static int minSmoothingPoints = 10;
-  private static int maxSmoothingPoints = 50;
-  private static int iterations = 1;
-  private static boolean plotDrift = true;
-  private static boolean saveDrift;
-
-  // Parameters to control the image alignment algorithm
-  private static int frames = 2000;
-  private static int minimimLocalisations = 50;
-  private static final String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
-  private static String reconstructionSize = SIZES[1];
-  private static String stackTitle = "";
-  private static int startFrame = 1;
-  private static int frameSpacing = 1;
-  private static int interpolationMethod = ImageProcessor.BILINEAR;
-  private static SubPixelMethod subPixelMethod = AlignImagesFft.SubPixelMethod.CUBIC;
-
-  private static PlotWindow plotx;
-  private static PlotWindow ploty;
+  private static AtomicReference<PlotWindow> plotx = new AtomicReference<>();
+  private static AtomicReference<PlotWindow> ploty = new AtomicReference<>();
 
   private int interpolationStart;
   private int interpolationEnd;
@@ -145,7 +115,119 @@ public class DriftCalculator implements PlugIn {
   private final TrackProgress tracker = SimpleImageJTrackProgress.getInstance();
 
   // Used to multi-thread the image alignment
-  private ExecutorService threadPool;
+  private ExecutorService executor;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    static final String SUB_IMAGE_ALIGNMENT = "Localisation Sub-Images";
+    static final String DRIFT_FILE = "Drift File";
+    static final String STACK_ALIGNMENT = "Reference Stack Alignment";
+    static final String MARKED_ROIS = "Marked ROIs";
+    static final String[] UPDATE_METHODS =
+        new String[] {"None", "Update", "New dataset", "New truncated dataset"};
+    static final String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String driftFilename;
+    String method;
+    int updateMethod;
+
+    String inputOption;
+    int maxIterations;
+    double relativeError;
+    double smoothing;
+    boolean limitSmoothing;
+    int minSmoothingPoints;
+    int maxSmoothingPoints;
+    int iterations;
+    boolean plotDrift;
+    boolean saveDrift;
+
+    // Parameters to control the image alignment algorithm
+    int frames;
+    int minimimLocalisations;
+    String reconstructionSize;
+    String stackTitle;
+    int startFrame;
+    int frameSpacing;
+    int interpolationMethod;
+    SubPixelMethod subPixelMethod;
+
+    Settings() {
+      // Set defaults
+      driftFilename = "";
+      method = "";
+      inputOption = "";
+      maxIterations = 50;
+      relativeError = 0.01;
+      smoothing = 0.25;
+      limitSmoothing = true;
+      minSmoothingPoints = 10;
+      maxSmoothingPoints = 50;
+      iterations = 1;
+      plotDrift = true;
+      frames = 2000;
+      minimimLocalisations = 50;
+      reconstructionSize = SIZES[1];
+      stackTitle = "";
+      startFrame = 1;
+      frameSpacing = 1;
+      interpolationMethod = ImageProcessor.BILINEAR;
+      subPixelMethod = AlignImagesFft.SubPixelMethod.CUBIC;
+    }
+
+    Settings(Settings source) {
+      driftFilename = source.driftFilename;
+      method = source.method;
+      updateMethod = source.updateMethod;
+      inputOption = source.inputOption;
+      maxIterations = source.maxIterations;
+      relativeError = source.relativeError;
+      smoothing = source.smoothing;
+      limitSmoothing = source.limitSmoothing;
+      minSmoothingPoints = source.minSmoothingPoints;
+      maxSmoothingPoints = source.maxSmoothingPoints;
+      iterations = source.iterations;
+      plotDrift = source.plotDrift;
+      saveDrift = source.saveDrift;
+      frames = source.frames;
+      minimimLocalisations = source.minimimLocalisations;
+      reconstructionSize = source.reconstructionSize;
+      stackTitle = source.stackTitle;
+      startFrame = source.startFrame;
+      frameSpacing = source.frameSpacing;
+      interpolationMethod = source.interpolationMethod;
+      subPixelMethod = source.subPixelMethod;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /**
    * Align images to the reference initialised in the given aligner.
@@ -159,9 +241,10 @@ public class DriftCalculator implements PlugIn {
     final int from;
     final int to;
     final Ticker ticker;
+    final SubPixelMethod subPixelMethod;
 
     ImageAligner(AlignImagesFft aligner, ImageProcessor[] ip, int[] time, Rectangle alignBounds,
-        List<double[]> alignments, int from, int to, Ticker ticker) {
+        List<double[]> alignments, int from, int to, Ticker ticker, SubPixelMethod subPixelMethod) {
       this.aligner = aligner;
       this.ip = ip;
       this.time = time;
@@ -170,6 +253,7 @@ public class DriftCalculator implements PlugIn {
       this.from = from;
       this.to = to;
       this.ticker = ticker;
+      this.subPixelMethod = subPixelMethod;
     }
 
     @Override
@@ -200,9 +284,10 @@ public class DriftCalculator implements PlugIn {
     final int from;
     final int to;
     final Ticker ticker;
+    final int interpolationMethod;
 
     ImageTranslator(ImageProcessor[] images, ImageProcessor[] ip, double[] dx, double[] dy,
-        int from, int to, Ticker ticker) {
+        int from, int to, Ticker ticker, int interpolationMethod) {
       this.images = images;
       this.ip = ip;
       this.dx = dx;
@@ -210,6 +295,7 @@ public class DriftCalculator implements PlugIn {
       this.from = from;
       this.to = to;
       this.ticker = ticker;
+      this.interpolationMethod = interpolationMethod;
     }
 
     @Override
@@ -356,28 +442,28 @@ public class DriftCalculator implements PlugIn {
     }
 
     final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL, null);
     if (results == null || results.size() < 2) {
       IJ.error(TITLE, "There are not enough fitting results for drift correction");
       return;
     }
     double[][] drift = null;
     final int[] limits = findTimeLimits(results);
-    if (method.equals(MARKED_ROIS)) {
+    if (settings.method.equals(Settings.MARKED_ROIS)) {
       drift = calculateUsingMarkers(results, limits, rois);
-    } else if (method.equals(STACK_ALIGNMENT)) {
+    } else if (settings.method.equals(Settings.STACK_ALIGNMENT)) {
       final ImageStack stack = showStackDialog(stackTitles);
       if (stack == null) {
         return;
       }
       drift = calculateUsingImageStack(stack, limits);
-    } else if (method.equals(DRIFT_FILE)) {
+    } else if (settings.method.equals(Settings.DRIFT_FILE)) {
       drift = calculateUsingDriftFile(limits);
     } else {
       if (!showSubImageDialog()) {
         return;
       }
-      drift = calculateUsingFrames(results, limits, Integer.parseInt(reconstructionSize));
+      drift = calculateUsingFrames(results, limits, Integer.parseInt(settings.reconstructionSize));
     }
 
     if (drift == null) {
@@ -391,6 +477,7 @@ public class DriftCalculator implements PlugIn {
     applyDriftCorrection(results, drift);
   }
 
+  @Nullable
   private static Roi[] getRois() {
     final RoiManager rmanager = RoiManager.getInstance();
     if (rmanager == null || rmanager.getCount() == 0) {
@@ -401,33 +488,35 @@ public class DriftCalculator implements PlugIn {
     return rmanager.getRoisAsArray();
   }
 
-  private static boolean showDialog(Roi[] rois, String[] stackTitles) {
+  private boolean showDialog(Roi[] rois, String[] stackTitles) {
+    settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Correct the drift in localisation results");
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
     final ArrayList<String> methods = new ArrayList<>(4);
-    methods.add(SUB_IMAGE_ALIGNMENT);
-    methods.add(DRIFT_FILE);
+    methods.add(Settings.SUB_IMAGE_ALIGNMENT);
+    methods.add(Settings.DRIFT_FILE);
     if (rois != null) {
-      methods.add(MARKED_ROIS);
+      methods.add(Settings.MARKED_ROIS);
     }
     if (stackTitles != null) {
-      methods.add(STACK_ALIGNMENT);
+      methods.add(Settings.STACK_ALIGNMENT);
     }
     final String[] items = methods.toArray(new String[methods.size()]);
-    gd.addChoice("Method", items, method);
+    gd.addChoice("Method", items, settings.method);
     gd.addMessage("Stopping criteria");
-    gd.addSlider("Max_iterations", 0, 100, maxIterations);
-    gd.addNumericField("Relative_error", relativeError, 3);
+    gd.addSlider("Max_iterations", 0, 100, settings.maxIterations);
+    gd.addNumericField("Relative_error", settings.relativeError, 3);
     gd.addMessage("LOESS smoothing parameters");
-    gd.addSlider("Smoothing", 0.001, 1, smoothing);
-    gd.addCheckbox("Limit_smoothing", limitSmoothing);
-    gd.addSlider("Min_smoothing_points", 5, 50, minSmoothingPoints);
-    gd.addSlider("Max_smoothing_points", 5, 50, maxSmoothingPoints);
-    gd.addSlider("Smoothing_iterations", 1, 10, iterations);
-    gd.addCheckbox("Plot_drift", plotDrift);
+    gd.addSlider("Smoothing", 0.001, 1, settings.smoothing);
+    gd.addCheckbox("Limit_smoothing", settings.limitSmoothing);
+    gd.addSlider("Min_smoothing_points", 5, 50, settings.minSmoothingPoints);
+    gd.addSlider("Max_smoothing_points", 5, 50, settings.maxSmoothingPoints);
+    gd.addSlider("Smoothing_iterations", 1, 10, settings.iterations);
+    gd.addCheckbox("Plot_drift", settings.plotDrift);
 
     gd.showDialog();
 
@@ -435,30 +524,31 @@ public class DriftCalculator implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    method = gd.getNextChoice();
-    maxIterations = (int) gd.getNextNumber();
-    relativeError = gd.getNextNumber();
-    smoothing = gd.getNextNumber();
-    limitSmoothing = gd.getNextBoolean();
-    minSmoothingPoints = (int) gd.getNextNumber();
-    maxSmoothingPoints = (int) gd.getNextNumber();
-    iterations = (int) gd.getNextNumber();
-    plotDrift = gd.getNextBoolean();
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.method = gd.getNextChoice();
+    settings.maxIterations = (int) gd.getNextNumber();
+    settings.relativeError = gd.getNextNumber();
+    settings.smoothing = gd.getNextNumber();
+    settings.limitSmoothing = gd.getNextBoolean();
+    settings.minSmoothingPoints = (int) gd.getNextNumber();
+    settings.maxSmoothingPoints = (int) gd.getNextNumber();
+    settings.iterations = (int) gd.getNextNumber();
+    settings.plotDrift = gd.getNextBoolean();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isPositive("Max iterations", maxIterations);
-      ParameterUtils.isAboveZero("Relative error", relativeError);
-      ParameterUtils.isPositive("Smoothing", smoothing);
-      if (limitSmoothing) {
-        ParameterUtils.isEqualOrAbove("Min smoothing points", minSmoothingPoints, 3);
-        ParameterUtils.isEqualOrAbove("Max smoothing points", maxSmoothingPoints, 3);
-        ParameterUtils.isEqualOrAbove("Max smoothing points", maxSmoothingPoints,
-            minSmoothingPoints);
+      ParameterUtils.isPositive("Max iterations", settings.maxIterations);
+      ParameterUtils.isAboveZero("Relative error", settings.relativeError);
+      ParameterUtils.isPositive("Smoothing", settings.smoothing);
+      if (settings.limitSmoothing) {
+        ParameterUtils.isEqualOrAbove("Min smoothing points", settings.minSmoothingPoints, 3);
+        ParameterUtils.isEqualOrAbove("Max smoothing points", settings.maxSmoothingPoints, 3);
+        ParameterUtils.isEqualOrAbove("Max smoothing points", settings.maxSmoothingPoints,
+            settings.minSmoothingPoints);
       }
-      ParameterUtils.isEqualOrBelow("Smoothing", smoothing, 1);
-      ParameterUtils.isPositive("Smoothing iterations", iterations);
+      ParameterUtils.isEqualOrBelow("Smoothing", settings.smoothing, 1);
+      ParameterUtils.isPositive("Smoothing iterations", settings.iterations);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -467,14 +557,14 @@ public class DriftCalculator implements PlugIn {
     return true;
   }
 
-  private static boolean showSubImageDialog() {
+  private boolean showSubImageDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Compute the drift using localisation sub-image alignment");
-    gd.addNumericField("Frames", frames, 0);
-    gd.addSlider("Minimum_localisations", 10, 50, minimimLocalisations);
-    gd.addChoice("FFT size", SIZES, reconstructionSize);
+    gd.addNumericField("Frames", settings.frames, 0);
+    gd.addSlider("Minimum_localisations", 10, 50, settings.minimimLocalisations);
+    gd.addChoice("FFT size", Settings.SIZES, settings.reconstructionSize);
 
     gd.showDialog();
 
@@ -482,13 +572,13 @@ public class DriftCalculator implements PlugIn {
       return false;
     }
 
-    frames = (int) gd.getNextNumber();
-    minimimLocalisations = (int) gd.getNextNumber();
-    reconstructionSize = gd.getNextChoice();
+    settings.frames = (int) gd.getNextNumber();
+    settings.minimimLocalisations = (int) gd.getNextNumber();
+    settings.reconstructionSize = gd.getNextChoice();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Frames", frames);
+      ParameterUtils.isAboveZero("Frames", settings.frames);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -497,38 +587,38 @@ public class DriftCalculator implements PlugIn {
     return true;
   }
 
-  private static ImageStack showStackDialog(String[] stackTitles) {
+  private ImageStack showStackDialog(String[] stackTitles) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Compute the drift using a reference stack alignment");
 
-    gd.addChoice("Stack_image", stackTitles, stackTitle);
+    gd.addChoice("Stack_image", stackTitles, settings.stackTitle);
     gd.addMessage("Frame = previous + spacing");
-    gd.addNumericField("Start_frame", startFrame, 0);
-    gd.addSlider("Frame_spacing", 1, 20, frameSpacing);
+    gd.addNumericField("Start_frame", settings.startFrame, 0);
+    gd.addSlider("Frame_spacing", 1, 20, settings.frameSpacing);
     final String[] methods = ImageProcessor.getInterpolationMethods();
-    gd.addChoice("Interpolation_method", methods, methods[interpolationMethod]);
+    gd.addChoice("Interpolation_method", methods, methods[settings.interpolationMethod]);
     gd.showDialog();
 
     if (gd.wasCanceled()) {
       return null;
     }
 
-    stackTitle = gd.getNextChoice();
-    startFrame = (int) gd.getNextNumber();
-    frameSpacing = (int) gd.getNextNumber();
-    interpolationMethod = gd.getNextChoiceIndex();
+    settings.stackTitle = gd.getNextChoice();
+    settings.startFrame = (int) gd.getNextNumber();
+    settings.frameSpacing = (int) gd.getNextNumber();
+    settings.interpolationMethod = gd.getNextChoiceIndex();
 
     try {
-      ParameterUtils.isAboveZero("Start frame", startFrame);
-      ParameterUtils.isAboveZero("Frame spacing", frameSpacing);
+      ParameterUtils.isAboveZero("Start frame", settings.startFrame);
+      ParameterUtils.isAboveZero("Frame spacing", settings.frameSpacing);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return null;
     }
 
-    final ImagePlus imp = WindowManager.getImage(stackTitle);
+    final ImagePlus imp = WindowManager.getImage(settings.stackTitle);
     if (imp != null && imp.getStackSize() > 1) {
       return imp.getImageStack();
     }
@@ -540,6 +630,7 @@ public class DriftCalculator implements PlugIn {
    *
    * @return the list of suitable stack images.
    */
+  @Nullable
   private static String[] createStackImageList() {
     final int[] idList = WindowManager.getIDList();
     if (idList != null) {
@@ -559,21 +650,21 @@ public class DriftCalculator implements PlugIn {
   private void applyDriftCorrection(MemoryPeakResults results, double[][] drift) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Apply drift correction to in-memory results?");
-    gd.addChoice("Update_method", UPDATE_METHODS, UPDATE_METHODS[updateMethod]);
+    gd.addChoice("Update_method", Settings.UPDATE_METHODS, settings.updateMethod);
     // Option to save the drift unless it was loaded from file
-    if (!DRIFT_FILE.equals(method)) {
-      gd.addCheckbox("Save_drift", saveDrift);
+    if (!Settings.DRIFT_FILE.equals(settings.method)) {
+      gd.addCheckbox("Save_drift", settings.saveDrift);
     }
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
-    updateMethod = gd.getNextChoiceIndex();
-    if (!DRIFT_FILE.equals(method)) {
-      saveDrift = gd.getNextBoolean();
+    settings.updateMethod = gd.getNextChoiceIndex();
+    if (!Settings.DRIFT_FILE.equals(settings.method)) {
+      settings.saveDrift = gd.getNextBoolean();
       saveDrift(calculatedTimepoints, lastdx, lastdy);
     }
-    if (updateMethod == 0) {
+    if (settings.updateMethod == 0) {
       return;
     }
 
@@ -583,15 +674,12 @@ public class DriftCalculator implements PlugIn {
     // Note: We can use the raw procedure on the results because we requested
     // the results were in pixels
 
-    if (updateMethod == 1) {
+    if (settings.updateMethod == 1) {
       // Update the results in memory
       ImageJUtils.log("Applying drift correction to the results set: " + results.getName());
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult result) {
-          result.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
-          result.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
-        }
+      results.forEach((PeakResultProcedure) result -> {
+        result.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
+        result.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
       });
     } else {
       // Create a new set of results
@@ -599,21 +687,17 @@ public class DriftCalculator implements PlugIn {
       newResults.copySettings(results);
       newResults.setName(results.getName() + " (Corrected)");
       MemoryPeakResults.addResults(newResults);
-      final boolean truncate = updateMethod == 3;
+      final boolean truncate = settings.updateMethod == 3;
       ImageJUtils.log("Creating %sdrift corrected results set: " + newResults.getName(),
           (truncate) ? "truncated " : "");
-      results.forEach(new PeakResultProcedure() {
-        @Override
-        public void execute(PeakResult result) {
-          if (truncate) {
-            if (result.getFrame() < interpolationStart || result.getFrame() > interpolationEnd) {
-              return;
-            }
-          }
-          result.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
-          result.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
-          newResults.add(result);
+      results.forEach((PeakResultProcedure) result -> {
+        if (truncate
+            && (result.getFrame() < interpolationStart || result.getFrame() > interpolationEnd)) {
+          return;
         }
+        result.setXPosition((float) (result.getXPosition() + dx[result.getFrame()]));
+        result.setYPosition((float) (result.getYPosition() + dy[result.getFrame()]));
+        newResults.add(result);
       });
     }
   }
@@ -628,6 +712,7 @@ public class DriftCalculator implements PlugIn {
    * @param rois the rois
    * @return the drift { dx[], dy[] }
    */
+  @Nullable
   private double[][] calculateUsingMarkers(MemoryPeakResults results, int[] limits, Roi[] rois) {
     final Spot[][] roiSpots = findSpots(results, rois, limits);
 
@@ -647,14 +732,15 @@ public class DriftCalculator implements PlugIn {
 
     lastdx = null;
     double change =
-        calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, iterations);
+        calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, settings.iterations);
     if (Double.isNaN(change) || tracker.isEnded()) {
       return null;
     }
     ImageJUtils.log("Drift Calculator : Initial drift " + MathUtils.rounded(change));
 
-    for (int i = 1; i <= maxIterations; i++) {
-      change = calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing, iterations);
+    for (int i = 1; i <= settings.maxIterations; i++) {
+      change = calculateDriftUsingMarkers(roiSpots, weights, sum, dx, dy, smoothing,
+          settings.iterations);
       if (Double.isNaN(change)) {
         return null;
       }
@@ -683,22 +769,22 @@ public class DriftCalculator implements PlugIn {
    * @param data The data to be smoothed
    * @return The updated smoothing parameter
    */
-  private static double updateSmoothingParameter(double[] data) {
-    if (!limitSmoothing) {
-      return smoothing;
+  private double updateSmoothingParameter(double[] data) {
+    if (!settings.limitSmoothing) {
+      return settings.smoothing;
     }
 
     final int n = countNonZeroValues(data);
 
-    int bandwidthInpoints = (int) (smoothing * n);
+    int bandwidthInpoints = (int) (settings.smoothing * n);
 
     // Check the bounds for the smoothing
     final int original = bandwidthInpoints;
-    if (minSmoothingPoints > 0) {
-      bandwidthInpoints = FastMath.max(bandwidthInpoints, minSmoothingPoints);
+    if (settings.minSmoothingPoints > 0) {
+      bandwidthInpoints = FastMath.max(bandwidthInpoints, settings.minSmoothingPoints);
     }
-    if (maxSmoothingPoints > 0) {
-      bandwidthInpoints = FastMath.min(bandwidthInpoints, maxSmoothingPoints);
+    if (settings.maxSmoothingPoints > 0) {
+      bandwidthInpoints = FastMath.min(bandwidthInpoints, settings.maxSmoothingPoints);
     }
 
     final double newSmoothing = (double) bandwidthInpoints / n;
@@ -740,7 +826,7 @@ public class DriftCalculator implements PlugIn {
     final double error = change / totalDrift;
     ImageJUtils.log("Iteration %d : Drift %s : Total change %s : Relative change %s", iteration,
         MathUtils.rounded(totalDrift), MathUtils.rounded(change), MathUtils.rounded(error));
-    if (error < relativeError || change < 1e-16) {
+    if (error < settings.relativeError || change < 1e-16) {
       return true;
     }
     if (tracker.isEnded()) {
@@ -861,8 +947,8 @@ public class DriftCalculator implements PlugIn {
     final TurboList<Spot> list = new TurboList<>(limits[1] - limits[0] + 1);
     final float minx = bounds.x;
     final float miny = bounds.y;
-    final float maxx = bounds.x + bounds.width;
-    final float maxy = bounds.y + bounds.height;
+    final float maxx = (float) bounds.x + bounds.width;
+    final float maxy = (float) bounds.y + bounds.height;
 
     // Find spots within the ROI
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
@@ -962,10 +1048,8 @@ public class DriftCalculator implements PlugIn {
     lastdy = Arrays.copyOf(newDy, newDy.length);
 
     // Perform smoothing
-    if (smoothing > 0) {
-      if (!smooth(newDx, newDy, weights, smoothing, iterations)) {
-        return Double.NaN;
-      }
+    if (smoothing > 0 && !smooth(newDx, newDy, weights, smoothing, iterations)) {
+      return Double.NaN;
     }
 
     // Average drift correction for the calculated points should be zero to allow change comparison
@@ -983,9 +1067,6 @@ public class DriftCalculator implements PlugIn {
         dy[t] = newDy[t];
       }
     }
-    // When weights == 0 any shift we calculate is later ignored since the points are interpolated
-    // dx[t] = newDx[t];
-    // dy[t] = newDy[t];
     return change;
   }
 
@@ -1045,7 +1126,7 @@ public class DriftCalculator implements PlugIn {
   }
 
   private void plotDrift(int[] limits, double[] dx, double[] dy) {
-    if (!plotDrift) {
+    if (!settings.plotDrift) {
       return;
     }
 
@@ -1064,11 +1145,12 @@ public class DriftCalculator implements PlugIn {
     final double[][] original =
         extractValues(calculatedTimepoints, limits[0], limits[1], lastdx, lastdy);
 
-    plotx = plotDrift(plotx, null, interpolated, original, "Drift X", 1);
-    ploty = plotDrift(ploty, plotx, interpolated, original, "Drift Y", 2);
+    final PlotWindow window = plotDrift(null, interpolated, original, "Drift X", 1);
+    ploty.set(plotDrift(window, interpolated, original, "Drift Y", 2));
+    plotx.set(window);
   }
 
-  private static PlotWindow plotDrift(PlotWindow src, PlotWindow parent, double[][] interpolated,
+  private static PlotWindow plotDrift(PlotWindow parent, double[][] interpolated,
       double[][] original, String name, int index) {
     // Create plot
     final double[] xlimits = MathUtils.limits(interpolated[0]);
@@ -1082,15 +1164,15 @@ public class DriftCalculator implements PlugIn {
     plot.setColor(java.awt.Color.RED);
     plot.addPoints(interpolated[0], interpolated[index], Plot.LINE);
     final WindowOrganiser wo = new WindowOrganiser();
-    src = ImageJUtils.display(name, plot, wo);
+    final PlotWindow window = ImageJUtils.display(name, plot, wo);
 
     if (wo.isNotEmpty() && parent != null) {
       final Point location = parent.getLocation();
       location.y += parent.getHeight();
-      src.setLocation(location);
+      window.setLocation(location);
     }
 
-    return src;
+    return window;
   }
 
   /**
@@ -1101,14 +1183,14 @@ public class DriftCalculator implements PlugIn {
    * @param dx the dx
    * @param dy the dy
    */
-  private static void saveDrift(double[] originalDriftTimePoints, double[] dx, double[] dy) {
-    if (!saveDrift) {
+  private void saveDrift(double[] originalDriftTimePoints, double[] dx, double[] dy) {
+    if (!settings.saveDrift) {
       return;
     }
     if (!getDriftFilename()) {
       return;
     }
-    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(driftFilename))) {
+    try (BufferedWriter out = Files.newBufferedWriter(Paths.get(settings.driftFilename))) {
       out.write("Time\tX\tY");
       out.newLine();
       for (int t = 0; t < dx.length; t++) {
@@ -1116,7 +1198,7 @@ public class DriftCalculator implements PlugIn {
           out.write(String.format("%d\t%f\t%f%n", t, dx[t], dy[t]));
         }
       }
-      ImageJUtils.log("Saved calculated drift to file: " + driftFilename);
+      ImageJUtils.log("Saved calculated drift to file: " + settings.driftFilename);
     } catch (final IOException ex) {
       // Do nothing
     }
@@ -1128,6 +1210,7 @@ public class DriftCalculator implements PlugIn {
    * @param limits the limits
    * @return the drift { dx[], dy[] }
    */
+  @Nullable
   private double[][] calculateUsingDriftFile(int[] limits) {
     // Read drift TXY from file
     calculatedTimepoints = new double[limits[1] + 1];
@@ -1150,10 +1233,8 @@ public class DriftCalculator implements PlugIn {
     final double smoothing = updateSmoothingParameter(calculatedTimepoints);
 
     // Perform smoothing
-    if (smoothing > 0) {
-      if (!smooth(dx, dy, calculatedTimepoints, smoothing, iterations)) {
-        return null;
-      }
+    if (smoothing > 0 && !smooth(dx, dy, calculatedTimepoints, smoothing, settings.iterations)) {
+      return null;
     }
 
     // Average drift correction for the calculated points should be zero
@@ -1167,14 +1248,14 @@ public class DriftCalculator implements PlugIn {
     return new double[][] {dx, dy};
   }
 
-  private static boolean getDriftFilename() {
-    final String[] path = ImageJUtils.decodePath(driftFilename);
+  private boolean getDriftFilename() {
+    final String[] path = ImageJUtils.decodePath(settings.driftFilename);
     final OpenDialog chooser = new OpenDialog("Drift_file", path[0], path[1]);
     if (chooser.getFileName() == null) {
       return false;
     }
-    driftFilename = chooser.getDirectory() + chooser.getFileName();
-    FileUtils.replaceExtension(driftFilename, "tsv");
+    settings.driftFilename = chooser.getDirectory() + chooser.getFileName();
+    FileUtils.replaceExtension(settings.driftFilename, "tsv");
     return true;
   }
 
@@ -1187,7 +1268,7 @@ public class DriftCalculator implements PlugIn {
    */
   private int readDriftFile(int[] limits) {
     int ok = 0;
-    try (BufferedReader input = Files.newBufferedReader(Paths.get(driftFilename))) {
+    try (BufferedReader input = Files.newBufferedReader(Paths.get(settings.driftFilename))) {
       String line;
       final Pattern pattern = Pattern.compile("[\t, ]+");
       while ((line = input.readLine()) != null) {
@@ -1222,6 +1303,13 @@ public class DriftCalculator implements PlugIn {
     final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<>();
     ArrayList<Localisation> nextBlock;
     final Counter counter = new Counter();
+    final int frames;
+    final int minimimLocalisations;
+
+    BlockPeakResultProcedure(Settings settings) {
+      this.frames = settings.frames;
+      this.minimimLocalisations = settings.minimimLocalisations;
+    }
 
     @Override
     public void execute(PeakResult result) {
@@ -1248,12 +1336,13 @@ public class DriftCalculator implements PlugIn {
    * @param reconstructionSize the reconstruction size
    * @return the drift { dx[], dy[] }
    */
+  @Nullable
   private double[][] calculateUsingFrames(MemoryPeakResults results, int[] limits,
       int reconstructionSize) {
     // Extract the localisations into blocks of N consecutive frames
-    final BlockPeakResultProcedure p = new BlockPeakResultProcedure();
+    final BlockPeakResultProcedure p = new BlockPeakResultProcedure(settings);
     results.sort();
-    results.forEach(new BlockPeakResultProcedure());
+    results.forEach(p);
 
     final ArrayList<ArrayList<Localisation>> blocks = p.blocks;
     final ArrayList<Localisation> nextBlock = p.nextBlock;
@@ -1264,7 +1353,7 @@ public class DriftCalculator implements PlugIn {
     }
 
     // Check the final block has enough localisations
-    if (nextBlock.size() < minimimLocalisations) {
+    if (nextBlock.size() < settings.minimimLocalisations) {
       blocks.remove(blocks.size() - 1);
       if (blocks.size() < 2) {
         tracker.log("ERROR : Require at least 2 images for drift calculation");
@@ -1290,7 +1379,7 @@ public class DriftCalculator implements PlugIn {
     final Rectangle bounds = results.getBounds(true);
     final float scale = (reconstructionSize - 1f) / FastMath.max(bounds.width, bounds.height);
 
-    threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+    executor = Executors.newFixedThreadPool(Prefs.getThreads());
 
     final double[] dx = new double[limits[1] + 1];
     final double[] dy = new double[dx.length];
@@ -1301,7 +1390,7 @@ public class DriftCalculator implements PlugIn {
     final double smoothing = updateSmoothingParameter(originalDriftTimePoints);
 
     double change = calculateDriftUsingFrames(blocks, blockT, bounds, scale, dx, dy,
-        originalDriftTimePoints, smoothing, iterations);
+        originalDriftTimePoints, smoothing, settings.iterations);
     if (Double.isNaN(change) || tracker.isEnded()) {
       return null;
     }
@@ -1309,9 +1398,9 @@ public class DriftCalculator implements PlugIn {
     plotDrift(limits, dx, dy);
     ImageJUtils.log("Drift Calculator : Initial drift " + MathUtils.rounded(change));
 
-    for (int i = 1; i <= maxIterations; i++) {
+    for (int i = 1; i <= settings.maxIterations; i++) {
       change = calculateDriftUsingFrames(blocks, blockT, bounds, scale, dx, dy,
-          originalDriftTimePoints, smoothing, iterations);
+          originalDriftTimePoints, smoothing, settings.iterations);
       if (Double.isNaN(change)) {
         return null;
       }
@@ -1375,7 +1464,7 @@ public class DriftCalculator implements PlugIn {
     final Ticker ticker = Ticker.createStarted(tracker, images.length * 2L, true);
 
     for (int i = 0; i < images.length; i++) {
-      futures.add(threadPool
+      futures.add(executor
           .submit(new ImageBuilder(blocks.get(i), images, i, bounds, scale, dx, dy, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
@@ -1433,8 +1522,8 @@ public class DriftCalculator implements PlugIn {
 
     final int imagesPerThread = getImagesPerThread(images);
     for (int i = 0; i < images.length; i += imagesPerThread) {
-      futures.add(threadPool.submit(new ImageAligner(aligner, images, imageT, alignBounds,
-          alignments, i, i + imagesPerThread, ticker)));
+      futures.add(executor.submit(new ImageAligner(aligner, images, imageT, alignBounds, alignments,
+          i, i + imagesPerThread, ticker, settings.subPixelMethod)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
     tracker.progress(1);
@@ -1448,7 +1537,7 @@ public class DriftCalculator implements PlugIn {
     for (final double[] result : alignments) {
       final int t = (int) result[2];
       if (Double.isNaN(result[0])) {
-        // TODO: How to ignore bad alignments?
+        // Q: How to ignore bad alignments?
         // Only do smoothing where there was an alignment?
         originalDriftTimePoints[t] = 0;
         tracker.log("WARNING : Unable to align image for time %d to the overall projection", t);
@@ -1538,16 +1627,17 @@ public class DriftCalculator implements PlugIn {
    * @param limits the limits
    * @return the drift { dx[], dy[] }
    */
+  @Nullable
   private double[][] calculateUsingImageStack(ImageStack stack, int[] limits) {
     // Update the limits using the stack size
-    final int upperT = startFrame + frameSpacing * (stack.getSize() - 1);
+    final int upperT = settings.startFrame + settings.frameSpacing * (stack.getSize() - 1);
     limits[1] = FastMath.max(limits[1], upperT);
 
     // TODO - Truncate the stack if there are far too many frames for the localisation limits
 
     tracker.status("Constructing images");
 
-    threadPool = Executors.newFixedThreadPool(Prefs.getThreads());
+    executor = Executors.newFixedThreadPool(Prefs.getThreads());
 
     // Built an image and FHT image for each slice
     final ImageProcessor[] images = new ImageProcessor[stack.getSize()];
@@ -1563,7 +1653,7 @@ public class DriftCalculator implements PlugIn {
     // actually be used for alignment, it is a reference for the FHT size
     aligner.initialiseReference(referenceIp, WindowMethod.NONE, false);
     for (int i = 0; i < images.length; i += imagesPerThread) {
-      futures.add(threadPool.submit(new ImageFhtInitialiser(stack, images, aligner, fhtImages, i,
+      futures.add(executor.submit(new ImageFhtInitialiser(stack, images, aligner, fhtImages, i,
           i + imagesPerThread, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
@@ -1578,7 +1668,7 @@ public class DriftCalculator implements PlugIn {
 
     final double[] originalDriftTimePoints = new double[dx.length];
     final int[] blockT = new int[stack.getSize()];
-    for (int i = 0, t = startFrame; i < stack.getSize(); i++, t += frameSpacing) {
+    for (int i = 0, t = settings.startFrame; i < stack.getSize(); i++, t += settings.frameSpacing) {
       originalDriftTimePoints[t] = 1;
       blockT[i] = t;
     }
@@ -1589,7 +1679,7 @@ public class DriftCalculator implements PlugIn {
     // For the first iteration calculate drift to the first image in the stack
     // (since the average projection may have a large drift blurring the image)
     double change = calculateDriftUsingImageStack(referenceIp, images, fhtImages, blockT, dx, dy,
-        originalDriftTimePoints, smoothing, iterations);
+        originalDriftTimePoints, smoothing, settings.iterations);
     if (Double.isNaN(change) || tracker.isEnded()) {
       return null;
     }
@@ -1597,9 +1687,9 @@ public class DriftCalculator implements PlugIn {
     plotDrift(limits, dx, dy);
     ImageJUtils.log("Drift Calculator : Initial drift " + MathUtils.rounded(change));
 
-    for (int i = 1; i <= maxIterations; i++) {
+    for (int i = 1; i <= settings.maxIterations; i++) {
       change = calculateDriftUsingImageStack(null, images, fhtImages, blockT, dx, dy,
-          originalDriftTimePoints, smoothing, iterations);
+          originalDriftTimePoints, smoothing, settings.iterations);
       if (Double.isNaN(change)) {
         return null;
       }
@@ -1658,8 +1748,8 @@ public class DriftCalculator implements PlugIn {
 
       final int imagesPerThread = getImagesPerThread(images);
       for (int i = 0; i < images.length; i += imagesPerThread) {
-        futures.add(threadPool.submit(new ImageTranslator(images, blockIp, threadDx, threadDy, i,
-            i + imagesPerThread, ticker)));
+        futures.add(executor.submit(new ImageTranslator(images, blockIp, threadDx, threadDy, i,
+            i + imagesPerThread, ticker, settings.interpolationMethod)));
       }
       ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
