@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.PseudoRandomGenerator;
+import uk.ac.sussex.gdsc.core.utils.RandomUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
@@ -38,7 +38,7 @@ public class PrecomputedFunctionTest {
   public void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final int size = 100;
-    final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+    final double[] v = RandomUtils.generate(size, r);
     final ValueFunction func = new PrecomputedValueFunction(v);
     final double[] vo = evaluateValueFunction(func);
     Assertions.assertArrayEquals(v, vo, "values");
@@ -63,10 +63,10 @@ public class PrecomputedFunctionTest {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final int size = 100;
-    final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+    final double[] v = RandomUtils.generate(size, r);
     final double[][] g1 = new double[size][];
     for (int i = 0; i < g1.length; i++) {
-      g1[i] = new PseudoRandomGenerator(n, r).getSequence();
+      g1[i] = RandomUtils.generate(n, r);
     }
     final Gradient1Function func = new PrecomputedGradient1Function(v, g1);
     final double[][] g1o = new double[size][];
@@ -96,12 +96,12 @@ public class PrecomputedFunctionTest {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
     final int size = 100;
-    final double[] v = new PseudoRandomGenerator(size, r).getSequence();
+    final double[] v = RandomUtils.generate(size, r);
     final double[][] g1 = new double[size][];
     final double[][] g2 = new double[size][];
     for (int i = 0; i < g1.length; i++) {
-      g1[i] = new PseudoRandomGenerator(n, r).getSequence();
-      g2[i] = new PseudoRandomGenerator(n, r).getSequence();
+      g1[i] = RandomUtils.generate(n, r);
+      g2[i] = RandomUtils.generate(n, r);
     }
     final Gradient2Function func = new PrecomputedGradient2Function(v, g1, g2);
     final double[][] g1o = new double[size][];
