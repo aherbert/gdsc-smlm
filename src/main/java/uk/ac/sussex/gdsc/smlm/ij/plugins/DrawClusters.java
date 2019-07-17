@@ -54,6 +54,7 @@ import ij.process.LUT;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Compares the coordinates in sets of traced results and computes the match statistics.
@@ -63,17 +64,72 @@ public class DrawClusters implements PlugIn {
   private static final String[] sorts =
       new String[] {"None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame"};
 
-  private static String inputOption = "";
-  private static String title = "";
-  private static int imageSize = 20;
-  private static boolean expandToSingles;
-  private static int minSize = 2;
-  private static int maxSize;
-  private static boolean drawLines = true;
-  private static int sort;
-  private static boolean splineFit;
-  private static boolean useStackPosition;
-  private static int lut;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    String title;
+    int imageSize;
+    boolean expandToSingles;
+    int minSize;
+    int maxSize;
+    boolean drawLines;
+    int sort;
+    boolean splineFit;
+    boolean useStackPosition;
+    int lut;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      title = "";
+      imageSize = 20;
+      minSize = 2;
+      drawLines = true;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      title = source.title;
+      imageSize = source.imageSize;
+      expandToSingles = source.expandToSingles;
+      minSize = source.minSize;
+      maxSize = source.maxSize;
+      drawLines = source.drawLines;
+      sort = source.sort;
+      splineFit = source.splineFit;
+      useStackPosition = source.useStackPosition;
+      lut = source.lut;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -90,7 +146,7 @@ public class DrawClusters implements PlugIn {
 
     // Load the results
     final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
@@ -106,13 +162,14 @@ public class DrawClusters implements PlugIn {
     // Filter traces to a min size
     int maxFrame = 0;
     int count = 0;
-    final int myMaxSize = (maxSize < minSize) ? Integer.MAX_VALUE : maxSize;
-    final boolean myDrawLines = (myMaxSize < 2) ? false : drawLines;
+    final int myMaxSize =
+        (settings.maxSize < settings.minSize) ? Integer.MAX_VALUE : settings.maxSize;
+    final boolean myDrawLines = myMaxSize > 1 && settings.drawLines;
     for (int i = 0; i < traces.length; i++) {
-      if (expandToSingles) {
+      if (settings.expandToSingles) {
         traces[i].expandToSingles();
       }
-      if (traces[i].size() >= minSize && traces[i].size() <= myMaxSize) {
+      if (traces[i].size() >= settings.minSize && traces[i].size() <= myMaxSize) {
         traces[count++] = traces[i];
         traces[i].sort();
         if (maxFrame < traces[i].getTail().getFrame()) {
@@ -130,11 +187,10 @@ public class DrawClusters implements PlugIn {
         String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
             TextUtils.pleural(results.size(), "localisation"));
     IJ.showStatus(msg);
-    // Utils.log(msg);
 
     final Rectangle bounds = results.getBounds(true);
-    ImagePlus imp = WindowManager.getImage(title);
-    boolean isUseStackPosition = useStackPosition;
+    ImagePlus imp = WindowManager.getImage(settings.title);
+    boolean isUseStackPosition = settings.useStackPosition;
     if (imp == null) {
       // Create a default image using 100 pixels as the longest edge
       final double maxD = (bounds.width > bounds.height) ? bounds.width : bounds.height;
@@ -142,14 +198,14 @@ public class DrawClusters implements PlugIn {
       int height;
       if (maxD == 0) {
         // Note that imageSize can be zero (for auto sizing)
-        width = height = (imageSize == 0) ? 20 : imageSize;
-      } else if (imageSize == 0) {
+        width = height = (settings.imageSize == 0) ? 20 : settings.imageSize;
+      } else if (settings.imageSize == 0) {
         // Note that imageSize can be zero (for auto sizing)
         width = bounds.width;
         height = bounds.height;
       } else {
-        width = (int) (imageSize * bounds.width / maxD);
-        height = (int) (imageSize * bounds.height / maxD);
+        width = (int) (settings.imageSize * bounds.width / maxD);
+        height = (int) (settings.imageSize * bounds.height / maxD);
       }
       final ByteProcessor bp = new ByteProcessor(width, height);
       if (isUseStackPosition) {
@@ -202,7 +258,7 @@ public class DrawClusters implements PlugIn {
       Roi roi;
       if (myDrawLines) {
         roi = new PolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
-        if (splineFit) {
+        if (settings.splineFit) {
           ((PolygonRoi) roi).fitSpline();
         }
       } else {
@@ -211,7 +267,7 @@ public class DrawClusters implements PlugIn {
       }
 
       rois[i] = roi;
-      switch (sort) {
+      switch (settings.sort) {
         case 1: // Sort by ID
           values[i] = traces[i].getId();
           break;
@@ -236,13 +292,13 @@ public class DrawClusters implements PlugIn {
       }
     }
 
-    if (sort > 0) {
+    if (settings.sort > 0) {
       SortUtils.sortIndices(indices, values, true);
     }
 
     // Draw the traces as ROIs on an overlay
     final Overlay o = new Overlay();
-    final LUT lut = LutHelper.createLut(DrawClusters.lut);
+    final LUT lut = LutHelper.createLut(settings.lut);
     final double scale = 256.0 / count;
     if (frames != null) {
       // Add the tracks on the frames containing the results
@@ -254,11 +310,9 @@ public class DrawClusters implements PlugIn {
         roi.setFillColor(c);
         roi.setStrokeColor(c);
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
-        // final Rectangle2D.Double pos = roi.getFloatBounds();
         // For each frame in the track, add the ROI track and a point ROI for the current position
         for (int j = 0; j < frames[index].length; j++) {
           addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
-          // PointRoi pointRoi = new PointRoi(pos.x + fp.xpoints[j], pos.y + fp.ypoints[j]);
           final PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
           pointRoi.setPointType(3);
           pointRoi.setFillColor(c);
@@ -279,7 +333,7 @@ public class DrawClusters implements PlugIn {
     IJ.showStatus(msg);
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     final ArrayList<String> titles = new ArrayList<>(WindowManager.getImageCount());
@@ -294,18 +348,19 @@ public class DrawClusters implements PlugIn {
       }
     }
 
+    settings = Settings.load();
     gd.addMessage("Draw the clusters on an image");
-    ResultsManager.addInput(gd, "Input", inputOption, InputSource.MEMORY_CLUSTERED);
-    gd.addChoice("Image", titles.toArray(new String[0]), title);
-    gd.addNumericField("Image_size", imageSize, 0);
-    gd.addCheckbox("Expand_to_singles", expandToSingles);
-    gd.addSlider("Min_size", 1, 15, minSize);
-    gd.addSlider("Max_size", 0, 20, maxSize);
-    gd.addCheckbox("Traces (draw lines)", drawLines);
-    gd.addChoice("Sort", sorts, sorts[sort]);
-    gd.addCheckbox("Spline_fit (traces only)", splineFit);
-    gd.addCheckbox("Use_stack_position", useStackPosition);
-    gd.addChoice("LUT", LutHelper.getLutNames(), lut);
+    ResultsManager.addInput(gd, "Input", settings.inputOption, InputSource.MEMORY_CLUSTERED);
+    gd.addChoice("Image", titles.toArray(new String[0]), settings.title);
+    gd.addNumericField("Image_size", settings.imageSize, 0);
+    gd.addCheckbox("Expand_to_singles", settings.expandToSingles);
+    gd.addSlider("Min_size", 1, 15, settings.minSize);
+    gd.addSlider("Max_size", 0, 20, settings.maxSize);
+    gd.addCheckbox("Traces (draw lines)", settings.drawLines);
+    gd.addChoice("Sort", sorts, sorts[settings.sort]);
+    gd.addCheckbox("Spline_fit (traces only)", settings.splineFit);
+    gd.addCheckbox("Use_stack_position", settings.useStackPosition);
+    gd.addChoice("LUT", LutHelper.getLutNames(), settings.lut);
 
     gd.showDialog();
 
@@ -313,17 +368,18 @@ public class DrawClusters implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    title = gd.getNextChoice();
-    imageSize = (int) Math.abs(gd.getNextNumber());
-    expandToSingles = gd.getNextBoolean();
-    minSize = (int) Math.abs(gd.getNextNumber());
-    maxSize = (int) Math.abs(gd.getNextNumber());
-    drawLines = gd.getNextBoolean();
-    sort = gd.getNextChoiceIndex();
-    splineFit = gd.getNextBoolean();
-    useStackPosition = gd.getNextBoolean();
-    lut = gd.getNextChoiceIndex();
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.title = gd.getNextChoice();
+    settings.imageSize = (int) Math.abs(gd.getNextNumber());
+    settings.expandToSingles = gd.getNextBoolean();
+    settings.minSize = (int) Math.abs(gd.getNextNumber());
+    settings.maxSize = (int) Math.abs(gd.getNextNumber());
+    settings.drawLines = gd.getNextBoolean();
+    settings.sort = gd.getNextChoiceIndex();
+    settings.splineFit = gd.getNextBoolean();
+    settings.useStackPosition = gd.getNextBoolean();
+    settings.lut = gd.getNextChoiceIndex();
+    settings.save();
 
     return true;
   }
