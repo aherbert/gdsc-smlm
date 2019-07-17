@@ -25,9 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
-import uk.ac.sussex.gdsc.core.utils.PseudoRandomSequence;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
+
+import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class FakeGradientFunction
@@ -35,7 +36,7 @@ public class FakeGradientFunction
   private final int maxx;
   private final int size;
   private final int nparams;
-  private final PseudoRandomSequence rng;
+  private SplitMix rng;
 
   /**
    * Instantiates a new fake gradient function.
@@ -44,7 +45,7 @@ public class FakeGradientFunction
    * @param nparams the nparams
    */
   public FakeGradientFunction(int maxx, int nparams) {
-    this(maxx, nparams, 1000, 30051977, 10.0);
+    this(maxx, nparams, 10.0);
   }
 
   /**
@@ -55,23 +56,9 @@ public class FakeGradientFunction
    * @param scale the scale
    */
   public FakeGradientFunction(int maxx, int nparams, double scale) {
-    this(maxx, nparams, 1000, 30051977, scale);
-  }
-
-  /**
-   * Instantiates a new fake gradient function.
-   *
-   * @param maxx the maxx
-   * @param nparams the nparams
-   * @param randomSize the random size
-   * @param randomSeed the random seed
-   * @param scale the scale
-   */
-  public FakeGradientFunction(int maxx, int nparams, int randomSize, int randomSeed, double scale) {
     this.maxx = maxx;
     this.size = maxx * maxx;
     this.nparams = nparams;
-    this.rng = new PseudoRandomSequence(randomSize, RngUtils.create(randomSeed), scale);
   }
 
   @Override
@@ -81,12 +68,7 @@ public class FakeGradientFunction
 
   @Override
   public void initialise(double[] a) {
-    int seed = 0;
-    for (int i = a.length; i-- > 0;) {
-      seed += Double.hashCode(a[i]);
-    }
-    // logger.fine(FunctionUtils.getSupplier("seed = %d", seed);
-    rng.setSeed(seed);
+    rng = new SplitMix(Arrays.hashCode(a));
   }
 
   @Override

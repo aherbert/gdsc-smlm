@@ -43,7 +43,7 @@ public class ParameterBoundsTest {
   }
 
   private static void canBoundParameter(double value) {
-    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1));
     if (value < 0) {
       bounds.setBounds(new double[] {2 * value}, null);
     } else {
@@ -63,7 +63,7 @@ public class ParameterBoundsTest {
 
   @Test
   public void canDoubleBoundParameter() {
-    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1));
     final double s = 2;
     bounds.setBounds(new double[] {-s}, new double[] {s});
     final double[] a1 = new double[1];
@@ -84,7 +84,7 @@ public class ParameterBoundsTest {
   }
 
   private static void canStepParameter(double value) {
-    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1, 1, 1));
+    final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1));
     double[] a1 = new double[1];
     double[] a2 = new double[1];
     double[] tmp;
