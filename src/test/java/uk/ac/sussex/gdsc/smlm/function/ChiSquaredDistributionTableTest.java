@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;

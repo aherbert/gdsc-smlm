@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.RandomUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;

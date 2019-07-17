@@ -44,7 +44,6 @@ import java.awt.Insets;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.ScrollPane;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
