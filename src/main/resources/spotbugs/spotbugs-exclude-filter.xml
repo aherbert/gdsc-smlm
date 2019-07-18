@@ -162,7 +162,7 @@
   </Match>
 
   <Match>
-    <!-- This uses a synchronized block to do the analysis. Some private fields are also accessed 
+    <!-- This uses a synchronized block to do the analysis. Some private fields are also accessed
     without synchronization from within the class. -->
     <Class name="uk.ac.sussex.gdsc.smlm.ij.plugins.PulseActivationAnalysis" />
     <Or>
