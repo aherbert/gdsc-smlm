@@ -55,7 +55,6 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
@@ -72,36 +71,15 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Fits the selected rectangular ROI using a 2D Gaussian.
  */
-public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
+public class GaussianFit implements ExtendedPlugInFilter {
   private static final String TITLE = "Gaussian Fit";
-  private double smooth = Prefs.get(Constants.smooth, 0);
-  private int boxSize = (int) Prefs.get(Constants.boxSize, 1);
-  private float background = (float) Prefs.get(Constants.background, 0);
-  private float peakHeight = (float) Prefs.get(Constants.peakHeight, 0);
-  private float fractionAboveBackground = (float) Prefs.get(Constants.fractionAboveBackground, 0);
-  private float peakWidth = (float) Prefs.get(Constants.peakWidth, 0);
-  private int topN = (int) Prefs.get(Constants.topN, 0);
-  private boolean blockFindAlgorithm = Prefs.get(Constants.blockFindAlgorithm, true);
-  private boolean neighbourCheck = Prefs.get(Constants.neighbourCheck, false);
-  private int border = (int) Prefs.get(Constants.border, 0);
-  private int fitFunction = (int) Prefs.get(Constants.fitFunction, 0);
-  private boolean fitBackground = Prefs.get(Constants.fitBackground, true);
-  private boolean logProgress = Prefs.get(Constants.logProgress, false);
-  private int maxIterations = (int) Prefs.get(Constants.maxIterations, 20);
-  private double relativeThreshold = Prefs.get(Constants.relativeThreshold, 1e-5);
-  private double absoluteThreshold = Prefs.get(Constants.absoluteThreshold, 1e-10);
-  private boolean singleFit = Prefs.get(Constants.singleFit, false);
-  private int singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
-  private double initialPeakStdDev = Prefs.get(Constants.initialPeakStdDev0, 0);
-  private boolean showDeviations = Prefs.get(Constants.showDeviations, false);
-  private boolean filterResults = Prefs.get(Constants.filterResults, false);
-  private boolean showFit = Prefs.get(Constants.showFit, false);
-
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | FINAL_PROCESSING | SNAPSHOT;
+
   private ImagePlus imp;
 
   private int[] maxIndices;
@@ -109,6 +87,133 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
   private double chiSquared;
 
   private ImageJTablePeakResults results;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    double smooth;
+    int boxSize;
+    float background;
+    float peakHeight;
+    float fractionAboveBackground;
+    float peakWidth;
+    int topN;
+    boolean blockFindAlgorithm;
+    boolean neighbourCheck;
+    int border;
+    int fitFunction;
+    boolean fitBackground;
+    boolean logProgress;
+    int maxIterations;
+    double relativeThreshold;
+    double absoluteThreshold;
+    boolean singleFit;
+    int singleRegionSize;
+    double initialPeakStdDev;
+    boolean showDeviations;
+    boolean filterResults;
+    boolean showFit;
+
+    Settings() {
+      // Set defaults
+      smooth = Prefs.get(Constants.smooth, 0);
+      boxSize = (int) Prefs.get(Constants.boxSize, 1);
+      background = (float) Prefs.get(Constants.background, 0);
+      peakHeight = (float) Prefs.get(Constants.peakHeight, 0);
+      fractionAboveBackground = (float) Prefs.get(Constants.fractionAboveBackground, 0);
+      peakWidth = (float) Prefs.get(Constants.peakWidth, 0);
+      topN = (int) Prefs.get(Constants.topN, 0);
+      blockFindAlgorithm = Prefs.get(Constants.blockFindAlgorithm, true);
+      neighbourCheck = Prefs.get(Constants.neighbourCheck, false);
+      border = (int) Prefs.get(Constants.border, 0);
+      fitFunction = (int) Prefs.get(Constants.fitFunction, 0);
+      fitBackground = Prefs.get(Constants.fitBackground, true);
+      logProgress = Prefs.get(Constants.logProgress, false);
+      maxIterations = (int) Prefs.get(Constants.maxIterations, 20);
+      relativeThreshold = Prefs.get(Constants.relativeThreshold, 1e-5);
+      absoluteThreshold = Prefs.get(Constants.absoluteThreshold, 1e-10);
+      singleFit = Prefs.get(Constants.singleFit, false);
+      singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
+      initialPeakStdDev = Prefs.get(Constants.initialPeakStdDev0, 0);
+      showDeviations = Prefs.get(Constants.showDeviations, false);
+      filterResults = Prefs.get(Constants.filterResults, false);
+      showFit = Prefs.get(Constants.showFit, false);
+    }
+
+    Settings(Settings source) {
+      smooth = source.smooth;
+      boxSize = source.boxSize;
+      background = source.background;
+      peakHeight = source.peakHeight;
+      fractionAboveBackground = source.fractionAboveBackground;
+      peakWidth = source.peakWidth;
+      topN = source.topN;
+      blockFindAlgorithm = source.blockFindAlgorithm;
+      neighbourCheck = source.neighbourCheck;
+      border = source.border;
+      fitFunction = source.fitFunction;
+      fitBackground = source.fitBackground;
+      logProgress = source.logProgress;
+      maxIterations = source.maxIterations;
+      relativeThreshold = source.relativeThreshold;
+      absoluteThreshold = source.absoluteThreshold;
+      singleFit = source.singleFit;
+      singleRegionSize = source.singleRegionSize;
+      initialPeakStdDev = source.initialPeakStdDev;
+      showDeviations = source.showDeviations;
+      filterResults = source.filterResults;
+      showFit = source.showFit;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+      Prefs.set(Constants.smooth, smooth);
+      Prefs.set(Constants.boxSize, boxSize);
+      Prefs.set(Constants.background, background);
+      Prefs.set(Constants.peakHeight, peakHeight);
+      Prefs.set(Constants.fractionAboveBackground, fractionAboveBackground);
+      Prefs.set(Constants.peakWidth, peakWidth);
+      Prefs.set(Constants.topN, topN);
+      Prefs.set(Constants.blockFindAlgorithm, blockFindAlgorithm);
+      Prefs.set(Constants.neighbourCheck, neighbourCheck);
+      Prefs.set(Constants.border, border);
+      Prefs.set(Constants.fitFunction, fitFunction);
+      Prefs.set(Constants.fitBackground, fitBackground);
+      Prefs.set(Constants.logProgress, logProgress);
+      Prefs.set(Constants.showDeviations, showDeviations);
+      Prefs.set(Constants.filterResults, filterResults);
+      Prefs.set(Constants.showFit, showFit);
+      Prefs.set(Constants.maxIterations, maxIterations);
+      Prefs.set(Constants.relativeThreshold, relativeThreshold);
+      Prefs.set(Constants.absoluteThreshold, absoluteThreshold);
+      Prefs.set(Constants.singleFit, singleFit);
+      Prefs.set(Constants.singleRegionSize, singleRegionSize);
+      Prefs.set(Constants.initialPeakStdDev0, initialPeakStdDev);
+    }
+  }
 
   private static class PsfTypeLoader {
     private static final PSFType[] psfTypeValues;
@@ -178,11 +283,13 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     final double minValue = limits[0];
     final double maxValue = limits[1];
 
-    if (background > maxValue) {
-      background = (int) maxValue;
+    settings = Settings.load();
+
+    if (settings.background > maxValue) {
+      settings.background = (int) maxValue;
     }
-    if (background < minValue) {
-      background = (int) minValue;
+    if (settings.background < minValue) {
+      settings.background = (int) minValue;
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
@@ -191,35 +298,35 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     gd.addMessage("Fit 2D Gaussian to identified maxima");
 
     gd.addMessage("--- Image smoothing ---\n" + "- Within a 2n+1 box\n");
-    gd.addSlider("Smoothing", 0, 4.5, smooth);
+    gd.addSlider("Smoothing", 0, 4.5, settings.smooth);
 
     gd.addMessage("--- Maxima identification ---\n" + "- Within a 2n+1 box\n");
-    gd.addSlider("Box_size", 1, 15, boxSize);
-    gd.addSlider("Background", minValue, maxValue, background);
-    gd.addSlider("Min_height", 0, maxValue, peakHeight);
-    gd.addSlider("Fraction_above_background", 0, 1.01, fractionAboveBackground);
-    gd.addSlider("Min_width", 0, 20, peakWidth);
-    gd.addSlider("Top_N", 0, 20, topN);
-    gd.addCheckbox("Block_find_algorithm", blockFindAlgorithm);
-    gd.addCheckbox("Neighbour_check", neighbourCheck);
-    gd.addSlider("Border", 0, 15, border);
+    gd.addSlider("Box_size", 1, 15, settings.boxSize);
+    gd.addSlider("Background", minValue, maxValue, settings.background);
+    gd.addSlider("Min_height", 0, maxValue, settings.peakHeight);
+    gd.addSlider("Fraction_above_background", 0, 1.01, settings.fractionAboveBackground);
+    gd.addSlider("Min_width", 0, 20, settings.peakWidth);
+    gd.addSlider("Top_N", 0, 20, settings.topN);
+    gd.addCheckbox("Block_find_algorithm", settings.blockFindAlgorithm);
+    gd.addCheckbox("Neighbour_check", settings.neighbourCheck);
+    gd.addSlider("Border", 0, 15, settings.border);
 
     gd.addMessage("--- Gaussian fitting ---");
     gd.addChoice("PSF", getPsfTypeNames(), PsfProtosHelper.getName(getPsfType()));
-    gd.addCheckbox("Fit_background", fitBackground);
-    gd.addNumericField("Max_iterations", maxIterations, 0);
-    gd.addNumericField("Relative_threshold", relativeThreshold, -3);
-    gd.addNumericField("Absolute_threshold", absoluteThreshold, -3);
-    gd.addCheckbox("Single_fit", singleFit);
-    gd.addNumericField("Single_region_size", singleRegionSize, 0);
-    gd.addNumericField("Initial_StdDev", initialPeakStdDev, 3);
-    gd.addCheckbox("Log_progress", logProgress);
-    gd.addCheckbox("Show_deviations", showDeviations);
-    gd.addCheckbox("Filter_results", filterResults);
-    gd.addCheckbox("Show_fit", showFit);
+    gd.addCheckbox("Fit_background", settings.fitBackground);
+    gd.addNumericField("Max_iterations", settings.maxIterations, 0);
+    gd.addNumericField("Relative_threshold", settings.relativeThreshold, -3);
+    gd.addNumericField("Absolute_threshold", settings.absoluteThreshold, -3);
+    gd.addCheckbox("Single_fit", settings.singleFit);
+    gd.addNumericField("Single_region_size", settings.singleRegionSize, 0);
+    gd.addNumericField("Initial_StdDev", settings.initialPeakStdDev, 3);
+    gd.addCheckbox("Log_progress", settings.logProgress);
+    gd.addCheckbox("Show_deviations", settings.showDeviations);
+    gd.addCheckbox("Filter_results", settings.filterResults);
+    gd.addCheckbox("Show_fit", settings.showFit);
 
     gd.addPreviewCheckbox(pfr);
-    gd.addDialogListener(this);
+    gd.addDialogListener(this::dialogItemChanged);
 
     gd.showDialog();
 
@@ -265,31 +372,30 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return limits;
   }
 
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
-    smooth = gd.getNextNumber();
-    boxSize = (int) gd.getNextNumber();
-    background = (float) gd.getNextNumber();
-    peakHeight = (float) gd.getNextNumber();
-    fractionAboveBackground = (float) gd.getNextNumber();
-    peakWidth = (float) gd.getNextNumber();
-    topN = (int) gd.getNextNumber();
-    blockFindAlgorithm = gd.getNextBoolean();
-    neighbourCheck = gd.getNextBoolean();
-    border = (int) gd.getNextNumber();
+  private boolean dialogItemChanged(GenericDialog gd, @SuppressWarnings("unused") AWTEvent event) {
+    settings.smooth = gd.getNextNumber();
+    settings.boxSize = (int) gd.getNextNumber();
+    settings.background = (float) gd.getNextNumber();
+    settings.peakHeight = (float) gd.getNextNumber();
+    settings.fractionAboveBackground = (float) gd.getNextNumber();
+    settings.peakWidth = (float) gd.getNextNumber();
+    settings.topN = (int) gd.getNextNumber();
+    settings.blockFindAlgorithm = gd.getNextBoolean();
+    settings.neighbourCheck = gd.getNextBoolean();
+    settings.border = (int) gd.getNextNumber();
 
-    fitFunction = gd.getNextChoiceIndex();
-    fitBackground = gd.getNextBoolean();
-    maxIterations = (int) gd.getNextNumber();
-    relativeThreshold = gd.getNextNumber();
-    absoluteThreshold = gd.getNextNumber();
-    singleFit = gd.getNextBoolean();
-    singleRegionSize = (int) gd.getNextNumber();
-    initialPeakStdDev = gd.getNextNumber();
-    logProgress = gd.getNextBoolean();
-    showDeviations = gd.getNextBoolean();
-    filterResults = gd.getNextBoolean();
-    showFit = gd.getNextBoolean();
+    settings.fitFunction = gd.getNextChoiceIndex();
+    settings.fitBackground = gd.getNextBoolean();
+    settings.maxIterations = (int) gd.getNextNumber();
+    settings.relativeThreshold = gd.getNextNumber();
+    settings.absoluteThreshold = gd.getNextNumber();
+    settings.singleFit = gd.getNextBoolean();
+    settings.singleRegionSize = (int) gd.getNextNumber();
+    settings.initialPeakStdDev = gd.getNextNumber();
+    settings.logProgress = gd.getNextBoolean();
+    settings.showDeviations = gd.getNextBoolean();
+    settings.filterResults = gd.getNextBoolean();
+    settings.showFit = gd.getNextBoolean();
 
     if (gd.invalidNumber()) {
       return false;
@@ -297,55 +403,30 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
     // Check arguments
     try {
-      ParameterUtils.isPositive("Smoothing", smooth);
-      ParameterUtils.isAboveZero("Box size", boxSize);
-      ParameterUtils.isPositive("Peak height", peakHeight);
-      ParameterUtils.isPositive("Fraction above background", fractionAboveBackground);
-      ParameterUtils.isPositive("Peak width", peakWidth);
-      ParameterUtils.isPositive("Top N", topN);
-      ParameterUtils.isPositive("Border", border);
-      ParameterUtils.isAboveZero("Relative threshold", relativeThreshold);
-      ParameterUtils.isAboveZero("Absolute threshold", absoluteThreshold);
-      ParameterUtils.isAboveZero("Max iterations", maxIterations);
-      ParameterUtils.isAboveZero("Single region size", singleRegionSize);
-      ParameterUtils.isPositive("Initial peak StdDev", initialPeakStdDev);
+      ParameterUtils.isPositive("Smoothing", settings.smooth);
+      ParameterUtils.isAboveZero("Box size", settings.boxSize);
+      ParameterUtils.isPositive("Peak height", settings.peakHeight);
+      ParameterUtils.isPositive("Fraction above background", settings.fractionAboveBackground);
+      ParameterUtils.isPositive("Peak width", settings.peakWidth);
+      ParameterUtils.isPositive("Top N", settings.topN);
+      ParameterUtils.isPositive("Border", settings.border);
+      ParameterUtils.isAboveZero("Relative threshold", settings.relativeThreshold);
+      ParameterUtils.isAboveZero("Absolute threshold", settings.absoluteThreshold);
+      ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
+      ParameterUtils.isAboveZero("Single region size", settings.singleRegionSize);
+      ParameterUtils.isPositive("Initial peak StdDev", settings.initialPeakStdDev);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
     }
 
-    setProperties();
+    settings.save();
 
     if (!gd.getPreviewCheckbox().getState()) {
       imp.setOverlay(null);
     }
 
     return true;
-  }
-
-  private void setProperties() {
-    Prefs.set(Constants.smooth, smooth);
-    Prefs.set(Constants.boxSize, boxSize);
-    Prefs.set(Constants.background, background);
-    Prefs.set(Constants.peakHeight, peakHeight);
-    Prefs.set(Constants.fractionAboveBackground, fractionAboveBackground);
-    Prefs.set(Constants.peakWidth, peakWidth);
-    Prefs.set(Constants.topN, topN);
-    Prefs.set(Constants.blockFindAlgorithm, blockFindAlgorithm);
-    Prefs.set(Constants.neighbourCheck, neighbourCheck);
-    Prefs.set(Constants.border, border);
-    Prefs.set(Constants.fitFunction, fitFunction);
-    Prefs.set(Constants.fitBackground, fitBackground);
-    Prefs.set(Constants.logProgress, logProgress);
-    Prefs.set(Constants.showDeviations, showDeviations);
-    Prefs.set(Constants.filterResults, filterResults);
-    Prefs.set(Constants.showFit, showFit);
-    Prefs.set(Constants.maxIterations, maxIterations);
-    Prefs.set(Constants.relativeThreshold, relativeThreshold);
-    Prefs.set(Constants.absoluteThreshold, absoluteThreshold);
-    Prefs.set(Constants.singleFit, singleFit);
-    Prefs.set(Constants.singleRegionSize, singleRegionSize);
-    Prefs.set(Constants.initialPeakStdDev0, initialPeakStdDev);
   }
 
   @Override
@@ -366,9 +447,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
 
     maxIndices = getMaxima(data, width, height);
 
-    if (topN > 0 && maxIndices.length > topN) {
+    if (settings.topN > 0 && maxIndices.length > settings.topN) {
       SortUtils.sortIndices(maxIndices, data, true);
-      maxIndices = Arrays.copyOf(maxIndices, topN);
+      maxIndices = Arrays.copyOf(maxIndices, settings.topN);
     }
 
     // Show an overlay of the indices
@@ -436,11 +517,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       // Smoothing destructively modifies the data so create a copy
       smoothData = Arrays.copyOf(data, width * height);
       final BlockMeanFilter filter = new BlockMeanFilter();
-      // filter.blockAverage(smoothData, width, height, smooth);
-      if (smooth <= border) {
-        filter.stripedBlockFilterInternal(smoothData, width, height, (float) smooth);
+      if (settings.smooth <= settings.border) {
+        filter.stripedBlockFilterInternal(smoothData, width, height, (float) settings.smooth);
       } else {
-        filter.stripedBlockFilter(smoothData, width, height, (float) smooth);
+        filter.stripedBlockFilter(smoothData, width, height, (float) settings.smooth);
       }
     }
     SortUtils.sortIndices(maxIndices, smoothData, true);
@@ -470,7 +550,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       return;
     }
 
-    results = new ImageJTablePeakResults(showDeviations,
+    results = new ImageJTablePeakResults(settings.showDeviations,
         imp.getTitle() + " [" + imp.getCurrentSlice() + "]");
     final CalibrationWriter cw = new CalibrationWriter();
     cw.setIntensityUnit(IntensityUnit.COUNT);
@@ -485,7 +565,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     // Perform the Gaussian fit
     long ellapsed = 0;
 
-    if (!singleFit) {
+    if (!settings.singleFit) {
       if (isLogProgress()) {
         IJ.log("Combined fit");
       }
@@ -524,12 +604,12 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
           final int x = maxIndices[n] % width;
 
           // Check the peak is a good fit
-          if (filterResults
+          if (settings.filterResults
               && config.validatePeak(n, initialParams, params, paramsDev) != FitStatus.OK) {
             continue;
           }
 
-          if (showFit) {
+          if (settings.showFit) {
             // Copy the valid parameters
             validPeaks++;
             for (int ii = i, j = 0; j < Gaussian2DFunction.PARAMETERS_PER_PEAK; ii++, j++) {
@@ -554,7 +634,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
         setOverlay(npoints, xpoints, ypoints);
 
         // Draw the fit
-        if (showFit && validPeaks != 0) {
+        if (settings.showFit && validPeaks != 0) {
           final double[] pixels = new double[data.length];
           final EllipticalGaussian2DFunction f =
               new EllipticalGaussian2DFunction(validPeaks, width, height);
@@ -588,14 +668,14 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       // Extract each peak and fit individually
       final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
       float[] region = null;
-      final Gaussian2DFitter gf = createGaussianFitter(filterResults);
+      final Gaussian2DFitter gf = createGaussianFitter(settings.filterResults);
 
       for (int n = 0; n < maxIndices.length; n++) {
         final int y = maxIndices[n] / width;
         final int x = maxIndices[n] % width;
 
         final long time = System.nanoTime();
-        final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, singleRegionSize);
+        final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, settings.singleRegionSize);
         region = ie.crop(regionBounds, region);
 
         final int newIndex = (y - regionBounds.y) * regionBounds.width + x - regionBounds.x;
@@ -611,7 +691,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
         // Output fit result
         if (peakParams != null) {
           double[] peakParamsDev = null;
-          if (showDeviations) {
+          if (settings.showDeviations) {
             peakParamsDev = convertParameters(fitResult.getParameterDeviations());
           }
 
@@ -698,19 +778,19 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     nms.setMinimumWidth(getPeakWidth());
     nms.setNeighbourCheck(isNeighbourCheck());
 
-    int[] maxIndices;
+    int[] indices;
     if (isBlockFindAlgorithm()) {
       if (getBorder() > 0) {
-        maxIndices = nms.blockFindInternal(data, width, height, getBoxSize(), getBorder());
+        indices = nms.blockFindInternal(data, width, height, getBoxSize(), getBorder());
       } else {
-        maxIndices = nms.blockFind(data, width, height, getBoxSize());
+        indices = nms.blockFind(data, width, height, getBoxSize());
       }
     } else if (getBorder() > 0) {
-      maxIndices = nms.maxFindInternal(data, width, height, getBoxSize(), getBorder());
+      indices = nms.maxFindInternal(data, width, height, getBoxSize(), getBorder());
     } else {
-      maxIndices = nms.maxFind(data, width, height, getBoxSize());
+      indices = nms.maxFind(data, width, height, getBoxSize());
     }
-    return maxIndices;
+    return indices;
   }
 
   /**
@@ -750,7 +830,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    *         elliptical fitting is performed the values are Amplitude, Angle, PosX, PosY, StdDevX,
    *         StdDevY for each fitted peak Null if no fit is possible.
    */
-  private @Nullable double[] fitMultiple(float[] data, int width, int height, int[] maxIndices,
+  @Nullable
+  private double[] fitMultiple(float[] data, int width, int height, int[] maxIndices,
       double[] estimatedHeights) {
     if (data == null || data.length != width * height) {
       return null;
@@ -773,6 +854,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return null;
   }
 
+  @Nullable
   private double[] convertParameters(double[] params) {
     if (params == null) {
       return null;
@@ -791,6 +873,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     return params;
   }
 
+  @Nullable
   private double[] invertParameters(double[] params) {
     if (params == null) {
       return null;
@@ -824,8 +907,9 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    *         remaining values are Amplitude, PosX, PosY, StdDevX, StdDevY for each fitted peak. Null
    *         if no fit is possible.
    */
-  private @Nullable double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height,
-      int index, double estimatedHeight) {
+  @Nullable
+  private double[] fitSingle(Gaussian2DFitter gf, float[] data, int width, int height, int index,
+      double estimatedHeight) {
     this.fitResult = gf.fit(SimpleArrayUtils.toDouble(data), width, height, new int[] {index},
         new double[] {estimatedHeight});
     if (fitResult.getStatus() == FitStatus.OK) {
@@ -854,10 +938,10 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     config.setFitSolver(FitSolver.LVM_LSE);
     config.setPsf(PsfProtosHelper.getDefaultPsf(getPsfType()));
     config.setMaxIterations(getMaxIterations());
-    config.setRelativeThreshold(relativeThreshold);
-    config.setAbsoluteThreshold(absoluteThreshold);
+    config.setRelativeThreshold(settings.relativeThreshold);
+    config.setAbsoluteThreshold(settings.absoluteThreshold);
     config.setInitialPeakStdDev(getInitialPeakStdDev());
-    config.setComputeDeviations(showDeviations);
+    config.setComputeDeviations(settings.showDeviations);
 
     // Set-up peak filtering only for single fitting
     config.setDisableSimpleFilter(!simpleFiltering);
@@ -867,7 +951,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
       config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
     }
 
-    config.setBackgroundFitting(fitBackground);
+    config.setBackgroundFitting(settings.fitBackground);
 
     return new Gaussian2DFitter(config);
   }
@@ -884,7 +968,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
     config.setSignalStrength(0);
     config.setMinWidthFactor(0.5);
     config.setMaxWidthFactor(3);
-    if (logProgress) {
+    if (settings.logProgress) {
       config.setLog(ImageJPluginLoggerHelper.getLogger(getClass()));
     }
   }
@@ -932,6 +1016,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return Array containing the fitted curve data: Background, Amplitude, PosX, PosY, StdDevX,
    *         StdDevY, Angle. Null if no fit is possible.
    */
+  @Nullable
   public double[] fit(float[] data, int width, int height) {
     // Note: This is a library function used in e.g. GDSC ImageJ plugins: FindFoci
 
@@ -993,7 +1078,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param smooth the new smooth
    */
   public void setSmooth(double smooth) {
-    this.smooth = smooth;
+    this.settings.smooth = smooth;
   }
 
   /**
@@ -1002,7 +1087,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the smooth
    */
   public double getSmooth() {
-    return smooth;
+    return settings.smooth;
   }
 
   /**
@@ -1011,7 +1096,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param boxSize the new box size
    */
   public void setBoxSize(int boxSize) {
-    this.boxSize = boxSize;
+    this.settings.boxSize = boxSize;
   }
 
   /**
@@ -1020,7 +1105,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the box size
    */
   public int getBoxSize() {
-    return boxSize;
+    return settings.boxSize;
   }
 
   /**
@@ -1029,7 +1114,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param background the new background
    */
   public void setBackground(float background) {
-    this.background = background;
+    this.settings.background = background;
   }
 
   /**
@@ -1038,7 +1123,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the background
    */
   public float getBackground() {
-    return background;
+    return settings.background;
   }
 
   /**
@@ -1047,7 +1132,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param peakHeight the new peak height
    */
   public void setPeakHeight(float peakHeight) {
-    this.peakHeight = peakHeight;
+    this.settings.peakHeight = peakHeight;
   }
 
   /**
@@ -1056,7 +1141,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the peak height
    */
   public float getPeakHeight() {
-    return peakHeight;
+    return settings.peakHeight;
   }
 
   /**
@@ -1065,7 +1150,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param fractionAboveBackground the new fraction above background
    */
   public void setFractionAboveBackground(float fractionAboveBackground) {
-    this.fractionAboveBackground = fractionAboveBackground;
+    this.settings.fractionAboveBackground = fractionAboveBackground;
   }
 
   /**
@@ -1074,7 +1159,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the fraction above background
    */
   public float getFractionAboveBackground() {
-    return fractionAboveBackground;
+    return settings.fractionAboveBackground;
   }
 
   /**
@@ -1083,7 +1168,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param peakWidth the new peak width
    */
   public void setPeakWidth(float peakWidth) {
-    this.peakWidth = peakWidth;
+    this.settings.peakWidth = peakWidth;
   }
 
   /**
@@ -1092,7 +1177,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the peak width
    */
   public float getPeakWidth() {
-    return peakWidth;
+    return settings.peakWidth;
   }
 
   /**
@@ -1101,7 +1186,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the top N
    */
   public int getTopN() {
-    return topN;
+    return settings.topN;
   }
 
   /**
@@ -1110,7 +1195,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param topN the new top N
    */
   public void setTopN(int topN) {
-    this.topN = topN;
+    this.settings.topN = topN;
   }
 
   /**
@@ -1119,7 +1204,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param blockFindAlgorithm the new block find algorithm
    */
   public void setBlockFindAlgorithm(boolean blockFindAlgorithm) {
-    this.blockFindAlgorithm = blockFindAlgorithm;
+    this.settings.blockFindAlgorithm = blockFindAlgorithm;
   }
 
   /**
@@ -1128,7 +1213,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return true, if is block find algorithm
    */
   public boolean isBlockFindAlgorithm() {
-    return blockFindAlgorithm;
+    return settings.blockFindAlgorithm;
   }
 
   /**
@@ -1137,7 +1222,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param neighbourCheck the new neighbour check
    */
   public void setNeighbourCheck(boolean neighbourCheck) {
-    this.neighbourCheck = neighbourCheck;
+    this.settings.neighbourCheck = neighbourCheck;
   }
 
   /**
@@ -1146,7 +1231,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return true, if is neighbour check
    */
   public boolean isNeighbourCheck() {
-    return neighbourCheck;
+    return settings.neighbourCheck;
   }
 
   /**
@@ -1155,7 +1240,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param border the new border
    */
   public void setBorder(int border) {
-    this.border = border;
+    this.settings.border = border;
   }
 
   /**
@@ -1164,7 +1249,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the border
    */
   public int getBorder() {
-    return border;
+    return settings.border;
   }
 
   /**
@@ -1173,7 +1258,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param fitFunction the new fit function
    */
   public void setFitFunction(int fitFunction) {
-    this.fitFunction = fitFunction;
+    this.settings.fitFunction = fitFunction;
   }
 
   /**
@@ -1182,7 +1267,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the fit function
    */
   public int getFitFunction() {
-    return fitFunction;
+    return settings.fitFunction;
   }
 
   /**
@@ -1191,8 +1276,8 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the PSF type
    */
   public PSFType getPsfType() {
-    if (fitFunction >= 0 && fitFunction < getPsfTypeValues().length) {
-      return getPsfTypeValues()[fitFunction];
+    if (settings.fitFunction >= 0 && settings.fitFunction < getPsfTypeValues().length) {
+      return getPsfTypeValues()[settings.fitFunction];
     }
     return PSFType.ONE_AXIS_GAUSSIAN_2D;
   }
@@ -1203,7 +1288,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param fitBackground the new fit background
    */
   public void setFitBackground(boolean fitBackground) {
-    this.fitBackground = fitBackground;
+    this.settings.fitBackground = fitBackground;
   }
 
   /**
@@ -1212,7 +1297,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return true, if is fit background
    */
   public boolean isFitBackground() {
-    return fitBackground;
+    return settings.fitBackground;
   }
 
   /**
@@ -1221,7 +1306,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param logProgress the new log progress
    */
   public void setLogProgress(boolean logProgress) {
-    this.logProgress = logProgress;
+    this.settings.logProgress = logProgress;
   }
 
   /**
@@ -1230,7 +1315,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return true, if is log progress
    */
   public boolean isLogProgress() {
-    return logProgress;
+    return settings.logProgress;
   }
 
   /**
@@ -1239,7 +1324,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param maxIterations the new max iterations
    */
   public void setMaxIterations(int maxIterations) {
-    this.maxIterations = maxIterations;
+    this.settings.maxIterations = maxIterations;
   }
 
   /**
@@ -1248,7 +1333,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the max iterations
    */
   public int getMaxIterations() {
-    return maxIterations;
+    return settings.maxIterations;
   }
 
   /**
@@ -1257,7 +1342,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return true, if is elliptical fitting
    */
   public boolean isEllipticalFitting() {
-    return fitFunction == 3;
+    return settings.fitFunction == 3;
   }
 
   /**
@@ -1266,7 +1351,7 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @param initialPeakStdDev the new initial peak standard deviation
    */
   public void setInitialPeakStdDev(double initialPeakStdDev) {
-    this.initialPeakStdDev = initialPeakStdDev;
+    this.settings.initialPeakStdDev = initialPeakStdDev;
   }
 
   /**
@@ -1275,6 +1360,6 @@ public class GaussianFit implements ExtendedPlugInFilter, DialogListener {
    * @return the initial peak standard deviation
    */
   public double getInitialPeakStdDev() {
-    return initialPeakStdDev;
+    return settings.initialPeakStdDev;
   }
 }
