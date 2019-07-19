@@ -94,8 +94,6 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
       final float y = 0;
       final float space = 2.5f;
 
-      // for (Rendering rendering : new Rendering[] { Rendering.SQUARE, Rendering.OCTAGON,
-      // Rendering.ICOSAHEDRON })
       for (final Rendering rendering : Rendering.values()) {
         final Shape3D shape = Shape3DHelper.createShape(rendering, 3);
 
@@ -141,7 +139,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         final Pair<Point3f[], int[]> p = CustomContentHelper.createIndexedObject(points);
         final int v = points.size();
         final int t = v / 3;
-        System.out.printf("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d\n", d, v, t,
+        ImageJUtils.log("Icosahedron divisions = %d, V=%d, T=%d, Vi=%d (%.2f), i=%d", d, v, t,
             p.getKey().length, v / (double) p.getKey().length, p.getValue().length);
 
         CustomMesh mesh = new ItemTriangleMesh(points.toArray(new Point3f[0]),
@@ -175,7 +173,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
         // This is a triangle strip array so is more space efficient
         final Sphere s = new Sphere(1, Primitive.GENERATE_NORMALS, d);
         final int t = s.getNumTriangles();
-        System.out.printf("Sphere divisions = %d, V=%d, T=%d\n", d, s.getNumVertices(), t);
+        ImageJUtils.log("Sphere divisions = %d, V=%d, T=%d", d, s.getNumVertices(), t);
 
         final ItemGeometryGroup g = new ItemGeometryGroup(new Point3f[] {new Point3f(x, y, 0)},
             (GeometryArray) s.getShape().getGeometry(), app, null, null, null);
@@ -245,7 +243,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
     final View view = univ.getViewer().getView();
     view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
     // I am not sure if this is required if objects are sorted.
-    // view.setDepthBufferFreezeTransparent(false);
+    // view.setDepthBufferFreezeTransparent(false)
 
     IJ.showStatus("Creating points ...");
     final Point3f[] points = pointList.toArray(new Point3f[pointList.size()]);

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
@@ -717,6 +718,63 @@ public class ImageJ3DResultsViewer implements PlugIn {
         listSelectionModel.setSelectionInterval(index, index);
       }
     }
+
+    private static PeakResultTableModelFrame findTable(ResultsMetaData data) {
+      // There is a single TableModel and SelectionModel for each unique results set.
+      // This may be displayed in a window.
+      final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
+          resultsTables.get(data.digest);
+      final PeakResultTableModelFrame table = t.getRight();
+      if (table != null && table.isVisible()) {
+        return table;
+      }
+      return null;
+    }
+
+    private static PeakResultTableModelFrame createTable(MemoryPeakResults results,
+        ResultsMetaData data) {
+      // There is a single TableModel and SelectionModel for each unique results set.
+      // This is displayed in a window. Show the window if it is not visible.
+      // Set the window to have dispose on close (to save memory).
+
+      // Clicks just select from the selection model, and add results to the table model.
+
+      final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
+          resultsTables.get(data.digest);
+
+      PeakResultTableModelFrame table = triplet.getRight();
+      if (table != null) {
+        if (table.isVisible()) {
+          return table;
+        }
+
+        // Just in case the listeners are still active
+        table.cleanUp();
+      }
+
+      // No table or not visible so create a new one
+      table = new PeakResultTableModelFrame(triplet.getLeft(), triplet.getMiddle());
+      table.setTitle(TITLE + " " + results.getName());
+      table.setReadOnly(false);
+      // Ensure cleanup
+      table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+      final PeakResultTableModelFrame finalTable = table;
+      table.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosed(WindowEvent event) {
+          // We must unmap the selection since we use the selection model
+          // across all active views of the same dataset.
+          final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.getMiddle());
+          finalTable.convertRowIndexToModel(indices);
+          finalTable.cleanUp(); // Remove listeners
+          ListSelectionModelHelper.setSelectedIndices(triplet.getMiddle(), indices);
+        }
+      });
+      table.setVisible(true);
+      resultsTables.put(data.digest, Triple.of(triplet.getLeft(), triplet.getMiddle(), table));
+
+      return table;
+    }
   }
 
   private static class CustomSortObject {
@@ -850,9 +908,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     @Override
     public void transformationUpdated(View view) {
-      // This is called when the zoom is adjusted. We can update clipping
-      // System.out.println(univ.getViewer().getView().getBackClipDistance());
-      // System.out.println(univ.getViewer().getView().getFrontClipDistance());
+      // Ignore.
+      // This is called when the zoom is adjusted. We can update clipping if required.
     }
 
     @Override
@@ -1371,6 +1428,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return (size > 0) ? (float) size : 1f;
   }
 
+  @Nullable
   private static Point3f[] createSphereSizeFromDeviations(MemoryPeakResults results) {
     if (!results.hasDeviations()) {
       IJ.error(TITLE, "The results have no deviations");
@@ -1404,6 +1462,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return (failed) ? null : size;
   }
 
+  @Nullable
   private static Point3f[] createSphereSizeFromPrecision(MemoryPeakResults results) {
     final PrecisionResultProcedure p = new PrecisionResultProcedure(results);
     try {
@@ -1422,6 +1481,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  @Nullable
   private static float[] createAlpha(MemoryPeakResults results, Builder settings,
       Point3f[] sphereSize) {
     if (settings.getTransparencyMode() == 0) {
@@ -1461,6 +1521,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  @Nullable
   private static float[] createAlphaFromIntensity(MemoryPeakResults results, double minA,
       double maxA) {
     final RawResultProcedure p = new RawResultProcedure(results);
@@ -1484,6 +1545,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return alpha;
   }
 
+  @Nullable
   private static float[] createAlphaFromSize(MemoryPeakResults results, Builder settings,
       double minA, double maxA, Point3f[] sphereSize) {
     final SizeMode sizeMode = SizeMode.forNumber(settings.getSizeMode());
@@ -1509,6 +1571,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return createAlphaFromSize(minA, maxA, sphereSize);
   }
 
+  @Nullable
   private static float[] createAlphaFromSize(double minA, double maxA, Point3f[] sphereSize) {
     if (sphereSize == null) {
       return null;
@@ -1566,19 +1629,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
       ImageJ3DResultsViewerSettingsOrBuilder settings) {
     final TurboList<Point3f> points = new TurboList<>(results.size());
     if (results.is3D()) {
-      results.forEach(DistanceUnit.NM, new XyzResultProcedure() {
-        @Override
-        public void executeXyz(float x, float y, float z) {
-          points.addf(new Point3f(x, y, z));
-        }
+      results.forEach(DistanceUnit.NM, (XyzResultProcedure) (x, y, z) -> {
+        points.addf(new Point3f(x, y, z));
       });
     } else {
-      results.forEach(DistanceUnit.NM, new XyResultProcedure() {
-
-        @Override
-        public void executeXy(float x, float y) {
-          points.addf(new Point3f(x, y, 0));
-        }
+      results.forEach(DistanceUnit.NM, (XyResultProcedure) (x, y) -> {
+        points.addf(new Point3f(x, y, 0));
       });
 
       final double range = settings.getDepthRange();
@@ -1651,7 +1707,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye) {
-    // System.out.printf("Dir %s : Eye %s\n", v, eye);
     final double[] d = new double[points.size()];
     for (int i = 0; i < d.length; i++) {
       final Point3f p = points.getf(i);
@@ -1669,8 +1724,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (v2.dot(direction) < 0) {
         d[i] = -d[i];
       }
-
-      // System.out.printf("[%d] %s %s %g = %g\n", i, p, v2, v2.dot(v), d[i]);
     }
     return d;
   }
@@ -1952,21 +2005,20 @@ public class ImageJ3DResultsViewer implements PlugIn {
       title2 = title + " " + (counter++);
     }
 
-    final Image3DUniverse univ = new Image3DUniverse();
+    final Image3DUniverse universe = new Image3DUniverse();
 
-    univ.addUniverseListener(new LocalUniverseListener());
+    universe.addUniverseListener(new LocalUniverseListener());
 
-    univ.setShowBoundingBoxUponSelection(false);
-    univ.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
+    universe.setShowBoundingBoxUponSelection(false);
+    universe.showAttribute(DefaultUniverse.ATTRIBUTE_SCALEBAR, false);
 
     // Capture a canvas mouse click/region and identify the coordinates.
-    final ImageCanvas3D canvas = (ImageCanvas3D) univ.getCanvas();
-    final BranchGroup scene = univ.getScene();
+    final ImageCanvas3D canvas = (ImageCanvas3D) universe.getCanvas();
+    final BranchGroup scene = universe.getScene();
 
     final MouseListener mouseListener = new MouseAdapter() {
       @Override
       public void mouseClicked(final MouseEvent event) {
-        // System.out.println("plugin mouseClicked");
         if (!consumeEvent(event)) {
           return;
         }
@@ -1978,14 +2030,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
         final Pair<Content, IntersectionInfo> pair =
             getPickedContent(canvas, scene, event.getX(), event.getY());
         if (pair == null) {
-          univ.select(null); // Do the same as the mouseClicked in Image3DUniverse
+          universe.select(null); // Do the same as the mouseClicked in Image3DUniverse
           return;
         }
 
         // Only process content added from localisations
         final Content c = pair.getKey();
         if (!(c.getUserData() instanceof ResultsMetaData)) {
-          univ.select(c); // Do the same as the mouseClicked in Image3DUniverse
+          universe.select(c); // Do the same as the mouseClicked in Image3DUniverse
           return;
         }
 
@@ -2001,10 +2053,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
           final CustomMesh mesh = node.getMesh();
           int vertexCount;
           final GeometryArray ga = (GeometryArray) mesh.getGeometry();
-          // if (ga instanceof IndexedGeometryArray)
-          // // An indexed mesh has the correct number of vertex indices
-          // nVertices = ((IndexedGeometryArray) ga).getValidIndexCount();
-          // else
           // Default to the number of vertices
           vertexCount = ga.getValidVertexCount();
 
@@ -2013,11 +2061,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           // Determine the localisation
           final int vertexIndex = pair.getValue().getVertexIndices()[0];
           index = vertexIndex / countPerLocalisation;
-          // System.out.printf("n=%d [%d] %s %s\n", nPerLocalisation, index,
-          // Arrays.toString(pair.b.getVertexIndices()), pair.b.getIntersectionPoint());
         } else if (content.getContent() instanceof ItemGroupNode) {
-          // ItemGeometryNode node = (ItemGeometryNode) content.getContent();
-          // ItemGroup g = node.getItemGroup();
           // All shapes have the index as the user data
           final Object o = pair.getValue().getGeometry().getUserData();
           if (o instanceof Integer) {
@@ -2033,15 +2077,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
         if (event.getClickCount() > 1) {
           // Centre on the localisation
           final Point3d coordinate = new Point3d();
-          // ga.getCoordinate(vertexIndex, coordinate);
           coordinate.set(data.points.get(index));
 
           // Handle the local transform of the content ...
           final Transform3D vWorldToLocal = getVworldToLocal(content);
-          // vWorldToLocal.invert();
           vWorldToLocal.transform(coordinate);
 
-          univ.centerAt(coordinate);
+          universe.centerAt(coordinate);
         } else if (event.isShiftDown()) {
           // Ctrl+Shift held down to remove selected
           data.removeFromSelectionModel(result);
@@ -2098,8 +2140,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // Finally display the window
-    univ.show();
-    final ImageWindow3D window = univ.getWindow();
+    universe.show();
+    final ImageWindow3D window = universe.getWindow();
     GUI.center(window);
     window.setTitle(title2);
 
@@ -2112,66 +2154,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     });
 
     // Add a new menu for SMLM functionality
-    createSmlmMenuBar(univ);
+    createSmlmMenuBar(universe);
 
-    return univ;
-  }
-
-  private static PeakResultTableModelFrame findTable(ResultsMetaData data) {
-    // There is a single TableModel and SelectionModel for each unique results set.
-    // This may be displayed in a window.
-    final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
-        resultsTables.get(data.digest);
-    final PeakResultTableModelFrame table = t.getRight();
-    if (table != null && table.isVisible()) {
-      return table;
-    }
-    return null;
-  }
-
-  private static PeakResultTableModelFrame createTable(MemoryPeakResults results,
-      ResultsMetaData data) {
-    // There is a single TableModel and SelectionModel for each unique results set.
-    // This is displayed in a window. Show the window if it is not visible.
-    // Set the window to have dispose on close (to save memory).
-
-    // Clicks just select from the selection model, and add results to the table model.
-
-    final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
-        resultsTables.get(data.digest);
-
-    PeakResultTableModelFrame table = triplet.getRight();
-    if (table != null) {
-      if (table.isVisible()) {
-        return table;
-      }
-
-      // Just in case the listeners are still active
-      table.cleanUp();
-    }
-
-    // No table or not visible so create a new one
-    table = new PeakResultTableModelFrame(triplet.getLeft(), triplet.getMiddle());
-    table.setTitle(TITLE + " " + results.getName());
-    table.setReadOnly(false);
-    // Ensure cleanup
-    table.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    final PeakResultTableModelFrame finalTable = table;
-    table.addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosed(WindowEvent event) {
-        // We must unmap the selection since we use the selection model
-        // across all active views of the same dataset.
-        final int[] indices = ListSelectionModelHelper.getSelectedIndices(triplet.getMiddle());
-        finalTable.convertRowIndexToModel(indices);
-        finalTable.cleanUp(); // Remove listeners
-        ListSelectionModelHelper.setSelectedIndices(triplet.getMiddle(), indices);
-      }
-    });
-    table.setVisible(true);
-    resultsTables.put(data.digest, Triple.of(triplet.getLeft(), triplet.getMiddle(), table));
-
-    return table;
+    return universe;
   }
 
   private static long getTotalTransparentObjects(Image3DUniverse univ, String ignoreName) {
@@ -2224,8 +2209,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_GEOMETRY);
       IJ.log("Enabled dynamic transparency");
-      // I am not sure if this is required if objects are sorted.
-      // view.setDepthBufferFreezeTransparent(false);
+      // Q. I am not sure if this is required if objects are sorted?
+      // view.setDepthBufferFreezeTransparent(false)
     } else {
       view.setTransparencySortingPolicy(View.TRANSPARENCY_SORT_NONE);
       IJ.log("Disabled dynamic transparency");
@@ -2424,13 +2409,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
         settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
         final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
         // Transparency can be set interactively using: Edit > Change Transparency
-        // gd.addSlider("Transparency", 0, 0.9, settings.getTransparency());
+        // so not option here.
         gd.addChoice("Colour", LutHelper.getLutNames(), settings.getLut());
         gd.showDialog();
         if (gd.wasCanceled()) {
           return -1;
         }
-        // settings.setTransparency(gd.getNextNumber());
         settings.setLut(gd.getNextChoiceIndex());
         SettingsManager.writeSettings(settings);
       }
@@ -2640,21 +2624,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
         // The point mesh does not support the transparency mode switching off.
         // So switch the actual transparency.
-        if (mesh instanceof ItemMesh && ((ItemMesh) mesh).isPointArray()) {
-          TransparencyData data;
-          if (mesh.getUserData() instanceof TransparencyData) {
-            data = (TransparencyData) mesh.getUserData();
-          } else {
-            data = new TransparencyData();
-            mesh.setUserData(data);
-          }
-
-          if (off) {
-            data.save(mesh);
-          } else {
-            data.restore(mesh);
-          }
-        } else if (mesh instanceof CustomPointMesh) {
+        if (mesh instanceof CustomPointMesh
+            || (mesh instanceof ItemMesh && ((ItemMesh) mesh).isPointArray())) {
           TransparencyData data;
           if (mesh.getUserData() instanceof TransparencyData) {
             data = (TransparencyData) mesh.getUserData();
@@ -2731,8 +2702,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       final Transform3D ipToVWorld = new Transform3D();
       univ.getCanvas().getImagePlateToVworld(ipToVWorld);
-      // ipToVWorldInverse.invert(ipToVWorld);
-      // System.out.printf("ipToVWorld\n%s", ipToVWorld);
 
       univ.getCanvas().getCenterEyeInImagePlate(eyePtInVWorld);
       ipToVWorld.transform(eyePtInVWorld);
@@ -2769,7 +2738,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Print the eye coords and direction in the virtual world.
       // This can be used for a custom sort.
-      // Utils.log("%s : Eye point = %s : Direction = %s", c.getName(), eye, direction);
       final Rounder rounder = RounderUtils.create(4);
       ImageJUtils.log("%s : Eye point = (%s,%s,%s) : Direction = (%s,%s,%s)", content.getName(),
           rounder.round(eye.x), rounder.round(eye.y), rounder.round(eye.z),
@@ -2845,7 +2813,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       if (updateable != null) {
         // Switch to fast mode when not debugging
-        // updateable.reorder(indices);
         updateable.reorderFast(indices);
       }
 
@@ -3067,7 +3034,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     ContentAction action = null;
 
     // Universe actions
-    // Adapted from univ.resetView();
+    // Adapted from univ.resetView()
     if (src == resetRotation) {
       univ.fireTransformationStarted();
       // rotate so that y shows downwards
@@ -3287,9 +3254,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static ItemGeometryGroup createItemGroup(
       final ImageJ3DResultsViewerSettings.Builder settings, final Point3f[] sphereSize,
       final TurboList<Point3f> points, float[] alpha, float transparency, Color3f[] colors) {
-    // Create the single localisation shape
-    // Shape3D shape = createShape(settings);
-
     final Rendering rendering = Rendering.forNumber(settings.getRendering());
     // All objects have colour using the appearance not per vertex colours.
     // The exception is points which do not support colour from appearance.
@@ -3321,7 +3285,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
         (transparency == 0) ? TransparencyAttributes.NONE : TransparencyAttributes.FASTEST);
     appearance.setTransparencyAttributes(ta);
     if (rendering == Rendering.POINT) {
-      // appearance.getPointAttributes().setPointSize((float) settings.getPixelSize());
       appearance.getPointAttributes().setPointSize(sphereSize[0].x);
     }
     return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
@@ -3376,17 +3339,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
       ga.setCoordinates(0, coords);
       ga.setNormals(0, normals);
       ga.setValidVertexCount(nVertices);
-
-      // // Test using the geometry from a sphere primitive
-      // switch (r)
-      // {
-      // case HIGH_RES_SPHERE:
-      // ga = ItemGeometryGroup.createSphere(50);
-      // break;
-      // case LOW_RES_SPHERE:
-      // ga = ItemGeometryGroup.createSphere(16);
-      // break;
-      // }
     }
 
     return new Shape3D(ga, mesh.getAppearance());

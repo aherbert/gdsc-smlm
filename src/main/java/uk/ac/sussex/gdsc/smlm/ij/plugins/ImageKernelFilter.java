@@ -54,15 +54,6 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private static final int FLAGS = DOES_8G | DOES_16 | DOES_32 | KEEP_PREVIEW | PARALLELIZE_STACKS
       | CONVERT_TO_FLOAT | FINAL_PROCESSING;
 
-  private static final String[] METHODS = {"Spatial domain", "FHT"};
-  private static final int METHOD_SPATIAL = 0;
-  private static final int METHOD_FHT = 1;
-  private static final String[] FILTERS;
-
-  static {
-    FILTERS = SettingsManager.getNames((Object[]) Operation.values());
-  }
-
   // Ensure not null
   private Ticker ticker = Ticker.getDefaultInstance();
 
@@ -82,6 +73,15 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
+    private static final String[] METHODS = {"Spatial domain", "FHT"};
+    private static final int METHOD_SPATIAL = 0;
+    private static final int METHOD_FHT = 1;
+    private static final String[] FILTERS;
+
+    static {
+      FILTERS = SettingsManager.getNames((Object[]) Operation.values());
+    }
+
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
@@ -150,7 +150,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     final float[] data = (float[]) ip.getPixels();
     final int w = ip.getWidth();
     final int h = ip.getHeight();
-    if (settings.method == METHOD_SPATIAL) {
+    if (settings.method == Settings.METHOD_SPATIAL) {
       kf.convolve(data, w, h, settings.border);
     } else {
       // Use a clone for thread safety
@@ -181,8 +181,8 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
 
     settings = Settings.load();
     gd.addChoice("Kernel_image", names, settings.imageTitle);
-    gd.addChoice("Method", METHODS, settings.method);
-    gd.addChoice("Filter", FILTERS, settings.filter);
+    gd.addChoice("Method", Settings.METHODS, settings.method);
+    gd.addChoice("Filter", Settings.FILTERS, settings.filter);
     gd.addSlider("Border", 0, 10, settings.border);
     gd.addCheckbox("Zero_outside_image", settings.zero);
 
@@ -218,12 +218,12 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     // Create the kernel from the image
     boolean build = kernelImp.getID() != lastId || settings.method != lastMethod
         || settings.filter != lastFilter;
-    build = build || (settings.method == METHOD_SPATIAL && kf == null);
-    build = build || (settings.method == METHOD_FHT && ff == null);
+    build = build || (settings.method == Settings.METHOD_SPATIAL && kf == null);
+    build = build || (settings.method == Settings.METHOD_FHT && ff == null);
     if (build) {
       final Operation operation = Operation.forOrdinal(settings.filter);
       FloatProcessor fp = kernelImp.getProcessor().toFloat(0, null);
-      if (settings.method == METHOD_SPATIAL) {
+      if (settings.method == Settings.METHOD_SPATIAL) {
         if (kf == null || kernelImp.getID() != lastId || settings.zero != lastZero) {
           fp = KernelFilter.pad(fp);
           final int kw = fp.getWidth();
@@ -241,6 +241,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
             break;
           case DECONVOLUTION:
           default:
+            // Spatial filtering does not support anything other than convolution or correlation.
             ImageJUtils.log("Unsupported operation (%s), default to correlation",
                 operation.getName());
             kf.setConvolution(false);
