@@ -38,18 +38,68 @@ import ij.IJ;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Run a tracing algorithm on the peak results to trace neighbours across the frames.
  */
 public class NeighbourAnalysis implements PlugIn {
   private static final String TITLE = "Neighbour Analysis";
-  private static String inputOption = "";
-  private static double distanceThreshold = 0.6;
-  private static int timeThreshold = 1;
-
-  private static String filename = "";
 
   private MemoryPeakResults results;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption = "";
+    double distanceThreshold = 0.6;
+    int timeThreshold = 1;
+
+    String filename = "";
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      distanceThreshold = 0.6;
+      timeThreshold = 1;
+      filename = "";
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      distanceThreshold = source.distanceThreshold;
+      timeThreshold = source.timeThreshold;
+      filename = source.filename;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -68,30 +118,32 @@ public class NeighbourAnalysis implements PlugIn {
 
     // Run the tracing
     manager.setTracker(SimpleImageJTrackProgress.getInstance());
-    final Trace[] traces = manager.findNeighbours(distanceThreshold, timeThreshold);
+    final Trace[] traces =
+        manager.findNeighbours(settings.distanceThreshold, settings.timeThreshold);
 
     saveTraces(traces);
   }
 
   private void saveTraces(Trace[] traces) {
-    final String[] path = ImageJUtils.decodePath(filename);
+    final String[] path = ImageJUtils.decodePath(settings.filename);
     final OpenDialog chooser = new OpenDialog("Traces_File", path[0], path[1]);
     if (chooser.getFileName() != null) {
-      filename = chooser.getDirectory() + chooser.getFileName();
+      settings.filename = chooser.getDirectory() + chooser.getFileName();
 
       // Remove extension and replace with .xls
-      final int index = filename.lastIndexOf('.');
+      final int index = settings.filename.lastIndexOf('.');
       if (index > 0) {
-        filename = filename.substring(0, index);
+        settings.filename = settings.filename.substring(0, index);
       }
-      filename += ".xls";
+      settings.filename += ".xls";
 
       final boolean showDeviations = results.hasDeviations();
-      final TextFilePeakResults traceResults = new TextFilePeakResults(filename, showDeviations);
+      final TextFilePeakResults traceResults =
+          new TextFilePeakResults(settings.filename, showDeviations);
       traceResults.copySettings(results);
       traceResults.begin();
       if (!traceResults.isActive()) {
-        IJ.error(TITLE, "Failed to write to file: " + filename);
+        IJ.error(TITLE, "Failed to write to file: " + settings.filename);
         return;
       }
       traceResults.addComment(createSettingsComment());
@@ -102,19 +154,20 @@ public class NeighbourAnalysis implements PlugIn {
     }
   }
 
-  private static String createSettingsComment() {
+  private String createSettingsComment() {
     return String.format("Neighbour tracing : distance-threshold = %f : time-threshold = %d",
-        distanceThreshold, timeThreshold);
+        settings.distanceThreshold, settings.timeThreshold);
   }
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
+    settings = Settings.load();
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
 
-    gd.addNumericField("Distance_Threshold (px)", distanceThreshold, 4);
-    gd.addNumericField("Time_Threshold (frames)", timeThreshold, 0);
+    gd.addNumericField("Distance_Threshold (px)", settings.distanceThreshold, 4);
+    gd.addNumericField("Time_Threshold (frames)", settings.timeThreshold, 0);
 
     gd.showDialog();
 
@@ -123,7 +176,7 @@ public class NeighbourAnalysis implements PlugIn {
     }
 
     // Load the results
-    results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL);
+    results = ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       IJ.showStatus("");
@@ -133,18 +186,19 @@ public class NeighbourAnalysis implements PlugIn {
     return true;
   }
 
-  private static boolean readDialog(ExtendedGenericDialog gd) {
-    inputOption = ResultsManager.getInputSource(gd);
-    distanceThreshold = gd.getNextNumber();
-    timeThreshold = (int) gd.getNextNumber();
+  private boolean readDialog(ExtendedGenericDialog gd) {
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.distanceThreshold = gd.getNextNumber();
+    settings.timeThreshold = (int) gd.getNextNumber();
 
-    if (distanceThreshold < 0) {
-      distanceThreshold = 0;
+    if (settings.distanceThreshold < 0) {
+      settings.distanceThreshold = 0;
     }
-    if (timeThreshold < 0) {
-      timeThreshold = 0;
+    if (settings.timeThreshold < 0) {
+      settings.timeThreshold = 0;
     }
-    if (timeThreshold == 0 && distanceThreshold == 0) {
+    settings.save();
+    if (settings.timeThreshold == 0 && settings.distanceThreshold == 0) {
       IJ.error(TITLE, "No thresholds specified");
       return false;
     }
