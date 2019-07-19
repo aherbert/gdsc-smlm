@@ -1299,7 +1299,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final StopWatch sw = StopWatch.createStarted();
     final Future<Content> future = univ.addContentLater(content);
     Content added = null;
-    while (true) {
+    for (;;) {
       try {
         // Wait for 1 second
         for (int i = 0; i < 20; i++) {

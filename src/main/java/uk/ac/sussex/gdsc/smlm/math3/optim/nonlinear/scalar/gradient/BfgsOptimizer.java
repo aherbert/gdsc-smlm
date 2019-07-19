@@ -321,7 +321,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
 
     PointValuePair current = null;
 
-    while (true) {
+    for (;;) {
       // Get the value of the point
       double fp = computeObjectiveValue(point);
 

@@ -608,7 +608,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final Integer job = jobs.take();
           if (job == null || job.intValue() < 0) {
             break;

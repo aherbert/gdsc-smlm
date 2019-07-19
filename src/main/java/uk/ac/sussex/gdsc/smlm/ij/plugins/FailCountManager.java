@@ -403,7 +403,7 @@ public class FailCountManager implements PlugIn {
     @Override
     public void run() {
       // Run until interrupted or the stack has null data
-      while (true) {
+      for (;;) {
         try {
           final PlotData plotData = stack.pop();
           if (plotData == null) {

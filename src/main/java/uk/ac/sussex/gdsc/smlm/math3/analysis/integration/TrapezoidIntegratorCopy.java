@@ -224,7 +224,7 @@ public class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
 
         double oldt = stage(this, 0);
         incrementCount();
-        while (true) {
+        for (;;) {
             final int i = getIterations();
             final double t = stage(this, i);
             if (i >= getMinimalIterationCount()) {

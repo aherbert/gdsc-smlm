@@ -118,7 +118,7 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
     double oldt = qtrap.stage(this, 1);
     double olds = (4 * oldt - s0) / 3.0;
     n = 2L;
-    while (true) {
+    for (;;) {
       // The first iteration is now the first refinement of the sum.
       // This matches how the TrapezoidIntegrator works.
       incrementCount();

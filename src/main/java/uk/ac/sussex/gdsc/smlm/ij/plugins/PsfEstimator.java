@@ -382,7 +382,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   @Override
   public void run(ImageProcessor ip) {
     int result;
-    while (true) {
+    for (;;) {
       result = estimatePsf();
       if (settings.getIterate() && result == TRY_AGAIN) {
         continue;
@@ -432,7 +432,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     boolean tryAgain = false;
 
     int iteration = 2;
-    do {
+    for (;;) {
       if (!calculateStatistics(fitter, params, paramsDev)) {
         return (ImageJUtils.isInterrupted()) ? ABORTED : INSUFFICIENT_PEAKS;
       }
@@ -484,7 +484,6 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
         return EXCEPTION;
       }
     }
-    while (true);
 
     return (tryAgain) ? TRY_AGAIN : COMPLETE;
   }

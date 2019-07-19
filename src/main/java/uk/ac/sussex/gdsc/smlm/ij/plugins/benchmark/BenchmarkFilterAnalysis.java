@@ -883,7 +883,7 @@ public class BenchmarkFilterAnalysis
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final Job job = jobs.take();
           if (job == null || job.candidates == null) {
             break;
@@ -1526,7 +1526,7 @@ public class BenchmarkFilterAnalysis
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final ScoreJob job = jobs.take();
           if (job == null || job.index == -1) {
             break;
@@ -1585,7 +1585,7 @@ public class BenchmarkFilterAnalysis
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final ParameterScoreJob job = jobs.take();
           if (job == null || job.index == -1) {
             break;

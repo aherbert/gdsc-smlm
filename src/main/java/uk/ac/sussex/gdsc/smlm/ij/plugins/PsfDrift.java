@@ -272,7 +272,7 @@ public class PsfDrift implements PlugIn {
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final Job job = jobs.take();
           if (job == null || job.index < 0) {
             break;

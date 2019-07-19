@@ -227,7 +227,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     applyBounds(x);
     double functionValue = computeObjectiveValue(x);
     double[] x1 = x.clone();
-    while (true) {
+    for (;;) {
       incrementIterationCount();
 
       final double fX = functionValue;

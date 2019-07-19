@@ -861,7 +861,7 @@ public class PeakResultsReader {
 
         final boolean convert = smlmVersion == 1;
         // Halted by the EOFException
-        while (true) {
+        for (;;) {
           // Note: Reading single strips seems fast enough at the moment.
           // This could be modified to read larger blocks of data if necessary.
 

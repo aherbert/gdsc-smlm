@@ -144,7 +144,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       }
 
       int status = 0;
-      while (true) {
+      for (;;) {
         // Compute next step
         computeStep(step);
         if (logger.isLoggable(traceLevel)) {

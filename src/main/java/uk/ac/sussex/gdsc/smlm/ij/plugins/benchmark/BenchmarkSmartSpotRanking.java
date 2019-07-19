@@ -354,7 +354,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final Integer job = jobs.take();
           if (job == null || job.intValue() < 0) {
             break;

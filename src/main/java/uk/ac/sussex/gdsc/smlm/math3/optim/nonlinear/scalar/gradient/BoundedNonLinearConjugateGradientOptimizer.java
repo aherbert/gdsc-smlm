@@ -246,7 +246,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
     PointValuePair current = null;
     int maxEval = getMaxEvaluations();
-    while (true) {
+    for (;;) {
       incrementIterationCount();
 
       final double objective = computeObjectiveValue(point);

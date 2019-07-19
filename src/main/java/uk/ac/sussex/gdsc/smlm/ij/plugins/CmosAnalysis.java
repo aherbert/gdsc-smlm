@@ -372,7 +372,7 @@ public class CmosAnalysis implements PlugIn {
     @Override
     public void run() {
       try {
-        while (true) {
+        for (;;) {
           final Object pixels = jobs.take();
           if (pixels == null) {
             break;
