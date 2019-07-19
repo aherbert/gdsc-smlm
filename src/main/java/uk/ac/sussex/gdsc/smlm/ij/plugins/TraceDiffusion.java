@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -1878,8 +1879,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     // Show a list box containing all the results. This should remember the last set of chosen
     // items.
-    final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
-    md.addSelected(selectedRef.get());
+    final MultiDialog md = ResultsManager.createMultiDialog(TITLE);
+    md.setSelected(selectedRef.get());
 
     md.showDialog();
 

@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -71,18 +72,8 @@ public class PsfCombiner implements PlugIn {
       return;
     }
 
-    final MultiDialog md = new MultiDialog("Select PSFs", new MultiDialog.BaseItems() {
-      @Override
-      public int size() {
-        return titles.size();
-      }
-
-      @Override
-      public String getFormattedName(int index) {
-        return titles.get(index);
-      }
-    });
-    md.addSelected(lastSelected.get());
+    final MultiDialog md = new MultiDialog("Select PSFs", titles);
+    md.setSelected(lastSelected.get());
 
     md.showDialog();
 

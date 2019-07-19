@@ -29,6 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -96,7 +97,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
@@ -129,7 +135,7 @@ public class ResultsManager implements PlugIn {
   private static double inputNmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
   private static double inputGain = Prefs.get(Constants.inputGain, 1);
   private static double inputExposureTime = Prefs.get(Constants.inputExposureTime, 0);
-  private static List<String> selected;
+  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
 
   /**
    * The input source.
@@ -172,6 +178,40 @@ public class ResultsManager implements PlugIn {
      * @return the name
      */
     public abstract String getName();
+  }
+
+  /**
+   * Class that allows the current results held in memory to be listed.
+   */
+  static class MemoryResultsList extends ArrayList<String> {
+    private static final long serialVersionUID = 20190719L;
+
+    private final Map<String, String> nameMap = new HashMap<>();
+
+    /**
+     * Instantiates a new memory results list.
+     *
+     * @param filter the filter
+     */
+    MemoryResultsList(Predicate<MemoryPeakResults> filter) {
+      final Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
+      for (final MemoryPeakResults results : allResults) {
+        if (filter.test(results)) {
+          String name = results.getName();
+          add(name);
+          nameMap.put(name, ResultsManager.getName(results));
+        }
+      }
+    }
+
+    /**
+     * Gets the display converter to map the name to a display name.
+     *
+     * @return the display converter
+     */
+    Function<String, String> getDisplayConverter() {
+      return nameMap::get;
+    }
   }
 
   @Override
@@ -301,6 +341,30 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Creates a MultiDialog listing all the results held in memory.
+   *
+   * @param title the dialog title
+   * @return the dialog
+   */
+  public static MultiDialog createMultiDialog(String title) {
+    return createMultiDialog(title, results -> true);
+  }
+
+  /**
+   * Creates a MultiDialog listing all the results held in memory.
+   *
+   * @param title the dialog title
+   * @param filter the filter to select results
+   * @return the dialog
+   */
+  public static MultiDialog createMultiDialog(String title, Predicate<MemoryPeakResults> filter) {
+    MemoryResultsList items = new MemoryResultsList(filter);
+    final MultiDialog md = new MultiDialog(title, items);
+    md.setDisplayConverter(items.getDisplayConverter());
+    return md;
+  }
+
   private static void runClearMemory(String arg) {
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "There are no fitting results in memory");
@@ -311,16 +375,17 @@ public class ResultsManager implements PlugIn {
     Collection<MemoryPeakResults> allResults;
     boolean removeAll = false;
     if (arg.contains("multi")) {
-      final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
-      md.addSelected(selected);
+      final MultiDialog md = createMultiDialog(TITLE);
+      md.setSelected(lastSelected.get());
       md.showDialog();
       if (md.wasCancelled()) {
         return;
       }
-      selected = md.getSelectedResults();
+      final List<String> selected = md.getSelectedResults();
       if (selected.isEmpty()) {
         return;
       }
+      lastSelected.set(selected);
       allResults = new ArrayList<>(selected.size());
       for (final String name : selected) {
         final MemoryPeakResults r = MemoryPeakResults.getResults(name);
@@ -1619,16 +1684,17 @@ public class ResultsManager implements PlugIn {
       IJ.error(TITLE, "No localisations in memory");
       return;
     }
-    final MultiDialog md = new MultiDialog(TITLE, new MultiDialog.MemoryResultsItems());
-    md.addSelected(selected);
+    final MultiDialog md = createMultiDialog(TITLE);
+    md.setSelected(lastSelected.get());
     md.showDialog();
     if (md.wasCancelled()) {
       return;
     }
-    selected = md.getSelectedResults();
+    final List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       return;
     }
+    lastSelected.set(selected);
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY);

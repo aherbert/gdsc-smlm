@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
@@ -33,7 +34,7 @@ import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.MultiDialog.MemoryResultsItems;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -56,6 +57,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +66,7 @@ import java.util.logging.Logger;
  */
 public class TraceExporter implements PlugIn {
   private static final String TITLE = "Trace Exporter";
-  private static List<String> selected;
+  private static AtomicReference<List<String>> selectedRef = new AtomicReference<>();
   private static String directory = "";
   private static int minLength = 2;
   private static int maxJump = 1;
@@ -110,7 +112,7 @@ public class TraceExporter implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    final MemoryResultsItems items = new MemoryResultsItems(MemoryPeakResults::hasId);
+    final MemoryResultsList items = new MemoryResultsList(MemoryPeakResults::hasId);
 
     if (items.size() == 0) {
       IJ.error(TITLE, "No traced localisations in memory");
@@ -161,11 +163,12 @@ public class TraceExporter implements PlugIn {
   }
 
   private static boolean showMultiDialog(ArrayList<MemoryPeakResults> allResults,
-      MemoryResultsItems items) {
+      MemoryResultsList items) {
     // Show a list box containing all the results. This should remember the last set of chosen
     // items.
     final MultiDialog md = new MultiDialog(TITLE, items);
-    md.addSelected(selected);
+    md.setDisplayConverter(items.getDisplayConverter());
+    md.setSelected(selectedRef.get());
 
     md.showDialog();
 
@@ -173,11 +176,12 @@ public class TraceExporter implements PlugIn {
       return false;
     }
 
-    selected = md.getSelectedResults();
+    List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       IJ.error(TITLE, "No results were selected");
       return false;
     }
+    selectedRef.set(selected);
 
     for (final String name : selected) {
       final MemoryPeakResults r = MemoryPeakResults.getResults(name);

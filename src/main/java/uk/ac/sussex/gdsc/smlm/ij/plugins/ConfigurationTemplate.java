@@ -26,7 +26,9 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.utils.AlphanumComparator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -56,7 +58,6 @@ import ij.gui.NonBlockingGenericDialog;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-import ij.util.StringSorter;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -79,6 +80,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings.
@@ -726,6 +728,15 @@ public class ConfigurationTemplate implements PlugIn {
   }
 
   /**
+   * Get the names of the available templates.
+   *
+   * @return The template names
+   */
+  private static List<String> getTemplateNamesAsList() {
+    return new TurboList<>(templates.keySet());
+  }
+
+  /**
    * Get the names of the available templates that have an example image.
    *
    * @return The template names
@@ -829,21 +840,11 @@ public class ConfigurationTemplate implements PlugIn {
       return;
     }
 
-    final MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems() {
-      @Override
-      public int size() {
-        return templateResources.length + inlineNames.length;
-      }
-
-      @Override
-      public String getFormattedName(int index) {
-        if (index < inlineNames.length) {
-          return inlineNames[index];
-        }
-        return templateResources[index - inlineNames.length].name;
-      }
-    });
-    md.addSelected(settings.getSelectedStandardTemplatesList());
+    final List<String> items = new TurboList<>();
+    Arrays.stream(inlineNames).forEach(items::add);
+    Arrays.stream(templateResources).forEach(t -> items.add(t.name));
+    final MultiDialog md = new MultiDialog("Select templates", items);
+    md.setSelected(settings.getSelectedStandardTemplatesList());
 
     md.showDialog();
 
@@ -920,29 +921,13 @@ public class ConfigurationTemplate implements PlugIn {
     }
 
     // Sort partially numerically
-    final String[] list = new String[fileList.length];
-    int fileCount = 0;
-    for (final File file : fileList) {
-      if (file.isFile()) {
-        list[fileCount++] = file.getPath();
-      }
-    }
-    final String[] sortedList = StringSorter.sortNumerically(Arrays.copyOf(list, fileCount));
+    final List<String> list = Arrays.stream(fileList).filter(File::isFile).map(File::getPath)
+        .sorted(AlphanumComparator.NULL_IS_MORE_INSTANCE).collect(Collectors.toList());
 
     // Select
-    final MultiDialog md = new MultiDialog("Select templates", new MultiDialog.BaseItems() {
-      @Override
-      public int size() {
-        return sortedList.length;
-      }
-
-      @Override
-      public String getFormattedName(int index) {
-        final String[] path = ImageJUtils.decodePath(sortedList[index]);
-        return path[1];
-      }
-    });
-    md.addSelected(settings.getSelectedCustomTemplatesList());
+    final MultiDialog md = new MultiDialog("Select templates", list);
+    md.setDisplayConverter(path -> ImageJUtils.decodePath(path)[1]);
+    md.setSelected(settings.getSelectedCustomTemplatesList());
 
     md.showDialog();
 
@@ -983,20 +968,8 @@ public class ConfigurationTemplate implements PlugIn {
       IJ.error(title, "No templates are currently loaded");
       return;
     }
-    final String[] names = getTemplateNames();
-    final MultiDialog md =
-        new MultiDialog("Select templates to remove", new MultiDialog.BaseItems() {
-          @Override
-          public int size() {
-            return names.length;
-          }
 
-          @Override
-          public String getFormattedName(int index) {
-            return names[index];
-          }
-        });
-
+    final MultiDialog md = new MultiDialog("Select templates to remove", getTemplateNamesAsList());
     md.showDialog();
 
     if (md.wasCancelled()) {
