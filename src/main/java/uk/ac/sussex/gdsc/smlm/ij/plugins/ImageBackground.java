@@ -36,6 +36,8 @@ import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.util.FastMath;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Produces a background intensity image and a mask from a sample image.
  *
@@ -45,11 +47,54 @@ import org.apache.commons.math3.util.FastMath;
 public class ImageBackground implements PlugInFilter {
   private static final String TITLE = "Image Background";
 
-  private static float bias = 500;
-  private static double sigma = 2;
-
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private ImagePlus imp;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    float bias;
+    double sigma;
+
+    Settings() {
+      // Set defaults
+      bias = 500;
+      sigma = 2;
+    }
+
+    Settings(Settings source) {
+      bias = source.bias;
+      sigma = source.sigma;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -72,8 +117,9 @@ public class ImageBackground implements PlugInFilter {
     gd.addMessage(
         "Creates a background and mask image from a sample input stack\nusing a median projection");
 
-    gd.addNumericField("Bias", bias, 0);
-    gd.addSlider("Blur", 0, 20, sigma);
+    settings = Settings.load();
+    gd.addNumericField("Bias", settings.bias, 0);
+    gd.addSlider("Blur", 0, 20, settings.sigma);
 
     gd.showDialog();
 
@@ -81,12 +127,13 @@ public class ImageBackground implements PlugInFilter {
       return DONE;
     }
 
-    bias = (float) gd.getNextNumber();
-    sigma = gd.getNextNumber();
+    settings.bias = (float) gd.getNextNumber();
+    settings.sigma = gd.getNextNumber();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isPositive("Bias", bias);
+      ParameterUtils.isPositive("Bias", settings.bias);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return DONE;
@@ -98,7 +145,6 @@ public class ImageBackground implements PlugInFilter {
   @Override
   public void run(ImageProcessor ip) {
     final ImageProcessor median = getProjection();
-    // Utils.display("Median", median);
 
     final ImageProcessor background = applyBlur(median);
     subtractBias(background);
@@ -118,24 +164,23 @@ public class ImageBackground implements PlugInFilter {
     final ZProjector p = new ZProjector(imp);
     p.setMethod(ZProjector.MEDIAN_METHOD);
     p.doProjection();
-    final ImageProcessor median = p.getProjection().getProcessor();
-    return median;
+    return p.getProjection().getProcessor();
   }
 
-  private static ImageProcessor applyBlur(ImageProcessor median) {
+  private ImageProcessor applyBlur(ImageProcessor median) {
     ImageProcessor blur = median;
-    if (sigma > 0) {
+    if (settings.sigma > 0) {
       blur = median.duplicate();
       final GaussianBlur gb = new GaussianBlur();
-      gb.blurGaussian(blur, sigma, sigma, 0.0002);
+      gb.blurGaussian(blur, settings.sigma, settings.sigma, 0.0002);
     }
     return blur;
   }
 
-  private static void subtractBias(ImageProcessor background) {
+  private void subtractBias(ImageProcessor background) {
     final float[] data = (float[]) background.getPixels();
     for (int i = 0; i < data.length; i++) {
-      data[i] = FastMath.max(0f, data[i] - bias);
+      data[i] = FastMath.max(0f, data[i] - settings.bias);
     }
     background.resetMinAndMax();
   }
