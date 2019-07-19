@@ -63,24 +63,46 @@ import java.util.regex.Pattern;
  * Loads generic localisation files into memory.
  */
 public class LoadLocalisations implements PlugIn {
+  private static final String TITLE = "Load Localisations";
+
   // TODO - Add support for noise and mean signal.
   // Q. Is this required?
 
-  // Time units for the exposure time cannot be in frames as this makes no sense
-  private static String[] tUnits;
-  private static TimeUnit[] tUnitValues;
+  private static class TimeUnitLoader {
+    // Time units for the exposure time cannot be in frames as this makes no sense
+    private static final String[] tUnits;
+    private static final TimeUnit[] tUnitValues;
 
-  static {
-    final EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
-    set.remove(TimeUnit.FRAME);
-    set.remove(TimeUnit.UNRECOGNIZED);
-    tUnits = new String[set.size()];
-    tUnitValues = new TimeUnit[set.size()];
-    int index = 0;
-    for (final TimeUnit t : set) {
-      tUnits[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
-      tUnitValues[index] = t;
-      index++;
+    static {
+      final EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
+      set.remove(TimeUnit.FRAME);
+      set.remove(TimeUnit.UNRECOGNIZED);
+      tUnits = new String[set.size()];
+      tUnitValues = new TimeUnit[set.size()];
+      int index = 0;
+      for (final TimeUnit t : set) {
+        tUnits[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
+        tUnitValues[index] = t;
+        index++;
+      }
+    }
+
+    /**
+     * Gets the time units.
+     *
+     * @return the time units
+     */
+    static String[] getTimeUnits() {
+      return tUnits;
+    }
+
+    /**
+     * Gets the time unit values.
+     *
+     * @return the time unit values
+     */
+    static TimeUnit[] getTimeUnitValues() {
+      return tUnitValues;
     }
   }
 
@@ -238,8 +260,6 @@ public class LoadLocalisations implements PlugIn {
     }
   }
 
-  private static final String TITLE = "Load Localisations";
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -360,6 +380,7 @@ public class LoadLocalisations implements PlugIn {
 
           localisations.add(l);
         } catch (final NumberFormatException | IndexOutOfBoundsException ex) {
+          // Log the first error line.
           if (errors++ == 0) {
             ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
           }
@@ -393,7 +414,7 @@ public class LoadLocalisations implements PlugIn {
     // This is the unit for the exposure time (used to convert the exposure time to milliseconds).
     // Use the name as the list is a truncated list of the full enum.
     final TimeUnit t = calibrationBuilder.getTimeCalibration().getTimeUnit();
-    gd.addChoice("Time_unit", tUnits,
+    gd.addChoice("Time_unit", TimeUnitLoader.getTimeUnits(),
         SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t)));
 
     gd.addMessage("Records:");
@@ -430,7 +451,7 @@ public class LoadLocalisations implements PlugIn {
 
     // The time units used a truncated list so look-up the value from the index
     calibrationBuilder.getTimeCalibrationBuilder()
-        .setTimeUnit(tUnitValues[gd.getNextChoiceIndex()]);
+        .setTimeUnit(TimeUnitLoader.getTimeUnitValues()[gd.getNextChoiceIndex()]);
 
     settings.setHeaderLines((int) gd.getNextNumber());
     settings.setComment(gd.getNextString());
