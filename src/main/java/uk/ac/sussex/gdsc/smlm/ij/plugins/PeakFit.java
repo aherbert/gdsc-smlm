@@ -192,8 +192,9 @@ public class PeakFit implements PlugInFilter {
   /** True if running in simple fit mode. */
   private boolean simpleFit;
 
-  private static PSFCalculatorSettings.Builder calculatorSettings =
-      GuiProtosHelper.defaultPSFCalculatorSettings.toBuilder();
+  /** The calculator setting used for the Simple Fit wizard. This is immutable. */
+  private static PSFCalculatorSettings calculatorSettings =
+      GuiProtosHelper.defaultPSFCalculatorSettings;
 
   /** The plugin settings. Loaded when a dialog is shown. */
   private Settings settings;
@@ -2349,11 +2350,10 @@ public class PeakFit implements PlugInFilter {
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", event -> {
         // Run the PSF Calculator
-        final PsfCalculator calculator = new PsfCalculator();
-        calculatorSettings.setPixelPitch(calibration.getNmPerPixel() / 1000.0);
-        calculatorSettings.setMagnification(1);
-        calculatorSettings.setBeamExpander(1);
-        final double sd = calculator.calculate(calculatorSettings.build(), true);
+        calculatorSettings =
+            calculatorSettings.toBuilder().setPixelPitch(calibration.getNmPerPixel() / 1000.0)
+                .setMagnification(1).setBeamExpander(1).build();
+        final double sd = new PsfCalculator().calculate(calculatorSettings, true);
         if (sd > 0) {
           textInitialPeakStdDev0.setText(Double.toString(sd));
         }
