@@ -1019,39 +1019,36 @@ public class PsfDrift implements PlugIn {
     if (ids != null) {
       for (final int id : ids) {
         final ImagePlus imp = WindowManager.getImage(id);
-        if (imp != null) {
-          // Image must be greyscale
-          if (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
-              || imp.getType() == ImagePlus.GRAY32) {
+        if (imp != null
+            // Image must be greyscale
+            && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
+                || imp.getType() == ImagePlus.GRAY32)
             // Image must be square and a stack of a single channel
-            if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1) {
-              // Check if these are PSF images created by the SMLM plugins
-              final ImagePSF psfSettings = getPsfSettings(imp);
-              if (psfSettings != null) {
-                if (psfSettings.getCentreImage() <= 0) {
-                  ImageJUtils
-                      .log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
-                  continue;
-                }
-                if (psfSettings.getPixelSize() <= 0) {
-                  ImageJUtils
-                      .log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
-                  continue;
-                }
-                if (psfSettings.getPixelDepth() <= 0) {
-                  ImageJUtils
-                      .log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
-                  continue;
-                }
-                if (requireFwhm && psfSettings.getFwhm() <= 0) {
-                  ImageJUtils
-                      .log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
-                  continue;
-                }
-
-                titles.add(imp.getTitle());
-              }
+            && (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1)) {
+          // Check if these are PSF images created by the SMLM plugins
+          final ImagePSF psfSettings = getPsfSettings(imp);
+          if (psfSettings != null) {
+            if (psfSettings.getCentreImage() <= 0) {
+              ImageJUtils
+                  .log(TITLE + ": Unknown PSF z-centre setting for image: " + imp.getTitle());
+              continue;
             }
+            if (psfSettings.getPixelSize() <= 0) {
+              ImageJUtils
+                  .log(TITLE + ": Unknown PSF nm/pixel setting for image: " + imp.getTitle());
+              continue;
+            }
+            if (psfSettings.getPixelDepth() <= 0) {
+              ImageJUtils
+                  .log(TITLE + ": Unknown PSF nm/slice setting for image: " + imp.getTitle());
+              continue;
+            }
+            if (requireFwhm && psfSettings.getFwhm() <= 0) {
+              ImageJUtils.log(TITLE + ": Unknown PSF FWHM setting for image: " + imp.getTitle());
+              continue;
+            }
+
+            titles.add(imp.getTitle());
           }
         }
       }
@@ -1158,8 +1155,6 @@ public class PsfDrift implements PlugIn {
       sw1 = loess.smooth(slice1, sw1);
     }
 
-    // int newCentre = 0;
-    // double minW = Double.POSITIVE_INFINITY;
     final TDoubleArrayList minWx = new TDoubleArrayList();
     final TDoubleArrayList minWy = new TDoubleArrayList();
     for (int i = 0; i < w0.length; i++) {
