@@ -36,16 +36,64 @@ import ij.plugin.PlugIn;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This plugin is extracted from ij.plugins.OverlayCommands to allow an image to be added with a
  * transparent background.
  */
 public class OverlayImage implements PlugIn {
-  private static int opacity = 100;
-  private static boolean transparent = true;
-  private static boolean replace = true;
-  private static String title = "";
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    int opacity;
+    boolean transparent;
+    boolean replace;
+    String title;
+
+    Settings() {
+      // Set defaults
+      opacity = 100;
+      transparent = true;
+      replace = true;
+      title = "";
+    }
+
+    Settings(Settings source) {
+      opacity = source.opacity;
+      transparent = source.transparent;
+      replace = source.replace;
+      title = source.title;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -89,27 +137,29 @@ public class OverlayImage implements PlugIn {
       y = r.y;
     }
 
+    settings = Settings.load();
     final GenericDialog gd = new GenericDialog("Add Image...");
-    gd.addChoice("Image to add:", titles, title);
+    gd.addChoice("Image to add:", titles, settings.title);
     gd.addNumericField("X location:", x, 0);
     gd.addNumericField("Y location:", y, 0);
-    gd.addNumericField("Opacity (0-100%):", opacity, 0);
-    gd.addCheckbox("Transparent background", transparent);
-    gd.addCheckbox("Replace overlay", replace);
+    gd.addNumericField("Opacity (0-100%):", settings.opacity, 0);
+    gd.addCheckbox("Transparent background", settings.transparent);
+    gd.addCheckbox("Replace overlay", settings.replace);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
 
-    title = gd.getNextChoice();
+    settings.title = gd.getNextChoice();
     x = (int) gd.getNextNumber();
     y = (int) gd.getNextNumber();
-    opacity = (int) gd.getNextNumber();
-    transparent = gd.getNextBoolean();
-    replace = gd.getNextBoolean();
+    settings.opacity = (int) gd.getNextNumber();
+    settings.transparent = gd.getNextBoolean();
+    settings.replace = gd.getNextBoolean();
+    settings.save();
 
-    final ImagePlus overlay = WindowManager.getImage(title);
+    final ImagePlus overlay = WindowManager.getImage(settings.title);
     if (overlay == imp) {
       IJ.error("Add Image...",
           "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
@@ -122,14 +172,14 @@ public class OverlayImage implements PlugIn {
     }
 
     final ImageRoi roi2 = new ImageRoi(x, y, overlay.getProcessor());
-    roi2.setZeroTransparent(transparent);
+    roi2.setZeroTransparent(settings.transparent);
     roi2.setName(overlay.getShortTitle());
-    if (opacity != 100) {
-      roi2.setOpacity(opacity / 100.0);
+    if (settings.opacity != 100) {
+      roi2.setOpacity(settings.opacity / 100.0);
     }
 
     Overlay overlayList = imp.getOverlay();
-    if (overlayList == null || replace) {
+    if (overlayList == null || settings.replace) {
       overlayList = new Overlay();
     }
     overlayList.add(roi2);
