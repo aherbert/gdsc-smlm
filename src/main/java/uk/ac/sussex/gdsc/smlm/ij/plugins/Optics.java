@@ -136,12 +136,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Optics implements PlugIn {
   private static final String TITLE_OPTICS = "OPTICS";
   private static final String TITLE_DBSCAN = "DBSCAN";
+  private static final int LOG_DBSCAN = 0x01;
+  private static final int LOG_OPTICS = 0x02;
+  private static final int LOG_LOOP = 0x04;
 
-  private static LUT clusterLut;
-  private static LUT valueLut;
-  private static LUT clusterDepthLut;
-  private static LUT clusterOrderLut;
-  private static LUT loopLut;
+  private static final AtomicInteger workerId = new AtomicInteger();
+
+  private static AtomicInteger logged = new AtomicInteger();
+
+  private static final LUT clusterLut;
+  private static final LUT valueLut;
+  private static final LUT clusterDepthLut;
+  private static final LUT clusterOrderLut;
+  private static final LUT loopLut;
 
   static {
     valueLut = LutHelper.createLut(LutColour.FIRE);
@@ -177,13 +184,6 @@ public class Optics implements PlugIn {
 
   // Stack to which the work is first added
   private final Workflow<OpticsSettings, SettingsList> workflow = new Workflow<>();
-
-  private static final AtomicInteger workerId = new AtomicInteger();
-
-  private static byte logged;
-  private static final byte LOG_DBSCAN = 0x01;
-  private static final byte LOG_OPTICS = 0x02;
-  private static final byte LOG_LOOP = 0x04;
 
   /**
    * Options for displaying the clustering image.
@@ -4134,16 +4134,14 @@ public class Optics implements PlugIn {
   private static void logReferences(boolean isDbscan) {
     final int width = 80;
     final StringBuilder sb = new StringBuilder();
-    if (isDbscan && (logged & LOG_DBSCAN) != LOG_DBSCAN) {
-      logged |= LOG_DBSCAN;
+    if (isDbscan && (logged.getAndUpdate(v -> v |= LOG_DBSCAN) & LOG_DBSCAN) != LOG_DBSCAN) {
       sb.append("DBSCAN: ");
       sb.append(TextUtils
           .wrap("Ester, et al (1996). 'A density-based algorithm for discovering clusters in large "
               + "spatial databases with noise'. Proceedings of the Second International Conference "
               + "on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226–231.", width))
           .append('\n');
-    } else if ((logged & LOG_OPTICS) != LOG_OPTICS) {
-      logged |= LOG_OPTICS;
+    } else if ((logged.getAndUpdate(v -> v |= LOG_OPTICS) & LOG_OPTICS) != LOG_OPTICS) {
       sb.append("OPTICS: ");
       sb.append(TextUtils.wrap(
           "Kriegel, et al (2011). 'Density-based clustering'. Wiley Interdisciplinary Reviews: "
@@ -4156,8 +4154,7 @@ public class Optics implements PlugIn {
               + "Management(CIKM). ACM. pp. 861-866.", width))
           .append('\n');
     }
-    if ((logged & LOG_LOOP) != LOG_LOOP) {
-      logged |= LOG_LOOP;
+    if ((logged.getAndUpdate(v -> v |= LOG_LOOP) & LOG_LOOP) != LOG_LOOP) {
       sb.append("LoOP: ");
       sb.append(TextUtils.wrap(
           "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
