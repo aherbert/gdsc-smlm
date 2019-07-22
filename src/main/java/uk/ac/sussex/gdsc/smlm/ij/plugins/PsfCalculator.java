@@ -116,14 +116,12 @@ public class PsfCalculator implements PlugIn, DialogListener {
       gd.addNumericField("Beam_Expander", settings.getBeamExpander(), 2);
       gd.addMessage(getPixelPitchLabel());
       pixelPitchLabel = (Label) gd.getMessage();
-      // pixelPitchLabel.setText(getPixelPitchLabel());
     }
 
     gd.addSlider("Wavelength (nm)", 400, 750, settings.getWavelength());
     gd.addSlider("Numerical_Aperture (NA)", 1, 1.5, settings.getNumericalAperture());
     gd.addMessage(getAbbeLimitLabel());
     abbeLimitLabel = (Label) gd.getMessage();
-    // abbe.setText(getAbbeLimitLabel());
     gd.addMessage("*** Account for optical aberations and focus error ***");
     gd.addSlider("Proportionality_factor", 1, 2.5, settings.getProportionalityFactor());
     gd.addCheckbox("Adjust_for_square_pixels", settings.getAdjustForSquarePixels());
@@ -213,10 +211,10 @@ public class PsfCalculator implements PlugIn, DialogListener {
       }
       ParameterUtils.isAboveZero("Wavelength", settingsBuilder.getWavelength());
       ParameterUtils.isAboveZero("Numerical aperture", settingsBuilder.getNumericalAperture());
-      ParameterUtils.isAboveZero("Proportionality factor", settingsBuilder.getProportionalityFactor());
+      ParameterUtils.isAboveZero("Proportionality factor",
+          settingsBuilder.getProportionalityFactor());
     } catch (final IllegalArgumentException ex) {
       // Q. Is logging the error necessary given that we will be in a live update preview?
-      // IJ.log(ex.getMessage());
       return false;
     }
 
@@ -319,8 +317,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
    * @return the width in nm
    */
   public static double calculateAiryWidth(double wavelength, double numericalAperture) {
-    final double width = wavelength / (2.0 * Math.PI * numericalAperture);
-    return width;
+    return wavelength / (2.0 * Math.PI * numericalAperture);
   }
 
   /**
@@ -357,10 +354,8 @@ public class PsfCalculator implements PlugIn, DialogListener {
     if (o == sdNmText || o == sdPixelsText || o == fwhmPixelsText || o == abbeLimitLabel) {
       return true;
     }
-    if (widthNmText != null) {
-      if (o == pixelPitchLabel || o == widthNmText || o == widthPixelsText) {
-        return true;
-      }
+    if (widthNmText != null && (o == pixelPitchLabel || o == widthNmText || o == widthPixelsText)) {
+      return true;
     }
 
     if (aquireLock()) {
@@ -444,7 +439,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
     p.setColor(Color.RED);
     p.addPoints(x2, y2, Plot.LINE);
     final double sd = airyWidth * AIRY_TO_GAUSSIAN * factor;
-    final double sdHeight = 0.606530659; // intensityGaussian(1);
+    final double sdHeight = 0.606530659; // intensityGaussian(1)
     p.drawLine(-sd, 0, -sd, sdHeight);
     p.drawLine(sd, 0, sd, sdHeight);
     p.setColor(Color.BLUE);

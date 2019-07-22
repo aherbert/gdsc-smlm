@@ -126,18 +126,15 @@ public class PsfCombiner implements PlugIn {
     if (ids != null) {
       for (final int id : ids) {
         final ImagePlus imp = WindowManager.getImage(id);
-        if (imp != null) {
-          // Image must be greyscale
-          if (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
-              || imp.getType() == ImagePlus.GRAY32) {
+        if (imp != null
+            // Image must be greyscale
+            && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
+                || imp.getType() == ImagePlus.GRAY32)
             // Image must be square and a stack of a single channel
-            if (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1) {
-              // Check if these are PSF images created by the SMLM plugins
-              if (containsPsf(imp)) {
-                titles.add(imp.getTitle());
-              }
-            }
-          }
+            && (imp.getWidth() == imp.getHeight() && imp.getNChannels() == 1)
+            // Check if these are PSF images created by the SMLM plugins
+            && containsPsf(imp)) {
+          titles.add(imp.getTitle());
         }
       }
     }
