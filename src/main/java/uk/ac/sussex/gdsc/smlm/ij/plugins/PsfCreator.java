@@ -150,6 +150,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -198,7 +199,7 @@ public class PsfCreator implements PlugInFilter {
   private double nmPerPixel;
   private int boxRadius;
   private int zRadius;
-  private static Point yesNoPosition;
+  private static AtomicReference<Point> yesNoPosition = new AtomicReference<>();
 
   private ExecutorService threadPool;
   private double progress;
@@ -962,14 +963,15 @@ public class PsfCreator implements PlugInFilter {
               + "x = %.2f\ny = %.2f\nz = %d\nsd = %.2f\n",
           n, cx, cy, cz, csd);
       gd.addSlider("Slice", z[0], z[z.length - 1], slice);
+      final Point previousPoint = yesNoPosition.get();
       if (yesNoPosition != null) {
         gd.centerDialog(false);
-        gd.setLocation(yesNoPosition);
+        gd.setLocation(previousPoint);
       }
       gd.addDialogListener(new SimpleInteractivePlotListener());
       gd.showDialog();
 
-      yesNoPosition = gd.getLocation();
+      yesNoPosition.set(gd.getLocation());
       return !gd.wasOKed();
     }
     return false;
@@ -1214,13 +1216,14 @@ public class PsfCreator implements PlugInFilter {
       ImageJUtils.addMessage(gd,
           "Add spot %d to the PSF?\n(The intensity profile is the sum within half the box region)",
           n);
-      if (yesNoPosition != null) {
+      final Point previousPoint = yesNoPosition.get();
+      if (previousPoint != null) {
         gd.centerDialog(false);
-        gd.setLocation(yesNoPosition);
+        gd.setLocation(previousPoint);
       }
       gd.showDialog();
 
-      yesNoPosition = gd.getLocation();
+      yesNoPosition.set(gd.getLocation());
       if (!gd.wasOKed()) {
         return false;
       }
