@@ -60,7 +60,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
    */
   public static final double AIRY_TO_GAUSSIAN = 1.323;
 
-  private PSFCalculatorSettings.Builder settings;
+  private PSFCalculatorSettings.Builder settingsBuilder;
   private GenericDialog gd;
   private Label abbeLimitLabel;
   private Label pixelPitchLabel;
@@ -86,7 +86,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
       return;
     }
 
-    SettingsManager.writeSettings(this.settings);
+    SettingsManager.writeSettings(this.settingsBuilder);
 
     final FitEngineConfiguration config = SettingsManager.readFitEngineConfiguration(0);
     final FitConfiguration fitConfig = config.getFitConfiguration();
@@ -108,7 +108,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
     gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
-    this.settings = settings.toBuilder();
+    this.settingsBuilder = settings.toBuilder();
 
     if (!simpleMode) {
       gd.addNumericField("Pixel_pitch (um)", settings.getPixelPitch(), 2);
@@ -195,25 +195,25 @@ public class PsfCalculator implements PlugIn, DialogListener {
 
   private boolean readDialog() {
     if (widthNmText != null) {
-      settings.setPixelPitch(gd.getNextNumber());
-      settings.setMagnification(gd.getNextNumber());
-      settings.setBeamExpander(gd.getNextNumber());
+      settingsBuilder.setPixelPitch(gd.getNextNumber());
+      settingsBuilder.setMagnification(gd.getNextNumber());
+      settingsBuilder.setBeamExpander(gd.getNextNumber());
     }
-    settings.setWavelength(gd.getNextNumber());
-    settings.setNumericalAperture(gd.getNextNumber());
-    settings.setProportionalityFactor(gd.getNextNumber());
-    settings.setAdjustForSquarePixels(gd.getNextBoolean());
+    settingsBuilder.setWavelength(gd.getNextNumber());
+    settingsBuilder.setNumericalAperture(gd.getNextNumber());
+    settingsBuilder.setProportionalityFactor(gd.getNextNumber());
+    settingsBuilder.setAdjustForSquarePixels(gd.getNextBoolean());
 
     // Check arguments
     try {
       if (widthNmText != null) {
-        ParameterUtils.isAboveZero("Pixel pitch", settings.getPixelPitch());
-        ParameterUtils.isAboveZero("Magnification", settings.getMagnification());
-        ParameterUtils.isEqualOrAbove("Beam expander", settings.getBeamExpander(), 1);
+        ParameterUtils.isAboveZero("Pixel pitch", settingsBuilder.getPixelPitch());
+        ParameterUtils.isAboveZero("Magnification", settingsBuilder.getMagnification());
+        ParameterUtils.isEqualOrAbove("Beam expander", settingsBuilder.getBeamExpander(), 1);
       }
-      ParameterUtils.isAboveZero("Wavelength", settings.getWavelength());
-      ParameterUtils.isAboveZero("Numerical aperture", settings.getNumericalAperture());
-      ParameterUtils.isAboveZero("Proportionality factor", settings.getProportionalityFactor());
+      ParameterUtils.isAboveZero("Wavelength", settingsBuilder.getWavelength());
+      ParameterUtils.isAboveZero("Numerical aperture", settingsBuilder.getNumericalAperture());
+      ParameterUtils.isAboveZero("Proportionality factor", settingsBuilder.getProportionalityFactor());
     } catch (final IllegalArgumentException ex) {
       // Q. Is logging the error necessary given that we will be in a live update preview?
       // IJ.log(ex.getMessage());
@@ -373,13 +373,13 @@ public class PsfCalculator implements PlugIn, DialogListener {
           }
 
           // Store the parameters to be processed
-          final double pixelPitch = settings.getPixelPitch();
-          final double magnification = settings.getMagnification();
-          final double beamExpander = settings.getBeamExpander();
-          final double wavelength = settings.getWavelength();
-          final double numericalAperture = settings.getNumericalAperture();
-          final boolean adjustForSquarePixels = settings.getAdjustForSquarePixels();
-          final double proportionalityFactor = settings.getProportionalityFactor();
+          final double pixelPitch = settingsBuilder.getPixelPitch();
+          final double magnification = settingsBuilder.getMagnification();
+          final double beamExpander = settingsBuilder.getBeamExpander();
+          final double wavelength = settingsBuilder.getWavelength();
+          final double numericalAperture = settingsBuilder.getNumericalAperture();
+          final boolean adjustForSquarePixels = settingsBuilder.getAdjustForSquarePixels();
+          final double proportionalityFactor = settingsBuilder.getProportionalityFactor();
 
           // Do something with parameters
           if (widthNmText != null) {
@@ -402,12 +402,12 @@ public class PsfCalculator implements PlugIn, DialogListener {
               numericalAperture), sd / s);
 
           // Check if the parameters have changed again
-          parametersChanged = (pixelPitch != settings.getPixelPitch())
-              || (magnification != settings.getMagnification())
-              || (beamExpander != settings.getBeamExpander())
-              || (wavelength != settings.getWavelength())
-              || (numericalAperture != settings.getNumericalAperture())
-              || (proportionalityFactor != settings.getProportionalityFactor());
+          parametersChanged = (pixelPitch != settingsBuilder.getPixelPitch())
+              || (magnification != settingsBuilder.getMagnification())
+              || (beamExpander != settingsBuilder.getBeamExpander())
+              || (wavelength != settingsBuilder.getWavelength())
+              || (numericalAperture != settingsBuilder.getNumericalAperture())
+              || (proportionalityFactor != settingsBuilder.getProportionalityFactor());
         }
       } finally {
         // Ensure the running flag is reset
@@ -473,8 +473,8 @@ public class PsfCalculator implements PlugIn, DialogListener {
   }
 
   private double getPixelPitch() {
-    return settings.getPixelPitch() * 1000
-        / (settings.getMagnification() * settings.getBeamExpander());
+    return settingsBuilder.getPixelPitch() * 1000
+        / (settingsBuilder.getMagnification() * settingsBuilder.getBeamExpander());
   }
 
   private static String getAbbeLimitLabel(double abbeLimit) {
@@ -486,6 +486,6 @@ public class PsfCalculator implements PlugIn, DialogListener {
   }
 
   private double getAbbeLimit() {
-    return settings.getWavelength() / (2 * settings.getNumericalAperture());
+    return settingsBuilder.getWavelength() / (2 * settingsBuilder.getNumericalAperture());
   }
 }
