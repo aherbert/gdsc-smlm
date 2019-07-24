@@ -35,16 +35,66 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Updates the frame numbers on results that are stored in memory.
  */
 public class ResequenceResults implements PlugIn {
   private static final String TITLE = "Resequence Results";
-  private static String inputOption = "";
-  private static int start = 1;
-  private static int block = 1;
-  private static int skip;
-  private static boolean logMapping;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    int start;
+    int block;
+    int skip;
+    boolean logMapping;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      start = 1;
+      block = 1;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      start = source.start;
+      block = source.block;
+      skip = source.skip;
+      logMapping = source.logMapping;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -60,19 +110,21 @@ public class ResequenceResults implements PlugIn {
     }
 
     final MemoryPeakResults results =
-        ResultsManager.loadInputResults(inputOption, true, null, null);
+        ResultsManager.loadInputResults(settings.inputOption, true, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
     }
 
-    if (resequenceResults(results, start, block, skip,
-        (logMapping) ? SimpleImageJTrackProgress.getInstance() : null)) {
+    if (resequenceResults(results, settings.start, settings.block, settings.skip,
+        (settings.logMapping) ? SimpleImageJTrackProgress.getInstance() : null)) {
       IJ.showStatus("Resequenced " + results.getName());
     }
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
+    settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
@@ -84,28 +136,29 @@ public class ResequenceResults implements PlugIn {
         + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
         + " then repeat.");
 
-    ResultsManager.addInput(gd, inputOption, InputSource.MEMORY);
-    gd.addNumericField("Start", start, 0);
-    gd.addNumericField("Block", block, 0);
-    gd.addNumericField("Skip", skip, 0);
-    gd.addCheckbox("Log_mapping", logMapping);
+    ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
+    gd.addNumericField("Start", settings.start, 0);
+    gd.addNumericField("Block", settings.block, 0);
+    gd.addNumericField("Skip", settings.skip, 0);
+    gd.addCheckbox("Log_mapping", settings.logMapping);
 
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    start = (int) gd.getNextNumber();
-    block = (int) gd.getNextNumber();
-    skip = (int) gd.getNextNumber();
-    logMapping = gd.getNextBoolean();
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.start = (int) gd.getNextNumber();
+    settings.block = (int) gd.getNextNumber();
+    settings.skip = (int) gd.getNextNumber();
+    settings.logMapping = gd.getNextBoolean();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Start", start);
-      ParameterUtils.isAboveZero("Block", block);
-      ParameterUtils.isPositive("Skip", skip);
+      ParameterUtils.isAboveZero("Start", settings.start);
+      ParameterUtils.isAboveZero("Block", settings.block);
+      ParameterUtils.isPositive("Skip", settings.skip);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -115,12 +168,16 @@ public class ResequenceResults implements PlugIn {
   }
 
   private static class ResequencePeakResultProcedure implements PeakResultProcedure {
-    int start;
-    TrackProgress tracker;
+    final int start;
+    final TrackProgress tracker;
+    final int block;
+    final int skip;
 
-    ResequencePeakResultProcedure(int start, TrackProgress tracker) {
+    ResequencePeakResultProcedure(int start, TrackProgress tracker, int block, int skip) {
       this.start = start;
       this.tracker = tracker;
+      this.block = block;
+      this.skip = skip;
     }
 
     @Override
@@ -183,7 +240,7 @@ public class ResequenceResults implements PlugIn {
       return false;
     }
 
-    results.forEach(new ResequencePeakResultProcedure(start, tracker));
+    results.forEach(new ResequencePeakResultProcedure(start, tracker, block, skip));
 
     return true;
   }
