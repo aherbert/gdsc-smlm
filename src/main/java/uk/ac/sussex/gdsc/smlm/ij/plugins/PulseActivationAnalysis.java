@@ -136,6 +136,18 @@ public class PulseActivationAnalysis implements PlugIn {
   private Settings settings;
 
   /**
+   * The analysis lock. All access to state modified by the analysis must be synchronized on this.
+   */
+  private final Object analysisLock = new Object();
+  private DensityCounter dc;
+  private int[][] density;
+  private int numberOfThreads;
+  private ExecutorService executor;
+  private TurboList<Future<?>> futures;
+  /** The last run settings. All access to this must be synchronized. */
+  private RunSettings lastRunSettings;
+
+  /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
@@ -689,15 +701,6 @@ public class PulseActivationAnalysis implements PlugIn {
     int firstFrame = results.getMinFrame();
     int lastFrame = results.getMaxFrame();
 
-    // if (false)
-    // {
-    // for (int t = firstFrame; t <= lastFrame; t++)
-    // {
-    // frameCount[getChannel(t)]++;
-    // }
-    // }
-    // else
-    // {
     // Move the ends to the repeat interval
     while (firstFrame % settings.repeatInterval != 1) {
       frameCount[getChannel(firstFrame++)]++;
@@ -712,7 +715,6 @@ public class PulseActivationAnalysis implements PlugIn {
     }
     final int remaining = (total - settings.channels * cycles);
     frameCount[0] += remaining;
-    // }
 
     printRate("Background", nonSpecificActivationsSize, frameCount[0]);
     for (int c = 1; c <= settings.channels; c++) {
@@ -799,7 +801,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final double[] x = SimpleArrayUtils.newArray(settings.channels, 0.5, 1);
     final double[] y = crosstalk;
     final Plot2 plot = new Plot2(title, "Channel", "Fraction activations");
-    plot.setLimits(0, settings.channels + 1, 0, 1);
+    plot.setLimits(0, settings.channels + 1.0, 0, 1);
     plot.setXMinorTicks(false);
     plot.addPoints(x, y, Plot2.BAR);
     String label = String.format("Crosstalk %s = %s", Settings.ctNames[index1],
@@ -884,8 +886,6 @@ public class PulseActivationAnalysis implements PlugIn {
     final double d2 = od2 - c12 * d1;
     // Assuming od1 and od2 are positive and c12 and c21 are
     // between 0 and 1 then we do not need to check the bounds.
-    // d1 = Maths.clip(0, od1, d1);
-    // d2 = Maths.clip(0, od2, d2);
     return new double[] {d1, d2};
   }
 
@@ -961,36 +961,6 @@ public class PulseActivationAnalysis implements PlugIn {
     x[0] = a * od1 + b * od2 + c * od3;
     x[1] = d * od1 + e * od2 + f * od3;
     x[2] = g * od1 + h * od2 + i * od3;
-
-    // Use matrix decomposition
-    // // Note: The linear solver uses LU decomposition.
-    // // We cannot use a faster method as the matrix A is not symmetric.
-    // final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(3);
-    // final DenseMatrix64F A = new DenseMatrix64F(3, 3);
-    // A.set(0, 1);
-    // A.set(1, c21);
-    // A.set(2, c31);
-    // A.set(3, c12);
-    // A.set(4, 1);
-    // A.set(5, c32);
-    // A.set(6, c13);
-    // A.set(7, c23);
-    // A.set(8, 1);
-    // final DenseMatrix64F B = new DenseMatrix64F(3, 1);
-    // B.set(0, od1);
-    // B.set(1, od2);
-    // B.set(2, od3);
-    //
-    // if (!linearSolver.setA(A))
-    // {
-    // // Failed so reset to the observed densities
-    // return new double[] { od1, od2, od3 };
-    // }
-    //
-    // // Input B is not modified to so we can re-use for output X
-    // linearSolver.solve(B, B);
-    //
-    // final double[] x = B.getData();
 
     // Due to floating-point error in the decomposition we check the bounds
     x[0] = MathUtils.clip(0, od1, x[0]);
@@ -1077,12 +1047,8 @@ public class PulseActivationAnalysis implements PlugIn {
       if (lastRunSettings.nonSpecificCorrection != nonSpecificCorrection) {
         return true;
       }
-      if (nonSpecificCorrection != Correction.NONE) {
-        if (lastRunSettings.nonSpecificCorrectionCutoff != nonSpecificCorrectionCutoff) {
-          return true;
-        }
-      }
-      return false;
+      return (nonSpecificCorrection != Correction.NONE
+          && lastRunSettings.nonSpecificCorrectionCutoff != nonSpecificCorrectionCutoff);
     }
   }
 
@@ -1164,14 +1130,6 @@ public class PulseActivationAnalysis implements PlugIn {
 
     resultsSettingsBuilder = SettingsManager.readResultsSettings(0).toBuilder();
     ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder, 0);
-
-    // ResultsImageSettings s = resultsSettings.getResultsImageSettings();
-    // gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
-    // SettingsManager.getResultsImageTypeNames()[s.getImageTypeValue()]);
-    // gd.addCheckbox("Weighted", s.getWeighted());
-    // gd.addCheckbox("Equalised", s.getEqualised());
-    // gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
-    // gd.addSlider("Image_Scale", 1, 15, s.getScale());
 
     final Checkbox previewCheckBox = gd.addAndGetCheckbox("Preview", false);
 
@@ -1294,13 +1252,6 @@ public class PulseActivationAnalysis implements PlugIn {
     resultsSettingsBuilder.getResultsImageSettingsBuilder()
         .setImageTypeValue(gd.getNextChoiceIndex());
 
-    // ResultsImageSettings.Builder s = resultsSettingsBuilder.getResultsImageSettingsBuilder();
-    // s.setImageTypeValue(gd.getNextChoiceIndex());
-    // s.setWeighted(gd.getNextBoolean());
-    // s.setEqualised(gd.getNextBoolean());
-    // s.setAveragePrecision(gd.getNextNumber());
-    // s.setScale(gd.getNextNumber());
-
     final boolean preview = gd.getNextBoolean();
 
     if (gd.invalidNumber()) {
@@ -1346,18 +1297,6 @@ public class PulseActivationAnalysis implements PlugIn {
     ParameterUtils.isPositive(name, percentage);
     ParameterUtils.isEqualOrBelow(name, percentage, 100);
   }
-
-  /**
-   * The analysis lock. All access to state modified by the analysis must be synchronized on this.
-   */
-  private final Object analysisLock = new Object();
-  private DensityCounter dc;
-  private int[][] density;
-  private int numberOfThreads;
-  private ExecutorService executor;
-  private TurboList<Future<?>> futures;
-  /** The last run settings. All access to the must be synchronized. */
-  private RunSettings lastRunSettings;
 
   /**
    * Run the analysis. This modifies state and so should be synchronized.
@@ -1514,11 +1453,6 @@ public class PulseActivationAnalysis implements PlugIn {
     imp.setDimensions(images.length, 1, 1);
     final CompositeImage ci = new CompositeImage(imp, IJ.COMPOSITE);
 
-    // Make it easier to see
-    // ij.plugin.ContrastEnhancerce = new ij.plugin.ContrastEnhancer();
-    // double saturated = 0.35;
-    // ce.stretchHistogram(ci, saturated);
-
     autoAdjust(ci, ci.getProcessor());
 
     imp = WindowManager.getImage(name);
@@ -1548,7 +1482,7 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   /**
-   * Auto adjust. Copied from {@link ij.plugin.frame.ContrastAdjuster }.
+   * Auto adjust. Copied from {@link ij.plugin.frame.ContrastAdjuster}.
    *
    * <p>Although the ContrastAdjuster records its actions as 'run("Enhance Contrast",
    * "saturated=0.35");' it actually does something else which makes the image easier to see than
@@ -1927,7 +1861,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // Draw the molecule positions
     ImageJUtils.showStatus("Simulating molecules ...");
     final float[][][] molecules = new float[3][][];
-    final MemoryPeakResults[] results = new MemoryPeakResults[3];
+    final MemoryPeakResults[] channelResults = new MemoryPeakResults[3];
     final Calibration calibration = CalibrationHelper.create(settings.nmPerPixel, 1, 100);
     final Rectangle bounds = new Rectangle(0, 0, settings.size, settings.size);
     for (int c = 0; c < 3; c++) {
@@ -1938,13 +1872,13 @@ public class PulseActivationAnalysis implements PlugIn {
       r.setCalibration(calibration);
       r.setBounds(bounds);
       r.setName(title + " C" + (c + 1));
-      results[c] = r;
+      channelResults[c] = r;
     }
 
     // Simulate activation
     ImageJUtils.showStatus("Simulating activations ...");
     for (int c = 0; c < 3; c++) {
-      simulateActivations(rng, molecules, c, results);
+      simulateActivations(rng, molecules, c, channelResults);
     }
 
     // Combine
@@ -1956,7 +1890,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     final ImageProcessor[] images = new ImageProcessor[3];
     for (int c = 0; c < 3; c++) {
-      final PeakResult[] list = results[c].toArray();
+      final PeakResult[] list = channelResults[c].toArray();
       r.addAll(list);
 
       // Draw the unmixed activations
@@ -1976,7 +1910,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // Add to memory. Set the composite dataset first.
     MemoryPeakResults.addResults(r);
     for (int c = 0; c < 3; c++) {
-      MemoryPeakResults.addResults(results[c]);
+      MemoryPeakResults.addResults(channelResults[c]);
     }
 
     // TODO:
@@ -2067,7 +2001,7 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private void simulateActivations(UniformRandomProvider rng, float[][][] molecules, int channel,
-      MemoryPeakResults[] results) {
+      MemoryPeakResults[] channelResults) {
     final int n = molecules[channel].length;
     if (n == 0) {
       return;
@@ -2134,16 +2068,17 @@ public class PulseActivationAnalysis implements PlugIn {
     final int[] count = new int[3];
 
     for (int i = 0, t = 1; i < settings.cycles; i++, t += 30) {
-      count[0] +=
-          simulateActivations(rng, bd[0], molecules[channel], results[channel], t, precision);
-      count[1] +=
-          simulateActivations(rng, bd[1], molecules[channel], results[channel], t + 10, precision);
-      count[2] +=
-          simulateActivations(rng, bd[2], molecules[channel], results[channel], t + 20, precision);
+      count[0] += simulateActivations(rng, bd[0], molecules[channel], channelResults[channel], t,
+          precision);
+      count[1] += simulateActivations(rng, bd[1], molecules[channel], channelResults[channel],
+          t + 10, precision);
+      count[2] += simulateActivations(rng, bd[2], molecules[channel], channelResults[channel],
+          t + 20, precision);
       // Add non-specific activations
       if (bd[3] != null) {
         for (final int t2 : frames) {
-          simulateActivations(rng, bd[3], molecules[channel], results[channel], t2, precision);
+          simulateActivations(rng, bd[3], molecules[channel], channelResults[channel], t2,
+              precision);
         }
       }
     }
@@ -2292,7 +2227,6 @@ public class PulseActivationAnalysis implements PlugIn {
   private void drawLoop(ImagePlus imp, Roi roi, int number) {
     if (!roi.isArea()) {
       return;
-      // System.out.println(roi);
     }
 
     // Map the ROI to a crop of the results set
@@ -2306,7 +2240,6 @@ public class PulseActivationAnalysis implements PlugIn {
         resultsBounds.width * (double)roiBounds.width / imp.getWidth(),
         resultsBounds.height * (double)roiBounds.height / imp.getHeight());
     //@formatter:on
-    // System.out.println(r);
 
     final int x = (int) r.getX();
     final int y = (int) r.getY();
@@ -2319,13 +2252,10 @@ public class PulseActivationAnalysis implements PlugIn {
       final Color color = Settings.colors[i];
 
       // The first result is the memory results
-      final MemoryPeakResults results = (MemoryPeakResults) output[i].getOutput(0);
-      results.forEach(DistanceUnit.PIXEL, new XyrResultProcedure() {
-        @Override
-        public void executeXyr(float xx, float yy, PeakResult result) {
-          if (r.contains(xx, yy)) {
-            add(o, (xx - x) * magnification, (yy - y) * magnification, color);
-          }
+      final MemoryPeakResults localResults = (MemoryPeakResults) output[i].getOutput(0);
+      localResults.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (xx, yy, result) -> {
+        if (r.contains(xx, yy)) {
+          add(o, (xx - x) * magnification, (yy - y) * magnification, color);
         }
       });
     }
@@ -2337,15 +2267,11 @@ public class PulseActivationAnalysis implements PlugIn {
     height *= magnification;
     final ImageProcessor ip = new ByteProcessor(width, height);
 
-    final String title = imp.getTitle() + " Loop " + number;
-    imp = WindowManager.getImage(title);
+    final String loopTitle = imp.getTitle() + " Loop " + number;
+    imp = WindowManager.getImage(loopTitle);
     if (imp == null) {
-      imp = new ImagePlus(title, ip);
+      imp = new ImagePlus(loopTitle, ip);
       imp.show();
-      // ImageCanvas ic = imp.getWindow().getCanvas();
-      // for (int i = 10; i-- > 0;)
-      // ic.zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
-      // ic.setMagnification(32);
     } else {
       imp.setProcessor(ip);
     }
@@ -2365,8 +2291,8 @@ public class PulseActivationAnalysis implements PlugIn {
     final PointRoi roi = new PointRoi(x, y);
     roi.setStrokeColor(color);
     roi.setFillColor(color);
-    roi.setPointType(1); // PointRoi.CROSSHAIR);
-    roi.setSize(1); // PointRoi.TINY);
+    roi.setPointType(1); // PointRoi.CROSSHAIR
+    roi.setSize(1); // PointRoi.TINY
     overlay.add(roi);
   }
 
