@@ -114,7 +114,7 @@ public class TraceExporter implements PlugIn {
 
     final MemoryResultsList items = new MemoryResultsList(MemoryPeakResults::hasId);
 
-    if (items.size() == 0) {
+    if (items.isEmpty()) {
       IJ.error(TITLE, "No traced localisations in memory");
       return;
     }
