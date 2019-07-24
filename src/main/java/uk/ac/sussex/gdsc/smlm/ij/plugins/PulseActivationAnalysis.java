@@ -95,13 +95,14 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 /**
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed
@@ -114,90 +115,169 @@ import java.util.logging.Logger;
 public class PulseActivationAnalysis implements PlugIn {
   private String title = "Activation Analysis";
 
-  private static final Correction[] specificCorrection;
-  private static final Correction[] nonSpecificCorrection;
+  private UniformRandomProvider initialisedRng;
 
-  static {
-    final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
-    specificCorrection = correction.toArray(new Correction[correction.size()]);
-    correction.remove(Correction.SUBTRACTION);
-    nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
-  }
-
-  private static String inputOption = "";
-  // Note: Set defaults to work with the 3-channel simulation
-  private static int channels = 3;
-  private static final int MAX_CHANNELS = 3;
-
-  private static int repeatInterval = 30;
-  private static final int[] startFrame = {1, 11, 21};
-  /** The crosstalk between channels. */
-  private static final double[] ct = new double[6];
-  private static final String[] ctNames = {"21", "31", "12", "32", "13", "23"};
-  private static final int C21 = 0;
-  private static final int C31 = 1;
-  private static final int C12 = 2;
-  private static final int C32 = 3;
-  private static final int C13 = 4;
-  private static final int C23 = 5;
-  private static int darkFramesForNewActivation = 1;
-
-  private static int targetChannel = 1;
-
-  private static double densityRadius = 35;
-  private static int minNeighbours = 5;
-  private static int specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
-  private static double[] specificCorrectionCutoff = {50, 50, 50};
-  private static int nonSpecificCorrectionIndex;
-  private static double nonSpecificCorrectionCutoff = 50;
-
-  // Simulation settings
-  private UniformRandomProvider rng;
-
-  private UniformRandomProvider getUniformRandomProvider() {
-    if (rng == null) {
-      rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
-    }
-    return rng;
-  }
-
-  private static int[] sim_numberOfMolecules = {1000, 1000, 1000};
-  private static SimulationDistribution[] sim_distribution =
-      {SimulationDistribution.CIRCLE, SimulationDistribution.LINE, SimulationDistribution.POINT};
-  private static double[] sim_precision = {15, 15, 15}; // nm
-  private static int sim_cycles = 1000;
-  private static int sim_size = 256;
-  private static double sim_nmPerPixel = 100;
-  private static double sim_activationDensity = 0.1; // molecules/micrometer
-  private static double sim_nonSpecificFrequency = 0.01;
-
-  // private ResultsSettings resultsSettings;
   private ResultsSettings.Builder resultsSettingsBuilder;
   private MemoryPeakResults results;
   private Trace[] traces;
 
   // The output. Used for the loop functionality
   private PeakResultsList[] output;
-  private static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
-  private static final String[] magnifications;
 
-  static {
-    final ArrayList<String> list = new ArrayList<>();
-    for (int i = 1; i <= 256; i *= 2) {
-      list.add(Integer.toString(i));
-    }
-    magnifications = list.toArray(new String[list.size()]);
-  }
-
-  private static String magnification = magnifications[1];
   private Choice magnificationChoice;
-  private Checkbox previewCheckBox;
 
   private Activation[] specificActivations;
   private Activation[] nonSpecificActivations;
   private int[] counts;
 
   private int nextPeakResultId;
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    /** The colours for each channel. */
+    static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
+
+    static final int C21 = 0;
+    static final int C31 = 1;
+    static final int C12 = 2;
+    static final int C32 = 3;
+    static final int C13 = 4;
+    static final int C23 = 5;
+    static final int MAX_CHANNELS = 3;
+
+    /** The cross talk names for each pair of 3-channels. */
+    static final String[] ctNames = {"21", "31", "12", "32", "13", "23"};
+
+    static final String[] magnifications;
+
+    static final Correction[] specificCorrection;
+    static final Correction[] nonSpecificCorrection;
+
+    static {
+      final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
+      specificCorrection = correction.toArray(new Correction[correction.size()]);
+      correction.remove(Correction.SUBTRACTION);
+      nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
+
+      // Produce 2^k for k in [0, 8]
+      magnifications =
+          IntStream.range(0, 9).map(i -> 1 << i).mapToObj(Integer::toString).toArray(String[]::new);
+    }
+
+    String inputOption;
+    int channels;
+
+    int repeatInterval;
+    int[] startFrame;
+    /** The crosstalk between channels. */
+    double[] ct;
+    int darkFramesForNewActivation;
+
+    int targetChannel;
+
+    double densityRadius;
+    int minNeighbours;
+    int specificCorrectionIndex;
+    double[] specificCorrectionCutoff;
+    int nonSpecificCorrectionIndex;
+    double nonSpecificCorrectionCutoff;
+
+    // Simulation settings
+    int[] numberOfMolecules;
+    SimulationDistribution[] distribution;
+    double[] precision;
+    int cycles;
+    int size;
+    double nmPerPixel;
+    double activationDensity;
+    double nonSpecificFrequency;
+
+
+    String magnification = magnifications[1];
+
+    Settings() {
+      // Note: Set defaults to work with the 3-channel simulation
+      inputOption = "";
+      channels = 3;
+
+      repeatInterval = 30;
+      startFrame = new int[] {1, 11, 21};
+      ct = new double[6];
+      darkFramesForNewActivation = 1;
+
+      targetChannel = 1;
+
+      densityRadius = 35;
+      minNeighbours = 5;
+      specificCorrectionIndex = Correction.SUBTRACTION.ordinal();
+      specificCorrectionCutoff = new double[] {50, 50, 50};
+      nonSpecificCorrectionCutoff = 50;
+
+      // Simulation settings
+      numberOfMolecules = new int[] {1000, 1000, 1000};
+      distribution = new SimulationDistribution[] {SimulationDistribution.CIRCLE,
+          SimulationDistribution.LINE, SimulationDistribution.POINT};
+      precision = new double[] {15, 15, 15}; // nm
+      cycles = 1000;
+      size = 256;
+      nmPerPixel = 100;
+      activationDensity = 0.1; // molecules/micrometer
+      nonSpecificFrequency = 0.01;
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      channels = source.channels;
+      repeatInterval = source.repeatInterval;
+      startFrame = source.startFrame.clone();
+      ct = source.ct.clone();
+      darkFramesForNewActivation = source.darkFramesForNewActivation;
+      targetChannel = source.targetChannel;
+      densityRadius = source.densityRadius;
+      minNeighbours = source.minNeighbours;
+      specificCorrectionIndex = source.specificCorrectionIndex;
+      specificCorrectionCutoff = source.specificCorrectionCutoff.clone();
+      nonSpecificCorrectionIndex = source.nonSpecificCorrectionIndex;
+      nonSpecificCorrectionCutoff = source.nonSpecificCorrectionCutoff;
+      numberOfMolecules = source.numberOfMolecules.clone();
+      distribution = source.distribution.clone();
+      precision = source.precision.clone();
+      cycles = source.cycles;
+      size = source.size;
+      nmPerPixel = source.nmPerPixel;
+      activationDensity = source.activationDensity;
+      nonSpecificFrequency = source.nonSpecificFrequency;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private enum Correction {
     //@formatter:off
@@ -389,6 +469,8 @@ public class PulseActivationAnalysis implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    settings = Settings.load();
+
     switch (isSimulation()) {
       case -1:
         // Cancelled
@@ -415,7 +497,8 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // Load the results
-    results = ResultsManager.loadInputResults(inputOption, false, DistanceUnit.PIXEL, null);
+    results =
+        ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(title, "No results could be loaded");
       return;
@@ -457,9 +540,9 @@ public class PulseActivationAnalysis implements PlugIn {
       gd.addMessage("Count & plot molecules activated after a pulse");
     }
 
-    ResultsManager.addInput(gd, "Input", inputOption, InputSource.MEMORY_CLUSTERED);
+    ResultsManager.addInput(gd, "Input", settings.inputOption, InputSource.MEMORY_CLUSTERED);
     final int min = (crosstalkMode) ? 2 : 1;
-    gd.addSlider("Channels", min, MAX_CHANNELS, channels);
+    gd.addSlider("Channels", min, Settings.MAX_CHANNELS, settings.channels);
 
     gd.showDialog();
 
@@ -467,10 +550,12 @@ public class PulseActivationAnalysis implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    channels = (int) gd.getNextNumber();
-    if (channels < min || channels > MAX_CHANNELS) {
-      IJ.error(title, "Channels must be between " + min + " and " + MAX_CHANNELS);
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.channels = (int) gd.getNextNumber();
+    settings.save();
+
+    if (settings.channels < min || settings.channels > Settings.MAX_CHANNELS) {
+      IJ.error(title, "Channels must be between " + min + " and " + Settings.MAX_CHANNELS);
       return false;
     }
 
@@ -482,10 +567,10 @@ public class PulseActivationAnalysis implements PlugIn {
 
     gd.addMessage("Specify the pulse cycle");
 
-    gd.addNumericField("Repeat_interval", repeatInterval, 0);
-    gd.addNumericField("Dark_frames_for_new_activation", darkFramesForNewActivation, 0);
-    for (int c = 1; c <= channels; c++) {
-      gd.addNumericField("Activation_frame_C" + c, startFrame[c - 1], 0);
+    gd.addNumericField("Repeat_interval", settings.repeatInterval, 0);
+    gd.addNumericField("Dark_frames_for_new_activation", settings.darkFramesForNewActivation, 0);
+    for (int c = 1; c <= settings.channels; c++) {
+      gd.addNumericField("Activation_frame_C" + c, settings.startFrame[c - 1], 0);
     }
 
     gd.showDialog();
@@ -494,25 +579,26 @@ public class PulseActivationAnalysis implements PlugIn {
       return false;
     }
 
-    repeatInterval = (int) gd.getNextNumber();
-    if (repeatInterval < channels) {
-      IJ.error(title, "Repeat interval must be greater than the number of channels: " + channels);
+    settings.repeatInterval = (int) gd.getNextNumber();
+    if (settings.repeatInterval < settings.channels) {
+      IJ.error(title,
+          "Repeat interval must be greater than the number of channels: " + settings.channels);
       return false;
     }
-    darkFramesForNewActivation = Math.max(1, (int) gd.getNextNumber());
-    for (int c = 1; c <= channels; c++) {
+    settings.darkFramesForNewActivation = Math.max(1, (int) gd.getNextNumber());
+    for (int c = 1; c <= settings.channels; c++) {
       final int frame = (int) gd.getNextNumber();
-      if (frame < 1 || frame > repeatInterval) {
+      if (frame < 1 || frame > settings.repeatInterval) {
         IJ.error(title, "Channel " + c + " activation frame must within the repeat interval");
         return false;
       }
-      startFrame[c - 1] = frame;
+      settings.startFrame[c - 1] = frame;
     }
 
     // Check all start frames are unique
-    for (int i = 0; i < channels; i++) {
-      for (int j = i + 1; j < channels; j++) {
-        if (startFrame[i] == startFrame[j]) {
+    for (int i = 0; i < settings.channels; i++) {
+      for (int j = i + 1; j < settings.channels; j++) {
+        if (settings.startFrame[i] == settings.startFrame[j]) {
           IJ.error(title, "Start frames must be unique for each channel");
           return false;
         }
@@ -535,7 +621,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Activations are only counted if there are at least
     // n frames between localisations.
-    final int n = darkFramesForNewActivation + 1;
+    final int n = settings.darkFramesForNewActivation + 1;
 
     for (final Trace trace : traces) {
       trace.sort(); // Time-order
@@ -576,7 +662,7 @@ public class PulseActivationAnalysis implements PlugIn {
   private void save(TurboList<Activation> list) {
     // Count the activations per channel
     // Note: Channels are 0-indexed in the activations
-    counts = new int[channels];
+    counts = new int[settings.channels];
     for (int i = list.size(); i-- > 0;) {
       final Activation result = list.getf(i);
       if (result.hasChannel()) {
@@ -599,7 +685,7 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // Output activation rates
-    final int[] frameCount = new int[channels + 1];
+    final int[] frameCount = new int[settings.channels + 1];
     int firstFrame = results.getMinFrame();
     int lastFrame = results.getMaxFrame();
 
@@ -613,23 +699,23 @@ public class PulseActivationAnalysis implements PlugIn {
     // else
     // {
     // Move the ends to the repeat interval
-    while (firstFrame % repeatInterval != 1) {
+    while (firstFrame % settings.repeatInterval != 1) {
       frameCount[getChannel(firstFrame++)]++;
     }
-    while (lastFrame % repeatInterval != 0) {
+    while (lastFrame % settings.repeatInterval != 0) {
       frameCount[getChannel(lastFrame--)]++;
     }
     final int total = lastFrame - firstFrame + 1;
-    final int cycles = total / repeatInterval;
-    for (int c = 1; c <= channels; c++) {
+    final int cycles = total / settings.repeatInterval;
+    for (int c = 1; c <= settings.channels; c++) {
       frameCount[c] += cycles;
     }
-    final int remaining = (total - channels * cycles);
+    final int remaining = (total - settings.channels * cycles);
     frameCount[0] += remaining;
     // }
 
     printRate("Background", nonSpecificActivationsSize, frameCount[0]);
-    for (int c = 1; c <= channels; c++) {
+    for (int c = 1; c <= settings.channels; c++) {
       printRate("Channel " + c, counts[c - 1], frameCount[c]);
     }
   }
@@ -639,15 +725,15 @@ public class PulseActivationAnalysis implements PlugIn {
         MathUtils.rounded((double) count / numberOfFrames));
   }
 
-  private static int getChannel(PeakResult result) {
+  private int getChannel(PeakResult result) {
     return getChannel(result.getFrame());
   }
 
-  private static int getChannel(int frame) {
+  private int getChannel(int frame) {
     // Classify if within a channel activation start frame
-    final int mod = frame % repeatInterval;
-    for (int i = 0; i < channels; i++) {
-      if (mod == startFrame[i]) {
+    final int mod = frame % settings.repeatInterval;
+    for (int i = 0; i < settings.channels; i++) {
+      if (mod == settings.startFrame[i]) {
         return i + 1;
       }
     }
@@ -675,7 +761,7 @@ public class PulseActivationAnalysis implements PlugIn {
       return;
     }
 
-    final double[] crosstalk = computeCrosstalk(counts, targetChannel - 1);
+    final double[] crosstalk = computeCrosstalk(counts, settings.targetChannel - 1);
 
     // Store the cross talk.
     // Crosstalk from M into N is defined as the number of times the molecule that should be
@@ -684,23 +770,23 @@ public class PulseActivationAnalysis implements PlugIn {
     // activationChannel = N
     int index1;
     int index2 = -1;
-    if (channels == 2) {
-      if (targetChannel == 1) {
-        index1 = setCrosstalk(C12, crosstalk[1]);
+    if (settings.channels == 2) {
+      if (settings.targetChannel == 1) {
+        index1 = setCrosstalk(Settings.C12, crosstalk[1]);
       } else {
-        index1 = setCrosstalk(C21, crosstalk[0]);
+        index1 = setCrosstalk(Settings.C21, crosstalk[0]);
       }
 
       // 3-channel
-    } else if (targetChannel == 1) {
-      index1 = setCrosstalk(C12, crosstalk[1]);
-      index2 = setCrosstalk(C13, crosstalk[2]);
-    } else if (targetChannel == 2) {
-      index1 = setCrosstalk(C21, crosstalk[0]);
-      index2 = setCrosstalk(C23, crosstalk[2]);
+    } else if (settings.targetChannel == 1) {
+      index1 = setCrosstalk(Settings.C12, crosstalk[1]);
+      index2 = setCrosstalk(Settings.C13, crosstalk[2]);
+    } else if (settings.targetChannel == 2) {
+      index1 = setCrosstalk(Settings.C21, crosstalk[0]);
+      index2 = setCrosstalk(Settings.C23, crosstalk[2]);
     } else {
-      index1 = setCrosstalk(C31, crosstalk[0]);
-      index2 = setCrosstalk(C32, crosstalk[1]);
+      index1 = setCrosstalk(Settings.C31, crosstalk[0]);
+      index2 = setCrosstalk(Settings.C32, crosstalk[1]);
     }
 
     // Show fraction activations histogram. So we have to set the sum to 1
@@ -710,15 +796,17 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // Plot a histogram
-    final double[] x = SimpleArrayUtils.newArray(channels, 0.5, 1);
+    final double[] x = SimpleArrayUtils.newArray(settings.channels, 0.5, 1);
     final double[] y = crosstalk;
     final Plot2 plot = new Plot2(title, "Channel", "Fraction activations");
-    plot.setLimits(0, channels + 1, 0, 1);
+    plot.setLimits(0, settings.channels + 1, 0, 1);
     plot.setXMinorTicks(false);
     plot.addPoints(x, y, Plot2.BAR);
-    String label = String.format("Crosstalk %s = %s", ctNames[index1], MathUtils.round(ct[index1]));
+    String label = String.format("Crosstalk %s = %s", Settings.ctNames[index1],
+        MathUtils.round(settings.ct[index1]));
     if (index2 > -1) {
-      label += String.format(", %s = %s", ctNames[index2], MathUtils.round(ct[index2]));
+      label += String.format(", %s = %s", Settings.ctNames[index2],
+          MathUtils.round(settings.ct[index2]));
     }
     plot.addLabel(0, 0, label);
     ImageJUtils.display(title, plot);
@@ -742,8 +830,8 @@ public class PulseActivationAnalysis implements PlugIn {
     return crosstalk;
   }
 
-  private static int setCrosstalk(int index, double value) {
-    ct[index] = value;
+  private int setCrosstalk(int index, double value) {
+    settings.ct[index] = value;
     return index;
   }
 
@@ -756,12 +844,12 @@ public class PulseActivationAnalysis implements PlugIn {
             + " the pulse in the target channel. Activations from the pulse in other channels"
             + " is crosstalk.", 80));
 
-    final String[] ch = new String[channels];
+    final String[] ch = new String[settings.channels];
     for (int i = 0; i < ch.length; i++) {
       ch[i] = "Channel " + (i + 1);
     }
 
-    gd.addChoice("Target", ch, "Channel " + targetChannel);
+    gd.addChoice("Target", ch, "Channel " + settings.targetChannel);
 
     gd.showDialog();
 
@@ -769,7 +857,7 @@ public class PulseActivationAnalysis implements PlugIn {
       return false;
     }
 
-    targetChannel = gd.getNextChoiceIndex() + 1;
+    settings.targetChannel = gd.getNextChoiceIndex() + 1;
 
     return true;
   }
@@ -924,23 +1012,24 @@ public class PulseActivationAnalysis implements PlugIn {
 
     RunSettings(ResultsSettings resultsSettings) {
       // Copy the current settings required
-      if (channels > 1) {
-        this.densityRadius = PulseActivationAnalysis.densityRadius / results.getNmPerPixel();
-        this.minNeighbours = PulseActivationAnalysis.minNeighbours;
+      if (settings.channels > 1) {
+        this.densityRadius =
+            PulseActivationAnalysis.this.settings.densityRadius / results.getNmPerPixel();
+        this.minNeighbours = PulseActivationAnalysis.this.settings.minNeighbours;
 
-        specificCorrection = getCorrection(PulseActivationAnalysis.specificCorrection,
-            PulseActivationAnalysis.specificCorrectionIndex);
-        this.specificCorrectionCutoff = new double[channels];
-        for (int i = channels; i-- > 0;) {
+        specificCorrection = getCorrection(Settings.specificCorrection,
+            PulseActivationAnalysis.this.settings.specificCorrectionIndex);
+        this.specificCorrectionCutoff = new double[settings.channels];
+        for (int i = settings.channels; i-- > 0;) {
           // Convert from percentage to a probability
           this.specificCorrectionCutoff[i] =
-              PulseActivationAnalysis.specificCorrectionCutoff[i] / 100.0;
+              PulseActivationAnalysis.this.settings.specificCorrectionCutoff[i] / 100.0;
         }
 
-        nonSpecificCorrection = getCorrection(PulseActivationAnalysis.nonSpecificCorrection,
-            PulseActivationAnalysis.nonSpecificCorrectionIndex);
+        nonSpecificCorrection = getCorrection(Settings.nonSpecificCorrection,
+            PulseActivationAnalysis.this.settings.nonSpecificCorrectionIndex);
         this.nonSpecificCorrectionCutoff =
-            PulseActivationAnalysis.nonSpecificCorrectionCutoff / 100.0;
+            PulseActivationAnalysis.this.settings.nonSpecificCorrectionCutoff / 100.0;
       }
       this.resultsSettings = resultsSettings;
     }
@@ -966,7 +1055,7 @@ public class PulseActivationAnalysis implements PlugIn {
         return true;
       }
       if (specificCorrection != Correction.NONE) {
-        for (int i = channels; i-- > 0;) {
+        for (int i = settings.channels; i-- > 0;) {
           if (lastRunSettings.specificCorrectionCutoff[i] != specificCorrectionCutoff[i]) {
             return true;
           }
@@ -1047,29 +1136,30 @@ public class PulseActivationAnalysis implements PlugIn {
     String[] correctionNames = null;
     String[] assignmentNames = null;
 
-    if (channels > 1) {
-      if (channels == 2) {
-        gd.addNumericField("Crosstalk_21", ct[C21], 3);
-        gd.addNumericField("Crosstalk_12", ct[C12], 3);
+    if (settings.channels > 1) {
+      if (settings.channels == 2) {
+        gd.addNumericField("Crosstalk_21", settings.ct[Settings.C21], 3);
+        gd.addNumericField("Crosstalk_12", settings.ct[Settings.C12], 3);
       } else {
-        for (int i = 0; i < ctNames.length; i++) {
-          gd.addNumericField("Crosstalk_" + ctNames[i], ct[i], 3);
+        for (int i = 0; i < Settings.ctNames.length; i++) {
+          gd.addNumericField("Crosstalk_" + Settings.ctNames[i], settings.ct[i], 3);
         }
       }
 
-      gd.addNumericField("Local_density_radius", densityRadius, 0, 6, "nm");
-      gd.addSlider("Min_neighbours", 0, 15, minNeighbours);
-      correctionNames = SettingsManager.getNames((Object[]) specificCorrection);
+      gd.addNumericField("Local_density_radius", settings.densityRadius, 0, 6, "nm");
+      gd.addSlider("Min_neighbours", 0, 15, settings.minNeighbours);
+      correctionNames = SettingsManager.getNames((Object[]) Settings.specificCorrection);
       gd.addChoice("Crosstalk_correction", correctionNames,
-          correctionNames[specificCorrectionIndex]);
-      for (int c = 1; c <= channels; c++) {
+          correctionNames[settings.specificCorrectionIndex]);
+      for (int c = 1; c <= settings.channels; c++) {
         gd.addSlider("Crosstalk_correction_cutoff_C" + c + "(%)", 0, 100,
-            specificCorrectionCutoff[c - 1]);
+            settings.specificCorrectionCutoff[c - 1]);
       }
-      assignmentNames = SettingsManager.getNames((Object[]) nonSpecificCorrection);
+      assignmentNames = SettingsManager.getNames((Object[]) Settings.nonSpecificCorrection);
       gd.addChoice("Nonspecific_assigment", assignmentNames,
-          assignmentNames[nonSpecificCorrectionIndex]);
-      gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100, nonSpecificCorrectionCutoff);
+          assignmentNames[settings.nonSpecificCorrectionIndex]);
+      gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100,
+          settings.nonSpecificCorrectionCutoff);
     }
 
     resultsSettingsBuilder = SettingsManager.readResultsSettings(0).toBuilder();
@@ -1083,12 +1173,13 @@ public class PulseActivationAnalysis implements PlugIn {
     // gd.addSlider("Image_Precision (nm)", 5, 30, s.getAveragePrecision());
     // gd.addSlider("Image_Scale", 1, 15, s.getScale());
 
-    previewCheckBox = gd.addAndGetCheckbox("Preview", false);
+    final Checkbox previewCheckBox = gd.addAndGetCheckbox("Preview", false);
 
     final String buttonLabel = "Draw loop";
     gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
     gd.addAndGetButton(buttonLabel, this::actionPerformed);
-    magnificationChoice = gd.addAndGetChoice("Magnification", magnifications, magnification);
+    magnificationChoice =
+        gd.addAndGetChoice("Magnification", Settings.magnifications, settings.magnification);
 
     gd.addDialogListener(this::dialogItemChanged);
     gd.addOptionCollectedListener(event -> addWork(previewCheckBox.getState()));
@@ -1106,33 +1197,36 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Record options for a macro since the NonBlockingDialog does not
     if (Recorder.record) {
-      if (channels > 1) {
+      if (settings.channels > 1) {
         // Suppress null warnings
         if (correctionNames == null || assignmentNames == null) {
           throw new IllegalStateException();
         }
 
-        if (channels == 2) {
-          Recorder.recordOption("Crosstalk_21", Double.toString(ct[C21]));
-          Recorder.recordOption("Crosstalk_12", Double.toString(ct[C12]));
+        if (settings.channels == 2) {
+          Recorder.recordOption("Crosstalk_21", Double.toString(settings.ct[Settings.C21]));
+          Recorder.recordOption("Crosstalk_12", Double.toString(settings.ct[Settings.C12]));
         } else {
-          for (int i = 0; i < ctNames.length; i++) {
-            Recorder.recordOption("Crosstalk_" + ctNames[i], Double.toString(ct[i]));
+          for (int i = 0; i < Settings.ctNames.length; i++) {
+            Recorder.recordOption("Crosstalk_" + Settings.ctNames[i],
+                Double.toString(settings.ct[i]));
           }
         }
 
-        Recorder.recordOption("Local_density_radius", Double.toString(densityRadius));
-        Recorder.recordOption("Min_neighbours", Integer.toString(minNeighbours));
+        Recorder.recordOption("Local_density_radius", Double.toString(settings.densityRadius));
+        Recorder.recordOption("Min_neighbours", Integer.toString(settings.minNeighbours));
 
-        Recorder.recordOption("Crosstalk_correction", correctionNames[specificCorrectionIndex]);
-        for (int c = 1; c <= channels; c++) {
+        Recorder.recordOption("Crosstalk_correction",
+            correctionNames[settings.specificCorrectionIndex]);
+        for (int c = 1; c <= settings.channels; c++) {
           Recorder.recordOption("Crosstalk_correction_cutoff_C" + c,
-              Double.toString(specificCorrectionCutoff[c - 1]));
+              Double.toString(settings.specificCorrectionCutoff[c - 1]));
         }
 
-        Recorder.recordOption("Nonspecific_assigment", assignmentNames[nonSpecificCorrectionIndex]);
+        Recorder.recordOption("Nonspecific_assigment",
+            assignmentNames[settings.nonSpecificCorrectionIndex]);
         Recorder.recordOption("Nonspecific_assignment_cutoff (%)",
-            Double.toString(nonSpecificCorrectionCutoff));
+            Double.toString(settings.nonSpecificCorrectionCutoff));
       }
 
       final ResultsImageSettings s = resultsSettingsBuilder.getResultsImageSettings();
@@ -1162,34 +1256,35 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Check arguments
     try {
-      if (channels > 1) {
-        if (channels == 2) {
-          ct[C21] = gd.getNextNumber();
-          ct[C12] = gd.getNextNumber();
-          validateCrosstalk(C21);
-          validateCrosstalk(C12);
+      if (settings.channels > 1) {
+        if (settings.channels == 2) {
+          settings.ct[Settings.C21] = gd.getNextNumber();
+          settings.ct[Settings.C12] = gd.getNextNumber();
+          validateCrosstalk(Settings.C21);
+          validateCrosstalk(Settings.C12);
         } else {
-          ct[C21] = gd.getNextNumber();
-          ct[C31] = gd.getNextNumber();
-          ct[C12] = gd.getNextNumber();
-          ct[C32] = gd.getNextNumber();
-          ct[C13] = gd.getNextNumber();
-          ct[C23] = gd.getNextNumber();
-          for (int i = 0; i < ct.length; i += 2) {
+          settings.ct[Settings.C21] = gd.getNextNumber();
+          settings.ct[Settings.C31] = gd.getNextNumber();
+          settings.ct[Settings.C12] = gd.getNextNumber();
+          settings.ct[Settings.C32] = gd.getNextNumber();
+          settings.ct[Settings.C13] = gd.getNextNumber();
+          settings.ct[Settings.C23] = gd.getNextNumber();
+          for (int i = 0; i < settings.ct.length; i += 2) {
             validateCrosstalk(i, i + 1);
           }
         }
 
-        densityRadius = Math.abs(gd.getNextNumber());
-        minNeighbours = Math.abs((int) gd.getNextNumber());
-        specificCorrectionIndex = gd.getNextChoiceIndex();
-        for (int c = 1; c <= channels; c++) {
-          specificCorrectionCutoff[c - 1] = (int) gd.getNextNumber();
-          validatePercentage("Crosstalk_correction_cutoff_C" + c, specificCorrectionCutoff[c - 1]);
+        settings.densityRadius = Math.abs(gd.getNextNumber());
+        settings.minNeighbours = Math.abs((int) gd.getNextNumber());
+        settings.specificCorrectionIndex = gd.getNextChoiceIndex();
+        for (int c = 1; c <= settings.channels; c++) {
+          settings.specificCorrectionCutoff[c - 1] = (int) gd.getNextNumber();
+          validatePercentage("Crosstalk_correction_cutoff_C" + c,
+              settings.specificCorrectionCutoff[c - 1]);
         }
-        nonSpecificCorrectionIndex = gd.getNextChoiceIndex();
-        nonSpecificCorrectionCutoff = gd.getNextNumber();
-        validatePercentage("Nonspecific_assignment_cutoff", nonSpecificCorrectionCutoff);
+        settings.nonSpecificCorrectionIndex = gd.getNextChoiceIndex();
+        settings.nonSpecificCorrectionCutoff = gd.getNextNumber();
+        validatePercentage("Nonspecific_assignment_cutoff", settings.nonSpecificCorrectionCutoff);
       }
     } catch (final IllegalArgumentException ex) {
       IJ.error(title, ex.getMessage());
@@ -1221,29 +1316,30 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private void addWork(boolean preview) {
-    final RunSettings settings = new RunSettings(resultsSettingsBuilder.build());
+    final RunSettings runSettings = new RunSettings(resultsSettingsBuilder.build());
     if (preview) {
       // Run the settings
-      workflow.run(settings);
+      workflow.run(runSettings);
       workflow.startPreview();
     } else {
       workflow.stopPreview();
       // Stage the work but do not run
-      workflow.stage(settings);
+      workflow.stage(runSettings);
     }
   }
 
-  private static void validateCrosstalk(int index) {
-    final String name = "Crosstalk " + ctNames[index];
-    ParameterUtils.isPositive(name, ct[index]);
-    ParameterUtils.isBelow(name, ct[index], 0.5);
+  private void validateCrosstalk(int index) {
+    final String name = "Crosstalk " + Settings.ctNames[index];
+    ParameterUtils.isPositive(name, settings.ct[index]);
+    ParameterUtils.isBelow(name, settings.ct[index], 0.5);
   }
 
-  private static void validateCrosstalk(int index1, int index2) {
+  private void validateCrosstalk(int index1, int index2) {
     validateCrosstalk(index1);
     validateCrosstalk(index2);
-    ParameterUtils.isBelow("Crosstalk " + ctNames[index1] + " + " + ctNames[index2],
-        ct[index1] + ct[index2], 0.5);
+    ParameterUtils.isBelow(
+        "Crosstalk " + Settings.ctNames[index1] + " + " + Settings.ctNames[index2],
+        settings.ct[index1] + settings.ct[index2], 0.5);
   }
 
   private static void validatePercentage(String name, double percentage) {
@@ -1302,7 +1398,7 @@ public class PulseActivationAnalysis implements PlugIn {
         // Do this all together: it uses a faster algorithm and we can cache the results
         if (density == null) {
           IJ.showStatus("Computing observed density");
-          density = dc.countAll(channels);
+          density = dc.countAll(settings.channels);
         }
 
         final SplitMix sm = new SplitMix(System.currentTimeMillis());
@@ -1371,8 +1467,8 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Set-up outputs for each channel
     IJ.showStatus("Creating outputs");
-    output = new PeakResultsList[channels];
-    for (int c = 0; c < channels; c++) {
+    output = new PeakResultsList[settings.channels];
+    for (int c = 0; c < settings.channels; c++) {
       output[c] = createOutput(c + 1);
     }
 
@@ -1381,16 +1477,16 @@ public class PulseActivationAnalysis implements PlugIn {
     count = write(output, nonSpecificActivations, count);
 
     int size = 0;
-    for (int c = 0; c < channels; c++) {
+    for (int c = 0; c < settings.channels; c++) {
       output[c].end();
       size += output[c].size();
     }
 
     // Collate image into a stack
-    if (channels > 1 && runSettings.resultsSettings.getResultsImageSettings()
+    if (settings.channels > 1 && runSettings.resultsSettings.getResultsImageSettings()
         .getImageType() != ResultsImageType.DRAW_NONE) {
-      final ImageProcessor[] images = new ImageProcessor[channels];
-      for (int c = 0; c < channels; c++) {
+      final ImageProcessor[] images = new ImageProcessor[settings.channels];
+      for (int c = 0; c < settings.channels; c++) {
         images[c] = getImage(output[c]);
       }
       displayComposite(images, results.getName() + " " + title);
@@ -1552,8 +1648,8 @@ public class PulseActivationAnalysis implements PlugIn {
     final int from;
     final int to;
     UniformRandomProvider rng;
-    int[] assignedChannel = new int[channels];
-    double[] probability = new double[channels];
+    int[] assignedChannel = new int[settings.channels];
+    double[] probability = new double[settings.channels];
 
     public UnmixWorker(int[] newChannel, int from, int to, UniformRandomProvider rng) {
       this.newChannel = newChannel;
@@ -1564,7 +1660,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     int weightedRandomSelection(double cutoff) {
       double sum = 0;
-      for (int j = channels; j-- > 0;) {
+      for (int j = settings.channels; j-- > 0;) {
         if (probability[j] > cutoff) {
           sum += probability[j];
         } else {
@@ -1577,7 +1673,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
       final double sum2 = sum * rng.nextDouble();
       sum = 0;
-      for (int j = channels; j-- > 0;) {
+      for (int j = settings.channels; j-- > 0;) {
         sum += probability[j];
         if (sum >= sum2) {
           return j + 1;
@@ -1590,7 +1686,7 @@ public class PulseActivationAnalysis implements PlugIn {
     int mostLikelySelection(double cutoff) {
       double max = cutoff;
       int size = 0;
-      for (int j = channels; j-- > 0;) {
+      for (int j = settings.channels; j-- > 0;) {
         if (probability[j] > max) {
           size = 1;
           max = probability[j];
@@ -1631,7 +1727,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
         // Compute the number of neighbours.
         int neighbours = 0;
-        for (int j = 1; j <= channels; j++) {
+        for (int j = 1; j <= settings.channels; j++) {
           neighbours += obsDen[j];
         }
 
@@ -1648,11 +1744,12 @@ public class PulseActivationAnalysis implements PlugIn {
 
         // Compute the true local densities
         double[] den;
-        if (channels == 2) {
-          den = unmix(obsDen[1], obsDen[2], ct[C12], ct[C12]);
+        if (settings.channels == 2) {
+          den = unmix(obsDen[1], obsDen[2], settings.ct[Settings.C12], settings.ct[Settings.C12]);
         } else {
-          den = unmix(obsDen[1], obsDen[2], obsDen[3], ct[C21], ct[C31], ct[C12], ct[C32], ct[C13],
-              ct[C23]);
+          den = unmix(obsDen[1], obsDen[2], obsDen[3], settings.ct[Settings.C21],
+              settings.ct[Settings.C31], settings.ct[Settings.C12], settings.ct[Settings.C32],
+              settings.ct[Settings.C13], settings.ct[Settings.C23]);
         }
 
         // Apply crosstalk correction
@@ -1674,12 +1771,12 @@ public class PulseActivationAnalysis implements PlugIn {
           // density.
           // This value is a simple probability using the local density in each channel.
           double sum = 0;
-          for (int j = channels; j-- > 0;) {
+          for (int j = settings.channels; j-- > 0;) {
             sum += den[j];
           }
           // Note that since this is a specific activation we can assume the molecule will be
           // self-counted within the radius and that d will never be zero in every channel
-          for (int j = channels; j-- > 0;) {
+          for (int j = settings.channels; j-- > 0;) {
             probability[j] = den[j] / sum;
           }
 
@@ -1720,18 +1817,18 @@ public class PulseActivationAnalysis implements PlugIn {
 
         // Assume the observed density is the true local density
         // (i.e. cross talk correction of specific activations is perfect)
-        final int[] d = dc.count(nonSpecificActivations[i], channels);
+        final int[] d = dc.count(nonSpecificActivations[i], settings.channels);
 
         // Compute the probability of each channel as:
         // p(i) = di / (d1 + d2 + ... + dn)
         double sum = 0;
-        for (int j = 1; j <= channels; j++) {
+        for (int j = 1; j <= settings.channels; j++) {
           sum += d[j];
         }
 
         // Do not unmix if there are not enough neighbours.
         if (sum >= runSettings.minNeighbours) {
-          for (int j = channels; j-- > 0;) {
+          for (int j = settings.channels; j-- > 0;) {
             probability[j] = d[j + 1] / sum;
           }
 
@@ -1750,7 +1847,7 @@ public class PulseActivationAnalysis implements PlugIn {
   private PeakResultsList createOutput(int channel) {
     final PeakResultsList outputList = new PeakResultsList();
     outputList.copySettings(results);
-    if (channels > 1) {
+    if (settings.channels > 1) {
       outputList.setName(results.getName() + " " + title + " C" + channel);
     } else {
       outputList.setName(results.getName() + " " + title);
@@ -1771,7 +1868,7 @@ public class PulseActivationAnalysis implements PlugIn {
     return outputList;
   }
 
-  private static void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
+  private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
       double nmPerPixel, double gain, ResultsImageSettings imageSettings) {
     if (imageSettings.getImageType() != ResultsImageType.DRAW_NONE) {
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
@@ -1779,7 +1876,7 @@ public class PulseActivationAnalysis implements PlugIn {
           title, bounds, nmPerPixel, gain, imageSettings.getScale(),
           imageSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
       image.setLiveImage(false);
-      image.setDisplayImage(channels == 1);
+      image.setDisplayImage(settings.channels == 1);
       resultsList.addOutput(image);
     }
   }
@@ -1831,8 +1928,8 @@ public class PulseActivationAnalysis implements PlugIn {
     ImageJUtils.showStatus("Simulating molecules ...");
     final float[][][] molecules = new float[3][][];
     final MemoryPeakResults[] results = new MemoryPeakResults[3];
-    final Calibration calibration = CalibrationHelper.create(sim_nmPerPixel, 1, 100);
-    final Rectangle bounds = new Rectangle(0, 0, sim_size, sim_size);
+    final Calibration calibration = CalibrationHelper.create(settings.nmPerPixel, 1, 100);
+    final Rectangle bounds = new Rectangle(0, 0, settings.size, settings.size);
     for (int c = 0; c < 3; c++) {
       molecules[c] = simulateMolecules(rng, c);
 
@@ -1864,8 +1961,8 @@ public class PulseActivationAnalysis implements PlugIn {
 
       // Draw the unmixed activations
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, sim_nmPerPixel, 1,
-          1024.0 / sim_size, 0, ResultsImageMode.IMAGE_ADD);
+          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, settings.nmPerPixel, 1,
+          1024.0 / settings.size, 0, ResultsImageMode.IMAGE_ADD);
       image.setCalibration(calibration);
       image.setLiveImage(false);
       image.setDisplayImage(false);
@@ -1891,7 +1988,7 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private float[][] simulateMolecules(UniformRandomProvider rng, int channel) {
-    final int n = sim_numberOfMolecules[channel];
+    final int n = settings.numberOfMolecules[channel];
     final float[][] molecules = new float[n][];
     if (n == 0) {
       return molecules;
@@ -1923,10 +2020,10 @@ public class PulseActivationAnalysis implements PlugIn {
 
   private Shape[] createShapes(UniformRandomProvider rng, int channel) {
     Shape[] shapes;
-    final double min = sim_size / 20.0;
-    final double max = sim_size / 10.0;
+    final double min = settings.size / 20.0;
+    final double max = settings.size / 10.0;
     final double range = max - min;
-    switch (sim_distribution[channel]) {
+    switch (settings.distribution[channel]) {
       case CIRCLE:
         shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
@@ -1951,7 +2048,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
       case POINT:
       default:
-        shapes = new Shape[sim_numberOfMolecules[channel]];
+        shapes = new Shape[settings.numberOfMolecules[channel]];
         for (int i = 0; i < shapes.length; i++) {
           final float x = nextCoordinate(rng);
           final float y = nextCoordinate(rng);
@@ -1961,12 +2058,12 @@ public class PulseActivationAnalysis implements PlugIn {
     return shapes;
   }
 
-  private static float nextCoordinate(UniformRandomProvider rng) {
-    return (float) rng.nextDouble() * sim_size;
+  private float nextCoordinate(UniformRandomProvider rng) {
+    return (float) rng.nextDouble() * settings.size;
   }
 
-  private static boolean outOfBounds(float value) {
-    return value < 0 || value > sim_size;
+  private boolean outOfBounds(float value) {
+    return value < 0 || value > settings.size;
   }
 
   private void simulateActivations(UniformRandomProvider rng, float[][][] molecules, int channel,
@@ -1977,10 +2074,10 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // Compute desired number per frame
-    final double umPerPixel = sim_nmPerPixel / 1000;
+    final double umPerPixel = settings.nmPerPixel / 1000;
     final double um2PerPixel = umPerPixel * umPerPixel;
-    final double area = sim_size * sim_size * um2PerPixel;
-    final double nPerFrame = area * sim_activationDensity;
+    final double area = settings.size * settings.size * um2PerPixel;
+    final double nPerFrame = area * settings.activationDensity;
 
     // Compute the activation probability (but set an upper limit so not all are on in every frame)
     final double p = Math.min(0.5, nPerFrame / n);
@@ -1993,30 +2090,30 @@ public class PulseActivationAnalysis implements PlugIn {
     int c2;
     switch (channel) {
       case 0:
-        index1 = C12;
-        index2 = C13;
+        index1 = Settings.C12;
+        index2 = Settings.C13;
         c1 = 1;
         c2 = 2;
         break;
       case 1:
-        index1 = C21;
-        index2 = C23;
+        index1 = Settings.C21;
+        index2 = Settings.C23;
         c1 = 0;
         c2 = 2;
         break;
       case 2:
       default:
-        index1 = C31;
-        index2 = C32;
+        index1 = Settings.C31;
+        index2 = Settings.C32;
         c1 = 0;
         c2 = 1;
         break;
     }
-    p0[c1] *= ct[index1];
-    p0[c2] *= ct[index2];
+    p0[c1] *= settings.ct[index1];
+    p0[c2] *= settings.ct[index2];
 
     // Assume 10 frames after each channel pulse => 30 frames per cycle
-    final double precision = sim_precision[channel] / sim_nmPerPixel;
+    final double precision = settings.precision[channel] / settings.nmPerPixel;
 
     final DiscreteSampler[] bd = new DiscreteSampler[4];
     for (int i = 0; i < 3; i++) {
@@ -2031,12 +2128,12 @@ public class PulseActivationAnalysis implements PlugIn {
       }
       frames[j++] = i;
     }
-    bd[3] = createBinomialDistribution(rng, n, p * sim_nonSpecificFrequency);
+    bd[3] = createBinomialDistribution(rng, n, p * settings.nonSpecificFrequency);
 
     // Count the actual cross talk
     final int[] count = new int[3];
 
-    for (int i = 0, t = 1; i < sim_cycles; i++, t += 30) {
+    for (int i = 0, t = 1; i < settings.cycles; i++, t += 30) {
       count[0] +=
           simulateActivations(rng, bd[0], molecules[channel], results[channel], t, precision);
       count[1] +=
@@ -2053,9 +2150,10 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Report simulated cross talk
     final double[] crosstalk = computeCrosstalk(count, channel);
-    ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", ctNames[index1],
-        MathUtils.rounded(ct[index1]), MathUtils.rounded(crosstalk[c1]), ctNames[index2],
-        MathUtils.rounded(ct[index2]), MathUtils.rounded(crosstalk[c2]));
+    ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", Settings.ctNames[index1],
+        MathUtils.rounded(settings.ct[index1]), MathUtils.rounded(crosstalk[c1]),
+        Settings.ctNames[index2], MathUtils.rounded(settings.ct[index2]),
+        MathUtils.rounded(crosstalk[c2]));
   }
 
   private int simulateActivations(UniformRandomProvider rng, DiscreteSampler bd,
@@ -2107,23 +2205,24 @@ public class PulseActivationAnalysis implements PlugIn {
     final String[] distribution = SettingsManager.getNames((Object[]) distributionValues);
 
     // Random crosstalk if not set
-    if (MathUtils.max(ct) == 0) {
+    if (MathUtils.max(settings.ct) == 0) {
       // Have some crosstalk
       final ContinuousUniformSampler sampler =
           new ContinuousUniformSampler(getUniformRandomProvider(), 0.05, 0.15);
-      for (int i = 0; i < ct.length; i++) {
-        ct[i] = sampler.sample();
+      for (int i = 0; i < settings.ct.length; i++) {
+        settings.ct[i] = sampler.sample();
       }
     }
 
     // Three channel
     for (int c = 0; c < 3; c++) {
       final String ch = "_C" + (c + 1);
-      gd.addNumericField("Molcules" + ch, sim_numberOfMolecules[c], 0);
-      gd.addChoice("Distribution" + ch, distribution, distribution[sim_distribution[c].ordinal()]);
-      gd.addNumericField("Precision_" + ch, sim_precision[c], 3);
-      gd.addNumericField("Crosstalk_" + ctNames[2 * c], ct[2 * c], 3);
-      gd.addNumericField("Crosstalk_" + ctNames[2 * c + 1], ct[2 * c + 1], 3);
+      gd.addNumericField("Molcules" + ch, settings.numberOfMolecules[c], 0);
+      gd.addChoice("Distribution" + ch, distribution,
+          distribution[settings.distribution[c].ordinal()]);
+      gd.addNumericField("Precision_" + ch, settings.precision[c], 3);
+      gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c], settings.ct[2 * c], 3);
+      gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c + 1], settings.ct[2 * c + 1], 3);
     }
     gd.showDialog();
 
@@ -2133,15 +2232,17 @@ public class PulseActivationAnalysis implements PlugIn {
 
     int count = 0;
     for (int c = 0; c < 3; c++) {
-      sim_numberOfMolecules[c] = (int) Math.abs(gd.getNextNumber());
-      if (sim_numberOfMolecules[c] > 0) {
+      settings.numberOfMolecules[c] = (int) Math.abs(gd.getNextNumber());
+      if (settings.numberOfMolecules[c] > 0) {
         count++;
       }
-      sim_distribution[c] = distributionValues[gd.getNextChoiceIndex()];
-      sim_precision[c] = Math.abs(gd.getNextNumber());
-      ct[2 * c] = Math.abs(gd.getNextNumber());
-      ct[2 * c + 1] = Math.abs(gd.getNextNumber());
+      settings.distribution[c] = distributionValues[gd.getNextChoiceIndex()];
+      settings.precision[c] = Math.abs(gd.getNextNumber());
+      settings.ct[2 * c] = Math.abs(gd.getNextNumber());
+      settings.ct[2 * c + 1] = Math.abs(gd.getNextNumber());
     }
+
+    settings.save();
 
     if (gd.invalidNumber()) {
       return false;
@@ -2152,8 +2253,8 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     try {
-      for (int i = 0; i < ct.length; i += 2) {
-        if (sim_numberOfMolecules[i / 2] > 0) {
+      for (int i = 0; i < settings.ct.length; i += 2) {
+        if (settings.numberOfMolecules[i / 2] > 0) {
           validateCrosstalk(i, i + 1);
         }
       }
@@ -2215,7 +2316,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // For each result set crop out the localisation and construct an overlay
     final Overlay o = new Overlay();
     for (int i = 0; i < output.length; i++) {
-      final Color color = colors[i];
+      final Color color = Settings.colors[i];
 
       // The first result is the memory results
       final MemoryPeakResults results = (MemoryPeakResults) output[i].getOutput(0);
@@ -2252,9 +2353,9 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private int getMagnification() {
-    magnification = magnificationChoice.getSelectedItem();
+    settings.magnification = magnificationChoice.getSelectedItem();
     try {
-      return Integer.parseInt(magnification);
+      return Integer.parseInt(settings.magnification);
     } catch (final NumberFormatException ex) {
       return 1;
     }
@@ -2267,5 +2368,12 @@ public class PulseActivationAnalysis implements PlugIn {
     roi.setPointType(1); // PointRoi.CROSSHAIR);
     roi.setSize(1); // PointRoi.TINY);
     overlay.add(roi);
+  }
+
+  private UniformRandomProvider getUniformRandomProvider() {
+    if (initialisedRng == null) {
+      initialisedRng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+    }
+    return initialisedRng;
   }
 }
