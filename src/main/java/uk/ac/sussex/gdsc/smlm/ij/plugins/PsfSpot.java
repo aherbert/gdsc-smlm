@@ -31,12 +31,13 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Stores details of a simulated localisation. Contains details of the amount of signal that occurs
  * due to overlap with neighbour PSFs.
  */
-final class PsfSpot extends BasePoint {
+public final class PsfSpot extends BasePoint {
   /** The time. */
-  final int time;
+  private final int time;
 
   /** The peak result. */
-  final PeakResult peakResult;
+  private final PeakResult peakResult;
+
   /**
    * The amount of total background contributed within the region of this spot from overlapping
    * PSFs, i.e. how much higher is this spot due to other PSFs.
@@ -54,7 +55,7 @@ final class PsfSpot extends BasePoint {
    * @param y the y
    * @param peakResult the peak result
    */
-  PsfSpot(int time, float x, float y, PeakResult peakResult) {
+  public PsfSpot(int time, float x, float y, PeakResult peakResult) {
     super(x, y);
     this.time = time;
     this.peakResult = peakResult;
@@ -65,8 +66,55 @@ final class PsfSpot extends BasePoint {
    *
    * @return the time
    */
-  int getTime() {
+  public int getTime() {
     return time;
+  }
+
+  /**
+   * Gets the peak result.
+   *
+   * @return the peak result
+   */
+  public PeakResult getPeakResult() {
+    return peakResult;
+  }
+
+  /**
+   * Gets amount of total background contributed within the region of this spot from overlapping
+   * PSFs, i.e. how much higher is this spot due to other PSFs.
+   *
+   * @return the background offset
+   */
+  public float getBackgroundOffset() {
+    return backgroundOffset;
+  }
+
+  /**
+   * Sets the amount of total background contributed within the region of this spot from overlapping
+   * PSFs, i.e. how much higher is this spot due to other PSFs.
+   *
+   * @param backgroundOffset the new background offset
+   */
+  public void setBackgroundOffset(float backgroundOffset) {
+    this.backgroundOffset = backgroundOffset;
+  }
+
+  /**
+   * Gets the amplitude.
+   *
+   * @return the amplitude
+   */
+  public double getAmplitude() {
+    return amplitude;
+  }
+
+  /**
+   * Sets the amplitude.
+   *
+   * @param amplitude the new amplitude
+   */
+  public void setAmplitude(double amplitude) {
+    this.amplitude = amplitude;
   }
 
   @Override
@@ -78,43 +126,5 @@ final class PsfSpot extends BasePoint {
   @Override
   public int hashCode() {
     return 41 * super.hashCode() + time;
-  }
-
-  /**
-   * Gets amount of total background contributed within the region of this spot from overlapping
-   * PSFs, i.e. how much higher is this spot due to other PSFs.
-   *
-   * @return the background offset
-   */
-  float getBackgroundOffset() {
-    return backgroundOffset;
-  }
-
-  /**
-   * Sets the amount of total background contributed within the region of this spot from overlapping
-   * PSFs, i.e. how much higher is this spot due to other PSFs.
-   *
-   * @param backgroundOffset the new background offset
-   */
-  void setBackgroundOffset(float backgroundOffset) {
-    this.backgroundOffset = backgroundOffset;
-  }
-
-  /**
-   * Gets the amplitude.
-   *
-   * @return the amplitude
-   */
-  double getAmplitude() {
-    return amplitude;
-  }
-
-  /**
-   * Sets the amplitude.
-   *
-   * @param amplitude the new amplitude
-   */
-  void setAmplitude(double amplitude) {
-    this.amplitude = amplitude;
   }
 }

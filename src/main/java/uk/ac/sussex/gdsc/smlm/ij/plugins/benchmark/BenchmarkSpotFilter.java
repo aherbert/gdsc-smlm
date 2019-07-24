@@ -732,7 +732,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       final double[] sa2 = new double[actual.length];
       for (int i = 0; i < actual.length; i++) {
         sa[i] = PsfCalculator.squarePixelAdjustment(
-            calculator.getStandardDeviation(actual[i].peakResult.getParameters()), 1);
+            calculator.getStandardDeviation(actual[i].getPeakResult().getParameters()), 1);
         sa2[i] = 2 * sa[i];
       }
 
@@ -762,7 +762,7 @@ public class BenchmarkSpotFilter implements PlugIn {
             // Initialise a Gaussian2D function for i
             if (overlapAnalysis == null) {
               final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-              params[Gaussian2DFunction.SIGNAL] = actual[i].peakResult.getIntensity();
+              params[Gaussian2DFunction.SIGNAL] = actual[i].getPeakResult().getIntensity();
               params[Gaussian2DFunction.X_POSITION] = cx;
               params[Gaussian2DFunction.Y_POSITION] = cy;
               params[Gaussian2DFunction.X_SD] = params[Gaussian2DFunction.Y_SD] = sa[i];
@@ -771,9 +771,9 @@ public class BenchmarkSpotFilter implements PlugIn {
             }
 
             // Accumulate the function for j
-            allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].peakResult.getIntensity();
-            allParams[offset + Gaussian2DFunction.X_POSITION] = actual[j].peakResult.getXPosition();
-            allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].peakResult.getYPosition();
+            allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].getPeakResult().getIntensity();
+            allParams[offset + Gaussian2DFunction.X_POSITION] = actual[j].getPeakResult().getXPosition();
+            allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].getPeakResult().getYPosition();
             allParams[offset + Gaussian2DFunction.X_SD] =
                 allParams[offset + Gaussian2DFunction.Y_SD] = sa[j];
             offset += Gaussian2DFunction.PARAMETERS_PER_PEAK;
@@ -812,7 +812,7 @@ public class BenchmarkSpotFilter implements PlugIn {
           list2[index++] = spot;
 
           // Compute the amplitude.
-          final float[] params = spot.peakResult.getParameters();
+          final float[] params = spot.getPeakResult().getParameters();
           spot.setAmplitude(calculator.getPixelAmplitude(params));
         }
         return list2;
@@ -2071,7 +2071,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       for (final PsfSpot[] spots : actualCoordinates.valueCollection()) {
         for (final PsfSpot spot : spots) {
           regression.addData(spot.getAmplitude(),
-              calculator.getAmplitude(spot.peakResult.getParameters()));
+              calculator.getAmplitude(spot.getPeakResult().getParameters()));
         }
       }
       ImageJUtils.log("PixelAmplitude vs Amplitude = %f, slope=%f, n=%d", regression.getR(),
