@@ -31,20 +31,20 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Stores details of a simulated localisation. Contains details of the amount of signal that occurs
  * due to overlap with neighbour PSFs.
  */
-public class PsfSpot extends BasePoint {
+final class PsfSpot extends BasePoint {
   /** The time. */
-  public final int time;
+  final int time;
 
   /** The peak result. */
-  public final PeakResult peakResult;
+  final PeakResult peakResult;
   /**
    * The amount of total background contributed within the region of this spot from overlapping
    * PSFs, i.e. how much higher is this spot due to other PSFs.
    */
-  public float backgroundOffset;
+  private float backgroundOffset;
 
   /** The amplitude. */
-  public double amplitude;
+  private double amplitude;
 
   /**
    * Instantiates a new PSF spot.
@@ -54,7 +54,7 @@ public class PsfSpot extends BasePoint {
    * @param y the y
    * @param peakResult the peak result
    */
-  public PsfSpot(int time, float x, float y, PeakResult peakResult) {
+  PsfSpot(int time, float x, float y, PeakResult peakResult) {
     super(x, y);
     this.time = time;
     this.peakResult = peakResult;
@@ -65,7 +65,7 @@ public class PsfSpot extends BasePoint {
    *
    * @return the time
    */
-  public int getTime() {
+  int getTime() {
     return time;
   }
 
@@ -78,5 +78,43 @@ public class PsfSpot extends BasePoint {
   @Override
   public int hashCode() {
     return 41 * super.hashCode() + time;
+  }
+
+  /**
+   * Gets amount of total background contributed within the region of this spot from overlapping
+   * PSFs, i.e. how much higher is this spot due to other PSFs.
+   *
+   * @return the background offset
+   */
+  float getBackgroundOffset() {
+    return backgroundOffset;
+  }
+
+  /**
+   * Sets the amount of total background contributed within the region of this spot from overlapping
+   * PSFs, i.e. how much higher is this spot due to other PSFs.
+   *
+   * @param backgroundOffset the new background offset
+   */
+  void setBackgroundOffset(float backgroundOffset) {
+    this.backgroundOffset = backgroundOffset;
+  }
+
+  /**
+   * Gets the amplitude.
+   *
+   * @return the amplitude
+   */
+  double getAmplitude() {
+    return amplitude;
+  }
+
+  /**
+   * Sets the amplitude.
+   *
+   * @param amplitude the new amplitude
+   */
+  void setAmplitude(double amplitude) {
+    this.amplitude = amplitude;
   }
 }

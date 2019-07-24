@@ -783,7 +783,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         if (overlapAnalysis != null) {
           final double[] overlapParams = Arrays.copyOf(allParams, 1 + offset);
           overlapAnalysis.add(overlapParams, false);
-          actual[i].backgroundOffset = (float) overlapAnalysis.getWeightedbackground();
+          actual[i].setBackgroundOffset((float) overlapAnalysis.getWeightedbackground());
 
           // This is not currently used.
           // Computation of this would depend on how a filter is estimating the signal.
@@ -813,7 +813,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
           // Compute the amplitude.
           final float[] params = spot.peakResult.getParameters();
-          spot.amplitude = calculator.getPixelAmplitude(params);
+          spot.setAmplitude(calculator.getPixelAmplitude(params));
         }
         return list2;
       }
@@ -1007,7 +1007,7 @@ public class BenchmarkSpotFilter implements PlugIn {
               final double intensity = getIntensity(actual[i]);
               if (rampedSignalScore != null) {
                 // Adjust intensity using the surrounding PSF contributions
-                final double rsf = (actual[i].backgroundOffset + intensity)
+                final double rsf = (actual[i].getBackgroundOffset() + intensity)
                     / (predicted[j].spot.intensity - background);
                 // Normalise so perfect is zero
                 final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
@@ -1203,7 +1203,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     private double getIntensity(final PsfSpot psfSpot) {
       // Use the amplitude as all spot filters currently estimate the height, not the total signal
-      return psfSpot.amplitude;
+      return psfSpot.getAmplitude();
     }
 
     private SpotCoordinate[] getCoordinates(Spot[] spots) {
@@ -2070,7 +2070,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       final SimpleRegression regression = new SimpleRegression(false);
       for (final PsfSpot[] spots : actualCoordinates.valueCollection()) {
         for (final PsfSpot spot : spots) {
-          regression.addData(spot.amplitude,
+          regression.addData(spot.getAmplitude(),
               calculator.getAmplitude(spot.peakResult.getParameters()));
         }
       }
