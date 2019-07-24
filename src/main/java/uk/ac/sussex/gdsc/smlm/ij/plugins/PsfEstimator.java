@@ -93,12 +93,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private double initialPeakAngle;
 
   private boolean extraOptions;
-  private static int optionIntegrateFrames = 1;
+
+  // These are set only when extra options is true. Otherwise use the defaults.
   private int integrateFrames = 1;
-  private static boolean optionInterlacedData;
-  private static int optionDataStart = 1;
-  private static int optionDataBlock = 1;
-  private static int optionDataSkip;
   private boolean interlacedData;
   private int dataStart = 1;
   private int dataBlock = 1;
@@ -118,6 +115,59 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   private final DescriptiveStatistics[] sampleNew = new DescriptiveStatistics[3];
   private final DescriptiveStatistics[] sampleOld = new DescriptiveStatistics[3];
   private final boolean[] ignore = new boolean[3];
+
+  /** The plugin settings. */
+  private Settings pluginSettings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    int integrateFrames;
+    boolean interlacedData;
+    int dataStart;
+    int dataBlock;
+    int dataSkip;
+
+    Settings() {
+      // Set defaults
+      integrateFrames = 1;
+      dataStart = 1;
+      dataBlock = 1;
+    }
+
+    Settings(Settings source) {
+      integrateFrames = source.integrateFrames;
+      interlacedData = source.interlacedData;
+      dataStart = source.dataStart;
+      dataBlock = source.dataBlock;
+      dataSkip = source.dataSkip;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -208,8 +258,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     PeakFit.addFittingOptions(gd, provider);
 
     if (extraOptions) {
-      gd.addCheckbox("Interlaced_data", optionInterlacedData);
-      gd.addSlider("Integrate_frames", 1, 5, optionIntegrateFrames);
+      pluginSettings = Settings.load();
+      gd.addCheckbox("Interlaced_data", pluginSettings.interlacedData);
+      gd.addSlider("Integrate_frames", 1, 5, pluginSettings.integrateFrames);
     }
 
     gd.addMessage("--- Gaussian fitting ---");
@@ -267,8 +318,8 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     config.setFitting(gd.getNextNumber());
 
     if (extraOptions) {
-      interlacedData = optionInterlacedData = gd.getNextBoolean();
-      integrateFrames = optionIntegrateFrames = (int) gd.getNextNumber();
+      interlacedData = pluginSettings.interlacedData = gd.getNextBoolean();
+      integrateFrames = pluginSettings.integrateFrames = (int) gd.getNextNumber();
     }
 
     fitConfig.setFitSolver(gd.getNextChoiceIndex());
@@ -350,9 +401,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
           + "Skip = The number of continuous frames to ignore before the next data\n \n"
           + "E.G. 2:9:1 = Data was imaged from frame 2 for 9 frames, 1 frame to ignore,"
           + " then repeat.");
-      gd.addNumericField("Start", optionDataStart, 0);
-      gd.addNumericField("Block", optionDataBlock, 0);
-      gd.addNumericField("Skip", optionDataSkip, 0);
+      gd.addNumericField("Start", pluginSettings.dataStart, 0);
+      gd.addNumericField("Block", pluginSettings.dataBlock, 0);
+      gd.addNumericField("Skip", pluginSettings.dataSkip, 0);
 
       gd.showDialog();
       if (gd.wasCanceled()) {
@@ -366,10 +417,11 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
         if (dataStart > 0 && dataBlock > 0 && dataSkip > 0) {
           // Store options for next time
-          optionInterlacedData = true;
-          optionDataStart = dataStart;
-          optionDataBlock = dataBlock;
-          optionDataSkip = dataSkip;
+          pluginSettings.interlacedData = true;
+          pluginSettings.dataStart = dataStart;
+          pluginSettings.dataBlock = dataBlock;
+          pluginSettings.dataSkip = dataSkip;
+          pluginSettings.save();
         }
       } else {
         interlacedData = false;
