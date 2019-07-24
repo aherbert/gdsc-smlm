@@ -115,6 +115,11 @@ public class ResultsManager implements PlugIn {
   private static final String TITLE = "Peak Results Manager";
   private static final Logger logger = ImageJPluginLoggerHelper.getLogger(ResultsManager.class);
 
+  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
+
+  /** An empty array of load options. */
+  private static final LoadOption[] EMPTY_LOAD_OPTIONS = new LoadOption[0];
+
   /** The input file. */
   static final String INPUT_FILE = "File";
 
@@ -124,25 +129,80 @@ public class ResultsManager implements PlugIn {
   /** The input none. */
   static final String INPUT_NONE = "[None]";
 
-  private static String inputOption = "";
-  private static String inputFilename = Prefs.get(Constants.inputFilename, "");
-
   private ResultsSettings.Builder resultsSettings = ResultsSettings.newBuilder();
   private boolean extraOptions;
 
+  /** Flag set to true when the input dialog selected to load from file input. */
   private boolean fileInput;
 
-  private static double inputNmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
-  private static double inputGain = Prefs.get(Constants.inputGain, 1);
-  private static double inputExposureTime = Prefs.get(Constants.inputExposureTime, 0);
-  private static AtomicReference<List<String>> lastSelected = new AtomicReference<>();
+  private String omDirectory;
+  private File[] omFiles;
+
+  /** The plugin settings. */
+  private Settings settings;
 
   /**
-   * The input source.
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption;
+    String inputFilename;
+    double inputNmPerPixel;
+    double inputGain;
+    double inputExposureTime;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+      inputFilename = Prefs.get(Constants.inputFilename, "");
+      inputNmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
+      inputGain = Prefs.get(Constants.inputGain, 1);
+      inputExposureTime = Prefs.get(Constants.inputExposureTime, 0);
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      inputFilename = source.inputFilename;
+      inputNmPerPixel = source.inputNmPerPixel;
+      inputGain = source.inputGain;
+      inputExposureTime = source.inputExposureTime;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+      Prefs.set(Constants.inputFilename, inputFilename);
+      Prefs.set(Constants.inputNmPerPixel, inputNmPerPixel);
+      Prefs.set(Constants.inputExposureTime, inputExposureTime);
+      Prefs.set(Constants.inputGain, inputGain);
+    }
+  }
+
+  /**
+   * Specify the results input source to be added to a dialog.
    */
   public enum InputSource {
     //@formatter:off
-    /** File input. */
+    /** File input. If specified then an addition field is added to the dialog for the filename. */
     FILE{ @Override
     public String getName() { return "File"; }},
 
@@ -214,6 +274,39 @@ public class ResultsManager implements PlugIn {
     }
   }
 
+  /**
+   * Specifies an option for the loading of results.
+   */
+  public interface LoadOption {
+    // Marker interface
+  }
+
+  /**
+   * Specifies a filename load option.
+   */
+  public static class FilenameLoadOption implements LoadOption {
+    /** The filename. */
+    private final String filename;
+
+    /**
+     * Create a new instance.
+     *
+     * @param filename the filename
+     */
+    public FilenameLoadOption(String filename) {
+      this.filename = filename;
+    }
+
+    /**
+     * Gets the filename.
+     *
+     * @return the filename
+     */
+    public String getFilename() {
+      return filename;
+    }
+  }
+
   @Override
   public void run(String arg) {
     extraOptions = ImageJUtils.isExtraOptions();
@@ -238,7 +331,7 @@ public class ResultsManager implements PlugIn {
       return;
     }
 
-    final MemoryPeakResults results = loadResults(inputOption);
+    final MemoryPeakResults results = loadResults(settings.inputOption);
 
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
@@ -534,7 +627,7 @@ public class ResultsManager implements PlugIn {
           FileUtils.replaceExtension(resultsFileSettings.getResultsFilename(),
               ResultsProtosHelper.getExtension(resultsFileSettings.getFileFormat()));
 
-      if (fileInput && inputFilename.equals(resultsFilename)) {
+      if (fileInput && settings.inputFilename.equals(resultsFilename)) {
         IJ.log(TITLE + ": Input and output files are the same, skipping output ...");
         return;
       }
@@ -612,12 +705,13 @@ public class ResultsManager implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
+    settings = Settings.load();
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
 
     gd.addMessage("Read the Peak Results and output to a new format");
 
     gd.addMessage("Select the Peak Results");
-    addInput(gd, inputOption, InputSource.MEMORY, InputSource.FILE);
+    addInput(gd, settings.inputOption, InputSource.MEMORY, InputSource.FILE);
 
     final Choice inputChoice = gd.getLastChoice();
 
@@ -654,8 +748,8 @@ public class ResultsManager implements PlugIn {
       return false;
     }
 
-    inputOption = ResultsManager.getInputSource(gd);
-    inputFilename = gd.getNextString();
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.inputFilename = gd.getNextString();
     resultsSettings.getResultsTableSettingsBuilder()
         .setResultsTableFormatValue(gd.getNextChoiceIndex());
     resultsSettings.getResultsImageSettingsBuilder().setImageTypeValue(gd.getNextChoiceIndex());
@@ -683,8 +777,7 @@ public class ResultsManager implements PlugIn {
       return false;
     }
 
-    Prefs.set(Constants.inputFilename, inputFilename);
-
+    settings.save();
     SettingsManager.writeSettings(resultsSettings.build());
 
     return true;
@@ -1026,19 +1119,37 @@ public class ResultsManager implements PlugIn {
    */
   public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption,
       InputSource... inputs) {
+    addInput(gd, inputName, inputOption, EMPTY_LOAD_OPTIONS, inputs);
+  }
+
+  /**
+   * Add a list of input sources to the generic dialog. The choice field will be named inputName. If
+   * a file input option is selected then a field will be added name 'Input_file'.
+   *
+   * <p>If the source is a memory source then it will not be added if it is empty. If not empty then
+   * a summary of the number of localisation is added as a message to the dialog.
+   *
+   * @param gd the dialog
+   * @param inputName the input name
+   * @param inputOption the input option
+   * @param extraOptions the extra options
+   * @param inputs the inputs
+   */
+  public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption,
+      LoadOption[] extraOptions, InputSource... inputs) {
     final ArrayList<String> source = new ArrayList<>();
-    boolean fileInput = false;
+    String filename = null;
     for (final InputSource input : inputs) {
       ResultsManager.addInputSource(source, input);
       if (input == InputSource.FILE) {
-        fileInput = true;
+        filename = findFileName(extraOptions);
       }
     }
     if (source.isEmpty()) {
       addInputSource(source, InputSource.NONE);
     }
 
-    addInputSourceToDialog(gd, inputName, inputOption, source, fileInput);
+    addInputSourceToDialog(gd, inputName, inputOption, source, filename);
   }
 
   /**
@@ -1049,10 +1160,10 @@ public class ResultsManager implements PlugIn {
    * @param inputName the input name
    * @param inputOption The option to select by default
    * @param source the source
-   * @param fileInput the file input
+   * @param filename the filename
    */
-  public static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
-      String inputOption, List<String> source, boolean fileInput) {
+  private static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
+      String inputOption, List<String> source, String filename) {
     final String[] options = source.toArray(new String[source.size()]);
     // Find the option
     inputOption = removeFormatting(inputOption);
@@ -1066,8 +1177,8 @@ public class ResultsManager implements PlugIn {
       }
     }
     final Choice choice = gd.addAndGetChoice(inputName, options, options[optionIndex]);
-    if (fileInput) {
-      gd.addFilenameField("Input_file", inputFilename);
+    if (filename != null) {
+      gd.addFilenameField("Input_file", filename);
 
       // Add a listener to the choice to enable the file input field.
       // Currently we hide the filename field and pack the dialog.
@@ -1099,7 +1210,7 @@ public class ResultsManager implements PlugIn {
    * @param name the formatted name
    * @return The name
    */
-  public static String removeFormatting(String name) {
+  private static String removeFormatting(String name) {
     final int index = name.lastIndexOf('[');
     if (index > 0) {
       name = name.substring(0, index - 1);
@@ -1115,7 +1226,7 @@ public class ResultsManager implements PlugIn {
    * @param source the source
    * @param input the input
    */
-  public static void addInputSource(List<String> source, InputSource input) {
+  private static void addInputSource(List<String> source, InputSource input) {
     switch (input) {
       case FILE:
         source.add(INPUT_FILE);
@@ -1146,7 +1257,7 @@ public class ResultsManager implements PlugIn {
    *        frames, MEMORY_CLUSTERED : Select only those results which have at least some IDs above
    *        zero (allowing zero to be a valid cluster Id for no cluster)
    */
-  public static void addInputSource(List<String> source, MemoryPeakResults memoryResults,
+  private static void addInputSource(List<String> source, MemoryPeakResults memoryResults,
       InputSource input) {
     if (memoryResults.size() > 0) {
       switch (input) {
@@ -1177,7 +1288,7 @@ public class ResultsManager implements PlugIn {
    * @param memoryResults the memory results
    * @return The name
    */
-  public static String getName(MemoryPeakResults memoryResults) {
+  private static String getName(MemoryPeakResults memoryResults) {
     return memoryResults.getName() + " [" + memoryResults.size() + "]";
   }
 
@@ -1187,7 +1298,7 @@ public class ResultsManager implements PlugIn {
    * @param name the name
    * @return The results
    */
-  public static MemoryPeakResults loadMemoryResults(String name) {
+  private static MemoryPeakResults loadMemoryResults(String name) {
     return MemoryPeakResults.getResults(removeFormatting(name));
   }
 
@@ -1246,25 +1357,6 @@ public class ResultsManager implements PlugIn {
 
   /**
    * Load the results from the named input option. If the results are not empty then a check can be
-   * made for calibration, and data using the legacy standard units (distance in Pixel and intensity
-   * in Count).
-   *
-   * <p>If the calibration cannot be obtained or the units are incorrect then the null will be
-   * returned.
-   *
-   * @param inputOption the input option
-   * @param checkCalibration Set to true to ensure the results have a valid calibration
-   * @return the results
-   * @deprecated Plugins should specify if they require results in a specific unit
-   */
-  @Deprecated
-  public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration) {
-    return loadInputResults(inputOption, checkCalibration, DistanceUnit.PIXEL,
-        IntensityUnit.PHOTON);
-  }
-
-  /**
-   * Load the results from the named input option. If the results are not empty then a check can be
    * made for calibration, and data using the specified units. If the calibration cannot be obtained
    * or the units are incorrect then the null will be returned.
    *
@@ -1302,17 +1394,18 @@ public class ResultsManager implements PlugIn {
    * @param checkCalibration Set to true to ensure the results have a valid calibration
    * @param distanceUnit the required distance unit for the results
    * @param intensityUnit the required intensity unit for the results
+   * @param extraOptions the extra options
    * @return the results
    */
   public static MemoryPeakResults loadInputResults(String inputOption, boolean checkCalibration,
-      DistanceUnit distanceUnit, IntensityUnit intensityUnit) {
+      DistanceUnit distanceUnit, IntensityUnit intensityUnit, LoadOption... extraOptions) {
     MemoryPeakResults results = null;
     PeakResultsReader reader = null;
     if (inputOption.equals(INPUT_NONE)) {
       // Do nothing
     } else if (inputOption.equals(INPUT_FILE)) {
       IJ.showStatus("Reading results file ...");
-      reader = new PeakResultsReader(inputFilename);
+      reader = new PeakResultsReader(findFileName(extraOptions));
       IJ.showStatus("Reading " + reader.getFormat() + " results file ...");
       final ResultOption[] options = reader.getOptions();
       if (options.length != 0) {
@@ -1355,6 +1448,21 @@ public class ResultsManager implements PlugIn {
       IJ.showStatus("");
     }
     return results;
+  }
+
+  /**
+   * Find the file name.
+   *
+   * @param extraOptions the extra options
+   * @return the filename (or empty)
+   */
+  private static String findFileName(LoadOption... extraOptions) {
+    for (LoadOption option : extraOptions) {
+      if (option instanceof FilenameLoadOption) {
+        return ((FilenameLoadOption) option).getFilename();
+      }
+    }
+    return "";
   }
 
   private static void collectOptions(PeakResultsReader reader, ResultOption[] options) {
@@ -1455,7 +1563,8 @@ public class ResultsManager implements PlugIn {
     String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
     final CalibrationWriter calibration = results.getCalibrationWriterSafe();
 
-    boolean missing = isEssentialCalibrationMissing(calibration);
+    Settings settings = Settings.load();
+    boolean missing = isEssentialCalibrationMissing(calibration, settings);
 
     if (missing) {
       logger.info(() -> "Results are " + msg + ". Requesting input.");
@@ -1490,17 +1599,15 @@ public class ResultsManager implements PlugIn {
         calibration.clearGlobalCameraSettings();
       }
 
-      missing = isEssentialCalibrationMissing(calibration);
+      missing = isEssentialCalibrationMissing(calibration, settings);
 
       // Save for next time ...
-      inputNmPerPixel = calibration.getNmPerPixel();
-      inputExposureTime = calibration.getExposureTime();
-      Prefs.set(Constants.inputNmPerPixel, inputNmPerPixel);
-      Prefs.set(Constants.inputExposureTime, inputExposureTime);
+      settings.inputNmPerPixel = calibration.getNmPerPixel();
+      settings.inputExposureTime = calibration.getExposureTime();
       if (calibration.isCcdCamera()) {
-        inputGain = calibration.getCountPerPhoton();
-        Prefs.set(Constants.inputGain, inputGain);
+        settings.inputGain = calibration.getCountPerPhoton();
       }
+      settings.save();
 
       results.setCalibration(calibration.getCalibration());
     }
@@ -1513,17 +1620,19 @@ public class ResultsManager implements PlugIn {
    * Check for essential calibration settings (i.e. not readNoise, bias, emCCD, amplification).
    *
    * @param calibration the calibration
+   * @param settings the settings
    * @return true, if calibration is missing
    */
-  private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration) {
+  private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration,
+      Settings settings) {
     TurboList<String> missing = new TurboList<>();
     if (!calibration.hasNmPerPixel()) {
       missing.add("nm/pixel");
-      calibration.setNmPerPixel(inputNmPerPixel);
+      calibration.setNmPerPixel(settings.inputNmPerPixel);
     }
     if (!calibration.hasExposureTime()) {
       missing.add("Exposure time");
-      calibration.setExposureTime(inputExposureTime);
+      calibration.setExposureTime(settings.inputExposureTime);
     }
     if (!calibration.hasDistanceUnit()) {
       missing.add("Distance unit");
@@ -1539,7 +1648,7 @@ public class ResultsManager implements PlugIn {
         if (!calibration.hasCountPerPhoton()) {
           missing.add("Count-per-photon");
         }
-        calibration.setCountPerPhoton(inputGain);
+        calibration.setCountPerPhoton(settings.inputGain);
         break;
       case SCMOS:
         break;
@@ -1574,42 +1683,29 @@ public class ResultsManager implements PlugIn {
    * @return the memory peak results
    */
   private MemoryPeakResults loadResults(String inputOption) {
+    LoadOption loadOption = null;
     if (inputOption.equals(INPUT_FILE)) {
       fileInput = true;
+      loadOption = new FilenameLoadOption(settings.inputFilename);
     }
-    return loadInputResults(inputOption, true, null, null);
-  }
-
-  /**
-   * Gets the input filename that will be used in
-   * {@link ResultsManager#loadInputResults(String, boolean)}.
-   *
-   * @return the input filename
-   */
-  static String getInputFilename() {
-    return inputFilename;
+    return loadInputResults(inputOption, true, null, null, loadOption);
   }
 
   /**
    * Sets the input filename that will be used in
-   * {@link ResultsManager#loadInputResults(String, boolean)}.
+   * {@link ResultsManager#loadInputResults(String, boolean, DistanceUnit, IntensityUnit)}.
    *
    * @param inputFilename the new input filename
    */
-  static void setInputFilename(String inputFilename) {
-    ResultsManager.inputFilename = inputFilename;
-  }
-
-  private String omDirectory;
-  private File[] omFiles;
+  // static void setInputFilename(String inputFilename) {
+  // ResultsManager.inputFilename = inputFilename;
+  // }
 
   /**
    * Batch load a set of results files.
    */
   private void batchLoad() {
     // Adapted from ij.io.Opener.openMultiple
-
-    final String resetInputFilename = inputFilename;
 
     Java2.setSystemLookAndFeel();
     // run JFileChooser in a separate thread to avoid possible thread deadlocks
@@ -1647,12 +1743,9 @@ public class ResultsManager implements PlugIn {
       final String path = omDirectory + omFiles[i].getName();
       load(path);
     }
-
-    inputFilename = resetInputFilename;
   }
 
   private static void load(String path) {
-    inputFilename = path;
     // Record this as a single load of the results manager.
     // This should support any dialogs that are presented in loadInputResults(...)
     // to get the calibration.
@@ -1665,7 +1758,8 @@ public class ResultsManager implements PlugIn {
       Recorder.recordOption("results_file", "[]");
       Recorder.recordOption("save_to_memory");
     }
-    final MemoryPeakResults results = loadInputResults(INPUT_FILE, true, null, null);
+    final MemoryPeakResults results =
+        loadInputResults(INPUT_FILE, true, null, null, new FilenameLoadOption(path));
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded from " + path);
     } else {

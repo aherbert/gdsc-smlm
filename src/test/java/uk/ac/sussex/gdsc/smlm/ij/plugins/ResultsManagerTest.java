@@ -229,9 +229,8 @@ public class ResultsManagerTest {
             Thread.currentThread().setName("Run$_");
             Macro.setOptions(sb.toString());
 
-            ResultsManager.setInputFilename(filename);
-            final MemoryPeakResults in =
-                ResultsManager.loadInputResults(ResultsManager.INPUT_FILE, false, null, null);
+            final MemoryPeakResults in = ResultsManager.loadInputResults(ResultsManager.INPUT_FILE,
+                false, null, null, new ResultsManager.FilenameLoadOption(filename));
             checkEqual(spots, channel, slice, position, type, in);
           }
         }
