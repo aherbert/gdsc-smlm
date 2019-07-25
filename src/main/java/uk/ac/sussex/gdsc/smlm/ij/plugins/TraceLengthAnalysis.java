@@ -57,6 +57,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Analyses the track lengths of traced data.
@@ -64,10 +65,6 @@ import java.util.Arrays;
 public class TraceLengthAnalysis implements PlugIn {
   private static final String TITLE = "Trace Length Analysis";
   private static final float WIDTH = 0.3f;
-
-  private static String inputOption = "";
-  private static double msdThreshold;
-  private static boolean normalise;
 
   private TypeConverter<DistanceUnit> distanceConverter;
   private TypeConverter<TimeUnit> timeConverter;
@@ -88,6 +85,64 @@ public class TraceLengthAnalysis implements PlugIn {
   private float[] y1;
   private float[] y2;
 
+  private int lastid = -1;
+  private float lastx;
+  private float lasty;
+  private int startFrame;
+  private int lastFrame;
+  private int totalJump;
+  private double sumSquared;
+  private final TDoubleArrayList msdList = new TDoubleArrayList();
+  private final TIntArrayList lengthList = new TIntArrayList();
+  private final TIntArrayList idList = new TIntArrayList();
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption = "";
+    double msdThreshold;
+    boolean normalise;
+
+    Settings() {
+      // Set defaults
+      inputOption = "";
+    }
+
+    Settings(Settings source) {
+      inputOption = source.inputOption;
+      msdThreshold = source.msdThreshold;
+      normalise = source.normalise;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -102,7 +157,8 @@ public class TraceLengthAnalysis implements PlugIn {
     }
 
     // Load the results
-    MemoryPeakResults results = ResultsManager.loadInputResults(inputOption, false, null, null);
+    MemoryPeakResults results =
+        ResultsManager.loadInputResults(settings.inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       return;
@@ -186,14 +242,14 @@ public class TraceLengthAnalysis implements PlugIn {
     // see if we can build a nice slider range from the histogram limits
     if (max - min < 5) {
       // Because sliders are used when the range is <5 and floating point
-      gd.addSlider("D_threshold", min, max, msdThreshold);
+      gd.addSlider("D_threshold", min, max, settings.msdThreshold);
     } else {
-      gd.addNumericField("D_threshold", msdThreshold, 2, 6, "um^2/s");
+      gd.addNumericField("D_threshold", settings.msdThreshold, 2, 6, "um^2/s");
     }
-    gd.addCheckbox("Normalise", normalise);
+    gd.addCheckbox("Normalise", settings.normalise);
     gd.addDialogListener((gd1, event) -> {
-      msdThreshold = gd1.getNextNumber();
-      normalise = gd1.getNextBoolean();
+      settings.msdThreshold = gd1.getNextNumber();
+      settings.normalise = gd1.getNextBoolean();
       update();
       return true;
     });
@@ -241,21 +297,23 @@ public class TraceLengthAnalysis implements PlugIn {
     MemoryPeakResults.addResults(out);
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
+    settings = Settings.load();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the track length of traced data");
-    ResultsManager.addInput(gd, "Input", inputOption, InputSource.MEMORY_CLUSTERED);
+    ResultsManager.addInput(gd, "Input", settings.inputOption, InputSource.MEMORY_CLUSTERED);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
-    inputOption = ResultsManager.getInputSource(gd);
+    settings.inputOption = ResultsManager.getInputSource(gd);
+    settings.save();
     return true;
   }
 
   private void draw(WindowOrganiser wo) {
-    lastMsdThreshold = msdThreshold;
-    lastNormalise = normalise;
+    lastMsdThreshold = settings.msdThreshold;
+    lastNormalise = settings.normalise;
 
     // Find the index in the MSD array
     int index = Arrays.binarySearch(msds, lastMsdThreshold);
@@ -347,7 +405,7 @@ public class TraceLengthAnalysis implements PlugIn {
       new Thread(() -> {
         try {
           // Continue while the parameter is changing
-          while (lastMsdThreshold != msdThreshold || lastNormalise != normalise) {
+          while (lastMsdThreshold != settings.msdThreshold || lastNormalise != settings.normalise) {
             draw(null);
           }
         } finally {
@@ -357,17 +415,6 @@ public class TraceLengthAnalysis implements PlugIn {
       }).start();
     }
   }
-
-  private int lastid = -1;
-  private float lastx;
-  private float lasty;
-  private int startFrame;
-  private int lastFrame;
-  private int totalJump;
-  private double sumSquared;
-  private final TDoubleArrayList msdList = new TDoubleArrayList();
-  private final TIntArrayList lengthList = new TIntArrayList();
-  private final TIntArrayList idList = new TIntArrayList();
 
   private void processTrackLength(PeakResult peakResult) {
     final int id = peakResult.getId();
