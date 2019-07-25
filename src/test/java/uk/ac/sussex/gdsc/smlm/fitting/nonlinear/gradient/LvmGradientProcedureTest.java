@@ -205,7 +205,7 @@ public class LvmGradientProcedureTest {
 
   @SeededTest
   public void gradientProcedureFastLogMleComputesSameAsGradientCalculator(RandomSeed seed) {
-    gradientProcedureComputesSameAsGradientCalculator(seed, Type.FAST_LOG_MLE, 1e-5);
+    gradientProcedureComputesSameAsGradientCalculator(seed, Type.FAST_LOG_MLE, 1e-3);
   }
 
   private void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed, Type type) {
