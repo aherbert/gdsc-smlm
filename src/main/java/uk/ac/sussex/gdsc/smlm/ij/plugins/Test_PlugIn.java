@@ -31,8 +31,6 @@ import ij.plugin.PlugIn;
  */
 
 import java.awt.Choice;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * A simple class used to test plugin functionality.
@@ -49,14 +47,11 @@ public class Test_PlugIn implements PlugIn {
     gd.addChoice("Select1", new String[] {"One", "Two"}, optionFields[0]);
     final Choice c2 =
         gd.addAndGetChoice("Select2", new String[] {"Three", "Four"}, optionFields[1]);
-    gd.addAndGetButton("Options", new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null);
-        gd2.addMessage(c2.getSelectedItem());
-        gd2.showDialog(true);
-        gd2.getNextChoice();
-      }
+    gd.addAndGetButton("Options", event -> {
+      final ExtendedGenericDialog gd2 = new ExtendedGenericDialog("Test2", null);
+      gd2.addMessage(c2.getSelectedItem());
+      gd2.showDialog(true);
+      gd2.getNextChoice();
     });
     gd.addStringField("Another", textFields[0]);
     gd.addStringField("Testing", textFields[1], 15, new OptionListener<String>() {
