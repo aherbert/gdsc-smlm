@@ -833,7 +833,7 @@ public class Optics implements PlugIn {
    * Compute which clusters were selected.
    */
   private static class ClusterSelectedEventWorker
-      extends WorkflowWorker<ClusterSelectedEvent, int[]> {
+      implements WorkflowWorker<ClusterSelectedEvent, int[]> {
     @Override
     public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous) {
       // Return false to always run doWork
@@ -859,7 +859,8 @@ public class Optics implements PlugIn {
   /**
    * Relay the selected clusters to all the handlers.
    */
-  private static class ClusterSelectedWorker extends WorkflowWorker<ClusterSelectedEvent, int[]> {
+  private static class ClusterSelectedWorker
+      implements WorkflowWorker<ClusterSelectedEvent, int[]> {
     TurboList<ClusterSelectedHandler> handlers = new TurboList<>();
 
     @Override
@@ -886,7 +887,7 @@ public class Optics implements PlugIn {
     }
   }
 
-  private abstract class BaseWorker extends WorkflowWorker<OpticsSettings, SettingsList> {
+  private abstract class BaseWorker implements WorkflowWorker<OpticsSettings, SettingsList> {
     final int id;
 
     BaseWorker() {
@@ -1560,7 +1561,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    protected void newResults() {
+    public void newResults() {
       clusteringResult = null;
     }
 
@@ -1711,8 +1712,8 @@ public class Optics implements PlugIn {
         if (mapper == null) {
           // Make zero black
           mapper = (maxColour >= 1) ? new LutHelper.NonZeroLutMapper(1, maxColour) :
-            // It should not matter when there are no clusters.
-            new LutHelper.DefaultLutMapper(0, 255);
+          // It should not matter when there are no clusters.
+              new LutHelper.DefaultLutMapper(0, 255);
         }
 
         // Cache all the colours
@@ -2079,7 +2080,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    protected void newResults() {
+    public void newResults() {
       // We can keep the image but should clear the overlays
       clearCache(false);
     }
@@ -2113,8 +2114,7 @@ public class Optics implements PlugIn {
 
       if (!clusteringResult.isValid()) {
         clearCache(true);
-        return Pair.of(settings,
-            new SettingsList(results, opticsManager, clusteringResult, image));
+        return Pair.of(settings, new SettingsList(results, opticsManager, clusteringResult, image));
       }
 
       final ImageMode mode = ImageMode.get(settings.getImageMode());
@@ -2393,8 +2393,7 @@ public class Optics implements PlugIn {
         imp.setOverlay(overlay);
       }
 
-      return Pair.of(settings,
-          new SettingsList(results, opticsManager, clusteringResult, image));
+      return Pair.of(settings, new SettingsList(results, opticsManager, clusteringResult, image));
     }
 
     private Roi createRoi(ConvexHull hull, boolean forcePolygon) {
@@ -2892,7 +2891,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    protected void newResults() {
+    public void newResults() {
       // Clear cache
       tableResults = null;
 
@@ -3107,7 +3106,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    protected void newResults() {
+    public void newResults() {
       // Clear cache
       results = null;
       clusteringResult = null;
@@ -3246,7 +3245,7 @@ public class Optics implements PlugIn {
     }
 
     @Override
-    protected void newResults() {
+    public void newResults() {
       // Clear cache
       profile = null;
     }

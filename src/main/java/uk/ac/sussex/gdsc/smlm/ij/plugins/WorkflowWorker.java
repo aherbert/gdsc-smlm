@@ -32,7 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <S> the generic type
  * @param <R> the generic type
  */
-public abstract class WorkflowWorker<S, R> {
+public interface WorkflowWorker<S, R> {
   /**
    * Compare the settings and return false if any settings that the work depends on have changed.
    *
@@ -42,7 +42,7 @@ public abstract class WorkflowWorker<S, R> {
    * @param previous the previous
    * @return true if settings have changed
    */
-  public abstract boolean equalSettings(S current, S previous);
+  boolean equalSettings(S current, S previous);
 
   /**
    * Compare the results and return false if any results that the work depends on have changed.
@@ -53,7 +53,7 @@ public abstract class WorkflowWorker<S, R> {
    * @param previous the previous
    * @return true if results have changed
    */
-  public abstract boolean equalResults(R current, R previous);
+  boolean equalResults(R current, R previous);
 
   /**
    * Creates the results.
@@ -61,13 +61,13 @@ public abstract class WorkflowWorker<S, R> {
    * @param work the work (the current settings and results)
    * @return the updated settings and results
    */
-  public abstract Pair<S, R> doWork(Pair<S, R> work);
+  Pair<S, R> doWork(Pair<S, R> work);
 
   /**
    * Called when there are new results in the current work. This can be used to reset the worker
    * before {@link #doWork(Pair)} is called.
    */
-  protected void newResults() {
+  default void newResults() {
     // Do nothing
   }
 }

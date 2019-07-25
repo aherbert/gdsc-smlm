@@ -2713,7 +2713,7 @@ public class Fire implements PlugIn {
     }
   }
 
-  private class BaseWorker extends WorkflowWorker<WorkSettings, Object> {
+  private class BaseWorker implements WorkflowWorker<WorkSettings, Object> {
     final MyWindowOrganiser wo;
 
     BaseWorker(MyWindowOrganiser wo) {
