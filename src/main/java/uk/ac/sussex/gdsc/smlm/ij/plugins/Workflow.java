@@ -46,8 +46,8 @@ public class Workflow<S, R> {
   public static final long DELAY = 500;
 
   private class Work {
-    public final long timeout;
-    public final Pair<S, R> work;
+    final long timeout;
+    final Pair<S, R> work;
 
     Work(long time, Pair<S, R> work) {
       if (work.getKey() == null) {
@@ -112,7 +112,7 @@ public class Workflow<S, R> {
   /**
    * A {@link Runnable} worker to some work in the workflow.
    */
-  public class RunnableWorker implements Runnable {
+  private class RunnableWorker implements Runnable {
     private final WorkflowWorker<S, R> worker;
     private boolean running = true;
     private Work lastWork;
@@ -204,7 +204,7 @@ public class Workflow<S, R> {
     }
 
     private void debug(String msg) {
-      if (debug) {
+      if (isDebug()) {
         System.out.println(worker.getClass().getSimpleName() + msg);
       }
     }
@@ -245,7 +245,7 @@ public class Workflow<S, R> {
   private long delay;
 
   /** The debug flag. Set to true to allow print statements during operation. */
-  boolean debug;
+  private boolean debug;
 
   /**
    * Adds the worker. Connect the inbox to the previous worker outbox, or the primary input if the
@@ -351,15 +351,15 @@ public class Workflow<S, R> {
 
   @SuppressWarnings("static-method")
   private ArrayList<Thread> startWorkers(ArrayList<RunnableWorker> workers) {
-    final ArrayList<Thread> threads = new ArrayList<>();
+    final ArrayList<Thread> newThreads = new ArrayList<>();
     for (final RunnableWorker w : workers) {
       final Thread t = new Thread(w);
       w.running = true;
       t.setDaemon(true);
       t.start();
-      threads.add(t);
+      newThreads.add(t);
     }
-    return threads;
+    return newThreads;
   }
 
   @SuppressWarnings("static-method")
@@ -498,5 +498,23 @@ public class Workflow<S, R> {
    */
   public void stopPreview() {
     setDelay(0);
+  }
+
+  /**
+   * Checks the debug flag.
+   *
+   * @return true if debugging
+   */
+  boolean isDebug() {
+    return debug;
+  }
+
+  /**
+   * Sets the debug flag. Set to true to enable print statements during processing.
+   *
+   * @param debug the new debug flag
+   */
+  void setDebug(boolean debug) {
+    this.debug = debug;
   }
 }
