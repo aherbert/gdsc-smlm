@@ -96,21 +96,13 @@ import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay.
  */
 public class SpotFinderPreview implements ExtendedPlugInFilter {
   private static final String TITLE = "Spot Finder Preview";
-
-  private static DataFilterMethod defaultDataFilterMethod;
-  private static double defaultSmooth;
-
-  static {
-    final FitEngineConfiguration c = new FitEngineConfiguration();
-    defaultDataFilterMethod = c.getDataFilterMethod(0);
-    defaultSmooth = c.getDataFilterParameterValue(0);
-  }
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
   private FitEngineConfiguration config;
@@ -120,14 +112,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private boolean preview;
   private Label label;
   private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
-  private static double distance = 1.5;
-  private static double lowerDistance = 50;
-  private static boolean multipleMatches;
-  private static boolean showTP = true;
-  private static boolean showFP = true;
-  private static int topN = 100;
-  private static int select = 1;
-  private static int neighbourRadius = 4;
 
   private int currentSlice;
   private MaximaSpotFilter filter;
@@ -156,6 +140,76 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private FitEngineSettings lastFitEngineSettings;
   private PSF lastPsf;
 
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    DataFilterMethod defaultDataFilterMethod;
+    double defaultSmooth;
+    double distance;
+    double lowerDistance;
+    boolean multipleMatches;
+    boolean showTP;
+    boolean showFP;
+    int topN;
+    int select;
+    int neighbourRadius;
+
+    Settings() {
+      // Set defaults
+      final FitEngineConfiguration c = new FitEngineConfiguration();
+      defaultDataFilterMethod = c.getDataFilterMethod(0);
+      defaultSmooth = c.getDataFilterParameterValue(0);
+      distance = 1.5;
+      lowerDistance = 50;
+      showTP = true;
+      showFP = true;
+      topN = 100;
+      select = 1;
+      neighbourRadius = 4;
+    }
+
+    Settings(Settings source) {
+      defaultDataFilterMethod = source.defaultDataFilterMethod;
+      defaultSmooth = source.defaultSmooth;
+      distance = source.distance;
+      lowerDistance = source.lowerDistance;
+      multipleMatches = source.multipleMatches;
+      showTP = source.showTP;
+      showFP = source.showFP;
+      topN = source.topN;
+      select = source.select;
+      neighbourRadius = source.neighbourRadius;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
+
   @Override
   public int setup(String arg, ImagePlus imp) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -176,8 +230,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
   @Override
   public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
+    settings = Settings.load();
     this.overlay = imp.getOverlay();
     this.imp = imp;
+
+    // Saved by reference so do it once now
+    settings.save();
 
     // The image is locked by the PlugInFilterRunner so unlock it to allow scroll.
     // This should be OK as the image data is not modified and only the overlay is
@@ -203,16 +261,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         new PeakFit.SimpleFitEngineConfigurationProvider(config);
     PeakFit.addDataFilterOptions(gd, provider);
     gd.addChoice("Spot_filter_2", SettingsManager.getDataFilterMethodNames(),
-        config.getDataFilterMethod(1, defaultDataFilterMethod).ordinal());
-    // gd.addSlider("Smoothing_2", 2.5, 4.5, config.getDataFilterParameterValue(1, defaultSmooth));
+        config.getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal());
     PeakFit.addRelativeParameterOptions(gd,
         new RelativeParameterProvider(2.5, 4.5, "Smoothing_2", provider) {
           @Override
           void setAbsolute(boolean absolute) {
             final FitEngineConfiguration c =
                 fitEngineConfigurationProvider.getFitEngineConfiguration();
-            final DataFilterMethod m = c.getDataFilterMethod(1, defaultDataFilterMethod);
-            final double smooth = c.getDataFilterParameterValue(1, defaultSmooth);
+            final DataFilterMethod m = c.getDataFilterMethod(1, settings.defaultDataFilterMethod);
+            final double smooth = c.getDataFilterParameterValue(1, settings.defaultSmooth);
             c.setDataFilter(m, smooth, absolute, 1);
           }
 
@@ -225,28 +282,27 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           @Override
           double getValue() {
             return fitEngineConfigurationProvider.getFitEngineConfiguration()
-                .getDataFilterParameterValue(1, defaultSmooth);
+                .getDataFilterParameterValue(1, settings.defaultSmooth);
           }
         });
 
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);
-    // gd.addNumericField("Top_N", topN, 0);
-    gd.addSlider("Top_N", 0, 100, topN);
+    gd.addSlider("Top_N", 0, 100, settings.topN);
     topNScrollBar = gd.getLastScrollbar();
-    gd.addSlider("Select", 0, 100, select);
+    gd.addSlider("Select", 0, 100, settings.select);
     selectScrollBar = gd.getLastScrollbar();
-    gd.addSlider("Neigbour_radius", 0, 10, neighbourRadius);
+    gd.addSlider("Neigbour_radius", 0, 10, settings.neighbourRadius);
 
     // Find if this image was created with ground truth data
     if (imp.getID() == CreateData.getImageId()) {
       final MemoryPeakResults results = CreateData.getResults();
       if (results != null) {
-        gd.addSlider("Match_distance", 0, 2.5, distance);
-        gd.addSlider("Lower_match_distance (%)", 0, 100, lowerDistance);
-        gd.addCheckbox("Multiple_matches", multipleMatches);
-        gd.addCheckbox("Show_TP", showTP);
-        gd.addCheckbox("Show_FP", showFP);
+        gd.addSlider("Match_distance", 0, 2.5, settings.distance);
+        gd.addSlider("Lower_match_distance (%)", 0, 100, settings.lowerDistance);
+        gd.addCheckbox("Multiple_matches", settings.multipleMatches);
+        gd.addCheckbox("Show_TP", settings.showTP);
+        gd.addCheckbox("Show_FP", settings.showFP);
         gd.addMessage("");
         label = (Label) gd.getMessage();
         final boolean integerCoords = false;
@@ -328,10 +384,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     // Set a camera model
     fitConfig.setCameraModelName(gd.getNextChoice());
-    // CameraModel model = CameraModelManager.load(fitConfig.getCameraModelName());
-    // if (model == null)
-    // model = new FakePerPixelCameraModel(0, 1, 1);
-    // fitConfig.setCameraModel(model);
 
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
 
@@ -340,16 +392,16 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 1);
     config.setSearch(gd.getNextNumber());
     config.setBorder(gd.getNextNumber());
-    topN = (int) gd.getNextNumber();
-    select = (int) gd.getNextNumber();
-    neighbourRadius = (int) gd.getNextNumber();
+    settings.topN = (int) gd.getNextNumber();
+    settings.select = (int) gd.getNextNumber();
+    settings.neighbourRadius = (int) gd.getNextNumber();
 
     if (label != null) {
-      distance = gd.getNextNumber();
-      lowerDistance = gd.getNextNumber();
-      multipleMatches = gd.getNextBoolean();
-      showTP = gd.getNextBoolean();
-      showFP = gd.getNextBoolean();
+      settings.distance = gd.getNextNumber();
+      settings.lowerDistance = gd.getNextNumber();
+      settings.multipleMatches = gd.getNextBoolean();
+      settings.showTP = gd.getNextBoolean();
+      settings.showFP = gd.getNextBoolean();
     }
     preview = gd.getNextBoolean();
 
@@ -414,11 +466,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     if (newCameraModel || !fitEngineSettings.equals(lastFitEngineSettings)
         || !psf.equals(lastPsf)) {
       // Configure a jury filter
-      if (config.getDataFilterType() == DataFilterType.JURY) {
-        if (!PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE)) {
-          gd.getPreviewCheckbox().setState(false);
-          return;
-        }
+      if (config.getDataFilterType() == DataFilterType.JURY
+          && !PeakFit.configureDataFilter(config, PeakFit.FLAG_NO_SAVE)) {
+        gd.getPreviewCheckbox().setState(false);
+        return;
       }
 
       try {
@@ -426,9 +477,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       } catch (final Exception ex) {
         filter = null;
         this.imp.setOverlay(overlay);
-        throw new RuntimeException(ex); // Required for ImageJ to disable the preview
-        // Utils.log("ERROR: " + ex.getMessage());
-        // return;
+        // Required for ImageJ to disable the preview
+        throw new IllegalStateException("Unable to create spot filter", ex);
       }
       ImageJUtils.log(filter.getDescription());
     }
@@ -521,7 +571,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       fp.add(bias);
     }
     out.insert(fp, bounds.x, bounds.y);
-    // ip.resetMinAndMax();
     final double min = fp.getMin();
     final double max = fp.getMax();
     out.setMinAndMax(min, max);
@@ -542,8 +591,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       // Compute assignments
       final TurboList<FractionalAssignment> fractionalAssignments =
           new TurboList<>(3 * predicted.length);
-      final double matchDistance = distance * fitConfig.getInitialPeakStdDev();
-      final RampedScore score = new RampedScore(matchDistance * lowerDistance / 100, matchDistance);
+      final double matchDistance = settings.distance * fitConfig.getInitialPeakStdDev();
+      final RampedScore score =
+          new RampedScore(matchDistance * settings.lowerDistance / 100, matchDistance);
       final double dmin = matchDistance * matchDistance;
       final int nActual = actual.length;
       final int nPredicted = predicted.length;
@@ -585,8 +635,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       // Compute matches
       final RankedScoreCalculator calc =
           RankedScoreCalculator.create(assignments, nActual - 1, nPredicted - 1);
-      final boolean save = showTP || showFP;
-      final double[] calcScore = calc.score(nPredicted, multipleMatches, save);
+      final boolean save = settings.showTP || settings.showFP;
+      final double[] calcScore = calc.score(nPredicted, settings.multipleMatches, save);
       final ClassificationResult result =
           RankedScoreCalculator.toClassificationResult(calcScore, nActual);
 
@@ -599,10 +649,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       final double auc = AucCalculator.auc(precision, recall);
 
       // Show scores
-      final String label = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s", imp.getCurrentSlice(),
-          MathUtils.rounded(auc), MathUtils.rounded(result.getRecall()),
+      final String scoreLabel = String.format("Slice=%d, AUC=%s, R=%s, Max J=%s",
+          imp.getCurrentSlice(), MathUtils.rounded(auc), MathUtils.rounded(result.getRecall()),
           MathUtils.rounded(MathUtils.maxDefault(0, jaccard)));
-      setLabel(label);
+      setLabel(scoreLabel);
 
       // Plot
       String title = TITLE + " Performance";
@@ -616,7 +666,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       plot.setColor(Color.black);
       plot.addPoints(rank, jaccard, Plot.LINE);
       plot.setColor(Color.black);
-      plot.addLabel(0, 0, label);
+      plot.addLabel(0, 0, scoreLabel);
 
       final WindowOrganiser windowOrganiser = new WindowOrganiser();
       ImageJUtils.display(title, plot, 0, windowOrganiser);
@@ -629,7 +679,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       plot.drawLine(recall[recall.length - 1], precision[recall.length - 1],
           recall[recall.length - 1], 0);
       plot.setColor(Color.black);
-      plot.addLabel(0, 0, label);
+      plot.addLabel(0, 0, scoreLabel);
       ImageJUtils.display(title, plot, 0, windowOrganiser);
 
       windowOrganiser.tile();
@@ -644,7 +694,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
             matches++;
           }
         }
-        if (showTP) {
+        if (settings.showTP) {
           final float[] x = new float[matches];
           final float[] y = new float[x.length];
           int count = 0;
@@ -658,7 +708,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           }
           addRoi(0, o, x, y, count, Color.green);
         }
-        if (showFP) {
+        if (settings.showFP) {
           final float[] x = new float[nPredicted - matches];
           final float[] y = new float[x.length];
           int count = 0;
@@ -674,25 +724,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         }
       }
     } else {
-      // float[] x = new float[size];
-      // float[] y = new float[x.length];
-      // for (int i = 0; i < size; i++)
-      // {
-      // x[i] = spots[i].x + bounds.x + 0.5f;
-      // y[i] = spots[i].y + bounds.y + 0.5f;
-      // }
-      // PointRoi roi = new PointRoi(x, y);
-      //// Add options to configure colour and labels
-      // o.add(roi);
-
       final WindowOrganiser wo = new WindowOrganiser();
 
       // Option to show the number of neighbours within a set pixel box radius
-      final int[] count = spotFilterHelper.countNeighbours(spots, width, height, neighbourRadius);
+      final int[] count =
+          spotFilterHelper.countNeighbours(spots, width, height, settings.neighbourRadius);
 
       // Show as histogram the totals...
       new HistogramPlotBuilder(TITLE, StoredData.create(count), "Neighbours").setIntegerBins(true)
-          .setPlotLabel("Radius = " + neighbourRadius).show(wo);
+          .setPlotLabel("Radius = " + settings.neighbourRadius).show(wo);
 
       // TODO - Draw n=0, n=1 on the image overlay
 
@@ -703,7 +743,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       // Plot the intensity
       final double[] intensity = new double[size];
       final double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
-      final int top = (topN > 0) ? topN : size;
+      final int top = (settings.topN > 0) ? settings.topN : size;
       final int size_1 = size - 1;
       for (int i = 0; i < size; i++) {
         intensity[i] = spots[i].intensity;
@@ -719,17 +759,17 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       final Plot plot = new Plot(title, "Rank", "Intensity");
       plot.setColor(Color.blue);
       plot.addPoints(rank, intensity, Plot.LINE);
-      if (topN > 0 && topN < size) {
+      if (settings.topN > 0 && settings.topN < size) {
         plot.setColor(Color.magenta);
-        plot.drawLine(topN, 0, topN, intensity[topN - 1]);
+        plot.drawLine(settings.topN, 0, settings.topN, intensity[settings.topN - 1]);
       }
-      if (select > 0 && select < size) {
+      if (settings.select > 0 && settings.select < size) {
         plot.setColor(Color.yellow);
-        final double in = intensity[select - 1];
-        plot.drawLine(select, 0, select, in);
-        x[0] = spots[select].x + bounds.x + 0.5f;
-        y[0] = spots[select].y + bounds.y + 0.5f;
-        final Color c = LutHelper.getColour(lut, size_1 - select, size);
+        final double in = intensity[settings.select - 1];
+        plot.drawLine(settings.select, 0, settings.select, in);
+        x[0] = spots[settings.select].x + bounds.x + 0.5f;
+        y[0] = spots[settings.select].y + bounds.y + 0.5f;
+        final Color c = LutHelper.getColour(lut, size_1 - settings.select, size);
         addRoi(0, o, x, y, 1, c, 3, 3);
         plot.setColor(Color.black);
         plot.addLabel(0, 0, "Selected spot intensity = " + MathUtils.rounded(in));
@@ -889,9 +929,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     textSmooth.setText("" + config.getDataFilterParameterValue(0));
     if (config.getDataFiltersCount() > 1) {
       textDataFilterMethod2.select(SettingsManager.getDataFilterMethodNames()[config
-          .getDataFilterMethod(1, defaultDataFilterMethod).ordinal()]);
-      textSmooth2.setText("" + config.getDataFilterParameterValue(1, defaultSmooth));
-      // XXX - What about the Abolute/Relative flag?
+          .getDataFilterMethod(1, settings.defaultDataFilterMethod).ordinal()]);
+      textSmooth2.setText("" + config.getDataFilterParameterValue(1, settings.defaultSmooth));
+      // XXX - What about the Absolute/Relative flag?
     }
     textSearch.setText("" + config.getSearch());
     textBorder.setText("" + config.getBorder());
