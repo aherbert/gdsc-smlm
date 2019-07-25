@@ -1711,9 +1711,9 @@ public class Optics implements PlugIn {
         final int maxColour = MathUtils.max(profileColourTo);
         if (mapper == null) {
           // Make zero black
-          mapper = (maxColour >= 1) ? new LutHelper.NonZeroLutMapper(1, maxColour) :
-          // It should not matter when there are no clusters.
-              new LutHelper.DefaultLutMapper(0, 255);
+          mapper = (maxColour >= 1) ? new LutHelper.NonZeroLutMapper(1, maxColour)
+              // It should not matter when there are no clusters.
+              : new LutHelper.DefaultLutMapper(0, 255);
         }
 
         // Cache all the colours

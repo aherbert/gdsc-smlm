@@ -771,9 +771,12 @@ public class BenchmarkSpotFilter implements PlugIn {
             }
 
             // Accumulate the function for j
-            allParams[offset + Gaussian2DFunction.SIGNAL] = actual[j].getPeakResult().getIntensity();
-            allParams[offset + Gaussian2DFunction.X_POSITION] = actual[j].getPeakResult().getXPosition();
-            allParams[offset + Gaussian2DFunction.Y_POSITION] = actual[j].getPeakResult().getYPosition();
+            allParams[offset + Gaussian2DFunction.SIGNAL] =
+                actual[j].getPeakResult().getIntensity();
+            allParams[offset + Gaussian2DFunction.X_POSITION] =
+                actual[j].getPeakResult().getXPosition();
+            allParams[offset + Gaussian2DFunction.Y_POSITION] =
+                actual[j].getPeakResult().getYPosition();
             allParams[offset + Gaussian2DFunction.X_SD] =
                 allParams[offset + Gaussian2DFunction.Y_SD] = sa[j];
             offset += Gaussian2DFunction.PARAMETERS_PER_PEAK;
