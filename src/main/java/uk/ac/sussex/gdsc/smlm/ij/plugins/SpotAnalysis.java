@@ -164,9 +164,9 @@ public class SpotAnalysis extends PlugInFrame
   private static final String OPT_LOCATION = "CT.location";
 
   private int runMode;
-  private ImagePlus imp;
-  private ImagePlus rawImp;
-  private ImagePlus blurImp;
+  private transient ImagePlus imp;
+  private transient ImagePlus rawImp;
+  private transient ImagePlus blurImp;
 
   private double gain;
   private double msPerFrame;
@@ -368,18 +368,19 @@ public class SpotAnalysis extends PlugInFrame
     // Find the currently open images
     final ArrayList<String> newImageList = new ArrayList<>();
 
-    for (final int id : ImageJUtils.getIdList()) {
-      final ImagePlus imp = WindowManager.getImage(id);
+    for (final int imageId : ImageJUtils.getIdList()) {
+      final ImagePlus image = WindowManager.getImage(imageId);
 
       // Image must be greyscale stacks
-      if (imp != null && (imp.getType() == ImagePlus.GRAY8 || imp.getType() == ImagePlus.GRAY16
-          || imp.getType() == ImagePlus.GRAY32) && imp.getStackSize() > 2) {
+      if (image != null && (image.getType() == ImagePlus.GRAY8
+          || image.getType() == ImagePlus.GRAY16 || image.getType() == ImagePlus.GRAY32)
+          && image.getStackSize() > 2) {
         // Exclude previous results
-        if (previousResult(imp.getTitle())) {
+        if (previousResult(image.getTitle())) {
           continue;
         }
 
-        newImageList.add(imp.getTitle());
+        newImageList.add(image.getTitle());
       }
     }
 
@@ -421,6 +422,8 @@ public class SpotAnalysis extends PlugInFrame
     if (actioner == null) {
       return;
     }
+
+    // Note: runLock and runMode are only used in this method
 
     synchronized (runLock) {
       if (runMode > 0) {
@@ -525,16 +528,16 @@ public class SpotAnalysis extends PlugInFrame
       return;
     }
 
-    final ImagePlus imp = WindowManager.getImage(inputChoice.getSelectedItem());
+    final ImagePlus image = WindowManager.getImage(inputChoice.getSelectedItem());
 
     // This should not be a problem but leave it in for now
-    if (imp == null || (imp.getType() != ImagePlus.GRAY8 && imp.getType() != ImagePlus.GRAY16
-        && imp.getType() != ImagePlus.GRAY32)) {
+    if (image == null || (image.getType() != ImagePlus.GRAY8 && image.getType() != ImagePlus.GRAY16
+        && image.getType() != ImagePlus.GRAY32)) {
       IJ.showMessage(PLUGIN_TITLE, "Images must be grayscale.");
       return;
     }
 
-    final Roi roi = imp.getRoi();
+    final Roi roi = image.getRoi();
     if (roi == null || !roi.isArea()) {
       IJ.showMessage(PLUGIN_TITLE, "Image must have an area ROI");
       return;
@@ -562,7 +565,7 @@ public class SpotAnalysis extends PlugInFrame
       }
     }
 
-    runCreateProfile(imp, bounds, psfWidth, blur);
+    runCreateProfile(image, bounds, psfWidth, blur);
   }
 
   private boolean parametersReady() {
@@ -1193,8 +1196,6 @@ public class SpotAnalysis extends PlugInFrame
     final Panel panel = new Panel();
     panel.setLayout(new BorderLayout());
     final Label listLabel = new Label(label, 0);
-    // listLabel.setFont(monoFont);
-    // list.setSize(fontWidth * 3, fontWidth);
     panel.add(listLabel, BorderLayout.WEST);
     panel.add(list, BorderLayout.CENTER);
     return panel;
@@ -1204,8 +1205,6 @@ public class SpotAnalysis extends PlugInFrame
     final Panel panel = new Panel();
     panel.setLayout(new BorderLayout());
     final Label listLabel = new Label(label, 0);
-    // listLabel.setFont(monoFont);
-    // textField.setSize(fontWidth * 3, fontWidth);
     textField.setText(value);
     panel.add(listLabel, BorderLayout.WEST);
     panel.add(textField, BorderLayout.CENTER);
@@ -1216,8 +1215,6 @@ public class SpotAnalysis extends PlugInFrame
     final Panel panel = new Panel();
     panel.setLayout(new BorderLayout());
     final Label listLabel = new Label(label, 0);
-    // listLabel.setFont(monoFont);
-    // textField.setSize(fontWidth * 3, fontWidth);
     field.setText(value);
     panel.add(listLabel, BorderLayout.WEST);
     panel.add(field, BorderLayout.CENTER);
@@ -1241,12 +1238,8 @@ public class SpotAnalysis extends PlugInFrame
 
       updateCurrentSlice(slice);
 
-      if (to != null) {
-        if (to.getCurrentSlice() != slice) {
-          // System.out.println("updating image");
-          to.setSlice(slice);
-          // to.resetDisplayRange();
-        }
+      if (to != null && to.getCurrentSlice() != slice) {
+        to.setSlice(slice);
       }
     }
   }
@@ -1299,7 +1292,6 @@ public class SpotAnalysis extends PlugInFrame
       }
 
       params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-      // float psfWidth = Float.parseFloat(widthTextField.getText());
       params[Gaussian2DFunction.BACKGROUND] = (float) smoothMean[slice - 1];
       params[Gaussian2DFunction.SIGNAL] = (float) (gain * signal);
       params[Gaussian2DFunction.X_POSITION] = rawImp.getWidth() / 2.0f;
@@ -1326,9 +1318,7 @@ public class SpotAnalysis extends PlugInFrame
   public void valueChanged(ListSelectionEvent event) {
     if (!event.getValueIsAdjusting()) {
       final int index = onFramesList.getSelectedIndex();
-      // int index = event.getFirstIndex();
       if (index >= 0 && index < listModel.size()) {
-        // Utils.log("index = %d, %b", index, event.getValueIsAdjusting());
         final Spot spot = (Spot) listModel.get(index);
         rawImp.setSlice(spot.frame);
       }
