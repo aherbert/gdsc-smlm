@@ -147,7 +147,7 @@ public class SmlmTools extends PlugInFrame {
   }
 
   private boolean createFrame() {
-    final ArrayList<String[]> plugins = new ArrayList<>();
+    final ArrayList<String[]> configPlugins = new ArrayList<>();
 
     // Locate all the GDSC SMLM plugins using the plugins.config:
     try (InputStream readmeStream = getToolsPluginsConfig()) {
@@ -163,14 +163,13 @@ public class SmlmTools extends PlugInFrame {
           if (tokens.length == 3) {
             // Only copy the entries from the Plugins menu
             if (!ignore(tokens)) {
-              if (!plugins.isEmpty()) {
-                // Multiple gaps indicates a new column
-                if (gaps > 1) {
-                  plugins.add(new String[] {"next", ""});
-                }
+              if (!configPlugins.isEmpty()
+                  // Multiple gaps indicates a new column
+                  && gaps > 1) {
+                configPlugins.add(new String[] {"next", ""});
               }
               gaps = 0;
-              plugins.add(new String[] {tokens[1].trim(), tokens[2].trim()});
+              configPlugins.add(new String[] {tokens[1].trim(), tokens[2].trim()});
             }
           } else {
             gaps++;
@@ -179,7 +178,7 @@ public class SmlmTools extends PlugInFrame {
           // Put a spacer between plugins if specified
           if ((tokens.length == 2 && tokens[0].startsWith("Plugins")
               && tokens[1].trim().equals("\"-\"")) || line.length() == 0) {
-            plugins.add(new String[] {"spacer", ""});
+            configPlugins.add(new String[] {"spacer", ""});
           }
         }
       }
@@ -187,7 +186,7 @@ public class SmlmTools extends PlugInFrame {
       // Ignore
     }
 
-    if (plugins.isEmpty()) {
+    if (configPlugins.isEmpty()) {
       return false;
     }
 
@@ -203,7 +202,7 @@ public class SmlmTools extends PlugInFrame {
     addSpacer = false;
     int col = 0;
     int row = 0;
-    for (final String[] plugin : plugins) {
+    for (final String[] plugin : configPlugins) {
       if (plugin[0].equals("next")) {
         col++;
         row = 0;
@@ -263,11 +262,7 @@ public class SmlmTools extends PlugInFrame {
     }
 
     // This plugin cannot be run unless in a macro
-    if (tokens[1].contains("SMLM Macro Extensions")) {
-      return true;
-    }
-
-    return false;
+    return tokens[1].contains("SMLM Macro Extensions");
   }
 
   private static InputStream getToolsPluginsConfig() {
@@ -294,9 +289,7 @@ public class SmlmTools extends PlugInFrame {
   public static InputStream getPluginsConfig() {
     // Get the embedded config in the jar file
     final Class<SmlmTools> resourceClass = SmlmTools.class;
-    final InputStream readmeStream =
-        resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
-    return readmeStream;
+    return resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/plugins.config");
   }
 
   @SuppressWarnings("unused")
