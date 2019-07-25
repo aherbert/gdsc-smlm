@@ -90,8 +90,8 @@ public class SpotInspector implements PlugIn, MouseListener {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    static String[] SORT_ORDER = new String[] {"SNR", "Precision", "Amplitude", "Signal", "Error",
-        "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
+    static final String[] SORT_ORDER = new String[] {"SNR", "Precision", "Amplitude", "Signal",
+        "Error", "Original Value", "X SD", "Y SD", "Width factor", "Shift"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> lastSettings =
