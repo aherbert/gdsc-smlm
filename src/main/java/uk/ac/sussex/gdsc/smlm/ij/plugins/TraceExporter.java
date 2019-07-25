@@ -67,13 +67,64 @@ import java.util.logging.Logger;
 public class TraceExporter implements PlugIn {
   private static final String TITLE = "Trace Exporter";
   private static AtomicReference<List<String>> selectedRef = new AtomicReference<>();
-  private static String directory = "";
-  private static int minLength = 2;
-  private static int maxJump = 1;
-  private static double wobble;
 
-  private static String[] formatNames;
-  private static int format;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+    static final String[] formatNames;
+
+    static {
+      formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
+    }
+
+    String directory;
+    int minLength;
+    int maxJump;
+    double wobble;
+    int format;
+
+    Settings() {
+      // Set defaults
+      directory = "";
+      minLength = 2;
+      maxJump = 1;
+    }
+
+    Settings(Settings source) {
+      directory = source.directory;
+      minLength = source.minLength;
+      maxJump = source.maxJump;
+      wobble = source.wobble;
+      format = source.format;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   private enum ExportFormat implements NamedObject {
     SPOT_ON("Spot-On");
@@ -136,29 +187,28 @@ public class TraceExporter implements PlugIn {
     }
   }
 
-  private static boolean showDialog() {
-    if (formatNames == null) {
-      formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
-    }
+  private boolean showDialog() {
+    settings = Settings.load();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Export traces to a directory");
-    gd.addDirectoryField("Directory", directory, 30);
-    gd.addNumericField("Min_length", minLength, 0);
+    gd.addDirectoryField("Directory", settings.directory, 30);
+    gd.addNumericField("Min_length", settings.minLength, 0);
     gd.addMessage("Specify the maximum jump allowed within a trace.\n"
         + "Traces with larger jumps will be split.");
-    gd.addNumericField("Max_jump", maxJump, 0);
+    gd.addNumericField("Max_jump", settings.maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
-    gd.addNumericField("Wobble", wobble, 0, 6, "nm");
-    gd.addChoice("Format", formatNames, formatNames[format]);
+    gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
+    gd.addChoice("Format", Settings.formatNames, settings.format);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
-    directory = gd.getNextString();
-    minLength = (int) Math.abs(gd.getNextNumber());
-    maxJump = (int) Math.abs(gd.getNextNumber());
-    wobble = Math.abs(gd.getNextNumber());
-    format = gd.getNextChoiceIndex();
+    settings.directory = gd.getNextString();
+    settings.minLength = (int) Math.abs(gd.getNextNumber());
+    settings.maxJump = (int) Math.abs(gd.getNextNumber());
+    settings.wobble = Math.abs(gd.getNextNumber());
+    settings.format = gd.getNextChoiceIndex();
+    settings.save();
     return true;
   }
 
@@ -193,7 +243,7 @@ public class TraceExporter implements PlugIn {
     return !allResults.isEmpty();
   }
 
-  private static void export(MemoryPeakResults results) {
+  private void export(MemoryPeakResults results) {
     // Copy to allow manipulation
     results = results.copy();
 
@@ -212,7 +262,7 @@ public class TraceExporter implements PlugIn {
     final TIntHashSet remove = new TIntHashSet();
     for (int i = 0, size = results.size(); i < size; i++) {
       if (results.get(i).getId() != id) {
-        if (count < minLength) {
+        if (count < settings.minLength) {
           remove.add(id);
         }
         count = 0;
@@ -221,7 +271,7 @@ public class TraceExporter implements PlugIn {
       count++;
     }
     // Final ID
-    if (count < minLength) {
+    if (count < settings.minLength) {
       remove.add(id);
     }
 
@@ -230,10 +280,10 @@ public class TraceExporter implements PlugIn {
       results.sort(IdFramePeakResultComparator.INSTANCE);
     }
 
-    if (wobble > 0) {
+    if (settings.wobble > 0) {
       // Just leave any exceptions to trickle up and kill the plugin
       final TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
-      final double w = c.convertBack(wobble);
+      final double w = c.convertBack(settings.wobble);
       final SplitMix sm = new SplitMix(SeedFactory.createLong());
       final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(sm);
       final boolean is3D = results.is3D();
@@ -250,8 +300,8 @@ public class TraceExporter implements PlugIn {
     exportSpotOn(results);
   }
 
-  private static MemoryPeakResults splitTraces(MemoryPeakResults results) {
-    if (maxJump < 1) {
+  private MemoryPeakResults splitTraces(MemoryPeakResults results) {
+    if (settings.maxJump < 1) {
       // Disabled
       return results;
     }
@@ -262,14 +312,14 @@ public class TraceExporter implements PlugIn {
       final PeakResult r = results.get(i);
       if (r.getId() != id) {
         id = r.getId();
-      } else if (r.getFrame() - lastT > maxJump) {
+      } else if (r.getFrame() - lastT > settings.maxJump) {
         return doSplit(results);
       }
     }
     return results;
   }
 
-  private static MemoryPeakResults doSplit(MemoryPeakResults results) {
+  private MemoryPeakResults doSplit(MemoryPeakResults results) {
     final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
     results2.copySettings(results);
     int nextId = results.getLast().getId();
@@ -281,7 +331,7 @@ public class TraceExporter implements PlugIn {
       if (r.getId() != id) {
         id = r.getId();
         idOut = id;
-      } else if (r.getFrame() - lastT > maxJump) {
+      } else if (r.getFrame() - lastT > settings.maxJump) {
         idOut = ++nextId;
       }
       final AttributePeakResult r2 = new AttributePeakResult(r);
@@ -292,13 +342,13 @@ public class TraceExporter implements PlugIn {
     return results2;
   }
 
-  private static void exportSpotOn(MemoryPeakResults results) {
+  private void exportSpotOn(MemoryPeakResults results) {
     // Simple Spot-On CSV file format:
     // https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats
     // frame, t (seconds), trajectory (trace id), x (um), y (um)
 
     try (BufferedWriter out =
-        Files.newBufferedWriter(Paths.get(directory, results.getName() + ".csv"))) {
+        Files.newBufferedWriter(Paths.get(settings.directory, results.getName() + ".csv"))) {
       out.write("frame,t,trajectory,x,y");
       out.newLine();
 
