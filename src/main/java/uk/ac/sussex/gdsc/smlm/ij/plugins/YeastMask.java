@@ -35,21 +35,79 @@ import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * This plugin creates a mask image of a Yeast cell for use in diffusion simulations.
  */
 public class YeastMask implements PlugIn {
   private static final String TITLE = "Yeast Mask";
 
-  private static double length = 8;
-  private static double radius = 1.5;
-  private static double nucleus = 0.9;
-  private static double nmPerPixel = 107;
-  private static double nmPerSlice = 20;
-  private static boolean excludeNucleus = true;
-  private static boolean squareOutput = true;
-  private static int border = 3;
-  private static boolean is2D;
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    double length = 8;
+    double radius = 1.5;
+    double nucleus = 0.9;
+    double nmPerPixel = 107;
+    double nmPerSlice = 20;
+    boolean excludeNucleus = true;
+    boolean squareOutput = true;
+    int border = 3;
+    boolean is2D;
+
+    Settings() {
+      // Set defaults
+      length = 8;
+      radius = 1.5;
+      nucleus = 0.9;
+      nmPerPixel = 107;
+      nmPerSlice = 20;
+      excludeNucleus = true;
+      squareOutput = true;
+      border = 3;
+    }
+
+    Settings(Settings source) {
+      length = source.length;
+      radius = source.radius;
+      nucleus = source.nucleus;
+      nmPerPixel = source.nmPerPixel;
+      nmPerSlice = source.nmPerSlice;
+      excludeNucleus = source.excludeNucleus;
+      squareOutput = source.squareOutput;
+      border = source.border;
+      is2D = source.is2D;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   @Override
   public void run(String arg) {
@@ -62,20 +120,22 @@ public class YeastMask implements PlugIn {
     createMask();
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
+    settings = Settings.load();
+
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Create a mask of a yeast cell as a tube plus end-caps");
-    gd.addSlider("Tube_length (um)", 10, 20, length);
-    gd.addSlider("Radius (um)", 0.5, 5, radius);
-    gd.addCheckbox("Exclude_nucleus", excludeNucleus);
-    gd.addSlider("Nucleus (fraction)", 0.5, 1, nucleus);
-    gd.addNumericField("Pixel_pitch", nmPerPixel, 1, 6, "nm");
-    gd.addNumericField("Pixel_depth", nmPerSlice, 1, 6, "nm");
-    gd.addCheckbox("Square_output", squareOutput);
-    gd.addSlider("Border", 0, 10, border);
-    gd.addCheckbox("2D", is2D);
+    gd.addSlider("Tube_length (um)", 10, 20, settings.length);
+    gd.addSlider("Radius (um)", 0.5, 5, settings.radius);
+    gd.addCheckbox("Exclude_nucleus", settings.excludeNucleus);
+    gd.addSlider("Nucleus (fraction)", 0.5, 1, settings.nucleus);
+    gd.addNumericField("Pixel_pitch", settings.nmPerPixel, 1, 6, "nm");
+    gd.addNumericField("Pixel_depth", settings.nmPerSlice, 1, 6, "nm");
+    gd.addCheckbox("Square_output", settings.squareOutput);
+    gd.addSlider("Border", 0, 10, settings.border);
+    gd.addCheckbox("2D", settings.is2D);
 
     gd.showDialog();
 
@@ -83,36 +143,38 @@ public class YeastMask implements PlugIn {
       return false;
     }
 
-    length = gd.getNextNumber();
-    radius = gd.getNextNumber();
-    excludeNucleus = gd.getNextBoolean();
-    nucleus = gd.getNextNumber();
-    nmPerPixel = gd.getNextNumber();
-    nmPerSlice = gd.getNextNumber();
-    squareOutput = gd.getNextBoolean();
-    border = (int) gd.getNextNumber();
-    is2D = gd.getNextBoolean();
+    settings.length = gd.getNextNumber();
+    settings.radius = gd.getNextNumber();
+    settings.excludeNucleus = gd.getNextBoolean();
+    settings.nucleus = gd.getNextNumber();
+    settings.nmPerPixel = gd.getNextNumber();
+    settings.nmPerSlice = gd.getNextNumber();
+    settings.squareOutput = gd.getNextBoolean();
+    settings.border = (int) gd.getNextNumber();
+    settings.is2D = gd.getNextBoolean();
 
-    if (radius < 0.5) {
-      radius = 0.5;
+    if (settings.radius < 0.5) {
+      settings.radius = 0.5;
     }
-    if (length < 0) {
-      length = 0;
+    if (settings.length < 0) {
+      settings.length = 0;
     }
-    if (nmPerPixel < 1) {
-      nmPerPixel = 1;
+    if (settings.nmPerPixel < 1) {
+      settings.nmPerPixel = 1;
     }
-    if (nmPerSlice < 1) {
-      nmPerSlice = 1;
+    if (settings.nmPerSlice < 1) {
+      settings.nmPerSlice = 1;
     }
+
+    settings.save();
 
     return true;
   }
 
-  private static void createMask() {
+  private void createMask() {
     // Create the dimensions
-    final int hw = (int) Math.ceil(radius * 1000 / nmPerPixel);
-    final int hd = (int) Math.ceil(radius * 1000 / nmPerSlice);
+    final int hw = (int) Math.ceil(settings.radius * 1000 / settings.nmPerPixel);
+    final int hd = (int) Math.ceil(settings.radius * 1000 / settings.nmPerSlice);
 
     final int width = 2 * hw + 1;
     final int depth = 2 * hd + 1;
@@ -120,7 +182,7 @@ public class YeastMask implements PlugIn {
     ImageStack stack = createHemiSphere(width, depth);
 
     // Extend the centre circle of the sphere into a tube of the required length
-    final int h = (int) Math.ceil(length * 1000 / nmPerPixel);
+    final int h = (int) Math.ceil(settings.length * 1000 / settings.nmPerPixel);
     if (h > 0) {
       final ImageStack newStack = new ImageStack(width, stack.getHeight() + h, stack.getSize());
       for (int slice = 1; slice <= stack.getSize(); slice++) {
@@ -157,7 +219,7 @@ public class YeastMask implements PlugIn {
     }
     stack = newStack;
 
-    if (excludeNucleus) {
+    if (settings.excludeNucleus) {
       final ImageStack stack2 = createNucleusSphere(width, depth);
       final int xloc = (stack.getWidth() - stack2.getWidth()) / 2;
       final int yloc = (stack.getHeight() - stack2.getHeight()) / 2;
@@ -169,7 +231,7 @@ public class YeastMask implements PlugIn {
       }
     }
 
-    if (squareOutput && stack.getWidth() != stack.getHeight()) {
+    if (settings.squareOutput && stack.getWidth() != stack.getHeight()) {
       final ImageStack stack2 = new ImageStack(stack.getHeight(), stack.getHeight());
       final int end = stack.getHeight() - stack.getWidth();
       for (int slice = 1; slice <= stack.getSize(); slice++) {
@@ -183,20 +245,20 @@ public class YeastMask implements PlugIn {
       stack = stack2;
     }
 
-    if (border > 0) {
-      final ImageStack stack2 =
-          new ImageStack(stack.getWidth() + 2 * border, stack.getHeight() + 2 * border);
+    if (settings.border > 0) {
+      final ImageStack stack2 = new ImageStack(stack.getWidth() + 2 * settings.border,
+          stack.getHeight() + 2 * settings.border);
       for (int slice = 1; slice <= stack.getSize(); slice++) {
         final ImageProcessor ip = stack.getProcessor(slice);
         final ImageProcessor ip2 = new ByteProcessor(stack2.getWidth(), stack2.getHeight());
         stack2.addSlice(ip2);
-        ip2.insert(ip, border, border);
+        ip2.insert(ip, settings.border, settings.border);
       }
       stack = stack2;
     }
 
     ImagePlus imp;
-    if (is2D) {
+    if (settings.is2D) {
       // TODO - Remove this laziness since we should really just do a 2D image
       final int centre = stack.getSize() / 2;
       imp = ImageJUtils.display(TITLE, stack.getProcessor(centre));
@@ -207,8 +269,8 @@ public class YeastMask implements PlugIn {
     // Calibrate
     final Calibration cal = new Calibration();
     cal.setUnit("um");
-    cal.pixelWidth = cal.pixelHeight = nmPerPixel / 1000;
-    cal.pixelDepth = nmPerSlice / 1000;
+    cal.pixelWidth = cal.pixelHeight = settings.nmPerPixel / 1000;
+    cal.pixelDepth = settings.nmPerSlice / 1000;
     imp.setCalibration(cal);
   }
 
@@ -220,7 +282,7 @@ public class YeastMask implements PlugIn {
    * @param depth the depth
    * @return A sphere
    */
-  private static ImageStack createNucleusSphere(int width, int depth) {
+  private ImageStack createNucleusSphere(int width, int depth) {
     // Create a sphere. This could be done exploiting symmetry to be more efficient
     // but is left as a simple implementation
     final double centreX = width * 0.5;
@@ -229,16 +291,16 @@ public class YeastMask implements PlugIn {
     // Precompute squares for the width
     final double[] s = new double[width];
     for (int iy = 0; iy < width; iy++) {
-      final double y = (centreX - (iy + 0.5)) * nmPerPixel;
+      final double y = (centreX - (iy + 0.5)) * settings.nmPerPixel;
       s[iy] = y * y;
     }
 
     final ImageStack stack = new ImageStack(width, width, depth);
     final byte on = (byte) 255;
-    final double r = radius * 1000 * nucleus;
+    final double r = settings.radius * 1000 * settings.nucleus;
     final double r2 = r * r;
     for (int iz = 0; iz < depth; iz++) {
-      final double z = (centreZ - (iz + 0.5)) * nmPerSlice;
+      final double z = (centreZ - (iz + 0.5)) * settings.nmPerSlice;
       final double z2 = z * z;
       final byte[] mask = new byte[width * width];
       for (int iy = 0, i = 0; iy < width; iy++) {
@@ -264,7 +326,7 @@ public class YeastMask implements PlugIn {
    * @param depth the depth
    * @return A hemi-sphere
    */
-  private static ImageStack createHemiSphere(int width, int depth) {
+  private ImageStack createHemiSphere(int width, int depth) {
     // Create a sphere. This could be done exploiting symmetry to be more efficient
     // but is left as a simple implementation
     final double centreX = width * 0.5;
@@ -273,17 +335,17 @@ public class YeastMask implements PlugIn {
     // Precompute squares for the width
     final double[] s = new double[width];
     for (int iy = 0; iy < width; iy++) {
-      final double y = (centreX - (iy + 0.5)) * nmPerPixel;
+      final double y = (centreX - (iy + 0.5)) * settings.nmPerPixel;
       s[iy] = y * y;
     }
 
     final int halfHeight = 1 + width / 2;
     final ImageStack stack = new ImageStack(width, halfHeight, depth);
     final byte on = (byte) 255;
-    final double r = radius * 1000;
+    final double r = settings.radius * 1000;
     final double r2 = r * r;
     for (int iz = 0; iz < depth; iz++) {
-      final double z = (centreZ - (iz + 0.5)) * nmPerSlice;
+      final double z = (centreZ - (iz + 0.5)) * settings.nmPerSlice;
       final double z2 = z * z;
       final byte[] mask = new byte[width * halfHeight];
       for (int iy = 0, i = 0; iy < halfHeight; iy++) {
