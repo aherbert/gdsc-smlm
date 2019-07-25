@@ -44,9 +44,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ShowResultsHeader implements PlugIn {
   private static final String TITLE = "Show Results Header";
 
-  /** The plugin settings. */
-  private Settings settings;
-
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
@@ -94,7 +91,7 @@ public class ShowResultsHeader implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    settings = Settings.load();
+    final Settings settings = Settings.load();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Show the results header in the ImageJ log");
