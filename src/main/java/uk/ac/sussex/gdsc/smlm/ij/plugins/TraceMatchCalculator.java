@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.match.Coordinate;
@@ -66,19 +67,72 @@ import java.util.function.Consumer;
 public class TraceMatchCalculator implements PlugIn {
   private static final String TITLE = "Trace Match Calculator";
 
-  private static String inputOption1 = "";
-  private static String inputOption2 = "";
-  private static String inputOption3 = "";
-  private static double dThreshold = 1;
-  private static double beta = 4;
-  private static boolean showPairs;
-  private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
-  private static int sortIndex = 1;
-
   private static AtomicBoolean writeHeader = new AtomicBoolean(true);
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
   private static AtomicReference<WindowAndPainter> pairsWindowRef = new AtomicReference<>();
   private static AtomicReference<WindowAndPainter> triplesWindowRef = new AtomicReference<>();
+
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Contains the settings that are the re-usable state of the plugin.
+   */
+  private static class Settings {
+    private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
+
+    String inputOption1 = "";
+    String inputOption2 = "";
+    String inputOption3 = "";
+    double distanceThreshold = 1;
+    double beta = 4;
+    boolean showPairs;
+    int sortIndex = 1;
+
+    Settings() {
+      // Set defaults
+      inputOption1 = "";
+      inputOption2 = "";
+      inputOption3 = "";
+      distanceThreshold = 1;
+      beta = 4;
+      sortIndex = 1;
+    }
+
+    Settings(Settings source) {
+      inputOption1 = source.inputOption1;
+      inputOption2 = source.inputOption2;
+      inputOption3 = source.inputOption3;
+      distanceThreshold = source.distanceThreshold;
+      beta = source.beta;
+      showPairs = source.showPairs;
+      sortIndex = source.sortIndex;
+    }
+
+    Settings copy() {
+      return new Settings(this);
+    }
+
+    /**
+     * Load a copy of the settings.
+     *
+     * @return the settings
+     */
+    static Settings load() {
+      return lastSettings.get().copy();
+    }
+
+    /**
+     * Save the settings.
+     */
+    void save() {
+      lastSettings.set(this);
+    }
+  }
 
   /**
    * Class to allow atomic update of the text window and the painter.
@@ -108,11 +162,11 @@ public class TraceMatchCalculator implements PlugIn {
 
     // Load the results
     final MemoryPeakResults results1 =
-        ResultsManager.loadInputResults(inputOption1, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
     final MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(inputOption2, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     final MemoryPeakResults results3 =
-        ResultsManager.loadInputResults(inputOption3, false, null, null);
+        ResultsManager.loadInputResults(settings.inputOption3, false, null, null);
     IJ.showStatus("");
     if (results1 == null || results1.size() == 0) {
       IJ.error(TITLE, "No results 1 could be loaded");
@@ -132,25 +186,27 @@ public class TraceMatchCalculator implements PlugIn {
     }
 
     final long start = System.nanoTime();
-    compareCoordinates(results1, results2, results3, dThreshold);
+    compareCoordinates(results1, results2, results3, settings.distanceThreshold);
     final double seconds = (System.nanoTime() - start) / 1000000000.0;
 
     IJ.showStatus(String.format("%s = %ss", TITLE, MathUtils.rounded(seconds, 4)));
   }
 
-  private static boolean showDialog() {
+  private boolean showDialog() {
+    settings = Settings.load();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
-    ResultsManager.addInput(gd, "Results1", inputOption1, InputSource.MEMORY_MULTI_FRAME);
-    ResultsManager.addInput(gd, "Results2", inputOption2, InputSource.MEMORY_MULTI_FRAME);
-    ResultsManager.addInput(gd, "Results3", inputOption3, InputSource.NONE,
+    ResultsManager.addInput(gd, "Results1", settings.inputOption1, InputSource.MEMORY_MULTI_FRAME);
+    ResultsManager.addInput(gd, "Results2", settings.inputOption2, InputSource.MEMORY_MULTI_FRAME);
+    ResultsManager.addInput(gd, "Results3", settings.inputOption3, InputSource.NONE,
         InputSource.MEMORY_MULTI_FRAME);
-    gd.addNumericField("Distance", dThreshold, 2, 6, "px");
+    gd.addNumericField("Distance", settings.distanceThreshold, 2, 6, "px");
 
-    gd.addNumericField("Beta", beta, 2);
-    gd.addCheckbox("Show_pairs", showPairs);
-    gd.addChoice("Sort_pairs", SORT_OPTIONS, SORT_OPTIONS[sortIndex]);
+    gd.addNumericField("Beta", settings.beta, 2);
+    gd.addCheckbox("Show_pairs", settings.showPairs);
+    gd.addChoice("Sort_pairs", Settings.SORT_OPTIONS, settings.sortIndex);
 
     gd.showDialog();
 
@@ -158,18 +214,19 @@ public class TraceMatchCalculator implements PlugIn {
       return false;
     }
 
-    inputOption1 = gd.getNextChoice();
-    inputOption2 = gd.getNextChoice();
-    inputOption3 = gd.getNextChoice();
-    dThreshold = gd.getNextNumber();
-    beta = gd.getNextNumber();
-    showPairs = gd.getNextBoolean();
-    sortIndex = gd.getNextChoiceIndex();
+    settings.inputOption1 = gd.getNextChoice();
+    settings.inputOption2 = gd.getNextChoice();
+    settings.inputOption3 = gd.getNextChoice();
+    settings.distanceThreshold = gd.getNextNumber();
+    settings.beta = gd.getNextNumber();
+    settings.showPairs = gd.getNextBoolean();
+    settings.sortIndex = gd.getNextChoiceIndex();
+    settings.save();
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Distance threshold", dThreshold);
-      ParameterUtils.isPositive("Beta", beta);
+      ParameterUtils.isAboveZero("Distance threshold", settings.distanceThreshold);
+      ParameterUtils.isPositive("Beta", settings.beta);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -179,7 +236,7 @@ public class TraceMatchCalculator implements PlugIn {
   }
 
   @SuppressWarnings("null")
-  private static void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
+  private void compareCoordinates(MemoryPeakResults results1, MemoryPeakResults results2,
       MemoryPeakResults results3, double distanceThreshold) {
     final Pulse[] p1 = extractPulses(results1);
     final Pulse[] p2 = extractPulses(results2);
@@ -195,7 +252,7 @@ public class TraceMatchCalculator implements PlugIn {
     List<Pulse> fn2 = null;
     List<PointPair> pairs2 = null;
 
-    if (showPairs) {
+    if (settings.showPairs) {
       pairs = new LinkedList<>();
       fp = new LinkedList<>();
       fn = new LinkedList<>();
@@ -216,7 +273,7 @@ public class TraceMatchCalculator implements PlugIn {
           () -> new TextWindow(TITLE + " Results", createResultsHeader(), "", 900, 300));
       resultsOutput = resultsWindow::append;
 
-      if (showPairs) {
+      if (settings.showPairs) {
         if (p3 == null) {
           // Produce a pairs output
           final WindowAndPainter wap = refresh(pairsWindowRef, true, resultsWindow, results1);
@@ -291,9 +348,11 @@ public class TraceMatchCalculator implements PlugIn {
     }
 
     final StringBuilder sb = new StringBuilder();
-    addResult(resultsOutput, sb, inputOption1, inputOption2, distanceThreshold, result);
+    addResult(resultsOutput, sb, settings.inputOption1, settings.inputOption2, distanceThreshold,
+        result);
     if (p3 != null) {
-      addResult(resultsOutput, sb, inputOption1, inputOption3, distanceThreshold, result2);
+      addResult(resultsOutput, sb, settings.inputOption1, settings.inputOption3, distanceThreshold,
+          result2);
     }
   }
 
@@ -353,6 +412,7 @@ public class TraceMatchCalculator implements PlugIn {
     return wap;
   }
 
+  @Nullable
   private static Pulse[] extractPulses(MemoryPeakResults results) {
     if (results == null) {
       return null;
@@ -385,7 +445,7 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addResult(Consumer<String> output, StringBuilder sb, String i1, String i2,
+  private void addResult(Consumer<String> output, StringBuilder sb, String i1, String i2,
       double distanceThrehsold, MatchResult result) {
     sb.setLength(0);
     sb.append(i1).append('\t');
@@ -402,7 +462,7 @@ public class TraceMatchCalculator implements PlugIn {
     sb.append(IJ.d2s(result.getFScore(0.5), 4)).append('\t');
     sb.append(IJ.d2s(result.getFScore(1.0), 4)).append('\t');
     sb.append(IJ.d2s(result.getFScore(2.0), 4)).append('\t');
-    sb.append(IJ.d2s(result.getFScore(beta), 4));
+    sb.append(IJ.d2s(result.getFScore(settings.beta), 4));
 
     output.accept(sb.toString());
   }
@@ -424,7 +484,7 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addPairResult(TextWindow pairsWindow, PointPair pair) {
+  private void addPairResult(TextWindow pairsWindow, PointPair pair) {
     final StringBuilder sb = new StringBuilder();
     final Pulse p1 = (Pulse) pair.getPoint1();
     final Pulse p2 = (Pulse) pair.getPoint2();
@@ -469,7 +529,7 @@ public class TraceMatchCalculator implements PlugIn {
     return sb.toString();
   }
 
-  private static void addTripleResult(TextWindow triplesWindow, Triple triple) {
+  private void addTripleResult(TextWindow triplesWindow, Triple triple) {
     final StringBuilder sb = new StringBuilder();
     final Pulse p1 = triple.p1;
     final Pulse p2 = triple.p2;
@@ -480,7 +540,7 @@ public class TraceMatchCalculator implements PlugIn {
     triplesWindow.append(sb.toString());
   }
 
-  private static void addPointPairResult(StringBuilder sb, Pulse p1, Pulse p2) {
+  private void addPointPairResult(StringBuilder sb, Pulse p1, Pulse p2) {
     addPoint(sb, p2);
     final PointPair pair = new PointPair(p1, p2);
     final double d = pair.getXyDistance();
@@ -490,14 +550,14 @@ public class TraceMatchCalculator implements PlugIn {
       sb.append("-\t");
     }
     if (p1 != null && p2 != null) {
-      sb.append(MathUtils.rounded(p1.score(p2, d * d, dThreshold), 4)).append('\t');
+      sb.append(MathUtils.rounded(p1.score(p2, d * d, settings.distanceThreshold), 4)).append('\t');
     } else {
       sb.append("-\t");
     }
   }
 
-  private static List<? extends PointPair> sort(List<PointPair> pairs) {
-    if (sortIndex == 1) {
+  private List<? extends PointPair> sort(List<PointPair> pairs) {
+    if (settings.sortIndex == 1) {
       // Sort by time
       final ArrayList<TimeComparablePointPair> newPairs = new ArrayList<>(pairs.size());
       for (final PointPair pair : pairs) {
@@ -510,8 +570,8 @@ public class TraceMatchCalculator implements PlugIn {
     return pairs;
   }
 
-  private static List<? extends Triple> sort(ArrayList<Triple> triples) {
-    if (sortIndex == 1) {
+  private List<? extends Triple> sort(ArrayList<Triple> triples) {
+    if (settings.sortIndex == 1) {
       // Sort by time
       final List<TimeComparableTriple> sorted = new ArrayList<>(triples.size());
       for (final Triple t : triples) {
@@ -522,7 +582,7 @@ public class TraceMatchCalculator implements PlugIn {
     }
     final List<ScoreComparableTriple> sorted = new ArrayList<>(triples.size());
     for (final Triple t : triples) {
-      sorted.add(new ScoreComparableTriple(t));
+      sorted.add(new ScoreComparableTriple(t, settings.distanceThreshold));
     }
     Collections.sort(sorted, ScoreComparableTriple::compare);
     return sorted;
@@ -709,14 +769,14 @@ public class TraceMatchCalculator implements PlugIn {
   private static class ScoreComparableTriple extends Triple {
     double score;
 
-    ScoreComparableTriple(Triple triple) {
+    ScoreComparableTriple(Triple triple, double distanceThreshold) {
       super(triple);
       if (p1 != null) {
         if (p2 != null) {
-          score = p1.score(p2, dThreshold);
+          score = p1.score(p2, distanceThreshold);
         }
         if (p3 != null) {
-          score = FastMath.max(score, p1.score(p2, dThreshold));
+          score = FastMath.max(score, p1.score(p2, distanceThreshold));
         }
       }
     }
