@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PcgXshRs32;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
@@ -1340,7 +1341,7 @@ public class PulseActivationAnalysis implements PlugIn {
           density = dc.countAll(settings.channels);
         }
 
-        final SplitMix sm = new SplitMix(System.currentTimeMillis());
+        final PcgXshRs32 rng = new PcgXshRs32(System.currentTimeMillis());
 
         // -=-=-=--=-=-
         // Unmix the specific activations to their correct channel.
@@ -1355,7 +1356,7 @@ public class PulseActivationAnalysis implements PlugIn {
         for (int from = 0; from < specificActivations.length;) {
           final int to = Math.min(from + nPerThread, specificActivations.length);
           futures.add(executor.submit(new SpecificUnmixWorker(runSettings, density, newChannel,
-              from, to, sm.copyAndJump())));
+              from, to, rng.split())));
           from = to;
         }
         waitToFinish();
