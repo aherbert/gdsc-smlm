@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.PcgXshRs32;
+import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -560,7 +560,7 @@ public class CmosAnalysis implements PlugIn {
     int numberPerThread = (int) Math.ceil((double) settings.frames / numberOfThreads);
     // Convert to fit the block size
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
-    final PcgXshRs32 rng = new PcgXshRs32(start);
+    final Pcg32 rng = Pcg32.xshrs(start);
     ticker = ImageJUtils.createTicker((long) photons.length * settings.frames, threadCount);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));

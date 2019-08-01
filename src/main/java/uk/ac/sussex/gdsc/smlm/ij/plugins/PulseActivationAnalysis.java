@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.PcgXshRs32;
+import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
@@ -1341,7 +1341,7 @@ public class PulseActivationAnalysis implements PlugIn {
           density = dc.countAll(settings.channels);
         }
 
-        final PcgXshRs32 rng = new PcgXshRs32(System.currentTimeMillis());
+        final Pcg32 rng = Pcg32.xshrs(System.currentTimeMillis());
 
         // -=-=-=--=-=-
         // Unmix the specific activations to their correct channel.
