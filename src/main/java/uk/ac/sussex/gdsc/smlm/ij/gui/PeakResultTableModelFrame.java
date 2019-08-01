@@ -534,7 +534,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    * @param args the arguments
    */
   public static void main(String[] args) {
-    final SplitMix r = new SplitMix(System.currentTimeMillis());
+    final SplitMix r = SplitMix.new64(System.currentTimeMillis());
     final int n = 20;
 
     final ListSelectionModel selectionModel = new DefaultListSelectionModel();

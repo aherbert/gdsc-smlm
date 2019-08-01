@@ -1643,7 +1643,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         final double min = -settings.getDepthRange() / 2;
         switch (mode) {
           case DITHER:
-            final SplitMix r = new SplitMix(settings.getDitherSeed());
+            final SplitMix r = SplitMix.new64(settings.getDitherSeed());
             for (int i = points.size(); i-- > 0;) {
               points.getf(i).z += (min + r.nextDouble() * range);
             }

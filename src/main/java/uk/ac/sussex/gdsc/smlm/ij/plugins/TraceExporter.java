@@ -284,7 +284,7 @@ public class TraceExporter implements PlugIn {
       // Just leave any exceptions to trickle up and kill the plugin
       final TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
       final double w = c.convertBack(settings.wobble);
-      final SplitMix sm = new SplitMix(SeedFactory.createLong());
+      final SplitMix sm = SplitMix.new64(SeedFactory.createLong());
       final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(sm);
       final boolean is3D = results.is3D();
       results.forEach((PeakResultProcedure) peakResult -> {

@@ -1381,7 +1381,7 @@ public class PulseActivationAnalysis implements PlugIn {
       if (runSettings.nonSpecificCorrection != Correction.NONE) {
         createDensityCounter((float) runSettings.densityRadius);
 
-        final SplitMix sm = new SplitMix(System.currentTimeMillis());
+        final SplitMix sm = SplitMix.new64(System.currentTimeMillis());
 
         IJ.showStatus("Non-specific assignment");
         createThreadPool();

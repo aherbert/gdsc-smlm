@@ -3345,7 +3345,7 @@ public class Optics implements PlugIn {
   private static void scrambleClusters(ClusteringResult result) {
     // Scramble to ensure adjacent clusters have different Ids.
     // Same seed for consistency (e.g. in macros on the same data).
-    result.scrambleClusters(new SplitMix(1999));
+    result.scrambleClusters(SplitMix.new64(1999));
   }
 
   /**

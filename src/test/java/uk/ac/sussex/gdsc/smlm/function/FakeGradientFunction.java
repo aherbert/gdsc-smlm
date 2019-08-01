@@ -68,7 +68,7 @@ public class FakeGradientFunction
 
   @Override
   public void initialise(double[] a) {
-    rng = new SplitMix(Arrays.hashCode(a));
+    rng = SplitMix.new64(Arrays.hashCode(a));
   }
 
   @Override
