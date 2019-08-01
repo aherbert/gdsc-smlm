@@ -188,7 +188,7 @@ public class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final int[] x =
-        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -298,7 +298,7 @@ public class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final int[] x =
-        createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -363,7 +363,7 @@ public class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final String name = GradientCalculator.class.getSimpleName();
@@ -430,7 +430,7 @@ public class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
+    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -506,7 +506,7 @@ public class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
@@ -575,7 +575,7 @@ public class LsqLvmGradientProcedureTest {
     final double defaultBackground = background;
     try {
       background = 1e-2;
-      createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
+      createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
       final EjmlLinearSolver solver = new EjmlLinearSolver(1e-5, 1e-6);
 

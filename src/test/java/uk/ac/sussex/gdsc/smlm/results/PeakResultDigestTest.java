@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 public class PeakResultDigestTest {
   @SeededTest
   public void sameResultsAreEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -48,7 +48,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameSize1ResultsAreEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -57,7 +57,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameEmptyResultsAreEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -66,7 +66,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameResultsAreEqualWithDeviation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -75,7 +75,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameResultsAreEqualWithId(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -84,7 +84,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameResultsAreEqualWithEndFrame(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -93,7 +93,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void sameResultsAreEqualWithPrecision(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     Assertions.assertTrue(digest.matches(r1));
@@ -102,7 +102,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void differentResultsAreNotEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
     for (final int size : new int[] {10, 1, 0}) {
@@ -114,7 +114,7 @@ public class PeakResultDigestTest {
 
   @SeededTest
   public void digestMatchesPeakResultDigest(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int size = 1; size < 5; size++) {
       final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
       final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -155,7 +155,7 @@ public class PeakResultDigestTest {
     Assumptions.assumeTrue(false);
     final Logger logger = Logger.getLogger(PeakResultDigestTest.class.getName());
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResultsDigest digest = new PeakResultsDigest();
     final int N = 5;
     for (int size = 1000; size < 2000000; size *= 2) {

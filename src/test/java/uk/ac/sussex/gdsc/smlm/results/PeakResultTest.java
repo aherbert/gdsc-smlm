@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Assertions;
 public class PeakResultTest {
   @SeededTest
   public void sameResultIsEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
     final PeakResult p = r1[0];
     Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
@@ -52,10 +52,10 @@ public class PeakResultTest {
       for (final boolean withId : both) {
         for (final boolean withEndFrame : both) {
           for (final boolean withPrecision : both) {
-            rng = RngUtils.create(seed.getSeedAsLong());
+            rng = RngUtils.create(seed.getSeed());
             final PeakResult[] r1 =
                 createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
-            rng = RngUtils.create(seed.getSeedAsLong());
+            rng = RngUtils.create(seed.getSeed());
             final PeakResult[] r2 =
                 createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
             for (int i = 0; i < r1.length; i++) {
@@ -77,7 +77,7 @@ public class PeakResultTest {
       for (final boolean withId : both) {
         for (final boolean withEndFrame : both) {
           for (final boolean withPrecision : both) {
-            rng = RngUtils.create(seed.getSeedAsLong());
+            rng = RngUtils.create(seed.getSeed());
             final PeakResult[] r1 =
                 createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
             final PeakResult[] r2 =

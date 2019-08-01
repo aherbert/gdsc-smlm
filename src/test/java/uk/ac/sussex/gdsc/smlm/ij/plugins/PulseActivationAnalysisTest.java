@@ -45,7 +45,7 @@ public class PulseActivationAnalysisTest {
 
   @SeededTest
   public void canLinearlyUnmix2Channels(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n <= 2; n++) {
       for (int m = 1; m <= 2; m++) {
         canLinearlyUnmix2Channels(r, n, m);
@@ -124,7 +124,7 @@ public class PulseActivationAnalysisTest {
 
   @SeededTest
   public void canLinearlyUnmix3Channels(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n <= 3; n++) {
       for (int m = 1; m <= 6; m++) {
         canLinearlyUnmix3Channels(r, n, m);

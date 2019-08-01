@@ -164,7 +164,7 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       frames[i] = i + 1;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     Assertions.assertTrue(source.open());
@@ -207,7 +207,7 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       frames[i] = i + 1;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     Assertions.assertTrue(source.open());
@@ -346,7 +346,7 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       frames[i] = i + 1;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
@@ -410,7 +410,7 @@ public class ImageSourceTest {
     for (int i = 0; i < data.length; i++) {
       frames[i] = i + 1;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     final int[] expected = new int[] {4, 5, 7, 8, 10, 11, 13, 14};
@@ -503,7 +503,7 @@ public class ImageSourceTest {
     for (int i = 0, frame = 1; i < frames.length; i++, frame += 3) {
       frames[i] = frame;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     Assertions.assertTrue(source.open());
@@ -561,7 +561,7 @@ public class ImageSourceTest {
     for (int i = 0, frame = 1; i < frames.length; i++, frame += 3) {
       frames[i] = frame;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     Assertions.assertTrue(source.open());
@@ -686,7 +686,7 @@ public class ImageSourceTest {
     for (int i = 0, ii = 0; ii < expected.length; i++, ii += 3) {
       frames[i] = ii;
     }
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     RandomUtils.shuffle(frames, rg);
 
     Assertions.assertTrue(source.open());

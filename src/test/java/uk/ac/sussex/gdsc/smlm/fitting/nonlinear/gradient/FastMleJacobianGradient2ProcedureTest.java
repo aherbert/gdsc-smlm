@@ -111,7 +111,7 @@ public class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2Proce
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
@@ -162,7 +162,7 @@ public class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2Proce
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), npeaks, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.getSeed()), npeaks, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;

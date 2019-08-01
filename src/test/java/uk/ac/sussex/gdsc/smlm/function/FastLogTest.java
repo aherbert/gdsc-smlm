@@ -353,7 +353,7 @@ public class FastLogTest {
   }
 
   private static float[] generateRandomFloats(RandomSeed seed, int n) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final float[] d = new float[n];
     for (int i = 0; i < d.length; i++) {
       d[i] = nextUniformFloat(rng);
@@ -572,7 +572,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[10000000];
@@ -611,7 +611,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[100000];
@@ -631,7 +631,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final TurboList<TestFastLog> test = new TurboList<>();
     final int n = 13;
@@ -767,7 +767,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final float[] x = new float[1000000];
     for (int i = 0; i < x.length; i++) {
       x[i] = nextUniformFloat(rng);
@@ -850,7 +850,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double[] values = new double[1000000];
     for (int i = 0; i < values.length; i++) {
       values[i] = nextUniformDouble(rng);
@@ -899,7 +899,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double[] x = new double[1000000];
     for (int i = 0; i < x.length; i++) {
       x[i] = nextUniformDouble(rng);
@@ -929,7 +929,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double[] x = new double[1000000];
     final float[] xf = new float[x.length];
     for (int i = 0; i < x.length; i++) {

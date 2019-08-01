@@ -127,7 +127,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     for (final int width : primes) {
       for (final int height : primes) {

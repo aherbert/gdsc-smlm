@@ -38,7 +38,7 @@ public class OffsetFunctionTest {
   @SeededTest
   public void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final ValueFunction f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
@@ -78,7 +78,7 @@ public class OffsetFunctionTest {
   @SeededTest
   public void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final Gradient1Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
@@ -127,7 +127,7 @@ public class OffsetFunctionTest {
   @SeededTest
   public void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final Gradient2Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);

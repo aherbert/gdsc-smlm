@@ -88,7 +88,7 @@ public class FrcTest {
     // Sample lines through an image to create a structure.
     final int size = 1024;
     final double[][] data = new double[size * 2][];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
@@ -271,7 +271,7 @@ public class FrcTest {
     // Sample lines through an image to create a structure.
     final int N = 2048;
     final double[][] data = new double[N * 2][];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};

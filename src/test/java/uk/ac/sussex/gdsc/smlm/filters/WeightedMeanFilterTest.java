@@ -46,7 +46,7 @@ public abstract class WeightedMeanFilterTest extends WeightedFilterTest {
   public void filterPerformsWeightedMeanFiltering(RandomSeed seed) {
     final DataFilter filter = createDataFilter();
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     final float[] offsets = getOffsets(filter);

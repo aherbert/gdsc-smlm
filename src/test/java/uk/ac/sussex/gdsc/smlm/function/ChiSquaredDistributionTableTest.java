@@ -118,7 +118,7 @@ public class ChiSquaredDistributionTableTest {
 
   @SeededTest
   public void canPerformChiSquaredTest(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final ChiSquareTest test = new ChiSquareTest();
     for (final int n : new int[] {10, 50, 100}) {
       final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);

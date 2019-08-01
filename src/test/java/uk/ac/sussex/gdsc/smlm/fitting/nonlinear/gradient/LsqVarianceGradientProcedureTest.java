@@ -110,7 +110,7 @@ public class LsqVarianceGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -182,7 +182,7 @@ public class LsqVarianceGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -253,7 +253,7 @@ public class LsqVarianceGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
     Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
     if (precomputed) {
@@ -303,7 +303,7 @@ public class LsqVarianceGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -364,7 +364,7 @@ public class LsqVarianceGradientProcedureTest {
   @SeededTest
   public void crlbIsHigherWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1,
         10, 10, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

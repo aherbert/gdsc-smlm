@@ -73,7 +73,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeConvolution(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     int size = 10;
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
     for (int i = 0; i < sizeLoops; i++) {
@@ -101,7 +101,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeDoubleConvolution(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     int size = 10;
     for (int i = 0; i < sizeLoops; i++) {
       double sd = 0.5;
@@ -146,7 +146,7 @@ public class ConvolutionTest {
   public void doSpeedTest(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     int size = 10;
     for (int i = 0; i < sizeLoops; i++) {
@@ -192,7 +192,7 @@ public class ConvolutionTest {
   public void doDoubleSpeedTest(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     int size = 10;
     for (int i = 0; i < sizeLoops; i++) {
@@ -252,7 +252,7 @@ public class ConvolutionTest {
   }
 
   private static void singleVsDoubleSpeedTest(RandomSeed seed, int size, double sd) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final int runs = 1000;
 
     final double[] data1 = randomData(random, size);
@@ -302,7 +302,7 @@ public class ConvolutionTest {
   }
 
   private static void singleVsDoubleFftSpeedTest(RandomSeed seed, int size, double sd) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final int runs = 1000;
 
     final double[] data1 = randomData(random, size);
@@ -368,7 +368,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeScaledConvolution(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final TDoubleArrayList list = new TDoubleArrayList();
     int size = 10;
     for (int i = 0; i < sizeLoops; i++) {
@@ -403,7 +403,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeDoubleScaledConvolution(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final TDoubleArrayList list = new TDoubleArrayList();
     int size = 10;
     for (int i = 0; i < sizeLoops / 2; i++) {
@@ -461,7 +461,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeScaledConvolutionWithEarlyExit(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     int size = 10;
     final int sizeLoops = 4;
     final int sLoops = 2;
@@ -502,7 +502,7 @@ public class ConvolutionTest {
 
   @SeededTest
   public void canComputeDoubleScaledConvolutionWithEarlyExit(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     int size = 10;
     final int sizeLoops = 4;
     final int sLoops = 2;
@@ -567,7 +567,7 @@ public class ConvolutionTest {
   }
 
   private static void doScaledSpeedTest(RandomSeed seed, int size, double sd, int scale) {
-    final UniformRandomProvider random = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final int runs = 100;
 
     final double[] data1 = randomData(random, size);

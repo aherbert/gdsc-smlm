@@ -60,7 +60,7 @@ public class FilterTest {
 
   @SeededTest
   public void canCompareMultiFilter(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
     final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter f1 =
@@ -75,7 +75,7 @@ public class FilterTest {
 
   @SeededTest
   public void canCompareMultiFilter2(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
     final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter2 f1 =
@@ -92,7 +92,7 @@ public class FilterTest {
   public void directCompareMultiFilterIsFaster(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
     final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -214,7 +214,7 @@ public class FilterTest {
   @SeededTest
   public void canSerialiseMultiFilter(RandomSeed seed) {
     // Check the XStream serialisation supports inheritance
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);

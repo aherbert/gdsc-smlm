@@ -873,7 +873,7 @@ public class PoissonGammaGaussianFunctionTest {
     final PoissonGammaGaussianFunction f2 = new PoissonGammaGaussianFunction(1 / g, s);
     f2.setConvolutionMode(fast);
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     // Generate realistic data from the probability mass function
     final double[][] samples = new double[photons.length][];

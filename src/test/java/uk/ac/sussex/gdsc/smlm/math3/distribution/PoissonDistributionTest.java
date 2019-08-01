@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 public class PoissonDistributionTest {
   @SeededTest
   public void canComputeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -54,7 +54,7 @@ public class PoissonDistributionTest {
 
   @SeededTest
   public void canComputeCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -72,7 +72,7 @@ public class PoissonDistributionTest {
 
   @SeededTest
   public void canComputeInverseCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {

@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Assertions;
 public class CalibrationWriterTest {
   @SeededTest
   public void canWrite(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     for (int i = 0; i < 100; i++) {
       canWrite(rng);
     }

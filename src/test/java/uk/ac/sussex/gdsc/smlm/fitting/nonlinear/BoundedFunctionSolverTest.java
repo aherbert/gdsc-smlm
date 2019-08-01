@@ -90,7 +90,7 @@ public class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
     final String name = getLvmName(applyBounds, clamping, false);
 
     final int loops = 5;
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
     for (final double s : signal) {

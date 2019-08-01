@@ -238,7 +238,7 @@ public class BlockSumFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, 57);
 
     for (final int width : primes) {

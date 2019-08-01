@@ -179,7 +179,7 @@ public class JumpDistanceAnalysisTest {
   // @formatter:on
 
   private void fitSinglePopulation(RandomSeed seed, boolean mle) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
     AssertionError error = null;
     NEXT_D: for (final double d : D) {
@@ -239,7 +239,7 @@ public class JumpDistanceAnalysisTest {
 
   private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
     AssertionError error = null;
@@ -272,7 +272,7 @@ public class JumpDistanceAnalysisTest {
   public void canDoBenchmark(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     out = null;
     try {

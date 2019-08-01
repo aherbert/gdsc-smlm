@@ -442,7 +442,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   private void checkCanAddUsingDifferentMethods(RandomSeed seed, int displayFlags) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     displayFlags |= ImageJImagePeakResults.DISPLAY_SIGNAL;
 
     final ImageJImagePeakResults[] r = new ImageJImagePeakResults[8];

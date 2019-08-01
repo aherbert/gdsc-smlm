@@ -68,7 +68,7 @@ public class FhtFilterTest {
     final int ey = 7;
     final int ox = 1;
     final int oy = 2;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
     // This is offset from the centre
     final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);

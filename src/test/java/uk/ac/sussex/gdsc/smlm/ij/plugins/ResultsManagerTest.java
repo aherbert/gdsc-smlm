@@ -126,7 +126,7 @@ public class ResultsManagerTest {
     }
 
     // Generate random spots
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final int size = 100;
     final Spot[] spots = new Spot[size];
     for (int i = 1; i <= size; i++) {

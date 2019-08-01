@@ -70,7 +70,7 @@ public class PerPixelCameraModelTest {
   }
 
   private static Object createData(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
 
     final PerPixelCameraModelTestData data = new PerPixelCameraModelTestData();
     data.bias = new float[size];
@@ -115,7 +115,7 @@ public class PerPixelCameraModelTest {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model = createModel(data, initialise);
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
     for (int i = 0; i < 10; i++) {
       final Rectangle bounds = getBounds(rand, ie);
@@ -159,7 +159,7 @@ public class PerPixelCameraModelTest {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model = createModel(data, initialise);
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
     for (int i = 0; i < 10; i++) {
       final Rectangle bounds = getBounds(rand, ie);
@@ -218,7 +218,7 @@ public class PerPixelCameraModelTest {
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
         new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
     for (int j = 0; j < 10; j++) {
       final Rectangle bounds = getBounds(rand, ie);
@@ -232,7 +232,7 @@ public class PerPixelCameraModelTest {
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
         new PerPixelCameraModel(w, h, data.bias, data.gain, data.variance);
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
     for (int j = 0; j < 10; j++) {
       final Rectangle bounds = getBounds(rand, ie);
@@ -304,7 +304,7 @@ public class PerPixelCameraModelTest {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model = createModel(data, initialise);
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final ImageExtractor ie = ImageExtractor.wrap(data.bias, w, h);
     for (int i = 0; i < 10; i++) {
       final Rectangle bounds = getBounds(rand, ie);

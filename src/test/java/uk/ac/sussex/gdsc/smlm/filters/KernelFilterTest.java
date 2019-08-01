@@ -205,7 +205,7 @@ public class KernelFilterTest {
 
   private void filter1IsSameAsFilter2(RandomSeed seed, FilterWrapper f1, FilterWrapper f2,
       boolean internal, double tolerance) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final float[] data = createData(rand, size, size);
 
     final int testBorder = (internal) ? f1.kw / 2 : 0;
@@ -283,7 +283,7 @@ public class KernelFilterTest {
 
   private void floatFilterIsFasterThanImageJFilter(RandomSeed seed, int kw) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final float[][] data = new float[10][];
     for (int i = 0; i < data.length; i++) {

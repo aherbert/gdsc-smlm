@@ -66,7 +66,7 @@ public class PeakResultStoreTest {
     final boolean isList = store instanceof PeakResultStoreList;
     final PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
     PeakResult result;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
 
     PeakResult[] list = new PeakResult[20];
     int size = 0;

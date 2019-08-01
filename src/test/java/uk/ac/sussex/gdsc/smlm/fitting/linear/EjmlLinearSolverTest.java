@@ -529,7 +529,7 @@ public class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1
@@ -828,7 +828,7 @@ public class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1

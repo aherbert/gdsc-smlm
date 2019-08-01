@@ -39,7 +39,7 @@ import java.io.IOException;
 public class SettingsManagerTest {
   @SeededTest
   public void canReadWriteConfiguration(RandomSeed seed) throws IOException {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
 
     final Calibration.Builder builder = Calibration.newBuilder();
     builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());

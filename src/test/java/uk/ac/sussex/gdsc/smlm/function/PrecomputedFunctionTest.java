@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Assertions;
 public class PrecomputedFunctionTest {
   @SeededTest
   public void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final ValueFunction func = new PrecomputedValueFunction(v);
@@ -61,7 +61,7 @@ public class PrecomputedFunctionTest {
   @SeededTest
   public void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final double[][] g1 = new double[size][];
@@ -94,7 +94,7 @@ public class PrecomputedFunctionTest {
   @SeededTest
   public void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final double[][] g1 = new double[size][];

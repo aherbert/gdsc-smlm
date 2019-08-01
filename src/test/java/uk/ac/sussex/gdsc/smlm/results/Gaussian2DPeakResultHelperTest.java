@@ -280,7 +280,7 @@ public class Gaussian2DPeakResultHelperTest {
 
   @SeededTest
   public void canComputeMeanSignalUsingR(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 10; i++) {
@@ -307,7 +307,7 @@ public class Gaussian2DPeakResultHelperTest {
 
   @SeededTest
   public void canComputeMeanSignalUsingP(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 10; i++) {

@@ -63,7 +63,7 @@ public class SpotFilterHelperTest {
 
   @SeededTest
   public void canCountNeighbours(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final int width = 64;
     final int height = 64;

@@ -44,7 +44,7 @@ public class ErfGaussian2DFunctionVsPsfModelTest {
 
   @SeededTest
   public void computesSameAsPsfModel(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     for (int i = 0; i < 10; i++) {
       //@formatter:off
       computesSameAsPsfModel(

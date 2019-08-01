@@ -71,7 +71,7 @@ public abstract class WeightedFilterTest {
 
   @SeededTest
   public void evenWeightsDoesNotAlterFiltering(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final DataFilter filter1 = createDataFilter();
     final DataFilter filter2 = createDataFilter();
@@ -131,7 +131,7 @@ public abstract class WeightedFilterTest {
 
   @SeededTest
   public void filterDoesNotAlterFilteredImageMean(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     // ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
     // ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 

@@ -433,7 +433,7 @@ public class PeakResultsReaderTest {
 
   @SeededTest
   public void canConvertMalkToNmAndPhotons(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
     // Output in pixel and count
@@ -458,7 +458,7 @@ public class PeakResultsReaderTest {
   @SeededTest
   public void writeTextWithComputedPrecisionMatchesRead(RandomSeed seed) {
     // Create without precision
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
     // Ensure units are OK for computing precision
     final CalibrationWriter cw = results.getCalibrationWriter();
@@ -497,7 +497,7 @@ public class PeakResultsReaderTest {
   }
 
   private static void canReadIntoPreferredUnits(RandomSeed seed, ResultsFileFormat fileFormat) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
     // Output in nm and count
@@ -540,7 +540,7 @@ public class PeakResultsReaderTest {
 
   private static void canReadAndSimplifyGaussian2DPsf(RandomSeed seed,
       ResultsFileFormat fileFormat) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out = createResults(rg, 1, false, false, false, false);
 
     final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -617,7 +617,7 @@ public class PeakResultsReaderTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out =
         createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision);
     final String filename = createFile();
@@ -644,7 +644,7 @@ public class PeakResultsReaderTest {
   private static void writeMatchesRead(RandomSeed seed, boolean sequential,
       ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
       boolean showPrecision, boolean sort) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out =
         createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision);
     if (fileFormat == ResultsFileFormat.MALK) {
@@ -738,7 +738,7 @@ public class PeakResultsReaderTest {
 
   private static void checkScannerMatchesNonScanner(RandomSeed seed, boolean showDeviations,
       boolean showEndFrame, boolean showId, boolean showPrecision, boolean sort) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out =
         createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision);
     final String filename = createFile();

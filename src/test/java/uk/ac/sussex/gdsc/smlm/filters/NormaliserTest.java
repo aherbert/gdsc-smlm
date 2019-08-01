@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Assertions;
 public class NormaliserTest extends AbstractFilterTest {
   @SeededTest
   public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     for (final int width : primes) {
       for (final int height : primes) {

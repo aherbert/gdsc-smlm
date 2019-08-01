@@ -46,7 +46,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest {
   public void filterPerformsWeightedSumFiltering(RandomSeed seed) {
     final DataFilter filter = createDataFilter();
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     final float[] offsets = getOffsets(filter);

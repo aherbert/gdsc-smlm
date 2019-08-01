@@ -122,7 +122,7 @@ public class ErfTest {
   }
 
   private static void checkErfxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final int range = 8;
     double max = 0;
 
@@ -198,7 +198,7 @@ public class ErfTest {
   }
 
   private static void checkErfxxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final int range = 3;
     double max = 0;

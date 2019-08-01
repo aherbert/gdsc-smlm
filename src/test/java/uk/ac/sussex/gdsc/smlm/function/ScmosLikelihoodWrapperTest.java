@@ -285,7 +285,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -493,7 +493,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -842,7 +842,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);

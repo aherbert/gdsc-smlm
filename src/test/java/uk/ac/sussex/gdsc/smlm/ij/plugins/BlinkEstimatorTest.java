@@ -113,7 +113,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[MEDIUM],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[MEDIUM],
         toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
@@ -123,7 +123,7 @@ public class BlinkEstimatorTest {
           RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[MEDIUM],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[MEDIUM],
         toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
@@ -132,7 +132,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[MEDIUM],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[MEDIUM],
         toff[MEDIUM], particles, fixedFraction, false, true);
   }
 
@@ -141,7 +141,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[HIGH],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[HIGH],
         toff[HIGH], particles, fixedFraction, false, true);
   }
 
@@ -150,7 +150,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[HIGH],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[HIGH],
         toff[HIGH], particles, fixedFraction, false, true);
   }
 
@@ -159,7 +159,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[HIGH],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[HIGH],
         toff[HIGH], particles, fixedFraction, false, true);
   }
 
@@ -168,7 +168,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[LOW], ton[LOW], toff[LOW],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -177,7 +177,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[MEDIUM], ton[LOW],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[LOW],
         toff[LOW], particles, fixedFraction, false, true);
   }
 
@@ -186,7 +186,7 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeedAsLong()), blinkingRate[HIGH], ton[LOW], toff[LOW],
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -194,7 +194,7 @@ public class BlinkEstimatorTest {
   public void findOptimalFittedPoints(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final int particles = 1000;
     final double fixedFraction = 1;

@@ -273,7 +273,7 @@ public class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
         (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
@@ -366,7 +366,7 @@ public class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
         (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
@@ -406,7 +406,7 @@ public class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc = new GradientCalculator6();
     final GradientCalculator calc2 = new GradientCalculator6();
@@ -467,7 +467,7 @@ public class GradientCalculatorSpeedTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final int[] x =
-        createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
+        createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
     final double delta = 1e-3;
     final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
@@ -575,7 +575,7 @@ public class GradientCalculatorSpeedTest {
     final boolean report = logger.isLoggable(Level.INFO);
     try {
       background = 1e-2;
-      createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
+      createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
       final EjmlLinearSolver solver = new EjmlLinearSolver(1e-5, 1e-6);
 
@@ -673,7 +673,7 @@ public class GradientCalculatorSpeedTest {
         new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
     final int n = blockWidth * blockWidth;
     final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int run = 5; run-- > 0;) {
       a[Gaussian2DFunction.BACKGROUND] = random(rng, background);

@@ -307,7 +307,7 @@ public class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
@@ -442,7 +442,7 @@ public class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
@@ -517,7 +517,7 @@ public class PoissonCalculatorTest {
     nlf1.initialise(a);
     nlf2.initialise(a);
     nlf3.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
     final double[] u = new double[x.length];
     final double[] b1 = new double[x.length];
@@ -688,7 +688,7 @@ public class PoissonCalculatorTest {
   @SeededTest
   public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed) {
     final DoubleEquality eq = new DoubleEquality(3e-4, 0);
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     // Test for different x. The calculator approximation begins
     final int n = 100;
     final double[] u = new double[n];

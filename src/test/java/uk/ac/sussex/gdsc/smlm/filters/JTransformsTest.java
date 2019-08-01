@@ -297,7 +297,7 @@ public class JTransformsTest {
 
     final int size = 256;
     final int w = size / 4;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
 
     // Blob in the centre
     FloatProcessor fp = createProcessor(size, size / 2 - w / 2, size / 2 - w / 2, w, w, null);

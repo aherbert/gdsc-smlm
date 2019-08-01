@@ -167,7 +167,7 @@ public class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final MleGradientCalculator calc =
@@ -187,7 +187,7 @@ public class FastMleGradient2ProcedureTest {
   @SeededTest
   public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10,
         10, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -307,7 +307,7 @@ public class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final MleGradientCalculator calc =
@@ -373,7 +373,7 @@ public class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeedAsLong()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     // Create messages
@@ -439,7 +439,7 @@ public class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList);
+    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final Gradient2Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -526,7 +526,7 @@ public class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeedAsLong()), 1, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;

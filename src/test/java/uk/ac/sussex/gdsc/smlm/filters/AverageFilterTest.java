@@ -144,7 +144,7 @@ public class AverageFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, DataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (final int width : primes) {
       for (final int height : primes) {
         for (final float boxSize : boxSizes) {

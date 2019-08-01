@@ -139,7 +139,7 @@ public class SeriesImageSourceTest {
       }
     }
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int i = 0; i < 3; i++) {
       final int[] random = RandomUtils.sample(pixels.length / 2, pixels.length, r);
       for (final int frame : random) {

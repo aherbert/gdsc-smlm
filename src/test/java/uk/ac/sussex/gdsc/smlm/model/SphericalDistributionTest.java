@@ -61,7 +61,7 @@ public class SphericalDistributionTest {
 
   @SeededTest
   public void canSampleUsingTransformationMethod(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(false);
@@ -72,7 +72,7 @@ public class SphericalDistributionTest {
 
   @SeededTest
   public void canSampleUsingRejectionMethod(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(true);
@@ -85,7 +85,7 @@ public class SphericalDistributionTest {
   public void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     dist.setUseRejectionMethod(false);
@@ -129,7 +129,7 @@ public class SphericalDistributionTest {
   }
 
   private static void drawImage(RandomSeed seed, boolean useRejctionMethod) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults results = new MemoryPeakResults();
     results.setSortAfterEnd(true);
     final int radius = 10;

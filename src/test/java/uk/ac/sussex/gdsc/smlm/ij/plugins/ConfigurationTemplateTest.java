@@ -153,7 +153,7 @@ public class ConfigurationTemplateTest {
     // Create a dummy image
     final int size = 20;
     final float[] pixels = new float[size * size];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int i = pixels.length; i-- > 0;) {
       pixels[i] = r.nextFloat();
     }

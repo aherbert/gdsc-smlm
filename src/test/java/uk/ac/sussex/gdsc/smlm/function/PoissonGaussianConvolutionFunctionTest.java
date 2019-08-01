@@ -247,7 +247,7 @@ public class PoissonGaussianConvolutionFunctionTest {
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
     f2.setComputePmf(false);
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     // Generate realistic data from the probability mass function
     final double[][] samples = new double[photons.length][];

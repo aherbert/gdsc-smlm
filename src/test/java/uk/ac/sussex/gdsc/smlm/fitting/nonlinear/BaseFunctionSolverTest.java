@@ -274,7 +274,7 @@ public abstract class BaseFunctionSolverTest {
       solver.setWeights(getWeights(seed, noiseModel));
     }
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     for (final double s : signal) {
       final double[] expected = createParams(1, s, 0, 0, 1);
@@ -360,7 +360,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     final int loops = 5;
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
     final String[] statName = {"Signal", "X", "Y"};
 
@@ -663,7 +663,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.
@@ -773,7 +773,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeedAsLong());
+    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.
