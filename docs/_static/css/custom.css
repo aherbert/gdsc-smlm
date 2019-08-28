@@ -1,0 +1,9 @@
+.wy-table-responsive table td, .wy-table-responsive table th {
+     /* Changed from nrowrap */
+     white-space: normal;
+}
+
+.wy-table td, .rst-content table.docutils td, .rst-content table.field-list td {
+     /* Changed from middle */
+     vertical-align: top;
+}

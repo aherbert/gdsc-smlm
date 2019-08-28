@@ -40,6 +40,7 @@ release = u'1.0.0'
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.autosectionlabel',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -64,12 +65,14 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store', 'global.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-highlight_language = 'java'
+#highlight_language = 'java'
+
+rst_prolog = open('global.rst', 'r').read()
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -94,6 +97,12 @@ else:
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -164,3 +173,5 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+autosectionlabel_prefix_document = True
+numfig = True

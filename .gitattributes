@@ -1,2 +1,4 @@
 *        text=auto
 *.odt    -text
+*.jpg    -text
+*.png    -text

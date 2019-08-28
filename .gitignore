@@ -9,3 +9,5 @@ JumpDistanceAnalysisTest.dat
 /gdsc.smlm.settings.xml
 /luts
 /.checkstyle
+# Sphinx documentation
+docs/_build/
