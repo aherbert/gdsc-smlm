@@ -858,7 +858,6 @@ public class TraceMolecules implements PlugIn {
     gd.addCheckbox("Save_clusters", settings.getSaveTraces());
     gd.addCheckbox("Show_histograms", settings.getShowHistograms());
     gd.addCheckbox("Save_cluster_data", settings.getSaveTraceData());
-    gd.addCheckbox("Refit_option", settings.getRefitOption());
     if (altKeyDown) {
       gd.addCheckbox("Debug", pluginSettings.inputDebugMode);
     }
@@ -904,7 +903,6 @@ public class TraceMolecules implements PlugIn {
     settings.setSaveTraces(gd.getNextBoolean());
     settings.setShowHistograms(gd.getNextBoolean());
     settings.setSaveTraceData(gd.getNextBoolean());
-    settings.setRefitOption(gd.getNextBoolean());
     if (altKeyDown) {
       debugMode = pluginSettings.inputDebugMode = gd.getNextBoolean();
     }
