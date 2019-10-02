@@ -47,6 +47,7 @@ import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
 import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -1849,15 +1850,12 @@ public class CreateData implements PlugIn {
         try (BufferedReader in = new BufferedReader(new UnicodeReader(
             new FileInputStream(new File(settings.getPhotonDistributionFile())), null))) {
           final StoredDataStatistics stats = new StoredDataStatistics();
-          try {
-            String str = null;
-            double val = 0.0d;
-            while ((str = in.readLine()) != null) {
-              val = Double.parseDouble(str);
-              stats.add(val);
-            }
-          } finally {
-            in.close();
+          String str = in.readLine();
+          double val = 0.0d;
+          while (str != null) {
+            val = Double.parseDouble(str);
+            stats.add(val);
+            str = in.readLine();
           }
 
           if (stats.getSum() > 0) {
@@ -1873,7 +1871,6 @@ public class CreateData implements PlugIn {
 
             // Create the distribution using the recommended number of bins
             final int binCount = stats.getN() / 10;
-
 
             final EmpiricalDistribution dist = new EmpiricalDistribution(binCount,
                 new RandomGeneratorAdapter(createRandomGenerator()));
@@ -3026,8 +3023,8 @@ public class CreateData implements PlugIn {
             }
             final double scale = emGain - 1 + 1 / image[i];
             final double shape = image[i];
-            final double electrons = Math
-                .round(SamplerUtils.createGammaSampler(rng, shape, scale).sample() - 1);
+            final double electrons =
+                Math.round(SamplerUtils.createGammaSampler(rng, shape, scale).sample() - 1);
             image[i] += electrons;
           }
         } else {
@@ -3121,7 +3118,7 @@ public class CreateData implements PlugIn {
 
   /**
    * Check if the localisation, or its neighbours, reach the SNR thresholds. The intensity and noise
-   * are after EM-gain has been applied.
+   * must be in the same units.
    *
    * @param localisationSet the localisation set
    * @param intensity the intensity
@@ -3191,9 +3188,7 @@ public class CreateData implements PlugIn {
         }
       } else {
         for (int i = 0; i < pixels2.length; i++) {
-          if (backgroundPixels[i] > 0) {
-            pixels2[i] = cache.createPoissonSampler(rng, backgroundPixels[i]).sample();
-          }
+          pixels2[i] = PoissonSamplerUtils.nextPoissonSample(rng, backgroundPixels[i]);
         }
       }
     } else {
@@ -5201,7 +5196,7 @@ public class CreateData implements PlugIn {
     comment("Multiple compounds can be combined using fractional ratios.");
     comment("Coordinates are specified in nanometres.");
     comment("Coordinates describe the relative positions of atoms in the molecule;"
-        + " the molcule will have a randomly assigned XYZ position for its centre-of-mass."
+        + " the molecule will have a randomly assigned XYZ position for its centre-of-mass."
         + " Rotation will be about the centre-of-mass.");
     IJ.log("");
 
