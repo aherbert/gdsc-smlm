@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.utils.AlphanumComparator;
+import uk.ac.sussex.gdsc.core.utils.AlphaNumericComparator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
@@ -922,7 +922,7 @@ public class ConfigurationTemplate implements PlugIn {
 
     // Sort partially numerically
     final List<String> list = Arrays.stream(fileList).filter(File::isFile).map(File::getPath)
-        .sorted(new AlphanumComparator(false)).collect(Collectors.toList());
+        .sorted(AlphaNumericComparator.NULL_IS_MORE_INSTANCE).collect(Collectors.toList());
 
     // Select
     final MultiDialog md = new MultiDialog("Select templates", list);
