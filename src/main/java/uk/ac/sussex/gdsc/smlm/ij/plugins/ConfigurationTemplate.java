@@ -922,7 +922,7 @@ public class ConfigurationTemplate implements PlugIn {
 
     // Sort partially numerically
     final List<String> list = Arrays.stream(fileList).filter(File::isFile).map(File::getPath)
-        .sorted(AlphanumComparator.NULL_IS_MORE_INSTANCE).collect(Collectors.toList());
+        .sorted(new AlphanumComparator(false)).collect(Collectors.toList());
 
     // Select
     final MultiDialog md = new MultiDialog("Select templates", list);
