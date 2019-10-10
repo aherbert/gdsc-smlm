@@ -131,6 +131,7 @@ import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -1483,8 +1484,7 @@ public class PeakFit implements PlugInFilter {
               calibration.setCameraType(t);
               calibrationProvider.saveCalibration(calibration.getCalibration());
             }
-            final boolean result = collectOptions(false);
-            return result;
+            return collectOptions(false);
           }
 
           @Override
@@ -2136,7 +2136,7 @@ public class PeakFit implements PlugInFilter {
     fitConfig.setCoordinateShiftFactor(1);
     resultsSettings = ResultsSettings.newBuilder();
 
-    // Do simple results output. We only need set non-default values.
+    // Do simple results output. We only need to set non-default values.
     resultsSettings.getResultsInMemorySettingsBuilder().setInMemory(true);
     if (settings.showTable) {
       final ResultsTableSettings.Builder tableSettings =
@@ -2203,17 +2203,27 @@ public class PeakFit implements PlugInFilter {
     }
 
     // Check for a PSF width
-    if (fitConfig.getInitialXSd() <= 0) {
-      return true;
-    }
-
-    return false;
+    return fitConfig.getInitialXSd() <= 0;
   }
 
   private boolean showCalibrationWizard(CalibrationWriter calibration, boolean showIntroduction) {
     if (showIntroduction) {
-      final ExtendedGenericDialog gd = newWizardDialog("No configuration file could be loaded.",
-          "Please follow the configuration wizard to calibrate.");
+      // Currently we do not support a sCMOS camera.
+      // If this is set then the settings must have been created in Peak Fit and not
+      // the calibration wizard.
+      final ArrayList<String> msgs = new ArrayList<>();
+      if (calibration.isScmos()) {
+        msgs.add("The configuration file specifies a sCMOS camera. "
+            + "This is only supported in the Peak Fit plugin.");
+        msgs.add("Continuing with the wizard will overwrite the current cofiguration.");
+        msgs.add("Press Cancel to close the wizard. "
+            + "You can then run Peak Fit with the current configuration.");
+      } else {
+        msgs.add("No configuration file could be loaded.");
+        msgs.add("Please follow the configuration wizard to calibrate.");
+      }
+
+      final ExtendedGenericDialog gd = newWizardDialog(msgs.toArray(new String[0]));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -2343,9 +2353,8 @@ public class PeakFit implements PlugInFilter {
         "The peak width can be estimated using the wavelength of light emitted by the single"
             + " molecules and the parameters of the microscope. Use a PSF calculator by clicking"
             + " the checkbox below:");
-    // Add ability to run the PSF Calculator to get the width
-    gd.addCheckbox("Run_PSF_calculator", false);
     gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSd(), 3);
+    // Add ability to run the PSF Calculator to get the width
     if (ImageJUtils.isShowGenericDialog()) {
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", event -> {
