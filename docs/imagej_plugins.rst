@@ -25,26 +25,144 @@ The plugins have been divided into the following sub-sets:
    * - Set
      - Description
 
-   * - Fitting
+   * - :ref:`Fitting <fitting_plugins:Fitting Plugins>`
      - For identification of localisations on an image.
 
-   * - Results
+   * - :ref:`Results <results_plugins:Results Plugins>`
      - Allow loading and saving results in different formats. Results can be filtered to subsets and compared to a reference set, e.g. for benchmarking.
 
-   * - Analysis
+   * - :ref:`Analysis <analysis_plugins:Analysis Plugins>`
      - Perform analysis on localisations for example blinking rate estimation, molecule tracing and Fourier image resolution.
 
-   * - PC PALM
+   * - :ref:`PC PALM <pc_palm_plugins:PC PALM Plugins>`
      - Plugins for Pair Correlation (PC) analysis.
 
-   * - Model
+   * - :ref:`Model <model_plugins:Model Plugins>`
      - Simulate single-molecule images.
 
-   * - Calibration
+   * - :ref:`Calibration <calibration_plugins:Calibration Plugins>`
      - Estimate PSF widths and allow calibration of the imaging camera noise and gain.
 
-   * - Tools
+   * - :ref:`Tools <tools_plugins:Tools Plugins>`
      - Utility plugins for image manipulation.
 
-   * - Toolset
+   * - :ref:`Toolset <toolset_plugins:Toolset Plugins>`
      - For install of the SMLM Toolset and configuration of the SMLM Tools window.
+
+
+Usage Tracking
+--------------
+
+To understand how the GDSC SMLM plugins are being used around the world we have added some code to track usage.
+
+**Tracking is disabled by default. You must opt-in and you can opt-out at any time.**
+
+Option are changed by running the ``SMLM Usage Tracker`` plugin.
+
+Tracking will allow us to understand our user base and help us to improve the plugins. Example questions we can answer are:
+
+* Which plugins are popular?
+* How often people update to the latest version?
+* How many times people use different plugins in one ``ImageJ`` analysis session?
+* What plugins are frequently used together, and in what order?
+* What computer platform and software do we need to support?
+
+To track usage we use Google Analytics, a web analytics service provided by Google, Inc. ("Google"). The information about your use of the plugins will be transmitted to and stored by Google on servers in the United States.
+
+Please consider allowing tracking as it really will help improve our code, and will not impact your use of ``ImageJ``.
+
+Usage Data
+~~~~~~~~~~
+
+No personal information is transmitted to Google. There is no information that uniquely identifies a person. No data currently open in ``ImageJ`` are sent. Only data about the GDSC plugins are sent. No data about any other actions within ``ImageJ`` are sent.
+
+Data is only sent when a GDSC plugin is run. The following data is sent:
+
+* Name of the plugin
+* Plugin version
+* ``ImageJ`` version
+* Java version
+* Operating system (e.g. Windows, Linux, Mac OS)
+* Screen resolution\ :sup:`1`
+
+:sup:`1` This is used to design dialogs that fit on the screen.
+
+Tracking Identifiers
+~~~~~~~~~~~~~~~~~~~~
+
+All the usage information could be collected without tracking the same individual. Each ``ImageJ`` session would count as a new individual using the software. To allow the distinction of new or repeat use a random identifier for the individual is generated. This is a 128-bit random `UUID <https://en.wikipedia.org/wiki/Universally_unique_identifier>`_ with a very low chance of being repeated on another ``ImageJ`` instance. This is stored in the ``ImageJ`` preferences file under the key ``.gdsc.ga.clientId``. It can only be read by programs with permission to read the ``ImageJ`` preferences file. This is usually in the user home directory and so would only be read by programs run by the user.
+
+The tracking identifier will not be created unless you opt-in to tracking. The default is no tracking.
+
+Performance
+~~~~~~~~~~~
+
+Note that usage tracking will not slow down ``ImageJ``. The tracking is performed in the background only when the computer is doing nothing else. If it is always too busy then no tracking data will ever be sent.
+
+If you are not connected to the internet then no tracking data will ever be sent. The tracker will identify that messages cannot be sent and shutdown. You will not notice.
+
+User Preferences
+~~~~~~~~~~~~~~~~
+
+To notify users of Google Analytics a dialog is shown when the user runs a GDSC plugin and their preferences are not known. This will also happen when a release of the code has been made that affects the tracking data. The following options can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Opt in
+     - Set to *true* to enable Google Analytics.
+
+       Set to *false* to prevent any data being collected.
+
+Preferences are saved in the ``ImageJ`` preferences file. This is written when ``ImageJ`` closes and stores user preferences between ``ImageJ`` sessions. If ``ImageJ`` does not shut-down correctly then the preferences may not be stored. In this case you can just set them next time you run ``ImageJ``. The following settings are stored:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Key
+     - Description
+
+   * - gdsc.ga.lastVersion
+     - The version number of the most recently run GDSC analytics code. If a new version is released that does not match this stored version then the user preferences dialog will be shown again to ensure the preferences are correct.
+
+   * - gdsc.ga.clientId
+     - The random UUID for the user. This allows repeat sessions to be distinguished from new users. 
+
+   * - gdsc.ga.state
+     - A flag indicating the user preference:
+
+       * -1: Opt-out - no tracking is performed
+       * 0: Unknown - show the user preferences dialog
+       * 1: Opt-in - tracking is active
+
+   * - gdsc.ga.anonymize
+     - No longer used. This was used in an old version of GDSC analytics to store the preference to anonymize the IP address. This is sent to Google to indicate the IP address should not be available for any analysis.
+
+       The default is to always use an anonymized IP address.
+
+The user can change their options at any time by running the ``SMLM Usage Tracker`` plugin.
+
+Google Analytics Details
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The code uses the Analytics Measurement Protocol. This allows any web connected application to record simple usage data. The GDSC plugins fully comply with the Google protocol policy. In brief this means that no data should be sent to Google that allows the user to be personally identified, and the user can opt-out at any time. If we break these rules then all our data and our account will be deleted by Google.
+
+Data is sent using a secure HTTP connection. To see the data you can set the Java logging level to ``FINE`` before running ``ImageJ``. This can be done in the default Java logging properties file (``logging.properties``) usually found in the ``lib`` or ``conf`` folder of the java version.
+
+Set the logging for the GDSC package::
+
+    uk.ac.sussex.gdsc.analytics.level = FINE
+
+When you run a plugin the tracking information will be written to the log output. For GDSC plugins run within ``ImageJ`` this is directed to the ``ImageJ`` log window. For example the following is logged when running the ``Create Data`` plugin followed by the ``Filter Spot Data`` plugin (for convenience the text has been URL decoded)::
+
+    FINE: Sent hit 'v=1&je=1&tid=UA-74666243-1&cid=2ee0766a-5a53-4ae5-b7e6-3740eaff15ea&t=pageview&sc=start&an=GDSC+ImageJ+Plugins&av=2.0.0&sr=5680x1920&cd1=(Fiji+Is+Just)+ImageJ+2.0.0-rc-69/1.52p&cd2=1.8.0_242&cd3=Linux&cd4=4.4.0-171-generic&cd5=amd64&cd9=2.0&cd7=1.0&dh=localhost&dp=/Plugins/GDSC+SMLM/Model/Create+Data&dt=Create+Data&cm1=0&cd8=false&qt=349'
+    FINE: Sent hit 'v=1&je=1&tid=UA-74666243-1&cid=2ee0766a-5a53-4ae5-b7e6-3740eaff15ea&t=pageview&dh=localhost&dp=/Plugins/GDSC+SMLM/Model/Filter+Spot+Data&dt=Filter+Spot+Data&cm1=0&cd8=false&qt=0'
+
+The first hit starts a session (``sc=start``) and contains information about the software versions and host Java environment. The second hit continues the session by using the same ``id`` and only contains information about the plugin that was run. The ``dp`` parameter is the path in the ``ImageJ`` menu and the ``dt`` parameter is the plugin name. The ``cm`` and ``cd8`` custom parameters are used to indicate the plugin was running in a macro.
+
+Details of all the parameters can be found in the `Google Measurement Protocol Parameter Reference <https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters>`_.

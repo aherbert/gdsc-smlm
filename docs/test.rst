@@ -1,5 +1,22 @@
 :orphan:
 
+.. index:: headings
+
+Heading 1
+=========
+
+Heading 2
+---------
+
+Heading 3
+~~~~~~~~~
+
+Heading 4
+^^^^^^^^^
+
+Hello world!
+
+.. index:: formatting
 
 Formatting
 ==========
@@ -19,6 +36,8 @@ b\ :sup:`2`
 
 s\ :sub:`a`
 
+.. index:: equations
+
 Equations
 =========
 
@@ -35,8 +54,12 @@ inline: :math:`y = ax + c`
 
 :math:`\mathit{SNR}=\frac{N}{\sqrt{b^2}}`
 
+.. index:: tables
+
 Tables
 ======
+
+.. index:: style 1
 
 Style 1
 -------
@@ -62,8 +85,10 @@ Style 1
       - The Y standard deviation.
 
     * - :math:`\theta`
-      - The angle of rotation of the ellipse
-.
+      - The angle of rotation of the ellipse.
+
+
+.. index:: style 2
 
 Style 2
 -------
@@ -93,6 +118,8 @@ The indentation of the ``:widths:`` etc must match that of the table.
          The image will be 1024 pixels on the long edge.
 
 
+.. index:: style 3
+
 Style 3
 -------
 
@@ -105,6 +132,8 @@ p      The proportionality factor.
 =====  ===========
 
 
+.. index:: references
+
 References
 ==========
 
@@ -113,6 +142,8 @@ See :ref:`calibration_plugins:PSF Estimator`.
 See :numref:`{number}: {name} <fitting_plugins:Fitting Parameters>`
 
 See :ref:`comparison_metrics:Comparison Metrics` for more details.
+
+.. index:: code
 
 Code
 ====

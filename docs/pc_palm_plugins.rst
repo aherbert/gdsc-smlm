@@ -11,6 +11,8 @@ The plugins are described in the following sections using the order presented on
 ``Plugins > GDSC SMLM > PC PALM``
 menu.
 
+.. index:: status: experimental
+
 Status: Experimental
 --------------------
 

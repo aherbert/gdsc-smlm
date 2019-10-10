@@ -72,3 +72,76 @@ If the file cannot be written the plugin will report an error. If the file alrea
 asked if they wish to overwrite the file. The option to remove the existing file is also provided. If removed, the ``SMLM Tools`` window will revert to showing the default plugins.
 
 If the plugin is run and the ``SMLM Tools`` window is currently open then it will be closed and re-opened to update to the new configuration.
+
+
+
+SMLM Macro Extensions
+---------------------
+
+Register functions that can be used in the ``ImageJ`` macro language.
+
+To register the functions in an ``ImageJ`` macro script use the following command:
+
+.. code::
+
+    run("SMLM Macro Extensions");
+
+
+Trace Diffusion Extensions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Extensions for the ``Trace Diffusion`` plugin (see :numref:`%s <analysis_plugins:Trace Diffusion>`).
+
+
+getNumberOfSpecies(`numberOfSpecies`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Get the number of fitted species from the last call to fit the jump distances.
+
+- numberOfSpecies: (output) the number of species
+
+.. code::
+
+    Ext.getNumberOfSpecies(numberOfSpecies);
+    print(numberOfSpecies);
+
+getD(`index`, `diffusionCoefficient`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Get the diffusion coefficient for the requested species from the last call to fit the jump distances.
+
+- index: (input) the index of the species
+- diffusionCoefficient: (output) the diffusion coefficient
+
+.. code::
+
+    Ext.getD(0, diffusionCoefficient);
+    print(diffusionCoefficient);
+
+getF(`index`, `populationFraction`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Get the population fraction for the requested species from the last call to fit the jump distances.
+
+- index: (input) the index of the species
+- populationFraction: (output) the population fraction 
+
+.. code::
+
+    Ext.getF(0, populationFraction);
+    print(populationFraction);
+
+getSpecies(`index`, `diffusionCoefficient`, `populationFraction`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Get the diffusion coefficient and population fraction for the requested species from the last call to fit the jump distances.
+
+- index: (input) the index of the species
+- diffusionCoefficient: (output) the diffusion coefficient
+- populationFraction: (output) the population fraction 
+
+.. code::
+
+    Ext.getSpecies(0, diffusionCoefficient, populationFraction);
+    print(diffusionCoefficient);
+    print(populationFraction);

@@ -201,6 +201,41 @@ The fitting code in the ``Peak Fit`` plugin currently uses the ``QuickResidualsL
 
 The noise estimation method can be changed in the ``Peak Fit`` plugin by holding the ``Shift`` or ``Alt`` key down when running the plugin to see the extra options.
 
+
+Background Estimator
+--------------------
+
+Estimate the background in a region of an image. The ``Background Estimator`` plugin analyses the pixels within a region marked on the image. A thresholding method is applied to the data to determine background pixels using a global histogram. The standard deviation of the background pixels and all pixels is computed as a noise estimate. The background is the mean of the background pixels. If the fraction of background pixels is below a threshold then the mean background is computed using all the data; otherwise the background pixels are used. For reference a background level is computed using a percentile of the data in the region and using a noise estimation method on all the data.
+
+The following parameters can be specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Percentile
+     - The percentile to compute the using all the pixel data as an estimate of the background.
+
+   * - Noise method
+     - The noise method to apply using all the pixel data as a global noise estimate.
+
+   * - Threshold method
+     - The threshold method used to select the background pixels.
+
+   * - Fraction
+     - The fraction of the total region that must be covered by background pixels. If the background region area is below this level then the background mean is computed using all pixels.
+
+   * - Histogram size
+     - The size of the histogram to use for the thresholding method. Note: The data is processed as a 32-bit floating point image so the histogram bins can be defined using any bin width.
+
+The plugin runs in a preview mode where results are displayed on plots for the 100 frames after the current frame in the stack. Changes to parameters result in re-computation of the plots. The ``Noise`` plot shows the background noise and global noise estimate. The ``Background`` plot shows the threshold computed for background pixels, the mean of the background pixels and the percentile level using all pixels.
+
+Pressing ``OK`` in the plugin dialog will create a table of the results. This can be for either the current frame or all frames in the stack. The results table contains all the data from the plots in tabulated form. An additional column ``IsBackground`` is set to 1 if the background area was above the configured ``Fraction`` and the estimate used only the background pixels; otherwise it is set to 0 indicating the results for the ``Background`` and ``Noise`` columns are the mean and standard deviation of all the pixels.
+
+
 .. index:: median filter
 
 Median Filter
@@ -239,6 +274,49 @@ The following parameters can be specified:
 
    * - Bias
      - If subtracting the median, add a bias to the result image so that negative numbers can be modelled (i.e. when the original image data is lower than the median).
+
+
+.. index:: image background
+
+Image Background
+----------------
+
+Produces a background intensity image and a mask from a sample image.
+
+The ``Image Background`` plugin is used to generate suitable input for the ``Create Data`` plugin. The ``Create Data`` plugin creates an image by simulating fluorophores using a distribution. One allowed distribution is the region defined by a mask. The fluorophores are created and then drawn on the background. The background can be an input image. Both the mask and background image can be created from a suitable *in vivo* image using the ``Image Background`` plugin. The purpose would be to simulate fluorophores in a distribution that matches that observed in super-resolution experiments.
+
+The plugin requires that an image is open. The plugin dialog is show in :numref:`Figure %s <fig_image_background_dialog>`.
+
+.. _fig_image_background_dialog:
+.. figure:: images/image_background_dialog.png
+    :align: center
+    :figwidth: 80%
+
+    Image background dialog
+
+.. index:: image analysis
+
+Image analysis
+~~~~~~~~~~~~~~
+
+The ``Image Background`` plugin first computes a median intensity projection of the input image. A Gaussian blur is then applied to the projection to smooth the image. The blur parameter controls the size of the Gaussian kernel.
+
+The bias is subtracted from the blurred image. The bias is an offset that may be added to the pixel values read by the camera so that negative noise values can be observed. It is a constant level that can be subtracted. What remains should be the background level. This can be ignored using a bias of zero.
+
+Two output images are then displayed:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Image
+     - Description
+
+   * - Background
+     - The blurred projection.
+
+   * - Mask
+     - The blurred projection subjected to the ``ImageJ`` default thresholding method.
 
 
 .. index:: overlay image
@@ -298,3 +376,99 @@ The ``Overlay Image`` plugin must be run after selecting the image to overlay. T
 
    * - Replace overlay
      - Select this to replace the current overlay. Uncheck this to add to the current overlay (i.e. combine overlays).
+
+
+Image Kernel Filter
+-------------------
+
+Convolve an image with a kernel constructed from another image. The ``Image Kernel Filter`` plugin requires a single greyscale image to use as a kernel. This will be used as the kernel data for a filter operation on the currently selected image. The operation can be:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Operation
+     - Description
+
+   * - Correlation
+     - Perform a correlation. This is a conjugate multiplication in the frequency domain.
+
+       This is also available as a spatial domain filter.
+
+   * - Convolution
+     - Perform a convolution. This is a multiplication in the frequency domain.
+
+       This is also available as a spatial domain filter.
+
+   * - Deconvolution
+     - Perform a deconvolution. This is a divide in the frequency domain.
+
+       This is not available as a spatial domain filter.
+
+The filter operation is readily applied by converting the kernel and the image into the frequency domain. However both the correlation and convolution can also be applied in the spatial domain. The results should be approximately the same as the frequency domain. The spatial domain filter will be faster for small single images. Transforming to the frequency domain is an advantage on larger data and image stacks as the kernel need only be transformed once and can be applied in turn to each image.
+
+When operating in the spatial domain the center of the kernel image is aligned to each pixel in turn and the operation computed using the corresponding pixels from the image that are overlapped by the kernel image. The operation will create regions of the overlap that have no pixels. In this case the value is taken from the closest edge pixel in the image (edge extension), or is set to zero (zero outside image).
+
+The following parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Operation
+     - Description
+
+   * - Kernel image
+     - Select the input kernel image.
+
+   * - Method
+     - The method used for the operation: Spatial domain or FHT (frequency domain via Fast Hartley Transform)
+
+   * - Filter
+     - The filter operation: Correlation; Convolution; or Deconvolution.
+
+   * - Border
+     - The border to apply to the input image. In the spatial domain no pixels within the border region will be filtered. In the frequency domain the border will define the range for a window function to transform the image edge gradually to zero. A `Tukey window <https://en.wikipedia.org/wiki/Window_function#Tukey_window>`_ is used.
+
+   * - Zero outside image
+     - Applies when filtering in the spatial domain. If *true* all pixels outside the image are zero; otherwise edge extension is used to obtain the value from the closest pixel inside the image.
+
+   * - Preview
+     - Set to *true* to show the filter applied to the current image frame.
+
+Pressing ``OK`` in the plugin dialog will apply the filter settings to the current slice or the entire image stack.
+
+
+TIFF Series Viewer
+------------------
+
+Opens a TIFF image as a read-only virtual stack image. The ``TIFF Series Viewer`` allows opening large images without consuming large amounts of memory. These images may be hundreds of gigabytes and split over multiple image files in the same directory.
+
+The following parameters can be specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Mode
+     - Specify the type of image:
+
+       - ``File``: Open a single file.
+       - ``Directory``: Open a directory containing an image series.
+
+       The ``...`` button can be used to select the input.
+
+   * - Log progress
+     - If **true** the file details will be recorded to the ``ImageJ`` log during opening. 
+
+   * - Output mode
+     - Specify the type of output:
+
+       - ``Image``: Open a virtual image.
+       - ``Files``: Split the input image into a series of files.
+
+       The files option can be used to extract the image frames into small stack images. The number of slices per image and the output directory can be configured using the ``...`` button. This option is useful if the original input image is too large to read in ImageJ, for example if it is a BIG-TIFF with a size over 4GB.
+

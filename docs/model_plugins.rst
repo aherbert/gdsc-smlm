@@ -18,7 +18,8 @@ The benchmarking system provides the means to optimise the SMLM tools to produce
 *   Draw spots on an image using a defined camera noise model at configured XY positions and z-depths (``Create Spot Data``)
 *   Identify candidates for fitting (``Filter Spot Data``)
 *   Fit candidate spots (``Fit Spot Data``)
-*   Filter the fitting results, i.e accept or reject fitting results (``Benchmark Filter Analysis``)
+*   Filter the fitting results, i.e. accept or reject fitting results (``Benchmark Filter Analysis``)
+*   Save templates of the best fit configurations
 
 The benchmarking workflow will provide statistics on the recall and precision that can be achieved when fitting localisations of a given photon signal strength throughout the depth-of-field of the point spread function.
 
@@ -31,13 +32,9 @@ PSF Creator
 
 Produces an average PSF image using selected diffraction limited spots from a sample image.
 
-The
-``PSF Creator``
-plugin can be used to create a Point Spread Function (PSF) image for a microscope. The PSF represents how a single point source of light passes through the microscope optics to be captured on the camera. Due to physical limits the wavelength of light cannot be focussed perfectly and will appear as a blurred spot. The spot will change size with z-depth as the light will be captured as it is converging to, or diverging from, the focal point. Additionally since the spot is actually composed of a series of waves it may appear as a ring due to diffraction. More details on the PSF can be found in section :numref:`{number}: {name} <background:Diffraction limit of light microscopy>`.
+The ``PSF Creator`` plugin can be used to create a Point Spread Function (PSF) image for a microscope. The PSF can be saved as an image or a cubic spline function depending on the analysis mode. The PSF represents how a single point source of light passes through the microscope optics to be captured on the camera. Due to physical limits the wavelength of light cannot be focused perfectly and will appear as a blurred spot. The spot will change size with z-depth as the light will be captured as it is converging to, or diverging from, the focal point. Additionally since the spot is actually composed of a series of waves it may appear as a ring due to diffraction. More details on the PSF can be found in section :numref:`{number}: {name} <background:Diffraction limit of light microscopy>`.
 
-The exact shape of a PSF can be calculated using various models that account for the diffraction of various immersion media (water, oil, etc.) used to image samples. However individual microscope optics are unique and the PSF may vary from one set-up to another even if the hardware is duplicated. The
-``PSF Creator``
-allows an image model of the PSF to be created that can be used in simulations to draw diffraction limited spots that appear the same as those taken on the microscope. These simulations can be used to optimise localisation analysis.
+The exact shape of a PSF can be calculated using various models that account for the diffraction of various immersion media (water, oil, etc.) used to image samples. However individual microscope optics are unique and the PSF may vary from one set-up to another even if the hardware is duplicated. The ``PSF Creator`` allows an image model of the PSF to be created that can be used in simulations to draw diffraction limited spots that appear the same as those taken on the microscope. These simulations can be used to optimise localisation analysis. The stack alignment mode also allows the PSF to be saved as a function using a cubic spline approximation. Cubic spline PSFs can be used for rendering images or fitting to image data. Cubic splines are administered using the ``Cubic Spline Manager`` plugin (see :numref:`%s <model_plugins:Cubic Spline Manager>`).
 
 .. index:: input image
 
@@ -57,24 +54,255 @@ The input image must be a z-stack of diffraction limited spots, for example quan
 
 When preparing a calibration image not all the spots are ideal due to problems with sample preparation. The spots should be inspected and only those that show a small in-focus spot and a smooth transition to out-of-focus should be selected for analysis. In addition there should be no surrounding spots that will contribute overlapping PSFs to the image. The spots can have their focal point in different z slices.
 
-The spots should be marked using the ``ImageJ`` ``Point ROI`` tool. Right-clicking on the toolbar button will allow the tool to be changed to multiple-point mode. Clicking the image will add a point. Points can be dragged using the mouse and a point can be removed by holding the ``Alt`` key down while clicking the point marker.
+The spots should be marked using the ``ImageJ`` ``Point ROI`` tool. Right-clicking on the toolbar button will allow the tool to be changed to multiple-point mode. Clicking the image will add a point. Points can be dragged using the mouse and a point can be removed by holding the ``Alt`` key down while clicking the point marker. The marked spot centre is only an approximation and will be refined during analysis.
 
 .. index:: analysis
 
+Analysis Mode
+~~~~~~~~~~~~~
+
+The plugin will create a combined PSF by aligning many selected PSFs. The plugin offers two analysis modes using different alignment procedures. When run the type of analysis must be specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Mode
+     - The analysis mode:
+
+       * ``Stack alignment``: Align extracted image stacks using cross-correlation. The combined PSF is created using cubic spline interpolation and iteratively refined. Suitable for any PSF shape.
+       * ``Gaussian fitting``: Fit the centre of each spot using a 2D Gaussian and align the centres. No refinement of the initial alignment is possible. This is suitable for spot-type PSFs.
+
+   * - Radius
+     - The square radius around each marked point to use for analysis. Any spot pairs within 2 x radius will be eliminated from analysis to prevent overlapping PSFs.
+
+   * - Interactive mode
+     - Set to **true** to manually accept/reject each spot analysis result. This allows the parameters to be fine tuned until successful and then they can be applied in batch analysis.
+
+The following sections describe the different alignment modes.
+
+Stack Alignment
+~~~~~~~~~~~~~~~
+
+Each selected PSF will be cropped into a 3D stack. The stacks are aligned using an iterative procedure. An initial guess for the z-centre is made based on the PSF type. All spots are aligned using the initial centre to create a combined PSF. The alignment is performed using a cubic spline function to model each PSF allowing sub-pixel resolution for each alignment. The alignment is then refined by aligning each PSF to the current combined PSF using normalised cross-correlation to update the relative centre of each PSF. After each alignment the combined PSF is rebuilt and this repeats until convergence (no change in the centres of the PSFs).
+
+Convergence can be measured by the amount of change in the relative centres each iteration. The XYZ shifts to apply to each PSF are used to compute the root mean square deviation (RMSD) in XY and Z. The centre of mass of the combined PSF z-centre is also tracked and the XY shift computed. In interactive mode the change is logged to the ``ImageJ`` window but convergence is specified manually. In non-interactive mode convergence of computed RMSDs must be below a threshold and the change in the combined PSF centre must be below a threshold.
+
+The following parameters can be specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Alignment mode
+     - The alignment mode:
+
+       * ``2D Projections``: Align using the average shift required to align the 2D projections: XY, XZ and YZ. 2D projections are fast and alignment is numerically stable.
+       * ``3D Projections``: Align using a single shift computed from a 3D cross-correlation. Although this is better in theory the 3D cross correlation can produce incorrect alignment results which are attributed to numerical instability. This mode is experimental; use with caution.
+
+   * - Z radius
+     - Define the depth around the z-centre to extract into a stack. If zero then the entire image stack is used. Use this to limit the size of each PSF and ultimately the depth of the final combined PSF. This value can be adjusted later in ``Interactive mode`` when previewing the extracted PSF.
+
+   * - Alignment mode
+     - The alignment mode:
+
+       * ``Spot``: The PSF is 'spot-like'. The initial z-centre is estimated using the slice with the maximum intensity.
+       * ``Astigmatism``: The PSF is from an astigmatic lens which changes the X and Y widths individually through the depth of focus. The initial z-centre is estimated using the slice with the smallest combined spot width.
+       * ``Double Helix``: The PSF is from a split phase lens which renders two spots that spiral around a virtual centre through the depth of focus. The initial z-centre is estimated by identifying the two spots and their rotation angle and using a common angle for all PSFs.
+
+   * - nm per pixel
+     - The xy-pixel size of the calibration image.
+
+   * - nm per slice
+     - The z-slice step size used when acquiring the calibration image.
+
+   * - Camera type
+     - Configure the camera type. This is used to subtract the pixel offset bias from the input data. It is not strictly required for EMCCD/CCD cameras which have a common bias which will not effect the cross correlation. For sCMOS cameras the per pixel bias may effect correlation and a suitable per-pixel camera model must be provided to subtract the bias.
+
+   * - Analysis window
+     - Set the border to exclude from analysis on the PSF, for example computations on the PSF pixel values such as intensity and min/max. This can be used to ignore noise at the edge of the PSF. A setting of 0 uses the entire region.
+
+   * - Smoothing
+     - The LOESS smoothing parameter used to smooth data.
+
+   * - CoM z window
+     - The z-window around the PSF centre to use to compute the centre-of-mass (CoM). Use zero to compute the CoM with the z-centre slice. A higher number will incorporate neighbour slices.
+
+   * - CoM border
+     - The border to exclude around the PSF centre when computing the centre-of-mass. This is a fraction relative to the PSF image region. When zero the entire XY image plane is used to compute the centre. Exclude border pixels using a positive value.
+
+   * - Alignment magnification
+     - Set the magnification to apply to each PSF before alignment. Magnification uses tricubic interpolation to enlarge the PSF. Note: Magnification will remove noise from individual PSFs before alignment.
+
+   * - Smooth stack signal
+     - After magnification each PSF is normalised to sum to 1 so each contributes equally to the combined PSF. Normalisation uses the maximum signal across the PSF stack. Set to **true** to apply smoothing to the signal verses slice data before picking the maximum. Smoothing helps reduce noise in the final combined PSF by more equally weighting individual PSFs.
+
+   * - Max iterations
+     - The maximum number of iterations used to refine the alignment.
+
+   * - Check alignments
+     - Set to **true** to manually check each PSF alignment. This allows the new alignment to be accepted/rejected. If rejected then the existing alignment is used. The spot can also be excluded from any further alignments and will not contribute to the combined PSF.
+
+       Only available in interactive mode.
+
+   * - Sub-pixel precision
+     - Set the resolution of alignment. Shifts computed below this resolution are considered equal.
+
+   * - RMSD XY threshold
+     - Set the convergence threshold for the RMSD of the XY translation applied to the PSF centres in the current alignment iteration. Only available in interactive mode.
+
+   * - RMSD Z threshold
+     - Set the convergence threshold for the RMSD of the Z translation applied to the PSF centres in the current alignment iteration. Only available in interactive mode.
+
+   * - CoM shift threshold
+     - Set the convergence threshold for the change in the centre-of-mass of the combined PSF in the current alignment iteration. Only available in interactive mode.
+
+   * - Reset
+     - Press this button to reset to the default settings.
+
 Analysis
-~~~~~~~~
+^^^^^^^^
+
+Analysis begins by extracting all the spots into stacks based around their z-centre. The z-centres are determined automatically based on the spot type. In ``Interactive mode`` the analysis to determine the z-centre of each PSF can be inspected. The z-centre and z-radius can be manually changed and analysis settings updated based on the displayed PSF. For each candidate PSF the plugin will display:
+
+* A outline box on the input image of the current PSF.
+* The magnified PSF that was used for alignment.
+* The XY, XZ and YZ projections of the PSF.
+* A plot of the foreground intensity verses z slice. The foreground is the maximum intensity in the slice.
+* A plot of the background intensity verses z slice. The background is the minimum intensity in the slice.
+* A plot of the signal verses z slice. The signal is the sum of intensity in the slice.
+* A plot of the spot width verses z slice for ``Spot`` and ``Astigmatism`` modes, otherwise the rotation angle verses z slice for ``Double Helix`` mode.
+
+The plots show the current z-centre. A dialog is shown allowing the z-centre to be adjusted. The analysis parameters for the spots can also be adjusted based on inspecting the initial PSF and plot data:
+
+* ``Z centre``: Adjusting this will move the z-centre on the plots and update the displayed images.
+* ``Z radius``: Adjusting this will move the z-boundary on the plots and the displayed images. This setting determines the depth of pixel data extracted into a stack for alignment.
+* ``CoM z window``: Can be adjusted using input from the PSF images. No interactive display is used for this parameter.
+* ``CoM border``: Adjusting this will change the outline displayed on the PSF images.
+* ``Analysis window``: Adjusting this will change foreground and background plots.
+
+The following buttons are available:
+
+* ``Reset``: Changes the z centre back to the centre computed by the automated analysis.
+* ``Exclude``: Remove this PSF from future analysis.
+* ``Include``: Include this PSF in the combined PSF.
+* ``Cancel``: Stop the analysis.
+
+When all the z-centres and radius have been selected the PSFs are extracted and aligned to create a combined PSF. The z-centre of the combined PSF is automatically determined using the spot type. In ``Interactive mode`` the initial combined PSF can be inspected. The plugin displays the combined PSF using the same plots and display as used for the individual PSF. The z-centre of the combined PSF can be updated using the interactive dialog and the CoM region redefined. The location of the z-centre and computation of the centre-of-mass affect convergence. Alignments only use the cross-correlation result and will be the same.
+
+The initial combined PSF has been created by an initial alignment of all individual PSFs. Each PSF stores a centre relative to the combined PSF. The combined PSF can be refined by changing the alignment of each individual PSF; this is measured using a change in the relative centre of each individual PSF. This process is iterated until convergence (i.e. the change is very small).
+
+Refinement of the combined PSF uses re-alignment of each individual PSF with cross correlation. If ``Check alignments`` was enabled then the alignment can be inspected. The spot is displayed and the plugin shows a dialog with the computed alignment shift in the relative spot centre with the following options:
+
+* ``Exclude spot``: Remove this PSF from future analysis.
+* ``Accept``: Accept the alignment translation.
+* ``Reject``: Reject the alignment translation. The spot centre will not be updated this iteration. The spot will contribute to the combined PSF next iteration using its current relative position.
+* ``Cancel``: Stop the analysis.
+
+When all spots have been re-aligned the convergence criteria are evaluated. If the satisfied then the refinement stops, otherwise is continues. In ``Interactive mode`` a dialog is presented with the last RMSD change in the XY and Z centres of each spot and the change in centre-of-mass of the combined PSF. The dialog has the following options:
+
+* ``Converged``: Stop refinement.
+* ``Continue``: Continue with refinement.
+* ``Cancel``: Stop the analysis.
+
+When the refinement has completed the combined PSF must be finalised. The plugin will display the combined PSF and an interactive dialog allowing the PSF to be cropped and the output option specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Slice
+     - Adjust the currently displayed slice in the PSF. This is the 
+
+   * - Crop border
+     - Define the border around the PSF to crop. Use this to remove edge pixels that do not contribute to the PSF.
+
+   * - Crop start
+     - Define the number of initial slices to crop from the stack. Use this to remove slices that do not contribute to the PSF.
+
+   * - Crop end
+     - Define the number of final slices to crop from the stack. Use this to remove slices that do not contribute to the PSF.
+
+   * - Output type
+     - Define the output:
+
+       * ``CSpline``: Save the PSF using a cubic spline function. The data precision and filename can be specified. 
+       * ``Image PSF``: Generate an image representing the PSF. The magnification can be specified.
+
+       Additional options can be specified using the ``...`` button. The size of the output will be shown in the dialog. This will vary based on the crop.
+
+   * - Update ROI
+     - If **true** the final centres of each individual PSF are marked on the original image. 
+
+When the output options have been configured the combined PSF is cropped and enlarged to a final PSF. For a cubic spline the enlargement is 3x. For an Image PSF the enlargement magnification is specified in the output options. The enlarged PSF is displayed and options to compute the centre can be configured. The options are:
+
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - z-centre
+     - Define the z-centre of the PSF. It will be set on the current known z-centre.
+
+   * - CoM z window
+     - The z-window around the PSF centre to use to compute the centre-of-mass (CoM). Use zero to compute the CoM with the z-centre slice. A higher number will incorporate neighbour slices.
+
+   * - CoM border
+     - The border to exclude around the PSF centre when computing the centre-of-mass. This is a fraction relative to the PSF image region. When zero the entire XY image plane is used to compute the centre. Exclude border pixels using a positive value.
+
+   * - Analysis window
+     - Adjusting this will change foreground and background plots.
+
+   * - Edge window
+     - Define the window function applied to the PSF to smooth the edge to zero. A plot showing the window function is updated when the settings change. The function is a `Tukey window <https://en.wikipedia.org/wiki/Window_function#Tukey_window>`_.
+
+   * - Crop to z-centre
+     - If **true** the PSF will be cropped around the z-centre so the number of slices before and after the centre are the same.
+
+The final processing of the PSF will redisplay the PSF and the X, Y, and Z projections and log the centre to the ``ImageJ`` log window. The PSF image has a JSON tag added to the image info property containing the z-centre, image scale and number of input images used. This will be saved and reloaded when using the TIFF file format in ``ImageJ``. This information is used in the ``PSF Drift``, ``PSF combiner`` and ``Create Data`` plugins. The information can be viewed using the ``Image > Show Info...`` command, e.g.
+
+.. code-block:: json
+
+    {
+      "imageCount": 6,
+      "centreImage": 482,
+      "pixelSize": 25.0,
+      "pixelDepth": 5.0,
+      "notes": {
+        "Dir": "/data/lmc2016/Beads/",
+        "File": "sequence-as-stack-Beads-AS-Exp.tif",
+        "Created": "25-Feb-2020 12:04"
+      },
+      "xCentre": 112.79481547687612,
+      "yCentre": 112.17886326281314,
+      "zCentre": 481.0
+    }
+
+
+Gaussian Fitting
+~~~~~~~~~~~~~~~~
 
 Each marked spot will be analysed in turn. Spots will only be used when there are no other spots within a specified distance to ensure a clean signal is extracted, i.e. no overlapping PSFs.
 
-For each frame the plugin will run the
-``Peak Fit``
-algorithm to fit the amplitude, centre and width of the peak. Fitting will begin to fail when the peak is very out-of-focus as the PSF may not resemble a 2D Gaussian.
+For each frame the plugin will run the ``Peak Fit`` algorithm to fit the amplitude, centre and width of the peak. Fitting will begin to fail when the peak is very out-of-focus as the PSF may not resemble a 2D Gaussian.
 
-The amplitude is smoothed using a LOESS smoothing algorithm and plotted against the z-position. The amplitude should be highest when the peak is in focus. This point from the smoothed data is taken as the initial centre slice. The range of the in-focus spot is marked by moving in either direction from the center slice until the smoothed amplitude is below a set fraction of the highest point.
+The amplitude is smoothed using a LOESS smoothing algorithm and plotted against the z-position. The amplitude should be highest when the peak is in focus. This point from the smoothed data is taken as the initial centre slice. The range of the in-focus spot is marked by moving in either direction from the centre slice until the smoothed amplitude is below a set fraction of the highest point.
 
 The width and centre X and Y positions are then extracted for the in-focus range and smoothed using the LOESS algorithm. Since the amplitude is not a very consistent marker the centre slice is moved to the point with the lowest width. The spot centre is then recorded for the centre slice using the smoothed centre X and Y data.
 
-The identification of the spot centre can be run automatically using configured parameters. Alternatively the plugin can run in interactive mode. In this instance the plugin will produce plots of the raw and smoothed data as shown in :numref:`Figure %s <fig_psf_creator_amplitude_plot>` and :numref:`Figure %s <fig_psf_creator_psf_plot>`. The calculated centre is shown as a green line and the user is asked if the analysis result should be accepted or rejected (see :numref:`Figure %s <fig_psf_creator_interactive_dialog>`). The user is able to adjust the centre of the spot using a slider if the plugin appears to have miscalculated.
+The identification of the spot centre can be run automatically using configured parameters. Alternatively the plugin can run in interactive mode. In this instance the plugin will produce plots of the raw and smoothed data as shown in :numref:`Figure %s <fig_psf_creator_amplitude_plot>` and :numref:`Figure %s <fig_psf_creator_psf_plot>`. The calculated centre is shown as a green line and the user is asked if the analysis result should be accepted or rejected (see :numref:`Figure %s <fig_psf_creator_interactive_dialog>`). The user is able to adjust the centre of the spot using a slider if the centre analysis is incorrect.
 
 .. _fig_psf_creator_amplitude_plot:
 .. figure:: images/psf_creator_amplitude_plot.png
@@ -112,14 +340,14 @@ If using interactive mode the user has a second chance to view the spot data and
 
     Spot intensity within half the region surrounding the spot.
 
-    The profiles is produced after the image has been scaled, background normalised and windowed. The centre is marked using a green line.
+    The profile is produced after the image has been scaled, background normalised and windowed. Black) Raw data; Red) Smoothed data; Green) Spot z-centre.
 
 For all spots that are accepted, the spots are then overlaid using their X, Y and Z centres into an average PSF image. It is assumed that the in-focus spot can be modelled by a 2D Gaussian. All the pixels within 3 standard deviations of the centre are summed as foreground pixels. The image is then normalised across all frames so that the sum of the foreground is 1.
 
 .. index:: parameters
 
 Parameters
-~~~~~~~~~~
+^^^^^^^^^^
 
 .. list-table::
    :widths: 20 80
@@ -128,16 +356,8 @@ Parameters
    * - Parameter
      - Description
 
-   * - Update fit configuration
-     - Run the ``Fit Configuration`` plugin to allow the fitting parameters to be updated.
-
-       The ``Width factor`` should be set to allow very wide (out-of-focus) spots (e.g. 5) and the ``Signal strength`` should allow poor spots (e.g. 5).
-
    * - nm per slice
      - The z-slice step size used when acquiring the calibration image.
-
-   * - Radius
-     - The square radius around each marked point to use for analysis. Any spot pairs within 2 x radius will be eliminated from analysis to prevent overlapping PSFs.
 
    * - Amplitude fraction
      - The fraction of the peak amplitude to use to mark the in-focus spot.
@@ -157,36 +377,41 @@ Parameters
    * - Centre each slice
      - Set the centre of each slice to the centre-of-mass.
 
-       Note that using this option may cause consecutive frames to shift erratically. A better approach is to disable this and compute a drift curve using the ``PSF Drift`` plugin.
+       Note that using this option may cause the centre of consecutive frames to shift erratically. A better approach is to disable this and compute a drift curve using the ``PSF Drift`` plugin.
 
    * - CoM cut off
      - The amplitude cut-off for pixels to be included in the centre-of-mass calculation. Any pixels below this fraction of the maximum pixel intensity are ignored as noise.
 
-   * - Interactive mode
-     - Set to **true** to manually accept/reject each spot analysis result. This allows the parameters to be fine tuned until successful and then they can be applied in batch analysis.
-
    * - Interpolation
      - Set the interpolation mode to use when enlarging images to create the final PSF.
 
+When the configuration for the analysis has been configured a second dialog is shown to allow the fitting configuration to be specified. Details of the options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit>`.
+
+It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 5).
 
 .. index:: output
 
 Output
-~~~~~~
+^^^^^^
 
 The plugin will log details of each spot analysed to the ``ImageJ`` log window (e.g. centre and width). When complete the plugin will record the z-centre, scale and standard deviation of the final PSF image to the log. The plugin also fits a 2D Gaussian to the combined PSF image and records the fitted standard deviation at the z-centre as a measure of the PSF width.
 
-The final PSF image is shown as a new image. The z-centre is selected as the active slice. The PSF image has an XML tag added to the image info property containing the z-centre, image scale, number of input images used and the PSF width. This will be saved and reloaded when using the TIFF file format in
-``ImageJ``. This information is used in the ``PSF Drift``, ``PSF combiner`` and ``Create Data`` plugins. The information can be viewed using the ``Image > Show Info...`` command, e.g.
+The final PSF image is shown as a new image. The z-centre is selected as the active slice. The PSF image has a JSON tag added to the image info property containing the z-centre, image scale, number of input images used and the PSF width. This will be saved and reloaded when using the TIFF file format in ``ImageJ``. This information is used in the ``PSF Drift``, ``PSF combiner`` and ``Create Data`` plugins. The information can be viewed using the ``Image > Show Info...`` command, e.g.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <gdsc.smlm.ij.settings.PSFSettings>
-      <zCentre>453</zCentre>
-      <nmPerPixel>11.428571428571429</nmPerPixel>
-      <nmPerSlice>20.0</nmPerSlice>
-      <nImages>1</nImages>
-    </gdsc.smlm.ij.settings.PSFSettings>
+    {
+      "imageCount": 6,
+      "centreImage": 90,
+      "pixelSize": 10.0,
+      "pixelDepth": 20.0,
+      "fwhm": 39.4433161942883,
+      "notes": {
+        "Dir": "/data/lmc2016/Beads/",
+        "File": "sequence-as-stack-Beads-AS-Exp.tif",
+        "Created": "25-Feb-2020 12:35"
+      }
+    }
 
 When the final PSF image has been constructed the plugin will show the Amplitude and PSF plots for the final PSF image. A dialog is then presented allowing analysis of the PSF to be done interactively (:numref:`Figure %s <fig_psf_creator_spot_analysis_dialog>`).
 
@@ -220,7 +445,7 @@ A plot is also shown of the cumulative signal as the distance from the centre of
 
     The cumulative signal is shown for the slice and distance (green line) as selected in the ``PSF Creator`` interactive spot analysis dialog.
 
-The green line shows the current distance selected and the total is shown in the plot label. If the ``Normalise`` parameter is selected then the cumulative signal up to the distance is normalised to 1 on the chart (but the label is unchanged). This plot visualises how much of the PSF signal is missed at a given distance and how the focal depth changes how the signal is distributed.
+The green line shows the current distance selected and the total is shown in the plot label. If the ``Normalise`` parameter is selected then the cumulative signal up to the distance is normalised to 1 on the chart (but the label is unchanged). This plot visualises how much of the PSF signal is missed at a given distance and how the focal depth changes how the signal is distributed. Note: The y-axis scale is reset when the ``Distance`` or ``Normalise`` parameters change. It is not reset when the ``Slice`` parameter changes allowing visualisation of the magnitude changes as the slice is adjusted.
 
 The interactive dialog is a blocking window. It must be closed before the plots can be saved.
 
@@ -240,9 +465,7 @@ Finally the Centre-of-Mass (CoM) of the PSF is computed and shown on a plot (:nu
 PSF Drift
 ---------
 
-The
-``PSF Drift``
-plugin computes the drift of the centre of a PSF image against the slice. The centre is defined by fitting a simulated image using Gaussian 2D fitting. The drift curve thus defines a correction factor to apply to the PSF when simulating ground-truth images to be used for benchmarking. This allows scoring benchmarking fit results using distance metrics to compare actual and predicted localisations. For example if rendering an image from a PSF model always results in fitting the centre with a -50nm offset, then the image can be rendered for benchmarking with a corresponding +50nm offset and a perfect fit would have a distance of 0nm between predicted and actual.
+The ``PSF Drift`` plugin computes the drift of the centre of a PSF image against the slice. The centre is defined by fitting a simulated image using Gaussian 2D fitting. The drift curve thus defines a correction factor to apply to the PSF when simulating ground-truth images to be used for benchmarking. This allows scoring benchmarking fit results using distance metrics to compare actual and predicted localisations. For example if rendering an image from a PSF model always results in fitting the centre with a -50nm offset, then the image can be rendered for benchmarking with a corresponding +50nm offset and a perfect fit would have a distance of 0nm between predicted and actual.
 
 When the plugin is run it searches all the open images for valid PSF images. These will be tagged in the image info property with settings containing details of the PSF. The plugin then presents a dialog where the user can configure how to compute the drift curve (:numref:`Figure %s <fig_psf_drift_dialog>`).
 
@@ -420,11 +643,7 @@ plugin when reconstructing images. This allows benchmarking data to be construct
 PSF Combiner
 ------------
 
-The
-``PSF Combiner``
-plugin produces an average PSF image from multiple PSF images. PSF images can be created using the
-``PSF Creator``
-plugin (see section :numref:`%s<model_plugins:PSF Creator>`).
+The ``PSF Combiner`` plugin produces an average PSF image from multiple PSF images. PSF images can be created using the ``PSF Creator`` plugin (see section :numref:`%s<model_plugins:PSF Creator>`).
 
 When the plugin is run it searches all the open images for valid PSF images. These will be tagged in the image info property with the z-centre, image scale and number of input images used to create the PSF. The plugin then presents a dialog where the user can select the images to combine (:numref:`Figure %s <fig_psf_combiner_dialog>`). The dialog is presented iteratively to allowing only one image to be selected from the available images each time. Select the first image from the dialog and click ``OK`` to include the image. The list of available images is then updated and the dialog reshown. Click ``Cancel`` to stop adding images. Note that the iterative addition of images allows the plugin to be fully supported by the ``ImageJ`` macro recorder.
 
@@ -449,12 +668,311 @@ plugin. The information can be viewed using the
 ``Image > Show Info...``
 command.
 
+
+PSF HWHM
+--------
+
+The ``PSF HWHM`` plugin computes the half-width at half-maxima (HWHM) curve for a PSF image assuming the PSF is a peaked maxima. The curve can be used to redefine the z-centre of the PSF and saved as metadata for the PSF image. PSF images can be created using the ``PSF Creator`` plugin (see section :numref:`%s<model_plugins:PSF Creator>`).
+
+The concept of HWHM only applies to a PSF that is a peaked maxima. This may not be true for an image PSF that shows diffraction patterns at out-of-focus regions. To approximate a peak maxima for all z-depths it is assumed that the peak is Gaussian. For each frame the centre of the PSF is identified. The width is gradually increased until the sum equals the integral of a 2D Gaussian at HWHM. This value thus corresponds to the HWHM of the 2D Gaussian approximation of the peak. It is the expected width for peaks fit to the image using the ``Peak Fit`` plugin which approximates PSFs using a 2D Gaussian.
+
+When the plugin is run the following parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - PSF
+     - The PSF used to compute the HWHM curve.
+
+   * - Use offset
+     - Use a calibrated PSF centre drift curve stored in the PSF to define the centre of each slice. Otherwise use the pixel centre of the input image as the centre of each slice.
+
+   * - Smoothing
+     - The smoothing to apply to the curve. This is the bandwidth parameter for a LOESS smoothing algorithm and corresponds to the fraction of surrounding data used for local smoothing of each point.
+
+Clicking the ``OK`` button begins the analysis. The HWHM for each dimension is evaluated separately to produce a HWHM curve for the X and Y dimensions. This is averaged to a combined curve and shown on an interactive plot (see :numref:`Figure %s <fig_hwhm_curve>`).
+
+.. _fig_hwhm_curve:
+.. figure:: images/hwhm_curve.jpg
+    :align: center
+    :figwidth: 80%
+
+A dialog is shown that displays the current z-centre and FWHM (full-width at half-maxima) stored for the PSF and a new z-centre and FWHM defined by the HWHM curve (see :numref:`Figure %s <fig_hwhm_curve_dialog>`). Upon initialisation the minimum of the combined HWHM defines the new z-centre of the PSF. This can be moved using the dialog slider and the position of this slice is highlighted on the HWHM curve in green. The original PSF image is updated to the selected slice for reference. This allows choosing a new centre based on the HWHM curve. If the ``Yes`` button is selected the new z-centre and/or the new HWHM can be saved to the metadata for the PSF image. Note that the metadata for a PSF image is stored in the ImageJ info property and can be viewed using ``Image > Show Info...``.
+
+.. _fig_hwhm_curve_dialog:
+.. figure:: images/hwhm_curve_dialog.png
+    :align: center
+    :figwidth: 80%
+
+
+
+Cubic Spline Manager
+--------------------
+
+The ``Cubic Spline Manager`` provides management of the cubic spline models of point spread functions (PSFs). Cubic spline models are created by the ``PSF Creator`` plugin (see :numref:`%s<model_plugins:PSF Creator>`).
+
+When the ``Cubic Spline Manager`` plugin is run a dialog allows a choice from the following options:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Print all model details
+     - Write details of each cubic spline model to the ``ImageJ`` log window.
+
+   * - View a spline model
+     - Render a stack image using the entire PSF model.
+
+   * - Load a spline model
+     - Load a model from an external file.
+
+   * - Load from directory
+     - Load all models from a directory.
+
+   * - Delete a spline model
+     - Deletes a model from the settings.
+
+   * - Render the spline function
+     - Render an image dynamically using the PSF model.
+
+Print all model details
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This options prints the details of each model to the ``ImageJ`` log window. The settings contain the name of the model, the details of the file containing the model data and the scale (in nm) of the PSF model. Note that the scale defines the spacing interval between data points in the cubic spline. For efficiency during fitting of a model to data this spacing should be an integer factor of the pixel width, e.g. for a pixel width of 104nm the spline scale could be 104, 52, 26, etc.
+
+View a spline model
+~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog allowing the model to be selected and the output magnification. The magnification should be an integer. The model is then used to render a stack image of the PSF at the given magnification.
+
+Load a spline model
+~~~~~~~~~~~~~~~~~~~
+
+Presents a file selection dialog where a spline model can be selected. Models are contained in a single file. The file has metadata identifying the model format. The plugin will attempt to load the cubic spline model. The result is recorded in the ``ImageJ`` log window. If successful then the model is named using the filename and metadata on the model is added to the settings. The model is then available for use. Any existing model with the same name will be replaced.
+
+Note: Model files are stored in a binary format. The files can be copied to another location and reloaded. It is also possible to allow multiple ``ImageJ`` instances to load models from a network resource.
+
+Load from directory
+~~~~~~~~~~~~~~~~~~~
+
+Presents a directory selection dialog allowing a model directory to be chosen. The plugin will attempt to load each file in the directory. The results are recorded in the ``ImageJ`` log window. If a file was a valid model then it is named using the filename and added to the settings. Any existing model with the same name will be replaced.
+
+Delete a spline model
+~~~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog allowing the model to be selected. The selected model is then removed from the settings.
+
+Note: The model data file is not deleted.
+
+Render the spline function
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog allowing the model to be selected. The selected model is then dynamically rendered on an image. An interactive dialog is displayed allowing the relative centre of the PSF to be adjusted. This has the effect of translating the model in the XY plane or viewing a different part of the model in the z-axis.
+
+The ``Scale`` parameter is used to control the sampling interval of the cubic spline. A scale of 1 will sample the model at the spacing interval of the spline data points. A scale of 2 samples at every other data point. Higher scales sample every ``n`` data points where ``n=Scale``. This can be used to show how a model with a higher resolution than the image pixel width renders the PSF, e.g. a model with a 53nm spline scale can be rendered on a 106nm image using ``Scale=2``.
+
+For maximum efficiency the scale should be an integer. However the translations may be any value as the cubic spline is a continuous function and interpolates appropriately.
+
+Astigmatism Model Manager
+-------------------------
+
+The ``Astigmatism Model Manager`` provides creation and management of astigmatism models for 2D Gaussian point spread functions (PSFs) imaged using an cylindrical lens. This creates a spot where the width of the spot in the X and Y dimensions varies with the Z depth. This occurs as the focal planes for the X and Y dimensions are not colocated.
+
+The model provides a function to compute the X and Y width using Z and is based on Smith *et al*, (2010) *Nature Methods* **7**, 373-375 and Holtzer *et al* (2007) *Applied Physics Letters* **90**, 1–3.
+
+When the ``Astigmatism Model Manager`` plugin is run a dialog allows a choice from the following options:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Create Model
+     - Create a model by fitting a 2D Gaussian to a PSF image.
+
+   * - Import Model
+     - Import a model from file.
+
+   * - View Model
+     - Show the model function and an example PSF image.
+
+   * - Delete Model
+     - Delete a model from the settings.
+
+   * - Invert Model
+     - Invert a model along the z-axis.
+
+   * - Export Model
+     - Export a model to file.
+
+Create Model
+~~~~~~~~~~~~
+
+Create a model by fitting a 2D Gaussian to a PSF image. An stack image must be available with an example PSF marked with a single ``ImageJ`` point ROI. Multiple points are not currently supported because it does not appear to be necessary. Repeating the analysis on different examples should create a model with approximately the same width curve. This is simplified by the plugin saving the configuration options used in the last analysis.
+
+Presents a dialog where PSF image can be selected. The plugin then asks for the z-step resolution of the PSF stack and presents a dialog where the fitting can be configured. The fitting options are a simplified version of the options available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Peak Fit>`). The same dialog fields are used to allow users familiar with ``Peak Fit`` to configure the options. The camera used to image the data must be configured and the expected PSF type. This should be an elliptical Gaussian; other options that do not fit independent X and Y widths will produce data that cannot be fit with a model. Fitting is most sensitive to the initial PSF width parameter so this should be tried using a few different sizes. The ``Fitting Width`` parameter should be wide enough to capture the out-of-focus PSF. Filtering options can be used to discard bad fits for out-of-focus spots. The ``Width factor`` should be high so that wide spots can be used to model the out-of-focus PSF.
+
+Once the fitting is configured the plugin will fit each frame of the input image. The data is used to produce the plot of the following metrics against the z depth:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Metric
+     - Notes
+
+   * - Intensity
+     - This should be a smooth line showing the PSF intensity is gradually lost when out-of-focus
+
+   * - X or Y Width
+     - This should show gradual change of the widths with the z position and a clear separation of the focal plane (minimum width) for the two dimensions.
+
+   * - X or Y Position
+     - This should show only gradual drift of the spot position. Large shifts of the fitted centre indicate that the PSF data may be poor or the fit settings were not optimal.
+
+The plots can be used to select the data that will be used to fit the model. The model will map the z position to the PSF widths. Thus the data used for fitting should contain points on a smooth curve over a large range of z. This data is used to estimate the initial model parameters which are then refined using a least squares fitting. Width outliers are expected at the edge of the z range so the plugin displays an interactive dialog where the minimum and maximum z can be selected. The currently specified levels are shown on the plot using an ROI (see :numref:`Figure %s <fig_astig_model_manager_create_model_curve>`). The dialog allows the following options to be set to control building the model:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Min z
+     - The minimum z slice from the stack to use when building the model.
+
+   * - Max z
+     - The maximum z slice from the stack to use when building the model.
+
+   * - Smoothing
+     - The smoothing parameter for a LOESS smoothing on the raw data before estimating model parameters.
+
+   * - Show estimated curve
+     - If **true** after the initial estimation of model parameters the analysis pauses to display the estimate on the width curve. This is used to verify that the estimation (after data smoothing) was good.
+
+   * - Weighted fit
+     - If **true** weight each observation using 1/observation. Thus small widths (in focus positions) have higher weights.
+
+The model is created by fitting the parameters using the raw data. The model is then shown on the width curve over the original data (see :numref:`Figure %s <fig_astig_model_manager_fit_model_curve>`). The plugin has the following options to save the model:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Save model
+     - Set to **true** to save the model. Select this option if the model is a good visual fit to the raw PSF width data.
+
+   * - Model name
+     - The name of the saved model.
+
+       If the name is already in use the plugin will present option to overwrite the existing model or rename the new model.
+
+   * - Save fit width
+     - Set to **true** to save the final model PSF widths in the fitting configuration. Select this option to allow the plugin to be re-run on the same example PSF or a different PSF with an optimal width determined by the model.
+
+       This can be used to iterate the building of a model when the initial estimate for the peak width was not appropriate.
+
+.. _fig_astig_model_manager_create_model_curve:
+.. figure:: images/astig_model_manager_create_model_curve.jpg
+    :align: center
+    :figwidth: 80%
+
+    Astigmatism raw data width curve
+
+    The curve shows the PSF x and y widths against the z depth. The z region currently selected for use in building the model is shown an an ROI.
+
+.. _fig_astig_model_manager_fit_model_curve:
+.. figure:: images/astig_model_manager_fit_model_curve.jpg
+    :align: center
+    :figwidth: 80%
+
+    Fitted astigmatism model width curve
+
+    The curve shows the PSF x and y widths against the z depth. The astigmatism model function that maps the z position to the width is shown using a line.
+
+Import Model
+~~~~~~~~~~~~
+
+Presents a dialog where a model name is specified and the import file can be selected. The plugin will attempt to load the astigmatism model. The result is recorded in the ``ImageJ`` log window. If successful then the model is saved to settings and is then available for use.
+
+View Model
+~~~~~~~~~~
+
+Display the model function as a width curve against the z dimension (see :numref:`Figure %s <fig_astig_model_manager_view_model_curve>`) and an example 2D Gaussian image for a given z depth. The following options are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Model
+     - The model to view.
+
+   * - z distance unit
+     - The distance unit for the z dimension. The default is the native unit used by the model.
+
+   * - s distance unit
+     - The distance unit for the Gaussian width. The default is the native unit used by the model.
+
+   * - Show depth of focus
+     - If **true** display the depth of focus on the model width curve. The depth of focus is a property of the model. Dotted lines will show the depth of focus +/- from the focal plane in the X and Y dimensions using the same colour as the function.
+
+   * - Show combined width
+     - If **true** show a combined width curve. The combined width is computed using :math:`s = \sqrt{|s_x s_y|}`.
+
+   * - Show PSF
+     - If **true** show an example 2D Gaussian PSF for the current z value; the slice is set using an interactive dialog.
+
+If the ``Show PSF`` option was selected an interactive dialog is shown allowing the z value to be changed. This will update the example 2D Gaussian PSF. The z value is marked on the model function width curve for reference. The example PSF may optionally be calibrated in the units specified by the ``s distance unit`` parameter. This allows the ``ImageJ`` ROI tools to be used to measure distances on the image using the appropriate units.
+
+.. _fig_astig_model_manager_view_model_curve:
+.. figure:: images/astig_model_manager_view_model_curve.jpg
+    :align: center
+    :figwidth: 80%
+
+    Astigmatism model width curve
+
+    The width curve shows the x and y widths against the z depth. The combined width is shown in green and dotted lines in red and blue mark the depth of focus around the focal plane for X and Y respectively. The current z position in the view model dialog is shown as a ROI line.
+
+Delete Model
+~~~~~~~~~~~~
+
+Presents a selection dialog allowing the model to be selected. The selected model is then removed from the settings.
+
+Invert Model
+~~~~~~~~~~~~
+
+Inverts the z-orientation of a model. An astigmatism model creates a focal plane for the X and Y dimensions above and below respectively the z-centre. This option will invert the model to change the orientation. It can be used for example if a model was created with an incorrect specification of the imaging direction of the PSF along the z axis.
+
+Presents a selection dialog allowing the model to be selected. The selected model is then inverted.
+
+Export Model
+~~~~~~~~~~~~
+
+Presents a dialog where a model and export file can be selected. The model is saved to the file in a text format.
+
 .. index:: create data
 
 Create Data
 -----------
 
 Creates an image by simulating single molecule localisations using a model of photoactivated diffusing fluorophore complexes. The simulation is partly based on the work of Colthorpe, *et al* (2012).
+
 
 .. index:: simulation
 
@@ -1230,6 +1748,21 @@ The ``Create Benchmark Data`` plugin will report the theoretical limit (precisio
 
 Note that these formulas are derived from modelling the point spread function (PSF) as a 2D Gaussian for both the simulation and the fitting. Given that the true data will have a PSF defined by the microscope parameters these formulas only approximate the precision that can be obtained on image data. However they are useful to allow demonstration that the fitting routines in the SMLM plugins can achieve the theoretical limit, i.e. they are working as well as can be expected.
 
+
+Create Track Data
+-----------------
+
+Creates an image by simulating single molecule localisations diffusing in tracks that do not overlap in time. This is the simplest simulation to test moving molecules.
+
+The ``Create Track Data`` plugin is a modification of the ``Create Data`` plugin to simplify the simulation of diffusing fluorophores. Each flourophore will have a fixed lifetime configured by the ``On time`` parameter. The simulation draws a single fluorophore that will diffuse using the configured parameters such as the diffusion rate and type, the fraction of fixed molecules, and the diffusion confinement. A single dark frame will be added to the image at the end of a flourophore lifetime before a new flourophore is created.
+
+The parameters are configured as for the ``Create Data`` plugin (see :numref:`{number}: {name} <model_plugins:Create Data>`. Some parameters have been removed as they are redundant as follows:
+
+ * The simulation duration (``Seconds``) has been removed. The duration of the simulation is defined by the ``On time`` and the number of ``Particles``.
+ * The correlation mode is removed from the available photon distributions as all fluorophores have the same lifetime.
+ * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks has been removed since each flourophore has a single pulse of a fixed lifetime.
+
+
 .. index:: fit benchmark data
 
 Fit Benchmark Data
@@ -1513,6 +2046,63 @@ The following parameters can be configured:
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
 
 
+Load Benchmark Data
+-------------------
+
+Load benchmark data using an open image and a localisations text file. The benchmark data should be representative of single molecule localisation images that will be processed by the ``Peak Fit`` plugin. It can be used with the benchmark plugins to find the optimal settings for the ``Peak Fit`` plugin to identify localisations. Loading external benchmarking data allows the image simulation to be performed using any suitable software.
+
+The benchmark data will be used exactly as if the image was simulated using the ``Create Data`` plugin under certain assumptions. The benchmark system requires that the data be well approximated as a 2D Gaussian PSF. If the input data contains widths for the x and optionally y deviations then the PSF will be auto-configured as a one-axis or two-axis Gaussian PSF. If no width data is loaded then a standard width for an approximate Gaussian 2D is added to the localisation data. This width is configured in simulation settings dialog. This allows the input data to be used in the benchmarking plugins.
+
+When the plugin runs the input data must be selected:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Image
+     - The simulated localisation image.
+
+   * - Results file
+     - The ground-truth localisation result file.
+
+   * - Preprocessed results
+     - Set to **true** to indicate that the results have been pre-processed to the GDSC SMLM file format. This will contain the appropriate calibration and PSF data for the results.
+
+       If *false* the results are loaded via a universal results loader that will collect the required calibration data.
+
+When the input data is selected the plugin will load the ground-truth localisation result file. If this is pre-processed data then it is assumed the input is in a GDSC SMLM localisations format and the calibration is valid. Otherwise a dialog is presented to load the localisation data. The data is loaded using the generic ``Load Localisations`` plugin (see :numref:`{number}: {name} <results_plugins:Load Localisations>`). Settings should be configured to read the correct columns from the text file.The dataset will be loaded into memory with the name of the localisations image and the suffix ``(Results)``.
+
+Once the data has been loaded the settings for the simulation are configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Flourophore simulation
+     - Set to **true** if this is a simulation with the same fluorophores occurring in multiple frames. Set to *false* if using single random localisations per frame.
+
+   * - Gaussian SD
+     - The standard deviation of a 2D Gaussian that approximates the PSF of the localisation data. This value will be used as the reference for the image PSF. An appropriate value can be obtained using the ``PSF Calculator`` plugin (see section :numref:`%s<calibration_plugins:PSF Calculator>`).
+
+   * - Pixel pitch
+     - Set the size of the image pixels. This will be pre-populated with the calibration if available.
+
+   * - Background
+     - The number of background photons in the simulation per frame. This is used to allow estimation of fitting precision. If unknown then set to zero.
+
+   * - Camera type
+     - The type of camera in the simulation. This will be pre-populated with the calibration if available. The settings can be configured using the ``...`` button. Some additional settings may be required over those collected when loading the localisations.
+
+   * - Depth
+     - The maximum z-depth of the simulation relative to the focal plain (z=0). The units are pixels. This field is pre-populated with the maximum z-depth in the input data. Convert a known z-depth (e.g. in nanometers) to pixels using the calibration defined by the ``Pixel pitch`` parameter.
+
+
 .. index:: filter spot data
 
 Filter Spot Data
@@ -1558,6 +2148,8 @@ The TP, FP and FN totals can be used to produced scoring metrics to assess the f
 
 Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different filters, since some algorithms may identify spot candidates closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce the same results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
 
+.. index:: parameters
+
 Parameters
 ~~~~~~~~~~
 
@@ -1578,8 +2170,8 @@ The following parameters can be configured.
    * - Spot filter
      - The name of the first spot filter.
 
-   * - Relative distances
-     - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This is the same as when using the ``Peak Fit`` plugin. This applies to the spot identification, and also the match distance. Note that the actual distances used will be recorded in the results table.
+   * - Filter relative distances
+     - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This is the same as when using the ``Peak Fit`` plugin. This applies to the spot identification. Note that the actual distances used will be recorded in the results table.
 
        Set to **true** to use absolute distances enabling fine control over the tested settings. Distances will be in pixels.
 
@@ -1590,16 +2182,25 @@ The following parameters can be configured.
      - Define the region within which to search for a local maxima. The region size is 2n+1. This must be at least 1.
 
    * - Border
-     - Define the number of border pixels to ignore. No maxima are allowed in the border.
+     - Define the number of border pixels for the filter to ignore. This prevents detection of maxima at the edge of the image where fitting is has an incomplete PSF.
+
+   * - Score relative distances
+     - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This applies to the spot scoring options. Note that the actual distances used will be recorded in the results table.
 
    * - Analysis border
-     - Define the number of border pixels to ignore during the analysis. Any true or candidate maxima within this border are ignored.
+     - Define the number of border pixels to ignore during the analysis. Any true or candidate maxima within this border are ignored. This should be used to reduce the scoring effect of edge localisations that have incomplete PSFs.
 
-   * - Multiple matches
-     - Set to **true** to allow a candidate to match more than one localisation.
+   * - Hard border
+     - Set to **true** to ignore all localisations in the analysis border.
 
-   * - Ranked matches
-     - Set to **true** to try and find a matching localisation for each spot candidate, processing the candidates in their ranked order. The default is to simply match the closest candidate and localisation, irrespective of the candidate rank.
+       If **false** localisations are weighted using their distance from the edge allowing those just outside the analysis region a weight close to 1 and those at the edge of the image a weight of 0. The weighting uses a cosine curve to create a Tukey window function.
+
+   * - Matching method
+     - Configure the matching method:
+
+       * ``Single``: Allow a candidate to match only one localisation. Matches are assigned closest first.
+       * ``Multi``: Allow a candidate to match more than one localisation. For all unmatched localisations the closest candidate is assigned. Each candidate can only be assigned once per iteration. This repeats until no more matches can be made. This method thus matches all close pairs and then adds further matches if anything that is unmatched is within the match distance.
+       * ``Greedy``: Allow a candidate to match more than one localisation. Matches are assigned closest first. This differs from the ``Multi`` method which only allows 1 assignment to be made per iteration. This method is not iterative and so is faster for multi-matching. It can ignore candidates that are close enough to match a localisation because they are not as close as another candidate that is already paired. This will increase the false positive score.
 
    * - Match distance
      - The maximum allowed distance between a true and candidate maxima to be classed as a match.
@@ -1633,6 +2234,15 @@ The following parameters can be configured.
 
    * - Show failure plots
      - Select this option to show a histogram of the count of false positives before each true positive (i.e. failures).
+
+   * - Show TP
+     - If **true** show the true-positives overlaid on the localisation image in green.
+
+   * - Show FP
+     - If **true** show the false-positives overlaid on the localisation image in red.
+
+   * - Show FN
+     - If **true** show the false-negatives overlaid on the localisation image in yellow.
 
 
 .. index:: data summary
@@ -1868,6 +2478,121 @@ The analysis results are then reported in a summary table:
 
    * - Fail100
      - The failure count that must be allowed to achieve 100% of the maximum true positive count.
+
+
+Filter Spot Data (Batch)
+------------------------
+
+Allows the analysis of the ``Filter Spot Data`` plugin (see :numref:`%s<model_plugins:Filter Spot Data>`) to be applied to a batch of different filters. The plugin analysis settings are the same as the ``Filter Spot Data`` plugin. However the settings do not allow precise configuration of a *single* filter. The plugin has options to select different *types* of filter. These are then applied using a range of widths appropriate for the PSF width of the data. This begins at a small width and is limited to 3 times the standard deviation of the Gaussian 2D approximation of the PSF. The following filter parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Mean
+     - A block mean filter using widths in increments of 0.05.
+
+   * - Gaussian
+     - A Gaussian filter using widths in increments of 0.05.
+
+   * - Circular
+     - A circular filter using widths in increments of 0.5. Note: Radius changes below 0.5 do not alter the circular mask created for the filter.
+
+   * - Median
+     - A median filter using widths in increments of 1. Note: Fractional pixels are not applicable to the median filter.
+
+   * - Difference filter
+     - If **true** the filters will be configured as difference filters. A second filter of the same type is created. The output of this filter will be subtracted from the first filter to create a batch of difference filters.
+
+   * - Difference smoothing
+     - The width for the difference filter.
+
+       Note if this is not above the maximum width of the first filter then the difference filter is invalid and the results for these filters should be ignored in the results.
+
+   * - Min search width
+     - The minimum width to use in the filter to search for local maxima.
+
+   * - Max search width
+     - The maximum width to use in the filter to search for local maxima.
+
+Note that the results output options from the ``Filter Spot Data`` plugin are not shown in this dialog as they apply to a specific filter. These options are available for the best performing filter once analysis of all filters is complete.
+
+Results
+~~~~~~~
+
+The analysis produces an entry in a summary table for each filter. The summary table is the same as for the ``Filter Spot Data`` plugin.
+
+When all filters have been scored a dialog is presented allowing the results to be displayed. The plugin provides options to view how the performance of the filter changes with the width of the filter. Then it allows the best filter to be selected and the results of that filter displayed using the same options as the ``Filter Spot Data`` plugin.
+
+Note that the results are cached in memory for the benchmark dataset. Re-running the plugin with the same filter options will use cached results as the analysis will be the same. This allows repeat execution of the plugin to by-pass the analysis stage and allow selection of different result options.
+
+The following options can be selected:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Use cached results
+     - If **true** the analysis will add the most recently selected filter results to the cache of all analysis performed on this benchmark data. This creates plots with all filters that have been analysed. Use this option to add a new filter to the existing analysis plots.
+
+       If **false** only the most recently selected filter results will be displayed. Use this option to show plots only with the configured filters.
+
+   * - AUC
+     - Display the Area Under precision-recall Curve (AUC) for each filter against the width of the filter. See :numref:`Figure %s <fig_filter_spot_data_performance_auc>` for an example of AUC score against filter width.
+
+   * - Max Jaccard
+     - Display the maximum Jaccard score for each filter against the width of the filter.
+
+       Note the Jaccard score is computed for all sets of the candidate maxima from 1 to number of candidates when the candidates are ranked by their filter score. This plot shows the maximum Jaccard score, i.e. the score before extra false positives begin to lower the score. See :numref:`Figure %s <fig_filter_spot_data_score_vs_rank>` for an example of spot data scoring metrics against spot rank.
+
+   * - Precision (at Max Jaccard)
+     - Display the precision score at the location of the maximum Jaccard score for each filter against the width of the filter.
+
+   * - Recall (at Max Jaccard)
+     - Display the recall score at the location of the maximum Jaccard score for each filter against the width of the filter.
+
+   * - Time
+     - Display the filtering time for each filter against the width of the filter.
+
+   * - Selection
+     - Specify the method to select the best filter:
+
+       * ``AUC``: The filter with the highest AUC score
+       * ``Max Jaccard``: The filter with the highest max Jaccard score
+       * ``AUC+Max Jaccard``: The filter with the highest combined AUC amd Max Jaccard score. The scores are combined by converting them to z-scores using the mean and standard deviation of the population, then the z-scores are summed.
+
+   * - Show plots
+     - Select this option to show plots of the results (the match statistics verses the spot candidate rank and the precision-recall curve).
+
+   * - Plot rank by intensity
+     - The default x-axis rank when plotting is an integer series starting from 1.
+
+       Set this option to true to show the ranking using the candidate spot intensity relative to the intensity range of all the spots. Candidates are ordered by intensity so the order will be the same, the relative positions will change as many candidates have low signal.
+
+   * - Show failure plots
+     - Select this option to show a histogram of the count of false positives before each true positive (i.e. failures).
+
+   * - Show TP
+     - If **true** show the true-positives overlaid on the localisation image in green.
+
+   * - Show FP
+     - If **true** show the false-positives overlaid on the localisation image in red.
+
+   * - Show FN
+     - If **true** show the false-negatives overlaid on the localisation image in yellow.
+
+.. _fig_filter_spot_data_performance_auc:
+.. figure:: images/filter_spot_data_performance_auc.jpg
+    :align: center
+    :figwidth: 80%
+
+    Plot of the Area Under precision-recall Curve score against the filter width for various filters. The filter width is relative to the PSF width of the image data. All filters are single filters using a search width of 1.
 
 
 .. index:: fit spot data
@@ -2206,6 +2931,8 @@ Run different filtering methods on a set of benchmark fitting results produced b
 
 The ``Benchmark Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
 
+This plugin is similar to the ``Benchmark Filter Parameters`` plugin. Searching all parameters that control filtering of fitting results is computationally intractable. The search has been split into optimising the parameters for the result filter (``Benchmark Filter Analysis``) and optimising the parameters that control a single result filter (``Benchmark Filter Parameters``). Alternating the optimisation of the two sets of parameters can be done using the ``Iterate Filter Analysis`` plugin (see :numref:`%s<model_plugins:Iterate Filter Analysis>`).
+
 .. index:: input filters
 
 Input Filters
@@ -2432,7 +3159,7 @@ The following parameters can be adjusted:
      - Select this to save the best filter from all filter sets to file. The user will be prompted for a filename when the analysis is complete.
 
    * - Save template
-     - Set to **true** to save a template containing the fit and filter settings from the best filter to a template file. Template files can be loaded by the ``Template Configuration`` plugin for use in ``Peak Fit``.
+     - Set to **true** to save a template containing the fit and filter settings from the best filter to a template file. Template files can be loaded by the ``Template Manager`` plugin for use in ``Peak Fit``.
 
    * - Calculate sensitivity
      - Select this to perform sensitivity analysis on the top filter from each filter set.
@@ -2748,6 +3475,39 @@ The summary table contains the same fields as the results table. The following a
      - A flag to indicate if the optimal filter from the filter set was at the limit of the range for any of the expanded parameters. If this is Y (yes) then a better filter may exist if the ranges are changed. The parameter(s) at the edge of the range are recorded in the ``ImageJ`` log window.
 
 
+Benchmark Filter Parameters
+---------------------------
+
+Run different filter parameters on a set of benchmark fitting results produced by ``Fit Spot Data`` outputting performance statistics on the success. If these results are not available an error will be displayed when running the plugin.
+
+The ``Benchmark Filter Parameters`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
+
+This plugin is similar to the ``Benchmark Filter Analysis`` plugin. Searching all parameters that control filtering of fitting results is computationally intractable. The search has been split into optimising the parameters for the result filter (``Benchmark Filter Analysis``) and optimising the parameters that control a single result filter (``Benchmark Filter Parameters``). Alternating the optimisation of the two sets of parameters can be done using the ``Iterate Filter Analysis`` plugin (see :numref:`%s<model_plugins:Iterate Filter Analysis>`).
+
+This documentation is in progress.
+
+
+Iterate Filter Analysis
+-----------------------
+
+Run different filter parameters on a set of benchmark fitting results produced by ``Fit Spot Data`` outputting performance statistics on the success. If these results are not available an error will be displayed when running the plugin.
+
+The ``Iterate Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
+
+Searching all parameters that control filtering of fitting results is computationally intractable. This plugin alternates the ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
+
+This documentation is in progress.
+
+
+Score Filter
+------------
+
+Scores a filter against a set of benchmark fitting results.
+
+This documentation is in progress.
+
+
+
 .. index:: doublet analysis
 
 Doublet Analysis
@@ -2814,7 +3574,7 @@ The following parameters can be configured:
    * - Template
      - Select a template to configure the spot filter and fitting settings.
 
-       Templates are loaded using the ``Template Configuration`` plugin.
+       Templates are loaded using the ``Template Manager`` plugin.
 
    * - Benchmark settings
      - Use the spot filter and fitting settings from the best filter identified by the ``Benchmark Filter Analysis`` plugin.
@@ -3370,7 +4130,7 @@ The following parameters can be configured:
    * - Template
      - Select a template to use to populate the filter settings.
 
-       Templates can be loaded using the ``Template Configuration`` plugin.
+       Templates can be loaded using the ``Template Manager`` plugin.
 
    * - Benchmark settings
      - Use the filter settings from the best filter identified by the ``Benchmark Filter Analysis`` plugin.
@@ -3428,7 +4188,7 @@ The following parameters can be configured:
    * - Save template
      - Set to **true** to save a template containing all the filter, fit and filtering settings from the benchmark plugins to file. The template will contain the best residuals threshold given the filter settings.
 
-       This template can be loaded using the ``Template Configuration`` plugin for use in the ``Peak Fit`` plugin when fitting localisation data.
+       This template can be loaded using the ``Template Manager`` plugin for use in the ``Peak Fit`` plugin when fitting localisation data.
 
 
 .. index:: results
@@ -3570,44 +4330,12 @@ Results Table
 
 If the ``Show results`` option was selected the plugin outputs information about the fit of each spot candidate to a table as per the ``Doublet Analysis`` plugin. See section :numref:`{number} <model_plugins:Doublet Analysis>` for more details.
 
-.. index:: image background
 
-Image Background
-----------------
 
-Produces a background intensity image and a mask from a sample image.
+Smart Spot Ranking
+------------------
 
-The ``Image Background`` plugin is used to generate suitable input for the ``Create Data`` plugin. The ``Create Data`` plugin creates an image by simulating fluorophores using a distribution. One allowed distribution is the region defined by a mask. The fluorophores are created and then drawn on the background. The background can be an input image. Both the mask and background image can be created from a suitable *in vivo* image using the ``Image Background`` plugin. The purpose would be to simulate fluorophores in a distribution that matches that observed in super-resolution experiments.
+Compare methods for ranking spot candidates.
 
-The plugin requires that an image is open. The plugin dialog is show in :numref:`Figure %s <fig_image_background_dialog>`.
+This documentation is in progress.
 
-.. _fig_image_background_dialog:
-.. figure:: images/image_background_dialog.png
-    :align: center
-    :figwidth: 80%
-
-    Image background dialog
-
-.. index:: image analysis
-
-Image analysis
-~~~~~~~~~~~~~~
-
-The ``Image Background`` plugin first computes a median intensity projection of the input image. A Gaussian blur is then applied to the projection to smooth the image. The blur parameter controls the size of the Gaussian kernel.
-
-The bias is subtracted from the blurred image. The bias is an offset that may be added to the pixel values read by the camera so that negative noise values can be observed. It is a constant level that can be subtracted. What remains should be the background level. This can be ignored using a bias of zero.
-
-Two output images are then displayed:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Image
-     - Description
-
-   * - Background
-     - The blurred projection.
-
-   * - Mask
-     - The blurred projection subjected to the ``ImageJ`` default thresholding method.

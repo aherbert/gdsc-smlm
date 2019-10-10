@@ -648,7 +648,6 @@ plugin and allows much faster fitting since the Poisson PMF (a) can be evaluated
 .. _table_em_gain_pmf:
 .. list-table:: Example EM gain probability mass function (PMF) plots
     :align: center
-    :width: 80
 
     * - |em_gain_pmf_1_png|
     * - |em_gain_pmf_2_png|
@@ -658,6 +657,585 @@ plugin and allows much faster fitting since the Poisson PMF (a) can be evaluated
 .. |em_gain_pmf_1_png| image:: images/em_gain_pmf_1.png
 .. |em_gain_pmf_2_png| image:: images/em_gain_pmf_2.png
 .. |em_gain_pmf_3_png| image:: images/em_gain_pmf_3.png
+
+
+.. index:: diffusion rate test
+
+sCMOS Analysis
+--------------
+
+Analyse the per pixel offset, variance and gain from a sCMOS camera. This plugin is based on the paper by Huang `et al` (2013).
+
+A sCMOS camera has read-out circuits for each pixel in the camera chip. Contrast this with a CCD based camera which has a single readout circuit for every pixel. To construct a probability model of the pixel output requires the variance and the amplification (gain) of the pixel. The model can be used for maximum likelihood estimation (MLE) based fitting of camera output. To apply MLE fitting of point spread functions to super-resolution data requires a per-pixel camera model. The ``sCMOS Analysis`` plugin allows a per-pixel model to be constructed using the protocol described by Huang `et al` (2013).
+
+The first step is to take 60,000 frames of zero exposure from the sCMOS camera. These are used to compute the bias (offset from zero) and read-noise (variance) of each pixel. The bias is the mean pixel value and the variance is computed per-pixel. Note that a fixed value is added to the pixel output by the camera so that the noise can be correctly analysed using the unsigned output data. If no offset was added then any noise below zero could not be recorded.
+
+The gain can be computed using 20,000 frames of increasing exposure from the sCMOS camera. Gain is assumed to be constant. Thus a linear fit of the exposure against the output on a per-pixel basis will output the gain as the slope of the best fit line. The specified numbers of frames for analysis are the numbers used by Huang `et al`.
+
+The gain estimate is obtained using:
+
+.. math::
+
+    g_i = (B_i B_i^T)^{-1} B_i A_i^T
+
+where:
+
+.. math::
+
+    A_i &= \{ (v_i^1 - \mathit{var}_i), \ldots, (v_i^k - \mathit{var}_i), \ldots, (v_i^K - \mathit{var}_i) \} \\
+    B_i &= \{ (\overline{D_i^1} - o_i), \ldots, (\overline{D_i^k} - o_i), \ldots, (\overline{D_i^K} - o_i) \}
+
+and :math:`i` is pixel index, :math:`v_i^k` is the variance at exposure level :math:`k`, :math:`\overline{D_i^k}` is the mean at exposure level :math:`k`, :math:`o_i` is the offset, :math:`var_i` is the variance at zero exposure, and :math:`K` is the number of exposure levels.
+
+When the ``sCMOS Analysis`` plugin is run it will ask for a directory. This should contain sub-directories with the images from the sCMOS camera. Each directory should have a number suffix that represents the exposure time. The bias and variance will be computed using the directory with the suffix zero. The numbers of the other directories are arbitrary as the exposure value is not required to compute the gain. Note that the images can be simulated to allow the plugin to be tested (see :numref:`%s <calibration_plugins:sCMOS Camera Simulation>`).
+
+Parameters
+~~~~~~~~~~
+
+The analysis requires the following parameters:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - nThreads
+     - The number of threads to use for the analysis.
+
+   * - Rolling algorithm
+     - Use a rolling algorithm to compute the variance (sum of square difference from the mean).
+
+       If **false** then the sum of squared values is computed and used to compute the variance as:
+
+       :math:`\mathit{variance} = \left( \sum{x_i^2} - \frac{(\sum{x_i})^2}{n} \right) / (n-1)`
+
+       This algorithm is only suitable if the sum of the squared values will not overflow a 64-bit signed integer. For 16-bit unsigned data the maximum squared value is :math:`2^32` and the overflow will occur if using more than :math:`2^31` image frames. In most cases this option should be set to **false**.
+
+   * - Re-use processed data
+     - If **true** the plugin will check for a processed data file for each directory of images. This is a tif image with the mean and variance of each pixel in the image series. This data is written by the plugin during processing.
+
+       If the processed data exists then the plugin will use it rather than perform the analysis again. For example this can be used to repeat analysis of a camera after adding more directories with additional exposure data; or it can be used to show the output plots of a previously analysed camera.
+
+Analysis
+~~~~~~~~
+
+When the plugin runs it will analyse each directory of images in turn. The mean and variance of each pixel is recorded to a tif image named ``perPixel<directory>.tif``. These can be reloaded by the plugin for fast analysis of precomputed data using the ``Re-use processed data`` option. For the zero exposure image the mean and standard deviation statistics of the computed offset and and variance data is shown in the ``ImageJ`` log::
+
+    photon000 Offset = 99.97 +/- 10.04. Variance = 57.04 +/- 59.31
+
+For the non-zero exposure images the mean and standard deviation statistics of the raw data is shown. The known offset values for each pixel are subtracted from the mean values for each pixel to compute the signal and the mean and standard deviation of the signal is shown in the ``ImageJ`` log::
+
+    photon025 Mean = 155.0 +/- 11.36. Signal = 55.0 +/- 5.55 ADU
+
+When all the images have been processed the gain is computed for each pixel. The mean and standard deviation of the gain is shown in the ``ImageJ`` log::
+
+    Gain Mean = 2.153 +/- 0.4506
+
+The plugin will then ask for a filename to save the per-pixel model. This is saved into the specified directory as a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled. This model can be loaded by the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`) for use in fitting of localisation data. It is recommended to set the model directory for all output models to the same directory and appropriately name the model after the camera.
+
+The ``sCMOS Analysis`` plugin will show summary histograms of the computed pixel offset, variance and gain. These histograms are equivalent to those shown in Huang `et al` (2013) supplementary figure 1.
+
+If the data was created using a simulation the plugin will load the simulation model from the file ``perPixelSimulation.tif``. Comparisons of the computed and known values of the offset, variance and gain are computed. A scatter plot is produced of the simulated against the measured values. The error for each pixel is computed as the measured value minus the simulated value and displayed in a histogram. The following analysis is performed:
+
+* A Pearson correlation is computed.
+* A Komolgorov-Smirnov test is performed to test that the distributions are the same.
+* A paired T-Test compares two related samples to assess whether their population means differ. This test is only valid if the distribution of the error is normal; this test is only performed on the gain.
+* A Wilcoxon Signed Rank test compares two related samples to assess whether their population mean ranks differ. This test is performed as an alternative to the paired T-Test when the distribution of the error is not normal.
+
+All computations are recorded to the ``ImageJ`` log.
+
+Note that the statistical tests are a guide. Rejection of the null hypothesis does not indicate that the computed values for the per-pixel model are invalid. It shows the measured values can be distinguished statistically from the simulation. This can occur with large population sizes (i.e. number of pixels) even when the differences are small.
+
+In the following example using 20,000 frames of 64x64 pixels with photons 50, 100, 200, 400 and 800 the analysis passes the tests::
+
+    Comparison to simulation: Offset=100.0; Variance=57.9; Gain=2.2 +/- 0.2 (64x64px)
+    Error Offset = 0.002947 +/- 0.2119 : R=0.9998 : Kolmogorov–Smirnov p=0.3273 accept : Wilcoxon Signed Rank p=0.5777 accept
+    Error Variance = -0.02123 +/- 3.281 : R=0.9984 : Kolmogorov–Smirnov p=1.0 accept : Wilcoxon Signed Rank p=0.2128 accept
+    Error Gain = -0.001652 +/- 0.07027 : R=0.9422 : Kolmogorov–Smirnov p=0.3845 accept : Paired T-Test p=0.1324 accept
+
+The same example using an image of 512x512 (a population size increase of 64-fold) the analysis rejects the tests::
+
+    Comparison to simulation: Offset=100.0; Variance=57.9; Gain=2.2 +/- 0.2 (512x512px)
+    Error Offset = 3.954E-4 +/- 0.211 : R=0.9998 : Kolmogorov–Smirnov p=0.0 reject : Wilcoxon Signed Rank p=0.0 reject
+    Error Variance = 0.04352 +/- 3.2 : R=0.9985 : Kolmogorov–Smirnov p=0.9056 accept : Wilcoxon Signed Rank p=0.0 reject
+    Error Gain = -0.001682 +/- 0.06968 : R=0.9441 : Kolmogorov–Smirnov p=0.0 reject : Paired T-Test p=4.337E-35 reject
+
+
+sCMOS Camera Simulation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``sCMOS Analysis`` plugin requires a large amount of data from a sCMOS camera. This data can be simulated allowing the plugin to be tested.
+
+The simulation can be run by holding the ``Shift`` key down when running the plugin. Note that the ``Shift`` must be pressed when the main ``ImageJ`` window is the active. When run in simulation mode the plugin will create image data in a specified output directory. The plugin will prompt for the output directory.
+
+Each pixel is assigned a random offset, variance and gain. The offset is sampled from a Poisson distribution; the variance is sampled from an exponential distribution; and the gain is sampled from a Gaussian distribution. These distributions approximate the raw data shown in Huang `et al` (2013) supplementary figure 1. The defaults for the simulation are configured to approximately match that figure.
+
+The simulation requires the following parameters:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - nThreads
+     - The number of threads to use for the simulation.
+
+   * - Offset
+     - The mean of the Poisson distribution used to create the pixel offset.
+
+   * - Variance
+     - The mean of the exponential distribution used to create the pixel variance.
+
+   * - Gain
+     - The mean of the Gaussian distribution used to create the pixel gain.
+
+   * - Gain SD
+     - The standard deviation of the Gaussian distribution used to create the pixel gain.
+
+   * - Size
+     - The size of the output image (width and height).
+
+   * - Frames
+     - The number of frames for the output image.
+
+       This will be tripled for the bias output image (i.e. where photons = 0).
+
+   * - Photons
+     - The number of photons to simulate.
+
+       Pixel output for the simulation should be in the range of a 16-bit unsigned integer. Photons should be above zero and ``photons x gain`` should be below the maximum for 16-bit unsigned integer (65535). Due to the randomness of the simulation pixel values may still be clipped to 65535. It is recommended to keep ``photons x gain`` far below this level.
+
+       The zero photon level is added to this list if it is absent.
+
+
+The simulation will record the per-pixel model to a file named ``perPixelSimulation.tif`` in the output directory. This is a 3 frame stack of 32-bit float data representing the offset, variance and gain for each pixel. The slices are appropriately labelled.
+
+Simulated images are created using the specified ``Frames``  for output photon level; each level will be written to the directory named ``photonsN`` where ``N`` is the photons. Images are written as a series of tif stacks of 10 frames. The data for a pixel is computed using a random Poisson sample of the number of photons multiplied by the gain and added to a random Gaussian sample using a mean of the pixel offset and variance of the pixel variance:
+
+.. math::
+
+    D_i^k = \mathit{Pois}(k) \times g_i + \mathcal{N}(o_i, \mathit{var}_i)
+
+When the simulated images have been created the ``sCMOS Analysis`` plugin continues to run as normal to compute a per-pixel model. The simulated images will be used to perform the camera analysis.
+
+
+.. index:: camera model analysis
+
+Camera Model Analysis
+---------------------
+
+Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera and compares the data to a model of the camera amplification process. This plugin simulates converting a photon into a measured count as performed by a microscope camera. The simulated data is then fit using a camera noise model. The difference between the data and the model indicates how well the model represents the data; this has implications for fitting localisation data using maximum likelihood estimation (MLE).
+
+The camera noise model can be selected from those that are available for use in fitting or from more robust models that are computationally expensive. An ideal model should fit the data over a range of low to high photons that are the expected photon levels of the localisation image data.
+
+Each camera simulation is performed using only two parameters: gain  :math:`g` and read noise :math:`\sigma^2`. The simulation for a CCD or sCMOS camera will perform sampling of the specified number of photons :math:`x` using a Poisson distribution to produce photo-electrons. This is multiplied by the gain (to simulate linear amplification) and combined with a Gaussian sample of the read noise of the camera pixel. The result is rounded to an integer count. This is the Poisson-Gaussian (PG) model:
+
+.. math::
+
+    PG(x|g,\sigma^2) = \lfloor \mathcal{N}(P(x) \times g, \sigma^2) \rceil
+
+The simulation for an EM-CCD camera adds an additional sample from a gamma distribution to simulate amplification of the photo-electrons in the electron multiplication (EM) gain register. The shape of the distribution is the number of photo-electrons; the scale of the gamma distribution is the total gain of the EM-CCD camera. This is the Poisson-Gamma-Gaussian (PGG) model:
+
+.. math::
+
+    PGG(x|g,\sigma^2) = \lfloor \mathcal{N}( \text{Gamma}(P(x), g), \sigma^2) \rceil
+
+The simulation requires sampling from multiple distributions. To increase the total number of samples the plugin will generate a given number of Poisson samples. For the EM-CCD simulation each Poisson sample is used to generate a number of gamma samples. For the CCD-simulation the amplification has no noise so no over-sampling is done. In either case amplification generates a real-valued sample from a integer valued photo-electron count. Each amplified sample is combined with a configured number of noise samples. The final value is rounded and a histogram of counts generated. For reference a full convolution of the model probability mass/density functions (PMF/PDF) is performed and added to the histogram. The PG model is a convolution of the discrete Poisson PMF scaled by the gain and the continuous Gaussian PDF. The PGG model is a convolution of the Poisson-Gamma PDF and the Gaussian PDF. The Poisson-Gamma PDF can be expressed using a single analytical expression as per [Ulbrich & Isacoff, 2007] SI equation 3.
+
+The cumulative distribution function (CDF) of the simulated data is easily computed by summing the simulation PMF. This is compared to the CDF of the selected camera model function. Since the camera model function is a continuous PDF the CDF must be computed. This is done using integration of the PDF over the range of each histogram bin. The two CDFs are plotted and the maximum and mean distance between the distributions is computed. A Kolmogorov Smirnov test provides a p-value for rejecting the null hypothesis that the two distributions can be considered equal.
+
+The ``Camera Model Analysis`` plugin supports a preview mode. The parameters of the simulation and the chosen camera model can be updated and the results inspected in real-time. This allows fast comparison of models across different levels of photons. The following parameters can be specified:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Photons
+     - The number of photons to simulate.
+
+   * - Mode
+     - The camera simulation mode. The gain and read-noise of the camera is specified using the ``...`` button.
+
+       For an EM-CCD camera the number of EM amplification samples per photo-electron sample can also be specified.
+
+   * - Seed
+     - The seed for the simulation. This option is shown if the ``Shift`` key is held down when running the plugin. By default the same seed is used for simulations to ensure the settings can be reverted to a previous configuration and the output plots are generated as previously.
+
+   * - Samples
+     - The number of Poisson samples.
+
+   * - Noise samples
+     - The number of Gaussian read-noise samples per amplified photo-electron sample.
+
+   * - Round down
+     - If **true** the simulation will round-down the continuous valued result from the Gaussian sample to create the simulated count. The default is normal rounding which generates data that can be more closely modelled by the available camera model functions.
+
+       Note that the simulation creates continuous valued data. This is an approximation of the discrete process occurring in a camera which outputs integer counts for input photons.
+
+   * - Model
+     - The camera model function used to model the simulated data. See :numref:`{number}: {name} <calibration_plugins:Camera Noise Models>`.
+
+   * - Full integration
+     - If **true** the integration of the camera model function PDF to CDF uses Simpson integration. Otherwise a fast flap-top integration is used.
+
+   * - Preview
+     - Enable dynamic result generation.
+
+Camera Noise Models
+~~~~~~~~~~~~~~~~~~~
+
+The simulation is configured using gain :math:`g` and read noise :math:`\sigma^2`. The gain can be set to 1 and read noise to 0 to effectively disable them. The simulation is valid but many models may not be valid and exceptions will be logged to the ``ImageJ`` log window. Some models may require that the gain is above 1. Models that use a read noise may require that the read noise is above 0. In this case a read noise of 0.001 (or lower) can be used when the read noise must be strictly positive.
+
+The camera model functions have been written to generate a continuous probability density function (PDF) or a discrete probability mass function (PMF) for observed camera count value :math:`x` and the number of photons :math:`x/g`.
+
+There are many variants of the Poisson-Gamma-Gaussian model function using different convolutions with a Gaussian. These are provided for evaluation purposes. Note that the Poisson-Gamma PMF is a Dirac delta function at x=0. At low expected number of photons the delta function contains the majority of the probability and special handling of the convolution yields improved results.
+
+The following table lists the camera model functions, their intended purpose and notes on the implementation.
+
+.. list-table::
+   :widths: 20 10 70
+   :header-rows: 1
+
+   * - Model
+     - Camera
+     - Description
+
+   * - Poisson PMF
+     - CCD/sCMOS
+     - Uses a discrete Poisson PMF. Gain is handled by mapping the input value x to the PMF. If gain is above 1 this effectively stretches out the underlying Poisson PMF so that each input x maps to either 0 or 1 value from the PMF. If gain is below 1 this compresses the underlying Poisson PMF so that each input x maps to 1 or more values from the PMF where multiple values are summed.
+
+   * - Poisson (Discrete)
+     - CCD/sCMOS
+     - Converts the input count to integer photons by rounding down and computes the Poisson PMF :math:`P(x) = \frac{{e^{ - \lambda } \lambda ^{\lfloor x/g \rfloor} }}{{\lfloor x/g \rfloor !}}`. The probability is rescaled so that it sums to 1 over the domain.
+
+   * - Poisson (Continuous)
+     - CCD/sCMOS
+     - Converts the input count to photons and computes the Poisson PMF :math:`P(x) = \frac{{e^{ - \lambda } \lambda ^{x/g} }}{{{x/g}!}}`. The gamma function can be used to provide a factorial for non-integer values. The probability is rescaled so that it sums to 1 over the domain.
+
+   * - Poisson+Gaussian PDF integration
+     - CCD/sCMOS
+     - Convolves the Poisson PMF with a Gaussian PDF.
+
+       This is not a good model when the read noise is small as convolution of the discrete Poisson PMF with single points of a Gaussian PDF leads to summation errors in the output probability. This is corrected using the ``Full integration`` option. Note that ``Full integration`` is not actually a numerically complete integration and the model may be a poor fit when the read noise is small.
+
+   * - Poisson+Gaussian PMF integration
+     - CCD/sCMOS
+     - Convolves the Poisson PMF with a Gaussian PMF. The Gaussian PMF is generated using an integration of the PDF over integer intervals, i.e. x +/- 0.5 for all x required in the convolution.
+
+       This is the most accurate camera model function.
+
+   * - Poisson+Gaussian approximation
+     - CCD/sCMOS
+     - Uses the saddle-point approximation of the Poisson-Gaussian convolution from [Snyder et al, 1995].
+
+       This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when not an EM-CCD camera.
+
+   * - Poisson+Poisson
+     - CCD/sCMOS
+     - Models the Gaussian read noise as a Poisson distribution. The combination of two Poisson distributions is a Poisson distribution. This model is a good approximation of a Poisson-Gaussian function when the number of photons is high. The model suitability for low signal data can be investigated by setting the read-noise of the microscope camera and using typical per-pixel photon counts.
+
+       This model is used in the ``Peak Fit`` plugin for the ``LVM MLE`` and ``Fast MLE`` fit solver.
+
+   * - Poisson+Gamma PMF
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF. This model function neglects modelling the read noise which is significant when the number of photons approaches zero.
+
+   * - Poisson+Gamma+Gaussian approximation
+     - EM-CCD
+     - Computes the Poisson-Gamma-Gaussian PDF. The convolution with the Gaussian is approximated using a partial convolution with a Gaussian at low photon counts where the dirac function is significant. This method is provided as Python source code within the supplementary information of the paper Mortensen, et al (2010) Nature Methods 7, 377-383.
+
+       This model is used in the ``Peak Fit`` plugin for the ``MLE`` fit solver when an EM-CCD camera.
+
+   * - Poisson+Gamma+Gaussian PDF integration
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF and numerically convolves with a Gaussian PDF. Note: This is not suitable for read noise below 1 and the computation switches to using a Gaussian PMF for the convolution.
+
+   * - Poisson+Gamma+Gaussian PMF integration
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF and numerically convolves with a Gaussian PMF. The Gaussian PMF is generated using an integration of the PDF over integer intervals, i.e. x +/- 0.5 for all x required in the convolution.
+
+   * - Poisson+Gamma+Gaussian Simpson's integration
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF and convolves with a Gaussian PDF. The integral over the effective range of the Gaussian kernel is computed with Simpson integration.
+
+   * - Poisson+Gamma+Gaussian Legendre-Gauss integration
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF and convolves with a Gaussian PDF. The integral over the effective range of the Gaussian kernel is computed with Legendre-Gauss integration.
+
+       This is the most accurate camera model function.
+
+   * - Poisson+Gamma*Gaussian convolution
+     - EM-CCD
+     - Computes the Poisson-Gamma PMF and numerically convolves with a Gaussian PDF.
+
+       Note that this method is a raw convolution of the PMF and PDF. It contains no special boundary handling of the Poisson-Gamma PMF around x=0 which is a Dirac delta function.
+
+       This is not a good model when the read noise is small as convolution of the discrete Poisson-Gamma PMF with single points of a Gaussian PDF leads to summation errors in the output probability. This is corrected using the ``Full integration`` option. Note that ``Full integration`` is not actually a numerically complete integration and the model may be a poor fit when the read noise is small.
+
+Results
+~~~~~~~
+
+The ``Camera Model Analysis`` plugin produces two output plots. The histogram plot shows the raw simulation histogram and the curve of the expected probability mass function. The example shown in :numref:`Figure %s <fig_camera_model_analysis_histogram>` demonstrates the contribution of the Dirac delta function at count=0 to the PMF is significant at low photons.
+
+.. _fig_camera_model_analysis_histogram:
+.. figure:: images/camera_model_analysis_histogram.jpg
+    :align: center
+    :figwidth: 80%
+
+    Camera Model Analysis histogram plot.
+
+    The histogram is a simulation of 1 photon captured by an EM-CCD camera with gain 40 and read noise 13.
+
+The cumulative density function (CDF) plot shows the CDF of the simulation histogram against the CDF of the camera model function. The example shown in :numref:`Figure %s <fig_camera_model_analysis_cdf>` demonstrates the closeness of the ``Poisson+Gamma+Gaussian approximation`` to a simulated PMF at low photons.
+
+.. _fig_camera_model_analysis_cdf:
+.. figure:: images/camera_model_analysis_cdf.jpg
+    :align: center
+    :figwidth: 80%
+
+    Camera Model Analysis cumulative density function plot.
+
+    The CDF is a simulation of 1 photon captured by an EM-CCD camera with gain 40 and read noise 13. The model is the ``Poisson+Gamma+Gaussian approximation`` as used in ``Peak Fit``. The magenta line shows the count for the maximum distance between the two CDF curves. The p-value is the significance of the  Kolmogorov Smirnov test for this distance.
+
+
+.. index:: camera model fisher information analysis
+
+Camera Model Fisher Information Analysis
+----------------------------------------
+
+Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera. This plugin is based on the paper by [Chao *et al*, 2013].
+
+The Fisher information is the amount of information an observable random variable :math:`X` carries about an unknown parameter :math:`\theta` of a distribution that models :math:`X`.
+
+.. math::
+
+  I = \mathbb{E} \left[ \left(\frac{\delta}{\delta \theta} \ln f(X; \theta) \, \middle| \, \theta \right)^2 \right]
+
+In this case the observable :math:`X` is the count from the microscope camera and the parameter :math:`\theta` is the number of photons. Thus this is the Fisher information of the camera count distribution created when light is captured by the camera pixels. The Fisher information can be used to determine the lower bounds on the precision of fitting a model to data. The Cramer-Rao inequality states that the covariance matrix of any unbiased estimator :math:`\hat{\theta}` of :math:`\theta` is no smaller than the inverse of the Fisher information matrix:
+
+.. math::
+
+  \text{Cov}(\hat{\theta}) \geq I^{-1}(\theta)
+
+Thus computation of the Fisher information for a camera model allows determination of the limit of fitting precision for each of the fitted parameters. To avoid direct comparison of the Fisher information between models Chao *et al* instead note that the difference in the fisher information is entirely dependent on the expectation term:
+
+.. math::
+
+  \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
+
+where :math:`v_{\theta}` is the mean of the Poisson random variable that models the detected signal in the pixel, and :math:`p_{\theta}(z))` is the probability distribution of the data :math:`z` at the pixel. The subscript :math:`\theta` denotes the dependence of :math:`v_{\theta}` on the parameter vector :math:`\theta`, i.e. the parameters of the model. The expectation term is a nonnegative scalar, and is proportional to the amount of information the data contains about the parameters in :math:`\theta`. This term is the Fisher information of the probability model with respect to :math:`v_{\theta}`. 
+
+Two models can be compared using their expectation terms. However instead of comparing them directly they can be compared using their noise coefficient :math:`\alpha`. This is the expectation term normalised by the expectation term for an uncorrupted Poisson signal :math:`\frac{1}{v_{\theta}}`:
+
+.. math::
+
+  \alpha = v_{\theta} \cdot \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
+
+The noise coefficient is 1 for a hypothetical best scenario and :math:`0 \leq \alpha \leq 1` for a Poisson signal corrupted by detector noise.
+
+Chao *et al* provide the equation for a CCD detector as a convolution between a Poisson and a Gaussian with width :math:`\sigma^2` equal to the read noise of the CCD (SI equation 7). This is also applicable to single pixels on a sCMOS camera.
+
+Chao *et al* provide the equation for an EM-CCD detector as a convolution between a Poisson, a geometric branching distribution with mean gain :math:`m` and a Gaussian with width :math:`\sigma^2` equal to the read noise of the EM-CCD (SI equation 8; also [Chao *et al* (2012)] equation 13). For the purpose of this plugin the geometric branching distribution has been replaced by the Gamma distribution to use the Poisson-Gamma equation of [Ulbrich & Isacoff, 2007] SI equation 3. This models the EM process of a high number of multiplication stages as an exponential distribution instead of a branched chain geometric distribution. Note that unlike [Chao *et al* (2012)] equation 22 which models using a similar zero-modified exponential distribution (which prevents loss of electrons in the EM gain process) this is not an approximation for high gain only as the gain is not eliminated from the computation of :math:`\alpha`. Thus different gains can create different output Fisher information. However the model is only valid if the gain is significant compared to the read noise (which is to be expected for an EM-CCD) due to assumptions made during the computation for speed.
+
+An additional model is provided for comparison purposes that models the Gaussian read noise as a Poisson distribution. The Poisson-Gaussian approximation is then a single Poisson distribution with mean equal to the sum of Poisson mean photon signal and the Gaussian read-noise variance. This model is used in the ``Peak Fit`` plugin for the ``LVM MLE`` and ``Fast MLE`` fit solver.
+
+The expected term is evaluated by integration:
+
+.. math::
+
+  \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right] & = \int_{-\infty}^{\infty} \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 p_{\theta}(z) \, \delta z \\
+  & = \int_{-\infty}^{\infty} \frac{1}{p_{\theta}(z)} \left(\frac{\delta p_{\theta}(z)}{\delta v_{\theta}} \right)^2 \delta z
+
+Thus the expectation term can be evaluated using the probability mass function for the noise model and its gradient function with respect to the mean photon signal :math:`v_{\theta}`. This is numerically integrated over a suitable range to compute both the Fisher information and the noise coefficient.
+
+The plugin provides options to configure the range of photons :math:`v_{\theta}` and two models for side-by-side comparisons. The following parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Min exponent
+     - The minimum exponent for the photons using a log10 scale.
+
+   * - Max exponent
+     - The maximum exponent for the photons using a log10 scale.
+
+   * - Sub divisions
+     - The number of divisions to use between each exponent on the log10 scale.
+
+   * - Camera 1 type
+     - The type for camera 1.
+
+   * - Camera 1 gain
+     - The total gain for camera 1 (count/photon).
+
+   * - Camera 1 noise
+     - The read noise for camera 1 (count).
+
+   * - Camera 2 type
+     - The type for camera 2.
+
+   * - Camera 2 gain
+     - The total gain for camera 2 (count/photon).
+
+   * - Camera 2 noise
+     - The read noise for camera 2 (count).
+
+   * - Plot point
+     - Choose the shape used to plot the evaluated points on the plot. An interpolated curve will be constructed between the computed points.
+
+The ``Camera Model Fisher Information Analysis`` plugin produces two output plots. The Fisher information plot shows the raw Fisher information for selected models (:numref:`Figure %s <fig_fisher_information_plot>`). The noise coefficient plot shows the noise coefficient for two selected models and demonstrates the relative performance of the noise model verses an uncorrupted Poisson signal. The example shown (:numref:`Figure %s <fig_noise_coefficient_plot>`) uses the same parameters as Chao *et al* (2013) figure S1. The CCD model noise coefficient drops to zero at low signal levels. In contrast the EM-CCD noise coefficient is close to 1 over a similar range of low signal levels. At high signal levels the CCD model is preferred and the EM-CCD model converges on the value of 0.5 which is the excess noise factor of 2 commonly referred to in the literature for an EM-CCD. This noise factor is used in the Mortensen formula for precision using an EM-CCD camera (see :numref:`localisation_precision:Localisation Precision`).
+
+.. _fig_fisher_information_plot:
+.. figure:: images/fisher_information_plot.jpg
+    :align: center
+    :figwidth: 80%
+
+    Camera Model Fisher Information Analysis plot.
+
+    The plot shows the Fisher information of two camera noise models. EM-CCD gain 1000 and read noise 24; CCD gain 1 and read noise 2.
+
+.. _fig_noise_coefficient_plot:
+.. figure:: images/noise_coefficient_plot.jpg
+    :align: center
+    :figwidth: 80%
+
+    Camera Model Noise Coefficient plot.
+
+    The plot shows the Fisher information of two camera noise models relative to an uncorrupted Poisson signal. EM-CCD gain 1000 and read noise 24; CCD gain 1 and read noise 2.
+
+.. index:: camera model manager
+
+Camera Model Manager
+--------------------
+
+The ``Camera Model Manager`` provides management of the per-pixel camera models that can be used in other plugins to perform per-pixel adjustment and fitting of image pixels. A camera model contains the following data for each pixel:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Offset
+     - The offset added to the pixel by the camera. An offset allows the noise below zero to be recorded correctly for very low signals.
+
+   * - Variance
+     - The variance or read-noise of the pixel. This is the noise that occurs when pixel values are read by the camera.
+
+   * - Gain
+     - The amplification applied to the raw photo-electron data output to create the camera counts.
+
+Camera models are stored in a TIFF image file that contains 3 frames. The size of the image matches the number of pixels in the camera. The frames represent offset, variance and gain. Camera models can be created by the ``sCMOS Analysis`` plugin (see :numref:`%s <calibration_plugins:sCMOS Analysis>`).
+
+When the ``Camera Model Manager`` plugin is run a dialog allows a choice from the following options:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Option
+     - Description
+
+   * - Load a camera model
+     - Allows a single camera model to be loaded.
+
+   * - Load from directory
+     - Allows a directory of camera models to be loaded.
+
+   * - Print all model details
+     - Prints all current camera models to the ``ImageJ`` log.
+
+   * - View a camera model
+     - Opens the camera model as a stack image.
+
+   * - Delete a camera model
+     - Removes a camera model. The file data is not deleted.
+
+   * - Filter an image
+     - Applies filtering to an image using the camera model offset and gain.
+
+
+Load a camera model
+~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog where the camera model TIFF image file can be selected.
+
+If the model is not valid an error message is shown in the ``ImageJ`` log.
+
+
+Load from directory
+~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog where a directory of camera model TIFF image files can be selected.
+
+If any model is not valid an error message is shown in the ``ImageJ`` log.
+
+
+Print all model details
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Prints the details of the current camera models to the ``ImageJ`` log. This includes the name of the file containing the model data and the summary metadata such as the width and height and in the case of a camera crop the origin relative to (0,0). An example model is shown below::
+
+    camera_model_resources {
+      key: "sCMOS_12bit"
+      value {
+        width: 1200
+        height: 1200
+        filename: "/images/sCMOS/Camera model calibration/sCMOS_12bit"
+      }
+    }
+
+
+View a camera model
+~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog to choose a camera model. The camera model data is then loaded from the data file and the offset (bias), variance and gain are shown as 3 slices in a stack. The plugin adds a 4\ :sup:`th` slice to the stack containing the normalised variance:
+
+.. math::
+
+    \mathit{var}/g^2 = \frac{\mathit{var}}{g^2}
+
+This is the variance divided by the squared gain. This value represents the pixel read noise in photons. It is used for modelling the camera in some maximum likelihood estimation (MLE) fitting methods in the ``PeakFit`` plugin.
+
+The plugin will compute the mean and standard deviation of each of the camera model properties and log them to the ``ImageJ`` log window::
+
+    Bias : 99.98 += 9.994 : [56.84 to 148.5]
+    Gain : 2.198 += 0.2115 : [1.297 to 3.28]
+    Variance : 57.98 += 58.05 : [0.0 to 850.8]
+    var/g^2 : 12.35 += 12.85 : [0.0 to 183.5]
+    sqrt(var/g^2) : 3.101 += 1.653 : [0.0 to 13.55]
+
+The numbers in square brackets are the minimum and maximum of the property values.
+
+Delete a camera model
+~~~~~~~~~~~~~~~~~~~~~
+
+Presents a selection dialog to choose a camera model. The camera model is removed from the list of registered camera models. The raw model data file is not deleted.
+
+Filter an image
+~~~~~~~~~~~~~~~
+
+Presents a selection dialog to choose an open image. Presents a selection dialog to choose a camera model. The camera model data is loaded and used to filter the image.
+
+If the model bounds are different from the image then it is assumed the image is a crop from within the camera model. A dialog is presented to configure the crop of the camera model. This is used to align the per-pixel data with the correct pixels from the crop image.
+
+The image is then filtered for each frame in the stack and output to a new image with the suffix ``Filtered``. Filtering subtracts the offset and divides by the gain to represent the input image in camera counts converted to photons:
+
+.. math::
+
+    \mathit{photons}_i = \frac{\mathit{count}_i - o_i}{g_i}
 
 
 .. index:: diffusion rate test
@@ -943,530 +1521,3 @@ The precision error has the effect of increasing the mean-squared displacement f
     Raw data D=1.0 um^2/s, Precision = 30.0 nm, N=22000, step=0.001 s, mean=0.007614 um^2, MSD = 7.614 um^2/s
 
 .. index:: trace diffusion
-
-Trace Diffusion
----------------
-
-The ``Trace Diffusion`` plugin will trace molecules through consecutive frames and then perform mean-squared displacement analysis to calculate a diffusion coefficient.
-
-The plugin is similar to the ``Diffusion Rate Test`` plugin however instead of simulating particle diffusion the plugin will use an existing results set. This allows the analysis to be applied to results from fitting single-molecule images using the ``Peak Fit`` plugin.
-
-.. index:: analysis
-
-Analysis
-~~~~~~~~
-
-The plugin runs a tracing algorithm on the results to find localisations that occur in consecutive frames. Details of the tracing algorithm can be found in section :numref:`{number}: {name} <analysis_plugins:Trace Molecules>`. The distance threshold for the tracing algorithm can be specified but the time threshold is set to 1 frame, i.e. only continuous tracks will be extracted. Thus a pair of localisations within adjacent frames will be connected if they are within the distance threshold. In addition the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the first localisation. This effectively removes traces of particles that could overlap with another moving particle.
-
-Once the tracks have been identified the tracks are filtered using a length criteria and shorter tracks discarded. Optionally the tracks can be truncated to the minimum length which ensures even sampling of particles with different track lengths. The plugin computes the mean-squared distance of each point from the origin. Optionally the plugin computes the mean-squared distance of each point from every other point in the track. These internal distances increase the number of points in the analysis. Therefore if the track is not truncated the number of internal distances at a given time separation is proportional to the track length. To prevent bias in the data towards the longer tracks the average distance for each time separation is computed per track and these are used in the population statistics. Thus each track contributes only once to the mean-displacement for a set time separation.
-
-The mean-squared distance (MSD) per molecule is calculated using two methods. The ``all-vs-all`` method uses the sum of squared distances divided by the sum of time separation between points. The value includes the all-vs-all internal distances (if selected). The ``adjacent`` method uses the average of the squared distances between adjacent frames divided by the time delta (:math:`\Delta t`) between frames. The MSD values are expressed in |micro|\ m\ :sup:`2`/second and can be saved to file or shown in a histogram.
-
-The average mean-squared distances for all the traces are plotted against the time separation and a best fit line is calculated. The mean-squared distances are proportional to the diffusion coefficient (*D*):
-
-.. math::
-
-    \mathit{MSD}(n\Delta t)=4\mathit{Dn}\Delta t+4\sigma ^{2}
-
-where
-:math:`n` is the number of separating frames,
-:math:`\Delta t` is the time lag between frames, and
-:math:`\sigma` is the localisation precision.
-Thus the gradient of the best fit line can be used to obtain the diffusion coefficient. Note that the plugin will compute a fit with and without an explicit intercept and pick the solution with the best fit to the data (see :numref:`{number}: {name} <calibration_plugins:Selecting the best fit>`).
-Note that an additional best fit line can be computed using a MSD correction factor
-(see :numref:`{number}: {name} <calibration_plugins:MSD Correction>`).
-
-.. index:: apparent diffusion coefficient
-
-Apparent Diffusion Coefficient
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Given that the localisations within each trace are subject to a fitting error, or precision (:math:`\sigma`), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [Uphoff *et al*, 2013]:
-
-.. math::
-
-    D^{\star}=\mathit{max}(0,\frac{\mathit{MSD}}{4n\Delta t}-\frac{\sigma_{\mathit{loc}}^{2}}{n\Delta t})
-
-The plugin thus computes the average precision for the localisations included in the analysis and can optionally report the apparent diffusion coefficient (:math:`D^{\star}`). If the average precision is above 100nm then the plugin prompts the user to confirm the precision value.
-
-.. index:: jump distance analysis
-
-Jump Distance analysis
-~~~~~~~~~~~~~~~~~~~~~~
-
-The jump distance is how far a particle moves is given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [Weimann *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
-
-.. math::
-
-    p(r^{2},\Delta t)\mathit{dr}^{2}=\frac{1}{4D\Delta t}e^{-{\frac{r^{2}}{4D\Delta t}}}\mathit{dr}^{2}
-
-This can be expanded to a mixed population of *m* species where each fraction (:math:`f_i`) has a diffusion coefficient :math:`D_i`\ :
-
-.. math::
-
-    p(r^{2},\Delta t)\mathit{dr}^{2}=\sum_{j=1}^{m}{\frac{f_{j}}{4D_{j}\Delta t}e^{-{\frac{r^{2}}{4D_{j}\Delta t}}}\mathit{dr}^{2}}
-
-For the purposes of fitting the integrated distribution can be used. For a single population this is given by:
-
-.. math::
-
-    P(r^{2},\Delta t)=\int_{0}^{r^{2}}p(r^{2})\mathit{dr}^{2}=1-e^{-{\frac{r^{2}}{4D\Delta t}}}
-
-The advantage of the integrated distribution is that specific histogram bin sizes are not
-required to construct the cumulative histogram from the raw data. Note that the
-integration holds for a mixed population of *m* species where each fraction (:math:`f_i`) has a diffusion coefficient :math:`D_i`\ :
-
-.. math::
-
-    P(r^{2},\Delta t)=1-\sum _{j=1}^{m}f_{j}e^{-{\frac{r^{2}}{4D_{j}\Delta t}}}
-
-Weimmann *et al* (2013) show that fitting of the cumulative histogram of jump distances can
-accurately reproduce the diffusion coefficient in single molecule simulations. The performance of the method uses an indicator :math:`\beta` expressed as the average distance a particle travels in the chosen time (*d*) divided by the average localisation precision (:math:`\sigma`):
-
-.. math::
-
-    \beta = d / \sigma
-
-When :math:`\beta` is above 6 then jump distance analysis reproduces the diffusion coefficient as accurately as MSD analysis for single populations. For mixed populations of moving and stationary particles the MSD analysis fails (it cannot determine multiple diffusion coefficients) and the jump distance analysis yields accurate values when :math:`\beta` is above 6.
-
-The ``Trace Diffusion`` plugin performs jump distance analysis using the jumps between frames that are *n* frames apart. The distances may be from the origin to the *n* th frame or may use all the available internal distances *n* frames apart. A cumulative histogram is produced of the jump distance. This is then fitted using a single population and then for mixed populations of *j* species by minimising the sum-of-squared residuals (SS) between the observed and expected curves. Alternatively the plugin can fit the jump distances directly without using a cumulative histogram. In this case the probability of each jump distance is computed using the formula for :math:`P(r^{2},\Delta t)` and the combined probability (likelihood) of the data given the model is computed. The best model fit is achieved by maximising the likelihood (maximum likelihood estimation, MLE).
-
-When fitting multiple species the fit is rejected if:
-(a) the relative difference between coefficients is smaller than a given factor; or
-(b) the minimum fraction, :math:`f_i`, is less than a configured level.
-If accepted the result must then be compared to the previous result to determine if increasing the number of parameters has improved the fit (see :numref:`{number}: {name} <calibration_plugins:Selecting the best fit>`).
-
-
-Optimisation is performed using a fast search to maximise the score by varying each parameter in turn (Powell optimiser). In most cases this achieves convergence. However in the case that the default algorithm fails then a second algorithm is used that uses a directed random walk (CMAES optimiser). This algorithm depends on randomness and so can benefit from restarts. The plugin allows the number of restarts to be varied. For the optimisation of the sum-of-squares against the cumulative histogram a least-squares fitting algorithm (Levenberg-Marquardt or LVM optimiser) is used to improve the initial score where possible. The plugin will log messages on the success of the optimisers to the ``ImageJ`` log window. Extra information will be logged if using the ``Debug fitting`` option.
-
-.. index:: msd correction
-
-MSD Correction
-~~~~~~~~~~~~~~
-
-This corrects for the diffusion distance lost in the first and last frames of the track due to the representation of diffusion over the entire frame as an average coordinate.
-A full explanation of the correction is provided in section :numref:`{number}: {name} <msd_correction:MSD Correction>`.
-
-The observed MSD can be converted to the true MSD by dividing by a correction factor (*F*):
-
-.. math::
-
-    F=\frac{n-1/3}{n}
-
-Where *n* is the number of frames over which the jump distance is measured (i.e. end - start).
-
-When performing jump distance analysis it is not necessary to the correct each observed squared distance before fitting. Since the correction is a single scaling factor instead the computed diffusion coefficient can be adjusted by applying the correction factor after fitting. This allows the plugin to save the raw data to file and use for display on results plots.
-
-If the ``MSD correction`` option is selected the plugin will compute the corrected diffusion coefficient as:
-
-.. math::
-
-    D_{\mathit{corr}}=D\cdot {\frac{n}{n-1/3}}
-
-.. index:: fitting the plot of msd verses n frames
-
-Fitting the plot of MSD verses N frames
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When fitting the linear plot of MSD verses the number of frames the correction factor can be included. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
-
-
-.. math::
-
-    \mathit{oMSD}(n\Delta t)=4D(n\Delta t)-\frac{4D(\Delta t)}{3}+4\sigma^{2}
-
-This is still a linear fit with a new representation for the intercept that allows the intercept to be negative. To ensure the intercept is correctly bounded it is represented using the fit parameters and not just fit using a single constant C.
-
-When performing the linear fit of the MSD verses jump distance plot, 3 equations are fitted and the results with the best information criterion is selected. The results of each fit are written to the ``ImageJ`` log. The following equations are fit:
-
-Linear fit:
-
-.. math::
-
-    \mathit{oMSD}(n\Delta t)=4D(n\Delta t)
-
-Linear fit with intercept:
-
-.. math::
-
-    \mathit{oMSD}(n\Delta t)=4D(n\Delta t)+4\sigma ^{2}
-
-Linear fit with MSD corrected intercept:
-
-.. math::
-
-    \mathit{oMSD}(n\Delta t)=4D(n\Delta t)-\frac{4D(\Delta t)}{3}+4\sigma^{2}
-
-Note: In each model the linear gradient is proportional to the diffusion coefficient.
-
-.. index:: precision correction
-
-Precision Correction
-~~~~~~~~~~~~~~~~~~~~
-
-Given that the localisations within each trace are subject to a fitting error, or precision (σ), the apparent diffusion coefficient (:math:`D^{\star}`) can be calculated accounting for precision [Uphoff *et al* , 2013]:
-
-.. math::
-
-    D^\star=\mathit{max}(0,\frac{\mathit{MSD}}{4n\Delta t}-\frac{\sigma _{\mathit{loc}}^{2}}{n\Delta t})
-
-If the ``Precision correction`` option is selected the plugin will subtract the precision and report the apparent diffusion coefficient (:math:`D^{\star}`) from the jump distance analysis.
-
-.. index:: msd and precision correction
-
-MSD and Precision correction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Both the ``MSD correction`` and ``Precision correction`` can be applied to the fitted MSD to compute the corrected diffusion coefficient:
-
-.. math::
-
-    D=\frac{n}{n-1/3}\cdot \mathit{max}(0,\frac{\mathit{MSD}}{4n\Delta t}-\frac{\sigma _{\mathit{loc}}^{2}}{n\Delta t})
-
-.. index:: selecting the best fit
-
-Selecting the best fit
-~~~~~~~~~~~~~~~~~~~~~~
-
-The Bias Corrected Akaike Information Criterion (cAIC) [Hurvich & Tsai, 1989] is calculated for the fit using the log likelihood (*L*), the number of data points (*n*) and the number of parameters (*p*):
-
-.. math::
-
-   \mathit{AIC}=2p-2L
-
-.. math::
-
-    \mathit{cAIC}=\mathit{AIC}+(2p(p+1)/(n-p-1))
-
-The corrected AIC penalises additional parameters. The model with the lowest cAIC is preferred. If a higher cAIC is obtained then increasing the number of fitted species in the mixed population has not improved the fit and so fitting is stopped. Note that when performing maximum likelihood estimation the log likelihood (*L*) is already known and is used directly to calculate the corrected AIC. When fitting the sum-of-squared residuals (SS) the log likelihood can be computed as:
-
-.. math::
-
-    L=-{\frac{n}{2}}\ln (2\pi )-\frac{n}{2}\ln(\sigma ^{2})-\frac{1}{2\sigma ^{2}}\mathit{SS}}
-
-.. index:: parameters
-
-Parameters
-~~~~~~~~~~
-
-The plugin dialog allowing the data to be selected is shown in :numref:`Figure %s <fig_trace_diffusion_dialog>`.
-
-.. _fig_trace_diffusion_dialog:
-.. figure:: images/trace_diffusion_dialog.png
-    :align: center
-    :figwidth: 80%
-
-    Trace Diffusion dialog
-
-The plugin has the following parameters:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-
-   * - Input
-     - Specify the input results set.
-
-   * - Distance threshold
-     - The distance threshold for tracing.
-
-   * - Distance exclusion
-     - The exclusion distance. If a particle is within the distance threshold but a second particle is within the exclusion distance then the trace is discarded (due to overlapping tracks).
-
-   * - Min trace length
-     - The minimum length for a track (in time frames).
-
-   * - Ignore ends
-     - Ignore the end jumps in the track.
-
-       If a fluorophore activated only part way through the first frame and bleaches only part way through the last frame the end jumps represent a shorter time-span than the frame interval. These jumps can optionally be ignored.
-
-       This option requires tracks to be 2 frames longer than the ``Min trace length`` parameter.
-
-   * - Save traces
-     - Save the traces to file in the ``Peak Fit`` results format.
-
-
-When all the datasets have been traced the plugin presents a second dialog to configure the diffusion analysis. The following parameters can be configured:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-
-   * - Truncate traces
-     - Set to to true to only use the first N points specified by the ``Min trace length`` parameter.
-
-   * - Internal distances
-     - Compute the all-vs-all distances. Otherwise only compute distance from the origin.
-
-   * - Fit length
-     - Fit the first N points with a linear regression.
-
-   * - MSD correction
-     - Perform mean square distance (MSD) correction.
-
-       This corrects for the diffusion distance lost in the first and last frames of the track due to the representation of diffusion over the entire frame as an average coordinate.
-
-   * - Precision correction
-     - Correct the fitted diffusion coefficient using the average precision of the localisations.
-
-       Note that uncertainty in the position of localisations (fit precision) will contribute to the displacement between localisations. This can be corrected for by subtracting :math:`4s^2` from the measured squared distances with *s* the average precision of the localisations.
-
-   * - Maximum likelihood
-     - Perform jump distance fitting using maximum likelihood estimation (MLE). The default is sum-of-squared residuals (SS) fitting of the cumulative histogram of jump distances.
-
-   * - Fit restarts
-     - The number of restarts to attempt when fitting using the CMAES optimiser. A higher number produces and more robust fit solution since the best fit of all the restarts is selected.
-
-       Note that the CMAES optimiser is only used when the default Powell optimiser fails to converge.
-
-   * - Jump distance
-     - The distance between frames to use for jump analysis.
-
-   * - Minimum difference
-     - The minimum relative difference (ratio) between fitted diffusion coefficients to accept the model. The difference is calculated by ranking the coefficient in descending order and then expressing successive pairs as a ratio. Models with coefficients too similar are rejected.
-
-   * - Minimum fraction
-     - The minimum fraction of the population that each species must satisfy. Models with species fractions below this are rejected.
-
-   * - Minimum N
-     - The minimum number of species to fit. This can be used to force fitting with a set number of species.
-
-       This extra option is only available if the plugin is run with the ``Shift`` key held down, otherwise the default is 1.
-
-   * - Maximum N
-     - The maximum number of species to fit. In practice this number may not be achieved if adding more species does not improve the fit.
-
-   * - Debug fitting
-     - Output extra information to the ``ImageJ`` log window about the fitting process.
-
-   * - Save trace distances
-     - Save the traces to file. The file contains the per-molecule MSD and D* and the squared distance to the origin for each trace.
-
-   * - Save raw data
-     - Select this to select a results directory where the raw data will be saved. This is the data that is used to produce all the histograms and output plots.
-
-   * - Show histograms
-     - Show histograms of the trace data. If selected a second dialog is presented allowing the histograms to be chosen and the number of histogram bins to be configured.
-
-   * - Title
-     - A title to add to the results table.
-
-
-.. index:: output
-
-Output
-~~~~~~
-
-.. index:: msd verses time
-
-MSD verses time
-^^^^^^^^^^^^^^^
-
-The plugin will plot the mean-squared distances against the time as show in :numref:`Figure %s <fig_trace_diffusion_msd_vs_time>`. The plot shows the best fit line. If the data is not linear then the diffusion of particles may be confined, for example by cellular structures when using *in vivo* image data. In this case the diffusion coefficient will be underestimated.
-
-.. _fig_trace_diffusion_msd_vs_time:
-.. figure:: images/trace_diffusion_msd_vs_time.png
-    :align: center
-    :figwidth: 80%
-
-    Plot of mean-squared distance verses time produced by the Trace Diffusion plugin.
-
-    The mean of the raw data is plotted with bars representing standard error of the mean. The best fit line is shown in magenta.
-
-.. index:: jump distance histogram
-
-Jump distance histogram
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The plugin produces a cumulative probability histogram of the jump distance (see :numref:`Figure %s <fig_trace_diffusion_jump_distance_cumul_histogram>`). The best fit for a single species model will be shown in magenta. Any significant deviations of the histogram line from the single species fit are indicative of a multi-species population. If a multiple species model has a better fit than the single species model then it will be plotted in yellow.
-
-.. _fig_trace_diffusion_jump_distance_cumul_histogram:
-.. figure:: images/trace_diffusion_jump_distance_cumul_histogram.png
-    :align: center
-    :figwidth: 80%
-
-    Jump distance cumulative probability histogram.
-
-    The best fit for the single species model is shown in magenta.
-
-.. index:: histograms
-
-Histograms
-^^^^^^^^^^
-
-If the ``Show histograms`` option is selected the plugin presents a second dialog where the histograms can be configured. The number of bins in the histogram can be specified and outliers can optionally be removed. Outliers are any point more than 1.5 times the inter-quartile range above or below the upper and lower quartile boundaries. The following histograms can be chosen:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-
-   * - Total signal
-     - The total signal of each trace.
-
-   * - Signal-per-frame
-     - The signal-per-frame of the localisations in a trace.
-
-   * - t-On
-     - The on-time of a trace. This excludes the traces too short to be analysed.
-
-   * - MSD/Molecule
-     - The average mean-squared distance per molecule. Plots of the all-vs-all and adjacent MSD are shown.
-
-       If the particles contain molecules moving with different diffusion rates or a fixed fraction of molecules then the histogram may be multi-modal.
-
-   * - D*/Molecule
-     - The apparent diffusion coefficient per molecule. Plots of the all-vs-all and adjacent D* are shown.
-
-
-.. index:: summary table
-
-Summary table
-^^^^^^^^^^^^^
-
-The plugin shows a summary table of the analysis results. This allows the plugin to be run with many different settings to view the effect on the calculated diffusion coefficient. The following columns are reported:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Field
-     - Description
-
-   * - Title
-     - The title (specified by the ``Title`` parameter).
-
-   * - Dataset
-     - The input dataset.
-
-   * - Exposure time
-     - The dataset exposure time per frame.
-
-   * - D-threshold
-     - The distance threshold.
-
-   * - Ex-threshold
-     - The exclusion distance.
-
-   * - Min-length
-     - The minimum track length that was analysed.
-
-   * - Ignore ends
-     - True if the end jumps of tracks were ignored.
-
-   * - Truncate
-     - True if tracks were truncated to the min length.
-
-   * - Internal
-     - True if internal distance were used.
-
-   * - Fit length
-     - The number of points fitted in the linear regression.
-
-   * - MSD corr
-     - True if MSD correction was applied.
-
-   * - S corr
-     - True if precision correction was applied.
-
-   * - MLE
-     - True if maximum likelihood fitting was used.
-
-   * - Traces
-     - The number of traces analysed.
-
-   * - s
-     - The average precision of the localisations in the traces.
-
-   * - D
-     - The diffusion coefficient from MSD linear fitting.
-
-   * - Fit s
-     - The fitted precision when fitting an intercept in the MSD linear fit.
-
-   * - Jump distance
-     - The time distance used for jump analysis.
-
-   * - N
-     - The number of jumps for jump distance analysis.
-
-   * - Beta
-     - The beta parameter which is the ratio between the mean squared distance the localisation precision: :math:`\frac{\mathit{MSD}}{s^2}`.
-
-       A beta above 6 indicates that jump distance analysis will produce reliable results [Weimann *et al*, 2013].
-
-   * - Jump D
-     - The diffusion coefficient(s) from jump analysis.
-
-   * - Fractions
-     - The fractions of each population from jump analysis.
-
-   * - IC
-     - The information criterion (IC) for the best model fit.
-
-       Note that the IC is not comparable between the MLE or LSQ methods for fitting. It is also not comparable when the number of jumps is different. It can only be used to compare fitting the same jump distances with a different number of mobile species. This can can be controlled using the ``Minimum`` and ``Maximum N`` parameters.
-
-   * - Total signal
-     - The average total signal of each trace.
-
-   * - Signal/frame
-     - The average signal-per-frame of the localisations in a trace.
-
-   * - t-On
-     - The average on-time of a trace. This excludes the traces too short to be analysed.
-
-
-The plugin will report the number of traces that were excluded using the length criteria and the fitting results to the ``ImageJ`` log. This includes details of the jump analysis with the fitting results for each model and the information criterion used to assess the best model, e.g.
-
-.. code-block:: text
-
-    783 Traces filtered to 117 using minimum length 5
-    Linear fit (5 points) : Gradient = 2.096, D = 0.5239 um^2/s, SS = 0.047595 (2 evaluations)
-    Jump Distance analysis : N = 151, Time = 6 frames (0.6 seconds). Mean Distance = 1371.0 nm, Precision = 38.55 nm, Beta = 35.57
-    Estimated D = 0.4698 um^2/s
-    Fit Jump distance (N=1) : D = 0.0498 um^2/s, SS = 0.433899, IC = -453.1 (12 evaluations)
-    Fit Jump distance (N=2) : D = 1.655, 0.0346 um^2/s (0.1832, 0.8168), SS = 0.014680, IC = -960.3 (342 evaluations)
-    Fit Jump distance (N=3) : D = 1.655, 0.0346, 0.0346 um^2/s (0.1832, 0.1204, 0.6964), SS = 0.014680, IC = -956.1 (407 evaluations)
-    Coefficients are not different: 0.0346 / 0.0346 = 1.0
-    Best fit achieved using 2 populations: D = 1.655, 0.0346 um^2/s, Fractions = 0.1832, 0.8168
-
-.. index:: trace diffusion (multi)
-
-Trace Diffusion (Multi)
------------------------
-
-This plugin allows the ``Trace Diffusion`` plugin to be run with multiple input datasets. Each dataset will be traced separately. The results are then combined for analysis. This allows analysis of multiple repeat experiments as if one single dataset.
-
-When the plugin runs a dialog is presented that allows the datasets to be selected (:numref:`Figure %s <fig_trace_diffusion_multi_selection>`).
-
-.. _fig_trace_diffusion_multi_selection:
-.. figure:: images/trace_diffusion_multi_selection.png
-    :align: center
-    :figwidth: 80%
-
-    Trace Diffusion (Multi) dataset selection dialog
-
-*  Click a single result set to select or deselect.
-
-*  Hold the ``Shift`` key to select or deselect a range of results starting from the last clicked result set.
-
-*  Use the ``All`` or ``None`` buttons to select or deselect all the results.
-
-*  Click the ``Cancel`` button to end the plugin.
-
-*  Click the ``OK`` button to run the
-   ``Trace Diffusion``
-   plugin with the selected results.
-
-When the ``Trace Diffusion`` plugin is executed it will not have the ``Input`` option as the results have already been selected. If multiple datasets are chosen the dataset name in the results table will be named using the first dataset plus the number of additional datasets, e.g. ``Dataset 1 + 6 others``.
-
-Note that the plugin supports the ``ImageJ`` recorder to allow running within an ``ImageJ`` macro.

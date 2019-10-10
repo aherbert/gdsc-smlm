@@ -20,7 +20,7 @@ import os
 # -- Project information -----------------------------------------------------
 
 project = u'GDSC SMLM'
-copyright = u'2019, Alex Herbert'
+copyright = u'2020, Alex Herbert'
 author = u'Alex Herbert'
 
 # The short X.Y version
@@ -91,7 +91,10 @@ else:
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'collapse_navigation': False,
+    'navigation_depth': 4,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

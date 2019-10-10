@@ -1,3 +1,5 @@
+.. index:: gdsc single molecule light microscopy (smlm) imagej plugins
+
 GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
 ===========================================================
 
@@ -22,6 +24,8 @@ GDSC SMLM plugins provide various tools for single molecule localisation analysi
 The tools are easily :ref:`installed <installation:Installation>` into ``ImageJ``. The library works for Java 1.8+.
 
 The code is hosted on GitHub_.
+
+.. index:: overview
 
 Overview
 ========
@@ -72,6 +76,9 @@ The GDSC Single Molecule Light Microscopy (SMLM) plugins provide various tools f
 
 The following plugins are available:
 
+
+.. index:: fitting plugins
+
 Fitting plugins
 ---------------
 
@@ -87,8 +94,8 @@ Fitting plugins
    * - :ref:`fitting_plugins:Peak Fit`
      - Performs fitting on an image to generate a list of molecule localisations.
 
-   * - :ref:`fitting_plugins:Template Configuration`
-     - Allows the user to load custom configuration templates from a directory.
+   * - :ref:`fitting_plugins:Template Manager`
+     - Allows management of templates for the fitting configuration.
 
    * - :ref:`fitting_plugins:Fit Configuration`
      - Allows setting the fitting parameters and saving them to file.
@@ -102,12 +109,23 @@ Fitting plugins
    * - :ref:`fitting_plugins:Spot Finder (Series)`
      - Identifies candidate maxima in a folder of images.
 
+   * - :ref:`fitting_plugins:Spot Finder (Preview)`
+     - Shows an interactive view of the candidates that will be identified in an image.
+
    * - :ref:`fitting_plugins:Fit Maxima`
      - Performs PSF fitting on candidate maxima.
 
    * - :ref:`fitting_plugins:Gaussian Fit`
-     - Allows interactive identification of maxima and 2D Gaussian fitting
-.
+     - Allows interactive identification of maxima using filters and 2D Gaussian fitting.
+
+   * - :ref:`fitting_plugins:Fail Count Manager`
+     - Provides analysis of the fail count settings used in the ``Peak Fit`` plugin.
+
+   * - :ref:`fitting_plugins:Spot Fit Tool`
+     - Allows interactive fitting of clicked spots on an image.
+
+
+.. index:: results plugins
 
 Results plugins
 ---------------
@@ -118,6 +136,12 @@ Results plugins
 
    * - :ref:`results_plugins:Results Manager`
      - Allows conversion of the localisation results into different formats, e.g. files or images.
+
+   * - :ref:`results_plugins:Batch Load Results`
+     - Allows multiple files to be loaded into memory.
+
+   * - :ref:`results_plugins:Batch Save Results`
+     - Allows multiple results sets to be saved to file.
 
    * - :ref:`results_plugins:Summarise Results`
      - Displays a summary of the results held in memory.
@@ -137,6 +161,12 @@ Results plugins
    * - :ref:`results_plugins:Calibrate Results`
      - Allows results held in memory to be calibrated.
 
+   * - :ref:`results_plugins:Update Results Bounds`
+     - Allows the bounds of the results to be updated.
+
+   * - :ref:`results_plugins:Convert Results`
+     - Allows results held in memory to be converted to different units.
+
    * - :ref:`results_plugins:Show Results Header`
      - Shows the header information from any support localisation results file format.
 
@@ -144,22 +174,31 @@ Results plugins
      - Draws an overlay on an image using all the localisations from a results dataset.
 
    * - :ref:`results_plugins:Load Localisations`
-     - Loads loca
-       lisation data from a delimited text file
+     - Loads localisation data from a delimited text file.
+
+   * - :ref:`results_plugins:Trace Exporter`
+     - Export traced datasets to file.
 
    * - :ref:`results_plugins:Filter Results`
      - Filters a list of localisations using signal strength, coordinate shift and PSF width.
 
    * - :ref:`results_plugins:Crop Results`
-     - Filters a set of localisations using
-       a 2D bounding rectangle
+     - Filters a set of localisations using a 2D bounding rectangle.
+
+   * - :ref:`results_plugins:ROI Crop Results`
+     - Filters a set of localisations using any ``ImageJ`` region of interest (ROI).
 
    * - :ref:`results_plugins:Free Filter Results`
-     - Filters a list of localisations using a custom filter specified using a
-       text description. Multiple filters can be combined with AND/OR operators
+     - Filters a list of localisations using a custom filter specified using a text description. Multiple filters can be combined with AND/OR operators.
 
    * - :ref:`results_plugins:Split Results`
      - Splits a set of localisation results using a 2D mask.
+
+   * - :ref:`results_plugins:Translate Results`
+     - Allows the localisations in a dataset to be translated.
+
+   * - :ref:`results_plugins:3D Results Viewer`
+     - Show an interactive 3D view of the localisations in a dataset.
 
    * - :ref:`results_plugins:Results Match Calculator`
      - Calculate the match statistics between two results sets.
@@ -168,8 +207,19 @@ Results plugins
      - Calculate the match statistics between two sets of traced molecules.
 
    * - :ref:`results_plugins:Spot Inspector`
-     - Extracts the fitted spots from an image into a stack ordered by the user-selected score
-.
+     - Extracts the fitted spots from an image into a stack ordered by the user-selected score.
+
+   * - :ref:`results_plugins:Yeast Mask`
+     - Creates a mask of a fission yeast cell (*S. pombe*).
+
+   * - :ref:`results_plugins:Depth Mask`
+     - Creates a 3D mask using three 2D masks to define the shape.
+
+   * - :ref:`results_plugins:Nucleus Mask`
+     - Creates a 3D mask using spheres to model a nucleus of a cell.
+
+
+.. index:: analysis plugins
 
 Analysis plugins
 ----------------
@@ -186,6 +236,21 @@ Analysis plugins
 
    * - :ref:`analysis_plugins:Cluster Molecules`
      - Clusters molecules through time using time and distance thresholds (using centroid-linkage clustering).
+
+   * - :ref:`analysis_plugins:Trace Diffusion`
+     - Trace molecules through consecutive frames. Mean-squared displacement analysis is performed on the traces to calculate a diffusion coefficient.
+
+   * - :ref:`analysis_plugins:Trace Diffusion (Multi)`
+     - Allows the ``Trace Diffusion`` plugin to be run with multiple input datasets.
+
+   * - :ref:`analysis_plugins:Trace Length Analysis`
+     - Analyses the track length of traced data.
+
+   * - :ref:`analysis_plugins:OPTICS`
+     - Runs the OPTICS algorithm to perform interactive density-based clustering of localisation data.
+
+   * - :ref:`analysis_plugins:DBSCAN`
+     - Runs the DBSCAN algorithm to perform interactive density-based clustering of localisation data.
 
    * - :ref:`analysis_plugins:Draw Clusters`
      - Draws collections of localisations with the same ID on an image, for example the output from ``Trace Molecules`` or ``Cluster Molecules``.
@@ -217,11 +282,20 @@ Analysis plugins
    * - :ref:`analysis_plugins:Spot Analysis (Add)`
      - This plugin provides a named plugin command for the ``Add`` button of the ``Spot Analysis`` plugin.
 
+   * - :ref:`analysis_plugins:Crosstalk Activation Analysis`
+     - Perform crosstalk activation analysis of photo-switchable probes under pulsed light activation.
+
+   * - :ref:`analysis_plugins:Pulse Activation Analysis`
+     - Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation.
+
    * - :ref:`analysis_plugins:Fourier Image Resolution`
      - Analyses the resolution of an image using Fourier Ring Correlation.
 
    * - :ref:`analysis_plugins:FIRE Q Estimation`
      - Estimate the spurious correction factor *Q* for use in ``Fourier Image Resolution`` (FIRE) analysis.
+
+
+.. index:: pc palm plugins
 
 PC PALM plugins
 ---------------
@@ -249,8 +323,10 @@ PC PALM plugins
      - Combine multiple Pair Correlation curves and fit them using models for random or clustered distributions.
 
    * - :ref:`pc_palm_plugins:PC-PALM Clustering`
-     - Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm
-.
+     - Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
+
+
+.. index:: model plugins
 
 Model plugins
 -------------
@@ -268,6 +344,15 @@ Model plugins
    * - :ref:`model_plugins:PSF Combiner`
      - Combines several PSF images into a single average PSF.
 
+   * - :ref:`model_plugins:PSF HWHM`
+     - Diplays the half-width at half-maxima (HWHM) curve for a PSF image.
+
+   * - :ref:`model_plugins:Cubic Spline Manager`
+     - Allows management of the cubic spline models of point spread functions (PSFs).
+
+   * - :ref:`model_plugins:Astigmatism Model Manager`
+     - Allows management of 2D Gaussian astigmatism models for a 2D astigmatic PSF.
+
    * - :ref:`model_plugins:Create Data`
      - Creates an image by simulating single molecule localisations using a model of photoactivated diffusing fluorophore complexes.
 
@@ -275,6 +360,9 @@ Model plugins
 
    * - :ref:`model_plugins:Create Simple Data`
      - Creates an image by simulating single molecule localisations at a specified density.
+
+   * - :ref:`model_plugins:Create Track Data`
+     - Creates an image by simulating single molecule localisations diffusing in tracks that do not overlap in time.
 
    * - :ref:`model_plugins:Create Benchmark Data`
      - Creates an image by simulating single molecule localisations in a fixed location.
@@ -288,8 +376,14 @@ Model plugins
    * - :ref:`model_plugins:Create Spot Data`
      - Creates a sparse image by simulating zero or one localisation per frame.
 
+   * - :ref:`model_plugins:Load Benchmark Data`
+     - Load benchmark data using an open image and a localisations text file.
+
    * - :ref:`model_plugins:Filter Spot Data`
      - Filter the image created by ``Create Simple Data`` or ``Create Spot Data`` and compute statistics on the accuracy and precision of identifying spot candidates.
+
+   * - :ref:`model_plugins:Filter Spot Data (Batch)`
+     - Run a batch of filters through the analysis of ``Filter Spot Data``.
 
    * - :ref:`model_plugins:Fit Spot Data`
      - Fits all the candidate spots identified by the ``Filter Spot Data`` plugin.
@@ -297,15 +391,26 @@ Model plugins
    * - :ref:`model_plugins:Benchmark Filter Analysis`
      - Run different filtering methods on a set of benchmark fitting results outputting performance statistics on the success of the filter.
 
+   * - :ref:`model_plugins:Benchmark Filter Parameters`
+     - Run different filter control parameters on a set of benchmark fitting results outputting performance statistics on the success of the filter.
+
+   * - :ref:`model_plugins:Iterate Filter Analysis`
+     - Iterates the ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugin to optimise performance on a set of benchmark fitting results.
+
+   * - :ref:`model_plugins:Score Filter`
+     - Scores a filter against a set of benchmark fitting results.
+
    * - :ref:`model_plugins:Doublet Analysis`
      - Fits candidate spots identified by the ``Filter Spot Data`` plugin as a single or double spot (doublet) and scores the results.
 
    * - :ref:`model_plugins:Doublet Filter Analysis`
      - Filters all the fit results produced by the ``Doublet Analysis`` plugin using the specified filter settings and scores the results.
 
-   * - :ref:`model_plugins:Image Background`
-     - Produces a background intensity image and a mask from a sample *in vivo* image. This can be used to simulate realistic fluorophore distributions
-.
+   * - :ref:`model_plugins:Smart Spot Ranking`
+     - Compare methods for ranking spot candidates.
+
+
+.. index:: calibration plugins
 
 Calibration plugins
 -------------------
@@ -331,15 +436,23 @@ Calibration plugins
    * - :ref:`calibration_plugins:EM-Gain PMF`
      - Displays a plot of the probability mass function (PMF) of the expected value of a pixel on an EM-CCD camera given an average number of photons.
 
+   * - :ref:`calibration_plugins:sCMOS Analysis`
+     - Analyse the per pixel offset, variance and gain from a sCMOS camera.
+
+   * - :ref:`calibration_plugins:Camera Model Analysis`
+     - Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera.
+
+   * - :ref:`calibration_plugins:Camera Model Fisher Information Analysis`
+     - Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera.
+
+   * - :ref:`calibration_plugins:Camera Model Manager`
+     - Allows management of per-pixel camera models for the fitting configuration.
+
    * - :ref:`calibration_plugins:Diffusion Rate Test`
      - Simulate molecule diffusion and fit a graph of mean-squared displacement to determine the diffusion coefficient.
 
-   * - :ref:`calibration_plugins:Trace Diffusion`
-     - Trace molecules through consecutive frames. Mean-squared displacement analysis is performed on the traces to calculate a diffusion coefficient.
 
-   * - :ref:`calibration_plugins:Trace Diffusion (Multi)`
-     - Allows the ``Trace Diffusion`` plugin to be run with multiple input datasets
-.
+.. index:: tool plugins
 
 Tool plugins
 ------------
@@ -365,11 +478,26 @@ In addition to the principle plugins for localisation fitting and analysis there
    * - :ref:`tools_plugins:Noise Estimator`
      - Estimate the noise in an image using various methods.
 
+   * - :ref:`tools_plugins:Background Estimator`
+     - Estimate the background in a region of an image.
+
    * - :ref:`tools_plugins:Median Filter`
      - Compute the median of an image, on a per-pixel basis, using a rolling window at set intervals.
 
+   * - :ref:`tools_plugins:Image Background`
+     - Produces a background intensity image and a mask from a sample *in vivo* image. This can be used to simulate realistic fluorophore distributions.
+
    * - :ref:`tools_plugins:Overlay Image`
      - Allow an image to be added as an overlay with a transparent background.
+
+   * - :ref:`tools_plugins:Image Kernel Filter`
+     - Convolve an image with a kernel from another image.
+
+   * - :ref:`tools_plugins:TIFF Series Viewer`
+     - Opens a TIFF image as a read-only virtual stack image. Images can be extremely large.
+
+
+.. index:: toolset plugins
 
 Toolset plugins
 ---------------
@@ -389,15 +517,21 @@ These plugins provide quick access to the various SMLM plugins via `ImageJ` tool
    * - :ref:`toolset_plugins:Create SMLM Tools config`
      - Create a configuration file allowing the ``SMLM Tools`` panel to be customised.
 
+   * - :ref:`toolset_plugins:SMLM Macro Extensions`
+     - Register functions that can be used in the ``ImageJ`` macro language.
+
 
 All of the plugins can be incorporated into ``ImageJ`` macros to allow automation of image analysis workflows.
+
+
+.. index:: contents
 
 Contents
 ========
 
 .. toctree::
     :numbered:
-    :maxdepth: 2
+    :maxdepth: 4
 
     background
     installation
@@ -420,11 +554,15 @@ Contents
 
     change_log
 
+.. index:: index
+
 Index
 =====
 
 * :ref:`genindex`
 * :ref:`search`
+
+.. index:: issues
 
 Issues
 ======
