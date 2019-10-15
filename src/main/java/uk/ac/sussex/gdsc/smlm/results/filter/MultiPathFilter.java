@@ -917,17 +917,22 @@ public class MultiPathFilter {
   /**
    * Select a set of peak results.
    *
-   * <p>The number of consecutive rejections are counted. When the configured number of failures is
-   * reached all remaining results are rejected.
+   * <p>The results are processed in order. Results are only processed if either the fail counter
+   * {@link FailCounter#isOk() isOK} or the store determines the result
+   * {@link SelectedResultStore#isValid(int) isValid}. Results are selected using the configured
+   * filters and may be excluded using the coordinate store. Selected results are passed to the
+   * selected results store. The fail counter is sent a pass/fail signal for each multi-path result.
    *
    * <p>A selected result will be stored for each MultiPathFitResult that is assessed, even if the
    * fitting failed. In this case the list of accepted results will be null.
    *
    * <p>The SelectedResultStore can be used to track results that pass validation. If this is null
-   * then the default behaviour is to track fitted candidates that pass validation. These will be
-   * processed even if the fail count has been reached.
+   * then the default behaviour is to track candidates that were successfully fit and that pass
+   * validation. These will be marked as valid and will be processed even if the fail counter is not
+   * OK. This allows filtering of candidate known to be good that may have been fit as a multi-fit
+   * result for a previous candidate.
    *
-   * <p>The coordinate store is used to check for duplicates.
+   * <p>The coordinate store can be used to check for duplicates.
    *
    * @param multiPathResults the multi path results
    * @param failCounter the counter to track the failures to allow per frame before all peaks are
@@ -1754,8 +1759,8 @@ public class MultiPathFilter {
   /**
    * Create a subset of multi-path results, i.e. all those that pass the filter.
    *
-   * <p>The number of consecutive rejections are counted. When the configured number of failures is
-   * reached all remaining results for the frame are rejected.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
    * failed fits before the current candidate, assuming candidates start at zero and increment.
@@ -1775,8 +1780,8 @@ public class MultiPathFilter {
   /**
    * Create a subset of multi-path results, i.e. all those that pass the filter.
    *
-   * <p>The number of consecutive rejections are counted. When the configured number of failures is
-   * reached all remaining results for the frame are rejected.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
    * failed fits before the current candidate, assuming candidates start at zero and increment.
@@ -1893,8 +1898,8 @@ public class MultiPathFilter {
   /**
    * Create a subset of multi-path results, i.e. all those that pass the filter.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>If the subset flag is set to true the candidate Id will be used to determine the number of
    * failed fits before the current candidate, assuming candidates start at zero and increment.
@@ -1966,9 +1971,8 @@ public class MultiPathFilter {
    * new results are assumed to be positives and their assignments used to score the results per
    * frame.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
    * returned in the positives and negatives fields of the result.
@@ -1989,9 +1993,8 @@ public class MultiPathFilter {
    * new results are assumed to be positives and their assignments used to score the results per
    * frame.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
    * returned in the positives and negatives fields of the result.
@@ -2021,9 +2024,8 @@ public class MultiPathFilter {
    * <p>Filter each multi-path result. Any output results that are new results are assumed to be
    * positives and their assignments used to score the results per frame.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
    * returned in the positives and negatives fields of the result.
@@ -2046,9 +2048,8 @@ public class MultiPathFilter {
    * <p>Filter each multi-path result. Any output results that are new results are assumed to be
    * positives and their assignments used to score the results per frame.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
    * returned in the positives and negatives fields of the result.
@@ -2082,9 +2083,8 @@ public class MultiPathFilter {
    * <p>Filter each multi-path result. Any output results that are new results are assumed to be
    * positives and their assignments used to score the results per frame.
    *
-   * <p>The number of consecutive rejections are counted per frame. When the configured number of
-   * failures is reached all remaining results for the frame are rejected. This assumes the results
-   * are ordered by the frame.
+   * <p>The results are processed in order. Results are only processed if the fail counter
+   * {@link FailCounter#isOk() isOK}.
    *
    * <p>Note: The fractional scores are totalled as well as the integer tp/fp scores. These are
    * returned in the positives and negatives fields of the result.

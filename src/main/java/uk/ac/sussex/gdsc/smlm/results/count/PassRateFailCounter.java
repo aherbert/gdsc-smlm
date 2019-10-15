@@ -45,7 +45,7 @@ public class PassRateFailCounter extends BaseFailCounter {
    * Instantiates a new pass rate fail counter.
    *
    * @param allowedCounts the number of allowed counts before the pass rate is evaluated
-   * @param passRate the reset fraction
+   * @param passRate the fraction of passes that is allowed
    */
   private PassRateFailCounter(int allowedCounts, double passRate) {
     this.allowedCounts = allowedCounts;
@@ -61,7 +61,7 @@ public class PassRateFailCounter extends BaseFailCounter {
    * Instantiates a new pass rate fail counter.
    *
    * @param allowedCounts the number of allowed counts before the pass rate is evaluated
-   * @param passRate The fraction of the current failures count to reset to for a pass.
+   * @param passRate the fraction of passes that is allowed
    * @return the pass rate fail counter
    */
   public static PassRateFailCounter create(int allowedCounts, double passRate) {
