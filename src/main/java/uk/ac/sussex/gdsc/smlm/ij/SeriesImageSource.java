@@ -1078,7 +1078,7 @@ public class SeriesImageSource extends ImageSource {
    * @return the seekable stream
    */
   private SeekableStream createSeekableStream(String path, long size)
-      throws FileNotFoundException, SecurityException {
+      throws FileNotFoundException {
     final File file = new File(path);
 
     // Don't buffer massive images into memory
