@@ -31,7 +31,7 @@
  * href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm"> Levenberg–Marquardt
  * algorithm</a>. <li>The Hessian-type matrix of partial first-order derivatives used in Laurence
  * &amp; Chromy (2010) Maximum Likelihood Estimation variant of the Levenberg–Marquardt algorithm.
- * <li>The Hessian-type matrix of partial first-order derivatives used in Ruisheng, et al (2017)
+ * <li>The Hessian-type matrix of partial first-order derivatives used in Lin, et al (2017)
  * weighted variant of the Levenberg–Marquardt algorithm. <li>The Fisher information matrix for a
  * Poisson process. <li>The Smith et al, (2010) Newton-Raphson update vector for a Poisson process
  * using the first and second partial derivatives. </ul>

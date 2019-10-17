@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
  * is equal to 1/[variance + max(y, 0) + 1].
  *
  *
- * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+ * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
  * cameras - characterisation of a computationally efficient localization approach. Optical Express
  * 25, Issue 10, pp 11701-11716.
  */
@@ -58,7 +58,7 @@ public class WLsqLvmGradientProcedure extends LsqLvmGradientProcedure {
     final int n = y.length;
     wgt = new double[n];
 
-    // From Ruisheng, et al (2017):
+    // From Lin, et al (2017):
     // Total noise = variance + max(di, 0) + 1
 
     if (var != null && var.length == n) {

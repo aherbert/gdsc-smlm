@@ -36,7 +36,7 @@ import java.util.Arrays;
  * Weighted Least Squares Estimation assuming a Poisson model with a Gaussian noise component. The
  * weight per observation is equal to 1/[variance + max(y, 0) + 1].
  *
- * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+ * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
  * cameras - characterisation of a computationally efficient localization approach. Optical Express
  * 25, Issue 10, pp 11701-11716.
  */
@@ -73,7 +73,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
     final int n = y.length;
     wgt = new double[n];
 
-    // From Ruisheng, et al (2017):
+    // From Lin, et al (2017):
     // Total noise = variance + max(di, 0) + 1
 
     if (var != null && var.length == n) {
@@ -107,7 +107,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * </pre>
    *
    * <p>In this case Yi refers to the expected value at observation i. This expression was updated
-   * (Ruisheng, et al (2017)) to use Yi as the observed value at observation i (Oi). To increase
+   * (Lin, et al (2017)) to use Yi as the observed value at observation i (Oi). To increase
    * stability for zero or small Oi a Baysian prior is added using max(0, Oi) + 1. To account for
    * Gaussian noise per observation using the variance (vari) the weights can be combined resulting
    * in:
@@ -119,7 +119,7 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
    * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
    *
-   * <p>See Ruisheng, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
+   * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
    * cameras - characterisation of a computationally efficient localization approach. Optical
    * Express 25, Issue 10, pp 11701-11716.
    *
