@@ -86,6 +86,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.util.FastMath;
 
@@ -4125,11 +4126,24 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           final float[] v = (isFitCameraCounts) ? cameraModel.getVariance(bounds)
               : cameraModel.getNormalisedVariance(bounds);
           // Convert to double
-          if (varG2 == null || varG2.length != v.length) {
+          if (ArrayUtils.getLength(varG2) != v.length) {
             varG2 = SimpleArrayUtils.toDouble(v);
           } else {
+            // Re-use space
             for (int i = 0; i < v.length; i++) {
               varG2[i] = v[i];
+            }
+          }
+        } else {
+          // Create a single valued weight array.
+          final float v = (isFitCameraCounts) ? cameraModel.getVariance(0, 0)
+              : cameraModel.getNormalisedVariance(0, 0);
+          // Only create if there is variance
+          if (v != 0) {
+            // Only create if the array size changes
+            final int length = regionBounds.width * regionBounds.height;
+            if (ArrayUtils.getLength(varG2) != length) {
+              varG2 = SimpleArrayUtils.newDoubleArray(length, v);
             }
           }
         }

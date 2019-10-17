@@ -213,7 +213,6 @@ public class PeakFit implements PlugInFilter {
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
 
-    int numberOfThreads;
     double fractionOfThreads;
     String inputOption;
     boolean showTable;
@@ -221,17 +220,14 @@ public class PeakFit implements PlugInFilter {
     boolean fitAcrossAllFrames;
 
     Settings() {
-      numberOfThreads = 1;
-      // Testing has shown that we should use ~85% of the total number of cores the system has
-      // available. Extra cores then do not make a difference.
-      fractionOfThreads = 0.85;
+      // Allow 1 thread free.
+      fractionOfThreads = 0.99;
       inputOption = "";
       showTable = true;
       showImage = true;
     }
 
     Settings(Settings source) {
-      numberOfThreads = source.numberOfThreads;
       fractionOfThreads = source.fractionOfThreads;
       inputOption = source.inputOption;
       showTable = source.showTable;
@@ -273,7 +269,7 @@ public class PeakFit implements PlugInFilter {
 
     /**
      * This option is only required for the dialog when the input image has a crop. Otherwise the
-     * class level {@link PeakFit#ignoreBoundsForNoise} will be set the default of via the API
+     * class level {@link PeakFit#ignoreBoundsForNoise} will be set via the API
      * method {@link PeakFit#initialiseImage(ImageSource, Rectangle, boolean)}.
      */
     boolean optionIgnoreBoundsForNoise;
@@ -729,7 +725,8 @@ public class PeakFit implements PlugInFilter {
       // Load input series ...
       SeriesOpener series;
       if (extraOptions) {
-        series = SeriesOpener.create(inputDirectory, true, settings.numberOfThreads);
+        // The series opener does not support threads
+        series = SeriesOpener.create(inputDirectory, true, 0);
       } else {
         series = new SeriesOpener(inputDirectory);
       }
@@ -1086,7 +1083,7 @@ public class PeakFit implements PlugInFilter {
       final String textRunTime = TextUtils.nanosToString(runTime);
 
       final int size = getSize();
-      final String message = String.format("%s. Fitting Time = %s. Run time = %s",
+      final String message = String.format("%s. Total fitting time = %s. Run time = %s",
           TextUtils.pleural(size, "localisation"), textTime, textRunTime);
       if (resultsSettings.getLogProgress()) {
         IJ.log(LOG_SPACER);
@@ -3080,6 +3077,7 @@ public class PeakFit implements PlugInFilter {
         } else {
           gd.addNumericField("Camera_bias", calibration.getBias(), 2, 6, "Count");
           gd.addNumericField("Gain", calibration.getCountPerPhoton(), 2, 6, "Count/photon");
+          gd.addNumericField("Read_noise", calibration.getReadNoise(), 2, 6, "Count");
         }
       }
 
@@ -3129,6 +3127,7 @@ public class PeakFit implements PlugInFilter {
         } else {
           calibration.setBias(Math.abs(gd.getNextNumber()));
           calibration.setCountPerPhoton(Math.abs(gd.getNextNumber()));
+          calibration.setReadNoise(Math.abs(gd.getNextNumber()));
           fitConfig.setCalibration(calibration.getCalibration());
         }
       }
