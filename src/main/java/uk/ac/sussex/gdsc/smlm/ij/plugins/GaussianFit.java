@@ -61,9 +61,11 @@ import ij.gui.Roi;
 import ij.measure.Measurements;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+import ij.process.ShortProcessor;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -565,6 +567,9 @@ public class GaussianFit implements ExtendedPlugInFilter {
     // Perform the Gaussian fit
     long ellapsed = 0;
 
+    final FloatProcessor renderedImage =
+        settings.showFit ? new FloatProcessor(ip.getWidth(), ip.getHeight()) : null;
+
     if (!settings.singleFit) {
       if (isLogProgress()) {
         IJ.log("Combined fit");
@@ -610,7 +615,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
           }
 
           if (settings.showFit) {
-            // Copy the valid parameters
+            // Copy the valid parameters before there are adjusted to global bounds
             validPeaks++;
             for (int ii = i, j = 0; j < Gaussian2DFunction.PARAMETERS_PER_PEAK; ii++, j++) {
               validParams[count++] = params[ii];
@@ -634,24 +639,12 @@ public class GaussianFit implements ExtendedPlugInFilter {
         setOverlay(npoints, xpoints, ypoints);
 
         // Draw the fit
-        if (settings.showFit && validPeaks != 0) {
-          final double[] pixels = new double[data.length];
-          final EllipticalGaussian2DFunction f =
-              new EllipticalGaussian2DFunction(validPeaks, width, height);
-          invertParameters(validParams);
-          f.initialise(validParams);
-          for (int x = 0; x < pixels.length; x++) {
-            pixels[x] = f.eval(x);
-          }
-          final FloatProcessor fp = new FloatProcessor(width, height, pixels);
-          // Insert into a full size image
-          final FloatProcessor fp2 = new FloatProcessor(ip.getWidth(), ip.getHeight());
-          fp2.insert(fp, bounds.x, bounds.y);
-          ImageJUtils.display(TITLE, fp2);
+        if (validPeaks != 0) {
+          addToImage(bounds.x, bounds.y, renderedImage, validParams, validPeaks, width, height);
         }
       } else {
         if (isLogProgress()) {
-          IJ.log("Failed to fit " + TextUtils.pleural(maxIndices.length, "peak")
+          IJ.log("Failed to fit " + TextUtils.pleural(maxIndices.length, "peak") + ": "
               + getReason(fitResult));
         }
         imp.setOverlay(null);
@@ -669,6 +662,10 @@ public class GaussianFit implements ExtendedPlugInFilter {
       final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
       float[] region = null;
       final Gaussian2DFitter gf = createGaussianFitter(settings.filterResults);
+      double[] validParams = null;
+
+      final ShortProcessor renderedImageCount =
+          settings.showFit ? new ShortProcessor(ip.getWidth(), ip.getHeight()) : null;
 
       for (int n = 0; n < maxIndices.length; n++) {
         final int y = maxIndices[n] / width;
@@ -690,6 +687,11 @@ public class GaussianFit implements ExtendedPlugInFilter {
 
         // Output fit result
         if (peakParams != null) {
+          if (settings.showFit) {
+            // Copy the valid parameters before there are adjusted to global bounds
+            validParams = peakParams.clone();
+          }
+
           double[] peakParamsDev = null;
           if (settings.showDeviations) {
             peakParamsDev = convertParameters(fitResult.getParameterDeviations());
@@ -703,8 +705,17 @@ public class GaussianFit implements ExtendedPlugInFilter {
           xpoints[npoints] = (float) xf;
           ypoints[npoints] = (float) yf;
           npoints++;
+
+          // Draw the fit
+          if (settings.showDeviations) {
+            final int ox = bounds.x + regionBounds.x;
+            final int oy = bounds.y + regionBounds.y;
+            addToImage(ox, oy, renderedImage, validParams, 1, regionBounds.width,
+                regionBounds.height);
+            addCount(ox, oy, renderedImageCount, regionBounds.width, regionBounds.height);
+          }
         } else if (isLogProgress()) {
-          IJ.log("Failed to fit peak " + (n + 1) + getReason(fitResult));
+          IJ.log("Failed to fit peak " + (n + 1) + ": " + getReason(fitResult));
         }
       }
 
@@ -714,13 +725,60 @@ public class GaussianFit implements ExtendedPlugInFilter {
       } else {
         imp.setOverlay(null);
       }
+      // Create the mean
+      if (settings.showDeviations) {
+        for (int i = renderedImageCount.getPixelCount(); i-- > 0;) {
+          final int count = renderedImageCount.get(i);
+          if (count > 1) {
+            renderedImage.setf(i, renderedImage.getf(i) / count);
+          }
+        }
+      }
     }
 
     results.end();
 
+    if (renderedImage != null) {
+      ImageJUtils.display(TITLE, renderedImage);
+    }
+
     if (isLogProgress()) {
       IJ.log("Time = " + (ellapsed / 1000000.0) + "ms");
     }
+  }
+
+  /**
+   * Adds the function to the image at the specified origin.
+   *
+   * @param ox the x-origin
+   * @param oy the y-origin
+   * @param renderedImage the rendered image
+   * @param params the function parameters
+   * @param npeaks the number of peaks
+   * @param width the function width
+   * @param height the function height
+   */
+  private void addToImage(int ox, int oy, final FloatProcessor renderedImage, double[] params,
+      int npeaks, int width, int height) {
+    final EllipticalGaussian2DFunction f = new EllipticalGaussian2DFunction(npeaks, width, height);
+    invertParameters(params);
+    final FloatProcessor fp = new FloatProcessor(width, height, f.computeValues(params));
+    // Insert into a full size image
+    renderedImage.copyBits(fp, ox, oy, Blitter.ADD);
+  }
+
+  /**
+   * Adds a count of 1 to the image at the specified origin.
+   *
+   * @param ox the x-origin
+   * @param oy the y-origin
+   * @param image the image
+   * @param width the function width
+   * @param height the function height
+   */
+  private static void addCount(int ox, int oy, final ShortProcessor image, int width, int height) {
+    image.setRoi(ox, oy, width, height);
+    image.add(1);
   }
 
   /**
@@ -731,7 +789,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    */
   private static String getReason(FitResult fitResult) {
     if (fitResult == null || fitResult.getStatus() == null) {
-      return "";
+      return "unknown reason";
     }
     final FitStatus status = fitResult.getStatus();
     return status.toString().toLowerCase(Locale.US).replace("_", " ");
@@ -860,7 +918,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
       return null;
     }
 
-    // Convert coordinates with 0.5 pixel offset
+    // Convert coordinates with +0.5 pixel offset
     // Convert radians to degrees (if elliptical fitting)
     final int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
     for (int i = 0, j = 0; i < n; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
@@ -879,8 +937,8 @@ public class GaussianFit implements ExtendedPlugInFilter {
       return null;
     }
 
-    // Convert coordinates with 0.5 pixel offset
-    // Convert radians to degrees (if elliptical fitting)
+    // Convert coordinates with -0.5 pixel offset
+    // Convert degrees to radians (if elliptical fitting)
     final int n = params.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
     for (int i = 0, j = 0; i < n; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
       params[j + Gaussian2DFunction.X_POSITION] -= 0.5;
@@ -962,8 +1020,8 @@ public class GaussianFit implements ExtendedPlugInFilter {
    * @param config the configuration
    */
   protected void setupPeakFiltering(FitConfiguration config) {
-    final double Mk = getSmooth() * 2 + 1;
-    final double halfMk = 0.5f * Mk;
+    final double mk = getSmooth() * 2 + 1;
+    final double halfMk = 0.5 * mk;
     config.setCoordinateShift(halfMk);
     config.setSignalStrength(0);
     config.setMinWidthFactor(0.5);
