@@ -765,10 +765,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       }
       if (settings.select > 0 && settings.select < size) {
         plot.setColor(Color.yellow);
-        final double in = intensity[settings.select - 1];
+        final int index = settings.select - 1;
+        final double in = intensity[index];
         plot.drawLine(settings.select, 0, settings.select, in);
-        x[0] = spots[settings.select].x + bounds.x + 0.5f;
-        y[0] = spots[settings.select].y + bounds.y + 0.5f;
+        x[0] = spots[index].x + bounds.x + 0.5f;
+        y[0] = spots[index].y + bounds.y + 0.5f;
         final Color c = LutHelper.getColour(lut, size_1 - settings.select, size);
         addRoi(0, o, x, y, 1, c, 3, 3);
         plot.setColor(Color.black);
