@@ -484,7 +484,7 @@ public class SpotFit implements PlugIn {
       if (imp.isDisplayedHyperStack()) {
         roi.setPosition(channel, (attachToSlice) ? slice : 0, frame);
       } else if (attachToSlice) {
-        roi.setPosition(imp.getCurrentSlice());
+        roi.setPosition(imp.getStackIndex(channel, slice, frame));
       }
       overlay.add(roi);
       imp.setOverlay(overlay);
@@ -500,6 +500,8 @@ public class SpotFit implements PlugIn {
 
       final boolean isDisplayedHyperStack = imp.isDisplayedHyperStack();
 
+      final int currentSlice = imp.getStackIndex(channel, slice, frame);
+
       // Remove all the overlay components
       Overlay overlay = imp.getOverlay();
       if (overlay != null) {
@@ -514,6 +516,9 @@ public class SpotFit implements PlugIn {
               // Must be on the same channel/slice/frame
               boundsCheck = roi.getCPosition() == channel && roi.getTPosition() == frame
                   && (roi.getZPosition() == 0 || roi.getZPosition() == slice);
+            } else if (roi.getPosition() != 0) {
+              // Must be on the same slice
+              boundsCheck = roi.getPosition() == currentSlice;
             }
             if (boundsCheck) {
               final FloatPolygon poly = roi.getFloatPolygon();
@@ -548,7 +553,7 @@ public class SpotFit implements PlugIn {
           final String[] fields = pattern.split(line, 0);
 
           try {
-            if (isCorrectSlice(channel, frame, isDisplayedHyperStack, fields)) {
+            if (isCorrectSlice(channel, slice, frame, isDisplayedHyperStack, fields)) {
               final float xp = Float.parseFloat(fields[7]);
               final float yp = Float.parseFloat(fields[8]);
               if (bounds.contains(xp, yp)) {
@@ -566,18 +571,18 @@ public class SpotFit implements PlugIn {
       }
     }
 
-    private static boolean isCorrectSlice(int channel, int frame, boolean isDisplayedHyperStack,
-        String[] fields) {
-      if (isDisplayedHyperStack) {
-        final int c = Integer.parseInt(fields[1]);
-        // Ignore z as the user may be on the wrong slice but can still see
-        // the overlay if it is not tied to the slice position
-        final int t = Integer.parseInt(fields[3]);
-        if (c != channel || t != frame) {
-          return false;
-        }
-      }
-      return true;
+    private static boolean isCorrectSlice(int channel, int slice, int frame,
+        boolean isDisplayedHyperStack, String[] fields) {
+      // Match channel and frame
+      // Ignore z for hyperstacks as the overlay may not be tied to the slice position.
+      // For standard stacks the click location should be 1 for 2 of 3 out of CZT,
+      // i.e. c*z*t = stack index (1-based), so match all.
+      return isMatch(fields, 3, frame) && isMatch(fields, 1, channel)
+          && (isDisplayedHyperStack || isMatch(fields, 2, slice));
+    }
+
+    private static boolean isMatch(String[] fields, int index, int value) {
+      return Integer.parseInt(fields[index]) == value;
     }
 
     // "data" will not be null as the width and height from the image processor are correct
