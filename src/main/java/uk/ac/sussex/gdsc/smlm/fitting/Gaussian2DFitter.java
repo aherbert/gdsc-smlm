@@ -127,7 +127,7 @@ public class Gaussian2DFitter {
    * Guess the background from the data given the estimated peak heights.
    *
    * <p>For a single peak the method assumes the peak is in the centre. In this case the minimum
-   * average value of the four edges in used.
+   * average value of the four edges is used.
    *
    * <p>If multiple peaks heights are provided then always use the minimum value in the data since
    * it cannot be assumed that all peaks are away from the edge of the data.
