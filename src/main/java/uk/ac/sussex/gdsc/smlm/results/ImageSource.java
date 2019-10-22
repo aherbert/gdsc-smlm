@@ -119,10 +119,8 @@ public abstract class ImageSource {
    */
   public boolean open() {
     startFrame = endFrame = 0;
-    // In the event of creation by reflection this may be null
-    if (imageConverter == null) {
-      imageConverter = IMAGE_CONVERTER;
-    }
+    // In the event of creation by reflection this may be null and will be reset to the default.
+    setImageConverter(imageConverter);
     if (openSource()) {
       // Special flag for sequential reading
       sequentialReadStatus = SequentialReadStatus.READY;
