@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -86,6 +87,9 @@ import java.util.stream.Collectors;
  * This plugin loads configuration templates for the localisation fitting settings.
  */
 public class ConfigurationTemplate implements PlugIn {
+  /** The title for the template manager plugin. */
+  private static final String TITLE = "Template Manager";
+
   /** A set of inline templates. These can be loaded. */
   private static Map<String, Template> inlineTemplates;
   /** The current set of templates that will be listed as loaded. */
@@ -906,22 +910,23 @@ public class ConfigurationTemplate implements PlugIn {
         ImageJUtils.getDirectory("Template_directory", settings.getConfigurationDirectory());
 
     if (newDirectory == null) {
+      // Cancelled dialog
       return;
     }
 
     settings.setConfigurationDirectory(newDirectory);
 
-    // Search the configuration directory and add any custom templates that can be deserialised from
-    // XML files. We can try and deserialise everything that is not a tif image
+    // Search the configuration directory and add everything that is not a tif image
     // (which may be the template source image example).
     final File[] fileList = (new File(newDirectory))
         .listFiles(file -> file.isFile() && !file.getName().toLowerCase(Locale.US).endsWith("tif"));
     if (fileList == null) {
+      IJ.error(TITLE, "No files in template directory: " + newDirectory);
       return;
     }
 
     // Sort partially numerically
-    final List<String> list = Arrays.stream(fileList).filter(File::isFile).map(File::getPath)
+    final List<String> list = Arrays.stream(fileList).map(File::getPath)
         .sorted(AlphaNumericComparator.NULL_IS_MORE_INSTANCE).collect(Collectors.toList());
 
     // Select
@@ -948,19 +953,22 @@ public class ConfigurationTemplate implements PlugIn {
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     for (final String path : selected) {
       builder.clear();
-      final File file = new File(newDirectory, path);
+      final File file = new File(path);
       if (SettingsManager.fromJson(file, builder, 0)) {
         count++;
         final String name = FileUtils.removeExtension(file.getName());
-        // Assume the Tif image will be detected automatically
+        // Assume the tif image will be detected automatically
         addTemplate(templates, name, builder.build(), TemplateType.CUSTOM, file, null);
+      } else {
+        ImageJPluginLoggerHelper.getDefaultLogger()
+            .info(() -> "Failed to load template file: " + file);
       }
     }
 
     if (count > 0) {
       saveLoadedTemplates(templates);
     }
-    IJ.showMessage("Loaded " + TextUtils.pleural(count, "custom template"));
+    IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "custom template"));
   }
 
   private void removeLoadedTemplates() {
