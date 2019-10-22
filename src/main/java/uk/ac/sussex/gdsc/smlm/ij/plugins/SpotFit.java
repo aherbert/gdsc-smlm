@@ -289,8 +289,6 @@ public class SpotFit implements PlugIn {
 
         if (settings.getLogProgress()) {
           ImageJUtils.log("Fit estimate = %s", Arrays.toString(fitResult.getInitialParameters()));
-        }
-        if (settings.getLogProgress()) {
           String msg = "Fit status = " + fitResult.getStatus();
           final Object data = fitResult.getStatusData();
           if (data != null) {
