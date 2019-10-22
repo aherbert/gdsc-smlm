@@ -998,7 +998,7 @@ public class FailCountManager implements PlugIn {
         }
 
         // TODO - Ideally this plugin should be run on benchmark data with ground truth.
-        // The target could be to ensure all all the correct results are fit
+        // The target could be to ensure all the correct results are fit
         // and false positives are excluded from incrementing the pass counter.
         // This could be done by saving the results from a benchmarking scoring
         // plugin to memory as the current dataset.
