@@ -387,6 +387,9 @@ public class CameraModelManager implements PlugIn {
 
     // Filter all the frames
     final ImageSource source = new IJImageSource(imp);
+    if (!source.open()) {
+      IJ.error(TITLE, "Cannot open image: " + image);
+    }
     final ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
     for (float[] data = source.next(); data != null; data = source.next()) {
       cameraModel.removeBiasAndGain(data);
