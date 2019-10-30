@@ -473,13 +473,15 @@ public class CropResults implements PlugIn {
     // Scale the results to the size of the image with the ROI
     final int roiImageWidth = imp.getWidth();
     final int roiImageHeight = imp.getHeight();
-    final double xscale = (double) roiImageWidth / integerBounds.width;
-    final double yscale = (double) roiImageHeight / integerBounds.height;
+    final double ox = integerBounds.getX();
+    final double oy = integerBounds.getY();
+    final double xscale = roiImageWidth / integerBounds.getWidth();
+    final double yscale = roiImageHeight / integerBounds.getWidth();
 
     final Predicate<PeakResult> testZ = getZFilter();
 
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
-      if (roiTest.test(x * xscale, y * yscale) && testZ.test(result)) {
+      if (roiTest.test((x - ox) * xscale, (y - oy) * yscale) && testZ.test(result)) {
         newResults.add(result);
       }
     });
