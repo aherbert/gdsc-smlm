@@ -157,8 +157,8 @@ public class CropResults implements PlugIn {
     final Rectangle bounds = results.getBounds(true);
     results.is3D();
 
-    gd.addMessage(
-        String.format("x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y, bounds.width, bounds.height));
+    gd.addMessage(String.format("Current bounds: x=%d,y=%d,w=%d,h=%d", bounds.x, bounds.y,
+        bounds.width, bounds.height));
     gd.addNumericField("Border", settings.getBorder(), 2);
     gd.addCheckbox("Select_region", settings.getSelectRegion());
     gd.addNumericField("X", settings.getX(), 2);
@@ -380,7 +380,11 @@ public class CropResults implements PlugIn {
     if (bounds.getWidth() > 0 && bounds.getHeight() > 0) {
       results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
         if (bounds.contains(x, y) && testZ.test(result)) {
-          newResults.add(result);
+          if (settings.getResetOrigin()) {
+            newResults.add(result.copy());
+          } else {
+            newResults.add(result);
+          }
         }
       });
     }
