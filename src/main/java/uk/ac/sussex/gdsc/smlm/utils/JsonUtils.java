@@ -27,9 +27,12 @@ package uk.ac.sussex.gdsc.smlm.utils;
 /**
  * Provides utilities for working with JSON.
  */
-public class JsonUtils {
+public final class JsonUtils {
   /** Allowed characters. */
   private static final char[] ALLOWED = {'-', '_'};
+
+  /** No public constructor. */
+  private JsonUtils() {}
 
   /**
    * Simplify the JSON string. Removes redundant double quotes around fields, e.g. if they have only
@@ -89,26 +92,129 @@ public class JsonUtils {
     return new String(newChars, 0, length);
   }
 
+  /**
+   * Checks if the character at the index is a double-quote that is not escaped (prefixed with
+   * {@code '\\'}).
+   *
+   * @param chars the chars
+   * @param index the index
+   * @return true, if is double quote
+   */
   private static boolean isDoubleQuote(char[] chars, int index) {
-    // Check the quote is not escaped
     return chars[index] == '"' && (index == 0 || chars[index - 1] != '\\');
   }
 
+  /**
+   * Check if the range of characters can be simplified, i.e. the outer double-quotes around the
+   * characters can be removed.
+   *
+   * @param chars the characters
+   * @param start the start (inclusive)
+   * @param end the end (exclusive)
+   * @return true if double-quotes are redundant around the characters
+   */
   private static boolean canSimplify(char[] chars, int start, int end) {
-    OUTER: for (int j = start; j < end; j++) {
-      if (Character.isWhitespace(chars[j])) {
+    for (int j = start; j < end; j++) {
+      final char ch = chars[j];
+      if (Character.isWhitespace(ch)) {
         return false;
       }
-      if (Character.isLetterOrDigit(chars[j])) {
+      if (Character.isLetterOrDigit(ch) || isAllowed(ch)) {
         continue;
-      }
-      for (int i = 0; i < ALLOWED.length; i++) {
-        if (chars[j] == ALLOWED[i]) {
-          continue OUTER;
-        }
       }
       return false;
     }
     return true;
+  }
+
+  /**
+   * Checks if the character is allowed.
+   *
+   * @param ch the character
+   * @return true if allowed
+   */
+  private static boolean isAllowed(char ch) {
+    for (int i = 0; i < ALLOWED.length; i++) {
+      if (ch == ALLOWED[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Formats a JSON string for pretty printing.
+   *
+   * <p>Copied from <a href="https://stackoverflow.com/a/49564514">StackOverflow pretty-print JSON
+   * in Java</a>.
+   *
+   * <Blockquote><p>"The basic idea is to trigger the formatting based on special characters in
+   * JSON. For example, if a '{' or '[' is observed, the code will create a new line and increase
+   * the indent level.</p>
+   *
+   * <p>Disclaimer: I only tested this for some simple JSON cases (basic key-value pair, list,
+   * nested JSON) so it may need some work for more general JSON text, like string value with quotes
+   * inside, or special characters (\n, \t etc.)."</p></blockquote>
+   *
+   * @param json the JSON
+   * @return pretty-print formatted JSON
+   */
+  public static String prettyPrintJson(String json) {
+    final StringBuilder sb = new StringBuilder();
+    int indentLevel = 0;
+    boolean inQuote = false;
+    for (char ch : json.toCharArray()) {
+      switch (ch) {
+        case '"':
+          // switch the quoting status
+          inQuote = !inQuote;
+          sb.append(ch);
+          break;
+        case ' ':
+          // For space: ignore the space if it is not being quoted.
+          if (inQuote) {
+            sb.append(ch);
+          }
+          break;
+        case '{':
+        case '[':
+          // Starting a new block: increase the indent level
+          sb.append(ch);
+          indentLevel++;
+          appendIndentedNewLine(indentLevel, sb);
+          break;
+        case '}':
+        case ']':
+          // Ending a new block; decrease the indent level
+          indentLevel--;
+          appendIndentedNewLine(indentLevel, sb);
+          sb.append(ch);
+          break;
+        case ',':
+          // Ending a json item; create a new line after
+          sb.append(ch);
+          if (!inQuote) {
+            appendIndentedNewLine(indentLevel, sb);
+          }
+          break;
+        default:
+          sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Print a new line with indentation at the beginning of the new line.
+   *
+   * @param indentLevel the indent level
+   * @param sb the string builder
+   */
+  private static void appendIndentedNewLine(int indentLevel, StringBuilder sb) {
+    sb.append('\n');
+    for (int i = 0; i < indentLevel; i++) {
+      // Assuming indentation using 2 spaces
+      sb.append("  ");
+    }
   }
 }
