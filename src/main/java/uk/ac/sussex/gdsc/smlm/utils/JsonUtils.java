@@ -36,30 +36,39 @@ public final class JsonUtils {
 
   /**
    * Simplify the JSON string. Removes redundant double quotes around fields, e.g. if they have only
-   * letters or digits.
+   * letters or digits. The {@code '-' '_'} characters are also allowed within a field.
    *
    * <p>If the input is null then an empty string will be returned.
    *
-   * @param json the json
-   * @return the simplified string
+   * <pre>
+   * null                   -> ""
+   * ""                     -> ""
+   * "hello"                -> "hello"
+   * "\"hello\""            -> "hello"
+   * "\"hello world\""      -> "\"hello world\""
+   * "\"hello_world\""      -> "hello_world"
+   * "\"hello.world\""      -> "\"hello.world\""
+   * "\"Say \\\"hello\\\"." -> "\"Say \\\"hello\\\"."
+   * </pre>
+   *
+   * @param json the JSON
+   * @return the simplified JSON string
    */
-  public static String simplify(String json) {
+  public static String simplify(CharSequence json) {
     if (json == null || json.length() == 0) {
       return "";
     }
-    final char[] chars = json.toCharArray();
-    final char[] newChars = new char[chars.length];
-    int length = 0;
+    final int length = json.length();
+    final StringBuilder sb = new StringBuilder(length);
     // Scan for first double quote
     int index = 0;
-    final int size = chars.length;
-    while (index < size) {
-      if (isDoubleQuote(chars, index)) {
+    while (index < length) {
+      if (isDoubleQuote(json, index)) {
         final int start = index;
         // Scan for end double quote
         int end = -1;
-        for (int j = index + 1; j < size; j++) {
-          if (isDoubleQuote(chars, j)) {
+        for (int j = index + 1; j < length; j++) {
+          if (isDoubleQuote(json, j)) {
             end = j;
             break;
           }
@@ -67,29 +76,29 @@ public final class JsonUtils {
         if (end > start) {
           // We have a terminating double quote.
           // Check if all the characters between start and end are valid
-          if (canSimplify(chars, start + 1, end)) {
+          if (canSimplify(json, start + 1, end)) {
             for (index = start + 1; index < end; index++) {
-              newChars[length++] = chars[index];
+              sb.append(json.charAt(index));
             }
             index = end + 1;
             continue;
           }
-          // Cannot remove the quotes so advance to copy all the chars
+          // Cannot remove the quotes so advance to copy all the json
           end++;
         } else {
           // No terminating double quote so this is the end of the string
-          end = size;
+          end = length;
         }
 
         // We cannot simplify so copy all the characters
         for (index = start; index < end; index++) {
-          newChars[length++] = chars[index];
+          sb.append(json.charAt(index));
         }
       } else {
-        newChars[length++] = chars[index++];
+        sb.append(json.charAt(index++));
       }
     }
-    return new String(newChars, 0, length);
+    return sb.toString();
   }
 
   /**
@@ -100,8 +109,8 @@ public final class JsonUtils {
    * @param index the index
    * @return true, if is double quote
    */
-  private static boolean isDoubleQuote(char[] chars, int index) {
-    return chars[index] == '"' && (index == 0 || chars[index - 1] != '\\');
+  private static boolean isDoubleQuote(CharSequence chars, int index) {
+    return chars.charAt(index) == '"' && (index == 0 || chars.charAt(index - 1) != '\\');
   }
 
   /**
@@ -113,9 +122,9 @@ public final class JsonUtils {
    * @param end the end (exclusive)
    * @return true if double-quotes are redundant around the characters
    */
-  private static boolean canSimplify(char[] chars, int start, int end) {
+  private static boolean canSimplify(CharSequence chars, int start, int end) {
     for (int j = start; j < end; j++) {
-      final char ch = chars[j];
+      final char ch = chars.charAt(j);
       if (Character.isWhitespace(ch)) {
         return false;
       }
@@ -145,7 +154,7 @@ public final class JsonUtils {
   /**
    * Formats a JSON string for pretty printing.
    *
-   * <p>Copied from <a href="https://stackoverflow.com/a/49564514">StackOverflow pretty-print JSON
+   * <p>Adapted from <a href="https://stackoverflow.com/a/49564514">StackOverflow pretty-print JSON
    * in Java</a>.
    *
    * <Blockquote><p>"The basic idea is to trigger the formatting based on special characters in
@@ -159,11 +168,16 @@ public final class JsonUtils {
    * @param json the JSON
    * @return pretty-print formatted JSON
    */
-  public static String prettyPrintJson(String json) {
-    final StringBuilder sb = new StringBuilder();
+  public static String prettyPrint(CharSequence json) {
+    if (json == null || json.length() == 0) {
+      return "";
+    }
+    final int length = json.length();
+    final StringBuilder sb = new StringBuilder(length);
     int indentLevel = 0;
     boolean inQuote = false;
-    for (char ch : json.toCharArray()) {
+    for (int i = 0; i < length; i++) {
+      final char ch = json.charAt(i);
       switch (ch) {
         case '"':
           // switch the quoting status

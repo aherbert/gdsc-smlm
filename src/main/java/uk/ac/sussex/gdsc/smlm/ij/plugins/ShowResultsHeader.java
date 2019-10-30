@@ -148,7 +148,7 @@ public class ShowResultsHeader implements PlugIn {
     String text = (data instanceof String) ? (String) data : XStreamUtils.toXml(data);
     if (text.startsWith("{")) {
       text = uk.ac.sussex.gdsc.smlm.utils.JsonUtils.simplify(text);
-      text = uk.ac.sussex.gdsc.smlm.utils.JsonUtils.prettyPrintJson(text);
+      text = uk.ac.sussex.gdsc.smlm.utils.JsonUtils.prettyPrint(text);
     } else if (text.startsWith("<")) {
       text = uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(text);
     }
