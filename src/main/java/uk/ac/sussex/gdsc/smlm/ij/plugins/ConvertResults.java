@@ -28,7 +28,6 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
@@ -37,7 +36,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 import ij.IJ;
-import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -102,20 +100,20 @@ public class ConvertResults implements PlugIn {
   }
 
   private static boolean showDialog(MemoryPeakResults results) {
-    final GenericDialog gd = new GenericDialog(TITLE);
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Convert the current units for the results");
     gd.addHelp(About.HELP_URL);
 
     final CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
 
     gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(),
-        UnitHelper.getName(cr.getDistanceUnit()));
+        cr.getDistanceUnitValue());
     gd.addNumericField("Calibration (nm/px)", cr.getNmPerPixel(), 2);
     gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
-        UnitHelper.getName(cr.getIntensityUnit()));
+        cr.getIntensityUnitValue());
     gd.addNumericField("Gain (Count/photon)", cr.getCountPerPhoton(), 2);
     gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(),
-        UnitHelper.getName(cr.getAngleUnit()));
+        cr.getAngleUnitValue());
 
     gd.showDialog();
     if (gd.wasCanceled()) {
