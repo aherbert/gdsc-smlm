@@ -342,8 +342,9 @@ public class MemoryPeakResults extends AbstractPeakResults {
     this.sortAfterEnd = source.sortAfterEnd;
     copySettings(source);
     // Deep copy the mutable bounds object
-    setBounds(new Rectangle(getBounds()));
-    results = (PeakResultStoreList) results.copy(copyResults);
+    setBounds(new Rectangle(source.getBounds()));
+    // Copy the results
+    results = (PeakResultStoreList) source.results.copy(copyResults);
   }
 
   /////////////////////////////////////////////////////////////////
