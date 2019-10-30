@@ -55,7 +55,6 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
    */
   public ArrayPeakResultStore(int capacity) {
     this.results = new PeakResult[Math.max(capacity, 0)];
-    this.size = 0;
   }
 
   /**
