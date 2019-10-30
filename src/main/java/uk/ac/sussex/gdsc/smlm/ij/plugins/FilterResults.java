@@ -50,6 +50,7 @@ import ij.process.ImageProcessor;
 
 import org.apache.commons.math3.util.FastMath;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -293,13 +294,16 @@ public class FilterResults implements PlugIn {
     newResults.setName(results.getName() + " Filtered");
 
     // Initialise the mask
-    CoordFilter maskFilter = null;
+    CoordFilter maskFilter;
     final ImagePlus maskImp = WindowManager.getImage(filterSettings.getMaskTitle());
     if (maskImp != null) {
       final int maxx = maskImp.getWidth();
       final int maxy = maskImp.getHeight();
-      final double scaleX = (double) results.getBounds().width / maxx;
-      final double scaleY = (double) results.getBounds().height / maxy;
+      final Rectangle bounds = results.getBounds();
+      final double ox = bounds.getX();
+      final double oy = bounds.getY();
+      final double scaleX = bounds.getWidth() / maxx;
+      final double scaleY = bounds.getHeight() / maxy;
 
       // Improve to allow stacks
       if (maskImp.getStackSize() > 1) {
@@ -309,8 +313,8 @@ public class FilterResults implements PlugIn {
         maskFilter = (t, x, y) -> {
           // Check stack index
           if (t >= 1 && t <= stack.size()) {
-            int ix = (int) (x / scaleX);
-            int iy = (int) (y / scaleY);
+            int ix = (int) ((x - ox) / scaleX);
+            int iy = (int) ((y - oy) / scaleY);
             if (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy) {
               ip.setPixels(stack.getPixels(t));
               return ip.get(iy * maxx + ix) != 0;
@@ -322,8 +326,8 @@ public class FilterResults implements PlugIn {
         // 2D filter.
         final ImageProcessor ip = maskImp.getProcessor();
         maskFilter = (t, x, y) -> {
-          int ix = (int) (x / scaleX);
-          int iy = (int) (y / scaleY);
+          int ix = (int) ((x - ox) / scaleX);
+          int iy = (int) ((y - oy) / scaleY);
           return (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy && ip.get(iy * maxx + ix) != 0);
         };
       }
