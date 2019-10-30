@@ -69,7 +69,8 @@ public class JsonUtilsTest {
 
     assertPrettyPrint(
         "names:[{first: \"john\", last: \"doe\"}, {first:\"bill, ben\", last:\"blogs\"}]",
-        "names:[\n  {\n    first:\"john\",\n    last:\"doe\"\n  },\n  {\n    first:\"bill, ben\",\n    last:\"blogs\"\n  }\n]");
+        "names:[\n  {\n    first:\"john\",\n    last:\"doe\"\n  },\n  {\n    first:\"bill, ben\","
+            + "\n    last:\"blogs\"\n  }\n]");
   }
 
   private static void assertPrettyPrint(String json, String expected) {
