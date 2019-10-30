@@ -198,8 +198,7 @@ public class PeakResultTableModel extends AbstractTableModel {
    */
   private static boolean equals(ResultsTableSettings t1, ResultsTableSettings t2) {
     // Adapted from ResultsTableSettings.equals() to only use the settings of interest
-    boolean result = true;
-    result = result && t1.getDistanceUnitValue() == t2.getDistanceUnitValue();
+    boolean result = t1.getDistanceUnitValue() == t2.getDistanceUnitValue();
     result = result && t1.getIntensityUnitValue() == t2.getIntensityUnitValue();
     result = result && t1.getAngleUnitValue() == t2.getAngleUnitValue();
     result = result && (t1.getShowPrecision() == t2.getShowPrecision());
