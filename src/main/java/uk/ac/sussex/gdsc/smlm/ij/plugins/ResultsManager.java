@@ -343,7 +343,10 @@ public class ResultsManager implements PlugIn {
 
     boolean saved = false;
     if (resultsSettings.getResultsInMemorySettings().getInMemory() && fileInput) {
-      MemoryPeakResults.addResults(results);
+      if (!addResultsToMemory(results, settings.inputFilename)) {
+        IJ.showStatus("");
+        return;
+      }
       saved = true;
     }
 
@@ -1024,11 +1027,11 @@ public class ResultsManager implements PlugIn {
             final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
             if (resultsFileFormat == ResultsFileFormat.TEXT) {
               egd.addChoice("File_distance_unit", SettingsManager.getDistanceUnitNames(),
-                  fileSettings.getDistanceUnit().ordinal());
+                  fileSettings.getDistanceUnitValue());
               egd.addChoice("File_intensity_unit", SettingsManager.getIntensityUnitNames(),
-                  fileSettings.getIntensityUnit().ordinal());
+                  fileSettings.getIntensityUnitValue());
               egd.addChoice("File_angle_unit", SettingsManager.getAngleUnitNames(),
-                  fileSettings.getAngleUnit().ordinal());
+                  fileSettings.getAngleUnitValue());
               egd.addCheckbox("File_show_precision", fileSettings.getShowPrecision());
             }
             egd.addCheckbox("Show_deviations", resultsSettings.getShowDeviations());
@@ -1763,11 +1766,37 @@ public class ResultsManager implements PlugIn {
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded from " + path);
     } else {
-      if (Recorder.record) {
+      if (addResultsToMemory(results, path) && Recorder.record) {
         Recorder.saveCommand();
       }
-      MemoryPeakResults.addResults(results);
     }
+  }
+
+  /**
+   * Adds the results loaded from a file to memory. Performs a check for a results name and if not
+   * present will show a dialog to obtain a name.
+   *
+   * @param results the results
+   * @param filename the filename
+   * @return true, if successful
+   */
+  private static boolean addResultsToMemory(final MemoryPeakResults results, String filename) {
+    if (TextUtils.isNullOrEmpty(results.getName())) {
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      gd.addMessage("Results require a name");
+      gd.addStringField("Results_name", FileUtils.removeExtension(FileUtils.getName(filename)));
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return false;
+      }
+      final String name = gd.getNextString();
+      if (TextUtils.isNullOrEmpty(name)) {
+        return false;
+      }
+      results.setName(name);
+    }
+    MemoryPeakResults.addResults(results);
+    return true;
   }
 
   /**
@@ -1791,7 +1820,7 @@ public class ResultsManager implements PlugIn {
     lastSelected.set(selected);
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY);
+    addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY | FLAG_NO_SECTION_HEADER);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
