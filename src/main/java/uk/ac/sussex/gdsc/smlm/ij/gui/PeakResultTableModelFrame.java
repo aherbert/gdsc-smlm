@@ -157,7 +157,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       }
 
       @Override
-      public void windowClosed(WindowEvent event) {
+      public void windowClosing(WindowEvent event) {
         model.setLive(false);
         WindowManager.removeWindow(PeakResultTableModelFrame.this);
       }
@@ -207,13 +207,10 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     editReadOnly.setSelected(true);
     editDelete.setEnabled(false);
     editDeleteAll.setEnabled(false);
-    editReadOnly.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        final boolean allowDelete = !isReadOnly();
-        editDelete.setEnabled(allowDelete);
-        editDeleteAll.setEnabled(allowDelete);
-      }
+    editReadOnly.addActionListener(event -> {
+      final boolean allowDelete = !isReadOnly();
+      editDelete.setEnabled(allowDelete);
+      editDeleteAll.setEnabled(allowDelete);
     });
 
     return menu;
@@ -355,11 +352,11 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     // Copied from ResultsManager.addTableResultsOptions
     final ExtendedGenericDialog egd = new ExtendedGenericDialog("Table Settings", this);
     egd.addChoice("Table_distance_unit", SettingsManager.getDistanceUnitNames(),
-        tableSettings.getDistanceUnit().getNumber());
+        tableSettings.getDistanceUnitValue());
     egd.addChoice("Table_intensity_unit", SettingsManager.getIntensityUnitNames(),
-        tableSettings.getIntensityUnit().getNumber());
+        tableSettings.getIntensityUnitValue());
     egd.addChoice("Table_angle_unit", SettingsManager.getAngleUnitNames(),
-        tableSettings.getAngleUnit().getNumber());
+        tableSettings.getAngleUnitValue());
     egd.addCheckbox("Table_show_fitting_data", tableSettings.getShowFittingData());
     egd.addCheckbox("Table_show_noise_data", tableSettings.getShowNoiseData());
     egd.addCheckbox("Table_show_precision", tableSettings.getShowPrecision());
