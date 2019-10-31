@@ -42,6 +42,7 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
+import java.awt.Rectangle;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -159,8 +160,11 @@ public class SplitResults implements PlugIn {
     final int maxx = ip.getWidth();
     final int maxy = ip.getHeight();
 
-    final float scaleX = (float) results.getBounds().width / maxx;
-    final float scaleY = (float) results.getBounds().height / maxy;
+    final Rectangle bounds = results.getBounds();
+    final double ox = bounds.getX();
+    final double oy = bounds.getY();
+    final double scaleX = bounds.getWidth() / maxx;
+    final double scaleY = bounds.getHeight() / maxy;
 
     // Create a results set for each object
     final int maxObject = objectAnalyzer.getMaxObject();
@@ -196,8 +200,8 @@ public class SplitResults implements PlugIn {
 
       // Map to the mask objects
       final int object;
-      final int x = (int) (xx / scaleX);
-      final int y = (int) (yy / scaleY);
+      final int x = (int) ((xx - ox) / scaleX);
+      final int y = (int) ((yy - oy) / scaleY);
       if (x < 0 || x >= maxx || y < 0 || y >= maxy) {
         object = 0;
       } else {
