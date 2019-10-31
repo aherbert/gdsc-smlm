@@ -66,6 +66,7 @@ import uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemMesh;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemPointMesh;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemShape;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.ItemTriangleMesh;
+import uk.ac.sussex.gdsc.smlm.ij.ij3d.OrderedItemGeometryGroup;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.ReferenceItemMesh;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.Shape3DHelper;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.Shape3DHelper.Rendering;
@@ -123,6 +124,7 @@ import org.scijava.java3d.IndexedGeometryArray;
 import org.scijava.java3d.LineAttributes;
 import org.scijava.java3d.PickInfo;
 import org.scijava.java3d.PickInfo.IntersectionInfo;
+import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.SceneGraphPath;
 import org.scijava.java3d.Shape3D;
@@ -222,6 +224,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private JMenuItem resetAll;
   private JMenuItem changeColour;
   private JMenuItem changePointSize;
+  private JMenuItem increasePointSize;
+  private JMenuItem decreasePointSize;
   private JMenuItem resetSelectedView;
   private JMenuItem findEyePoint;
   private JMenuItem sortBackToFront;
@@ -576,6 +580,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (rendering == Rendering.POINT) {
         ((ItemPointMesh) outline).setPointSize(size);
       }
+    }
+
+    float getPointSize() {
+      if (rendering == Rendering.POINT) {
+        ((ItemPointMesh) outline).getPointSize();
+      }
+      return 0;
     }
 
     void highlightColourUpdated() {
@@ -2148,7 +2159,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     WindowManager.addWindow(window);
     window.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosed(WindowEvent event) {
+      public void windowClosing(WindowEvent event) {
         WindowManager.removeWindow(window);
       }
     });
@@ -2281,63 +2292,73 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private void createSmlmMenuBar(Image3DUniverse univ) {
     final Image3DMenubar menubar = (Image3DMenubar) univ.getMenuBar();
 
-    final JMenu add = new JMenu("GDSC SMLM");
-    add.setMnemonic(KeyEvent.VK_G);
+    final JMenu menu = new JMenu("GDSC SMLM");
+    menu.setMnemonic(KeyEvent.VK_G);
 
     resetRotation = new JMenuItem("Reset global rotation", KeyEvent.VK_R);
     resetRotation.addActionListener(this::menuActionPerformed);
-    add.add(resetRotation);
+    menu.add(resetRotation);
 
     resetTranslation = new JMenuItem("Reset global translation", KeyEvent.VK_T);
     resetTranslation.addActionListener(this::menuActionPerformed);
-    add.add(resetTranslation);
+    menu.add(resetTranslation);
 
     resetZoom = new JMenuItem("Reset global zoom", KeyEvent.VK_Z);
     resetZoom.addActionListener(this::menuActionPerformed);
-    add.add(resetZoom);
+    menu.add(resetZoom);
 
-    add.addSeparator();
+    menu.addSeparator();
 
     resetAll = new JMenuItem("Reset all transformations", KeyEvent.VK_A);
     resetAll.addActionListener(this::menuActionPerformed);
-    add.add(resetAll);
+    menu.add(resetAll);
 
     resetSelectedView = new JMenuItem("Reset selected transformation", KeyEvent.VK_S);
     resetSelectedView.addActionListener(this::menuActionPerformed);
-    add.add(resetSelectedView);
+    menu.add(resetSelectedView);
 
     findEyePoint = new JMenuItem("Find eye point", KeyEvent.VK_E);
     findEyePoint.addActionListener(this::menuActionPerformed);
-    add.add(findEyePoint);
+    menu.add(findEyePoint);
 
     sortBackToFront = new JMenuItem("Sort Back-to-Front", KeyEvent.VK_B);
     sortBackToFront.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed B"));
     sortBackToFront.addActionListener(this::menuActionPerformed);
-    add.add(sortBackToFront);
+    menu.add(sortBackToFront);
 
     sortFrontToBack = new JMenuItem("Sort Front-to-Back", KeyEvent.VK_F);
     sortFrontToBack.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed R"));
     sortFrontToBack.addActionListener(this::menuActionPerformed);
-    add.add(sortFrontToBack);
+    menu.add(sortFrontToBack);
 
-    add.addSeparator();
+    menu.addSeparator();
 
     changeColour = new JMenuItem("Change colour", KeyEvent.VK_O);
     changeColour.addActionListener(this::menuActionPerformed);
-    add.add(changeColour);
+    menu.add(changeColour);
 
     changePointSize = new JMenuItem("Change point size", KeyEvent.VK_H);
     changePointSize.addActionListener(this::menuActionPerformed);
-    add.add(changePointSize);
+    menu.add(changePointSize);
+
+    increasePointSize = new JMenuItem("Increase point size", KeyEvent.VK_I);
+    increasePointSize.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed PERIOD"));
+    increasePointSize.addActionListener(this::menuActionPerformed);
+    menu.add(increasePointSize);
+
+    decreasePointSize = new JMenuItem("Decrease point size", KeyEvent.VK_D);
+    decreasePointSize.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed COMMA"));
+    decreasePointSize.addActionListener(this::menuActionPerformed);
+    menu.add(decreasePointSize);
 
     toggleTransparent = new JMenuItem("Toggle transparent", KeyEvent.VK_P);
     toggleTransparent.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed E"));
     toggleTransparent.addActionListener(this::menuActionPerformed);
-    add.add(toggleTransparent);
+    menu.add(toggleTransparent);
 
     toggleShaded = new JMenuItem("Toggle shaded", KeyEvent.VK_S);
     toggleShaded.addActionListener(this::menuActionPerformed);
-    add.add(toggleShaded);
+    menu.add(toggleShaded);
 
     toggleDynamicTransparency = new JCheckBoxMenuItem("Toggle dynamic transparency");
     toggleDynamicTransparency.setMnemonic(KeyEvent.VK_D);
@@ -2345,26 +2366,26 @@ public class ImageJ3DResultsViewer implements PlugIn {
     toggleDynamicTransparency.setSelected(
         univ.getViewer().getView().getTransparencySortingPolicy() != View.TRANSPARENCY_SORT_NONE);
     toggleDynamicTransparency.addActionListener(this::menuActionPerformed);
-    add.add(toggleDynamicTransparency);
+    menu.add(toggleDynamicTransparency);
 
     colourSurface = new JMenuItem("Colour surface from 2D image", KeyEvent.VK_I);
     colourSurface.addActionListener(this::menuActionPerformed);
-    add.add(colourSurface);
+    menu.add(colourSurface);
 
-    add.addSeparator();
+    menu.addSeparator();
 
     cropResults = new JMenuItem("Crop results", KeyEvent.VK_C);
     cropResults.setAccelerator(KeyStroke.getKeyStroke("ctrl pressed X"));
     cropResults.addActionListener(this::menuActionPerformed);
-    add.add(cropResults);
+    menu.add(cropResults);
 
-    add.addSeparator();
+    menu.addSeparator();
 
     updateSettings = new JMenuItem("Update settings", KeyEvent.VK_U);
     updateSettings.addActionListener(this::menuActionPerformed);
-    add.add(updateSettings);
+    menu.add(updateSettings);
 
-    menubar.add(add);
+    menubar.add(menu);
     // Add back so it is redrawn
     univ.setMenubar(menubar);
     // 4.0.3 method
@@ -2496,6 +2517,51 @@ public class ImageJ3DResultsViewer implements PlugIn {
         pointSize = (float) settings.getPixelSize();
       }
       return true;
+    }
+  }
+
+  private static class UpdatePointSizeContentAction extends BaseContentAction {
+    static final UpdatePointSizeContentAction INCREASE = new UpdatePointSizeContentAction(true);
+    static final UpdatePointSizeContentAction DECREASE = new UpdatePointSizeContentAction(false);
+
+    private final boolean increase;
+
+    private UpdatePointSizeContentAction(boolean increase) {
+      this.increase = increase;
+    }
+
+    @Override
+    public int run(Content content) {
+      final ContentInstant contentInstant = content.getCurrent();
+      if (contentInstant.getContent() instanceof CustomMeshNode) {
+        final CustomMeshNode node = (CustomMeshNode) contentInstant.getContent();
+        final CustomMesh mesh = node.getMesh();
+        if (mesh instanceof ItemMesh) {
+          final ItemMesh t = (ItemMesh) mesh;
+          if (t.isPointArray()) {
+            final PointAttributes pa = t.getAppearance().getPointAttributes();
+            pa.setPointSize(updatePointSize(pa.getPointSize()));
+          }
+        } else if (mesh instanceof CustomPointMesh) {
+          CustomPointMesh cmesh = ((CustomPointMesh) mesh);
+          cmesh.setPointSize(updatePointSize(cmesh.getPointSize()));
+        }
+      } else if (contentInstant.getContent() instanceof ItemGroupNode) {
+        final ItemGroupNode node = (ItemGroupNode) contentInstant.getContent();
+        final ItemGroup g = node.getItemGroup();
+        g.setPointSize(updatePointSize(g.getPointSize()));
+      }
+
+      if (content.getUserData() instanceof ResultsMetaData) {
+        final ResultsMetaData data = (ResultsMetaData) content.getUserData();
+        data.setPointSize(updatePointSize(data.getPointSize()));
+      }
+
+      return 0;
+    }
+
+    private float updatePointSize(float pointSize) {
+      return increase ? pointSize * 1.5f : pointSize / 1.5f;
     }
   }
 
@@ -3231,6 +3297,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
       action = new ToggleShadedAction();
     } else if (src == changePointSize) {
       action = new ChangePointSizeContentAction();
+    } else if (src == increasePointSize) {
+      action = UpdatePointSizeContentAction.INCREASE;
+    } else if (src == decreasePointSize) {
+      action = UpdatePointSizeContentAction.DECREASE;
     } else if (src == cropResults) {
       action = new CropResultsAction();
     }
@@ -3287,7 +3357,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
     if (rendering == Rendering.POINT) {
       appearance.getPointAttributes().setPointSize(sphereSize[0].x);
     }
-    return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
+    if (settings.getSupportDynamicTransparency()) {
+      return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
+          sphereSize, colors, alpha);
+    }
+    return new OrderedItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
         sphereSize, colors, alpha);
   }
 
