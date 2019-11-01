@@ -267,7 +267,7 @@ public class TraceLengthAnalysis implements PlugIn {
 
     // Sort by ID
     final PeakResult[] list = results.toArray();
-    Arrays.sort(list, new IdFramePeakResultComparator());
+    Arrays.sort(list, IdFramePeakResultComparator.INSTANCE);
 
     createResults(results, "Fixed", 0, lastIndex, list);
     createResults(results, "Moving", lastIndex, msds.length, list);
@@ -329,7 +329,7 @@ public class TraceLengthAnalysis implements PlugIn {
     final int sum2 = (int) MathUtils.sum(h2);
 
     final float max1 = createHistogramValues(h1, (lastNormalise) ? sum1 : 1, y1);
-    final float max2 = createHistogramValues(h2, (lastNormalise) ? sum2 : 2, y2);
+    final float max2 = createHistogramValues(h2, (lastNormalise) ? sum2 : 1, y2);
 
     final String title = "Trace length distribution";
     final Plot plot = new Plot(title, "Length", "Frequency");
