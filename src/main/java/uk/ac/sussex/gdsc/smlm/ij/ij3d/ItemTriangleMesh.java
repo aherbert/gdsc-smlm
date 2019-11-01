@@ -475,7 +475,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     final int oldSize = size();
     final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-    if (size == 0 || indices == null) {
+    if (size == 0) {
       mesh.clear();
       points = new Point3f[0];
       sizes = new Point3f[0];
@@ -520,8 +520,6 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
       geom.setColors(0, colors);
       geom.setValidVertexCount(coords.length);
     });
-
-    // this.setGeometry(ga);
   }
 
   /**

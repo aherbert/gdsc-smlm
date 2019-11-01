@@ -36,7 +36,7 @@ public interface TransparentItemShape extends ItemShape {
    * @param color the new color
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  void setItemColor4(final Color4f[] color) throws IllegalArgumentException;
+  void setItemColor4(final Color4f[] color);
 
   /**
    * Sets the alpha for each item. 1 is opaque and 0 is fully transparent.
@@ -44,7 +44,7 @@ public interface TransparentItemShape extends ItemShape {
    * @param alpha the new alpha
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  void setItemAlpha(final float[] alpha) throws IllegalArgumentException;
+  void setItemAlpha(final float[] alpha);
 
   /**
    * Sets the alpha for each item. 1 is opaque and 0 is fully transparent.
@@ -52,7 +52,7 @@ public interface TransparentItemShape extends ItemShape {
    * @param alpha the new alpha
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  void setItemAlpha(final float alpha) throws IllegalArgumentException;
+  void setItemAlpha(final float alpha);
 
   /**
    * Gets the alpha for each item.
@@ -60,5 +60,5 @@ public interface TransparentItemShape extends ItemShape {
    * @param alpha the new alpha
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  void getItemAlpha(final float[] alpha) throws IllegalArgumentException;
+  void getItemAlpha(final float[] alpha);
 }

@@ -24,40 +24,23 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point3f;
-
 /**
- * Interface for shape objects that represent a set of items.
+ * Contains helper methods.
  */
-public interface ItemShape {
-  /**
-   * Gets the number of items.
-   *
-   * @return the size
-   */
-  int size();
+final class ItemHelper {
+  /** No public construction. */
+  private ItemHelper() {}
 
   /**
-   * Gets the coordinate of the specified item.
+   * Check the actual size matches the expected size.
    *
-   * @param index the index
-   * @return the coordinate
+   * @param actual the actual
+   * @param expected the expected
+   * @throws IllegalArgumentException if the size does not match
    */
-  Point3f getCoordinate(int index);
-
-  /**
-   * Sets the color for each item.
-   *
-   * @param color the new color
-   */
-  void setItemColor(final Color3f color);
-
-  /**
-   * Sets the color for each item.
-   *
-   * @param color the new color
-   * @throws IllegalArgumentException if the number of colours is incorrect
-   */
-  void setItemColor(final Color3f[] color);
+  static void checkSize(final float actual, final int expected) {
+    if (actual != expected) {
+      throw new IllegalArgumentException("list of size " + expected + " expected");
+    }
+  }
 }

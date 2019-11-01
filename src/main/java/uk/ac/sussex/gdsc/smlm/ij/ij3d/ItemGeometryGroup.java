@@ -237,7 +237,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       translate.set(points[i]);
 
       // Scale and translate
-      final GeometryArray ga2 = (GeometryArray) ga.cloneNodeComponent(true);
+      final GeometryArray geom = (GeometryArray) ga.cloneNodeComponent(true);
       if (hasSize) {
         scale.set(sizes[i]); // For scaling the bounds
         final float sx = sizes[i].x;
@@ -255,10 +255,10 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
           coordinates2[j + 2] = coordinates[j + 2] + translate.z;
         }
       }
-      ga2.setCoordinates(0, coordinates2);
+      geom.setCoordinates(0, coordinates2);
 
       // Store the point index in the geometry for intersection analysis
-      ga2.setUserData(i);
+      geom.setUserData(i);
 
       // Allow per-item appearance with shared attributes.
       // This allows a global transparency for PointArray.
@@ -273,7 +273,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         if (isPointArray) {
           final Color3f c = (hasColor) ? colors[i] : color;
           final float alpha = (hasAlpha) ? alphas[i] : 1f;
-          ga2.setColors(0, pointArrayColorUpdater.getColors(c, alpha));
+          geom.setColors(0, pointArrayColorUpdater.getColors(c, alpha));
         } else {
           // Note that this entire class is based on an assumption that setting
           // the colour using attributes is faster/easier than if the input GA
@@ -301,13 +301,13 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
       // Store to allow fast update
       if (isPointArray) {
-        geometryArray[i] = ga2;
+        geometryArray[i] = geom;
       } else {
         transparencyAttributes[i] = appearance.getTransparencyAttributes();
         material[i] = appearance.getMaterial();
       }
 
-      final Shape3D shape = new Shape3D(ga2, appearance);
+      final Shape3D shape = new Shape3D(geom, appearance);
       // Each object can be picked. Is this needed?
       // shape.setCapability(Shape3D.ENABLE_PICK_REPORTING);
       shape.setPickable(true);

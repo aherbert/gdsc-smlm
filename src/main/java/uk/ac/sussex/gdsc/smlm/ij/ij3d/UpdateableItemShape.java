@@ -35,7 +35,7 @@ public interface UpdateableItemShape extends ItemShape {
    * @param indices the indices
    * @throws IllegalArgumentException if the indices are not valid
    */
-  void reorder(int[] indices) throws IllegalArgumentException;
+  void reorder(int[] indices);
 
   /**
    * Reorder the mesh items using the given indices. The output number of items will be the minimum
@@ -44,5 +44,5 @@ public interface UpdateableItemShape extends ItemShape {
    * @param indices the indices
    * @throws IllegalArgumentException if the indices are not valid
    */
-  void reorderFast(int[] indices) throws IllegalArgumentException;
+  void reorderFast(int[] indices);
 }

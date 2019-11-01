@@ -174,10 +174,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     ta.setCoordinateIndices(0, faces);
 
     ta.setColors(0, colors);
-    // ta.setColorIndices(0, faces);
 
     ta.setNormals(0, getNormals());
-    // ta.setNormalIndices(0, faces);
 
     ta.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
     ta.setCapability(Geometry.ALLOW_INTERSECT);
@@ -238,23 +236,6 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
       normals[i] = new Vector3f();
     }
 
-    // final IndexedTriangleArray ta = new IndexedTriangleArray(vertices.length,
-    // GeometryArray.COORDINATES | GeometryArray.NORMALS, faces.length);
-    //
-    // ta.setValidIndexCount(nFaces);
-    //
-    // ta.setCoordinates(0, vertices);
-    // ta.setCoordinateIndices(0, faces);
-    // final GeometryInfo gi = new GeometryInfo(ta);
-    // final NormalGenerator ng = new NormalGenerator();
-    // ng.generateNormals(gi);
-    // final Vector3f[] n = gi.getNormals();
-    //
-    // for (int i = 0; i < nFaces; i++)
-    // {
-    // normals[faces[i]].add(n[i]);
-    // }
-
     final Vector3f v1 = new Vector3f();
     final Vector3f v2 = new Vector3f();
     for (int i = 0; i < nFaces; i += 3) {
@@ -277,11 +258,6 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     for (int i = 0; i < nVertices; i++) {
       normals[i].normalize();
     }
-
-    // for (int i = 0; i < nVertices; i++)
-    // {
-    // System.out.printf("[%d] %s\n", i, normals[i]);
-    // }
 
     return normals;
   }

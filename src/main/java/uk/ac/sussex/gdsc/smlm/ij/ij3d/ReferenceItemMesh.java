@@ -179,7 +179,6 @@ public class ReferenceItemMesh extends ItemMesh {
 
     // Reorder all things in the geometry: coordinates and colour.
     // The normals, indices, strip counts are are unchanged.
-    // int objectSize = vertexCount;
 
     int countPerObject = vertexCount * 3;
     final float[] oldCoords = ga.getCoordRefFloat();
@@ -207,30 +206,30 @@ public class ReferenceItemMesh extends ItemMesh {
     }
 
     ga.updateData(geometry -> {
-      final GeometryArray ga2 = (GeometryArray) geometry;
+      final GeometryArray geom = (GeometryArray) geometry;
       // We re-use the geometry and just truncate the vertex count
-      ga2.setCoordRefFloat(coords);
+      geom.setCoordRefFloat(coords);
       if (colors != null) {
-        ga2.setColorRefFloat(colors);
+        geom.setColorRefFloat(colors);
       }
 
       if (size != oldSize) {
         if (isIndexGeometryArray()) {
           if (isStripGeometryArray()) {
             int[] indices2 = new int[indexCount * oldSize];
-            ((IndexedGeometryStripArray) ga2).getStripIndexCounts(indices2);
+            ((IndexedGeometryStripArray) geom).getStripIndexCounts(indices2);
             indices2 = Arrays.copyOf(indices2, indexCount * size);
-            ((IndexedGeometryStripArray) ga2).setStripIndexCounts(indices2);
+            ((IndexedGeometryStripArray) geom).setStripIndexCounts(indices2);
           } else {
-            ((IndexedGeometryArray) ga2).setValidIndexCount(size * indexCount);
+            ((IndexedGeometryArray) geom).setValidIndexCount(size * indexCount);
           }
         } else if (isStripGeometryArray()) {
           int[] indices2 = new int[vertexCount * oldSize];
-          ((GeometryStripArray) ga2).getStripVertexCounts(indices2);
+          ((GeometryStripArray) geom).getStripVertexCounts(indices2);
           indices2 = Arrays.copyOf(indices2, vertexCount * size);
-          ((GeometryStripArray) ga2).setStripVertexCounts(indices2);
+          ((GeometryStripArray) geom).setStripVertexCounts(indices2);
         } else {
-          ga2.setValidVertexCount(size * vertexCount);
+          geom.setValidVertexCount(size * vertexCount);
         }
       }
     });
@@ -281,9 +280,7 @@ public class ReferenceItemMesh extends ItemMesh {
     }
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -310,15 +307,11 @@ public class ReferenceItemMesh extends ItemMesh {
 
   @Override
   public void setItemColor4(Color4f[] color) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -334,14 +327,10 @@ public class ReferenceItemMesh extends ItemMesh {
 
   @Override
   public void setItemAlpha(float[] alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -361,9 +350,7 @@ public class ReferenceItemMesh extends ItemMesh {
 
   @Override
   public void setItemAlpha(float alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
@@ -385,14 +372,10 @@ public class ReferenceItemMesh extends ItemMesh {
 
   @Override
   public void getItemAlpha(float[] alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -402,6 +385,12 @@ public class ReferenceItemMesh extends ItemMesh {
     for (int i = 0; i < size; i++) {
       // Get only alpha
       alpha[i] = colors[i * n + 3];
+    }
+  }
+
+  private void checkPerItemAlpha() {
+    if (!hasColor4()) {
+      throw new IllegalArgumentException("Per-item alpha not supported");
     }
   }
 }

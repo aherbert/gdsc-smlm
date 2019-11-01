@@ -133,7 +133,7 @@ public class CustomContentInstant extends ContentInstant {
     setCapability(BranchGroup.ALLOW_DETACH);
     setCapability(Node.ENABLE_PICK_REPORTING);
 
-    // create transformation for pickeing
+    // Create transformation for picking
     localTranslate = new TransformGroup();
     localTranslate.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
     localTranslate.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -157,7 +157,7 @@ public class CustomContentInstant extends ContentInstant {
 
     localRotate.addChild(ordered);
 
-    // create the point list
+    // Create the point list
     points = new PointList();
     plShape = new PointListShape(points);
     plShape.setPickable(true);
@@ -169,7 +169,7 @@ public class CustomContentInstant extends ContentInstant {
     if (image == null) {
       return;
     }
-    // create content node and add it to the switch
+    // Create content node and add it to the switch
     switch (type) {
       case VOLUME:
         contentNode = new VoltexGroup(this);
@@ -191,18 +191,18 @@ public class CustomContentInstant extends ContentInstant {
             "Specified type is neither VOLUME, ORTHO," + "SURFACE or SURFACEPLOT2D");
     }
     display(contentNode);
-    // update type
+    // Update type
     this.type = type;
   }
 
   @Override
   public void display(final ContentNode node) {
-    // remove everything if possible
+    // Remove everything if possible
     for (final Enumeration<Node> e = ordered.getAllChildren(); e.hasMoreElements();) {
       final Switch s = (Switch) e.nextElement();
       s.removeAllChildren();
     }
-    // remove custom switch objects
+    // Remove custom switch objects
     while (ordered.numChildren() > 5) {
       ordered.removeChild(ordered.numChildren() - 1);
     }
@@ -211,11 +211,11 @@ public class CustomContentInstant extends ContentInstant {
       switchMap.clear();
     }
 
-    // create content node and add it to the switch
+    // Create content node and add it to the switch
     contentNode = node;
     ((Switch) ordered.getChild(CO)).addChild(contentNode);
 
-    // create the bounding box and add it to the switch
+    // Create the bounding box and add it to the switch
     final Point3d min = new Point3d();
     contentNode.getMin(min);
     final Point3d max = new Point3d();
@@ -227,25 +227,25 @@ public class CustomContentInstant extends ContentInstant {
     bb.setPickable(false);
     ((Switch) ordered.getChild(BB)).addChild(bb);
 
-    // create coordinate system and add it to the switch
+    // Create coordinate system and add it to the switch
     final float cl = (float) Math.abs(max.x - min.x) / 5f;
     final CoordinateSystem cs = new CoordinateSystem(cl, new Color3f(0, 1, 0));
     cs.setPickable(false);
     ((Switch) ordered.getChild(CS)).addChild(cs);
 
-    // create point list and add it to the switch
+    // Create point list and add it to the switch
     ((Switch) ordered.getChild(PL)).addChild(plShape);
 
-    // adjust the landmark point size properly
+    // Adjust the landmark point size properly
     plShape.setRadius((float) min.distance(max) / 100f);
 
-    // initialize child mask of the switch
-    setSwitch(BS, selected);
-    setSwitch(CS, coordVisible);
-    setSwitch(CO, visible);
-    setSwitch(PL, showPl);
+    // Initialize child mask of the switch
+    setSwitchValue(BS, selected);
+    setSwitchValue(CS, coordVisible);
+    setSwitchValue(CO, visible);
+    setSwitchValue(PL, showPl);
 
-    // update type
+    // Update type
     this.type = CUSTOM;
   }
 
@@ -281,7 +281,8 @@ public class CustomContentInstant extends ContentInstant {
     } else {
       ordered.addChild(bg);
     }
-    return index; // Account for the standard switches
+    // Account for the standard switches
+    return index;
   }
 
   /**
@@ -301,7 +302,7 @@ public class CustomContentInstant extends ContentInstant {
     s.setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
   }
 
-  private void setSwitch(int which, final boolean on) {
+  private void setSwitchValue(int which, final boolean on) {
     // Account for custom switch data before the standard data
     which += customBefore;
     ((Switch) ordered.getChild(which)).setWhichChild(on ? Switch.CHILD_ALL : Switch.CHILD_NONE);
@@ -316,7 +317,7 @@ public class CustomContentInstant extends ContentInstant {
     if (!available) {
       return;
     }
-    contentNode.swapDisplayedData(getDisplayedDataSwapfile(), getName());
+    contentNode.swapDisplayedData(getDisplayedDataSwapFile(), getName());
     available = false;
   }
 
@@ -325,7 +326,7 @@ public class CustomContentInstant extends ContentInstant {
     if (available) {
       return;
     }
-    contentNode.restoreDisplayedData(getDisplayedDataSwapfile(), getName());
+    contentNode.restoreDisplayedData(getDisplayedDataSwapFile(), getName());
     available = true;
   }
 
@@ -345,7 +346,7 @@ public class CustomContentInstant extends ContentInstant {
 
   private String displayedDataSwapfile;
 
-  private String getDisplayedDataSwapfile() {
+  private String getDisplayedDataSwapFile() {
     if (displayedDataSwapfile != null) {
       return displayedDataSwapfile;
     }
@@ -366,8 +367,8 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public void setVisible(final boolean visible) {
     this.visible = visible;
-    setSwitch(CO, visible);
-    setSwitch(CS, visible && coordVisible);
+    setSwitchValue(CO, visible);
+    setSwitchValue(CS, visible && coordVisible);
     // whichChild.set(BB, visible && bbVisible)
 
     // Only if hiding, hide the point list
@@ -379,20 +380,20 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public void showBoundingBox(final boolean visible) {
     bbVisible = visible;
-    setSwitch(BB, visible);
+    setSwitchValue(BB, visible);
   }
 
   @Override
   public void showCoordinateSystem(final boolean visible) {
     coordVisible = visible;
-    setSwitch(CS, visible);
+    setSwitchValue(CS, visible);
   }
 
   @Override
   public void setSelected(final boolean selected) {
     this.selected = selected;
     final boolean sb = selected && UniverseSettings.showSelectionBox;
-    setSwitch(BS, sb);
+    setSwitchValue(BS, sb);
   }
 
   /////////////////////////////////////////////////////////////
@@ -410,7 +411,7 @@ public class CustomContentInstant extends ContentInstant {
       return;
     }
 
-    setSwitch(PL, visible);
+    setSwitchValue(PL, visible);
     showPl = visible;
     if (visible && plDialog != null) {
       plDialog.addPointList(getName(), plPanel);
@@ -421,9 +422,9 @@ public class CustomContentInstant extends ContentInstant {
 
   @Override
   public void loadPointList() {
-    final PointList points = PointList.load(image);
-    if (points != null) {
-      setPointList(points);
+    final PointList list = PointList.load(image);
+    if (list != null) {
+      setPointList(list);
     }
   }
 

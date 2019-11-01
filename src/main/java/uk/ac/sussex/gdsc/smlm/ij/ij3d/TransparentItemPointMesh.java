@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.GeometryUpdater;
 import org.scijava.java3d.PointArray;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
@@ -62,7 +61,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 
   @Override
   protected GeometryArray createGeometry() {
-    if (mesh == null || mesh.size() == 0) {
+    if (mesh == null || mesh.isEmpty()) {
       return null;
     }
     final int size = size();
@@ -100,7 +99,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     final int oldSize = size();
     final int size = (indices == null) ? 0 : Math.min(oldSize, indices.length);
 
-    if (size == 0 || indices == null) {
+    if (size == 0) {
       mesh.clear();
       this.setGeometry(null);
       return;
@@ -124,18 +123,13 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     }
     mesh = Arrays.asList(coords);
 
-    ga.updateData(new GeometryUpdater() {
-      @Override
-      public void updateData(Geometry geometry) {
-        final GeometryArray ga = (GeometryArray) geometry;
-        // We re-use the geometry and just truncate the vertex count
-        ga.setCoordinates(0, coords);
-        ga.setColors(0, colors);
-        ga.setValidVertexCount(coords.length);
-      }
+    ga.updateData(geometry -> {
+      final GeometryArray geom = (GeometryArray) geometry;
+      // We re-use the geometry and just truncate the vertex count
+      geom.setCoordinates(0, coords);
+      geom.setColors(0, colors);
+      geom.setValidVertexCount(coords.length);
     });
-
-    // this.setGeometry(ga);
   }
 
   @Override
@@ -166,9 +160,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
   public void setItemColor(Color3f[] color) {
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -190,9 +182,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
   public void setItemColor4(Color4f[] color) {
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -204,9 +194,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
   @Override
   public void setItemAlpha(float[] alpha) {
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -241,9 +229,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
   @Override
   public void getItemAlpha(float[] alpha) {
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;

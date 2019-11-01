@@ -52,7 +52,7 @@ import java.util.List;
 /**
  * Create Shape3D objects.
  */
-public class Shape3DHelper {
+public final class Shape3DHelper {
   //@formatter:off
   /**
    * The rendering.
@@ -136,6 +136,9 @@ public class Shape3DHelper {
   //@formatter:on
 
   private static int[] numberOfTriangles = new int[Rendering.values().length];
+
+  /** No public construction. */
+  private Shape3DHelper() {}
 
   /**
    * Creates the shape.
