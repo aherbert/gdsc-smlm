@@ -970,11 +970,12 @@ public class ResultsMatchCalculator implements PlugIn {
       }
 
       // Create the pair painter if necessary
-      ImageRoiPainter painter = pairPainterRef.get();
-      if (painter == null) {
-        painter = new ImageRoiPainter(null, null, ResultsMatchCalculator::getRoiCoordinates);
-        pairPainterRef.set(painter);
-      }
+      final ImageRoiPainter painter = pairPainterRef.updateAndGet(p -> {
+        if (p == null) {
+          p = new ImageRoiPainter(null, null, ResultsMatchCalculator::getRoiCoordinates);
+        }
+        return p;
+      });
 
       // Update the painter
       painter.setTextPanel(pairsWindow.getTextPanel());
