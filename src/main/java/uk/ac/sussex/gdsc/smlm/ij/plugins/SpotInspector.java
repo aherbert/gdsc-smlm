@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -38,6 +39,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
@@ -62,10 +64,12 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,7 +77,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Extract the spots from the original image into a stack, ordering the spots by various rankings.
  */
-public class SpotInspector implements PlugIn, MouseListener {
+public class SpotInspector implements PlugIn {
   private static final String TITLE = "Spot Inspector";
 
   private MemoryPeakResults results;
@@ -114,7 +118,7 @@ public class SpotInspector implements PlugIn, MouseListener {
       showCalibratedValues = true;
       plotScore = true;
       plotHistogram = true;
-      histogramBins = 100;
+      histogramBins = 0;
       removeOutliers = true;
     }
 
@@ -197,6 +201,7 @@ public class SpotInspector implements PlugIn, MouseListener {
       return;
     }
     source = source.getOriginal();
+    source.setReadHint(ReadHint.NONSEQUENTIAL);
     if (!source.open()) {
       IJ.error(TITLE, "Cannot open original source image: " + source.toString());
       return;
@@ -279,7 +284,12 @@ public class SpotInspector implements PlugIn, MouseListener {
 
     // We must ignore old instances of this class from the mouse listeners
     id = currentId.incrementAndGet();
-    textPanel.addMouseListener(this);
+    textPanel.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent event) {
+        SpotInspector.this.mouseClicked(event);
+      }
+    });
 
     // Add results to the table
     int count = 0;
@@ -388,6 +398,9 @@ public class SpotInspector implements PlugIn, MouseListener {
     }
 
     source.close();
+
+    // Reset to the rank order
+    Collections.sort(rankedResults, PeakResultRank::compare);
 
     final ImagePlus imp = ImageJUtils.display(TITLE, spots);
     imp.setRoi((PointRoi) null);
@@ -556,7 +569,6 @@ public class SpotInspector implements PlugIn, MouseListener {
     // Check arguments
     try {
       ParameterUtils.isAboveZero("Radius", settings.radius);
-      ParameterUtils.isAbove("Histogram bins", settings.histogramBins, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -565,8 +577,7 @@ public class SpotInspector implements PlugIn, MouseListener {
     return true;
   }
 
-  @Override
-  public void mouseClicked(MouseEvent event) {
+  private void mouseClicked(MouseEvent event) {
     if (id != currentId.get()) {
       return;
     }
@@ -582,72 +593,51 @@ public class SpotInspector implements PlugIn, MouseListener {
           imp.getWindow().toFront();
         }
 
-        // Add an ROI to to the image containing all the spots in that part of the frame
         final PeakResult r = rankedResults.get(rank - 1).peakResult;
 
-        final int x = (int) (r.getXPosition());
-        final int y = (int) (r.getYPosition());
+        final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.PIXEL);
+
+        final float rx = dc.convert(r.getXPosition());
+        final float ry = dc.convert(r.getYPosition());
+        final int x = (int) rx;
+        final int y = (int) ry;
 
         // Find bounds
         final int minX = x - settings.radius;
         final int minY = y - settings.radius;
+
+        // Add an ROI to the image containing the clicked spot / all spots in the region.
+
+        // Require the Shift key to add all spots
+        if (!event.isShiftDown()) {
+          // Add the single clicked spot
+          imp.setRoi(new PointRoi(rx - minX, ry - minY));
+          return;
+        }
+
+        // Add all the spots
         final int maxX = x + settings.radius + 1;
         final int maxY = y + settings.radius + 1;
 
         // Create ROIs
-        final ArrayList<float[]> spots = new ArrayList<>();
-        results.forEach(DistanceUnit.PIXEL, new XyResultProcedure() {
-          @Override
-          public void executeXy(float x, float y) {
-            if (x > minX && x < maxX && y > minY && y < maxY) {
-              // Use only unique points
-              final float xPosition = x - minX;
-              final float yPosition = y - minY;
-              if (!contains(spots, xPosition, yPosition)) {
-                spots.add(new float[] {xPosition, yPosition});
-              }
-            }
+        final HashSet<Point2D.Float> spots = new HashSet<>();
+        results.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (xp, yp) -> {
+          if (xp > minX && xp < maxX && yp > minY && yp < maxY) {
+            // Use only unique points
+            spots.add(new Point2D.Float(xp - minX, yp - minY));
           }
         });
 
         final int points = spots.size();
         final float[] ox = new float[points];
         final float[] oy = new float[points];
-        for (int i = 0; i < points; i++) {
-          ox[i] = spots.get(i)[0];
-          oy[i] = spots.get(i)[1];
-        }
+        final Counter c = new Counter();
+        spots.forEach(p -> {
+          ox[c.getCount()] = p.x;
+          oy[c.getAndIncrement()] = p.y;
+        });
         imp.setRoi(new PointRoi(ox, oy, points));
       }
     }
-  }
-
-  private static boolean contains(ArrayList<float[]> spots, float xPosition, float yPosition) {
-    for (final float[] data : spots) {
-      if (data[0] == xPosition && data[1] == yPosition) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public void mousePressed(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseReleased(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseEntered(MouseEvent event) {
-    // Ignore
-  }
-
-  @Override
-  public void mouseExited(MouseEvent event) {
-    // Ignore
   }
 }
