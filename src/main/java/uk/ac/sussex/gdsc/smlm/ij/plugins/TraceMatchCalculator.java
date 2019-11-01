@@ -197,7 +197,7 @@ public class TraceMatchCalculator implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
-    gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
+    gd.addMessage("Compare the traced points in results sets\nand computes the match statistics");
     ResultsManager.addInput(gd, "Results1", settings.inputOption1, InputSource.MEMORY_MULTI_FRAME);
     ResultsManager.addInput(gd, "Results2", settings.inputOption2, InputSource.MEMORY_MULTI_FRAME);
     ResultsManager.addInput(gd, "Results3", settings.inputOption3, InputSource.NONE,
