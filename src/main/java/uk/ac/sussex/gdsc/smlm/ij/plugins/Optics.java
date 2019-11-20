@@ -1802,10 +1802,13 @@ public class Optics implements PlugIn {
         final PlotWindow pw = ImageJUtils.display(title, plot,
             ImageJUtils.PRESERVE_X_MIN | ImageJUtils.PRESERVE_X_MAX | ImageJUtils.PRESERVE_Y_MAX,
             wo);
-        if (wo.isNotEmpty()) {
+        // Attach listener if a new window or the lastCanvas is not set (i.e. first run)
+        // This allows attaching to windwos created by a previous run of OPTICS.
+        final boolean firstRun = lastCanvas == null;
+        if (wo.isNotEmpty() || firstRun) {
+          // Detach this from a previous window
           if (lastCanvas != null) {
             lastCanvas.removeMouseListener(this);
-            lastCanvas = null;
           }
           lastCanvas = (PlotCanvas) pw.getCanvas();
           lastCanvas.addMouseListener(this);
@@ -1831,6 +1834,7 @@ public class Optics implements PlugIn {
     public void mousePressed(final MouseEvent event) {
       if (!eventWorkflow.isRunning()) {
         if (lastCanvas != null) {
+          // Remove mouse listener when workflow is closed
           lastCanvas.removeMouseListener(this);
           lastCanvas = null;
         }
@@ -2535,7 +2539,7 @@ public class Optics implements PlugIn {
 
           candidates = ids.toArray();
           // Sort ascending
-          SortUtils.sortIndices(candidates, area.toArray(), false);
+          SortUtils.sortData(candidates, area.toArray(), false, false);
           for (final int clusterId : candidates) {
             if (hulls[clusterId].contains(x, y)) {
               return new int[] {clusterId};
@@ -3098,11 +3102,8 @@ public class Optics implements PlugIn {
 
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      if (current.getOpticsEventSettings().getShowSelectionTable() != previous
-          .getOpticsEventSettings().getShowSelectionTable()) {
-        return false;
-      }
-      return true;
+      return current.getOpticsEventSettings().getShowSelectionTable() == previous
+          .getOpticsEventSettings().getShowSelectionTable();
     }
 
     @Override
@@ -3452,11 +3453,13 @@ public class Optics implements PlugIn {
   private abstract class BaseDialogListener
       implements DialogListener, OptionCollectedListener, OptionListener<Boolean> {
     final GenericDialog gd;
+    final boolean isOptics;
     MemoryPeakResults results;
     String input;
 
-    BaseDialogListener(GenericDialog gd) {
+    BaseDialogListener(GenericDialog gd, boolean isOptics) {
       this.gd = gd;
+      this.isOptics = isOptics;
     }
 
     @Override
@@ -3559,8 +3562,10 @@ public class Optics implements PlugIn {
       egd.addCheckbox("Table_show_selection", old.getTableShowSelection());
       egd.addCheckbox("Image_create_selection", old.getImageCreateSelection());
       egd.addCheckbox("Image_show_selection", old.getImageShowSelection());
-      egd.addCheckbox("Plot_create_selection", old.getPlotCreateSelection());
-      egd.addCheckbox("Plot_show_selection", old.getPlotShowSelection());
+      if (isOptics) {
+        egd.addCheckbox("Plot_create_selection", old.getPlotCreateSelection());
+        egd.addCheckbox("Plot_show_selection", old.getPlotShowSelection());
+      }
       egd.showDialog(false, gd);
       if (egd.wasCanceled()) {
         Recorder.record = record;
@@ -3572,8 +3577,10 @@ public class Optics implements PlugIn {
       b.setTableShowSelection(egd.getNextBoolean());
       b.setImageCreateSelection(egd.getNextBoolean());
       b.setImageShowSelection(egd.getNextBoolean());
-      b.setPlotCreateSelection(egd.getNextBoolean());
-      b.setPlotShowSelection(egd.getNextBoolean());
+      if (isOptics) {
+        b.setPlotCreateSelection(egd.getNextBoolean());
+        b.setPlotShowSelection(egd.getNextBoolean());
+      }
       Recorder.record = record;
       return !old.equals(b.build());
     }
@@ -3587,7 +3594,7 @@ public class Optics implements PlugIn {
 
   private class OpticsDialogListener extends BaseDialogListener {
     OpticsDialogListener(GenericDialog gd) {
-      super(gd);
+      super(gd, true);
     }
 
     @Override
@@ -3632,7 +3639,7 @@ public class Optics implements PlugIn {
 
   private class DbscanDialogListener extends BaseDialogListener {
     DbscanDialogListener(GenericDialog gd) {
-      super(gd);
+      super(gd, false);
     }
 
     @Override
@@ -4153,7 +4160,7 @@ public class Optics implements PlugIn {
               + "Management(CIKM). ACM. pp. 861-866.", width))
           .append('\n');
     }
-    if ((logged.getAndUpdate(v -> v |= LOG_LOOP) & LOG_LOOP) != LOG_LOOP) {
+    if ((logged.getAndUpdate(v -> v | LOG_LOOP) & LOG_LOOP) != LOG_LOOP) {
       sb.append("LoOP: ");
       sb.append(TextUtils.wrap(
           "Kriegel, et al (2009). 'LoOP: Local Outlier Probabilities'. 18th ACM International "
