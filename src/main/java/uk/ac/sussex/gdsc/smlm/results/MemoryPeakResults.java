@@ -429,6 +429,41 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
+   * Performs the specified test on each set of results in memory; any results must pass to return
+   * {@code true}. Returns {@code false} if there are no results in memory.
+   *
+   * @param test the test
+   * @return true, if the test passes on any result
+   */
+  public static boolean isAnyInMemory(Predicate<MemoryPeakResults> test) {
+    for (final MemoryPeakResults r : resultsMap.values()) {
+      if (test.test(r)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Performs the specified test on each set of results in memory; all results must pass to return
+   * {@code true}. Returns {@code false} if there are no results in memory.
+   *
+   * @param test the test
+   * @return true, if the test passes on all results
+   */
+  public static boolean isAllInMemory(Predicate<MemoryPeakResults> test) {
+    if (resultsMap.isEmpty()) {
+      return false;
+    }
+    for (final MemoryPeakResults r : resultsMap.values()) {
+      if (!test.test(r)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Count the total number of results in memory.
    *
    * @return the int
