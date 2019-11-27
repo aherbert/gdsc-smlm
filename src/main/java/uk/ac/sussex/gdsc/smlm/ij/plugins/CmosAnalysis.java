@@ -76,6 +76,7 @@ import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.apache.commons.rng.simple.RandomSource;
 
 import java.io.File;
@@ -522,7 +523,7 @@ public class CmosAnalysis implements PlugIn {
 
     final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, settings.offset);
     final ContinuousSampler ed = new AhrensDieterExponentialSampler(rg, settings.variance);
-    final GaussianSampler gauss =
+    final SharedStateContinuousSampler gauss =
         SamplerUtils.createGaussianSampler(rg, settings.gain, settings.gainStdDev);
     Ticker ticker = ImageJUtils.createTicker(n, 0);
     for (int i = 0; i < n; i++) {

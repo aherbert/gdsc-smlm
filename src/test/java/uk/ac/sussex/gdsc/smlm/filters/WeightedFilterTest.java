@@ -40,7 +40,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Arrays;
@@ -141,7 +141,7 @@ public abstract class WeightedFilterTest {
 
     final TDoubleArrayList l1 = new TDoubleArrayList();
 
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     for (final int width : primes) {
       for (final int height : primes) {

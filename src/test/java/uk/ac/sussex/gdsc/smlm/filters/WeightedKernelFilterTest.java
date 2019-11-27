@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import gnu.trove.list.array.TDoubleArrayList;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 
 import java.util.Arrays;
 
@@ -47,7 +47,7 @@ public abstract class WeightedKernelFilterTest extends WeightedFilterTest {
     final DataFilter filter = createDataFilter();
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     final float[] offsets = getOffsets(filter);
     final int[] boxSizes = getBoxSizes(filter);

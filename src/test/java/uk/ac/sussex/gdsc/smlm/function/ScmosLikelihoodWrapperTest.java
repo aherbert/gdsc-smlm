@@ -52,7 +52,7 @@ import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -153,7 +153,7 @@ public class ScmosLikelihoodWrapperTest {
     data.sd = new float[n];
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final DiscreteSampler pd = GdscSmlmTestUtils.createPoissonSampler(rg, O);
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
     for (int i = 0; i < n; i++) {
       data.offset[i] = pd.sample();
@@ -286,7 +286,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {
@@ -494,7 +494,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
       for (final double signal1 : testsignal1) {
@@ -843,7 +843,7 @@ public class ScmosLikelihoodWrapperTest {
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
     for (int i = 0; i < n; i++) {

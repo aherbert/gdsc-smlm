@@ -56,8 +56,8 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -236,7 +236,7 @@ public abstract class BaseFunctionSolverTest {
     // This is generated once so create the randon generator here.
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
     final double[] w = new double[size * size];
     final double[] n = new double[size * size];
     for (int i = 0; i < w.length; i++) {

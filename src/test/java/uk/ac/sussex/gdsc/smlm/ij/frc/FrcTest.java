@@ -45,7 +45,7 @@ import ij.process.ImageProcessor;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.PermutationSampler;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -89,7 +89,7 @@ public class FrcTest {
     final int size = 1024;
     final double[][] data = new double[size * 2][];
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
       data[i++] = new double[] {x + gs.sample(), y2 + gs.sample()};
@@ -272,7 +272,7 @@ public class FrcTest {
     final int N = 2048;
     final double[][] data = new double[N * 2][];
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
       data[i++] = new double[] {x + gs.sample(), y2 + gs.sample()};

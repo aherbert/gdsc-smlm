@@ -24,8 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.rng.GeometricSampler;
-import uk.ac.sussex.gdsc.core.utils.rng.GeometricSampler.GeometricDiscreteInverseCumulativeProbabilityFunction;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
@@ -151,18 +150,10 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
   public static int getBlinks(boolean useGeometricBlinkingDistribution, UniformRandomProvider rand,
       double mean) {
     if (mean > 0) {
-      return (useGeometricBlinkingDistribution) ? nextGeometric(rand, mean)
-          : new PoissonSampler(rand, mean).sample();
+      return (useGeometricBlinkingDistribution)
+          ? SamplerUtils.createGeometricSamplerFromMean(rand, mean).sample()
+          : PoissonSampler.of(rand, mean).sample();
     }
     return 0;
-  }
-
-  private static int nextGeometric(UniformRandomProvider rand, double mean) {
-    // Use methods from the GeometricSampler
-    final double probabilityOfSuccess = GeometricSampler.getProbabilityOfSuccess(mean);
-    final GeometricDiscreteInverseCumulativeProbabilityFunction fun =
-        new GeometricDiscreteInverseCumulativeProbabilityFunction(probabilityOfSuccess);
-    final double cumulativeProbability = rand.nextDouble();
-    return fun.inverseCumulativeProbability(cumulativeProbability);
   }
 }

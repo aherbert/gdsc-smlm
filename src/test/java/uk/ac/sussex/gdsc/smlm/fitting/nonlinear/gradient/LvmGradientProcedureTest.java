@@ -61,7 +61,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -840,7 +840,7 @@ public class LvmGradientProcedureTest {
       boolean checkGradients) {
     final int iter = 10;
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
-    final GaussianSampler gs = SamplerUtils.createGaussianSampler(rng, 0, noise);
+    final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rng, 0, noise);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);

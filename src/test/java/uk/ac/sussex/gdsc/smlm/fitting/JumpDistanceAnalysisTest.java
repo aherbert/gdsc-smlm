@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -569,7 +569,7 @@ public class JumpDistanceAnalysisTest {
 
     double[][] getSample(UniformRandomProvider random, int size) {
       if (size > getSize()) {
-        final GaussianSampler gs = SamplerUtils.createGaussianSampler(random, 0, 1);
+        final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(random, 0, 1);
         final int extra = size - getSize();
 
         // Get cumulative fraction
