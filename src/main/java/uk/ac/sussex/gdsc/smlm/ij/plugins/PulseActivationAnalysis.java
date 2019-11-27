@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
@@ -85,6 +86,7 @@ import org.apache.commons.rng.sampling.UnitSphereSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import org.apache.commons.rng.simple.RandomSource;
 
@@ -152,10 +154,6 @@ public class PulseActivationAnalysis implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
-
     /** The colours for each channel. */
     static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
 
@@ -185,6 +183,10 @@ public class PulseActivationAnalysis implements PlugIn {
       magnifications =
           IntStream.range(0, 9).map(i -> 1 << i).mapToObj(Integer::toString).toArray(String[]::new);
     }
+
+    /** The last settings used by the plugin. This should be updated after plugin execution. */
+    private static final AtomicReference<Settings> lastSettings =
+        new AtomicReference<>(new Settings());
 
     String inputOption;
     int channels;
@@ -498,8 +500,8 @@ public class PulseActivationAnalysis implements PlugIn {
         break;
     }
 
-    if (MemoryPeakResults.isMemoryEmpty()) {
-      IJ.error(title, "No localisations in memory");
+    if (!MemoryPeakResults.isAnyInMemory(ResultsManager::hasId)) {
+      IJ.error(title, "No clustered localisations in memory");
       return;
     }
 
@@ -823,7 +825,7 @@ public class PulseActivationAnalysis implements PlugIn {
    *
    * @param count the count
    * @param target the target
-   * @return the double[]
+   * @return the crosstalk
    */
   private static double[] computeCrosstalk(int[] count, int target) {
     final double[] crosstalk = new double[count.length];
@@ -1355,8 +1357,8 @@ public class PulseActivationAnalysis implements PlugIn {
             (int) Math.ceil((double) specificActivations.length / numberOfThreads);
         for (int from = 0; from < specificActivations.length;) {
           final int to = Math.min(from + nPerThread, specificActivations.length);
-          futures.add(executor.submit(new SpecificUnmixWorker(runSettings, density, newChannel,
-              from, to, rng.split())));
+          futures.add(executor.submit(
+              new SpecificUnmixWorker(runSettings, density, newChannel, from, to, rng.split())));
           from = to;
         }
         waitToFinish();
@@ -2143,8 +2145,8 @@ public class PulseActivationAnalysis implements PlugIn {
     // Random crosstalk if not set
     if (MathUtils.max(settings.ct) == 0) {
       // Have some crosstalk
-      final ContinuousUniformSampler sampler =
-          new ContinuousUniformSampler(getUniformRandomProvider(), 0.05, 0.15);
+      final SharedStateContinuousSampler sampler =
+          ContinuousUniformSampler.of(getUniformRandomProvider(), 0.05, 0.15);
       for (int i = 0; i < settings.ct.length; i++) {
         settings.ct[i] = sampler.sample();
       }
@@ -2299,7 +2301,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
   private UniformRandomProvider getUniformRandomProvider() {
     if (initialisedRng == null) {
-      initialisedRng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+      initialisedRng = UniformRandomProviders.create(RandomSource.createLong());
     }
     return initialisedRng;
   }
