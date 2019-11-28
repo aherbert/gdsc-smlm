@@ -36,10 +36,8 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.core.utils.rng.SplittableUniformRandomProvider;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
@@ -105,7 +103,6 @@ import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1295,7 +1292,7 @@ public class PulseActivationAnalysis implements PlugIn {
     ParameterUtils.isBelow(name, settings.ct[index], 1.0);
   }
 
-  private void validateCrosstalk2(int index1, int index2) {
+  private void validateCrosstalk(int index1, int index2) {
     validateCrosstalk(index1);
     validateCrosstalk(index2);
     // Previously the combined crosstalk into a channel had to be less than 0.5.
