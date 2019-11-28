@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
+import uk.ac.sussex.gdsc.core.utils.rng.SplittableUniformRandomProvider;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -62,6 +63,8 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
+
+import com.google.common.base.Optional;
 
 import ij.CompositeImage;
 import ij.IJ;
@@ -102,6 +105,7 @@ import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1121,7 +1125,7 @@ public class PulseActivationAnalysis implements PlugIn {
       gd.addChoice("Crosstalk_correction", correctionNames,
           correctionNames[settings.specificCorrectionIndex]);
       for (int c = 1; c <= settings.channels; c++) {
-        gd.addSlider("Crosstalk_correction_cutoff_C" + c + "(%)", 0, 100,
+        gd.addSlider("Crosstalk_correction_cutoff_C" + c + " (%)", 0, 100,
             settings.specificCorrectionCutoff[c - 1]);
       }
       assignmentNames = SettingsManager.getNames((Object[]) Settings.nonSpecificCorrection);
@@ -1285,15 +1289,19 @@ public class PulseActivationAnalysis implements PlugIn {
   private void validateCrosstalk(int index) {
     final String name = "Crosstalk " + Settings.ctNames[index];
     ParameterUtils.isPositive(name, settings.ct[index]);
-    ParameterUtils.isBelow(name, settings.ct[index], 0.5);
+    // Previously this was required to be less than 0.5.
+    // I now believe any value less than 1 is OK. Above 1 shows that the
+    // other channel is more specifically activating the fluorophore.
+    ParameterUtils.isBelow(name, settings.ct[index], 1.0);
   }
 
-  private void validateCrosstalk(int index1, int index2) {
+  private void validateCrosstalk2(int index1, int index2) {
     validateCrosstalk(index1);
     validateCrosstalk(index2);
-    ParameterUtils.isBelow(
-        "Crosstalk " + Settings.ctNames[index1] + " + " + Settings.ctNames[index2],
-        settings.ct[index1] + settings.ct[index2], 0.5);
+    // Previously the combined crosstalk into a channel had to be less than 0.5.
+    // This does not make sense as it does not scale with the number of channels.
+    // E.g. 6 channel could easily have 5 other channels combined crosstalk into
+    // the target channel above 0.5.
   }
 
   private static void validatePercentage(String name, double percentage) {
@@ -1315,6 +1323,8 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     IJ.showStatus("Analysing ...");
+
+    SplittableUniformRandomProvider rng = null;
 
     // Assign all activations to a channel.
     // This is only necessary when we have more than 1 channel. If we have 1 channel then
@@ -1343,7 +1353,8 @@ public class PulseActivationAnalysis implements PlugIn {
           density = dc.countAll(settings.channels);
         }
 
-        final Pcg32 rng = Pcg32.xshrs(System.currentTimeMillis());
+        rng = Optional.fromNullable(rng)
+            .or(() -> UniformRandomProviders.createSplittable(RandomSource.createLong()));
 
         // -=-=-=--=-=-
         // Unmix the specific activations to their correct channel.
@@ -1383,7 +1394,8 @@ public class PulseActivationAnalysis implements PlugIn {
       if (runSettings.nonSpecificCorrection != Correction.NONE) {
         createDensityCounter((float) runSettings.densityRadius);
 
-        final SplitMix sm = SplitMix.new64(System.currentTimeMillis());
+        rng = Optional.fromNullable(rng)
+            .or(() -> UniformRandomProviders.createSplittable(RandomSource.createLong()));
 
         IJ.showStatus("Non-specific assignment");
         createThreadPool();
@@ -1395,7 +1407,7 @@ public class PulseActivationAnalysis implements PlugIn {
         for (int from = 0; from < nonSpecificActivations.length;) {
           final int to = Math.min(from + nPerThread, nonSpecificActivations.length);
           futures.add(executor.submit(
-              new NonSpecificUnmixWorker(runSettings, dc, newChannel, from, to, sm.copyAndJump())));
+              new NonSpecificUnmixWorker(runSettings, dc, newChannel, from, to, rng.split())));
           from = to;
         }
         waitToFinish();
@@ -1682,7 +1694,7 @@ public class PulseActivationAnalysis implements PlugIn {
         // Compute the true local densities
         double[] den;
         if (settings.channels == 2) {
-          den = unmix(obsDen[1], obsDen[2], settings.ct[Settings.C12], settings.ct[Settings.C12]);
+          den = unmix(obsDen[1], obsDen[2], settings.ct[Settings.C21], settings.ct[Settings.C12]);
         } else {
           den = unmix(obsDen[1], obsDen[2], obsDen[3], settings.ct[Settings.C21],
               settings.ct[Settings.C31], settings.ct[Settings.C12], settings.ct[Settings.C32],
@@ -2240,12 +2252,13 @@ public class PulseActivationAnalysis implements PlugIn {
     final Rectangle2D.Double r = new Rectangle2D.Double(
         resultsBounds.width * (double)roiBounds.x / imp.getWidth(),
         resultsBounds.height * (double)roiBounds.y / imp.getHeight(),
-        resultsBounds.width * (double)roiBounds.width / imp.getWidth(),
-        resultsBounds.height * (double)roiBounds.height / imp.getHeight());
+        // Since we output pixels map the width/height to the nearest pixel
+        Math.ceil(resultsBounds.width * (double)roiBounds.width / imp.getWidth()),
+        Math.ceil(resultsBounds.height * (double)roiBounds.height / imp.getHeight()));
     //@formatter:on
 
-    final int x = (int) r.getX();
-    final int y = (int) r.getY();
+    final double x = r.getX();
+    final double y = r.getY();
 
     final int magnification = getMagnification();
 
@@ -2264,8 +2277,8 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // This results in a change of shape depending on where the roi is positioned
-    int width = (int) Math.ceil(r.getWidth());
-    int height = (int) Math.ceil(r.getHeight());
+    int width = (int) r.getWidth();
+    int height = (int) r.getHeight();
     width *= magnification;
     height *= magnification;
     final ImageProcessor ip = new ByteProcessor(width, height);
@@ -2277,6 +2290,7 @@ public class PulseActivationAnalysis implements PlugIn {
       imp.show();
     } else {
       imp.setProcessor(ip);
+      imp.getWindow().toFront();
     }
     imp.setOverlay(o);
   }
@@ -2290,7 +2304,7 @@ public class PulseActivationAnalysis implements PlugIn {
     }
   }
 
-  private static void add(Overlay overlay, float x, float y, Color color) {
+  private static void add(Overlay overlay, double x, double y, Color color) {
     final PointRoi roi = new PointRoi(x, y);
     roi.setStrokeColor(color);
     roi.setFillColor(color);
