@@ -1788,7 +1788,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    *
    * <p>Get the number of fitted species from the last call to fit the jump distances.
    *
-   * @param args 0: Double[1] - output the number of species
+   * @param args An array of output variables.
+   *
+   *        <p>[0]: Double[1] - output: the number of species
    * @return Empty string
    */
   public static String getNumberOfSpecies(Object[] args) {
@@ -1808,8 +1810,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * <p>Get the diffusion coefficient for the requested species from the last call to fit the jump
    * distances.
    *
-   * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the
-   *        coefficient
+   * @param args An array of input and output variables.
+   *
+   *        <p>[0]: Double[1] - input: the index of the species
+   *
+   *        <p>[1]: Double[1] - output: the coefficient
    * @return Empty string
    */
   public static String getD(Object[] args) {
@@ -1831,8 +1836,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * <p>Get the population fraction for the requested species from the last call to fit the jump
    * distances.
    *
-   * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the population
-   *        fraction
+   * @param args An array of input and output variables.
+   *
+   *        <p>[0]: Double[1] - input: the index of the species
+   *
+   *        <p>[1]: Double[1] - output: the population fraction
    * @return Empty string
    */
   public static String getF(Object[] args) {
@@ -1854,8 +1862,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * <p>Get the diffusion coefficient and population fraction for the requested species from the
    * last call to fit the jump distances.
    *
-   * @param args 0: Double[1] - input the index of the species; 1: Double[1] - output the
-   *        coefficient; 1: Double[1] - output the population fraction
+   * @param args An array of input and output variables.
+   *
+   *        <p>[0]: Double[1] - input: the index of the species
+   *
+   *        <p>[1]: Double[1] - output: the coefficient
+   *
+   *        <p>[2]: Double[1] - output: the population fraction
    * @return Empty string
    */
   public static String getSpecies(Object[] args) {
