@@ -89,7 +89,6 @@ import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
@@ -1350,8 +1349,7 @@ public class PulseActivationAnalysis implements PlugIn {
           density = dc.countAll(settings.channels);
         }
 
-        rng = Optional.fromNullable(rng)
-            .or(() -> UniformRandomProviders.createSplittable(RandomSource.createLong()));
+        rng = Optional.fromNullable(rng).or(UniformRandomProviders::createSplittable);
 
         // -=-=-=--=-=-
         // Unmix the specific activations to their correct channel.
@@ -1391,8 +1389,7 @@ public class PulseActivationAnalysis implements PlugIn {
       if (runSettings.nonSpecificCorrection != Correction.NONE) {
         createDensityCounter((float) runSettings.densityRadius);
 
-        rng = Optional.fromNullable(rng)
-            .or(() -> UniformRandomProviders.createSplittable(RandomSource.createLong()));
+        rng = Optional.fromNullable(rng).or(UniformRandomProviders::createSplittable);
 
         IJ.showStatus("Non-specific assignment");
         createThreadPool();
@@ -2312,7 +2309,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
   private UniformRandomProvider getUniformRandomProvider() {
     if (initialisedRng == null) {
-      initialisedRng = UniformRandomProviders.create(RandomSource.createLong());
+      initialisedRng = UniformRandomProviders.create();
     }
     return initialisedRng;
   }

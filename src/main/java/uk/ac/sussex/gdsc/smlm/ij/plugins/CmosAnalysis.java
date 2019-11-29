@@ -28,8 +28,10 @@ import uk.ac.sussex.gdsc.core.data.IntegerType;
 import uk.ac.sussex.gdsc.core.data.SiPrefix;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.io.CustomTiffEncoder;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.math.ArrayMoment;
@@ -40,18 +42,19 @@ import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
+
+import gnu.trove.set.hash.TIntHashSet;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -60,7 +63,6 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 
@@ -68,22 +70,23 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TestUtils;
+import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
-import org.apache.commons.rng.sampling.distribution.GaussianSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -102,6 +105,8 @@ import java.util.regex.Pattern;
  */
 public class CmosAnalysis implements PlugIn {
   private static final String TITLE = "sCMOS Analysis";
+  private static final String REJECT = "reject";
+  private static final String ACCEPT = "accept";
 
   private int numberOfThreads;
   // The simulated offset, variance and gain
@@ -118,6 +123,7 @@ public class CmosAnalysis implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
+    private static final String DEFAULT_PHOTONS = "50, 100, 200, 400, 800";
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
@@ -135,6 +141,7 @@ public class CmosAnalysis implements PlugIn {
     int frames;
     int imagejNThreads;
     int lastNumberOfThreads;
+    String simulationPhotons;
 
     Settings() {
       // Set defaults
@@ -164,10 +171,11 @@ public class CmosAnalysis implements PlugIn {
       gainStdDev = 0.2;
 
       size = 512;
-      frames = 512;
+      frames = 500;
 
       imagejNThreads = Prefs.getThreads();
       lastNumberOfThreads = imagejNThreads;
+      simulationPhotons = DEFAULT_PHOTONS;
     }
 
     Settings(Settings source) {
@@ -184,6 +192,7 @@ public class CmosAnalysis implements PlugIn {
       frames = source.frames;
       imagejNThreads = source.imagejNThreads;
       lastNumberOfThreads = source.lastNumberOfThreads;
+      simulationPhotons = source.simulationPhotons;
     }
 
     Settings copy() {
@@ -205,12 +214,35 @@ public class CmosAnalysis implements PlugIn {
     void save() {
       lastSettings.set(this);
     }
+
+    /**
+     * Gets the photons from the simulation photons string.
+     *
+     * @return the photons
+     */
+    int[] getPhotons() {
+      final TIntHashSet list = new TIntHashSet();
+      list.add(0);
+      for (final String key : simulationPhotons.split(",")) {
+        try {
+          final int value = Integer.parseInt(key.trim());
+          if (value < 0 || (value * gain) > (1 << 16)) {
+            throw new NumberFormatException("Invalid number of photons after gain: " + value);
+          }
+          list.add(value);
+        } catch (final NumberFormatException ex) {
+          throw new NumberFormatException("Invalid number of photons: " + key);
+        }
+      }
+      final int[] result = list.toArray();
+      Arrays.sort(result);
+      return result;
+    }
   }
 
   private static class SimulationWorker implements Runnable {
-    static final short MIN_SHORT = 0;
-    // Require cast since this is out-of-range for a signed short
-    static final short MAX_SHORT = (short) 65335;
+    /** The maximum value for a short integer. */
+    static final short MAX_SHORT = (short) 0xffff;
 
     final Ticker ticker;
     final UniformRandomProvider rg;
@@ -253,15 +285,12 @@ public class CmosAnalysis implements PlugIn {
       final int size = (int) Math.sqrt(pixelVariance.length);
 
       // Pre-compute a set of Poisson numbers since this is slow
-      int[] poisson = null;
-      if (photons != 0) {
-        // For speed we can precompute a set of random numbers to reuse
-        final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, photons);
-        poisson = new int[pixelVariance.length];
-        for (int i = poisson.length; i-- > 0;) {
-          poisson[i] = pd.sample();
-        }
-      }
+      final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, photons);
+      // // For speed we can precompute a set of random numbers to reuse
+      // final int[] poisson = new int[pixelVariance.length];
+      // for (int i = poisson.length; i-- > 0;) {
+      // poisson[i] = pd.sample();
+      // }
 
       // Save image in blocks
       ImageStack stack = new ImageStack(size, size);
@@ -269,7 +298,7 @@ public class CmosAnalysis implements PlugIn {
       for (int i = from; i < to; i++) {
         // Create image
         final short[] pixels = new short[pixelOffset.length];
-        if (poisson == null) {
+        if (photons == 0) {
           for (int j = 0; j < pixelOffset.length; j++) {
             // Fixed offset per pixel plus a variance
             final double p = pixelOffset[j] + gauss.sample() * pixelSd[j];
@@ -280,14 +309,14 @@ public class CmosAnalysis implements PlugIn {
             // Fixed offset per pixel plus a variance plus a
             // fixed gain multiplied by a Poisson sample of the photons
             final double p =
-                pixelOffset[j] + gauss.sample() * pixelSd[j] + (poisson[j] * pixelGain[j]);
+                pixelOffset[j] + gauss.sample() * pixelSd[j] + (pd.sample() * pixelGain[j]);
             pixels[j] = clip16bit(p);
           }
 
           // Rotate Poisson numbers.
           // Shuffling what we have is faster than generating new values
           // and we should have enough.
-          RandomUtils.shuffle(poisson, rg);
+          // RandomUtils.shuffle(poisson, rg);
         }
 
         // Save image
@@ -314,10 +343,10 @@ public class CmosAnalysis implements PlugIn {
      */
     private static short clip16bit(double value) {
       final int i = (int) Math.round(value);
-      if (i < 0) {
-        return MIN_SHORT;
+      if (value < 0) {
+        return 0;
       }
-      if (i > 65335) {
+      if (i > 0xffff) {
         return MAX_SHORT;
       }
       return (short) i;
@@ -325,9 +354,15 @@ public class CmosAnalysis implements PlugIn {
 
     private void save(ImageStack stack, int start) {
       final ImagePlus imp = new ImagePlus("", stack);
-      final String path = new File(out, String.format("image%06d.tif", start)).getPath();
-      final FileSaver fs = new FileSaver(imp);
-      fs.saveAsTiffStack(path);
+      final CustomTiffEncoder file = new CustomTiffEncoder(imp.getFileInfo());
+      try (
+          OutputStream os =
+              Files.newOutputStream(Paths.get(out, String.format("image%06d.tif", start)));
+          BufferedOutputStream bos = new BufferedOutputStream(os)) {
+        file.write(bos);
+      } catch (IOException ex) {
+        throw new ConcurrentRuntimeException("Failed to save image", ex);
+      }
     }
   }
 
@@ -482,7 +517,7 @@ public class CmosAnalysis implements PlugIn {
       }
       try {
         simulate();
-      } catch (IOException ex) {
+      } catch (final IOException ex) {
         IJ.error(TITLE, "Failed to perform simulation: " + ex.getMessage());
         return;
       }
@@ -519,10 +554,10 @@ public class CmosAnalysis implements PlugIn {
     IJ.showStatus("Creating random per-pixel readout");
     final long start = System.currentTimeMillis();
 
-    final UniformRandomProvider rg = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+    final UniformRandomProvider rg = UniformRandomProviders.create();
 
     final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, settings.offset);
-    final ContinuousSampler ed = new AhrensDieterExponentialSampler(rg, settings.variance);
+    final ContinuousSampler ed = AhrensDieterExponentialSampler.of(rg, settings.variance);
     final SharedStateContinuousSampler gauss =
         SamplerUtils.createGaussianSampler(rg, settings.gain, settings.gainStdDev);
     Ticker ticker = ImageJUtils.createTicker(n, 0);
@@ -553,27 +588,30 @@ public class CmosAnalysis implements PlugIn {
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
     final TurboList<Future<?>> futures = new TurboList<>(numberOfThreads);
 
-    // Simulate the zero exposure input.
-    // Simulate 20 - 200 photon images.
-    final int[] photons = new int[] {0, 20, 50, 100, 200};
+    // Simulate the exposure input.
+    final int[] photons = settings.getPhotons();
 
     final int blockSize = 10; // For saving stacks
     int numberPerThread = (int) Math.ceil((double) settings.frames / numberOfThreads);
     // Convert to fit the block size
     numberPerThread = (int) Math.ceil((double) numberPerThread / blockSize) * blockSize;
     final Pcg32 rng = Pcg32.xshrs(start);
-    ticker = ImageJUtils.createTicker((long) photons.length * settings.frames, threadCount);
+    // Note the bias is increased by 3-fold so add 2 to the length
+    ticker = Ticker.createStarted(new ImageJTrackProgress(true),
+        (long) (photons.length + 2) * settings.frames, threadCount > 1);
     for (final int p : photons) {
       ImageJUtils.showStatus(() -> "Simulating " + TextUtils.pleural(p, "photon"));
 
       // Create the directory
-      Path out = Paths.get(settings.directory, String.format("photon%03d", p));
+      final Path out = Paths.get(settings.directory, String.format("photon%03d", p));
       Files.createDirectories(out);
 
-      for (int from = 0; from < settings.frames;) {
-        final int to = Math.min(from + numberPerThread, settings.frames);
-        futures.add(executor.submit(new SimulationWorker(ticker, rng.split(),
-            out.toString(), simulationStack, from, to, blockSize, p)));
+      // Increase frames for bias image
+      final int frames = settings.frames * (p == 0 ? 3 : 1);
+      for (int from = 0; from < frames;) {
+        final int to = Math.min(from + numberPerThread, frames);
+        futures.add(executor.submit(new SimulationWorker(ticker, rng.split(), out.toString(),
+            simulationStack, from, to, blockSize, p)));
         from = to;
       }
 
@@ -581,12 +619,15 @@ public class CmosAnalysis implements PlugIn {
       futures.clear();
     }
 
-    ImageJUtils.finished();
+    final String msg =
+        "Simulation time = " + TextUtils.millisToString(System.currentTimeMillis() - start);
+
+    IJ.showStatus(msg);
+    ImageJUtils.clearSlowProgress();
 
     executor.shutdown();
 
-    ImageJUtils
-        .log("Simulation time = " + TextUtils.millisToString(System.currentTimeMillis() - start));
+    ImageJUtils.log(msg);
   }
 
   private boolean showSimulateDialog() {
@@ -602,6 +643,7 @@ public class CmosAnalysis implements PlugIn {
     gd.addNumericField("Gain_SD", settings.gainStdDev, 3);
     gd.addNumericField("Size", settings.size, 0);
     gd.addNumericField("Frames", settings.frames, 0);
+    gd.addStringField("Photons (comma-delimited)", settings.simulationPhotons, 20);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -614,6 +656,7 @@ public class CmosAnalysis implements PlugIn {
     settings.gainStdDev = Math.abs(gd.getNextNumber());
     settings.size = Math.abs((int) gd.getNextNumber());
     settings.frames = Math.abs((int) gd.getNextNumber());
+    settings.simulationPhotons = gd.getNextString();
 
     // Check arguments
     try {
@@ -695,6 +738,7 @@ public class CmosAnalysis implements PlugIn {
 
     setThreads((int) gd.getNextNumber());
     settings.rollingAlgorithm = gd.getNextBoolean();
+    settings.reuseProcessedData = gd.getNextBoolean();
 
     return true;
   }
@@ -725,7 +769,7 @@ public class CmosAnalysis implements PlugIn {
     int height = 0;
 
     for (int n = 0; n < nSubDirs; n++) {
-      ImageJUtils.showSlowProgress(0, nSubDirs);
+      ImageJUtils.showSlowProgress(n, nSubDirs);
 
       final SubDir sd = subDirs.getf(n);
       ImageJUtils.showStatus(() -> "Analysing " + sd.name);
@@ -849,7 +893,7 @@ public class CmosAnalysis implements PlugIn {
         sw.stop();
         // ticker holds the number of number of frames processed
         final double bits =
-            (double) bitDepth * ticker.getCurrent() * source.getWidth() * source.getHeight();
+            (double) bitDepth * source.getFrames() * source.getWidth() * source.getHeight();
         final double bps = bits / sw.getTime(TimeUnit.SECONDS);
         final SiPrefix prefix = SiPrefix.getSiPrefix(bps);
         ImageJUtils.log("Processed %d frames. Time = %s. Rate = %s %sbits/s", moment.getN(),
@@ -965,7 +1009,7 @@ public class CmosAnalysis implements PlugIn {
       final PerPixelCameraModel cameraModel =
           new PerPixelCameraModel(width, height, bias, gain, variance);
       if (!CameraModelManager.save(cameraModel,
-          new File(settings.directory, settings.modelName).getPath())) {
+          new File(settings.modelDirectory, settings.modelName).getPath())) {
         IJ.error(TITLE, "Failed to save model to file");
       }
     }
@@ -977,7 +1021,7 @@ public class CmosAnalysis implements PlugIn {
 
   private static void showHistogram(String name, double[] values, int bins, Statistics stats,
       WindowOrganiser wo) {
-    final DoubleData data = new StoredData(values, false);
+    final DoubleData data = DoubleData.wrap(values);
     final double minWidth = 0;
     final int removeOutliers = 0;
     final int shape = Plot.CIRCLE;
@@ -1008,24 +1052,29 @@ public class CmosAnalysis implements PlugIn {
 
   private void computeError() {
     // Assume the simulation stack and measured stack are not null.
-    ImageJUtils.log("Comparison to simulation: %s", simulationImp.getInfoProperty());
+    ImageJUtils.log("Comparison to simulation: %s (%dx%dpx)", simulationImp.getInfoProperty(),
+        simulationImp.getWidth(), simulationImp.getHeight());
+    WindowOrganiser wo = new WindowOrganiser();
     final ImageStack simulationStack = simulationImp.getImageStack();
     for (int slice = 1; slice <= 3; slice++) {
-      computeError(slice, simulationStack);
+      computeError(slice, simulationStack, wo);
     }
+    wo.tile();
   }
 
-  private void computeError(int slice, ImageStack simulationStack) {
+  private void computeError(int slice, ImageStack simulationStack, WindowOrganiser wo) {
     final String label = simulationStack.getSliceLabel(slice);
     final float[] e = (float[]) simulationStack.getPixels(slice);
     final float[] o = (float[]) measuredStack.getPixels(slice);
 
     // Get the mean error
-    final Statistics s = new Statistics();
+    final double[] error = new double[e.length];
     for (int i = e.length; i-- > 0;) {
-      s.add(o[i] - e[i]);
+      error[i] = (double) o[i] - e[i];
     }
 
+    final Statistics s = new Statistics();
+    s.add(error);
     final StringBuilder result = new StringBuilder("Error ").append(label);
     result.append(" = ").append(MathUtils.rounded(s.getMean()));
     result.append(" +/- ").append(MathUtils.rounded(s.getStandardDeviation()));
@@ -1037,20 +1086,37 @@ public class CmosAnalysis implements PlugIn {
     final PearsonsCorrelation c = new PearsonsCorrelation();
     result.append(" : R=").append(MathUtils.rounded(c.correlation(x, y)));
 
-    // Mann-Whitney U is valid for any distribution, e.g. variance
-    final MannWhitneyUTest test = new MannWhitneyUTest();
-    double pvalue = test.mannWhitneyUTest(x, y);
-    result.append(" : Mann-Whitney U p=").append(MathUtils.rounded(pvalue)).append(' ')
-        .append(((pvalue < 0.05) ? "reject" : "accept"));
+    // Plot these
+    String title = TITLE + " " + label + " Simulation vs Measured";
+    final Plot plot = new Plot(title, "simulated", "measured");
+    plot.addPoints(e, o, Plot.DOT);
+    plot.addLabel(0, 0, result.toString());
+    ImageJUtils.display(title, plot, wo);
 
-    if (slice != 2) {
-      // T-Test is valid for approximately Normal distributions, e.g. offset and gain
-      pvalue = TestUtils.tTest(x, y);
-      result.append(" : T-Test p=").append(MathUtils.rounded(pvalue)).append(' ')
-          .append(((pvalue < 0.05) ? "reject" : "accept"));
+    // Histogram the error
+    new HistogramPlotBuilder(TITLE + " " + label, DoubleData.wrap(error), "Error")
+        .setPlotLabel(result.toString()).show(wo);
+
+    // Kolmogorov–Smirnov test that the distributions are the same
+    double pvalue = TestUtils.kolmogorovSmirnovTest(x, y);
+    result.append(" : Kolmogorov–Smirnov p=").append(MathUtils.rounded(pvalue)).append(' ')
+        .append(((pvalue < 0.001) ? REJECT : ACCEPT));
+
+    if (slice == 3) {
+      // Paired T-Test compares two related samples to assess whether their
+      // population means differ.
+      // T-Test is valid when the difference between the means is normally
+      // distributed, e.g. gain
       pvalue = TestUtils.pairedTTest(x, y);
       result.append(" : Paired T-Test p=").append(MathUtils.rounded(pvalue)).append(' ')
-          .append(((pvalue < 0.05) ? "reject" : "accept"));
+          .append(((pvalue < 0.001) ? REJECT : ACCEPT));
+    } else {
+      // Wilcoxon Signed Rank test compares two related samples to assess whether their
+      // population mean ranks differ
+      final WilcoxonSignedRankTest wsrTest = new WilcoxonSignedRankTest();
+      pvalue = wsrTest.wilcoxonSignedRankTest(x, y, false);
+      result.append(" : Wilcoxon Signed Rank p=").append(MathUtils.rounded(pvalue)).append(' ')
+          .append(((pvalue < 0.001) ? REJECT : ACCEPT));
     }
 
     ImageJUtils.log(result.toString());
