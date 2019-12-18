@@ -563,7 +563,7 @@ public class SeriesImageSource extends ImageSource {
     }
 
     /**
-     * Gets the info of the specified index. Uses the using the IndexMap.
+     * Gets the info of the specified index. Uses the cached FileInfo using the IndexMap.
      *
      * @param index the index
      * @return the info
@@ -701,25 +701,31 @@ public class SeriesImageSource extends ImageSource {
       // This is done when sequentially reading so we clear the memory
       inMemory = false;
 
-      // The dedicated tiff decoder is used for reading IFDs
-      if (fss != null) {
-        try {
-          fss.close();
-        } catch (final IOException ignore) {
-          // Ignore
-        }
-        // Reset
-        fss = null;
-      }
+      // The dedicated tiff decoder is used for reading IFDs.
+      // Ensure it is re-initialised.
+      td = null;
 
-      if (ss != null) {
-        try {
-          ss.close();
-        } catch (final IOException ignore) {
-          // Ignore
-        }
-        // Reset
-        ss = null;
+      // Close a second seekable stream if present
+      closeQuietly(fss);
+      fss = null;
+
+      // Close the primary seekable stream if present
+      closeQuietly(ss);
+      ss = null;
+    }
+  }
+
+  /**
+   * Close the stream quietly.
+   *
+   * @param ss the stream
+   */
+  private static void closeQuietly(SeekableStream ss) {
+    if (ss != null) {
+      try {
+        ss.close();
+      } catch (final IOException ignore) {
+        // Ignore
       }
     }
   }
@@ -1695,6 +1701,8 @@ public class SeriesImageSource extends ImageSource {
     // Note that frame is 1-based index and the slice is 0-based.
     final int slice = (id == 0) ? frame - 1 : frame - imageSize[id - 1] - 1;
 
+    // This is not concurrent safe
+
     // Return from the cache if it exists
     if (id != lastImageId || lastImage == null) {
       if (lastImage != null) {
@@ -1712,37 +1720,17 @@ public class SeriesImageSource extends ImageSource {
         }
 
         lastImage = tiffImage;
-
-        // try
-        // {
-        // if (lastImage == null || lastImage.getSize() == 0)
-        // {
-        // // Not supported - Fall back to IJ objects
-        // ImagePlus imp = IJ.openImage(path);
-        // if (imp != null)
-        // {
-        // lastImage = new ArrayImage(imp);
-        // }
-        // }
-        // }
-        // catch (Throwable e)
-        // {
-        // System.out.println(e.toString()); e.printStackTrace();
-        // }
       }
     }
     lastImageId = id;
-    if (lastImage != null) {
-      if (slice < lastImage.size) {
-        try {
-          return lastImage.getFrame(slice);
-        } catch (final Exception ex) {
-          // Q. Should the problem be reported. Currently if the exception is
-          // not bubbled up then the frame will be null.
-          if (trackProgress.isLog()) {
-            trackProgress.log("Failed to open frame %d: %s", frame,
-                ExceptionUtils.getStackTrace(ex));
-          }
+    if (lastImage != null && slice < lastImage.size) {
+      try {
+        return lastImage.getFrame(slice);
+      } catch (final Exception ex) {
+        // Q. Should the problem be reported. Currently if the exception is
+        // not bubbled up then the frame will be null.
+        if (trackProgress.isLog()) {
+          trackProgress.log("Failed to open frame %d: %s", frame, ExceptionUtils.getStackTrace(ex));
         }
       }
     }
