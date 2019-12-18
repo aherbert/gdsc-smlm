@@ -306,7 +306,7 @@ public class SeriesImageSource extends ImageSource {
     TiffImage(IndexMap indexMap, ExtendedFileInfo fi, SeekableStream ss) {
       super(fi.width, fi.height, 0);
       this.indexMap = indexMap;
-      this.info = new ExtendedFileInfo[indexMap.size];
+      this.info = new ExtendedFileInfo[indexMap.getSize()];
       info[0] = fi;
       this.fi = fi;
 
@@ -329,12 +329,12 @@ public class SeriesImageSource extends ImageSource {
         }
 
         // Determine number of images
-        if (indexMap.size > 1) {
+        if (indexMap.getSize() > 1) {
           if (singlePlane()) {
-            size = indexMap.size;
+            size = indexMap.getSize();
           }
         } else {
-          size = indexMap.size;
+          size = indexMap.getSize();
           contiguous = true;
         }
         if (size != 0) {
@@ -751,7 +751,7 @@ public class SeriesImageSource extends ImageSource {
 
             // Check the image map is the correct size (only if we have sizes)
             if (indexMap != null
-                && (imageSize == null || indexMap.size == getImageSize(currentImage))) {
+                && (imageSize == null || indexMap.getSize() == getImageSize(currentImage))) {
               // We need the first IFD to define the image pixel type and width/height
               final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, true);
               image = new TiffImage(indexMap, fi, null);
@@ -1805,7 +1805,7 @@ public class SeriesImageSource extends ImageSource {
       final IndexMap indexMap = td.getIndexMap();
 
       // Check the image map is the correct size (only if we have sizes)
-      if (indexMap != null && (imageSize == null || indexMap.size == getImageSize(id))) {
+      if (indexMap != null && (imageSize == null || indexMap.getSize() == getImageSize(id))) {
         // We need the first IFD to define the image pixel type and width/height
         final ExtendedFileInfo fi = td.getTiffInfo(indexMap, 0, pixelInfoOnly);
         // A byte array seekable stream will ignore the close() method so we can re-use it
