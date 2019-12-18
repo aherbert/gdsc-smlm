@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
@@ -66,7 +66,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack
  * image.
  */
-public class TiffSeriesViewer implements PlugIn, TrackProgress {
+public class TiffSeriesViewer implements PlugIn {
   private static final String TITLE = "Tiff Series Viewer";
 
   private Label label;
@@ -285,7 +285,35 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       return;
     }
     ImageJUtils.showStatus("Opening TIFF ...");
-    source.setTrackProgress(this);
+    final TrackProgressAdaptor progress = new TrackProgressAdaptor() {
+      @Override
+      public void progress(double fraction) {
+        IJ.showProgress(fraction);
+      }
+
+      @Override
+      public void progress(long position, long total) {
+        IJ.showProgress((double) position / total);
+      }
+
+      @Override
+      public void log(String format, Object... args) {
+        if (settings.logProgress) {
+          ImageJUtils.log(format, args);
+        }
+      }
+
+      @Override
+      public void status(String format, Object... args) {
+        ImageJUtils.showStatus(() -> String.format(format, args));
+      }
+
+      @Override
+      public boolean isLog() {
+        return settings.logProgress;
+      }
+    };
+    source.setTrackProgress(progress);
     if (!source.open()) {
       IJ.error(TITLE, "Cannot open the image");
       return;
@@ -522,53 +550,5 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
       // Don't sort
       return this;
     }
-  }
-
-  @Override
-  public void progress(double fraction) {
-    IJ.showProgress(fraction);
-  }
-
-  @Override
-  public void progress(long position, long total) {
-    IJ.showProgress((double) position / total);
-  }
-
-  @Override
-  public void incrementProgress(double fraction) {
-    // Ignore
-  }
-
-  @Override
-  public void log(String format, Object... args) {
-    if (settings.logProgress) {
-      ImageJUtils.log(format, args);
-    }
-  }
-
-  @Override
-  public void status(String format, Object... args) {
-    IJ.showStatus(String.format(format, args));
-  }
-
-  @Override
-  public boolean isEnded() {
-    // Ignore
-    return false;
-  }
-
-  @Override
-  public boolean isProgress() {
-    return true;
-  }
-
-  @Override
-  public boolean isLog() {
-    return settings.logProgress;
-  }
-
-  @Override
-  public boolean isStatus() {
-    return true;
   }
 }
