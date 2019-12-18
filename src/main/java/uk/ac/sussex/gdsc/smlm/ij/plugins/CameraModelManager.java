@@ -207,7 +207,7 @@ public class CameraModelManager implements PlugIn {
     IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
     if (imp == null) {
-      ImageJUtils.log("Failed to load camera model %s data from file: ", name, filename);
+      ImageJUtils.log("Failed to load camera model %s data from file: %s", name, filename);
       return null;
     }
     // Check stack size
@@ -465,6 +465,7 @@ public class CameraModelManager implements PlugIn {
 
     if (model != null) {
       saveResource(model, filename, name);
+      ImageJUtils.log("Load camera model %s data from file: %s", name, filename);
     }
   }
 
