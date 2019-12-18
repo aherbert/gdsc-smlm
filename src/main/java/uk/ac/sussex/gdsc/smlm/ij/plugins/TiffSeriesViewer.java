@@ -56,10 +56,10 @@ import java.awt.Choice;
 import java.awt.Font;
 import java.awt.Label;
 import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -325,23 +325,21 @@ public class TiffSeriesViewer implements PlugIn, TrackProgress {
           // outImp.setCalibration(cal);
           saveAsTiff(outImp, path);
         }
+        IJ.showStatus("Saved image");
       } catch (final IOException ex) {
         IJ.log(ExceptionUtils.getStackTrace(ex));
         IJ.error(TITLE, "Failed to save image: " + ex.getMessage());
         IJ.showStatus("Failed to save image");
-        return;
       } finally {
         ImageJUtils.clearSlowProgress();
       }
-      IJ.showStatus("Saved image");
     }
   }
 
   private static void saveAsTiff(ImagePlus imp, String path) throws IOException {
     final FileInfo fi = imp.getFileInfo();
     fi.nImages = imp.getStackSize();
-    try (DataOutputStream out =
-        new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)))) {
+    try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path))) {
       new TiffEncoder(fi).write(out);
     }
   }
