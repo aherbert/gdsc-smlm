@@ -389,7 +389,7 @@ public class LogFactorial {
    *
    * @param n the n (must be positive)
    * @return log(n!)
-   * @if n is outside the table bounds
+   * @throws ArrayIndexOutOfBoundsException if n is outside the table bounds
    * @see #getMaxN()
    */
   public double getLogF(int n) {
@@ -408,7 +408,7 @@ public class LogFactorial {
    *
    * @param n the n (must be positive)
    * @return log(n!)
-   * @if n is outside the table bounds
+   * @throws ArrayIndexOutOfBoundsException if n is outside the table bounds
    * @see #getMaxN()
    */
   public double getLogFUnsafe(int n) {
