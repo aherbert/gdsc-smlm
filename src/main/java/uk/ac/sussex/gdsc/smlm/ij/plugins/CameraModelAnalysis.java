@@ -38,6 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.function.InterpolatedPoissonFunction;
@@ -81,7 +82,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -240,7 +240,7 @@ public class CameraModelAnalysis
   }
 
   private UniformRandomProvider getRandomGenerator() {
-    return RandomSource.create(RandomSource.SPLIT_MIX_64, settings.getSeed());
+    return UniformRandomProviders.create(settings.getSeed());
   }
 
   @Override
@@ -704,10 +704,10 @@ public class CameraModelAnalysis
 
     final boolean debug = false;
 
-    // Build the Probabity Mass/Density Function (PDF) of the distribution:
+    // Build the Probability Mass/Density Function (PDF) of the distribution:
     // either a Poisson (PMF) or Poisson-Gamma (PDF). The PDF is 0 at all
     // values apart from the step interval.
-    // Note: The Poisson-Gamm is computed without the Dirac delta contribution
+    // Note: The Poisson-Gamma is computed without the Dirac delta contribution
     // at c=0. This allows correct convolution with the Gaussian of the dirac delta
     // and the rest of the Poisson-Gamma (so matching the simulation).
     final TDoubleArrayList list = new TDoubleArrayList();
@@ -1319,7 +1319,7 @@ public class CameraModelAnalysis
 
       final int mod;
       if (settings.getRoundDown()) {
-        // Do this final value outside the loop as y[index/n] does not exists
+        // Do this final value outside the loop as y[index/n] does not exist
         mod = 0;
         index--;
         f[index] = fun.likelihood(start + index * SIMPSON_H, e);

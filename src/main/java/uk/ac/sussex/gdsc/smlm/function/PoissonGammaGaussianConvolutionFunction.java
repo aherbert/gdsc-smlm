@@ -164,11 +164,11 @@ public class PoissonGammaGaussianConvolutionFunction
     // cover the range. This effectively makes the Poisson-Gamma a continuous
     // probability distribution.
     // Note:
-    // This does seem to be valid. The Poisson-Gamma is a discrete PMF.
+    // This does not seem to be valid. The Poisson-Gamma is a discrete PMF.
     // The CameraModelAnalysis plugin works with full integration if this function
     // is computed using integer steps.
     //
-    // This is to computing:
+    // This is computing:
     // Poisson-Gamma PMF(c) x Gaussian PDF(c-o)
     //
     // The solution is to compute:
