@@ -40,6 +40,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CreateDataSettings;
@@ -71,7 +72,6 @@ import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.io.File;
@@ -336,7 +336,7 @@ public class DiffusionRateTest implements PlugIn {
     // Move the molecules and get the diffusion rate
     IJ.showStatus("Simulating ...");
     final long start = System.nanoTime();
-    final UniformRandomProvider random = RandomSource.create(RandomSource.SPLIT_MIX_64);
+    final UniformRandomProvider random = UniformRandomProviders.create();
     final Statistics[] stats2D = new Statistics[totalSteps];
     final Statistics[] stats3D = new Statistics[totalSteps];
     final StoredDataStatistics jumpDistances2D = new StoredDataStatistics(totalSteps);
@@ -1222,7 +1222,7 @@ public class DiffusionRateTest implements PlugIn {
 
     // Q - is this useful?
     final double p = myPrecision / settings.getPixelPitch();
-    final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+    final UniformRandomProvider rng = UniformRandomProviders.create();
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
 
     final int totalSteps = (int) Math
@@ -1320,8 +1320,7 @@ public class DiffusionRateTest implements PlugIn {
     for (int i = 0; i < 3; i++) {
       stats2[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
       stats[i] = new StoredDataStatistics(pluginSettings.simpleParticles);
-      gauss[i] = SamplerUtils
-          .createNormalizedGaussianSampler(RandomSource.create(RandomSource.SPLIT_MIX_64));
+      gauss[i] = SamplerUtils.createNormalizedGaussianSampler(UniformRandomProviders.create());
     }
 
     final double scale = Math.sqrt(2 * pluginSettings.simpleD);

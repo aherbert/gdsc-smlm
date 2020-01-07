@@ -28,6 +28,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
@@ -43,7 +44,6 @@ import ij.process.ImageProcessor;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.event.MouseAdapter;
@@ -178,7 +178,7 @@ public class NucleusMask implements PlugIn {
       int cx = radius;
       final int lowerz = (maxz - ditherDepth) / 2;
       final int upperz = (maxz + ditherDepth) / 2;
-      final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+      final UniformRandomProvider rng = UniformRandomProviders.create();
       final DiscreteUniformSampler ditherSampler = new DiscreteUniformSampler(rng, 0, ditherHeight);
       final DiscreteUniformSampler zSampler = new DiscreteUniformSampler(rng, lowerz, upperz);
 

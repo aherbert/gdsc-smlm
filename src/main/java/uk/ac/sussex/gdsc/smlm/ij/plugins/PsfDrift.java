@@ -35,6 +35,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
@@ -72,7 +73,6 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -262,7 +262,7 @@ public class PsfDrift implements PlugIn {
       w2 = width * width;
       if (settings.useSampling) {
         // TOOD: This could be updated to use an input RNG
-        rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+        rng = UniformRandomProviders.create();
         poissonSampler = new PoissonSampler(rng, settings.photons);
       }
 

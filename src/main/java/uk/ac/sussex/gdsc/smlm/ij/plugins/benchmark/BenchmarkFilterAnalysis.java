@@ -49,6 +49,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -145,7 +146,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Checkbox;
 import java.awt.Color;
@@ -4303,7 +4303,7 @@ public class BenchmarkFilterAnalysis
         }
 
         // Create the genetic algorithm
-        final UniformRandomProvider rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+        final UniformRandomProvider rng = UniformRandomProviders.create();
         final SimpleMutator<FilterScore> mutator = new SimpleMutator<>(rng, settings.mutationRate);
         // Override the settings with the step length, a min of zero and the configured upper
         final double[] upper = searchScoreFilter.upperLimit();

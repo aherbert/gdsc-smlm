@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -64,7 +65,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.TestUtils;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Rectangle;
 import java.util.Collection;
@@ -670,7 +670,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     for (int i = 0; i < slices.length; i++) {
       slices[i] = i + 1;
     }
-    RandomUtils.shuffle(slices, RandomSource.create(RandomSource.SPLIT_MIX_64));
+    RandomUtils.shuffle(slices, UniformRandomProviders.create());
 
     IJ.showStatus("Fitting ...");
 

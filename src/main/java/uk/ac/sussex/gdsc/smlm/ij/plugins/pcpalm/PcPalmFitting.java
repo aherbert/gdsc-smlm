@@ -30,6 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -68,7 +69,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -1258,8 +1258,7 @@ public class PcPalmFitting implements PlugIn {
     final boolean isActiveCma = true;
     final int diagonalOnly = 0;
     final int checkFeasableCount = 1;
-    final RandomGenerator random =
-        new RandomGeneratorAdapter(RandomSource.create(RandomSource.XOR_SHIFT_1024_S));
+    final RandomGenerator random = new RandomGeneratorAdapter(UniformRandomProviders.create());
     final boolean generateStatistics = false;
     final ConvergenceChecker<PointValuePair> checker = new SimpleValueChecker(1e-6, 1e-10);
     // The sigma determines the search range for the variables. It should be 1/3 of the initial

@@ -44,6 +44,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
@@ -106,7 +107,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -1179,7 +1179,7 @@ public class PcPalmMolecules implements PlugIn {
     double width = settings.simulationSize * 1000.0;
     // Allow a border of 3 x sigma for +/- precision
     width -= 3 * settings.sigmaS;
-    final UniformRandomProvider rng = RandomSource.create(RandomSource.SPLIT_MIX_64);
+    final UniformRandomProvider rng = UniformRandomProviders.create();
     final UniformDistribution dist =
         new UniformDistribution(null, new double[] {width, width, 0}, rng.nextInt());
     final NormalizedGaussianSampler gauss =

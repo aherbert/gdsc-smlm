@@ -26,11 +26,11 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 /**
  * Samples uniformly from the specified spherical volume.
@@ -62,7 +62,7 @@ public class SphericalDistribution implements SpatialDistribution {
   public SphericalDistribution(double radius, UniformRandomProvider randomGenerator) {
     ValidationUtils.checkPositive(radius, "Radius");
     if (randomGenerator == null) {
-      randomGenerator = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+      randomGenerator = UniformRandomProviders.create();
     }
     this.radius = radius;
     this.r2 = radius * radius;

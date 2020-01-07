@@ -25,10 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.util.Arrays;
 
@@ -114,7 +114,7 @@ public class GridDistribution implements SpatialDistribution {
       throw new IllegalArgumentException("Min distance must be below max distance");
     }
     if (randomGenerator == null) {
-      this.rng = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+      this.rng = UniformRandomProviders.create();
     } else {
       this.rng = randomGenerator;
     }

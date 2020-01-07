@@ -36,6 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
@@ -66,7 +67,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -292,7 +292,7 @@ public class EmGainAnalysis implements PlugInFilter {
     g[g.length - 1] = 1; // Ensure value of 1 at the end
 
     // Randomly sample
-    final UniformRandomProvider random = RandomSource.create(RandomSource.XOR_SHIFT_1024_S);
+    final UniformRandomProvider rng = UniformRandomProviders.create();
     final int bias = (int) settings.settingBias;
     final int[] bins = new int[x.length];
     for (int i = 0; i < x.length; i++) {
@@ -302,7 +302,7 @@ public class EmGainAnalysis implements PlugInFilter {
     final int steps = settings.simulationSize;
     final Ticker ticker = ImageJUtils.createTicker(steps, 1);
     for (int n = 0; n < steps; n++) {
-      int index = binarySearch(g, random.nextDouble());
+      int index = binarySearch(g, rng.nextDouble());
       if (index < 0) {
         index = -(index + 1);
       }
@@ -338,12 +338,12 @@ public class EmGainAnalysis implements PlugInFilter {
    */
   private int[] simulateFromPoissonGammaGaussian() {
     // Randomly sample
-    final UniformRandomProvider random = RandomSource.create(RandomSource.SPLIT_MIX_64);
+    final UniformRandomProvider rng = UniformRandomProviders.create();
 
-    final PoissonSampler poisson = new PoissonSampler(random, settings.settingPhotons);
+    final PoissonSampler poisson = new PoissonSampler(rng, settings.settingPhotons);
     final MarsagliaTsangGammaSampler gamma =
-        new MarsagliaTsangGammaSampler(random, settings.settingPhotons, settings.settingGain);
-    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
+        new MarsagliaTsangGammaSampler(rng, settings.settingPhotons, settings.settingGain);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
 
     final int steps = settings.simulationSize;
     final int[] samples = new int[steps];

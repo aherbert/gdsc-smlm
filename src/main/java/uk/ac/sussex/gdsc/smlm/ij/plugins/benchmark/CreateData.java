@@ -51,6 +51,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -182,7 +183,6 @@ import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
 import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
-import org.apache.commons.rng.simple.RandomSource;
 
 import java.awt.Checkbox;
 import java.awt.Rectangle;
@@ -802,7 +802,7 @@ public class CreateData implements PlugIn {
         // Ensure we have 50% of the frames with a spot.
         nextN = new int[settings.getParticles() * 2];
         Arrays.fill(nextN, 0, settings.getParticles(), 1);
-        RandomUtils.shuffle(nextN, RandomSource.create(RandomSource.SPLIT_MIX_64));
+        RandomUtils.shuffle(nextN, UniformRandomProviders.create());
 
         // Only put spots in the central part of the image
         final double border = settings.getSize() / 4.0;
