@@ -372,7 +372,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     // The Poisson-Gaussian must be differentiated to compute the Fisher information:
     // Expected [ (d ln(p(z)) dv)^2 ]
     // = integral [ (1/p(z) . d p(z) dv)^2 p(z) dz ]
-    // = integral [ (1/p(z) . (d p(z) dv)^2 dz ]
+    // = integral [  1/p(z) . (d p(z) dv)^2 dz ]
 
     // Gaussian standard deviation = s
 
