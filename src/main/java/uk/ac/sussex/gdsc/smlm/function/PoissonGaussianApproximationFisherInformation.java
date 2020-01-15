@@ -26,7 +26,12 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 /**
  * Calculate the Fisher information for a Poisson-Gaussian distribution using an approximation of
- * the Poisson (mean=theta) as a Gaussian (u=theta, var=theta).
+ * the Poisson (mean=theta) as a Gaussian (u=theta, var=theta). The combined variance of two convolved
+ * Gaussians is the sum of the variance.
+ *
+ * <p>Note that this is equivalent to the reverse by modelling the Gaussian noise s as a Poisson with
+ * variance s*s for a Poisson-Poisson Fisher information since the combined variance of two convolved
+ * Poissons is the sum of the variance.
  */
 public class PoissonGaussianApproximationFisherInformation extends BasePoissonFisherInformation {
   /** The variance of the Gaussian. */
