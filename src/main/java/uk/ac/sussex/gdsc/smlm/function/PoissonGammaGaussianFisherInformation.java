@@ -369,14 +369,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // This Fisher information is based on Chao, et al (2013) Nature Methods, 10, 335-338, SI.
 
     // Chao et al, Eq 4:
-    // (Poisson Binomial Gaussian convolution)
+    // (Poisson Geometric Gaussian convolution)
     // P(z) = e^-v / (sqrt(2pi)*s) * [ e^-0.5*(z/s)^2 +
     // sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
     // sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^(j+1) / ( j!*(l-1-j)!*(j+1)! ) ] ]
     // ]
     // Note: dividing by (g/v)^(j+1) has been changed to multiplying by (v/g)^(j+1)
 
-    // Gradient of the Poisson Binomial Gaussian is:
+    // Gradient of the Poisson Geometric Gaussian is:
     // P'(z|v) = e^-v / (sqrt(2pi)*s) * [
     // sum_l=1_inf [ e^-0.5*((z-l)/s)^2 *
     // sum_j=0_l-1 [ (l-1)!*(1-1/g)^(l-1-j)*(v/g)^j / ( j!*(l-1-j)!*j!*g ) ] ]
@@ -393,15 +393,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
     // This equation is:
     // integral [ 1/p(z) . a(z|v)^2 dz ] - 1
-    // Where a(z|v) is the partial gradient of the Poisson-Binomial-Gaussian with respect to v
+    // Where a(z|v) is the partial gradient of the Poisson-Geometric-Gaussian with respect to v
     // without the subtraction of P(z).
 
-    // Note that the partial gradient of the Poisson-Binomial-Gaussian is just the
-    // partial gradient of the Poisson-Binomial convolved with a Gaussian (since the Gaussian does
-    // not
-    // have a component v).
+    // Note that the partial gradient of the Poisson-Geometric-Gaussian is just the
+    // partial gradient of the Poisson-Geometric convolved with a Gaussian (since the Gaussian does
+    // not have a component v).
 
-    // The Poisson-Binomial is computationally intense. Thus this can be substituted using
+    // The Poisson-Geometric is computationally intense. Thus this can be substituted using
     // the Poisson-Gamma convolution which can be computed efficiently using Bessel functions.
 
     // Poisson-Gamma-Gaussian:
@@ -482,7 +481,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
 
     // Note: This method works by using the Poisson-Gamma PDF as a substitute
-    // for a Poisson-Binomial PMF. For simplicity the PDF is integrated over
+    // for a Poisson-Geometric PMF. For simplicity the PDF is integrated over
     // integer intervals to create a discrete PMF. This is a fair approximation
     // of how an EM-CCD camera would work as input electrons should produce
     // discrete output electrons.
