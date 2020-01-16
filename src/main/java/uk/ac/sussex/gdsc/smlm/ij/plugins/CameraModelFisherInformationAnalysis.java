@@ -547,9 +547,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       photons[i] = FastMath.pow(10, exp[i]);
     }
 
-    // Get the alpha. This may be from the cache
-    final double[] alpha1 = getAlpha(photons, exp, f1, key1);
-    final double[] alpha2 = getAlpha(photons, exp, f2, key2);
+    // Get the alpha.
+    // This may be from the cache or computed shutdown the executor if it was created.
+    double[] alpha1;
+    double[] alpha2;
+    try {
+      alpha1 = getAlpha(photons, exp, f1, key1);
+      alpha2 = getAlpha(photons, exp, f2, key2);
+    } finally {
+      if (es != null) {
+        es.shutdownNow();
+      }
+    }
 
     // Compute the Poisson Fisher information
     final double[] fi1 = getFisherInformation(alpha1, photons);
