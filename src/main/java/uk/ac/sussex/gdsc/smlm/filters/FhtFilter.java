@@ -129,6 +129,9 @@ public class FhtFilter {
     kw = source.kw;
     kh = source.kh;
     kn = source.kn;
+    // Assume this is thread safe.
+    // JTransforms code uses the same classes in concurrent threads.
+    dht = source.dht;
     kernelFht = source.kernelFht;
     operation = source.operation;
     window = source.window;
@@ -256,14 +259,14 @@ public class FhtFilter {
    */
   public void initialiseKernel(int maxx, int maxy) {
     final int maxN = MathUtils.nextPow2(MathUtils.max(maxx, maxy, kn));
-    if (tmp == null || tmp.length != maxN * maxN) {
-      tmp = new float[maxN * maxN];
+    final int size = maxN * maxN;
+    if (tmp == null || tmp.length != size) {
+      tmp = new float[size];
     }
     if (kernelFht != null && maxN == kernelFht.getWidth()) {
       // Already initialised
       return;
     }
-    final int size = maxN * maxN;
     // No window function for the kernel so just create a new FHT
     float[] data;
     if (kw < maxN || kh < maxN) {
@@ -290,9 +293,6 @@ public class FhtFilter {
     } else {
       kernelFht.initialiseFastMultiply();
     }
-
-    // This is used for the output complex multiple of the two FHTs
-    tmp = new float[size];
   }
 
   private static int getInsert(int maxN, int width) {
