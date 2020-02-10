@@ -218,7 +218,7 @@ public class ImagePsfModel extends PsfModel {
       final double newValue = image[i] - floor;
       if (newValue > 0) {
         image[i] = newValue;
-        sum += newValue;
+        sum2 += newValue;
       } else {
         image[i] = 0;
       }
