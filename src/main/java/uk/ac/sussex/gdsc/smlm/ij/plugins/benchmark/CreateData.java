@@ -1066,7 +1066,7 @@ public class CreateData implements PlugIn {
     simulationParameters = null;
     setBenchmarkResults(null, null);
     // Run the garbage collector to free memory
-    MemoryUtils.runGarbageCollector();
+    MemoryUtils.runGarbageCollectorOnce();
   }
 
   /**
@@ -4786,7 +4786,7 @@ public class CreateData implements PlugIn {
     gd.addSlider("Fixed_fraction (%)", 0, 100, settings.getFixedFraction() * 100);
     gd.addChoice("Confinement", CONFINEMENT, settings.getConfinement());
     gd.addNumericField("Photons (sec^-1)", settings.getPhotonsPerSecond(), 0);
-    // We cannot use the correlation moe with fixed life time tracks
+    // We cannot use the correlation mode with fixed life time tracks
     final String[] dist =
         (trackMode) ? Arrays.copyOf(PHOTON_DISTRIBUTION, PHOTON_DISTRIBUTION.length - 1)
             : PHOTON_DISTRIBUTION;
@@ -5565,10 +5565,12 @@ public class CreateData implements PlugIn {
     }
     // String tmp = loadSettings.getLocalisationsFilename();
     loadSettings.setLocalisationsFilename(benchmarkFile);
-    // TODO - This could be configurable to ignore fields that are not required,
+    // Ignore fields that are not required,
     // e.g. the dataset name
+    final boolean hide = loadSettings.getHideFieldDatasetName();
+    loadSettings.setHideFieldDatasetName(true);
     final LocalisationList localisations = LoadLocalisations.loadLocalisations(loadSettings);
-    // loadSettings.setLocalisationsFilename(tmp);
+    loadSettings.setHideFieldDatasetName(hide);
     SettingsManager.writeSettings(loadSettings.build());
     if (localisations == null || localisations.isEmpty()) {
       return null;
@@ -5665,10 +5667,10 @@ public class CreateData implements PlugIn {
     // Camera type does not need the full simulation settings. Plus the units are different
     // so just re-implement.
     gd.addChoice("Camera_type", SettingsManager.getCameraTypeNames(),
-        CalibrationProtosHelper.getName(settings.getCameraType()), new OptionListener<Integer>() {
+        CalibrationProtosHelper.getName(cal.getCameraType()), new OptionListener<Integer>() {
           @Override
           public boolean collectOptions(Integer field) {
-            settings.setCameraType(SettingsManager.getCameraTypeValues()[field]);
+            cal.setCameraType(SettingsManager.getCameraTypeValues()[field]);
             return collectOptions(false);
           }
 
@@ -5678,7 +5680,7 @@ public class CreateData implements PlugIn {
           }
 
           private boolean collectOptions(boolean silent) {
-            final CameraType cameraType = settings.getCameraType();
+            final CameraType cameraType = cal.getCameraType();
             final boolean isCcd = CalibrationProtosHelper.isCcdCameraType(cameraType);
             final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
             if (isCcd) {
@@ -5727,7 +5729,7 @@ public class CreateData implements PlugIn {
     sd = gd.getNextNumber();
     cal.setNmPerPixel(gd.getNextNumber());
     background = gd.getNextNumber();
-    settings.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+    cal.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
 
     float myDepth = depth;
     if (!fixedDepth) {

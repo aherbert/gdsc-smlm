@@ -304,6 +304,10 @@ public class LoadLocalisations implements PlugIn {
   /**
    * Load localisations.
    *
+   * <p>Any calibration will be written to the Calibration.Builder contained in the settings (see
+   * {@link uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.LoadLocalisationsSettings.Builder#getCalibrationBuilder()
+   * LoadLocalisationsSettings.Builder.getCalibrationBuilder()}).
+   *
    * @param settings the settings
    * @return the localisation list
    */
@@ -400,7 +404,9 @@ public class LoadLocalisations implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     gd.addMessage("Load delimited localisations");
-    gd.addStringField("Dataset_name", settings.getName(), 30);
+    if (!settings.getHideFieldDatasetName()) {
+      gd.addStringField("Dataset_name", settings.getName(), 30);
+    }
 
     gd.addMessage("Calibration:");
     // Allow the full camera type top be captured
@@ -444,7 +450,9 @@ public class LoadLocalisations implements PlugIn {
       return false;
     }
 
-    settings.setName(getNextString(gd, settings.getName()));
+    if (!settings.getHideFieldDatasetName()) {
+      settings.setName(getNextString(gd, settings.getName()));
+    }
     cw.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
     cw.setNmPerPixel(gd.getNextNumber());
     cw.setExposureTime(gd.getNextNumber());
