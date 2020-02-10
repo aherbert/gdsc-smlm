@@ -1123,30 +1123,28 @@ public class PsfDrift implements PlugIn {
     double[] slice1;
     double[] sw0 = new double[w0.length];
     double[] sw1 = new double[w1.length];
-    {
-      final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
-      final TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
-      int c0 = 0;
-      int c1 = 0;
-      for (int i = 0; i < w0.length; i++) {
-        if (Double.isFinite(w0[i])) {
-          s0.add(i + 1);
-          sw0[c0++] = w0[i];
-        }
-        if (Double.isFinite(w1[i])) {
-          s1.add(i + 1);
-          sw1[c1++] = w1[i];
-        }
+    final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
+    final TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
+    int c0 = 0;
+    int c1 = 0;
+    for (int i = 0; i < w0.length; i++) {
+      if (Double.isFinite(w0[i])) {
+        s0.add(i + 1);
+        sw0[c0++] = w0[i];
       }
-      if (c0 == 0 && c1 == 0) {
-        IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
-        return;
+      if (Double.isFinite(w1[i])) {
+        s1.add(i + 1);
+        sw1[c1++] = w1[i];
       }
-      slice0 = s0.toArray();
-      sw0 = Arrays.copyOf(sw0, c0);
-      slice1 = s1.toArray();
-      sw1 = Arrays.copyOf(sw1, c1);
     }
+    if (c0 == 0 && c1 == 0) {
+      IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
+      return;
+    }
+    slice0 = s0.toArray();
+    sw0 = Arrays.copyOf(sw0, c0);
+    slice1 = s1.toArray();
+    sw1 = Arrays.copyOf(sw1, c1);
 
     // Smooth
     if (settings.smoothing > 0) {
