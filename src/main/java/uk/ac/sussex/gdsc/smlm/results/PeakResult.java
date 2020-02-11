@@ -177,6 +177,32 @@ public class PeakResult implements Serializable {
   }
 
   /**
+   * Create a resized copy with the specified number of parameters.
+   * The number of parameters will not be reduced below {@link #STANDARD_PARAMETERS}.
+   *
+   * <p>This method can be used to add or remove PSF parameters:
+   * <pre>
+   * PeakResult r;
+   * // Remove extra parameters:
+   * PeakResult simple = r.resize(0);
+   * // Add an extra parameter:
+   * PeakResult simple = r.resize(r.getNumberOfParameters() + 1);
+   * </pre>
+   *
+   * @param parameters the number of parameters
+   * @return the resized copy
+   */
+  public PeakResult resize(int parameters) {
+    final PeakResult copy = copy();
+    final int length = Math.max(STANDARD_PARAMETERS , parameters);
+    copy.resizeParameters(length);
+    if (copy.hasParameterDeviations()) {
+      copy.resizeParameterDeviations(length);
+    }
+    return copy;
+  }
+
+  /**
    * Creates the params array for a peak result.
    *
    * @param background the background
