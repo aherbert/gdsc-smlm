@@ -1536,7 +1536,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private BenchmarkSpotFilterResult analyse(ArrayList<BatchResult[]> batchResults) {
     // Support z-score of AUC and Max. Jaccard combined.
-    // For this wee need the statistics of the population of scores.
+    // For this we need the statistics of the population of scores.
     final double[][] stats = getStats(batchResults);
 
     double max = 0;
@@ -1600,8 +1600,13 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private double[][] getStats(ArrayList<BatchResult[]> batchResults) {
     if (settings.selectionMethod < 2) {
+      // 0 = AUC
+      // 1 = Max Jaccard
       return null;
     }
+
+    // 2 = AUC+Max Jaccard so we require the mean and standard deviation of each
+    // score to normalise them
 
     final double[][] stats = new double[2][2];
     for (int index = 0; index < stats.length; index++) {
@@ -1723,11 +1728,11 @@ public class BenchmarkSpotFilter implements PlugIn {
       gd.addSlider("Search_width", 1, 4, settings.search);
     }
     gd.addSlider("Border", 0, 5, settings.border);
-    gd.addCheckbox("Hard_border", settings.hardBorder);
 
     gd.addMessage("Scoring options:");
     gd.addCheckbox("Score_relative_distances (to HWHM)", settings.scoreRelativeDistances);
     gd.addSlider("Analysis_border", 0, 5, settings.analysisBorder);
+    gd.addCheckbox("Hard_border", settings.hardBorder);
     gd.addChoice("Matching_method", Settings.MATCHING_METHOD, settings.matchingMethod);
     gd.addSlider("Match_distance", 0.5, 3.5, settings.upperDistance);
     gd.addSlider("Lower_distance", 0, 3.5, settings.lowerDistance);
@@ -1789,9 +1794,9 @@ public class BenchmarkSpotFilter implements PlugIn {
       settings.search = gd.getNextNumber();
     }
     settings.border = gd.getNextNumber();
-    settings.hardBorder = gd.getNextBoolean();
     settings.scoreRelativeDistances = gd.getNextBoolean();
     settings.analysisBorder = Math.abs(gd.getNextNumber());
+    settings.hardBorder = gd.getNextBoolean();
     settings.matchingMethod = gd.getNextChoiceIndex();
     settings.upperDistance = Math.abs(gd.getNextNumber());
     settings.lowerDistance = Math.abs(gd.getNextNumber());
