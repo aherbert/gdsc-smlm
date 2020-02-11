@@ -68,6 +68,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.Offset;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
@@ -5474,6 +5475,26 @@ public class CreateData implements PlugIn {
 
     simulationParameters = showSimulationParametersDialog(imp, results);
     if (simulationParameters != null) {
+      // Convert data to allow analysis as if a Gaussian2D PSF
+      if (simulationParameters.sd > 0 && !PsfHelper.isGaussian2D(results.getPsf())) {
+        final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.NM);
+        final PSF.Builder psf =
+            PsfProtosHelper.getDefaultPsf(PSFType.ONE_AXIS_GAUSSIAN_2D).toBuilder();
+        psf.getParametersBuilder(0).setValue(dc.convertBack(simulationParameters.sd));
+        results.setPsf(psf.build());
+        // Update all the results. This assume the results do not have data for a custom PSF,
+        // i.e. the parameters only have [t,i,x,y,z]
+        final TurboList<PeakResult> newResults = new TurboList<>(results.size());
+        final float sd = (float) dc.convertBack(simulationParameters.sd);
+        results.forEach((PeakResultProcedure) r -> {
+          final PeakResult peak = r.resize(PeakResult.STANDARD_PARAMETERS + 1);
+          peak.setParameter(PeakResult.STANDARD_PARAMETERS, sd);
+          newResults.add(peak);
+        });
+        results.begin();
+        results.addAll(newResults);
+        results.end();
+      }
       setBackground(results);
       setNoise(results, imp);
       setBenchmarkResults(imp, results);
