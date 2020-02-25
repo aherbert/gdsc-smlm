@@ -1894,33 +1894,35 @@ public class PeakFit implements PlugInFilter {
   public static void addDataFilterOptions(final ExtendedGenericDialog gd,
       final FitEngineConfigurationProvider fitEngineConfigurationProvider) {
     final int n = 0;
+    final DataFilterMethod defaultFilterMethod = DataFilterMethod.GAUSSIAN;
+    final double defaultFilterSmoothing = 0.5;
     final FitEngineConfiguration config =
         fitEngineConfigurationProvider.getFitEngineConfiguration();
     gd.addChoice("Spot_filter_type", SettingsManager.getDataFilterTypeNames(),
         config.getDataFilterType().ordinal());
     gd.addChoice("Spot_filter", SettingsManager.getDataFilterMethodNames(),
-        config.getDataFilterMethod(n).ordinal());
+        config.getDataFilterMethod(n, defaultFilterMethod).ordinal());
     addRelativeParameterOptions(gd,
         new RelativeParameterProvider(0, 2.5, "Smoothing", fitEngineConfigurationProvider, true) {
           @Override
           void setAbsolute(boolean absolute) {
             final FitEngineConfiguration c =
                 fitEngineConfigurationProvider.getFitEngineConfiguration();
-            final DataFilterMethod m = c.getDataFilterMethod(n);
-            final double smooth = c.getDataFilterParameter(n).getValue();
+            final DataFilterMethod m = c.getDataFilterMethod(n, defaultFilterMethod);
+            final double smooth = c.getDataFilterParameterValue(n, defaultFilterSmoothing);
             c.setDataFilter(m, smooth, absolute, n);
           }
 
           @Override
           boolean isAbsolute() {
             return fitEngineConfigurationProvider.getFitEngineConfiguration()
-                .getDataFilterParameterAbsolute(n);
+                .getDataFilterParameterAbsolute(n, false);
           }
 
           @Override
           double getValue() {
             return fitEngineConfigurationProvider.getFitEngineConfiguration()
-                .getDataFilterParameter(n).getValue();
+                .getDataFilterParameterValue(n, defaultFilterSmoothing);
           }
         });
   }

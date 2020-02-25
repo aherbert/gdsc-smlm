@@ -61,16 +61,20 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -648,7 +652,7 @@ public class PsfCreator implements PlugInFilter {
       cz = (int) newZ[maximumIndex];
       csd = smoothSd[maximumIndex];
       ca = smoothA[maximumIndex + start];
-      ImageJUtils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f\n", n, cx, cy, cz, csd,
+      ImageJUtils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f", n, cx, cy, cz, csd,
           ca);
       centres.add(new double[] {cx, cy, cz, csd, n});
     }
@@ -964,7 +968,7 @@ public class PsfCreator implements PlugInFilter {
           n, cx, cy, cz, csd);
       gd.addSlider("Slice", z[0], z[z.length - 1], slice);
       final Point previousPoint = yesNoPosition.get();
-      if (yesNoPosition != null) {
+      if (previousPoint != null) {
         gd.centerDialog(false);
         gd.setLocation(previousPoint);
       }
@@ -1597,6 +1601,12 @@ public class PsfCreator implements PlugInFilter {
     final Configuration configPlugin = new Configuration();
     // We have a different fit configuration just for the PSF Creator.
     // This allows it to be saved and not effect PeakFit settings.
+    // Sanitise the settings because previous versions did not store them and they 
+    // can be null.
+    // PSF which is not allowed to be non-Gaussian.
+    if (!PsfHelper.isGaussian2D(settings.getPsf())) {
+      settings.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
+    }
     config = new FitEngineConfiguration(settings.getFitEngineSettings(), settings.getCalibration(),
         settings.getPsf());
     final boolean save = false;
@@ -1854,7 +1864,8 @@ public class PsfCreator implements PlugInFilter {
     // Need to be updated after the widths have been set
     fitConfig.setCoordinateShiftFactor(shift);
     fitConfig.setBackgroundFitting(false);
-    // Since the PSF will be normalised
+    // Since the PSF will be normalised remove the camera calibration
+    fitConfig.setCameraType(CameraType.CAMERA_TYPE_NA);
     fitConfig.setMinPhotons(0);
     fitConfig.setBias(0);
     fitConfig.setGain(1);
@@ -1862,7 +1873,9 @@ public class PsfCreator implements PlugInFilter {
     fitConfig.setPrecisionThreshold(0);
     fitConfig.setDirectFilter(null);
     // fitConfig.setDisableSimpleFilter(true);
-    // fitConfig.setLog(new uk.ac.sussex.gdsc.core.ij.IJLogger());
+
+    // Use this for debugging the fit
+    // fitConfig.setLog(uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper.getDefaultLogger());
 
     final MemoryPeakResults results =
         fitSpot(psfStack, psfStack.getWidth(), psfStack.getHeight(), x, y);
@@ -3974,7 +3987,9 @@ public class PsfCreator implements PlugInFilter {
         psf2[i] = ie.crop(bounds);
       }
 
-      return new ExtractedPsf(psf2, bounds.width, bounds.height);
+      final ExtractedPsf cropped = new ExtractedPsf(psf2, bounds.width, bounds.height);
+      cropped.stackZCentre = MathUtils.clip(1, size, psf.stackZCentre - start);
+      return cropped;
     }
 
     @Override

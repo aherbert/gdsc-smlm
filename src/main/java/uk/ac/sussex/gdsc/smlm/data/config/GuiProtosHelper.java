@@ -50,6 +50,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -290,6 +291,11 @@ public final class GuiProtosHelper {
     builder.setRmsdXyThreshold(0.01);
     builder.setRmsdZThreshold(0.05);
     builder.setComShiftThreshold(0.01);
+    // Copy default fit settings but modify for fitting standalone PSFs
+    final FitEngineSettings.Builder febuilder = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+    febuilder.setIncludeNeighbours(false);
+    builder.setFitEngineSettings(febuilder);
+    builder.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
     defaultPSFCreatorSettings = builder.build();
   }
 
