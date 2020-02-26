@@ -450,6 +450,10 @@ public class AstigmatismModelManager implements PlugIn {
       if (roi == null || roi.getType() != Roi.POINT) {
         continue;
       }
+      final FloatPolygon p = roi.getFloatPolygon();
+      if (p.npoints != 1) {
+        continue;
+      }
       newImageList.add(imp.getTitle());
     }
 
