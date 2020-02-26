@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Store a 3D image in a single array.

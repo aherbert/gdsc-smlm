@@ -24,19 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import gnu.trove.list.array.TIntArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-
-import gnu.trove.list.array.TIntArrayList;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
-import java.util.Arrays;
-import java.util.Comparator;
 
 @SuppressWarnings({"javadoc"})
 public class TraceManagerTest {

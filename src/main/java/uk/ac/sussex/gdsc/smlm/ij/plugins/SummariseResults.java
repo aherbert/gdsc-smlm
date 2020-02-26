@@ -24,6 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
+import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -46,19 +56,6 @@ import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.SnrResultProcedure;
-
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
-import ij.text.TextPanel;
-import ij.text.TextWindow;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces a summary table of the results that are stored in memory.
@@ -219,15 +216,14 @@ public class SummariseResults implements PlugIn {
     TextUtils.formatTo(sb, "\t%d,%d,%d,%d", bounds.x, bounds.y, bounds.x + bounds.width,
         bounds.y + bounds.height);
     if (calibration != null) {
-      //@formatter:off
-      sb.append('\t').append(calibration.hasNmPerPixel() ? MathUtils.rounded(calibration.getNmPerPixel()) : '-');
-      sb.append('\t').append(calibration.hasExposureTime() ? MathUtils.rounded(calibration.getExposureTime()) : '-');
+      sb.append('\t').append(
+          calibration.hasNmPerPixel() ? MathUtils.rounded(calibration.getNmPerPixel()) : '-');
+      sb.append('\t').append(
+          calibration.hasExposureTime() ? MathUtils.rounded(calibration.getExposureTime()) : '-');
 
-      if (calibration.hasCameraType())
-      {
+      if (calibration.hasCameraType()) {
         sb.append('\t').append(CalibrationProtosHelper.getName(calibration.getCameraType()));
-        if (calibration.isCcdCamera())
-        {
+        if (calibration.isCcdCamera()) {
           sb.append(" bias=").append(calibration.getBias());
           sb.append(" gain=").append(calibration.getCountPerPhoton());
         }
@@ -235,9 +231,13 @@ public class SummariseResults implements PlugIn {
         sb.append("\t-");
       }
 
-      sb.append('\t').append(calibration.hasDistanceUnit() ? UnitHelper.getShortName(calibration.getDistanceUnit()) : '-');
-      sb.append('\t').append(calibration.hasIntensityUnit() ? UnitHelper.getShortName(calibration.getIntensityUnit()) : '-');
-      //@formatter:on
+      sb.append('\t').append(
+          calibration.hasDistanceUnit() ? UnitHelper.getShortName(calibration.getDistanceUnit())
+              : '-');
+      sb.append('\t')
+          .append(calibration.hasIntensityUnit()
+              ? UnitHelper.getShortName(calibration.getIntensityUnit())
+              : '-');
     } else {
       sb.append("\t\t\t\t\t");
     }

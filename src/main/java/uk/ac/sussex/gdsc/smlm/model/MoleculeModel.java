@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 /**
  * Contains a model for a moving molecule.

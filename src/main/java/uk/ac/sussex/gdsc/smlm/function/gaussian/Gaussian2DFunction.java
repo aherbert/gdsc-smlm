@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
+import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedNonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
@@ -31,8 +32,6 @@ import uk.ac.sussex.gdsc.smlm.function.IntegralValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.NamedFunction;
 import uk.ac.sussex.gdsc.smlm.function.NoiseModel;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Abstract base class for a 2-dimensional Gaussian function for a configured number of peaks.

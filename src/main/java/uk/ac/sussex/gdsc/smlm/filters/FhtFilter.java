@@ -24,13 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import org.jtransforms.dht.FloatDHT_2D;
+import org.jtransforms.utils.CommonUtils;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
-
-import org.jtransforms.dht.FloatDHT_2D;
-import org.jtransforms.utils.CommonUtils;
 
 /**
  * Computes a convolution/correlation in the frequency domain using a Fast Hartley Tranform. An

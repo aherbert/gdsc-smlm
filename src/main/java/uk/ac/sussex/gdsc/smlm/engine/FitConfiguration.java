@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -95,9 +97,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterCrlb;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Specifies the fitting configuration.

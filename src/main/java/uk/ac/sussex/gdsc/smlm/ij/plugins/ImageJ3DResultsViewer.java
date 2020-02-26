@@ -24,6 +24,92 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import customnode.CustomLineMesh;
+import customnode.CustomMesh;
+import customnode.CustomMeshNode;
+import customnode.CustomPointMesh;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.GUI;
+import ij.gui.Roi;
+import ij.plugin.PlugIn;
+import ij.process.LUT;
+import ij3d.Content;
+import ij3d.ContentInstant;
+import ij3d.ContentNode;
+import ij3d.DefaultUniverse;
+import ij3d.Image3DMenubar;
+import ij3d.Image3DUniverse;
+import ij3d.ImageCanvas3D;
+import ij3d.ImageWindow3D;
+import ij3d.UniverseListener;
+import ij3d.UniverseSettings;
+import java.awt.Color;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.scijava.java3d.Appearance;
+import org.scijava.java3d.BranchGroup;
+import org.scijava.java3d.Canvas3D;
+import org.scijava.java3d.ColoringAttributes;
+import org.scijava.java3d.GeometryArray;
+import org.scijava.java3d.IndexedGeometryArray;
+import org.scijava.java3d.LineAttributes;
+import org.scijava.java3d.PickInfo;
+import org.scijava.java3d.PickInfo.IntersectionInfo;
+import org.scijava.java3d.PointAttributes;
+import org.scijava.java3d.PolygonAttributes;
+import org.scijava.java3d.SceneGraphPath;
+import org.scijava.java3d.Shape3D;
+import org.scijava.java3d.Transform3D;
+import org.scijava.java3d.TransformGroup;
+import org.scijava.java3d.TransparencyAttributes;
+import org.scijava.java3d.TriangleArray;
+import org.scijava.java3d.View;
+import org.scijava.java3d.utils.pickfast.PickCanvas;
+import org.scijava.vecmath.AxisAngle4d;
+import org.scijava.vecmath.Color3f;
+import org.scijava.vecmath.Point2d;
+import org.scijava.vecmath.Point3d;
+import org.scijava.vecmath.Point3f;
+import org.scijava.vecmath.Vector3d;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -85,99 +171,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.RawResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
-
-import customnode.CustomLineMesh;
-import customnode.CustomMesh;
-import customnode.CustomMeshNode;
-import customnode.CustomPointMesh;
-
-import gnu.trove.map.hash.TObjectIntHashMap;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.GUI;
-import ij.gui.Roi;
-import ij.plugin.PlugIn;
-import ij.process.LUT;
-
-import ij3d.Content;
-import ij3d.ContentInstant;
-import ij3d.ContentNode;
-import ij3d.DefaultUniverse;
-import ij3d.Image3DMenubar;
-import ij3d.Image3DUniverse;
-import ij3d.ImageCanvas3D;
-import ij3d.ImageWindow3D;
-import ij3d.UniverseListener;
-import ij3d.UniverseSettings;
-
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.scijava.java3d.Appearance;
-import org.scijava.java3d.BranchGroup;
-import org.scijava.java3d.Canvas3D;
-import org.scijava.java3d.ColoringAttributes;
-import org.scijava.java3d.GeometryArray;
-import org.scijava.java3d.IndexedGeometryArray;
-import org.scijava.java3d.LineAttributes;
-import org.scijava.java3d.PickInfo;
-import org.scijava.java3d.PickInfo.IntersectionInfo;
-import org.scijava.java3d.PointAttributes;
-import org.scijava.java3d.PolygonAttributes;
-import org.scijava.java3d.SceneGraphPath;
-import org.scijava.java3d.Shape3D;
-import org.scijava.java3d.Transform3D;
-import org.scijava.java3d.TransformGroup;
-import org.scijava.java3d.TransparencyAttributes;
-import org.scijava.java3d.TriangleArray;
-import org.scijava.java3d.View;
-import org.scijava.java3d.utils.pickfast.PickCanvas;
-import org.scijava.vecmath.AxisAngle4d;
-import org.scijava.vecmath.Color3f;
-import org.scijava.vecmath.Point2d;
-import org.scijava.vecmath.Point3d;
-import org.scijava.vecmath.Point3f;
-import org.scijava.vecmath.Vector3d;
-
-import java.awt.Color;
-import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  * Draws a localisation results set using an ImageJ 3D image.
@@ -255,27 +248,34 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  //@formatter:off
-  private enum SizeMode implements NamedObject
-  {
-    FIXED_SIZE { @Override
-    public String getName() { return "Fixed"; }},
-    XY_PRECISION { @Override
-    public String getName() { return "XY Precision"; }},
-    XYZ_DEVIATIONS { @Override
-    public String getName() { return "XYZ Deviations"; }},
-        ;
+  private enum SizeMode implements NamedObject {
+    FIXED_SIZE {
+      @Override
+      public String getName() {
+        return "Fixed";
+      }
+    },
+    XY_PRECISION {
+      @Override
+      public String getName() {
+        return "XY Precision";
+      }
+    },
+    XYZ_DEVIATIONS {
+      @Override
+      public String getName() {
+        return "XYZ Deviations";
+      }
+    },;
 
     static final SizeMode[] values = SizeMode.values();
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static SizeMode forNumber(int number)
-    {
+    public static SizeMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
@@ -283,26 +283,34 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private enum DepthMode implements NamedObject
-  {
-    NONE { @Override
-    public String getName() { return "None"; }},
-    INTENSITY { @Override
-    public String getName() { return "Intensity"; }},
-    DITHER { @Override
-    public String getName() { return "Dither"; }},
-        ;
+  private enum DepthMode implements NamedObject {
+    NONE {
+      @Override
+      public String getName() {
+        return "None";
+      }
+    },
+    INTENSITY {
+      @Override
+      public String getName() {
+        return "Intensity";
+      }
+    },
+    DITHER {
+      @Override
+      public String getName() {
+        return "Dither";
+      }
+    },;
 
     static final DepthMode[] values = DepthMode.values();
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static DepthMode forNumber(int number)
-    {
+    public static DepthMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
@@ -310,30 +318,46 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private enum TransparencyMode implements NamedObject
-  {
-    NONE { @Override
-    public String getName() { return "None"; }},
-    SIZE { @Override
-    public String getName() { return "Size"; }},
-    INTENSITY { @Override
-    public String getName() { return "Intensity"; }},
-    XY_PRECISION { @Override
-    public String getName() { return "XY Precision"; }},
-    XYZ_DEVIATIONS { @Override
-    public String getName() { return "XYZ Deviations"; }},
-        ;
+  private enum TransparencyMode implements NamedObject {
+    NONE {
+      @Override
+      public String getName() {
+        return "None";
+      }
+    },
+    SIZE {
+      @Override
+      public String getName() {
+        return "Size";
+      }
+    },
+    INTENSITY {
+      @Override
+      public String getName() {
+        return "Intensity";
+      }
+    },
+    XY_PRECISION {
+      @Override
+      public String getName() {
+        return "XY Precision";
+      }
+    },
+    XYZ_DEVIATIONS {
+      @Override
+      public String getName() {
+        return "XYZ Deviations";
+      }
+    },;
 
     static final TransparencyMode[] values = TransparencyMode.values();
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static TransparencyMode forNumber(int number)
-    {
+    public static TransparencyMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
@@ -341,36 +365,62 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private enum SortMode implements NamedObject
-  {
-    NONE { @Override
-    public String getName() { return "None"; }
-    @Override
-    public String getDescription() { return ""; }},
-    XYZ { @Override
-    public String getName() { return "XYZ"; }
-    @Override
-    public String getDescription() { return "Sort using XYZ. The order is defined by the direction with the major component used first, e.g. 1,2,3 for zyx ascending, -3,-2,-1 for xyz descending."; }},
-    OTHOGRAPHIC { @Override
-    public String getName() { return "Othographic"; }
-    @Override
-    public String getDescription() { return "Project all points to the plane defined by the direction. Rank by distance to the plane."; }},
-    PERSPECTIVE { @Override
-    public String getName() { return "Perspective"; }
-    @Override
-    public String getDescription() { return "Rank by distance to the eye position for true depth perspective rendering."; }},
-        ;
+  private enum SortMode implements NamedObject {
+    NONE {
+      @Override
+      public String getName() {
+        return "None";
+      }
+
+      @Override
+      public String getDescription() {
+        return "";
+      }
+    },
+    XYZ {
+      @Override
+      public String getName() {
+        return "XYZ";
+      }
+
+      @Override
+      public String getDescription() {
+        return "Sort using XYZ. The order is defined by the direction with the major component "
+            + "used first, e.g. 1,2,3 for zyx ascending, -3,-2,-1 for xyz descending.";
+      }
+    },
+    OTHOGRAPHIC {
+      @Override
+      public String getName() {
+        return "Othographic";
+      }
+
+      @Override
+      public String getDescription() {
+        return "Project all points to the plane defined by the direction. Rank by distance to "
+            + "the plane.";
+      }
+    },
+    PERSPECTIVE {
+      @Override
+      public String getName() {
+        return "Perspective";
+      }
+
+      @Override
+      public String getDescription() {
+        return "Rank by distance to the eye position for true depth perspective rendering.";
+      }
+    },;
 
     static final SortMode[] values = SortMode.values();
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
-    public static SortMode forNumber(int number)
-    {
+    public static SortMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
       }
@@ -379,12 +429,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     public abstract String getDescription();
 
-    public String getDetails()
-    {
+    public String getDetails() {
       return getName() + ": " + getDescription();
     }
   }
-  //@formatter:on
 
   private static class ResultsMetaData implements ListSelectionListener {
     PeakResultTableModel peakResultTableModel;

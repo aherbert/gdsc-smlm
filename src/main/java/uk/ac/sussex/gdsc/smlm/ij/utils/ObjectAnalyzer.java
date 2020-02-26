@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
 import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 
 /**
  * Find objects defined by contiguous pixels of the same value.
@@ -214,8 +212,7 @@ public class ObjectAnalyzer {
 
       listI++;
 
-    }
-    while (listI < listLen);
+    } while (listI < listLen);
 
     ppList[0] = pointList;
 

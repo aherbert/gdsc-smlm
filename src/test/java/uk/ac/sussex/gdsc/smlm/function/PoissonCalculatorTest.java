@@ -24,6 +24,24 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
+import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.math.QuadraticUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -42,27 +60,6 @@ import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
-
-import gnu.trove.list.array.TDoubleArrayList;
-
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
-import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
-import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class PoissonCalculatorTest {

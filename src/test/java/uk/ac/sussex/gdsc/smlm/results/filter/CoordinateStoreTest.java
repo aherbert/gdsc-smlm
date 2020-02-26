@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Supplier;
 
 @SuppressWarnings({"javadoc"})
 public class CoordinateStoreTest {
@@ -69,13 +68,13 @@ public class CoordinateStoreTest {
       for (int j = 0; j < datax.length; j++) {
         final int jj = j;
         final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
-        //@formatter:off
         Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
-        Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
-        Assertions.assertFalse(s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
-        //@formatter:on
+        Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01),
+            datay[j] + resolution[i], dataz[j]), msg);
+        Assertions.assertFalse(s.contains(datax[j] + resolution[i],
+            datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
       }
     }
   }
@@ -279,13 +278,13 @@ public class CoordinateStoreTest {
       for (int j = 0; j < datax.length; j++) {
         final int jj = j;
         final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
-        //@formatter:off
         Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
-        Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
-        Assertions.assertFalse(s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
-        //@formatter:on
+        Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01),
+            datay[j] + resolution[i], dataz[j]), msg);
+        Assertions.assertFalse(s.contains(datax[j] + resolution[i],
+            datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
       }
     }
   }
@@ -309,13 +308,13 @@ public class CoordinateStoreTest {
       for (int j = 0; j < datax.length; j++) {
         final int jj = j;
         final Supplier<String> msg = () -> resolution[ii] + " [" + jj + "]";
-        //@formatter:off
         Assertions.assertTrue(s.contains(datax[j], datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j] + resolution[i] * 0.99, datay[j], dataz[j]), msg);
         Assertions.assertTrue(s.contains(datax[j], datay[j] + resolution[i] * 0.99, dataz[j]), msg);
-        Assertions.assertFalse(  s.contains(datax[j] + increase(resolution[i], 1.01), datay[j] + resolution[i], dataz[j]), msg);
-        Assertions.assertFalse(  s.contains(datax[j] + resolution[i], datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
-        //@formatter:on
+        Assertions.assertFalse(s.contains(datax[j] + increase(resolution[i], 1.01),
+            datay[j] + resolution[i], dataz[j]), msg);
+        Assertions.assertFalse(s.contains(datax[j] + resolution[i],
+            datay[j] + increase(resolution[i], 1.01), dataz[j]), msg);
       }
     }
   }

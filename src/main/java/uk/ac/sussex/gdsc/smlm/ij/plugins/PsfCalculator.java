@@ -24,6 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Label;
+import java.awt.SystemColor;
+import java.awt.TextField;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -34,20 +45,6 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.AiryPattern;
-
-import ij.IJ;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Label;
-import java.awt.SystemColor;
-import java.awt.TextField;
 
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.

@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Computes a Gaussian convolution in the spatial domain for each point within the array.

@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.process.ImageProcessor;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
@@ -196,13 +195,13 @@ public class PoissonGaussianConvolutionFunction
     return pvalue;
   }
 
-  // @CHECKSTYLE.OFF
+  // CHECKSTYLE.OFF: ParameterName
   private double getX(final double D, int q) {
     // Do not round to compute the convolution point x
     // return Math.round(D - q * g)
     return D - q * gain;
   }
-  // @CHECKSTYLE.ON
+  // CHECKSTYLE.ON: ParameterName
 
   /**
    * Gaussian CDF.

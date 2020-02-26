@@ -24,6 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import ij.plugin.filter.EDM;
+import ij.process.ByteProcessor;
+import ij.process.FHT;
+import ij.process.FloatProcessor;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
@@ -35,15 +42,6 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestCounter;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
-
-import ij.plugin.filter.EDM;
-import ij.process.ByteProcessor;
-import ij.process.FHT;
-import ij.process.FloatProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
 public class FhtFilterTest {

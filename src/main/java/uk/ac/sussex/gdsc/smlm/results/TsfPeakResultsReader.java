@@ -24,6 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.util.JsonFormat.Parser;
+import java.awt.Rectangle;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -41,20 +53,6 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.ROI;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.ThetaUnits;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
-import com.google.protobuf.util.JsonFormat.Parser;
-
-import java.awt.Rectangle;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Reads the fit results from file using the Tagged Spot File (TSF) format.

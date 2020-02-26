@@ -24,18 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
-import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
-import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
-import uk.ac.sussex.gdsc.core.utils.FileUtils;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
-import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -48,10 +36,6 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import java.awt.Choice;
 import java.awt.Font;
 import java.awt.Label;
@@ -61,6 +45,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 
 /**
  * Reads a TIFF image using the series image source and presents it using a read-only virtual stack

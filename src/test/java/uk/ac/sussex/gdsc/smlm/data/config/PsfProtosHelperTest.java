@@ -24,12 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModel;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
 public class PsfProtosHelperTest {

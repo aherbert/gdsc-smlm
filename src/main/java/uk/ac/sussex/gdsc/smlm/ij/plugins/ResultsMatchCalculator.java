@@ -24,6 +24,23 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
@@ -47,26 +64,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * Compares the coordinates in two sets of results and computes the match statistics.
@@ -173,24 +170,28 @@ public class ResultsMatchCalculator implements PlugIn {
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
 
-    // @formatter:off
     private static final String KEY_INPUT_OPTION1 = "gdsc.smlm.resultsmatchcalculator.inputOption1";
     private static final String KEY_INPUT_OPTION2 = "gdsc.smlm.resultsmatchcalculator.inputOption2";
-    private static final String KEY_COORD_METHOD1 = "gdsc.smlm.resultsmatchcalculator.coordinateMethod1";
-    private static final String KEY_COORD_METHOD2 = "gdsc.smlm.resultsmatchcalculator.coordinateMethod2";
-    private static final String KEY_DISTANCE_THRESHOLD = "gdsc.smlm.resultsmatchcalculator.distanceThreshold";
+    private static final String KEY_COORD_METHOD1 =
+        "gdsc.smlm.resultsmatchcalculator.coordinateMethod1";
+    private static final String KEY_COORD_METHOD2 =
+        "gdsc.smlm.resultsmatchcalculator.coordinateMethod2";
+    private static final String KEY_DISTANCE_THRESHOLD =
+        "gdsc.smlm.resultsmatchcalculator.distanceThreshold";
     private static final String KEY_INCREMENTS = "gdsc.smlm.resultsmatchcalculator.increments";
     private static final String KEY_DELTA = "gdsc.smlm.resultsmatchcalculator.delta";
     private static final String KEY_BETA = "gdsc.smlm.resultsmatchcalculator.beta";
     private static final String KEY_SHOW_TABLE = "gdsc.smlm.resultsmatchcalculator.showTable";
     private static final String KEY_SHOW_PAIRS = "gdsc.smlm.resultsmatchcalculator.showPairs";
-    private static final String KEY_SAVE_CLASS = "gdsc.smlm.resultsmatchcalculator.saveClassifications";
-    private static final String KEY_CLASS_FILE = "gdsc.smlm.resultsmatchcalculator.classificationsFile";
+    private static final String KEY_SAVE_CLASS =
+        "gdsc.smlm.resultsmatchcalculator.saveClassifications";
+    private static final String KEY_CLASS_FILE =
+        "gdsc.smlm.resultsmatchcalculator.classificationsFile";
     private static final String KEY_ID_ANALYSIS = "gdsc.smlm.resultsmatchcalculator.idAnalysis";
     private static final String KEY_SAVE_PAIRS = "gdsc.smlm.resultsmatchcalculator.savePairs";
     private static final String KEY_PAIRS_DIR = "gdsc.smlm.resultsmatchcalculator.pairsDirectory";
-    private static final String KEY_OUTPUT_END_FRAME = "gdsc.smlm.resultsmatchcalculator.outputEndFrame";
-    // @formatter:on
+    private static final String KEY_OUTPUT_END_FRAME =
+        "gdsc.smlm.resultsmatchcalculator.outputEndFrame";
 
     /** The options to save the classifications. */
     private static final String[] saveClassificationsOptions =

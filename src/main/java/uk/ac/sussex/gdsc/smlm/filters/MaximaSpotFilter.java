@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.filters.NonMaximumSuppression;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.filters.NonMaximumSuppression;
 
 /**
  * Identifies candidate spots (local maxima) in an image using non-maximum suppression.

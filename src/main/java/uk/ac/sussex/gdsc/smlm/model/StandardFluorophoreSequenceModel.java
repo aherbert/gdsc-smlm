@@ -24,13 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-
 import gnu.trove.list.array.TDoubleArrayList;
-
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 /**
  * Contains a continuous-time model for a blinking fluorophore. Assumes a constant activation laser

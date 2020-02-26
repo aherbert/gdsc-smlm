@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
-
-import java.util.Arrays;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood.

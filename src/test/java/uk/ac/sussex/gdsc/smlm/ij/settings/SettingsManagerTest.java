@@ -24,16 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.settings;
 
+import java.io.File;
+import java.io.IOException;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Assertions;
-
-import java.io.File;
-import java.io.IOException;
 
 @SuppressWarnings({"javadoc"})
 public class SettingsManagerTest {

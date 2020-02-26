@@ -24,6 +24,42 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Macro;
+import ij.Prefs;
+import ij.gui.Overlay;
+import ij.gui.Plot;
+import ij.gui.PointRoi;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -75,46 +111,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Macro;
-import ij.Prefs;
-import ij.gui.Overlay;
-import ij.gui.Plot;
-import ij.gui.PointRoi;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Fits spots created by CreateData plugin.
@@ -2862,7 +2858,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       case 3:  return result.maic2 < result.maic1;
       case 4:  return result.mbic2 < result.mbic1;
       // This should not happen
-      default: throw new IllegalStateException("Unknown selection criteria: " + settings.selectionCriteria);
+      default: throw new IllegalStateException("Unknown selection criteria: "
+          + settings.selectionCriteria);
       //@formatter:on
     }
   }

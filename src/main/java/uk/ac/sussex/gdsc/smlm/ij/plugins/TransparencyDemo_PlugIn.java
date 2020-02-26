@@ -27,19 +27,15 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import customnode.CustomMesh;
 import customnode.CustomTriangleMesh;
 import customnode.MeshMaker;
-
 import ij.gui.GUI;
 import ij.plugin.PlugIn;
-
 import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
-
+import java.util.List;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
-
-import java.util.List;
 
 /**
  * This is a demo to demonstrate the issues with transparency in the ImageJ 3D Viewer.

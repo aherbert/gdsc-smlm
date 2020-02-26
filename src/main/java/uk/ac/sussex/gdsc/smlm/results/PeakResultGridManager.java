@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Stores a set of results within a grid arrangement at a given resolution. Allows listing

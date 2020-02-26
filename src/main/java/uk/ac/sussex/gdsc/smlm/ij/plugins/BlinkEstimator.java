@@ -24,6 +24,23 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import java.awt.Color;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.Precision;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -37,26 +54,6 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
-
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
-import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Precision;
-
-import java.awt.Color;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Estimates the flourophore blinking rate from a set of localisations.

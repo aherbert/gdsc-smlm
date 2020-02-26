@@ -24,12 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.function.FisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
-
-import java.util.Arrays;
 
 /**
  * Calculator for the Fisher information, a symmetric positive definite matrix containing the amount
@@ -116,9 +115,9 @@ public class UnivariateLikelihoodFisherInformationCalculator
     final double[] data = new double[n * (n + 1) / 2];
     gf.initialise1(parameters);
     gf.forEach(new Gradient1Procedure() {
-      // @CHECKSTYLE.OFF: MemberName
+      // CHECKSTYLE.OFF: MemberName
       int k = -1;
-      // @CHECKSTYLE.ON: MemberName
+      // CHECKSTYLE.ON: MemberName
 
       @Override
       public void execute(double value, double[] dvDt) {

@@ -24,13 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-
 import customnode.CustomTriangleMesh;
-
+import java.util.Arrays;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
@@ -41,8 +36,10 @@ import org.scijava.java3d.utils.geometry.NormalGenerator;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
-
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
  * Use a triangle mesh object to represent a set of points. The object is duplicated, scaled and

@@ -24,6 +24,21 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import ij.IJ;
+import ij.Prefs;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -50,25 +65,6 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianApproximationFisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFisherInformation;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Model the Fisher information from an EM-CCD camera, CCD or sCMOS camera.
@@ -119,8 +115,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         @Override  public boolean isFast() { return false; }
         @Override  public boolean isLowerFixedI() { return true; } },
     /**
-     * CCD approximation has Poisson shot noise and uses a Poisson distribution to simulate Gaussian noise (s).
-     * The distribution is Approx(u,s) = Poisson(u) + Poisson(s) = Poisson(u+s)
+     * CCD approximation has Poisson shot noise and uses a Poisson distribution to simulate
+     *  Gaussian noise (s). The distribution is Approx(u,s) = Poisson(u) + Poisson(s) = Poisson(u+s)
      */
     CCD_APPROXIMATION { @Override public String getName() { return "CCD Approximation"; }
               @Override public String getShortName() { return "CCD Approx"; }},

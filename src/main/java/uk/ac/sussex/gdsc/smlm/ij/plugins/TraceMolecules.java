@@ -24,6 +24,33 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.set.hash.TIntHashSet;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.plugin.LutLoader;
+import ij.plugin.PlugIn;
+import ij.process.FloatProcessor;
+import ij.text.TextWindow;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -56,37 +83,6 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
-
-import gnu.trove.set.hash.TIntHashSet;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.measure.Calibration;
-import ij.plugin.LutLoader;
-import ij.plugin.PlugIn;
-import ij.process.FloatProcessor;
-import ij.text.TextWindow;
-
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
-import java.io.BufferedWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -159,13 +155,13 @@ public class TraceMolecules implements PlugIn {
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
 
-    // @formatter:off
     private static final String KEY_INPUT_OPTION = "gdsc.smlm.tracemolecules.inputOption";
     private static final String KEY_INPUT_DEBUG_MODE = "gdsc.smlm.tracemolecules.inputDebugMode";
-    private static final String KEY_INPUT_OPTIMISE = "gdsc.smlm.tracemolecules.inputOptimiseBlinkingRate";
-    private static final String KEY_DISPLAY_HISTOGRAMS = "gdsc.smlm.tracemolecules.displayHistograms";
+    private static final String KEY_INPUT_OPTIMISE =
+        "gdsc.smlm.tracemolecules.inputOptimiseBlinkingRate";
+    private static final String KEY_DISPLAY_HISTOGRAMS =
+        "gdsc.smlm.tracemolecules.displayHistograms";
     private static final String KEY_FILENAME = "gdsc.smlm.tracemolecules.filename";
-    // @formatter:on
     private static final char ON = '1';
     private static final char OFF = '0';
 

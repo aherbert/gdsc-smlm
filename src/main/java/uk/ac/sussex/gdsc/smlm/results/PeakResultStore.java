@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
 import java.util.Collection;
 import java.util.function.Predicate;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Stores peak results.

@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import org.apache.commons.rng.UniformRandomProvider;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Samples uniformly from the specified mask. All non-zero pixels are sampled. The centre of the
@@ -337,8 +336,7 @@ public class MaskDistribution implements SpatialDistribution {
 
       listI++;
 
-    }
-    while (listI < listLen);
+    } while (listI < listLen);
   }
 
   /**

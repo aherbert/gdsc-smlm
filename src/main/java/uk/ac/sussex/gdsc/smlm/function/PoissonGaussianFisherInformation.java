@@ -27,18 +27,15 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import java.util.Arrays;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.ConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
-
-import gnu.trove.list.array.TDoubleArrayList;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.util.Arrays;
 
 /**
  * Calculate the Fisher information for a Poisson-Gaussian distribution.

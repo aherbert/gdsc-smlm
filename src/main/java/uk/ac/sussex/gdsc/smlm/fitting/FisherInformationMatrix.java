@@ -24,14 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import java.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
+import org.ejml.data.DenseMatrix64F;
 import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
-
-import java.util.Arrays;
 
 /**
  * Container for the Fisher information, a symmetric positive definite matrix containing the amount

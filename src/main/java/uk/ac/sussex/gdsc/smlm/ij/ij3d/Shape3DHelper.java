@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.smlm.data.NamedObject;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
@@ -45,9 +43,8 @@ import org.scijava.java3d.utils.geometry.NormalGenerator;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
-
-import java.util.Arrays;
-import java.util.List;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 
 /**
  * Create Shape3D objects.

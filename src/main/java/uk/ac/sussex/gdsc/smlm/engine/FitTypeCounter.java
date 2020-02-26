@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Count the type of fit that was performed.

@@ -1185,7 +1185,7 @@ public class SumFilter {
   // The following code is copied directly from above.
   // All 'float' have been replaced with 'int'.
   // ----------------------------------------------------
-  // @CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+  // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
   private int[] intDataBuffer;
   private int[] intRowBuffer;
 

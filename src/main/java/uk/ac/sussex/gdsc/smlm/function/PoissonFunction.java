@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
-
 import org.apache.commons.math3.special.Gamma;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 
 /**
  * Implements the probability density function for a Poisson distribution.

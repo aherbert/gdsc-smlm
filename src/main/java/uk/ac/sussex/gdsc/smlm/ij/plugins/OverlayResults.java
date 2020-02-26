@@ -24,21 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResultView;
-
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.set.hash.TIntHashSet;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -49,7 +36,6 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
-
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Label;
@@ -61,6 +47,17 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultView;
 
 /**
  * Produces a summary table of the results that are stored in memory.

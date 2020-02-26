@@ -24,22 +24,19 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
+import java.awt.Rectangle;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-
-import ij.process.ByteProcessor;
-import ij.process.FloatProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-
-import java.awt.Rectangle;
-import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({"javadoc"})
 public class ImageConverterTest {

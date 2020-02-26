@@ -24,6 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import ij.IJ;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -45,19 +54,6 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
-
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
-
-import ij.IJ;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Analyses the track lengths of traced data.

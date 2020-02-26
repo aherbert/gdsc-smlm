@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import java.util.Arrays;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
-
-import java.util.Arrays;
 
 /**
  * Compute the variance of the parameters of the function assuming a least squares fit of a Poisson
@@ -58,7 +57,7 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
    */
   public final int numberOfGradients;
 
-  // @CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: MemberName
 
   /** Working space for I = sum_i { Ei,a * Ei,b }. */
   protected final double[] I;
@@ -66,7 +65,7 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
   /** Working space for E = sum_i { Ei * Ei,a * Ei,b }. */
   protected final double[] E;
 
-  // @CHECKSTYLE.ON: MemberName
+  // CHECKSTYLE.ON: MemberName
 
   /** The solver. */
   protected final EjmlLinearSolver solver;
@@ -129,7 +128,7 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
     return STATUS_OK;
   }
 
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   @Override
   public void execute(final double Ei, double[] Eix) {
@@ -142,7 +141,7 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
     }
   }
 
-  // @CHECKSTYLE.ON: ParameterName
+  // CHECKSTYLE.ON: ParameterName
 
   /**
    * Initialise for the computation using the first order gradients.

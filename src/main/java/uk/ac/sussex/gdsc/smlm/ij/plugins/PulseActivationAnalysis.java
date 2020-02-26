@@ -24,6 +24,47 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import com.google.common.base.Optional;
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+import java.awt.AWTEvent;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.geom.Rectangle2D;
+import java.util.EnumSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.IntStream;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.UnitSphereSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -61,51 +102,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-
-import com.google.common.base.Optional;
-
-import ij.CompositeImage;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Overlay;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.UnitSphereSampler;
-import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
-import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
-import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
-import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
-
-import java.awt.AWTEvent;
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.geom.Rectangle2D;
-import java.util.EnumSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 /**
  * Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed
@@ -918,7 +914,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // od3 = d3 + c13 * d1 + c23 * d2
 
     // Use matrix inversion so that: X = A^-1 * B
-    // @CHECKSTYLE.OFF: LocalVariableName
+    // CHECKSTYLE.OFF: LocalVariableName
     double a = 1;
     double b = c21;
     double c = c31;
@@ -928,7 +924,7 @@ public class PulseActivationAnalysis implements PlugIn {
     double g = c13;
     double h = c23;
     double i = 1;
-    // @CHECKSTYLE.ON: LocalVariableName
+    // CHECKSTYLE.ON: LocalVariableName
 
     final double A = (e * i - f * h);
     final double B = -(d * i - f * g);

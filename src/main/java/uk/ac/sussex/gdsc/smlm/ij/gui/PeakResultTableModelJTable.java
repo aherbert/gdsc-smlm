@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
@@ -33,6 +31,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Stores peak results and allows event propagation to listeners of the model.

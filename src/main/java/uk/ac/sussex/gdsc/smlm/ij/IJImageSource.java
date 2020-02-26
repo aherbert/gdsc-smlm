@@ -24,10 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij;
 
-import uk.ac.sussex.gdsc.smlm.results.ImageSource;
-
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -35,19 +32,18 @@ import ij.WindowManager;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.awt.Rectangle;
+import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
  * Represent an ImageJ image as a results source. Supports all greyscale images. Only processes
  * channel 0 of 32-bit colour images.
  */
 // This is allowed to support backwards serialisation compatibility
-// @CHECKSTYLE.OFF: AbbreviationAsWordInName
+// CHECKSTYLE.OFF: AbbreviationAsWordInName
 public class IJImageSource extends ImageSource {
-  // @CHECKSTYLE.ON: AbbreviationAsWordInName
+  // CHECKSTYLE.ON: AbbreviationAsWordInName
 
   @XStreamOmitField
   private int slice;

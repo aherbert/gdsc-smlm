@@ -33,12 +33,10 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.awt.AWTEvent;
 import java.awt.Label;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Filters pixels using the surrounding region.

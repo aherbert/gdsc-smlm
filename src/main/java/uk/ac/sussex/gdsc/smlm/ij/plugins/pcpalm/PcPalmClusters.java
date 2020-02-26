@@ -24,6 +24,32 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
+import ij.IJ;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -46,35 +72,6 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-
-import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 /**
  * Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.

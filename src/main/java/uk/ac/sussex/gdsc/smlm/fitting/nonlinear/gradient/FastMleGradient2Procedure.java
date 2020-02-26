@@ -24,13 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import java.util.Arrays;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
-
-import java.util.Arrays;
 
 /**
  * Calculates the Newton-Raphson update vector for a Poisson process using the first and second
@@ -62,7 +61,7 @@ public class FastMleGradient2Procedure
   public final double[] d2;
 
   // Names u and k match the uk nomenclature of Smith, et al.
-  // @CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: MemberName
 
   /** Counter. */
   protected int k;
@@ -73,7 +72,7 @@ public class FastMleGradient2Procedure
    */
   public final double[] u;
 
-  // @CHECKSTYLE.ON: MemberName
+  // CHECKSTYLE.ON: MemberName
 
   /**
    * Instantiates a new procedure.

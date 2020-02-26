@@ -24,18 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.SortUtils;
-import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
-
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.text.TextPanel;
-
 import java.awt.Color;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
+import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
 
 /**
  * Attaches to a text panel and listens for mouse events. Upon double click it obtains the

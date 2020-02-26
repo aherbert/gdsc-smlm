@@ -24,6 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import ij.plugin.filter.Convolver;
+import ij.process.FloatProcessor;
+import java.awt.Rectangle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
@@ -36,19 +46,6 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
-
-import ij.plugin.filter.Convolver;
-import ij.process.FloatProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-
-import java.awt.Rectangle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class KernelFilterTest {

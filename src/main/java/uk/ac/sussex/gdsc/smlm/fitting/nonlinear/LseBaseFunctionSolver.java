@@ -131,7 +131,7 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
   }
 
   // Allow I and E as they have special meaning in the formula.
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   /**
    * Compute the covariance matrix of the parameters of the function assuming a least squares fit of

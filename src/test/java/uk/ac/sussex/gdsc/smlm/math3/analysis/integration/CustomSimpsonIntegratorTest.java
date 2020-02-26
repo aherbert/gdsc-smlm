@@ -24,19 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class CustomSimpsonIntegratorTest {

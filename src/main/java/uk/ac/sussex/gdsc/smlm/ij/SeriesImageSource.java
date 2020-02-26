@@ -24,6 +24,20 @@
 
 package uk.ac.sussex.gdsc.smlm.ij;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import ij.ImagePlus;
+import ij.io.FileInfo;
+import ij.io.Opener;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
@@ -41,24 +55,6 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
-
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
-import ij.ImagePlus;
-import ij.io.FileInfo;
-import ij.io.Opener;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.awt.Rectangle;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Represent a series of TIFF image files as a results source. Supports all greyscale images. Only

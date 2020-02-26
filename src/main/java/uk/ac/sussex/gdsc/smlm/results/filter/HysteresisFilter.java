@@ -24,6 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.ga.Chromosome;
@@ -35,13 +40,6 @@ import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * Filter results using a precision threshold. Any results below the lower precision limit are

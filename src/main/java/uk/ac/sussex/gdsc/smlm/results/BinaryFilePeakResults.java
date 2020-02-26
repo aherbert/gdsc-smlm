@@ -24,9 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -38,6 +35,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.TurboList;
 
 /**
  * Saves the fit results to a binary file format.
@@ -391,8 +390,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
       } else {
         break;
       }
-    }
-    while (!line.startsWith("#" + END_HEADER));
+    } while (!line.startsWith("#" + END_HEADER));
     return sb.toString();
   }
 
@@ -402,8 +400,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     do {
       bi = input.readByte();
       sb.append((char) bi);
-    }
-    while (bi != '\n');
+    } while (bi != '\n');
     return sb.toString();
   }
 

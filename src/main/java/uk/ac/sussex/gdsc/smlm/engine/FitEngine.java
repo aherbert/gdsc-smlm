@@ -24,15 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
-import uk.ac.sussex.gdsc.smlm.results.PeakResults;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -40,6 +31,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.filters.MaximaSpotFilter;
+import uk.ac.sussex.gdsc.smlm.results.PeakResults;
 
 /**
  * Fits local maxima using a 2D Gaussian.

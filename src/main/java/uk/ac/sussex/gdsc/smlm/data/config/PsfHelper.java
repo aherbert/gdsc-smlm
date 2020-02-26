@@ -24,14 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import java.util.List;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
-import java.util.List;
 
 /**
  * Contains helper functions for the PSF class.

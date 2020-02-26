@@ -24,16 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.search;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
-import org.apache.commons.math3.random.HaltonSequenceGenerator;
-import org.apache.commons.math3.random.RandomVectorGenerator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.math3.random.RandomVectorGenerator;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Search a range of parameter space using a window divided into increments.

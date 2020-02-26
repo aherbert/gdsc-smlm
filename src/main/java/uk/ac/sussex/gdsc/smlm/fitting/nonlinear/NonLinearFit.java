@@ -289,9 +289,9 @@ public class NonLinearFit extends LseBaseFunctionSolver
    * @param b the b
    * @return False if the equation is singular (no solution)
    */
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
   protected boolean solve(double[][] a, double[] b) {
-    // @CHECKSTYLE.ON: ParameterName
+    // CHECKSTYLE.ON: ParameterName
 
     // TODO
     // Q. Do we need a better qr decomposition that uses the largest Eigen column first.

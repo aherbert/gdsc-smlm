@@ -24,15 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
+import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
-
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Contains methods for generating models of a Point Spread Function.

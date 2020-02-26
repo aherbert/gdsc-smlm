@@ -24,13 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
-
+import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
-
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 
 /**
  * Recombine sequence by selecting random positions for crossover.

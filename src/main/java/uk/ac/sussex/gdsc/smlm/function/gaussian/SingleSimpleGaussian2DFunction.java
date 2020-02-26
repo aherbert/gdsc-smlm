@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import uk.ac.sussex.gdsc.core.data.NotImplementedException;
-
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.

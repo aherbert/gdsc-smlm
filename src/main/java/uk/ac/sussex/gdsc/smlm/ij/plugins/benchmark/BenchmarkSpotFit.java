@@ -24,6 +24,43 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.exception.OutOfRangeException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -104,47 +141,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.SignalFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter2;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.exception.OutOfRangeException;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-
-import java.awt.Checkbox;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.TextArea;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Fits all the candidate spots identified by the benchmark spot filter plugin.
@@ -2294,8 +2290,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Precision has enough discrimination power to be able to use the Jaccard score
       criteria[index++] = new FilterCriteria(ParameterType.PRECISION,  LowerLimit.HALF_MAX_JACCARD_VALUE, UpperLimit.MAX_JACCARD2);
       // These are not filters but are used for stats analysis
-      criteria[index++] = new FilterCriteria(null, "Iterations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
-      criteria[index] = new FilterCriteria(null, "Evaluations",LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index++] = new FilterCriteria(null, "Iterations",  LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
+      criteria[index]   = new FilterCriteria(null, "Evaluations", LowerLimit.ONE_PERCENT, UpperLimit.NINETY_NINE_NINE_PERCENT, 1, false, false);
       //@formatter:on
 
       filterCriteria = criteria;

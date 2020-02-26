@@ -24,6 +24,20 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+import ij.process.ImageProcessor;
+import java.awt.Rectangle;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Comparator;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.core.source64.SplitMix64;
+import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
@@ -31,24 +45,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
-import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.hash.TLongObjectHashMap;
-
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PointRoi;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.core.source64.SplitMix64;
-import org.apache.commons.rng.simple.internal.SeedFactory;
-
-import java.awt.Rectangle;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Allows sampling sections from a source image for localisation results.

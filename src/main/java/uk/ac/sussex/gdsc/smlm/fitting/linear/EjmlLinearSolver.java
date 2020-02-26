@@ -24,16 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-
+import java.util.logging.Logger;
 import org.ejml.alg.dense.linsol.chol.LinearSolverCholLDL;
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.ops.CommonOps;
-
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 /**
  * Solves (one) linear equation, A x = b.
@@ -51,8 +49,8 @@ import java.util.logging.Logger;
  */
 public class EjmlLinearSolver {
   // Allow matrix name A and vector names b & x for equation A x = b
-  // @CHECKSTYLE.OFF: MemberName
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: ParameterName
 
   /**
    * Solve the matrix using direct inversion.
@@ -1050,7 +1048,7 @@ public class EjmlLinearSolver {
   }
 
   // Methods for input of primitive arrays
-  // @CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+  // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
 
   /**
    * Solves (one) linear equation, A x = b.

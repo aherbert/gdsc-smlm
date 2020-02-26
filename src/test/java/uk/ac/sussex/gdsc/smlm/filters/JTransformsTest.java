@@ -24,6 +24,22 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import ij.plugin.filter.EDM;
+import ij.process.ByteProcessor;
+import ij.process.FHT;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.jtransforms.dht.FloatDHT_2D;
+import org.jtransforms.fft.FloatFFT_2D;
+import org.jtransforms.utils.CommonUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
@@ -37,25 +53,6 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
-
-import ij.plugin.filter.EDM;
-import ij.process.ByteProcessor;
-import ij.process.FHT;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.jtransforms.dht.FloatDHT_2D;
-import org.jtransforms.fft.FloatFFT_2D;
-import org.jtransforms.utils.CommonUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class JTransformsTest {

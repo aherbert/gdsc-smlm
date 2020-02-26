@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Implements the probability density function for a Poisson-Gamma Mixture.
@@ -45,7 +44,8 @@ public class PoissonGammaFunction
     implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction {
 
   // Allow parameters names [c, p, m] to match Ulbrich & Isacoff (2007).
-  // @CHECKSTYLE.OFF: ParameterNames
+  // CHECKSTYLE.OFF: ParameterNames
+  // CHECKSTYLE.OFF: MemberName
 
   /**
    * The on-chip gain multiplication factor.

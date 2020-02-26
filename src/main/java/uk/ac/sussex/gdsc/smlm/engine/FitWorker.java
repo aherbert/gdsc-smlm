@@ -24,6 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.awt.Rectangle;
+import java.io.File;
+import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.filters.AreaStatistics;
 import uk.ac.sussex.gdsc.core.filters.FloatAreaSum;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -85,18 +95,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.SelectedResultStore
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.PreprocessedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Rectangle;
-import java.io.File;
-import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Fits local maxima using a 2D Gaussian.

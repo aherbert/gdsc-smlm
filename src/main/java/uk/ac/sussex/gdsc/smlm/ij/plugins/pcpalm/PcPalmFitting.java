@@ -24,26 +24,25 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.FileUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
-import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
-
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
-
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -69,21 +68,19 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
+import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.

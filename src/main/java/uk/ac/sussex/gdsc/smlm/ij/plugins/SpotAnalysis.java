@@ -24,34 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
-import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
-import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
-import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
-import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
-import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.Trace;
-import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -68,10 +42,6 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.frame.PlugInFrame;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Choice;
@@ -111,13 +81,38 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
+import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
+import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
+import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
+import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageRoiPainter;
+import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.Trace;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 
 /**
  * Allows analysis of the signal and on/off times for fixed fluorophore spots in an image stack.

@@ -24,6 +24,38 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.NonBlockingGenericDialog;
+import ij.io.Opener;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.AWTEvent;
+import java.awt.Choice;
+import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -46,42 +78,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-
-import ij.IJ;
-import ij.ImageListener;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.ImageWindow;
-import ij.gui.NonBlockingGenericDialog;
-import ij.io.Opener;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.awt.AWTEvent;
-import java.awt.Choice;
-import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 /**
  * This plugin loads configuration templates for the localisation fitting settings.
@@ -753,35 +749,55 @@ public class ConfigurationTemplate implements PlugIn {
   /**
    * The template option.
    */
-  //@formatter:off
-  public enum TemplateOption implements NamedObject
-  {
+  public enum TemplateOption implements NamedObject {
     /** Load standard templates. */
-    LOAD_STANDARD_TEMPLATES{ @Override public String getName() { return "Load standard templates"; }},
+    LOAD_STANDARD_TEMPLATES {
+      @Override
+      public String getName() {
+        return "Load standard templates";
+      }
+    },
     /** Load custom templates. */
-    LOAD_CUSTOM_TEMPLATES{ @Override public String getName() { return "Load custom templates"; }},
+    LOAD_CUSTOM_TEMPLATES {
+      @Override
+      public String getName() {
+        return "Load custom templates";
+      }
+    },
     /** Remove loaded templates. */
-    REMOVE_LOADED_TEMPLATES{ @Override public String getName() { return "Remove loaded templates"; }},
+    REMOVE_LOADED_TEMPLATES {
+      @Override
+      public String getName() {
+        return "Remove loaded templates";
+      }
+    },
     /** View template. */
-    VIEW_TEMPLATE{ @Override public String getName() { return "View template"; }},
+    VIEW_TEMPLATE {
+      @Override
+      public String getName() {
+        return "View template";
+      }
+    },
     /** View image example for template. */
-    VIEW_TEMPLATE_IMAGE{ @Override public String getName() { return "View image example for template"; }};
+    VIEW_TEMPLATE_IMAGE {
+      @Override
+      public String getName() {
+        return "View image example for template";
+      }
+    };
 
     @Override
-    public String getShortName()
-    {
+    public String getShortName() {
       return getName();
     }
 
     /**
      * Get the template option for the number.
      *
-     * @param number
-     *            the number
+     * @param number the number
      * @return the template option
      */
-    public static TemplateOption forNumber(int number)
-    {
+    public static TemplateOption forNumber(int number) {
       final TemplateOption[] values = TemplateOption.values();
       if (number < 0 || number >= values.length) {
         number = 0;
@@ -789,7 +805,6 @@ public class ConfigurationTemplate implements PlugIn {
       return values[number];
     }
   }
-  //@formatter:on
 
   @Override
   public void run(String arg) {

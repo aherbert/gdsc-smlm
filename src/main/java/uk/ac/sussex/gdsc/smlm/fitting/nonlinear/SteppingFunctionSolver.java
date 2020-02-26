@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -33,9 +35,6 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1FunctionStore;
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.ValueFunction;
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Abstract class for FunctionSolvers that use update steps to the current parameters.

@@ -24,17 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.plugin.PlugIn;
+import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-
-import ij.IJ;
-import ij.plugin.PlugIn;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Allows results held in memory to be calibrated.

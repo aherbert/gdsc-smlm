@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -59,8 +60,6 @@ import uk.ac.sussex.gdsc.smlm.results.count.ConsecutiveFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.FailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.NullFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.PassRateFailCounter;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Specifies the configuration for the fit engine.

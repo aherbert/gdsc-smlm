@@ -24,19 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import com.google.protobuf.Message;
+import ij.IJ;
+import ij.Prefs;
+import ij.plugin.PlugIn;
+import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
 import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
-
-import com.google.protobuf.Message;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.plugin.PlugIn;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This plugin allows the header to be displayed from a PeakFit results file.

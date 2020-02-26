@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -34,8 +35,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
 public class PsfModelGradient1FunctionTest {

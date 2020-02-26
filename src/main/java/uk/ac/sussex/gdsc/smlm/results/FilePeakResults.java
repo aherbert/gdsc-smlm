@@ -24,21 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.data.NotImplementedException;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 
 /**
  * Saves the fit results to file.

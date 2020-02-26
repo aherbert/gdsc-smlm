@@ -46,7 +46,6 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   public static final int Y_POSITION = 3;
   /** Index of the z-position in the parameters array. */
   public static final int Z_POSITION = 4;
-  /** Index of the x-standard deviation in the parameters array */
 
   /** The number of parameters per spline. */
   public static final int PARAMETERS_PER_PEAK = 4;

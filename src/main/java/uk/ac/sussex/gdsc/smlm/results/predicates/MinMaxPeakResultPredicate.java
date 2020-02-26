@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results.predicates;
 
+import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
-
-import java.util.function.Predicate;
 
 /**
  * Accept results with a value within a min/max range.

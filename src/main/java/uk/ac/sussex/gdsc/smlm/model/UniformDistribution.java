@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import java.util.function.Supplier;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
 import org.apache.commons.rng.UniformRandomProvider;
-
-import java.util.function.Supplier;
 
 /**
  * Samples uniformly from the specified volume.

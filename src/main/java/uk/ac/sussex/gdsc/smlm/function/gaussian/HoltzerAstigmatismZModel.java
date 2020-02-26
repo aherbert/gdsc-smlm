@@ -104,7 +104,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
   }
 
   // Allow names 'a' and 'b'
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   /**
    * Gets the standard deviation, first and second derivatives for the z-depth.
@@ -173,7 +173,7 @@ public class HoltzerAstigmatismZModel implements AstigmatismZModel {
     return s0 * Math.sqrt(1 + oneOverD2 * (z2 + a * z3 + b * z4));
   }
 
-  // @CHECKSTYLE.ON: ParameterName
+  // CHECKSTYLE.ON: ParameterName
 
   private static double pow2(final double value) {
     return value * value;

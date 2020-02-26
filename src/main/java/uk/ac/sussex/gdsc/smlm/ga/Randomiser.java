@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import org.apache.commons.rng.UniformRandomProvider;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Base class for data generation using randomness.

@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-
 import java.util.List;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 
 /**
  * Defines a selection strategy of a population of individuals.

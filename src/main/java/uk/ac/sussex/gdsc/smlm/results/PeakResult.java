@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.io.Serializable;
 import java.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Specifies a peak fitting result.
@@ -177,10 +175,11 @@ public class PeakResult implements Serializable {
   }
 
   /**
-   * Create a resized copy with the specified number of parameters.
-   * The number of parameters will not be reduced below {@link #STANDARD_PARAMETERS}.
+   * Create a resized copy with the specified number of parameters. The number of parameters will
+   * not be reduced below {@link #STANDARD_PARAMETERS}.
    *
    * <p>This method can be used to add or remove PSF parameters:
+   *
    * <pre>
    * PeakResult r;
    * // Remove extra parameters:
@@ -194,7 +193,7 @@ public class PeakResult implements Serializable {
    */
   public PeakResult resize(int parameters) {
     final PeakResult copy = copy();
-    final int length = Math.max(STANDARD_PARAMETERS , parameters);
+    final int length = Math.max(STANDARD_PARAMETERS, parameters);
     copy.resizeParameters(length);
     if (copy.hasParameterDeviations()) {
       copy.resizeParameterDeviations(length);

@@ -24,11 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.distribution.BinomialDistribution;
@@ -54,10 +52,10 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 
 /**
  * Fit a binomial distribution to a histogram.

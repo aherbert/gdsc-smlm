@@ -24,12 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.function.Predicate;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
  * Wraps peak results in memory and prevents modification of the results size.

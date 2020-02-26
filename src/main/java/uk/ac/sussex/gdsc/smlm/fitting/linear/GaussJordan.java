@@ -32,7 +32,7 @@ public class GaussJordan {
   private int maxCol;
 
   // Allow use of parameter names a and b
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   private boolean findPivot(float[][] a, int[] piv) {
     float max = 0;
@@ -173,7 +173,7 @@ public class GaussJordan {
   }
 
   // The above code is repeated for <double>
-  // @CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
+  // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
 
   private boolean findPivot(double[][] a, int[] piv) {
     double max = 0;

@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 
 /**
  * Represent a named results source providing data from memory.

@@ -24,6 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import java.util.Arrays;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
@@ -32,13 +36,6 @@ import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
-
-import gnu.trove.list.array.TDoubleArrayList;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
-
-import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public abstract class WeightedKernelFilterTest extends WeightedFilterTest {

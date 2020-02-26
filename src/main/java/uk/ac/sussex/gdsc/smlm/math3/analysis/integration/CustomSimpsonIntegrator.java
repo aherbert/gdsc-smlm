@@ -37,15 +37,15 @@ import org.apache.commons.math3.util.FastMath;
  *
  * <p>This implementation employs the basic trapezoid rule to calculate Simpson's rule.
  *
- * <p>Extends the default CustomSimpsonIntegrator to allow the last computed sum to be returned even
+ * <p>Extends the default SimpsonIntegrator to allow the last computed sum to be returned even
  * upon failure.
  *
  * @since 1.2
  */
 public class CustomSimpsonIntegrator extends SimpsonIntegrator {
-  // @CHECKSTYLE.OFF: MemeberName
+  // CHECKSTYLE.OFF: MemberName
   private long n;
-  // @CHECKSTYLE.ON: MemeberName
+  // CHECKSTYLE.ON: MemberName
   private double lastSum;
 
   /** Maximal number of iterations for Simpson. */
@@ -138,6 +138,9 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
       oldt = t;
     }
   }
+
+  // The following overrides are changed from protected to public to
+  // allow access by the TrapezoidIntegratorCopy.
 
   @Override
   public double getMax() {

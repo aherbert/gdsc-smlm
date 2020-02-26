@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij3d.ImageJ_3D_Viewer;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Level;

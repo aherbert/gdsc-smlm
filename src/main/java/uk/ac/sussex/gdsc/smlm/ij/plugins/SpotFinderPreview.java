@@ -24,6 +24,34 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.gui.ImageRoi;
+import ij.gui.Overlay;
+import ij.gui.Plot;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.plugin.filter.ExtendedPlugInFilter;
+import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.Blitter;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.LUT;
+import java.awt.AWTEvent;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Label;
+import java.awt.Rectangle;
+import java.awt.Scrollbar;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -66,37 +94,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.FakePerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-
-import ij.IJ;
-import ij.ImageListener;
-import ij.ImagePlus;
-import ij.gui.GenericDialog;
-import ij.gui.ImageRoi;
-import ij.gui.Overlay;
-import ij.gui.Plot;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.plugin.filter.ExtendedPlugInFilter;
-import ij.plugin.filter.PlugInFilterRunner;
-import ij.process.Blitter;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import ij.process.LUT;
-
-import java.awt.AWTEvent;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Label;
-import java.awt.Rectangle;
-import java.awt.Scrollbar;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Runs the candidate maxima identification on the image and provides a preview using an overlay.
@@ -495,10 +492,12 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       if (modelBounds != null) {
         if (!modelBounds.contains(bounds)) {
           //@formatter:off
-          ImageJUtils.log("WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d] does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
+          ImageJUtils.log(
+              "WARNING: Camera model bounds [x=%d,y=%d,width=%d,height=%d]"
+                  + " does not contain image target bounds [x=%d,y=%d,width=%d,height=%d]",
               modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
               bounds.x, bounds.y, bounds.width, bounds.height
-              );
+          );
           //@formatter:on
 
           // Warn if the model bounds are mismatched than the image as this may be an incorrect
@@ -506,10 +505,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         } else if (modelBounds.x != 0 || modelBounds.y != 0 || modelBounds.width > ip.getWidth()
             || modelBounds.height > ip.getHeight()) {
           //@formatter:off
-          ImageJUtils.log("WARNING: Probably an incorrect camera model!\nModel bounds [x=%d,y=%d,width=%d,height=%d]\ndo not match the image target bounds [width=%d,height=%d].",
+          ImageJUtils.log(
+              "WARNING: Probably an incorrect camera model!\n"
+                  + "Model bounds [x=%d,y=%d,width=%d,height=%d]\n"
+                  + "do not match the image target bounds [width=%d,height=%d].",
               modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
               ip.getWidth(),  ip.getHeight()
-              );
+          );
           //@formatter:on
         }
       }

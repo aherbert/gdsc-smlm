@@ -24,15 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import java.util.Arrays;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.rng.UniformRandomProvider;
-
-import java.util.Arrays;
 
 /**
  * Generates a Point Spread Function using an image constructed from diffraction limited spots

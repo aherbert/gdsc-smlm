@@ -24,13 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import gnu.trove.list.array.TDoubleArrayList;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.Arrays;
+import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Store a Gaussian kernel for use in convolution.

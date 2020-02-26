@@ -24,6 +24,51 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.gui.YesNoCancelDialog;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
+import ij.process.LUT;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.Scrollbar;
+import java.awt.SystemColor;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -99,54 +144,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Overlay;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.gui.YesNoCancelDialog;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.ImageProcessor;
-import ij.process.LUT;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Label;
-import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.Scrollbar;
-import java.awt.SystemColor;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.IntFunction;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Fits local maxima using a 2D Gaussian. Process each frame until a successive number of fits fail
@@ -3296,7 +3293,8 @@ public class PeakFit implements PlugInFilter {
       final GenericDialog gd2 = new GenericDialog("Crop Camera Model");
       //@formatter:off
       ImageJUtils.addMessage(gd2,
-          "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\nare larger than the image size [%dx%d].\n \nCrop the model?",
+          "WARNING:\n \nCamera model bounds\n[x=%d,y=%d,width=%d,height=%d]\n"
+              + "are larger than the image size [%dx%d].\n \nCrop the model?",
           modelBounds.x, modelBounds.y, modelBounds.width, modelBounds.height,
           width, height
           );

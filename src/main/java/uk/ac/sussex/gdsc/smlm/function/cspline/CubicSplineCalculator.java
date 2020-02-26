@@ -24,13 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
-import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
-import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import uk.ac.sussex.gdsc.core.data.TrivalueProvider;
+import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
+import uk.ac.sussex.gdsc.core.math.interpolation.DoubleCubicSplineData;
 
 /**
  * Computes the cubic spline coefficients for a 3D cubic spline from interpolated points.

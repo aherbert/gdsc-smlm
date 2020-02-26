@@ -24,13 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.Arrays;
 import java.util.logging.Logger;
+import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Fits a 2-dimensional Gaussian function for the specified peak. Can optionally fit an elliptical

@@ -24,6 +24,26 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.io.FileSaver;
+import ij.measure.Calibration;
+import ij.plugin.PlugIn;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import java.awt.Rectangle;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
@@ -39,29 +59,6 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
-
-import ij.CompositeImage;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.io.FileSaver;
-import ij.measure.Calibration;
-import ij.plugin.PlugIn;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.awt.Rectangle;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This plugin handle the save and load of per-pixel camera models.

@@ -25,9 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.ImageStack;
-
 import org.jtransforms.dht.DoubleDHT_3D;
-
 import pl.edu.icm.jlargearrays.LargeArray;
 
 /**

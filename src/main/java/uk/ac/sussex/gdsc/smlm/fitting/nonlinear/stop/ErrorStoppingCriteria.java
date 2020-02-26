@@ -24,12 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
+import java.util.logging.Level;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
-
-import java.util.logging.Level;
 
 /**
  * Defines the stopping criteria for the

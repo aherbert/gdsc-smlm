@@ -24,18 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
-import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-
 import java.awt.Rectangle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
+import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
 
 /**
  * Abstract base class for the image source for peak results.

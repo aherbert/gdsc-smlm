@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import java.util.Arrays;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.Bounds;
 import org.scijava.java3d.GeometryArray;
@@ -42,8 +43,6 @@ import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3d;
 import org.scijava.vecmath.Vector3f;
-
-import java.util.Arrays;
 
 /**
  * This class represents a list as a number of repeated shapes in the universe. Each item has its

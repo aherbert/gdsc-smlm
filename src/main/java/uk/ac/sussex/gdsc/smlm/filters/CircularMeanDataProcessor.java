@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import java.util.Arrays;
 import java.util.List;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is smoothed with a circular mean

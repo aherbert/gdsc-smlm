@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
 import ij.text.TextPanel;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 

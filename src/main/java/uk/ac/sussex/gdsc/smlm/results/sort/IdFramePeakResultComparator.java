@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results.sort;
 
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
 import java.io.Serializable;
 import java.util.Comparator;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Compares the results by Id then by frame.

@@ -24,6 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.plugin.PlugIn;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.function.Predicate;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -48,17 +56,6 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.MinMaxPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.PassPeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.MinMaxResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.function.Predicate;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.

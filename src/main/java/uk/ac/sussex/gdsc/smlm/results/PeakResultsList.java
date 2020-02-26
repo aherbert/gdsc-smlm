@@ -24,13 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
-
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 
 /**
  * Wrapper class to output to multiple results destinations.

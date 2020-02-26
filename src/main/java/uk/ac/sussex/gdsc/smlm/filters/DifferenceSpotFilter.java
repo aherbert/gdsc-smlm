@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import java.util.List;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with two

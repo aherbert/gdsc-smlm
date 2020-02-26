@@ -24,23 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
-import uk.ac.sussex.gdsc.core.ij.process.Fht;
-import uk.ac.sussex.gdsc.core.utils.ImageWindow;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
-import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -51,12 +37,6 @@ import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
-
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.rng.core.source64.SplitMix64;
-import org.jtransforms.fft.DoubleFFT_2D;
-import org.jtransforms.fft.FloatFFT_2D;
-
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Rectangle;
@@ -71,6 +51,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.rng.core.source64.SplitMix64;
+import org.jtransforms.fft.DoubleFFT_2D;
+import org.jtransforms.fft.FloatFFT_2D;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
+import uk.ac.sussex.gdsc.core.utils.ImageWindow;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
+import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 
 /**
  * Use the PC-PALM protocol to analyse a set of molecules to produce a correlation curve.

@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.match.BasePoint;
-
 import java.util.Arrays;
 import java.util.Objects;
+import uk.ac.sussex.gdsc.core.match.BasePoint;
 
 /**
  * A point that holds a reference to a PeakResult.

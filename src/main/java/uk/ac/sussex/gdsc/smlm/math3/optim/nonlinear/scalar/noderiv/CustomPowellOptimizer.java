@@ -38,9 +38,7 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv;
 
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
-
+import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
@@ -59,8 +57,8 @@ import org.apache.commons.math3.optim.univariate.SimpleUnivariateValueChecker;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 /**
  * Powell's algorithm.
@@ -207,8 +205,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     this(rel, abs, lineRel, lineAbs, null, false);
   }
 
-  // @CHECKSTYLE.OFF: LocalVariableName
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: LocalVariableName
+  // CHECKSTYLE.OFF: ParameterName
 
   @Override
   protected PointValuePair doOptimize() {

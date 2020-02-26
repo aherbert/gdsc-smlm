@@ -24,14 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
-import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -39,9 +31,6 @@ import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-
-import org.apache.commons.math3.util.FastMath;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +38,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.FloatMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 
 /**
  * Filters each pixel using a sliding median through the time stack. Medians are computed at set

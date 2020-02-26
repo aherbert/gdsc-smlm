@@ -24,6 +24,25 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.filter.ExtendedPlugInFilter;
+import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Formatter;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -38,28 +57,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.DataEstimator;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.filter.ExtendedPlugInFilter;
-import ij.plugin.filter.PlugInFilterRunner;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Contains methods to find the noise in the provided image data.

@@ -24,6 +24,36 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.Prefs;
+import ij.gui.GenericDialog;
+import ij.gui.YesNoCancelDialog;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import ij.util.Java2;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.EventQueue;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.event.ItemListener;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import org.apache.commons.lang3.StringUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
@@ -72,40 +102,6 @@ import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TsfPeakResultsWriter;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
-
-import ij.IJ;
-import ij.Prefs;
-import ij.gui.GenericDialog;
-import ij.gui.YesNoCancelDialog;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-import ij.util.Java2;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.EventQueue;
-import java.awt.Label;
-import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.event.ItemListener;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-
-import javax.swing.JFileChooser;
 
 /**
  * Opens peaks results and displays/converts them.
@@ -1693,16 +1689,6 @@ public class ResultsManager implements PlugIn {
     }
     return loadInputResults(inputOption, true, null, null, loadOption);
   }
-
-  /**
-   * Sets the input filename that will be used in
-   * {@link ResultsManager#loadInputResults(String, boolean, DistanceUnit, IntensityUnit)}.
-   *
-   * @param inputFilename the new input filename
-   */
-  // static void setInputFilename(String inputFilename) {
-  // ResultsManager.inputFilename = inputFilename;
-  // }
 
   /**
    * Batch load a set of results files.

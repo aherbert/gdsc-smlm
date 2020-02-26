@@ -24,6 +24,33 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -56,36 +83,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
-
-import ij.IJ;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyIterationsException;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
-import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -1790,7 +1787,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    *
    * @param args An array of output variables.
    *
-   *        <p>[0]: Double[1] - output: the number of species
+   *        <ul>
+   *
+   *        <li>[0]: Double[1] - output: the number of species
+   *
+   *        </ul>
    * @return Empty string
    */
   public static String getNumberOfSpecies(Object[] args) {
@@ -1812,9 +1813,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    *
    * @param args An array of input and output variables.
    *
-   *        <p>[0]: Double[1] - input: the index of the species
+   *        <ul>
    *
-   *        <p>[1]: Double[1] - output: the coefficient
+   *        <li>[0]: Double[1] - input: the index of the species
+   *
+   *        <li>[1]: Double[1] - output: the coefficient
+   *
+   *        </ul>
    * @return Empty string
    */
   public static String getD(Object[] args) {
@@ -1833,14 +1838,18 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   /**
    * Macro extension function.
    *
-   * <p>Get the population fraction for the requested species from the last call to fit the jump
+   * <li>Get the population fraction for the requested species from the last call to fit the jump
    * distances.
    *
    * @param args An array of input and output variables.
    *
-   *        <p>[0]: Double[1] - input: the index of the species
+   *        <ul>
    *
-   *        <p>[1]: Double[1] - output: the population fraction
+   *        <li>[0]: Double[1] - input: the index of the species
+   *
+   *        <li>[1]: Double[1] - output: the population fraction
+   *
+   *        </ul>
    * @return Empty string
    */
   public static String getF(Object[] args) {
@@ -1864,11 +1873,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    *
    * @param args An array of input and output variables.
    *
-   *        <p>[0]: Double[1] - input: the index of the species
+   *        <ul>
    *
-   *        <p>[1]: Double[1] - output: the coefficient
+   *        <li>[0]: Double[1] - input: the index of the species
    *
-   *        <p>[2]: Double[1] - output: the population fraction
+   *        <li>[1]: Double[1] - output: the coefficient
+   *
+   *        <li>[2]: Double[1] - output: the population fraction
+   *
+   *        </ul>
    * @return Empty string
    */
   public static String getSpecies(Object[] args) {

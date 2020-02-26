@@ -24,15 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.smlm.filters.FhtFilter;
-import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
-import uk.ac.sussex.gdsc.smlm.filters.KernelFilter;
-import uk.ac.sussex.gdsc.smlm.filters.ZeroKernelFilter;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -42,9 +33,16 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-
 import java.awt.AWTEvent;
 import java.util.concurrent.atomic.AtomicReference;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter;
+import uk.ac.sussex.gdsc.smlm.filters.FhtFilter.Operation;
+import uk.ac.sussex.gdsc.smlm.filters.KernelFilter;
+import uk.ac.sussex.gdsc.smlm.filters.ZeroKernelFilter;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 /**
  * Convolve an image with a kernel from another image.

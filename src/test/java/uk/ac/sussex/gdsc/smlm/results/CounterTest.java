@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.count.Counter;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 
 @SuppressWarnings({"javadoc"})
 public class CounterTest {

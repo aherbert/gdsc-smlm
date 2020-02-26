@@ -24,6 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -32,10 +35,6 @@ import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
-import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({"javadoc"})
 public class ErfGaussian2DFunctionVsPsfModelTest {

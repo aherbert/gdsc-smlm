@@ -24,6 +24,38 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.Line;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.plugin.PlugIn;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Label;
+import java.awt.TextField;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -53,42 +85,6 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.ImagePsfModel;
-
-import gnu.trove.list.array.TDoubleArrayList;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.Line;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.plugin.PlugIn;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.PoissonSampler;
-
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Label;
-import java.awt.TextField;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Produces an drift curve for a PSF image using fitting.
@@ -1119,8 +1115,6 @@ public class PsfDrift implements PlugIn {
     final int centre = psfSettings.getCentreImage();
 
     // Extract valid values (some can be NaN)
-    double[] slice0;
-    double[] slice1;
     double[] sw0 = new double[w0.length];
     double[] sw1 = new double[w1.length];
     final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
@@ -1141,9 +1135,9 @@ public class PsfDrift implements PlugIn {
       IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
       return;
     }
-    slice0 = s0.toArray();
+    double[] slice0 = s0.toArray();
     sw0 = Arrays.copyOf(sw0, c0);
-    slice1 = s1.toArray();
+    double[] slice1 = s1.toArray();
     sw1 = Arrays.copyOf(sw1, c1);
 
     // Smooth

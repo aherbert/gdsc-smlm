@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import java.util.Collections;
 import java.util.List;
 

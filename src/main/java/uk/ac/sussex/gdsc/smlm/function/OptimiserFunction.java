@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import gnu.trove.list.array.TDoubleArrayList;
-
 import java.util.Arrays;
 
 /**

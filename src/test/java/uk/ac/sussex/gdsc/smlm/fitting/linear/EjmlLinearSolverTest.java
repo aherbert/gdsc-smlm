@@ -24,6 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
@@ -42,18 +52,6 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class EjmlLinearSolverTest {
@@ -361,8 +359,8 @@ public class EjmlLinearSolverTest {
   //@formatter:on
 
   // Allow matrix name A and vector names b & x for equation A x = b
-  // @CHECKSTYLE.OFF: MemberName
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: ParameterName
 
   private abstract class SolverTimingTask extends BaseTimingTask {
     DenseMatrix64F[] a;
@@ -450,8 +448,8 @@ public class EjmlLinearSolverTest {
     }
   }
 
-  private class CholeskyLDLTSolverTimingTask extends SolverTimingTask {
-    public CholeskyLDLTSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class CholeskyLdltSolverTimingTask extends SolverTimingTask {
+    public CholeskyLdltSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("CholeskyLDLT Solver", a, b);
     }
 
@@ -573,7 +571,7 @@ public class EjmlLinearSolverTest {
     tasks.add(new PseudoInverseSolverTimingTask(a, b));
     tasks.add(new LinearSolverTimingTask(a, b));
     tasks.add(new CholeskySolverTimingTask(a, b));
-    tasks.add(new CholeskyLDLTSolverTimingTask(a, b));
+    tasks.add(new CholeskyLdltSolverTimingTask(a, b));
     tasks.add(new DirectInversionSolverTimingTask(a, b));
     for (final SolverTimingTask task : tasks) {
       if (!task.badSolver) {
@@ -726,8 +724,8 @@ public class EjmlLinearSolverTest {
     }
   }
 
-  private class CholeskyLDLTInversionTimingTask extends InversionTimingTask {
-    public CholeskyLDLTInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
+  private class CholeskyLdltInversionTimingTask extends InversionTimingTask {
+    public CholeskyLdltInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
         double[][] answer) {
       super("CholeskyLDLT Inversion", a, ignore, answer);
     }
@@ -871,7 +869,7 @@ public class EjmlLinearSolverTest {
     // Added in descending speed order
     tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
     tasks.add(new LinearInversionTimingTask(a, ignore, answer));
-    tasks.add(new CholeskyLDLTInversionTimingTask(a, ignore, answer));
+    tasks.add(new CholeskyLdltInversionTimingTask(a, ignore, answer));
     tasks.add(new CholeskyInversionTimingTask(a, ignore, answer));
     tasks.add(new DirectInversionInversionTimingTask(a, ignore, answer));
     tasks.add(new DiagonalDirectInversionInversionTimingTask(a, ignore, answer));

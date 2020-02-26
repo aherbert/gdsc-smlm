@@ -24,23 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import uk.ac.sussex.gdsc.core.utils.TurboList;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-
+import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
-
+import uk.ac.sussex.gdsc.core.utils.TurboList;
 import vib.InterpolatedImage;
-
-import java.util.List;
 
 /**
  * Provide helper functionality for dealing with the CustomContent.

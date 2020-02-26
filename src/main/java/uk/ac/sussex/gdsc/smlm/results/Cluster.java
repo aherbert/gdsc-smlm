@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Define a cluster of localisations.

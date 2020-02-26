@@ -45,9 +45,9 @@ public class DFastLog extends FastLog {
   /** The base. */
   private final double base;
   /** The number of bits to remove from a float mantissa. */
-  // @CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: MemberName
   private final int q;
-  // @CHECKSTYLE.ON: MemberName
+  // CHECKSTYLE.ON: MemberName
   /** (q-1). */
   private final int qm1;
   /**

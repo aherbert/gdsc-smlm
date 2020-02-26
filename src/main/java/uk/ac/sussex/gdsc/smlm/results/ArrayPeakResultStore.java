@@ -24,10 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
-import org.apache.commons.rng.UniformRandomProvider;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -35,6 +31,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Predicate;
+import org.apache.commons.rng.UniformRandomProvider;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Stores peak results using an array.

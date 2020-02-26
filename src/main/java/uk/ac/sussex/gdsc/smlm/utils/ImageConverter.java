@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-
 import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 
 /**
  * Contains methods for converting an image to float data.

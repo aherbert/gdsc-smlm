@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
-import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
+import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 @SuppressWarnings({"javadoc"})
 public class ParameterBoundsTest {

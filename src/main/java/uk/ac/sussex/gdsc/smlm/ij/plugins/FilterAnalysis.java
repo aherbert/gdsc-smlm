@@ -24,6 +24,26 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.io.OpenDialog;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -46,28 +66,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.SnrHysteresisFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.TraceFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
-import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.io.OpenDialog;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * Run different filtering methods on a set of labelled peak results outputting performance

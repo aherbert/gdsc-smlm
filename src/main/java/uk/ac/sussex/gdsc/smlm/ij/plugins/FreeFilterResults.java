@@ -24,6 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.plugin.PlugIn;
+import java.awt.Checkbox;
+import java.awt.event.ItemEvent;
+import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -54,13 +59,6 @@ import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter2;
 import uk.ac.sussex.gdsc.smlm.results.filter.XyWidthFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.XyWidthFilter2;
-
-import ij.IJ;
-import ij.plugin.PlugIn;
-
-import java.awt.Checkbox;
-import java.awt.event.ItemEvent;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Filters PeakFit results that are stored in memory using the configured filters.

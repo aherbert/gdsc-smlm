@@ -24,6 +24,52 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.Line;
+import ij.gui.Overlay;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.io.FileInfo;
+import ij.measure.Calibration;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.Blitter;
+import ij.process.ByteProcessor;
+import ij.process.FloatPolygon;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import java.awt.AWTEvent;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
@@ -68,13 +114,13 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -106,55 +152,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.HeightResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.Tensor2D;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.DialogListener;
-import ij.gui.GenericDialog;
-import ij.gui.ImageCanvas;
-import ij.gui.Line;
-import ij.gui.Overlay;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.io.FileInfo;
-import ij.measure.Calibration;
-import ij.plugin.filter.PlugInFilter;
-import ij.process.Blitter;
-import ij.process.ByteProcessor;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.AWTEvent;
-import java.awt.Checkbox;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Label;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces an average PSF image using selected diffraction limited spots from a sample image.
@@ -1601,7 +1598,7 @@ public class PsfCreator implements PlugInFilter {
     final Configuration configPlugin = new Configuration();
     // We have a different fit configuration just for the PSF Creator.
     // This allows it to be saved and not effect PeakFit settings.
-    // Sanitise the settings because previous versions did not store them and they 
+    // Sanitise the settings because previous versions did not store them and they
     // can be null.
     // PSF which is not allowed to be non-Gaussian.
     if (!PsfHelper.isGaussian2D(settings.getPsf())) {

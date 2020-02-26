@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
+import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 
 /**
  * Test the ToleranceChecker can converge as expected.

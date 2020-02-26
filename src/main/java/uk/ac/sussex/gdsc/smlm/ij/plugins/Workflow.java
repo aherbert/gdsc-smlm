@@ -24,13 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 
 /**
  * Allow processing work in stages, repeating only the stages necessary to render new results given

@@ -24,23 +24,20 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
-import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
 public class PsfProtosTest {

@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.core.utils.DigestUtils;
-
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import uk.ac.sussex.gdsc.core.utils.DigestUtils;
 
 /**
  * Provide digest functionality for ImageJ images to digest the pixels array.

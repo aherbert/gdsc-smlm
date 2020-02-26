@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.Arrays;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.special.Gamma;
-
-import java.util.Arrays;
 
 /**
  * Computes probability values from the Chi-squared distribution

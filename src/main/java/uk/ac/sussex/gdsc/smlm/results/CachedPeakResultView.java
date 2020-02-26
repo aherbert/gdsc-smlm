@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.FramePeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
-
-import gnu.trove.map.hash.TIntObjectHashMap;
-
-import java.util.function.Predicate;
 
 /**
  * Provides a cache of the view of the results.

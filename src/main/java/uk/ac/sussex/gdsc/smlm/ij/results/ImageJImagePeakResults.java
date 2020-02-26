@@ -24,14 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
-import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
-import uk.ac.sussex.gdsc.core.utils.SoftLock;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -44,11 +36,16 @@ import ij.process.ImageProcessor;
 import ij.process.InfinityMappedFloatProcessor;
 import ij.process.MappedFloatProcessor;
 import ij.process.ShortProcessor;
-
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-
 import java.awt.Rectangle;
 import java.util.Arrays;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
+import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Saves the fit results to an ImageJ image.

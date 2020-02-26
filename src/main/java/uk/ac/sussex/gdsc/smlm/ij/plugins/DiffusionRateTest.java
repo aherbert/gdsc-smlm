@@ -24,6 +24,28 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.LutLoader;
+import ij.plugin.PlugIn;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+import ij.text.TextWindow;
+import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math3.distribution.GammaDistribution;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -56,31 +78,6 @@ import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.LutLoader;
-import ij.plugin.PlugIn;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-import ij.text.TextWindow;
-
-import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-
-import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
  * plugin so that the diffusion should be equivalent.
@@ -94,12 +91,6 @@ public class DiffusionRateTest implements PlugIn {
 
   private static final AtomicReference<SimulationData> lastSimulation = new AtomicReference<>();
   private SimulationData simulation;
-
-  /** The last simulated precision. */
-  // static double lastSimulatedPrecision;
-
-  /** The last simulated dataset. */
-  // static String[] lastSimulatedDataset = new String[2];
 
   private CreateDataSettings.Builder settings;
   private int myAggregateSteps;

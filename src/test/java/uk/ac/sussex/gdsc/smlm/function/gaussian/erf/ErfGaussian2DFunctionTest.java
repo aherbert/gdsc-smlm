@@ -24,6 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
+import java.util.logging.Level;
+import org.apache.commons.math3.util.Precision;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -47,14 +53,6 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
-
-import org.apache.commons.math3.util.Precision;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
-import java.util.logging.Level;
 
 @SuppressWarnings({"javadoc"})
 public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {

@@ -24,20 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.process.FloatProcessor;
+import java.util.Arrays;
+import org.jtransforms.fft.DoubleFFT_2D;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-
-import ij.process.FloatProcessor;
-
-import org.jtransforms.fft.DoubleFFT_2D;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class DoubleDht2DTest {

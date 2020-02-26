@@ -24,15 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
-import uk.ac.sussex.gdsc.core.data.procedures.TrivalueProcedure;
-import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
-import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
-import uk.ac.sussex.gdsc.core.math.interpolation.FloatCustomTricubicFunction;
-
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -41,6 +32,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import uk.ac.sussex.gdsc.core.data.procedures.TrivalueProcedure;
+import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.logging.TrackProgress;
+import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
+import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
+import uk.ac.sussex.gdsc.core.math.interpolation.FloatCustomTricubicFunction;
 
 /**
  * Stores a cubic spline data.

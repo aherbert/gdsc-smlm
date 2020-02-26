@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
-import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 @SuppressWarnings({"unchecked", "javadoc"})
 public class TimeUnitTest {

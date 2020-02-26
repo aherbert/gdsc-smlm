@@ -15,10 +15,9 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Implementation of the Poisson distribution for computation of the probability mass function.

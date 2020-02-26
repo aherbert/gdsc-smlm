@@ -24,6 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.ImageStack;
+import ij.process.ImageProcessor;
+import java.util.Arrays;
+import java.util.logging.Logger;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
@@ -34,20 +45,6 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
 import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
-
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-
-import java.util.Arrays;
-import java.util.logging.Logger;
 
 /**
  * Perform 3D image alignment using normalised cross-correlation.

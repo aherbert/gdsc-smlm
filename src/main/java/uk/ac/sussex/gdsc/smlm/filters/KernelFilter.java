@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-
 import ij.process.FloatProcessor;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
  * Computes a convolution in the spatial domain for each point within the array. Pixels outside the

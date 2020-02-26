@@ -24,14 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.core.annotation.Nullable;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.annotation.Nullable;
 
 /**
  * Uses {@link XStream} functionality for reading/writing {@link Filter} members as XML.

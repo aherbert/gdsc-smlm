@@ -24,16 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import java.util.Arrays;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.math.interpolation.CachedBicubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-
-import java.util.Arrays;
-import java.util.logging.Logger;
 
 /**
  * Perform 2D image alignment using normalised cross-correlation.

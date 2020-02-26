@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
-
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a

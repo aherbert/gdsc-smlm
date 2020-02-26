@@ -24,14 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -41,13 +33,18 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
-
-import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
-
 import java.awt.AWTEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.NucleusMaskSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 /**
  * This plugin creates a mask image stack using an XY and XZ mask image.

@@ -24,12 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Predicate;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Stores peak results using a set.

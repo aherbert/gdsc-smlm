@@ -24,18 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
  * Allows results held in memory to be renamed.

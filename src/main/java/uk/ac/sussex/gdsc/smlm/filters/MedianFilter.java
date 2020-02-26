@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
-
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 
 /**
  * Computes the block median for each point within the array.
@@ -259,12 +258,12 @@ public class MedianFilter {
   private static final float findNthLowestNumber(float[] buf, int bufLength, int n) {
     // Hoare's find, algorithm, based on http://www.geocities.com/zabrodskyvlada/3alg.html
     // Contributed by Heinz Klar.
-    // @CHECKSTYLE.OFF: LocalVariableName
+    // CHECKSTYLE.OFF: LocalVariableName
     int i;
     int j;
     int l = 0;
     int m = bufLength - 1;
-    // @CHECKSTYLE.ON: LocalVariableName
+    // CHECKSTYLE.ON: LocalVariableName
     float med = buf[n];
 
     while (l < m) {
@@ -282,8 +281,7 @@ public class MedianFilter {
         buf[i] = dum;
         i++;
         j--;
-      }
-      while ((j >= n) && (i <= n));
+      } while ((j >= n) && (i <= n));
       if (j < n) {
         l = i;
       }

@@ -44,9 +44,9 @@ public abstract class MultiErfGaussian2DFunction extends ErfGaussian2DFunction {
   protected final int[] gradientIndices;
 
   /** The target intensity for each peak. */
-  // @CHECKSTYLE.OFF: LocalVariableName
+  // CHECKSTYLE.OFF: MemberName
   protected final double[] tI;
-  // @CHECKSTYLE.ON: LocalVariableName
+  // CHECKSTYLE.ON: MemberName
 
   /**
    * Instantiates a new multi-peak erf gaussian 2D function.

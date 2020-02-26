@@ -20,4 +20,7 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
   <suppress checks="MissingJavadocType" files=".*[\\/]test[\\/].*" />
+  <suppress checks="LineLength" files=".*BenchmarkSpotFit.java" lines="2284-2294" />
+  <suppress checks="LineLength" files=".*TsfPeakResultsReader.java" lines="67-90" />
+  <suppress checks="LineLength" files=".*LvmGradientProcedureTest.java" lines="140-189" />
 </suppressions>

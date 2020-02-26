@@ -24,6 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.WindowManager;
+import ij.plugin.PlugIn;
+import ij.process.ImageProcessor;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -40,19 +50,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.WidthResultProcedure;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.WindowManager;
-import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Filters PeakFit results that are stored in memory using various fit criteria.

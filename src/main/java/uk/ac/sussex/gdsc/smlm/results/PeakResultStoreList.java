@@ -24,11 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
-
-import org.apache.commons.rng.UniformRandomProvider;
-
 import java.util.Comparator;
+import org.apache.commons.rng.UniformRandomProvider;
+import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 
 /**
  * Stores peak results with list access.

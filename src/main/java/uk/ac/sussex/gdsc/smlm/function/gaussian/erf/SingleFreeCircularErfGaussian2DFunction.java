@@ -24,20 +24,19 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
  */
 public class SingleFreeCircularErfGaussian2DFunction extends SingleErfGaussian2DFunction {
   // Allow underscores in the variables used during computation
-  // @CHECKSTYLE.OFF: ParameterName|LocalVariableName
+  // CHECKSTYLE.OFF: ParameterName|LocalVariableName
 
   /** The gradient indices. */
   static final int[] gradientIndices;

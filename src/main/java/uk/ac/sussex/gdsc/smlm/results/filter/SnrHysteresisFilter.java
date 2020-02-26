@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
-import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
+import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Filter results using a signal-to-noise (SNR) threshold. Any results above the upper SNR limit are

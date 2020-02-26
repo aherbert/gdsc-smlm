@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import java.io.File;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.optics.SampleMode;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -61,8 +62,6 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.OutlineMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.PlotMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.SpanningTreeMode;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
-
-import java.io.File;
 
 /**
  * Contains helper functions for the GUIProtos class.
@@ -292,7 +291,8 @@ public final class GuiProtosHelper {
     builder.setRmsdZThreshold(0.05);
     builder.setComShiftThreshold(0.01);
     // Copy default fit settings but modify for fitting standalone PSFs
-    final FitEngineSettings.Builder febuilder = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+    final FitEngineSettings.Builder febuilder =
+        FitProtosHelper.defaultFitEngineSettings.toBuilder();
     febuilder.setIncludeNeighbours(false);
     builder.setFitEngineSettings(febuilder);
     builder.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
@@ -336,9 +336,10 @@ public final class GuiProtosHelper {
   }
 
   /** The default CameraModelFisherInformationAnalysisSettings. */
-  // @CHECKSTYLE.OFF: LineLength
-  public static final CameraModelFisherInformationAnalysisSettings defaultCameraModelFisherInformationAnalysisSettings;
-  // @CHECKSTYLE.ON: LineLength
+  // @formatter:off
+  public static final CameraModelFisherInformationAnalysisSettings
+      defaultCameraModelFisherInformationAnalysisSettings;
+  // @formatter:on
 
   static {
     final CameraModelFisherInformationAnalysisSettings.Builder builder =

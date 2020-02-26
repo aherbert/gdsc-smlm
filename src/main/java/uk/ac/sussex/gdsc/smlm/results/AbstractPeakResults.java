@@ -24,15 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import java.awt.Rectangle;
+import java.util.Collection;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
-
-import java.awt.Rectangle;
-import java.util.Collection;
 
 /**
  * Abstract base class for peak results.

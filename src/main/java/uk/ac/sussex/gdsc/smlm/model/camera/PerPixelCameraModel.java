@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-
 import java.awt.Rectangle;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
  * Define the methods for manipulating camera pixel data.

@@ -24,21 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
-import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
-import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
-import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
-import uk.ac.sussex.gdsc.smlm.function.FixedNonLinearFunction;
-import uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
@@ -60,9 +47,20 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
+import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
+import uk.ac.sussex.gdsc.smlm.function.FixedNonLinearFunction;
+import uk.ac.sussex.gdsc.smlm.function.LikelihoodWrapper;
+import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
+import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
+import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 
 /**
  * Uses Maximum Likelihood Estimation (MLE) to fit a nonlinear model with coefficients (a) for a set

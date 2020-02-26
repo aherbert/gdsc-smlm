@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.apache.commons.rng.UniformRandomProvider;
-
 import java.util.Comparator;
+import org.apache.commons.rng.UniformRandomProvider;
 
 /**
  * Stores peak results and prevents modification.

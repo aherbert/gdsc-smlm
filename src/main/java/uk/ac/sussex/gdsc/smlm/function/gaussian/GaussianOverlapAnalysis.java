@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
-
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Compute the overlap between 2D Gaussian functions.

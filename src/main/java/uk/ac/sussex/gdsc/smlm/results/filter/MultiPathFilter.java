@@ -24,6 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
@@ -31,15 +38,6 @@ import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
 import uk.ac.sussex.gdsc.smlm.results.count.ConsecutiveFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.FailCounter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Filter a multi-path set of peak results into accepted/rejected.
@@ -910,7 +908,7 @@ public class MultiPathFilter {
     if (result == singleResults) {
       return new SelectedResult(singleResults,       multiPathResult.getSingleFitResult());
     }
-                                       return new SelectedResult(singleDoubletResults,multiPathResult.getDoubletFitResult());
+    return new SelectedResult(singleDoubletResults,  multiPathResult.getDoubletFitResult());
     //@formatter:on
   }
 

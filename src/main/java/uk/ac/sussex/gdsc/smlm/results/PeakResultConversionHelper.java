@@ -388,9 +388,12 @@ public class PeakResultConversionHelper {
     // there is no converter; or the converter will output the wrong units.
 
     //@formatter:off
-    bad |= (hasIntensityUnit() && (!hasIntensityConverter() || intensityUnit != getIntensityConverter().to()));
-    bad |= (hasDistanceUnit() && (!hasDistanceConverter() || distanceUnit != getDistanceConverter().to()));
-    bad |= (hasAngleUnit() && (!hasAngleConverter() || angleUnit != getAngleConverter().to()));
+    bad |= (hasIntensityUnit()
+        && (!hasIntensityConverter() || intensityUnit != getIntensityConverter().to()));
+    bad |= (hasDistanceUnit()
+        && (!hasDistanceConverter() || distanceUnit != getDistanceConverter().to()));
+    bad |= (hasAngleUnit()
+        && (!hasAngleConverter() || angleUnit != getAngleConverter().to()));
     //@formatter:on
 
     return !bad;

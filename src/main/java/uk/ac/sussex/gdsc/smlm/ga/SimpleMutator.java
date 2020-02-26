@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 /**
  * Mutates the sequence by selecting random positions and random shifts.

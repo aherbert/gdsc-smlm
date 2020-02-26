@@ -24,15 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.math.NumberUtils;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.smlm.utils.Convolution;
-import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
-import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
-
 import gnu.trove.function.TDoubleFunction;
 import gnu.trove.list.array.TDoubleArrayList;
-
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.AbstractConvergenceChecker;
@@ -43,6 +36,11 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.math.NumberUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.Convolution;
+import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
+import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 
 /**
  * Calculate the Fisher information for a Poisson-Gamma-Gaussian distribution.

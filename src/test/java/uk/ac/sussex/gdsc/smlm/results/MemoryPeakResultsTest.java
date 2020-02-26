@@ -24,14 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-
-import org.junit.jupiter.api.Test;
-
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"javadoc"})
 public class MemoryPeakResultsTest {

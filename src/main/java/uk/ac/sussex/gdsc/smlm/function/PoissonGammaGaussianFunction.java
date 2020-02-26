@@ -24,17 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
-import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
+import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 
 /**
  * This is a function to compute the likelihood assuming a Poisson-Gamma-Gaussian distribution.

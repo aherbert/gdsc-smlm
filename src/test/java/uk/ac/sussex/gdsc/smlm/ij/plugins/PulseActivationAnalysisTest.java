@@ -24,24 +24,22 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.TestUtils;
-
+import java.util.Iterator;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.opentest4j.AssertionFailedError;
-
-import java.util.Iterator;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestUtils;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions.
  */
 @SuppressWarnings({"javadoc"})
 public class PulseActivationAnalysisTest {
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   @SeededTest
   public void canLinearlyUnmix2Channels(RandomSeed seed) {

@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.EigenDecomposition;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Compute the inertia tensor for a 3D object.

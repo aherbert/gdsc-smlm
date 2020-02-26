@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
  * Implements the probability density function for a Poisson-Gamma-Gaussian Mixture. The Gaussian is

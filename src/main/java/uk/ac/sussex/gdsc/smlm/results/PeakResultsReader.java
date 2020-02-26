@@ -24,6 +24,23 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import uk.ac.sussex.gdsc.core.annotation.NotNull;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -44,25 +61,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
-
-import java.awt.Rectangle;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Reads the fit results from file.
@@ -1116,68 +1114,105 @@ public class PeakResultsReader {
     abstract PeakResult read(String line);
   }
 
-  //@formatter:off
   private class LineReaderV4 extends LineReader {
     int fieldCount;
-    LineReaderV4(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
+
+    LineReaderV4(MemoryPeakResults results, int fieldCount) {
+      super(results);
+      this.fieldCount = fieldCount;
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultV4(line, fieldCount);
     }
   }
+
   private class LineReaderDV4 extends LineReader {
     int fieldCount;
-    LineReaderDV4(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
+
+    LineReaderDV4(MemoryPeakResults results, int fieldCount) {
+      super(results);
+      this.fieldCount = fieldCount;
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultDeviationsV4(line, fieldCount);
     }
   }
+
   private class LineReaderV3 extends LineReader {
     int fieldCount;
-    LineReaderV3(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
+
+    LineReaderV3(MemoryPeakResults results, int fieldCount) {
+      super(results);
+      this.fieldCount = fieldCount;
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultV3(line, fieldCount);
     }
   }
+
   private class LineReaderDV3 extends LineReader {
     int fieldCount;
-    LineReaderDV3(MemoryPeakResults results, int fieldCount) { super(results); this.fieldCount=fieldCount; }
+
+    LineReaderDV3(MemoryPeakResults results, int fieldCount) {
+      super(results);
+      this.fieldCount = fieldCount;
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultDeviationsV3(line, fieldCount);
     }
   }
+
   private class LineReaderV2 extends LineReader {
-    LineReaderV2(MemoryPeakResults results) { super(results); }
+    LineReaderV2(MemoryPeakResults results) {
+      super(results);
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultV2(line);
     }
   }
+
   private class LineReaderDV2 extends LineReader {
-    LineReaderDV2(MemoryPeakResults results) { super(results); }
+    LineReaderDV2(MemoryPeakResults results) {
+      super(results);
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultDeviationsV2(line);
     }
   }
+
   private class LineReaderV1 extends LineReader {
-    LineReaderV1(MemoryPeakResults results) { super(results); }
+    LineReaderV1(MemoryPeakResults results) {
+      super(results);
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultV1(line);
     }
   }
+
   private class LineReaderDV1 extends LineReader {
-    LineReaderDV1(MemoryPeakResults results) { super(results); }
+    LineReaderDV1(MemoryPeakResults results) {
+      super(results);
+    }
+
     @Override
     PeakResult read(String line) {
       return createPeakResultDeviationsV1(line);
     }
   }
-  //@formatter:on
 
   private LineReader createLineReader(MemoryPeakResults results, int version, int fieldCount) {
     switch (version) {

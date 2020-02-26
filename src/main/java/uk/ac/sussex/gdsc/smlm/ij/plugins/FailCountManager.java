@@ -24,6 +24,29 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TByteArrayList;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.Prefs;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.Plot;
+import ij.plugin.PlugIn;
+import ij.text.TextWindow;
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import uk.ac.sussex.gdsc.core.ags.utils.data.trees.gen2.IntResultHeap;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -58,32 +81,6 @@ import uk.ac.sussex.gdsc.smlm.results.count.PassRateFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.ResettingFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.RollingWindowFailCounter;
 import uk.ac.sussex.gdsc.smlm.results.count.WeightedFailCounter;
-
-import gnu.trove.list.array.TByteArrayList;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.Plot;
-import ij.plugin.PlugIn;
-import ij.text.TextWindow;
-
-import java.awt.Rectangle;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 /**
  * This plugin handles generation and analysis of fail counts to optimise the stopping criteria for

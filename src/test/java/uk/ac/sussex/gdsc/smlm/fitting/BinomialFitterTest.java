@@ -24,13 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
-
+import java.util.logging.Logger;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
@@ -39,8 +33,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-
-import java.util.logging.Logger;
+import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.junit5.SeededTest;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
 public class BinomialFitterTest {
@@ -208,7 +206,7 @@ public class BinomialFitterTest {
   }
 
   // Allow n and p for parameter names
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   private static void fitBinomial(UniformRandomProvider rg, int n, double p, boolean zeroTruncated,
       boolean maximumLikelihood, int minN, int maxN) {
@@ -292,8 +290,7 @@ public class BinomialFitterTest {
         int count;
         do {
           count = sampler.sample();
-        }
-        while (count == 0);
+        } while (count == 0);
         data[i] = count;
       }
     } else {

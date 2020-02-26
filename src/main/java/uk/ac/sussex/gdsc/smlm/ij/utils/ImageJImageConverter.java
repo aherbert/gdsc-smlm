@@ -24,12 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
+import ij.process.ImageProcessor;
+import java.awt.Rectangle;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
-
-import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
 
 /**
  * Contains methods for converting an image to float data. Simple wrapper around

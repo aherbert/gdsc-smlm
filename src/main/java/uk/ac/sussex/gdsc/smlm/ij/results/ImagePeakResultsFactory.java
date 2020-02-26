@@ -24,10 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
+import java.awt.Rectangle;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
-
-import java.awt.Rectangle;
 
 /**
  * A factory for creating ImagePeakResults objects.

@@ -48,9 +48,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public class TurboLog2 extends TurboLog {
   /** The number of bits to remove from a float mantissa. */
-  // @CHECKSTYLE.OFF: MemberName
+  // CHECKSTYLE.OFF: MemberName
   private final int q;
-  // @CHECKSTYLE.ON: MemberName
+  // CHECKSTYLE.ON: MemberName
   /** The number of bits to remove from a double mantissa. */
   private final int qd;
   /**

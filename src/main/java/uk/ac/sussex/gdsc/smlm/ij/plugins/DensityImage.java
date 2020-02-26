@@ -24,6 +24,21 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.plugin.PlugIn;
+import ij.plugin.frame.Recorder;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.random.HaltonSequenceGenerator;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -39,25 +54,6 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.StandardResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
-
-import gnu.trove.list.array.TDoubleArrayList;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.WindowManager;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.Recorder;
-
-import org.apache.commons.math3.random.HaltonSequenceGenerator;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.rng.simple.internal.SeedFactory;
-
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Produces an image on localisation using their density.

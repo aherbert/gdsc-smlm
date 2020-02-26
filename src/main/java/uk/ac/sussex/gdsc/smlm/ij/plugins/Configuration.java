@@ -24,6 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.plugin.PlugIn;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.SystemColor;
+import java.awt.TextField;
+import java.awt.event.ItemEvent;
+import java.io.File;
+import java.util.Iterator;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -40,20 +52,6 @@ import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-
-import ij.IJ;
-import ij.plugin.PlugIn;
-
-import java.awt.Checkbox;
-import java.awt.Choice;
-import java.awt.Color;
-import java.awt.SystemColor;
-import java.awt.TextField;
-import java.awt.event.ItemEvent;
-import java.io.File;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Adjust the configuration used for fitting.

@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
-
-import java.util.Arrays;
 
 @SuppressWarnings({"javadoc"})
 public class FakeGradientFunction

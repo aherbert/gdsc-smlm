@@ -24,6 +24,28 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import ij.IJ;
+import ij.ImageJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.gui.Toolbar;
+import ij.plugin.PlugIn;
+import ij.plugin.tool.PlugInTool;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
@@ -45,30 +67,6 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
-
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.GenericDialog;
-import ij.gui.ImageCanvas;
-import ij.gui.Overlay;
-import ij.gui.PointRoi;
-import ij.gui.Roi;
-import ij.gui.Toolbar;
-import ij.plugin.PlugIn;
-import ij.plugin.tool.PlugInTool;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import ij.text.TextPanel;
-import ij.text.TextWindow;
-
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 /**
  * Plugin to fit spots interactively.

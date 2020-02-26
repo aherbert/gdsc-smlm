@@ -24,14 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
+import java.util.Arrays;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
 import org.scijava.java3d.TransparencyAttributes;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
-
-import java.util.Arrays;
 
 /**
  * This class represents a list of repeated shapes in the universe that can be added to a scene. It

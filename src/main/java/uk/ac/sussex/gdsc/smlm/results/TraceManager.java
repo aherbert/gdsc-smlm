@@ -24,6 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -37,14 +42,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
  * Trace localisations through a time stack to identify single molecules.
  */
@@ -55,20 +52,21 @@ public class TraceManager {
   public enum TraceMode {
     //@formatter:off
     /**
-     * Search the latest localisations first. This is equivalent to a downwards search. When a localisation is found
-     * no more time points will be searched.
+     * Search the latest localisations first. This is equivalent to a downwards search.
+     * When a localisation is found no more time points will be searched.
      */
     LATEST_FORERUNNER{ @Override
     public String getName() { return "Latest forerunner"; }},
     /**
-     * Search the earliest localisations first. This is equivalent to a depth first search. When a localisation is
-     * found no more time points will be searched.
+     * Search the earliest localisations first. This is equivalent to a depth first search.
+     * When a localisation is found no more time points will be searched.
      */
     EARLIEST_FORERUNNER{ @Override
     public String getName() { return "Earliest forerunner"; }},
     /**
-     * Search all time points within the distance threshold. This is slower as all time points are searched. It is
-     * equivalent to single-linkage clustering with a time constraint on joined localisations.
+     * Search all time points within the distance threshold. This is slower as all time points
+     * are searched. It is equivalent to single-linkage clustering with a time constraint on
+     * joined localisations.
      */
     SINGLE_LINKAGE{ @Override
     public String getName() { return "Single linkage"; }};

@@ -24,6 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -65,15 +73,6 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyzrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.ZResultProcedure;
-
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Stores peak results in memory.

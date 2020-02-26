@@ -24,11 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 /**
  * Filter results using a signal-to-background ratio (SBR) threshold.

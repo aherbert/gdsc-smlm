@@ -24,8 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient;
 
-import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
-
+import java.util.Locale;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.util.Localizable;
@@ -40,8 +39,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptim
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.util.FastMath;
-
-import java.util.Locale;
+import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 /**
  * Implementation of the Broyden-Fletcher-Goldfarb-Shanno (BFGS) variant of the
@@ -480,8 +478,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
 
     do {
       machEps /= 2.0;
-    }
-    while ((1.0 + (machEps / 2.0)) != 1.0);
+    } while ((1.0 + (machEps / 2.0)) != 1.0);
 
     // ISO standard is 2^-52 = 2.220446049e-16
 

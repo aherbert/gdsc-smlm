@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
+import java.awt.Rectangle;
+import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
@@ -33,10 +35,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-
-import org.apache.commons.math3.util.FastMath;
-
-import java.awt.Rectangle;
 
 /**
  * Draws the fit results using the Gaussian PSF to an ImageJ image.
@@ -264,11 +262,11 @@ public class PsfImagePeakResults extends ImageJImagePeakResults {
   private static double[] getPsfParameters(double angle, double sx, double sy) {
     // abc are defined factors for xx, xy and yy:
     // https://en.wikipedia.org/wiki/Gaussian_function#Two-dimensional_Gaussian_function
-    // @CHECKSTYLE.OFF: LocalVariableName
+    // CHECKSTYLE.OFF: LocalVariableName
     double a;
     double b;
     double c;
-    // @CHECKSTYLE.ON: LocalVariableName
+    // CHECKSTYLE.ON: LocalVariableName
     double height;
     double width;
 

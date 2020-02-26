@@ -24,17 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
-
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
-
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import ij.ImagePlus;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
-
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.ContentNode;
@@ -44,9 +39,14 @@ import ij3d.pointlist.PointListPanel;
 import ij3d.pointlist.PointListShape;
 import ij3d.shapes.BoundingBox;
 import ij3d.shapes.CoordinateSystem;
-
 import isosurface.MeshGroup;
-
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.scijava.java3d.BranchGroup;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.Node;
@@ -59,23 +59,12 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Matrix3f;
 import org.scijava.vecmath.Point3d;
 import org.scijava.vecmath.Vector3d;
-
 import orthoslice.MultiOrthoGroup;
 import orthoslice.OrthoGroup;
-
 import surfaceplot.SurfacePlotGroup;
-
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import vib.PointList;
-
 import voltex.VoltexGroup;
-
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Extend the ContentInstant class to avoid using an OrderedPath.

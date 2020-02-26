@@ -24,18 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import java.util.Arrays;
 import org.apache.commons.math3.util.FastMath;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.utils.CommonUtils;
-
-import java.util.Arrays;
 
 /**
  * Simple class to perform convolution.
  */
 public class Convolution {
   // Allow h as an input parameter name
-  // @CHECKSTYLE.OFF: ParameterName
+  // CHECKSTYLE.OFF: ParameterName
 
   /** The maximum size supported for scaled convolution. */
   public static final int MAX = 1 << 30;

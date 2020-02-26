@@ -24,29 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import uk.ac.sussex.gdsc.core.data.DataException;
-import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
-import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
-import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
-
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.helpers.DefaultHandler;
-
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -61,12 +41,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
+import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.GUIFilterSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.filter.AndFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
+import uk.ac.sussex.gdsc.smlm.results.filter.OrFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.PrecisionFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.SnrFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.WidthFilter;
 
 /**
  * Creates an XML file of configured filters from a template.
