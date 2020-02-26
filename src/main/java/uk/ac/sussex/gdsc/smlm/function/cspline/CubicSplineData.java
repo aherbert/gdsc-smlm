@@ -221,12 +221,12 @@ public class CubicSplineData {
   }
 
   /**
-   * Read a tricubic splines from the input stream.
+   * Read a tricubic spline from the input stream.
    *
    * <p>Note: For best performance a buffered input stream should be used.
    *
    * @param inputStream the input stream
-   * @return the custom tricubic interpolating function
+   * @return the tricubic spline data
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public static CubicSplineData read(InputStream inputStream) throws IOException {
@@ -234,13 +234,13 @@ public class CubicSplineData {
   }
 
   /**
-   * Read a tricubic splines from the input stream.
+   * Read a tricubic spline from the input stream.
    *
    * <p>Note: For best performance a buffered input stream should be used.
    *
    * @param inputStream the input stream
    * @param progress the progress
-   * @return the custom tricubic interpolating function
+   * @return the tricubic spline data
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public static CubicSplineData read(InputStream inputStream, TrackProgress progress)

@@ -747,6 +747,7 @@ public class CubicSplineManager implements PlugIn {
     final CubicSplinePsf model = loadFromFile(name, filename);
 
     if (model != null) {
+      ImageJUtils.log("Loaded spline model %s from file: %s", name, filename);
       saveResource(model, filename, name);
     }
   }
