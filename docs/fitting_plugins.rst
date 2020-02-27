@@ -1368,6 +1368,7 @@ The results parameters control where the list of localisations will be recorded.
        *   ``Intensity (width=av.precision)``: Plot a Gaussian at the centre of each spot using the configured image precision for the standard deviation and the signal intensity for the height.
        *   ``Fit error``: Use the fitting error for each spot.
        *   ``Z position``: Use the fit z-position for each spot. This is primitive support for 3D data. Use the ``3D Results Viewer`` (section :numref:`%s <results_plugins:3D Results Viewer>`) for existing 3D datasets.
+       *   ``ID``: Use the ID for each spot. IDs may be assigned by clustering analysis to group localisations.
 
        The ``...`` button allows the available image options to be configured.
 

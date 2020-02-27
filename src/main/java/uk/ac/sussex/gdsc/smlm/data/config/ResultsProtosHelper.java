@@ -105,6 +105,8 @@ public final class ResultsProtosHelper {
         return "None";
       case DRAW_Z_POSITION:
         return "Z position";
+      case DRAW_ID:
+        return "ID";
       case UNRECOGNIZED:
         return ProtosHelperUtils.UNKNOWN;
       default:

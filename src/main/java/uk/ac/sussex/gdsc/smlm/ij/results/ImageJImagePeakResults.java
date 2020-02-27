@@ -114,6 +114,18 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    * weighted option is disabled and the max and display negatives options are enabled.
    */
   public static final int DISPLAY_Z_POSITION = 0x0400;
+  /**
+   * Display the ID in the image. When this is used the weighted option is disabled and the max
+   * option is enabled.
+   *
+   * <p>IDs are typically used to group localisations (e.g. clusters).
+   *
+   * <p>Rendering assumes IDs are positive. The output value is {@code id + 1} allowing display
+   * of localisations not assigned an ID. Use of the max option ensures actual clusters are
+   * drawn in place of non-clustered items (ID=0). If clustering is hierarchical then assign
+   * higher cluster numbers to the centre of the cluster network.
+   */
+  public static final int DISPLAY_ID = 0x0800;
 
   /** The empty value. */
   private double empty;
@@ -385,11 +397,11 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     }
 
     // The following cannot use weighting and should show the exact value so use replace
-    if ((displayFlags & (DISPLAY_PEAK | DISPLAY_ERROR | DISPLAY_Z_POSITION)) != 0) {
+    if ((displayFlags & (DISPLAY_PEAK | DISPLAY_ERROR | DISPLAY_Z_POSITION | DISPLAY_ID)) != 0) {
       displayFlags &= ~DISPLAY_WEIGHTED;
       displayFlags |= DISPLAY_MAX;
 
-      // z position will probably have negatives
+      // z position will probably have negatives.
       if ((displayFlags & (DISPLAY_ERROR | DISPLAY_Z_POSITION)) != 0) {
         displayFlags |= DISPLAY_NEGATIVES;
       }
@@ -600,7 +612,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     final int[] indices = new int[5];
     final float[] values = new float[4];
 
-    getValue(peak, params, error, x, y, indices, values);
+    // No ID
+    getValue(peak, 0, params, error, x, y, indices, values);
 
     addData(1, indices[4], indices, values);
 
@@ -847,7 +860,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
         updateToFrame(result.getFrame());
       }
 
-      getValue(result.getFrame(), result.getParameters(), result.getError(), x, y, indices, values);
+      getValue(result.getFrame(), result.getId(), result.getParameters(), result.getError(), x, y,
+          indices, values);
 
       for (int i = indices[4]; i-- > 0;) {
         allIndices[nvalues] = indices[i];
@@ -929,6 +943,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    * with their values. The number of indices is stored in the 5th position of the indices array.
    *
    * @param peak the peak
+   * @param id the id
    * @param params the peak params
    * @param error the peak error
    * @param x the x position
@@ -936,8 +951,8 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    * @param indices the indices
    * @param value the values for the indices
    */
-  private void getValue(int peak, float[] params, double error, float x, float y, int[] indices,
-      float[] value) {
+  private void getValue(int peak, int id, float[] params, double error, float x, float y,
+      int[] indices, float[] value) {
     final float v;
 
     // Use the signal for the count
@@ -947,6 +962,9 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       v = peak;
     } else if ((displayFlags & DISPLAY_Z_POSITION) != 0) {
       v = params[PeakResult.Z];
+    } else if ((displayFlags & DISPLAY_ID) != 0) {
+      // Assuming ID is zero if unset or positive.
+      v = id + 1;
     } else if ((displayFlags & DISPLAY_ERROR) != 0) {
       v = (float) error;
     } else {

@@ -94,6 +94,9 @@ public class ImagePeakResultsFactory {
       case DRAW_Z_POSITION:
         flags |= ImageJImagePeakResults.DISPLAY_Z_POSITION;
         break;
+      case DRAW_ID:
+        flags |= ImageJImagePeakResults.DISPLAY_ID;
+        break;
       default:
         // Nothing to do for the other cases
         break;
