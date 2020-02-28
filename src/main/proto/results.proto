@@ -64,6 +64,8 @@ message ResultsImageSettings {
   double scale = 5;
   // The rolling window size for the results image
   int32 rolling_window_size = 6;
+  // The look-up table name
+  string lut_name = 7;
 }
 
 // The type of results file

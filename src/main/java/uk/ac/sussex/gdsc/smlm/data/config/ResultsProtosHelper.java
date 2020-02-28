@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
@@ -42,6 +43,7 @@ public final class ResultsProtosHelper {
     builder.getResultsImageSettingsBuilder().setEqualised(true);
     builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
     builder.getResultsImageSettingsBuilder().setScale(1);
+    builder.getResultsImageSettingsBuilder().setLutName(LutColour.FIRE.getName());
     builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
     builder.getResultsInMemorySettingsBuilder().setInMemory(true);
     defaultResultsSettings = builder.build();

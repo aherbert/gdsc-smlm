@@ -60,6 +60,7 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -612,6 +613,9 @@ public class ResultsManager implements PlugIn {
       if (BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS)) {
         image.setRollingWindowSize(resultsSettings.getRollingWindowSize());
       }
+      if (TextUtils.isNotEmpty(resultsSettings.getLutName())) {
+        image.setLutName(resultsSettings.getLutName());
+      }
       image.setRepaintDelay(2000);
       resultsList.addOutput(image);
     }
@@ -967,6 +971,7 @@ public class ResultsManager implements PlugIn {
             if (isExtraOptions) {
               egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
             }
+            egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());
             egd.setSilent(silent);
             egd.showDialog(true, gd);
             if (egd.wasCanceled()) {
@@ -983,6 +988,7 @@ public class ResultsManager implements PlugIn {
             if (isExtraOptions) {
               imageSettings.setRollingWindowSize((int) egd.getNextNumber());
             }
+            imageSettings.setLutName(egd.getNextChoice());
             return true;
           }
         });

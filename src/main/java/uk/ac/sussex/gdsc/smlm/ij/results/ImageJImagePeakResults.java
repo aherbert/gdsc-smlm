@@ -42,6 +42,8 @@ import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.InfinityMappedImageStack;
 import uk.ac.sussex.gdsc.core.ij.MappedImageStack;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -312,11 +314,19 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
 
     if (imp == null) {
       imp = new ImagePlus(title, ip);
-      // Apply the fire lookup table
-      WindowManager.setTempCurrentImage(imp);
-      final LutLoader lut = new LutLoader();
-      lut.run(lutName);
-      WindowManager.setTempCurrentImage(null);
+      // Apply the selected lookup table
+      if (TextUtils.isNotEmpty(lutName)) {
+        final LutColour colour = LutColour.forName(lutName);
+        if (colour != null) {
+          imp.setLut(LutHelper.createLut(LutColour.forName(lutName), false));
+        } else {
+          // Assume ImageJ LUT
+          WindowManager.setTempCurrentImage(imp);
+          final LutLoader lut = new LutLoader();
+          lut.run(lutName);
+          WindowManager.setTempCurrentImage(null);
+        }
+      }
 
       if (displayImage) {
         imp.show();

@@ -1397,6 +1397,9 @@ The results parameters control where the list of localisations will be recorded.
 
        The image will be rendered using the original fit bounds multiplied by the scale, e.g. a 64x64 image with a scale of 8 will draw a 512x512 super resolution image.
 
+   * - LUT
+     - Specify the look-up table used colour the image.
+
 .. list-table:: File results parameters
    :widths: 20 80
    :header-rows: 1
