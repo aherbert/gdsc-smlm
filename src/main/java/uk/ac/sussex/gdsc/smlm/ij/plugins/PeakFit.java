@@ -78,6 +78,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -734,12 +735,15 @@ public class PeakFit implements PlugInFilter {
 
       final SeriesImageSource seriesImageSource =
           new SeriesImageSource(getName(series.getImageList()), series);
-      seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
-      // if (extraOptions)
-      // {
-      // numberOfThreads = Math.max(1, series.getNumberOfThreads());
-      // seriesImageSource.setNumberOfThreads(numberOfThreads);
-      // }
+      // TrackProgress logging is very verbose if the series has many images
+      // Status is used only when reading TIFF info.
+      //seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
+      seriesImageSource.setTrackProgress(new TrackProgressAdaptor() {
+        @Override
+        public void status(String format, Object... args) {
+          ImageJUtils.showStatus(() -> String.format(format, args));
+        }
+      });
       imageSource = seriesImageSource;
 
       pluginFlags |= NO_IMAGE_REQUIRED;
