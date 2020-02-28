@@ -36,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Arrays;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
@@ -62,9 +63,13 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.TiffSeriesViewer.TiffSeriesVirtualStack;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
+import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
@@ -85,7 +90,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private JMenuItem editSelectNone;
   private JMenuItem editUnsort;
   private JMenuItem editTableSettings;
-  private JMenuItem sourceShow;
+  private JMenuItem sourceShowInfo;
+  private JMenuItem sourceShowImage;
   private JMenuItem sourceOverlay;
   private String saveName;
 
@@ -215,7 +221,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private JMenu createSourceMenu() {
     final JMenu menu = new JMenu("Source");
     menu.setMnemonic(KeyEvent.VK_S);
-    menu.add(sourceShow = add("Show", KeyEvent.VK_DELETE, "ctrl pressed I"));
+    menu.add(sourceShowInfo = add("Show Info", KeyEvent.VK_I, "ctrl pressed I"));
+    menu.add(sourceShowImage = add("Show Image", KeyEvent.VK_S, "ctrl shift pressed I"));
     menu.add(sourceOverlay = add("Overlay", KeyEvent.VK_O, "ctrl pressed Y"));
     return menu;
   }
@@ -244,27 +251,29 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   public void actionPerformed(ActionEvent event) {
     final Object src = event.getSource();
     if (src == fileSave) {
-      doSave();
+      doFileSave();
     } else if (src == editDelete) {
-      doDelete();
+      doEditDelete();
     } else if (src == editDeleteAll) {
-      doDeleteAll();
+      doEditDeleteAll();
     } else if (src == editSelectNone) {
-      doSelectNone();
+      doEditSelectNone();
     } else if (src == editSelectAll) {
-      doSelectAll();
+      doEditSelectAll();
     } else if (src == editUnsort) {
-      doUnsort();
+      doEditUnsort();
     } else if (src == editTableSettings) {
       doEditTableSettings();
-    } else if (src == sourceShow) {
-      doShowSource();
+    } else if (src == sourceShowInfo) {
+      doSourceShowInfo();
+    } else if (src == sourceShowImage) {
+      doSourceShowImage();
     } else if (src == sourceOverlay) {
-      doShowOverlay();
+      doSourceOverlay();
     }
   }
 
-  private void doSave() {
+  private void doFileSave() {
     final PeakResultTableModel model = getModel();
     if (model == null || model.getRowCount() == 0) {
       return;
@@ -306,7 +315,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     return editReadOnly.isSelected();
   }
 
-  private void doDelete() {
+  private void doEditDelete() {
     final PeakResultTableModel model = getModel();
     if (model == null) {
       return;
@@ -316,7 +325,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     model.remove(this, indices);
   }
 
-  private void doDeleteAll() {
+  private void doEditDeleteAll() {
     final PeakResultTableModel model = getModel();
     if (model == null) {
       return;
@@ -324,15 +333,15 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     model.clear(this);
   }
 
-  private void doSelectNone() {
+  private void doEditSelectNone() {
     table.clearSelection();
   }
 
-  private void doSelectAll() {
+  private void doEditSelectAll() {
     table.selectAll();
   }
 
-  private void doUnsort() {
+  private void doEditUnsort() {
     final RowSorter<?> rs = table.getRowSorter();
     if (rs != null) {
       rs.setSortKeys(null);
@@ -373,7 +382,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     model.setTableSettings(tableSettings.build());
   }
 
-  private void doShowSource() {
+  private void doSourceShowInfo() {
     final PeakResultTableModel model = getModel();
     if (model == null) {
       return;
@@ -385,10 +394,57 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     } else {
       text += "\n" + XmlUtils.prettyPrintXml(source.toXml());
     }
+    // Note:
+    // If a raw path is printed to the ImageJ log double-clicking it will open the image.
+    // We could separate these onto multiple lines:
+    // <path>/path/to/image.tif</path>
+    // <string>/path/to/image.tif</string>
     IJ.log(text);
   }
 
-  private void doShowOverlay() {
+  private void doSourceShowImage() {
+    final PeakResultTableModel model = getModel();
+    if (model == null) {
+      return;
+    }
+    final ImageSource source = model.getSource();
+    if (source == null) {
+      return;
+    }
+    // Check if already open
+    final ImagePlus imp = WindowManager.getImage(source.getName());
+    if (imp != null) {
+      imp.getWindow().toFront();
+      return;
+    }
+
+    // Check if an ImageJ image source
+    if (source instanceof IJImageSource) {
+      final IJImageSource imageSource = (IJImageSource) source;
+      final String path = imageSource.getPath();
+      if (path != null && new File(path).exists()) {
+        IJ.showStatus("Opening image ...");
+        IJ.open(path);
+        IJ.showStatus("");
+      } else {
+        IJ.log("Cannot find the image source: " + path);
+      }
+      return;
+    }
+    // Open a SeriesImageSource.
+    if (source instanceof SeriesImageSource) {
+      final SeriesImageSource imageSource = (SeriesImageSource) source;
+      imageSource.setBufferLimit(0); // No memory buffer
+      imageSource.setReadHint(ReadHint.NONSEQUENTIAL);
+      if (!source.open()) {
+        IJ.log("Cannot open the series image source");
+        return;
+      }
+      new TiffSeriesVirtualStack(imageSource).show();
+    }
+  }
+
+  private void doSourceOverlay() {
     final PeakResultTableModel model = getModel();
     if (model == null) {
       return;

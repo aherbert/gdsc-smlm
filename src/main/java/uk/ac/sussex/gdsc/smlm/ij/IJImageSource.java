@@ -204,6 +204,15 @@ public class IJImageSource extends ImageSource {
     yOrigin = y;
   }
 
+  /**
+   * Gets the path to the original image file.
+   *
+   * @return the path (or null)
+   */
+  public String getPath() {
+    return path;
+  }
+
   @Override
   protected boolean openSource() {
     if (nullImageArray() && imageStack == null) {

@@ -103,8 +103,12 @@ The menu provides the following options:
      - Open the settings configuration dialog for the table. See :ref:`interactive table settings <table_interactive_table_settings>` for details.
 
    * - Source
-     - Show
+     - Show Info
      - Print details of the source of the results set to the ``ImageJ`` log window.
+
+   * - Source
+     - Show Image
+     - Load the image source of the results.
 
    * - Source
      - Overlay
