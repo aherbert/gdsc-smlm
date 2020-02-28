@@ -1592,6 +1592,9 @@ The following options are available:
 
        Note: Single colour LUTs vary the intensity of the colour from 50% to 100% to provide identification of the order.
 
+   * - Line width
+     - Specify the line width. Use zero to draw lines with a 1 pixel stroke width regardless of the magnification.
+
 
 .. index:: drawing cluster centroids
 

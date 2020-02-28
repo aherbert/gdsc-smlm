@@ -84,6 +84,7 @@ public class DrawClusters implements PlugIn {
     boolean splineFit;
     boolean useStackPosition;
     int lut;
+    float lineWidth;
 
     Settings() {
       // Set defaults
@@ -106,6 +107,7 @@ public class DrawClusters implements PlugIn {
       splineFit = source.splineFit;
       useStackPosition = source.useStackPosition;
       lut = source.lut;
+      lineWidth = source.lineWidth;
     }
 
     Settings copy() {
@@ -307,6 +309,8 @@ public class DrawClusters implements PlugIn {
         final PolygonRoi roi = (PolygonRoi) rois[index];
         roi.setFillColor(c);
         roi.setStrokeColor(c);
+        //roi.setStrokeWidth(settings.lineWidth);
+        roi.updateWideLine(settings.lineWidth);
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
         // For each frame in the track, add the ROI track and a point ROI for the current position
         for (int j = 0; j < frames[index].length; j++) {
@@ -323,6 +327,8 @@ public class DrawClusters implements PlugIn {
       for (int i = 0; i < count; i++) {
         final Roi roi = rois[indices[i]];
         roi.setStrokeColor(new Color(lut.getRGB((int) (i * scale))));
+        //roi.setStrokeWidth(settings.lineWidth);
+        roi.updateWideLine(settings.lineWidth);
         o.add(roi);
       }
     }
@@ -359,6 +365,7 @@ public class DrawClusters implements PlugIn {
     gd.addCheckbox("Spline_fit (traces only)", settings.splineFit);
     gd.addCheckbox("Use_stack_position", settings.useStackPosition);
     gd.addChoice("LUT", LutHelper.getLutNames(), settings.lut);
+    gd.addSlider("Line_width", 0, 0.5, settings.lineWidth);
 
     gd.showDialog();
 
@@ -377,6 +384,7 @@ public class DrawClusters implements PlugIn {
     settings.splineFit = gd.getNextBoolean();
     settings.useStackPosition = gd.getNextBoolean();
     settings.lut = gd.getNextChoiceIndex();
+    settings.lineWidth = (float) gd.getNextNumber();
     settings.save();
 
     return true;
