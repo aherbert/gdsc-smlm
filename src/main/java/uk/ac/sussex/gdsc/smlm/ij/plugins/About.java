@@ -52,7 +52,7 @@ public class About implements PlugIn, MacroExtension {
   /** The help url for the SMLM plugins. */
   public static final String HELP_URL =
       "http://www.sussex.ac.uk/gdsc/intranet/microscopy/UserSupport/AnalysisProtocol/imagej/smlm_plugins";
-  private static final String YEAR = "2019";
+  private static final String YEAR = "2020";
 
   /**
    * The configure option.
