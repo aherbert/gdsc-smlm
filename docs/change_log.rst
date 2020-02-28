@@ -1,11 +1,8 @@
-.. index:: change log
-
 Change Log
 ==========
 
 .. contents::
 
-.. index:: version 1.0.0
 
 Version 1.0.0
 -------------

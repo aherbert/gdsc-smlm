@@ -1,4 +1,4 @@
-.. index:: model plugins
+.. index:: ! Model Plugins
 
 Model Plugins
 =============
@@ -7,7 +7,8 @@ The following plugins allow single-molecule images to be simulated. This can be 
 ``Results Match Calculator``
 plugin (see section :numref:`{number}<results_plugins:Results Match Calculator>`).
 
-.. index:: benchmarking
+
+.. index:: ! Benchmarking
 
 Benchmarking
 ------------
@@ -25,7 +26,8 @@ The benchmarking workflow will provide statistics on the recall and precision th
 
 The plugins are described in the following sections using the order presented on the ``Plugins > GDSC SMLM > Model`` menu.
 
-.. index:: psf creator
+
+.. index:: ! PSF Creator
 
 PSF Creator
 -----------
@@ -36,9 +38,11 @@ The ``PSF Creator`` plugin can be used to create a Point Spread Function (PSF) i
 
 The exact shape of a PSF can be calculated using various models that account for the diffraction of various immersion media (water, oil, etc.) used to image samples. However individual microscope optics are unique and the PSF may vary from one set-up to another even if the hardware is duplicated. The ``PSF Creator`` allows an image model of the PSF to be created that can be used in simulations to draw diffraction limited spots that appear the same as those taken on the microscope. These simulations can be used to optimise localisation analysis. The stack alignment mode also allows the PSF to be saved as a function using a cubic spline approximation. Cubic spline PSFs can be used for rendering images or fitting to image data. Cubic splines are administered using the ``Cubic Spline Manager`` plugin (see :numref:`%s <model_plugins:Cubic Spline Manager>`).
 
-.. index:: input image
 
-Input image
+..
+  No index
+
+Input Image
 ~~~~~~~~~~~
 
 The input image must be a z-stack of diffraction limited spots, for example quantum dots or fluorescent beads. The spot must be imaged through a large z range in small increments from out-of-focus through focus to out-of-focus. This will allow the entire PSF to be captured. The first and last frames are used to set a background level for the image intensity so ideally the spot should not be visible at all. An example spot imaged at 1000nm intervals is shown in :numref:`Figure %s <fig_beads_at_intervals>`. It can be seen that the spot disappears when 3\ |micro|\ m out of focus. Ideal input images should cover a similar range but using a smaller step size, for example 20nm.
@@ -56,7 +60,9 @@ When preparing a calibration image not all the spots are ideal due to problems w
 
 The spots should be marked using the ``ImageJ`` ``Point ROI`` tool. Right-clicking on the toolbar button will allow the tool to be changed to multiple-point mode. Clicking the image will add a point. Points can be dragged using the mouse and a point can be removed by holding the ``Alt`` key down while clicking the point marker. The marked spot centre is only an approximation and will be refined during analysis.
 
-.. index:: analysis
+
+..
+  No index
 
 Analysis Mode
 ~~~~~~~~~~~~~
@@ -83,6 +89,9 @@ The plugin will create a combined PSF by aligning many selected PSFs. The plugin
      - Set to **true** to manually accept/reject each spot analysis result. This allows the parameters to be fine tuned until successful and then they can be applied in batch analysis.
 
 The following sections describe the different alignment modes.
+
+
+.. index:: PSF Creator; Stack Alignment
 
 Stack Alignment
 ~~~~~~~~~~~~~~~
@@ -165,6 +174,7 @@ The following parameters can be specified:
 
    * - Reset
      - Press this button to reset to the default settings.
+
 
 Analysis
 ^^^^^^^^
@@ -291,6 +301,8 @@ The final processing of the PSF will redisplay the PSF and the X, Y, and Z proje
     }
 
 
+.. index:: PSF Creator; Gaussian Fitting
+
 Gaussian Fitting
 ~~~~~~~~~~~~~~~~
 
@@ -344,7 +356,6 @@ If using interactive mode the user has a second chance to view the spot data and
 
 For all spots that are accepted, the spots are then overlaid using their X, Y and Z centres into an average PSF image. It is assumed that the in-focus spot can be modelled by a 2D Gaussian. All the pixels within 3 standard deviations of the centre are summed as foreground pixels. The image is then normalised across all frames so that the sum of the foreground is 1.
 
-.. index:: parameters
 
 Parameters
 ^^^^^^^^^^
@@ -389,7 +400,6 @@ When the configuration for the analysis has been configured a second dialog is s
 
 It is recommended that the peak filtering be configured to allow very wide (out-of-focus) spots (e.g. ``Width factor`` >= 5) and the ``Signal strength`` should allow poor spots (e.g. 5).
 
-.. index:: output
 
 Output
 ^^^^^^
@@ -460,7 +470,8 @@ Finally the Centre-of-Mass (CoM) of the PSF is computed and shown on a plot (:nu
 
     Centre-of-mass computed for each slice in the final combined PSF. The raw data is shown as points with a smoothed curve for X (red) and Y (blue) coordinates.
 
-.. index:: psf drift
+
+.. index:: ! PSF Drift
 
 PSF Drift
 ---------
@@ -476,7 +487,8 @@ When the plugin is run it searches all the open images for valid PSF images. The
 
     PSF Drift dialog
 
-.. index:: drift calculation
+
+.. index:: Drift Calculation
 
 Drift Calculation
 ~~~~~~~~~~~~~~~~~
@@ -498,7 +510,6 @@ Fits are accepted if the fitting algorithm successfully converged and the fitted
 
 where :math:`f` is a user configured lower fraction.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -566,8 +577,6 @@ Parameters
      - The smoothing parameter used to smooth the fit curve using the LOESS smoothing algorithm.
 
 
-.. index:: output
-
 Output
 ~~~~~~
 
@@ -575,7 +584,8 @@ The drift for each frame is computed as the mean of all the fitted centres. The 
 
 The drift curves for each dimension (X & Y) are then plotted along with the recall against the z-depth. The z-axis is limited to the input z-depth or the available depth of the PSF, whichever is lower.
 
-.. index:: drift curve
+
+.. index:: Drift Curve
 
 Drift Curve
 ^^^^^^^^^^^
@@ -591,7 +601,8 @@ The drift curve plot shows the average centre of spots fitted to the simulated i
 
     The plot shows the average Y centre when simulated spots are fit using a Gaussian 2D function.Original data points in blue with magenta vertical bars for the standard error of the mean. The smoothed curve is shown as a blue line. Green vertical lines mark the points where the recall falls below the configured limit. The PSF has an equivalent pixel pitch of 107nm.
 
-.. index:: recall curve
+
+.. index:: Recall Curve
 
 Recall Curve
 ^^^^^^^^^^^^
@@ -607,7 +618,8 @@ The recall curve shows the fraction of fits that were successful at each z-depth
 
     The plot shows the fraction of simulated PSF spots successfully fit at each z-depth. The magenta line indicates the recall limit.
 
-.. index:: saving the drift
+
+.. index:: Saving the Drift
 
 Saving the Drift
 ~~~~~~~~~~~~~~~~
@@ -638,7 +650,8 @@ Note: The saved drift curve is used by default in the
 ``Create Data``
 plugin when reconstructing images. This allows benchmarking data to be constructed by placing the localisation data at the average centre that would be found by idealised fitting of that PSF.
 
-.. index:: psf combiner
+
+.. index:: ! PSF Combiner
 
 PSF Combiner
 ------------
@@ -668,6 +681,8 @@ plugin. The information can be viewed using the
 ``Image > Show Info...``
 command.
 
+
+.. index:: ! PSF HWHM
 
 PSF HWHM
 --------
@@ -709,6 +724,7 @@ A dialog is shown that displays the current z-centre and FWHM (full-width at hal
     :figwidth: 80%
 
 
+.. index:: ! Cubic Spline Manager
 
 Cubic Spline Manager
 --------------------
@@ -742,36 +758,60 @@ When the ``Cubic Spline Manager`` plugin is run a dialog allows a choice from th
    * - Render the spline function
      - Render an image dynamically using the PSF model.
 
-Print all model details
+
+..
+  No index
+
+Print All Model Details
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 This options prints the details of each model to the ``ImageJ`` log window. The settings contain the name of the model, the details of the file containing the model data and the scale (in nm) of the PSF model. Note that the scale defines the spacing interval between data points in the cubic spline. For efficiency during fitting of a model to data this spacing should be an integer factor of the pixel width, e.g. for a pixel width of 104nm the spline scale could be 104, 52, 26, etc.
+
+
+..
+  No index
 
 View a spline model
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog allowing the model to be selected and the output magnification. The magnification should be an integer. The model is then used to render a stack image of the PSF at the given magnification.
 
-Load a spline model
+
+..
+  No index
+
+Load a Spline Model
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a file selection dialog where a spline model can be selected. Models are contained in a single file. The file has metadata identifying the model format. The plugin will attempt to load the cubic spline model. The result is recorded in the ``ImageJ`` log window. If successful then the model is named using the filename and metadata on the model is added to the settings. The model is then available for use. Any existing model with the same name will be replaced.
 
 Note: Model files are stored in a binary format. The files can be copied to another location and reloaded. It is also possible to allow multiple ``ImageJ`` instances to load models from a network resource.
 
-Load from directory
+
+..
+  No index
+
+Load from Directory
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a directory selection dialog allowing a model directory to be chosen. The plugin will attempt to load each file in the directory. The results are recorded in the ``ImageJ`` log window. If a file was a valid model then it is named using the filename and added to the settings. Any existing model with the same name will be replaced.
 
-Delete a spline model
+
+..
+  No index
+
+Delete a Spline Model
 ~~~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog allowing the model to be selected. The selected model is then removed from the settings.
 
 Note: The model data file is not deleted.
 
-Render the spline function
+
+..
+  No index
+
+Render the Spline Function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog allowing the model to be selected. The selected model is then dynamically rendered on an image. An interactive dialog is displayed allowing the relative centre of the PSF to be adjusted. This has the effect of translating the model in the XY plane or viewing a different part of the model in the z-axis.
@@ -779,6 +819,9 @@ Presents a selection dialog allowing the model to be selected. The selected mode
 The ``Scale`` parameter is used to control the sampling interval of the cubic spline. A scale of 1 will sample the model at the spacing interval of the spline data points. A scale of 2 samples at every other data point. Higher scales sample every ``n`` data points where ``n=Scale``. This can be used to show how a model with a higher resolution than the image pixel width renders the PSF, e.g. a model with a 53nm spline scale can be rendered on a 106nm image using ``Scale=2``.
 
 For maximum efficiency the scale should be an integer. However the translations may be any value as the cubic spline is a continuous function and interpolates appropriately.
+
+
+.. index:: ! Astigmatism Model Manager
 
 Astigmatism Model Manager
 -------------------------
@@ -813,6 +856,9 @@ When the ``Astigmatism Model Manager`` plugin is run a dialog allows a choice fr
 
    * - Export Model
      - Export a model to file.
+
+
+.. index:: Create Model
 
 Create Model
 ~~~~~~~~~~~~
@@ -903,10 +949,18 @@ The model is created by fitting the parameters using the raw data. The model is 
 
     The curve shows the PSF x and y widths against the z depth. The astigmatism model function that maps the z position to the width is shown using a line.
 
+
+..
+  No index
+
 Import Model
 ~~~~~~~~~~~~
 
 Presents a dialog where a model name is specified and the import file can be selected. The plugin will attempt to load the astigmatism model. The result is recorded in the ``ImageJ`` log window. If successful then the model is saved to settings and is then available for use.
+
+
+..
+  No index
 
 View Model
 ~~~~~~~~~~
@@ -949,10 +1003,18 @@ If the ``Show PSF`` option was selected an interactive dialog is shown allowing 
 
     The width curve shows the x and y widths against the z depth. The combined width is shown in green and dotted lines in red and blue mark the depth of focus around the focal plane for X and Y respectively. The current z position in the view model dialog is shown as a ROI line.
 
+
+..
+  No index
+
 Delete Model
 ~~~~~~~~~~~~
 
 Presents a selection dialog allowing the model to be selected. The selected model is then removed from the settings.
+
+
+..
+  No index
 
 Invert Model
 ~~~~~~~~~~~~
@@ -961,12 +1023,17 @@ Inverts the z-orientation of a model. An astigmatism model creates a focal plane
 
 Presents a selection dialog allowing the model to be selected. The selected model is then inverted.
 
+
+..
+  No index
+
 Export Model
 ~~~~~~~~~~~~
 
 Presents a dialog where a model and export file can be selected. The model is saved to the file in a text format.
 
-.. index:: create data
+
+.. index:: ! Create Data
 
 Create Data
 -----------
@@ -974,7 +1041,7 @@ Create Data
 Creates an image by simulating single molecule localisations using a model of photoactivated diffusing fluorophore complexes. The simulation is partly based on the work of Colthorpe, *et al* (2012).
 
 
-.. index:: simulation
+.. index:: Simulation
 
 Simulation
 ~~~~~~~~~~
@@ -1006,14 +1073,16 @@ allowing the results of fitting the simulated image to be compared to the actual
 The simulation computes the fluorophores using a single worker thread. The time intensive
 rendering of the localisations as an image is multi-threaded. The number of threads uses the ``ImageJ`` setting under ``Edit > Options > Memory & threads...``.
 
-.. index:: point spread function
+
+.. index:: Point Spread Function
 
 Point Spread Function
 ~~~~~~~~~~~~~~~~~~~~~
 
 The appearance of the fluorophore is modelled using a configurable point spread function (PSF). The number of photons in the fluorophore is used to create a Poisson random variable of the number of photons, N, that are actually observed. The PSF is then sampled randomly N times and each sample is mapped from the PSF coordinates on to the correct pixel in the image.
 
-.. index:: gaussian psf
+
+.. index:: Gaussian PSF
 
 Gaussian PSF
 ^^^^^^^^^^^^
@@ -1032,7 +1101,8 @@ where
 
 PSF sampling is done by drawing a Gaussian random variable for the X and Y coordinates and then adding this location to the image.
 
-.. index:: airy psf
+
+.. index:: Airy PSF
 
 Airy PSF
 ^^^^^^^^
@@ -1043,7 +1113,8 @@ plugin (see section :numref:`%s<calibration_plugins:PSF Calculator>`). The Airy 
 
 PSF sampling is done by constructing a cumulative Airy pattern (i.e. power of the Airy pattern) for all distances up to the 4\ :sup:`th` zero ring. This is approximately 95.2% of the entire Airy pattern power. Note however that the pattern diminishes gradually to infinity so sampling beyond this ring is not practical. A random sample from 0 to 1 is taken for the total Airy power. If outside the 4\ :sup:`th` zero ring it is ignored. Otherwise the radius for the power is interpolated and the radius used with a randomly orientated vector to generate the X and Y coordinates. The location is added to the image.
 
-.. index:: image psf
+
+.. index:: Image PSF
 
 Image PSF
 ^^^^^^^^^
@@ -1062,9 +1133,10 @@ During initialisation the PSF image is normalised so the z-centre has a sum of 1
 
 PSF sampling is performed by selecting the appropriate slice from the image using the z-depth. The z-centre is specified using the middle of the slice so if the slice depth is 30nm then both -10 and 10 will be sampled from the centre slice. A random sample from 0 to 1 is taken and used to look up the appropriate pixel within the cumulative image for that slice. This sampled PSF pixel is then mapped to the output and the location added to the image. Note that if the cumulative total for the slice is below 1 then the sample may be ignored. This is allowed since the image PSF has a limited size (i.e. does not have infinite dimensions). Missed samples are unlikely to effect the output image as the pixels are very far from the PSF centre.
 
-.. index:: image reconstruction
 
-Image reconstruction
+.. index:: Image Reconstruction
+
+Image Reconstruction
 ~~~~~~~~~~~~~~~~~~~~
 
 The simulation aims to match the data produced by the pixel array of an EM-CCD camera. Photons are generated in a random process modelled by the Poisson distribution. Photons are captured on the sensor and converted to electrons. The conversion is subject to the quantum efficiency of the camera sensor modelled as a binomial distribution. The electrons are amplified through an Electron Multiplying device to increase the number. This process is subject to gamma noise. The electrons are read from the camera and digitised to Analogue-to-Digital Units (ADUs). Reading the electrons is subject to Gaussian read noise.
@@ -1099,9 +1171,10 @@ plugin (see section :numref:`%s <calibration_plugins:Mean-Variance Test>`) or th
 ``EM-gain Analysis``
 plugin (see section :numref:`%s <calibration_plugins:EM-gain Analysis>`).
 
-.. index:: particle distribution
 
-Particle distribution
+.. index:: Particle Distribution
+
+Particle Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
 The simulation can distribute the particle using the following methods:
@@ -1159,8 +1232,6 @@ Once the particles are distributed within the volume they can move using a diffu
    * - Within image
      - Confine the movement to the image bounding dimensions.
 
-
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -1340,8 +1411,6 @@ The following parameters can be used to control the simulation:
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
 
 
-.. index:: data summary
-
 Data Summary
 ~~~~~~~~~~~~
 
@@ -1427,9 +1496,9 @@ The ``Create Data`` plugin summarises the dataset when the image has been constr
      - The average PSF width (in pixels).
 
 
-.. index:: compound molecules
+.. index:: Compound Molecules
 
-Compound molecules
+Compound Molecules
 ~~~~~~~~~~~~~~~~~~
 
 By default all the molecules are single particles. However it may be desirable to simulate a collection of compound molecules, for example dimers and hexamers. This is possible using the ``Compound molecules`` option. If this option is selected the plugin will show a second dialog where the user can input the molecule configuration using a `Google Protocol Buffers <https://developers.google.com/protocol-buffers>`_ specification.
@@ -1490,7 +1559,8 @@ The compound molecules dialog contains a ``Show examples`` checkbox. If this is 
 
 When the simulation is run the molecules are created and placed randomly in the 3D volume. Each atom in the compound is then modelled as a separate fluorophore. The total lifetime of the compound is computed using the first and last time of any fluorophore in the compound that was active. The entire compound is then subject to the diffusion (and rotation) over the lifetime of the compound.
 
-.. index:: sampled statistics
+
+.. index:: Sampled Statistics
 
 Sampled Statistics
 ~~~~~~~~~~~~~~~~~~
@@ -1501,7 +1571,9 @@ The sampled statistics recompute the number of blinks, on and off times for fram
 
 It should be possible to experimentally compute values close to the sampled statistics by using optimised fitting parameters within the ``Peak Fit`` plugin (see section :numref:`%s<fitting_plugins:Peak Fit>`) and then using the ``Blink Estimator`` plugin (see section :numref:`%s<analysis_plugins:Blink Estimator>`). An approximate number of molecules and pulses can be estimated using the ``Trace Molecules`` plugin (see section :numref:`%s<analysis_plugins:Trace Molecules>`).
 
-.. index:: memory output
+
+..
+  No index
 
 Memory Output
 ~~~~~~~~~~~~~
@@ -1531,7 +1603,8 @@ The localisations that are created are stored as various results sets in memory.
 
 It is possible to save these results to file using the ``Results Manager`` plugin.
 
-.. index:: create simple data
+
+.. index:: ! Create Simple Data
 
 Create Simple Data
 ------------------
@@ -1594,7 +1667,7 @@ The following parameters can be configured:
    * - Distribution
      - The random distribution of the particles.
 
-       See section :numref:`{number}: {name} <model_plugins:Particle distribution>`. Note: Some distributions are not supported.
+       See section :numref:`{number}: {name} <model_plugins:Particle Distribution>`. Note: Some distributions are not supported.
 
    * - Sample per frame
      - The density is used to compute the number of molecules to draw per frame (*N*). The default is to use a fixed number in each frame by rounding *N*. Select this option to sample each frame using a Poisson distribution with a mean of *N*.
@@ -1639,7 +1712,7 @@ The following parameters can be configured:
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
 
 
-.. index:: create benchmark data
+.. index:: ! Create Benchmark Data
 
 Create Benchmark Data
 ---------------------
@@ -1739,7 +1812,7 @@ The following parameters can be configured:
      - Specify the radius (relative to the Half-Width at Half-Maxima, HWHM, of the PSF) to use when calculating the localisation density around each molecule. The average density is shown in the summary table. The density is the number of molecules within the specified radius.
 
 
-.. index:: fitting limits
+.. index:: Fitting Limits
 
 Fitting Limits
 ~~~~~~~~~~~~~~
@@ -1748,6 +1821,8 @@ The ``Create Benchmark Data`` plugin will report the theoretical limit (precisio
 
 Note that these formulas are derived from modelling the point spread function (PSF) as a 2D Gaussian for both the simulation and the fitting. Given that the true data will have a PSF defined by the microscope parameters these formulas only approximate the precision that can be obtained on image data. However they are useful to allow demonstration that the fitting routines in the SMLM plugins can achieve the theoretical limit, i.e. they are working as well as can be expected.
 
+
+.. index:: ! Create Track Data
 
 Create Track Data
 -----------------
@@ -1763,7 +1838,7 @@ The parameters are configured as for the ``Create Data`` plugin (see :numref:`{n
  * The additional parameters to configure the on-times, off-times, and distribution of the number of blinks has been removed since each flourophore has a single pulse of a fixed lifetime.
 
 
-.. index:: fit benchmark data
+.. index:: ! Fit Benchmark Data
 
 Fit Benchmark Data
 ------------------
@@ -1817,8 +1892,6 @@ The following parameters can be configured:
 
        If selected a second dialog is shown allowing the user to choose which histograms to display.
 
-
-.. index:: data summary
 
 Data Summary
 ~~~~~~~~~~~~
@@ -1932,7 +2005,7 @@ true answer for each parameter that was fitted. Histograms of the differences ca
      - The average and standard deviation of the difference of the fit to the actual PSF standard deviation in the Y dimension, adjusted for square pixels. This is only reported for the ``Free`` and ``Free circular`` fit functions.
 
 
-.. index:: benchmark analysis
+.. index:: ! Benchmark Analysis
 
 Benchmark Analysis
 ------------------
@@ -1949,7 +2022,8 @@ The ``Benchmark Analysis`` plugin requires that the ``Fit Benchmark Data`` plugi
 
 Note: If a new set of benchmark data is created (e.g. using ``Create Benchmark Data``) then any results in memory from ``Fit Benchmark Data`` will be discarded as they no longer apply to the new data.
 
-.. index:: create spot data
+
+.. index:: ! Create Spot Data
 
 Create Spot Data
 ----------------
@@ -2046,6 +2120,8 @@ The following parameters can be configured:
      - Remove outliers before plotting histograms. Outliers are 1.5 times the interquartile range above/below the upper/lower quartiles. Outliers are always removed for the Precision data since low photon signals can produce extreme precision values.
 
 
+.. index:: ! Load Benchmark Data
+
 Load Benchmark Data
 -------------------
 
@@ -2103,14 +2179,13 @@ Once the data has been loaded the settings for the simulation are configured:
      - The maximum z-depth of the simulation relative to the focal plain (z=0). The units are pixels. This field is pre-populated with the maximum z-depth in the input data. Convert a known z-depth (e.g. in nanometers) to pixels using the calibration defined by the ``Pixel pitch`` parameter.
 
 
-.. index:: filter spot data
+.. index:: ! Filter Spot Data
 
 Filter Spot Data
 ----------------
 
 Filter the image created by ``Create Simple Data`` or ``Create Spot Data`` and compute statistics on the accuracy and precision of identifying spot candidates. If these results are not available an error will be displayed.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -2148,7 +2223,6 @@ The TP, FP and FN totals can be used to produced scoring metrics to assess the f
 
 Note that the use of a ramped score function based on distance (and signal factor) allows the comparison of scores between different filters, since some algorithms may identify spot candidates closer to the true localisation. Also note that if it is not clear at what level to set the match distance and signal factor then using a ramped score will produce the same results as repeating the analysis with multiple thresholds and averaging the score with the same ramped weighting for each scoring threshold.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -2244,8 +2318,6 @@ The following parameters can be configured.
    * - Show FN
      - If **true** show the false-negatives overlaid on the localisation image in yellow.
 
-
-.. index:: data summary
 
 Results
 ~~~~~~~
@@ -2480,6 +2552,8 @@ The analysis results are then reported in a summary table:
      - The failure count that must be allowed to achieve 100% of the maximum true positive count.
 
 
+.. index:: ! Filter Spot Data Batch
+
 Filter Spot Data (Batch)
 ------------------------
 
@@ -2519,6 +2593,7 @@ Allows the analysis of the ``Filter Spot Data`` plugin (see :numref:`%s<model_pl
      - The maximum width to use in the filter to search for local maxima.
 
 Note that the results output options from the ``Filter Spot Data`` plugin are not shown in this dialog as they apply to a specific filter. These options are available for the best performing filter once analysis of all filters is complete.
+
 
 Results
 ~~~~~~~
@@ -2595,14 +2670,13 @@ The following options can be selected:
     Plot of the Area Under precision-recall Curve score against the filter width for various filters. The filter width is relative to the PSF width of the image data. All filters are single filters using a search width of 1.
 
 
-.. index:: fit spot data
+.. index:: ! Fit Spot Data
 
 Fit Spot Data
 -------------
 
 Fits all the candidate spots identified by the ``Filter Spot Data`` plugin. This plugin requires the results generated by the ``Filter Spot Data`` plugin. If these results are not available an error will be displayed.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -2630,7 +2704,6 @@ The TP and FP totals thus represent the score that can be achieved for a perfect
 
 Note that the use of a ramped score function based on distance and signal allows the comparison of scores between different fitting algorithms, since some algorithms may fit the spots closer to the true localisation. Also note that if it is not clear at what level to set the scoring thresholds then using a ramped distance score will produce the same results as repeating the analysis with multiple thresholds and averaging the score (with the same weighting applied by the ramp).
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -2712,8 +2785,6 @@ The following parameters can be configured:
 
        Note: The range increment in the filter set file is set to 1/10 of the range and certain filters are disabled as they are similar (e.g. Shift and EShift).
 
-
-.. index:: results
 
 Results
 ~~~~~~~
@@ -2922,7 +2993,8 @@ The analysis results are then reported in a summary table
 
 Note: The lower and upper bounds are set using a variety of measures suitable for the metric including percentile values of the data range and the maximum difference between the cumulative histograms of matched and non-matched fit results. Full details can be found in the source code. The ranges are only a suggested start point for generation of a filter to classify fit results. The ranges can be tested on the fit results using the ``Benchmark Filter Analysis`` plugin to find an optimum filter for the simulated data.
 
-.. index:: benchmark filter analysis
+
+.. index:: ! Benchmark Filter Analysis
 
 Benchmark Filter Analysis
 -------------------------
@@ -2933,7 +3005,6 @@ The ``Benchmark Filter Analysis`` plugin is designed to test the results filteri
 
 This plugin is similar to the ``Benchmark Filter Parameters`` plugin. Searching all parameters that control filtering of fitting results is computationally intractable. The search has been split into optimising the parameters for the result filter (``Benchmark Filter Analysis``) and optimising the parameters that control a single result filter (``Benchmark Filter Parameters``). Alternating the optimisation of the two sets of parameters can be done using the ``Iterate Filter Analysis`` plugin (see :numref:`%s<model_plugins:Iterate Filter Analysis>`).
 
-.. index:: input filters
 
 Input Filters
 ~~~~~~~~~~~~~
@@ -2942,7 +3013,8 @@ The plugin is able to process thousands of filters by loading the filters from a
 
 Filters are grouped into sets. Each set is processed separately. Results are shown per filter and then as a summary of the best results per filter set. This allows different types of filters to be compared (e.g. SNR, Precision, etc) in a summary table.
 
-.. index:: expanding filter sets
+
+.. index:: Expanding Filter Sets
 
 Expanding Filter Sets
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2980,7 +3052,6 @@ Note that advanced filters using ``And`` or ``Or`` filters can be constructed us
 
 would expand into a SNR and Width filter using a range of 10-20 for SNR and 1.5 to 2.5 for Width.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -3047,9 +3118,10 @@ The totals TP+FP+TN+FN must equal the number of spot candidates. This allows dif
 
 As an alternative scoring system, different fitting methods can be compared using the same TP value but calculating FN = localisations - TP and FP as Positives - TP. In this scheme FN represents any original spots that were missed and FP represents the number of accepted fits that do not match an original spot. This creates a score against the original simulated localisations using everything that was passed through the filter (Positives). The results table indicates this by prefixing the score column titles with o for Original. This score is comparable when a different spot candidate filter has been used and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering. Note that in this scheme there is no TN total and so the number of comparison metrics that can be computed are reduced to recall, precision, Jaccard and F1-score. The original score metrics are used by default for selection and ranking.
 
-.. index:: ranking filters
 
-Ranking filters
+.. index:: Ranking Filters
+
+Ranking Filters
 ^^^^^^^^^^^^^^^
 
 When all the scores have been computed for the filters in a filter set, the filters are ranked. Ranking is performed using two chosen scoring metrics. The first metric is chosen as a minimum limit that must be achieved; this is the ``Criteria`` metric. The second metric is chosen to rank all the filters that pass the criteria; this is the ``Score`` metric. If no filters pass the criteria then a warning is written to the ``ImageJ`` log window.
@@ -3063,7 +3135,8 @@ The use of the ``Criteria`` filter can be disabled by setting the ``Criteria lim
 
 The best filter from each filter set is recorded to the summary table.
 
-.. index:: sensitivity analysis
+
+.. index:: Sensitivity Analysis
 
 Sensitivity Analysis
 ^^^^^^^^^^^^^^^^^^^^
@@ -3072,12 +3145,17 @@ The sensitivity analysis aims to show how much the scores will change when the f
 
 Sensitivity can be calculated for the best filter from each filter set. This is done by altering the parameters of the filter by a small change (delta) and recomputing the scores. This can be used to express the relative change in the score with a change in the parameters, i.e. the partial gradient. The gradient of each parameter is reported; those with lower gradients are more robust and those with higher gradients are the ones that cannot be varied very much for optimal performance of the filter.
 
-.. index:: optimisation
+
+..
+  No index
 
 Optimisation
 ^^^^^^^^^^^^
 
 Searching for the best parameters for a filter is an optimisation problem. The more parameters there are in the filter the more combinations are possible. It may not be feasible to enumerate all the possible parameter combinations to find the best parameters. The plugin offers two methods for searching for the optimal parameters: evolution using a genetic algorithm; and a step search. Once the optimal parameters are found for the filter set then the plugin produces the summary results as per normal.
+
+
+.. index:: Evolution using a Genetic Algorithm
 
 Evolution using a Genetic Algorithm
 """""""""""""""""""""""""""""""""""
@@ -3088,6 +3166,9 @@ After computing the fitness of individuals in a population, the population is al
 
 Due to the use of mutation the genetic algorithm is able to produce parameter values that were not in the original filter set.
 
+
+.. index:: Step Search
+
 Step Search
 """""""""""
 
@@ -3097,7 +3178,6 @@ All of the filters in a filter set are evaluated and then ranked. A search is th
 
 The ``Step search`` option is a fast method for taking an initial parameter range and producing an optimal set of parameters that may not be within that range. If the range and increment for the parameters is well chosen then the optimal parameters can be found without computing the results for a large set of filters.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -3283,7 +3363,6 @@ If the ``Evolve`` option is selected a dialog will be presented for each filter 
 
 Once the genetic algorithm is started a results table is created named ``Benchmark Filter Analysis Evolution``. This table contains the same columns as the main results table with an extra column for the iteration of the algorithm. The results from the best filter per iteration are added to the table. This table can be used to track the progress of the algorithm. If desired the genetic algorithm can be stopped manually by pressing the ``Escape`` character.
 
-.. index:: results
 
 Results
 ~~~~~~~
@@ -3475,6 +3554,8 @@ The summary table contains the same fields as the results table. The following a
      - A flag to indicate if the optimal filter from the filter set was at the limit of the range for any of the expanded parameters. If this is Y (yes) then a better filter may exist if the ranges are changed. The parameter(s) at the edge of the range are recorded in the ``ImageJ`` log window.
 
 
+.. index:: ! Benchmark Filter Parameters
+
 Benchmark Filter Parameters
 ---------------------------
 
@@ -3486,6 +3567,8 @@ This plugin is similar to the ``Benchmark Filter Analysis`` plugin. Searching al
 
 This documentation is in progress.
 
+
+.. index:: ! Iterate Filter Analysis
 
 Iterate Filter Analysis
 -----------------------
@@ -3499,6 +3582,8 @@ Searching all parameters that control filtering of fitting results is computatio
 This documentation is in progress.
 
 
+.. index:: ! Score Filter
+
 Score Filter
 ------------
 
@@ -3507,8 +3592,7 @@ Scores a filter against a set of benchmark fitting results.
 This documentation is in progress.
 
 
-
-.. index:: doublet analysis
+.. index:: ! Doublet Analysis
 
 Doublet Analysis
 ----------------
@@ -3517,7 +3601,6 @@ Fits candidate spots identified by the ``Filter Spot Data`` plugin as a single o
 
 Super-resolution data may contain overlapping localisations. These may be so close they appear as a single spot. The fitting algorithm within the SMLM code is capable of analysing the difference (fit residuals) between the fitted 2D Gaussian and the image data. If the residuals show an asymmetric pattern (e.g. an elliptical shape) then it is possible that the image contains two spots in close proximity that have been identified and fit as a single spot. The software can refit the image using a two peak model. The results are compared to the single peak model and accepted if they pass set criteria. The ``Doublet Analysis`` plugin allows the criteria for choosing doublet fits to be tested.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -3556,8 +3639,6 @@ Matching of fit results to localisations can be performed using different method
    * - By candidate
      - Process the fit results in the order determined by the spot candidate rank. Each fit result (or pair of results) is matched to free localisations if within the match distance. This means results from higher ranking spot candidates may match a localisation that is actually closer to a lower ranking spot candidate results.
 
-
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -3660,8 +3741,6 @@ The following parameters can be configured:
    * - Matching
      - Select the matching algorithm.
 
-
-.. index:: results
 
 Results
 ~~~~~~~
@@ -3812,7 +3891,7 @@ The analysis results are reported in a summary table:
      - The run time for fitting.
 
 
-.. index:: overlay
+.. index:: Overlay
 
 Overlay
 ^^^^^^^
@@ -3830,7 +3909,6 @@ If the ``Show overlay`` option was selected the plugin will put a cross on the i
 
 The overlay can be removed using ``Image > Overlay > Remove Overlay``.
 
-.. index:: histograms
 
 Histograms
 ^^^^^^^^^^
@@ -3889,8 +3967,6 @@ If the ``Show histograms`` option was selected the plugin prompts the user to se
    * - Eval n>1
      - The number of function evaluations to fit a candidate that matches more than 1 actual result.
 
-
-.. index:: results table
 
 Results Table
 ^^^^^^^^^^^^^
@@ -4023,7 +4099,7 @@ The following data is shown:
      - The fit parameters of the doublet.
 
 
-.. index:: doublet filter analysis
+.. index:: ! Doublet Filter Analysis
 
 Doublet Filter Analysis
 -----------------------
@@ -4032,16 +4108,18 @@ Filters all the fit results produced by the ``Doublet Analysis`` plugin using th
 
 This can be used to determine the best settings for optimum doublet fitting and filtering.
 
-.. index:: selecting a two spot model
 
-Selecting a two spot model
+.. index:: Selecting a Two Spot Model
+
+Selecting a Two Spot Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``Doublet Analysis`` plugin fits a subset of the candidate spots in the benchmark image. These are fit as a single spot or as a double spot (doublet). The results are compared to the actual coordinates and scored. The ``Doublet Filter Analysis`` plugin applies filters to the fitting results to select if the single or doublet (or no fit) results should be accepted. The filtered results are then scored against the actual coordinates.
 
 Unlike standard fitting and filtering, where the system must decide if the fit of a single spot is good, doublet fitting must decide if the fit is better with two spots rather than one. The system first requires that both results from the doublet are valid (i.e. using SNR, width, precision, etc). It then must decide if the fit is better using two spots rather than one. Given that the two spot model has more parameters it has an advantage over a simpler one spot model. The plugin provide various scores to determine if there is sufficient improvement in the fit to accept the more complex two spot model. The acceptance scores are described below.
 
-.. index:: adjusted coefficient of determination
+
+.. index:: Adjusted Coefficient of Determination
 
 Adjusted Coefficient of Determination
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4057,7 +4135,8 @@ Where
 :math:`p` is the number of parameters.
 A higher score is better.
 
-.. index:: bias corrected akaike information criterion
+
+.. index:: Bias corrected Akaike Information Criterion
 
 Bias corrected Akaike Information Criterion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4077,7 +4156,8 @@ Where
 :math:`p` is the number of parameters.
 :math:`\mathit{AICc}` is the bias corrected Akaike Information Criterion which corrects for an increase in the number of parameters with respect to the number of fitted data points. A lower score is better.
 
-.. index:: bayesian information criterion
+
+.. index:: Bayesian Information Criterion
 
 Bayesian Information Criterion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4095,9 +4175,10 @@ A lower score is better.
 
 Note: The BIC penalises additional parameters more than the AIC.
 
-.. index:: computing the likelihood
 
-Computing the likelihood
+.. index:: Computing the Likelihood
+
+Computing the Likelihood
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 The likelihood score is output directly when using a Maximum Likelihood Estimator.
@@ -4108,7 +4189,6 @@ When using a Least Squares Estimator the variance of a model's residuals distrib
 
     \ln (\mathit{likelihood})=-{\frac{n}{2}}\ln (2\pi )-\frac{n}{2}\ln(\sigma ^{2})-\frac{1}{2\sigma ^{2}}\mathit{SS}_{\mathit{res}}
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -4190,8 +4270,6 @@ The following parameters can be configured:
 
        This template can be loaded using the ``Template Manager`` plugin for use in the ``Peak Fit`` plugin when fitting localisation data.
 
-
-.. index:: results
 
 Results
 ~~~~~~~
@@ -4323,14 +4401,13 @@ The filter analysis results are reported in a summary table:
      - The weighted mean Jaccard score using the region around the maximum Jaccard score with a Jaccard above 90% of the performance improvement over no doublet fitting.
 
 
-.. index:: results table
-
 Results Table
 ^^^^^^^^^^^^^
 
 If the ``Show results`` option was selected the plugin outputs information about the fit of each spot candidate to a table as per the ``Doublet Analysis`` plugin. See section :numref:`{number} <model_plugins:Doublet Analysis>` for more details.
 
 
+.. index:: ! Smart Spot Ranking
 
 Smart Spot Ranking
 ------------------

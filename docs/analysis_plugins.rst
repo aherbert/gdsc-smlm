@@ -1,4 +1,4 @@
-.. index:: analysis plugins
+.. index:: ! Analysis Plugins
 
 Analysis Plugins
 ================
@@ -9,7 +9,8 @@ The plugins are described in the following sections using the order presented on
 ``Plugins > GDSC SMLM > Analysis``
 menu.
 
-.. index:: drift calculator
+
+.. index:: ! Drift Calculator
 
 Drift Calculator
 ----------------
@@ -28,14 +29,14 @@ Drift can be calculated using:
    * - Sub-image alignment
      - Subsets of the localisation data are used to build images that are aligned to the global image.
 
-   * - Fiducial markers within an image
-     - The positions of fiducial markers are aligned to their centre-of-mass over the entire image.
+   * - Drift file
+     - The drift is loaded from file.
 
    * - Reference stack alignment
      - Images from a reference stack (e.g. a white light image) are aligned to a global projection.
 
-   * - Drift file
-     - The drift is loaded from file.
+   * - Fiducial markers within an image
+     - The positions of fiducial markers are aligned to their centre-of-mass over the entire image.
 
 Further details of the methods are shown in the sections below.
 
@@ -142,14 +143,15 @@ Example images showing the original and drift corrected localisations following 
 
 Details of the different drift calculation methods are shown below.
 
-.. index:: localisation sub-images
 
-Localisation Sub-images
-~~~~~~~~~~~~~~~~~~~~~~~
+.. index:: Sub-Image Alignment
+
+Sub-Image Alignment
+~~~~~~~~~~~~~~~~~~~
 
 If the localisations represent a structural image then a subset of the localisations will also represent the same structure. Where there are a large number of localisations (for example in STORM images) it is possible to create sub-images from sub-sets of the data and align them.
 
-The ``Localisation sub-images`` method performs the following steps:
+The ``Sub-image alignment`` method performs the following steps:
 
 #.  Initialise the drift for each time point to zero.
 
@@ -189,7 +191,7 @@ The following parameters can be specified:
        (c) May produce a better drift estimate if the number of localisations per sub-image is very high.
 
 
-.. index:: drift file
+.. index:: Drift File
 
 Drift File
 ~~~~~~~~~~
@@ -204,18 +206,15 @@ The fields can be delimited with tabs, spaces or commas. Any line not starting w
 
 The file is assumed to contain the final drift curve and no iterations are performed to update the curve. The curve may be smoothed using LOESS smoothing before being interpolated and applied to the data.
 
-The
-``Drift File``
-method allows the same drift to be applied to multiple data sets. For example if an image is produced with a white light channel for drift tracking and two different colour channels with localisation data the same drift from the white light image can be used to correct both sets of localisations.
+The ``Drift File`` method allows the same drift to be applied to multiple data sets. For example if an image is produced with a white light channel for drift tracking and two different colour channels with localisation data the same drift from the white light image can be used to correct both sets of localisations.
 
-.. index:: reference stack alignment
+
+.. index:: Reference Stack Alignment
 
 Reference Stack Alignment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The drift can be calculated using a reference stack image, for example this may be a white light image taken during the experiment. The reference stack must be a single stack image. Some microscopes may make a separate image during acquisition for the white light. However if all the frames are joined into a master image then you can extract reference stack slices from a master image using ``ImageJ``'s ``Substack Maker`` plugin (
-``Image > Stacks > Tools > Make Substack...``
-).
+The drift can be calculated using a reference stack image, for example this may be a white light image taken during the experiment. The reference stack must be a single stack image. Some microscopes may make a separate image during acquisition for the white light. However if all the frames are joined into a master image then you can extract reference stack slices from a master image using ``ImageJ``'s ``Substack Maker`` plugin (``Image > Stacks > Tools > Make Substack...``).
 
 The slice numbers in the reference stack will not correspond to the slices in the localisation results. Therefore the plugin allows the user to specify the actual slice number of the first slice in the reference stack (start frame), and then the frame spacing between slices in the stack. The actual frame for the stack is then calculated as the previous frame (starting from the start frame) plus the frame spacing.
 
@@ -254,10 +253,11 @@ For example if a white light image was taken at the start and then every 20 fram
 
     1, 21, 41, ..., 20 * (n-1) + 1, 20 * n + 1
 
-.. index:: marked rois
 
-Marked ROIs
-~~~~~~~~~~~
+.. index:: Fiducial Markers
+
+Fiducial Markers
+~~~~~~~~~~~~~~~~
 
 This method uses constant fiducial markers that are placed within the image to allow the drift to be tracked (e.g. fluorescent beads). The method is only available in the drop-down options when there are ROIs listed in the ``ImageJ`` ROI manager.
 
@@ -280,24 +280,28 @@ The ``Marked ROIs`` method performs the following steps:
 
 The ``Marked ROIs`` method requires no additional parameters, only ROIs within the ``ROI Manager``. Note however that each ROI's bounds (x,y,width,height) are used to find spots within the input localisations and so the ROI should be selected using an image with the same scale and image bounds as the input data. Ideally this should be an average intensity projection of the original image but it can be a super-resolution reconstruction of the data made using an image scale of 1.
 
-.. index:: image alignment using correlation analysis
 
-Image alignment using correlation analysis
+..
+  No index
+
+Image Alignment using Correlation Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Image alignment in the ``Localisation sub-image`` and ``Reference Stack Alignment`` methods is done using the maximum correlation between images (including sub-pixel registration using cubic interpolation). This is computed in the frequency domain after a Fast Fourier Transform (FFT) of the image. The method of producing and then aligning images is computationally intensive so the plugin uses multi-threading to increase speed. The number of threads to use is the ``ImageJ`` default set in ``Edit > Options > Memory & Threads...``.
+Image alignment in the ``Sub-image alignment`` and ``Reference Stack Alignment`` methods is done using the maximum correlation between images (including sub-pixel registration using cubic interpolation). This is computed in the frequency domain after a Fast Fourier Transform (FFT) of the image. The method of producing and then aligning images is computationally intensive so the plugin uses multi-threading to increase speed. The number of threads to use is the ``ImageJ`` default set in ``Edit > Options > Memory & Threads...``.
 
-.. index:: trace molecules
+
+.. index:: ! Trace Molecules
 
 Trace Molecules
 ---------------
 
 Traces localisations through time and collates them into traces using time and distance thresholds. Each trace can only have one localisation per time frame. With the correct parameters a trace should represent all the localisations of a single fluorophore molecule including blinking events.
 
-.. index:: background
 
-Background
-~~~~~~~~~~
+.. index:: Molecule Tracing
+
+Molecule Tracing
+~~~~~~~~~~~~~~~~
 
 The fluorophores used in single molecule imaging can exist is several states. When in an active state it can absorb light and emit it at a different frequency (fluorescence). The active state can move into a dark state where it does not fluoresce. The dark state can move back to the active state. Eventually the molecule moves into a bleached state where it will no longer fluoresce (photo-bleached). The rates of the transitions between states are random as are the number of times this can occur. This means that it is possible for the same molecule to turn on and off several times causing blinking.
 
@@ -307,7 +311,8 @@ Any spot that occurred within time threshold and distance threshold of a previou
 
 The molecule tracing algorithm is based on the work of Coltharp, *et al* (2012).
 
-.. index:: trace molecules plugin
+
+.. index:: Trace Molecules Plugin
 
 Trace Molecules Plugin
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -384,7 +389,8 @@ A summary of the number of traces is shown on the ``ImageJ`` status bar. The res
 ``Results Manager``
 plugin.
 
-.. index:: pulse analysis
+
+.. index:: Pulse Analysis
 
 Pulse Analysis
 ^^^^^^^^^^^^^^
@@ -399,7 +405,8 @@ The options should be disabled when using a continuous activation laser by setti
 
 When using a pulse activation it is possible to photo-bleach all fluorophores that were activated by the pulse before the next pulse. This requires a long pulse interval. If you are confident that all molecules have bleached then it does not make sense for a trace to span pulse intervals. Use the ``Split pulses`` option to break apart any traces that span a pulse interval boundary into separate traces.
 
-.. index:: optimisation
+
+.. index:: Trace Molecules; Optimisation
 
 Optimisation
 ~~~~~~~~~~~~
@@ -482,7 +489,8 @@ Note that at the end of optimisation the thresholds are automatically set using 
 
 If the optimised thresholds are not suitable it is left to the user to interpret the plot of the scores and select the best values. For example this could be done by assuming the distance threshold calculated using ``2.5 x Av. Precision`` is correct and looking up the corresponding time threshold when the score is zero.
 
-.. index:: memory output
+
+.. index:: Memory Output
 
 Memory Output
 ~~~~~~~~~~~~~
@@ -519,9 +527,10 @@ It is possible to save these results to file using the
 ``Results Manager``
 plugin.
 
-.. index:: file output
 
-File output
+.. index:: File Output
+
+File Output
 ~~~~~~~~~~~
 
 If the ``Save traces`` option is selected then the plugin will show a file selection dialog allowing the user to choose the location of the clusters results file. The results will use the same format as the plain-text file results option in the ``Peak Fit`` and ``Results Manager`` plugins. However all the localisations for each trace will be stored together under a Trace entry. The Trace entry will have the format:
@@ -545,7 +554,7 @@ The prefix ``#`` character allows the clusters to be ignored as comments, for ex
 Note that the number of pulse (or bursts) is equal to the number of blinks + 1. It is equivalent to the blinking rate of the molecule.
 
 
-.. index:: cluster molecules
+.. index:: ! Cluster Molecules
 
 Cluster Molecules
 -----------------
@@ -602,7 +611,8 @@ plugin and many of the options are the same. The following options are available
 
 The plugin will cluster the localisations and store the results in memory with a suffix ``Clustered``. Two additional datasets are created: all single localisations which could not be joined are given a suffix ``Cluster Singles``; all clusters are given a suffix ``Clusters``. The ``Cluster Singles`` plus ``Clusters`` datasets equal the ``Clustered`` dataset.
 
-.. index:: clustering algorithms
+
+.. index:: Clustering Algorithms
 
 Clustering Algorithms
 ~~~~~~~~~~~~~~~~~~~~~
@@ -656,7 +666,8 @@ All the clustering algorithms (except ``Pairwise``) are multi-threaded for at le
 
 The ``Pairwise`` algorithm is not suitable for multi-threaded operation but is the fastest algorithm by an order of magnitude over the others. All other algorithms have a similar run-time performance except the ``Pairwise without neighbours`` algorithm which doesn't just search for the closest clusters but also tracks the number of neighbours. The algorithm should return the same results as the ``Closest`` algorithm but the analysis of neighbours has run-time implications. At very low densities this algorithm is faster since all pairs without neighbours can be joined in one step. However at most normal and high densities tracking neighbours is costly and the algorithm is approximately 3x slower than the next algorithm.
 
-.. index:: draw clusters
+
+.. index:: ! Trace Diffusion
 
 Trace Diffusion
 ---------------
@@ -665,7 +676,6 @@ The ``Trace Diffusion`` plugin will trace molecules through consecutive frames a
 
 The plugin is similar to the ``Diffusion Rate Test`` plugin however instead of simulating particle diffusion the plugin will use an existing results set. This allows the analysis to be applied to results from fitting single-molecule images using the ``Peak Fit`` plugin.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -686,11 +696,12 @@ where
 :math:`n` is the number of separating frames,
 :math:`\Delta t` is the time lag between frames, and
 :math:`\sigma` is the localisation precision.
-Thus the gradient of the best fit line can be used to obtain the diffusion coefficient. Note that the plugin will compute a fit with and without an explicit intercept and pick the solution with the best fit to the data (see :numref:`{number}: {name} <analysis_plugins:Selecting the best fit>`).
+Thus the gradient of the best fit line can be used to obtain the diffusion coefficient. Note that the plugin will compute a fit with and without an explicit intercept and pick the solution with the best fit to the data (see :numref:`{number}: {name} <analysis_plugins:Selecting the Best Fit>`).
 Note that an additional best fit line can be computed using a MSD correction factor
 (see :numref:`{number}: {name} <analysis_plugins:MSD Correction>`).
 
-.. index:: apparent diffusion coefficient
+
+.. index:: Apparent Diffusion Coefficient
 
 Apparent Diffusion Coefficient
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -703,9 +714,10 @@ Given that the localisations within each trace are subject to a fitting error, o
 
 The plugin thus computes the average precision for the localisations included in the analysis and can optionally report the apparent diffusion coefficient (:math:`D^{\star}`). If the average precision is above 100nm then the plugin prompts the user to confirm the precision value.
 
-.. index:: jump distance analysis
 
-Jump Distance analysis
+.. index:: Jump Distance Analysis
+
+Jump Distance Analysis
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The jump distance is how far a particle moves is given time period. Analysis of a population of jump distances can be used to determine if the population contains molecules diffusing with one or more diffusion coefficients [Weimann *et al*, 2013]. For two dimensional Brownian motion the probability that a particle starting at the origin will be encountered within a shell of radius *r* and a width *dr* at time :math:`\Delta t` is given by:
@@ -748,12 +760,13 @@ The ``Trace Diffusion`` plugin performs jump distance analysis using the jumps b
 When fitting multiple species the fit is rejected if:
 (a) the relative difference between coefficients is smaller than a given factor; or
 (b) the minimum fraction, :math:`f_i`, is less than a configured level.
-If accepted the result must then be compared to the previous result to determine if increasing the number of parameters has improved the fit (see :numref:`{number}: {name} <analysis_plugins:Selecting the best fit>`).
+If accepted the result must then be compared to the previous result to determine if increasing the number of parameters has improved the fit (see :numref:`{number}: {name} <analysis_plugins:Selecting the Best Fit>`).
 
 
 Optimisation is performed using a fast search to maximise the score by varying each parameter in turn (Powell optimiser). In most cases this achieves convergence. However in the case that the default algorithm fails then a second algorithm is used that uses a directed random walk (CMAES optimiser). This algorithm depends on randomness and so can benefit from restarts. The plugin allows the number of restarts to be varied. For the optimisation of the sum-of-squares against the cumulative histogram a least-squares fitting algorithm (Levenberg-Marquardt or LVM optimiser) is used to improve the initial score where possible. The plugin will log messages on the success of the optimisers to the ``ImageJ`` log window. Extra information will be logged if using the ``Debug fitting`` option.
 
-.. index:: msd correction
+
+.. index:: Trace Diffusion; MSD Correction
 
 MSD Correction
 ~~~~~~~~~~~~~~
@@ -777,9 +790,11 @@ If the ``MSD correction`` option is selected the plugin will compute the correct
 
     D_{\mathit{corr}}=D\cdot {\frac{n}{n-1/3}}
 
-.. index:: fitting the plot of msd verses n frames
 
-Fitting the plot of MSD verses N frames
+..
+  No index
+
+Fitting the Plot of MSD verses N Frames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When fitting the linear plot of MSD verses the number of frames the correction factor can be included. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
@@ -813,7 +828,8 @@ Linear fit with MSD corrected intercept:
 
 Note: In each model the linear gradient is proportional to the diffusion coefficient.
 
-.. index:: precision correction
+
+.. index:: Precision Correction
 
 Precision Correction
 ~~~~~~~~~~~~~~~~~~~~
@@ -826,9 +842,10 @@ Given that the localisations within each trace are subject to a fitting error, o
 
 If the ``Precision correction`` option is selected the plugin will subtract the precision and report the apparent diffusion coefficient (:math:`D^{\star}`) from the jump distance analysis.
 
-.. index:: msd and precision correction
 
-MSD and Precision correction
+.. index:: MSD and Precision Correction
+
+MSD and Precision Correction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Both the ``MSD correction`` and ``Precision correction`` can be applied to the fitted MSD to compute the corrected diffusion coefficient:
@@ -837,9 +854,10 @@ Both the ``MSD correction`` and ``Precision correction`` can be applied to the f
 
     D=\frac{n}{n-1/3}\cdot \mathit{max}(0,\frac{\mathit{MSD}}{4n\Delta t}-\frac{\sigma _{\mathit{loc}}^{2}}{n\Delta t})
 
-.. index:: selecting the best fit
 
-Selecting the best fit
+.. index:: Selecting the Best Fit
+
+Selecting the Best Fit
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The Bias Corrected Akaike Information Criterion (cAIC) [Hurvich & Tsai, 1989] is calculated for the fit using the log likelihood (*L*), the number of data points (*n*) and the number of parameters (*p*):
@@ -858,7 +876,6 @@ The corrected AIC penalises additional parameters. The model with the lowest cAI
 
     L=-{\frac{n}{2}} \ln (2\pi) - \frac{n}{2} \ln(\sigma^2) - \frac{1}{2\sigma^2} \mathit{SS}
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -973,14 +990,14 @@ When all the datasets have been traced the plugin presents a second dialog to co
      - A title to add to the results table.
 
 
-.. index:: output
-
 Output
 ~~~~~~
 
-.. index:: msd verses time
 
-MSD verses time
+..
+  No index
+
+MSD verses Time
 ^^^^^^^^^^^^^^^
 
 The plugin will plot the mean-squared distances against the time as show in :numref:`Figure %s <fig_trace_diffusion_msd_vs_time>`. The plot shows the best fit line. If the data is not linear then the diffusion of particles may be confined, for example by cellular structures when using *in vivo* image data. In this case the diffusion coefficient will be underestimated.
@@ -994,9 +1011,11 @@ The plugin will plot the mean-squared distances against the time as show in :num
 
     The mean of the raw data is plotted with bars representing standard error of the mean. The best fit line is shown in magenta.
 
-.. index:: jump distance histogram
 
-Jump distance histogram
+..
+  No index
+
+Jump Distance Histogram
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The plugin produces a cumulative probability histogram of the jump distance (see :numref:`Figure %s <fig_trace_diffusion_jump_distance_cumul_histogram>`). The best fit for a single species model will be shown in magenta. Any significant deviations of the histogram line from the single species fit are indicative of a multi-species population. If a multiple species model has a better fit than the single species model then it will be plotted in yellow.
@@ -1010,7 +1029,6 @@ The plugin produces a cumulative probability histogram of the jump distance (see
 
     The best fit for the single species model is shown in magenta.
 
-.. index:: histograms
 
 Histograms
 ^^^^^^^^^^
@@ -1042,9 +1060,10 @@ If the ``Show histograms`` option is selected the plugin presents a second dialo
      - The apparent diffusion coefficient per molecule. Plots of the all-vs-all and adjacent D* are shown.
 
 
-.. index:: summary table
+..
+  No index
 
-Summary table
+Summary Table
 ^^^^^^^^^^^^^
 
 The plugin shows a summary table of the analysis results. This allows the plugin to be run with many different settings to view the effect on the calculated diffusion coefficient. The following columns are reported:
@@ -1156,7 +1175,7 @@ The plugin will report the number of traces that were excluded using the length 
 For use in the ``ImageJ`` macro language, extension functions can be registered that allow access to the computed diffusion coefficients and population fractions (see :numref:`{number}: {name} <toolset_plugins:Trace Diffusion Extensions>`).
 
 
-.. index:: trace diffusion (multi)
+.. index:: ! Trace Diffusion Multi
 
 Trace Diffusion (Multi)
 -----------------------
@@ -1189,7 +1208,7 @@ When the ``Trace Diffusion`` plugin is executed it will not have the ``Input`` o
 Note that the plugin supports the ``ImageJ`` recorder to allow running within an ``ImageJ`` macro.
 
 
-.. index:: trace length analysis
+.. index:: ! Trace Length Analysis
 
 Trace Length Analysis
 ---------------------
@@ -1236,6 +1255,9 @@ If the ``Save datasets`` button is pressed the input dataset will be saved to me
 
 Note: An ideal dual population of fixed and moving molecules will be a bimodel histogram of the diffusion coefficient, for example DNA binding proteins that are either diffusing freely or bound to the DNA. If this plugin is run on data which does not contain an obvious dual population of fixed and moving molecules then the histogram will be unimodal. If the population contains only moving molecules then the diffusion coefficients will have a mode far above zero. If the population contains only fixed molecules then the diffusion coefficients will be very low with a mode close to zero. A split of mixed populations of diffusing molecules with different diffusion coefficients is not supported.
 
+
+.. index:: ! OPTICS
+
 OPTICS
 ------
 
@@ -1252,6 +1274,7 @@ The OPTICS algorithm outputs the points in a particular ordering. A plot of the 
 A local outlier probability (LoOP [Kriegel `et al`, 2009]) analysis can be performed by the plugin. The local density is estimated by the typical distance at which a point can be "reached" from its neighbours specified using the `MinPoints` nearest neighbour. By comparing the local density of an object to the local densities of its neighbours, one can identify regions of similar density, and points that have a substantially lower density than their neighbours. These are considered to be outliers. LoOP analysis produces a score in the range of 0 to 1.
 
 The ``OPTICS`` plugin has a preview mode that allows the parameters to be changed and the results updated in real-time. There are various output options to control outlining of clusters on an image, viewing of the clustering structure on the reachability profile and tabulation of cluster results. The ``OPTICS`` dialog is non-blocking allowing the other ``ImageJ`` windows to be used when the preview is active.
+
 
 Parameters
 ~~~~~~~~~~
@@ -1329,8 +1352,9 @@ The following options are available (extra options are activated by holding the 
    * - Debug
      - Extra option: If *true* write debugging information to the Java console.
 
-Algorithm Processing
-~~~~~~~~~~~~~~~~~~~~
+
+Analysis
+~~~~~~~~
 
 The ``OPTICS`` plugin records processing details to the ``ImageJ`` log window. This includes:
 
@@ -1388,6 +1412,8 @@ Examples of the clusters and spanning tree overlaid on an image are shown in :nu
     The spanning tree, representing the OPTICS order used to connect localisations, is coloured using the cluster depth and overlaid on a super-resolution image of the localisations.
 
 
+.. index:: ! DBSCAN
+
 DBSCAN
 ------
 
@@ -1400,6 +1426,9 @@ Processing starts from an arbitrary unprocessed point. The neighbours are comput
 The DBSCAN algorithm requires parameters `radius` and `MinPoints`. The run-time of the algorithm depends on `radius`. If set to the maximum distance between any two points in the data then the run-time is asymptomatically quadratic as each neighbourhood returns all the points. The `MinPoints` parameter is recommended to be double the number of dimensions: for 2D localisation data that is 4.
 
 If points can be reached within the clustering distance from any core point then they are included in the cluster. Clusters are not hierarchical. The algorithm is faster than OPTICS due to the arbitrary processing order. OPTICS is approximately 1.6x slower.
+
+
+.. index:: Parameter Estimation
 
 Parameter Estimation
 ~~~~~~~~~~~~~~~~~~~~
@@ -1416,6 +1445,7 @@ The ``Clustering distance`` parameter can be chosen by using a k-nearest neighbo
     DBSCAN K-nearest neighbour distance graph.
 
     The distance to the k\ :sup:`th` nearest neighbour for a random sample of points is plotted in descending order. An estimate for the DBSCAN clustering radius can be taken from the "elbow" of the plot. The red line shows the current ``Clustering distance``; the blue line is the distance defined by excluding the lowest fraction as specified by the ``Noise`` parameter.
+
 
 Parameters
 ~~~~~~~~~~
@@ -1482,8 +1512,9 @@ The following options are available:
    * - Debug
      - Extra option: If *true* write debugging information to the Java console.
 
-Algorithm Processing
-~~~~~~~~~~~~~~~~~~~~
+
+Analysis
+~~~~~~~~
 
 The ``DBSCAN`` plugin records processing details to the ``ImageJ`` log window. This includes:
 
@@ -1492,6 +1523,7 @@ The ``DBSCAN`` plugin records processing details to the ``ImageJ`` log window. T
 - The number of clusters.
 
 If the live preview is active the plugin also records the `Rand index <https://en.wikipedia.org/wiki/Rand_index>`_ comparing the current clustering with the previous clustering. This provides an indication of how much the clustering has changed with settings changes.
+
 
 Results
 ~~~~~~~
@@ -1515,7 +1547,7 @@ An example of the clusters overlaid on an image is shown in :numref:`Figure %s <
     The outline, representing the convex hull of clusters, is coloured using a look-up table to maximise separation of colours and overlaid on a super-resolution image of the localisations.
 
 
-.. index:: draw clusters
+.. index:: ! Draw Clusters
 
 Draw Clusters
 -------------
@@ -1596,9 +1628,9 @@ The following options are available:
      - Specify the line width. Use zero to draw lines with a 1 pixel stroke width regardless of the magnification.
 
 
-.. index:: drawing cluster centroids
+.. index:: Drawing Cluster Centroids
 
-Drawing cluster centroids
+Drawing Cluster Centroids
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that the
@@ -1611,7 +1643,8 @@ plugin will draw all the members of a cluster on the image. If you wish to draw 
 
 If you wish to draw the cluster centroid on each frame that contains a member of the cluster then you can use the ``Expand to singles`` and ``Use stack position`` options.
 
-.. index:: density image
+
+.. index:: ! Density Image
 
 Density Image
 -------------
@@ -1671,7 +1704,7 @@ plugin counts the number of localisations in the neighbourhood of each localisat
      - Analyse the data using a range of distance thresholds and compute the Ripley's L-score for each. Show a plot of the L-score against the distance threshold. See section :numref:`{number}: {name} <analysis_plugins:Ripley's L-plot>`.
 
 
-.. index:: available density score functions
+.. index:: Available Density Score functions
 
 Available Density Score functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1741,7 +1774,8 @@ The :math:`L_{i}(r)` score should be equal to *r* if the points are randomly dis
     * - :math:`(L_{i}(r)-r)/r`
       - Should be equal to zero. Scores should be comparable across different radii.
 
-.. index:: ripley's l-plot
+
+.. index:: Ripley's L-plot
 
 Ripley's L-plot
 ~~~~~~~~~~~~~~~
@@ -1764,7 +1798,7 @@ An example of Ripley's L-plot is shown in :numref:`Table %s <table_ripleys_l_plo
        |density_image_ripleys_l_plot_traced_png|
 
 
-.. index:: dark time analysis
+.. index:: ! Dark Time Analysis
 
 Dark Time Analysis
 ------------------
@@ -1820,7 +1854,8 @@ The plugin performs tracing or clustering on the localisations using a specified
 
 When started the progress of the algorithm is shown on the ``ImageJ`` task bar. When tracing/clustering is complete the plugin produces a histogram and cumulative histogram of the dark time for all traces. The dark-time corresponding to the specified percentile is then reported to the ``ImageJ`` log window.
 
-.. index:: blink estimator
+
+.. index:: ! Blink Estimator
 
 Blink Estimator
 ---------------
@@ -1892,7 +1927,8 @@ The following parameters can be set within the plugin to control the output:
 
     The curve data is plotted in black. The red circles show the fitted points. The blue crosses indicate where the fitted line will asymptote.
 
-.. index:: neighbour analysis
+
+.. index:: ! Neighbour Analysis
 
 Neighbour Analysis
 ------------------
@@ -1903,7 +1939,8 @@ The ``Neighbour Analysis`` plugin searches for the neighbour of each localisatio
 
 This plugin was written to allow off-line analysis of the neighbours of localisations, for example investigation of how average distance, signal strength and frequency of neighbours vary when localisations are categorised using their own signal strength.
 
-.. index:: filter analysis
+
+.. index:: ! Filter Analysis
 
 Filter Analysis
 ---------------
@@ -1912,7 +1949,6 @@ Performs filtering on a set of categorised localisation results and computes mat
 
 The ``Filter Analysis`` plugin is used to benchmark different methods for filtering the results of fitting a 2D Gaussian to an image. When a Gaussian peak is fitted to an image it has many parameters that are changed in order to optimise the fit of the function to the data. For example the centre of the spot, the width of the spot, etc. It can be difficult to know if the parameters have been adjusted too far and the Gaussian function is no longer a fair representation of the image. This plugin requires the user to prepare input data with fitting results identified as correct or incorrect. The plugin will load the results and then filter them with many different settings. The filtered results are compared with the classifications and various comparison metrics are generated allowing the best filter to be identified.
 
-.. index:: input data
 
 Input Data
 ~~~~~~~~~~
@@ -1927,7 +1963,8 @@ and the results files updated using the jury classification to mark results as c
 
 When the plugin is run the user must select a directory. The plugin will attempt to read all the files in the directory as PeakResults files. The results are cached in memory. If the same directory is selected the user can opt to re-use the results. Click 'No' to re-read the results, for example if the files have been modified with new classifications.
 
-.. index:: available filters
+
+.. index:: Available Filters
 
 Available Filters
 ~~~~~~~~~~~~~~~~~
@@ -1984,9 +2021,8 @@ and
 ``Filter Analysis (File)``
 plugins (see sections :numref:`{number}<analysis_plugins:Create Filters>` and :numref:`{number}<analysis_plugins:Filter Analysis (File)>`).
 
-.. index:: additional parameters
 
-Additional parameters
+Additional Parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
 After the filters have been configured there are additional parameters controlling the analysis:
@@ -2014,25 +2050,24 @@ After the filters have been configured there are additional parameters controlli
      - The delta value used to adjust parameters to calculate the sensitivity.
 
 
-.. index:: output
-
 Output
 ~~~~~~
 
 At least one output method must be chosen otherwise the plugin will show an error message.
 
-.. index:: table output
 
-Table output
-^^^^^^^^^^^^
+Results Table
+^^^^^^^^^^^^^
 
 If ``Show table`` is selected the plugin produces a table of the match statistics for the filtered results compared to the categorised inputs. The results for all the filters in a filter set are shown together. An empty row is used to separate filter sets.
 
 The available scores are Precision, Recall, F-score and Jaccard. Details of the match statistics are given in section :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>`.
 
-.. index:: plot output
 
-Plot output
+..
+  No index
+
+Plot Output
 ^^^^^^^^^^^
 
 If a value for ``Plot top n`` is provided the plugin produces a chart of the Jaccard score against one independent filter variable for each of the top N performing filter sets. An example of the ``Hysteresis Precision`` filter chart is shown in :numref:`Figure %s <fig_filter_analysis_hysteresis_filter_jaccard_plot>`. The chart shows a clear improvement and then fall-off in performance as the lower threshold is increased.
@@ -2046,27 +2081,26 @@ If a value for ``Plot top n`` is provided the plugin produces a chart of the Jac
 
     The upper limit for hysteresis thresholding is 20nm higher than the lower limit (+20).
 
-.. index:: sensitivity analysis
 
-Sensitivity analysis
+..
+  No index
+
+Sensitivity Analysis
 ^^^^^^^^^^^^^^^^^^^^
 
 If ``Calculate sensitivity`` is selected the plugin produces a table of the sensitivity of each parameter for each unique filter (identified by name). The sensitivity is calculated for the filter parameters that produce the highest Jaccard score. The sensitivity is the partial gradient of the score with respect to each parameter.
 
-If the sensitivity is low then the filter will perform well using a range of parameter values. If the sensitivity is high then the filter performance will rapidly fall-off as the optimum parameter value is changed. Ideally a good filter will have good performance metrics and low sensitivity across all the parameters. It may be better to choose a filter that does not have the highest Jaccard score but has the lowest sensitivity. This filter should perform better on a range of input data.
+If the sensitivity is low then the filter will perform well using a range of parameter values. If the sensitivity is high then the filter performance will rapidly fall-off as the optimum parameter value is changed. Ideally a good filter will have good performance metrics and low sensitivity across all the parameters. It may be better to choose a fil|ter that does not have the highest Jaccard score but has the lowest sensitivity. This filter should perform better on a range of input data.
 
 The sensitivity is calculated by altering each parameter by a relative amount. The delta parameter controls the update magnitude. Note that integer parameters will be correctly adjusted to the next integer. The score is recomputed using the new parameter value following a positive or negative change. The average rate of change of the score is then computed. The sensitivity is output for the Jaccard, Precision and Recall scores. Two scores are output: (a) the raw average change, titled ``Sensitivity (delta)``; or (b) the average change divided by the change in the parameter value, titled ``Sensitivity (unit)``.
 
-.. index:: create filters
+
+.. index:: ! Create Filters
 
 Create Filters
 --------------
 
-The
-``Create Filters``
-plugin can be used to prepare a large set of filters for use in the
-``Filter Analysis (File)``
-plugin (see section :numref:`%s <analysis_plugins:Filter Analysis (File)>`). The purpose is to create a set of filters that can be applied to a testing dataset to identify the best filter.
+The ``Create Filters`` plugin can be used to prepare a large set of filters for use in the ``Filter Analysis (File)`` plugin (see section :numref:`%s <analysis_plugins:Filter Analysis (File)>`). The purpose is to create a set of filters that can be applied to a testing dataset to identify the best filter.
 
 The plugin dialog shows a text area where a filter template can be specified as shown in :numref:`Figure %s <fig_create_filters_dialog>`. If the ``Show demo filters`` checkbox is selected then several example filters will be recorded in the ``ImageJ`` log.
 
@@ -2109,7 +2143,8 @@ Becomes:
 
 When the plugin has generated all the filters it will present a file selection dialog allowing the user to specify the output filter file. If the file already exists it will be overwritten.
 
-.. index:: filter analysis (file)
+
+.. index:: ! Filter Analysis File
 
 Filter Analysis (File)
 ----------------------
@@ -2128,7 +2163,8 @@ plugin. A filter file can be generated from a filter template by enumerating the
 ``Create Filters``
 plugin (see section :numref:`{number}<analysis_plugins:Create Filters>`).
 
-.. index:: spot analysis
+
+.. index:: ! Spot Analysis
 
 Spot Analysis
 -------------
@@ -2143,7 +2179,6 @@ The plugin has been used to generate distributions for the signal-per-frame, on-
 ``Create Data``
 plugin.
 
-.. index:: input images
 
 Input Images
 ~~~~~~~~~~~~
@@ -2161,7 +2196,8 @@ plugin is shown in :numref:`Figure %s <fig_spot_analysis_example_input_image>`. 
 
     The super-resolution image is a simulated PSF image of localisations with a SNR above 20. A single fluorophore is selected for analysis.
 
-.. index:: plugin interface
+
+.. index:: Plugin Interface
 
 Plugin Interface
 ~~~~~~~~~~~~~~~~
@@ -2201,9 +2237,10 @@ The following parameters can be set:
      - The LOESS smoothing parameter used to create the smoothed average for the profile plots.
 
 
-.. index:: profiling a spot region
+..
+  No index
 
-Profiling a spot region
+Profiling a Spot Region
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The first action is to select a spot on the input image using a rectangular ROI. It is difficult to see spots on the input image which has many frames and very few fluorescent bursts. Consequently it is recommended that an overview image is created to allow the spots to be identified. This could be a maximum or average intensity projection of the input image. However it is best to identify spots using the
@@ -2231,9 +2268,11 @@ The plugin then analyses the spot region and creates profile plots of the mean a
 
     The current frame is shown as a vertical pink line. Candidate on-frames from ``Peak Fit`` results are shown as cyan box. Selected on-frames are shown as magenta circles. The red line is the LOESS smoothing of the plot data.
 
-.. index:: adding on-frames
 
-Adding on-frames
+..
+  No index
+
+Adding On-Frames
 ^^^^^^^^^^^^^^^^
 
 Any fluorophore on-frame should have a higher mean that the frames around it. These can be easily viewed as spikes on the plot profile and the relevant frames in the spot image inspected.
@@ -2248,9 +2287,11 @@ plugin (see section :numref:`%s <analysis_plugins:Spot Analysis (Add)>`).
 
 The frame is added to the list in the ``Spot Analysis`` window along with the current estimate of the signal for that frame. Note that LOESS smoothing only uses frames that have not been selected as on-frames. Consequently the background and the noise are updated as more on-frames are added to the list.
 
-.. index:: saving a fluorophore sequence
 
-Saving a fluorophore sequence
+..
+  No index
+
+Saving a Fluorophore Sequence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When all the on-frames have been marked the fluorophore sequence must be saved using the Save button. This will record the sequence to a summary window as shown in :numref:`Figure %s <fig_spot_analysis_summary_window>`. The window shows the fluorophore signal, on and off times and number of blinks.
@@ -2264,10 +2305,11 @@ When all the on-frames have been marked the fluorophore sequence must be saved u
 
 The ``Save`` button can only be pressed once to prevent duplicates in the window. If the sequence list is updated by adding or removing on-frames then the listed can be re-saved. Note that the old sequence will remain in the summary window and the new sequence will have a new ID. The old sequence should be removed using the summary tables ``Edit > Clear`` command to remove selected lines.
 
-.. index:: analysis workflow
 
-Analysis Workflow
-~~~~~~~~~~~~~~~~~
+.. index:: Spot Analysis Workflow
+
+Spot Analysis Workflow
+~~~~~~~~~~~~~~~~~~~~~~
 
 The following workflow is recommended when using the
 ``Spot Analysis``
@@ -2295,7 +2337,8 @@ plugin.
 
 #.  Save all the results to file using the ``Save Traces`` button. Only results that are present in the table are saved. Duplicate or unwanted results can be removed using the table ``Edit > Clear`` command to remove selected rows.
 
-.. index:: results files
+
+.. index:: Results Files
 
 Results Files
 ~~~~~~~~~~~~~
@@ -2329,7 +2372,7 @@ Fluorophore sequences in the summary table can be saved to file. The plugin save
      - Contains the number of blinks for all the results. Blinks are the number of dark times recorded for a fluorophore. It is one less than the number of pulses (on-time events).
 
 
-.. index:: spot analysis (add)
+.. index:: ! Spot Analysis Add
 
 Spot Analysis (Add)
 -------------------
@@ -2339,7 +2382,7 @@ This plugin provides a named plugin command for the ``Add`` button of the ``Spot
 Any named plugin command can be mapped to a hot key using ``ImageJ``'s ``Plugins > Shortcuts > Create Shortcut...`` command. Thus the ``Add`` button can be mapped by ``ImageJ`` to a keyboard shortcut. This allows the user to scroll through an image generated by the ``Spot Analysis`` plugin using the standard left and right arrow keys to move between frames. When a spot is present the user adds the spot to the list by clicking the ``Add`` button on the ``Spot Analysis`` window. If the ``Add`` command is mapped to a shortcut the user can perform the same action using the hotkey. This allows faster analysis of images using only simple keyboard commands.
 
 
-.. index:: crosstalk activation analysis
+.. index:: ! Crosstalk Activation Analysis
 
 Crosstalk Activation Analysis
 -----------------------------
@@ -2363,6 +2406,7 @@ The crosstalk between two channels is the ratio of incorrectly to correctly colo
 The ``Crosstalk Activation Analysis`` plugin requires localisations identified from imaging of a single FRET fluorophore-chromophore pair under the conditions of the multi-channel imaging protocol. Thus if 3 channel imaging is desired using 3 FRET pairs of fluorophore-chromophore then 3 rounds of crosstalk analysis must be performed to compute the crosstalk ratio for each pair.
 
 The input localisations must be traced. This allows crosstalk analysis to be separated from how localisations are traced into bursts of fluorescence from the same molecule. Tracing can be done using the :numref:`{name} <analysis_plugins:Trace Molecules>` plugin.
+
 
 Workflow
 ~~~~~~~~
@@ -2429,6 +2473,9 @@ In the following example from a simulated 3 channel pulsed experiment the activa
 After computing the activation counts the plugin will ask for the target channel. Analysis is performed on the activations to compute the crosstalk ratio(s) for the channel. The plugin will compute 1 ratio for a 2 channel analysis and 2 ratios for a 3 channel analysis. These are saved to memory.
 
 A histogram is constructed of the activation counts for each channel. The crosstalk ratios between channels are displayed on the plot.
+
+
+.. index:: Simulated Crosstalk
 
 Simulated Crosstalk
 ~~~~~~~~~~~~~~~~~~~
@@ -2523,7 +2570,7 @@ After the simulation has finished the ``Crosstalk Activation Analysis`` plugin c
     Example image of simulated 3 channel data output by the Crosstalk Activation Analysis plugin.
 
 
-.. index:: pulse activation analysis
+.. index:: ! Pulse Activation Analysis
 
 Pulse Activation Analysis
 -------------------------
@@ -2542,6 +2589,9 @@ This plugin performs the following analysis on a set of traced localisations:
 * Outputs the assigned localisations to an image.
 
 The quality of the output of the crosstalk correction procedure is subjective and depends on the current parameters. The plugin provides a live preview mode allowing the settings for correction to be changed and the results viewed dynamically.
+
+
+.. index:: Crosstalk Correction
 
 Crosstalk Correction
 ~~~~~~~~~~~~~~~~~~~~
@@ -2605,6 +2655,7 @@ Correction uses the following methods:
      - Assign the activation randomly using the probabilities as weights. This only uses probabilities above a specified threshold to ignore unlikely results.
 
 In all cases correction is only applied if there are enough neighbours as specified by a threshold value. Otherwise the activation is removed from output.
+
 
 Workflow
 ~~~~~~~~
@@ -2734,7 +2785,7 @@ Each computation of new results will be saved to memory with the prefix of the i
     Each cross hair represents an activation. Colours represent the channel: red (1); green (2); and blue (3). Subtraction correction was performed by removing all activations with a correct assignment probability of below 50%.
 
 
-.. index:: fourier image resolution
+.. index:: ! Fourier Image Resolution
 
 Fourier Image Resolution
 ------------------------
@@ -2768,7 +2819,6 @@ To compute the image resolution of a set of localisations requires the following
 
 The spatial frequency at the correlation limit is the Fourier Image Resolution (FIRE). This can be interpreted as stating that there is no meaningful similarity information at any frequency higher than the resolution, i.e. if the images were reconstructed using only frequencies at this level and above then they would be not be recognised as matching.
 
-.. index:: input data
 
 Input Data
 ~~~~~~~~~~
@@ -2781,23 +2831,28 @@ Note that if non-random splitting is performed then the output results will be t
 
 When two datasets are used then no splitting is required.
 
-.. index:: threshold methods
+
+.. index:: Threshold methods
 
 Threshold methods
 ~~~~~~~~~~~~~~~~~
 
 The final resolution is dependent on the threshold used to assess when the correlation of the image at a given spatial frequency is not significant. Changing the threshold method will change the calculated resolution. The FRC plugin can compute the correlation threshold using the following methods: Fixed; n-Bit information content; or Sigma.
 
-.. index:: fixed
+
+..
+  No index
 
 Fixed
 ^^^^^
 
 Use the fixed value 1/7 = 0.142857. This is the threshold value preferred by Niewenhuizen, *et al* (2013) as it provides output that closely matches the apparent resolution of images under manual inspection.
 
-.. index:: n-bit information content (fourier-space signal-to-noise-ratio)
 
-n-Bit information content (Fourier-space signal-to-noise-ratio)
+..
+  No index
+
+n-Bit Information Content (Fourier-Space Signal-to-Noise-Ratio)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This method sets the threshold using a level expected for a given information content (Signal-to-Noise Ratio, SNR) in each pixel of the super-resolution image.
@@ -2823,7 +2878,9 @@ Note the use of the binary logarithm. Classically this can be done using *n-bits
 
     T_{i}=\frac{0.2071+1.9102/\sqrt{N_{i}}}{1.2701+0.9102/\sqrt{N_{i}}}
 
-.. index:: sigma
+
+..
+  No index
 
 Sigma
 ^^^^^
@@ -2836,12 +2893,13 @@ Compute the threshold at each frequency (:math:`T_i`) from the number of data po
 
 with :math:`\sigma` the sigma-factor (see Heel & Schatz, (2005), equation 2). For example sigma can be 1, 2, 3, etc.
 
-.. index:: spurious correlation (q) correction
 
-Spurious correlation (Q) correction
+.. index:: Spurious Correlation Q Correction
+
+Spurious Correlation (Q) Correction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When analysing a single dataset, if the same emitter is localised more than once then this can lead to correlations being observed at all spatial frequencies if localisations from the same emitter are split into each half-dataset (because a non-zero pixel will be present in the same position is both images). These spurious correlations can be corrected by subtracting a term from the numerator of the FRC and adding it to the denominator. The FRC at a given frequency *q* is given by the sum of the conjugate multiple of the Fourier transform of two sub-images divided by the product of the sums of the squared absolute values of each transformed sub-image:
+When analysing a single dataset, if the same emitter is localised more than once then this can lead to correlations being observed at all spatial frequencies if localisations from the same emitter are split into each half-dataset (because a non-zero pixel will be present in the same position is both images). These spurious correlations can be corrected by subtracting a term from the numerator of the FRC and adding it to the denominator. The FRC at a given frequency *q* is given by the sum of the conjugate multiple of the Fourier transform oFf two sub-images divided by the product of the sums of the squared absolute values of each transformed sub-image:
 
 .. math::
 
@@ -2881,7 +2939,6 @@ The corrected FRC is thus:
 
     \mathit{FRC}(q)=\frac{\frac{1}{N_{C}}\sum _{\vec{q}\in C}\widehat{f}_{1}(\vec{q})\ast \widehat{f}_{2}(\vec{q})-\mathit{Corr}(q)}{\frac{1}{N_{C}}\sqrt{\sum_{\vec{q}\in C}|\widehat {f}_{1}(\vec{q})|^{2}}\sqrt{\sum _{\vec{q}\in C}|\widehat {f}_{2}(\vec{q})|^{2}}+\mathit{Corr}(q)}
 
-.. index:: data selection
 
 Data Selection
 ~~~~~~~~~~~~~~
@@ -2917,7 +2974,6 @@ input data and only localisations within the bounds selected. An efficient way t
 ``Results Manager``
 plugin. An ROI can be drawn on the super resolution image and only that region will be used for the FIRE computation.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -2930,9 +2986,11 @@ The FRC plugin provides options for each stage of the process:
 
 There are also additional options for single dataset processing.
 
-.. index:: image construction
 
-Image construction
+..
+  No index
+
+Image Construction
 ^^^^^^^^^^^^^^^^^^
 
 A super resolution image is required for analysis. If the image is very large then Fourier transform will be slow and may fail due to lack of memory. Options are provided to scale the image automatically to a suitable size for Fourier transform. Localisations are rendered onto the image using bilinear weighting onto the 4 neighbour pixels surrounding the coordinates to reduce pixelation artefacts in the super-resolution image.
@@ -2958,9 +3016,10 @@ A super resolution image is required for analysis. If the image is very large th
        Note: This is set to 5 in Niewenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
-.. index:: fourier options
+..
+  No index
 
-Fourier options
+Fourier Options
 ^^^^^^^^^^^^^^^
 
 .. list-table::
@@ -2987,9 +3046,10 @@ Fourier options
        Note that samples are taken in the interval :math:`[0 - \pi]` radians since the Fourier image is two-fold radially symmetric.
 
 
-.. index:: fire options
+..
+  No index
 
-FIRE options
+FIRE Options
 ^^^^^^^^^^^^
 
 .. list-table::
@@ -3006,9 +3066,10 @@ FIRE options
      - Display the FRC curve. The curve shows the raw data, the smoothed data and the correlation cut-off.
 
 
-.. index:: single dataset processing
+..
+  No index
 
-Single dataset processing
+Single Dataset Processing
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A single data must be split into two halves to construct the images for analysis. If this split is random then multiple repeats can be performed to provide a mean resolution with a confidence interval. Additionally spurious correlations can be corrected using a Q correction factor (see :numref:`{number}: {name} <analysis_plugins:Spurious correlation (Q) correction>`).
@@ -3056,8 +3117,6 @@ A single data must be split into two halves to construct the images for analysis
      - The standard deviation (width) of the Gaussian distribution of the localisation precision.
 
 
-.. index:: output
-
 Output
 ~~~~~~
 
@@ -3073,7 +3132,9 @@ If repeats were performed then the mean resolution is reported with a confidence
 
     Fit Spot Data : FIRE number = 32.95 +/- 0.4573 nm [95% CI, n=10] (Fourier scale = 33.0)
 
-.. index:: frc curve
+
+..
+  No index
 
 FRC Curve
 ^^^^^^^^^
@@ -3098,7 +3159,8 @@ If multiple repeats are performed with randomly split data then a combined curve
 
     Example combined FRC Curve from 10 repeats of Fourier Image Resolution analysis.
 
-.. index:: fire q estimation
+
+.. index:: ! FIRE Q Estimation
 
 FIRE Q Estimation
 -----------------
@@ -3134,7 +3196,8 @@ Note that *H(q)* is typically computed assuming the theoretical distribution of 
 
     H(q)=\frac{1}{N}\sum _{i=0}^{i<N}{\exp (-{4\pi ^{2}\sigma_{i}^{2}q^{2}})}
 
-.. index:: estimating q
+
+.. index:: Estimating Q
 
 Estimating Q
 ~~~~~~~~~~~~
@@ -3199,7 +3262,6 @@ The initial estimate uses a quadratic fit of the function *f(q)*. This estimate 
 
 with *noise* set to a defined level to scale the difference value appropriately. The cost function has a value between 0 and 1 for all observations; a low value is better. Note that *Corr(q)* is constructed using Q, :math:`\sigma_m` and :math:`\Delta\sigma` and this second optimisation can be done by fitting Q alone and fixing :math:`\sigma_m` and :math:`\Delta\sigma`, or fitting the 3 parameters together.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -3211,16 +3273,20 @@ The FRC plugin provides options for each stage of the process:
 *  Fourier transform
 *  Estimation options
 
-.. index:: data selection
+
+..
+  No index
 
 Data Selection
 ^^^^^^^^^^^^^^
 
 These are the same as the ``FIRE`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`) without the option for a second dataset. A subset of the data can be selected using an ROI selected from an open image.
 
-.. index:: image construction
 
-Image construction
+..
+  No index
+
+Image Construction
 ^^^^^^^^^^^^^^^^^^
 
 These are the same as the ``FIRE`` plugin for single datasets. Note that localisations are drawn using bilinear weighting onto the 4 neighbour pixels surrounding the coordinates to reduce pixelation artefacts in the super-resolution image.
@@ -3254,16 +3320,19 @@ These are the same as the ``FIRE`` plugin for single datasets. Note that localis
        Note: This is set to 5 in Niewenhuizen, *et al* (2013) to limit the effect of bright spots from anomalous fluorescent molecules.
 
 
-.. index:: fourier options
+..
+  No index
 
-Fourier options
+Fourier Options
 ^^^^^^^^^^^^^^^
 
 These are the same as the ``FIRE`` plugin (see :numref:`{number}: {name} <analysis_plugins:Fourier Image Resolution>`).
 
-.. index:: estimation options
 
-Estimation options
+..
+  No index
+
+Estimation Options
 ^^^^^^^^^^^^^^^^^^
 
 .. list-table::
@@ -3311,14 +3380,15 @@ Estimation options
 
 Note: *q* is specified in terms of the Fourier image width so has a range from 0 to 0.5. Choose a range for *q* where the correlation has fallen off from the initial high value to approach 0, i.e. the range where the correlation is mainly due to spurious correlations between repeats of the same molecule.
 
-.. index:: output
 
 Output
 ~~~~~~
 
 The plugin will display progress of the computation on the ``ImageJ`` status bar. When the plugin has finished the results are presented graphically. A non-blocking dialog is used to allow the user to adjust the estimated values and the displayed results are dynamically updated.
 
-.. index:: precision histogram
+
+..
+  No index
 
 Precision Histogram
 ^^^^^^^^^^^^^^^^^^^
@@ -3332,7 +3402,9 @@ The histogram of the localisation uncertainty (precision) is displayed with an o
 
     FIRE Q estimation precision histogram plot
 
-.. index:: frc numerator curve
+
+..
+  No index
 
 FRC Numerator Curve
 ^^^^^^^^^^^^^^^^^^^
@@ -3349,7 +3421,9 @@ within the selected fitting range of *q*. The range is shown using magenta verti
 
     FIRE Q estimation FRC numerator plot
 
-.. index:: frc numerator/correction ratio
+
+..
+  No index
 
 FRC Numerator/Correction Ratio
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3369,7 +3443,9 @@ over a selected range of *q*, where *g(x)* is a mapping function with value 0 wh
 
     FIRE Q estimation FRC numerator/correction ratio plot
 
-.. index:: frc curve
+
+..
+  No index
 
 FRC Curve
 ^^^^^^^^^
@@ -3383,7 +3459,8 @@ The FRC curve (:numref:`Figure %s <fig_q_estimation_frc_curve>`) is similar to t
 
     FIRE Q estimation FRC curve plot
 
-.. index:: interactive q-estimation
+
+.. index:: Interactive Q-Estimation
 
 Interactive Q-Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^

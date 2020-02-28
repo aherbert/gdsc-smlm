@@ -1,4 +1,4 @@
-.. index:: localisation precision
+.. index:: ! Localisation Precision
 
 Localisation Precision
 ======================
@@ -20,7 +20,7 @@ Note that the precision of the localisation is the square root of the variance.
 **Warning: Without a correctly calibrated camera gain and bias the precision estimates in the SMLM code will be inaccurate.**
 
 
-.. index:: signal precision
+.. index:: ! Signal Precision
 
 Signal Precision
 ----------------
@@ -55,7 +55,7 @@ where
       - The pixel size in nm.
 
 
-.. index:: localisation precision for least squares fitting
+.. index:: ! Localisation Precision for Least Squares Fitting
 
 Localisation Precision for Least Squares Fitting
 ------------------------------------------------
@@ -92,7 +92,8 @@ where
     * - :math:`a`
       - The pixel size in nm.
 
-.. index:: localisation precision for maximum likelihood fitting
+
+.. index:: ! Localisation Precision for Maximum Likelihood Fitting
 
 Localisation Precision for Maximum Likelihood Fitting
 -----------------------------------------------------

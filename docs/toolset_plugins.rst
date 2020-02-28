@@ -1,4 +1,4 @@
-.. index:: toolset plugins
+.. index:: ! Toolset Plugins
 
 Toolset Plugins
 ===============
@@ -7,7 +7,8 @@ The following plugins add functionality to ``ImageJ`` to allow the SMLM plugins 
 
 The plugins are described in the following sections using the order presented on the ``Plugins > GDSC SMLM > Toolset`` menu.
 
-.. index:: install smlm toolset
+
+.. index:: ! Install SMLM Toolset
 
 Install SMLM Toolset
 --------------------
@@ -27,7 +28,8 @@ The toolset defines 8 buttons for the ``ImageJ`` menu bar that allow various plu
 
 Note: The latest version of the ``SMLM Tools.txt`` file is packaged within the SMLM Jar file. This can be manually extracted using an archiving utility. The ``Install SMLM Toolset`` plugin simply extracts this file and writes it to the ``[ImageJ Path]/macros/toolsets`` directory if the user has the correct access permissions.
 
-.. index:: show smlm tools
+
+.. index:: ! Show SMLM Tools
 
 Show SMLM Tools
 ---------------
@@ -59,7 +61,8 @@ The ``SMLM Tools`` window is a series of buttons arranged in columns. Each butto
 
     SMLM Tools window
 
-.. index:: create smlm tools config
+
+.. index:: ! Create SMLM Tools Config
 
 Create SMLM Tools Config
 ------------------------
@@ -74,6 +77,7 @@ asked if they wish to overwrite the file. The option to remove the existing file
 If the plugin is run and the ``SMLM Tools`` window is currently open then it will be closed and re-opened to update to the new configuration.
 
 
+.. index:: ! SMLM Macro Extensions
 
 SMLM Macro Extensions
 ---------------------
@@ -87,58 +91,115 @@ To register the functions in an ``ImageJ`` macro script use the following comman
     run("SMLM Macro Extensions");
 
 
+.. index:: Trace Diffusion Extensions
+
 Trace Diffusion Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Extensions for the ``Trace Diffusion`` plugin (see :numref:`%s <analysis_plugins:Trace Diffusion>`).
 
 
-getNumberOfSpecies(`numberOfSpecies`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+getNumberOfSpecies
+^^^^^^^^^^^^^^^^^^
 
 Get the number of fitted species from the last call to fit the jump distances.
 
-- numberOfSpecies: (output) the number of species
+.. list-table::
+   :widths: 20 10 60
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Description
+
+   * - numberOfSpecies
+     - Output
+     - The number of species.
 
 .. code::
 
     Ext.getNumberOfSpecies(numberOfSpecies);
     print(numberOfSpecies);
 
-getD(`index`, `diffusionCoefficient`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+getD
+^^^^
 
 Get the diffusion coefficient for the requested species from the last call to fit the jump distances.
 
-- index: (input) the index of the species
-- diffusionCoefficient: (output) the diffusion coefficient
+.. list-table::
+   :widths: 20 10 60
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Description
+
+   * - index
+     - Input
+     - The index of the species.
+
+   * - diffusionCoefficient
+     - Output
+     - The diffusion coefficient.
 
 .. code::
 
     Ext.getD(0, diffusionCoefficient);
     print(diffusionCoefficient);
 
-getF(`index`, `populationFraction`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+getF
+^^^^
 
 Get the population fraction for the requested species from the last call to fit the jump distances.
 
-- index: (input) the index of the species
-- populationFraction: (output) the population fraction 
+.. list-table::
+   :widths: 20 10 60
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Description
+
+   * - index
+     - Input
+     - The index of the species.
+
+   * - populationFraction
+     - Output
+     - The population fraction.
 
 .. code::
 
     Ext.getF(0, populationFraction);
     print(populationFraction);
 
-getSpecies(`index`, `diffusionCoefficient`, `populationFraction`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+getSpecies
+^^^^^^^^^^
 
 Get the diffusion coefficient and population fraction for the requested species from the last call to fit the jump distances.
 
-- index: (input) the index of the species
-- diffusionCoefficient: (output) the diffusion coefficient
-- populationFraction: (output) the population fraction 
+.. list-table::
+   :widths: 20 10 60
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Description
+
+   * - index
+     - Input
+     - The index of the species.
+
+   * - diffusionCoefficient
+     - Output
+     - The diffusion coefficient.
+
+   * - populationFraction
+     - Output
+     - The population fraction.
 
 .. code::
 

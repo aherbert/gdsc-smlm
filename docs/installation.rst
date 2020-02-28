@@ -1,11 +1,12 @@
-.. index:: installation
+.. index:: ! Installation
 
 Installation
 ============
 
 The plugin is designed to run within ``ImageJ``. This can be the original ``ImageJ`` (version 1) or any modified version of ``ImageJ`` such as ``ImageJ2`` or ``Fiji``.
 
-.. index:: install using imagej2/fiji
+
+.. index:: ! Install using ImageJ2/Fiji
 
 Install using ImageJ2/Fiji
 --------------------------
@@ -18,7 +19,8 @@ Add the ``GDSC SMLM2`` update site. ``Fiji`` will automatically check for a new 
 
 All the plugins will appear under the ``Plugins > GDSC SMLM`` menu.
 
-.. index:: install using imagej version 1
+
+.. index:: ! Install using ImageJ version 1
 
 Install using ImageJ version 1
 ------------------------------

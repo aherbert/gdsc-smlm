@@ -1,4 +1,4 @@
-.. index:: results plugins
+.. index:: ! Results Plugins
 
 Results Plugins
 ===============
@@ -7,7 +7,8 @@ The following plugins allow localisation results to be opened, converted and sav
 
 The plugins are described in the following sections using the order presented on the ``Plugins > GDSC SMLM > Results`` menu.
 
-.. index:: results manager
+
+.. index:: ! Results Manager
 
 Results Manager
 ---------------
@@ -18,9 +19,10 @@ The ``Results Manager`` allows the ``Peak Fit`` plugin to be run in the fastest 
 
 The plugin can be used to convert text results to binary results and vice-versa. Binary results save and load very fast but are not human readable. They are a good option for storing large results sets (10,000 or more localisations) for repeat analysis.
 
-.. index:: input options
 
-Input options
+.. index:: Results Manager; Input Options
+
+Input Options
 ~~~~~~~~~~~~~
 
 Input can be from results in memory or a result file. All the datasets held in memory are shown in the ``Input`` selection list. Choose the ``File`` option to load results from a file. The ``Input file`` can be selected using the ``...`` button to open a file selection dialog. The result file option allows the user to load results that were generated in a previous session.
@@ -35,21 +37,26 @@ Note: Custom text formats can be loaded into memory using the ``Load Localisatio
 
 As with all of the SMLM plugins, the ``Results Manager`` is fully supported by the ``ImageJ`` macro recorder. This allows the use of macros to bulk convert many results sets, for example to render images and save them using the ``File > Save As`` command.
 
-.. index:: image calibration
 
-Image calibration
+.. index:: Image Calibration
+
+Image Calibration
 ^^^^^^^^^^^^^^^^^
 
-The SMLM plugins require that an image have a calibration to allow certain plugins to function. This calibration includes the pixel pitch, the total gain and the exposure time (as described in section :numref:`{number}: {name} <fitting_plugins:Calibration>`). Certain file types do not have an image calibration. If the ``Results Manager`` detects that calibration is missing a message is written to the ``ImageJ`` log window and the plugin will present a dialog where the user can enter the missing calibration for the results. This is added to the results and will be saved if using a SMLM file format.
+The SMLM plugins require that an image have a calibration to allow certain plugins to function. This calibration includes the pixel pitch, the total gain and the exposure time (as described in section :numref:`{number}: {name} <fitting_plugins:Fitting Calibration>`). Certain file types do not have an image calibration. If the ``Results Manager`` detects that calibration is missing a message is written to the ``ImageJ`` log window and the plugin will present a dialog where the user can enter the missing calibration for the results. This is added to the results and will be saved if using a SMLM file format.
 
-.. index:: output options
 
-Output options
+.. index:: Results Manager; Output Options
+
+Output Options
 ~~~~~~~~~~~~~~
 
 The output options are the same as in the ``Peak Fit`` plugin: image, table, file and memory output. The differences from the ``Peak Fit`` are described below.
 
-Table output
+
+.. index:: Table Output
+
+Table Output
 ^^^^^^^^^^^^
 
 The ``Peak Fit`` plugin presented results as they were computed using an ``ImageJ`` table. This is available using the ``ImageJ`` option.
@@ -155,7 +162,9 @@ The following table settings can be configured:
      - Show a column with the ID of the result. This matches the default order of the dataset.
 
 
-Image output
+.. index:: Image Output
+
+Image Output
 ^^^^^^^^^^^^
 
 One additional image parameter is available for ``Image`` output if the extra options are enabled using the ``Shift`` key:
@@ -180,11 +189,16 @@ One additional image parameter is available for ``Image`` output if the extra op
 
        This option is not available during live fitting since the result must be sorted. This is not possible with multi-threaded code as the results can appear out of order.
 
-File output
+
+.. index:: File Output
+
+File Output
 ^^^^^^^^^^^
 
 The only difference is that the file output requires that the name of the output file be provided. In the ``Peak Fit`` plugin only the results directory was specified and the filename was taken from the image. Allowing the full filename to be specified provides greater flexibility in saving results.
 
+
+.. index:: ! Batch Load Results
 
 Batch Load Results
 ------------------
@@ -196,6 +210,8 @@ The plugin will load each file in turn using the same file input options as the 
 The results set for each file is named using the metadata in the results file, or if missing, a dialog is presented where the name can be entered.
 
 
+.. index:: ! Batch Save Results
+
 Batch Save Results
 ------------------
 
@@ -204,7 +220,7 @@ Allows multiple results sets to be saved to file. Presents a dialog where the re
 Results are saved to a file named using the dataset name and the appropriate suffix for the file format. A message is written to the ``ImageJ`` log for each output file.
 
 
-.. index:: summarise results
+.. index:: ! Summarise Results
 
 Summarise Results
 -----------------
@@ -219,26 +235,32 @@ The summary table shows the name of the results dataset and then the following s
 *   The image calibration
 *   The average, median, minimum and maximum of the precision and signal-to-noise ratio (SNR)
 
+
+.. index:: Summary Data Histograms
+
 Summary Data Histograms
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The table only shows summary statistics. Double-click on a row in the table to open a dialog where histograms of the data can be constructed. The data for the histograms can be chosen and the number of histogram bins. Set to zero to auto-scale the bin widths. Outliers can be removed from the data before plotting to reduce the histogram width. This is useful for plotting the localisation precision which may have a long tail.
 
-.. index:: clear memory results
+
+.. index:: ! Clear Memory Results
 
 Clear Memory Results
 --------------------
 
 Removes all the results currently stored in memory. Presents a confirmation dialog showing the number of results that will be removed if the user selects ``OK``.
 
-.. index:: clear memory results (multi)
+
+.. index:: ! Clear Memory Results Multi
 
 Clear Memory Results (Multi)
 ----------------------------
 
 Removes selected results currently stored in memory. Presents a dialog where the results to be removed can be selected. Then presents a confirmation dialog showing the number of results that will be removed if the user selects ``OK``.
 
-.. index:: rename results
+
+.. index:: ! Rename Results
 
 Rename Results
 --------------
@@ -273,7 +295,8 @@ The following would rename ``NewResults`` to ``AnalysisResults`` and ``AnalysisR
     NewResults = AnalysisResults;
     AnalysisResults = OldResults;
 
-.. index:: resequence results
+
+.. index:: ! Resequence Results
 
 Resequence Results
 ------------------
@@ -309,12 +332,12 @@ This plugin can resequences the results using the regular repeat of the original
      - Write to the ``ImageJ`` log the mapping between the current and the new frame number.
 
 
-
 It is not possible to undo the ``Resequence Results`` plugin. Before running the plugin you can save the results to file using the ``Results Manager`` . These can be reloaded if the resequence operation produced an incorrect frame-by-frame mapping.
 
 Note: If the source data is interlaced it can be directly handled by the ``Peak Fit`` plugin using the extra options (hold the ``Shift`` or ``Alt`` key down when running the plugin). There is no need to extract all the relevant data frames from the source image before running ``Peak Fit``.
 
-.. index:: calibrate results
+
+.. index:: ! Calibrate Results
 
 Calibrate Results
 -----------------
@@ -352,6 +375,8 @@ The following options are then available:
 Note that not all the calibration parameters have to be configured. Not all the plugins require every parameter. The most common parameters used for analysis are ``Calibration`` and ``Exposure time``.
 
 
+.. index:: ! Update Results Bounds
+
 Update Results Bounds
 ---------------------
 
@@ -364,6 +389,8 @@ When the plugin is run it presents a selection of the current results that are h
 The plugin then presents a dialog where the bounds can be updated. The auto-bounds as defined by the minimum and maximum coordinates are computed and displayed for reference. The current bounds if available are shown in the dialog. These can be updated. The new bounds will be the union of the input bounds and the auto-bounds. This ensures that all the data is within the bounds.
 
 
+.. index:: ! Convert Results
+
 Convert Results
 ---------------
 
@@ -374,7 +401,7 @@ When the plugin is run it presents a selection of the current results that are h
 The plugin then presents a dialog where the current units for the results are shown. Calibration values are also shown for distance and intensity. The units can be changed and the calibration updated if required. If the ``OK`` button is pressed then the results are converted if the units have been changed by linearly scaling the data by the appropriate conversion factor. The results calibration will be updated to the new units (if changed) and the new calibration values.
 
 
-.. index:: show results header
+.. index:: ! Show Results Header
 
 Show Results Header
 -------------------
@@ -418,7 +445,7 @@ If the ``Raw`` option is not selected then the plugin will attempt to extract th
      - The fitting configuration used to produce the results.
 
 
-.. index:: overlay results
+.. index:: ! Overlay Results
 
 Overlay Results
 ---------------
@@ -433,7 +460,8 @@ The ``Show table`` option can be used to present a results table of the localisa
 
 The ``Overlay Results`` dialog is non-blocking allowing the user to interact with ``ImageJ`` as normal. However if the results are cleared from memory or the image is no longer available then the dialog list will be out-of-date and an error is logged to the ``ImageJ`` log window and shown on the dialog. Restarting the plugin will refresh the list of available results.
 
-.. index:: load localisations
+
+.. index:: ! Load Localisations
 
 Load Localisations
 ------------------
@@ -453,10 +481,11 @@ The plugin requires that the dataset be given a name. This is used to store the 
 
 The following sections describe the parameters required to define the file format.
 
-.. index:: calibration
 
-Calibration
-~~~~~~~~~~~
+.. index:: Data Calibration
+
+Data Calibration
+~~~~~~~~~~~~~~~~
 
 The GDSC SMLM plugins store localisation data assumed to be obtained from a microscope camera. The data is stored using distances in pixels and intensity in photons. The units can be converted to nanometres (nm) and camera counts using a calibration stored with the dataset. This conversion is required for many analysis plugins.
 
@@ -506,7 +535,7 @@ For ``sCMOS`` cameras a camera model must be loaded. This contains the bias, gai
 Note: sCMOS cameras read each pixel using individual circuits. This is in contrast to CCD cameras which use the same circuits to read every pixel allowing a global bias, gain and read noise.
 
 
-.. index:: localisation records
+.. index:: Localisation Records
 
 Localisation Records
 ~~~~~~~~~~~~~~~~~~~~
@@ -536,7 +565,8 @@ Each line of the file is read as a localisation record of delimited fields. Line
      - The intensity units of the localisation records. Records will be converted to the GDSC SMLM format if necessary using the ``Gain`` parameter.
 
 
-.. index:: fields
+..
+  No index
 
 Fields
 ~~~~~~
@@ -618,7 +648,9 @@ The fields must be defined so the plugin knows how to read the data. Note that t
 
 If any field does not exist then it will be set to the default value. Note that the GDSC SMLM localisation model is based around approximating the point spread function (PSF) of a microscope using a 2D Gaussian. If the localisation results have been produced using another PSF model then either the ``Sx`` and ``Sy`` fields can be omitted or the PSF data should be converted to a Gaussian approximation before loading the data.
 
-.. index:: errors
+
+..
+  No index
 
 Other Parameters
 ~~~~~~~~~~~~~~~~
@@ -633,21 +665,29 @@ Other Parameters
    * - Precision method
      - The method used to compute the precision. This is stored with the results.
 
+
+..
+  No index
+
 Errors
 ~~~~~~
 
 If any errors occur when parsing a record then the first error will be recorded to the ``ImageJ`` log. Subsequent errors are counted silently and the plugin reports the count of total errors at the end. Errors typically occur when the fields or header format have been defined incorrectly and so should be corrected.
 
-.. index:: unsupported file formats
 
-Unsupported file formats
+..
+  No index
+
+Unsupported File Formats
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``Load Localisations`` plugin is designed to be generic so it can handle a wide variety of data. If you have data in a format that cannot be loaded then please contact us with an example. This is likely to occur if the units are not supported, e.g. distance in metres.
 
-.. index:: z-depth filtering
 
-Z-depth filtering
+..
+  No index
+
+Z-Depth Filtering
 ~~~~~~~~~~~~~~~~~
 
 When all the localisation records have been processed the plugin can optionally filter the localisations by z-depth. This allows loading a slice of 3D data for processing within 2D analysis. This feature is disabled by setting the Z-dimension field index to -1. In this case any 3D data will be loaded as a 2D projection.
@@ -665,6 +705,8 @@ Thus the ``Load localisations`` plugin can be used to load selected slices of da
 
 If the user requires a subset of the data in the XY dimensions then this can be achieved using the ``Crop Results`` or ``ROI Crop Results`` plugins once the results have been loaded (see sections :numref:`%s <results_plugins:Crop Results>` and :numref:`%s <results_plugins:ROI Crop Results>`).
 
+
+.. index:: ! Trace Exporter
 
 Trace Exporter
 --------------
@@ -695,6 +737,9 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
    * - Format
      - Select the output format (see :numref:`%s <results_plugins:Available Formats>`).
 
+
+.. index:: Available Formats
+
 Available Formats
 ~~~~~~~~~~~~~~~~~
 
@@ -722,13 +767,16 @@ Currently the exporter only supports the `Spot-On CSV file format <https://spoto
    * - Y
      - The y position (in |micro|\ m).
 
+
+.. index:: Exporting Datasets
+
 Exporting Datasets
 ~~~~~~~~~~~~~~~~~~
 
 When the export parameters have been chosen the plugin presents a selection dialog of all the results sets that are available. When the results have been selected they are exported to a file in the output directory named using the results set name and the appropriate file extension.
 
 
-.. index:: filter results
+.. index:: ! Filter Results
 
 Filter Results
 --------------
@@ -776,7 +824,7 @@ If any parameter is set to zero it will be ignored.
 The results of filtering are saved to memory with the same name and the ``Filtered`` suffix.
 
 
-.. index:: crop results
+.. index:: ! Crop Results
 
 Crop Results
 ------------
@@ -787,7 +835,9 @@ Requires the fitting results to be loaded into memory. When the plugin is run th
 
 The plugin then computes the 2D data bounds of the selected results and presents options for cropping the data using a bounding rectangle.
 
-.. index:: defining the crop
+
+..
+  No index
 
 Defining the crop
 ~~~~~~~~~~~~~~~~~
@@ -800,7 +850,6 @@ The bounding rectangle can be defined in multiple ways. If more than one boundin
 
 Note that regions are defined using pixel units.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -854,6 +903,8 @@ The following parameters are available:
 Note that the ROI method scales the ROI from the image to the current data bounds (width and height) of the selected results. If the ROI is on an image that does not match the width/height ratio of the data bounds then the scaling will be different in the X and Y dimensions. For the best results it is recommended to construct a super-resolution image of the target dataset using the ``Results Manager``. An ROI can then be drawn on the super-resolution image covering the desired results. This ensures the rectangle shape of the source image and the target dataset are identical.
 
 
+.. index:: ! ROI Crop Results
+
 ROI Crop Results
 ----------------
 
@@ -884,13 +935,16 @@ When the plugin is executed the localisation coordinates are mapped from the bou
 
 An example method to create the ROI is to use the ``Results Manager`` to construct a super-resolution image of the dataset. The region can be marked using any of the ``ImageJ`` ROI tools to select the localisations of interest.
 
+
+.. index:: Composite ROIs
+
 Composite ROIs
 ~~~~~~~~~~~~~~
 
 The plugin will support composite ROIs. This is when multiple regions are marked on the image when holding the shift key. This feature can for example be used to draw around cells of interest on a white light image of the sample. The ``ROI Crop Results`` plugin would then extract all the localisations inside the marked cells.
 
 
-.. index:: free filter results
+.. index:: ! Free Filter Results
 
 Free Filter Results
 -------------------
@@ -999,7 +1053,7 @@ Note how the combined filters require that the contained filters are specified i
 When the filter is run on the selected data a new dataset is created with the suffix ``Free Filtered``.
 
 
-.. index:: split results
+.. index:: ! Split Results
 
 Split Results
 -------------
@@ -1039,8 +1093,6 @@ The following parameters can be set:
      - Include a results set for all the results that do not occur within an object.
 
 
-.. index:: analysis
-
 Analysis
 ~~~~~~~~
 
@@ -1053,6 +1105,8 @@ A new dataset is created for each mask object. The results are then mapped to th
 Optionally the plugin can save a results set containing all the results that do not map to
 any objects. This has an ID of zero. To create this dataset use the ``Non mask dataset`` option.
 
+
+.. index:: ! Translate Results
 
 Translate Results
 -----------------
@@ -1087,6 +1141,9 @@ The translations will be converted using the dataset calibration into valid coor
 
 This plugin will update only the XYZ coordinates. Other data stored in the localisations such as the original X and Y values are not updated. The bounds of the dataset will be updated to the bounding box of the new coordinates if an x or y translation is applied.
 
+
+.. index:: ! 3D Results Viewer
+
 3D Results Viewer
 -----------------
 
@@ -1100,6 +1157,9 @@ Show an interactive 3D view of the localisations in a dataset using graphics car
     Main window of the 3D Results Viewer.
 
     The image shows fitting results for a simulated microtubule network. The image is sample dataset MT0.N1.LD from the Localisation Microscopy Challenge 2016. The image is coloured by z-depth using a red-yellow transition. The size of the localisations represents the localisation precision. Transparency is 30%. Selected localisations are outlined using a green 3D mesh.
+
+
+.. index:: Stability Issues
 
 Stability Issues
 ~~~~~~~~~~~~~~~~
@@ -1116,6 +1176,9 @@ It is recommended to:
 
 The ``3D Results Viewer`` supports interactive cropping allow easy selection of subsets of data for viewing with higher resolution rendering.
 
+
+.. index:: 3D Results Viewer; Overview
+
 Overview
 ~~~~~~~~
 
@@ -1126,6 +1189,9 @@ A 3D view is created by constructing surfaces, shining a light on the surfaces a
 Transparency has an additional caveat. The graphics engine constructs each surface sequentially and models the light reflecting on the surface. When an object is transparent the light of those object that are behind it is used in the rendering. Due to the implementation of the underlying graphics libraries a transparent object can only pass light through from objects that are *already part of the scene*. Thus true transparency requires that the objects are sorted and processed in depth first order. This is very intense and can be prohibitively slow. The ``3D Results Viewer`` supports the dynamic transparency mode of the ``Java 3D`` library. It also offers the ability to enable and disable object transparency and dynamic transparency (object sorting) in the view. Thus the view can be positioned with transparency off and then it can be enabled once the view position is set as desired.
 
 Dynamic transparency may be prohibitively slow as objects are sorted for every change in the view. A compromise is to turn-off dynamic transparency and only sort objects from back to front when the view is correct. This is an available option but must be chosen when the dataset is added to the view. It cannot later be changed as the type of graphics object created is different. Menu options with mapped shortcut keys are available to sort the objects once the view is correctly positioned.
+
+
+.. index:: Loading Data
 
 Loading Data
 ~~~~~~~~~~~~
@@ -1219,6 +1285,8 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
 When the options are configured the localisations are used to create the 3D objects. This may take a long time and a counter is displayed in the ``ImageJ`` progress bar until the view window is displayed.
 
 
+.. index:: Rendering Options
+
 Rendering Options
 ^^^^^^^^^^^^^^^^^
 
@@ -1285,6 +1353,9 @@ Note: The ``Point`` rendering is not a true shape. It is rendered as a circle of
 
 Use of the 2D rendering objects can be used to provide an alternative to the rasterised 2D image output created for 2D localisations by the ``Results Manager``. However the view has the advantage of dynamic resizing of the window; image zoom and translation; and selection of localisations by mouse click or ROIs.
 
+
+.. index:: Interactive View
+
 Interactive View
 ~~~~~~~~~~~~~~~~
 
@@ -1347,6 +1418,9 @@ The following menu options are useful:
    * - View
      - Fullscreen
      - Show the view using the entire screen. Closed using ``Escape``.
+
+
+.. index:: GDSC SMLM View Menu
 
 GDSC SMLM View Menu
 ~~~~~~~~~~~~~~~~~~~
@@ -1418,6 +1492,9 @@ The ``ImageJ 3D Viewer`` window has a ``GDSC SMLM`` menu added with features for
    * - Update settings
      - Show a dialog to update the ``3D Results Viewer`` settings (see :numref:`%s <results_plugins:3D Results Viewer Settings>`).
 
+
+.. index:: 3D Results Viewer Settings
+
 3D Results Viewer Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1449,7 +1526,7 @@ Several of the options in the ``3D Results Viewer`` are controlled by settings. 
      - If **true** any changes to the table settings configured for ``Show results table`` will be applied to existing table. Otherwise they apply to new tables.
 
 
-.. index:: results match calculator
+.. index:: ! Results Match Calculator
 
 Results Match Calculator
 ------------------------
@@ -1529,7 +1606,7 @@ The following parameters can be set:
      - If **true** the output results files will contain the end frame column if this is present in the data.
 
 
-.. index:: interactive results match table
+.. index:: Interactive Results Match Table
 
 Interactive Results Match Table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1546,7 +1623,7 @@ The coordinates for each point are taken from the X1 & Y1 columns, or if they ar
 Note: The image must be open before the plugin is run for the table to be linked the source image.
 
 
-.. index:: trace match calculator
+.. index:: ! Trace Match Calculator
 
 Trace Match Calculator
 ----------------------
@@ -1618,7 +1695,7 @@ The following parameters can be set:
      - Specify the sort method for the pairs: Time or Score.
 
 
-.. index:: spot inspector
+.. index:: ! Spot Inspector
 
 Spot Inspector
 --------------
@@ -1667,6 +1744,8 @@ The following parameters can be configured:
      - Remove any localisation from the plots that lies more than 1.5x the interquartile range above or below the 25\ :sup:`th` and 75\ :sup:`th` percentile (quartile boundaries). This can remove poor scoring results that skew the plot visualisation.
 
 
+.. index:: ! Yeast Mask
+
 Yeast Mask
 ----------
 
@@ -1711,6 +1790,8 @@ The following parameters can be configured:
      - If **true** the output will be a 2D image of the central slice through the cell. Othewise a 3D image is created.
 
 
+.. index:: ! Depth Mask
+
 Depth Mask
 ----------
 
@@ -1726,6 +1807,8 @@ The output mask will have dimensions [``Mask XY`` width] by [``Mask XY`` height]
 
 The mask is constructed by copying the XY mask through the entire z stack. Then the XZ and YZ masks are used to remove any pixels from the 3D mask so that the XZ and YZ projections of the 3D mask match the corresponding 2D mask.
 
+
+.. index:: ! Nucleus Mask
 
 Nucleus Mask
 ------------

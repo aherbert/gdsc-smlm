@@ -1,4 +1,4 @@
-.. index:: fitting plugins
+.. index:: ! Fitting Plugins
 
 Fitting Plugins
 ===============
@@ -9,7 +9,8 @@ It is vital that the method used by the software is understood when adjusting th
 
 The plugins are described in the following sections using the order presented on the ``Plugins > GDSC SMLM > Fitting`` menu.
 
-.. index:: simple fit
+
+.. index:: ! Simple Fit
 
 Simple Fit
 ----------
@@ -18,16 +19,17 @@ The ``Simple Fit`` plugin provides a single plugin to fit localisations on an im
 
 The plugin must be run when a single-molecule image is the currently active window in ``ImageJ``. When the plugin is run it:
 
-* Loads the current calibration (see section :numref:`%s <fitting_plugins:Calibration>`).
+* Loads the current calibration (see section :numref:`%s <fitting_plugins:Fitting Calibration>`).
 * If the calibration cannot be loaded a wizard is shown to create a calibration (see section :numref:`%s <fitting_plugins:Configuration Wizard 1: Introduction>`).
 * A dialog is shown to select output options (see section :numref:`%s <fitting_plugins:Fitting Images>`).
 
 Each frame of the image will be analysed and the localisations recorded in a table and/or drawn on a high resolution image reconstruction.
 
-.. index:: calibration
 
-Calibration
-~~~~~~~~~~~
+.. index:: Fitting Calibration
+
+Fitting Calibration
+~~~~~~~~~~~~~~~~~~~
 
 The SMLM plugins require information about the system used to capture the images. This information is used is many of the analysis plugins. The information that is required is detailed below:
 
@@ -78,7 +80,8 @@ When the ``Simple Fit`` plugin is run it attempts to load the SMLM configuration
 
 Note: The configuration wizard is also displayed if the settings are not suitable for the simple fitting procedure due to the use of advanced settings. These can only be configured using the ``Peak Fit`` plugin (see section :numref:`%s <fitting_plugins:Peak Fit>`). If the wizard is used then the existing settings will be overwritten. To use the advanced settings run the ``Peak Fit`` plugin.
 
-.. index:: configuration wizard 1: introduction
+
+.. index:: Configuration Wizard 1: Introduction
 
 Configuration Wizard 1: Introduction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -92,7 +95,8 @@ The first dialog (:numref:`Figure %s <fig_simple_fit_wizard_intro>`) of the wiza
 
     Configuration Wizard 1: Introduction
 
-.. index:: configuration wizard 2: pixel pitch
+
+.. index:: Configuration Wizard 2: Camera type
 
 Configuration Wizard 2: Camera type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -106,7 +110,8 @@ The second dialog (:numref:`Figure %s <fig_simple_fit_wizard_camera>`) of the wi
 
     Configuration Wizard 2: Camera Type
 
-.. index:: configuration wizard 3: pixel pitch
+
+.. index:: Configuration Wizard 3: Pixel Pitch
 
 Configuration Wizard 3: Pixel Pitch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,7 +125,8 @@ The second dialog (:numref:`Figure %s <fig_simple_fit_wizard_pitch>`) of the wiz
 
     Configuration Wizard 3: Pixel Pitch
 
-.. index:: configuration wizard 3: gain
+
+.. index:: Configuration Wizard 4: Gain
 
 Configuration Wizard 4: Gain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -134,7 +140,8 @@ The third dialog (:numref:`Figure %s <fig_simple_fit_wizard_gain>`) of the wizar
 
     Configuration Wizard 4: Gain
 
-.. index:: configuration wizard 5: exposure time
+
+.. index:: Configuration Wizard 5: Exposure Time
 
 Configuration Wizard 5: Exposure Time
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -148,7 +155,8 @@ The fourth dialog (:numref:`Figure %s <fig_simple_fit_wizard_exposure>`) of the 
 
     Configuration Wizard 5: Exposure Time
 
-.. index:: configuration wizard 6: peak width
+
+.. index:: Configuration Wizard 6: Peak Width
 
 Configuration Wizard 6: Peak Width
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -199,7 +207,8 @@ When the configuration wizard is finished the user is presented with the ``Simpl
 
 Note that the settings are saved when the ``OK`` button is pressed in the ``Simple Fit`` dialog. This action will reset all fitting settings to the defaults and update the calibration using the values collected in the wizard. If any dialog is cancelled the user will be forced to go through the wizard again the next time they run the plugin.
 
-.. index:: advanced settings
+
+.. index:: Fitting Images
 
 Fitting Images
 ~~~~~~~~~~~~~~
@@ -216,7 +225,6 @@ The plugin dialog has a simple appearance as shown in :numref:`Figure %s <fig_si
 
     Simple Fit dialog
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -243,14 +251,17 @@ The plugin offers the following parameters.
 
 It is possible to stop the fitting process using the ``Escape`` key. All current results will be kept but the fitting process will end.
 
-.. index:: advanced settings
+
+..
+  No index
 
 Advanced Settings
 ~~~~~~~~~~~~~~~~~
 
 The ``Simple Fit`` plugin is a simplified interface to the ``Peak Fit`` plugin that uses default values for fitting parameters. All the fitting parameters can be adjusted only by using the ``Peak Fit`` plugin. Since the ``Simple Fit`` plugin resets the SMLM configuration file to the fitting defaults when the ``Peak Fit`` plugin is run immediately after the ``Simple Fit`` plugin the results will be the same. This allows the user to reset the fitting parameters with ``Simple Fit`` and then repeatedly make changes to the parameters with the ``Peak Fit`` plugin to see how the results are affected. This can be a useful learning tool to experiment with the fitting parameters.
 
-.. index:: peak fit
+
+.. index:: ! Peak Fit
 
 Peak Fit
 --------
@@ -286,7 +297,8 @@ Each of the sections is described below.
 
 The fitting algorithm is described in section :numref:`{number}: {name} <background:Localisation Fitting Method>`. Understanding the method will ensure that the parameters can be adjusted to achieve the desired fitting result. The ``Simple Fit`` plugin can be used to reset the fitting parameters to their defaults while preserving the current camera calibration.
 
-.. index:: imaging calibration parameters
+
+.. index:: Imaging Calibration Parameters
 
 Imaging Calibration Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -316,7 +328,8 @@ The imaging parameters describe the conditions used to acquire the image. The pi
    * - Gain
      - The total gain. Used to convert the camera ADUs to photons.
 
-.. index:: camera type
+
+.. index:: Camera Type
 
 Camera Type
 ^^^^^^^^^^^
@@ -407,7 +420,8 @@ For ``sCMOS`` cameras each pixel has its own readout electronics and a per pixel
 
 The gain and bias of a CCD-type camera can be analysed using the ``Mean-Variance Test`` plugins (see :numref:`%s <calibration_plugins:Mean-Variance Test>` and :numref:`%s <calibration_plugins:Mean-Variance Test (EM-CCD)>`). The sCMOS camera model can be created using the ``sCMOS Analysis`` plugin (see :numref:`%s <calibration_plugins:sCMOS Analysis>`) and administered using the ``Camera Model Manager`` plugin (see :numref:`%s <calibration_plugins:Camera Model Manager>`).
 
-.. index:: gaussian psf parameters
+
+.. index:: Gaussian PSF Parameters
 
 Gaussian PSF Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -443,13 +457,16 @@ The following PSF models can be selected.
 
 The parameters for the PSF are configured by pressing the ``...`` button to open the PSF options configuration. Note that the Gaussian function widths are defined in units of pixels and the rotation angle in degrees.
 
+
+.. index:: Astigmatic PSF Model
+
 Astigmatic PSF Model
 ^^^^^^^^^^^^^^^^^^^^
 
 The ``Astigmatic`` PSF model is experimental. The performance of the model is highly variable and the results should not be used with confidence. Fitting is very sensitive to the initial estimated z-position; currently the estimation algorithm for selecting the initial fit parameters is not good enough to allow high confidence in the results.
 
 
-.. index:: maxima identification parameters
+.. index:: Maxima Identification Parameters
 
 Maxima Identification Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -510,7 +527,7 @@ The maxima identification parameters control the search for local maxima in the 
        The width should be large enough to cover a localisation spot so the function can fit the entire spot data. 3 standard deviations should cover 99% of a Gaussian function.
 
 
-.. index:: spot filter type
+.. index:: Spot Filter Type
 
 Spot Filter Type
 ^^^^^^^^^^^^^^^^
@@ -527,7 +544,8 @@ A ``Jury`` filter will apply many filters to the image. Each filtered image is u
 
 The ``Jury`` filter is experimental and is not recommended. It is not performing a true `scale space <https://en.wikipedia.org/wiki/Scale_space>`_ feature detector.
 
-.. index:: fitting parameters
+
+.. index:: Fitting Parameters
 
 Fitting Parameters
 ~~~~~~~~~~~~~~~~~~
@@ -570,7 +588,8 @@ The fitting parameters control the fitting algorithm. Fitting is performed on ea
 
 If the ``Fail limit`` and ``Pass rate`` are both disabled then all candidates in the frame will be processed.
 
-.. index:: gaussian psf equation
+
+.. index:: Gaussian PSF Equation
 
 Gaussian PSF Equation
 ^^^^^^^^^^^^^^^^^^^^^
@@ -701,7 +720,8 @@ A previous of the software did not fit the Gaussian volume (signal) but the heig
 
     \mathit{Amplitude}=\frac{\mathit{Signal}}{2\pi \sigma _{x}\sigma _{y}}
 
-.. index:: least squares estimation
+
+.. index:: Fit Solvers
 
 Fit Solvers
 ~~~~~~~~~~~
@@ -732,6 +752,8 @@ Note that if no termination conditions for the solver exist (all have been disab
 
 Additional parameters for each solver are outlined in the following sections.
 
+
+.. index:: Least Squares Estimation
 
 Least Squares Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -783,6 +805,8 @@ The ``LVM LSE`` requires the following additional parameters:
        If the sign of the update :math:`U_k` changes then :math:`C_k` is first reduced by a factor of 2. This suppresses oscillations in the optimisation.
 
 
+.. index:: LVM Maximum Likelihood Estimation
+
 LVM Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -802,6 +826,8 @@ The ``LVM MLE`` solver requires a camera calibration so that the bias can be sub
 
 The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but in addition the current values of the camera calibration are displayed for verification and/or update.
 
+
+.. index:: Weighted Least Squares Estimation
 
 Weighted Least Squares Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -824,7 +850,7 @@ The ``LVM WLSE`` solver requires a camera calibration so that the bias can be su
 The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but in addition the current values of the camera calibration are displayed for verification and/or update.
 
 
-.. index:: maximum likelihood estimation
+.. index:: Maximum Likelihood Estimation
 
 Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -859,7 +885,10 @@ The maximum likelihood returns the fit that is the most probable given the model
    * - Poisson-Gamma-Gaussian
      - Model the Poisson shot noise of photon signal, the Gamma noise of EM amplification and the Gaussian read noise of each pixel.
 
-Poisson noise model
+
+.. index:: Poisson Noise Model
+
+Poisson Noise Model
 """""""""""""""""""
 
 This model is suitable for modelling objects with a lot of signal. In this case the read noise is not significant and any EM amplification for EM-CCD cameras is well approximated by a Poisson.
@@ -886,7 +915,10 @@ Note that when we take a logarithm of this we can remove the factorial since it 
 
 The final log-likelihood function is fast to evaluate and since it can be differentiated the formula can be used with derivative based function solvers.
 
-Poisson-Gaussian noise model
+
+.. index:: Poisson-Gaussian Noise Model
+
+Poisson-Gaussian Noise Model
 """"""""""""""""""""""""""""
 
 This model is suitable for modelling a standard CCD camera.
@@ -906,7 +938,10 @@ with
 
 No gradient is available for the function and so non-derivative based methods must be used during fitting.
 
-Poisson-Gamma-Gaussian noise model
+
+.. index:: Poisson-Gamma-Gaussian Noise Model
+
+Poisson-Gamma-Gaussian Noise Model
 """"""""""""""""""""""""""""""""""
 
 This model is suitable for modelling a Electron Multiplying (EM) CCD camera.
@@ -945,6 +980,7 @@ where:
 This is taken from Ulbrich and Isacoff (2007). The output of this function is subsequently convolved with a Gaussian function with standard deviation equal to the camera read noise and mean zero. This must be done numerically since no algebraic solution exists. However Mortensen *et al* (2010) provide example code that computes an approximation to the full convolution using the Error function to model the cumulative Gaussian distribution applied to the Poisson-Gamma convolution at low pixel counts. This approximation closely matches the full convolution with a Gaussian but is faster to compute.
 
 No gradient is available for the function and so non-derivative based methods must be used during fitting.
+
 
 Parameters
 """"""""""
@@ -988,7 +1024,7 @@ The Maximum Likelihood Estimator requires the following additional parameters:
        This is applicable to many of the ``Search method`` options which may evaluate the function multiple times during a single iteration.
 
 
-.. index:: search methods
+.. index:: Search Methods
 
 Search Methods
 ^^^^^^^^^^^^^^
@@ -1003,12 +1039,18 @@ Note that some algorithms support a bounded search. This is a way to constrain t
 
 * The width is allowed to change by a value of 2-fold from the initial standard deviation.
 
-Powell (bounded)
+
+.. index:: Powell Bounded
+
+Powell (Bounded)
 """"""""""""""""
 
 Search using `Powell's conjugate direction method <https://en.wikipedia.org/wiki/Powell%27s_method>`_. The ``Powell`` method uses an unrestricted parameter space. This variation puts hard limits on the parameters so that the optimisation does not drift into invalid parameters (e.g. negative signal or background).
 
 This method does not require derivatives. It is the recommended method for the camera noise models.
+
+
+.. index:: Powell
 
 Powell
 """"""
@@ -1017,12 +1059,18 @@ Search using `Powell's conjugate direction method <https://en.wikipedia.org/wiki
 
 This method does not require derivatives.
 
-Powell (adapter)
+
+.. index:: Powell Adapter
+
+Powell (Adapter)
 """"""""""""""""
 
 Search using Powell's conjugate direction method using a mapping adapter to ensure a restricted search on the parameter space.
 
 This method maps the parameters from a bounded space to infinite space and then uses the Powell method.
+
+
+.. index:: BOBYQA
 
 BOBYQA
 """"""
@@ -1033,6 +1081,8 @@ BOBYQA could also be considered as a replacement of any derivative-based optimis
 
 This method does not require derivatives.
 
+
+.. index:: CMAES
 
 CMAES
 """""
@@ -1048,6 +1098,9 @@ This is a bounded search using simple truncation of coordinates at the bounds of
 
 This method requires derivatives.
 
+
+.. index:: BFGS
+
 BFGS
 """"
 
@@ -1055,6 +1108,8 @@ Search using a Broyden-Fletcher-Goldfarb-Shanno (`BFGS <https://en.wikipedia.org
 
 This method requires derivatives. This is a good alternative to the Powell method for the Poisson noise model.
 
+
+.. index:: Fast Maximum Likelihood Estimation
 
 Fast Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1103,6 +1158,8 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
        Note: If all updates are ignored then there is no step and the iteration stops. This may be undesirable.
 
 
+.. index:: Backtracking Fast Maximum Likelihood Estimation
+
 Backtracking Fast Maximum Likelihood Estimation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1119,7 +1176,7 @@ This is an extension to the ``Fast MLE`` method suggested by Numerical Recipes, 
 Note that if the backtracking fails then the iteration stops as the algorithm has no known step to improve the fit.
 
 
-.. index:: which fit solver to choose
+.. index:: Which Fit Solver to Choose
 
 Which Fit Solver to Choose
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1159,7 +1216,7 @@ For explicit modelling of the EM-gain of a EM-CCD camera the Poisson-Gamma-Gauss
 Methods for determining the bias, read noise and gain of a CCD-type camera can be found in the sections :numref:`{number}: {name} <calibration_plugins:Mean-Variance Test>` and :numref:`{number}: {name} <calibration_plugins:EM-Gain Analysis>`. For per-pixel modelling of sCMOS cameras see section :numref:`{number}: {name} <calibration_plugins:Camera Model Manager>`.
 
 
-.. index:: multiple peak fitting parameters
+.. index:: Multiple Peak Fitting Parameters
 
 Multiple Peak Fitting Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1215,7 +1272,7 @@ The following multi-peak parameters can be configured:
        Note that doublets are allowed to be closer than this distance since the results of the latest fitting are only compared to all existing results.
 
 
-.. index:: filtering parameters
+.. index:: Filtering Parameters
 
 Filtering Parameters
 ~~~~~~~~~~~~~~~~~~~~
@@ -1306,7 +1363,8 @@ This was extended by Huang *et al* (2015) to account for per-observation Gaussia
 
 No full definition exists for the Fisher information for a EM-CCD camera. However Mortensen *et al* (2010) provide proof (see supplementary information) that the Fisher information for the localisation precision of a fitted Gaussian is doubled when modelling the likelihood of an EM-CCD camera rather than a CCD camera. Thus to compute the CRLB for a EM-CCD camera the above formula is used and the value multiplied by 2. This simplification produces values that correspond to those produced using the Mortensen formulas.
 
-.. index:: results parameters
+
+.. index:: Results Parameters
 
 Results Parameters
 ~~~~~~~~~~~~~~~~~~
@@ -1372,7 +1430,7 @@ The results parameters control where the list of localisations will be recorded.
 
        The ``...`` button allows the available image options to be configured.
 
-       See also sections :numref:`{number}: {name} <fitting_plugins:Live image display>` and :numref:`{number}: {name} <fitting_plugins:Image examples>`.
+       See also sections :numref:`{number}: {name} <fitting_plugins:Live Image Display>` and :numref:`{number}: {name} <fitting_plugins:Image Examples>`.
 
 .. list-table:: Image rendering options
    :widths: 20 80
@@ -1438,7 +1496,7 @@ The results parameters control where the list of localisations will be recorded.
        The memory results will be named using the input image title. If a results set already exists with the same name then it will be replaced.
 
 
-.. index:: interactive results table
+.. index:: Interactive Results Table
 
 Interactive Results Table
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1451,16 +1509,18 @@ The results table will show the coordinates and frame for each localisation. To 
 
 The coordinates for each point are taken from the X & Y columns for the fitted centre (not the original candidate maxima position).
 
-.. index:: live image display
 
-Live image display
+.. index:: Live Image Display
+
+Live Image Display
 ~~~~~~~~~~~~~~~~~~
 
 The super-resolution image is computed in memory and displayed live during the fitting process. To reduce the work load on ``ImageJ`` the displayed image is updated at set intervals as more results become available. The image is initially created using a blank frame; the size is defined by the input image. The image is first drawn when 20 localisations have been recorded. The image is then redrawn each time the number of localisations increases by 10%. Finally the image is redrawn when the fitting process is complete.
 
-.. index:: image examples
 
-Image examples
+.. index:: Image Examples
+
+Image Examples
 ~~~~~~~~~~~~~~
 
 :numref:`Table %s <table_example_images>` shows examples of different image rendering methods. The ``Localisations`` and ``Intensity`` methods are able to plot the location of the fibres to a higher resolution than the original average intensity projection. The ``Point Spread Function`` (PSF) plot shows a very similar width for the fibres as the original image. However there has been a significant reduction in background noise since any signals not identified as a localisation are removed.
@@ -1482,7 +1542,8 @@ The ``Localisations`` image method can be used to directly count localisations i
 
 Images were generated from a sequence of 2401 frames using the Tubulins 1 dataset from the `Localisation Microscopy Challenge 2013 <http://bigwww.epfl.ch/smlm/challenge/>`_. The original image has been enlarged using 8x magnification and part of the image has been extracted using a region of 256x256 pixels at origin (x=1348, y=1002). The region contains 3855 localisations.
 
-.. index:: running peak fit
+
+.. index:: Running Peak Fit
 
 Running Peak Fit
 ~~~~~~~~~~~~~~~~
@@ -1495,7 +1556,6 @@ The number of threads used by the fit engine is :math:`\max (1, \lfloor t \times
 
 Progress is shown on the ``ImageJ`` progress bar. The plugin can be stopped using the ``Escape`` key. If stopped early the plugin will still correctly close any open output files and the partial results will be saved.
 
-.. index:: additional fitting options
 
 Additional Fitting Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1565,7 +1625,7 @@ The standard ``Peak Fit`` plugin allows the user to set all the parameters that 
      - Used to determine the fraction of threads used for the fitting engine. The default value of 0.99 ensures that 1 thread is available for other tasks such as pre-processing the image frames.
 
 
-.. index:: interlaced data
+.. index:: Interlaced Data
 
 Interlaced Data
 ~~~~~~~~~~~~~~~
@@ -1602,6 +1662,7 @@ The ``Interlaced Data`` option is fully compatible with the ``Integrate Frames``
 The use of the interlaced and integrate options together can produce results that have a larger gap between the start and end frame that the number of frames that were integrated. For example if the plugin is set to fit 2 out of 3 frames but integrate 4 frames then any fit results from the first processed image will have a start frame of 1 and an end frame of 5.
 
 
+.. index:: ! Template Manager
 
 Template Manager
 ----------------
@@ -1636,12 +1697,18 @@ When the ``Template Manager`` plugin is run a dialog allows a choice from the fo
 
        This is applicable to templates created using the benchmarking plugins. These associate templates with frames extracted from the image to demonstrate the PSF and noise of the image.
 
+
+.. index:: Load Standard Templates
+
 Load Standard Templates
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog where the user can choose to load standard templates. These are templates directly configured in the code or stored in the SMLM jar file.
 
 New templates can be added to the jar file by adding a JSON format template file to the jar in the directory ``/uk/ac/sussex/gdsc/smlm/templates/`` and adding the template file name to the template list ``/uk/ac/sussex/gdsc/smlm/templates/list.txt``. This allows distribution of the SMLM code with custom templates in a single file.
+
+
+.. index:: Load Custom Templates
 
 Load Custom Templates
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1652,10 +1719,16 @@ For each chosen file the template will be loaded and added to the list of availa
 
 If any chosen file is not a valid template then an error message is written to the ``ImageJ`` log window.
 
+
+.. index:: Remove Loaded Templates
+
 Remove Loaded Templates
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog where the user can choose which templates to remove from memory. The original template source will not be deleted.
+
+
+.. index:: View Template
 
 View Template
 ~~~~~~~~~~~~~
@@ -1664,7 +1737,10 @@ Presents a dialog with a list of the loaded templates. A text window displays th
 
 If the ``Close on exit`` checkbox is set to **true** the text window will be closed with the plugin dialog.
 
-View image example for template
+
+.. index:: View Image Example for Template
+
+View Image Example for Template
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Presents a dialog with a list of the loaded templates that have an associated example image. A window displays the image example for the currently selected template. This updates with changes to the selection. If the template contains embedded fit results for the image data then these are displayed in a results table. The results represent an example of applying the template fit configuration to the example image data.
@@ -1674,7 +1750,7 @@ If no loaded templates have images then a warning message is displayed.
 Note: Templates with associated image data are created using the benchmarking plugins. The benchmarking workflow allows construction of simulated images and optimisation of the fitting settings given the known ground truth localisations. For more details see section :numref:`{number}: {name} <model_plugins:Benchmarking>`.
 
 
-.. index:: fit configuration
+.. index:: ! Fit Configuration
 
 Fit Configuration
 -----------------
@@ -1708,7 +1784,8 @@ The template files saved by the plugin use a JSON format text file to save the s
 
 Templates can be administered using the ``Template Manager`` plugin (see section :numref:`%s <fitting_plugins:Template Manager>`). This allows loading and removing templates from the current set of active templates. The template files can be transferred to other computers to allow the same settings to be used on different systems.
 
-.. index:: peak fit (series)
+
+.. index:: ! Peak Fit Series
 
 Peak Fit (Series)
 -----------------
@@ -1759,7 +1836,7 @@ When the input series is ready the ``Peak Fit`` plugin is run and must be config
 Note that if the directory contains a mixed collection of images then the results will not make sense.
 
 
-.. index:: spot finder
+.. index:: ! Spot Finder
 
 Spot Finder
 -----------
@@ -1775,7 +1852,7 @@ When the plugin runs all the settings will be saved to the existing settings.
 Spots identified as candidates can be fit using the ``Fit Maxima`` plugin (see section :numref:`%s <fitting_plugins:Fit Maxima>`).
 
 
-.. index:: spot finder (series)
+.. index:: ! Spot Finder Series
 
 Spot Finder (Series)
 --------------------
@@ -1785,6 +1862,7 @@ Allows the ``Spot Finder`` plugin to be run on a folder containing many images. 
 The plugins allows the user to select a folder containing source images. This works using the same method as the ``Peak Fit (Series)`` plugin. More details on the selection options can be found in section :numref:`{number}: {name} <fitting_plugins:Peak Fit (Series)>`.
 
 
+.. index:: ! Spot Finder Preview
 
 Spot Finder (Preview)
 ---------------------
@@ -1830,6 +1908,9 @@ If the ``Save`` button is pressed then all the settings will be saved to the exi
 
 The results created by the plugin are described in the following sections.
 
+
+.. index:: Spot Filter Settings
+
 Spot Filter Settings
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -1837,6 +1918,9 @@ The spot filter settings are written to the ``ImageJ`` log window. These are the
 
     Single: [search = 2, border = 1, Filter = Average: [border = 1, smooth = 1.84]]
     Single: [search = 2, border = 1, Filter = Gaussian: [border = 1, sigma = 1.84, width = 6.0]]
+
+
+.. index:: Image Overlay
 
 Image Overlay
 ~~~~~~~~~~~~~
@@ -1847,6 +1931,9 @@ If the ``Top N`` option is active then the overlay will include spots for the to
 
 If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a circle. This can be used in conjuction with the candidate intensity plot to find spots with a selected intensity by adjusting the selected candidate based on the plot profile.
 
+
+.. index:: Candidate Intensity Plot
+
 Candidate Intensity Plot
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1854,12 +1941,16 @@ Shows the candidate spot intensity against the rank.
 
 If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a line. This moves dynamically when the ``Select`` option is adjusted.
 
+
+.. index:: Neighbour Histogram
+
 Neighbour Histogram
 ~~~~~~~~~~~~~~~~~~~
 
 Shows a histogram of the count of neighbours around a candidate. The size of the box around each candidate is configured using the ``Neighbour radius``. The box dimensions are :math:`2r + 1` where *r* is the radius.
 
-.. index:: fit maxima
+
+.. index:: ! Fit Maxima
 
 Fit Maxima
 ----------
@@ -1875,7 +1966,7 @@ The fit configuration is the same as in the ``Peak Fit`` plugin. As with the ``P
 When the plugin runs all the settings will be saved to the existing settings.
 
 
-.. index:: gaussian fit
+.. index:: ! Gaussian Fit
 
 Gaussian Fit
 ------------
@@ -1903,7 +1994,8 @@ The plugin works using a two stage process:
 #. Identify peaks on a smoothed image using non-maximal suppression
 #. Fit all the peaks using a 2D Gaussian simultaneously with a global background or separately with local background
 
-.. index:: maxima identification
+
+.. index:: Maxima Identification
 
 Maxima Identification
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1955,10 +2047,10 @@ The following parameters are available:
      - The border size in pixels to ignore when identifying maxima.
 
 
-.. index:: gaussian fitting
+.. index:: Peak Fitting
 
-Gaussian Fitting
-~~~~~~~~~~~~~~~~
+Peak Fitting
+~~~~~~~~~~~~
 
 When peaks have been identified they are fit using a 2D Gaussian. This uses the same fitting algorithm as the ``Peak Fit`` plugin.
 
@@ -2025,6 +2117,8 @@ The following parameters are available:
 Click ``OK`` to start the fitting. The fit uses a non-linear least squares routine until convergence. If convergence is not achieved by the maximum number of iterations the fit fails. The fitted results are output to a results table.
 
 
+.. index:: ! Fail Count Manager
+
 Fail Count Manager
 ------------------
 
@@ -2054,6 +2148,9 @@ When the plugin is run a dialog allows a choice from the following options:
    * - Analyse Data
      - Perform analysis on the fail count data using various conditions for fit termination.
 
+
+.. index:: Create Fail Count Data
+
 Create Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2079,10 +2176,16 @@ When the options are configured a dialog to configured the fit engine is shown. 
 
 The fitting engine will be run on the selected frames from the image and the fail count data saved to memory. If ``Save`` was enabled then a dialog will be present to save the data to file.
 
+
+.. index:: Load Fail Count Data
+
 Load Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~
 
 Load a saved set of fail count data. The option will present a file selection dialog and then load the data to memory.
+
+
+.. index:: Save Fail Count Data
 
 Save Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~
@@ -2096,6 +2199,9 @@ Save fail count data to file. The option will present a file selection dialog an
     1,4,y
 
 where ``ID`` is the frame, ``Candidate`` is the candidate ID in the frame, and ``Status`` is ``y`` if the fit was successful, otherwise it is ``n``.
+
+
+.. index:: Plot Fail Count Data
 
 Plot Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~
@@ -2164,6 +2270,9 @@ The following plot parameters can be specified:
 
    * - Reset fraction
      - The reset fraction for the ``Resetting Fail Count`` plot.
+
+
+.. index:: Analyse Fail Count Data
 
 Analyse Fail Count Data
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2283,6 +2392,8 @@ The following plot parameters can be specified:
 Note: There are no parameters for the ``Consecutive Failures`` counter. All fail limits up to the maximum number of consecutive failures in the data are analysed.
 
 
+.. index:: ! Spot Fit Tool
+
 Spot Fit Tool
 -------------
 
@@ -2335,6 +2446,9 @@ The following option parameters are available:
 
    * - Comparison channel
      - Show information about a second channel in the same region. If the channel exists a background and signal intensity estimate is made for the second channel. The background uses the minimum average value of the four edges of the fit region. The intensity uses a weighted mean of the fit region above the background. The weights use the normalised Gaussian function of the fitted spot.
+
+
+.. index:: Advanced Spot Fit Settings
 
 Advanced Spot Fit Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

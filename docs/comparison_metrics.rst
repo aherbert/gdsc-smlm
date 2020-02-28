@@ -1,4 +1,4 @@
-.. index:: comparison metrics
+.. index:: ! Comparison Metrics
 
 Comparison Metrics
 ==================
@@ -42,7 +42,8 @@ The classification counts can be used to compute binary scoring statistics as de
     then some metrics will change and some are invariant.
 #.  When comparing point coordinates that can only ever exist the definition of the true negative is invalid. However there are cases where a set of results have two classifications (either absent or present), and a set of predictions aim to predict those values. In this case the TN count can be obtained and used to compute scores.
 
-.. index:: recall
+
+.. index:: ! Recall
 
 Recall
 ------
@@ -59,7 +60,8 @@ A score of 1 indicates that all the points were predicted, lower scores indicate
 
 Recall can be interpreted probabilistically as the chance that a randomly selected actual point will be predicted.
 
-.. index:: precision
+
+.. index:: ! Precision
 
 Precision
 ---------
@@ -77,7 +79,8 @@ some points are not correct.
 
 Precision can be interpreted probabilistically as the chance that a randomly selected prediction is correct.
 
-.. index:: jaccard
+
+.. index:: ! Jaccard
 
 Jaccard
 -------
@@ -90,7 +93,8 @@ The Jaccard measures the similarity between two sets and is defined as the size 
 
 A score of 1 indicates that the overlap is perfect. Zero indicates no overlap.
 
-.. index:: f-score
+
+.. index:: ! F-score
 
 F-score
 -------
@@ -112,7 +116,7 @@ A weight of 1 produces the balanced F-score where precision and recall are weigh
     \mathit{recall}}{\mathit{precision}+\mathit{recall}}}
 
 
-.. index:: fnr
+.. index:: ! FNR
 
 FNR
 ---
@@ -123,7 +127,8 @@ False-negative rate:
 
     \mathit{FNR}=\frac{\mathit{fn}}{\mathit{fn}+\mathit{tp}}
 
-.. index:: fdr
+
+.. index:: ! FDR
 
 FDR
 ---
@@ -134,7 +139,8 @@ False discovery rate:
 
     \mathit{FDR}=1-\mathit{Precision}=\frac{\mathit{fp}}{\mathit{tp}+\mathit{fp}}
 
-.. index:: tnr
+
+.. index:: ! TNR
 
 TNR
 ---
@@ -145,7 +151,8 @@ True-negative rate:
 
     \mathit{TNR}=\frac{\mathit{tn}}{\mathit{fp}+\mathit{tn}}
 
-.. index:: npv
+
+.. index:: ! NPV
 
 NPV
 ---
@@ -156,7 +163,8 @@ Negative predictive value:
 
     \mathit{NPV}=\frac{\mathit{tn}}{\mathit{tn}+\mathit{fn}}
 
-.. index:: fpr
+
+.. index:: ! FPR
 
 FPR
 ---
@@ -167,7 +175,8 @@ False-positive rate:
 
     \mathit{FPR}=\frac{\mathit{fp}}{\mathit{fp}+\mathit{tn}}
 
-.. index:: acc
+
+.. index:: ! ACC
 
 ACC
 ---
@@ -178,7 +187,8 @@ Accuracy:
 
     \mathit{Accuracy}=\frac{\mathit{tp}+\mathit{tn}}{\mathit{tp}+\mathit{fp}+\mathit{tn}+\mathit{fn}}
 
-.. index:: mcc
+
+.. index:: ! MCC
 
 MCC
 ---
@@ -194,7 +204,8 @@ Matthews Correlation Coefficient:
 
 The Matthews Correlation Coefficient is used in machine learning as a measure of the quality of binary (two-class) classifications, introduced by biochemist Brian W. Matthews in 1975. It takes into account true and false positives and negatives and is generally regarded as a balanced measure which can be used even if the classes are of very different sizes. The MCC is in essence a correlation coefficient between the observed and predicted binary classifications; it returns a value between −1 and +1. A coefficient of +1 represents a perfect prediction, 0 no better than random prediction and −1 indicates total disagreement between prediction and observation. The statistic is also known as the phi coefficient.
 
-.. index:: informedness
+
+.. index:: ! Informedness
 
 Informedness
 ------------
@@ -203,7 +214,8 @@ Informedness
 
     \mathit{Informedness}=\mathit{TPR}+\mathit{TNR}-1
 
-.. index:: markedness
+
+.. index:: ! Markedness
 
 Markedness
 ----------

@@ -1,4 +1,4 @@
-.. index:: imagej plugins
+.. index:: ! ImageJ Plugins Overview
 
 ImageJ Plugins Overview
 =======================
@@ -50,6 +50,8 @@ The plugins have been divided into the following sub-sets:
      - For install of the SMLM Toolset and configuration of the SMLM Tools window.
 
 
+.. index:: ! Usage Tracking
+
 Usage Tracking
 --------------
 
@@ -71,6 +73,9 @@ To track usage we use Google Analytics, a web analytics service provided by Goog
 
 Please consider allowing tracking as it really will help improve our code, and will not impact your use of ``ImageJ``.
 
+
+.. index:: Usage Data
+
 Usage Data
 ~~~~~~~~~~
 
@@ -87,6 +92,9 @@ Data is only sent when a GDSC plugin is run. The following data is sent:
 
 :sup:`1` This is used to design dialogs that fit on the screen.
 
+
+.. index:: Tracking Identifiers
+
 Tracking Identifiers
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -94,12 +102,18 @@ All the usage information could be collected without tracking the same individua
 
 The tracking identifier will not be created unless you opt-in to tracking. The default is no tracking.
 
+
+.. index:: Performance
+
 Performance
 ~~~~~~~~~~~
 
 Note that usage tracking will not slow down ``ImageJ``. The tracking is performed in the background only when the computer is doing nothing else. If it is always too busy then no tracking data will ever be sent.
 
 If you are not connected to the internet then no tracking data will ever be sent. The tracker will identify that messages cannot be sent and shutdown. You will not notice.
+
+
+.. index:: User Preferences
 
 User Preferences
 ~~~~~~~~~~~~~~~~
@@ -146,6 +160,9 @@ Preferences are saved in the ``ImageJ`` preferences file. This is written when `
        The default is to always use an anonymized IP address.
 
 The user can change their options at any time by running the ``SMLM Usage Tracker`` plugin.
+
+
+.. index:: Google Analytics Details
 
 Google Analytics Details
 ~~~~~~~~~~~~~~~~~~~~~~~~

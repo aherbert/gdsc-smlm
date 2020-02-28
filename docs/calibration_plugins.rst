@@ -1,4 +1,4 @@
-.. index:: calibration plugins
+.. index:: ! Calibration Plugins
 
 Calibration Plugins
 ===================
@@ -9,7 +9,8 @@ The plugins are described in the following sections using the order presented on
 ``Plugins > GDSC SMLM > Calibration``
 menu.
 
-.. index:: psf calculator
+
+.. index:: ! PSF Calculator
 
 PSF Calculator
 --------------
@@ -107,7 +108,8 @@ Clicking ``OK`` will save the PSF standard deviation in pixels to the global pro
 
 Please contact us if you have feedback on the calculated width from the plugin verses your measured PSF using quantum dots (or other single-point light sources) on calibration images.
 
-.. index:: psf estimator
+
+.. index:: ! PSF Estimator
 
 PSF Estimator
 -------------
@@ -235,17 +237,16 @@ Note that the estimator may not find any peaks if the fitting parameters are bad
      - 2
 
 
-.. index:: mean-variance test
+.. index:: ! Mean-Variance Test
 
 Mean-Variance Test
 ------------------
 
 The ``Mean-Variance Test`` plugin can be used to calculate the gain and read noise of the microscope Charged Coupled Device (CCD) camera. The plugin requires a set of calibration images. A single-image mode is available but will provide less information on the camera.
 
-.. index:: multiple input images
 
-Multiple Input Images
-~~~~~~~~~~~~~~~~~~~~~
+Input Images
+~~~~~~~~~~~~
 
 When run the plugin will present a folder selection dialog. The folder should contain a set of calibration images. All the images should be taken of the same view with the camera in the same gain mode.
 
@@ -255,7 +256,6 @@ The remaining images should be a representative series of different exposures. T
 
 All the images in the folder are opened and processed by the plugin. Each image must contain at least 2 frames. If the filename contains a valid integer delimited by a space or a period character (``.``) then this will be taken as the exposure time. Otherwise an arbitrary exposure time is used, either zero for the first image (alphabetically sorted) or 9999 for the rest.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -274,7 +274,6 @@ This is recorded in a summary table. A graph is then produced of the mean verses
 
 If the bias has multiple difference images then the average bias variance is used to calculate the read noise.
 
-.. index:: output
 
 Output
 ~~~~~~
@@ -344,7 +343,6 @@ The parameters for the best fit line are shown as ``Variance = a + b * mean``. T
 
 Note that the gain can be expressed as electrons per ADU and so the output shows the gain using 1 over the reciprocal of the fit parameter to allow comparison with manufacturer gain values. E.g. In the example above 1 / 6.422 = 1 / (1 / 0.1557) and the gain would be 6.422 e-/ADU.
 
-.. index:: single image mode
 
 Single Image Mode
 ~~~~~~~~~~~~~~~~~
@@ -363,7 +361,8 @@ The bias must be provided since there is no input bias image; the plugin will as
 
 The plugin provides a plot of gain verses slice and a histogram of the values. These can be used to determine if the gain is constant throughout the image and so is a good estimate.
 
-.. index:: mean-variance test (em-ccd)
+
+.. index:: ! Mean-Variance Test EM-CCD
 
 Mean-Variance Test (EM-CCD)
 ---------------------------
@@ -372,7 +371,8 @@ This plugin is similar to the ``Mean-Variance Test`` plugin but is used on image
 
 The analysis can only be performed if the gain for the camera in non-EM mode is already known. If the ``Mean-Variance Test`` plugin has been used to calculate the gain in the same ``ImageJ`` session then the value will be stored in memory. If the camera gain is not known then using a value of 1 will allow the plugin to run and the output EM-gain will be the total gain of the system.
 
-.. index:: multiple input images
+
+.. index:: Multiple Input Images
 
 Multiple Input Images
 ~~~~~~~~~~~~~~~~~~~~~
@@ -388,7 +388,6 @@ If all the images are valid the plugin will show a dialog asking for the camera 
 
     EM-gain dialog of the Mean-Variance Test (EM-CCD) plugin
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -407,7 +406,6 @@ This is recorded in a summary table. A graph is then produced of the mean verses
 
     \mathit{EM\:gain}=\frac{\mathit{gradient}}{2\times\mathit{gain}}
 
-.. index:: output
 
 Output
 ~~~~~~
@@ -435,7 +433,6 @@ The total gain can be used to convert the ADUs into photons if the camera quantu
 
 The total gain multiplied by the QE is known as the system gain. The system gain is used as an input parameter in the ``Peak Fit`` plugin to convert the pixel values into photons.
 
-.. index:: single image mode
 
 Single Image Mode
 ~~~~~~~~~~~~~~~~~
@@ -454,14 +451,16 @@ The bias must be provided since there is no input bias image; the plugin will as
 
 The plugin provides a plot of gain verses slice and a histogram of the values. These can be used to determine if the gain is constant throughout the image and so is a good estimate.
 
-.. index:: em-gain analysis
+
+.. index:: ! EM-Gain Analysis
 
 EM-Gain Analysis
 ----------------
 
 Analyses a white light image from an EM-CCD camera, construct a histogram of pixel intensity and fit the histogram to obtain the bias, EM-gain, read noise and photons per pixel (see Ulbrich & Isacoff (2007) Supplementary Information).
 
-.. index:: em-ccd probability model
+
+.. index:: EM-CCD Probability Model
 
 EM-CCD Probability Model
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -490,16 +489,16 @@ where
 
 The output of this is subsequently convolved numerically (no algebraic solution exists) with a Gaussian function with standard deviation equal to the camera read noise and mean equal to the camera bias.
 
-.. index:: camera bias
+
+.. index:: Camera Bias
 
 Camera Bias
 ^^^^^^^^^^^
 
 Note that in order to observe the read noise of the camera a bias (offset) is added to the camera pixel values. This allows a pixel to record negative read noise on very low counts which would not be possible using unsigned integer values as no value below zero is allowed. The bias for the camera is set by the manufacturer and is set at a value far greater than the expected read noise of the system, e.g. 100, 400, 500 or 1000 for a read noise of 3-30 ADUs (Analogue to Digital Units, or pixel values).
 
-.. index:: input image
 
-Input image
+Input Image
 ~~~~~~~~~~~
 
 The plugin requires a white light image where each pixel has been exposed to the same number of photons. This can be produced by imaging without a sample and instead using white paper in front of the objective so that images are evenly illuminated. The light can be adjusted by varying the exposure time and different calibration performed by using different camera gain settings.
@@ -510,7 +509,6 @@ Ideally the input image should provide a minimum of 1,000,000 pixels, for exampl
 
 If the minimum pixel limit is not reached the plugin will log a warning but will continue to analyse the image.
 
-.. index:: parameters
 
 Parameters
 ~~~~~~~~~~
@@ -541,7 +539,8 @@ The following parameters can be configured:
 
 Note that the plugin will remember the last values that were fitted for the bias, gain and noise estimates. Thus an initial guess can be used, the image analysed and then the plugin repeated with updates to the estimates if appropriate to refine the fit.
 
-.. index:: simulation mode
+
+.. index:: Simulation Mode
 
 Simulation Mode
 ~~~~~~~~~~~~~~~
@@ -581,7 +580,6 @@ Instead of using an input image to create a histogram of pixel values, it is pos
 
 Simulation mode can be used to see if the fitting process is working given the expected parameters for bias, gain, noise and photons.
 
-.. index:: results
 
 Results
 ~~~~~~~
@@ -599,7 +597,8 @@ The histogram of pixel values, fitted PMF and the fit parameters are shown on a 
 
 The values for the gain, bias and noise should be constant for different background photon levels. This can be evaluated using different input calibration images. The parameters can be used within the ``Peak Fit`` plugin to perform Maximum Likelihood Estimation modelling the camera noise of the EM-CCD camera.
 
-.. index:: em-gain pmf
+
+.. index:: ! EM-Gain PMF
 
 EM-Gain PMF
 -----------
@@ -659,7 +658,7 @@ plugin and allows much faster fitting since the Poisson PMF (a) can be evaluated
 .. |em_gain_pmf_3_png| image:: images/em_gain_pmf_3.png
 
 
-.. index:: diffusion rate test
+.. index:: ! sCMOS Analysis
 
 sCMOS Analysis
 --------------
@@ -689,6 +688,7 @@ and :math:`i` is pixel index, :math:`v_i^k` is the variance at exposure level :m
 
 When the ``sCMOS Analysis`` plugin is run it will ask for a directory. This should contain sub-directories with the images from the sCMOS camera. Each directory should have a number suffix that represents the exposure time. The bias and variance will be computed using the directory with the suffix zero. The numbers of the other directories are arbitrary as the exposure value is not required to compute the gain. Note that the images can be simulated to allow the plugin to be tested (see :numref:`%s <calibration_plugins:sCMOS Camera Simulation>`).
 
+
 Parameters
 ~~~~~~~~~~
 
@@ -717,6 +717,7 @@ The analysis requires the following parameters:
      - If **true** the plugin will check for a processed data file for each directory of images. This is a tif image with the mean and variance of each pixel in the image series. This data is written by the plugin during processing.
 
        If the processed data exists then the plugin will use it rather than perform the analysis again. For example this can be used to repeat analysis of a camera after adding more directories with additional exposure data; or it can be used to show the output plots of a previously analysed camera.
+
 
 Analysis
 ~~~~~~~~
@@ -762,6 +763,8 @@ The same example using an image of 512x512 (a population size increase of 64-fol
     Error Variance = 0.04352 +/- 3.2 : R=0.9985 : Kolmogorov–Smirnov p=0.9056 accept : Wilcoxon Signed Rank p=0.0 reject
     Error Gain = -0.001682 +/- 0.06968 : R=0.9441 : Kolmogorov–Smirnov p=0.0 reject : Paired T-Test p=4.337E-35 reject
 
+
+.. index:: sCMOS Camera Simulation
 
 sCMOS Camera Simulation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -823,7 +826,7 @@ Simulated images are created using the specified ``Frames``  for output photon l
 When the simulated images have been created the ``sCMOS Analysis`` plugin continues to run as normal to compute a per-pixel model. The simulated images will be used to perform the camera analysis.
 
 
-.. index:: camera model analysis
+.. index:: ! Camera Model Analysis
 
 Camera Model Analysis
 ---------------------
@@ -887,6 +890,9 @@ The ``Camera Model Analysis`` plugin supports a preview mode. The parameters of 
 
    * - Preview
      - Enable dynamic result generation.
+
+
+.. index:: Camera Noise Models
 
 Camera Noise Models
 ~~~~~~~~~~~~~~~~~~~
@@ -979,6 +985,7 @@ The following table lists the camera model functions, their intended purpose and
 
        This is not a good model when the read noise is small as convolution of the discrete Poisson-Gamma PMF with single points of a Gaussian PDF leads to summation errors in the output probability. This is corrected using the ``Full integration`` option. Note that ``Full integration`` is not actually a numerically complete integration and the model may be a poor fit when the read noise is small.
 
+
 Results
 ~~~~~~~
 
@@ -1005,7 +1012,7 @@ The cumulative density function (CDF) plot shows the CDF of the simulation histo
     The CDF is a simulation of 1 photon captured by an EM-CCD camera with gain 40 and read noise 13. The model is the ``Poisson+Gamma+Gaussian approximation`` as used in ``Peak Fit``. The magenta line shows the count for the maximum distance between the two CDF curves. The p-value is the significance of the  Kolmogorov Smirnov test for this distance.
 
 
-.. index:: camera model fisher information analysis
+.. index:: ! Camera Model Fisher Information Analysis
 
 Camera Model Fisher Information Analysis
 ----------------------------------------
@@ -1114,7 +1121,8 @@ The ``Camera Model Fisher Information Analysis`` plugin produces two output plot
 
     The plot shows the Fisher information of two camera noise models relative to an uncorrupted Poisson signal. EM-CCD gain 1000 and read noise 24; CCD gain 1 and read noise 2.
 
-.. index:: camera model manager
+
+.. index:: ! Camera Model Manager
 
 Camera Model Manager
 --------------------
@@ -1167,7 +1175,10 @@ When the ``Camera Model Manager`` plugin is run a dialog allows a choice from th
      - Applies filtering to an image using the camera model offset and gain.
 
 
-Load a camera model
+..
+  No index
+
+Load a Camera Model
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog where the camera model TIFF image file can be selected.
@@ -1175,7 +1186,10 @@ Presents a selection dialog where the camera model TIFF image file can be select
 If the model is not valid an error message is shown in the ``ImageJ`` log.
 
 
-Load from directory
+..
+  No index
+
+Load from Directory
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog where a directory of camera model TIFF image files can be selected.
@@ -1183,7 +1197,10 @@ Presents a selection dialog where a directory of camera model TIFF image files c
 If any model is not valid an error message is shown in the ``ImageJ`` log.
 
 
-Print all model details
+..
+  No index
+
+Print All Model Details
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Prints the details of the current camera models to the ``ImageJ`` log. This includes the name of the file containing the model data and the summary metadata such as the width and height and in the case of a camera crop the origin relative to (0,0). An example model is shown below::
@@ -1198,7 +1215,10 @@ Prints the details of the current camera models to the ``ImageJ`` log. This incl
     }
 
 
-View a camera model
+..
+  No index
+
+View a Camera Model
 ~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog to choose a camera model. The camera model data is then loaded from the data file and the offset (bias), variance and gain are shown as 3 slices in a stack. The plugin adds a 4\ :sup:`th` slice to the stack containing the normalised variance:
@@ -1219,12 +1239,20 @@ The plugin will compute the mean and standard deviation of each of the camera mo
 
 The numbers in square brackets are the minimum and maximum of the property values.
 
-Delete a camera model
+
+..
+  No index
+
+Delete a Camera Model
 ~~~~~~~~~~~~~~~~~~~~~
 
 Presents a selection dialog to choose a camera model. The camera model is removed from the list of registered camera models. The raw model data file is not deleted.
 
-Filter an image
+
+..
+  No index
+
+Filter an Image
 ~~~~~~~~~~~~~~~
 
 Presents a selection dialog to choose an open image. Presents a selection dialog to choose a camera model. The camera model data is loaded and used to filter the image.
@@ -1238,7 +1266,7 @@ The image is then filtered for each frame in the stack and output to a new image
     \mathit{photons}_i = \frac{\mathit{count}_i - o_i}{g_i}
 
 
-.. index:: diffusion rate test
+.. index:: ! Diffusion Rate Test
 
 Diffusion Rate Test
 -------------------
@@ -1247,14 +1275,16 @@ The ``Diffusion Rate Test`` plugin will simulate molecule diffusion and fit a gr
 
 When a molecule is diffusing it can move in any direction. The total distance it moves and the track it took may not be visible due to the speed of movement. However the diffusion of particles in a single dimension can be modelled as a population. If the squared distances from the origin after a set time are plotted as a histogram they can be modelled using a Gaussian curve. The average distance the particles will move is zero and the variance of the Gaussian curve will be the mean-squared displacement (MSD). This can be expressed by unit time. The MSD is proportional to the diffusion coefficient (:math:`D`). The relationship for a single-dimension is MSD = :math:`2D`. This increases to :math:`4D` and :math:`6D` for two and three dimensional distances (since the diffusion in each dimension is independent).
 
-.. index:: grid walk simulation
+
+.. index:: Grid Walk simulation
 
 Grid Walk simulation
 ~~~~~~~~~~~~~~~~~~~~
 
 Since the MSD in a single dimension is equal to :math:`2D`, the mean-distance a particle moves will be :math:`\sqrt{2D}`. This step size can be used to simulate diffusion using a grid walk. At each step a particle can move forward or backwards by the step size :math:`s`. If the direction is random then the population of particles will have an average displacement of zero, a mean displacement of the step size:math:`s`, and a mean squared displacement (MSD) of :math:`s^2 = 2D`. Multi-dimension diffusion is done by simulating the movement in each dimension separately.
 
-.. index:: random move simulation
+
+.. index:: Random Move simulation
 
 Random Move simulation
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1265,14 +1295,14 @@ However the unit vector must be directed in a random orientation. For one dimens
 
 The generation of the unit vector and the movement distance can be combined into a single stage. The random displacement is produced by sampling each dimension from a Gaussian distribution with mean zero and standard deviation of :math:`\sqrt{2D}`. This is the equivalent of 1-dimension diffusion in 3 independent dimensions.
 
-.. index:: confined diffusion
+
+.. index:: Confined Diffusion
 
 Confined Diffusion
 ~~~~~~~~~~~~~~~~~~
 
 Particles may not be able to freely move in any direction, for example when they collide with a barrier. The ``Diffusion Rate Test`` plugin allows particles to be confined in a sphere. In this case the diffusion step is calculated and if the step would move the particle outside the sphere the move is rejected. Attempts are made to move the particle a set number of times until successful otherwise the particle coordinates are not updated. This simulation produces good results when the average step size is at least an order of magnitude less than the sphere radius (so allowing many steps inside the sphere to be valid) and the ``Randon Move`` simulation is used.
 
-.. index:: analysis
 
 Analysis
 ~~~~~~~~
@@ -1325,12 +1355,12 @@ plugin simulates the random diffusion of many particles over a period of time. E
      - The magnification of the example image. The pixels will represent (pixel pitch) / magnification nanometres.
 
 
-.. index:: output
-
 Output
 ~~~~~~
 
-.. index:: msd plot
+
+..
+  No index
 
 MSD plot
 ^^^^^^^^
@@ -1368,16 +1398,20 @@ If confined diffusion is performed the MSD will reach a natural upper limit. Thi
 
 Thus the mean-distance to the centre for particles in a sphere is 0.75 *R*. This can be used to check that the confined simulation is performing as a true random diffusion within a sphere.
 
-.. index:: diffusion example
 
-Diffusion example
+..
+  No index
+
+Diffusion Example
 ^^^^^^^^^^^^^^^^^
 
 If the ``Show example`` option was selected the plugin will show an image of the track of a single particle. The track is shown on a black background. The track is initialised at a value of 32 and ends with a value of 255. The movement can thus be followed using a colour lookup table (LUT), e.g. ``Image > Lookup Tables > Fire``.
 
 The plugin will also show a plot of the displacement of the particle over time. The red line shows the X displacement and the blue shows the Y displacement.
 
-.. index:: analysis results
+
+..
+  No index
 
 Analysis results
 ^^^^^^^^^^^^^^^^
@@ -1401,16 +1435,17 @@ If the simulation was performed using confinement then the final distance to the
 
     3D asymptote distance = 702.7 nm (expected 750.00)
 
-.. index:: memory results
+
+..
+  No index
 
 Memory Results
 ^^^^^^^^^^^^^^
 
 The coordinates of each diffusing particle, starting at the origin (0,0), are saved to a results dataset in memory. Each consecutive step of the same particle is given a new frame and particles are allocated a unique ID. The current frame is incremented between particles so that each particle track is separated in time. This allows the results set to be used within the ``Trace Diffusion`` and ``Draw Clusters`` plugins to verify their functionality.
 
-.. index:: extra options
 
-Extra options
+Extra Options
 ~~~~~~~~~~~~~
 
 Hold the ``Shift`` key down when running the plugin to activate extra options. The following options are available and are described in the following sections:
@@ -1432,10 +1467,11 @@ Hold the ``Shift`` key down when running the plugin to activate extra options. T
      - Specify the localisation precision of positions.
 
 
-.. index:: aggregate steps parameter
+..
+  No index
 
 Aggregate steps parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The standard plugin simulates diffusion in small steps. These can be aggregated together to simulate the position of the particle in a frame taken on a camera. In this case the average position of a set of consecutive steps is calculated to aggregated the position into a frame. The mean-squared distance between frames is then reported to the ``ImageJ`` log:
 
@@ -1448,10 +1484,12 @@ Note that the aggregation has the effect of reducing the mean-squared displaceme
 
 The aggregated data is saved into a dataset in memory.
 
-.. index:: msd analysis parameter
+
+..
+  No index
 
 MSD Analysis parameter
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 The ``MSD Analysis`` option is available when data aggregation has been performed using the ``Aggregate steps`` parameter. When multiple small steps are aggregated into single coordinates this causes the observed MSD to be lower than the expected MSD given the diffusion coefficient. Effectively the averaging of the position of a particle within a frame has caused loss of information about the diffusion distance covered within that frame. MSD analysis allows the effect of aggregation to be analysed.
 
@@ -1505,10 +1543,11 @@ The mean squared distance is then reported for each separation *j* to a summary 
      - The observed diffusion coefficient (calculated as MSD / 4t).
 
 
-.. index:: precision parameter
+..
+  No index
 
 Precision parameter
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 
 By default the exact coordinates of a particle are used in the analysis and to create the output datasets. To simulate the results generated by a super-resolution image reconstruction method the coordinates can be reported with a random error added to each position. The error simulates the fitting precision of the super-resolution localisation method. Error is added independently to the X and Y coordinates using a Gaussian random variable with the given standard deviation.
 
@@ -1520,4 +1559,4 @@ The precision error has the effect of increasing the mean-squared displacement f
     …
     Raw data D=1.0 um^2/s, Precision = 30.0 nm, N=22000, step=0.001 s, mean=0.007614 um^2, MSD = 7.614 um^2/s
 
-.. index:: trace diffusion
+

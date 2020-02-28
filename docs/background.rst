@@ -1,11 +1,12 @@
-.. index:: background
+.. index:: ! Background
 
 Background
 ==========
 
-.. index:: diffraction limit of light microscopy
 
-Diffraction limit of light microscopy
+.. index:: ! Diffraction Limit of Light Microscopy
+
+Diffraction Limit of Light Microscopy
 -------------------------------------
 
 Light microscopy uses lens optics to focus light from a sample onto an imaging plane. However even with a perfect set of optics it is not possible to bring all the light into perfect focus. This is because light is diffracted when passing through an opening.
@@ -33,7 +34,8 @@ where
 :math:`d` is the diameter of the aperture.
 Therefore the resolution that can be achieved is a function of the wavelength of the light and the size of the aperture used in the optical system.
 
-.. index:: approximation using a gaussian
+
+.. index:: ! Approximation using a Gaussian
 
 Approximation using a Gaussian
 ------------------------------
@@ -53,7 +55,8 @@ An alternative measure of the spot size is to ignore the relatively small outer 
 
 The Gaussian profile closely approximates the profile of the Airy pattern in the plane of focus. This allows the location of a point source of light to be found by 2D Gaussian fitting. However this approximation breaks down if the focal plane is above or below the imaging plane. In this instance the pattern still exists as a series of rings but the relative strength of central spot is reduced. Consequently the Gaussian fit will be poor, or not possible, and the localisation precision will be reduced.
 
-.. index:: localisation fitting method
+
+.. index:: ! Localisation Fitting Method
 
 Localisation Fitting Method
 ---------------------------

@@ -1,4 +1,4 @@
-.. index:: gdsc single molecule light microscopy (smlm) imagej plugins
+.. index:: ! GDSC Single Molecule Light Microscopy SMLM ImageJ Plugins
 
 GDSC Single Molecule Light Microscopy (SMLM) ImageJ Plugins
 ===========================================================
@@ -25,7 +25,8 @@ The tools are easily :ref:`installed <installation:Installation>` into ``ImageJ`
 
 The code is hosted on GitHub_.
 
-.. index:: overview
+
+.. index:: ! Overview
 
 Overview
 ========
@@ -77,9 +78,7 @@ The GDSC Single Molecule Light Microscopy (SMLM) plugins provide various tools f
 The following plugins are available:
 
 
-.. index:: fitting plugins
-
-Fitting plugins
+Fitting Plugins
 ---------------
 
 .. list-table::
@@ -125,9 +124,7 @@ Fitting plugins
      - Allows interactive fitting of clicked spots on an image.
 
 
-.. index:: results plugins
-
-Results plugins
+Results Plugins
 ---------------
 
 .. list-table::
@@ -219,9 +216,7 @@ Results plugins
      - Creates a 3D mask using spheres to model a nucleus of a cell.
 
 
-.. index:: analysis plugins
-
-Analysis plugins
+Analysis Plugins
 ----------------
 
 .. list-table::
@@ -295,9 +290,7 @@ Analysis plugins
      - Estimate the spurious correction factor *Q* for use in ``Fourier Image Resolution`` (FIRE) analysis.
 
 
-.. index:: pc palm plugins
-
-PC PALM plugins
+PC PALM Plugins
 ---------------
 
 .. list-table::
@@ -326,9 +319,7 @@ PC PALM plugins
      - Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
 
 
-.. index:: model plugins
-
-Model plugins
+Model Plugins
 -------------
 
 .. list-table::
@@ -410,9 +401,7 @@ Model plugins
      - Compare methods for ranking spot candidates.
 
 
-.. index:: calibration plugins
-
-Calibration plugins
+Calibration Plugins
 -------------------
 
 .. list-table::
@@ -452,9 +441,7 @@ Calibration plugins
      - Simulate molecule diffusion and fit a graph of mean-squared displacement to determine the diffusion coefficient.
 
 
-.. index:: tool plugins
-
-Tool plugins
+Tool Plugins
 ------------
 
 In addition to the principle plugins for localisation fitting and analysis there are several utility plugins provided.
@@ -497,9 +484,7 @@ In addition to the principle plugins for localisation fitting and analysis there
      - Opens a TIFF image as a read-only virtual stack image. Images can be extremely large.
 
 
-.. index:: toolset plugins
-
-Toolset plugins
+Toolset Plugins
 ---------------
 
 These plugins provide quick access to the various SMLM plugins via `ImageJ` toolsets and a customisable ``SMLM Tools`` window.
@@ -524,7 +509,8 @@ These plugins provide quick access to the various SMLM plugins via `ImageJ` tool
 All of the plugins can be incorporated into ``ImageJ`` macros to allow automation of image analysis workflows.
 
 
-.. index:: contents
+..
+  No index
 
 Contents
 ========
@@ -554,7 +540,9 @@ Contents
 
     change_log
 
-.. index:: index
+
+..
+  No index
 
 Index
 =====
@@ -562,7 +550,8 @@ Index
 * :ref:`genindex`
 * :ref:`search`
 
-.. index:: issues
+
+.. index:: ! Issues
 
 Issues
 ======

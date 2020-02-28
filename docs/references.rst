@@ -1,4 +1,4 @@
-.. index:: references
+.. index:: ! References
 
 References
 ==========

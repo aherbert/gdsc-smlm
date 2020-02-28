@@ -1,5 +1,3 @@
-.. index:: pc palm plugins
-
 PC PALM Plugins
 ===============
 
@@ -11,60 +9,51 @@ The plugins are described in the following sections using the order presented on
 ``Plugins > GDSC SMLM > PC PALM``
 menu.
 
-.. index:: status: experimental
 
-Status: Experimental
---------------------
+.. note::
 
-**The PC-PALM plugins are under development and should be considered experimental.**
+    The PC-PALM plugins are under development and should be considered experimental.
 
-The plugins are subject to change and so no documentation has yet been produced to describe them. They are included in this package to assess interest from the community.
+    The plugins are subject to change and so no documentation has yet been produced to describe them. They are included in this package to assess interest from the community.
 
-If you wish to use the plugins please contact `Alex Herbert <a.herbert@sussex.ac.uk>`_ for more information.
+    If you wish to use the plugins please contact `Alex Herbert <a.herbert@sussex.ac.uk>`_ for more information.
 
-.. index:: pc-palm molecules
 
 PC-PALM Molecules
 -----------------
 
 Prepare results held in memory for analysis using pair correlation methods. This plugin either simulates results or filter results from a results set to a set of coordinates with time and photon signal information. The localisations are drawn on a binary image to allow regions of the data to be selected for analysis.
 
-.. index:: pc-palm analysis
 
 PC-PALM Analysis
 ----------------
 
 Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al* , 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* correlation curve.
 
-.. index:: pc-palm spatial analysis
 
 PC-PALM Spatial Analysis
 ------------------------
 
 Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*, 2013]. This methods plots the molecule density around each localisation as a function of distance from the localisation.
 
-.. index:: pc-palm save results
 
 PC-PALM Save Results
 --------------------
 
 Saves all the PC-PALM results held in memory to a results folder.
 
-.. index:: pc-palm load results
 
 PC-PALM Load Results
 --------------------
 
 Load all the PC-PALM results from a results folder to memory.
 
-.. index:: pc-palm fitting
 
 PC-PALM Fitting
 ---------------
 
 Combines multiple correlation curves calculated by PC-PALM Analysis into an average curve and fits the curve using various models.
 
-.. index:: pc-palm clustering
 
 PC-PALM Clustering
 ------------------

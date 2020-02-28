@@ -1,4 +1,4 @@
-.. index:: msd correction
+.. index:: ! MSD Correction
 
 MSD Correction
 ==============
@@ -49,15 +49,15 @@ The gradient of the under-prediction factor with respect to the jump distance ca
 
     Simulation was performed using a diffusion coefficient (D) of 0.02, 0.1, 0.5 and 1. The resolution is 100 steps per frame.
 
-.. index:: n < 1
 
 Fitting the under-prediction ratio
 ----------------------------------
 
 The under-prediction ratio is a function :math:`f(n)` of the jump distance in frames *n*. The gradient of the under-prediction factor (:math:`f'(n)`, :numref:`Figure %s <fig_observed_msd_vs_expected_gradient>`) is readily fitted. The solution can be integrated to determine the fit of the under-prediction factor (:math:`f(n)`, :numref:`Figure %s <fig_observed_msd_vs_expected>`).
 
+
 n < 1
-"""""
+~~~~~
 
 The curve is linear for jump distances under 1 frame. For :math:`n<1` the gradient of :math:`f'(n)` is -2/3
 and the curve is described by:
@@ -77,10 +77,9 @@ And the integral is:
 
 Note that this solution is not applicable to super-resolution data as it cannot be imaged at less than 1 frame intervals.
 
-.. index:: n > 1
 
 n > 1
-"""""
+~~~~~
 
 The gradient follows a power law for :math:`n>1`.
 
@@ -103,8 +102,9 @@ And the integral is:
 
 Note that this solution is applicable to super-resolution data.
 
-Application to diffusion data
-"""""""""""""""""""""""""""""
+
+Application to Diffusion Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Given that the under-prediction is only relevant to experimental data when the number of frames is 1 or more the observed MSD can be converted to the true MSD by dividing by a correction factor (:math:`F`):
 
@@ -117,9 +117,8 @@ This correction factor effectively states that the diffusion of the objects with
 
 When performing jump distance analysis it is not necessary to the correct each observed squared distance before fitting the MSD. Since the correction is a single scaling factor the computed diffusion coefficient can be adjusted by applying the linear correction factor.
 
-.. index:: fitting the plot of msd verses n frames
 
-Fitting the plot of MSD verses N frames
+Fitting the Plot of MSD verses N Frames
 ---------------------------------------
 
 When fitting the linear plot of MSD verses the number of frames we can account for the correction factor. The observed MSD is composed of the actual MSD multiplied by the correction factor before being adjusted for the precision error:
