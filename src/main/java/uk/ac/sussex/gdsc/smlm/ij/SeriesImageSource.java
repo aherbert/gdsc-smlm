@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
@@ -53,7 +55,6 @@ import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
-import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
@@ -73,6 +74,8 @@ public class SeriesImageSource extends ImageSource {
 
   /** The list of image filenames. */
   private ArrayList<String> images;
+  /** The stop signal to halt processing. */
+  private static final Object RAW_FRAME_STOP_SIGNAL = new Object();
   /**
    * Flag indicating if the image series contains only TIFF images. No other formats are currently
    * supported.
@@ -127,6 +130,88 @@ public class SeriesImageSource extends ImageSource {
    */
   @XStreamOmitField
   private DataException error;
+
+  /**
+   * A extension of an ArrayBlockingQueue that allows the queue to be closed to additions.
+   * Additions should use a special method that returns a signal that the put was called on
+   * a closed queue. A closed queue will return the stop signal if empty.
+   *
+   * @param <E> the element type
+   */
+  private static class CloseableBlockingQueue<E> extends ArrayBlockingQueue<E> {
+    private static final long serialVersionUID = 1L;
+    /** The closed flag. */
+    private AtomicBoolean closed = new AtomicBoolean();
+    /** The stop signal. */
+    private final E stopSignal;
+
+    /**
+     * Create a new instance.
+     *
+     * @param capacity the capacity
+     * @param stopSignal the stop signal
+     */
+    CloseableBlockingQueue(int capacity, E stopSignal) {
+      super(capacity);
+      this.stopSignal = stopSignal;
+    }
+
+    /**
+     * Inserts the specified element at the tail of this queue, waiting for space to become
+     * available if the queue is full.
+     *
+     * <p>If closed then it ignores the element.
+     *
+     * @param e the element to add
+     * @return true, if successfully added to the queue
+     * @throws InterruptedException If interrupted while waiting
+     * @throws NullPointerException If the specified element is null
+     */
+    boolean putAndConfirm(E e) throws InterruptedException {
+      if (closed.get()) {
+        return false;
+      }
+      put(e);
+      return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If the queue is closed for additions then this will return null if empty.
+     */
+    @Override
+    public E take() throws InterruptedException {
+      if (closed.get() && isEmpty()) {
+        return stopSignal;
+      }
+      return super.take();
+    }
+
+    /**
+     * Close the queue. No additions are possible using {@link #putAndConfirm(Object)} when the
+     * queue is closed. Items can still be removed.
+     *
+     * @param clear Set to true to clear the queue when closing
+     */
+    void close(boolean clear) {
+      // Update to closed if currently not closed
+      if (closed.compareAndSet(false, true)) {
+        // Switched to closed
+        // Ideally we would signal:
+        // - anything blocked waiting to put() to the queue (it must be full) that it is closed
+        // and to unblock because an add will be ignored.
+        // - anything blocked waiting to take() from the queue (it must be empty) that it is closed
+        // and to unblock because a take will always get the stop signal.
+        // We do not know how many threads are waiting without access to the underlying
+        // concurrent data objects.
+        if (clear) {
+          // After this nothing will be waiting to put
+          clear();
+        }
+      }
+    }
+  }
 
   /**
    * Store details for an image.
@@ -818,7 +903,7 @@ public class SeriesImageSource extends ImageSource {
               // This should throw if no pixels can be read
               final Object pixels = image.nextFrame();
 
-              // This will block until the queue has capacity or is closed
+              // This will block until the queue has capacity unless is closed
               if (!rawFramesQueue.putAndConfirm(pixels)) {
                 break;
               }
@@ -836,14 +921,16 @@ public class SeriesImageSource extends ImageSource {
         closeInputStream(ss);
       }
 
-      // Close and clear if an error occurred
-      rawFramesQueue.close((error != null));
+      // Close and clear if an error occurred to halt downstream processing
+      rawFramesQueue.close(error != null);
 
       run = false;
     }
   }
 
   private static class NextSource {
+    /** The stop signal to halt processing. */
+    static final NextSource STOP_SIGNAL = new NextSource(null, -1);
     final byte[] buffer;
     final int imageId;
     // ExtendedFileInfo[] info;
@@ -999,9 +1086,7 @@ public class SeriesImageSource extends ImageSource {
           nextSource.setImage(image);
 
           // This may be closed upon error
-          if (!readQueue.putAndConfirm(nextSource)) {
-            break;
-          }
+          readQueue.put(nextSource);
         }
       } catch (final DataException ex) {
         setError(ex);
@@ -1451,7 +1536,7 @@ public class SeriesImageSource extends ImageSource {
     }
     // Now create a queue to hold n images in memory
     final int n = Math.max(2, (int) Math.ceil(sequentialReadBufferLimit / (double) bytesPerFrame));
-    rawFramesQueue = new CloseableBlockingQueue<>(n);
+    rawFramesQueue = new CloseableBlockingQueue<>(n, RAW_FRAME_STOP_SIGNAL);
 
     if (belowBufferLimit() && images.size() > 1) {
       // For now just support a single thread for each of reading the
@@ -1459,8 +1544,8 @@ public class SeriesImageSource extends ImageSource {
       // We can control the number of images buffered into memory.
       final int nImages = numberOfImages;
 
-      decodeQueue = new CloseableBlockingQueue<>(nImages);
-      readQueue = new CloseableBlockingQueue<>(nImages);
+      decodeQueue = new CloseableBlockingQueue<>(nImages, NextSource.STOP_SIGNAL);
+      readQueue = new CloseableBlockingQueue<>(nImages, NextSource.STOP_SIGNAL);
 
       workers = new ArrayList<>(3);
       threads = new ArrayList<>(3);
@@ -1483,7 +1568,8 @@ public class SeriesImageSource extends ImageSource {
   }
 
   /**
-   * Close the background thread.
+   * Close the background thread(s). This will shutdown sequential image processing and no more
+   * frames will be queued for reading.
    */
   private synchronized void closeQueue() {
     if (threads != null) {
@@ -1492,18 +1578,25 @@ public class SeriesImageSource extends ImageSource {
         worker.run = false;
       }
 
-      // Close the queues. This will wake any thread waiting for them to have capacity.
+      // Close the queues and unblock workers so they shutdown.
+      // Currently we use either 1 or 3 threads with a single queue or 3 queues.
+      // Queues are used with a single producer and consumer so
+      // each queue will have 1 thread potentially blocked in put() and or take().
+      // If they are blocked waiting to put() then closing and clearing the queue will
+      // unblock them and they immediately shutdown due to the closed signal.
+      // If blocked in take() then adding the shutdown signal will unblock them and they
+      // immediately shutdown from the signal.
       if (decodeQueue != null) {
-        decodeQueue.close(false);
-        readQueue.close(false);
+        closeClearAndSignal(decodeQueue);
+        closeClearAndSignal(readQueue);
       }
-      rawFramesQueue.close(false);
+      closeClearAndSignal(rawFramesQueue);
 
       // Join the threads and then set all to null
       for (final Thread thread : threads) {
         try {
-          // This thread will be waiting on imageQueue.put() (which has been cleared)
-          // or sourceQueue.take() which contains shutdown signals, it should be finished by now
+          // This thread should be on final processing of an image frame so we should
+          // have a short wait time
           thread.join();
         } catch (final InterruptedException ex) {
           Thread.currentThread().interrupt();
@@ -1516,8 +1609,7 @@ public class SeriesImageSource extends ImageSource {
       decodeQueue = null;
       readQueue = null;
 
-      // Do not set this to null as it is used in nextRawFrame()
-      rawFramesQueue.close(false);
+      // Note: Do not set rawFramesQueue to null as it is used in nextRawFrame()
     }
   }
 
@@ -1529,6 +1621,21 @@ public class SeriesImageSource extends ImageSource {
     decodeQueue.close(true);
     readQueue.close(true);
     rawFramesQueue.close(true);
+  }
+
+
+  /**
+   * Close the queue, clear it to unblock anything waiting to add and then add the shutdown signal
+   * to unblock anything waiting to take. This only adds 1 shutdown signal on the assumption that
+   * the queue is used with a single producer and consumer.
+   *
+   * @param <E> the element type
+   * @param queue the queue
+   */
+  private static <E> void closeClearAndSignal(CloseableBlockingQueue<E> queue) {
+    queue.close(false);
+    queue.clear();
+    queue.add(queue.stopSignal);
   }
 
   private void storeTiffImage(int imageId, TiffImage image) {
@@ -1571,14 +1678,14 @@ public class SeriesImageSource extends ImageSource {
   /**
    * {@inheritDoc}
    *
-   * @throws DataException If there was an error duing the sequential read
+   * @throws DataException If there was an error during the sequential read
    */
   @Override
   protected Object nextRawFrame() {
     try {
       // We can take if closed
       final Object pixels = rawFramesQueue.take();
-      if (pixels != null) {
+      if (pixels != RAW_FRAME_STOP_SIGNAL) {
         return pixels;
       }
       if (error != null) {

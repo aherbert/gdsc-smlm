@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,7 +84,6 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.TurboList;
-import uk.ac.sussex.gdsc.core.utils.concurrent.CloseableBlockingQueue;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
@@ -389,6 +389,8 @@ public class CmosAnalysis implements PlugIn {
    * Used to allow multi-threading of the scoring the filters.
    */
   private static class ImageWorker implements Runnable {
+    /** The signal to stop processing jobs. */
+    static final Object STOP_SIGNAL = new Object();
     final Ticker ticker;
     volatile boolean finished;
     final BlockingQueue<Object> jobs;
@@ -406,7 +408,7 @@ public class CmosAnalysis implements PlugIn {
       try {
         for (;;) {
           final Object pixels = jobs.take();
-          if (pixels == null) {
+          if (pixels == STOP_SIGNAL) {
             break;
           }
           if (!finished) {
@@ -838,7 +840,7 @@ public class CmosAnalysis implements PlugIn {
           moment = new SimpleArrayMoment();
         }
 
-        final CloseableBlockingQueue<Object> jobs = new CloseableBlockingQueue<>(nThreads * 2);
+        final BlockingQueue<Object> jobs = new ArrayBlockingQueue<>(nThreads * 2);
         for (int i = 0; i < nThreads; i++) {
           final ImageWorker worker = new ImageWorker(ticker, jobs, moment);
           workers.add(worker);
@@ -864,16 +866,19 @@ public class CmosAnalysis implements PlugIn {
 
         if (error) {
           // Kill the workers
-          jobs.close(true);
           workers.stream().forEach(worker -> worker.finished = true);
+          // Clear the queue
+          jobs.clear();
+          // Signal any waiting workers
+          workers.stream().forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
           // Cancel by interruption. We set the finished flag so the ImageWorker should
           // ignore the interrupt.
           futures.stream().forEach(future -> future.cancel(true));
           break;
         }
 
-        // Finish all the worker threads by passing in a null job
-        jobs.close(false);
+        // Finish all the worker threads cleanly
+        workers.stream().forEach(worker -> jobs.add(ImageWorker.STOP_SIGNAL));
 
         // Wait for all to finish
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
