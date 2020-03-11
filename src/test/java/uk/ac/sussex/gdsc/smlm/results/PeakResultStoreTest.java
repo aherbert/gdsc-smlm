@@ -45,11 +45,6 @@ public class PeakResultStoreTest {
   }
 
   @SeededTest
-  public void canStoreResultsUsingLocalList(RandomSeed seed) {
-    canStoreResults(seed, new TurboListPeakResultStore(capacity));
-  }
-
-  @SeededTest
   public void canStoreResultsUsingArray(RandomSeed seed) {
     canStoreResults(seed, new ArrayPeakResultStore(capacity));
   }
