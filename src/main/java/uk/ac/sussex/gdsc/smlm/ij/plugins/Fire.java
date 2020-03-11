@@ -97,12 +97,12 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
 import uk.ac.sussex.gdsc.core.utils.DoubleMedianWindow;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
@@ -595,8 +595,8 @@ public class Fire implements PlugIn {
         // Multi-thread this ...
         final int nThreads = MathUtils.min(repeats, getThreads());
         final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-        final TurboList<Future<?>> futures = new TurboList<>(repeats);
-        final TurboList<FireWorker> workers = new TurboList<>(repeats);
+        final LocalList<Future<?>> futures = new LocalList<>(repeats);
+        final LocalList<FireWorker> workers = new LocalList<>(repeats);
         setProgress(repeats);
         IJ.showProgress(0);
         IJ.showStatus(pluginTitle + " computing ...");

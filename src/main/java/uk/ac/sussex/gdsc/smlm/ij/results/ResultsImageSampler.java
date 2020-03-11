@@ -38,8 +38,8 @@ import java.util.Comparator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.simple.internal.SeedFactory;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -73,7 +73,7 @@ public class ResultsImageSampler {
   private ResultsSample[] data;
   private int lower;
   private int upper;
-  private final TurboList<ResultsSample> sampleList = new TurboList<>();
+  private final LocalList<ResultsSample> sampleList = new LocalList<>();
   private UniformRandomProvider rng = new SplitMix64(SeedFactory.createLong());
 
   private static class PeakResultList {
@@ -426,7 +426,7 @@ public class ResultsImageSampler {
       return null;
     }
 
-    sampleList.clearf();
+    sampleList.clear();
 
     // empty
     for (final int i : RandomUtils.sample(countNo, no.length, rng)) {

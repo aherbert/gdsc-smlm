@@ -49,12 +49,12 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
@@ -1052,7 +1052,7 @@ public class BenchmarkFit implements PlugIn {
       return startPoints;
     }
 
-    final TurboList<double[]> list = new TurboList<>();
+    final LocalList<double[]> list = new LocalList<>();
 
     // Set up origin with an offset
     final double[] origin = new double[3];

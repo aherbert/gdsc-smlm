@@ -37,8 +37,8 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.IcsiFastLog.DataType;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
@@ -380,7 +380,7 @@ public class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final TurboList<TestFastLog> test = new TurboList<>();
+    final LocalList<TestFastLog> test = new LocalList<>();
     final int n = 13;
     test.add(new TestFastLog(IcsiFastLog.create(n, DataType.FLOAT)));
     test.add(new TestFastLog(new FFastLog(n)));
@@ -402,7 +402,7 @@ public class FastLogTest {
     // testFloatErrorRange(test, n, d, logD, 253, 255, 0);
   }
 
-  private static void testFloatErrorRange(TurboList<TestFastLog> test, int n, float[] data,
+  private static void testFloatErrorRange(LocalList<TestFastLog> test, int n, float[] data,
       float[] logD, int mine, int maxe, int ee) {
     for (int e = mine; e < maxe; e += ee + 1) {
       data = generateFloats(e, e + ee, data);
@@ -631,7 +631,7 @@ public class FastLogTest {
 
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
-    final TurboList<TestFastLog> test = new TurboList<>();
+    final LocalList<TestFastLog> test = new LocalList<>();
     final int n = 13;
     test.add(new TestFastLog(IcsiFastLog.create(n, DataType.DOUBLE)));
     test.add(new TestFastLog(new FFastLog(n)));
@@ -652,7 +652,7 @@ public class FastLogTest {
     testDoubleErrorRange(rng, test, n, d, logD, 2045, 2047, 0);
   }
 
-  private static void testDoubleErrorRange(UniformRandomProvider rng, TurboList<TestFastLog> test,
+  private static void testDoubleErrorRange(UniformRandomProvider rng, LocalList<TestFastLog> test,
       int n, double[] data, double[] logD, int mine, int maxe, int ee) {
     for (int e = mine; e < maxe; e += ee + 1) {
       data = generateDoubles(rng, e, e + ee, data);

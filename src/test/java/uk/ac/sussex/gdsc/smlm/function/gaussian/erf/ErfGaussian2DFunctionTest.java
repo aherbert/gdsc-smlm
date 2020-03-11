@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
@@ -455,8 +455,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
     final boolean zDepth = (flags & GaussianFunctionFactory.FIT_Z) != 0;
 
-    final TurboList<double[]> params1 = new TurboList<>();
-    final TurboList<double[]> params2 = new TurboList<>();
+    final LocalList<double[]> params1 = new LocalList<>();
+    final LocalList<double[]> params2 = new LocalList<>();
     for (final double background : testbackground) {
       // Peak 1
       for (final double signal1 : testsignal1) {
@@ -1055,7 +1055,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
-    final TurboList<double[]> params = new TurboList<>();
+    final LocalList<double[]> params = new LocalList<>();
     for (final double background : testbackground) {
       // Peak 1
       for (final double signal1 : testsignal1) {
@@ -1128,7 +1128,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   public void computeIntegralIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final TurboList<double[]> p = new TurboList<>();
+    final LocalList<double[]> p = new LocalList<>();
     for (final double background : testbackground) {
       // Peak 1
       for (final double signal1 : testsignal1) {
@@ -1151,13 +1151,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     long t1 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
-        s1 += new IntegralValueProcedure().getIntegral(f1, p.getf(j));
+        s1 += new IntegralValueProcedure().getIntegral(f1, p.unsafeGet(j));
       }
     }
     long t2 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
-        s2 += f1.integral(p.getf(j));
+        s2 += f1.integral(p.unsafeGet(j));
       }
     }
     final long t3 = System.nanoTime();
@@ -1215,7 +1215,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     Assumptions.assumeTrue(null != f2);
 
-    final TurboList<double[]> p = new TurboList<>();
+    final LocalList<double[]> p = new LocalList<>();
     for (final double background : testbackground) {
       // Peak 1
       for (final double signal1 : testsignal1) {
@@ -1252,13 +1252,13 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     long t1 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
-        s1 += new IntegralValueProcedure().getIntegral(f2, p.getf(j));
+        s1 += new IntegralValueProcedure().getIntegral(f2, p.unsafeGet(j));
       }
     }
     long t2 = System.nanoTime();
     for (int i = n; i-- > 0;) {
       for (int j = p.size(); j-- > 0;) {
-        s2 += f2.integral(p.getf(j));
+        s2 += f2.integral(p.unsafeGet(j));
       }
     }
     final long t3 = System.nanoTime();

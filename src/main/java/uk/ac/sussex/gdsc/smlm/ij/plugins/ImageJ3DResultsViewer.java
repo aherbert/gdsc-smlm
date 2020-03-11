@@ -124,11 +124,11 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
@@ -448,7 +448,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
      * The actual positions of each item in the object mesh. The coordinates may differ from the
      * results as 2D datasets can be dithered.
      */
-    final TurboList<Point3f> points;
+    final LocalList<Point3f> points;
 
     /** The sizes of each rendered point. */
     final Point3f[] sizes;
@@ -461,11 +461,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     CustomContentInstant contentInstance;
     CustomMesh outline;
-    TurboList<PeakResult> selected = new TurboList<>();
-    TurboList<TransformGroup> selectedNode = new TurboList<>();
+    LocalList<PeakResult> selected = new LocalList<>();
+    LocalList<TransformGroup> selectedNode = new LocalList<>();
 
     ResultsMetaData(ImageJ3DResultsViewerSettings settings, MemoryPeakResults results,
-        TurboList<Point3f> points, Point3f[] sizes) {
+        LocalList<Point3f> points, Point3f[] sizes) {
       this.settings = settings;
       this.results = results;
       this.points = points;
@@ -501,7 +501,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
      */
     private CustomMesh createOutline() {
       if (settings.getRendering() == 0) {
-        final TurboList<Point3f> points = new TurboList<>(1);
+        final LocalList<Point3f> points = new LocalList<>(1);
         points.add(new Point3f());
         final ItemPointMesh mesh = new ItemPointMesh(points, highlightColor, 0);
         mesh.setPointSize((float) settings.getPixelSize());
@@ -574,13 +574,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
         t.setScale(scale);
       }
 
-      selectedNode.getf(switchIndex).setTransform(t);
+      selectedNode.unsafeGet(switchIndex).setTransform(t);
       contentInstance.setCustomSwitch(switchIndex, true);
     }
 
     private int findSelected(PeakResult result) {
       for (int i = 0; i < selected.size(); i++) {
-        final PeakResult r2 = selected.getf(i);
+        final PeakResult r2 = selected.unsafeGet(i);
         if (r2 != null && result.equals(r2)) {
           return i;
         }
@@ -602,14 +602,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
         selected.add(result);
         selectedNode.add(tg);
       } else {
-        selected.setf(switchIndex, result);
+        selected.unsafeSet(switchIndex, result);
       }
       return switchIndex;
     }
 
     private int findEmpty() {
       for (int i = 0; i < selected.size(); i++) {
-        final PeakResult r2 = selected.getf(i);
+        final PeakResult r2 = selected.unsafeGet(i);
         if (r2 == null) {
           return i;
         }
@@ -620,7 +620,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     public void clearSelected() {
       for (int i = 0; i < selected.size(); i++) {
         contentInstance.setCustomSwitch(i, false);
-        selected.setf(i, null);
+        selected.unsafeSet(i, null);
       }
     }
 
@@ -681,7 +681,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       final TObjectIntHashMap<PeakResult> oldSelection =
           new TObjectIntHashMap<>(selected.size(), 0.5f, NO_ENTRY);
       for (int i = 0; i < selected.size(); i++) {
-        final PeakResult r = selected.getf(i);
+        final PeakResult r = selected.unsafeGet(i);
         if (r != null) {
           oldSelection.put(r, i);
         }
@@ -696,26 +696,26 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       // Process the new selection, checking if already selected.
-      final TurboList<PeakResult> toSelect = new TurboList<>(indices.length);
+      final LocalList<PeakResult> toSelect = new LocalList<>(indices.length);
       for (int i = 0; i < indices.length; i++) {
         final PeakResult r = peakResultTableModel.get(indices[i]);
         // Check if already selected
         if (oldSelection.remove(r) == NO_ENTRY) {
           // Do this later to save space
-          toSelect.addf(r);
+          toSelect.push(r);
         }
       }
 
       // Remove the old selection no longer required
       oldSelection.forEachEntry((result, index) -> {
         contentInstance.setCustomSwitch(index, false);
-        selected.setf(index, null);
+        selected.unsafeSet(index, null);
         return true;
       });
 
       // Select the new additions
       for (int i = toSelect.size(); i-- > 0;) {
-        select(toSelect.getf(i));
+        select(toSelect.unsafeGet(i));
       }
     }
 
@@ -1040,8 +1040,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // Get a list of the window titles available. Allow the user to select
     // an existing window or a new one.
     final String title = TITLE;
-    final List<Image3DUniverse> univList = new TurboList<>();
-    final List<String> titleList = new TurboList<>();
+    final List<Image3DUniverse> univList = new LocalList<>();
+    final List<String> titleList = new LocalList<>();
     titleList.add("New window");
     buildWindowList(title, univList, titleList);
     final String[] titles = titleList.toArray(new String[titleList.size()]);
@@ -1318,7 +1318,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final Future<PeakResultsDigest> futureDigest =
         PeakResultsDigest.digestLater(executorService, results.toArray());
 
-    final TurboList<Point3f> points = getPoints(results, settings);
+    final LocalList<Point3f> points = getPoints(results, settings);
 
     final ResultsMetaData data = new ResultsMetaData(settings.build(), results, points, sphereSize);
 
@@ -1684,16 +1684,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
    * @param settings the settings
    * @return the points
    */
-  static TurboList<Point3f> getPoints(MemoryPeakResults results,
+  static LocalList<Point3f> getPoints(MemoryPeakResults results,
       ImageJ3DResultsViewerSettingsOrBuilder settings) {
-    final TurboList<Point3f> points = new TurboList<>(results.size());
+    final LocalList<Point3f> points = new LocalList<>(results.size());
     if (results.is3D()) {
       results.forEach(DistanceUnit.NM, (XyzResultProcedure) (x, y, z) -> {
-        points.addf(new Point3f(x, y, z));
+        points.push(new Point3f(x, y, z));
       });
     } else {
       results.forEach(DistanceUnit.NM, (XyResultProcedure) (x, y) -> {
-        points.addf(new Point3f(x, y, 0));
+        points.push(new Point3f(x, y, 0));
       });
 
       final double range = settings.getDepthRange();
@@ -1704,7 +1704,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           case DITHER:
             final SplitMix r = SplitMix.new64(settings.getDitherSeed());
             for (int i = points.size(); i-- > 0;) {
-              points.getf(i).z += (min + r.nextDouble() * range);
+              points.unsafeGet(i).z += (min + r.nextDouble() * range);
             }
             break;
           case INTENSITY:
@@ -1716,7 +1716,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             final double inc = range / indices.length;
             for (int i = 0; i < indices.length; i++) {
               // The standard rendering has +z going away so put the highest rank at min
-              points.getf(indices[i]).z += (min + i * inc);
+              points.unsafeGet(indices[i]).z += (min + i * inc);
             }
             break;
           case NONE:
@@ -1765,10 +1765,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
     reorder(indices, data);
   }
 
-  private static double[] getDistance(TurboList<Point3f> points, Vector3d direction, Point3d eye) {
+  private static double[] getDistance(LocalList<Point3f> points, Vector3d direction, Point3d eye) {
     final double[] d = new double[points.size()];
     for (int i = 0; i < d.length; i++) {
-      final Point3f p = points.getf(i);
+      final Point3f p = points.unsafeGet(i);
 
       final Vector3d v2 = new Vector3d(p.x - eye.x, p.y - eye.y, p.z - eye.z);
 
@@ -1799,7 +1799,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   private static void reorder(int[] indices, ResultsMetaData data) {
     final MemoryPeakResults results = data.results;
-    final TurboList<Point3f> points = data.points;
+    final LocalList<Point3f> points = data.points;
 
     final PeakResult[] originalPeakResults = results.toArray();
     final Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
@@ -1810,7 +1810,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // Rewrite order
     for (int i = 0; i < indices.length; i++) {
       final int index = indices[i];
-      points.setf(i, originalPoints[index]);
+      points.unsafeSet(i, originalPoints[index]);
       peakResults[i] = originalPeakResults[index];
     }
 
@@ -1842,11 +1842,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final double b = direction.y;
     final double c = direction.z;
 
-    final TurboList<Point3f> points = data.points;
+    final LocalList<Point3f> points = data.points;
 
     final double[] d = new double[points.size()];
     for (int i = 0; i < d.length; i++) {
-      final Point3f p = points.getf(i);
+      final Point3f p = points.unsafeGet(i);
 
       // Compute signed distance of all points from the plane
       // defined by normal v and point (0,0,0)
@@ -1884,11 +1884,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final int sz = (values[2] <= 0) ? 1 : -1;
 
     // Sort using the points since these have dithered positions for 2D results.
-    final TurboList<Point3f> points = data.points;
+    final LocalList<Point3f> points = data.points;
     final CustomSortObject[] toSort = new CustomSortObject[points.size()];
     final float[] f = new float[3];
     for (int i = 0; i < toSort.length; i++) {
-      final Point3f p = points.getf(i);
+      final Point3f p = points.unsafeGet(i);
       f[ix] = sx * p.x;
       f[iy] = sy * p.y;
       f[iz] = sz * p.z;
@@ -3047,7 +3047,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Transform all points to the image plate and test if they are in the ROI
       final MemoryPeakResults results = data.results;
-      final TurboList<Point3f> points = data.points;
+      final LocalList<Point3f> points = data.points;
       final MemoryPeakResults newResults = new MemoryPeakResults();
       newResults.copySettings(results);
       // Get the output name
@@ -3094,7 +3094,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       final Ticker ticker = ImageJUtils.createTicker(results.size(), 0);
       final PeakResult[] allResults = results.toArray();
       for (int i = 0, size = results.size(); i < size; i++) {
-        final Point3d locInImagePlate = new Point3d(points.getf(i));
+        final Point3d locInImagePlate = new Point3d(points.unsafeGet(i));
         virtualWorldToIp.transform(locInImagePlate);
         canvas.getPixelLocationFromImagePlate(locInImagePlate, p2d);
         if (shape.test(p2d.x, p2d.y)) {
@@ -3371,7 +3371,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   private static ItemGeometryGroup createItemGroup(
       final ImageJ3DResultsViewerSettings.Builder settings, final Point3f[] sphereSize,
-      final TurboList<Point3f> points, float[] alpha, float transparency, Color3f[] colors) {
+      final LocalList<Point3f> points, float[] alpha, float transparency, Color3f[] colors) {
     final Rendering rendering = Rendering.forNumber(settings.getRendering());
     // All objects have colour using the appearance not per vertex colours.
     // The exception is points which do not support colour from appearance.
@@ -3415,8 +3415,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   @SuppressWarnings("unused")
   private static Shape3D createShape(Builder settings) {
-    final TurboList<Point3f> points = new TurboList<>(1);
-    points.addf(new Point3f());
+    final LocalList<Point3f> points = new LocalList<>(1);
+    points.push(new Point3f());
 
     // We try and match the geometry and appearance of the standard mesh.
     // Do this by creating a mesh with a single point and get the Geometry and Appearance.
@@ -3467,7 +3467,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static ItemMesh createItemMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
-      TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha) {
+      LocalList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha) {
     final Rendering rendering = Rendering.forNumber(settings.getRendering());
     final int colorDepth = (alpha != null) ? 4 : 3;
     final Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
@@ -3539,7 +3539,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   @SuppressWarnings("unused")
   private static CustomMesh createMesh(final ImageJ3DResultsViewerSettingsOrBuilder settings,
-      TurboList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha) {
+      LocalList<Point3f> points, final Point3f[] sphereSize, float transparency, float[] alpha) {
     int stride = 3 + 3; // Coordinates + color
     if (alpha != null) {
       stride++; // add color alpha

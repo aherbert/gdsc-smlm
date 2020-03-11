@@ -43,7 +43,7 @@ import org.scijava.java3d.utils.geometry.NormalGenerator;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
 import org.scijava.vecmath.Vector3f;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 
 /**
@@ -145,9 +145,6 @@ public final class Shape3DHelper {
    * @return the shape
    */
   public static Shape3D createShape(Rendering rendering, int colorDepth) {
-    final TurboList<Point3f> points = new TurboList<>(1);
-    points.addf(new Point3f());
-
     GeometryArray ga;
     final Appearance appearance = new Appearance();
 
@@ -381,7 +378,7 @@ public final class Shape3DHelper {
       circleY[i] = y + radius * c * ay + radius * s * by;
       circleZ[i] = z + radius * c * az + radius * s * bz;
     }
-    final TurboList<Point3f> list = new TurboList<>();
+    final LocalList<Point3f> list = new LocalList<>();
     final Point3f centre = new Point3f((float) x, (float) y, (float) z);
     for (int i = 0; i < edgePoints; ++i) {
       final Point3f t2 = new Point3f((float) circleX[i], (float) circleY[i], (float) circleZ[i]);
@@ -492,7 +489,7 @@ public final class Shape3DHelper {
    * @return the list of vertices for the triangles
    */
   private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise) {
-    final List<Point3f> ps = new TurboList<>();
+    final List<Point3f> ps = new LocalList<>();
     for (int i = 0; i < faces.length; i++) {
       for (int k = 0; k < 3; k++) {
         ps.add(new Point3f(vertices[faces[i][k]]));
@@ -562,7 +559,7 @@ public final class Shape3DHelper {
    * @return the list of vertices for the triangles
    */
   private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise) {
-    final List<Point3f> ps = new TurboList<>();
+    final List<Point3f> ps = new LocalList<>();
     for (int i = 0; i < vertices.length; i++) {
       ps.add(new Point3f(vertices[i]));
     }
@@ -659,7 +656,7 @@ public final class Shape3DHelper {
     by *= bScale;
     bz *= bScale;
 
-    final TurboList<Point3f> list = new TurboList<>();
+    final LocalList<Point3f> list = new LocalList<>();
     if (includeCenter) {
       list.add(new Point3f((float) x, (float) y, (float) z));
     }
@@ -719,7 +716,7 @@ public final class Shape3DHelper {
       // 2D
       case SQUARE:
         primitive = GeometryInfo.QUAD_ARRAY;
-        coords = new TurboList<>();
+        coords = new LocalList<>();
         for (int i = 0; i < 4; i++) {
           coords.add(new Point3f(cubeVertices[i][0], cubeVertices[i][1], 0));
         }
@@ -739,7 +736,7 @@ public final class Shape3DHelper {
       // 3D
       case CUBE:
         primitive = GeometryInfo.QUAD_ARRAY;
-        coords = new TurboList<>();
+        coords = new LocalList<>();
         final Point3f[] vertices = new Point3f[8];
         for (int i = 0; i < 8; i++) {
           vertices[i] = new Point3f(cubeVertices[i][0], cubeVertices[i][1], cubeVertices[i][2]);
@@ -838,7 +835,7 @@ public final class Shape3DHelper {
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces
     final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
-    final TurboList<Point3f> vertices = new TurboList<>(list.size());
+    final LocalList<Point3f> vertices = new LocalList<>(list.size());
     final TIntArrayList faces = new TIntArrayList(list.size());
     int index = 0;
     // Process triangles

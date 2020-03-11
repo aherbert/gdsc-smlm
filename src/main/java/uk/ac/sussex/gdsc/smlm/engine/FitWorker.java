@@ -39,12 +39,12 @@ import uk.ac.sussex.gdsc.core.filters.FloatAreaSum;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
@@ -147,7 +147,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   private final double ysd;
 
   // Used for fitting methods
-  private TurboList<PeakResult> sliceResults;
+  private LocalList<PeakResult> sliceResults;
   private boolean useFittedBackground;
   private Statistics fittedBackground;
   private int slice;
@@ -747,7 +747,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       sliceResults.ensureCapacity(fitted.getSize());
       for (int i = 0; i < fitted.getSize(); i++) {
         if (fitted.get(i).fit) {
-          sliceResults.addf(createResult(offsetx, offsety, fitted.get(i)));
+          sliceResults.push(createResult(offsetx, offsety, fitted.get(i)));
         }
       }
 
@@ -827,7 +827,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           maxCandidate);
     }
 
-    sliceResults = new TurboList<>(maxCandidate);
+    sliceResults = new LocalList<>(maxCandidate);
     if (requireIndices) {
       job.setResults(sliceResults);
       job.setIndices(maxIndices);

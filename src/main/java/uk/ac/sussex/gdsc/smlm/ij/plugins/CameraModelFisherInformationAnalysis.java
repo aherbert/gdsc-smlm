@@ -46,11 +46,11 @@ import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FisherProtos.AlphaSample;
@@ -260,7 +260,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       // so assume we must merge the lists.
       // Note: The lists must be sorted.
       final AlphaSample[] list1 = data.getAlphaSampleList().toArray(new AlphaSample[0]);
-      final TurboList<AlphaSample> list = new TurboList<>(list1.length + log10photons.length);
+      final LocalList<AlphaSample> list = new LocalList<>(list1.length + log10photons.length);
       int i1 = 0;
       int i2 = 0;
       final AlphaSample.Builder a2 = AlphaSample.newBuilder();
@@ -313,7 +313,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     if (type == CameraType.EM_CCD) {
       final int t = type.ordinal();
       // Get the EM-CCD keys
-      final TurboList<FiKey> list = new TurboList<>(cache.size());
+      final LocalList<FiKey> list = new LocalList<>(cache.size());
       for (final FiKey k : cache.keySet()) {
         if (k.type == t) {
           list.add(k);
@@ -326,7 +326,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       final PoissonFisherInformationCache.Builder cacheData =
           PoissonFisherInformationCache.newBuilder();
       for (int i = Math.min(list.size(), MAX_DATA_TO_FILE); i-- > 0;) {
-        cacheData.addData(cache.get(list.getf(i)));
+        cacheData.addData(cache.get(list.unsafeGet(i)));
       }
       SettingsManager.writeSettings(cacheData);
     }
@@ -855,7 +855,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         }
         final Ticker ticker = ImageJUtils.createTicker(index.length, nThreads);
         final int nPerThread = (int) Math.ceil((double) index.length / nThreads);
-        final TurboList<Future<?>> futures = new TurboList<>(nThreads);
+        final LocalList<Future<?>> futures = new LocalList<>(nThreads);
         for (int i = 0; i < index.length; i += nPerThread) {
           final int start = i;
           final int end = Math.min(index.length, i + nPerThread);

@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 
 /**
  * Selects the individuals using a linear ramp from the highest rank to the lowest to set the
@@ -69,7 +69,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
       return individuals;
     }
 
-    final List<Chromosome<T>> scored = new TurboList<>(individuals.size());
+    final List<Chromosome<T>> scored = new LocalList<>(individuals.size());
     // Add only those with a fitness score
     for (final Chromosome<T> c : individuals) {
       if (c.getFitness() != null) {
@@ -91,7 +91,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
     ChromosomeComparator.sort(scored);
 
     // Create the output subset
-    final List<Chromosome<T>> subset = new TurboList<>(size);
+    final List<Chromosome<T>> subset = new LocalList<>(size);
 
     // Get the number of point available for selection:
     // n in this case is (size-1) since we include the top ranking individual.
@@ -174,8 +174,8 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
         return;
       }
       // A mixed population, some of which we can sort and some we cannot.
-      list = new TurboList<>(toSort);
-      final List<Chromosome<T>> subset = new TurboList<>(count);
+      list = new LocalList<>(toSort);
+      final List<Chromosome<T>> subset = new LocalList<>(count);
       for (final Chromosome<T> c : individuals) {
         if (c.getFitness() == null) {
           subset.add(c);
@@ -193,7 +193,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
       list.addAll(subset);
     } else {
-      list = new TurboList<>(individuals);
+      list = new LocalList<>(individuals);
       ChromosomeComparator.sort(list);
 
       // Build a cumulative array of rank weighting. The highest ranked starts at n.

@@ -68,11 +68,11 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
@@ -249,7 +249,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
+    final List<String> list = new LocalList<>();
     if (includeNone) {
       list.add("[None]");
     }
@@ -430,7 +430,7 @@ public class AstigmatismModelManager implements PlugIn {
   }
 
   private static String[] getImageList() {
-    final TurboList<String> newImageList = new TurboList<>();
+    final LocalList<String> newImageList = new LocalList<>();
 
     for (final int id : ImageJUtils.getIdList()) {
       final ImagePlus imp = WindowManager.getImage(id);

@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -244,8 +244,8 @@ public class PeakResultTableModel extends AbstractTableModel {
 
     // Organise the data columns.
     // This is done as per the IJTablePeakResults for consistency
-    final TurboList<PeakResultData<?>> valuesList = new TurboList<>();
-    final TurboList<String> namesList = new TurboList<>();
+    final LocalList<PeakResultData<?>> valuesList = new LocalList<>();
+    final LocalList<String> namesList = new LocalList<>();
 
     rowCounter = tableSettings.getShowRowCounter();
     if (rowCounter) {
@@ -345,12 +345,12 @@ public class PeakResultTableModel extends AbstractTableModel {
     fireTableStructureChanged();
   }
 
-  private static void addName(TurboList<PeakResultData<?>> valuesList,
-      TurboList<String> namesList) {
+  private static void addName(LocalList<PeakResultData<?>> valuesList,
+      LocalList<String> namesList) {
     namesList.add(valuesList.get(valuesList.size() - 1).getValueName());
   }
 
-  private static void addName(String name, TurboList<String> namesList, String unitName) {
+  private static void addName(String name, LocalList<String> namesList, String unitName) {
     if (!TextUtils.isNullOrEmpty(unitName)) {
       name += " (" + unitName + ")";
     }

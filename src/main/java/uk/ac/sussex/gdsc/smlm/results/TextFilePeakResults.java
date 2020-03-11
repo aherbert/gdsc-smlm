@@ -38,8 +38,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -151,7 +151,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
   }
 
   @Override
-  public void begin() {
+  public synchronized void begin() {
     calculator = null;
     canComputePrecision = false;
 
@@ -495,7 +495,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
 
   @Override
   protected void sort() throws IOException {
-    final TurboList<Result> results = new TurboList<>(size);
+    final LocalList<Result> results = new LocalList<>(size);
     final StringBuilder header = new StringBuilder();
 
     final Path path = Paths.get(filename);
@@ -523,7 +523,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     try (BufferedWriter output = Files.newBufferedWriter(path)) {
       output.write(header.toString());
       for (int i = 0; i < results.size(); i++) {
-        output.write(results.getf(i).line);
+        output.write(results.unsafeGet(i).line);
         output.newLine();
       }
     }

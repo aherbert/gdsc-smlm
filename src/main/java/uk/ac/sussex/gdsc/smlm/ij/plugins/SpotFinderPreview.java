@@ -68,11 +68,11 @@ import uk.ac.sussex.gdsc.core.match.Coordinate;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.RankedScoreCalculator;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -591,8 +591,8 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       }
 
       // Compute assignments
-      final TurboList<FractionalAssignment> fractionalAssignments =
-          new TurboList<>(3 * predicted.length);
+      final LocalList<FractionalAssignment> fractionalAssignments =
+          new LocalList<>(3 * predicted.length);
       final double matchDistance = settings.distance * fitConfig.getInitialPeakStdDev();
       final RampedScore score =
           new RampedScore(matchDistance * settings.lowerDistance / 100, matchDistance);

@@ -40,9 +40,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.ImagePSF;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
@@ -119,7 +119,7 @@ public class PsfCombiner implements PlugIn {
    * @return the list
    */
   public static List<String> createImageList() {
-    final List<String> titles = new TurboList<>();
+    final List<String> titles = new LocalList<>();
     final int[] ids = WindowManager.getIDList();
     if (ids != null) {
       for (final int id : ids) {

@@ -35,7 +35,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -522,7 +522,7 @@ public class ImageJImagePeakResultsTest {
 
   private static void addPeakResults(ImageJImagePeakResults results, float[] x, float[] y,
       float[] value) {
-    final TurboList<PeakResult> list = new TurboList<>(x.length);
+    final LocalList<PeakResult> list = new LocalList<>(x.length);
     for (int i = 0; i < x.length; i++) {
       list.add(new PeakResult(x[i], y[i], value[i]));
     }
@@ -531,7 +531,7 @@ public class ImageJImagePeakResultsTest {
 
   private static void addPeakResults(ImageJImagePeakResults results, int[] time, float[] x,
       float[] y, float[] value) {
-    final TurboList<PeakResult> list = new TurboList<>(x.length);
+    final LocalList<PeakResult> list = new LocalList<>(x.length);
     for (int i = 0; i < x.length; i++) {
       list.add(new PeakResult(time[i], 0, 0, 0, 0, 0, 0, createParams(x[i], y[i], value[i]), null));
     }

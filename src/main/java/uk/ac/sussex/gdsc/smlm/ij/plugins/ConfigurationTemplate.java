@@ -63,8 +63,8 @@ import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.AlphaNumericComparator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -719,7 +719,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template names
    */
   public static String[] getTemplateNames(boolean includeNone) {
-    final TurboList<String> names = new TurboList<>(templates.size() + 1);
+    final LocalList<String> names = new LocalList<>(templates.size() + 1);
     if (includeNone) {
       names.add("[None]");
     }
@@ -733,7 +733,7 @@ public class ConfigurationTemplate implements PlugIn {
    * @return The template names
    */
   private static List<String> getTemplateNamesAsList() {
-    return new TurboList<>(templates.keySet());
+    return new LocalList<>(templates.keySet());
   }
 
   /**
@@ -859,7 +859,7 @@ public class ConfigurationTemplate implements PlugIn {
       return;
     }
 
-    final List<String> items = new TurboList<>();
+    final List<String> items = new LocalList<>();
     Arrays.stream(inlineNames).forEach(items::add);
     Arrays.stream(templateResources).forEach(t -> items.add(t.name));
     final MultiDialog md = new MultiDialog("Select templates", items);
@@ -898,7 +898,7 @@ public class ConfigurationTemplate implements PlugIn {
 
     if (!remaining.isEmpty()) {
       // Build a list of resources to load
-      final TurboList<TemplateResource> list = new TurboList<>(remaining.size());
+      final LocalList<TemplateResource> list = new LocalList<>(remaining.size());
       for (final TemplateResource t : templateResources) {
         if (remaining.contains(t.name)) {
           list.add(t);

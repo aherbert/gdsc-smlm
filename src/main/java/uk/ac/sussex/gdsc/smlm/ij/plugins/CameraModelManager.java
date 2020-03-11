@@ -48,9 +48,9 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.utils.ExtendedStatistics;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelResource;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraModelSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CameraModelManagerSettings;
@@ -265,7 +265,7 @@ public class CameraModelManager implements PlugIn {
   }
 
   private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
+    final List<String> list = new LocalList<>();
     if (includeNone) {
       list.add("[None]");
     }

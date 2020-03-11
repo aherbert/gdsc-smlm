@@ -45,8 +45,8 @@ import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 
 /**
  * Use a mesh object to represent a set of points. The object is duplicated, scaled and translated
@@ -498,8 +498,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       final Class<?> clazz = sourceGa.getClass();
       // clazz = clazz.asSubclass(clazz);
 
-      final TurboList<Class<?>> paramTypes = new TurboList<>(4);
-      final TurboList<Object> paramValues = new TurboList<>(4);
+      final LocalList<Class<?>> paramTypes = new LocalList<>(4);
+      final LocalList<Object> paramValues = new LocalList<>(4);
 
       paramTypes.add(int.class);
       paramTypes.add(int.class);

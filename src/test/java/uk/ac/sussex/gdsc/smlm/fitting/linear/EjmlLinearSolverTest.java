@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
@@ -518,8 +518,8 @@ public class EjmlLinearSolverTest {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
-    final TurboList<DenseMatrix64F> aList = new TurboList<>();
-    final TurboList<DenseMatrix64F> bList = new TurboList<>();
+    final LocalList<DenseMatrix64F> aList = new LocalList<>();
+    final LocalList<DenseMatrix64F> bList = new LocalList<>();
     final double[] testbackground = new double[] {0.2, 0.7};
     final double[] testsignal1 = new double[] {30, 100, 300};
     final double[] testcx1 = new double[] {4.9, 5.3};
@@ -566,7 +566,7 @@ public class EjmlLinearSolverTest {
     final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
     final int runs = 100000 / a.length;
     final TimingService ts = new TimingService(runs);
-    final TurboList<SolverTimingTask> tasks = new TurboList<>();
+    final LocalList<SolverTimingTask> tasks = new LocalList<>();
     // Added in descending speed order
     tasks.add(new PseudoInverseSolverTimingTask(a, b));
     tasks.add(new LinearSolverTimingTask(a, b));
@@ -818,7 +818,7 @@ public class EjmlLinearSolverTest {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
-    final TurboList<DenseMatrix64F> aList = new TurboList<>();
+    final LocalList<DenseMatrix64F> aList = new LocalList<>();
     final double[] testbackground = new double[] {0.2, 0.7};
     final double[] testsignal1 = new double[] {30, 100, 300};
     final double[] testcx1 = new double[] {4.9, 5.3};
@@ -865,7 +865,7 @@ public class EjmlLinearSolverTest {
     final double[][] answer = new double[a.length][];
     final int runs = 100000 / a.length;
     final TimingService ts = new TimingService(runs);
-    final TurboList<InversionTimingTask> tasks = new TurboList<>();
+    final LocalList<InversionTimingTask> tasks = new LocalList<>();
     // Added in descending speed order
     tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
     tasks.add(new LinearInversionTimingTask(a, ignore, answer));

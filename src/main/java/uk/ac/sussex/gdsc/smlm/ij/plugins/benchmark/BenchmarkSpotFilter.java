@@ -63,13 +63,13 @@ import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.ImmutableFractionalAssignment;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
@@ -987,8 +987,8 @@ public class BenchmarkSpotFilter implements PlugIn {
         // This is used to raise the spot intensity when computing the signal factor.
 
         // Compute assignments
-        final TurboList<FractionalAssignment> fractionalAssignments =
-            new TurboList<>(predicted.length * 3);
+        final LocalList<FractionalAssignment> fractionalAssignments =
+            new LocalList<>(predicted.length * 3);
 
         final double dmin = matchDistance * matchDistance;
         final int predictedSize = predicted.length;
@@ -1648,7 +1648,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     // Set the prefix for this batch
     final double hwhmMin = config.getHwhmMin();
     progressPrefix = new BatchResult(null, dataFilter, 0, search, param2, hwhmMin).getName();
-    final TurboList<BatchResult> result = new TurboList<>();
+    final LocalList<BatchResult> result = new LocalList<>();
 
     // Note: All batch runs use absolute distances for filter smoothing parameters
 
@@ -1943,8 +1943,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     // Create a pool of workers
     final int nThreads = Prefs.getThreads();
     final BlockingQueue<Integer> jobs = new ArrayBlockingQueue<>(nThreads * 2);
-    final List<Worker> workers = new TurboList<>(nThreads);
-    final List<Thread> threads = new TurboList<>(nThreads);
+    final List<Worker> workers = new LocalList<>(nThreads);
+    final List<Thread> threads = new LocalList<>(nThreads);
     for (int i = 0; i < nThreads; i++) {
       final Worker worker = new Worker(jobs, stack, spotFilter, background, simulationCoords);
       final Thread t = new Thread(worker);

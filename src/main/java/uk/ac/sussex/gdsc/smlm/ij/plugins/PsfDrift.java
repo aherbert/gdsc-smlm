@@ -62,10 +62,10 @@ import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
@@ -742,7 +742,7 @@ public class PsfDrift implements PlugIn {
       settings.positionsToAverage = Math.abs((int) gd.getNextNumber());
       final Map<Integer, Offset> oldOffset = psfSettings.getOffsetsMap();
       final boolean useOldOffset = settings.useOffset && !oldOffset.isEmpty();
-      final TurboList<double[]> offset = new TurboList<>();
+      final LocalList<double[]> offset = new LocalList<>();
       final double pitch = psfSettings.getPixelSize();
       int index = 0;
       for (int i = start, slice = startSlice; i <= end; slice++, i++) {
@@ -790,7 +790,7 @@ public class PsfDrift implements PlugIn {
   }
 
   private void addMissingOffsets(int startSlice, int endSlice, int slices,
-      TurboList<double[]> offset) {
+      LocalList<double[]> offset) {
     // Add an offset for the remaining slices
     if (settings.positionsToAverage > 0) {
       double cx = 0;

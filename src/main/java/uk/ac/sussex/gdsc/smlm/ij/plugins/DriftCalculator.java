@@ -77,8 +77,8 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
@@ -941,7 +941,7 @@ public class DriftCalculator implements PlugIn {
   }
 
   private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, int[] limits) {
-    final TurboList<Spot> list = new TurboList<>(limits[1] - limits[0] + 1);
+    final LocalList<Spot> list = new LocalList<>(limits[1] - limits[0] + 1);
     final float minx = bounds.x;
     final float miny = bounds.y;
     final float maxx = (float) bounds.x + bounds.width;
@@ -957,7 +957,7 @@ public class DriftCalculator implements PlugIn {
     // For each frame pick the strongest spot
     Collections.sort(list, Spot::compare);
 
-    final TurboList<Spot> newList = new TurboList<>(list.size());
+    final LocalList<Spot> newList = new LocalList<>(list.size());
 
     int currentT = -1;
     for (final Spot spot : list) {

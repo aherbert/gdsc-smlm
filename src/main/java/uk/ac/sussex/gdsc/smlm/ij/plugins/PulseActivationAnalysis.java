@@ -72,10 +72,10 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -142,7 +142,7 @@ public class PulseActivationAnalysis implements PlugIn {
   private int[][] density;
   private int numberOfThreads;
   private ExecutorService executor;
-  private TurboList<Future<?>> futures;
+  private LocalList<Future<?>> futures;
   /** The last run settings. All access to this must be synchronized. */
   private RunSettings lastRunSettings;
 
@@ -628,7 +628,7 @@ public class PulseActivationAnalysis implements PlugIn {
    */
   @SuppressWarnings("null")
   private void createActivations() {
-    final TurboList<Activation> activations = new TurboList<>(traces.length);
+    final LocalList<Activation> activations = new LocalList<>(traces.length);
 
     // Activations are only counted if there are at least
     // n frames between localisations.
@@ -670,12 +670,12 @@ public class PulseActivationAnalysis implements PlugIn {
     save(activations);
   }
 
-  private void save(TurboList<Activation> list) {
+  private void save(LocalList<Activation> list) {
     // Count the activations per channel
     // Note: Channels are 0-indexed in the activations
     counts = new int[settings.channels];
     for (int i = list.size(); i-- > 0;) {
-      final Activation result = list.getf(i);
+      final Activation result = list.unsafeGet(i);
       if (result.hasChannel()) {
         counts[result.getChannel()]++;
       }
@@ -687,7 +687,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final int nonSpecificActivationsSize = list.size() - sum;
     nonSpecificActivations = new Activation[nonSpecificActivationsSize];
     for (int i = list.size(), c1 = 0, c2 = 0; i-- > 0;) {
-      final Activation result = list.getf(i);
+      final Activation result = list.unsafeGet(i);
       if (result.hasChannel()) {
         specificActivations[c1++] = result;
       } else {
@@ -1564,7 +1564,7 @@ public class PulseActivationAnalysis implements PlugIn {
     if (executor == null) {
       numberOfThreads = Prefs.getThreads();
       executor = Executors.newFixedThreadPool(numberOfThreads);
-      futures = new TurboList<>(numberOfThreads);
+      futures = new LocalList<>(numberOfThreads);
     }
   }
 

@@ -99,12 +99,12 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
@@ -2604,7 +2604,7 @@ public class CreateData implements PlugIn {
 
   private PsfModel createPsfModel(double[] xyz) {
     // Create a set with a single model
-    final List<LocalisationModelSet> localisationSets = new TurboList<>(1);
+    final List<LocalisationModelSet> localisationSets = new LocalList<>(1);
     final LocalisationModelSet set = new LocalisationModelSet(0, 0);
     final LocalisationModel m = new LocalisationModel(0, 0, xyz, 1, 0);
     set.add(m);
@@ -4602,7 +4602,7 @@ public class CreateData implements PlugIn {
   private void addPsfOptions(final ExtendedGenericDialog gd) {
     gd.addMessage("--- PSF Model ---");
     final List<String> imageNames = PsfCombiner.createImageList();
-    final TurboList<String> availableModels = new TurboList<>();
+    final LocalList<String> availableModels = new LocalList<>();
     availableModels.add(PSF_MODELS[PSF_MODEL_GAUSSIAN]);
     availableModels.add(PSF_MODELS[PSF_MODEL_AIRY]);
     final String[] images;
@@ -5479,7 +5479,7 @@ public class CreateData implements PlugIn {
         results.setPsf(psf.build());
         // Update all the results. This assume the results do not have data for a custom PSF,
         // i.e. the parameters only have [t,i,x,y,z]
-        final TurboList<PeakResult> newResults = new TurboList<>(results.size());
+        final LocalList<PeakResult> newResults = new LocalList<>(results.size());
         final float sd = (float) dc.convertBack(simulationParameters.sd);
         results.forEach((PeakResultProcedure) r -> {
           final PeakResult peak = r.resize(PeakResult.STANDARD_PARAMETERS + 1);

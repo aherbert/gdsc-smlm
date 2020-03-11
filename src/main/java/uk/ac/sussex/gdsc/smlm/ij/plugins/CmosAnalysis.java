@@ -79,11 +79,11 @@ import uk.ac.sussex.gdsc.core.math.IntegerArrayMoment;
 import uk.ac.sussex.gdsc.core.math.RollingArrayMoment;
 import uk.ac.sussex.gdsc.core.math.SimpleArrayMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
@@ -110,7 +110,7 @@ public class CmosAnalysis implements PlugIn {
   // The measured offset, variance and gain
   private ImageStack measuredStack;
   // The sub-directories containing the sCMOS images
-  private TurboList<SubDir> subDirs;
+  private LocalList<SubDir> subDirs;
 
   /** The plugin settings. */
   private Settings settings;
@@ -584,7 +584,7 @@ public class CmosAnalysis implements PlugIn {
     // Create thread pool and workers
     final int threadCount = getThreads();
     final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-    final TurboList<Future<?>> futures = new TurboList<>(numberOfThreads);
+    final LocalList<Future<?>> futures = new LocalList<>(numberOfThreads);
 
     // Simulate the exposure input.
     final int[] photons = settings.getPhotons();
@@ -684,7 +684,7 @@ public class CmosAnalysis implements PlugIn {
 
     // Get only those with numbers at the end.
     // These should correspond to exposure times
-    subDirs = new TurboList<>();
+    subDirs = new LocalList<>();
     final Pattern p = Pattern.compile("([0-9]+)$");
     for (final File path : dirs) {
       final String name = path.getName();
@@ -751,8 +751,8 @@ public class CmosAnalysis implements PlugIn {
     // otherwise it is 1.
     final int nThreads = Math.max(1, getThreads() - 3);
     final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-    final TurboList<Future<?>> futures = new TurboList<>(nThreads);
-    final TurboList<ImageWorker> workers = new TurboList<>(nThreads);
+    final LocalList<Future<?>> futures = new LocalList<>(nThreads);
+    final LocalList<ImageWorker> workers = new LocalList<>(nThreads);
 
     final double[][] data = new double[subDirs.size() * 2][];
     double[] pixelOffset = null;
@@ -769,7 +769,7 @@ public class CmosAnalysis implements PlugIn {
     for (int n = 0; n < nSubDirs; n++) {
       ImageJUtils.showSlowProgress(n, nSubDirs);
 
-      final SubDir sd = subDirs.getf(n);
+      final SubDir sd = subDirs.unsafeGet(n);
       ImageJUtils.showStatus(() -> "Analysing " + sd.name);
       final StopWatch sw = StopWatch.createStarted();
 

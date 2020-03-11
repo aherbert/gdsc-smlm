@@ -99,13 +99,13 @@ import uk.ac.sussex.gdsc.core.match.FractionalAssignment;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
@@ -2798,7 +2798,7 @@ public class BenchmarkFilterAnalysis
 
       final Counter uniqueId = new Counter();
       final FrameCounter counter = new FrameCounter();
-      final TurboList<PeakResult> tmp = new TurboList<>();
+      final LocalList<PeakResult> tmp = new LocalList<>();
       // Add the results to the lists
       results.forEach((PeakResultProcedure) result -> {
         if (counter.advanceAndReset(result.getFrame()) && !tmp.isEmpty()) {

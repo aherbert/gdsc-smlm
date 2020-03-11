@@ -99,12 +99,12 @@ import uk.ac.sussex.gdsc.core.ij.text.TextWindow2;
 import uk.ac.sussex.gdsc.core.match.RandIndex;
 import uk.ac.sussex.gdsc.core.match.Resequencer;
 import uk.ac.sussex.gdsc.core.utils.ConvexHull;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsSettings;
@@ -857,7 +857,7 @@ public class Optics implements PlugIn {
    */
   private static class ClusterSelectedWorker
       implements WorkflowWorker<ClusterSelectedEvent, int[]> {
-    TurboList<ClusterSelectedHandler> handlers = new TurboList<>();
+    LocalList<ClusterSelectedHandler> handlers = new LocalList<>();
 
     @Override
     public boolean equalSettings(ClusterSelectedEvent current, ClusterSelectedEvent previous) {
@@ -2597,7 +2597,7 @@ public class Optics implements PlugIn {
       final ConvexHull[] hulls = clusteringResult.getHulls();
 
       if (clusters != null && clusters.length > 0) {
-        final TurboList<Roi> rois = new TurboList<>(clusters.length);
+        final LocalList<Roi> rois = new LocalList<>(clusters.length);
         for (final int clusterId : clusters) {
           final ConvexHull hull = hulls[clusterId];
           if (hull != null) {
@@ -2608,7 +2608,7 @@ public class Optics implements PlugIn {
           }
         }
         if (rois.size() == 1) {
-          roi = rois.getf(0);
+          roi = rois.unsafeGet(0);
         } else if (rois.size() > 1) {
           // If all are points then create a multi-point ROI.
           // This is useful to see where the tiny clusters are.
@@ -2616,7 +2616,7 @@ public class Optics implements PlugIn {
             final float[] x = new float[rois.size()];
             final float[] y = new float[x.length];
             for (int i = 0; i < rois.size(); i++) {
-              final Rectangle2D.Double b = rois.getf(i).getFloatBounds();
+              final Rectangle2D.Double b = rois.unsafeGet(i).getFloatBounds();
               x[i] = (float) b.getX();
               y[i] = (float) b.getY();
             }
@@ -2639,9 +2639,9 @@ public class Optics implements PlugIn {
               }
             }
 
-            // ShapeRoi shapeRoi = new ShapeRoi(rois.getf(0));
+            // ShapeRoi shapeRoi = new ShapeRoi(rois.unsafeGet(0));
             // for (int i = 1; i < rois.size(); i++)
-            // shapeRoi.or(new ShapeRoi(rois.getf(i)));
+            // shapeRoi.or(new ShapeRoi(rois.unsafeGet(i)));
             roi = shapeRoi;
           }
         }
@@ -2695,7 +2695,7 @@ public class Optics implements PlugIn {
       return path;
     }
 
-    private boolean allPoints(TurboList<Roi> rois) {
+    private boolean allPoints(LocalList<Roi> rois) {
       for (final Roi r : rois) {
         if (!(r instanceof PointRoi)) {
           return false;
@@ -2866,7 +2866,7 @@ public class Optics implements PlugIn {
 
   private class TableResultsWorker extends BaseWorker
       implements MouseListener, ClusterSelectedHandler {
-    TurboList<TableResult> tableResults;
+    LocalList<TableResult> tableResults;
     TextWindow2 tw;
     Rectangle location;
     BaseTableResultComparator previous;
@@ -2921,7 +2921,7 @@ public class Optics implements PlugIn {
           final int[] size = clusteringResult.getSize();
           final int[] level = clusteringResult.getLevel();
 
-          tableResults = new TurboList<>(size.length);
+          tableResults = new LocalList<>(size.length);
           for (int c = 1; c < size.length; c++) {
             tableResults.add(new TableResult(c, size[c], level[c], hulls[c], bounds[c]));
           }
@@ -3072,7 +3072,7 @@ public class Optics implements PlugIn {
         // Find the clusters.
         // Assume that the panel is showing the current results.
         for (int i = 0; i < tableResults.size(); i++) {
-          final TableResult r = tableResults.getf(i);
+          final TableResult r = tableResults.unsafeGet(i);
           if (r.id == clusters[0]) {
             // We can only handle selecting continuous lines so
             // for now just select the first cluster.

@@ -96,6 +96,7 @@ import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow.WindowMethod;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -105,7 +106,6 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -4189,8 +4189,8 @@ public class PsfCreator implements PlugInFilter {
     PeakFit.addCameraOptions(gd, PeakFit.FLAG_NO_GAIN | PeakFit.FLAG_NO_READ_NOISE, cw);
 
     // For reset
-    final TurboList<TextField> tf = new TurboList<>();
-    final TurboList<Checkbox> cb = new TurboList<>();
+    final LocalList<TextField> tf = new LocalList<>();
+    final LocalList<Checkbox> cb = new LocalList<>();
     tf.add(gd.addAndGetSlider("Analysis_window", 0, 8, settings.getAnalysisWindow()));
     tf.add(gd.addAndGetSlider("Smoothing", 0.1, 0.5, settings.getSmoothing()));
     tf.add(gd.addAndGetSlider("CoM_z_window", 0, 8, settings.getComWindow()));
@@ -4303,7 +4303,7 @@ public class PsfCreator implements PlugInFilter {
   }
 
   private ExtractedPsf[] extractPsfs(final float[][] image, final BasePoint[] centres) {
-    final List<Future<?>> futures = new TurboList<>(centres.length);
+    final List<Future<?>> futures = new LocalList<>(centres.length);
 
     final int w = imp.getWidth();
     final int h = imp.getHeight();
@@ -5166,7 +5166,7 @@ public class PsfCreator implements PlugInFilter {
     // so the middle of the 2D image is the middle of the projection.
 
     final int n = psfs.length * 3;
-    final List<Future<?>> futures = new TurboList<>(n);
+    final List<Future<?>> futures = new LocalList<>(n);
 
     final Image2DAligner[] align = new Image2DAligner[3];
     for (int i = 0; i < 3; i++) {
@@ -5212,7 +5212,7 @@ public class PsfCreator implements PlugInFilter {
     // Note: For alignment we extract each PSF around the current z-centre
     // so the middle of the stack is the middle of the PSF.
 
-    final List<Future<?>> futures = new TurboList<>(psfs.length);
+    final List<Future<?>> futures = new LocalList<>(psfs.length);
 
     final Image3DAligner align = new Image3DAligner();
     align.setReference(combined.getImageStack(true));
@@ -5253,7 +5253,7 @@ public class PsfCreator implements PlugInFilter {
   @SuppressWarnings("unused")
   private float[][] align2(ExtractedPsf combined, final ExtractedPsf[] psfs) {
     final int n = psfs.length * 3;
-    final List<Future<?>> futures = new TurboList<>(n);
+    final List<Future<?>> futures = new LocalList<>(n);
 
     final AlignImagesFft[] align = new AlignImagesFft[3];
     final Rectangle[] bounds = new Rectangle[3];

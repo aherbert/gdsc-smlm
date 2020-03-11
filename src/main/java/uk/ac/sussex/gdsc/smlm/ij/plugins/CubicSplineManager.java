@@ -58,10 +58,10 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CubicSplineManagerSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.CubicSplineResource;
@@ -220,7 +220,7 @@ public class CubicSplineManager implements PlugIn {
     final int threadCount = Prefs.getThreads();
     final Ticker ticker = ImageJUtils.createTicker((long) maxi * maxj * maxk, threadCount);
     final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-    final TurboList<Future<?>> futures = new TurboList<>(maxk);
+    final LocalList<Future<?>> futures = new LocalList<>(maxk);
     // Create all the spline nodes by processing continuous blocks of 4x4x4 from the image stack.
     // Note that the function is enlarge x3 so a 4x4x4 block samples the voxel at [0,1/3,2/3,1]
     // in each dimension. There should be a final pixel on the end of the data for the final
@@ -440,7 +440,7 @@ public class CubicSplineManager implements PlugIn {
   }
 
   private static List<String> createList(boolean includeNone) {
-    final List<String> list = new TurboList<>();
+    final List<String> list = new LocalList<>();
     if (includeNone) {
       list.add("[None]");
     }

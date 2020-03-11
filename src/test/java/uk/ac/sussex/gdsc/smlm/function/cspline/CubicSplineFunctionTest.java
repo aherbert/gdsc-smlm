@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.core.data.DoubleStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolatingFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicInterpolator;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Function;
@@ -901,9 +901,9 @@ public abstract class CubicSplineFunctionTest {
             ? GaussianFunctionFactory.create2D(n, maxx, maxy,
                 GaussianFunctionFactory.FIT_SIMPLE_FREE_CIRCLE, zModel)
             : null;
-    final TurboList<double[]> l1 = new TurboList<>();
-    final TurboList<double[]> l2 = new TurboList<>();
-    final TurboList<double[]> l3 = new TurboList<>();
+    final LocalList<double[]> l1 = new LocalList<>();
+    final LocalList<double[]> l2 = new LocalList<>();
+    final LocalList<double[]> l3 = new LocalList<>();
     final double[] a = new double[1 + n * CubicSplineFunction.PARAMETERS_PER_PEAK];
     final double[] b = new double[1 + n * Gaussian2DFunction.PARAMETERS_PER_PEAK];
     double[] bb = null;

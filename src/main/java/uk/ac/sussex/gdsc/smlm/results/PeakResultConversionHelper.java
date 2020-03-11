@@ -27,8 +27,8 @@ package uk.ac.sussex.gdsc.smlm.results;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -238,7 +238,7 @@ public class PeakResultConversionHelper {
    * @return the converters
    */
   public Converter[] getConverters() {
-    final TurboList<Converter> list = new TurboList<>(5);
+    final LocalList<Converter> list = new LocalList<>(5);
 
     getIntensityConverter();
     getDistanceConverter();
@@ -280,7 +280,7 @@ public class PeakResultConversionHelper {
    * @return the converters
    */
   public String[] getNames() {
-    final TurboList<String> list = new TurboList<>(5);
+    final LocalList<String> list = new LocalList<>(5);
 
     list.add("Background");
     list.add("Intensity");
@@ -308,7 +308,7 @@ public class PeakResultConversionHelper {
    * @return the converters
    */
   public String[] getUnitNames() {
-    final TurboList<String> list = new TurboList<>(5);
+    final LocalList<String> list = new LocalList<>(5);
 
     getIntensityConverter();
     getDistanceConverter();

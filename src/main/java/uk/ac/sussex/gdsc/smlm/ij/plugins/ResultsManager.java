@@ -63,9 +63,9 @@ import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -1630,7 +1630,7 @@ public class ResultsManager implements PlugIn {
    */
   private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration,
       Settings settings) {
-    TurboList<String> missing = new TurboList<>();
+    LocalList<String> missing = new LocalList<>();
     if (!calibration.hasNmPerPixel()) {
       missing.add("nm/pixel");
       calibration.setNmPerPixel(settings.inputNmPerPixel);
@@ -1674,7 +1674,7 @@ public class ResultsManager implements PlugIn {
         if (i != 0) {
           sb.append("; ");
         }
-        sb.append(missing.getf(i));
+        sb.append(missing.unsafeGet(i));
       }
       return sb.toString();
     });

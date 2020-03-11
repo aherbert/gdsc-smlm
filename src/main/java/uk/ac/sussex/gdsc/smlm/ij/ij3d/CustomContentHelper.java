@@ -34,7 +34,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import vib.InterpolatedImage;
 
 /**
@@ -100,7 +100,7 @@ public final class CustomContentHelper {
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces
     final TObjectIntHashMap<Point3f> map = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
-    final TurboList<Point3f> vertices = new TurboList<>(list.size());
+    final LocalList<Point3f> vertices = new LocalList<>(list.size());
     final TIntArrayList faces = new TIntArrayList(list.size());
     int index = 0;
     // Process triangles
@@ -113,7 +113,7 @@ public final class CustomContentHelper {
     return Pair.of(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
   }
 
-  private static int addFace(TObjectIntHashMap<Point3f> map, TurboList<Point3f> vertices,
+  private static int addFace(TObjectIntHashMap<Point3f> map, LocalList<Point3f> vertices,
       TIntArrayList faces, Point3f point, int index) {
     // Add the point if it is not in the set of vertices.
     // Get the index associated with the vertex.

@@ -30,17 +30,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import org.apache.commons.rng.UniformRandomProvider;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.rng.JdkRandomAdaptor;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
- * Stores peak results using a TurboList. This is similar to an ArrayList but does not have
+ * Stores peak results using a LocalList. This is similar to an ArrayList but does not have
  * concurrency checking.
  */
 public class TurboListPeakResultStore implements PeakResultStoreList, PeakResultStoreCollection {
   /** The results. */
-  private final TurboList<PeakResult> results;
+  private final LocalList<PeakResult> results;
 
   /**
    * Instantiates a new array list peak results store.
@@ -48,7 +48,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
    * @param capacity the capacity
    */
   public TurboListPeakResultStore(int capacity) {
-    this.results = new TurboList<>(capacity);
+    this.results = new LocalList<>(capacity);
   }
 
   /**
@@ -57,7 +57,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
    * @param store the store to copy
    */
   public TurboListPeakResultStore(TurboListPeakResultStore store) {
-    this.results = new TurboList<>(store.results);
+    this.results = new LocalList<>(store.results);
   }
 
   @Override
@@ -179,7 +179,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
     if (deepCopy) {
       final TurboListPeakResultStore copy = new TurboListPeakResultStore(size());
       for (int i = 0, size = size(); i < size; i++) {
-        copy.add(results.getf(i).copy());
+        copy.add(results.unsafeGet(i).copy());
       }
       return copy;
     }
@@ -195,7 +195,7 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
   @Override
   public void forEach(PeakResultProcedure procedure) {
     for (int i = 0, size = size(); i < size; i++) {
-      procedure.execute(results.getf(i));
+      procedure.execute(results.unsafeGet(i));
     }
   }
 
@@ -203,8 +203,8 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
   public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
     for (int i = 0, size = size(); i < size; i++) {
-      if (filter.test(results.getf(i))) {
-        list.add(results.getf(i));
+      if (filter.test(results.unsafeGet(i))) {
+        list.add(results.unsafeGet(i));
       }
     }
     return list.toArray();
@@ -231,9 +231,8 @@ public class TurboListPeakResultStore implements PeakResultStoreList, PeakResult
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Collection<PeakResult> getCollection() {
-    return (Collection<PeakResult>) results.clone();
+    return results.copy();
   }
 
   @Override

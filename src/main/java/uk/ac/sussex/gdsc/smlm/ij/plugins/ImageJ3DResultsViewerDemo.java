@@ -44,7 +44,7 @@ import org.scijava.java3d.utils.geometry.Sphere;
 import org.scijava.vecmath.Point3f;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ImageJ3DResultsViewerSettings;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.CustomContent;
 import uk.ac.sussex.gdsc.smlm.ij.ij3d.CustomContentHelper;
@@ -183,11 +183,11 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
       return;
     }
 
-    TurboList<Point3f> pointList;
+    LocalList<Point3f> pointList;
     float scale;
 
     if (MemoryPeakResults.isMemoryEmpty()) {
-      pointList = new TurboList<>();
+      pointList = new LocalList<>();
       int range;
       range = 1; // 9 points
       // range = 12; // 25^3 = 15625 points

@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 
 /**
  * Saves the fit results to a binary file format.
@@ -334,7 +334,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
 
   @Override
   protected void sort() throws IOException {
-    final TurboList<Result> results = new TurboList<>(size);
+    final LocalList<Result> results = new LocalList<>(size);
     String header;
 
     try (DataInputStream input = new DataInputStream(new FileInputStream(filename))) {

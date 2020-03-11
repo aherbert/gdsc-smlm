@@ -56,11 +56,11 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.BooleanArray;
 import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
@@ -94,8 +94,8 @@ public class FailCountManager implements PlugIn {
   private static final String[] OPTIONS =
       SettingsManager.getNames((Object[]) FailCountOption.values());
 
-  private static AtomicReference<TurboList<FailCountData>> failCountDataRef =
-      new AtomicReference<>(new TurboList<>(1));
+  private static AtomicReference<LocalList<FailCountData>> failCountDataRef =
+      new AtomicReference<>(new LocalList<>(1));
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   private FailCountManagerSettings.Builder settings;
@@ -385,15 +385,15 @@ public class FailCountManager implements PlugIn {
 
   private static class PlotWorker implements Runnable {
     final ConcurrentMonoStack<PlotData> stack;
-    final TurboList<FailCountData> failCountData;
+    final LocalList<FailCountData> failCountData;
     PlotData lastPlotData;
     int maxSize;
 
-    PlotWorker(ConcurrentMonoStack<PlotData> stack, TurboList<FailCountData> failCountData) {
+    PlotWorker(ConcurrentMonoStack<PlotData> stack, LocalList<FailCountData> failCountData) {
       this.stack = stack;
       this.failCountData = failCountData;
       for (int i = 0; i < failCountData.size(); i++) {
-        maxSize = Math.max(maxSize, failCountData.getf(i).results.length);
+        maxSize = Math.max(maxSize, failCountData.unsafeGet(i).results.length);
       }
     }
 
@@ -548,7 +548,7 @@ public class FailCountManager implements PlugIn {
     IJ.showProgress(0);
     boolean shutdown = false;
     int slice = 0;
-    final TurboList<ParameterisedFitJob> jobs = new TurboList<>(totalFrames);
+    final LocalList<ParameterisedFitJob> jobs = new LocalList<>(totalFrames);
     while (!shutdown && slice < totalFrames) {
       final float[] data = source.next();
       if (data == null) {
@@ -563,7 +563,7 @@ public class FailCountManager implements PlugIn {
       }
 
       final ParameterisedFitJob job = createJob(source.getStartFrameNumber(), data, bounds);
-      jobs.addf(job);
+      jobs.push(job);
       engine.run(job);
 
       shutdown = escapePressed();
@@ -575,9 +575,9 @@ public class FailCountManager implements PlugIn {
     source.close();
 
     // Extract the fail count data
-    final TurboList<FailCountData> failCountData = new TurboList<>(jobs.size());
+    final LocalList<FailCountData> failCountData = new LocalList<>(jobs.size());
     for (int i = 0; i < jobs.size(); i++) {
-      final ParameterisedFitJob job = jobs.getf(i);
+      final ParameterisedFitJob job = jobs.unsafeGet(i);
       if (job.getStatus() == Status.FINISHED) {
         final FitParameters fitParams = job.getFitParameters();
 
@@ -653,7 +653,7 @@ public class FailCountManager implements PlugIn {
       return;
     }
     settings.setFilename(filename);
-    final TurboList<FailCountData> countData = new TurboList<>();
+    final LocalList<FailCountData> countData = new LocalList<>();
 
     try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
       final Pattern pattern = Pattern.compile("[\t, ]+");
@@ -750,7 +750,7 @@ public class FailCountManager implements PlugIn {
    * Save the data in memory to file.
    */
   private void saveData() {
-    final TurboList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -790,7 +790,7 @@ public class FailCountManager implements PlugIn {
    * Show an interactive plot of the fail count data.
    */
   private void plotData() {
-    final TurboList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -840,33 +840,33 @@ public class FailCountManager implements PlugIn {
     }
   }
 
-  private static int getMaxConsecutiveFailCount(TurboList<FailCountData> failCountData) {
+  private static int getMaxConsecutiveFailCount(LocalList<FailCountData> failCountData) {
     int max = 1;
     for (int i = 0; i < failCountData.size(); i++) {
-      max = Math.max(max, failCountData.getf(i).getMaxConsecutiveFailCount());
+      max = Math.max(max, failCountData.unsafeGet(i).getMaxConsecutiveFailCount());
     }
     return max;
   }
 
-  private static int getMaxFailCount(TurboList<FailCountData> failCountData) {
+  private static int getMaxFailCount(LocalList<FailCountData> failCountData) {
     int max = 1;
     for (int i = 0; i < failCountData.size(); i++) {
-      max = Math.max(max, failCountData.getf(i).getFailCount());
+      max = Math.max(max, failCountData.unsafeGet(i).getFailCount());
     }
     return max;
   }
 
   @SuppressWarnings("unused")
-  private static int getMaxPassCount(TurboList<FailCountData> failCountData) {
+  private static int getMaxPassCount(LocalList<FailCountData> failCountData) {
     int max = 1;
     for (int i = 0; i < failCountData.size(); i++) {
-      max = Math.max(max, failCountData.getf(i).getPassCount());
+      max = Math.max(max, failCountData.unsafeGet(i).getPassCount());
     }
     return max;
   }
 
   private void analyseData() {
-    final TurboList<FailCountData> failCountData = failCountDataRef.get();
+    final LocalList<FailCountData> failCountData = failCountDataRef.get();
     if (failCountData.isEmpty()) {
       IJ.error(TITLE, "No fail count data in memory");
       return;
@@ -880,7 +880,7 @@ public class FailCountManager implements PlugIn {
     final int maxFail = getMaxFailCount(failCountData);
 
     // Create a set of fail counters
-    final TurboList<FailCounter> counters = new TurboList<>();
+    final LocalList<FailCounter> counters = new LocalList<>();
     final TByteArrayList type = new TByteArrayList();
     for (int i = 0; i <= maxCons; i++) {
       counters.add(ConsecutiveFailCounter.create(i));
@@ -983,12 +983,12 @@ public class FailCountManager implements PlugIn {
 
     final int nThreads = Prefs.getThreads();
     final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-    final TurboList<Future<?>> futures = new TurboList<>(nThreads);
+    final LocalList<Future<?>> futures = new LocalList<>(nThreads);
 
     final Ticker ticker = ImageJUtils.createTicker(failCountData.size(), nThreads);
     IJ.showStatus("Analysing " + TextUtils.pleural(counters.size(), "counter"));
     for (int i = 0; i < failCountData.size(); i++) {
-      final FailCountData data = failCountData.getf(i);
+      final FailCountData data = failCountData.unsafeGet(i);
       futures.add(executor.submit(() -> {
         if (IJ.escapePressed()) {
           return;
@@ -1011,7 +1011,7 @@ public class FailCountManager implements PlugIn {
           }
           final int block = Math.min(8192, counters.size() - index);
           for (int j = 0; j < block; j++) {
-            final FailCounter counter = counters.getf(index + j).newCounter();
+            final FailCounter counter = counters.unsafeGet(index + j).newCounter();
             s[j] = data.score(counter);
           }
           // Write to the combined score
@@ -1039,7 +1039,7 @@ public class FailCountManager implements PlugIn {
     // TODO - check if the top filter is at the bounds of the range
     final int minIndex = SimpleArrayUtils.findMinIndex(score);
     ImageJUtils.log(TITLE + " Analysis : Best counter = %s (Score = %f)",
-        counters.getf(minIndex).getDescription(), score[minIndex]);
+        counters.unsafeGet(minIndex).getDescription(), score[minIndex]);
 
     // Show a table of results for the top N for each type
     final int topN = Math.min(settings.getTableTopN(), score.length);
@@ -1069,7 +1069,7 @@ public class FailCountManager implements PlugIn {
             sb.setLength(0);
             final int j = indices[i];
             sb.append(i + 1).append('\t');
-            sb.append(counters.getf(j).getDescription()).append('\t');
+            sb.append(counters.unsafeGet(j).getDescription()).append('\t');
             sb.append(score[j]);
             tw.append(sb.toString());
           }
@@ -1082,13 +1082,13 @@ public class FailCountManager implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void fill(TByteArrayList type, TurboList<FailCounter> counters, int value) {
+  private static void fill(TByteArrayList type, LocalList<FailCounter> counters, int value) {
     final int n = counters.size() - type.size();
     ImageJUtils.log("Type %d = %d", value, n);
     type.fill(type.size(), counters.size(), (byte) value);
   }
 
-  private static CounterStatus checkCounters(TurboList<FailCounter> counters) {
+  private static CounterStatus checkCounters(LocalList<FailCounter> counters) {
     final int localMaxCounters = maxCounters.get();
     if (counters.size() > localMaxCounters) {
       final GenericDialog gd = new GenericDialog(TITLE);

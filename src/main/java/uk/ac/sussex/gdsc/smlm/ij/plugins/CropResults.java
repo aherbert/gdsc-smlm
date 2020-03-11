@@ -40,9 +40,9 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CropResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
@@ -76,7 +76,7 @@ public class CropResults implements PlugIn {
    */
   static final int NAME_OPTION_SEQUENCE = 2;
 
-  private TurboList<String> titles;
+  private LocalList<String> titles;
   private CropResultsSettings.Builder settings;
   private boolean myUseRoi;
   private MemoryPeakResults results;
@@ -95,7 +95,7 @@ public class CropResults implements PlugIn {
     }
 
     // Build a list of all images with a region ROI
-    titles = new TurboList<>(WindowManager.getWindowCount());
+    titles = new LocalList<>(WindowManager.getWindowCount());
     for (final int imageId : ImageJUtils.getIdList()) {
       final ImagePlus imp = WindowManager.getImage(imageId);
       if (imp != null && imp.getRoi() != null && imp.getRoi().isArea()) {

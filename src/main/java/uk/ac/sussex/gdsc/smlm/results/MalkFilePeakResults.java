@@ -40,8 +40,8 @@ import java.util.Scanner;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.TurboList;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -117,7 +117,7 @@ public class MalkFilePeakResults extends FilePeakResults {
   }
 
   @Override
-  public void begin() {
+  public synchronized void begin() {
     // Ensure we write out in nm and photons if possible.
     if (hasCalibration()) {
       // Copy it so it can be modified
@@ -269,7 +269,7 @@ public class MalkFilePeakResults extends FilePeakResults {
 
   @Override
   protected void sort() throws IOException {
-    final TurboList<Result> results = new TurboList<>(size);
+    final LocalList<Result> results = new LocalList<>(size);
     final StringBuilder header = new StringBuilder();
 
     final Path path = Paths.get(filename);
@@ -296,7 +296,7 @@ public class MalkFilePeakResults extends FilePeakResults {
     try (BufferedWriter output = Files.newBufferedWriter(path)) {
       output.write(header.toString());
       for (int i = 0; i < results.size(); i++) {
-        output.write(results.getf(i).line);
+        output.write(results.unsafeGet(i).line);
         output.newLine();
       }
     }
