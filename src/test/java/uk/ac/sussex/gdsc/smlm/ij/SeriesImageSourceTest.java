@@ -60,12 +60,12 @@ public class SeriesImageSourceTest {
     canReadBigTiffSequentially(true, true);
   }
 
-  @SeededTest
+  @Test
   public void canReadBigTiffSequentiallyBe() throws IOException {
     canReadBigTiffSequentially(false, false);
   }
 
-  @SeededTest
+  @Test
   public void canReadBigTiffSequentiallyInMemoryBe() throws IOException {
     canReadBigTiffSequentially(true, false);
   }
