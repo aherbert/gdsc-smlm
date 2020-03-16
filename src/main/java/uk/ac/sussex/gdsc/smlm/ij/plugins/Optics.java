@@ -2951,14 +2951,13 @@ public class Optics implements PlugIn {
           tw.getTextPanel().setColumnHeadings(headings);
         }
 
-        final BufferedTextWindow bw = new BufferedTextWindow(tw);
-        bw.setIncrement(Integer.MAX_VALUE);
-
         sort(settings);
-        for (final TableResult r : tableResults) {
-          bw.append(r.getTableText(toUnit));
+        try (BufferedTextWindow bw = new BufferedTextWindow(tw)) {
+          bw.setIncrement(Integer.MAX_VALUE);
+          for (final TableResult r : tableResults) {
+            bw.append(r.getTableText(toUnit));
+          }
         }
-        bw.flush();
 
         tw.getTextPanel().scrollToTop();
       }
