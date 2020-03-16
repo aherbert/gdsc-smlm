@@ -476,6 +476,7 @@ public class FailCountManager implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", OPTIONS, settings.getOption());
+    gd.addHelp(HelpUrls.getUrl("fail-count-manager"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -610,6 +611,7 @@ public class FailCountManager implements PlugIn {
     gd.addSlider("Max_frames", 1, imp.getStackSize(), settings.getMaxFrames());
     gd.addNumericField("Fail_count_limit", settings.getFailCountLimit(), 0);
     gd.addCheckbox("Save", settings.getSaveAfterFitting());
+    gd.addHelp(HelpUrls.getUrl("fail-count-manager-create"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -833,6 +835,7 @@ public class FailCountManager implements PlugIn {
 
       gd.hideCancelButton();
       gd.setOKLabel("Close");
+      gd.addHelp(HelpUrls.getUrl("fail-count-manager-plot"));
       gd.showDialog();
       clear = gd.wasCanceled();
     } finally {
@@ -1095,6 +1098,7 @@ public class FailCountManager implements PlugIn {
       gd.addMessage("Too many counters to analyse: " + counters.size());
       gd.addNumericField("Max_counters", localMaxCounters, 0);
       gd.enableYesNoCancel(" Analyse ", " Continue ");
+      gd.addHelp(HelpUrls.getUrl("fail-count-manager-analysis"));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return CounterStatus.RETURN;
@@ -1157,6 +1161,7 @@ public class FailCountManager implements PlugIn {
         3);
     gd.addNumericField("Pass_rate_counter_inc_pass_rate", settings.getPassRateCounterIncPassRate(),
         3);
+    gd.addHelp(HelpUrls.getUrl("fail-count-manager-analysis"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;

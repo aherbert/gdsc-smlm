@@ -489,7 +489,7 @@ public class DriftCalculator implements PlugIn {
     settings = Settings.load();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
 
     gd.addMessage("Correct the drift in localisation results");
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
@@ -556,7 +556,7 @@ public class DriftCalculator implements PlugIn {
 
   private boolean showSubImageDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
 
     gd.addMessage("Compute the drift using localisation sub-image alignment");
     gd.addNumericField("Frames", settings.frames, 0);
@@ -586,7 +586,7 @@ public class DriftCalculator implements PlugIn {
 
   private ImageStack showStackDialog(String[] stackTitles) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("drift-calculator"));
 
     gd.addMessage("Compute the drift using a reference stack alignment");
 

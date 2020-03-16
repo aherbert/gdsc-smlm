@@ -159,7 +159,7 @@ public class NeighbourAnalysis implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("neighbour-analysis"));
 
     settings = Settings.load();
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);

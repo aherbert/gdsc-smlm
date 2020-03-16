@@ -533,7 +533,7 @@ public class SpotInspector implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("spot-inspector"));
 
     settings = Settings.load();
 

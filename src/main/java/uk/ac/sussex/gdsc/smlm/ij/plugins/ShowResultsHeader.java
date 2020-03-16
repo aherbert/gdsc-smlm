@@ -95,6 +95,7 @@ public class ShowResultsHeader implements PlugIn {
     gd.addFilenameField("Filename", settings.inputFilename, 30);
     gd.addCheckbox("Raw", settings.raw);
 
+    gd.addHelp(HelpUrls.getUrl("show-results-header"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

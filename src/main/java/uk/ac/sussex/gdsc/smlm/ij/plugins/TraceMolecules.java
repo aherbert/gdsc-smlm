@@ -728,7 +728,7 @@ public class TraceMolecules implements PlugIn {
   private boolean showDialog() {
     pluginTitle = outputName + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("trace-molecules"));
 
     readSettings();
 
@@ -837,7 +837,7 @@ public class TraceMolecules implements PlugIn {
   private boolean showClusterDialog() {
     pluginTitle = outputName + " Molecules";
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("cluster-molecules"));
 
     readSettings();
 

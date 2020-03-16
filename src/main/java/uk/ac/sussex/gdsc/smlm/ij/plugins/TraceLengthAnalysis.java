@@ -255,6 +255,7 @@ public class TraceLengthAnalysis implements PlugIn {
     }
     gd.setOKLabel("Save datasets");
     gd.setCancelLabel("Close");
+    gd.addHelp(HelpUrls.getUrl("trace-length-analysis"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -298,6 +299,7 @@ public class TraceLengthAnalysis implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the track length of traced data");
     ResultsManager.addInput(gd, "Input", settings.inputOption, InputSource.MEMORY_CLUSTERED);
+    gd.addHelp(HelpUrls.getUrl("trace-length-analysis"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;

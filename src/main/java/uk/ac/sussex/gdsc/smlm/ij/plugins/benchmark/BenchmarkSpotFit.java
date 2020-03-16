@@ -102,7 +102,7 @@ import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit.FitEngineConfigurationProvider;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
@@ -1205,7 +1205,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fit-spot-data"));
 
     ImageJUtils.addMessage(gd,
         "Fit candidate spots in the benchmark image created by " + CreateData.TITLE

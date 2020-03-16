@@ -62,7 +62,7 @@ import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
@@ -347,7 +347,6 @@ public class PcPalmAnalysis implements PlugIn {
 
   private boolean showDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     if (settings.blinkingRate < 1 || settings.copiedBlinkingRate != moleculesResults.blinkingRate) {
       settings.copiedBlinkingRate = settings.blinkingRate = moleculesResults.blinkingRate;
@@ -369,10 +368,12 @@ public class PcPalmAnalysis implements PlugIn {
       gd.addCheckbox("Apply_window", settings.applyWindow);
       gd.addCheckbox("Show_high_res_image", settings.showHighResolutionImage);
       gd.addCheckbox("Show_correlation_images", settings.showCorrelationImages);
+      gd.addHelp(HelpUrls.getUrl("pc-palm-analysis"));
     } else {
       gd.addMessage("-=- Spatial domain analysis -=-");
       gd.addCheckbox("Use_border", settings.useBorder);
       gd.addNumericField("Correlation_interval (nm)", settings.correlationInterval, 0);
+      gd.addHelp(HelpUrls.getUrl("pc-palm-spatial-analysis"));
     }
 
     gd.showDialog();

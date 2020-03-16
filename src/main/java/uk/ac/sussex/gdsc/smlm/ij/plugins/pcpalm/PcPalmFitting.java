@@ -75,7 +75,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
@@ -262,14 +262,13 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private boolean showDialog() {
-    final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
-
     // Build a list of results to use in the analysis
     if (!getCorrelationResults()) {
       return false;
     }
 
+    final GenericDialog gd = new GenericDialog(TITLE);
+    gd.addHelp(HelpUrls.getUrl("pc-palm-fitting"));
     if (spatialDomain) {
       // Spatial domain results are just combined to a curve
       // Add option to save the results curve
@@ -359,6 +358,7 @@ public class PcPalmFitting implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage("Select the source for the correlation curve");
     gd.addChoice("Input", options, settings.inputOption);
+    gd.addHelp(HelpUrls.getUrl("pc-palm-fitting"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -472,7 +472,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("pc-palm-fitting"));
     gd.addMessage(
         "Select the next correlation curve\nFrequency domain curves are identified with *");
     final int n = (results.size() + 1);

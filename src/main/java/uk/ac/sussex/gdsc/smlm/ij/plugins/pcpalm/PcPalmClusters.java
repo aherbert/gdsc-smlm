@@ -65,7 +65,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.BinomialFitter;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
@@ -619,6 +619,7 @@ public class PcPalmClusters implements PlugIn {
       gd.addCheckbox(macroOption, true);
     }
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-clusters"));
     gd.showDialog();
     if (!gd.wasOKed()) {
       return null;
@@ -663,6 +664,7 @@ public class PcPalmClusters implements PlugIn {
       gd.addMessage("Fit a Binomial distribution to a histogram of cluster sizes.\n \n"
           + "Select the method to generate the histogram:");
       gd.addChoice("Method", items, items[settings.runMode]);
+      gd.addHelp(HelpUrls.getUrl("pc-palm-clusters"));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -682,7 +684,6 @@ public class PcPalmClusters implements PlugIn {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     // Check if the molecules have weights
     boolean haveWeights = false;
@@ -715,6 +716,7 @@ public class PcPalmClusters implements PlugIn {
       gd.addChoice("Units", Settings.UNITS, settings.units);
     }
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-clusters"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

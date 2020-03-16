@@ -250,6 +250,7 @@ public class TiffSeriesViewer implements PlugIn {
       updateLabel2();
     }
 
+    gd.addHelp(HelpUrls.getUrl("tiff-series-viewer"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

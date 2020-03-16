@@ -76,7 +76,6 @@ public class NucleusMask implements PlugIn {
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Create a mask stack using spheres");
 
@@ -86,6 +85,7 @@ public class NucleusMask implements PlugIn {
     gd.addNumericField("Pixel_width", settings.getNmPerPixel(), 2, 6, "nm");
     gd.addNumericField("Pixel_depth", settings.getNmPerSlice(), 2, 6, "nm");
 
+    gd.addHelp(HelpUrls.getUrl("nucleus-mask"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -109,7 +109,7 @@ public class NucleusMask implements PlugIn {
 
     if (settings.getMode() == 0) {
       gd = new ExtendedGenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("nucleus-mask"));
 
       gd.addMessage("Create a mask stack using uniform random spheres");
 
@@ -117,6 +117,7 @@ public class NucleusMask implements PlugIn {
       gd.addNumericField("z_dither", settings.getZDither(), 2, 6, "um");
       gd.addNumericField("Diameter", settings.getDiameter(), 2, 6, "um");
 
+      gd.addHelp(HelpUrls.getUrl("nucleus-mask"));
       gd.showDialog();
 
       if (gd.wasCanceled()) {
@@ -212,13 +213,14 @@ public class NucleusMask implements PlugIn {
       imp.getCanvas().addMouseListener(ml);
 
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("nucleus-mask"));
 
       gd.addMessage("Click the image to add a sphere");
       gd.addNumericField("Diameter", diameter, 2, 6, "um");
       gd.addDialogListener(this::dialogItemChanged);
       gd.hideCancelButton();
       gd.setOKLabel("Close");
+      gd.addHelp(HelpUrls.getUrl("nucleus-mask"));
       gd.showDialog();
 
       imp.getCanvas().removeMouseListener(ml);

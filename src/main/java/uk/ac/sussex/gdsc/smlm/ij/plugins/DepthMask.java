@@ -104,7 +104,7 @@ public class DepthMask implements PlugIn {
     settings = Settings.load();
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("depth-mask"));
 
     gd.addMessage("Create a mask stack using XY, XZ and YZ mask images");
 

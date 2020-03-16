@@ -286,6 +286,7 @@ public class CameraModelManager implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", options, pluginSettings.getOption());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -346,6 +347,7 @@ public class CameraModelManager implements PlugIn {
     gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-filter"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -402,6 +404,7 @@ public class CameraModelManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-delete"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -422,15 +425,16 @@ public class CameraModelManager implements PlugIn {
   }
 
   private static void runLoadFromDirectory() {
-    final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-    egd.addMessage("Load camera models from a directory.");
-    egd.addDirectoryField("Directory", directory.get());
-    egd.showDialog();
-    if (egd.wasCanceled()) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addMessage("Load camera models from a directory.");
+    gd.addDirectoryField("Directory", directory.get());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-load-dir"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
       return;
     }
 
-    final String dir = egd.getNextString();
+    final String dir = gd.getNextString();
     directory.set(dir);
 
     final File[] fileList = (new File(dir)).listFiles(File::isFile);
@@ -442,15 +446,16 @@ public class CameraModelManager implements PlugIn {
   }
 
   private static void runLoadFromFile() {
-    final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-    egd.addMessage("Load a camera model from file.");
-    egd.addFilenameField("Filename", filename.get());
-    egd.showDialog();
-    if (egd.wasCanceled()) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addMessage("Load a camera model from file.");
+    gd.addFilenameField("Filename", filename.get());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-load-file"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
       return;
     }
 
-    final String file = egd.getNextString();
+    final String file = gd.getNextString();
     filename.set(file);
 
     loadFromFileAndSaveResource(file);
@@ -470,6 +475,7 @@ public class CameraModelManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCameraModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("camera-model-manager-view"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

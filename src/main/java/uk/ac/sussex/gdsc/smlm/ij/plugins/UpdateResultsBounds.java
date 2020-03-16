@@ -112,7 +112,7 @@ public class UpdateResultsBounds implements PlugIn {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("update-results-bounds"));
     gd.addMessage("Select results to update");
 
     settings = Settings.load();
@@ -132,7 +132,7 @@ public class UpdateResultsBounds implements PlugIn {
 
   private static boolean showDialog(MemoryPeakResults results) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("update-results-bounds"));
 
     // Force computation of bounds
     Rectangle currentBounds = results.getBounds();

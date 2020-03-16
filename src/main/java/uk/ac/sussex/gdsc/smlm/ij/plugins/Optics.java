@@ -3772,7 +3772,7 @@ public class Optics implements PlugIn {
     logReferences(isDbscan);
 
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl(isDbscan ? "dbscan" : "optics"));
 
     ResultsManager.addInput(gd, inputSettings.getInputOption(), InputSource.MEMORY);
 

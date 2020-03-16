@@ -884,6 +884,7 @@ public class DiffusionRateTest implements PlugIn {
     gd.addCheckbox("Show_example", pluginSettings.showDiffusionExample);
     gd.addSlider("Magnification", 1, 10, pluginSettings.magnification);
 
+    gd.addHelp(HelpUrls.getUrl("diffusion-rate-test"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -1368,6 +1369,7 @@ public class DiffusionRateTest implements PlugIn {
     gd.addCheckbox("Linear_diffusion", pluginSettings.linearDiffusion);
     gd.addStringField("Directory", pluginSettings.simpleDir, 30);
 
+    gd.addHelp(HelpUrls.getUrl("diffusion-rate-test"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;

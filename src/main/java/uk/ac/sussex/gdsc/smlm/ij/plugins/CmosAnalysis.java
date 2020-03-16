@@ -630,7 +630,7 @@ public class CmosAnalysis implements PlugIn {
 
   private boolean showSimulateDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("scmos-analysis"));
 
     gd.addMessage("Simulate per-pixel offset, variance and gain of sCMOS images.");
 
@@ -712,7 +712,7 @@ public class CmosAnalysis implements PlugIn {
     }
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("scmos-analysis"));
 
     //@formatter:off
     gd.addMessage("Analyse the per-pixel offset, variance and gain of sCMOS images.\n \n" +

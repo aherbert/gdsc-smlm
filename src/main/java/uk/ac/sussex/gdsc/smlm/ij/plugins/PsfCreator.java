@@ -280,7 +280,7 @@ public class PsfCreator implements PlugInFilter {
 
   private int showDialog() {
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("psf-creator"));
 
     settings = SettingsManager.readPsfCreatorSettings(0).toBuilder();
 
@@ -423,7 +423,7 @@ public class PsfCreator implements PlugInFilter {
 
   private boolean showFittingDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("psf-creator"));
 
     gd.addMessage("Use PSF fitting to create a combined PSF");
 
@@ -4174,7 +4174,7 @@ public class PsfCreator implements PlugInFilter {
 
   private boolean showAlignmentDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("psf-creator"));
 
     gd.addMessage("Use XYZ stack alignment to create a combined PSF");
 

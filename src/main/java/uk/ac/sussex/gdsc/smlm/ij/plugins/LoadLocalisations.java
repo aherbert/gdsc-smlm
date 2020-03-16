@@ -443,6 +443,7 @@ public class LoadLocalisations implements PlugIn {
     gd.addChoice("Precision_method", SettingsManager.getPrecisionMethodNames(),
         cw.getPrecisionMethodValue());
 
+    gd.addHelp(HelpUrls.getUrl("load-localisations"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;

@@ -367,6 +367,7 @@ public class DrawClusters implements PlugIn {
     gd.addChoice("LUT", LutHelper.getLutNames(), settings.lut);
     gd.addSlider("Line_width", 0, 0.5, settings.lineWidth);
 
+    gd.addHelp(HelpUrls.getUrl("draw-clusters"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

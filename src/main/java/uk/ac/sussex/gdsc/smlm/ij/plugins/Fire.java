@@ -733,7 +733,7 @@ public class Fire implements PlugIn {
   private boolean showInputDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addMessage("Compute the resolution using Fourier Ring Correlation");
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fourier-image-resolution"));
 
     // Build a list of all images with a region ROI
     final List<String> titles = new LinkedList<>();
@@ -795,7 +795,7 @@ public class Fire implements PlugIn {
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
     gd.addMessage("Compute the resolution using Fourier Ring Correlation");
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fourier-image-resolution"));
 
     final boolean single = results2 == null;
 
@@ -1978,7 +1978,7 @@ public class Fire implements PlugIn {
 
   private boolean showQEstimationInputDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fourier-image-resolution"));
 
     // Build a list of all images with a region ROI
     final List<String> titles = new LinkedList<>();
@@ -2031,6 +2031,7 @@ public class Fire implements PlugIn {
     gd.addSlider("MinQ", 0, 0.4, settings.minQ);
     gd.addSlider("MaxQ", 0.1, 0.5, settings.maxQ);
 
+    gd.addHelp(HelpUrls.getUrl("fire-q-estimation"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -2805,7 +2806,7 @@ public class Fire implements PlugIn {
 
       // Build the dialog
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(pluginTitle);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("fourier-image-resolution"));
 
       final double mu = histogram.mean / nmPerPixel;
       final double sd = histogram.sigma / nmPerPixel;
@@ -2842,6 +2843,7 @@ public class Fire implements PlugIn {
         Thread.currentThread().interrupt();
       }
 
+      gd.addHelp(HelpUrls.getUrl("fire-q-estimation"));
       gd.showDialog();
 
       // Finish the worker threads

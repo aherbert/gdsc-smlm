@@ -109,7 +109,7 @@ public class ImageBackground implements PlugInFilter {
 
   private int showDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("image-background"));
 
     gd.addMessage(
         "Creates a background and mask image from a sample input stack\nusing a median projection");

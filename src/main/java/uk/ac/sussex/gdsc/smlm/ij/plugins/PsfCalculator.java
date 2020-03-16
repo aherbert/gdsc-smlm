@@ -103,7 +103,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
    */
   public double calculate(PSFCalculatorSettings settings, boolean simpleMode) {
     gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("psf-calculator"));
 
     this.settingsBuilder = settings.toBuilder();
 

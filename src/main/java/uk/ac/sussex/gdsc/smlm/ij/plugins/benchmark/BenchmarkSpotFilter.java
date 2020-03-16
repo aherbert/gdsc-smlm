@@ -85,7 +85,7 @@ import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianOverlapAnalysis;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfSpot;
@@ -1399,6 +1399,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       gd.addCheckbox("Show_FP", settings.showFP);
       gd.addCheckbox("Show_FN", settings.showFN);
 
+      gd.addHelp(HelpUrls.getUrl("filter-spot-data-batch"));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -1677,7 +1678,6 @@ public class BenchmarkSpotFilter implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     settings = Settings.load();
     config = settings.config;
@@ -1749,6 +1749,11 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     ImageJUtils.rearrangeColumns(gd, (batchMode) ? 14 : 8);
 
+    if (batchMode) {
+      gd.addHelp(HelpUrls.getUrl("filter-spot-data-batch"));
+    } else {
+      gd.addHelp(HelpUrls.getUrl("filter-spot-data"));
+    }
     gd.showDialog();
 
     if (gd.wasCanceled()) {

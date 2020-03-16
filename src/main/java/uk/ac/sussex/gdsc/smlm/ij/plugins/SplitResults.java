@@ -122,6 +122,7 @@ public class SplitResults implements PlugIn {
     gd.addChoice("Object_mask", items, settings.objectMask);
     gd.addCheckbox("Show_object_mask", settings.showObjectMask);
     gd.addCheckbox("Non_mask_dataset", settings.nonMaskDataset);
+    gd.addHelp(HelpUrls.getUrl("split-results"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

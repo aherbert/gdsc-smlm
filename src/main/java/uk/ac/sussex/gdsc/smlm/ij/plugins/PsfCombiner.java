@@ -73,6 +73,7 @@ public class PsfCombiner implements PlugIn {
     final MultiDialog md = new MultiDialog("Select PSFs", titles);
     md.setSelected(lastSelected.get());
 
+    md.setHelpUrl(HelpUrls.getUrl("psf-combiner"));
     md.showDialog();
 
     if (md.wasCancelled()) {
@@ -198,6 +199,7 @@ public class PsfCombiner implements PlugIn {
                 + "Size %d to %d\n \nCrop to the smallest?",
             minStart, maxStart, minEnd, maxEnd, minSize, maxSize);
         gd.enableYesNoCancel();
+        gd.addHelp(HelpUrls.getUrl("psf-combiner"));
         gd.showDialog();
         if (gd.wasCanceled()) {
           return;

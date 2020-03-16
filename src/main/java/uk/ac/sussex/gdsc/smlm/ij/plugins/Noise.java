@@ -178,7 +178,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
       drawPlot();
 
       gd = new ExtendedGenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("noise-estimator"));
 
       final String[] methodNames = SettingsManager.getNoiseEstimatorMethodNames();
 

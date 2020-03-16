@@ -272,12 +272,14 @@ public class MeanVarianceTest implements PlugIn {
     settings = Settings.load();
     settings.save();
 
+    String helpKey = "mean-variance-test";
     if (ImageJUtils.isExtraOptions()) {
       final ImagePlus imp = WindowManager.getCurrentImage();
       if (imp.getStackSize() > 1) {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage("Perform single image analysis on the current image?");
         gd.addNumericField("Bias", settings.bias, 0);
+        gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
           return;
@@ -340,6 +342,10 @@ public class MeanVarianceTest implements PlugIn {
       gd.addMessage("Estimating the EM-gain requires the camera gain without EM readout enabled");
       gd.addNumericField("Camera_gain (Count/e-)", settings.cameraGain, 4);
     }
+    if (emMode) {
+      helpKey += "-em-ccd";
+    }
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

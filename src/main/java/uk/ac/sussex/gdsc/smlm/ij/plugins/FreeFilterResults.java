@@ -115,7 +115,7 @@ public class FreeFilterResults implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("free-filter-results"));
 
     gd.addMessage("Select a dataset to filter");
     ResultsManager.addInput(gd, inputOptionRef.get(), InputSource.MEMORY);

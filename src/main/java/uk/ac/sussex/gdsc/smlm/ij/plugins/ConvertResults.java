@@ -78,7 +78,7 @@ public class ConvertResults implements PlugIn {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("convert-results"));
     gd.addMessage("Select results to convert");
 
     inputOption = inputOptionRef.get();
@@ -100,7 +100,7 @@ public class ConvertResults implements PlugIn {
   private static boolean showDialog(MemoryPeakResults results) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Convert the current units for the results");
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("convert-results"));
 
     final CalibrationReader cr = CalibrationWriter.create(results.getCalibration());
 

@@ -64,6 +64,7 @@ public class TranslateResults implements PlugIn {
     gd.addNumericField("z", settings.getDz(), 3);
     gd.addChoice("Distance_unit", SettingsManager.getDistanceUnitNames(),
         settings.getDistanceUnitValue());
+    gd.addHelp(HelpUrls.getUrl("translate-results"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

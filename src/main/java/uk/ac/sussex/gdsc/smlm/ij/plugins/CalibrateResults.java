@@ -114,7 +114,7 @@ public class CalibrateResults implements PlugIn {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("calibrate-results"));
     gd.addMessage("Select results to calibrate");
 
     settings = Settings.load();
@@ -135,7 +135,7 @@ public class CalibrateResults implements PlugIn {
 
   private boolean showDialog(MemoryPeakResults results) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("calibrate-results"));
 
     final Calibration oldCalibration = results.getCalibration();
 

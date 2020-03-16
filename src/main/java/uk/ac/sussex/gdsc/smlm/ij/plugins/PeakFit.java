@@ -266,8 +266,8 @@ public class PeakFit implements PlugInFilter {
 
     /**
      * This option is only required for the dialog when the input image has a crop. Otherwise the
-     * class level {@link PeakFit#ignoreBoundsForNoise} will be set via the API
-     * method {@link PeakFit#initialiseImage(ImageSource, Rectangle, boolean)}.
+     * class level {@link PeakFit#ignoreBoundsForNoise} will be set via the API method
+     * {@link PeakFit#initialiseImage(ImageSource, Rectangle, boolean)}.
      */
     boolean optionIgnoreBoundsForNoise;
     int integrateFrames;
@@ -722,8 +722,9 @@ public class PeakFit implements PlugInFilter {
       // Load input series ...
       SeriesOpener series;
       if (extraOptions) {
-        // The series opener does not support threads
-        series = SeriesOpener.create(inputDirectory, true, 0);
+        final String helpKey = maximaIdentification ? "spot-finder-series" : "peak-fit-series";
+        // The series opener does not support threads so use 0 threads
+        series = SeriesOpener.create(inputDirectory, true, 0, HelpUrls.getUrl(helpKey));
       } else {
         series = new SeriesOpener(inputDirectory);
       }
@@ -736,7 +737,7 @@ public class PeakFit implements PlugInFilter {
           new SeriesImageSource(getName(series.getImageList()), series);
       // TrackProgress logging is very verbose if the series has many images
       // Status is used only when reading TIFF info.
-      //seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
+      // seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
       seriesImageSource.setTrackProgress(new TrackProgressAdaptor() {
         @Override
         public void status(String format, Object... args) {
@@ -1104,7 +1105,7 @@ public class PeakFit implements PlugInFilter {
 
     settings = Settings.load();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fit-maxima"));
     gd.addMessage("Select identified maxima for fitting");
 
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
@@ -1174,9 +1175,17 @@ public class PeakFit implements PlugInFilter {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
-    gd.addMessage((maximaIdentification) ? "Identify candidate maxima"
-        : "Fit 2D Gaussian to identified maxima");
+    String helpKey;
+    if (maximaIdentification) {
+      helpKey = "spot-finder";
+      gd.addMessage("Identify candidate maxima");
+    } else {
+      helpKey = "peak-fit";
+      gd.addMessage("Fit 2D Gaussian to identified maxima");
+    }
+    // Note: Currently is is not useful to append "-series" when running for a series image
+    // source since the params in this dialog do not concern the image input.
+    gd.addHelp(HelpUrls.getUrl(helpKey));
 
     final String[] templates = ConfigurationTemplate.getTemplateNames(true);
     gd.addChoice("Template", templates, templates[0]);
@@ -2101,7 +2110,7 @@ public class PeakFit implements PlugInFilter {
 
     // Present dialog with simple output options: Image, Table
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("simple-fit"));
     gd.addMessage("Fit single-molecule localisations");
 
     if (!requireCalibration) {
@@ -2262,7 +2271,7 @@ public class PeakFit implements PlugInFilter {
 
   private static ExtendedGenericDialog newWizardDialog(String... messages) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("simple-fit"));
     final String header = "-=-";
     gd.addMessage(header + " " + TITLE + " Configuration Wizard " + header);
     for (final String message : messages) {

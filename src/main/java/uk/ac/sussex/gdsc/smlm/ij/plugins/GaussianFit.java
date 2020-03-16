@@ -293,7 +293,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
     }
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("gaussian-fit"));
 
     gd.addMessage("Fit 2D Gaussian to identified maxima");
 

@@ -122,7 +122,7 @@ public class YeastMask implements PlugIn {
     settings = Settings.load();
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("yeast-mask"));
 
     gd.addMessage("Create a mask of a yeast cell as a tube plus end-caps");
     gd.addSlider("Tube_length (um)", 10, 20, settings.length);

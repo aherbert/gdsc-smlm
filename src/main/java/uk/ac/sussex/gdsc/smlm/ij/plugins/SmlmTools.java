@@ -54,7 +54,7 @@ import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 
 /**
  * Build a frame window to run all the GDSC SMLM ImageJ plugins defined in
- * /uk/ac/sussex/gdsc/smlm/plugins.config. Also add these commands to the plugins menu.
+ * {@code /uk/ac/sussex/gdsc/smlm/plugins.config}. Also add these commands to the plugins menu.
  */
 public class SmlmTools extends PlugInFrame {
   private static final long serialVersionUID = -5457127382849923056L;

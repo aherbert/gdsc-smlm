@@ -468,7 +468,7 @@ public class MedianFilter implements PlugInFilter {
 
   private int showDialog(MedianFilter plugin) {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("median-filter"));
 
     gd.addMessage("Compute the median using a rolling window at set intervals.\n"
         + "Blocks of pixels are processed on separate threads.");

@@ -113,6 +113,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
  */
 public class PulseActivationAnalysis implements PlugIn {
   private String title = "Activation Analysis";
+  private String helpKey = "crosstalk-activation-analysis";
 
   private UniformRandomProvider initialisedRng;
 
@@ -548,6 +549,7 @@ public class PulseActivationAnalysis implements PlugIn {
     if (crosstalkMode) {
       gd.addMessage("Analyse crosstalk activation rate");
     } else {
+      helpKey = "pulse-activation-analysis";
       gd.addMessage("Count & plot molecules activated after a pulse");
     }
 
@@ -555,6 +557,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final int min = (crosstalkMode) ? 2 : 1;
     gd.addSlider("Channels", min, Settings.MAX_CHANNELS, settings.channels);
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -584,6 +587,7 @@ public class PulseActivationAnalysis implements PlugIn {
       gd.addNumericField("Activation_frame_C" + c, settings.startFrame[c - 1], 0);
     }
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -852,6 +856,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     gd.addChoice("Target", ch, "Channel " + settings.targetChannel);
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -1141,6 +1146,7 @@ public class PulseActivationAnalysis implements PlugIn {
     gd.addDialogListener(this::dialogItemChanged);
     gd.addOptionCollectedListener(event -> addWork(previewCheckBox.getState()));
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -1842,6 +1848,7 @@ public class PulseActivationAnalysis implements PlugIn {
       final GenericDialog gd = new GenericDialog(title);
       gd.addMessage("Perform a crosstalk simulation?");
       gd.enableYesNoCancel();
+      gd.addHelp(HelpUrls.getUrl(helpKey));
       gd.showDialog();
       if (gd.wasOKed()) {
         return 1;
@@ -2164,6 +2171,7 @@ public class PulseActivationAnalysis implements PlugIn {
       gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c], settings.ct[2 * c], 3);
       gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c + 1], settings.ct[2 * c + 1], 3);
     }
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

@@ -69,6 +69,7 @@ public class HelpUrlsTest {
   public void canGetUrls() {
     final String url = HelpUrls.getUrl("non-existing key");
     Assertions.assertTrue(url.startsWith("http"));
+    Assertions.assertEquals(url, HelpUrls.getUrl(), "Non-existent key should match base URL");
   }
 
   /**

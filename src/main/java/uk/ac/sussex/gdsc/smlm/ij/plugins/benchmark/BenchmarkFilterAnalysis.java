@@ -126,8 +126,8 @@ import uk.ac.sussex.gdsc.smlm.ga.SimpleMutator;
 import uk.ac.sussex.gdsc.smlm.ga.SimpleRecombiner;
 import uk.ac.sussex.gdsc.smlm.ga.SimpleSelectionStrategy;
 import uk.ac.sussex.gdsc.smlm.ga.ToleranceChecker;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
@@ -1887,6 +1887,7 @@ public class BenchmarkFilterAnalysis
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.addMessage("Iteration results are held in memory.\n \nReport these results?");
+      gd.addHelp(HelpUrls.getUrl("iterate-filter-analysis"));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -2817,10 +2818,12 @@ public class BenchmarkFilterAnalysis
 
   private boolean showDialog(int optimiseParameters) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     final boolean showOptimiseFilter = (optimiseParameters & FLAG_OPTIMISE_FILTER) != 0;
     final boolean showOptimiseParams = (optimiseParameters & FLAG_OPTIMISE_PARAMS) != 0;
+
+    final String helpKey =
+        showOptimiseParams ? "benchmark-filter-parameters" : "benchmark-filter-analysis";
 
     addSimulationData(gd);
 
@@ -2887,6 +2890,7 @@ public class BenchmarkFilterAnalysis
     gd.addCheckboxGroup(1, 3, labels,
         new boolean[] {settings.showTP, settings.showFP, settings.showFN});
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled() || !readDialog(gd, optimiseParameters, tmp)) {
@@ -2944,7 +2948,7 @@ public class BenchmarkFilterAnalysis
   private boolean selectTableColumns() {
     if (settings.showResultsTable || settings.showSummaryTable) {
       final GenericDialog gd = new GenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("benchmark-filter-analysis"));
 
       gd.addMessage("Select the results:");
       for (int i = 0; i < Settings.COLUMNS.length; i++) {
@@ -3125,6 +3129,7 @@ public class BenchmarkFilterAnalysis
         settings.iterationMinRangeReductionIteration);
     gd.addCheckbox("Converge_before_refit", settings.iterationConvergeBeforeRefit);
 
+    gd.addHelp(HelpUrls.getUrl("iterate-filter-analysis"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -3146,7 +3151,6 @@ public class BenchmarkFilterAnalysis
 
   private boolean showReportDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     addSimulationData(gd);
 
@@ -3169,6 +3173,7 @@ public class BenchmarkFilterAnalysis
     gd.addCheckboxGroup(1, 3, labels,
         new boolean[] {settings.showTP, settings.showFP, settings.showFN});
 
+    gd.addHelp(HelpUrls.getUrl("benchmark-filter-analysis"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -3222,7 +3227,6 @@ public class BenchmarkFilterAnalysis
 
   private boolean showScoreDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     addSimulationData(gd);
 
@@ -3276,6 +3280,7 @@ public class BenchmarkFilterAnalysis
       });
     }
 
+    gd.addHelp(HelpUrls.getUrl("score-filter"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

@@ -67,7 +67,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.filters.Spot;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -599,7 +599,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("smart-spot-ranking"));
 
     settings = Settings.load();
     config = configRef.get().createCopy();
@@ -674,7 +674,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       levels = new double[Settings.snrLevels.length];
 
       gd = new ExtendedGenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("smart-spot-ranking"));
       for (int i = 0; i < Settings.thresholdMethodNames.length; i++) {
         gd.addCheckbox(Settings.thresholdMethodNames[i], settings.thresholdMethodOptions[i]);
       }

@@ -187,7 +187,7 @@ public class BlinkEstimator implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("blink-estimator"));
 
     settings = Settings.load();
 

@@ -1258,6 +1258,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     });
 
+    gd.addHelp(HelpUrls.getUrl("d-results-viewer"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

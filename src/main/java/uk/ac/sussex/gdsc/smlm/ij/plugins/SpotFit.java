@@ -197,6 +197,7 @@ public class SpotFit implements PlugIn {
           80));
       gd.addNumericField("Comparison_channel", settings.getComparisonChannel(), 0);
 
+      gd.addHelp(HelpUrls.getUrl("spot-fit-tool"));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -317,7 +318,6 @@ public class SpotFit implements PlugIn {
     }
 
     // "data" will not be null as the width and height from the image processor are correct
-    @SuppressWarnings("null")
     private int findMaxima(ImageProcessor ip, ImageExtractor ie, int x, int y, int searchRadius) {
       if (searchRadius <= 0) {
         // No search
@@ -582,7 +582,6 @@ public class SpotFit implements PlugIn {
     }
 
     // "data" will not be null as the width and height from the image processor are correct
-    @SuppressWarnings("null")
     private static @Nullable ComparisonResult createComparisonResult(ImagePlus imp,
         SpotFitSettings settings, FitResult fitResult) {
       if (settings.getComparisonChannel() == 0

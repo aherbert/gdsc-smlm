@@ -84,6 +84,15 @@ public final class HelpUrls {
   }
 
   /**
+   * Gets the base help URL.
+   *
+   * @return the URL
+   */
+  public static String getUrl() {
+    return urlBase;
+  }
+
+  /**
    * Gets the URL for the given key.
    *
    * @param key the key

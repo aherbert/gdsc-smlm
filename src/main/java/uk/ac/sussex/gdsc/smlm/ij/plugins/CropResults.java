@@ -149,7 +149,7 @@ public class CropResults implements PlugIn {
 
   private boolean showCropDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("crop-results"));
 
     final Rectangle bounds = results.getBounds(true);
     results.is3D();
@@ -428,7 +428,7 @@ public class CropResults implements PlugIn {
 
   private boolean showRoiCropDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("roi-crop-results"));
 
     final String[] items = titles.toArray(new String[titles.size()]);
     gd.addMessage("Use ROI from ...");

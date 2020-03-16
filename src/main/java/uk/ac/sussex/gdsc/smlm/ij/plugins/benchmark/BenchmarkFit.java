@@ -69,7 +69,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
@@ -589,7 +589,6 @@ public class BenchmarkFit implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     final double sa = getSa();
     ImageJUtils.addMessage(gd,
@@ -767,6 +766,7 @@ public class BenchmarkFit implements PlugIn {
     gd.addCheckbox("Show_histograms", showHistograms);
     gd.addCheckbox("Save_raw_data", saveRawData);
 
+    gd.addHelp(HelpUrls.getUrl("fit-benchmark-data"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

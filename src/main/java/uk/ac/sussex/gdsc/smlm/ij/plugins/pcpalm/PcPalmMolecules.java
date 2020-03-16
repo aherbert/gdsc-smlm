@@ -95,7 +95,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.SkewNormalFunction;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -470,7 +470,6 @@ public class PcPalmMolecules implements PlugIn {
 
   private boolean getRunMode(boolean resultsAvailable) {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     // Build a list of all images with a region ROI
     final List<String> titles = new LinkedList<>();
@@ -523,6 +522,7 @@ public class PcPalmMolecules implements PlugIn {
     gd.addMessage("Optionally remove all analysis results from memory");
     gd.addCheckbox("Clear_results", settings.clearResults);
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -684,7 +684,6 @@ public class PcPalmMolecules implements PlugIn {
 
   private boolean showPcPalmDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Estimate the average localisation precision by fitting histograms.\n"
         + "Use the precision to trace localisations into molecule pulses.");
@@ -696,6 +695,7 @@ public class PcPalmMolecules implements PlugIn {
     gd.addCheckbox("Binary_image", settings.binaryImage);
     gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -1108,13 +1108,13 @@ public class PcPalmMolecules implements PlugIn {
 
   private boolean showManualTracingDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Use distance and time thresholds to trace localisations into molecules.");
 
     gd.addNumericField("Distance (nm)", settings.distanceThreshold, 0);
     gd.addNumericField("Time (seconds)", settings.timeThreshold, 2);
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -1565,7 +1565,6 @@ public class PcPalmMolecules implements PlugIn {
 
         // Determine 95th and 99th percentile
         // Will not be null as we requested a non-integer histogram.
-        @SuppressWarnings("null")
         int p99 = intraHist[0].length - 1;
         final double limit1 = 0.99 * intraHist[1][p99];
         final double limit2 = 0.95 * intraHist[1][p99];
@@ -1757,7 +1756,6 @@ public class PcPalmMolecules implements PlugIn {
 
   private boolean showSimulationDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
 
     gd.addMessage("Simulate a random distribution of molecules.");
 
@@ -1776,6 +1774,7 @@ public class PcPalmMolecules implements PlugIn {
     gd.addNumericField("Cluster_radius", settings.clusterRadius, 2);
     gd.addCheckbox("Show_cluster_mask", settings.showClusterMask);
 
+    gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

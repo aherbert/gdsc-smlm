@@ -205,6 +205,7 @@ public class TraceMatchCalculator implements PlugIn {
     gd.addCheckbox("Show_pairs", settings.showPairs);
     gd.addChoice("Sort_pairs", Settings.SORT_OPTIONS, settings.sortIndex);
 
+    gd.addHelp(HelpUrls.getUrl("trace-match-calculator"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

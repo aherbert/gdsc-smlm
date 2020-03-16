@@ -223,7 +223,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     this.imp = imp;
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("psf-estimator"));
     gd.addMessage("Estimate 2D Gaussian to fit maxima");
 
     gd.addNumericField("Initial_StdDev0", initialPeakStdDev0, 3);

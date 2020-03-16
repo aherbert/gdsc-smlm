@@ -169,7 +169,7 @@ public class Configuration implements PlugIn {
     final CalibrationReader calibrationReader = fitConfig.getCalibrationReader();
 
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("fit-configuration"));
     gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
     final String[] templates = ConfigurationTemplate.getTemplateNames(true);

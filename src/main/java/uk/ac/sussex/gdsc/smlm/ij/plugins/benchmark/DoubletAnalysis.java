@@ -101,8 +101,8 @@ import uk.ac.sussex.gdsc.smlm.fitting.LseFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.MleFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.About;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PeakFit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
@@ -1606,7 +1606,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    final String helpKey = "doublet-analysis";
 
     settings = Settings.load();
     config = configRef.get().createCopy();
@@ -1696,6 +1696,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       textLowerFactor = nu.next();
     }
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -1779,6 +1780,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         gd.addCheckbox(Settings.NAMES2[i].replace(' ', '_'),
             settings.displayHistograms[i + Settings.NAMES.length]);
       }
+      gd.addHelp(HelpUrls.getUrl(helpKey));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -2981,7 +2983,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
   private boolean showAnalysisDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("doublet-analysis"));
 
     final StringBuilder sb =
         new StringBuilder("Filters the doublet fits and reports the performance increase\n");
@@ -3052,6 +3054,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       textPrecisionMethod = choices.get(2);
     }
 
+    gd.addHelp(HelpUrls.getUrl("doublet-filter-analysis"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

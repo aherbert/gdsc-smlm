@@ -391,7 +391,7 @@ public class OverlayResults implements PlugIn {
     gd.addChoice("Results", names, (settings.name == null) ? "" : settings.name);
     gd.addCheckbox("Show_table", settings.showTable);
     gd.addMessage("");
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("overlay-results"));
     gd.hideCancelButton();
     gd.setOKLabel("Close");
     if (!(IJ.isMacro() || java.awt.GraphicsEnvironment.isHeadless())) {

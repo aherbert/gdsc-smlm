@@ -195,6 +195,7 @@ public class TraceExporter implements PlugIn {
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
     gd.addChoice("Format", Settings.formatNames, settings.format);
+    gd.addHelp(HelpUrls.getUrl("trace-exporter"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;

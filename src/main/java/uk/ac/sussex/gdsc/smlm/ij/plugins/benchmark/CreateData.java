@@ -152,6 +152,7 @@ import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.AstigmatismModelManager;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.CameraModelFisherInformationAnalysis;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.CameraModelManager;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.HelpUrls;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.LoadLocalisations.LocalisationList;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
@@ -333,6 +334,7 @@ public class CreateData implements PlugIn {
   private boolean spotMode;
   private boolean trackMode;
   private boolean extraOptions;
+  private String helpKey = "create-data";
 
   // Hold private variables for settings that are ignored in simple/benchmark mode
   private boolean poissonNoise = true;
@@ -4215,6 +4217,13 @@ public class CreateData implements PlugIn {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     settings = SettingsManager.readCreateDataSettings(0).toBuilder();
+    if (simpleMode) {
+      helpKey = "create-simple-data";
+    } else if (benchmarkMode) {
+      helpKey = "create-benchmark-data";
+    } else {
+      helpKey = "create-spot-data";
+    }
 
     // Image size
     gd.addMessage("--- Image Size ---");
@@ -4271,6 +4280,7 @@ public class CreateData implements PlugIn {
     }
     gd.addNumericField("Depth-of-field (nm)", settings.getDepthOfField(), 0);
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -4370,6 +4380,7 @@ public class CreateData implements PlugIn {
           gd.addNumericField("Distribution_slice_depth (nm)",
               settings.getDistributionMaskSliceDepth(), 0);
         }
+        gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
@@ -4494,6 +4505,7 @@ public class CreateData implements PlugIn {
             MathUtils.clip(modelBounds.x, upperx, settings.getOriginX()));
         gd.addSlider("Origin_y", modelBounds.y, uppery,
             MathUtils.clip(modelBounds.y, uppery, settings.getOriginY()));
+        gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
           throw new IllegalArgumentException("Unknown camera model crop");
@@ -4712,6 +4724,7 @@ public class CreateData implements PlugIn {
       for (int i = 0; i < pluginSettings.displayHistograms.length; i++) {
         gd.addCheckbox(NAMES[i].replace(' ', '_'), pluginSettings.displayHistograms[i]);
       }
+      gd.addHelp(HelpUrls.getUrl(helpKey));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -4734,8 +4747,7 @@ public class CreateData implements PlugIn {
     // Fixed length tracks will be drawn, non-overlapping in time. This is the simplest
     // simulation for moving molecules
 
-    ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-
+    helpKey = trackMode ? "create-track-data" : "create-data";
     settings = SettingsManager.readCreateDataSettings(0).toBuilder();
 
     if (settings.getStepsPerSecond() < 1) {
@@ -4743,6 +4755,7 @@ public class CreateData implements PlugIn {
     }
 
     final String[] backgroundImages = createBackgroundImageList();
+    ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addNumericField("Pixel_pitch (nm)", settings.getPixelPitch(), 2);
     gd.addNumericField("Size (px)", settings.getSize(), 0);
     gd.addNumericField("Depth (nm)", settings.getDepth(), 0);
@@ -4816,6 +4829,7 @@ public class CreateData implements PlugIn {
     gd.addSlider("Density_radius (N x HWHM)", 0, 4.5, settings.getDensityRadius());
     gd.addNumericField("Depth-of-field (nm)", settings.getDepthOfField(), 0);
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -4957,6 +4971,7 @@ public class CreateData implements PlugIn {
           gd.addNumericField("Distribution_slice_depth (nm)",
               settings.getDistributionMaskSliceDepth(), 0);
         }
+        gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
@@ -4973,6 +4988,7 @@ public class CreateData implements PlugIn {
       gd.addSlider("p-binary", 0, 1, settings.getProbabilityBinary());
       gd.addNumericField("Min_binary_distance (nm)", settings.getMinBinaryDistance(), 0);
       gd.addNumericField("Max_binary_distance (nm)", settings.getMaxBinaryDistance(), 0);
+      gd.addHelp(HelpUrls.getUrl(helpKey));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -5004,6 +5020,7 @@ public class CreateData implements PlugIn {
         gd = new ExtendedGenericDialog(TITLE);
         gd.addMessage("Select the sphere radius for the diffusion confinement");
         gd.addSlider("Confinement_radius (nm)", 0, 2000, settings.getConfinementRadius());
+        gd.addHelp(HelpUrls.getUrl(helpKey));
         gd.showDialog();
         if (gd.wasCanceled()) {
           return false;
@@ -5021,6 +5038,7 @@ public class CreateData implements PlugIn {
             gd.addNumericField("Confinement_slice_depth (nm)",
                 settings.getConfinementMaskSliceDepth(), 0);
           }
+          gd.addHelp(HelpUrls.getUrl(helpKey));
           gd.showDialog();
           if (gd.wasCanceled()) {
             return false;
@@ -5054,6 +5072,7 @@ public class CreateData implements PlugIn {
         cb.addItemListener(this::itemStateChanged);
       }
 
+      gd.addHelp(HelpUrls.getUrl(helpKey));
       gd.showDialog();
       if (gd.wasCanceled()) {
         return false;
@@ -5089,6 +5108,7 @@ public class CreateData implements PlugIn {
       return true;
     }
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -5736,6 +5756,7 @@ public class CreateData implements PlugIn {
       gd.addNumericField("Depth", depth, 3, 8, "pixel");
     }
 
+    gd.addHelp(HelpUrls.getUrl("load-benchmark-data"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return null;
@@ -5867,6 +5888,7 @@ public class CreateData implements PlugIn {
             + "false to load using a universal results loader.", 80));
     gd.addCheckbox("Preprocessed_results", benchmarkAuto);
 
+    gd.addHelp(HelpUrls.getUrl("load-benchmark-data"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

@@ -380,7 +380,7 @@ public class FilterResults implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("filter-results"));
 
     filterSettings = SettingsManager.readGuiFilterSettings(0).toBuilder();
 

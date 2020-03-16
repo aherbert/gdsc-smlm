@@ -322,6 +322,7 @@ public class AstigmatismModelManager implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", options, pluginSettings.getOption());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -410,6 +411,7 @@ public class AstigmatismModelManager implements PlugIn {
       return false;
     }
     gd.addChoice("Image", list, pluginSettings.getImage());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-create"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -461,9 +463,9 @@ public class AstigmatismModelManager implements PlugIn {
     guessScale();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
     gd.addMessage("Use Gaussian 2D PSF fitting to create an astigmatism z-model");
     gd.addNumericField("nm_per_slice", pluginSettings.getNmPerSlice(), 0);
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-create"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {
@@ -549,7 +551,7 @@ public class AstigmatismModelManager implements PlugIn {
     fitConfig = config.getFitConfiguration();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager"));
     gd.addMessage("Configuration settings for the single-molecule localisation microscopy plugins");
 
     PeakFit.addCameraOptions(gd, fitConfig);
@@ -820,6 +822,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addMessage("Fit options");
     gd.addCheckbox("Weighted_fit", pluginSettings.getWeightedFit());
     gd.addDialogListener(new ZDialogListener());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-create"));
     gd.showDialog();
 
     // Save settings
@@ -1273,6 +1276,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addMessage("Save the model width to this plugin's settings, e.g. to use\n"
         + "on another selected PSF when creating a model.");
     gd.addCheckbox("Save_fit_width", pluginSettings.getSaveFitWidth());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-create"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
@@ -1356,6 +1360,7 @@ public class AstigmatismModelManager implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addStringField("Model_name", pluginSettings.getModelName());
     gd.addFilenameField("Filename", pluginSettings.getFilename());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-import"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1377,6 +1382,7 @@ public class AstigmatismModelManager implements PlugIn {
     final String[] models = listAstigmatismModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.addFilenameField("Filename", pluginSettings.getFilename());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-export"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1412,6 +1418,7 @@ public class AstigmatismModelManager implements PlugIn {
     gd.addCheckbox("Show_depth_of_focus", pluginSettings.getShowDepthOfFocus());
     gd.addCheckbox("Show_combined_width", pluginSettings.getShowCombinedWidth());
     gd.addCheckbox("Show_PSF", pluginSettings.getShowPsf());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-view"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1648,6 +1655,7 @@ public class AstigmatismModelManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listAstigmatismModels(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-delete"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1680,6 +1688,7 @@ public class AstigmatismModelManager implements PlugIn {
             80));
 
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-invert"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

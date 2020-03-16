@@ -19,4 +19,4 @@ Copyright (C) 2011-2020 Alex Herbert
 MRC Genome Damage and Stability Centre
 University of Sussex, UK
 
-http://www.sussex.ac.uk/gdsc/intranet/microscopy/UserSupport/AnalysisProtocol/imagej/smlm_plugins
+https://gdsc-smlm.readthedocs.io/

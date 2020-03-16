@@ -181,7 +181,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     // with the preview. So we can only support a single slice.
 
     final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("smooth-image"));
 
     settings = Settings.load();
     gd.addMessage("Smooth image:");

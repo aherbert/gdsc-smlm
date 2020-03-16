@@ -904,7 +904,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   private boolean showTraceDialog(ArrayList<MemoryPeakResults> allResults) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("trace-diffusion"));
 
     if (!multiMode) {
       ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
@@ -1076,7 +1076,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("trace-diffusion"));
 
     clusteringSettings = SettingsManager.readClusteringSettings(0).toBuilder();
 
@@ -1907,6 +1907,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     // items.
     final MultiDialog md = ResultsManager.createMultiDialog(TITLE);
     md.setSelected(selectedRef.get());
+    md.setHelpUrl(HelpUrls.getUrl("trace-diffusion-multi"));
 
     md.showDialog();
 

@@ -61,7 +61,7 @@ public class RenameResults implements PlugIn {
 
   private boolean showDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("rename-results"));
 
     gd.addMessage("To rename the results in memory update the second name field as desired.\n"
         + "(Note the semi-colon at the end of the line is needed for macro recording.)");

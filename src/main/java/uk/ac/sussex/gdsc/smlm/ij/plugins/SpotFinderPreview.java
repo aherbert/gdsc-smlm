@@ -244,7 +244,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     fitConfig = config.getFitConfiguration();
 
     gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("spot-finder-preview"));
     gd.addMessage("Preview candidate maxima");
 
     final String[] templates = ConfigurationTemplate.getTemplateNames(true);

@@ -251,7 +251,7 @@ public class CameraModelAnalysis
     settings = SettingsManager.readCameraModelAnalysisSettings(0).toBuilder();
 
     gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("camera-model-analysis"));
 
     gd.addMessage("Simulate on-chip camera applification.");
 

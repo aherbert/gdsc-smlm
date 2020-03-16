@@ -420,7 +420,11 @@ public class FilterAnalysis implements PlugIn {
 
   private boolean showDialog(List<MemoryPeakResults> resultsList, boolean fileInput) {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    String helpKey = "filter-analysis";
+    if (fileInput) {
+      helpKey += "-file";
+    }
+    gd.addHelp(HelpUrls.getUrl(helpKey));
 
     int total = 0;
     final Counter tp = new Counter();

@@ -472,6 +472,7 @@ public class CubicSplineManager implements PlugIn {
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addChoice("Option", OPTIONS, pluginSettings.getOption());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -514,6 +515,7 @@ public class CubicSplineManager implements PlugIn {
     final String[] modesl = listCubicSplines(false);
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addChoice("Model", modesl, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-render"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -685,6 +687,7 @@ public class CubicSplineManager implements PlugIn {
     final GenericDialog gd = new GenericDialog(TITLE);
     final String[] models = listCubicSplines(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-delete"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -705,15 +708,16 @@ public class CubicSplineManager implements PlugIn {
   }
 
   private static void runLoadFromDirectory() {
-    final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-    egd.addMessage("Load spline models from a directory.");
-    egd.addDirectoryField("Directory", directory.get());
-    egd.showDialog();
-    if (egd.wasCanceled()) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addMessage("Load spline models from a directory.");
+    gd.addDirectoryField("Directory", directory.get());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-load-dir"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
       return;
     }
 
-    final String dir = egd.getNextString();
+    final String dir = gd.getNextString();
     directory.set(dir);
 
     final File[] fileList = (new File(dir)).listFiles(File::isFile);
@@ -725,15 +729,16 @@ public class CubicSplineManager implements PlugIn {
   }
 
   private static void runLoadFromFile() {
-    final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE);
-    egd.addMessage("Load a spline model from file.");
-    egd.addFilenameField("Filename", filename.get());
-    egd.showDialog();
-    if (egd.wasCanceled()) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addMessage("Load a spline model from file.");
+    gd.addFilenameField("Filename", filename.get());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-load-file"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
       return;
     }
 
-    final String file = egd.getNextString();
+    final String file = gd.getNextString();
     filename.set(file);
 
     loadFromFileAndSaveResource(file);
@@ -754,6 +759,7 @@ public class CubicSplineManager implements PlugIn {
     final String[] models = listCubicSplines(false);
     gd.addChoice("Model", models, pluginSettings.getSelected());
     gd.addSlider("Magnification", 1, 5, pluginSettings.getMagnification());
+    gd.addHelp(HelpUrls.getUrl("cubic-spline-manager-view"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

@@ -856,7 +856,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
   private int showDialog() {
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("em-gain-analysis"));
 
     gd.addMessage(
         "Analyse the white-light histogram of an image stack to determine EM-gain parameters.\n \n"
@@ -1140,7 +1140,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
   private boolean showPmfDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("em-gain-pmf"));
 
     gd.addMessage("Plot the probability mass function for EM-gain");
 

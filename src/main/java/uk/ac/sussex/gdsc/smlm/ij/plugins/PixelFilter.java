@@ -258,7 +258,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     preview = true;
 
     final GenericDialog gd = new GenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("pixel-filter"));
 
     gd.addMessage("Replace pixels with mean if they are N StdDevs from the mean");
 

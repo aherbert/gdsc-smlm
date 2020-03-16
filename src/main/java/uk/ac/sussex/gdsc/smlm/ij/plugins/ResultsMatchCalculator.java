@@ -383,6 +383,7 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addCheckbox("Save_pairs", settings.savePairs);
     gd.addCheckbox("Output_end_frame", settings.outputEndFrame);
 
+    gd.addHelp(HelpUrls.getUrl("results-match-calculator"));
     gd.showDialog();
 
     if (gd.wasCanceled()) {

@@ -49,8 +49,6 @@ import uk.ac.sussex.gdsc.smlm.Version;
  */
 public class About implements PlugIn, MacroExtension {
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
-  /** The help url for the SMLM plugins. */
-  public static final String HELP_URL = "https://gdsc-smlm.readthedocs.io/";
   private static final String YEAR = "2020";
 
   /**
@@ -99,7 +97,7 @@ public class About implements PlugIn, MacroExtension {
 
     if ("toolset".equals(arg)) {
       installResource("/macros/toolsets/SMLM Tools.txt", "macros",
-          "toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset",
+          "toolsets" + File.separator + "SMLM Tools.txt", "SMLM toolset", "install-smlm-toolset",
           "Select the toolset from the ImageJ 'More Tools' menu to load buttons on to the "
               + "ImageJ menu bar.",
           ConfigureOption.INSTALL, ConfigureOption.REMOVE);
@@ -108,7 +106,7 @@ public class About implements PlugIn, MacroExtension {
 
     if ("config".equals(arg)) {
       final int result = installResource("/uk/ac/sussex/gdsc/smlm/plugins.config", "plugins",
-          "smlm.config", "SMLM Tools Configuration",
+          "smlm.config", "SMLM Tools Configuration", "create-smlm-tools-config",
           "The configuration file is used to specify which plugins to display on the SMLM Tools "
               + "window. Creating a custom file will need to be repeated when the available "
               + "plugins change.",
@@ -145,21 +143,16 @@ public class About implements PlugIn, MacroExtension {
     final Class<About> resourceClass = About.class;
 
     StringBuilder msg = new StringBuilder();
-    String helpUrl = HELP_URL;
 
     try (BufferedReader input = new BufferedReader(new UnicodeReader(
         resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/README.txt"), null))) {
       // Read the contents of the README file
       String line;
       while ((line = input.readLine()) != null) {
-        if (line.contains("http:")) {
-          helpUrl = line;
-        } else {
-          if (line.equals("")) {
-            line = " "; // Required to insert a line in the GenericDialog
-          }
-          msg.append(line).append('\n');
+        if (line.equals("")) {
+          line = " "; // Required to insert a line in the GenericDialog
         }
+        msg.append(line).append('\n');
       }
     } catch (final IOException ex) {
       // Default message
@@ -180,7 +173,7 @@ public class About implements PlugIn, MacroExtension {
 
     final GenericDialog gd = new GenericDialog(TITLE);
     gd.addMessage(msg.toString());
-    gd.addHelp(helpUrl);
+    gd.addHelp(HelpUrls.getUrl());
     gd.hideCancelButton();
     gd.showDialog();
   }
@@ -211,12 +204,13 @@ public class About implements PlugIn, MacroExtension {
    * @param ijDirectory the ij directory
    * @param destinationName the destination name
    * @param resourceTitle the resource title
+   * @param helpKey the help key
    * @param notes the notes
    * @param options the options
    * @return -1 on error, 0 if installed, 1 if removed
    */
   private static int installResource(String resource, String ijDirectory, String destinationName,
-      String resourceTitle, String notes, ConfigureOption... options) {
+      String resourceTitle, String helpKey, String notes, ConfigureOption... options) {
     final Class<About> resourceClass = About.class;
 
     final String dir = IJ.getDirectory(ijDirectory);
@@ -236,6 +230,7 @@ public class About implements PlugIn, MacroExtension {
       sb.append("\n \n").append(uk.ac.sussex.gdsc.core.utils.XmlUtils.lineWrap(notes, 80, 0, null));
     }
 
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.addMessage(sb.toString());
 
     // Configure the options

@@ -471,7 +471,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     settings = SettingsManager.readCameraModelFisherInformationAnalysisSettings(0).toBuilder();
 
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("camera-model-fisher-information-analysis"));
 
     //@formatter:off
     gd.addMessage(TextUtils.wrap(

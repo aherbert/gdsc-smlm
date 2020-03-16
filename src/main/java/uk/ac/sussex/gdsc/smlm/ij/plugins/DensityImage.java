@@ -615,7 +615,7 @@ public class DensityImage implements PlugIn {
     settings = Settings.load();
 
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("density-image"));
 
     // Build a list of all images with a region ROI
     final List<String> titles = new LinkedList<>();

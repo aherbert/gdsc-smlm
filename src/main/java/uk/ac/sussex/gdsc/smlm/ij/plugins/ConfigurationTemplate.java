@@ -817,6 +817,7 @@ public class ConfigurationTemplate implements PlugIn {
     final GenericDialog gd = new GenericDialog(title);
     final String[] options = SettingsManager.getNames((Object[]) TemplateOption.values());
     gd.addChoice("Option", options, options[settings.getOption()]);
+    gd.addHelp(HelpUrls.getUrl("template-manager"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -865,6 +866,7 @@ public class ConfigurationTemplate implements PlugIn {
     final MultiDialog md = new MultiDialog("Select templates", items);
     md.setSelected(settings.getSelectedStandardTemplatesList());
 
+    md.setHelpUrl(HelpUrls.getUrl("template-manager-load-standard"));
     md.showDialog();
 
     if (md.wasCancelled()) {
@@ -949,6 +951,7 @@ public class ConfigurationTemplate implements PlugIn {
     md.setDisplayConverter(path -> ImageJUtils.decodePath(path)[1]);
     md.setSelected(settings.getSelectedCustomTemplatesList());
 
+    md.setHelpUrl(HelpUrls.getUrl("template-manager-load-custom"));
     md.showDialog();
 
     if (md.wasCancelled()) {
@@ -993,6 +996,7 @@ public class ConfigurationTemplate implements PlugIn {
     }
 
     final MultiDialog md = new MultiDialog("Select templates to remove", getTemplateNamesAsList());
+    md.setHelpUrl(HelpUrls.getUrl("template-manager-remove"));
     md.showDialog();
 
     if (md.wasCancelled()) {
@@ -1038,6 +1042,7 @@ public class ConfigurationTemplate implements PlugIn {
     final String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
     showTemplate(template);
 
+    gd.addHelp(HelpUrls.getUrl("template-manager-show-template"));
     gd.showDialog();
 
     // There is no cancel so read the settings.
@@ -1126,6 +1131,7 @@ public class ConfigurationTemplate implements PlugIn {
     final String template = ((Choice) (gd.getChoices().get(0))).getSelectedItem();
     showTemplateImage(template);
 
+    gd.addHelp(HelpUrls.getUrl("template-manager-show-images"));
     gd.showDialog();
 
     // There is no cancel so read the settings.

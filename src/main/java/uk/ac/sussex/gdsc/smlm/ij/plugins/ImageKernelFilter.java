@@ -173,7 +173,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     this.dataImp = imp;
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("image-kernel-filter"));
 
     gd.addMessage("Convolve an image using another image as the convolution kernel");
 

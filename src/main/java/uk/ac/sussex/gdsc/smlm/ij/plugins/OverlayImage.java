@@ -145,6 +145,7 @@ public class OverlayImage implements PlugIn {
     gd.addCheckbox("Transparent background", settings.transparent);
     gd.addCheckbox("Replace overlay", settings.replace);
 
+    gd.addHelp(HelpUrls.getUrl("overlay-image"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

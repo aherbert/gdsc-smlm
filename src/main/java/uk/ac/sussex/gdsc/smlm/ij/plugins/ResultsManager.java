@@ -452,7 +452,7 @@ public class ResultsManager implements PlugIn {
    * @return the dialog
    */
   public static MultiDialog createMultiDialog(String title, Predicate<MemoryPeakResults> filter) {
-    MemoryResultsList items = new MemoryResultsList(filter);
+    final MemoryResultsList items = new MemoryResultsList(filter);
     final MultiDialog md = new MultiDialog(title, items);
     md.setDisplayConverter(items.getDisplayConverter());
     return md;
@@ -467,9 +467,12 @@ public class ResultsManager implements PlugIn {
 
     Collection<MemoryPeakResults> allResults;
     boolean removeAll = false;
+    String helpKey = "clear-memory-results";
     if (arg.contains("multi")) {
+      helpKey += "-multi";
       final MultiDialog md = createMultiDialog(TITLE);
       md.setSelected(lastSelected.get());
+      md.setHelpUrl(HelpUrls.getUrl(helpKey));
       md.showDialog();
       if (md.wasCancelled()) {
         return;
@@ -508,6 +511,7 @@ public class ResultsManager implements PlugIn {
 
     gd.addMessage(
         String.format("Do you want to remove %s from memory (%s, %s)?", count, sets, memory));
+    gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -706,7 +710,7 @@ public class ResultsManager implements PlugIn {
 
   private boolean showDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("results-manager"));
 
     settings = Settings.load();
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
@@ -1801,6 +1805,7 @@ public class ResultsManager implements PlugIn {
     }
     final MultiDialog md = createMultiDialog(TITLE);
     md.setSelected(lastSelected.get());
+    md.setHelpUrl(HelpUrls.getUrl("batch-save-results"));
     md.showDialog();
     if (md.wasCancelled()) {
       return;
@@ -1813,6 +1818,7 @@ public class ResultsManager implements PlugIn {
     resultsSettings = SettingsManager.readResultsSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     addFileResultsOptions(gd, resultsSettings, FLAG_RESULTS_DIRECTORY | FLAG_NO_SECTION_HEADER);
+    gd.addHelp(HelpUrls.getUrl("batch-save-results"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;

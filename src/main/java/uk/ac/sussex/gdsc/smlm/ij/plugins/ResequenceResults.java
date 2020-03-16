@@ -124,7 +124,7 @@ public class ResequenceResults implements PlugIn {
     settings = Settings.load();
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(About.HELP_URL);
+    gd.addHelp(HelpUrls.getUrl("resequence-results"));
 
     gd.addMessage("Resequence the results in memory (assumed to be continuous from 1).\n"
         + "Describe the regular repeat of the original image:\n"

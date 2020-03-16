@@ -479,6 +479,7 @@ public class PsfDrift implements PlugIn {
     gd.addSlider("Photon_limit", 0, 1, settings.photonLimit);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
+    gd.addHelp(HelpUrls.getUrl("psf-drift"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1084,6 +1085,7 @@ public class PsfDrift implements PlugIn {
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 
+    gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1218,6 +1220,7 @@ public class PsfDrift implements PlugIn {
     final UpdateDialogListener dl =
         new UpdateDialogListener(cx, cy, maxY, newCentre, scale, pw, label);
     gd2.addDialogListener(dl);
+    gd.addHelp(HelpUrls.getUrl("psf-hwhm"));
     gd2.showDialog();
     if (gd2.wasOKed() && (settings.updateCentre || settings.updateHwhm)) {
       final ImagePSF.Builder b = psfSettings.toBuilder();

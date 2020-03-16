@@ -154,7 +154,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
       drawPlot();
 
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
-      gd.addHelp(About.HELP_URL);
+      gd.addHelp(HelpUrls.getUrl("background-estimator"));
 
       gd.addSlider("Percential", 0, 100, settings.percentile);
 
