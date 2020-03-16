@@ -55,7 +55,7 @@ PC-PALM Fitting
 Combines multiple correlation curves calculated by PC-PALM Analysis into an average curve and fits the curve using various models.
 
 
-PC-PALM Clustering
-------------------
+PC-PALM Clusters
+----------------
 
 Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated negative Binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).

@@ -315,7 +315,7 @@ PC PALM Plugins
    * - :ref:`pc_palm_plugins:PC-PALM Fitting`
      - Combine multiple Pair Correlation curves and fit them using models for random or clustered distributions.
 
-   * - :ref:`pc_palm_plugins:PC-PALM Clustering`
+   * - :ref:`pc_palm_plugins:PC-PALM Clusters`
      - Find clusters of molecules using a partial centroid-linkage hierarchical clustering algorithm.
 
 
