@@ -724,7 +724,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
         imp.setOverlay(null);
       }
       // Create the mean
-      if (settings.showDeviations) {
+      if (settings.showFit) {
         for (int i = renderedImageCount.getPixelCount(); i-- > 0;) {
           final int count = renderedImageCount.get(i);
           if (count > 1) {
