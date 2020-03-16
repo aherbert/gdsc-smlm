@@ -28,7 +28,6 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.plugin.filter.ExtendedPlugInFilter;
@@ -53,7 +52,6 @@ import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
-import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -86,8 +84,7 @@ import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 /**
  * Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera.
  */
-public class CameraModelAnalysis
-    implements ExtendedPlugInFilter, DialogListener, OptionCollectedListener {
+public class CameraModelAnalysis implements ExtendedPlugInFilter {
   // Add mode to compute the distance over a range of photons at a set gain and variance
   // Compute distance to simulation. Compute distance to another distribution.
 
@@ -312,8 +309,8 @@ public class CameraModelAnalysis
     gd.addCheckbox("Round_down", settings.getRoundDown());
     gd.addChoice("Model", MODEL, settings.getModel());
     gd.addCheckbox("Full_integration", settings.getSimpsonIntegration());
-    gd.addOptionCollectedListener(this);
-    gd.addDialogListener(this);
+    gd.addOptionCollectedListener(this::optionCollected);
+    gd.addDialogListener(this::dialogItemChanged);
     gd.addPreviewCheckbox(pfr);
     gd.showDialog();
 
@@ -326,8 +323,7 @@ public class CameraModelAnalysis
     return DONE;
   }
 
-  @Override
-  public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
+  private boolean dialogItemChanged(GenericDialog gd, @SuppressWarnings("unused") AWTEvent event) {
     dirty = true;
     settings.setPhotons(gd.getNextNumber());
     settings.setMode(gd.getNextChoiceIndex());
@@ -345,8 +341,7 @@ public class CameraModelAnalysis
     return true;
   }
 
-  @Override
-  public void optionCollected(OptionCollectedEvent event) {
+  private void optionCollected(@SuppressWarnings("unused") OptionCollectedEvent event) {
     if (gd.getPreviewCheckbox().getState()) {
       boolean ok = false;
       try {
@@ -744,8 +739,8 @@ public class CameraModelAnalysis
           upper = settings.getPhotons() + 3 * Math.sqrt(settings.getPhotons());
         }
 
-        final GammaDistribution gamma = new GammaDistribution(null,
-            upper, gain, GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
+        final GammaDistribution gamma = new GammaDistribution(null, upper, gain,
+            GammaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
         final int maxc = (int) gamma.inverseCumulativeProbability(0.999);
 
         final int minn = Math.max(1, poisson.inverseCumulativeProbability(LOWER));
