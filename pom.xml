@@ -364,13 +364,6 @@ Software for single molecule localisation microscopy (SMLM)
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-        <excludes>
-          <exclude>**/binary/**</exclude>
-        </excludes>
-      </resource>
-      <resource>
-        <directory>src/main/resources/binary</directory>
       </resource>
     </resources>
     <testResources>
