@@ -98,6 +98,7 @@ Software for single molecule localisation microscopy (SMLM)
     <ejml.version>0.24</ejml.version>
     <JTransforms.version>3.1</JTransforms.version>
     <protobuf.version>3.6.1</protobuf.version>
+    <jsoup.version>1.13.1</jsoup.version>
 
     <!-- Other maven plugin versions -->
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
@@ -210,6 +211,12 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>jogl-all-main</artifactId>
       <optional>true</optional>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -366,6 +373,11 @@ Software for single molecule localisation microscopy (SMLM)
         <directory>src/main/resources/binary</directory>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <profiles>
