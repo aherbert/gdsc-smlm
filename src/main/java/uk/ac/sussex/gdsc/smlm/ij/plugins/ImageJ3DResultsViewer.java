@@ -1016,7 +1016,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // For testing
     // if (true || Utils.isExtraOptions())
     // {
-    // new ImageJ3DResultsViewerTest().run(arg);
+    // new ImageJ3DResultsViewerDemo().run(arg);
     // return;
     // }
 
