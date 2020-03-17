@@ -138,11 +138,6 @@ public class TraceExporter implements PlugIn {
       return name;
     }
 
-    @Override
-    public String getShortName() {
-      return name;
-    }
-
     /**
      * Get the enum value from the index ordinal.
      *

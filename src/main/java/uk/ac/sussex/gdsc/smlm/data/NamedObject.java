@@ -36,9 +36,11 @@ public interface NamedObject {
   String getName();
 
   /**
-   * Gets the short name. This may be the same as {@link #getName()}.
+   * Gets the short name. The default implementation is to return {@link #getName()}.
    *
    * @return the short name
    */
-  String getShortName();
+  default String getShortName() {
+    return getName();
+  }
 }

@@ -93,11 +93,6 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
     public String getName() {
       return name;
     }
-
-    @Override
-    public String getShortName() {
-      return name;
-    }
   }
 
   /** The line search method. */

@@ -60,11 +60,6 @@ public class FhtFilter {
       return niceName;
     }
 
-    @Override
-    public String getShortName() {
-      return niceName;
-    }
-
     /**
      * Get the operation for the given ordinal. If invalid then the ordinal is set to zero.
      *

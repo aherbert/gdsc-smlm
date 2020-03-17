@@ -149,11 +149,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       return false;
     }
 
-    @Override
-    public String getShortName() {
-      return getName();
-    }
-
     /**
      * Get the camera type for the number.
      *

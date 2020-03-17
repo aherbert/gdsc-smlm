@@ -192,11 +192,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     ;
     //@formatter:on
 
-    @Override
-    public String getShortName() {
-      return getName();
-    }
-
     public static Model forNumber(int number) {
       final Model[] values = Model.values();
       if (number < 0 || number >= values.length) {

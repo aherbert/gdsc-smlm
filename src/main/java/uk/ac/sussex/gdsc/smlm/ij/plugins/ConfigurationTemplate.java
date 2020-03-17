@@ -786,11 +786,6 @@ public class ConfigurationTemplate implements PlugIn {
       }
     };
 
-    @Override
-    public String getShortName() {
-      return getName();
-    }
-
     /**
      * Get the template option for the number.
      *
