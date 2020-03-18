@@ -1275,6 +1275,7 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
      - Set the mode used to assign colour to each localisation.
 
        * ``Depth``: Use the z-depth.
+       * ``Intensity``: Use the localisation intensity.
        * ``ID``: Use the localisation ID. For example identifiers may be assigned by clustering.
 
    * - Depth mode
