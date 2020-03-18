@@ -633,6 +633,7 @@ message ImageJ3DResultsViewerSettings {
   bool enable_dynamic_transparency = 31;
   bool add_to_selection = 32;
   int32 colour_mode = 33;
+  double colour_gamma = 34;
 }
 
 // Contains settings for the Translate Results plugin

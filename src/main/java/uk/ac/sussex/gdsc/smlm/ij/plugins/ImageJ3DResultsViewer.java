@@ -1241,7 +1241,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             return true;
           }
         });
-    gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode());
+    addColourMode(settings, gd);
     gd.addMessage("2D options");
     gd.addChoice("Depth_mode", DEPTH_MODE, settings.getDepthMode(), new OptionListener<Integer>() {
       @Override
@@ -1479,6 +1479,45 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     IJ.showStatus("");
+  }
+
+  private static void addColourMode(final ImageJ3DResultsViewerSettings.Builder settings,
+      final ExtendedGenericDialog gd) {
+    gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode(),
+        new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            settings.setColourMode(value);
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog("Colour mode options", null);
+            final ColourMode mode = ColourMode.forNumber(settings.getColourMode());
+            if (mode != ColourMode.INTENSITY) {
+              return false;
+            }
+            // Default outside the range of the slider will be set to the range of the slider
+            double gamma = settings.getColourGamma();
+            if (gamma < 0.05 || gamma > 5.0) {
+              gamma = 1.0;
+            }
+            egd.addSlider("Colour_gamma", 0.05, 5.0, gamma);
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+            settings.setColourGamma(egd.getNextNumber());
+            return true;
+          }
+        });
   }
 
   private static void addHelp(final ExtendedGenericDialog gd) {
@@ -2014,7 +2053,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         rank = createRankById(results);
         break;
       case INTENSITY:
-        rank = createRankByIntensity(results);
+        rank = createRankByIntensity(results, settings);
         break;
       case DEPTH:
       default:
@@ -2064,10 +2103,64 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return null;
   }
 
-  private static float[] createRankByIntensity(MemoryPeakResults results) {
+  private static float[] createRankByIntensity(MemoryPeakResults results,
+      ImageJ3DResultsViewerSettingsOrBuilder settings) {
     final StandardResultProcedure procedure = new StandardResultProcedure(results);
     procedure.getI();
-    return procedure.intensity;
+    final float[] rank = procedure.intensity;
+    final double gamma = settings.getColourGamma();
+    // These are the same limits used by ImageJ
+    if (gamma > 0 && gamma < 5) {
+      applyGamma(rank, gamma);
+    }
+    return rank;
+  }
+
+  /**
+   * Apply a gamma correction curve: {@code out = in^gamma} where 'in' is in the range [0, 1].
+   *
+   * <p>The input are scaled to the range [0, 1]. The output will be in the range [0, 1].
+   *
+   * <p>The data are untouched if gamma is 1.0 (i.e. no output scaling is performed).
+   *
+   * @param rank the rank
+   * @param gamma the gamma
+   */
+  private static void applyGamma(float[] rank, double gamma) {
+    if (gamma == 1.0) {
+      return;
+    }
+    float[] limits = MathUtils.limits(rank);
+    final float min = limits[0];
+    final float max = limits[1];
+    if (min == max) {
+      return;
+    }
+    final int limit = 1000;
+    if (rank.length > limit) {
+      // Large number of localisations so map them to a corrected gamma
+      final float[] map = createGammaCurve(limit, gamma);
+      final double scale = (limit - 1.0) / (max - min);
+      for (int i = 0; i < rank.length; i++) {
+        final int index = (int) Math.round((rank[i] - min) * scale);
+        rank[i] = map[index];
+      }
+    } else {
+      // Apply direct
+      final double scale = 1.0 / (max - min);
+      for (int i = 0; i < rank.length; i++) {
+        rank[i] = (float) Math.pow((rank[i] - min) * scale, gamma);
+      }
+    }
+  }
+
+  private static float[] createGammaCurve(int length, double gamma) {
+    final float[] curve = new float[length];
+    final double max = length - 1;
+    for (int i = 1; i < length; i++) {
+      curve[i] = (float) Math.pow(i / max, gamma);
+    }
+    return curve;
   }
 
   private static float[] createRankByDepth(MemoryPeakResults results) {
@@ -2545,13 +2638,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
         // Transparency can be set interactively using: Edit > Change Transparency
         // so not an option here.
         gd.addChoice("Colour", LutHelper.getLutNames(), settings.getLut());
-        gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode());
+        addColourMode(settings, gd);
         gd.showDialog();
         if (gd.wasCanceled()) {
           return -1;
         }
         settings.setLut(gd.getNextChoiceIndex());
         settings.setColourMode(gd.getNextChoiceIndex());
+        // No call to gd.collectOptions() as we do not support macros in the menu items
         SettingsManager.writeSettings(settings);
       }
 
