@@ -1271,6 +1271,12 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
        * ``XY Precision``: Use the localisation XY precision (in nm).
        * ``XYZ Deviations``: Use the fitting deviations of the XYZ parameters (in nm).
 
+   * - Colour mode
+     - Set the mode used to assign colour to each localisation.
+
+       * ``Depth``: Use the z-depth.
+       * ``ID``: Use the localisation ID. For example identifiers may be assigned by clustering.
+
    * - Depth mode
      - Applies to 2D datasets.
 
@@ -1492,6 +1498,8 @@ The ``ImageJ 3D Viewer`` window has a ``GDSC SMLM`` menu added with features for
    * - Update settings
      - Show a dialog to update the ``3D Results Viewer`` settings (see :numref:`%s <results_plugins:3D Results Viewer Settings>`).
 
+   * - Help
+     - Show the help documentation.
 
 .. index:: 3D Results Viewer Settings
 
