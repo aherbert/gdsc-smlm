@@ -28,6 +28,7 @@ import customnode.CustomLineMesh;
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
+import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -165,6 +166,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsDigest;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.RawResultProcedure;
@@ -191,6 +193,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static final String[] TRANSPARENCY_MODE =
       SettingsManager.getNames((Object[]) TransparencyMode.values());
   private static final String[] SORT_MODE = SettingsManager.getNames((Object[]) SortMode.values());
+  private static final String[] COLOUR_MODE =
+      SettingsManager.getNames((Object[]) ColourMode.values());
 
   /** The executor service for message digests. */
   private static final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -270,11 +274,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final SizeMode[] values = SizeMode.values();
 
-    @Override
-    public String getShortName() {
-      return getName();
-    }
-
     public static SizeMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
@@ -304,11 +303,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
     },;
 
     static final DepthMode[] values = DepthMode.values();
-
-    @Override
-    public String getShortName() {
-      return getName();
-    }
 
     public static DepthMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
@@ -351,11 +345,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
     },;
 
     static final TransparencyMode[] values = TransparencyMode.values();
-
-    @Override
-    public String getShortName() {
-      return getName();
-    }
 
     public static TransparencyMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
@@ -415,11 +404,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final SortMode[] values = SortMode.values();
 
-    @Override
-    public String getShortName() {
-      return getName();
-    }
-
     public static SortMode forNumber(int number) {
       if (number < 0 || number >= values.length) {
         throw new IllegalArgumentException();
@@ -431,6 +415,30 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     public String getDetails() {
       return getName() + ": " + getDescription();
+    }
+  }
+
+  private enum ColourMode implements NamedObject {
+    DEPTH {
+      @Override
+      public String getName() {
+        return "Depth";
+      }
+    },
+    ID {
+      @Override
+      public String getName() {
+        return "ID";
+      }
+    },;
+
+    static final ColourMode[] values = ColourMode.values();
+
+    public static ColourMode forNumber(int number) {
+      if (number < 0 || number >= values.length) {
+        throw new IllegalArgumentException();
+      }
+      return values[number];
     }
   }
 
@@ -1222,6 +1230,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             return true;
           }
         });
+    gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode());
     gd.addMessage("2D options");
     gd.addChoice("Depth_mode", DEPTH_MODE, settings.getDepthMode(), new OptionListener<Integer>() {
       @Override
@@ -1274,6 +1283,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     settings.setSizeMode(gd.getNextChoiceIndex());
     settings.setSortMode(gd.getNextChoiceIndex());
     settings.setTransparencyMode(gd.getNextChoiceIndex());
+    settings.setColourMode(gd.getNextChoiceIndex());
     settings.setDepthMode(gd.getNextChoiceIndex());
     gd.collectOptions();
 
@@ -1974,23 +1984,24 @@ public class ImageJ3DResultsViewer implements PlugIn {
     highlightColor.set(colours.get(highlightColour.toLowerCase(Locale.US)));
   }
 
-  @SuppressWarnings("null")
   private static Color3f[] createColour(MemoryPeakResults results,
       ImageJ3DResultsViewerSettingsOrBuilder settings) {
-    // Colour by z
+    final ColourMode mode = ColourMode.forNumber(settings.getColourMode());
+    float[] rank;
+    switch (mode) {
+      case ID:
+        rank = createRankById(results);
+        break;
+      case DEPTH:
+      default:
+        rank = createRankByDepth(results);
+        break;
+    }
     final LUT lut = LutHelper.createLut(LutColour.forNumber(settings.getLut()), false);
 
-    StandardResultProcedure procedure = null;
-    float range = 0;
-    float[] limits = null;
-    if (results.is3D()) {
-      procedure = new StandardResultProcedure(results);
-      procedure.getZ();
-      limits = MathUtils.limits(procedure.z);
-      range = limits[1] - limits[0];
-    }
-
-    if (range == 0) {
+    final float[] limits = MathUtils.limits(rank);
+    final float range = limits[1] - limits[0];
+    if (!(range > 0)) {
       return new Color3f[] {new Color3f(new Color(lut.getRGB(255)))};
     }
 
@@ -2005,18 +2016,37 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final float minimum = limits[0];
     final Color3f[] allColors = new Color3f[results.size()];
     for (int i = 0, size = results.size(); i < size; i++) {
-      float value = procedure.z[i];
+      float value = rank[i];
       value = value - minimum;
       if (value < 0f) {
-        value = 0f;
+        allColors[i] = colors[0];
+      } else {
+        int ivalue = (int) ((value * scale) + 0.5f);
+        if (ivalue > 255) {
+          ivalue = 255;
+        }
+        allColors[i] = colors[ivalue];
       }
-      int ivalue = (int) ((value * scale) + 0.5f);
-      if (ivalue > 255) {
-        ivalue = 255;
-      }
-      allColors[i] = colors[ivalue];
     }
     return allColors;
+  }
+
+  private static float[] createRankById(MemoryPeakResults results) {
+    if (results.hasId()) {
+      final TFloatArrayList list = new TFloatArrayList(results.size());
+      results.forEach((PeakResultProcedure) r -> list.add(r.getId()));
+      return list.toArray();
+    }
+    return null;
+  }
+
+  private static float[] createRankByDepth(MemoryPeakResults results) {
+    if (results.is3D()) {
+      final StandardResultProcedure procedure = new StandardResultProcedure(results);
+      procedure.getZ();
+      return procedure.z;
+    }
+    return null;
   }
 
   private static void changeColour(ItemShape itemShape, MemoryPeakResults results,
@@ -2479,13 +2509,15 @@ public class ImageJ3DResultsViewer implements PlugIn {
         settings = SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
         final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
         // Transparency can be set interactively using: Edit > Change Transparency
-        // so not option here.
+        // so not an option here.
         gd.addChoice("Colour", LutHelper.getLutNames(), settings.getLut());
+        gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode());
         gd.showDialog();
         if (gd.wasCanceled()) {
           return -1;
         }
         settings.setLut(gd.getNextChoiceIndex());
+        settings.setColourMode(gd.getNextChoiceIndex());
         SettingsManager.writeSettings(settings);
       }
 
