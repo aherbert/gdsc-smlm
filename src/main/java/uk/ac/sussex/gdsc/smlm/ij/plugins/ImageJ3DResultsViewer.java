@@ -35,6 +35,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.Roi;
+import ij.macro.MacroRunner;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
 import ij3d.Content;
@@ -181,6 +182,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyzResultProcedure;
  */
 public class ImageJ3DResultsViewer implements PlugIn {
   private static final String TITLE = "ImageJ 3D Results Viewer";
+  private static final String HELP_KEY = "d-results-viewer";
   private static final int NO_ENTRY = -1;
 
   // To debug this from Eclipse relies on being able to find the native
@@ -205,9 +207,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
   // No need to store this in settings as when the plugin is first run there are no windows
   private static AtomicReference<String> lastWindow = new AtomicReference<>("");
 
+  // @formatter:off
   private static final Map<PeakResultsDigest,
       Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
-          new ConcurrentHashMap<>();
+      new ConcurrentHashMap<>();
+  // @formatter:on
 
   private static final AtomicReference<ResultsTableSettings> resultsTableSettings =
       new AtomicReference<>();
@@ -232,6 +236,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private JMenuItem toggleShaded;
   private JMenuItem updateSettings;
   private JMenuItem cropResults;
+  private JMenuItem showHelp;
   private JCheckBoxMenuItem toggleDynamicTransparency;
 
   /** A map between the name of the AWT colour and the colour as a SciJava colour. */
@@ -1267,7 +1272,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     });
 
-    gd.addHelp(HelpUrls.getUrl("d-results-viewer"));
+    addHelp(gd);
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
@@ -1468,6 +1473,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     IJ.showStatus("");
+  }
+
+  private static void addHelp(final ExtendedGenericDialog gd) {
+    gd.addHelp(HelpUrls.getUrl(HELP_KEY));
+  }
+
+  @SuppressWarnings("unused")
+  private static void showHelp() {
+    String macro = "run('URL...', 'url=" + HelpUrls.getUrl(HELP_KEY) + "');";
+    new MacroRunner(macro);
   }
 
   private static Point3f[] createSphereSize(MemoryPeakResults results, Builder settings) {
@@ -2464,6 +2479,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
     updateSettings.addActionListener(this::menuActionPerformed);
     menu.add(updateSettings);
 
+    showHelp = new JMenuItem("Help", KeyEvent.VK_H);
+    showHelp.addActionListener(this::menuActionPerformed);
+    menu.add(showHelp);
+
     menubar.add(menu);
     // Add back so it is redrawn
     univ.setMenubar(menubar);
@@ -3316,6 +3335,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             }
           });
       gd.addCheckbox("Update_existing_tables", localResultsTableSettings.getUpdateExistingTables());
+      addHelp(gd);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -3384,6 +3404,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
       action = UpdatePointSizeContentAction.DECREASE;
     } else if (src == cropResults) {
       action = new CropResultsAction();
+    } else if (src == showHelp) {
+      showHelp();
+      return;
     }
     if (action == null) {
       return;
