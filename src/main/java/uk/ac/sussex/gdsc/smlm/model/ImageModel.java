@@ -703,8 +703,7 @@ public abstract class ImageModel {
       // Create a random unit vector using 2/3 Gaussian variables
       axis = new double[3];
       double length = 0;
-      final NormalizedGaussianSampler gauss =
-          SamplerUtils.createNormalizedGaussianSampler(random);
+      final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
       // Check the vector has a length
       while (length == 0) {
         axis[0] = gauss.sample();

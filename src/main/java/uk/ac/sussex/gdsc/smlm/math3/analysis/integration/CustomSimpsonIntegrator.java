@@ -37,8 +37,8 @@ import org.apache.commons.math3.util.FastMath;
  *
  * <p>This implementation employs the basic trapezoid rule to calculate Simpson's rule.
  *
- * <p>Extends the default SimpsonIntegrator to allow the last computed sum to be returned even
- * upon failure.
+ * <p>Extends the default SimpsonIntegrator to allow the last computed sum to be returned even upon
+ * failure.
  *
  * @since 1.2
  */
@@ -59,12 +59,11 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    * @param minimalIterationCount minimum number of iterations
    * @param maximalIterationCount maximum number of iterations (must be less than or equal to
    *        {@link #SIMPSON_MAX_ITERATIONS_COUNT})
-   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly
-   *            positive
+   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly positive
    * @throws NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
-   *            the minimal number of iterations
+   *         the minimal number of iterations
    * @throws NumberIsTooLargeException if maximal number of iterations is greater than
-   *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
+   *         {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
   public CustomSimpsonIntegrator(final double relativeAccuracy, final double absoluteAccuracy,
       final int minimalIterationCount, final int maximalIterationCount) {
@@ -81,12 +80,11 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
    * @param minimalIterationCount minimum number of iterations
    * @param maximalIterationCount maximum number of iterations (must be less than or equal to
    *        {@link #SIMPSON_MAX_ITERATIONS_COUNT})
-   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly
-   *            positive
+   * @throws NotStrictlyPositiveException if minimal number of iterations is not strictly positive
    * @throws NumberIsTooSmallException if maximal number of iterations is lesser than or equal to
-   *            the minimal number of iterations
+   *         the minimal number of iterations
    * @throws NumberIsTooLargeException if maximal number of iterations is greater than
-   *            {@link #SIMPSON_MAX_ITERATIONS_COUNT}
+   *         {@link #SIMPSON_MAX_ITERATIONS_COUNT}
    */
   public CustomSimpsonIntegrator(final int minimalIterationCount, final int maximalIterationCount) {
     super(minimalIterationCount, maximalIterationCount);

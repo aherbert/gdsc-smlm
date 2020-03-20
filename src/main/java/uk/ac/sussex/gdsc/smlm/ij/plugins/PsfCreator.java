@@ -649,8 +649,7 @@ public class PsfCreator implements PlugInFilter {
       cz = (int) newZ[maximumIndex];
       csd = smoothSd[maximumIndex];
       ca = smoothA[maximumIndex + start];
-      ImageJUtils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f", n, cx, cy, cz, csd,
-          ca);
+      ImageJUtils.log("  Spot %d => x=%.2f, y=%.2f, z=%d, sd=%.2f, A=%.2f", n, cx, cy, cz, csd, ca);
       centres.add(new double[] {cx, cy, cz, csd, n});
     }
 

@@ -110,8 +110,7 @@ public class ConvertResults implements PlugIn {
     gd.addChoice("Intensity_unit", SettingsManager.getIntensityUnitNames(),
         cr.getIntensityUnitValue());
     gd.addNumericField("Gain (Count/photon)", cr.getCountPerPhoton(), 2);
-    gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(),
-        cr.getAngleUnitValue());
+    gd.addChoice("Angle_unit", SettingsManager.getAngleUnitNames(), cr.getAngleUnitValue());
 
     gd.showDialog();
     if (gd.wasCanceled()) {

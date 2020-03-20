@@ -309,7 +309,7 @@ public class DrawClusters implements PlugIn {
         final PolygonRoi roi = (PolygonRoi) rois[index];
         roi.setFillColor(c);
         roi.setStrokeColor(c);
-        //roi.setStrokeWidth(settings.lineWidth);
+        // roi.setStrokeWidth(settings.lineWidth);
         roi.updateWideLine(settings.lineWidth);
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
         // For each frame in the track, add the ROI track and a point ROI for the current position
@@ -327,7 +327,7 @@ public class DrawClusters implements PlugIn {
       for (int i = 0; i < count; i++) {
         final Roi roi = rois[indices[i]];
         roi.setStrokeColor(new Color(lut.getRGB((int) (i * scale))));
-        //roi.setStrokeWidth(settings.lineWidth);
+        // roi.setStrokeWidth(settings.lineWidth);
         roi.updateWideLine(settings.lineWidth);
         o.add(roi);
       }

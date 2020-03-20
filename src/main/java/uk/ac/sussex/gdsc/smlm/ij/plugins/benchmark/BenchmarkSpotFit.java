@@ -765,8 +765,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param spots the spots
      * @param maxCandidate the max candidate
      */
-    FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots,
-        int maxCandidate) {
+    FilterCandidates(int pos, int neg, double np, double nn, ScoredSpot[] spots, int maxCandidate) {
       this.pos = pos;
       this.neg = neg;
       this.np = np;

@@ -35,9 +35,9 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
  * Weighted Least Squares Estimation assuming a Poisson model with a Gaussian noise component. The
  * weight per observation is equal to 1/[variance + max(y, 0) + 1].
  *
- * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
- * cameras - characterisation of a computationally efficient localization approach. Optical Express
- * 25, Issue 10, pp 11701-11716.
+ * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras -
+ * characterisation of a computationally efficient localization approach. Optical Express 25, Issue
+ * 10, pp 11701-11716.
  */
 public class WPoissonGradientProcedure implements Gradient1Procedure {
   /** The weights. */
@@ -118,9 +118,9 @@ public class WPoissonGradientProcedure implements Gradient1Procedure {
    * <p>See Smith et al, (2010). Fast, single-molecule localisation that achieves theoretically
    * minimum uncertainty. Nature Methods 7, 373-375 (supplementary note), Eq. 9.
    *
-   * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS
-   * cameras - characterisation of a computationally efficient localization approach. Optical
-   * Express 25, Issue 10, pp 11701-11716.
+   * <p>See Lin, et al (2017) Algorithmic corrections for localization microscopy with sCMOS cameras
+   * - characterisation of a computationally efficient localization approach. Optical Express 25,
+   * Issue 10, pp 11701-11716.
    *
    * <p>A call to {@link #isNaNGradients()} will indicate if the gradients were invalid.
    *

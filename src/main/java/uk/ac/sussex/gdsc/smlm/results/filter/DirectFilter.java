@@ -54,7 +54,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
   }
 
   @Override
-  public int getFilterSetupFlags()  {
+  public int getFilterSetupFlags() {
     return 0;
   }
 

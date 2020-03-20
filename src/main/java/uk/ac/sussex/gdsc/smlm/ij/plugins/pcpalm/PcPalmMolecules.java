@@ -1178,8 +1178,7 @@ public class PcPalmMolecules implements PlugIn {
     final UniformRandomProvider rng = UniformRandomProviders.create();
     final UniformDistribution dist =
         new UniformDistribution(null, new double[] {width, width, 0}, rng.nextInt());
-    final NormalizedGaussianSampler gauss =
-        SamplerUtils.createNormalizedGaussianSampler(rng);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
 
     settings.molecules = new ArrayList<>(settings.numberOfMolecules);
     // Create some dummy results since the calibration is required for later analysis

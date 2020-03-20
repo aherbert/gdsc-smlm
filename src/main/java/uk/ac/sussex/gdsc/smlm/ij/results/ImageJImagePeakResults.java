@@ -122,10 +122,10 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
    *
    * <p>IDs are typically used to group localisations (e.g. clusters).
    *
-   * <p>Rendering assumes IDs are positive. The output value is {@code id + 1} allowing display
-   * of localisations not assigned an ID. Use of the max option ensures actual clusters are
-   * drawn in place of non-clustered items (ID=0). If clustering is hierarchical then assign
-   * higher cluster numbers to the centre of the cluster network.
+   * <p>Rendering assumes IDs are positive. The output value is {@code id + 1} allowing display of
+   * localisations not assigned an ID. Use of the max option ensures actual clusters are drawn in
+   * place of non-clustered items (ID=0). If clustering is hierarchical then assign higher cluster
+   * numbers to the centre of the cluster network.
    */
   public static final int DISPLAY_ID = 0x0800;
 
