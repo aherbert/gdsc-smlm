@@ -889,7 +889,7 @@ public abstract class CubicSplineFunctionTest {
   private void speedTest(int n, int order) {
     // No assertions, this is just a report
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
-    //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
+    // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final CubicSplineFunction cf = (n == 2) ? f2 : f1;
     Assumptions.assumeTrue(null != cf);

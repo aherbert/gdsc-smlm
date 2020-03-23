@@ -464,8 +464,7 @@ public class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x =
-        createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+    final int[] x = createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
 
     final double delta = 1e-3;
     final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);

@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverTest {
   enum SteppingFunctionSolverClamp {
     NO_CLAMP("x"), CLAMP("C"), DYNAMIC_CLAMP("DC");
+
     final String name;
 
     SteppingFunctionSolverClamp(String name) {

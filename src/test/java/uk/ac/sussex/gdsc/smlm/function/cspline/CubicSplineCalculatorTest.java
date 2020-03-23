@@ -89,7 +89,7 @@ public class CubicSplineCalculatorTest {
         new CustomTricubicInterpolator().interpolate(xval, yval, zval, fval);
 
     final double[] exp = new double[64];
-    f1.getSplineNode(1, 1,1).getCoefficients(exp);
+    f1.getSplineNode(1, 1, 1).getCoefficients(exp);
 
     final CustomTricubicFunction f = CustomTricubicFunctionUtils.create(exp);
     final CubicSplinePosition[] s = new CubicSplinePosition[4];

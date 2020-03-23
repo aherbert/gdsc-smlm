@@ -110,8 +110,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[MEDIUM],
-        toff[MEDIUM], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[MEDIUM], toff[MEDIUM],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -129,8 +129,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[MEDIUM],
-        toff[MEDIUM], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[MEDIUM], toff[MEDIUM],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -138,8 +138,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[HIGH],
-        toff[HIGH], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[LOW], ton[HIGH], toff[HIGH],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -147,8 +147,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[HIGH],
-        toff[HIGH], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[HIGH], toff[HIGH],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -156,8 +156,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[HIGH],
-        toff[HIGH], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[HIGH], ton[HIGH], toff[HIGH],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -174,8 +174,8 @@ public class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[LOW],
-        toff[LOW], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.getSeed()), blinkingRate[MEDIUM], ton[LOW], toff[LOW],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
