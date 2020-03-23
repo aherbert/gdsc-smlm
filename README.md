@@ -11,7 +11,7 @@ single molecule microscopy methods.
 [![Documentation Status](https://readthedocs.org/projects/gdsc-smlm/badge/?version=latest)](https://gdsc-smlm.readthedocs.io/en/latest/?badge=latest)
 
 
-Read the [SMLM User Manual](SMLM.odt) for full details.
+Read the [SMLM User Manual](https://gdsc-smlm.readthedocs.io/en/latest) for full details.
 
 The plugins provide tools to:
 
