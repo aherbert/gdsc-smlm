@@ -47,13 +47,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import uk.ac.sussex.gdsc.core.ags.utils.data.trees.gen2.IntResultHeap;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.trees.heaps.IntDoubleMinHeap;
 import uk.ac.sussex.gdsc.core.utils.BooleanArray;
 import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -1053,16 +1053,16 @@ public class FailCountManager implements PlugIn {
       for (byte b = 0; b <= maxType; b++) {
         int[] indices;
         // Use a heap to avoid a full sort
-        final IntResultHeap heap = new IntResultHeap(topN);
+        final IntDoubleMinHeap heap = new IntDoubleMinHeap(topN);
         for (int i = 0; i < score.length; i++) {
           if (types[i] == b) {
-            heap.addValue(score[i], i);
+            heap.offer(score[i], i);
           }
         }
         if (heap.getSize() == 0) {
           continue;
         }
-        indices = heap.getData();
+        indices = heap.getItems();
         // Ensure sorted
         SortUtils.sortIndices(indices, score, false);
 
