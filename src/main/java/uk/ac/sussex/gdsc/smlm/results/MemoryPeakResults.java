@@ -235,7 +235,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Sort the results.
+   * Sort the results. The sort order uses the frame in ascending order.
    */
   public void sort() {
     this.results.sort();
