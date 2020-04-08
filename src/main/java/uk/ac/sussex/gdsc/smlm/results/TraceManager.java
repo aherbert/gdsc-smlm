@@ -156,10 +156,6 @@ public class TraceManager {
    * @throws IllegalArgumentException if results are null or empty
    */
   public TraceManager(final MemoryPeakResults results) {
-    initialise(results);
-  }
-
-  private void initialise(final MemoryPeakResults results) {
     if (results == null || results.size() == 0) {
       throw new IllegalArgumentException("Results are null or empty");
     }
