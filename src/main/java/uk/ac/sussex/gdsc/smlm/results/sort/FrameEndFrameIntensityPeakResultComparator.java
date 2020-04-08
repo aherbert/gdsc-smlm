@@ -24,19 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.results.sort;
 
-import java.io.Serializable;
 import java.util.Comparator;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Compares the results by frame, end frame and then intensity descending.
  */
-public class FrameEndFrameIntensityPeakResultComparator
-    implements Comparator<PeakResult>, Serializable {
-  private static final long serialVersionUID = 1L;
+public enum FrameEndFrameIntensityPeakResultComparator implements Comparator<PeakResult> {
   /** An instance of the comparator. */
-  public static final FrameEndFrameIntensityPeakResultComparator INSTANCE =
-      new FrameEndFrameIntensityPeakResultComparator();
+  INSTANCE;
 
   @Override
   public int compare(PeakResult o1, PeakResult o2) {

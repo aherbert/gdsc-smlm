@@ -38,6 +38,19 @@ import java.util.List;
 public class ChromosomeComparator<T extends Comparable<T>>
     implements Comparator<Chromosome<T>>, Serializable {
   private static final long serialVersionUID = 1L;
+  /** An instance of the comparator. */
+  @SuppressWarnings("rawtypes")
+  private static final ChromosomeComparator INSTANCE = new ChromosomeComparator<>();
+
+  /**
+   * Returns an instance.
+   *
+   * @param <T> the generic type
+   * @return the chromosome comparator
+   */
+  public static final <T extends Comparable<T>> ChromosomeComparator<T> instance() {
+    return INSTANCE;
+  }
 
   @Override
   public int compare(Chromosome<T> chromosome1, Chromosome<T> chromosome2) {
@@ -51,7 +64,7 @@ public class ChromosomeComparator<T extends Comparable<T>>
    * @param list the list
    */
   public static <T extends Comparable<T>> void sort(List<? extends Chromosome<T>> list) {
-    Collections.sort(list, new ChromosomeComparator<T>());
+    Collections.sort(list, instance());
   }
 
   /**
@@ -74,6 +87,6 @@ public class ChromosomeComparator<T extends Comparable<T>>
    */
   public static <T extends Comparable<T>> void sort(Chromosome<T>[] list, int fromIndex,
       int toIndex) {
-    Arrays.sort(list, fromIndex, toIndex, new ChromosomeComparator<T>());
+    Arrays.sort(list, fromIndex, toIndex, instance());
   }
 }

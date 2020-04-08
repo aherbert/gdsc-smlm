@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -45,10 +44,9 @@ class CandidateList {
     boolean test(Candidate candidate);
   }
 
-  private static class CandidateComparator implements Comparator<Candidate>, Serializable {
-    private static final long serialVersionUID = 1L;
-    /** The candidate comparator. */
-    private static final CandidateComparator INSTANCE = new CandidateComparator();
+  private static enum CandidateComparator implements Comparator<Candidate> {
+    /** An instance of the comparator. */
+    INSTANCE;
 
     @Override
     public int compare(Candidate o1, Candidate o2) {

@@ -24,19 +24,14 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * Compares the {@link ResultAssignment} using the distance, lowest first.
  */
-public class ResultAssignmentDistanceComparator
-    implements Comparator<ResultAssignment>, Serializable {
-  private static final long serialVersionUID = 1L;
-
-  /** The instance. */
-  public static final ResultAssignmentDistanceComparator INSTANCE =
-      new ResultAssignmentDistanceComparator();
+public enum ResultAssignmentDistanceComparator implements Comparator<ResultAssignment> {
+  /** An instance of the comparator. */
+  INSTANCE;
 
   @Override
   public int compare(ResultAssignment o1, ResultAssignment o2) {

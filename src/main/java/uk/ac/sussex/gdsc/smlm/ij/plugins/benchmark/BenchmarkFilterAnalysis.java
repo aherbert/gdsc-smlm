@@ -51,7 +51,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1141,11 +1140,9 @@ public class BenchmarkFilterAnalysis
     }
   }
 
-  private static class FilterScoreCompararor
-      implements Comparator<ComplexFilterScore>, Serializable {
-    private static final long serialVersionUID = 1L;
-    /** The instance. */
-    static final FilterScoreCompararor INSTANCE = new FilterScoreCompararor();
+  private static enum FilterScoreCompararor implements Comparator<ComplexFilterScore> {
+    /** An instance of the comparator. */
+    INSTANCE;
 
     @Override
     public int compare(ComplexFilterScore o1, ComplexFilterScore o2) {

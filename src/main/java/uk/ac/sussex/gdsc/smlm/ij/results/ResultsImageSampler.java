@@ -32,7 +32,6 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
 import java.awt.Rectangle;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -128,9 +127,9 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class IndexComparator implements Comparator<ResultsSample>, Serializable {
-    private static final long serialVersionUID = 1L;
-    static final IndexComparator INSTANCE = new IndexComparator();
+  private static enum IndexComparator implements Comparator<ResultsSample>  {
+    /** An instance of the comparator. */
+    INSTANCE;
 
     @Override
     public int compare(ResultsSample o1, ResultsSample o2) {
@@ -138,9 +137,9 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class CountComparator implements Comparator<ResultsSample>, Serializable {
-    private static final long serialVersionUID = 1L;
-    static final CountComparator INSTANCE = new CountComparator();
+  private static enum  CountComparator implements Comparator<ResultsSample>  {
+    /** An instance of the comparator. */
+    INSTANCE;
 
     @Override
     public int compare(ResultsSample o1, ResultsSample o2) {
@@ -153,9 +152,9 @@ public class ResultsImageSampler {
     }
   }
 
-  private static class ReverseCountComparator implements Comparator<ResultsSample>, Serializable {
-    private static final long serialVersionUID = 1L;
-    static final ReverseCountComparator INSTANCE = new ReverseCountComparator();
+  private static enum ReverseCountComparator implements Comparator<ResultsSample> {
+    /** An instance of the comparator. */
+    INSTANCE;
 
     @Override
     public int compare(ResultsSample o1, ResultsSample o2) {
