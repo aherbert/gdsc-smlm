@@ -26,12 +26,12 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Predicate;
 import org.apache.commons.rng.UniformRandomProvider;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
@@ -93,32 +93,39 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   }
 
   /**
-   * Ensure that the specified number of elements can be added to the array.
+   * Increase the capacity to hold at least one more than the current capacity. This will reallocate
+   * a new array and should only be called when the capacity has been checked and is known to be too
+   * small.
    *
-   * <p>This is not synchronized. However any class using the safeAdd() methods in different threads
-   * should be using the same synchronized method to add data thus this method will be within
-   * synchronized code.
-   *
-   * @param length the length
+   * @return the new data array
    */
-  private void checkCapacity(int length) {
-    final int minCapacity = size + length;
-    final int oldCapacity = results.length;
-    if (minCapacity > oldCapacity) {
-      int newCapacity = (oldCapacity * 3) / 2 + 1;
-      if (newCapacity < minCapacity) {
-        newCapacity = minCapacity;
-      }
-      final PeakResult[] newResults = new PeakResult[newCapacity];
-      System.arraycopy(results, 0, newResults, 0, size);
-      results = newResults;
-    }
+  private PeakResult[] increaseCapacity() {
+    return results =
+        Arrays.copyOf(results, MemoryUtils.createNewCapacity(results.length + 1, results.length));
+  }
+
+  /**
+   * Increase the capacity to hold at least the minimum required capacity. This will reallocate a
+   * new array and should only be called when the capacity has been checked and is known to be too
+   * small.
+   *
+   * @param minCapacity the minimum required capacity
+   * @return the new results array
+   */
+  private PeakResult[] increaseCapacity(final int minCapacity) {
+    return results =
+        Arrays.copyOf(results, MemoryUtils.createNewCapacity(minCapacity, results.length));
   }
 
   @Override
   public boolean add(PeakResult result) {
-    checkCapacity(1);
-    results[size++] = result;
+    final int s = size;
+    PeakResult[] r = results;
+    if (s == r.length) {
+      r = increaseCapacity();
+    }
+    size = s + 1;
+    r[s] = result;
     return true;
   }
 
@@ -139,9 +146,15 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
     if (results == null || length == 0) {
       return false;
     }
-    checkCapacity(length);
-    System.arraycopy(results, 0, this.results, size, length);
-    size += length;
+    final int s = size;
+    PeakResult[] r = this.results;
+    // spare = r.length - size
+    if (length > r.length - s) {
+      r = increaseCapacity(s + length);
+    }
+    // Append
+    System.arraycopy(results, 0, r, s, length);
+    size = s + length;
     return true;
   }
 
@@ -230,7 +243,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
 
   @Override
   public boolean removeCollection(Collection<PeakResult> results) {
-    return removeArray(results.toArray(new PeakResult[results.size()]));
+    return removeIf(results::contains);
   }
 
   @Override
@@ -238,51 +251,17 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
     if (results == null || results.length == 0) {
       return false;
     }
-    return batchRemove(results, false);
+    return removeStore(new ArrayPeakResultStore(results));
   }
 
   @Override
   public boolean removeStore(PeakResultStore results) {
-    if (results instanceof ArrayPeakResultStore) {
-      return removeArray(((ArrayPeakResultStore) results).results);
-    }
-    return removeArray(results.toArray());
-  }
-
-  private boolean batchRemove(PeakResult[] results2, boolean complement) {
-    // Adapted from java.utils.ArrayList
-
-    final ArrayPeakResultStore c = new ArrayPeakResultStore(results2);
-    int index = 0;
-    int newSize = 0;
-    boolean modified = false;
-    try {
-      for (; index < size; index++) {
-        if (c.contains(results[index]) == complement) {
-          results[newSize++] = results[index];
-        }
-      }
-    } finally {
-      // Preserve data even if c.contains() throws.
-      if (index != size) {
-        System.arraycopy(results, index, results, newSize, size - index);
-        newSize += size - index;
-      }
-      if (newSize != size) {
-        // clear to let GC do its work
-        for (int i = newSize; i < size; i++) {
-          results[i] = null;
-        }
-        size = newSize;
-        modified = true;
-      }
-    }
-    return modified;
+    return removeIf(results::contains);
   }
 
   @Override
   public boolean retainCollection(Collection<PeakResult> results) {
-    return retainArray(results.toArray(new PeakResult[results.size()]));
+    return removeIf(e -> !results.contains(e));
   }
 
   @Override
@@ -292,15 +271,12 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
       clear();
       return result;
     }
-    return batchRemove(results, true);
+    return retainStore(new ArrayPeakResultStore(results));
   }
 
   @Override
   public boolean retainStore(PeakResultStore results) {
-    if (results instanceof ArrayPeakResultStore) {
-      return retainArray(((ArrayPeakResultStore) results).results);
-    }
-    return retainArray(results.toArray());
+    return removeIf(e -> !results.contains(e));
   }
 
   /**
@@ -353,43 +329,73 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   /**
    * {@inheritDoc}
    *
-   * <p>Note: This does not remove the references to the underlying data or reallocate storage thus
-   * {@link #get(int)} can return stale data.
+   * <p>Functions as if testing all items:
+   *
+   * <pre>
+   * int newSize = 0;
+   * for (int i = 0; i < size; i++) {
+   *   if (filter.test(data[i])) {
+   *     // remove
+   *     continue;
+   *   }
+   *   data[newSize++] = data[i];
+   * }
+   * size = newSize;
+   * </pre>
    */
   @Override
   public boolean removeIf(Predicate<PeakResult> filter) {
     Objects.requireNonNull(filter);
 
-    // Adapted from java.util.ArrayList (Java 1.8)
+    int index = 0;
+    final PeakResult[] elements = results;
+    final int length = size;
 
-    // figure out which elements are to be removed
-    // any exception thrown from the filter predicate at this stage
-    // will leave the collection unmodified
-    int removeCount = 0;
-    final int oldSize = this.size;
-    final BitSet removeSet = new BitSet(oldSize);
-    for (int i = 0; i < oldSize; i++) {
-      if (filter.test(results[i])) {
-        removeSet.set(i);
-        removeCount++;
+    // Find first item to filter.
+    for (; index < length; index++) {
+      if (filter.test(elements[index])) {
+        break;
       }
     }
-
-    // shift surviving elements left over the spaces left by removed elements
-    final boolean anyToRemove = removeCount > 0;
-    if (anyToRemove) {
-      final int newSize = oldSize - removeCount;
-      for (int i = 0, j = 0; (i < oldSize) && (j < newSize); i++, j++) {
-        i = removeSet.nextClearBit(i);
-        results[j] = results[i];
-      }
-      for (int k = newSize; k < oldSize; k++) {
-        results[k] = null; // Let gc do its work
-      }
-      this.size = newSize;
+    if (index == length) {
+      // Nothing to remove
+      return false;
     }
 
-    return anyToRemove;
+    // The list has changed.
+    // Do a single sweep across the remaining data copying elements if they are not filtered.
+    // Note: The filter may throw and leave the list without a new size.
+    // (E.g. is the filter is a collection that does not allow null).
+    // So we set the new size in a finally block.
+    int newSize = index;
+    try {
+      // We know the current index is identified by the filter so advance 1
+      index++;
+
+      // Scan the rest
+      for (; index < length; index++) {
+        final PeakResult e = elements[index];
+        if (filter.test(e)) {
+          continue;
+        }
+        elements[newSize++] = e;
+      }
+    } finally {
+      // Ensure the length is correct
+      if (index != length) {
+        // Did not get to the end of the list (e.g. the filter may throw) so copy it verbatim.
+        final int len = length - index;
+        System.arraycopy(elements, index, elements, newSize, len);
+        newSize += len;
+      }
+      // Clear old references
+      for (int i = newSize; i < length; i++) {
+        elements[i] = null;
+      }
+      size = newSize;
+    }
+    // The list was modified
+    return true;
   }
 
   @Override
@@ -402,9 +408,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   @Override
   public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-    for (int i = 0; i < size; i++) {
-      if (filter.test(results[i])) {
-        list.add(results[i]);
+    final PeakResult[] r = results;
+    final int length = size;
+    for (int i = 0; i < length; i++) {
+      if (filter.test(r[i])) {
+        list.add(r[i]);
       }
     }
     return list.toArray();
@@ -413,25 +421,28 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
     // Fisher-Yates shuffle
+    final PeakResult[] r = results;
     for (int i = size; i-- > 1;) {
       final int j = randomSource.nextInt(i + 1);
-      final PeakResult tmp = results[i];
-      results[i] = results[j];
-      results[j] = tmp;
+      final PeakResult tmp = r[i];
+      r[i] = r[j];
+      r[j] = tmp;
     }
   }
 
   @Override
   public int indexOf(PeakResult result) {
+    final PeakResult[] r = results;
+    final int length = size;
     if (result == null) {
-      for (int i = 0; i < size; i++) {
-        if (results[i] == null) {
+      for (int i = 0; i < length; i++) {
+        if (r[i] == null) {
           return i;
         }
       }
     } else {
-      for (int i = 0; i < size; i++) {
-        if (result.equals(results[i])) {
+      for (int i = 0; i < length; i++) {
+        if (result.equals(r[i])) {
           return i;
         }
       }
@@ -441,15 +452,17 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
 
   @Override
   public int lastIndexOf(PeakResult result) {
+    final PeakResult[] r = results;
+    final int length = size;
     if (result == null) {
-      for (int i = size; i-- > 0;) {
-        if (results[i] == null) {
+      for (int i = length; i-- > 0;) {
+        if (r[i] == null) {
           return i;
         }
       }
     } else {
-      for (int i = size; i-- > 0;) {
-        if (result.equals(results[i])) {
+      for (int i = length; i-- > 0;) {
+        if (result.equals(r[i])) {
           return i;
         }
       }
