@@ -44,14 +44,16 @@ public class Cluster {
   }
 
   /** The results. */
-  protected PeakResultStoreList results = new ArrayPeakResultStore(2);
+  protected PeakResultStoreList results;
   private float[] centroid;
   private int id;
 
   /**
    * Instantiates a new cluster.
    */
-  public Cluster() {}
+  public Cluster() {
+    results = new ArrayPeakResultStore(2);
+  }
 
   /**
    * Instantiates a new cluster.
@@ -59,7 +61,17 @@ public class Cluster {
    * @param result the result
    */
   public Cluster(PeakResult result) {
+    results = new ArrayPeakResultStore(2);
     add(result);
+  }
+
+  /**
+   * Instantiates a new cluster.
+   *
+   * @param results the results
+   */
+  public Cluster(PeakResultStore results) {
+    this.results = new ArrayPeakResultStore(results.toArray());
   }
 
   /**

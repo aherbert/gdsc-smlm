@@ -50,6 +50,15 @@ public class Trace extends Cluster {
     super(peakResult);
   }
 
+  /**
+   * Instantiates a new trace.
+   *
+   * @param results the results
+   */
+  public Trace(PeakResultStore results) {
+    super(results);
+  }
+
   @Override
   public void add(PeakResult result) {
     super.add(result);
