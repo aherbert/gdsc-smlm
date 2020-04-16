@@ -304,9 +304,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
 
   @Override
   public PeakResult[] toArray() {
-    final PeakResult[] array = new PeakResult[size];
-    System.arraycopy(results, 0, array, 0, size);
-    return array;
+    return Arrays.copyOf(results, size);
   }
 
   @Override
