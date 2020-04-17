@@ -239,8 +239,8 @@ message ClusteringSettings {
   double disappearanceDecayFactor = 40;
   // The disappearance threshold.
   int32 disappearanceThreshold = 41;
-  // The mode for the trace analysis
-  int32 trace_mode = 42;
+  // The mode for the trace diffusion analysis
+  int32 trace_diffusion_mode = 42;
 }
 
 // Contains the settings for the events in the OPTICS GUI

@@ -29,6 +29,7 @@ import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import java.awt.Color;
+import java.awt.TextField;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -57,6 +59,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -76,6 +79,8 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
+import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing.DmttConfiguration;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -97,6 +102,10 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   // Used for the multiMode option
   private static AtomicReference<List<String>> selectedRef = new AtomicReference<>();
+
+  /** The names for the different tracing modes. */
+  private static final String[] TRACE_MODE =
+      {"Nearest neighbour", "Dynamic Multiple Target Tracing"};
 
   private boolean directoryChosen;
   private ClusteringSettings.Builder clusteringSettings;
@@ -127,8 +136,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "t-On (s)"};
-    static final boolean[] ROUNDED = new boolean[] {false, false, true};
+    static final String[] NAMES = {"Total Signal", "Signal/Frame", "t-On (s)"};
+    static final boolean[] ROUNDED = {false, false, true};
     static final int TOTAL_SIGNAL = 0;
     static final int SIGNAL_PER_FRAME = 1;
     static final int T_ON = 2;
@@ -344,32 +353,30 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         final double[] sumTime = new double[sumDistance.length];
 
         // Do the distances to the origin (saving if necessary)
-        {
-          final float x = results.get(0).getXPosition();
-          final float y = results.get(0).getYPosition();
-          if (distances != null) {
-            final double[] msd = new double[traceLength - 1];
-            for (int j = 1; j < traceLength; j++) {
-              final int t = j;
-              final double d = distance2(x, y, results.get(j));
-              msd[j - 1] = px2ToUm2 * d;
-              if (t == jumpDistanceInterval) {
-                jumpDistances.add(msd[j - 1]);
-              }
-              sumDistance[t] += d;
-              sumTime[t] += t;
+        final float x0 = results.get(0).getXPosition();
+        final float y0 = results.get(0).getYPosition();
+        if (distances != null) {
+          final double[] msd = new double[traceLength - 1];
+          for (int j = 1; j < traceLength; j++) {
+            final int t = j;
+            final double d = distance2(x0, y0, results.get(j));
+            msd[j - 1] = px2ToUm2 * d;
+            if (t == jumpDistanceInterval) {
+              jumpDistances.add(msd[j - 1]);
             }
-            distances.add(msd);
-          } else {
-            for (int j = 1; j < traceLength; j++) {
-              final int t = j;
-              final double d = distance2(x, y, results.get(j));
-              if (t == jumpDistanceInterval) {
-                jumpDistances.add(px2ToUm2 * d);
-              }
-              sumDistance[t] += d;
-              sumTime[t] += t;
+            sumDistance[t] += d;
+            sumTime[t] += t;
+          }
+          distances.add(msd);
+        } else {
+          for (int j = 1; j < traceLength; j++) {
+            final int t = j;
+            final double d = distance2(x0, y0, results.get(j));
+            if (t == jumpDistanceInterval) {
+              jumpDistances.add(px2ToUm2 * d);
             }
+            sumDistance[t] += d;
+            sumTime[t] += t;
           }
         }
 
@@ -556,7 +563,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * Calculate the average precision of localisation in the traces.
    *
    * @param traces the traces
-   * @param multi the multi
+   * @param multi true if the traces were from multiple input results
    */
   private void calculatePrecision(Trace[] traces, boolean multi) {
     // Check the diffusion simulation for a precision
@@ -755,7 +762,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   }
 
   /**
-   * Filter traces that are not the minimum length.
+   * Filter traces that are not the minimum length. Re-assigns the ID for the output traces.
    *
    * @param name the name
    * @param traces the traces
@@ -768,11 +775,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final int minLength = (ignoreEnds) ? minimumTraceLength + 2 : minimumTraceLength;
     int count = 0;
     for (int i = 0; i < traces.length; i++) {
-      if (traces[i].size() >= minLength) {
+      final Trace t = traces[i];
+      if (t.size() >= minLength) {
         if (ignoreEnds) {
-          traces[i].removeEnds();
+          t.removeEnds();
         }
-        traces[count++] = traces[i];
+        traces[count++] = t;
+        t.setId(count);
       }
     }
 
@@ -807,8 +816,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     sb.append('\t').append(createCombinedName());
     sb.append('\t');
     sb.append(MathUtils.rounded(exposureTime * 1000, 3)).append('\t');
-    sb.append(MathUtils.rounded(clusteringSettings.getDistanceThreshold(), 3)).append('\t');
-    sb.append(MathUtils.rounded(clusteringSettings.getDistanceExclusion(), 3)).append('\t');
+    appendClusteringSettings(sb).append('\t');
     sb.append(clusteringSettings.getMinimumTraceLength()).append('\t');
     sb.append(clusteringSettings.getIgnoreEnds()).append('\t');
     sb.append(clusteringSettings.getTruncate()).append('\t');
@@ -863,6 +871,28 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     IJ.showStatus("Finished " + TITLE);
   }
 
+  private StringBuilder appendClusteringSettings(StringBuilder sb) {
+    if (clusteringSettings.getTraceDiffusionMode() == 1) {
+      sb.append("Dynamic MTT : D=")
+          .append(MathUtils.rounded(clusteringSettings.getDiffusionCoefficentMaximum(), 3))
+          .append("um^2/s, window=").append(clusteringSettings.getTemporalWindow())
+          .append(", wLocal=")
+          .append(MathUtils.rounded(clusteringSettings.getLocalDiffusionWeight(), 2))
+          .append(", wOn=").append(MathUtils.rounded(clusteringSettings.getOnIntensityWeight(), 2))
+          .append(", decay=")
+          .append(MathUtils.rounded(clusteringSettings.getDisappearanceDecayFactor(), 2))
+          .append(", disappear=").append(clusteringSettings.getDisappearanceThreshold());
+    } else {
+      sb.append("Nearest Neighbour : ")
+          .append(MathUtils.rounded(clusteringSettings.getDistanceThreshold(), 3)).append("nm");
+      if (clusteringSettings.getDistanceExclusion() > clusteringSettings.getDistanceThreshold()) {
+        sb.append(" (ex. ").append(MathUtils.rounded(clusteringSettings.getDistanceExclusion(), 3))
+            .append("nm)");
+      }
+    }
+    return sb;
+  }
+
   private static String format(double[] jumpD) {
     if (jumpD == null || jumpD.length == 0) {
       return "";
@@ -891,8 +921,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
   private static String createHeader() {
     final StringBuilder sb =
-        new StringBuilder("Title\tDataset\tExposure time (ms)\tD-threshold (nm)");
-    sb.append("\tEx-threshold (nm)\t");
+        new StringBuilder("Title\tDataset\tExposure time (ms)\tTrace settings\t");
     sb.append("Min.Length\tIgnoreEnds\tTruncate\tInternal\tFit Length");
     sb.append("\tMSD corr.\ts corr.\tMLE\tTraces\ts (nm)\tD (um^2/s)\tfit s (nm)");
     sb.append("\tJump Distance (s)\tN\tBeta\tJump D (um^2/s)\tFractions\tFit Score");
@@ -912,8 +941,79 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     clusteringSettings = SettingsManager.readClusteringSettings(0).toBuilder();
 
-    gd.addNumericField("Distance_Threshold (nm)", clusteringSettings.getDistanceThreshold(), 0);
-    gd.addNumericField("Distance_Exclusion (nm)", clusteringSettings.getDistanceExclusion(), 0);
+    gd.addChoice("Mode", TRACE_MODE, clusteringSettings.getTraceDiffusionMode(),
+        new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            clusteringSettings.setTraceDiffusionMode(value);
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog("Trace diffusion options", null);
+            // Only 2 modes
+            if (clusteringSettings.getTraceDiffusionMode() == 1) {
+              // Dynamic Multiple Target Tracing
+              final TextField tfD = egd.addAndGetNumericField("Diffusion_coefficient",
+                  clusteringSettings.getDiffusionCoefficentMaximum(), 3, 6, "um^2/s");
+              final TextField tfW = egd.addAndGetNumericField("Temporal_window",
+                  clusteringSettings.getTemporalWindow(), 0);
+              final TextField tfLdw = egd.addAndGetNumericField("Local_diffusion_weight",
+                  clusteringSettings.getLocalDiffusionWeight(), 2);
+              final TextField tfOiw = egd.addAndGetNumericField("On_intensity_weight",
+                  clusteringSettings.getOnIntensityWeight(), 2);
+              final TextField tfDdf = egd.addAndGetNumericField("Disappearance_decay_factor",
+                  clusteringSettings.getDisappearanceDecayFactor(), 0, 6, "frames");
+              final TextField tfDt = egd.addAndGetNumericField("Disappearance_threshold",
+                  clusteringSettings.getDisappearanceThreshold(), 0, 6, "frames");
+
+              // Allow reset to defaults
+              egd.addAndGetButton("Defaults", e -> {
+                final DmttConfiguration config = DmttConfiguration.newBuilder(1).build();
+                tfD.setText(String.valueOf(clusteringSettings.getDiffusionCoefficentMaximum()));
+                tfW.setText(String.valueOf(config.getTemporalWindow()));
+                tfLdw.setText(String.valueOf(config.getLocalDiffusionWeight()));
+                tfOiw.setText(String.valueOf(config.getOnIntensityWeight()));
+                tfDdf.setText(String.valueOf(config.getDisappearanceDecayFactor()));
+                tfDt.setText(String.valueOf(config.getDisappearanceThreshold()));
+              });
+            } else {
+              // Nearest Neighbour
+              egd.addNumericField("Distance_Threshold (nm)",
+                  clusteringSettings.getDistanceThreshold(), 0);
+              egd.addNumericField("Distance_Exclusion (nm)",
+                  clusteringSettings.getDistanceExclusion(), 0);
+            }
+
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+
+            if (clusteringSettings.getTraceDiffusionMode() == 1) {
+              // Dynamic Multiple Target Tracing
+              clusteringSettings.setDiffusionCoefficentMaximum(egd.getNextNumber());
+              clusteringSettings.setTemporalWindow((int) egd.getNextNumber());
+              clusteringSettings.setLocalDiffusionWeight(egd.getNextNumber());
+              clusteringSettings.setOnIntensityWeight(egd.getNextNumber());
+              clusteringSettings.setDisappearanceDecayFactor(egd.getNextNumber());
+              clusteringSettings.setDisappearanceThreshold((int) egd.getNextNumber());
+            } else {
+              // Nearest Neighbour
+              clusteringSettings.setDistanceThreshold(egd.getNextNumber());
+              clusteringSettings.setDistanceExclusion(Math.abs(egd.getNextNumber()));
+            }
+            return true;
+          }
+        });
+
     gd.addSlider("Min_trace_length", 2, 20, clusteringSettings.getMinimumTraceLength());
     gd.addCheckbox("Ignore_ends", clusteringSettings.getIgnoreEnds());
     gd.addCheckbox("Save_traces", clusteringSettings.getSaveTraces());
@@ -981,11 +1081,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (!multiMode) {
       settings.inputOption = ResultsManager.getInputSource(gd);
     }
-    clusteringSettings.setDistanceThreshold(gd.getNextNumber());
-    clusteringSettings.setDistanceExclusion(Math.abs(gd.getNextNumber()));
     clusteringSettings.setMinimumTraceLength((int) Math.abs(gd.getNextNumber()));
     clusteringSettings.setIgnoreEnds(gd.getNextBoolean());
     clusteringSettings.setSaveTraces(gd.getNextBoolean());
+
+    gd.collectOptions();
 
     if (gd.invalidNumber()) {
       return false;
@@ -993,7 +1093,12 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Distance threshold", clusteringSettings.getDistanceThreshold());
+      if (clusteringSettings.getTraceDiffusionMode() == 1) {
+        // Validate using the Builder
+        createDmttConfiguration();
+      } else {
+        ParameterUtils.isAboveZero("Distance threshold", clusteringSettings.getDistanceThreshold());
+      }
       ParameterUtils.isAbove("Min trace length", clusteringSettings.getMinimumTraceLength(), 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -1003,38 +1108,41 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     return true;
   }
 
+  /**
+   * Creates the DMTT configuration from the clustering settings.
+   *
+   * @return the DMTTconfiguration
+   */
+  private DmttConfiguration createDmttConfiguration() {
+    return DmttConfiguration.newBuilder(clusteringSettings.getDiffusionCoefficentMaximum())
+        .setTemporalWindow(clusteringSettings.getTemporalWindow())
+        .setLocalDiffusionWeight(clusteringSettings.getLocalDiffusionWeight())
+        .setOnIntensityWeight(clusteringSettings.getOnIntensityWeight())
+        .setDisappearanceDecayFactor(clusteringSettings.getDisappearanceDecayFactor())
+        .setDisappearanceThreshold(clusteringSettings.getDisappearanceThreshold()).build();
+  }
+
   private Trace[] getTraces(ArrayList<MemoryPeakResults> allResults) {
     this.results = allResults.get(0);
 
     // Results should be checked for calibration by this point
     exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
 
-    // Convert from NM to the native units of the results
-    final Converter c =
-        CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
-    final double distanceThreshold = c.convertBack(clusteringSettings.getDistanceThreshold());
-    final double distanceExclusion = c.convertBack(clusteringSettings.getDistanceExclusion());
+    final Function<MemoryPeakResults, Trace[]> traceFunction = createTraceFunction();
 
     final ArrayList<Trace> allTraces = new ArrayList<>();
     additionalDatasets = -1;
     for (final MemoryPeakResults r : allResults) {
       additionalDatasets++;
 
-      final TraceManager manager = new TraceManager(r);
-
-      // Run the tracing
-      manager.setTracker(SimpleImageJTrackProgress.getInstance());
-      // convert from
-      manager.setDistanceExclusion(distanceExclusion);
-      manager.traceMolecules(distanceThreshold, 1);
-      Trace[] traces = manager.getTraces();
+      Trace[] traces = traceFunction.apply(r);
 
       traces = filterTraces(r.getName(), traces, clusteringSettings.getMinimumTraceLength(),
           clusteringSettings.getIgnoreEnds());
       allTraces.addAll(Arrays.asList(traces));
 
       // --- Save results ---
-      if (traces.length > 0) {
+      if (traces.length != 0) {
         // Save the traces to memory
         TraceMolecules.saveResults(r, traces, "Tracks");
 
@@ -1052,9 +1160,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       }
     }
 
-    final Trace[] all = allTraces.toArray(new Trace[allTraces.size()]);
+    final Trace[] all = allTraces.toArray(new Trace[0]);
 
-    if (additionalDatasets > 0) {
+    if (additionalDatasets != 0) {
       ImageJUtils.log("Multiple inputs provide %d traces", allTraces.size());
 
       final MemoryPeakResults tracedResults =
@@ -1065,6 +1173,36 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
 
     return all;
+  }
+
+  /**
+   * Creates the trace function for the configured trace diffusion mode.
+   *
+   * @return the function
+   */
+  private Function<MemoryPeakResults, Trace[]> createTraceFunction() {
+    if (clusteringSettings.getTraceDiffusionMode() == 1) {
+      DmttConfiguration config = createDmttConfiguration();
+      return r -> new DynamicMultipleTargetTracing(r).traceMolecules(config).toArray(new Trace[0]);
+    }
+
+    // Nearest neighbour
+
+    // Convert from NM to the native units of the results
+    final Converter c =
+        CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
+    final double distanceThreshold = c.convertBack(clusteringSettings.getDistanceThreshold());
+    final double distanceExclusion = c.convertBack(clusteringSettings.getDistanceExclusion());
+
+    return r -> {
+      final TraceManager manager = new TraceManager(r);
+
+      // Run the tracing
+      manager.setTracker(SimpleImageJTrackProgress.getInstance());
+      manager.setDistanceExclusion(distanceExclusion);
+      manager.traceMolecules(distanceThreshold, 1);
+      return manager.getTraces();
+    };
   }
 
   private String createCombinedName() {
@@ -1418,29 +1556,37 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       plot.drawLine(0, intercept, x[x.length - 1], 4 * diffCoeff * x[x.length - 1] + intercept);
       display(title, plot);
 
-      checkTraceDistance(diffCoeff);
+      checkTraceSettings(diffCoeff);
     }
 
     return new double[] {diffCoeff, precision};
   }
 
   /**
-   * Check the distance used for tracing covers enough of the cumulative mean-squared distance
-   * distribution.
+   * Check the tracing settings. For nearest neighbour tracing this checks the distance used for
+   * tracing covers enough of the cumulative mean-squared distance distribution.
    *
-   * @param distance the distance
+   * @param d the diffusion coefficient (um^2/s)
    */
-  private void checkTraceDistance(double distance) {
-    final double t = exposureTime;
-    // Cumul P(r^2) = 1 - exp(-r^2 / 4dt)
-    final double r = clusteringSettings.getDistanceThreshold() / 1000;
-    final double msd = 4 * distance * t;
-    final double p = 1 - FastMath.exp(-r * r / msd);
-    ImageJUtils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
-        clusteringSettings.getDistanceThreshold(), MathUtils.rounded(distance),
-        MathUtils.rounded(p));
-    if (p < 0.95) {
-      ImageJUtils.log("WARNING *** The tracing distance may not be large enough! ***");
+  private void checkTraceSettings(double d) {
+    if (clusteringSettings.getTraceDiffusionMode() == 1) {
+      final double dMax = clusteringSettings.getDiffusionCoefficentMaximum();
+      ImageJUtils.log("Checking trace settings: Dmax = %s um^s/s, D = %s um^2/s",
+          MathUtils.rounded(dMax), MathUtils.rounded(d));
+      if (d > dMax * 2) {
+        ImageJUtils.log("WARNING *** The diffusion coefficient may not be large enough! ***");
+      }
+    } else {
+      final double t = exposureTime;
+      // Cumul P(r^2) = 1 - exp(-r^2 / 4dt)
+      final double r = clusteringSettings.getDistanceThreshold() / 1000;
+      final double msd = 4 * d * t;
+      final double p = 1 - FastMath.exp(-r * r / msd);
+      ImageJUtils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
+          clusteringSettings.getDistanceThreshold(), MathUtils.rounded(d), MathUtils.rounded(p));
+      if (p < 0.95) {
+        ImageJUtils.log("WARNING *** The tracing distance may not be large enough! ***");
+      }
     }
   }
 
@@ -1742,7 +1888,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (fit != null) {
       fit[0] = jd.calculateApparentDiffusionCoefficient(fit[0]);
       // Check the largest D
-      checkTraceDistance(fit[0][0]);
+      checkTraceSettings(fit[0][0]);
       fitValue = jd.getLastFitValue();
     }
 
