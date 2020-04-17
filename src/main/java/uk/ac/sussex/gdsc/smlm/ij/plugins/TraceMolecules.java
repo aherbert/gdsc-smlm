@@ -497,7 +497,7 @@ public class TraceMolecules implements PlugIn {
         result.add(t);
       }
     }
-    return result.toArray(new Trace[result.size()]);
+    return result.toArray(new Trace[0]);
   }
 
   private static Trace[] getTraces(Trace[] traces) {
@@ -507,7 +507,7 @@ public class TraceMolecules implements PlugIn {
         result.add(t);
       }
     }
-    return result.toArray(new Trace[result.size()]);
+    return result.toArray(new Trace[0]);
   }
 
   private void saveTraces(Trace[] traces) {
