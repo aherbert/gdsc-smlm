@@ -1081,6 +1081,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (!multiMode) {
       settings.inputOption = ResultsManager.getInputSource(gd);
     }
+    clusteringSettings.setTraceDiffusionMode(gd.getNextChoiceIndex());
     clusteringSettings.setMinimumTraceLength((int) Math.abs(gd.getNextNumber()));
     clusteringSettings.setIgnoreEnds(gd.getNextBoolean());
     clusteringSettings.setSaveTraces(gd.getNextBoolean());
