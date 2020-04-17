@@ -227,6 +227,20 @@ message ClusteringSettings {
   int32 fit_length = 33;
   int32 fit_restarts = 34;
   int32 jump_distance = 35;
+  // The temporal window.
+  int32 temporalWindow = 36;
+  // The local diffusion weight.
+  double localDiffusionWeight = 37;
+  // The diffusion coefficient maximum.
+  double diffusionCoefficentMaximum = 38;
+  // The on intensity weight.
+  double onIntensityWeight = 39;
+  // The disappearance decay factor.
+  double disappearanceDecayFactor = 40;
+  // The disappearance threshold.
+  int32 disappearanceThreshold = 41;
+  // The mode for the trace analysis
+  int32 trace_mode = 42;
 }
 
 // Contains the settings for the events in the OPTICS GUI

@@ -61,6 +61,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.OpticsMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.OutlineMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.PlotMode;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.Optics.SpanningTreeMode;
+import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager.TraceMode;
 
 /**
@@ -195,6 +196,14 @@ public final class GuiProtosHelper {
     builder.setFitLength(6);
     builder.setFitRestarts(1);
     builder.setJumpDistance(1);
+    // DynamicMultipleTargetTracing
+    final DynamicMultipleTargetTracing.DmttConfiguration config =
+        DynamicMultipleTargetTracing.DmttConfiguration.newBuilder(1).build();
+    builder.setTemporalWindow(config.getTemporalWindow());
+    builder.setLocalDiffusionWeight(config.getLocalDiffusionWeight());
+    builder.setOnIntensityWeight(config.getLocalDiffusionWeight());
+    builder.setDisappearanceDecayFactor(config.getDisappearanceDecayFactor());
+    builder.setDisappearanceThreshold(config.getDisappearanceThreshold());
     defaultClusteringSettings = builder.build();
   }
 
