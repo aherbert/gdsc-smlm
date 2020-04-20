@@ -241,6 +241,8 @@ message ClusteringSettings {
   int32 disappearanceThreshold = 41;
   // The mode for the trace diffusion analysis
   int32 trace_diffusion_mode = 42;
+  // Flag to disable the intensity model
+  bool disable_intensity_model = 43;
 }
 
 // Contains the settings for the events in the OPTICS GUI

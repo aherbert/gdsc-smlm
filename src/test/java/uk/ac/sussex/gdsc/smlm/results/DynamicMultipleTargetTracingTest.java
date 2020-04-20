@@ -62,6 +62,7 @@ public class DynamicMultipleTargetTracingTest {
       Assertions.assertTrue(config.getOnIntensityWeight() <= 1);
       Assertions.assertTrue(config.getDisappearanceDecayFactor() > 0);
       Assertions.assertTrue(config.getDisappearanceThreshold() > 0);
+      Assertions.assertFalse(config.isDisableIntensityModel());
     }
   }
 
@@ -74,6 +75,7 @@ public class DynamicMultipleTargetTracingTest {
     final double onIntensityWeight = rng.nextDouble();
     final double disappearanceDecayFactor = 1 + rng.nextDouble();
     final int disappearanceThreshold = 1 + rng.nextInt(10);
+    final boolean disableIntensityModel = rng.nextBoolean();
 
     final DmttConfiguration.Builder b = DmttConfiguration.newBuilder(45);
 
@@ -82,7 +84,8 @@ public class DynamicMultipleTargetTracingTest {
             .setDiffusionCoefficientMaximum(diffusionCoefficientMaximum)
             .setOnIntensityWeight(onIntensityWeight)
             .setDisappearanceDecayFactor(disappearanceDecayFactor)
-            .setDisappearanceThreshold(disappearanceThreshold).build();
+            .setDisappearanceThreshold(disappearanceThreshold)
+            .setDisableIntensityModel(disableIntensityModel).build();
 
     // Check round-trip
     for (final DmttConfiguration config : new DmttConfiguration[] {c1, c1.toBuilder().build()}) {
@@ -92,6 +95,7 @@ public class DynamicMultipleTargetTracingTest {
       Assertions.assertEquals(onIntensityWeight, config.getOnIntensityWeight());
       Assertions.assertEquals(disappearanceDecayFactor, config.getDisappearanceDecayFactor());
       Assertions.assertEquals(disappearanceThreshold, config.getDisappearanceThreshold());
+      Assertions.assertEquals(disableIntensityModel, config.isDisableIntensityModel());
     }
   }
 
@@ -142,11 +146,6 @@ public class DynamicMultipleTargetTracingTest {
 
     writer.setExposureTime(50);
     results.setCalibration(writer.getCalibration());
-    Assertions.assertThrows(IllegalArgumentException.class,
-        () -> new DynamicMultipleTargetTracing(results), "No standard deviation of intensity");
-
-    // Ensure a mean and standard deviation
-    results.add(new PeakResult(frame++, x, y, intensity + 1));
 
     // Should be OK
     new DynamicMultipleTargetTracing(results)
@@ -212,6 +211,52 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
+  public void testTrajectoryWithNoOnFrames() {
+    final PeakResult p1 = new PeakResult(0, 1, 2);
+    final PeakResult p2 = new PeakResult(1, 2, 3);
+    final PeakResult p3 = new PeakResult(2, 3, 4);
+    final PeakResult p4 = new PeakResult(3, 4, 5);
+    final Trajectory t = new Trajectory(42, p1);
+    Assertions.assertEquals(42, t.getId());
+    Assertions.assertSame(p1, t.getLast(-1));
+    Assertions.assertEquals(1, t.size());
+    Assertions.assertThrows(NullPointerException.class, () -> t.onSize());
+    t.add(p2);
+    t.add(p3);
+    t.add(p4);
+    Assertions.assertSame(p4, t.getLast(-1));
+    Assertions.assertSame(p3, t.getLast(-2));
+    Assertions.assertSame(p2, t.getLast(-3));
+    Assertions.assertSame(p1, t.getLast(-4));
+    Assertions.assertEquals(4, t.size());
+    final LocalList<PeakResult> list = new LocalList<>();
+    t.forLast(2, list::add);
+    Assertions.assertEquals(2, list.size());
+    Assertions.assertSame(p3, list.pop());
+    Assertions.assertSame(p4, list.pop());
+    final Trace trace = t.toTrace();
+    Assertions.assertEquals(4, trace.size());
+    Assertions.assertEquals(42, trace.getId());
+
+    // Test setting the gap
+    final int frame = t.getLast(-1).getFrame();
+    for (int i = 1; i <= 3; i++) {
+      t.reset(frame + i);
+      Assertions.assertEquals(i - 1, t.gap);
+    }
+
+    // Test setting the local statistics
+    Assertions.assertFalse(t.isLocalIntensity);
+
+    t.setLocalDiffusion(10, 9);
+    Assertions.assertEquals(10, t.r2);
+    Assertions.assertFalse(t.isLocalDiffusion);
+    t.setLocalDiffusion(9, 10);
+    Assertions.assertEquals(9, t.r2);
+    Assertions.assertTrue(t.isLocalDiffusion);
+  }
+
+  @Test
   public void testIsOn() {
     final double meanI = 1000;
     final double sdI = 100;
@@ -222,7 +267,8 @@ public class DynamicMultipleTargetTracingTest {
 
   /**
    * Test trace molecules using 2 molecules. One is fixed and the other moves across it. The tracing
-   * should assign the fixed molecule correctly as it has a low local diffusion rate.
+   * should assign the fixed molecule correctly as it has a low local diffusion rate and different
+   * intensity.
    */
   @Test
   public void testTraceMolecules() {
@@ -265,6 +311,79 @@ public class DynamicMultipleTargetTracingTest {
     // Move centre to centre each jump => sqrt(2 * 0.1^2) = 0.141 um or 0.02 um^2
     // MSD = 4D => D = 0.02 / 4 = 0.005
     final DmttConfiguration config = DmttConfiguration.newBuilder(0.005).build();
+    final List<Trace> traces = new DynamicMultipleTargetTracing(results).traceMolecules(config);
+
+    // Should have 3 traces
+    Assertions.assertEquals(3, traces.size());
+
+    // Assert ids start from 1
+    for (int i = 0; i < traces.size(); i++) {
+      Assertions.assertEquals(i + 1, traces.get(i).getId());
+    }
+
+    // Traces should be 2 full length and 1 single peak
+    Assertions.assertEquals(size, traces.get(0).size());
+    Assertions.assertEquals(size, traces.get(1).size());
+    Assertions.assertEquals(1, traces.get(2).size());
+
+    // Do an analysis on the actual tracks.
+    // One should be based in the centre and the other should have parts close to position (i,i)
+    // for each frame i.
+    final PeakResult[] peaks = results.toArray();
+    // Assume traces are initially created using the input order of the results.
+    final Trace t1 = traces.get(0);
+    final Trace t2 = traces.get(1);
+    for (int i = 0; i < size; i++) {
+      Assertions.assertSame(peaks[i], t1.get(i));
+      Assertions.assertSame(peaks[i + size], t2.get(i));
+    }
+  }
+
+  /**
+   * Test trace molecules using 2 molecules. One is fixed and the other moves past it. The tracing
+   * should assign the fixed molecule correctly as it has a low local diffusion rate.
+   */
+  @Test
+  public void testTraceMoleculesDisableIntensityModel() {
+    final UniformRandomProvider rng = RngUtils.create(125631236L);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
+    // localisation precision (in pixels)
+    final double s = 0.1;
+    final SharedStateContinuousSampler intensity =
+        SamplerUtils.createGaussianSampler(rng, 1000, 100);
+
+    final MemoryPeakResults results = new MemoryPeakResults(100);
+    final CalibrationWriter writer = results.getCalibrationWriterSafe();
+    // 0.1 um pixels, 1 second exposure time
+    writer.setDistanceUnit(DistanceUnit.PIXEL);
+    writer.setNmPerPixel(100);
+    writer.setExposureTime(1000);
+    results.setCalibration(writer.getCalibration());
+
+    // First molecule diffuses roughly across the field from top-left to bottom-right.
+    // 5 frames is the default for local stats, 15 frames for trajectory removal.
+    // Use 20 so we build local stats and can expire a trajectory.
+    final int size = 20;
+    final float x1 = size / 2 + 0.5f;
+    for (int i = 0; i < size; i++) {
+      results.add(new PeakResult(i, (float) (x1 + gauss.sample() * s),
+          (float) (i + gauss.sample() * s), (float) (intensity.sample())));
+    }
+    // Second molecule is fixed in the centre with a lower intensity (allow
+    // correct matching when tracks overlap)
+    final int x = size / 2;
+    for (int i = 0; i < size; i++) {
+      results.add(new PeakResult(i, (float) (x + gauss.sample() * s),
+          (float) (x + gauss.sample() * s), (float) (intensity.sample())));
+    }
+    // Add a single molecule that will not connect to anything in the second frame.
+    // This should create a trajectory that will expire.
+    results.add(new PeakResult(1, x1, size, (float) (intensity.sample())));
+
+    // Move centre to centre each jump => 0.1 um or 0.01 um^2
+    // MSD = 4D => D = 0.01 / 4 = 0.0025
+    final DmttConfiguration config =
+        DmttConfiguration.newBuilder(0.0025).setDisableIntensityModel(true).build();
     final List<Trace> traces = new DynamicMultipleTargetTracing(results).traceMolecules(config);
 
     // Should have 3 traces

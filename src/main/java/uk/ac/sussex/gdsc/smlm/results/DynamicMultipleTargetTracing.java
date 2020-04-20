@@ -103,6 +103,8 @@ public class DynamicMultipleTargetTracing {
     private final double disappearanceDecayFactor;
     /** The disappearance threshold. */
     private final int disappearanceThreshold;
+    /** Flag to indicate that the intensity probability model should be disabled. */
+    private final boolean disableIntensityModel;
 
     /**
      * Builder for the Dynamic Multiple Target Tracing (DMMT) configuration.
@@ -120,6 +122,8 @@ public class DynamicMultipleTargetTracing {
       double disappearanceDecayFactor = 5;
       /** The disappearance threshold. */
       int disappearanceThreshold = 15;
+      /** Flag to indicate that the intensity probability model should be used. */
+      boolean disableIntensityModel;
 
       /**
        * Create an instance.
@@ -144,6 +148,7 @@ public class DynamicMultipleTargetTracing {
         this.onIntensityWeight = source.getOnIntensityWeight();
         this.disappearanceDecayFactor = source.getDisappearanceDecayFactor();
         this.disappearanceThreshold = source.getDisappearanceThreshold();
+        this.disableIntensityModel = source.isDisableIntensityModel();
       }
 
       /**
@@ -253,6 +258,17 @@ public class DynamicMultipleTargetTracing {
       }
 
       /**
+       * Set if the intensity probability model is disabled.
+       *
+       * @param disableIntensityModel true if the intensity model is disabled
+       * @return this object
+       */
+      public Builder setDisableIntensityModel(boolean disableIntensityModel) {
+        this.disableIntensityModel = disableIntensityModel;
+        return this;
+      }
+
+      /**
        * Builds the Dynamic Multiple Target Tracing (DMMT) configuration.
        *
        * @return the DMTT configuration
@@ -286,6 +302,7 @@ public class DynamicMultipleTargetTracing {
       this.onIntensityWeight = source.onIntensityWeight;
       this.disappearanceDecayFactor = source.disappearanceDecayFactor;
       this.disappearanceThreshold = source.disappearanceThreshold;
+      this.disableIntensityModel = source.disableIntensityModel;
     }
 
     /**
@@ -388,6 +405,15 @@ public class DynamicMultipleTargetTracing {
     public int getDisappearanceThreshold() {
       return disappearanceThreshold;
     }
+
+    /**
+     * Checks if the intensity probability model is disabled.
+     *
+     * @return true if the intensity model is disabled
+     */
+    public boolean isDisableIntensityModel() {
+      return disableIntensityModel;
+    }
   }
 
   /**
@@ -403,7 +429,7 @@ public class DynamicMultipleTargetTracing {
     /** The results. */
     final PeakResultStoreList results = new ArrayPeakResultStore(11);
     /** The indices for frames when the trajectory was on. */
-    final TIntArrayList onFrames = new TIntArrayList();
+    final TIntArrayList onFrames;
     /**
      * The gap between the last frame in the trajectory and the current frame minus 1. A value of
      * zero indicates the current frame is adjacent.
@@ -444,7 +470,20 @@ public class DynamicMultipleTargetTracing {
      */
     Trajectory(int id, PeakResult result, boolean on) {
       this.id = id;
+      onFrames = new TIntArrayList();
       add(result, on);
+    }
+
+    /**
+     * Create an instance. Specialised version when no on-frames are being tracked.
+     *
+     * @param id the id
+     * @param result the result
+     */
+    Trajectory(int id, PeakResult result) {
+      this.id = id;
+      onFrames = null;
+      add(result);
     }
 
     /**
@@ -457,6 +496,15 @@ public class DynamicMultipleTargetTracing {
       if (on) {
         onFrames.add(results.size());
       }
+      results.add(result);
+    }
+
+    /**
+     * Adds the result. Specialised version when no on-frames are being tracked.
+     *
+     * @param result the result
+     */
+    void add(PeakResult result) {
       results.add(result);
     }
 
@@ -619,14 +667,12 @@ public class DynamicMultipleTargetTracing {
     // remove the first empty array
     frameResults.remove(0);
 
-    // Currently do not handle fixed intensity.
-    // This could be done using an abstraction of the probability model for intensity
+    // Allow a fixed intensity (i.e. no standard deviation).
+    // This is done using an abstraction of the probability model for intensity
     // so that it returns a constant (p=1.0) if the intensity is fixed. This allows
     // tracing based only on diffusion and blinking.
     meanI = stats.getMean();
     sdI = stats.getStandardDeviation();
-    ValidationUtils.checkStrictlyPositive(meanI, "Mean intensity");
-    ValidationUtils.checkStrictlyPositive(sdI, "Standard deviation of intensity");
   }
 
   /**
@@ -641,26 +687,39 @@ public class DynamicMultipleTargetTracing {
   public List<Trace> traceMolecules(DmttConfiguration configuration) {
     ValidationUtils.checkNotNull(configuration, "configuration");
 
-    final double dMax = computeDMax(configuration);
-
-    // Create the maximum radius for diffusion with different dark frames
-    final double[] rMax = createRMax(dMax, configuration);
-    final double r2max = rMax[0] * rMax[0];
-    // Pre-compute the search radius threshold
-    // Use r < 3r_max => r^2 < 9 r_max^2.
-    final double[] r2maxThreshold = Arrays.stream(rMax).map(d -> d * d * 9).toArray();
-    final double[] logPOff = createLogPOff(configuration);
-
-    final double ldw = configuration.getLocalDiffusionWeight();
-    final double gdw = 1 - ldw;
-    final double oiw = configuration.getOnIntensityWeight();
-    final double biw = 1 - oiw;
-
-    final Statistics stats = new Statistics();
-
     // Initialise with the first frame
     final List<Trajectory> activeTrajectories = createTrajectories();
     final List<Trajectory> allTrajectories = new LocalList<>(activeTrajectories);
+
+    // Maximum likelihood reconnection test.
+    //
+    // Performs a Kuhn-Munkres algorithm for maximising the likelihood of all-vs-all connections.
+    // Complexity is O(kkl) where k = min(n, m) and l = max(n, m).
+    // The connection test is all-vs-all for complexity O(nm).
+    //
+    // The likelihood is reversed for a minimum distance matching.
+    // We can use double max value for the negative log likelihood threshold since
+    // any invalid matching is computed as positive infinity.
+    // Note: The actual scores for matches will be re-mapped using the range of valid values
+    // by the Matchings class so the threshold value does not effect the scoring.
+    // The resulting matchings are consumed directly to either extend a
+    // trajectory or create a new one.
+
+    // Create the functions.
+
+    // Compute the negative log likelihood for the connection.
+    final ToDoubleBiFunction<Trajectory, PeakResult> edges = createConnectionModel(configuration);
+
+    // Extend each matched trajectory with the result.
+    // This could be updated with different models for computing the local statistics.
+    final BiConsumer<Trajectory, PeakResult> matched = createMatchedAction(configuration);
+
+    // This could be used to mark the trajectory as entered into an off state.
+    final Consumer<Trajectory> unmatchedA = null;
+
+    // For any unmatched result create a new trajectory
+    final Consumer<PeakResult> unmatchedB =
+        createUnmatchedPeakAction(configuration, allTrajectories);
 
     // For each remaining frame connect trajectories
     for (int i = 1; i < frameResults.size(); i++) {
@@ -670,23 +729,53 @@ public class DynamicMultipleTargetTracing {
       updateTrajectories(configuration, activeTrajectories, frame);
       final int currentSize = allTrajectories.size();
 
-      // Maximum likelihood reconnection test.
-      // The likelihood is reversed for a minimum distance matching.
-      // We can use double max value for the negative log likelihood threshold since
-      // any invalid matching is computed as positive infinity.
-      // Note: The actual scores for matches will be re-mapped using the range of valid values
-      // by the Matchings class so the threshold value does not effect the scoring.
-      // The resulting matchings are consumed directly to either extend a
-      // trajectory or create a new one.
+      // Performs the reconnection test
+      Matchings.minimumDistance(activeTrajectories, results, edges, Double.MAX_VALUE, matched,
+          unmatchedA, unmatchedB);
 
-      // Compute the negative log likelihood for the connection.
-      // Note:
-      // This computes an all-vs-all distance. This will not scale well when the number of
-      // results per frame is high. In that case the edges could be pre-computed using
-      // a neighbour search at the maximum radius in a KD-tree or other structure. This is
-      // simplified if each result and trajectory have a unique ID. Known distances can be
-      // stored in a HashMap using the combined two IDs as the key.
-      final ToDoubleBiFunction<Trajectory, PeakResult> edges = (t, r) -> {
+      // Copy new trajectories to the currently active trajectories
+      activeTrajectories.addAll(allTrajectories.subList(currentSize, allTrajectories.size()));
+    }
+
+    // Convert trajectories to traces
+    return allTrajectories.stream().map(Trajectory::toTrace).collect(Collectors.toList());
+  }
+
+  /**
+   * Checks the intensity model should be disabled.
+   *
+   * @param configuration the configuration
+   * @return true to disable the intensity model
+   */
+  private boolean isDisableIntensityModel(DmttConfiguration configuration) {
+    return configuration.isDisableIntensityModel() || sdI == 0;
+  }
+
+  /**
+   * Creates the connection model. This computes the negative log-likelihood for the connection
+   * between a trajectory and a localisation. No connection is positive infinity.
+   *
+   * @param configuration the configuration
+   * @return the connection model
+   */
+  private ToDoubleBiFunction<Trajectory, PeakResult>
+      createConnectionModel(DmttConfiguration configuration) {
+    final double dMax = computeDMax(configuration);
+
+    // Create the maximum radius for diffusion with different dark frames
+    final double[] rMax = createRMax(dMax, configuration);
+    // final double r2max = rMax[0] * rMax[0];
+    // Pre-compute the search radius threshold
+    // Use r < 3r_max => r^2 < 9 r_max^2.
+    final double[] r2maxThreshold = Arrays.stream(rMax).map(d -> d * d * 9).toArray();
+    final double[] logPOff = createLogPOff(configuration);
+
+    final double ldw = configuration.getLocalDiffusionWeight();
+    final double gdw = 1 - ldw;
+
+    // Optionally disable the intensity model
+    if (isDisableIntensityModel(configuration)) {
+      return (t, r) -> {
         final double r2 = r.distance2(t.getLast(-1));
         // Must be within the maximum radius for the frame gap.
         if (r2 < r2maxThreshold[t.gap]) {
@@ -699,69 +788,145 @@ public class DynamicMultipleTargetTracing {
             // Combined global and local diffusion
             pDiff = gdw * pDiff + ldw * probDiffusion(r2, t.rlocal);
           }
-          final double intensity = r.getIntensity();
-          final double pInt = t.isLocalIntensity
-              ? oiw * probOn(intensity, t.meanI, t.sdI) + biw * probBlink(t.meanI)
-              : oiw * probOn(intensity, meanI, sdI) + biw * probBlink(meanI);
-          // Negative log likelihood
-          return -Math.log(pDiff) - Math.log(pInt) - logPOff[t.gap];
+          // Negative log likelihood: p(Diffusion) * p(Off)
+          return -Math.log(pDiff) - logPOff[t.gap];
         }
 
         // no connection probability
         return Double.POSITIVE_INFINITY;
       };
-
-      // Extend each matched trajectory with the result.
-      // This could be updated with different models for computing the local statistics.
-      final BiConsumer<Trajectory, PeakResult> matched = (t, r) -> {
-        // Add the peak to the trajectory
-        final double intensity = r.getIntensity();
-        final boolean on =
-            t.isLocalIntensity ? isOn(intensity, t.meanI, t.sdI) : isOn(intensity, meanI, sdI);
-        t.add(r, on);
-
-        // Update local statistics
-        // Currently the temporal window is occurrences and not an actual time span.
-        // Thus some local statistics can be average over a long duration. However if
-        // the trajectory is for a blinking particle with short on-times and long off-times
-        // the local statistics are no better or worse than the global model.
-        if (t.size() >= configuration.getTemporalWindow()) {
-          PeakResult after = t.getLast(-1);
-          double sum = 0;
-          for (int j = 2; j <= configuration.getTemporalWindow(); j++) {
-            final PeakResult before = t.getLast(-j);
-            sum += after.distance2(before) / (after.getFrame() - before.getFrame());
-            after = before;
-          }
-          t.setLocalDiffusion(sum / (configuration.getTemporalWindow() - 1), r2max);
-        }
-        if (t.onSize() >= configuration.getTemporalWindow()) {
-          stats.reset();
-          t.forLastOn(configuration.getTemporalWindow(), peak -> stats.add(peak.getIntensity()));
-          t.setLocalIntensity(stats.getMean(), stats.getStandardDeviation());
-        }
-      };
-
-      // This could be used to mark the trajectory as entered into an off state.
-      final Consumer<Trajectory> unmatchedA = null;
-
-      // For any unmatched result create a new trajectory
-      final Consumer<PeakResult> unmatchedB = r -> {
-        final double intensity = r.getIntensity();
-        final boolean on = isOn(intensity, meanI, sdI);
-        allTrajectories.add(new Trajectory(allTrajectories.size() + 1, r, on));
-      };
-
-      // Performs the reconnection test
-      Matchings.minimumDistance(activeTrajectories, results, edges, Double.MAX_VALUE, matched,
-          unmatchedA, unmatchedB);
-
-      // Copy new trajectories to the currently active trajectories
-      activeTrajectories.addAll(allTrajectories.subList(currentSize, allTrajectories.size()));
     }
 
-    // Convert trajectories to traces
-    return allTrajectories.stream().map(Trajectory::toTrace).collect(Collectors.toList());
+    final double oiw = configuration.getOnIntensityWeight();
+    final double biw = 1 - oiw;
+
+    return (t, r) -> {
+      final double r2 = r.distance2(t.getLast(-1));
+      // Must be within the maximum radius for the frame gap.
+      if (r2 < r2maxThreshold[t.gap]) {
+        // p(reconnection) = p(diffusion) * p(intensity) * p(off)
+        // sum for log probability.
+        // Use the local or global model as appropriate.
+        // The p(off) can be pre-computed.
+        double pDiff = probDiffusion(r2, rMax[t.gap]);
+        if (t.isLocalDiffusion) {
+          // Combined global and local diffusion
+          pDiff = gdw * pDiff + ldw * probDiffusion(r2, t.rlocal);
+        }
+        final double intensity = r.getIntensity();
+        final double pInt =
+            t.isLocalIntensity ? oiw * probOn(intensity, t.meanI, t.sdI) + biw * probBlink(t.meanI)
+                : oiw * probOn(intensity, meanI, sdI) + biw * probBlink(meanI);
+        // Negative log likelihood: p(Diffusion) * p(Intensity) * p(Off)
+        return -Math.log(pDiff) - Math.log(pInt) - logPOff[t.gap];
+      }
+
+      // no connection probability
+      return Double.POSITIVE_INFINITY;
+    };
+  }
+
+  /**
+   * Creates the action to process a connection between a trajectory and a localisation.
+   *
+   * <p>Currently the temporal window is occurrences and not an actual time span. Thus some local
+   * statistics can be averaged over a long duration. However if the trajectory is for a blinking
+   * particle with short on-times and long off-times the local statistics are no better or worse
+   * than the global model.
+   *
+   * @param configuration the configuration
+   * @return the matched action
+   */
+  private BiConsumer<Trajectory, PeakResult> createMatchedAction(DmttConfiguration configuration) {
+    final double dMax = computeDMax(configuration);
+    // D_max = r^2 / 4t ('t' is frame acquisition time)
+    // dMax has been converted to frames
+    final double r2max = dMax * 4;
+
+    // Optionally disable the intensity model
+    if (isDisableIntensityModel(configuration)) {
+      return (t, r) -> {
+        // Add the peak to the trajectory. Do not track on-frames for intensity.
+        t.add(r);
+
+        updateLocalDiffusion(configuration, r2max, t);
+        // Ignore local intensity
+      };
+    }
+
+    final Statistics stats = new Statistics();
+    return (t, r) -> {
+      // Add the peak to the trajectory tracking on-frames
+      final double intensity = r.getIntensity();
+      final boolean on =
+          t.isLocalIntensity ? isOn(intensity, t.meanI, t.sdI) : isOn(intensity, meanI, sdI);
+      t.add(r, on);
+
+      updateLocalDiffusion(configuration, r2max, t);
+      updateLocalIntensity(configuration, stats, t);
+    };
+  }
+
+  /**
+   * Update local diffusion. The maximum jump distance is used to switch global to local diffusion
+   * (which must be slower than the global diffusion).
+   *
+   * @param configuration the configuration
+   * @param r2max the maximum mean squared jump distance
+   * @param t the trajectory
+   */
+  private static void updateLocalDiffusion(DmttConfiguration configuration, final double r2max,
+      Trajectory t) {
+    if (t.size() >= configuration.getTemporalWindow()) {
+      PeakResult after = t.getLast(-1);
+      double sum = 0;
+      for (int j = 2; j <= configuration.getTemporalWindow(); j++) {
+        final PeakResult before = t.getLast(-j);
+        sum += after.distance2(before) / (after.getFrame() - before.getFrame());
+        after = before;
+      }
+      t.setLocalDiffusion(sum / (configuration.getTemporalWindow() - 1), r2max);
+    }
+  }
+
+  /**
+   * Update local intensity.
+   *
+   * @param configuration the configuration
+   * @param stats the working statistics instance
+   * @param t the trajectory
+   */
+  private static void updateLocalIntensity(DmttConfiguration configuration, final Statistics stats,
+      Trajectory t) {
+    if (t.onSize() >= configuration.getTemporalWindow()) {
+      stats.reset();
+      t.forLastOn(configuration.getTemporalWindow(), peak -> stats.add(peak.getIntensity()));
+      t.setLocalIntensity(stats.getMean(), stats.getStandardDeviation());
+    }
+  }
+
+  /**
+   * Creates the the action for an unmatched localisation. This will create a new trajectory and add
+   * it to the list.
+   *
+   * @param configuration the configuration
+   * @param allTrajectories the list of all trajectories
+   * @return the action
+   */
+  private Consumer<PeakResult> createUnmatchedPeakAction(DmttConfiguration configuration,
+      List<Trajectory> allTrajectories) {
+    // Optionally disable the intensity model
+    if (isDisableIntensityModel(configuration)) {
+      return r -> {
+        // Do not track on-frames for intensity.
+        allTrajectories.add(new Trajectory(allTrajectories.size() + 1, r));
+      };
+    }
+    return r -> {
+      final double intensity = r.getIntensity();
+      final boolean on = isOn(intensity, meanI, sdI);
+      allTrajectories.add(new Trajectory(allTrajectories.size() + 1, r, on));
+    };
   }
 
   /**

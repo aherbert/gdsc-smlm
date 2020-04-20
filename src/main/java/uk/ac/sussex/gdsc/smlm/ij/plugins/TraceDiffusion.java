@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.TextField;
 import java.io.BufferedWriter;
@@ -877,9 +878,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           .append(MathUtils.rounded(clusteringSettings.getDiffusionCoefficentMaximum(), 3))
           .append("um^2/s, window=").append(clusteringSettings.getTemporalWindow())
           .append(", wLocal=")
-          .append(MathUtils.rounded(clusteringSettings.getLocalDiffusionWeight(), 2))
-          .append(", wOn=").append(MathUtils.rounded(clusteringSettings.getOnIntensityWeight(), 2))
-          .append(", decay=")
+          .append(MathUtils.rounded(clusteringSettings.getLocalDiffusionWeight(), 2));
+      if (!clusteringSettings.getDisableIntensityModel()) {
+        sb.append(", wOn=").append(MathUtils.rounded(clusteringSettings.getOnIntensityWeight(), 2));
+      }
+      sb.append(", decay=")
           .append(MathUtils.rounded(clusteringSettings.getDisappearanceDecayFactor(), 2))
           .append(", disappear=").append(clusteringSettings.getDisappearanceThreshold());
     } else {
@@ -972,6 +975,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                   clusteringSettings.getDisappearanceDecayFactor(), 0, 6, "frames");
               final TextField tfDt = egd.addAndGetNumericField("Disappearance_threshold",
                   clusteringSettings.getDisappearanceThreshold(), 0, 6, "frames");
+              final Checkbox cbDim = egd.addAndGetCheckbox("Disabled_intensity_model",
+                  clusteringSettings.getDisableIntensityModel());
 
               // Allow reset to defaults
               egd.addAndGetButton("Defaults", e -> {
@@ -982,6 +987,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                 tfOiw.setText(String.valueOf(config.getOnIntensityWeight()));
                 tfDdf.setText(String.valueOf(config.getDisappearanceDecayFactor()));
                 tfDt.setText(String.valueOf(config.getDisappearanceThreshold()));
+                cbDim.setState(config.isDisableIntensityModel());
               });
             } else {
               // Nearest Neighbour
@@ -1005,6 +1011,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
               clusteringSettings.setOnIntensityWeight(egd.getNextNumber());
               clusteringSettings.setDisappearanceDecayFactor(egd.getNextNumber());
               clusteringSettings.setDisappearanceThreshold((int) egd.getNextNumber());
+              clusteringSettings.setDisableIntensityModel(egd.getNextBoolean());
             } else {
               // Nearest Neighbour
               clusteringSettings.setDistanceThreshold(egd.getNextNumber());
@@ -1120,7 +1127,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         .setLocalDiffusionWeight(clusteringSettings.getLocalDiffusionWeight())
         .setOnIntensityWeight(clusteringSettings.getOnIntensityWeight())
         .setDisappearanceDecayFactor(clusteringSettings.getDisappearanceDecayFactor())
-        .setDisappearanceThreshold(clusteringSettings.getDisappearanceThreshold()).build();
+        .setDisappearanceThreshold(clusteringSettings.getDisappearanceThreshold())
+        .setDisableIntensityModel(clusteringSettings.getDisableIntensityModel()).build();
   }
 
   private Trace[] getTraces(ArrayList<MemoryPeakResults> allResults) {
