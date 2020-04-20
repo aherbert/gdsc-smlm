@@ -975,7 +975,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                   clusteringSettings.getDisappearanceDecayFactor(), 0, 6, "frames");
               final TextField tfDt = egd.addAndGetNumericField("Disappearance_threshold",
                   clusteringSettings.getDisappearanceThreshold(), 0, 6, "frames");
-              final Checkbox cbDim = egd.addAndGetCheckbox("Disabled_intensity_model",
+              final Checkbox cbDim = egd.addAndGetCheckbox("Disable_intensity_model",
                   clusteringSettings.getDisableIntensityModel());
 
               // Allow reset to defaults
