@@ -123,6 +123,10 @@ Sengupta P, Jovanovic-Talisman T, Skoko D, Renz M, Veatch SL & Lippincott-Schwar
 Probing protein heterogeneity in the plasma membrane using PALM and pair correlation analysis.
 *Nature Methods* 8: 969-975.
 
+Sergé A, Bertaux N, Rigneault H & Marguet D (2008)
+Dynamic multiple-target tracing to probe spatiotemporal cartography of cell membranes.
+*Nature Methods* 5: 687-694.
+
 Snyder DL, Helstrom CW, Lanterman AD, Faisal M & White RL (1995)
 Compensation for readout noise in CCD images.
 *Journal of the Optical Society of America* 12: 272-283.

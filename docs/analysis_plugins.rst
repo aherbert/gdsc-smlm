@@ -677,10 +677,40 @@ The ``Trace Diffusion`` plugin will trace molecules through consecutive frames a
 The plugin is similar to the ``Diffusion Rate Test`` plugin however instead of simulating particle diffusion the plugin will use an existing results set. This allows the analysis to be applied to results from fitting single-molecule images using the ``Peak Fit`` plugin.
 
 
+Trace Mode
+~~~~~~~~~~
+
+Tracing can be performed using different trace modes:
+
+- Nearest Neighbour
+- Dynamic Multiple Target Tracing (DMTT)
+
+Nearest Neighbour
+^^^^^^^^^^^^^^^^^
+
+Use a simple nearest neighbour tracing using consecutive frames. The distance threshold for the tracing algorithm can be specified: a pair of localisations within adjacent frames will be connected if they are within the distance threshold. In the event of multiple candidate connections the algorithm assigns the closest connection first. This is a greedy algorithm and may not achieve the maximum cardinality matching for the specified distance threshold.
+
+To remove the possibility for overlapping tracks the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the current track position. This ensures that the localisation assigned to the track is the only candidate within the exclusion distance and effectively removes traces of particles that could overlap with another moving particle. Setting the exclusion distance to less than the distance threshold disables this feature.
+
+Dynamic Multiple Target Tracing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use dynamic multiple target tracing based on Sergé *et al* (2008). Details can be found in the paper's supplementary information appendix 2. This tracing uses a model to assign the probability that a localisation should join a current trajectory (or track). The matrix of all localisations paired with all current trajectories is considered and the maximum likelihood reconnection is selected. New trajectories are created as required and existing trajectories can expire if no localisations have been assigned to them for a set number of frames.
+
+The probability model consists of three parts: the probability for a match given the diffusion; the probability for a match given the intensity; and the probability the trajectory blinks or disappears.
+
+The probability for diffusion computes a probability based on the distance from the end of the trajectory to the localisation. This assumes a maximum diffusion coefficient for moving particles which sets an upper limit on the distance allowed. A moving particle may be slower than the maximum if it has become confined, for example a DNA binding protein bound to the DNA or a membrane protein that has formed a complex. The tracing thus maintains a local diffusion coefficient for each track based on the jumps observed for the previous *N* frames. The probability is computed as a weighted average of the probability based on maximum (unconfined) diffusion and the probability using the local diffusion rate.
+
+The probability for intensity computes the probability that the localisation intensity is from the distribution of intensity values in the trajectory. This is the non-blinking, or on, probability for intensity. When the trajectory is short the probability function uses the population mean and standard deviation. Otherwise it uses the mean and standard deviation from the previous *N* frames where the trajectory was on. A second component is the probability the trajectory will blink (i.e. turn off). The final probability is the weighted combination of the probability for non-blinking (on) and blinking (off). Note that the intensity statistics are only valid if the trajectory was on for the entire frame. Turning off during the frame (partial blink) will skew the statistics. Thus frames are counted as on for new localisations if the probability for non-blinking is higher than the blinking probability. The result is the previous *N* on frames for local statistics may span more time than *N* frames.
+
+The probability for disappearance is the probability that an off trajectory will reappear. This is modelled using an exponential decay controlled by a decay factor. A higher factor will increase the probability a trajectory reappears after a set amount of time.
+
+The intensity model is disabled if all localisations have the same intensity (i.e. are only (x,y) positions) and can also be optionally disabled. The result is tracing based on diffusion and blinking.
+
+Setting a disappearance threshold to 0 frames will configure tracing using diffusion and intensity with no allowed blinking. This should create tracks similar to the ``Nearest Neighbour`` trace mode but will use a maximum probability connection test and not the closest first assignment algorithm.
+
 Analysis
 ~~~~~~~~
-
-The plugin runs a tracing algorithm on the results to find localisations that occur in consecutive frames. Details of the tracing algorithm can be found in section :numref:`{number}: {name} <analysis_plugins:Trace Molecules>`. The distance threshold for the tracing algorithm can be specified but the time threshold is set to 1 frame, i.e. only continuous tracks will be extracted. Thus a pair of localisations within adjacent frames will be connected if they are within the distance threshold. In addition the plugin allows the track to be excluded if a second localisation occurs within an exclusion threshold of the first localisation. This effectively removes traces of particles that could overlap with another moving particle.
 
 Once the tracks have been identified the tracks are filtered using a length criteria and shorter tracks discarded. Optionally the tracks can be truncated to the minimum length which ensures even sampling of particles with different track lengths. The plugin computes the mean-squared distance of each point from the origin. Optionally the plugin computes the mean-squared distance of each point from every other point in the track. These internal distances increase the number of points in the analysis. Therefore if the track is not truncated the number of internal distances at a given time separation is proportional to the track length. To prevent bias in the data towards the longer tracks the average distance for each time separation is computed per track and these are used in the population statistics. Thus each track contributes only once to the mean-displacement for a set time separation.
 
@@ -901,11 +931,13 @@ The plugin has the following parameters:
    * - Input
      - Specify the input results set.
 
-   * - Distance threshold
-     - The distance threshold for tracing.
+   * - Mode
+     - Specify the trace mode.
 
-   * - Distance exclusion
-     - The exclusion distance. If a particle is within the distance threshold but a second particle is within the exclusion distance then the trace is discarded (due to overlapping tracks).
+       - ``Nearest Neighbour``
+       - ``Dynamic Multiple Target Tracing``
+
+       The parameters for each are configured using the ``...`` button. See descriptions below. 
 
    * - Min trace length
      - The minimum length for a track (in time frames).
@@ -919,6 +951,56 @@ The plugin has the following parameters:
 
    * - Save traces
      - Save the traces to file in the ``Peak Fit`` results format.
+
+Nearest Neighbour Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Distance threshold
+     - The distance threshold for tracing.
+
+   * - Distance exclusion
+     - The exclusion distance. If a particle is within the distance threshold but a second particle is within the exclusion distance then the trace is discarded (due to overlapping tracks).
+
+Dynamic Multiple Target Tracing Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Diffusion coefficient
+     - The expected maximum diffusion coefficient for moving particles. Used to set an upper limit on the radius allowed to reconnect trajectories and localisations.
+
+   * - Temporal window
+     - The window over which to build local statistics
+
+   * - Local diffusion weight
+     - The weighting for the probability created using the local diffusion coefficient; the remaining probability uses the maximum diffusion coefficient.
+
+   * - On intensity weight
+     - The weighting for the probability for non-blinking intensity; the remaining probability uses the probability for blinking intensity.
+
+   * - Disappearance decay factor
+     - Controls the expected duration over which an off trajectory may reappear. Higher values will increase probability the molecule may reappear after *t* frames.
+
+   * - Disappearance threshold
+     - The threshold used to deactivate a trajectory. Any trajectory that has been in the off (dark) state longer than this threshold is removed and cannot connect to new localisations.
+
+   * - Disable intensity model
+     - Set to **true** to disable the intensity model. Can be used when the intensity of particles in a track is highly variable and intensity cannot be used to distinguish the track.
+
+   * - Defaults
+     - Use this button to reset the values to the defaults as used in the original source paper (Sergé *et al*, 2008).
 
 
 When all the datasets have been traced the plugin presents a second dialog to configure the diffusion analysis. The following parameters can be configured:
@@ -1084,11 +1166,8 @@ The plugin shows a summary table of the analysis results. This allows the plugin
    * - Exposure time
      - The dataset exposure time per frame.
 
-   * - D-threshold
-     - The distance threshold.
-
-   * - Ex-threshold
-     - The exclusion distance.
+   * - Trace settings
+     - The settings used for the trace algorithm.
 
    * - Min-length
      - The minimum track length that was analysed.
