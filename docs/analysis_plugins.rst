@@ -672,7 +672,7 @@ The ``Pairwise`` algorithm is not suitable for multi-threaded operation but is t
 Trace Diffusion
 ---------------
 
-The ``Trace Diffusion`` plugin will trace molecules through consecutive frames and then perform mean-squared displacement analysis to calculate a diffusion coefficient.
+The ``Trace Diffusion`` plugin will trace molecules through frames and then perform mean-squared displacement analysis on consecutive frames to calculate a diffusion coefficient.
 
 The plugin is similar to the ``Diffusion Rate Test`` plugin however instead of simulating particle diffusion the plugin will use an existing results set. This allows the analysis to be applied to results from fitting single-molecule images using the ``Peak Fit`` plugin.
 
@@ -684,6 +684,8 @@ Tracing can be performed using different trace modes:
 
 - Nearest Neighbour
 - Dynamic Multiple Target Tracing (DMTT)
+
+Note that diffusion analysis is based in consecutive frames. If tracing allows gaps then the initial discontinuous tracks are dividing into continuous tracks before diffusion analysis.
 
 Nearest Neighbour
 ^^^^^^^^^^^^^^^^^
@@ -712,7 +714,7 @@ Setting a disappearance threshold to 0 frames will configure tracing using diffu
 Analysis
 ~~~~~~~~
 
-Once the tracks have been identified the tracks are filtered using a length criteria and shorter tracks discarded. Optionally the tracks can be truncated to the minimum length which ensures even sampling of particles with different track lengths. The plugin computes the mean-squared distance of each point from the origin. Optionally the plugin computes the mean-squared distance of each point from every other point in the track. These internal distances increase the number of points in the analysis. Therefore if the track is not truncated the number of internal distances at a given time separation is proportional to the track length. To prevent bias in the data towards the longer tracks the average distance for each time separation is computed per track and these are used in the population statistics. Thus each track contributes only once to the mean-displacement for a set time separation.
+Once the tracks have been identified any tracks containing frame gaps are split into sub-tracks with contiguous frames. Diffusion analysis with variable frame gaps is not supported. The tracks are then filtered using a length criteria and shorter tracks discarded. Optionally the tracks can be truncated to the minimum length which ensures even sampling of particles with different track lengths. The plugin computes the mean-squared distance of each point from the origin. Optionally the plugin computes the mean-squared distance of each point from every other point in the track. These internal distances increase the number of points in the analysis. Therefore if the track is not truncated the number of internal distances at a given time separation is proportional to the track length. To prevent bias in the data towards the longer tracks the average distance for each time separation is computed per track and these are used in the population statistics. Thus each track contributes only once to the mean-displacement for a set time separation.
 
 The mean-squared distance (MSD) per molecule is calculated using two methods. The ``all-vs-all`` method uses the sum of squared distances divided by the sum of time separation between points. The value includes the all-vs-all internal distances (if selected). The ``adjacent`` method uses the average of the squared distances between adjacent frames divided by the time delta (:math:`\Delta t`) between frames. The MSD values are expressed in |micro|\ m\ :sup:`2`/second and can be saved to file or shown in a histogram.
 

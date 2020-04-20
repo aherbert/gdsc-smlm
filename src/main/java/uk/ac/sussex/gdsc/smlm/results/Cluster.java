@@ -66,7 +66,7 @@ public class Cluster {
   }
 
   /**
-   * Instantiates a new cluster.
+   * Instantiates a new cluster. A duplicate result store will be created.
    *
    * @param results the results
    */

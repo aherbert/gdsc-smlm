@@ -51,7 +51,7 @@ public class Trace extends Cluster {
   }
 
   /**
-   * Instantiates a new trace.
+   * Instantiates a new trace. A duplicate result store will be created.
    *
    * @param results the results
    */
@@ -87,8 +87,8 @@ public class Trace extends Cluster {
       blinks = 1;
       int t1 = results.get(0).getFrame();
       int onStart = t1;
-      for (int i = 0; i < results.size() - 1; i++) {
-        final int t2 = results.get(i + 1).getFrame();
+      for (int i = 1; i < results.size(); i++) {
+        final int t2 = results.get(i).getFrame();
         final int diff = t2 - t1;
         if (diff > 1) {
           off.add(diff - 1);

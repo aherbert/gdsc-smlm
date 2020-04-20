@@ -65,6 +65,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -80,6 +81,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.CurveLogger;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing.DmttConfiguration;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultCalculator;
@@ -763,7 +765,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   }
 
   /**
-   * Filter traces that are not the minimum length. Re-assigns the ID for the output traces.
+   * Split traces to contiguous traces and filter traces that are not the minimum length. Re-assigns
+   * the ID for the output traces.
    *
    * @param name the name
    * @param traces the traces
@@ -773,23 +776,72 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    */
   private static Trace[] filterTraces(String name, Trace[] traces, int minimumTraceLength,
       boolean ignoreEnds) {
+    final LocalList<Trace> list = new LocalList<>(traces.length);
+
     final int minLength = (ignoreEnds) ? minimumTraceLength + 2 : minimumTraceLength;
-    int count = 0;
-    for (int i = 0; i < traces.length; i++) {
-      final Trace t = traces[i];
+    final Consumer<Trace> action = (ignoreEnds) ? t -> {
       if (t.size() >= minLength) {
-        if (ignoreEnds) {
-          t.removeEnds();
+        t.removeEnds();
+        list.add(t);
+        t.setId(list.size());
+      }
+    } : t -> {
+      if (t.size() >= minLength) {
+        list.add(t);
+        t.setId(list.size());
+      }
+    };
+    final Consumer<ArrayPeakResultStore> action2 = (ignoreEnds) ? r -> {
+      if (r.size() >= minLength) {
+        r.remove(0);
+        r.remove(r.size() - 1);
+        final Trace t = new Trace(r);
+        list.add(t);
+        t.setId(list.size());
+      }
+    } : r -> {
+      if (r.size() >= minLength) {
+        final Trace t = new Trace(r);
+        list.add(t);
+        t.setId(list.size());
+      }
+    };
+
+    final ArrayPeakResultStore results = new ArrayPeakResultStore(11);
+    for (final Trace trace : traces) {
+      if (trace.size() < minLength) {
+        // Too short
+        continue;
+      }
+      if (trace.size() == trace.getTail().getFrame() - trace.getHead().getFrame() + 1) {
+        // Contiguous
+        action.accept(trace);
+      } else {
+        // Split the trace
+        int t1 = trace.getHead().getFrame();
+        for (int i = 0; i < trace.size(); i++) {
+          final PeakResult peak = trace.get(i);
+          final int t2 = peak.getFrame();
+          if (t2 - t1 > 1) {
+            // Non-contiguous
+            action2.accept(results);
+            results.clear();
+          }
+          t1 = t2;
+          results.add(peak);
         }
-        traces[count++] = t;
-        t.setId(count);
+        // Final trace
+        action2.accept(results);
+        results.clear();
       }
     }
 
     ImageJUtils.log(
-        "Filtered results '%s' : %s filtered to %d using minimum length %d (Ignore ends = %b)",
-        name, TextUtils.pleural(traces.length, "trace"), count, minimumTraceLength, ignoreEnds);
-    return Arrays.copyOf(traces, count);
+        "Filtered results '%s' : %s split and filtered to %d using "
+            + "minimum length %d (Ignore ends = %b)",
+        name, TextUtils.pleural(traces.length, "trace"), list.size(), minimumTraceLength,
+        ignoreEnds);
+    return list.toArray(new Trace[0]);
   }
 
   private String createSettingsComment() {
@@ -1191,7 +1243,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    */
   private Function<MemoryPeakResults, Trace[]> createTraceFunction() {
     if (clusteringSettings.getTraceDiffusionMode() == 1) {
-      DmttConfiguration config = createDmttConfiguration();
+      final DmttConfiguration config = createDmttConfiguration();
       return r -> new DynamicMultipleTargetTracing(r).traceMolecules(config).toArray(new Trace[0]);
     }
 
