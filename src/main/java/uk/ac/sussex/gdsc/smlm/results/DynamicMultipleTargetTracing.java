@@ -249,10 +249,10 @@ public class DynamicMultipleTargetTracing {
        *
        * @param disappearanceThreshold the disappearance threshold
        * @return this object
-       * @throws IllegalArgumentException if the value is not strictly positive
+       * @throws IllegalArgumentException if the value is not positive
        */
       public Builder setDisappearanceThreshold(int disappearanceThreshold) {
-        ValidationUtils.checkStrictlyPositive(disappearanceThreshold);
+        ValidationUtils.checkPositive(disappearanceThreshold);
         this.disappearanceThreshold = disappearanceThreshold;
         return this;
       }

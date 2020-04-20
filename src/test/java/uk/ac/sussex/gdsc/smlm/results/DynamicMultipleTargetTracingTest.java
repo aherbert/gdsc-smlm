@@ -104,6 +104,8 @@ public class DynamicMultipleTargetTracingTest {
     Assertions.assertThrows(IllegalArgumentException.class, () -> DmttConfiguration.newBuilder(0));
 
     final DmttConfiguration.Builder b = DmttConfiguration.newBuilder(1.0);
+    // This is allowed: it will cause trajectories to be continuous (no gaps)
+    b.setDisappearanceThreshold(0);
 
     Assertions.assertThrows(IllegalArgumentException.class, () -> b.setTemporalWindow(0));
     Assertions.assertThrows(IllegalArgumentException.class, () -> b.setLocalDiffusionWeight(-1));
@@ -113,7 +115,7 @@ public class DynamicMultipleTargetTracingTest {
     Assertions.assertThrows(IllegalArgumentException.class, () -> b.setOnIntensityWeight(-1));
     Assertions.assertThrows(IllegalArgumentException.class, () -> b.setOnIntensityWeight(1.01));
     Assertions.assertThrows(IllegalArgumentException.class, () -> b.setDisappearanceDecayFactor(0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> b.setDisappearanceThreshold(0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> b.setDisappearanceThreshold(-1));
   }
 
   @Test
