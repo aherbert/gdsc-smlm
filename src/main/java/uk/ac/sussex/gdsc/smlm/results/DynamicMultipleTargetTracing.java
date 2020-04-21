@@ -105,6 +105,11 @@ public class DynamicMultipleTargetTracing {
     private final int disappearanceThreshold;
     /** Flag to indicate that the intensity probability model should be disabled. */
     private final boolean disableIntensityModel;
+    /**
+     * Flag to indicate that the local diffusion probability model should be disabled. The diffusion
+     * model will be only global diffusion.
+     */
+    boolean disableLocalDiffusionModel;
 
     /**
      * Builder for the Dynamic Multiple Target Tracing (DMMT) configuration.
@@ -122,8 +127,13 @@ public class DynamicMultipleTargetTracing {
       double disappearanceDecayFactor = 5;
       /** The disappearance threshold. */
       int disappearanceThreshold = 15;
-      /** Flag to indicate that the intensity probability model should be used. */
+      /** Flag to indicate that the intensity probability model should be disabled. */
       boolean disableIntensityModel;
+      /**
+       * Flag to indicate that the local diffusion probability model should be disabled. The
+       * diffusion model will be only global diffusion.
+       */
+      boolean disableLocalDiffusionModel;
 
       /**
        * Create an instance.
@@ -149,6 +159,7 @@ public class DynamicMultipleTargetTracing {
         this.disappearanceDecayFactor = source.getDisappearanceDecayFactor();
         this.disappearanceThreshold = source.getDisappearanceThreshold();
         this.disableIntensityModel = source.isDisableIntensityModel();
+        this.disableLocalDiffusionModel = source.isDisableLocalDiffusionModel();
       }
 
       /**
@@ -269,6 +280,19 @@ public class DynamicMultipleTargetTracing {
       }
 
       /**
+       * Set if the local diffusion probability model is disabled. The probability model will use
+       * only the global diffusion model based on the {@link #setDiffusionCoefficientMaximum(double)
+       * diffusion coefficient}.
+       *
+       * @param disableLocalDiffusionModel true if the local diffusion model is disabled
+       * @return this object
+       */
+      public Builder setDisableLocalDiffusionModel(boolean disableLocalDiffusionModel) {
+        this.disableLocalDiffusionModel = disableLocalDiffusionModel;
+        return this;
+      }
+
+      /**
        * Builds the Dynamic Multiple Target Tracing (DMMT) configuration.
        *
        * @return the DMTT configuration
@@ -303,6 +327,7 @@ public class DynamicMultipleTargetTracing {
       this.disappearanceDecayFactor = source.disappearanceDecayFactor;
       this.disappearanceThreshold = source.disappearanceThreshold;
       this.disableIntensityModel = source.disableIntensityModel;
+      this.disableLocalDiffusionModel = source.disableLocalDiffusionModel;
     }
 
     /**
@@ -413,6 +438,17 @@ public class DynamicMultipleTargetTracing {
      */
     public boolean isDisableIntensityModel() {
       return disableIntensityModel;
+    }
+
+    /**
+     * Checks if the local diffusion probability model is disabled. The probability model will use
+     * only the global diffusion model based on the {@link #getDiffusionCoefficientMaximum()
+     * diffusion coefficient}.
+     *
+     * @return true if the local diffusion model is disabled
+     */
+    public boolean isDisableLocalDiffusionModel() {
+      return disableLocalDiffusionModel;
     }
   }
 
@@ -628,6 +664,23 @@ public class DynamicMultipleTargetTracing {
   }
 
   /**
+   * Interface for a function on an object and a double.
+   *
+   * @param <T> the generic type
+   */
+  @FunctionalInterface
+  private interface ObjDoubleToDoubleFunction<T> {
+    /**
+     * Apply the function.
+     *
+     * @param t the first operand
+     * @param u the second operand
+     * @return the result
+     */
+    double apply(T t, double u);
+  }
+
+  /**
    * Create an instance.
    *
    * @param results the results
@@ -768,10 +821,27 @@ public class DynamicMultipleTargetTracing {
     // Pre-compute the search radius threshold
     // Use r < 3r_max => r^2 < 9 r_max^2.
     final double[] r2maxThreshold = Arrays.stream(rMax).map(d -> d * d * 9).toArray();
+    // The log(p(off)) can be pre-computed.
     final double[] logPOff = createLogPOff(configuration);
 
-    final double ldw = configuration.getLocalDiffusionWeight();
-    final double gdw = 1 - ldw;
+    // Optionally disable the local diffusion model
+    final ObjDoubleToDoubleFunction<Trajectory> fDiff;
+    if (configuration.isDisableLocalDiffusionModel()) {
+      // Global diffusion model
+      fDiff = (t, r2) -> probDiffusion(r2, rMax[t.gap]);
+    } else {
+      final double ldw = configuration.getLocalDiffusionWeight();
+      final double gdw = 1 - ldw;
+      fDiff = (t, r2) -> {
+        // Use the local or global model as appropriate
+        double pDiff = probDiffusion(r2, rMax[t.gap]);
+        if (t.isLocalDiffusion) {
+          // Combined global and local diffusion
+          pDiff = gdw * pDiff + ldw * probDiffusion(r2, t.rlocal);
+        }
+        return pDiff;
+      };
+    }
 
     // Optionally disable the intensity model
     if (isDisableIntensityModel(configuration)) {
@@ -781,15 +851,8 @@ public class DynamicMultipleTargetTracing {
         if (r2 < r2maxThreshold[t.gap]) {
           // p(reconnection) = p(diffusion) * p(intensity) * p(off)
           // sum for log probability.
-          // Use the local or global model as appropriate.
-          // The p(off) can be pre-computed.
-          double pDiff = probDiffusion(r2, rMax[t.gap]);
-          if (t.isLocalDiffusion) {
-            // Combined global and local diffusion
-            pDiff = gdw * pDiff + ldw * probDiffusion(r2, t.rlocal);
-          }
           // Negative log likelihood: p(Diffusion) * p(Off)
-          return -Math.log(pDiff) - logPOff[t.gap];
+          return -Math.log(fDiff.apply(t, r2)) - logPOff[t.gap];
         }
 
         // no connection probability
@@ -806,19 +869,12 @@ public class DynamicMultipleTargetTracing {
       if (r2 < r2maxThreshold[t.gap]) {
         // p(reconnection) = p(diffusion) * p(intensity) * p(off)
         // sum for log probability.
-        // Use the local or global model as appropriate.
-        // The p(off) can be pre-computed.
-        double pDiff = probDiffusion(r2, rMax[t.gap]);
-        if (t.isLocalDiffusion) {
-          // Combined global and local diffusion
-          pDiff = gdw * pDiff + ldw * probDiffusion(r2, t.rlocal);
-        }
         final double intensity = r.getIntensity();
         final double pInt =
             t.isLocalIntensity ? oiw * probOn(intensity, t.meanI, t.sdI) + biw * probBlink(t.meanI)
                 : oiw * probOn(intensity, meanI, sdI) + biw * probBlink(meanI);
         // Negative log likelihood: p(Diffusion) * p(Intensity) * p(Off)
-        return -Math.log(pDiff) - Math.log(pInt) - logPOff[t.gap];
+        return -Math.log(fDiff.apply(t, r2)) - Math.log(pInt) - logPOff[t.gap];
       }
 
       // no connection probability
@@ -838,10 +894,18 @@ public class DynamicMultipleTargetTracing {
    * @return the matched action
    */
   private BiConsumer<Trajectory, PeakResult> createMatchedAction(DmttConfiguration configuration) {
-    final double dMax = computeDMax(configuration);
-    // D_max = r^2 / 4t ('t' is frame acquisition time)
-    // dMax has been converted to frames
-    final double r2max = dMax * 4;
+    // Optionally disable the local diffusion model
+    final Consumer<Trajectory> updateLocalDiffusion;
+    if (configuration.isDisableLocalDiffusionModel()) {
+      updateLocalDiffusion = t -> {
+        /* Do nothing */ };
+    } else {
+      final double dMax = computeDMax(configuration);
+      // D_max = r^2 / 4t ('t' is frame acquisition time)
+      // dMax has been converted to frames
+      final double r2max = dMax * 4;
+      updateLocalDiffusion = t -> updateLocalDiffusion(configuration, r2max, t);
+    }
 
     // Optionally disable the intensity model
     if (isDisableIntensityModel(configuration)) {
@@ -849,7 +913,7 @@ public class DynamicMultipleTargetTracing {
         // Add the peak to the trajectory. Do not track on-frames for intensity.
         t.add(r);
 
-        updateLocalDiffusion(configuration, r2max, t);
+        updateLocalDiffusion.accept(t);
         // Ignore local intensity
       };
     }
@@ -862,7 +926,7 @@ public class DynamicMultipleTargetTracing {
           t.isLocalIntensity ? isOn(intensity, t.meanI, t.sdI) : isOn(intensity, meanI, sdI);
       t.add(r, on);
 
-      updateLocalDiffusion(configuration, r2max, t);
+      updateLocalDiffusion.accept(t);
       updateLocalIntensity(configuration, stats, t);
     };
   }

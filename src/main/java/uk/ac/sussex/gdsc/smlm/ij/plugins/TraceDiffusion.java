@@ -928,9 +928,15 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     if (clusteringSettings.getTraceDiffusionMode() == 1) {
       sb.append("Dynamic MTT : D=")
           .append(MathUtils.rounded(clusteringSettings.getDiffusionCoefficentMaximum(), 3))
-          .append("um^2/s, window=").append(clusteringSettings.getTemporalWindow())
-          .append(", wLocal=")
-          .append(MathUtils.rounded(clusteringSettings.getLocalDiffusionWeight(), 2));
+          .append("um^2/s");
+      if (!clusteringSettings.getDisableLocalDiffusionModel()
+          | !clusteringSettings.getDisableIntensityModel()) {
+        sb.append(", window=").append(clusteringSettings.getTemporalWindow());
+      }
+      if (!clusteringSettings.getDisableLocalDiffusionModel()) {
+        sb.append(", wLocal=")
+            .append(MathUtils.rounded(clusteringSettings.getLocalDiffusionWeight(), 2));
+      }
       if (!clusteringSettings.getDisableIntensityModel()) {
         sb.append(", wOn=").append(MathUtils.rounded(clusteringSettings.getOnIntensityWeight(), 2));
       }
@@ -1027,6 +1033,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                   clusteringSettings.getDisappearanceDecayFactor(), 0, 6, "frames");
               final TextField tfDt = egd.addAndGetNumericField("Disappearance_threshold",
                   clusteringSettings.getDisappearanceThreshold(), 0, 6, "frames");
+              final Checkbox cbDld = egd.addAndGetCheckbox("Disable_local_diffusion_model",
+                  clusteringSettings.getDisableLocalDiffusionModel());
               final Checkbox cbDim = egd.addAndGetCheckbox("Disable_intensity_model",
                   clusteringSettings.getDisableIntensityModel());
 
@@ -1039,6 +1047,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
                 tfOiw.setText(String.valueOf(config.getOnIntensityWeight()));
                 tfDdf.setText(String.valueOf(config.getDisappearanceDecayFactor()));
                 tfDt.setText(String.valueOf(config.getDisappearanceThreshold()));
+                cbDld.setState(config.isDisableLocalDiffusionModel());
                 cbDim.setState(config.isDisableIntensityModel());
               });
             } else {
@@ -1063,6 +1072,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
               clusteringSettings.setOnIntensityWeight(egd.getNextNumber());
               clusteringSettings.setDisappearanceDecayFactor(egd.getNextNumber());
               clusteringSettings.setDisappearanceThreshold((int) egd.getNextNumber());
+              clusteringSettings.setDisableLocalDiffusionModel(egd.getNextBoolean());
               clusteringSettings.setDisableIntensityModel(egd.getNextBoolean());
             } else {
               // Nearest Neighbour
@@ -1180,6 +1190,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         .setOnIntensityWeight(clusteringSettings.getOnIntensityWeight())
         .setDisappearanceDecayFactor(clusteringSettings.getDisappearanceDecayFactor())
         .setDisappearanceThreshold(clusteringSettings.getDisappearanceThreshold())
+        .setDisableLocalDiffusionModel(clusteringSettings.getDisableLocalDiffusionModel())
         .setDisableIntensityModel(clusteringSettings.getDisableIntensityModel()).build();
   }
 

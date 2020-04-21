@@ -243,6 +243,8 @@ message ClusteringSettings {
   int32 trace_diffusion_mode = 42;
   // Flag to disable the intensity model
   bool disable_intensity_model = 43;
+  // Flag to disable the local diffusion model
+  bool disable_local_diffusion_model = 44;
 }
 
 // Contains the settings for the events in the OPTICS GUI

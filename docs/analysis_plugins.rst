@@ -707,6 +707,8 @@ The probability for intensity computes the probability that the localisation int
 
 The probability for disappearance is the probability that an off trajectory will reappear. This is modelled using an exponential decay controlled by a decay factor. A higher factor will increase the probability a trajectory reappears after a set amount of time.
 
+The local diffusion model can be optionally disabled. The result is tracing based on a maximum diffusion rate.
+
 The intensity model is disabled if all localisations have the same intensity (i.e. are only (x,y) positions) and can also be optionally disabled. The result is tracing based on diffusion and blinking.
 
 Setting a disappearance threshold to 0 frames will configure tracing using diffusion and intensity with no allowed blinking. This should create tracks similar to the ``Nearest Neighbour`` trace mode but will use a maximum probability connection test and not the closest first assignment algorithm.
@@ -997,6 +999,9 @@ Dynamic Multiple Target Tracing Parameters
 
    * - Disappearance threshold
      - The threshold used to deactivate a trajectory. Any trajectory that has been in the off (dark) state longer than this threshold is removed and cannot connect to new localisations.
+
+   * - Disable local diffusion model
+     - Set to **true** to disable the local diffusion model. The diffusion model will only use the maximum diffusion coefficient. Can be used when particles blink frequently which results in under estimation of the local diffusion using jump distances due to missing distances.
 
    * - Disable intensity model
      - Set to **true** to disable the intensity model. Can be used when the intensity of particles in a track is highly variable and intensity cannot be used to distinguish the track.
