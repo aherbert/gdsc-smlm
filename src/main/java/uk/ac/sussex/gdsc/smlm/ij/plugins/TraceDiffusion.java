@@ -1024,7 +1024,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
               final TextField tfD = egd.addAndGetNumericField("Diffusion_coefficient",
                   clusteringSettings.getDiffusionCoefficentMaximum(), 3, 6, "um^2/s");
               final TextField tfW = egd.addAndGetNumericField("Temporal_window",
-                  clusteringSettings.getTemporalWindow(), 0);
+                  clusteringSettings.getTemporalWindow(), 0, 6, "frames");
               final TextField tfLdw = egd.addAndGetNumericField("Local_diffusion_weight",
                   clusteringSettings.getLocalDiffusionWeight(), 2);
               final TextField tfOiw = egd.addAndGetNumericField("On_intensity_weight",

@@ -36,6 +36,8 @@ import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.text.TextWindow;
+import java.awt.Checkbox;
+import java.awt.TextField;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -75,6 +77,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing;
+import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing.DmttConfiguration;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TextFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
@@ -278,10 +282,23 @@ public class TraceMolecules implements PlugIn {
 
     Trace[] traces = null;
     int totalFiltered = 0;
-    if ("cluster".equals(arg)) {
-      // --=-=-=-=-=-
+    if ("dynamic".equals(arg)) {
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+      // Dynamic Mutliple Target Tracing
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+      outputName = "Dynamic Trace";
+
+      if (!showDynamicTraceDialog()) {
+        return;
+      }
+
+      final DmttConfiguration config = createDmttConfiguration();
+      traces =
+          new DynamicMultipleTargetTracing(results).traceMolecules(config).toArray(new Trace[0]);
+    } else if ("cluster".equals(arg)) {
+      // -=-=-=-=-=
       // Clustering
-      // --=-=-=-=-=-
+      // -=-=-=-=-=
       outputName = "Cluster";
 
       if (!showClusterDialog()) {
@@ -308,9 +325,9 @@ public class TraceMolecules implements PlugIn {
 
       traces = convertToTraces(clusters);
     } else {
-      // --=-=-=-=-=-
+      // -=-=-=-
       // Tracing
-      // --=-=-=-=-=-
+      // -=-=-=-
       outputName = "Trace";
 
       if (!showDialog()) {
@@ -925,6 +942,116 @@ public class TraceMolecules implements PlugIn {
     }
 
     return true;
+  }
+
+  private boolean showDynamicTraceDialog() {
+    pluginTitle = outputName + " Molecules";
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(pluginTitle);
+    gd.addHelp(HelpUrls.getUrl("dynamic-trace-molecules"));
+
+    readSettings();
+
+    ResultsManager.addInput(gd, pluginSettings.inputOption, InputSource.MEMORY);
+
+    // Dynamic Multiple Target Tracing
+    final TextField tfD = gd.addAndGetNumericField("Diffusion_coefficient",
+        settings.getDiffusionCoefficentMaximum(), 3, 6, "um^2/s");
+    final TextField tfW =
+        gd.addAndGetNumericField("Temporal_window", settings.getTemporalWindow(), 0, 6, "frames");
+    final TextField tfLdw =
+        gd.addAndGetNumericField("Local_diffusion_weight", settings.getLocalDiffusionWeight(), 2);
+    final TextField tfOiw =
+        gd.addAndGetNumericField("On_intensity_weight", settings.getOnIntensityWeight(), 2);
+    final TextField tfDdf = gd.addAndGetNumericField("Disappearance_decay_factor",
+        settings.getDisappearanceDecayFactor(), 0, 6, "frames");
+    final TextField tfDt = gd.addAndGetNumericField("Disappearance_threshold",
+        settings.getDisappearanceThreshold(), 0, 6, "frames");
+    final Checkbox cbDld = gd.addAndGetCheckbox("Disable_local_diffusion_model",
+        settings.getDisableLocalDiffusionModel());
+    final Checkbox cbDim =
+        gd.addAndGetCheckbox("Disable_intensity_model", settings.getDisableIntensityModel());
+    // Allow reset to defaults
+    gd.addAndGetButton("Defaults", e -> {
+      final DmttConfiguration config = DmttConfiguration.newBuilder(1).build();
+      tfD.setText(String.valueOf(settings.getDiffusionCoefficentMaximum()));
+      tfW.setText(String.valueOf(config.getTemporalWindow()));
+      tfLdw.setText(String.valueOf(config.getLocalDiffusionWeight()));
+      tfOiw.setText(String.valueOf(config.getOnIntensityWeight()));
+      tfDdf.setText(String.valueOf(config.getDisappearanceDecayFactor()));
+      tfDt.setText(String.valueOf(config.getDisappearanceThreshold()));
+      cbDld.setState(config.isDisableLocalDiffusionModel());
+      cbDim.setState(config.isDisableIntensityModel());
+    });
+    gd.addCheckbox("Save_traces", settings.getSaveTraces());
+    gd.addCheckbox("Show_histograms", settings.getShowHistograms());
+    gd.addCheckbox("Save_trace_data", settings.getSaveTraceData());
+
+    gd.showDialog();
+
+    if (gd.wasCanceled() || !readDynamicTraceDialog(gd)) {
+      return false;
+    }
+
+    // Load the results
+    results = ResultsManager.loadInputResults(pluginSettings.inputOption, true, null, null);
+    if (MemoryPeakResults.isEmpty(results)) {
+      IJ.error(pluginTitle, "No results could be loaded");
+      IJ.showStatus("");
+      return false;
+    }
+
+    // Store exposure time in seconds
+    exposureTime = results.getCalibrationReader().getExposureTime() / 1000;
+
+    return true;
+  }
+
+  private boolean readDynamicTraceDialog(ExtendedGenericDialog gd) {
+    pluginSettings.inputOption = ResultsManager.getInputSource(gd);
+    settings.setDiffusionCoefficentMaximum(gd.getNextNumber());
+    settings.setTemporalWindow((int) gd.getNextNumber());
+    settings.setLocalDiffusionWeight(gd.getNextNumber());
+    settings.setOnIntensityWeight(gd.getNextNumber());
+    settings.setDisappearanceDecayFactor(gd.getNextNumber());
+    settings.setDisappearanceThreshold((int) gd.getNextNumber());
+    settings.setDisableLocalDiffusionModel(gd.getNextBoolean());
+    settings.setDisableIntensityModel(gd.getNextBoolean());
+    settings.setSaveTraces(gd.getNextBoolean());
+    settings.setShowHistograms(gd.getNextBoolean());
+    settings.setSaveTraceData(gd.getNextBoolean());
+
+    writeSettings();
+
+    if (gd.invalidNumber() || !showHistogramsDialog()) {
+      return false;
+    }
+
+    // Check arguments
+    try {
+      // Validate using the Builder
+      createDmttConfiguration();
+    } catch (final IllegalArgumentException ex) {
+      IJ.error(pluginTitle, ex.getMessage());
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Creates the DMTT configuration from the clustering settings.
+   *
+   * @return the DMTTconfiguration
+   */
+  private DmttConfiguration createDmttConfiguration() {
+    return DmttConfiguration.newBuilder(settings.getDiffusionCoefficentMaximum())
+        .setTemporalWindow(settings.getTemporalWindow())
+        .setLocalDiffusionWeight(settings.getLocalDiffusionWeight())
+        .setOnIntensityWeight(settings.getOnIntensityWeight())
+        .setDisappearanceDecayFactor(settings.getDisappearanceDecayFactor())
+        .setDisappearanceThreshold(settings.getDisappearanceThreshold())
+        .setDisableLocalDiffusionModel(settings.getDisableLocalDiffusionModel())
+        .setDisableIntensityModel(settings.getDisableIntensityModel()).build();
   }
 
   private void runOptimiser(TraceManager manager) {
