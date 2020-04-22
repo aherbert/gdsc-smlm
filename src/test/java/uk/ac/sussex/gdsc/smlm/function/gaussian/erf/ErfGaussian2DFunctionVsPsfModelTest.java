@@ -83,7 +83,7 @@ public class ErfGaussian2DFunctionVsPsfModelTest {
         // We expect a small error since the ErfGaussian2DFunction uses a
         // fast approximation of the Erf(..) (the error function). The PSFModel
         // uses the Apache commons implementation.
-        if (error > 5e-4) {
+        if (error > 5e-3) {
           Assertions.fail(String.format("[%d] %s != %s  error = %f", i, Double.toString(e[i]),
               Double.toString(o[i]), error));
         }
