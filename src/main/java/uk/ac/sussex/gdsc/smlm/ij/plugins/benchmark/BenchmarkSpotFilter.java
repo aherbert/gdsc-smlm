@@ -1747,8 +1747,6 @@ public class BenchmarkSpotFilter implements PlugIn {
       gd.addCheckbox("Debug", settings.debug);
     }
 
-    ImageJUtils.rearrangeColumns(gd, (batchMode) ? 14 : 8);
-
     if (batchMode) {
       gd.addHelp(HelpUrls.getUrl("filter-spot-data-batch"));
     } else {
@@ -1788,10 +1786,11 @@ public class BenchmarkSpotFilter implements PlugIn {
       settings.filterRelativeDistances = gd.getNextBoolean();
     } else {
       config.setDataFilterType(SettingsManager.getDataFilterTypeValues()[gd.getNextChoiceIndex()]);
+      final int filterIndex = gd.getNextChoiceIndex();
       settings.filterRelativeDistances = gd.getNextBoolean();
-      config.setDataFilter(SettingsManager.getDataFilterMethodValues()[gd.getNextChoiceIndex()],
-          MathUtils.roundUsingDecimalPlaces(Math.abs(gd.getNextNumber()), 3),
-          !settings.filterRelativeDistances, 0);
+      final double smoothing = Math.abs(gd.getNextNumber());
+      config.setDataFilter(SettingsManager.getDataFilterMethodValues()[filterIndex],
+          MathUtils.roundUsingDecimalPlaces(smoothing, 3), !settings.filterRelativeDistances, 0);
       settings.search = gd.getNextNumber();
     }
     settings.border = gd.getNextNumber();
