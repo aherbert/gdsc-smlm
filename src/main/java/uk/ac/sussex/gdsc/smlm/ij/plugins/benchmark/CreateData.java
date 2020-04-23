@@ -3040,7 +3040,7 @@ public class CreateData implements PlugIn {
               continue;
             }
             sampler.setAlpha(image[i]);
-            image[i] = Math.round(sampler.sample() * image[i]);
+            image[i] = Math.round(sampler.sample());
           }
         }
       }
