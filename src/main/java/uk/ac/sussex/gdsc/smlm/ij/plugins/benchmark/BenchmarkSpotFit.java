@@ -1412,14 +1412,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private BenchmarkSpotFitResult runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    final Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+    Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
       // from the MemoryPeakResults
-      coordinateCache.set(
-          Pair.of(simulationParameters.id, ResultsMatchCalculator.getCoordinates(results, false)));
+      coords =
+          Pair.of(simulationParameters.id, ResultsMatchCalculator.getCoordinates(results, false));
+      coordinateCache.set(coords);
       refresh = true;
     }
 
