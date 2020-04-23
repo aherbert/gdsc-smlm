@@ -73,7 +73,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   // TODO
   // Options to show the computed convolution across a range of means.
 
-  private static final String TITLE = "Camera Model Fisher Information Analysis";
+  /**
+   * The title of the plugin.
+   */
+  public static final String TITLE = "Camera Model Fisher Information Analysis";
 
   private static final String[] POINT_OPTION = {"None", "X", "Circle", "Box", "Cross"};
 

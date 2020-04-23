@@ -4581,7 +4581,8 @@ public class CreateData implements PlugIn {
         if (i == null) {
           throw new IllegalStateException(
               "No stored Fisher information for EM-CCD camera with gain " + amp + " and noise "
-                  + readNoise);
+                  + readNoise + "\n \nPlease generate using the "
+                  + CameraModelFisherInformationAnalysis.TITLE);
         }
         fi = i;
       } else {
