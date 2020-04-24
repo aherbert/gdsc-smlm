@@ -2248,10 +2248,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
       // Create a filter set using the ranges
       ArrayList<Filter> filters = new ArrayList<>(3);
-      final MultiFilter2 mf = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
-      filters.add(mf.create(lower));
-      filters.add(mf.create(upper));
-      filters.add(mf.create(increment));
+      // Do not support z
+      filters.add(createMultiFilter(lower));
+      filters.add(createMultiFilter(upper));
+      filters.add(createMultiFilter(increment));
       if (saveFilters(filename, filters)) {
         SettingsManager.writeSettings(filterSettings);
       }
@@ -2259,20 +2259,28 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Create a filter set using the min/max and the initial bounds.
       // Set sensible limits
       min[FILTER_SIGNAL] = Math.max(min[FILTER_SIGNAL], 30);
+      max[FILTER_SNR] = Math.min(max[FILTER_SNR], 10000);
       max[FILTER_PRECISION] = Math.min(max[FILTER_PRECISION], 100);
 
       // Make the 4-set filters the same as the 3-set filters.
 
       filters = new ArrayList<>(4);
-      filters.add(mf.create(min));
-      filters.add(mf.create(lower));
-      filters.add(mf.create(upper));
-      filters.add(mf.create(max));
+      filters.add(createMultiFilter(min));
+      filters.add(createMultiFilter(lower));
+      filters.add(createMultiFilter(upper));
+      filters.add(createMultiFilter(max));
       saveFilters(FileUtils.replaceExtension(filename, ".4.xml"), filters);
     }
 
     spotFitResults.min = min;
     spotFitResults.max = max;
+  }
+
+  private static Filter createMultiFilter(double[] parameters) {
+    // Currently no support for z-filter as 3D astigmatism fitting is experimental.
+    return new MultiFilter2(parameters[FILTER_SIGNAL], (float) parameters[FILTER_SNR],
+        parameters[FILTER_MIN_WIDTH], parameters[FILTER_MAX_WIDTH], parameters[FILTER_SHIFT],
+        parameters[FILTER_ESHIFT], parameters[FILTER_PRECISION], 0f, 0f);
   }
 
   private static FilterCriteria[] createFilterCriteria() {
@@ -3042,7 +3050,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     for (int j = 0; j < filterCriteria.length; j++) {
       if (filterCriteria[j].type == type) {
-        return array[j];
+        // Some metrics (e.g. SNR) can be infinite
+        return MathUtils.clip(-Double.MAX_VALUE, Double.MAX_VALUE, array[j]);
       }
     }
 
