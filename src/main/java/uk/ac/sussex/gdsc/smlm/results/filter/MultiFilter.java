@@ -356,7 +356,7 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   static MultiFilterComponent[] remove(MultiFilterComponent[] in, int size,
       Class<? extends MultiFilterComponent> clazz) {
     if (clazz == null) {
-      return in;
+      return Arrays.copyOf(in, size);
     }
     final MultiFilterComponent[] out = new MultiFilterComponent[size];
     int length = 0;
