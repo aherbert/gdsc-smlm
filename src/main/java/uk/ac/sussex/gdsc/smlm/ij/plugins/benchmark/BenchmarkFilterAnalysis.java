@@ -2518,7 +2518,7 @@ public class BenchmarkFilterAnalysis
       increment[i] = 0;
 
       if (!Double.isFinite(inc) || !Double.isFinite(parameters[i])
-          || !Double.isFinite(parameters2[i]) || parameters[i] > parameters2[i]) {
+          || !Double.isFinite(parameters2[i]) || parameters[i] > parameters2[i] || inc < 0) {
         continue;
       }
 
