@@ -717,6 +717,8 @@ public class BenchmarkFilterAnalysis
       countHigh = source.countHigh;
       reUseFilters = source.reUseFilters;
       expandFilters = source.expandFilters;
+      showColumns = source.showColumns.clone();
+      requireIntegerResults = source.requireIntegerResults;
       scoreFailCount = source.scoreFailCount;
       scoreResidualsThreshold = source.scoreResidualsThreshold;
       scoreDuplicateDistance = source.scoreDuplicateDistance;
@@ -1854,9 +1856,16 @@ public class BenchmarkFilterAnalysis
       }
       return true;
     }
-    if (spotFitResults.simulationId != filterResult.id) {
+    filterResult = BenchmarkSpotFilter.getBenchmarkFilterResult();
+    if (filterResult == null) {
       if (!silent) {
-        IJ.error(TITLE, "Update the benchmark spot fitting for the latest filter");
+        IJ.error(TITLE, "No benchmark spot candidates in memory");
+      }
+      return false;
+    }
+    if (filterResult.simulationId != simulationParameters.id) {
+      if (!silent) {
+        IJ.error(TITLE, "Update the benchmark spot candidates for the latest simulation");
       }
       return true;
     }
@@ -2567,10 +2576,11 @@ public class BenchmarkFilterAnalysis
   private MultiPathFitResults[] readResults() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean update = false;
-    final Pair<Integer, TIntObjectHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
+    Pair<Integer, TIntObjectHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
-      coordinateCache.set(Pair.of(simulationParameters.id, getCoordinates(results)));
+      coords = Pair.of(simulationParameters.id, getCoordinates(results));
+      coordinateCache.set(coords);
       update = true;
     }
 
@@ -2782,6 +2792,7 @@ public class BenchmarkFilterAnalysis
 
       fitResultDataCache.set(localFitResultData);
     }
+    fitResultData = localFitResultData;
 
     return localFitResultData.resultsList;
   }
