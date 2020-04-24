@@ -2325,7 +2325,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (total != 0) {
       for (int i = 1; i < status.length; i++) {
         if (status[i] != 0) {
-          ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, FitStatus.values()[i].toString(),
+          ImageJUtils.log("%s %s = %d / %d  (%.2f)", title, FitStatus.values()[i].toString(),
               status[i], total, 100.0 * status[i] / total);
         }
       }
@@ -2333,7 +2333,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Print total
     final int all = total + status[0];
     if (all != 0) {
-      ImageJUtils.log("%s %s = %d / %d  (%.2f)%n", title, "Total", total, all, 100.0 * total / all);
+      ImageJUtils.log("%s %s = %d / %d  (%.2f)", title, "Total", total, all, 100.0 * total / all);
     }
   }
 
