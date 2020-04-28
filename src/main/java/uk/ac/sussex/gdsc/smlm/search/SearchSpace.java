@@ -804,7 +804,7 @@ public class SearchSpace {
       double fraction, double padding) {
     ValidationUtils.checkArrayLength(dimensions, "Dimensions");
     ValidationUtils.checkNotNull(scoreFunction, "Score function is null");
-    ValidationUtils.checkArgument(fraction <= 0 || fraction >= 1,
+    ValidationUtils.checkArgument(fraction > 0 && fraction < 1,
         "Fraction must be between 0 and 1: %f", fraction);
     ValidationUtils.checkStrictlyPositive(samples, "Samples");
     ValidationUtils.checkPositive(padding, "Padding");
