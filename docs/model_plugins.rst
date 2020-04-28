@@ -3021,13 +3021,11 @@ Expanding Filter Sets
 
 Note that the plugin will detect if a filter set only contains 3 filters and determine if it can be expanded. The criteria for expansion are that the second filter has a value for each parameter equal or above the first filter. The first filter then forms the minimum value and the second filter the maximum value. The third filter must then have a value that is positive for each parameter where the second filter value was above the first filter value. The third filter then forms the increment for the parameters. Note that if the increment is infinity then it is ignored. This means that it is possible to create a series of values from minimum to maximum using the increment. Note that the increment does not have to be an exact factor of the range. The value is just incremented from the minimum until the maximum is reached (or exceeded).
 
-Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be renabled by changing the third filter value from Infinity to a suitable increment. If a filter set file is saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
+Note that a filter set file can be created using suitable ranges for the current fit results by the ``Fit Spot Data`` plugin using the ``Save filter range`` option. To avoid testing filters that assess similar properties the ``Fit Spot Data`` plugin disables certain filters. Currently EShift and Signal filtering are disabled as they are similar to Shift and SNR. They can be renabled by changing the third filter value from Infinity to a suitable increment. The Z depth filtering is also disabled as 3D fitting using astigmatism is experimental and not supported in the benchmarking plugins. If a filter set file is saved using ``Fit Spot Data`` then the file will be pre-selected in the dialog for convenience.
 
 If the filter set can be expanded the plugin will compute the number of combinations that will be created after expansion. It will then ask the user if they would like to expand the filters.
 
-Expanding filters is much faster that reading a large number of filters from a file and so is the preferred method of loading a large evenly spaced filter set. Any filter set that has been expanded is also available for a step search optimisation of the parameters (see :numref:`{number}: {name} <model_plugins:Optimisation>`).
-
-Note that advanced filters using ``And`` or ``Or`` filters can be constructed using expansion. The user should note that the parameters for the combined filters are represented as a single linear array, for example:
+Expanding filters is much faster that reading a large number of filters from a file and so is the preferred method of loading a large evenly spaced filter set. Note that advanced filters using ``And`` or ``Or`` filters can be constructed using expansion. The user should note that the parameters for the combined filters are represented as a single linear array, for example:
 
 .. code-block:: xml
 
@@ -3072,14 +3070,11 @@ The scoring scheme is shown in :numref:`Figure %s <fig_filter_analysis_scoring_s
     Scoring scheme for the spot candidates against the known spot locations.
 
     .. list-table::
-       :align: left
        :widths: 20 80
        :header-rows: 0
 
        * - Candidates
          - All the spot candidates.
-       * - Actual matches
-         - Any spot candidate or fitted spot candidate that matches a localisation.
        * - Fitted spots
          - Any spot candidate that was successfully fitted.
        * - Positives
@@ -3088,18 +3083,17 @@ The scoring scheme is shown in :numref:`Figure %s <fig_filter_analysis_scoring_s
          - Any fitted spot that was rejected by the filter.
        * - TP
          - True Positive:
-           A spot candidate that was fitted and matches a localisation and is accepted.
+           A spot candidate that was fitted and accepted by the filter and matches a localisation.
        * - FP
          - False Positive:
-           A spot candidate that was fitted but does not match a localisation and is accepted.
+           A spot candidate that was fitted and accepted by the filter but does not match a localisation.
        * - FN
          - False Negative:
-           A spot candidate that failed to be fitted but matches a localisation;
-           or a spot candidate that was fitted and matches a localisation and is rejected.
+           A spot candidate that was fitted and rejected by the filter but matches a localisation.
+           or any unmatched localisation.
        * - TN
          - True Negative:
-           A spot candidate that failed to be fitted and does not match a localisation;
-           or a spot candidate that was fitted and does not match a localisation and is rejected.
+           A spot candidate that was fitted and rejected by the filter and does not match a localisation.
 
 
 Classically a match is assigned if a predicted result and a localisation are within a distance threshold. This makes the choice of distance threshold critical. It also means that methods that get very close to the answer are not scored better than methods that get just close enough to the answer. This can be overcome by repeating the analysis multiple times with different distance thresholds and averaging the scores. An alternative is to use a ramped scoring function where the degree of match can be varied from 0 to 1. When using ramped scoring functions the fractional allocation of scores is performed, i.e. candidates are treated as if they both match and unmatch and the scores accumulated using fractional counts. This results in an equivalent to multiple analysis using different thresholds and averaging of the scores, but it can be performed in one iteration.
@@ -3114,9 +3108,9 @@ where NA is the numerical aperture of the microscope [Abbe, 1873]. Any match bel
 
 As well as matching the localisation position it is possible to assign matches using the fitted signal. The signal-factor is computed within the ``Fit Spot Data`` plugin and is a measure of how far the fitted signal was from the true number of photons. Matches can be rejected if they are above a threshold and, as for the distance match, a ramped score is available using a ramped scoring function. In the case that ramped scoring is used for both distance and signal-factor then the final match score is the product of the two ramped scores. The remaining unmatched score is set so the total for the result is 1.
 
-The totals TP+FP+TN+FN must equal the number of spot candidates. This allows different fitting methods to be compared since the total number of candidates is the same. The TP, FP, TN and FN totals can be used to compute scores as detailed in :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>`.
+Scores are reported using classical binary scoring and the fractional scoring. In binary scoring any filtered spot close to a localisation is counted as a true positive. In fractional scoring the same spot may be part true positive and part false positive. The fractional scoring metrics are prefixed with an ``f``.
 
-As an alternative scoring system, different fitting methods can be compared using the same TP value but calculating FN = localisations - TP and FP as Positives - TP. In this scheme FN represents any original spots that were missed and FP represents the number of accepted fits that do not match an original spot. This creates a score against the original simulated localisations using everything that was passed through the filter (Positives). The results table indicates this by prefixing the score column titles with o for Original. This score is comparable when a different spot candidate filter has been used and the total number of candidates is different, e.g. Mean filtering vs. Gaussian filtering. Note that in this scheme there is no TN total and so the number of comparison metrics that can be computed are reduced to recall, precision, Jaccard and F1-score. The original score metrics are used by default for selection and ranking.
+The total TP+FP must equal the number of fitted spots accepted by the filter; and TP+FN must equal the number of localisations included in the analysis. This may be lower than the number of simulated molecules if a border is used. There is no reporting of the TN score as this will vary depending on the number of candidates and fitted spots produced by the spot filter and fitting algorithms. Focusing the results on the TP score allows different spot filter and fitting methods to be compared since the total number of localisations is the same. The TP, FP, and FN totals can be used to compute scores as detailed in :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>`.
 
 
 .. index:: Ranking Filters
@@ -3124,12 +3118,9 @@ As an alternative scoring system, different fitting methods can be compared usin
 Ranking Filters
 ^^^^^^^^^^^^^^^
 
-When all the scores have been computed for the filters in a filter set, the filters are ranked. Ranking is performed using two chosen scoring metrics. The first metric is chosen as a minimum limit that must be achieved; this is the ``Criteria`` metric. The second metric is chosen to rank all the filters that pass the criteria; this is the ``Score`` metric. If no filters pass the criteria then a warning is written to the ``ImageJ`` log window.
+When all the scores have been computed for the filters in a filter set, the filters are ranked. Ranking is performed using two chosen scoring metrics. The first metric is chosen as a minimum limit that must be achieved; this is the ``Criteria`` metric with the limit specified as the ``Criteria limit``. The second metric is chosen to rank all the filters that pass the criteria; this is the ``Score`` metric. If no filters pass the criteria then a warning is written to the ``ImageJ`` log window.
 
-This ranking system allows filters to be restricted to those that function at a minimum desired level and then ranked. For example assessing all filters that achieve 95% precision and then ranking by recall would pick the best filter for high confidence in the results, and assessing all filters that achieve 80% recall and then ranking by precision would pick the best filter for returning a high number of localisations but potentially also returning many false positives. Note that some scores are better as they get lower. In this case the plugin reverses the ordering to pick the best filter.
-
-The original score metrics are used by default for selection and ranking. The precision is used to set the
-``Criteria limit``. The results are then ranked using the Jaccard score. Using the Jaccard ensures that the best possible filter is chosen since this score maximises the overlap between predicted and actual results. Note that when ranking filters if the score is the same then the rank is determined by the criteria metric.
+This ranking system allows filters to be restricted to those that function at a minimum desired level and then ranked. For example assessing all filters that achieve 95% precision and then ranking by recall would pick the best filter for high confidence in the results, and assessing all filters that achieve 80% recall and then ranking by precision would pick the best filter for returning a high number of localisations but potentially also returning many false positives. Note that some scores are better as they get lower. In this case the plugin reverses the ordering to pick the best filter. Note that when ranking filters if the score is the same then the rank is determined by the criteria metric.
 
 The use of the ``Criteria`` filter can be disabled by setting the ``Criteria limit`` to a value achievable by any filter, e.g. Precision = 0.
 
@@ -3146,13 +3137,27 @@ The sensitivity analysis aims to show how much the scores will change when the f
 Sensitivity can be calculated for the best filter from each filter set. This is done by altering the parameters of the filter by a small change (delta) and recomputing the scores. This can be used to express the relative change in the score with a change in the parameters, i.e. the partial gradient. The gradient of each parameter is reported; those with lower gradients are more robust and those with higher gradients are the ones that cannot be varied very much for optimal performance of the filter.
 
 
-..
-  No index
+.. index:: Filter Optimisation
 
 Filter Optimisation
 ^^^^^^^^^^^^^^^^^^^
 
-Searching for the best parameters for a filter is an optimisation problem. The more parameters there are in the filter the more combinations are possible. It may not be feasible to enumerate all the possible parameter combinations to find the best parameters. The plugin offers two methods for searching for the optimal parameters: evolution using a genetic algorithm; and a step search. Once the optimal parameters are found for the filter set then the plugin produces the summary results as per normal.
+Searching for the best parameters for a filter is an optimisation problem. The more parameters there are in the filter the more combinations are possible. It may not be feasible to enumerate all the possible parameter combinations to find the best parameters. The plugin offers methods for searching for the optimal parameters: evolution using a genetic algorithm; range search; enrichment search; and step search. Each method uses the input filter set as a seed. Filters are then created using different methods and evaluated. Some algorithms iterate the generation of filters and evaluation until the best score has converged. Once the optimal parameters are found for the filter set then the plugin produces the summary results as per normal.
+
+For some algorithms the input filter set is used to define the lower and upper bounds for the filter parameters. In this case the filter set must contain at least 2 filters. An example below shows a filter file that defines the parameter bounds for a ``MultiFilter2`` filter:
+
+.. code-block:: xml
+
+    <list>
+      <FilterSet name="Range">
+        <filters>
+          <MultiFilter2 signal="1975.0" snr="158.0" minWidth="0.64" maxWidth="1.1" shift="0.0" eshift="0.0" precision="4.0" minZ="0.0" maxZ="0.0"/>
+          <MultiFilter2 signal="19620.0" snr="230.0" minWidth="0.96" maxWidth="1.5" shift="2.8" eshift="3.2" precision="20.0" minZ="0.0" maxZ="0.0"/>
+        </filters>
+      </FilterSet>
+    </list>
+
+The ultimate limits for each filter parameter are set using the minimum and maximum value of that filter data in all the results generated by ``Benchmark Spot Fit`` plugin. This prevents evaluation of filters that will not discriminate the fit results.
 
 
 .. index:: Evolution using a Genetic Algorithm
@@ -3160,11 +3165,135 @@ Searching for the best parameters for a filter is an optimisation problem. The m
 Evolution using a Genetic Algorithm
 """""""""""""""""""""""""""""""""""
 
-All the filters in a filter set are used to create a population of filters. The parameters are listed in order to create a genome for each individual. The fitness of each individual is the score that is achieved using the ranking metric. If the criteria is not reached then the fitness is set to zero. Optionally this can be relaxed to allow all filters achieving the criteria to be ranked ahead of all filters not achieving the criteria.
+All the filters in a filter set are used to create a population of filters. The parameters are listed in order to create a genome for each individual. The fitness of each individual is the score that is achieved using the ranking metric and the criteria metric. Scoring is performed by ensuring all filters achieving the criteria are ranked ahead of all filters not achieving the criteria.
 
-After computing the fitness of individuals in a population, the population is allowed to change. The population is first reduced to a subset of the individuals using a selection process; the best scoring individual is always kept at each iteration. The subset forms a new population that is expanded by breeding. Pairs are selected for crossover and then new individuals are created by crossing their parent parameter values at random points along the genome. These new individuals may also mutate to change parameters in their genome. When enough new individuals have been created the fitness is evaluated again and the process repeated until no improvement can be made. Note that the individuals selected for the subset are not changed and only new individuals can mutate. This means that the population should not get worse if the top fraction is selected each iteration. If selection is by sampling from the population then it is possible the population can get worse, but the top individual is always retained.
+After computing the fitness of individuals in a population, the population is allowed to change. The population is first reduced to a subset of the individuals using a selection process; the best scoring individual is always kept at each iteration. The subset forms a new population that is expanded by breeding. Pairs are selected for crossover and then new individuals are created by crossing their parent parameter values at random points along the genome. These new individuals may also mutate to change parameters in their genome. When enough new individuals have been created the fitness is evaluated again and the process repeated until no improvement can be made. Note that the individuals selected for the subset are not changed and only new individuals can mutate. This means that the best individuals in the population will not get worse each iteration.
 
-Due to the use of mutation the genetic algorithm is able to produce parameter values that were not in the original filter set.
+Note that due to the use of mutation the genetic algorithm is able to produce parameter values that were not in the original filter set.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Population size
+     - The size of the population.
+
+   * - Failure limit
+     - The limit on the number of failed attempts to create a new individual before stopping growing the population. Note that new individuals are checked to be unique so it is common in a highly similar population that many crossovers will no create unique combinations.
+
+   * - Tolerance
+     - The relative error for convergence of the top filter score.
+
+   * - Converged count
+     - The number of iterations with a converged score to allow before stopping.
+
+   * - Mutation rate
+     - The mean fraction of the genome positions that will mutate. The number of mutations is a Poisson variable sampled using a mean equal to the mutation rate multiplied by the genome length. Note that the same position can mutate multiple times.
+
+   * - Crossover rate
+     - The mean fraction of the genome positions that will crossover. The number of crossovers is a Poisson variable sampled using a mean equal to the crossover rate multiplied by the genome length. It is not possible to crossover more times than the number of parameters in the genome.
+
+   * - Mean children
+     - When performing crossover between two selected individuals, the number of children will be equal to a Poisson variable sampled using this mean. At least 1 child is always produced.
+
+   * - Selection fraction
+     - At each iteration the population is reduced to a fraction of the target population size. The new size will be at least 2.
+
+   * - Ramped selection
+     - Select individuals using a weighting so that each individual is weighted according to the rank of the fitness score. This allows unfit individuals to be selected when reducing the population size, albeit with lower probability. When selecting for crossovers the selection is biased towards the highest ranking individuals.
+
+       If not selected the individuals will be selected in order of fitness when reducing the population and randomly from the population when selecting for crossovers.
+
+   * - Save option
+     - Allow the final population of filters (after convergence) to be saved to file. This allows restarting the plugin to continue with the same population.
+
+   * - Parameter name
+     - The mutation range.
+
+       The dialog will present a field for each named parameter of the filter. The mutation range is the standard deviation of the Gaussian distribution used to mutate the parameter.
+
+       A negative value disables optimisation of that filter parameter. A value of zero includes the filter parameter but will prevent mutation. The parameter will only take values observed in the population.
+
+
+.. index:: Range Search
+
+Range Search
+""""""""""""
+
+Create a range for each parameter. This is divided uniformly into a set number of samples. The all-vs-all combination of all parameters is then evaluated. At each iteration the search will enumerate all points in the configured search space and find the optimum. If at the bounds of the range in any dimension then the range is expanded and only those points that have not yet been evaluated will be passed to the score function. If not at the bounds then the range is re-centred on the optimum. A refinement step can be performed at the current optimum. The optimum is a sample from an enumerated grid of parameter space. Refinement will evaluate the parameters using values between the current optimum and next grid interval. This can be done using small steps in a single dimension with all other dimensions held fixed and dimensions are rotated until no improvement (``Single Dimension`` refinement). Or by enumerating all dimensions on a smaller parameter grid within the original interval (``Multi Dimension`` refinement). Following refinement the parameter range is reduced by a factor and the process iterated. The effect is an enumerated search of parameter space that gradually reduces around the current optimum.
+
+If a seed population was provided then the first step is to re-centre to the optimum of the seed population and the range refined/reduced as per the refinement mode parameter. Subsequent steps are the same.
+
+The process iterates until the range cannot be reduced in size, or convergence is reached.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Width
+     - Defines the spread of samples for each parameter range around the range centre. The number of samples is equal to 2 * Width + 1.
+
+   * - Save option
+     - Set to **true** to save the final population of filters as a filter set. This can be used as input to the plugin to resume optimisation.
+
+   * - Max iterations
+     - The maximum number of iterations.
+
+   * - Reduce
+     - The factor used to reduce the range. If set to 1 then no reduction is performed and the process stops after the first enumeration and refinement.
+
+   * - Refinement
+     - Set the refinement mode used to refine the best filter from the most recent iteration.
+
+   * - Seed size
+     - The number of random samples to seed the initial iteration. These are samples taken using a uniform sample from within the parameter range.
+
+   * - Parameter name
+     - Each filter parameter has a boolean flag to state if it is enabled. If **true** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be enumerated to create filters.
+
+
+.. index:: Enrichment Search
+
+Enrichment Search
+"""""""""""""""""
+
+Search the configured parameter space using random sampling until convergence of the optimum.
+
+At each iteration the search will randomly sample points in the configured search space and score them. The top fraction of the results is used to redefine the search space. This range can be padded to expand it to a larger range.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Save option
+     - Set to **true** to save the final population of filters as a filter set. This can be used as input to the plugin to resume optimisation.
+
+   * - Max iterations
+     - The maximum number of iterations.
+
+   * - Converged count
+     - The number of iterations with a converged score to allow before stopping.
+
+   * - Samples
+     - The number of samples per iteration. These are samples taken using a uniform sample from within the parameter range.
+
+   * - Fraction
+     - The fraction of filters used to define the new search space each iteration.
+
+   * - Padding
+     - The amount of additional range to add to the range for each dimension.
+
+   * - Parameter name
+     - Each filter parameter has a boolean flag to state if it is enabled. If **true** then the parameter will be set to the disabled value for the filter. Otherwise the range for the parameter will be sampled to create filters.
 
 
 .. index:: Step Search
@@ -3172,19 +3301,19 @@ Due to the use of mutation the genetic algorithm is able to produce parameter va
 Step Search
 """""""""""
 
-If a filter set has been expanded using 3 filters defining minimum, maximum and increment parameters then the plugin can perform a step search using a fraction of the increment as the step size.
+The ``Step Search`` is the same as the initial iteration of the ``Range Search``. The ``Refinement`` mode is set to ``Multi Dimension``. The ``Reduce`` parameter is set to 1 thus no iteration is performed to improve the initial best scoring filter.
 
-All of the filters in a filter set are evaluated and then ranked. A search is then performed from the best filter using a fraction of the increment. New filters are created that use the step increment to push the parameters to new values outside the original range. The new filters are evaluated and this process is repeated until no improvement in score is made.
+The search can be represented as a grid of filter parameters in n-dimensional space bounded by the range of the filter parameters. The initial search will identify the best grid position. A refinement constructs a grid within the space between the grid position and all its neighbours.
 
-The ``Step search`` option is a fast method for taking an initial parameter range and producing an optimal set of parameters that may not be within that range. If the range and increment for the parameters is well chosen then the optimal parameters can be found without computing the results for a large set of filters.
+This search is an efficient optimisation if the number of combinations is computationally feasible. For example a filter with 5 parameters and a ``Width`` of 5 will have ``2*5+1 = 11`` samples per dimension and 161,051 filters. From the optimum filter a second set of 161,051 filters will be sampled during the refinement step within the interval between the initial optimum and the next evaluated parameter in either direction for all dimensions. To identify the same optimum in a single step would require ``2*5*5+1 == 51`` samples per dimension and approximately 345 million filters.
 
 
 Parameters
 ~~~~~~~~~~
 
-When the plugin is run a dialog is present allowing parameters to be configured.
+When the plugin is run a dialog is presented allowing parameters to be configured.
 
-The dialog message shows a summary of the results computed by ``Fit Spot Data`` that will be analysed. The number of results is shown along with the number of true positives within the results if they are scored with the current values for the match distances. If the match distances are altered then the number of true positives will be recomputed when the plugin is run but will not update in the plugin message until it is next displayed.
+The dialog message shows a summary of the results computed by ``Fit Spot Data`` that will be analysed. The number of results is shown along with the number of true positives within the results if they are scored with the current values for the match distances. This is the upper limit of true positives for any filter. If the match distances are altered then the number of true positives will be recomputed when the plugin is run but will not update in the plugin message until it is next displayed.
 
 The expected signal and localisation precision of the simulation localisations is computed using the formulas of Thompson (for signal) and Mortensen (for localisation), see section :numref:`{number}: {name} <localisation_precision:Localisation Precision>` for more details. If analysis has been previously run on this data then the score for the best filter result held in memory is shown. (The results in memory functionality is used for choosing the optimum fail count settings for a filter set.)
 
@@ -3288,21 +3417,18 @@ The following parameters can be adjusted:
        - ``All``: Output all results per round building filters using an enumeration of all combinations of the components.
 
    * - Evolve
-     - Perform a search optimisation of the filter parameters (see section :numref:`<model_plugins:Filter Optimisation>`). This option does not evaluate all the filters in the input filter set. The input filter set is used to defined bounds of the filter parameters for the search. Once the optimal parameters have been identified then the best filter is included in the output results.
+     - Perform a search optimisation of the filter parameters (see section :numref:`%s <model_plugins:Filter Optimisation>`). This option may not evaluate all the filters in the input filter set. The input filter set is used to defined bounds of the filter parameters for the search. Once the optimal parameters have been identified then the best filter is included in the output results.
 
        - ``None``: No optimisation
-       - ``Genetic Algorithm``: Use a genetic algorithm to explore combinations of the best filters.
+       - ``Genetic Algorithm``: Use a genetic algorithm to explore combinations of the best filters until convergence.
        - ``Range Search``: Search using a range. The range is reduced each iteration until convergence. The initial range is created from the input filter set.
        - ``Enrichment Search``: Sample randomly from the parameter range of the filters. The top fraction of the results are used to define the range for the next round of sampling. Iterates until convergence.
        - ``Step Search``: Search using the parameter range of the input filters with a configured number of steps.
 
-   * - Step Search
-     - Set above zero to do a step search algorithm. The step search is performed using a step size of increment/N, where N is the ``Step Search`` parameter. Note if the step size is 1, a search will only be performed if the best filter is at the edge of the range tested (otherwise each step will move to an already evaluated filter).
-
-       This can only be performed if the filters were expanded from an input filter set and the ``Evolve`` option is **false**.
-
    * - Repeat evolve
-     - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input. This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded. If **false** the plugin will allow configuration of the output display options for the previous results; otherwise new results are generated by the configured optimisation algorithm.
+     - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
+
+     This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded.
 
        This option is useful to experiment with different ``Evolve`` settings for the same input results and filter settings.
 
@@ -3319,76 +3445,11 @@ The following parameters can be adjusted:
      - Show the false negatives on the original input image data. FN are shown in yellow if included in the filter scoring; otherwise orange if they are excluded (e.g. in the image border).
 
 
-Once the main parameters have been chosen a second dialog is presented where the scoring metrics that are recorded in the results table can be specified (:numref:`Figure %s <fig_filter_analysis_score_selection_dialog>`). This allows the user to remove many of the results from the table if they do not need them to save space.
+Once the main parameters have been chosen a second dialog is presented where the scoring metrics that are recorded in the results table can be specified. This allows the user to remove many of the results from the table if they do not need them to save space.
 
-.. _fig_filter_analysis_score_selection_dialog:
-.. figure:: images/filter_analysis_score_selection_dialog.png
-    :align: center
-    :figwidth: 80%
+If the ``Evolve`` option is selected a dialog will be presented for each filter set to be optimised. The parameters are all prefixed with the filter set number. This allows support for recording the plugin using the ``ImageJ`` recorder for use in the ``ImageJ`` macro language. See section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` for details.
 
-    Benchmark filter analysis scoring metric selection dialog
-
-If the ``Evolve`` option is selected a dialog will be presented for each filter set to be optimised. The parameters are all prefixed with the filter set number. This allows support for recording the plugin using the ``ImageJ`` recorder for use in the ``ImageJ`` macro language. The following parameters are available:
-
-.. list-table::
-   :widths: 20 80
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-
-   * - Population size
-     - The size of the population to reach when producing new individuals. A higher number will slow down the optimisation but may allow a better solution to be found.
-
-   * - Failure limit
-     - The limit on the number of failed attempts to create a new individual before stopping growing the population. Note that new individuals are checked to be unique so it is common in a highly similar population that many crossovers will no create unique combinations.
-
-   * - Tolerance
-     - The relative difference below which two fitness scores are equal.
-
-   * - Converged count
-     - The number of iterations with no change in fitness for convergence.
-
-       Warning: If this is set to zero then convergence checking is disabled and the algorithm must be stopped using the ``ImageJ`` interrupt by pressing the ``Escape`` button.
-
-   * - Mutation rate
-     - The mean fraction of the genome positions that will mutate. The number of mutations is a Poisson variable sampled using a mean equal to the mutation rate multiplied by the genome length. Note that the same position can mutate multiple times.
-
-   * - Crossover rate
-     - The mean fraction of the genome positions that will crossover. The number of crossovers is a Poisson variable sampled using a mean equal to the crossover rate multiplied by the genome length. It is not possible to crossover more times than the number of parameters in the genome.
-
-   * - Mean children
-     - When performing crossover between two selected individuals, the number of children will be equal to a Poisson variable sampled using this mean. At least 1 child is always produced.
-
-   * - Selection fraction
-     - At each iteration the population is reduced to a fraction of the target population size. The new size will be at least 2.
-
-   * - Ramped selection
-     - Select individuals using a weighting so that each individual is weighted according to the rank of the fitness score. This allows unfit individuals to be selected when reducing the population size, albeit with lower probability. When selecting for crossovers the selection is biased towards the highest ranking individuals.
-
-       If not selected the individuals will be selected in order of fitness when reducing the population and randomly from the population when selecting for crossovers.
-
-   * - Strict fitness
-     - Only allow individuals that pass the ``Criteria limit`` to be selected. This may results in an empty population after selection.
-
-       If not selected then the fitness score for the individual is:
-
-       ``score metric + 1 + criteria metric``
-
-       This will work for any criteria metric that is in the range of 0-1 allowing all those individuals that pass the criteria to be ranked above the others.
-
-   * - Save option
-     - Allow the final population of filters (after convergence) to be saved to file. This allows restarting the plugin to continue with the same population.
-
-   * - Param name
-     - The mutation range.
-
-       The dialog will present a field for each named parameter of the filter. The mutation range is the standard deviation of the Gaussian distribution used to mutate the parameter.
-
-       Note: If the filter set was created using expansion from min; max; increment values then the range defaults to zero for any parameter that was not expanded. (It is assumed that the user does not want to explore this parameter.) Otherwise the value is a default for the filter parameter adjusted by the ``Delta`` parameter.
-
-
-Once the genetic algorithm is started a results table is created named ``Benchmark Filter Analysis Evolution``. This table contains the same columns as the main results table with an extra column for the iteration of the algorithm. The results from the best filter per iteration are added to the table. This table can be used to track the progress of the algorithm. If desired the genetic algorithm can be stopped manually by pressing the ``Escape`` character.
+When using the ``Evolve`` option a results table is created named ``Benchmark Filter Analysis Evolution``. This table contains the same columns as the main results table with an extra column for the iteration of the algorithm. The results from the best filter per iteration are added to the table. This table can be used to track the progress of the algorithm. If desired the algorithm can be stopped manually by pressing the ``Escape`` character.
 
 
 Results
@@ -3520,7 +3581,13 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
      - The name of the filter.
 
    * - Fail
-     - The fail count. If using a range then the min and maximum of the range will be shown.
+     - The fail count.
+
+   * - Res
+     - The residuals threshold.
+
+   * - Dup D
+     - The duplicate distance.
 
    * - Lower D
      - The lower match distance.
@@ -3540,23 +3607,23 @@ If the ``Show table`` or ``Show summary`` options are selected the plugin will d
    * - FP
      - The false positive score.
 
-   * - TN
-     - The true negative score.
-
    * - FN
      - The false negative score.
 
    * - Metrics
-     - Configured score metrics computed using TP, FP, TN and FN. See section :numref:`{number} <comparison_metrics:Comparison Metrics>`.
+     - Configured score metrics computed using TP, FP and FN. See section :numref:`{number} <comparison_metrics:Comparison Metrics>`.
 
-   * - oFP
-     - The original false positives score. This is equal to the number of results that were accepted by the filter minus the TP.
+   * - fTP
+     - The fractional true positive score.
 
-   * - oFN
-     - The original false negatives score. This is equal to the number of localisations that were simulated minus the TP.
+   * - fFP
+     - The fractional false positive score.
 
-   * - oMetrics
-     - The original score metrics computed using TP, oFP and oFN. See section :numref:`{number} <comparison_metrics:Comparison Metrics>`.
+   * - fFN
+     - The fractional false negative score.
+
+   * - fMetrics
+     - The fraction score metrics computed using fTP, fFP and fFN.
 
 
 The summary table contains the same fields as the results table. The following additional columns are present:
@@ -3569,7 +3636,7 @@ The summary table contains the same fields as the results table. The following a
      - Description
 
    * - Depth Recall
-     - The recall of localisations that were within the depth specified by the ``Summary depth`` parameter. Note that the parameter is halved to set a range for z set above and below zero so that the depth-of-field equals the ``Summary depth``.
+     - The recall of localisations that were within the depth specified by the ``Summary depth`` parameter. Note that the summary depth parameter is for a span half above and half below zero so that the depth-of-field equals the ``Summary depth``.
 
    * - Distance
      - The average distance between fitted results and the true localisation.
@@ -3577,8 +3644,26 @@ The summary table contains the same fields as the results table. The following a
    * - Signal factor
      - The average signal factor between fitted results and the true localisation.
 
+   * - RMSD
+     - The root mean squared distance (RMSD) between fitted results and the true localisation.
+
+   * - Slope
+     - The slope of the best line fit of the simulated localisation signal and the fitted signal.
+
    * - At limit
-     - A flag to indicate if the optimal filter from the filter set was at the limit of the range for any of the expanded parameters. If this is Y (yes) then a better filter may exist if the ranges are changed. The parameter(s) at the edge of the range are recorded in the ``ImageJ`` log window.
+     - A flag to indicate if the optimal filter from the filter set was at the limit of the range for any of the expanded parameters. A character is used for each filter parameter: ``U`` = Upper limit; ``>`` = Above the upper limit; ``L`` = Lower limit; and ``<`` = Below the lower limit. If this is set then a better filter may exist if the ranges are changed. The parameter(s) at the edge of the range are also recorded in the ``ImageJ`` log window.
+
+   * - Evolve
+     - The optimisation algorithm for the filter set.
+
+   * - Time
+     - The time for the analysis of the filter set.
+
+   * - Search
+     - The optimisation algorithm for the standard filter parameters. This is used by the ``Benchmark Filter Parameters`` plugin.
+
+   * - Time
+     - The time for the analysis of the standard filter parameters. This is used by the ``Benchmark Filter Parameters`` plugin.
 
 
 .. index:: ! Benchmark Filter Parameters
