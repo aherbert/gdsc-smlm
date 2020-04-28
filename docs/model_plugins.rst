@@ -3149,8 +3149,8 @@ Sensitivity can be calculated for the best filter from each filter set. This is 
 ..
   No index
 
-Optimisation
-^^^^^^^^^^^^
+Filter Optimisation
+^^^^^^^^^^^^^^^^^^^
 
 Searching for the best parameters for a filter is an optimisation problem. The more parameters there are in the filter the more combinations are possible. It may not be feasible to enumerate all the possible parameter combinations to find the best parameters. The plugin offers two methods for searching for the optimal parameters: evolution using a genetic algorithm; and a step search. Once the optimal parameters are found for the filter set then the plugin produces the summary results as per normal.
 
@@ -3202,18 +3202,14 @@ The following parameters can be adjusted:
    * - Fail count
      - The number of failures to accept before rejecting the remaining results from the current frame.
 
-   * - Fail count range
-     - If specified, the filter will be evaluated using each fail count from ``Fail count`` to ``Fail count + Fail count range``.
+   * - Residuals Threshold
+     - The threshold for the residuals analysis where a single spot would be fit again as a double spot. The residuals are a measure of how elliptical the Gaussian data is compared to the Gaussian spot; this elliptical shape is assumed to be due to two overlapping spots. A lower threshold will attempt a doublet fit for more candidates. Set to 1.0 to disable.
 
-       This setting significantly slows down computation as the filters must be evaluated multiple times and results pre-processing is not performed.
+   * - Duplicate distance
+     - The distance where two spots are considered equal. This is used to filter later spot fit results where a candidate has drifted to fit another previously identified spot.
 
    * - Reset
      - Set to **true** to clear the best filter scores from memory. The memory is also cleared if the fit results have changed, or the ranking and scoring thresholds are changed.
-
-   * - Rank by signal
-     - By default results are ranked using the order determined by the spot filter that identified the candidates.
-
-       Choose this option to re-rank the results using the fitted signal. Note that ranking spot candidates by fitted signal is not possible in the ``Peak Fit`` plugin since fitting results have not been computed. This option allows the user to test if fitting every possible candidate spot, re-ranking and then filtering would improve results.
 
    * - Show table
      - Show a result table with the scores of each filter.
@@ -3248,7 +3244,7 @@ The following parameters can be adjusted:
      - The relative change in the parameter value to use to calculate the sensitivity.
 
    * - Criteria
-     - The metric used for the minimum criteria.
+     - The metric used for the minimum criteria. All filters must pass this criteria to be included in scoring.
 
    * - Criteria limit
      - The value for the minimum criteria.
@@ -3280,16 +3276,47 @@ The following parameters can be adjusted:
    * - Score analysis
      - Produce a histogram of the distance and signal factor for all fit matches to the original localisations.
 
+   * - Component analysis
+     - Perform an analysis of the component parts of the top scoring filter. Applies only to multi-part filters. This creates filters from the components and scores them allowing the contribution of each component part to be assessed.
+
+       Filters are created by either enumerating all combinations of the components, or scoring a subset using *n* components and ranking them with the top ranked filter progressing to the next round for *n+1* components. Enumerating all combinations is available when there are up to 12 component parts (4095 combinations). Either option starts with all possible filters with 1 component and reports results for the best filter or all the filters. Subsequent rounds use 2, 3, etc component parts.
+
+       - ``None``: No component analysis
+       - ``Best Ranked``: Output the best result per round building filters using the top ranked filter from the previous round.
+       - ``Ranked``: Output all results per round building filters using the top ranked filter from the previous round.
+       - ``Best All``: Output the best result per round building filters using an enumeration of all combinations of the components.
+       - ``All``: Output all results per round building filters using an enumeration of all combinations of the components.
+
    * - Evolve
-     - Perform evolution optimisation with a genetic algorithm.
+     - Perform a search optimisation of the filter parameters (see section :numref:`<model_plugins:Filter Optimisation>`). This option does not evaluate all the filters in the input filter set. The input filter set is used to defined bounds of the filter parameters for the search. Once the optimal parameters have been identified then the best filter is included in the output results.
+
+       - ``None``: No optimisation
+       - ``Genetic Algorithm``: Use a genetic algorithm to explore combinations of the best filters.
+       - ``Range Search``: Search using a range. The range is reduced each iteration until convergence. The initial range is created from the input filter set.
+       - ``Enrichment Search``: Sample randomly from the parameter range of the filters. The top fraction of the results are used to define the range for the next round of sampling. Iterates until convergence.
+       - ``Step Search``: Search using the parameter range of the input filters with a configured number of steps.
 
    * - Step Search
      - Set above zero to do a step search algorithm. The step search is performed using a step size of increment/N, where N is the ``Step Search`` parameter. Note if the step size is 1, a search will only be performed if the best filter is at the edge of the range tested (otherwise each step will move to an already evaluated filter).
 
        This can only be performed if the filters were expanded from an input filter set and the ``Evolve`` option is **false**.
 
+   * - Repeat evolve
+     - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input. This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded. If **false** the plugin will allow configuration of the output display options for the previous results; otherwise new results are generated by the configured optimisation algorithm.
+
+       This option is useful to experiment with different ``Evolve`` settings for the same input results and filter settings.
+
    * - Title
      - Add a title for the analysis to the results tables. This can be used when running multiple repeats of the plugin with results from different filters and fitting algorithms.
+
+   * - Show TP
+     - Show the true positives on the original input image data. TP are shown in green.
+
+   * - Show FP
+     - Show the false positives on the original input image data. FP are shown in red if included in the filter scoring; otherwise magenta if they are excluded (e.g. in the image border).
+
+   * - Show FN
+     - Show the false negatives on the original input image data. FN are shown in yellow if included in the filter scoring; otherwise orange if they are excluded (e.g. in the image border).
 
 
 Once the main parameters have been chosen a second dialog is presented where the scoring metrics that are recorded in the results table can be specified (:numref:`Figure %s <fig_filter_analysis_score_selection_dialog>`). This allows the user to remove many of the results from the table if they do not need them to save space.
