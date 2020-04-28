@@ -1886,6 +1886,10 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final PreprocessedPeakResult r = ((PeakFractionalAssignment) a[j]).peakResult;
         set.remove(r.getUniqueId());
 
+        if (!Double.isFinite(r.getSnr())) {
+          System.out.println("bad1");
+        }
+
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
         final double snr = r.getSnr();
@@ -1916,6 +1920,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
         if (r == null) {
           throw new IllegalArgumentException("Missing result: " + uniqueId);
+        }
+        if (!Double.isFinite(r.getSnr())) {
+          System.out.println("bad2");
         }
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
@@ -2493,6 +2500,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (index <= FILTER_PRECISION
         && (settings.showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard)) {
       // Jaccard score verses the range of the metric
+      for (double[] d : matchScores) {
+        if (!Double.isFinite(d[index])) {
+          System.out.printf("Error in fit data [%d]: %s%n", index, d[index]);
+        }
+      }
+
+      // Do not use Double.compare(double, double) so we get exceptions in the sort for inf/nan
       Arrays.sort(matchScores, (o1, o2) -> {
         if (o1[index] < o2[index]) {
           return -1;
@@ -2667,14 +2681,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
             break;
           }
         }
-      } else {
-        // Switch to percentiles if we have no delta histogram
-        if (upper.requiresDeltaHistogram()) {
-          upper = UpperLimit.NINETY_NINE_PERCENT;
-        }
-        if (lower.requiresDeltaHistogram()) {
-          lower = LowerLimit.ONE_PERCENT;
-        }
       }
     }
 
@@ -2693,11 +2699,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     double lowerBound;
     double upperBound;
     switch (lower) {
+      case MAX_NEGATIVE_CUMUL_DELTA:
+        // Switch to percentiles if we have no delta histogram
+        if (maxx2 < 0) {
+          lowerBound = maxx2;
+          break;
+        }
+        // fall-through
       case ONE_PERCENT:
         lowerBound = getPercentile(h2, 0.01);
-        break;
-      case MAX_NEGATIVE_CUMUL_DELTA:
-        lowerBound = maxx2;
         break;
       case ZERO:
         lowerBound = 0;
@@ -2710,8 +2720,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
     switch (upper) {
       case MAX_POSITIVE_CUMUL_DELTA:
-        upperBound = maxx1;
-        break;
+        // Switch to percentiles if we have no delta histogram
+        if (maxx1 > 0) {
+          upperBound = maxx1;
+          break;
+        }
+        // fall-through
       case NINETY_NINE_PERCENT:
         upperBound = getPercentile(h2, 0.99);
         break;
