@@ -2042,6 +2042,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // can produce the total gain. If the total gain is 0 then no conversion
     // to photons is possible and the noise defaults to the global estimate.
 
+    // If the fitted background is <= 0 and the camera model has no noise 
+    // then the noise uses the global estimate.
+
     /**
      * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
      *
@@ -2133,6 +2136,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         background /= totalGain;
       }
 
+      // Noise estimate based on Poisson model requires positive noise
+      background = Math.max(0, background);
+
       // Apply the EM-CCD noise factor of 2 to the photon shot noise
       if (isEmCcd) {
         background *= 2;
@@ -2141,6 +2147,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Using the mean variance allows an estimate for a per-pixel camera model.
       // Use the normalised variance (i.e. the variance in photo-electrons).
       double noiseEstimate = Math.sqrt(background + cameraModel.getMeanNormalisedVariance(bounds));
+
+      if (noiseEstimate == 0) {
+        // Happens when the background is zero and there is no camera model noise.
+        // Fall back to the global noise estimate.
+        noiseEstimate = fitConfig.getNoise();
+      }
 
       if (isFitCameraCounts) {
         noiseEstimate *= totalGain;
@@ -3076,8 +3088,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final int npeaks = 2 + fittedNeighbourCount - precomputedFittedNeighbourCount;
         final double[] params = new double[1 + PARAMETERS_PER_PEAK * npeaks];
         System.arraycopy(fitParams, 0, params, 0, fitParams.length);
-        System.arraycopy(precomputedFunctionParamsSingle, 1 + PARAMETERS_PER_PEAK, params,
-            fitParams.length, params.length - fitParams.length);
+        System.arraycopy(precomputedFunctionParamsSingle, 1, params, fitParams.length,
+            params.length - fitParams.length);
 
         final double[] paramDevs = new double[params.length];
         // These pre-computed values will be those peaks outside the region
