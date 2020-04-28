@@ -4036,6 +4036,8 @@ public class BenchmarkFilterAnalysis
     boolean rangeInput = false;
     boolean[] disabled = null;
     double[][] seed = null;
+    // This flag is set if the analysis is not interactive. This occurs when running after the
+    // first iteration of an iterative analysis.
     boolean nonInteractive = false;
     if (allSameType) {
       // There should always be 1 filter
@@ -4079,7 +4081,8 @@ public class BenchmarkFilterAnalysis
         final Filter upperF = filterSet.getFilters().get(1);
 
         for (int i = 0; i < n; i++) {
-          // Do not disable if the increment is not set. This is left to the user to decide.
+          // Do not disable if the increment is not set. This is left to the user to decide
+          // which parameters to optimise with the enabled checkboxes in the dialog.
 
           final double lower = lowerF.getParameterValue(i);
           final double upper = upperF.getParameterValue(i);
@@ -4128,12 +4131,14 @@ public class BenchmarkFilterAnalysis
 
         // Get the search dimensions from the data.
         // Min/max must be set using values from BenchmarkSpotFit.
+        boolean hasRange = false;
         for (int i = 0; i < n; i++) {
           if (lower[i] == upper[i]) {
             // Not enabled
             originalDimensions[i] = new FixedDimension(lower[i]);
             continue;
           }
+          hasRange = true;
           final ParameterType type = searchScoreFilter.getParameterType(i);
           double min = BenchmarkSpotFit.getMin(type);
           double max = BenchmarkSpotFit.getMax(type);
@@ -4154,8 +4159,9 @@ public class BenchmarkFilterAnalysis
           }
         }
 
-        if (originalDimensions == null) {
+        if (!hasRange || originalDimensions == null) {
           // Failed to work out the dimensions. No optimisation will be possible.
+          originalDimensions = null;
 
           // Sort so that the filters are in a nice order for reporting
           filterSet.sort();
@@ -4215,6 +4221,9 @@ public class BenchmarkFilterAnalysis
     }
 
     analysisStopWatch = StopWatch.createStarted();
+
+    // Note:
+    // The input filters have yet to be scored.
 
     if (settings.evolve == 1 && originalDimensions != null) {
       // Collect parameters for the genetic algorithm
@@ -4451,8 +4460,8 @@ public class BenchmarkFilterAnalysis
           if (!isStepSearch) {
             settings.saveOption = gd.getNextBoolean();
             settings.maxIterations = (int) gd.getNextNumber();
-            settings.refinementMode = gd.getNextChoiceIndex();
             settings.rangeSearchReduce = gd.getNextNumber();
+            settings.refinementMode = gd.getNextChoiceIndex();
           }
           settings.seedSize = (int) gd.getNextNumber();
           for (int i = 0; i < n; i++) {
@@ -4532,8 +4541,7 @@ public class BenchmarkFilterAnalysis
             seed = merge(seed, sample);
           }
           // Note: If we have an optimum and we are not seeding this should not matter as the
-          // dimensions
-          // have been centred on the current optimum
+          // dimensions have been centred on the current optimum
           ss.seed(seed);
           final ConvergenceChecker<FilterScore> checker =
               new InterruptConvergenceChecker(0, 0, settings.maxIterations);
