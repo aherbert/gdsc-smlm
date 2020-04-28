@@ -72,7 +72,7 @@ public class SearchSpace {
      */
     SINGLE_DIMENSION,
     /**
-     * Enumerate all dimensions torgther up to the next increment in either direction. This is
+     * Enumerate all dimensions together up to the next increment in either direction. This is
      * performed once and then the range is reduced.
      */
     MULTI_DIMENSION
