@@ -60,7 +60,7 @@ public class MultiFilter2 extends MultiFilter {
   protected String generateName() {
     return String.format(
         "Multi2: Signal=%.1f, SNR=%.1f, Width=%.2f-%.2f, Shift=%.2f, EShift=%.2f, "
-            + "Precision=%.1f, Width=%.2f-%.2f",
+            + "Precision=%.1f, Z=%.2f-%.2f",
         signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ, maxZ);
   }
 
