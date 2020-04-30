@@ -3748,9 +3748,80 @@ Run different filter parameters on a set of benchmark fitting results produced b
 
 The ``Iterate Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
 
-Searching all parameters that control filtering of fitting results is computationally intractable. This plugin alternates the ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
+Searching all parameters that control fitting and filtering of fitting results is computationally intractable. This plugin alternates the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
 
-This documentation is in progress.
+Iteration
+~~~~~~~~~
+
+Note that the fitting of spot candidates involves filtering results dynamically as they are generated. Fitting stops when filtering is consistently rejecting fits. Thus changes to the spot filter can effect the number of fitted spots. This requires iteration of the spot fitting and the filtering together.
+
+The plugin uses the following routine:
+
+#. Fit spots using single, doublet and multi-fit options.
+#. Optimise the best filter from a filter set(s).
+#. Optimise the filter control parameters for the best filter.
+#. Optional: Test convergence of the filter parameters and go to 2 if not converged.
+#. Update the fit parameters to use the new filter.
+#. Fit spots using single, doublet and multi-fit options.
+#. Optimise the best filter from a filter set(s).
+#. Optimise the filter control parameters for the best filter.
+#. If converged then stop.
+#. Else go to 4.
+
+Steps 1-3 correspond to ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. The plugins are run interactively to collect settings on the first invocation. Step 1 is only run if the benchmark fitting results are not available for the current simulation, otherwise the current fit results are used. Step 4 is an optional step to ensure the filter is optimal for the current fit results before refitting the spot data. Without this option only a single optimisation of the filter is performed per refit of the spot data.
+
+The convergence is measured using:
+
+* The exact match of the filter control parameters (e.g. ``Fail count`` and ``Residuals threshold``); and one of
+* Convergence within a relative tolerance for the filter parameters; or
+* Convergence within a relative tolerance for the benchmarking score; or
+* Convergence of the final output results coordinates; or
+* A maximum number of iterations is reached.
+
+At each iteration it is expected that the best filter will be similar to the previous best filter. Thus the range around the current optimum that is searched can be reduced. The reduction factor is initially set to 1 (no reduction) and linearly progresses to a configured minimum level over a set number of iterations.
+
+Parameters
+~~~~~~~~~~
+
+The plugin requires parameters to control the iteration:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Score tolerance
+     - The relative error for convergence of the benchmark filter score.
+
+   * - Filter tolerance
+     - The relative error for convergence of the benchmark filter parameters.
+
+   * - Compare results
+     - Set to **true** to compare the current and previous results coordinates produced by fitting the spot data.
+
+   * - Compare distance
+     - The distance to mark localisations as identical. If the current and previous results are identical within this distance then iteration will stop, i.e. the current settings have converged to have no effect on the output results.
+
+   * - Iter Max iterations
+     - The maximum number of iterations. This includes the optional inner iterations to converge on the best filter before a refit. If using the ``Converge before refit`` option then the maximum iterations should be increased.
+
+   * - Min range reduction
+     - The minimum reduction factor to adjust the parameter ranges when performing the filter optimisation. Set to 1 this has no effect. Otherwise the reduction factor linear ramps from 1 to min over the configured number of iterations.
+
+   * - Min range reduction iterations
+     - The number of iterations taken to reach the ``Min range reduction`` factor. The iteration count is the the number of refits of the spot data thus excludes the optional inner convergence of the filter parameters.
+
+   * - Converge before refit
+     - Set to **true** to require the filter parameters to converge before performing a refit of the spot data with the new best filter.
+
+Results
+~~~~~~~
+
+The plugin requires that ``Benchmark Spot Fit`` has been run to initialise the fit settings. If this has not been done then it will be run once by the plugin. The plugin then iterates the optimisation of the result filter given the same filter control parameters, and the optimisation of the filter control parameters given a single result filter and repeats fitting of the spot data with the optimal filter until convergence.
+
+The results are shown in the same result tables as the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. Progress is logged to the ``ImageJ`` log window.
 
 
 .. index:: ! Score Filter
