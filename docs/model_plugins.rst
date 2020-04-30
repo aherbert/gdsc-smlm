@@ -3768,7 +3768,7 @@ The plugin uses the following routine:
 #. If converged then stop.
 #. Else go to 4.
 
-Steps 1-3 correspond to ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. The plugins are run interactively to collect settings on the first invocation. Step 1 is only run if the benchmark fitting results are not available for the current simulation, otherwise the current fit results are used. Step 4 is an optional step to ensure the filter is optimal for the current fit results before refitting the spot data. Without this option only a single optimisation of the filter is performed per refit of the spot data.
+Steps 1-3 correspond to the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. The plugins are run interactively to collect settings on the first invocation. Step 1 is only run if the benchmark fitting results are not available for the current simulation, otherwise the current fit results are used. Step 4 is an optional step to ensure the filter is optimal for the current fit results before refitting the spot data. Without this option only a single optimisation of the filter is performed per refit of the spot data.
 
 The convergence is measured using:
 
@@ -3783,7 +3783,7 @@ At each iteration it is expected that the best filter will be similar to the pre
 Parameters
 ~~~~~~~~~~
 
-The plugin requires parameters to control the iteration:
+The plugin requires the following parameters to control the iteration:
 
 .. list-table::
    :widths: 20 80
@@ -3816,10 +3816,14 @@ The plugin requires parameters to control the iteration:
    * - Converge before refit
      - Set to **true** to require the filter parameters to converge before performing a refit of the spot data with the new best filter.
 
+The plugin requires that ``Benchmark Spot Fit`` has been run to initialise the fit settings. If this has not been done then it will be run once by the plugin. Note that the initial spot fit must be run with the default filter settings and not a previously optimised filter. If the filter settings are not the defaults then the plugin will always be run. This ensures a consistent start point for optimisation.
+
+The plugin then shows a dialog to obtain options for ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters``. These plugins are very similar and a single dialog can collect the parameters for both plugins.
+
+The plugin then iterates the optimisation of the result filter given the same filter control parameters, and the optimisation of the filter control parameters given a single result filter and repeats fitting of the spot data with the optimal filter until convergence.
+
 Results
 ~~~~~~~
-
-The plugin requires that ``Benchmark Spot Fit`` has been run to initialise the fit settings. If this has not been done then it will be run once by the plugin. The plugin then iterates the optimisation of the result filter given the same filter control parameters, and the optimisation of the filter control parameters given a single result filter and repeats fitting of the spot data with the optimal filter until convergence.
 
 The results are shown in the same result tables as the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. Progress is logged to the ``ImageJ`` log window.
 
