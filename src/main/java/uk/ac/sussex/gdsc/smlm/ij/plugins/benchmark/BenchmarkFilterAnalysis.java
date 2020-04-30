@@ -4375,10 +4375,10 @@ public class BenchmarkFilterAnalysis
 
         best = gaPopulation.evolve(mutator, recombiner, this, selectionStrategy, gaChecker);
 
-        if (best != null) {
-          // In case optimisation was stopped
-          IJ.resetEscape();
+        // In case optimisation was stopped
+        IJ.resetEscape();
 
+        if (best != null) {
           // The GA may produce coordinates off the min interval grid
           best = enumerateMinInterval(best, stepSize, indices);
 
@@ -4552,10 +4552,10 @@ public class BenchmarkFilterAnalysis
           final SearchResult<FilterScore> optimum =
               ss.search(dimensions, this, checker, myRefinementMode);
 
-          if (optimum != null) {
-            // In case optimisation was stopped
-            IJ.resetEscape();
+          // In case optimisation was stopped
+          IJ.resetEscape();
 
+          if (optimum != null) {
             best = ((SimpleFilterScore) optimum.getScore()).result.filter;
 
             // Now update the filter set for final assessment
@@ -4669,10 +4669,10 @@ public class BenchmarkFilterAnalysis
         final SearchResult<FilterScore> optimum = ss.enrichmentSearch(dimensions, this, checker,
             settings.enrichmentSamples, settings.enrichmentFraction, settings.enrichmentPadding);
 
-        if (optimum != null) {
-          // In case optimisation was stopped
-          IJ.resetEscape();
+        // In case optimisation was stopped
+        IJ.resetEscape();
 
+        if (optimum != null) {
           best = ((SimpleFilterScore) optimum.getScore()).result.filter;
 
           // Now update the filter set for final assessment
@@ -5140,7 +5140,7 @@ public class BenchmarkFilterAnalysis
 
         // Check the number of combinations is OK
         long combinations = SearchSpace.countCombinations(dimensions);
-        if (!nonInteractive && combinations > 10000) {
+        if (!nonInteractive && combinations > 2000) {
           gd = new GenericDialog(TITLE);
           ImageJUtils.addMessage(gd,
               "%d combinations for the configured dimensions.\n \nClick 'Yes' to optimise.",
@@ -5183,10 +5183,10 @@ public class BenchmarkFilterAnalysis
 
           optimum = ss.search(dimensions, new ParameterScoreFunction(), checker, myRefinementMode);
 
-          if (optimum != null) {
-            // In case optimisation was stopped
-            IJ.resetEscape();
+          // In case optimisation was stopped
+          IJ.resetEscape();
 
+          if (optimum != null) {
             // Now update the parameters for final assessment
             point = optimum.getPoint();
           }
@@ -5249,10 +5249,10 @@ public class BenchmarkFilterAnalysis
             settings.paEnrichmentSamples, settings.paEnrichmentFraction,
             settings.paEnrichmentPadding);
 
-        if (optimum != null) {
-          // In case optimisation was stopped
-          IJ.resetEscape();
+        // In case optimisation was stopped
+        IJ.resetEscape();
 
+        if (optimum != null) {
           point = optimum.getPoint();
         }
       } else {
@@ -5310,10 +5310,10 @@ public class BenchmarkFilterAnalysis
 
         optimum = ss.findOptimum(dimensions, new ParameterScoreFunction());
 
-        if (optimum != null) {
-          // In case optimisation was stopped
-          IJ.resetEscape();
+        // In case optimisation was stopped
+        IJ.resetEscape();
 
+        if (optimum != null) {
           // Now update the parameters for final assessment
           point = optimum.getPoint();
         }
