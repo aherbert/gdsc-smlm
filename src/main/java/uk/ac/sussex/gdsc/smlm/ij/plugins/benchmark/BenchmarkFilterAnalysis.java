@@ -2012,7 +2012,6 @@ public class BenchmarkFilterAnalysis
 
           innerConverged =
               checker.converged("Filter", previous, current, previousParameters, currentParameters);
-
         }
         // Check if we can continue (e.g. not max iterations or escape pressed)
         if (!checker.canContinue) {
@@ -3132,7 +3131,7 @@ public class BenchmarkFilterAnalysis
     gd.addNumericField("Compare_Distance", settings.iterationCompareDistance, 2);
     gd.addNumericField("Iter_Max_Iterations", settings.iterationMaxIterations, 0);
     gd.addMessage("Configure how the parameter range is updated per iteration:");
-    gd.addSlider("Min_range_reduction", 0, 1, settings.iterationMinRangeReduction);
+    gd.addSlider("Min_range_reduction", 0.05, 1, settings.iterationMinRangeReduction);
     gd.addSlider("Min_range_reduction_iteration", 1, 10,
         settings.iterationMinRangeReductionIteration);
     gd.addCheckbox("Converge_before_refit", settings.iterationConvergeBeforeRefit);
