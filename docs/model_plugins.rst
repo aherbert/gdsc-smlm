@@ -3428,7 +3428,7 @@ The following parameters can be adjusted:
    * - Repeat evolve
      - Set to **true** to repeat the optimisation performed by the ``Evolve`` setting when re-running the plugin with identical input. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
 
-     This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded.
+       This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the evolve setting was used as the optimisation is randomly seeded.
 
        This option is useful to experiment with different ``Evolve`` settings for the same input results and filter settings.
 
@@ -3660,10 +3660,10 @@ The summary table contains the same fields as the results table. The following a
      - The time for the analysis of the filter set.
 
    * - Search
-     - The optimisation algorithm for the standard filter parameters. This is used by the ``Benchmark Filter Parameters`` plugin.
+     - The optimisation algorithm for the parameters of a single filter. This is used by the ``Benchmark Filter Parameters`` plugin.
 
    * - Time
-     - The time for the analysis of the standard filter parameters. This is used by the ``Benchmark Filter Parameters`` plugin.
+     - The time for the analysis of the parameters of a single filter. This is used by the ``Benchmark Filter Parameters`` plugin.
 
 
 .. index:: ! Benchmark Filter Parameters
@@ -3677,7 +3677,66 @@ The ``Benchmark Filter Parameters`` plugin is designed to test the results filte
 
 This plugin is similar to the ``Benchmark Filter Analysis`` plugin. Searching all parameters that control filtering of fitting results is computationally intractable. The search has been split into optimising the parameters for the result filter (``Benchmark Filter Analysis``) and optimising the parameters that control a single result filter (``Benchmark Filter Parameters``). Alternating the optimisation of the two sets of parameters can be done using the ``Iterate Filter Analysis`` plugin (see :numref:`%s<model_plugins:Iterate Filter Analysis>`).
 
-This documentation is in progress.
+The following parameters are used by every single filter:
+
+*  Fail count
+*  Residuals Threshold
+*  Duplicate distance
+
+The ``Benchmark Filter Parameters`` plugin uses the top scoring filter from the ``Benchmark Filter Analysis`` plugin and searches for the best filter control parameters. The search algorithms are similar to those described in section :numref:`{number}: {name} <model_plugins:Filter Optimisation>` and the filters are scored using the same metrics. Due to the low number of parameters and the expected bounds for each parameter the number of combinations is expected to be small. Thus the genetic algorithm has been removed and a new algorithm has been added that allows enumeration of the entire range in appropriate step increments.
+
+In the the ``Benchmark Filter Analysis`` plugin the range for the parameter optimisation is defined using a filter set due unlimited number of filter combinations. In contrast the ``Benchmark Filter Parameters`` plugin defines the range for the small set of parameters in the plugin dialog. The dialog is very similar to the dialog for the ``Benchmark Filter Analysis`` plugin. The following are different options for this plugin:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Fail count
+     - The number of failures to accept before rejecting the remaining results from the current frame.
+
+   * - Min fail count
+     - The lower limit of the fail count.
+
+   * - Max fail count
+     - The upper limit of the fail count.
+
+   * - Residuals Threshold
+     - The threshold for the residuals analysis where a single spot would be fit again as a double spot. The residuals are a measure of how elliptical the Gaussian data is compared to the Gaussian spot; this elliptical shape is assumed to be due to two overlapping spots. A lower threshold will attempt a doublet fit for more candidates. Set to 1.0 to disable.
+
+   * - Min residuals threshold
+     - The lower limit of the residuals threshold.
+
+   * - Max residuals threshold
+     - The upper limit of the residuals threshold.
+
+   * - Duplicate distance
+     - The distance where two spots are considered equal. This is used to filter later spot fit results where a candidate has drifted to fit another previously identified spot.
+
+   * - Min duplicate distance
+     - The lower limit of the duplicate distance.
+
+   * - Max duplicate distance
+     - The upper limit of the duplicate distance.
+
+   * - Search
+     - Perform a search optimisation of the filter parameters within the defined bounds (see section :numref:`%s <model_plugins:Filter Optimisation>`).
+
+       - ``Range Search``: Search using a range. The range is reduced each iteration until convergence. The initial range is created from the input bounds.
+       - ``Enrichment Search``: Sample randomly from the parameter range. The top fraction of the results are used to define the range for the next round of sampling. Iterates until convergence.
+       - ``Step Search``: Search using the parameter range with a configured number of steps.
+       - ``Enumerate``: Enumerate the parameter range. The increment used to enumerate the range for the parameters are: Fail count = 1; Residuals threshold = 0.05; and Duplicate distance = 0.5.
+
+   * - Repeat search
+     - Set to **true** to repeat the optimisation performed by the ``Search`` setting when re-running the plugin with identical input. If **false** the plugin will allow configuration of the output display options for the previous results cached for the specified settings.
+
+       This option only applies when re-running the plugin with the same input results and the same settings. In this case the analysis will be the same and the plugin can reuse cached results allowing display of different output options for the same results. Re-use of the same results is not possible if the search setting was used as the optimisation is randomly seeded.
+
+       This option is useful to experiment with different ``Search`` settings for the same input results and filter settings.
+
+The plugin results are presented as per the ``Benchmark Filter Analysis`` plugin. The summary table will contain the current best filter recorded from the ``Benchmark Filter Analysis`` plugin. The final columns of the summary table will contain the ``Search`` mode and analysis time for the search. Note that the scores for the current best filter may improve if a different set of filter control parameters have been identified.
 
 
 .. index:: ! Iterate Filter Analysis
