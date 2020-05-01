@@ -3833,9 +3833,9 @@ The results are shown in the same result tables as the ``Benchmark Spot Fit``, `
 Score Filter
 ------------
 
-Scores a filter against a set of benchmark fitting results.
+Scores a filter against a set of benchmark fitting results. This uses the same filter scoring analysis performed in the ``Benchmark Filter Analysis`` plugin (see section :numref:`%s <model_plugins:Benchmark Filter Analysis>`). The parameters to score the filter are the same as those used for the ``Benchmark Filter Analysis`` plugin. There are fields to configure the input filter. The main text field in the dialog is used to specify a filter using an XML description. The field will be populated with the current best filter from any benchmark analysis. Thus the plugin can be used to assess the effect that small changes to the optimum filter will have on the results.
 
-This documentation is in progress.
+When the plugin executes the results are output to the same results tables as the ``Benchmark Filter Analysis`` plugin.
 
 
 .. index:: ! Doublet Analysis
