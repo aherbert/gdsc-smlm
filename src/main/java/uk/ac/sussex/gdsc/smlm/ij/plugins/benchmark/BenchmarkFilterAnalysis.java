@@ -2817,7 +2817,7 @@ public class BenchmarkFilterAnalysis
       });
 
       if (!tmp.isEmpty()) {
-        coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
+        coords.put(counter.currentFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
       }
     }
     return coords;
