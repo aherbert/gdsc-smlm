@@ -1886,10 +1886,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final PreprocessedPeakResult r = ((PeakFractionalAssignment) a[j]).peakResult;
         set.remove(r.getUniqueId());
 
-        if (!Double.isFinite(r.getSnr())) {
-          System.out.println("bad1");
-        }
-
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
         final double snr = r.getSnr();
@@ -1920,9 +1916,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         final PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
         if (r == null) {
           throw new IllegalArgumentException("Missing result: " + uniqueId);
-        }
-        if (!Double.isFinite(r.getSnr())) {
-          System.out.println("bad2");
         }
         final double precision = Math.sqrt(r.getLocationVariance());
         final double signal = r.getSignal();
