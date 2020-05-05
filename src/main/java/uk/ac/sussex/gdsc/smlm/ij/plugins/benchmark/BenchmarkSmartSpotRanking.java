@@ -95,7 +95,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
 
   /** The reference to the latest fit engine configuration. */
-  private static AtomicReference<FitEngineConfiguration> configRef;
+  private static AtomicReference<FitEngineConfiguration> configRef =
+      new AtomicReference<>(new FitEngineConfiguration());
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
@@ -104,7 +105,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
 
-  private FitEngineConfiguration config = new FitEngineConfiguration();
+  private FitEngineConfiguration config;
   private AutoThreshold.Method[] methods;
   private double[] levels;
   private String[] methodNames;
