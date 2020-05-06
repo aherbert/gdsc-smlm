@@ -145,7 +145,7 @@ Preferences are saved in the ``ImageJ`` preferences file. This is written when `
      - The version number of the most recently run GDSC analytics code. If a new version is released that does not match this stored version then the user preferences dialog will be shown again to ensure the preferences are correct.
 
    * - gdsc.ga.clientId
-     - The random UUID for the user. This allows repeat sessions to be distinguished from new users. 
+     - The random UUID for the user. This allows repeat sessions to be distinguished from new users.
 
    * - gdsc.ga.state
      - A flag indicating the user preference:

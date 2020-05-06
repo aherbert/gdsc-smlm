@@ -8,7 +8,7 @@ Quantitative study of single molecule location techniques.
 *Optical Express* 17: 23352.
 
 Ankerst M, Breunig MM, Kriegel HP & Sander J (1999)
-OPTICS: ordering points to identify the clustering structure. 
+OPTICS: ordering points to identify the clustering structure.
 *Proceedings of the 1999 ACM SIGMOD international conference on Management of data (SIGMOD '99)* ACM, New York, NY, USA, 49-60.
 
 Annibale P, Vanni S, Scarselli M, Rothlisberger U & Radenovic A (2011)
@@ -72,7 +72,7 @@ Regression and time series model selection in small samples.
 *Biometrika* 76: 297–307.
 
 Kriegel HP, Kröger P, Schubert E & Zimek A (2009)
-LoOP: local outlier probabilities. 
+LoOP: local outlier probabilities.
 *Proceedings of the 18th ACM conference on Information and knowledge management (CIKM '09)* ACM, New York, NY, USA, 1649-1652.
 
 Laurence TA & Chromy BA (2010)
@@ -80,7 +80,7 @@ Efficient maximum likelihood estimator fitting of histograms.
 *Nature Methods* 7: 338-339.
 
 Lin R, Clowsley AH, Jayasinghe ID, Baddeley D, Soeller C (2017)
-Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation of a computationally efficient localization approach. 
+Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation of a computationally efficient localization approach.
 *Optical Express* 25(10): 11701-11716.
 
 Mortensen KI, Churchman LS, Spudich JA & Flyvbjerg H (2010)
@@ -112,7 +112,7 @@ NIH Image to ImageJ: 25 years of image analysis.
 *Nature Methods* 9: 671-675.
 
 Schneider J, & Vlachos M (2013)
-Fast parameterless density-based clustering via random projections. 
+Fast parameterless density-based clustering via random projections.
 *Proceedings of the 22nd ACM international conference on Conference on information & knowledge management (CIKM '13)* ACM, New York, NY, USA, 861-866.
 
 Sengupta P, Jovanovic-Talisman T & Lippincott-Schwartz J (2013)

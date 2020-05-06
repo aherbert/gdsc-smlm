@@ -231,7 +231,7 @@ When the refinement has completed the combined PSF must be finalised. The plugin
      - Description
 
    * - Slice
-     - Adjust the currently displayed slice in the PSF. This is the 
+     - Adjust the currently displayed slice in the PSF. This is the
 
    * - Crop border
      - Define the border around the PSF to crop. Use this to remove edge pixels that do not contribute to the PSF.
@@ -245,13 +245,13 @@ When the refinement has completed the combined PSF must be finalised. The plugin
    * - Output type
      - Define the output:
 
-       * ``CSpline``: Save the PSF using a cubic spline function. The data precision and filename can be specified. 
+       * ``CSpline``: Save the PSF using a cubic spline function. The data precision and filename can be specified.
        * ``Image PSF``: Generate an image representing the PSF. The magnification can be specified.
 
        Additional options can be specified using the ``...`` button. The size of the output will be shown in the dialog. This will vary based on the crop.
 
    * - Update ROI
-     - If **true** the final centres of each individual PSF are marked on the original image. 
+     - If **true** the final centres of each individual PSF are marked on the original image.
 
 When the output options have been configured the combined PSF is cropped and enlarged to a final PSF. For a cubic spline the enlargement is 3x. For an Image PSF the enlargement magnification is specified in the output options. The enlarged PSF is displayed and options to compute the centre can be configured. The options are:
 

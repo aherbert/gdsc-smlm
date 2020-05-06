@@ -999,7 +999,7 @@ The plugin has the following parameters:
        - ``Nearest Neighbour``
        - ``Dynamic Multiple Target Tracing``
 
-       The parameters for each are configured using the ``...`` button. See descriptions below. 
+       The parameters for each are configured using the ``...`` button. See descriptions below.
 
    * - Min trace length
      - The minimum length for a track (in time frames).

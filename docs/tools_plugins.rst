@@ -474,7 +474,7 @@ The following parameters can be specified:
        The ``...`` button can be used to select the input.
 
    * - Log progress
-     - If **true** the file details will be recorded to the ``ImageJ`` log during opening. 
+     - If **true** the file details will be recorded to the ``ImageJ`` log during opening.
 
    * - Output mode
      - Specify the type of output:

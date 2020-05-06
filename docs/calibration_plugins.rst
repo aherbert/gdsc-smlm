@@ -1037,7 +1037,7 @@ Thus computation of the Fisher information for a camera model allows determinati
 
   \mathbb{E} \left[ \left(\frac{\delta}{\delta v_{\theta}} \ln (p_{\theta}(z)) \right)^2 \right]
 
-where :math:`v_{\theta}` is the mean of the Poisson random variable that models the detected signal in the pixel, and :math:`p_{\theta}(z))` is the probability distribution of the data :math:`z` at the pixel. The subscript :math:`\theta` denotes the dependence of :math:`v_{\theta}` on the parameter vector :math:`\theta`, i.e. the parameters of the model. The expectation term is a nonnegative scalar, and is proportional to the amount of information the data contains about the parameters in :math:`\theta`. This term is the Fisher information of the probability model with respect to :math:`v_{\theta}`. 
+where :math:`v_{\theta}` is the mean of the Poisson random variable that models the detected signal in the pixel, and :math:`p_{\theta}(z))` is the probability distribution of the data :math:`z` at the pixel. The subscript :math:`\theta` denotes the dependence of :math:`v_{\theta}` on the parameter vector :math:`\theta`, i.e. the parameters of the model. The expectation term is a nonnegative scalar, and is proportional to the amount of information the data contains about the parameters in :math:`\theta`. This term is the Fisher information of the probability model with respect to :math:`v_{\theta}`.
 
 Two models can be compared using their expectation terms. However instead of comparing them directly they can be compared using their noise coefficient :math:`\alpha`. This is the expectation term normalised by the expectation term for an uncorrupted Poisson signal :math:`\frac{1}{v_{\theta}}`:
 

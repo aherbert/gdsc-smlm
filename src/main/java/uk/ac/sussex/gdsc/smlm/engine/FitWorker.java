@@ -2042,7 +2042,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // can produce the total gain. If the total gain is 0 then no conversion
     // to photons is possible and the noise defaults to the global estimate.
 
-    // If the fitted background is <= 0 and the camera model has no noise 
+    // If the fitted background is <= 0 and the camera model has no noise
     // then the noise uses the global estimate.
 
     /**
