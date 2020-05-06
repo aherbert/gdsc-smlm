@@ -4658,7 +4658,197 @@ If the ``Show results`` option was selected the plugin outputs information about
 Smart Spot Ranking
 ------------------
 
-Compare methods for ranking spot candidates.
+Compare methods for classifying spot candidates. This plugins requires that a set of benchmark spot candidates has been generated from a benchmarking image (see :numref:`{number}: {name} <model_plugins:Filter Spot Data>`).
 
-This documentation is in progress.
+The plugin will classify spot candidates into those that match a true result and those that do not. The plugin then uses various methods to classify the spot candidates and scores each method. An ideal classification would identify all candidates which match actual spots into one group and maximise the false positive candidates which do not match a spot into a second group.
 
+For the purpose of benchmarking it is possible to speed up processing by ignoring many of the candidates. The ``Smart Spot Ranking`` plugin allows the user to specify the fraction of positives in each frame that will be processed. This sets a target limit for the positives. When this target has been reached the plugin will continue processing candidates until: (1) a set fraction of the total number of candidates processed are negatives; and (2) a minimum number of negatives after the positive target have been processed. The rest of the candidates are then ignored from the analysis.
+
+For each ranking method the spot candidates in each frame are classified into positives and negatives. If a positive spot matches a localisation then the score is true positive, otherwise it is false positive. If a negative matches a localisation then it is a false negative, otherwise it is a true negative. The scores can be combined to provide :numref:`{name} <comparison_metrics:Comparison Metrics>`. Note that a spot candidate may be scored by the ``Filter Spot Data`` plugin as a partial match if it matches a localisation within a window of tolerance using a ramped score between zero and one. The plugin will report the score metrics for integer counts of true or false and also the fractional counts of true or false.
+
+.. note::
+
+    Smart spot ranking has implications for the ``Peak Fit`` plugin which processes candidates in order until fitting repeatedly fails. A smart candidate ranking could identify those candidates that should always be processed as they are highly likely to be true positives. Note that currently ``Peak Fit`` does not support smart spot ranking; this feature is under evaluation. The ``Smart Spot Ranking`` plugin is used to test if it is possible to correctly pre-filter spot candidates and the computational cost (run time) of the method.
+
+
+Ranking Methods
+~~~~~~~~~~~~~~~
+
+Ranking methods must perform a binary selection of spot candidates. Currently there are two types of method:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Method
+     - Description
+
+   * - Thresholding
+     - Create a histogram of the spot candidate intensity and apply a thresholding method. All spot candidates above the threshold are classified as positives.
+
+       Supports many types of thresholding algorithm. The histogram can be compacted into a fixed number of bins which may increase the speed of the thresholding algorithm.
+
+   * - SNR
+     - Use the signal to noise ratio (SNR). The signal is determined using the local pixel region around a spot candidate. The background is estimated using the average value of the edge of the region. The signal is the sum above the background. The noise is estimated across the entire image using the default noise estimation method in the ``Peak Fit`` plugin.
+
+       Supports thresholding at different values of the SNR. All spot candidates above the threshold are classified as positives.
+
+
+Parameters
+~~~~~~~~~~
+
+The ``Smart Spot Ranking`` plugin requires the following parameters:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - Fraction positives
+     - Set the limit (in percent) on the number of filter candidates that match true localisations that must be processed.
+
+   * - Fraction negatives after positives
+     - After the positive target has been reached, set the limit (in percent) on the fraction of filter candidates that must be negatives (i.e. how many of the candidates for fitting should be incorrect).
+
+   * - Min negatives after positives
+     - After the positive target has been reached, set a minimum number of filter candidates that must be negatives (i.e. how many extra incorrect candidates should be included in the fitting process).
+
+   * - Select methods
+     - Set to **true** to select the methods to rank. Otherwise use the default set.
+
+   * - Compact bins
+     - The fixed number of bins to use for the histogram created for thresholding methods.
+
+   * - Sort
+     - Configure the score used to sort the results in the results table.
+
+   * - Use fraction scores
+     - Set to **true** to sort the results using the fraction scores. Otherwise use the scores based on integer counts.
+
+   * - Initial StdDev
+     - Configure the estimated standard deviation of the spots. This is used to establish a local window around the spot candidate when multiplied by the ``Fitting width``.
+
+   * - Fitting width
+     - Configure the fitting width around candidates. This is used to establish a local window around the spot candidate when multiplied by the ``Initial StdDev``.
+
+   * - Show overlay
+     - Set to **true** to overlay the classification result from the top ranked method on the original localisation image. True positives = Green; False positives = Red; True negatives = Light Green; False negatives = Light red. Note that TN are only shown when ``ImageJ`` debug mode is enabled as the spot candidates will be mostly TN due to identification of local maxima finding many candidates that are noise.
+
+
+Results Table
+~~~~~~~~~~~~~
+
+The initial columns in the result table show details of the benchmark simulation and the spot filter used to identify spot candidates. These columns are as described in :numref:`{number}: {name} <model_plugins:Filter Spot Data>`. The next section of columns summarise the candidates that are included in the analysis and are identical for each ranking method. Finally the method scores are recorded.
+
+The following tables describes the results data specific to the ``Smart Spot Ranking`` plugin:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - Spots
+     - The number of spot candidates included in the analysis. This may be less than the number of spot candidates due to removal of negative candidates during pre-processing.
+
+   * - countPositive
+     - The total of the positive score across all frames. This is before pre-processing to exclude negative candidates.
+
+   * - countNegative
+     - The total of the negative score across all frames. This is before pre-processing to exclude negative candidates.
+
+   * - fP
+     - The total of the fraction positive score across all frames. This is before pre-processing to exclude negative candidates.
+
+   * - fN
+     - The total of the fraction negative score across all frames. This is before pre-processing to exclude negative candidates.
+
+   * - % nP
+     - The percentage of positive candidates included in the analysis.
+
+   * - % nN
+     - The percentage of negative candidates included in the analysis.
+
+   * - cTotal
+     - The total number of candidates included in the analysis.
+
+   * - cP
+     - The count of the positives included in the analysis.
+
+   * - cN
+     - The count of the negatives included in the analysis.
+
+   * - cfTotal
+     - The total of the fractional scores included in the analysis.
+
+   * - cfP
+     - The count of the fractional positives included in the analysis.
+
+   * - cfN
+     - The count of the fractional negatives included in the analysis.
+
+   * - Spot Av
+     - The average of number of localisations per frame.
+
+   * - Spot SD
+     - The standard deviation of the number of localisations per frame.
+
+   * - Candidate Av
+     - The average of number of spot candidates per frame.
+
+   * - Candidate SD
+     - The standard deviation of the number of spot candidates per frame.
+
+   * - Method
+     - The spot classification method.
+
+   * - Bins
+     - The number of histogram bins used for thresholding.
+
+   * - T Av
+     - The average spot candidate intensity threshold per frame. For the SNR method this is the pseudo threshold created using the minimum intensity per frame for spot candidates that are positives.
+
+   * - T SD
+     - The standard deviation of the threshold per frame.
+
+   * - Time
+     - The total run time for the method across all frames.
+
+   * - tp
+     - The true positives.
+
+   * - fp
+     - The false positives.
+
+   * - tn
+     - The true negatives.
+
+   * - fn
+     - The false negatives.
+
+   * - Precision
+     - The precision.
+
+   * - Recall
+     - The recall.
+
+   * - F0.5
+     - The F-score using a beta of 0.5.
+
+   * - F1
+     - The F-score using a beta of 1.
+
+   * - F2
+     - The F-score using a beta of 2.
+
+   * - Jaccard
+     - The Jaccard score.
+
+   * - MCC
+     - The Matthews Correlation Coefficient.
+
+   * - f tp (etc)
+     - The scores created using the integer counts of true and false positive and negative are repeated using the fractional counts. All scores are prefixed with ``f``.

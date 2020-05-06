@@ -398,7 +398,7 @@ Model Plugins
      - Filters all the fit results produced by the ``Doublet Analysis`` plugin using the specified filter settings and scores the results.
 
    * - :ref:`model_plugins:Smart Spot Ranking`
-     - Compare methods for ranking spot candidates.
+     - Compare methods for classifying spot candidates.
 
 
 Calibration Plugins
