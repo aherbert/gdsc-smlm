@@ -968,7 +968,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     add(sb, tp);
     add(sb, fp);
 
-    // Materialise rankeResults
+    // Materialise rankResults
     final int[] frames = new int[rankResults.size()];
     final RankResults[] rankResultsArray = new RankResults[rankResults.size()];
     final int[] counter = new int[1];
@@ -994,7 +994,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final String resultPrefix = sb.toString();
 
     // ---
-    // TODO
+    // TODO: Further explore pre-filtering of spot candidates.
+
     // Add good label to spot candidates and have the benchmark spot filter respect this before
     // applying the fail count limit.
 
@@ -1012,25 +1013,21 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     // ---
 
     // Do a full benchmark through different Spot SNR, image sizes, densities and mask structures
-    // and see if there are patterns
-    // for a good threshold method.
+    // and see if there are patterns for a good threshold method.
 
     // ---
 
     // Allow using the fitted results from benchmark spot fit. Will it make a difference if we fit
-    // the candidates (some will fail
-    // if weak).
+    // the candidates (some will fail if weak).
     // Can this be done by allowing the user to select the input (spot candidates or fitted
     // positions)?
 
     // Perhaps I need to produce a precision estimate for all simulated spots and then only use
-    // those that achieve a certain
-    // precision, i.e. are reasonably in focus. Can this be done? Does the image PSF have a width
-    // estimate for the entire stack?
+    // those that achieve a certain precision, i.e. are reasonably in focus. Can this be done?
+    // Does the image PSF have a width estimate for the entire stack?
 
     // Perhaps I should filter, fit and then filter all spots using no fail count. These then become
-    // the spots to work with
-    // for creating a smart fail count filter.
+    // the spots to work with for creating a smart fail count filter.
 
     // ---
 
