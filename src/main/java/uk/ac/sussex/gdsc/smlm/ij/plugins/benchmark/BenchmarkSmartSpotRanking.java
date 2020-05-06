@@ -283,7 +283,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   }
 
   private static class RankResult {
-    final float frame;
+    final float threshold;
     final FractionClassificationResult fresult;
     final ClassificationResult cresult;
     /**
@@ -292,9 +292,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final byte[] good;
     final long time;
 
-    RankResult(float frame, FractionClassificationResult fresult, ClassificationResult cresult,
+    RankResult(float threshold, FractionClassificationResult fresult, ClassificationResult cresult,
         byte[] good, long time) {
-      this.frame = frame;
+      this.threshold = threshold;
       this.fresult = fresult;
       this.cresult = cresult;
       this.good = good;
@@ -458,7 +458,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       this.results.put(frame, rankResults);
 
       long t1 = System.nanoTime();
-      final FloatHistogram histogram = FloatHistogram.buildHistogram(intensity.clone(), true);
+      final FloatHistogram histogram = FloatHistogram.buildHistogram(intensity, true);
       // Only compact once
       final Histogram histogram2 = histogram.compact(settings.compactBins);
       t1 = System.nanoTime() - t1;
@@ -1050,8 +1050,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       for (final RankResults rr : rankResultsArray) {
         final RankResult r = rr.results.get(i);
         // Some results will not have a threshold
-        if (!Float.isInfinite(r.frame)) {
-          s.add(r.frame);
+        if (!Float.isInfinite(r.threshold)) {
+          s.add(r.threshold);
         }
         time += r.time;
         tp += r.fresult.getTruePositives();
@@ -1212,12 +1212,12 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     sb.append("% nN\t");
 
     sb.append("cTotal\t");
-    sb.append("cTP\t");
-    sb.append("cFP\t");
+    sb.append("cP\t");
+    sb.append("cN\t");
 
     sb.append("cfTotal\t");
-    sb.append("cfTP\t");
-    sb.append("cfFP\t");
+    sb.append("cfP\t");
+    sb.append("cfN\t");
 
     sb.append("Spot Av\t");
     sb.append("Spot SD\t");
