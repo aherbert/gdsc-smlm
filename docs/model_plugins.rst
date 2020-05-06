@@ -231,7 +231,7 @@ When the refinement has completed the combined PSF must be finalised. The plugin
      - Description
 
    * - Slice
-     - Adjust the currently displayed slice in the PSF. This is the
+     - Adjust the currently displayed slice in the PSF.
 
    * - Crop border
      - Define the border around the PSF to crop. Use this to remove edge pixels that do not contribute to the PSF.
