@@ -83,6 +83,9 @@ public class ResultsMatchCalculator implements PlugIn {
   /** The rounder for the text output. */
   private static final Rounder rounder = RounderUtils.create(4);
 
+  /** an empty coordinate array. */
+  private static final Coordinate[] EMPTY_COORD_ARRAY = new Coordinate[0];
+
   /** The plugin settings. */
   private Settings settings;
 
@@ -795,9 +798,9 @@ public class ResultsMatchCalculator implements PlugIn {
       int time) {
     final ArrayList<Coordinate> tmp = coords.get(time);
     if (tmp != null) {
-      return tmp.toArray(new Coordinate[tmp.size()]);
+      return tmp.toArray(EMPTY_COORD_ARRAY);
     }
-    return new Coordinate[0];
+    return EMPTY_COORD_ARRAY;
   }
 
   private static int getStartFrame(PeakResult result, CoordinateMethod coordinateMethod) {
