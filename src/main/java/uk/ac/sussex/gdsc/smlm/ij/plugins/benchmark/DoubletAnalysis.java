@@ -798,8 +798,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
             }
           }
 
-          final double[] params = new double[] {background, signal, 0, spot.x - regionBounds.x,
-              spot.y - regionBounds.y, 0, 0};
+          final double[] params = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
+          params[Gaussian2DFunction.BACKGROUND] = background;
+          params[Gaussian2DFunction.SIGNAL] = signal;
+          params[Gaussian2DFunction.X_POSITION] = spot.x - regionBounds.x;
+          params[Gaussian2DFunction.Y_POSITION] = spot.y - regionBounds.y;
 
           final DoubletResult result = new DoubletResult(frame, noise, spot, matchCount,
               neighbourCount, almostNeighbourCount, j);
