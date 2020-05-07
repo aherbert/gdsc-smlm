@@ -109,6 +109,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsMatchCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
+import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultPoint;
 
@@ -546,6 +547,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final int fitting;
     final FitConfiguration fitConfig;
     final MaximaSpotFilter spotFilter;
+    final CameraModel cameraModel;
     final Gaussian2DFitter gf;
     final boolean relativeIntensity;
     final double limit;
@@ -586,6 +588,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
       this.gf = new Gaussian2DFitter(this.fitConfig);
       this.spotFilter = config.createSpotFilter();
+      this.cameraModel = fitConfig.getCameraModel();
       this.relativeIntensity = !spotFilter.isAbsoluteIntensity();
 
       fitting = config.getFittingWidth();
@@ -635,6 +638,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       final int maxx = stack.getWidth();
       final int maxy = stack.getHeight();
       data = ImageJImageConverter.getData(stack.getPixels(frame), maxx, maxy, null, data);
+
+      cameraModel.removeBiasAndGain(data);
 
       // Smooth the image and identify spots with a filter
       final Spot[] spots = spotFilter.rank(data, maxx, maxy);
@@ -1637,6 +1642,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       cal.setReadNoise(simulationParameters.readNoise);
       cal.setBias(simulationParameters.bias);
       cal.setCameraType(simulationParameters.cameraType);
+      fitConfig.setCameraModel(CreateData.getCameraModel(simulationParameters));
 
       fitConfig.setCalibration(cal.getCalibration());
     }
@@ -2183,14 +2189,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // double tpDoublet = 0;
     // double fpDoublet = 0;
     // int nSingle = 0, nDoublet = 0;
-    // for (DoubletResult result : results)
-    // {
-    // if (result.good1)
-    // {
-    // if (result.good2)
-    // {
-    // tpDoublet += result.tp2;
-    // fpDoublet += result.fp2;
+    // for (DoubletResult result : results) {
+    // if (result.good1) {
+    // if (result.good2) {
+    // tpDoublet += result.tp2a + result.tp2b;
+    // fpDoublet += result.fp2a + result.fp2b;
     // nDoublet++;
     // }
     // tpSingle += result.tp1;
@@ -2199,7 +2202,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // }
     // }
     // System.out.printf("Single %.1f,%.1f (%d) : Doublet %.1f,%.1f (%d)\n", tpSingle, fpSingle,
-    // nSingle, tpDoublet, fpDoublet, nDoublet*2);
+    // nSingle, tpDoublet, fpDoublet, nDoublet * 2);
 
     // Summarise score for true results
     final Percentile p = new Percentile(99);

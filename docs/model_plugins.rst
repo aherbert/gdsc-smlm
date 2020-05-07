@@ -3851,7 +3851,7 @@ Super-resolution data may contain overlapping localisations. These may be so clo
 Analysis
 ~~~~~~~~
 
-The ``Doublet Analysis`` plugin fits a subset of the candidate spots identified in the benchmark image by the ``Filter Spot Data`` plugin. Localisation are assigned to their nearest spot candidate. Their is no distance threshold but the localisation must be within the fit window that will be used when fitting the candidate, i.e could this localisation be fit by the candidate spot. All candidates that match one or more localisations are processed using the fitting routine since these have the possibility of being a doublet (a match to two localisations). Candidates that do not match any localisations are ignored, simplifying analysis; these are results that should be eliminated as a single fit by a good results filter preventing them from entering doublet fitting.
+The ``Doublet Analysis`` plugin fits a subset of the candidate spots identified in the benchmark image by the ``Filter Spot Data`` plugin. Localisations are assigned to their nearest spot candidate. Their is no distance threshold but the localisation must be within the fit window that will be used when fitting the candidate, i.e could this localisation be fit by the candidate spot. All candidates that match one or more localisations are processed using the fitting routine since these have the possibility of being a doublet (a match to two localisations). Candidates that do not match any localisations are ignored, simplifying analysis; these are results that should be eliminated as a single fit by a good results filter preventing them from entering doublet fitting.
 
 Optionally any spot candidate that has a neighbour spot candidate in the fit window can be ignored. This is a situation where the fitting algorithm could be set to fit multiple peaks, which is the preferred option to a guess between a single or doublet fit.
 
@@ -3861,9 +3861,9 @@ The candidates are then fit as a single and a doublet (irrespective of what the 
 
 Once all the fitting has been completed the results are compared to the actual localisations and scored. Scoring uses distance and signal factor thresholds with an upper and lower bounds and a ramped scoring function. This is same as the ramped scoring used in the ``Benchmark Filter Analysis`` plugin (see section :numref:`{number} <model_plugins:Benchmark Filter Analysis>`).
 
-Results are scored as if all fits were accepted a single fit, or all results accepted as a doublet fit. The results are stored for use in the ``Doublet Filter Analysis`` plugin. This accumulates the scores for singles or doublets depending on the fit results that are accepted.
+Results are scored as if all fits were accepted as a single fit, or all results accepted as a doublet fit. The results are stored for use in the ``Doublet Filter Analysis`` plugin. This accumulates the scores for singles or doublets depending on the fit results that are accepted.
 
-Note that precomputing scoring results as only two sets (singles or doublets) is a compromise for computation speed. Ideally the analysis would filter the results to accept and then compute match scores for the coordinates that remain. However in practice the coordinates of one of the doublet results is likely to match the same localisation as the corresponding single result, so totalling scores from either the single fit or doublet fit is valid. Using the option to ignore any candidates with neighbour candidates will ensure that no other fit results encroach within the fit window, and reduce scoring errors when summing single and doublet score results.
+Note that precomputing scoring results as only two sets (singles or doublets) is a compromise for computational speed. Ideally the analysis would filter the results to accept single or doublet fits and then compute match scores for the coordinates that remain. However in practice the coordinates of one of the doublet results is likely to match the same localisation as the corresponding single result, so totalling scores from either the single fit or doublet fit is valid. Using the option to ignore any candidates with neighbour candidates will ensure that no other fit results encroach within the fit window, and reduce scoring errors when summing single and doublet score results.
 
 Matching of fit results to localisations can be performed using different methods:
 
@@ -3922,7 +3922,7 @@ The following parameters can be configured:
    * - Relative distances
      - Set to **true** to make all distances relative to the Half-Width at Half-Maxima (HWHM) of the PSF used to create the data. This is the same as when using the ``Peak Fit`` plugin. This applies to the spot identification, and also the match distance. Note that the actual distances used will be recorded in the results table.
 
-       Set to **true** to use absolute distances enabling fine control over the tested settings. Distances will be in pixels.
+       Set to **false** to use absolute distances enabling fine control over the tested settings. Distances will be in pixels.
 
    * - Smoothing
      - The smoothing parameter for the first filter.
@@ -4304,12 +4304,10 @@ The following data is shown:
      - The Bayesian Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be the same as BIC.
 
    * - a1
-     - The angle between the vector.
-       defining the asymmetry in the fit residuals and the position of the first spot of the doublet
+     - The angle between the vector defining the asymmetry in the fit residuals and the position of the first spot of the doublet.
 
    * - a2
-     - The angle between the vector.
-       defining the asymmetry in the fit residuals and the position of the second spot of the doublet
+     - The angle between the vector defining the asymmetry in the fit residuals and the position of the second spot of the doublet.
 
    * - gap
      - The distance between the two spots in the doublet.
