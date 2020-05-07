@@ -2989,7 +2989,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
    */
   private boolean showAnalysisDialog() {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
-    gd.addHelp(HelpUrls.getUrl("doublet-analysis"));
+    gd.addHelp(HelpUrls.getUrl("doublet-filter-analysis"));
+
+    settings = Settings.load();
+    config = configRef.get().createCopy();
 
     final StringBuilder sb =
         new StringBuilder("Filters the doublet fits and reports the performance increase\n");
