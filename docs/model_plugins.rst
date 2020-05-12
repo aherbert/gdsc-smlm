@@ -4274,34 +4274,34 @@ The following data is shown:
      - The optimised value when fitting as a doublet (this may be the Maximum Likelihood Score or the sum-of-squares).
 
    * - r1
-     - The adjusted coefficient of determination when fitting a single spot.
+     - The adjusted coefficient of determination when fitting a single spot. If using Maximum Likelihood fitting this will be ignored.
 
    * - r2
-     - The adjusted coefficient of determination when fitting a doublet.
+     - The adjusted coefficient of determination when fitting a doublet. If using Maximum Likelihood fitting this will be ignored.
 
    * - aic1
-     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood estimated from the residuals.
+     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - aic2
-     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood estimated from the residuals.
+     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - bic1
-     - The Bayesian Information Criterion when fitting a single spot using the likelihood estimated from the residuals.
+     - The Bayesian Information Criterion when fitting a single spot using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - bic2
-     - The Bayesian Information Criterion when fitting a doublet using the likelihood estimated from the residuals.
+     - The Bayesian Information Criterion when fitting a doublet using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - maic1
-     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be the same as AIC.
+     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - maic2
-     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be the same as AIC.
+     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - mbic1
-     - The Bayesian Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be the same as BIC.
+     - The Bayesian Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - mbic2
-     - The Bayesian Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be the same as BIC.
+     - The Bayesian Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - a1
      - The angle between the vector defining the asymmetry in the fit residuals and the position of the first spot of the doublet.
@@ -4352,6 +4352,9 @@ Filters all the fit results produced by the ``Doublet Analysis`` plugin using th
 
 This can be used to determine the best settings for optimum doublet fitting and filtering.
 
+.. note::
+
+    The ``Doublet Filter Analysis`` plugin has been superseded by the ``Iterate Filter Analysis`` plugin which can simultaneously optimise the fit residuals and the filter settings. The plugin is still supported as it allows plotting of the filter score against the residuals threshold for information purposes.
 
 .. index:: Selecting a Two Spot Model
 
@@ -4360,7 +4363,7 @@ Selecting a Two Spot Model
 
 The ``Doublet Analysis`` plugin fits a subset of the candidate spots in the benchmark image. These are fit as a single spot or as a double spot (doublet). The results are compared to the actual coordinates and scored. The ``Doublet Filter Analysis`` plugin applies filters to the fitting results to select if the single or doublet (or no fit) results should be accepted. The filtered results are then scored against the actual coordinates.
 
-Unlike standard fitting and filtering, where the system must decide if the fit of a single spot is good, doublet fitting must decide if the fit is better with two spots rather than one. The system first requires that both results from the doublet are valid (i.e. using SNR, width, precision, etc). It then must decide if the fit is better using two spots rather than one. Given that the two spot model has more parameters it has an advantage over a simpler one spot model. The plugin provide various scores to determine if there is sufficient improvement in the fit to accept the more complex two spot model. The acceptance scores are described below.
+Unlike standard fitting and filtering, where the system must decide if the fit of a single spot is good, doublet fitting must decide if the fit is better with two spots rather than one. The system first requires that both results from the doublet are valid (i.e. using SNR, width, precision, etc). It then must decide if the fit is better using two spots rather than one. Given that the two spot model has more parameters it has an advantage over a simpler one spot model. The plugin provides various scores to determine if there is sufficient improvement in the fit to accept the more complex two spot model. The acceptance scores are described below.
 
 
 .. index:: Adjusted Coefficient of Determination
@@ -4461,6 +4464,9 @@ The following parameters can be configured:
 
        This allows testing the residuals threshold to use given the optimum filter for fitting single spots.
 
+   * - Smart filter
+     - Set to **true** to use a smart filter. The filter should be specified using XML in a separate dialog. 
+
    * - Shift Factor
      - Any peak that shifts more than a factor of the initial peak standard deviation is discarded.
 
@@ -4481,8 +4487,8 @@ The following parameters can be configured:
    * - Precision
      - Any peak with a precision above this level is discarded, i.e. not very good precision.
 
-   * - Local background
-     - Use the local fitted background in the precision calculation. The default is to use the global background estimate for the frame.
+   * - Precision method
+     - The method used to compute the precision.
 
    * - Drift angle
      - Set the maximum angle that a doublet centre can be away from the vector defining the assymetry in the single fit residuals. The angle criteria is only applied if the doublet centre has shifted beyond the configured shift factor for filtering a single spot (i.e. if the doublet centre is far from the original fitted position it must be in the correct direction given the fit residuals).
@@ -4520,7 +4526,7 @@ Results
 
 After spot candidates have been filtered using the specified criteria the results are summarised. Each candidate that was fitted as a single spot has a residuals score. The results are sorted by their residuals score and the binary scoring statistics (Precision, Recall, Jaccard) are computed for each possible threshold for the residuals score; for a given threshold all spots below the threshold are assessed as single fits and all above are subjected to the selction criteria to choose the single or doublet fit.
 
-If the \`Show Jaccard Plot`` option was selected the scoring statistics can be plotted against the residuals threshold (::numref:`Figure %s <fig_doublet_filter_analysis_jaccard_plot>`).
+If the ``Show Jaccard Plot`` option was selected the scoring statistics can be plotted against the residuals threshold (::numref:`Figure %s <fig_doublet_filter_analysis_jaccard_plot>`).
 
 .. _fig_doublet_filter_analysis_jaccard_plot:
 .. figure:: images/doublet_filter_analysis_jaccard_plot.jpg

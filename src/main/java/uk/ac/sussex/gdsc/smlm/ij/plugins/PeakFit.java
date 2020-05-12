@@ -2721,8 +2721,8 @@ public class PeakFit implements PlugInFilter {
   }
 
   /**
-   * Show a dialog to configure the smart filter. The updated settings are saved to the settings
-   * file.
+   * Show a dialog to configure the smart filter. The updated settings are optionally saved to the
+   * settings file.
    *
    * <p>If the fit configuration isSmartFilter is not enabled then this method returns true. If it
    * is enabled then a dialog is shown to input the configuration for a smart filter. If no valid
@@ -2737,6 +2737,32 @@ public class PeakFit implements PlugInFilter {
    */
   public static boolean configureSmartFilter(FitEngineConfiguration config, int flags) {
     final FitConfiguration fitConfig = config.getFitConfiguration();
+    if (!fitConfig.isSmartFilter()) {
+      return true;
+    }
+    final boolean result = configureSmartFilter(fitConfig);
+    if (result) {
+      if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
+        SettingsManager.writeSettings(config, 0);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Show a dialog to configure the smart filter.
+   *
+   * <p>If the fit configuration isSmartFilter is not enabled then this method returns true. If it
+   * is enabled then a dialog is shown to input the configuration for a smart filter. If no valid
+   * filter can be created from the input then the method returns false.
+   *
+   * <p>Note: If the smart filter is successfully configured then the user may want to disable the
+   * standard fit validation.
+   *
+   * @param fitConfig the fit config
+   * @return true, if successful
+   */
+  public static boolean configureSmartFilter(final FitConfiguration fitConfig) {
     if (!fitConfig.isSmartFilter()) {
       return true;
     }
@@ -2768,9 +2794,6 @@ public class PeakFit implements PlugInFilter {
 
     fitConfig.setDirectFilter((DirectFilter) f);
 
-    if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
-      SettingsManager.writeSettings(config, 0);
-    }
     return true;
   }
 

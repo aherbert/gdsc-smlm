@@ -820,9 +820,27 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           // at doublet fitting.
           result.good1 = goodFit(result.fitResult1, width, height) == 2;
 
+          ///////////////////
+          // XXX
+          //
+          // Note:
+          // This stores AIC and maximum likelihood AIC in different variables.
+          // This is a legacy from when maximum likelihood fitters could compute the
+          // residuals. This has been changed and so AIC and ML AIC are now mutually exclusive
+          // and should be consolidated.
+          //
+          // A new filter could be added using the log-likelihood ratio and a p-value threshold
+          // for a generalised LLR test.
+          //
+          // This does not matter as the doublet analysis plugin is redundant now that
+          // optimisation of residuals can be done in the BenchmarkFilterAnalysis plugin.
+          // This plugin exists to allow investigation of other criteria such as the doublet
+          // centres angles and gap relative to the single centre.
+          ///////////////////
+
           if (result.good1) {
             result.sumOfSquares1 = (f1.getType() == FunctionSolverType.LSE)
-                ? ((LseFunctionSolver) f1).getTotalSumOfSquares()
+                ? ((LseFunctionSolver) f1).getResidualSumOfSquares()
                 : 0;
             result.ll1 = (f1.getType() == FunctionSolverType.MLE)
                 ? ((MleFunctionSolver) f1).getLogLikelihood()
@@ -886,7 +904,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
               if (r2 != 0) {
                 result.good2 = r2 == 2;
                 result.sumOfSquares2 = (f2.getType() == FunctionSolverType.LSE)
-                    ? ((LseFunctionSolver) f2).getTotalSumOfSquares()
+                    ? ((LseFunctionSolver) f2).getResidualSumOfSquares()
                     : 0;
                 result.ll2 = (f2.getType() == FunctionSolverType.MLE)
                     ? ((MleFunctionSolver) f2).getLogLikelihood()
@@ -938,10 +956,10 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                     }
                   }
                 } else {
-                  result.maic1 = result.aic1;
-                  result.maic2 = result.aic2;
-                  result.mbic1 = result.bic1;
-                  result.mbic2 = result.bic2;
+                  result.maic1 = 0; // result.aic1;
+                  result.maic2 = 0; // result.aic2;
+                  result.mbic1 = 0; // result.bic1;
+                  result.mbic2 = 0; // result.bic2;
                 }
                 if (f1.getType() == FunctionSolverType.LSE) {
                   result.r1 = ((LseFunctionSolver) f1).getAdjustedCoefficientOfDetermination();
@@ -2582,6 +2600,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final double otherDriftAngle = 180 - settings.analysisDriftAngle;
     final FitConfiguration fitConfig = config.getFitConfiguration();
 
+    filterFitConfig.setup();
+
     // Process all the results
     for (final DoubletResult result : results.doubletResults) {
       // Filter the singles that would be accepted
@@ -3020,7 +3040,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     gd.addChoice("Template", templates, templates[0]);
     // Allow the settings from the benchmark analysis to be used
     gd.addCheckbox("Benchmark_settings", settings.analysisUseBenchmarkSettings);
-    gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
+    gd.addCheckbox("Smart_filter", filterFitConfig.isSmartFilter());
     gd.addSlider("Shift_factor", 0.01, 2, filterFitConfig.getCoordinateShiftFactor());
     gd.addNumericField("Signal_strength", filterFitConfig.getSignalStrength(), 2);
     gd.addNumericField("Min_photons", filterFitConfig.getMinPhotons(), 0);
@@ -3077,7 +3097,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // Ignore the template
     gd.getNextChoice();
     settings.analysisUseBenchmarkSettings = gd.getNextBoolean();
-    fitConfig.setSmartFilter(gd.getNextBoolean());
+    filterFitConfig.setSmartFilter(gd.getNextBoolean());
     filterFitConfig.setCoordinateShiftFactor(gd.getNextNumber());
     filterFitConfig.setSignalStrength(gd.getNextNumber());
     filterFitConfig.setMinPhotons(gd.getNextNumber());
@@ -3095,12 +3115,17 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     settings.analysisTitle = gd.getNextString();
     settings.saveTemplate = gd.getNextBoolean();
 
+    settings.save();
+    filterFitConfigRef.set(filterFitConfig);
+
     if (gd.invalidNumber()) {
       return false;
     }
 
     if (settings.analysisUseBenchmarkSettings) {
       return updateFilterConfiguration(filterFitConfig);
+    } else if (filterFitConfig.isSmartFilter()) {
+      return PeakFit.configureSmartFilter(filterFitConfig);
     }
 
     return true;
