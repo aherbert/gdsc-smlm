@@ -738,7 +738,7 @@ public class PcPalmMolecules implements PlugIn {
     // Access calibrated data
     final StandardResultProcedure sp =
         new StandardResultProcedure(results, DistanceUnit.NM, IntensityUnit.PHOTON);
-    sp.getXy();
+    sp.getIxy();
     final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
     pp.getPrecision();
 
