@@ -103,6 +103,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.model.MaskDistribution;
 import uk.ac.sussex.gdsc.smlm.model.StandardFluorophoreSequenceModel;
 import uk.ac.sussex.gdsc.smlm.model.UniformDistribution;
+import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.NullSource;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -659,7 +660,8 @@ public class PcPalmMolecules implements PlugIn {
 
     log("Fitting molecule precision...");
     final ArrayList<Molecule> singles = new ArrayList<>();
-    settings.molecules = extractMolecules(settings.results, sigmaRaw, singles);
+    final double[] precisions = localisations.stream().mapToDouble(m -> m.precision).toArray();
+    settings.molecules = extractMolecules(settings.results, precisions, sigmaRaw, singles);
     if (settings.singlesModeIndex == 1) {
       settings.molecules.addAll(singles);
     }
@@ -1015,32 +1017,28 @@ public class PcPalmMolecules implements PlugIn {
    * a single molecule
    *
    * @param results The results
+   * @param precisions the precisions
    * @param sigmaRaw The initial precision estimate
    * @param singles a list of the singles (not grouped into molecules)
    * @return a list of molecules
    */
-  private static ArrayList<Molecule> extractMolecules(MemoryPeakResults results, double sigmaRaw,
-      ArrayList<Molecule> singles) {
-    return traceMolecules(results, sigmaRaw * 2.5, 1, singles);
+  private static ArrayList<Molecule> extractMolecules(MemoryPeakResults results,
+      double[] precisions, double sigmaRaw, ArrayList<Molecule> singles) {
+    return traceMolecules(results, precisions, sigmaRaw * 2.5, 1, singles);
   }
 
   /**
    * Trace localisations.
    *
    * @param results The results
+   * @param precisions the precisions
    * @param distance The distance threshold (nm)
    * @param time The time threshold (frames)
    * @param singles a list of the singles (not grouped into molecules)
    * @return a list of molecules
    */
-  private static ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double distance,
-      int time, ArrayList<Molecule> singles) {
-    final TraceManager tm = new TraceManager(results);
-    final double distanceThreshold = distance / results.getNmPerPixel();
-    tm.traceMolecules(distanceThreshold, time);
-    final Trace[] traces = tm.getTraces();
-    final ArrayList<Molecule> molecules = new ArrayList<>(traces.length);
-
+  private static ArrayList<Molecule> traceMolecules(MemoryPeakResults results, double[] precisions,
+      double distance, int time, ArrayList<Molecule> singles) {
     // These plugins are not really supported so just leave them to throw an exception if
     // the data cannot be handled
     final TypeConverter<IntensityUnit> ic =
@@ -1048,10 +1046,26 @@ public class PcPalmMolecules implements PlugIn {
     final TypeConverter<DistanceUnit> dc =
         results.getCalibrationReader().getDistanceConverter(DistanceUnit.NM);
 
+    // Create a new dataset with the precision
+    final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+    for (int i = 0, size = results.size(); i < size; i++) {
+      final AttributePeakResult peak2 = new AttributePeakResult(results.get(i));
+      peak2.setPrecision(precisions[i]);
+      results2.add(peak2);
+    }
+
+    final TraceManager tm = new TraceManager(results2);
+    final double distanceThreshold = dc.convertBack(distance);
+
+    tm.traceMolecules(distanceThreshold, time);
+    final Trace[] traces = tm.getTraces();
+    final ArrayList<Molecule> molecules = new ArrayList<>(traces.length);
+
     for (final Trace t : traces) {
       final double p = t.getLocalisationPrecision(dc);
       final float[] centroid = t.getCentroid();
-      singles.add(new Molecule(dc.convert(centroid[0]), dc.convert(centroid[1]), p,
+      final List<Molecule> list = t.size() == 1 ? singles : molecules;
+      list.add(new Molecule(dc.convert(centroid[0]), dc.convert(centroid[1]), p,
           ic.convert(t.getSignal())));
     }
     log("  %d localisations traced to %d molecules (%d singles, %d traces) using d=%.2f nm,"
@@ -1100,9 +1114,13 @@ public class PcPalmMolecules implements PlugIn {
     final int timeInFrames = FastMath.max(1, (int) Math.round(settings.timeThreshold * 1000.0
         / settings.results.getCalibrationReader().getExposureTime()));
 
+    // Get precisions
+    final PrecisionResultProcedure pp = new PrecisionResultProcedure(settings.results);
+    pp.getPrecision();
+
     final ArrayList<Molecule> singles = new ArrayList<>();
-    settings.molecules =
-        traceMolecules(settings.results, settings.distanceThreshold, timeInFrames, singles);
+    settings.molecules = traceMolecules(settings.results, pp.precisions, settings.distanceThreshold,
+        timeInFrames, singles);
     settings.molecules.addAll(singles);
   }
 
