@@ -1197,9 +1197,7 @@ public class PcPalmMolecules implements PlugIn {
     }
 
     final double nmPerPixel = 100;
-    double width = settings.simulationSize * 1000.0;
-    // Allow a border of 3 x sigma for +/- precision
-    width -= 3 * settings.sigmaS;
+    final double width = settings.simulationSize * 1000.0;
     final UniformRandomProvider rng = UniformRandomProviders.create();
     final UniformDistribution dist =
         new UniformDistribution(null, new double[] {width, width, 0}, rng.nextInt());
@@ -1228,26 +1226,19 @@ public class PcPalmMolecules implements PlugIn {
       // Simulate clusters.
 
       // Note: In the Veatch et al. paper (Plos 1, e31457) correlation functions are built using
-      // circles
-      // with small radii of 4-8 Arbitrary Units (AU) or large radii of 10-30 AU. A fluctuations
-      // model is
-      // created at T = 1.075 Tc. It is not clear exactly how the particles are distributed.
+      // circles with small radii of 4-8 Arbitrary Units (AU) or large radii of 10-30 AU. A
+      // fluctuations model is created at T = 1.075 Tc. It is not clear exactly how the particles
+      // are distributed.
       // It may be that a mask is created first using the model. The particles are placed on the
-      // mask using
-      // a specified density. This simulation produces a figure to show either a damped cosine
-      // function
-      // (circles) or an exponential (fluctuations). The number of particles in each circle may be
-      // randomly
-      // determined just by density. The figure does not discuss the derivation of the cluster size
-      // statistic.
+      // mask using a specified density. This simulation produces a figure to show either a damped
+      // cosine function (circles) or an exponential (fluctuations). The number of particles in
+      // each circle may be randomly determined just by density. The figure does not discuss the
+      // derivation of the cluster size statistic.
       //
       // If this plugin simulation is run with a uniform distribution and blinking rate of 1 then
-      // the damped
-      // cosine function is reproduced. The curve crosses g(r)=1 at a value equivalent to the
-      // average
-      // distance to the centre-of-mass of each drawn cluster, not the input cluster radius
-      // parameter (which
-      // is a hard upper limit on the distance to centre).
+      // the damped cosine function is reproduced. The curve crosses g(r)=1 at a value equivalent
+      // to the average distance to the centre-of-mass of each drawn cluster, not the input cluster
+      // radius parameter (which is a hard upper limit on the distance to centre).
 
       final int maskSize = settings.lowResolutionImageSize;
       int[] mask = null;
@@ -1311,6 +1302,7 @@ public class PcPalmMolecules implements PlugIn {
         }
       }
 
+      final double scaledRadius = settings.clusterRadius / maskScale;
       if (settings.showClusterMask || settings.clusterSimulation == 3) {
         // Show the mask for the clusters
         if (mask == null) {
@@ -1318,7 +1310,7 @@ public class PcPalmMolecules implements PlugIn {
         } else {
           Arrays.fill(mask, 0);
         }
-        final int roiRadius = (int) Math.round((settings.clusterRadius) / maskScale);
+        final int roiRadius = (int) Math.round(scaledRadius);
         for (final double[] c : clusterCentres) {
           final double cx = c[0] / maskScale;
           final double cy = c[1] / maskScale;
@@ -1569,7 +1561,10 @@ public class PcPalmMolecules implements PlugIn {
     settings.results.end();
 
     if (bp != null) {
-      ImageJUtils.display(maskTitle, bp);
+      final ImagePlus imp = ImageJUtils.display(maskTitle, bp);
+      final Calibration cal = imp.getCalibration();
+      cal.setUnit("nm");
+      cal.pixelWidth = cal.pixelHeight = maskScale;
     }
 
     log("Simulation results");
@@ -1621,11 +1616,9 @@ public class PcPalmMolecules implements PlugIn {
 
   @Nullable
   private static double[][] plot(DoubleData stats, String label, boolean integerBins) {
-    final String title = TITLE + " " + label;
-
     if (integerBins) {
       // The histogram is not need for the return statement
-      new HistogramPlotBuilder(title, stats, label).setMinBinWidth(1).show();
+      new HistogramPlotBuilder(TITLE, stats, label).setMinBinWidth(1).show();
       return null;
     }
 
@@ -1637,6 +1630,7 @@ public class PcPalmMolecules implements PlugIn {
     final double[] yValues = hist[1];
 
     // Plot
+    final String title = TITLE + " " + label;
     final Plot2 plot = new Plot2(title, label, "Frequency", xValues, yValues);
     ImageJUtils.display(title, plot);
 
@@ -1686,6 +1680,7 @@ public class PcPalmMolecules implements PlugIn {
       plot.setColor(Color.blue);
       plot.addPoints(interIdHist[0], interIdHist[1], Plot.LINE);
       plot.setColor(Color.black);
+      plot.addLegend("Intra-molecule\nInter-molecule");
       ImageJUtils.display(title, plot);
     } else {
       log("Aborted clustering to check inter-molecule distances");
@@ -1784,18 +1779,18 @@ public class PcPalmMolecules implements PlugIn {
     gd.addMessage("Simulate a random distribution of molecules.");
 
     gd.addNumericField("Molecules", settings.numberOfMolecules, 0);
-    gd.addNumericField("Simulation_size (um)", settings.simulationSize, 2);
+    gd.addNumericField("Simulation_size", settings.simulationSize, 2, 6, "um");
     gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
     gd.addChoice("Blinking_distribution", Settings.BLINKING_DISTRIBUTION,
         settings.blinkingDistribution);
-    gd.addNumericField("Average_precision (nm)", settings.sigmaS, 2);
+    gd.addNumericField("Average_precision", settings.sigmaS, 2, 6, "nm");
     gd.addCheckbox("Show_histograms", settings.showHistograms);
     gd.addCheckbox("Distance_analysis", settings.distanceAnalysis);
 
     gd.addChoice("Cluster_simulation", Settings.CLUSTER_SIMULATION, settings.clusterSimulation);
     gd.addNumericField("Cluster_number", settings.clusterNumber, 2);
     gd.addNumericField("Cluster_variation (SD)", settings.clusterNumberStdDev, 2);
-    gd.addNumericField("Cluster_radius", settings.clusterRadius, 2);
+    gd.addNumericField("Cluster_radius", settings.clusterRadius, 2, 6, "nm");
     gd.addCheckbox("Show_cluster_mask", settings.showClusterMask);
 
     gd.addHelp(HelpUrls.getUrl("pc-palm-molecules"));
