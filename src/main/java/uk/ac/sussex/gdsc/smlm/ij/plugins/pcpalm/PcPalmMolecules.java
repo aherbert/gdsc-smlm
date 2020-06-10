@@ -443,8 +443,7 @@ public class PcPalmMolecules implements PlugIn {
       // Blinking rate is mentioned in the PC-PALM protocol and so we include it here.
       // TODO - Add automated estimation of the blinking rate from the data using the method of
       // Annibale, et al (2011), Quantitative photo activated localization microscopy: unraveling
-      // the
-      // effects of photoblinking. PLoS One, 6(7): e22678
+      // the effects of photoblinking. PLoS One, 6(7): e22678
       // (http://dx.doi.org/10.1371%2Fjournal.pone.0022678)
       settings.densityProtein = settings.densityPeaks / settings.blinkingRate;
       log("Peak Density = %s (um^-2). Protein Density = %s (um^-2)",
@@ -713,7 +712,7 @@ public class PcPalmMolecules implements PlugIn {
 
     // Check arguments
     try {
-      ParameterUtils.isAbove("Histogram bins", settings.histogramBins, 1);
+      ParameterUtils.isEqualOrAbove("Histogram bins", settings.histogramBins, 0);
       ParameterUtils.isEqualOrAbove("Blinking rate", settings.blinkingRate, 1);
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
@@ -820,7 +819,15 @@ public class PcPalmMolecules implements PlugIn {
       }
     }
 
-    final float[][] hist = HistogramPlot.calcHistogram(data, yMin, yMax, histogramBins);
+    int bins;
+    if (histogramBins <= 0) {
+      bins = (int) Math.ceil((stats.getMax() - stats.getMin())
+          / HistogramPlot.getBinWidthScottsRule(stats.getStandardDeviation(), (int) stats.getN()));
+    } else {
+      bins = histogramBins;
+    }
+
+    final float[][] hist = HistogramPlot.calcHistogram(data, yMin, yMax, bins);
 
     Plot2 plot = null;
     if (title != null) {
