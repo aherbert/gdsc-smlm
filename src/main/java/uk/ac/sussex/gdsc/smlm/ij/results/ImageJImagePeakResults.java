@@ -318,7 +318,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       if (TextUtils.isNotEmpty(lutName)) {
         final LutColour colour = LutColour.forName(lutName);
         if (colour != null) {
-          imp.setLut(LutHelper.createLut(LutColour.forName(lutName), false));
+          imp.setLut(LutHelper.createLut(LutColour.forName(lutName), true));
         } else {
           // Assume ImageJ LUT
           WindowManager.setTempCurrentImage(imp);
