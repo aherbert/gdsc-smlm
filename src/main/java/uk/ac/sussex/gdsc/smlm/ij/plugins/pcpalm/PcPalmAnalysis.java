@@ -335,7 +335,7 @@ public class PcPalmAnalysis implements PlugIn {
       }
       return true;
     } catch (final XStreamException | IOException ex) {
-      IJ.log("Failed to load correlation result from file: " + path);
+      ImageJUtils.log("Failed to load correlation result from file: %s\n%s", path, ex.getMessage());
     }
     return false;
   }
