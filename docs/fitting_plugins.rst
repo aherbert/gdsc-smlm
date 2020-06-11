@@ -37,43 +37,44 @@ The SMLM plugins require information about the system used to capture the images
    :widths: 20 80
    :header-rows: 1
 
-   * -  Information
+   * - Information
      - Description
 
-   * -  Pixel Pitch
-     -  Specify the size of each pixel in the image.
+   * - Pixel Pitch
+     - Specify the size of each pixel in the image.
 
-        This is used to set the scale of the image and allows determination of the distance between localisations. This is used in many analysis plugins and for the localisation precision calculation.
+       This is used to set the scale of the image and allows determination of the distance between localisations. This is used in many analysis plugins and for the localisation precision calculation.
 
-        It is expected that the value would be in the range around 100nm. Input of an incorrect value will lead to incorrect precision estimates and require the user to adapt the analysis plugins and their results.
+       It is expected that the value would be in the range around 100nm. Input of an incorrect value will lead to incorrect precision estimates and require the user to adapt the analysis plugins and their results.
 
-   * -  Gain
-     -  Specify how many pixel values are equal to a photon of light. The units are Analogue-to-Digital Units (ADUs)/photon.
+   * - Gain
+     - Specify how many pixel values are equal to a photon of light. The units are Analogue-to-Digital Units (ADUs)/photon.
 
-        This allows conversion of the pixel values to photons. It is used to convert the volume of the fitted 2D Gaussian to a photon count (the localisation signal).
+       This allows conversion of the pixel values to photons. It is used to convert the volume of the fitted 2D Gaussian to a photon count (the localisation signal).
 
-        The gain is the total gain of the system (ADU/photon) and is equal to:
-        [Camera gain (ADU/e-)] x [EM-gain] x [Quantum Efficiency (e-/photon)]
+       The gain is the total gain of the system (ADU/photon) and is equal to:
 
-        Note: Check the units for this calculation as the camera gain can often be represented as electrons/ADU. In this case a reciprocal must be used. EM-gain has no units. Quantum Efficiency should be in the range 0-1; the units are electrons/photon.
+       [Camera gain (ADU/e-)] x [EM-gain] x [Quantum Efficiency (e-/photon)]
 
-        For an EM-CCD camera with an EM-gain of 250 the total gain may be in the range around 40. Camera gain and EM-gain can be calculated for your camera using the :ref:`calibration_plugins:Mean-Variance Test` plugins. The gain values and Q.E. may also have been provided on a specification sheet with the camera.
+       Note: Check the units for this calculation as the camera gain can often be represented as electrons/ADU. In this case a reciprocal must be used. EM-gain has no units. Quantum Efficiency should be in the range 0-1; the units are electrons/photon.
 
-        Input of an incorrect value will lead to incorrect precision estimates. These estimates are used in various analysis plugins to set parameters relative to the average fitting precision.
+       For an EM-CCD camera with an EM-gain of 250 the total gain may be in the range around 40. Camera gain and EM-gain can be calculated for your camera using the :ref:`calibration_plugins:Mean-Variance Test` plugins. The gain values and Q.E. may also have been provided on a specification sheet with the camera.
 
-   * -  Exposure Time
-     -  This is the length of time captured by each frame in milliseconds.
+       Input of an incorrect value will lead to incorrect precision estimates. These estimates are used in various analysis plugins to set parameters relative to the average fitting precision.
 
-        The exposure time is used in various analysis plugins. Input of an incorrect value will only effect the time scales reported in the results.
+   * - Exposure Time
+     - This is the length of time captured by each frame in milliseconds.
 
-   * -  Peak Width
-     -  Specify the expected width of the Gaussian function that approximates the Point Spread Function (PSF) Airy disk. This is how spread out the spot of light is when in focus. The width is specified in pixels.
+       The exposure time is used in various analysis plugins. Input of an incorrect value will only effect the time scales reported in the results.
 
-        This value is used as an input to the fitting process to avoid having to guess the initial width for each spot processed. Since the width is approximately constant for the microscope it is valuable to input the expected width. The width is updated during the fitting process allowing fitting of out-of-focus spots.
+   * - Peak Width
+     - Specify the expected width of the Gaussian function that approximates the Point Spread Function (PSF) Airy disk. This is how spread out the spot of light is when in focus. The width is specified in pixels.
 
-        The width can be calculated using knowledge of the microscope objective and the wavelength of light. It can also be estimated from an image (see section :ref:`calibration_plugins:PSF Estimator`).
+       This value is used as an input to the fitting process to avoid having to guess the initial width for each spot processed. Since the width is approximately constant for the microscope it is valuable to input the expected width. The width is updated during the fitting process allowing fitting of out-of-focus spots.
 
-        It is expected that this should be in the range around 1 pixel. Input of an incorrect value will lead to poor fitting performance since by default peaks that are too wide/narrow are discarded.
+       The width can be calculated using knowledge of the microscope objective and the wavelength of light. It can also be estimated from an image (see section :ref:`calibration_plugins:PSF Estimator`).
+
+       It is expected that this should be in the range around 1 pixel. Input of an incorrect value will lead to poor fitting performance since by default peaks that are too wide/narrow are discarded.
 
 
 When the ``Simple Fit`` plugin is run it attempts to load the SMLM configuration. Settings are located in the user's home directory within a directory named ``[HOME]/.gdsc.smlm/``. If the configuration is missing then a wizard is run to guide the user through calibration (see section :numref:`%s <fitting_plugins:Configuration Wizard 1: Introduction>`).
@@ -238,16 +239,16 @@ The plugin offers the following parameters.
    * - Parameter
      - Description
 
-   * -  Use current calibration
-     -  If selected use the current SMLM configuration. Otherwise run the configuration wizard.
+   * - Use current calibration
+     - If selected use the current SMLM configuration. Otherwise run the configuration wizard.
 
-        This option is only shown if a SMLM configuration file can be found. If no file is found then the configuration wizard is run by default.
+       This option is only shown if a SMLM configuration file can be found. If no file is found then the configuration wizard is run by default.
 
-   * -  Show table
-     -  Show a table containing the localisations.
+   * - Show table
+     - Show a table containing the localisations.
 
-   * -  Show image
-     -  Show a super-resolution image of the localisations. The image will be 1024 pixels on the long edge. Note that the plugin will run if no output options are selected. This is because the fitting results are also stored in memory. The results can be accessed and manipulated using the :ref:`results_plugins:Results Plugins`.
+   * - Show image
+     - Show a super-resolution image of the localisations. The image will be 1024 pixels on the long edge. Note that the plugin will run if no output options are selected. This is because the fitting results are also stored in memory. The results can be accessed and manipulated using the :ref:`results_plugins:Results Plugins`.
 
 It is possible to stop the fitting process using the ``Escape`` key. All current results will be kept but the fitting process will end.
 
