@@ -358,7 +358,7 @@ public class PcPalmAnalysis implements PlugIn {
 
     gd.addMessage("Analyse clusters using Pair Correlation.");
 
-    gd.addNumericField("Correlation_distance (nm)", settings.correlationDistance, 0);
+    gd.addNumericField("Correlation_distance", settings.correlationDistance, 0, 6, "nm");
     if (!spatialDomain) {
       gd.addMessage("-=- Frequency domain analysis -=-");
       gd.addCheckbox("Binary_image", settings.binaryImage);
