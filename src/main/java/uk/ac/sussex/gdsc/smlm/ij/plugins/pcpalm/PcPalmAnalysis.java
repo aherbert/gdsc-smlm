@@ -709,7 +709,7 @@ public class PcPalmAnalysis implements PlugIn {
       double[][] gr;
       try {
         // Use the FFT library as it is multi-threaded. This may not be in the user's path.
-        gr = computeAutoCorrelationCurvefft(im, wp, pad, settings.nmPerPixel, peakDensity);
+        gr = computeAutoCorrelationCurveFft(im, wp, pad, settings.nmPerPixel, peakDensity);
       } catch (final Exception ex) {
         // Default to the ImageJ built-in FHT
         gr = computeAutoCorrelationCurveFht(im, wp, pad, settings.nmPerPixel, peakDensity);
@@ -783,6 +783,8 @@ public class PcPalmAnalysis implements PlugIn {
         final double sd = gr[2][i + offset];
         plot.drawLine(x[i], y[i] - sd, x[i], y[i] + sd);
       }
+      plot.setColor(Color.black);
+      plot.updateImage();
       ImageJUtils.display(plotTitle, plot);
     }
 
@@ -912,7 +914,7 @@ public class PcPalmAnalysis implements PlugIn {
    * @return { distances[], gr[], gr_se[] }
    */
   @Nullable
-  private double[][] computeAutoCorrelationCurvefft(ImageProcessor im, ImageProcessor wp,
+  private double[][] computeAutoCorrelationCurveFft(ImageProcessor im, ImageProcessor wp,
       int maxRadius, double nmPerPixel, double density) {
     log("Performing FFT correlation");
     final FloatProcessor corrIm = computeAutoCorrelationFft(im);
