@@ -10,11 +10,13 @@ The plugins are described in the following sections using the order presented on
 
 .. note::
 
-    The PC-PALM plugins are under development and should be considered experimental.
+    The PC-PALM plugins should be considered experimental.
 
-    The plugins are subject to change and so no documentation has yet been produced to describe them. They are included in this package to assess interest from the community.
+    The analysis of localisations using PC_PALM is applicable to 2D data (Sengupta *et al*, 2011). The analysis methods do not accommodate structures that overlap in the z-dimension. The original papers performed analysis on 2D bound membrane proteins.
 
-    If you wish to use the plugins please contact `Alex Herbert <a.herbert@sussex.ac.uk>`_ for more information.
+    The analysis of colocated fluorescence by Puchner *et al* (2013) is not limited to 2D data but requires that clusters projected onto the 2D imaging plane are well separated.
+
+    In either case the success of the method requires careful experimental setup, imaging conditions and localisation analysis. Development work on these plugins was halted when the methods were determined to be unsuitable for the imaging data of interest.
 
 
 PC-PALM Molecules
