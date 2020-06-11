@@ -1223,6 +1223,7 @@ public class PcPalmAnalysis implements PlugIn {
   private static void addCorrelationResult(CorrelationResult result) {
     final ArrayList<CorrelationResult> list = new ArrayList<>(resultsRef.get());
     result.id = list.size() + 1;
+    list.add(result);
     resultsRef.set(list);
   }
 
