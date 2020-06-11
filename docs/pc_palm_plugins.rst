@@ -53,6 +53,8 @@ The plugin has the following modes to prepare the molecule positions:
 
        See :numref:`{number}: {name} <pc_palm_plugins:Run Mode: Simulation>`.
 
+Note: If no localisations are currently stored in memory then the plugin will default to simulation mode. In this case the simulation dialog is combined with the output image options.
+
 Once the molecules have been identified the plugin will construct a super-resolution image of the data. The image is binary with a value of 1 for any pixel that has one or more molecules, otherwise the pixels are 0. The image has an ROI drawn on the image. This represents a rectangular region for analysis by the ``PC-PALM Analysis`` plugin. The image is used to select regions of data for analysis. Ideally some level of non-random distribution (clustering) should be visible in the image.
 
 Optionally a high resolution image of the data can be constructed. This will attempt to draw each molecule on a single pixel by defining the pixel pitch as the reciprocal of the minimum distance between any two molecules. In the event of colocalisation this may be a very small distance and the reciprocal which defines the output pixel pitch will tend towards infinity. Thus the plugin provides the option to limit the output pixel pitch. Note that this image allows debugging the molecule distribution that is used in the ``PC-PALM Analysis`` plugin. Ideally it should be possible to render all molecules to separate pixels on a high resolution image to maximise the information available during pair correlation. This may not be possible if colocalisation of blinks from the same molecules is present. However if the minimum distance between molecules is high then the conversion of localisations to molecules may have grouped together separate molecules.
@@ -71,6 +73,8 @@ The following parameters are available:
 
    * - Input
      - The input localisations.
+
+       Only available if there are localisations in memory. Otherwise the mode is ``Simulation`` and the dialog displays the simulation dialog parameters (see :numref:`{number}: {name} <pc_palm_plugins:Run Mode: Simulation>`).
 
    * - Use ROI
      - Map the ROI from the currently selected image to the input localisations and crop the selected region. This options is only shown if the current image has an area ROI.
@@ -225,7 +229,114 @@ The following parameters are available:
 PC-PALM Analysis
 ----------------
 
-Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al* , 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* correlation curve.
+Perform pair-correlation analysis in the frequency domain as per the paper by [Sengupta *et al* , 2011], [Sengupta, *et al*, 2013] to produce a *g(r)* auto-correlation curve. Analysis is based on the PC-PALM protocol of Sengupta, *et al* (2013), steps 19 to 20(A).
+
+Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A rectangular region of interest (ROI) should be marked on the image. This is the region that will be extracted from the molecule dataset for analysis. When the plugin is run the image with the ROI must be selected otherwise the plugin will display an error.
+
+The analysis plugin will extract the selected molecule data and create a super-resolution image. This should be as large as possible to maximise separation of molecules onto different pixels. This would be achieved using a pixel pitch inverse to the minimum distance between molecules. However due to colocalisation of molecules the minimum distance between them may be extremely small. In practice a pixel pitch of a few nm should be sufficient for analysis. Note that the PC-PALM Molecules plugin will report the minimum distance between molecules and a suggested pixel pitch. This is pre-loaded as the starting value in the analysis plugin dialog. If a previous analysis has been performed on a different ROI then the previous pixel pitch is retained.
+
+The super resolution image is used to compute an auto correlation curve (*g(r)*). This represents the similarity between the image and the same image offset at a given radius *r*. The computation is performed using Fourier transforms which results in the correlation score being computed at each radius *r* in all directions simultaneously. The curve is normalised using the protein density (the molecule density divided by the blinking rate) to account for different numbers of molecules in each ROI. This allows multiple correlation curves to be combined to create a smoother curve for fitting (see :numref:`{number}: {name} <pc_palm_plugins:PC-PALM Fitting>`). A summary of the data is recorded in a results table and the curve is saved in memory for fitting.
+
+Note that the use of an ROI to select regions for analysis allow computation of the *g(r)* curve with a larger super resolution image (smaller pixel pitch). A large dataset may not be possible to analyse in a single pass due to memory restrictions. This can be analysed by sectioning the region, analysing non-overlapping sections and then combining the *g(r)* curves from each analysis. Combination of curves can be done by the ``PC-PALM Fitting`` plugin for curves created using the same pixel pitch (resolution).
+
+Parameters
+~~~~~~~~~~
+
+The following parameters are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Correlation distance
+     - The maximum distance for the correlation curve.
+
+   * - Binary image
+     - Set to **true** to use a value of 1 for each pixel where 1 or more molecules are located. If **false** then the pixel value uses a count. This may effect the correlation curve when there are high levels of colocated molecules on the super-resolution image.
+
+   * - Blinking rate
+     - The estimated blinking rate of the fluorphore. This is used to map molecule counts to protein counts. The value effects the normalisation of the correlation curve and the same value should be used for all datasets from the same imaging conditions. The number will effect the peak density and ultimately the cluster number output when fitting models to the *g(r)* curve.
+
+   * - nm per pixel
+     - The pixel pitch (resolution) of super-resolution image constructed for auto-correlation.
+
+   * - Show error bars
+     - Set to **true** to show the standard error of each value of the *g(r)* curve. Note that the value is the mean of the auto-correlation in multiple directions for the given radius *r*.
+
+   * - Apply window
+     - Set to **true** to apply a Tukey window to the super-resolution image to reduce edge artifacts that occur due to periodicity of the Fourier transforms.
+
+   * - Show high res image
+     - Set to **true** to show the super-resolution image of the selected molecules.
+
+   * - Show correlation image
+     - Set to **true** to show the auto-correlation images computed using the fast Fourier transform (FFT). The transformed image, transformed image window and the normalised correlation are displayed. The *g(r)* curve is computed by averaging all pixel values at the same radius from the centre of the normalised correlation image. Note that the central pixel may have a very high value compared to the other pixel values and contrast adjustment will be required. 
+
+Results
+~~~~~~~
+
+A summary of the input data used for analysis is recorded to a results table:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - ID
+     - The identifier of the results.
+
+   * - Image Source
+     - The source data for the results.
+
+   * - X
+     - The X origin of the region (in |micro|\ m).
+
+   * - X %
+     - The X origin of the region as a percentage of the source data width.
+
+   * - Y
+     - The Y origin of the region (in |micro|\ m).
+
+   * - Y %
+     - The Y origin of the region as a percentage of the source data height.
+
+   * - Width
+     - The width of the region (in |micro|\ m).
+
+   * - Width %
+     - The width of the region as a percentage of the source data width.
+
+   * - Height
+     - The height of the region (in |micro|\ m).
+
+   * - Height %
+     - The height of the region as a percentage of the source data height.
+
+   * - N
+     - The number of molecules in the region.
+
+   * - PeakDensity
+     - The peak density (in |micro|\ m\ :sup:`2`).
+
+   * - nm/pixel
+     - The pixel pitch (resolution) of super-resolution image constructed for auto-correlation.
+
+   * - Binary
+     - **true** if the super-resolution image was binary.
+
+The correlation curve is displayed (see :numref:`Figure %s <fig_gr_curve>`). A high correlation is visible for small radii which gradually reduces to the background correlation value of 1. Multiple curves can be combined and fit using different models (see :numref:`{number}: {name} <pc_palm_plugins:PC-PALM Fitting>`).
+
+.. _fig_gr_curve:
+.. figure:: images/gr_curve.jpg
+    :align: center
+    :figwidth: 80%
+
+    Auto-correlation curve from PC-PALM analysis
 
 
 PC-PALM Spatial Analysis
@@ -237,13 +348,15 @@ Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*,
 PC-PALM Save Results
 --------------------
 
-Saves all the PC-PALM results held in memory to a results folder.
+Saves all the PC-PALM results held in memory to a results folder. When the plugin is run a folder must be selected. All results currently held in memory are saved to the folder in an XML format. Analysis results performed in the frequency domain to create a *g(r)* curve have the prefix ``Frequency``; results performed in the spatial domain have the prefix ``Spatial``.
 
 
 PC-PALM Load Results
 --------------------
 
-Load all the PC-PALM results from a results folder to memory.
+Loads all the PC-PALM results from a results folder to memory. When the plugin is run a folder must be selected. All files with the ``.xml`` suffix will be loaded. Each result file has an ID. The result will replace any current result held in memory with the same ID, otherwise the result will be added to the current results. To load results from different directories saved in different sessions of PC-PALM analysis (thus the IDs are not unique) requires editing the XML files to create a unique ID for each file.
+
+An error is shown if any XML file is not recognised as a PC-PALM result.
 
 
 PC-PALM Fitting
