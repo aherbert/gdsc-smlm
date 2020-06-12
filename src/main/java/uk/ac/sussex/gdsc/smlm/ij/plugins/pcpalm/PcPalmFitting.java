@@ -601,11 +601,11 @@ public class PcPalmFitting implements PlugIn {
     resultsTable = createResultsTable();
 
     // Get the protein density in nm^2.
-    peakDensity /= 1e6;
+    final double peakDensityNm2 = peakDensity / 1e6;
 
     // Use the blinking rate estimate to estimate the density
     // (factors in the over-counting of the same molecules)
-    final double proteinDensity = peakDensity / settings.blinkingRate;
+    final double proteinDensity = peakDensityNm2 / settings.blinkingRate;
 
     final ArrayList<double[]> curves = new ArrayList<>();
 
@@ -616,7 +616,7 @@ public class PcPalmFitting implements PlugIn {
         fitRandomModel(gr, settings.estimatedPrecision, proteinDensity, resultColour);
     if (parameters != null) {
       log("  Plot %s: Over-counting estimate = %s", randomModel.getName(),
-          MathUtils.rounded(peakDensity / parameters[1], 4));
+          MathUtils.rounded(peakDensityNm2 / parameters[1], 4));
       log("  Plot %s == %s", randomModel.getName(), resultColour);
       plot.setColor(color);
       plot.addPoints(randomModel.getX(), randomModel.value(parameters), Plot.LINE);
@@ -636,8 +636,8 @@ public class PcPalmFitting implements PlugIn {
 
       if (parameters != null) {
         log("  Plot %s: Over-counting estimate = %s", clusteredModel.getName(),
-            MathUtils.rounded(peakDensity / parameters[1], 4));
-        log("  Plot %s == %s, ", clusteredModel.getName(), resultColour.toString());
+            MathUtils.rounded(peakDensityNm2 / parameters[1], 4));
+        log("  Plot %s == %s", clusteredModel.getName(), resultColour.toString());
         plot.setColor(color);
         plot.addPoints(clusteredModel.getX(), clusteredModel.value(parameters), Plot.LINE);
         addNonFittedPoints(plot, gr, clusteredModel, parameters);
@@ -654,7 +654,7 @@ public class PcPalmFitting implements PlugIn {
 
       if (parameters != null) {
         log("  Plot %s: Over-counting estimate = %s", emulsionModel.getName(),
-            MathUtils.rounded(peakDensity / parameters[1], 4));
+            MathUtils.rounded(peakDensityNm2 / parameters[1], 4));
         log("  Plot %s == %s", emulsionModel.getName(), resultColour.toString());
         plot.setColor(color);
         plot.addPoints(emulsionModel.getX(), emulsionModel.value(parameters), Plot.LINE);
@@ -674,9 +674,10 @@ public class PcPalmFitting implements PlugIn {
     double[] x = new double[gr[0].length];
     double[] y = new double[x.length];
     int count = 0;
+    final double first = randomModel.getX()[0];
     for (int i = offset; i < gr[0].length; i++) {
       // Output points that were not fitted
-      if (gr[0][i] < randomModel.getX()[0]) {
+      if (gr[0][i] < first) {
         x[count] = gr[0][i];
         y[count] = model.evaluate(gr[0][i], parameters);
         count++;
