@@ -346,6 +346,41 @@ PC-PALM Spatial Analysis
 
 Perform pair-correlation spatial analysis as per the paper by [Puchnar, *et al*, 2013]. This methods plots the molecule density around each localisation as a function of distance from the localisation.
 
+Molecules representing distinct on bursts from a fluorophore over one or more frames must be prepared using ``PC-PALM Molecules``. That plugin will create an image of the molecule data. A region of interest (ROI) can be marked on the image using any area ROI. This is the region that will be extracted from the molecule dataset for analysis. For example individual cells may be outlined using the freehand ROI tool. If no ROI is present then the plugin will analyse the entire dataset.
+
+For each molecule in the analysis region a series of concentric rings is created from the centre up to a maximum distance. The number of surrounding molecules in each ring is counted and used to create a density plot against the radius.
+
+Note that molecules within the maximum distance to the edge of the analysis region will have the outer concentric rings outside the region (i.e. they are clipped). This will reduce the density of these rings as no molecules can exist outside the analysis region. To avoid incorrect density figures any molecule within this border region can be excluded from the density analysis. This lowers the number of molecules analysed and ensures all molecules are surrounded by a complete density region. This option only correctly supports rectangular ROI. The distance from the edge of a freehand ROI is not correctly computed and some molecules may be included that have a clipped density region.
+
+The following parameters are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Correlation distance
+     - The maximum distance for the density analysis.
+
+   * - Use border
+     - Set to **true** to skip density analysis for any molecule within the border region. The border is defined using the correlation distance inside the rectangular ROI bounds. The option will not correctly filter the border of non-rectangular freehand ROIs.
+
+   * - Correlation interval
+     - The size of each concentric ring used for density counting (in nm).
+
+When the analysis is complete the average density at each interval is displayed in a histogram (see :numref:`Figure %s <fig_pc_palm_density_histogram>`). Clustered data will show a peak at zero radius that falls away to a flat asymptote with increasing radius. The radius where the histogram is flat is a suitable radius to perform clustering to collect multiple occurrences of colocated molecules into clusters (see :numref:`{number}: {name} <pc_palm_plugins:PC-PALM Clusters>`). Note that if the input molecules have been previously clustered then the histogram can be used to check that clusters are uniformly distributed as the histogram for uniformly distributed data will be flat.
+
+The density curve is saved in memory. Multiple curves can be combined using :numref:`{name} <pc_palm_plugins:PC-PALM Fitting>` to create an aggregate curve from multiple datasets.
+
+.. _fig_pc_palm_density_histogram:
+.. figure:: images/pc_palm_density_histogram.jpg
+    :align: center
+    :figwidth: 80%
+
+    Density histogram from PC-PALM spatial analysis
+
 
 PC-PALM Save Results
 --------------------
