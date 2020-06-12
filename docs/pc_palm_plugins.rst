@@ -331,10 +331,10 @@ A summary of the input data used for analysis is recorded to a results table:
    * - Binary
      - **true** if the super-resolution image was binary.
 
-The correlation curve is displayed (see :numref:`Figure %s <fig_gr_curve>`). A high correlation is visible for small radii which gradually reduces to the background correlation value of 1. Multiple curves can be combined and fit using different models (see :numref:`{number}: {name} <pc_palm_plugins:PC-PALM Fitting>`).
+The correlation curve is displayed (see :numref:`Figure %s <fig_pc_palm_gr_curve>`). A high correlation is visible for small radii which gradually reduces to the background correlation value of 1. Multiple curves can be combined and fit using different models (see :numref:`{number}: {name} <pc_palm_plugins:PC-PALM Fitting>`).
 
-.. _fig_gr_curve:
-.. figure:: images/gr_curve.jpg
+.. _fig_pc_palm_gr_curve:
+.. figure:: images/pc_palm_gr_curve.jpg
     :align: center
     :figwidth: 80%
 
@@ -365,7 +365,7 @@ The following parameters are available:
      - The maximum distance for the density analysis.
 
    * - Use border
-     - Set to **true** to skip density analysis for any molecule within the border region. The border is defined using the correlation distance inside the rectangular ROI bounds. The option will not correctly filter the border of non-rectangular freehand ROIs.
+     - Set to **true** to skip density analysis for any molecule within the border region. The border is defined using the correlation distance inside the rectangular ROI bounds. This option will not correctly filter the border of non-rectangular freehand ROIs.
 
    * - Correlation interval
      - The size of each concentric ring used for density counting (in nm).
