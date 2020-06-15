@@ -173,7 +173,7 @@ public class PcPalmFitting implements PlugIn {
     String inputFilename;
     String outputFilename;
     int fitRestarts;
-    boolean useLse;
+    boolean refitWithGradients;
     double fitAboveEstimatedPrecision;
     double fittingTolerance; // Zero to ignore
     double grProteinThreshold;
@@ -205,7 +205,7 @@ public class PcPalmFitting implements PlugIn {
       inputFilename = source.inputFilename;
       outputFilename = source.outputFilename;
       fitRestarts = source.fitRestarts;
-      useLse = source.useLse;
+      refitWithGradients = source.refitWithGradients;
       fitAboveEstimatedPrecision = source.fitAboveEstimatedPrecision;
       fittingTolerance = source.fittingTolerance;
       grProteinThreshold = source.grProteinThreshold;
@@ -294,11 +294,11 @@ public class PcPalmFitting implements PlugIn {
 
     gd.addMessage("Analyse clusters using Pair Correlation.");
 
-    gd.addNumericField("Estimated_precision", settings.estimatedPrecision, 2);
+    gd.addNumericField("Estimated_precision", settings.estimatedPrecision, 2, 6, "nm");
     gd.addNumericField("Blinking_rate", settings.blinkingRate, 2);
     gd.addCheckbox("Show_error_bars", settings.showErrorBars);
     gd.addSlider("Fit_restarts", 0, 5, settings.fitRestarts);
-    gd.addCheckbox("Refit_using_LSE", settings.useLse);
+    gd.addCheckbox("Refit_using_gradients", settings.refitWithGradients);
     gd.addSlider("Fit_above_estimated_precision", 0, 2.5, settings.fitAboveEstimatedPrecision);
     gd.addSlider("Fitting_tolerance", 0, 200, settings.fittingTolerance);
     gd.addSlider("gr_random_threshold", 1, 2.5, settings.grProteinThreshold);
@@ -315,7 +315,7 @@ public class PcPalmFitting implements PlugIn {
     settings.blinkingRate = gd.getNextNumber();
     settings.showErrorBars = gd.getNextBoolean();
     settings.fitRestarts = (int) Math.abs(gd.getNextNumber());
-    settings.useLse = gd.getNextBoolean();
+    settings.refitWithGradients = gd.getNextBoolean();
     settings.fitAboveEstimatedPrecision = Math.abs(gd.getNextNumber());
     settings.fittingTolerance = Math.abs(gd.getNextNumber());
     settings.grProteinThreshold = gd.getNextNumber();
@@ -956,7 +956,7 @@ public class PcPalmFitting implements PlugIn {
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. cAIC = %f. %d evaluations", randomModel.getName(), ss, ic1,
+    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", randomModel.getName(), ss, ic1,
         optimum.getEvaluations());
     ImageJUtils.log("  %s parameters:", randomModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
@@ -1081,7 +1081,7 @@ public class PcPalmFitting implements PlugIn {
     int evaluations = boundedEvaluations;
 
     // Refit using a LVM
-    if (settings.useLse) {
+    if (settings.refitWithGradients) {
       ImageJUtils.log("Re-fitting %s using a gradient optimisation", clusteredModel.getName());
       final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
       Optimum lvmSolution;
@@ -1140,15 +1140,14 @@ public class PcPalmFitting implements PlugIn {
     final double domainDensity = parameters[3]; // The density of the cluster domain
 
     // This is from the PC-PALM paper. However that paper fits the g(r)protein exponential convolved
-    // in 2D
-    // with the g(r)PSF. In this method we have just fit the exponential
+    // in 2D with the g(r)PSF. In this method we have just fit the exponential
     final double nCluster =
         2 * domainDensity * Math.PI * domainRadius * domainRadius * fitProteinDensity;
 
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. cAIC = %f. %d evaluations", clusteredModel.getName(), ss,
+    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", clusteredModel.getName(), ss,
         ic2, evaluations);
     ImageJUtils.log("  %s parameters:", clusteredModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
@@ -1193,7 +1192,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     addResult(clusteredModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity,
-        domainRadius, domainDensity, nCluster, 0, ic2);
+        domainRadius, domainDensity, nCluster, -1, ic2);
 
     return parameters;
   }
@@ -1379,7 +1378,7 @@ public class PcPalmFitting implements PlugIn {
     int evaluations = boundedEvaluations;
 
     // Refit using a LVM
-    if (settings.useLse) {
+    if (settings.refitWithGradients) {
       ImageJUtils.log("Re-fitting %s using a gradient optimisation", emulsionModel.getName());
       final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
       Optimum lvmSolution;
@@ -1431,17 +1430,13 @@ public class PcPalmFitting implements PlugIn {
     final double fitSigmaS = parameters[0];
     final double fitProteinDensity = parameters[1];
     final double domainRadius = parameters[2]; // The radius of the cluster domain
-    final double domainDensity = parameters[3]; // The density of the cluster domain
+    final double amplitutde = parameters[3];
     final double coherence = parameters[4]; // The coherence length between circles
-
-    // This is from the PC-PALM paper. It may not be correct for the emulsion model.
-    final double nCluster =
-        2 * domainDensity * Math.PI * domainRadius * domainRadius * fitProteinDensity;
 
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. cAIC = %f. %d evaluations", emulsionModel.getName(), ss,
+    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", emulsionModel.getName(), ss,
         ic3, evaluations);
     ImageJUtils.log("  %s parameters:", emulsionModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
@@ -1449,9 +1444,8 @@ public class PcPalmFitting implements PlugIn {
     ImageJUtils.log("    Average protein density = %s um^-2 (%s%%)",
         MathUtils.rounded(fitProteinDensity * 1e6, 4), MathUtils.rounded(e2, 4));
     ImageJUtils.log("    Domain radius = %s nm", MathUtils.rounded(domainRadius, 4));
-    ImageJUtils.log("    Domain density = %s", MathUtils.rounded(domainDensity, 4));
+    ImageJUtils.log("    Domain density = %s", MathUtils.rounded(amplitutde, 4));
     ImageJUtils.log("    Domain coherence = %s", MathUtils.rounded(coherence, 4));
-    ImageJUtils.log("    nCluster = %s", MathUtils.rounded(nCluster, 4));
 
     // Check the fitted parameters are within tolerance of the initial estimates
     valid2 = true;
@@ -1474,9 +1468,9 @@ public class PcPalmFitting implements PlugIn {
           MathUtils.rounded(fitSigmaS, 4));
       valid2 = false;
     }
-    if (domainDensity < 0) {
+    if (amplitutde < 0) {
       ImageJUtils.log("  Failed to fit %s: Domain density is negative (%s)",
-          emulsionModel.getName(), MathUtils.rounded(domainDensity, 4));
+          emulsionModel.getName(), MathUtils.rounded(amplitutde, 4));
       valid2 = false;
     }
 
@@ -1487,7 +1481,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     addResult(emulsionModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity,
-        domainRadius, domainDensity, nCluster, coherence, ic3);
+        domainRadius, amplitutde, -1, coherence, ic3);
 
     return parameters;
   }
@@ -1671,8 +1665,8 @@ public class PcPalmFitting implements PlugIn {
    *
    * <p>g(r)PSF = (1/4*pi*s^2) * exp(-r^2/4s^2)
    *
-   * <p>Note: The clustered model described in the PLoS One paper models g(r)protein using the
-   * exponential directly, i.e. there is no convolution !!!
+   * <p>Note: The clustered model described in the Veatch PLoS One paper models g(r)protein using
+   * the exponential directly, i.e. there is no convolution !!!
    */
   private abstract static class ClusteredModelFunction extends BaseModelFunction {
     double[] lastValue;
@@ -2110,7 +2104,7 @@ public class PcPalmFitting implements PlugIn {
       sb.append("Domain Density\t");
       sb.append("N-cluster\t");
       sb.append("Coherence\t");
-      sb.append("cAIC\t");
+      sb.append("AICc\t");
       return new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
     });
   }
@@ -2133,7 +2127,7 @@ public class PcPalmFitting implements PlugIn {
   }
 
   private static String getString(double value) {
-    return (value == 0) ? "-" : MathUtils.rounded(value, 4);
+    return (value < 0) ? "-" : MathUtils.rounded(value, 4);
   }
 
   /**
