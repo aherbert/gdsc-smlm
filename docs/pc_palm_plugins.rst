@@ -1,7 +1,7 @@
 PC PALM Plugins
 ===============
 
-The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([Sengupta *et al* , 2011], [Sengupta, *et al*, 2013], [Puchnar, *et al*, 2013]).
+The following plugins are used to analyse the auto-correlation of a set of localisations using Pair Correlation (PC) analysis. This can provide information on whether the localisations are randomly distributed or clustered ([Sengupta *et al*, 2011], [Sengupta *et al*, 2013], [Veatch *et al*, 2012], [Puchnar, *et al*, 2013]).
 
 The analysis uses a set of localisations assumed to represent single molecules or single fluorescent bursts. The data is compared to itself using auto-correlation and a curve is computed as a function of the distance from the centre of the localisation. A flat curve is indicative that the distribution of localisations is no different from a random distribution. Shaped curves can be fit using models that apply to various distributions of localisations (random; fluctuations; or an emulsion).
 
@@ -12,7 +12,7 @@ The plugins are described in the following sections using the order presented on
 
     The PC-PALM plugins should be considered experimental.
 
-    The analysis of localisations using PC_PALM is applicable to 2D data (Sengupta *et al*, 2011). The analysis methods do not accommodate structures that overlap in the z-dimension. The original papers performed analysis on 2D bound membrane proteins.
+    The analysis of localisations using PC-PALM is applicable to 2D data (Sengupta *et al*, 2011). The analysis methods do not accommodate structures that overlap in the z-dimension. The original papers performed analysis on 2D bound membrane proteins.
 
     The analysis of colocated fluorescence by Puchner *et al* (2013) is not limited to 2D data but requires that clusters projected onto the 2D imaging plane are well separated.
 
@@ -254,7 +254,7 @@ The following parameters are available:
      - Description
 
    * - Correlation distance
-     - The maximum distance for the correlation curve.
+     - The maximum distance for the correlation curve (in nm).
 
    * - Binary image
      - Set to **true** to use a value of 1 for each pixel where 1 or more molecules are located. If **false** then the pixel value uses a count. This may effect the correlation curve when there are high levels of colocated molecules on the super-resolution image.
@@ -362,7 +362,7 @@ The following parameters are available:
      - Description
 
    * - Correlation distance
-     - The maximum distance for the density analysis.
+     - The maximum distance for the density analysis (in nm).
 
    * - Use border
      - Set to **true** to skip density analysis for any molecule within the border region. The border is defined using the correlation distance inside the rectangular ROI bounds. This option will not correctly filter the border of non-rectangular freehand ROIs.
@@ -399,7 +399,199 @@ An error is shown if any XML file is not recognised as a PC-PALM result.
 PC-PALM Fitting
 ---------------
 
-Combines multiple correlation curves calculated by PC-PALM Analysis into an average curve and fits the curve using various models.
+Combines multiple correlation curves calculated by PC-PALM Analysis into an average curve. The correlation curve from frequency domain analysis can be fit using various models.
+
+Both the ``PC-PALM Analysis`` and ``PC-PALM Spatial Analysis`` plugins generate a curve with radial distance on the x axis. ``PC-PALM Analysis`` is done in the frequency domain following Fourier transform and produces an auto-correlation *g(r)* curve. ``PC-PALM Spatial Analysis`` is done in the spatial domain and produces a radial density curve. The curves are saved to memory and identified as either frequency domain or spatial domain curves.
+
+When the ``PC-PALM Fitting`` plugin executes the source for the combined curve must be selected. The following options are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Input
+     - Description
+
+   * - Load from file
+     - Load a curve that has been previously saved by the ``PC-PALM Fitting`` plugin.
+
+       If this option is selected a second dialog is presented to select the file. 
+
+   * - Re-use previous curve
+     - Re-use the most recent combined curve from a previous execution of the ``PC-PALM Fitting`` plugin. This option is to enable fitting and output settings for the plugin to be adjusted while using the same input curve.
+
+       This is only available if a previous curve exists.
+
+   * - Select PC-PALM Analysis results
+     - Select results saved to memory by the ``PC-PALM Analysis`` plugin.
+
+       If this option is selected a second dialog is presented containing a list of available results. Those from a frequency analysis will be identified. A single result can be selected. After the first result is selected the dialog is updated to contain only those results that can be combined with the first result (i.e. same curve type and spatial resolution). The dialog is iteratively presented to allow selected of results one at a time from those not yet selected. Pressing the ``Cancel`` button will halt selection of results and all the curves are combined to create an average curve.
+
+       If only 1 results set is available then the dialog is skipped and the single result set selected.
+
+Once the combined curve has been loaded the plugin plots the combined correlation curve and then presents analysis options. For a spatial domain curve the only option is to save the combined curve to file. For a frequency domain curve it is possible to fit the curve using models of different spatial distributions of data (see below).
+
+
+Fitting the correlation curve
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The models available are described in [Sengupta *et al*, 2011] and [Veatch, *et al*, 2012]. The curve is modelled as:
+
+.. math::
+
+    g(r)^\text{peaks} = g(r)^\text{stoch} + g(r)^\text{protein}
+
+where :math:`g(r)^\text{peaks}` is the correlation curve, :math:`g(r)^\text{stoch}` represents the correlation observed for repeat occurrences of the same molecule due to blinking, and :math:`g(r)^\text{protein}` represents the correlation that occurs due to association of different proteins, e.g. clustering.
+
+Note repeat occurrences of the same molecule should be in the same position but are observed in different positions due to the uncertainty during the localisation process. Thus any data where the molecules are repeatedly observed will have a correlation at low radii due to repeat occurrences of the same position. This is modelled as:
+
+.. math::
+
+    g(r)^\text{stoch} = \frac{1}{4 \pi \sigma_s^2 \rho^\text{protein}} \exp(\frac{-r^2}{4 \sigma_s^2})
+
+where :math:`\sigma_s` is the average positional uncertainty in the molecule localisation and :math:`\rho^\text{protein}` is the average protein density.
+
+In the event of no association between proteins the molecules are uniform and the autocorrelation function of the protein molecules is 1. The autocorrelation function is as follows:
+
+.. math::
+
+    g(r)^\text{peaks} = g(r)^\text{stoch} + 1
+
+If the proteins are distributed according to a micro-emulsion model the the molecules will be randomly distributed within non-overlapping circles of a similar size (see Veatch *et al* (2012), figure 3). The micro-emulsion is modelled as:
+
+.. math::
+
+    g(r)^\text{protein} = \left( A \exp(\frac{-r}{\alpha}) \cos(\frac{\pi r}{2r_0}) + 1 \right) * g(r)^\text{PSF}
+
+where :math:`A` is an amplitude, :math:`\alpha` is a measure of the coherence length between circles, :math:`r_0` is the average circle radius and :math:`g(r)^\text{PSF}` is the PSF of the imaging method due to the positional uncertainty of the molecule localisation:
+
+.. math::
+
+    g(r)^\text{PSF} = \frac{1}{4 \pi \sigma_s^2} \exp(\frac{-r^2}{4 \sigma_s^2})
+
+The emulsion model distribution can be generated by the ``PC-PALM Molecules`` plugin simulation mode. Note that the damped cosine function is suitable when the correlation curve *g(r)* has a well defined dip below 1.
+
+If the proteins are distributed in random clusters of no definite shape then the *g(r)* curve is modelled using an exponential:
+
+.. math::
+
+    g(r)^\text{protein} = \left( A \exp(\frac{-r}{\xi}) + 1 \right) * g(r)^\text{PSF}
+
+where :math:`A` is an amplitude, :math:`\xi` is proportional to the cluster size. The random cluster  model distribution *cannot* be generated by the ``PC-PALM Molecules`` plugin simulation mode. The random cluster model allows expression of :math:`N^\text{cluster}`, the average occupancy of a cluster:
+
+.. math::
+
+    N^\text{cluster} = 2A \pi \xi^2 \rho^\text{protein}
+
+The ratio of the density of the proteins in clusters to the average density across the entire image, i.e. the increased density of proteins in a cluster, is given by:
+
+.. math::
+
+    \psi^\text{cluster} = 2A
+
+Note: Both the emulsion model and random clustered model (:math:`g(r)^\text{protein}`) use a convolution of the protein model function with :math:`g(r)^\text{PSF}`. For simplicity the convolution can be omitted. This is valid when the positional uncertainty :math:`\sigma_s` is an order of magnitude smaller than the spatial extent of clusters thus the Gaussian convolution has a small effect on the the curve. Thus the emulsion model for :math:`g(r)^\text{protein}` is a damped cosine function and the random clustered model is an exponential.
+
+Fitting of the curve is performed using a least squares estimtor to minimise the difference between the *g(r)* curve and the model. The fit uses a bounded `CMA-ES optimiser <https://en.wikipedia.org/wiki/CMA-ES>`_ which is stochastic and derivative free. The initial solution may be improved if restarted and the number of restarts is configurable. Optionally an attempt can be made to imrpove the solution  using a numerical gradient based method which is not suited to the initial search but works well when close to the optimal solution.
+
+Note that the *g(r)* curve may have large errors when the radius *r* is low due to the positional uncertainty of the localisations. The plugin provides the option to ignore small *r* values when fitting the curve. The minimum *r* used is expressed as a factor of the estimated precision.
+
+The curve is initially fit using the random model model and validated against the initial estimates. The fitted localisation precision and protein density are compared to the estimated precision and initial protein density (computed from the aggregated values output by ``PC-PALM Analysis`` for each *g(r)* curve). The change in the parameter is expressed as a percentage and the fit is rejected if above a threshold.
+
+The random model is composed of the :math:`g(r)^\text{stoch} + 1`. If stochastic component of the function is subtracted from the *g(r)* curve the value should be 1. If the value is above 1 then there is a :math:`g(r)^\text{protein}` component in the curve not explained by the model. The random model fit can be rejected if the magnitude of the :math:`g(r)^\text{protein}` component is above a threshold:
+
+.. math::
+
+    g(r)^\text{peaks} - g(r)^\text{stoch} > g(r)_\text{threshold}
+
+If the random model is rejected then the plugin will apply the random clustered and emulsion clustered models to the data. The clustered models are again validated using the percentage change of the parameters from the initial estimates. The domain radius must be larger than the estimated localisation precision. The `Akaike information criterion <https://en.wikipedia.org/wiki/Akaike_information_criterion>`_ is computed from the residual sum of squares (`RSS <https://en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares>`_) and the fit is rejected if the information criterion does not improve. The bias-corrected AIC (AICc) is used which incorporates the number of parameters in the score and adjusts for small sample sizes and will discourage overfitting using more complex models in contrast to simple selection on the goodness of fit.
+
+
+Parameters
+~~~~~~~~~~
+
+The following parameters are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Estimated precision
+     - The estimated positional uncertainty of the molecule localisation.
+
+   * - Blinking rate
+     - The estimated average blinking rate of each fluorophore molecule.
+
+   * - Show error bars
+     - Set to **true** show the standard error bars on the *g(r)* curve. This settings is relevant when the curve is an average composed from multiple input curves.
+
+   * - Fit restarts
+     - The number of restarts to use for the bounded fitting process.
+
+   * - Refit using gradients
+     - Set to **true** to refit from the initial solution using a gradient based method.
+
+   * - Fit above estimate precision
+     - Ignore *r) value on the *g(r)* curve below ``N`` times the ``Estimated precision``. This can be used to avoid the noisy part of the curve when fitting.
+
+   * - Fitting tolerance
+     - Set the percentage tolerance for the difference between the fitted parameters and the initial estimates for localisation precision and protein density. If the fit changes the values by greater than this threshold the fit is rejected.
+
+       Set to 0 to ignore fit validation.
+
+   * - gr random threshold
+     - Set the threshold for the :math:`` component of the *g(r)* curve to reject the random model.
+
+   * - Fit clustered models
+     - Set to **true** to always fit the clustered models. Otherwise only fit the clustered models if the random model is rejected.
+
+   * - Save correlation curve
+     - Set to **true** to save the combined correlation curve to file. The file will also contain the curve data for each fitted model.
+
+
+Results
+~~~~~~~
+
+Fitting details are recorded in the ``ImageJ`` log window. The fit for each model is displayed on the correlation curve plot. If low radius data was excluded from the fit using the ``Fit above estimate precision`` option then data points from the model below the distance threshold are shown using circles. The fit parameters are reported to a results table.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - Model
+     - The protein distribution model.
+
+   * - Colour
+     - The colour of the model data points in the correlation curve plot.
+
+   * - Valid
+     - Set to **true** if the model passed validation and, in the case of the clustered models, improved the fit of the random model.
+
+   * - Precision
+     - The fitted precision :math:`\sigma_s`.
+
+   * - Density
+     - The fitted protein density :math:`\rho^\text{protein}`.
+
+   * - Domain radius
+     - For the clustered model the domain radius :math:`\xi`.
+
+       For the emulsion model the average circle radius :math:`r_0`.
+
+   * - N-cluster
+     - For the clustered model the average occupancy of a cluster :math:`N^\text{cluster}`.
+
+   * - Coherence
+     - For the emulsion clustered model the coherence length :math:`\alpha`.
+
+   * - AICc
+     - The bias-corrected Akaike information criterion.
+
 
 
 PC-PALM Clusters
