@@ -226,7 +226,7 @@ public class PcPalmAnalysis implements PlugIn {
     log(TITLE);
     PcPalmMolecules.logSpacer();
 
-    final List<Molecule> molecules = cropToRoi(imp);
+    final List<Molecule> molecules = cropToRoi(imp, moleculesResults);
     if (molecules.size() < 2) {
       error("No results within the crop region");
       return;
@@ -418,14 +418,15 @@ public class PcPalmAnalysis implements PlugIn {
    * are converted using relative scaling to the limits of the PC-PALM molecules. If a
    * non-rectangular ROI is used then a mask is extracted and used for the crop. If no image is
    * provided then the full set of molecules is returned.
-   *
+   * 
    * <p>Set the area property to the region covered by the molecules.
    *
    * @param imp the image
+   * @param moleculesResults the results from PC-PALM Molecules
    * @return the array list
    */
   @SuppressWarnings("null")
-  List<Molecule> cropToRoi(ImagePlus imp) {
+  List<Molecule> cropToRoi(ImagePlus imp, MoleculesResults moleculesResults) {
     croppedArea = moleculesResults.area;
     if (moleculesResults.molecules == null || moleculesResults.molecules.isEmpty()) {
       return moleculesResults.molecules;

@@ -40,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -349,7 +348,8 @@ public class PcPalmClusters implements PlugIn {
   private HistogramData doClustering() {
     // Perform clustering analysis to generate the histogram of cluster sizes
     final PcPalmAnalysis analysis = new PcPalmAnalysis();
-    final List<Molecule> molecules = analysis.cropToRoi(WindowManager.getCurrentImage());
+    final List<Molecule> molecules =
+        analysis.cropToRoi(WindowManager.getCurrentImage(), moleculesResults);
 
     if (molecules.size() < 2) {
       error("No results within the crop region");
@@ -579,8 +579,6 @@ public class PcPalmClusters implements PlugIn {
       final HistogramData histogramData = new HistogramData(hist, frames, area, units);
       histogramData.filename = filename;
       return histogramData;
-    } catch (final InputMismatchException ex) {
-      error("Incorrect fields on line " + count);
     } catch (final NoSuchElementException ex) {
       error("Incorrect fields on line " + count);
     } catch (final IOException ex) {
@@ -593,7 +591,7 @@ public class PcPalmClusters implements PlugIn {
    * If the histogram is calibrated then ask the user if they wish to subtract a calibrated noise
    * histogram.
    *
-   * <p>Loads a noise histogram from a user selected file and check the units match those provided
+   * <p>Loads a noise histogram from a user selected file and check the units match those provided.
    *
    * @param histogramData the histogram data
    * @return The histogram (or null)

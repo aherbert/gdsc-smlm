@@ -196,7 +196,7 @@ public class BinomialFitter {
     final double mean = getMean(histogram);
 
     final String name =
-        (zeroTruncated) ? "Zero-truncated Binomial distribution" : "Binomial distribution";
+        (zeroTruncated) ? "zero-truncated binomial distribution" : "binomial distribution";
 
     log("Mean cluster size = %s", MathUtils.rounded(mean));
     log("Fitting cumulative " + name);
@@ -447,7 +447,7 @@ public class BinomialFitter {
   }
 
   /**
-   * Evaluates the cumulative binomial probability distribution. Assumes the input data is a
+   * Evaluates the binomial probability distribution. Assumes the input data is a
    * cumulative histogram from 0 to N in integer increments.
    */
   private class BinomialModel {
@@ -531,7 +531,6 @@ public class BinomialFitter {
           // Use p[i] to indicate the frequency of this observation.
           ll += pvalues[i] * Math.log(p2[i]);
         }
-        // System.out.printf("%f => %f\n", parameters[0], ll);
         return ll;
       }
       // Calculate the sum of squares
