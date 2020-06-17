@@ -1,3 +1,5 @@
+.. index:: ! PC PALM Plugins
+
 PC PALM Plugins
 ===============
 
@@ -18,6 +20,8 @@ The plugins are described in the following sections using the order presented on
 
     In either case the success of the method requires careful experimental setup, imaging conditions and localisation analysis. Development work on these plugins was halted when the methods were determined to be unsuitable for the imaging data of interest.
 
+
+.. index:: ! PC-PALM Molecules
 
 PC-PALM Molecules
 -----------------
@@ -102,6 +106,8 @@ The following parameters are available:
      - Set to **true** to remove any PC-PALM analysis results from memory. Use this option to clear old results when starting a new analysis of a different dataset.
 
 
+.. index:: Run Mode: PC-PALM
+
 Run Mode: PC-PALM
 ~~~~~~~~~~~~~~~~~
 
@@ -144,6 +150,8 @@ The following parameters are available:
    * - Blinking rate
      - Set the blinking rate. This only effects the protein density that is reported to the ``ImageJ`` log window. The protein density is the molecule density divided by the blinking rate. Blinking rate is of interest during later PC-PALM analysis.
 
+
+.. index:: Run Mode: Simulation
 
 Run Mode: Simulation
 ~~~~~~~~~~~~~~~~~~~~
@@ -228,6 +236,8 @@ The following parameters are available:
      - Set to **true** to show a mask of the region where a molecule may occur. The actual molecule positions are shown on the mask image. Note: This is different from the output binary image from ``PC-PALM Molecules`` that shows the final molecule dataset, i.e. each blink of the simulated molecule. This option shows the actual coordinate of the molecule without blinking and can be used to inspect the number of molecules in each cluster.
 
 
+.. index:: ! PC-PALM Analysis
+
 PC-PALM Analysis
 ----------------
 
@@ -275,7 +285,7 @@ The following parameters are available:
      - Set to **true** to show the super-resolution image of the selected molecules.
 
    * - Show correlation image
-     - Set to **true** to show the auto-correlation images computed using the fast Fourier transform (FFT). The transformed image, transformed image window and the normalised correlation are displayed. The *g(r)* curve is computed by averaging all pixel values at the same radius from the centre of the normalised correlation image. Note that the central pixel may have a very high value compared to the other pixel values and contrast adjustment will be required. 
+     - Set to **true** to show the auto-correlation images computed using the fast Fourier transform (FFT). The transformed image, transformed image window and the normalised correlation are displayed. The *g(r)* curve is computed by averaging all pixel values at the same radius from the centre of the normalised correlation image. Note that the central pixel may have a very high value compared to the other pixel values and contrast adjustment will be required.
 
 Results
 ~~~~~~~
@@ -341,6 +351,8 @@ The correlation curve is displayed (see :numref:`Figure %s <fig_pc_palm_gr_curve
     Auto-correlation curve from PC-PALM analysis
 
 
+.. index:: ! PC-PALM Spatial Analysis
+
 PC-PALM Spatial Analysis
 ------------------------
 
@@ -382,11 +394,15 @@ The density curve is saved in memory. Multiple curves can be combined using :num
     Density histogram from PC-PALM spatial analysis
 
 
+.. index:: ! PC-PALM Save Results
+
 PC-PALM Save Results
 --------------------
 
 Saves all the PC-PALM results held in memory to a results folder. When the plugin is run a folder must be selected. All results currently held in memory are saved to the folder in an XML format. Analysis results performed in the frequency domain to create a *g(r)* curve have the prefix ``Frequency``; results performed in the spatial domain have the prefix ``Spatial``.
 
+
+.. index:: ! PC-PALM Load Results
 
 PC-PALM Load Results
 --------------------
@@ -395,6 +411,8 @@ Loads all the PC-PALM results from a results folder to memory. When the plugin i
 
 An error is shown if any XML file is not recognised as a PC-PALM result.
 
+
+.. index:: ! PC-PALM Fitting
 
 PC-PALM Fitting
 ---------------
@@ -415,7 +433,7 @@ When the ``PC-PALM Fitting`` plugin executes the source for the combined curve m
    * - Load from file
      - Load a curve that has been previously saved by the ``PC-PALM Fitting`` plugin.
 
-       If this option is selected a second dialog is presented to select the file. 
+       If this option is selected a second dialog is presented to select the file.
 
    * - Re-use previous curve
      - Re-use the most recent combined curve from a previous execution of the ``PC-PALM Fitting`` plugin. This option is to enable fitting and output settings for the plugin to be adjusted while using the same input curve.
@@ -431,6 +449,8 @@ When the ``PC-PALM Fitting`` plugin executes the source for the combined curve m
 
 Once the combined curve has been loaded the plugin plots the combined correlation curve and then presents analysis options. For a spatial domain curve the only option is to save the combined curve to file. For a frequency domain curve it is possible to fit the curve using models of different spatial distributions of data (see below).
 
+
+.. index:: Fitting the correlation curve
 
 Fitting the correlation curve
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -593,8 +613,138 @@ Fitting details are recorded in the ``ImageJ`` log window. The fit for each mode
      - The bias-corrected Akaike information criterion.
 
 
+.. index:: ! PC-PALM Clusters
 
 PC-PALM Clusters
 ----------------
 
 Clusters localisations using a distance threshold and produces a histogram of cluster size. This can be fit using a zero-truncated negative Binomial distribution (with parameters *n*, *p*) to calculate the size of the clusters (*n*) and the probability of seeing a fluorophore (*p*).
+
+The ``PC-PALM Clusters`` plugin is based on the paper by Puchnar, *et al* (2013). The analysis aims to determine the stoichiometry of colocated molecules, i.e. are closer than the localisation precision. Note that this is in contrast to the ``PC-PALM Fitting`` plugin which models clusters of molecules over distances in excess of the localisation precision. The analysis is based on two assumptions:
+
+#. The activation, fluorescence and bleaching lifecycle for a fluorophore can be imaged without  interference from other fluorophores.
+#. The fluorophore activation probability is fixed.
+
+The first assumption is that the activation of a single fluorophore, measurement of its location and its final photo-bleaching all occurs before another fluorophore at the same location is activated. This requires careful experimental conditions to avoid excess photoactivation and may also require separation of the photoactivation light from the readout light. In this case the readout light can be run for a long time until all photoactivity is reduced to background before the next round of photoactivation.
+
+The second assumption is that the probability of a fluorophore being photoactivatable is fixed for all fluorophores in the imaging environment. Note that this is not the activation rate (the frequency activate per second) but the probability that a fluorophore can be activated, for example it has avoided misfolding and the chromophore is valid.
+
+An example of the analysis is to identify if a structure has a stoichiometry of 2 or 3 (dimer or trimer). An experiment is imaged so that all localisations at the same position within a set time span are from a single fluorophore; the fluorophore is then assumed to have bleached. Further localisations at the same positions are from a second fluorophore. This repeats for subsequent fluorophores. Clustering of the localisations within a time and distance threshold should collect all localisations from the same fluorophore into a single position. A second clustering of these molecules within a distance threshold should collect multimers together. A histogram of the count of N-mers would have a peak at 2 for dimers or 3 for trimers. Note however that not all fluorophores will be activated in the course of the entire experiment. If the activation probability is below 100% then a histogram of the counts for trimers would show some dimers (1 molecule not activated) and some monomers (2 molecules not activated). It is not possible to count the number of 0-mers; the histogram of N-mers thus shows a zero-truncated binomial distribution where the p-value is the probability of fluorophore activation.
+
+The ``PC-PALM Molecules`` plugin can be used to cluster localisations with a distance and time threshold. This should collect all localisations from the same fluorophore into a single molecule. It is possible to demonstrate this using known monomers of the fluorophore randomly distributed on the image. The ``PC-PALM Spatial Analysis`` plugin produces a histogram of molecule density surrounding each molecule. When constructed using the raw localisations there will be a peak at low radii due to repeat occurrences of the same molecule. Where this peak reduces to a flat background is a suitable radius for clustering repeat localisations into molecules. If the monomer localisations are clustered using a suitable distance threshold they should be grouped into molecules; the histogram of molecule density surrounding each molecule should be flat. Performing the same clustering using uniformly spread N-mers would not show a flat histogram after clustering as the N-mers are colocated creating a peak in density close to the origin. The radius of this peak after the first clustering is a suitable radius for a second clustering that should collect the molecules of the N-mer together. The histogram of the cluster count (N) can be analysed to determine the stoichiometry of the N-mer.
+
+Note: It is possible to simulate N-mers using the simulation mode of ``PC-PALM Molecules``. The ``Blinking distribution`` parameter should be set to ``Binomial`` and the ``Blinking rate`` parameter is then the count (N) of the N-mer. The fluorophore activation probability can be configured. The ``Cluster simulation`` should be ``None`` to create a uniform distribution. This will create N-mers uniformly spread on the image.
+
+The ``PC-PALM Clusters`` plugin provides fitting of a zero-truncated binomial distribution to a histogram of counts. The histogram can be loaded from file or created using clustering of the most recent molecules generated by ``PC-PALM Molecules``. When the plugin runs a selection dialog is shown allowing the method to be specified: ``File`` or ``Clustering``. If no molecules are present in memory then the dialog is not shown and the plugin defaults to file input. If clustering is performed then the histogram can be saved to allow it to be reloaded using the ``File`` option.
+
+The histogram is fit for all N in a range and the p-value is optimised. The fit of each binomial(n,p) combination is scored using the residual sum of squares (SS). If the range for N is large then fitting will halt increasing N if no improvement is achieved for 3 consecutive increases in N. Fitting can use a least squares estimator (LSE) to minimise the SS or a maximum likelihood estimator (MLE). In the case of a MLE the score is the sum of the log-likelihood of the zero-truncated binomial distribution multiplied by the observed frequency:
+
+.. math::
+
+    \text{log-likelihood} = \sum\limits_{i=1}^n { \text{obs}_i * \ln( \text{B}(i|n, p)) }
+
+where *n* is the target cluster size, and *p* is the current estimate for the p-value. Note that :math:`\text{B}(i|n, p)` is zero when observations *i* is greater than the target *n*; this is valid for LSE but for MLE observations above the target *n* are ignored.
+
+
+.. index:: Noise subtraction
+
+Noise subtraction
+~~~~~~~~~~~~~~~~~
+
+During an experiment there may be spurious background localisations. These can result in extra counts of molecules. The PC-PALM Clusters analysis can be applied to image data captured using the same imaging conditions but without fluorophores. This will create a histogram of molecules per cluster for background noise. The background noise can be subtracted from the histogram for the live experiment data.
+
+The analysis is performed using the same settings for the live experiment on the background noise experiment. The histogram should be saved with a calibration (the number of frames and the area used for data capture).
+
+The noise histogram can be subtracted from the live data histogram. When analysis is performed on a histogram the plugin will check if it is calibrated. This may be a calibrated histogram loaded from file or calibration added to a histogram created by clustering. If the histogram is calibrated the plugin will prompt the user if they wish to perform background subtraction. Additionally if the histogram was loaded from file an option will be provided to auto-save the noise subtracted histogram to the same file. The specified noise histogram is loaded. If the calibration units for the area match then the noise histogram is subtracted from the original histogram. Each histogram is converted from a raw counts histogram to counts per frame per area. The noise can then be subtracted from the live data. The remaining data is rescaled using the frames and area back to counts.
+
+The noise subtracted histogram will be displayed in a new plot window. If auto-save was selected then the histogram is saved using the original input filename with the suffix updated to ``.noise.tsv``.
+
+Note: Clustering of molecules and background noise localisations produces higher counts than expected across the entire histogram. It is impossible to correctly subtract the additional high cluster counts due to noise. Experiments should be configured to minimise noise to the extent that noise localisations are unlikely to be colocated with localisations from fluorophores. The only significant contributions of noise localisations is a higher count of 1 molecule/cluster due to isolated noise localisations. In this situation background subtraction of noise mainly targets the count of monomers and can improve the fit of the binomial distribution to the corrected data.
+
+
+Parameters
+~~~~~~~~~~
+
+The following parameters are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Distance
+     - The clustering distance (in nm).
+
+   * - Algorithm
+     - The clustering algorithm (see :numref:`{number}: {name} <analysis_plugins:Cluster Molecules>`).
+
+   * - Multi thread
+     - Use multi-threading if available for the algorithm.
+
+   * - Weighted clustering
+     - Set to **true** to use weighted clustering with each molecule weighted using the photon intensity. The weight effects the computation of the centre of mass of a cluster. The default is unweighted.
+
+   * - Min N
+     - The minimum cluster size *N* to fit to the histogram.
+
+   * - Max N
+     - The maximum cluster size *N* to fit to the histogram. Set to zero to use the maximum limit of the histogram data.
+
+   * - Show cumulative histogram
+     - Set to **true** to show the cumulative histogram of the data. Each fit for the various cluster size *N* will be added to the plot.
+
+   * - Maximum likelihood.
+     - Set to **true** to use maximum likelihood estimation (MLE); otherise using least squares estimation (LSE).
+
+   * - Save histogram
+     - Set to **true** to save the histogram to file.
+
+   * - Calibrate histogram
+     - Set to **true** to add a calibration to the histogram. The calibration is used to normalise the histogram counts to counts per frame per area. This allows histograms constructed from multiple datasets to be combined.
+
+   * - Frames
+     - The number of frames used to generate the localisation data.
+
+   * - Area
+     - The are of the region used to generate the localisation data.
+
+   * - Units
+     - The units for the area.
+
+
+Note: If the histogram is loaded from file many parameters are not applicable and will not be displayed in the dialog. The following parameters are available:
+
+- ``Min N``
+- ``Max N``
+- ``Show cumulative histogram``
+- ``Maximum likelihood``
+
+
+Results
+~~~~~~~
+
+If clustering is performed the clusters are saved to memory using the name ``PC-PALM Clusters`` to allow analysis or export of the data with other plugins.
+
+The histogram of the molecules per cluster is displayed (see :numref:`Figure %s <fig_pc_palm_cluster_histogram>`). Fitting details for each binomial distribution are recorded in the ``ImageJ`` log window. The best fit is recorded on the histogram using a magenta line. Note that the best fit line can include the expected count for zero molecules per cluster.
+
+Optionally the cumulative probability histogram of molecules per cluster is displayed (see :numref:`Figure %s <fig_pc_palm_cluster_cumul_histogram>`). The fit for each binomial distribution is shown as a line (blue to red) and the best fit is recorded using a magenta line.
+
+.. _fig_pc_palm_cluster_histogram:
+.. figure:: images/pc_palm_cluster_histogram.jpg
+    :align: center
+    :figwidth: 80%
+
+    Histogram of molecules per cluster from PC-PALM Clusters.
+
+    The data is from a simulation of trimers with an activation probability of 60%. The histogram is fit using a binomial distribution with different cluster size N. The best fit is shown as a magenta curve.
+
+.. _fig_pc_palm_cluster_cumul_histogram:
+.. figure:: images/pc_palm_cluster_cumul_histogram.jpg
+    :align: center
+    :figwidth: 80%
+
+    Cumulative probability histogram of molecules per cluster from PC-PALM Clusters.
+
+    The data is from a simulation of trimers with an activation probability of 60%.  The histogram is fit using a binomial distribution with different cluster size N. Each fit is shown using a coloured line from blue (lowest N) to red (highest N). The best fit is recorded on the histogram using a magenta line. The original curve is black with data points shown as circles.
