@@ -4280,10 +4280,10 @@ The following data is shown:
      - The adjusted coefficient of determination when fitting a doublet. If using Maximum Likelihood fitting this will be ignored.
 
    * - aic1
-     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
+     - The Akaike Information Criterion when fitting a single spot using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - aic2
-     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
+     - The Akaike Information Criterion when fitting a doublet using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - bic1
      - The Bayesian Information Criterion when fitting a single spot using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
@@ -4292,10 +4292,10 @@ The following data is shown:
      - The Bayesian Information Criterion when fitting a doublet using the likelihood estimated from the residuals. If using Maximum Likelihood fitting this will be ignored.
 
    * - maic1
-     - The adjusted Akaike Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
+     - The Akaike Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - maic2
-     - The adjusted Akaike Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
+     - The Akaike Information Criterion when fitting a doublet using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
 
    * - mbic1
      - The Bayesian Information Criterion when fitting a single spot using the likelihood from Maximum Likelihood fitting. If using Least Squares fitting this will be ignored.
@@ -4383,25 +4383,20 @@ Where
 A higher score is better.
 
 
-.. index:: Bias corrected Akaike Information Criterion
+.. index:: Akaike Information Criterion
 
-Bias corrected Akaike Information Criterion
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Akaike Information Criterion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. math::
 
     \mathit{AIC}=2p-2\times \ln (\mathit{likelihood})
 
-.. math::
-
-    \mathit{AICc}=\mathit{AIC}+2p(\frac{p+1}{n-p-1})
-
 Where
 :math:`\mathit{AIC}` is Akaike Information Criterion,
 :math:`\mathit{likelihood}` is the likelihood of the model given the data,
-:math:`n` is the number of fitted points and
 :math:`p` is the number of parameters.
-:math:`\mathit{AICc}` is the bias corrected Akaike Information Criterion which corrects for an increase in the number of parameters with respect to the number of fitted data points. A lower score is better.
+A lower score is better.
 
 
 .. index:: Bayesian Information Criterion
@@ -4435,6 +4430,8 @@ When using a Least Squares Estimator the variance of a model's residuals distrib
 .. math::
 
     \ln (\mathit{likelihood})=-{\frac{n}{2}}\ln (2\pi )-\frac{n}{2}\ln(\sigma ^{2})-\frac{1}{2\sigma ^{2}}\mathit{SS}_{\mathit{res}}
+
+This assumes the residuals are distributed according to independent identical normal distributions (with zero mean). This is valid for weighted least squares estimation but not non-weighted least squares. This metric is thus invalid and left for evaluation purposes.
 
 
 Parameters

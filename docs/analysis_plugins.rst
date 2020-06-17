@@ -952,21 +952,27 @@ Both the ``MSD correction`` and ``Precision correction`` can be applied to the f
 Selecting the Best Fit
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The Bias Corrected Akaike Information Criterion (cAIC) [Hurvich & Tsai, 1989] is calculated for the fit using the log likelihood (*L*), the number of data points (*n*) and the number of parameters (*p*):
+The Akaike Information Criterion (AIC) is calculated for the fit using the log likelihood (ln(*L*)) and the number of parameters (*p*):
 
 .. math::
 
-   \mathit{AIC}=2p-2L
+   \mathit{AIC}=2p-2\ln(L)
 
-.. math::
-
-    \mathit{cAIC}=\mathit{AIC}+(2p(p+1)/(n-p-1))
-
-The corrected AIC penalises additional parameters. The model with the lowest cAIC is preferred. If a higher cAIC is obtained then increasing the number of fitted species in the mixed population has not improved the fit and so fitting is stopped. Note that when performing maximum likelihood estimation the log likelihood (*L*) is already known and is used directly to calculate the corrected AIC. When fitting the sum-of-squared residuals (SS) the log likelihood can be computed as:
+The AIC penalises additional parameters. The model with the lowest AIC is preferred. If a higher AIC is obtained then increasing the number of fitted species in the mixed population has not improved the fit and so fitting is stopped. Note that when performing maximum likelihood estimation the log likelihood is already known and is used directly to calculate the corrected AIC. When fitting the sum-of-squared residuals (:math:`SS_{\text{res}}`) for the straight line MSD fit the log likelihood can be computed as:
 
 .. math::
 
     L=-{\frac{n}{2}} \ln (2\pi) - \frac{n}{2} \ln(\sigma^2) - \frac{1}{2\sigma^2} \mathit{SS}
+
+This assumes that the residuals are distributed according to independent identical normal distributions (with zero mean). When the residuals are not identical normal distributions, such as fitting the cumulative jump distance histogram, then the adjusted coefficient of determination is used to select the best model:
+
+.. math::
+
+    R^2 &= 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}}
+
+    R_{\text{adj}}^2 &= 1 - (1 - R^2) \frac{n - 1}{n - p - 1}
+
+where :math:`SS_{\text{tot}}` is the total sum of squares, :math:`n` is the number of values and :math:`p` is the number of parameters.
 
 
 Parameters

@@ -912,14 +912,19 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                 result.value2 = gf.getValue();
 
                 final int length = width * height;
-                result.aic1 = MathUtils.getAkaikeInformationCriterionFromResiduals(
-                    result.sumOfSquares1, length, result.fitResult1.getNumberOfFittedParameters());
-                result.aic2 = MathUtils.getAkaikeInformationCriterionFromResiduals(
-                    result.sumOfSquares2, length, result.fitResult2.getNumberOfFittedParameters());
-                result.bic1 = MathUtils.getBayesianInformationCriterionFromResiduals(
-                    result.sumOfSquares1, length, result.fitResult1.getNumberOfFittedParameters());
-                result.bic2 = MathUtils.getBayesianInformationCriterionFromResiduals(
-                    result.sumOfSquares2, length, result.fitResult2.getNumberOfFittedParameters());
+                // Caution:
+                // Converting residuals to log-likelihood is only valid if the fitter was
+                // a weighted least squares. This is not valid for a standard least squares
+                // as the residuals will not be identically normally distributed. This is here
+                // for testing purposes.
+                result.aic1 = getAkaikeInformationCriterionFromResiduals(result.sumOfSquares1,
+                    length, result.fitResult1.getNumberOfFittedParameters());
+                result.aic2 = getAkaikeInformationCriterionFromResiduals(result.sumOfSquares2,
+                    length, result.fitResult2.getNumberOfFittedParameters());
+                result.bic1 = getBayesianInformationCriterionFromResiduals(result.sumOfSquares1,
+                    length, result.fitResult1.getNumberOfFittedParameters());
+                result.bic2 = getBayesianInformationCriterionFromResiduals(result.sumOfSquares2,
+                    length, result.fitResult2.getNumberOfFittedParameters());
                 if (f2.getType() == FunctionSolverType.MLE) {
                   result.maic1 = MathUtils.getAkaikeInformationCriterion(result.ll1, length,
                       result.fitResult1.getNumberOfFittedParameters());
@@ -931,7 +936,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                       result.fitResult2.getNumberOfFittedParameters());
 
                   // XXX - Debugging: see if the IC computed from the residuals would make a
-                  // different choice
+                  // different choice.
                   // Disable by setting to 1
                   if (result.getMaxScore() > 1) {
                     cic++;
@@ -1572,6 +1577,47 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           overlay.add(roi);
         }
       }
+    }
+
+    /**
+     * Get the Akaike Information Criterion (AIC) for a least squares estimate. This assumes that
+     * the residuals are distributed according to independent identical normal distributions (with
+     * zero mean).
+     *
+     * @param sumOfSquaredResiduals the sum of squared residuals from the nonlinear least-squares
+     *        fit
+     * @param numberOfPoints The number of data points
+     * @param numberOfParameters The number of fitted parameters
+     * @return The corrected Akaike Information Criterion
+     * @see <a
+     *      href="https://en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares">https://
+     *      en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares</a>
+     */
+    double getAkaikeInformationCriterionFromResiduals(double sumOfSquaredResiduals,
+        int numberOfPoints, int numberOfParameters) {
+      return MathUtils.getAkaikeInformationCriterion(
+          MathUtils.getLogLikelihood(sumOfSquaredResiduals, numberOfPoints), numberOfParameters);
+    }
+
+    /**
+     * Get the Bayesian Information Criterion (BIC) for a least squares estimate. This assumes that
+     * the residuals are distributed according to independent identical normal distributions (with
+     * zero mean).
+     *
+     * @param sumOfSquaredResiduals the sum of squared residuals from the nonlinear least-squares
+     *        fit
+     * @param numberOfPoints The number of data points
+     * @param numberOfParameters The number of fitted parameters
+     * @return The Bayesian Information Criterion
+     * @see <a
+     *      href="http://en.wikipedia.org/wiki/Bayesian_information_criterion">http://en.wikipedia.org/wiki/
+     *      Bayesian_information_criterion</a>
+     */
+    double getBayesianInformationCriterionFromResiduals(double sumOfSquaredResiduals,
+        int numberOfPoints, int numberOfParameters) {
+      return MathUtils.getBayesianInformationCriterion(
+          MathUtils.getLogLikelihood(sumOfSquaredResiduals, numberOfPoints), numberOfPoints,
+          numberOfParameters);
     }
   }
 

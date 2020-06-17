@@ -104,8 +104,8 @@ public class PcPalmFitting implements PlugIn {
 
   private int boundedEvaluations;
 
-  // Information criterion of models
-  private double ic1;
+  /** The adjusted coefficient of determination (r^2) of the random model. */
+  private double randomModelAdjustedR2;
   private boolean valid1;
   private boolean valid2;
 
@@ -946,8 +946,9 @@ public class PcPalmFitting implements PlugIn {
     parameters[0] = Math.abs(parameters[0]);
 
     final double ss = optimum.getResiduals().dotProduct(optimum.getResiduals());
-    ic1 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, randomModel.size(),
-        parameters.length);
+    final double totalSumSquares = MathUtils.getTotalSumOfSquares(randomModel.getY());
+    randomModelAdjustedR2 = MathUtils.getAdjustedCoefficientOfDetermination(ss, totalSumSquares,
+        randomModel.size(), parameters.length);
 
     final double fitSigmaS = parameters[0];
     final double fitProteinDensity = parameters[1];
@@ -956,8 +957,8 @@ public class PcPalmFitting implements PlugIn {
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", randomModel.getName(), ss, ic1,
-        optimum.getEvaluations());
+    ImageJUtils.log("  %s fit: SS = %f. Adj.R^2 = %f. %d evaluations", randomModel.getName(), ss,
+        randomModelAdjustedR2, optimum.getEvaluations());
     ImageJUtils.log("  %s parameters:", randomModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
         MathUtils.rounded(e1, 4));
@@ -1011,7 +1012,7 @@ public class PcPalmFitting implements PlugIn {
     }
 
     addResult(randomModel.getName(), resultColour, valid1, fitSigmaS, fitProteinDensity, 0, 0, 0, 0,
-        ic1);
+        randomModelAdjustedR2);
 
     return parameters;
   }
@@ -1131,7 +1132,8 @@ public class PcPalmFitting implements PlugIn {
     for (int i = 0; i < obs.length; i++) {
       ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
     }
-    final double ic2 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss,
+    final double totalSumSquares = MathUtils.getTotalSumOfSquares(clusteredModel.getY());
+    final double adjustedR2 = MathUtils.getAdjustedCoefficientOfDetermination(ss, totalSumSquares,
         clusteredModel.size(), parameters.length);
 
     final double fitSigmaS = parameters[0];
@@ -1147,8 +1149,8 @@ public class PcPalmFitting implements PlugIn {
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", clusteredModel.getName(), ss,
-        ic2, evaluations);
+    ImageJUtils.log("  %s fit: SS = %f. Adj.R^2 = %f. %d evaluations", clusteredModel.getName(), ss,
+        adjustedR2, evaluations);
     ImageJUtils.log("  %s parameters:", clusteredModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
         MathUtils.rounded(e1, 4));
@@ -1185,14 +1187,15 @@ public class PcPalmFitting implements PlugIn {
       valid2 = false;
     }
 
-    if (ic2 > ic1) {
-      ImageJUtils.log("  Failed to fit %s - Information Criterion has increased %s%%",
-          clusteredModel.getName(), MathUtils.rounded((100 * (ic2 - ic1) / ic1), 4));
+    if (adjustedR2 <= randomModelAdjustedR2) {
+      ImageJUtils.log("  Failed to fit %s - Adjusted r^2 has decreased %s%%",
+          clusteredModel.getName(), MathUtils
+              .rounded((100 * (randomModelAdjustedR2 - adjustedR2) / randomModelAdjustedR2), 4));
       valid2 = false;
     }
 
     addResult(clusteredModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity,
-        domainRadius, domainDensity, nCluster, -1, ic2);
+        domainRadius, domainDensity, nCluster, -1, adjustedR2);
 
     return parameters;
   }
@@ -1424,7 +1427,8 @@ public class PcPalmFitting implements PlugIn {
     for (int i = 0; i < obs.length; i++) {
       ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
     }
-    final double ic3 = MathUtils.getAkaikeInformationCriterionFromResiduals(ss,
+    final double totalSumSquares = MathUtils.getTotalSumOfSquares(clusteredModel.getY());
+    final double adjustedR2 = MathUtils.getAdjustedCoefficientOfDetermination(ss, totalSumSquares,
         emulsionModel.size(), parameters.length);
 
     final double fitSigmaS = parameters[0];
@@ -1436,8 +1440,8 @@ public class PcPalmFitting implements PlugIn {
     final double e1 = parameterDrift(sigmaS, fitSigmaS);
     final double e2 = parameterDrift(proteinDensity, fitProteinDensity);
 
-    ImageJUtils.log("  %s fit: SS = %f. AICc = %f. %d evaluations", emulsionModel.getName(), ss,
-        ic3, evaluations);
+    ImageJUtils.log("  %s fit: SS = %f. Adj.R^2 = %f. %d evaluations", emulsionModel.getName(), ss,
+        adjustedR2, evaluations);
     ImageJUtils.log("  %s parameters:", emulsionModel.getName());
     ImageJUtils.log("    Average precision = %s nm (%s%%)", MathUtils.rounded(fitSigmaS, 4),
         MathUtils.rounded(e1, 4));
@@ -1474,14 +1478,15 @@ public class PcPalmFitting implements PlugIn {
       valid2 = false;
     }
 
-    if (ic3 > ic1) {
-      ImageJUtils.log("  Failed to fit %s - Information Criterion has increased %s%%",
-          emulsionModel.getName(), MathUtils.rounded((100 * (ic3 - ic1) / ic1), 4));
+    if (adjustedR2 <= randomModelAdjustedR2) {
+      ImageJUtils.log("  Failed to fit %s - Adjusted r^2 has decreased %s%%",
+          clusteredModel.getName(), MathUtils
+              .rounded((100 * (randomModelAdjustedR2 - adjustedR2) / randomModelAdjustedR2), 4));
       valid2 = false;
     }
 
     addResult(emulsionModel.getName(), resultColour, valid2, fitSigmaS, fitProteinDensity,
-        domainRadius, amplitutde, -1, coherence, ic3);
+        domainRadius, amplitutde, -1, coherence, adjustedR2);
 
     return parameters;
   }
@@ -2104,14 +2109,14 @@ public class PcPalmFitting implements PlugIn {
       sb.append("Domain Density\t");
       sb.append("N-cluster\t");
       sb.append("Coherence\t");
-      sb.append("AICc\t");
+      sb.append("Adjusted R2\t");
       return new TextWindow(TITLE, sb.toString(), (String) null, 800, 300);
     });
   }
 
   private void addResult(String model, String resultColour, boolean valid, double precision,
       double density, double domainRadius, double domainDensity, double ncluster, double coherence,
-      double ic) {
+      double adjustedR2) {
     final StringBuilder sb = new StringBuilder();
     sb.append(model).append('\t');
     sb.append(resultColour).append('\t');
@@ -2122,7 +2127,7 @@ public class PcPalmFitting implements PlugIn {
     sb.append(getString(domainDensity)).append('\t');
     sb.append(getString(ncluster)).append('\t');
     sb.append(getString(coherence)).append('\t');
-    sb.append(MathUtils.rounded(ic, 4)).append('\t');
+    sb.append(MathUtils.rounded(adjustedR2, 4)).append('\t');
     resultsTable.append(sb.toString());
   }
 

@@ -523,7 +523,7 @@ The random model is composed of the :math:`g(r)^\text{stoch} + 1`. If stochastic
 
     g(r)^\text{peaks} - g(r)^\text{stoch} > g(r)_\text{threshold}
 
-If the random model is rejected then the plugin will apply the random clustered and emulsion clustered models to the data. The clustered models are again validated using the percentage change of the parameters from the initial estimates. The domain radius must be larger than the estimated localisation precision. The `Akaike information criterion <https://en.wikipedia.org/wiki/Akaike_information_criterion>`_ is computed from the residual sum of squares (`RSS <https://en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares>`_) and the fit is rejected if the information criterion does not improve. The bias-corrected AIC (AICc) is used which incorporates the number of parameters in the score and adjusts for small sample sizes and will discourage overfitting using more complex models in contrast to simple selection on the goodness of fit.
+If the random model is rejected then the plugin will apply the random clustered and emulsion clustered models to the data. The clustered models are again validated using the percentage change of the parameters from the initial estimates. The domain radius must be larger than the estimated localisation precision. The `adjusted coefficient of determination <https://en.wikipedia.org/wiki/Coefficient_of_determination#Adjusted_R2>`_ is computed and the fit is rejected if the score does not improve. This will discourage overfitting using more complex models in contrast to simple selection on the residual sum of squares.
 
 
 Parameters
@@ -609,8 +609,8 @@ Fitting details are recorded in the ``ImageJ`` log window. The fit for each mode
    * - Coherence
      - For the emulsion clustered model the coherence length :math:`\alpha`.
 
-   * - AICc
-     - The bias-corrected Akaike information criterion.
+   * - Adjusted R2
+     - The adjusted coefficient of determination.
 
 
 .. index:: ! PC-PALM Clusters

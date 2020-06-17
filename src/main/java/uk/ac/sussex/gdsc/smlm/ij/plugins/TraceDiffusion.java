@@ -1471,7 +1471,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // for (int i = 0; i < obs.length; i++)
       // ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-      ic = MathUtils.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 1);
+      ic = getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 1);
 
       final double gradient = lvmSolution.getPoint().getEntry(0);
       diffCoeff = gradient / 4;
@@ -1515,8 +1515,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // for (int i = 0; i < obs.length; i++)
       // ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
-      final double ic2 =
-          MathUtils.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+      final double ic2 = getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
       final double gradient = lvmSolution.getPoint().getEntry(0);
       final double s = lvmSolution.getPoint().getEntry(1);
       final double intercept2 = 4 * s * s;
@@ -1582,7 +1581,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         // ss += (obs[i] - exp[i]) * (obs[i] - exp[i]);
 
         final double ic2 =
-            MathUtils.getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
+            getAkaikeInformationCriterionFromResiduals(ss, function.getY().length, 2);
         double gradient = lvmSolution.getPoint().getEntry(0);
         final double s = lvmSolution.getPoint().getEntry(1);
         final double intercept2 = 4 * s * s - gradient / 3;
@@ -1632,6 +1631,25 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     }
 
     return new double[] {diffCoeff, precision};
+  }
+
+  /**
+   * Get the Akaike Information Criterion (AIC) for a least squares estimate. This assumes that the
+   * residuals are distributed according to independent identical normal distributions (with zero
+   * mean).
+   *
+   * @param sumOfSquaredResiduals the sum of squared residuals from the least-squares fit
+   * @param numberOfPoints The number of data points
+   * @param numberOfParameters The number of fitted parameters
+   * @return The corrected Akaike Information Criterion
+   * @see <a
+   *      href="https://en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares">https://
+   *      en.wikipedia.org/wiki/Akaike_information_criterion#Comparison_with_least_squares</a>
+   */
+  private static double getAkaikeInformationCriterionFromResiduals(double sumOfSquaredResiduals,
+      int numberOfPoints, int numberOfParameters) {
+    return MathUtils.getAkaikeInformationCriterion(
+        MathUtils.getLogLikelihood(sumOfSquaredResiduals, numberOfPoints), numberOfParameters);
   }
 
   /**

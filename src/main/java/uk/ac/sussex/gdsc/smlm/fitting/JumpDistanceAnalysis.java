@@ -814,7 +814,6 @@ public class JumpDistanceAnalysis {
 
   /**
    * Fit the jump distances using a maximum likelihood estimation with the given number of species.
-   * | *
    *
    * <p>Results are sorted by the diffusion coefficient ascending.
    *
@@ -841,8 +840,7 @@ public class JumpDistanceAnalysis {
 
         final double[] fitParams = solution.getPointRef();
         ll = solution.getValue();
-        lastFitValue =
-            fitValue = MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, 1);
+        lastFitValue = fitValue = MathUtils.getAkaikeInformationCriterion(ll, 1);
         final double[] coefficients = fitParams;
         final double[] fractions = new double[] {1};
 
@@ -996,8 +994,7 @@ public class JumpDistanceAnalysis {
 
     // Since the fractions must sum to one we subtract 1 degree of freedom from the number of
     // parameters
-    fitValue =
-        MathUtils.getAkaikeInformationCriterion(ll, jumpDistances.length, fitParams.length - 1);
+    fitValue = MathUtils.getAkaikeInformationCriterion(ll, fitParams.length - 1);
 
     final double[] d = new double[n];
     final double[] f = new double[n];

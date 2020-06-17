@@ -3325,9 +3325,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         } else if (solverType == FunctionSolverType.WLSE) {
           // If using the weighted least squares estimator then we can get the log likelihood from
           // an approximation
-          ic1 = MathUtils.getBayesianInformationCriterionFromResiduals(singleValue, length,
+          ic1 = getBayesianInformationCriterionFromResiduals(singleValue, length,
               fitResult.getNumberOfFittedParameters());
-          ic2 = MathUtils.getBayesianInformationCriterionFromResiduals(doubleValue, length,
+          ic2 = getBayesianInformationCriterionFromResiduals(doubleValue, length,
               newFitResult.getNumberOfFittedParameters());
           // IC should be lower
           improvement = ic2 < ic1;
@@ -3587,6 +3587,27 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       return createResult(newFitResult, null);
       // return null;
+    }
+
+    /**
+     * Get the Bayesian Information Criterion (BIC) for a least squares estimate. This assumes that
+     * the residuals are distributed according to independent identical normal distributions (with
+     * zero mean).
+     *
+     * @param sumOfSquaredResiduals the sum of squared residuals from the nonlinear least-squares
+     *        fit
+     * @param numberOfPoints The number of data points
+     * @param numberOfParameters The number of fitted parameters
+     * @return The Bayesian Information Criterion
+     * @see <a
+     *      href="http://en.wikipedia.org/wiki/Bayesian_information_criterion">http://en.wikipedia.org/wiki/
+     *      Bayesian_information_criterion</a>
+     */
+    private double getBayesianInformationCriterionFromResiduals(double sumOfSquaredResiduals,
+        int numberOfPoints, int numberOfParameters) {
+      return MathUtils.getBayesianInformationCriterion(
+          MathUtils.getLogLikelihood(sumOfSquaredResiduals, numberOfPoints), numberOfPoints,
+          numberOfParameters);
     }
 
     private float distance2(float cx, float cy, Spot spot) {
