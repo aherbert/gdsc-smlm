@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
-// TODO: Auto-generated Javadoc
 /**
  * Define the status of a fit result.
  */
