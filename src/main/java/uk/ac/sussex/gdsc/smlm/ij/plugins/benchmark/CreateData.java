@@ -3518,18 +3518,19 @@ public class CreateData implements PlugIn {
         final Statistics densityStats = stats[DENSITY];
         final float radius = (float) (settings.getDensityRadius() * getHwhm());
         final Rectangle bounds = results.getBounds();
+        final double area = (double) bounds.width * bounds.height;
         // Store the density for each result.
         final int[] allDensity = new int[results.size()];
         final FrameCounter counter = results.newFrameCounter();
         results.forEach((PeakResultProcedure) result -> {
           if (counter.advance(result.getFrame())) {
             counter.increment(runDensityCalculation(threadPool, futures, coordsX, coordsY,
-                densityStats, radius, bounds, allDensity, counter.getCount(), ticker));
+                densityStats, radius, area, allDensity, counter.getCount(), ticker));
           }
           coordsX.add(result.getXPosition());
           coordsY.add(result.getYPosition());
         });
-        runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, bounds,
+        runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, area,
             allDensity, counter.getCount(), ticker);
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
         threadPool.shutdown();
@@ -3640,7 +3641,7 @@ public class CreateData implements PlugIn {
 
   private static int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
       final TFloatArrayList coordsX, final TFloatArrayList coordsY, final Statistics densityStats,
-      final float radius, final Rectangle bounds, final int[] allDensity, final int allIndex,
+      final float radius, final double area, final int[] allDensity, final int allIndex,
       Ticker ticker) {
     final int size = coordsX.size();
     final float[] xCoords = coordsX.toArray();
@@ -3648,7 +3649,7 @@ public class CreateData implements PlugIn {
     coordsX.resetQuick();
     coordsY.resetQuick();
     futures.add(threadPool.submit(() -> {
-      final DensityManager dm = new DensityManager(xCoords, yCoords, bounds);
+      final DensityManager dm = new DensityManager(xCoords, yCoords, area);
       final int[] density = dm.calculateDensity(radius, true);
       addDensity(densityStats, density);
 

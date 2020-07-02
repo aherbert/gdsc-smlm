@@ -228,7 +228,9 @@ public class DensityImage implements PlugIn {
 
     final StandardResultProcedure sp = new StandardResultProcedure(results, DistanceUnit.PIXEL);
     sp.getXy();
-    return new DensityManager(sp.x, sp.y, results.getBounds());
+    final Rectangle bounds = results.getBounds();
+    final double area = (double) bounds.width * bounds.height;
+    return new DensityManager(sp.x, sp.y, area);
   }
 
   private ScoreCalculator createCalculator(MemoryPeakResults results) {
@@ -748,6 +750,7 @@ public class DensityImage implements PlugIn {
     double[] upper = null;
     double[] lower = null;
     final Rectangle bounds = results.getBounds();
+    final double area = (double) bounds.width * bounds.height;
     // Use a uniform distribution for the coordinates
     final HaltonSequenceGenerator dist = new HaltonSequenceGenerator(2);
     dist.skipTo(SeedFactory.createInt());
@@ -763,7 +766,7 @@ public class DensityImage implements PlugIn {
         x[j] = (float) (d[0] * bounds.width);
         y[j] = (float) (d[1] * bounds.height);
       }
-      final double[][] values2 = calculateLScores(new DensityManager(x, y, bounds));
+      final double[][] values2 = calculateLScores(new DensityManager(x, y, area));
       if (upper == null || lower == null) {
         upper = values2[1];
         lower = upper.clone();

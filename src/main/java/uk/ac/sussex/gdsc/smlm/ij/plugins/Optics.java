@@ -921,7 +921,8 @@ public class Optics implements PlugIn {
       final StandardResultProcedure p = new StandardResultProcedure(results, DistanceUnit.PIXEL);
       p.getXy();
       final Rectangle bounds = results.getBounds(true);
-      final OpticsManager opticsManager = new OpticsManager(p.x, p.y, bounds);
+      final double area = (double) bounds.width * bounds.height;
+      final OpticsManager opticsManager = new OpticsManager(p.x, p.y, area);
       opticsManager.setTracker(SimpleImageJTrackProgress.getInstance());
       opticsManager.addOptions(Option.CACHE);
       return Pair.of(settings, new SettingsList(results, opticsManager));
