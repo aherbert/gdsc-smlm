@@ -907,8 +907,8 @@ public class Optics implements PlugIn {
   private class InputWorker extends BaseWorker {
     @Override
     public boolean equalSettings(OpticsSettings current, OpticsSettings previous) {
-      // Nothing in the settings effects if we have to create a new OPTICS manager
-      return true;
+      // Switch from 2D/3D
+      return current.getIgnoreZ() == previous.getIgnoreZ();
     }
 
     @Override
@@ -919,10 +919,18 @@ public class Optics implements PlugIn {
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
       // Convert results to coordinates
       final StandardResultProcedure p = new StandardResultProcedure(results, DistanceUnit.PIXEL);
-      p.getXy();
+      // Bounds are required for the 2D image
       final Rectangle bounds = results.getBounds(true);
-      final double area = (double) bounds.width * bounds.height;
-      final OpticsManager opticsManager = new OpticsManager(p.x, p.y, area);
+      OpticsManager opticsManager;
+      if (results.is3D() && !settings.getIgnoreZ()) {
+        p.getXyz();
+        // Note: Leave to auto compute the volume
+        opticsManager = new OpticsManager(p.x, p.y, p.z, 0);
+      } else {
+        final double area = (double) bounds.width * bounds.height;
+        p.getXy();
+        opticsManager = new OpticsManager(p.x, p.y, area);
+      }
       opticsManager.setTracker(SimpleImageJTrackProgress.getInstance());
       opticsManager.addOptions(Option.CACHE);
       return Pair.of(settings, new SettingsList(results, opticsManager));
@@ -3595,6 +3603,7 @@ public class Optics implements PlugIn {
 
     @Override
     boolean readSettings(GenericDialog gd) {
+      inputSettings.setIgnoreZ(gd.getNextBoolean());
       inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setOpticsMode(gd.getNextChoiceIndex());
       inputSettings.setClusteringMode(gd.getNextChoiceIndex());
@@ -3640,6 +3649,7 @@ public class Optics implements PlugIn {
 
     @Override
     boolean readSettings(GenericDialog gd) {
+      inputSettings.setIgnoreZ(gd.getNextBoolean());
       inputSettings.setMinPoints((int) Math.abs(gd.getNextNumber()));
       inputSettings.setFractionNoise(Math.abs(gd.getNextNumber() / 100));
       inputSettings.setSamples((int) Math.abs(gd.getNextNumber()));
@@ -3778,6 +3788,7 @@ public class Optics implements PlugIn {
 
     // globalSettings = SettingsManager.loadSettings();
     // settings = globalSettings.getClusteringSettings();
+    gd.addCheckbox("Ignore_z (for 3D data)", inputSettings.getIgnoreZ());
 
     if (isDbscan) {
       gd.addMessage("--- Nearest-Neighbour Analysis ---");

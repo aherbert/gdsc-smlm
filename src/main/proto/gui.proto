@@ -360,6 +360,9 @@ message OpticsSettings {
 
   // Event settings
   OpticsEventSettings optics_event_settings = 30;
+
+  // Set to true to force 2D processing of 3D data
+  bool ignore_z = 31;
 }
 
 enum TemplateType {
