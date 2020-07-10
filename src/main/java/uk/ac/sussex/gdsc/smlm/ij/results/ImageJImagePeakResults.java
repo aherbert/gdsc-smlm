@@ -927,7 +927,7 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
   }
 
   /**
-   * Map x to the location on the output image.
+   * Map results coordinate x to the location on the output image.
    *
    * @param x the x
    * @return the output x
@@ -937,13 +937,33 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
   }
 
   /**
-   * Map y to the location on the output image.
+   * Map results coordinate y to the location on the output image.
    *
    * @param y the y
    * @return the output y
    */
   public float mapY(float y) {
     return (y - oy) * scale;
+  }
+
+  /**
+   * Map output image x to the results coordinates. This is the opposite of {@link #mapX(float)}.
+   *
+   * @param x the output image x
+   * @return the x
+   */
+  public float inverseMapX(float x) {
+    return ox + x / scale;
+  }
+
+  /**
+   * Map output image y to the results coordinates. This is the opposite of {@link #mapY(float)}.
+   *
+   * @param y the output image y
+   * @return the y
+   */
+  public float inverseMapY(float y) {
+    return oy + y / scale;
   }
 
   /**
