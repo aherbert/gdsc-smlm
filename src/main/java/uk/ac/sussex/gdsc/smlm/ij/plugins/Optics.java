@@ -2144,9 +2144,9 @@ public class Optics implements PlugIn {
         if (grid == null) {
           final int max = clusteringResult.getMaxClusterId();
           area = SimpleArrayUtils.newDoubleArray(max + 1, -1);
-          // We need to ignore the first entry as this is not a cluster
           final float[][] clusterBounds = clusteringResult.getBounds();
           final Rectangle2D[] bounds = new Rectangle2D[clusterBounds.length - 1];
+          // We need to ignore the first entry as this is not a cluster
           for (int i = 1; i < clusterBounds.length; i++) {
             final float[] b = clusterBounds[i];
             bounds[i - 1] = new Rectangle2D.Float(b[0], b[2], b[1] - b[0], b[3] - b[2]);
@@ -2507,14 +2507,14 @@ public class Optics implements PlugIn {
       final double cx = ic.offScreenXD(event.getX());
       final double cy = ic.offScreenYD(event.getY());
 
-      // Convert to pixel coordinates using the scale
-      final float x = (float) (cx / image.getScale());
-      final float y = (float) (cy / image.getScale());
+      // Convert output image coordinates to the results coordinates
+      final float x = image.inverseMapX((float) cx);
+      final float y = image.inverseMapX((float) cy);
 
       eventWorkflow.run(new ClusterSelectedEvent(id) {
         @Override
         int[] computeClusters() {
-          System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+          //System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
 
           // Find the regions that could have been clicked
           if (grid == null) {
@@ -2526,7 +2526,7 @@ public class Optics implements PlugIn {
           }
 
           int[] candidates = grid.find(x, y);
-          System.out.println("Candidates: " + Arrays.toString(candidates));
+          //System.out.println("Candidates: " + Arrays.toString(candidates));
           if (candidates.length == 0) {
             return null;
           }
