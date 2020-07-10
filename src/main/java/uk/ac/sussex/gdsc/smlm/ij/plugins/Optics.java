@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntFunction;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
@@ -98,7 +99,8 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutMapper;
 import uk.ac.sussex.gdsc.core.ij.text.TextWindow2;
 import uk.ac.sussex.gdsc.core.match.RandIndex;
 import uk.ac.sussex.gdsc.core.match.Resequencer;
-import uk.ac.sussex.gdsc.core.utils.ConvexHull;
+import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
+import uk.ac.sussex.gdsc.core.math.hull.Hull;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
@@ -968,9 +970,9 @@ public class Optics implements PlugIn {
     /** The list of OPTICS clusters. */
     volatile List<OpticsCluster> allClusters;
     /** The cluster bounds. */
-    volatile Rectangle2D[] bounds;
+    volatile float[][] bounds;
     /** The cluster convex hulls. */
-    ConvexHull[] hulls;
+    Hull[] hulls;
     /** The size of the clusters for each cluster Id. */
     volatile int[] size;
     /** The level of the clusters for each cluster Id. */
@@ -1139,19 +1141,19 @@ public class Optics implements PlugIn {
      *
      * @return the bounds
      */
-    Rectangle2D[] getBounds() {
-      Rectangle2D[] localBounds = bounds;
+    float[][] getBounds() {
+      float[][] localBounds = bounds;
       if (localBounds == null) {
         // Double Checked Locking ...
         synchronized (clusteringResult) {
           localBounds = bounds;
           if (localBounds == null) {
-            clusteringResult.computeConvexHulls();
-            localBounds = new Rectangle2D[getMaxClusterId() + 1];
-            hulls = new ConvexHull[localBounds.length];
+            clusteringResult.computeHulls(ConvexHull2d.newBuilder());
+            localBounds = new float[getMaxClusterId() + 1][];
+            hulls = new Hull[localBounds.length];
             for (int c = 1; c <= max; c++) {
               localBounds[c] = clusteringResult.getBounds(c);
-              hulls[c] = clusteringResult.getConvexHull(c);
+              hulls[c] = clusteringResult.getHull(c);
             }
             bounds = localBounds;
           }
@@ -1166,7 +1168,7 @@ public class Optics implements PlugIn {
      *
      * @return the hulls
      */
-    ConvexHull[] getHulls() {
+    Hull[] getHulls() {
       getBounds();
       return hulls;
     }
@@ -2143,9 +2145,13 @@ public class Optics implements PlugIn {
           final int max = clusteringResult.getMaxClusterId();
           area = SimpleArrayUtils.newDoubleArray(max + 1, -1);
           // We need to ignore the first entry as this is not a cluster
-          final Rectangle2D[] clusterBounds = new Rectangle2D[max];
-          System.arraycopy(clusteringResult.getBounds(), 1, clusterBounds, 0, max);
-          grid = new BinarySearchDetectionGrid(clusterBounds);
+          final float[][] clusterBounds = clusteringResult.getBounds();
+          final Rectangle2D[] bounds = new Rectangle2D[clusterBounds.length - 1];
+          for (int i = 1; i < clusterBounds.length; i++) {
+            final float[] b = clusterBounds[i];
+            bounds[i - 1] = new Rectangle2D.Float(b[0], b[2], b[1] - b[0], b[3] - b[2]);
+          }
+          grid = new BinarySearchDetectionGrid(bounds);
           this.clusteringResult = clusteringResult;
         }
 
@@ -2274,10 +2280,10 @@ public class Optics implements PlugIn {
               colors[c] = mapper.getColour(lut, c);
             }
 
-            // Extract the ConvexHull of each cluster
-            final ConvexHull[] hulls = clusteringResult.getHulls();
+            // Extract the ConvexHull2d of each cluster
+            final Hull[] hulls = clusteringResult.getHulls();
             for (int c = 1; c <= max; c++) {
-              final ConvexHull hull = hulls[c];
+              final Hull hull = hulls[c];
               if (hull != null) {
                 final Roi roi = createRoi(hull, true);
                 roi.setStrokeColor(colors[map[c]]);
@@ -2405,13 +2411,15 @@ public class Optics implements PlugIn {
       return Pair.of(settings, new SettingsList(results, opticsManager, clusteringResult, image));
     }
 
-    private Roi createRoi(ConvexHull hull, boolean forcePolygon) {
+    private Roi createRoi(Hull hull, boolean forcePolygon) {
       // Convert the Hull to the correct image scale.
-      final float[] x2 = hull.x.clone();
-      final float[] y2 = hull.y.clone();
+      final int n = hull.getNumberOfVertices();
+      final float[] x2 = new float[n];
+      final float[] y2 = new float[n];
+      final double[][] v = hull.getVertices();
       for (int i = 0; i < x2.length; i++) {
-        x2[i] = image.mapX(x2[i]);
-        y2[i] = image.mapY(y2[i]);
+        x2[i] = image.mapX((float) v[i][0]);
+        y2[i] = image.mapY((float) v[i][1]);
       }
       // Note: The hull can be a single point or a line
       if (!forcePolygon) {
@@ -2425,15 +2433,15 @@ public class Optics implements PlugIn {
       return new PolygonRoi(x2, y2, Roi.POLYGON);
     }
 
-    private Roi createRoi(Rectangle2D bounds, int size) {
-      if (bounds.getWidth() == 0 && bounds.getHeight() == 0) {
-        return new PointRoi(bounds.getX(), bounds.getY());
+    private Roi createRoi(float[] bounds, int size) {
+      if (bounds[0] == bounds[1] && bounds[2] == bounds[3]) {
+        return new PointRoi(bounds[0], bounds[2]);
       }
       // It may be a cluster of size 2 so we should create a line for these.
       if (size == 2) {
-        return new Line(bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getMaxY());
+        return new Line(bounds[0], bounds[2], bounds[1], bounds[3]);
       }
-      return new Roi(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+      return new Roi(bounds[0], bounds[2], bounds[1] - bounds[0], bounds[3] - bounds[2]);
     }
 
     private void createLoopData(OpticsSettings settings, OpticsManager opticsManager) {
@@ -2506,7 +2514,7 @@ public class Optics implements PlugIn {
       eventWorkflow.run(new ClusterSelectedEvent(id) {
         @Override
         int[] computeClusters() {
-          // System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+          System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
 
           // Find the regions that could have been clicked
           if (grid == null) {
@@ -2518,6 +2526,7 @@ public class Optics implements PlugIn {
           }
 
           int[] candidates = grid.find(x, y);
+          System.out.println("Candidates: " + Arrays.toString(candidates));
           if (candidates.length == 0) {
             return null;
           }
@@ -2528,10 +2537,10 @@ public class Optics implements PlugIn {
           // is faster and can be precomputed)
           final TIntArrayList ids = new TIntArrayList(candidates.length);
           final TDoubleArrayList area = new TDoubleArrayList(candidates.length);
-          final ConvexHull[] hulls = clusteringResult.getHulls();
+          final Hull[] hulls = clusteringResult.getHulls();
           for (final int index : candidates) {
             final int clusterId = index + 1;
-            final ConvexHull hull = hulls[clusterId];
+            final Hull hull = hulls[clusterId];
             if (hull != null) {
               ids.add(clusterId);
               area.add(getArea(clusterId, hull));
@@ -2545,8 +2554,9 @@ public class Optics implements PlugIn {
           candidates = ids.toArray();
           // Sort ascending
           SortUtils.sortData(candidates, area.toArray(), false, false);
+          final double[] point = {x, y};
           for (final int clusterId : candidates) {
-            if (hulls[clusterId].contains(x, y)) {
+            if (contains(hulls[clusterId], point)) {
               return new int[] {clusterId};
             }
           }
@@ -2556,11 +2566,22 @@ public class Optics implements PlugIn {
       });
     }
 
-    protected double getArea(int clusterId, ConvexHull hull) {
+    private double getArea(int clusterId, Hull hull) {
       if (area[clusterId] == -1) {
-        area[clusterId] = hull.getArea();
+        // This will need to change if we compute a different hull
+        if (hull instanceof ConvexHull2d) {
+          area[clusterId] = ((ConvexHull2d) hull).getArea();
+        }
       }
       return area[clusterId];
+    }
+
+    private boolean contains(Hull hull, double[] point) {
+      // This will need to change if we compute a different hull
+      if (hull instanceof ConvexHull2d) {
+        return ((ConvexHull2d) hull).contains(point);
+      }
+      return false;
     }
 
     @Override
@@ -2603,12 +2624,12 @@ public class Optics implements PlugIn {
 
       final int[] clusters = event.getClusters();
       Roi roi = null;
-      final ConvexHull[] hulls = clusteringResult.getHulls();
+      final Hull[] hulls = clusteringResult.getHulls();
 
       if (clusters != null && clusters.length > 0) {
         final LocalList<Roi> rois = new LocalList<>(clusters.length);
         for (final int clusterId : clusters) {
-          final ConvexHull hull = hulls[clusterId];
+          final Hull hull = hulls[clusterId];
           if (hull != null) {
             rois.add(createRoi(hull, false));
           } else {
@@ -2714,59 +2735,119 @@ public class Optics implements PlugIn {
     }
   }
 
-  private static class TableResult {
+  private abstract static class TableResult {
     int id;
     int size;
     int level;
     double area;
     double density;
-    // ConvexHull hull;
-    Rectangle2D bounds;
+    float[] bounds;
     String text;
     double toUnit;
 
-    TableResult(int id, int size, int level, ConvexHull hull, Rectangle2D bounds) {
+    TableResult(int id, int size, int level, float[] bounds) {
       this.id = id;
       this.size = size;
       this.level = level;
-      // this.hull = hull;
       this.bounds = bounds;
+    }
+
+    public String getTableText(double toUnit) {
+      String t = text;
+      if (t == null || this.toUnit != toUnit) {
+        this.toUnit = toUnit;
+        t = text = createTableText(toUnit);
+      }
+      return t;
+    }
+
+    abstract String createTableText(double toUnit);
+  }
+
+  private static class TableResult2d extends TableResult {
+    TableResult2d(int id, int size, int level, Hull hull, float[] bounds) {
+      super(id, size, level, bounds);
 
       if (hull != null) {
-        area = hull.getArea();
+        // Modify if the type of hull changes
+        if (hull instanceof ConvexHull2d) {
+          area = ((ConvexHull2d) hull).getArea();
+        }
 
         if (area != 0) {
           density = size / area;
         } else {
-          // System.out.printf("Weird: %d\n%s\n%s\n", size, Arrays.toString(hull.x),
-          // Arrays.toString(hull.y));
           density = Double.MAX_VALUE; // Just used for sorting
         }
       }
     }
 
-    public String getTableText(double toUnit) {
-      if (text == null || this.toUnit != toUnit) {
-        this.toUnit = toUnit;
-        final StringBuilder sb = new StringBuilder();
-        // "Level\tId\tSize\tArea\tDensity\tBounds"
-        sb.append(level).append('\t');
-        sb.append(id).append('\t');
-        sb.append(size).append('\t');
-        if (area > 0) {
-          final double area = this.area * toUnit * toUnit;
-          sb.append(MathUtils.round(area)).append('\t');
-          sb.append(MathUtils.round(size / area)).append('\t');
-        } else {
-          sb.append("0\t\t");
-        }
-        sb.append('(').append(MathUtils.round(toUnit * bounds.getX())).append(',');
-        sb.append(MathUtils.round(toUnit * bounds.getY())).append(") ");
-        sb.append(MathUtils.round(toUnit * bounds.getWidth())).append('x');
-        sb.append(MathUtils.round(toUnit * bounds.getHeight()));
-        text = sb.toString();
+    @Override
+    String createTableText(double toUnit) {
+      final StringBuilder sb = new StringBuilder();
+      // "Level\tId\tSize\tArea\tDensity\tBounds"
+      sb.append(level).append('\t');
+      sb.append(id).append('\t');
+      sb.append(size).append('\t');
+      if (area > 0) {
+        final double area = this.area * toUnit * toUnit;
+        sb.append(MathUtils.round(area)).append('\t');
+        sb.append(MathUtils.round(size / area)).append('\t');
+      } else {
+        sb.append("0\t\t");
       }
-      return text;
+      sb.append('(').append(MathUtils.round(toUnit * bounds[0]));
+      sb.append(',').append(MathUtils.round(toUnit * bounds[2]));
+      sb.append(") ");
+      sb.append(MathUtils.round(toUnit * (bounds[1] - bounds[0]))).append('x');
+      sb.append(MathUtils.round(toUnit * (bounds[3] - bounds[2])));
+      return sb.toString();
+    }
+  }
+
+  private static class TableResult3d extends TableResult {
+    TableResult3d(int id, int size, int level, Hull hull, float[] bounds) {
+      super(id, size, level, bounds);
+
+      // XXX - This could be modified to use a 3D hull to compute volume.
+      // Currently we support only 2D hull in the XY plane.
+
+      if (hull != null) {
+        // Modify if the type of hull changes
+        if (hull instanceof ConvexHull2d) {
+          area = ((ConvexHull2d) hull).getArea();
+        }
+
+        if (area != 0) {
+          density = size / area;
+        } else {
+          density = Double.MAX_VALUE; // Just used for sorting
+        }
+      }
+    }
+
+    @Override
+    String createTableText(double toUnit) {
+      final StringBuilder sb = new StringBuilder();
+      // "Level\tId\tSize\tArea\tDensity\tBounds"
+      sb.append(level).append('\t');
+      sb.append(id).append('\t');
+      sb.append(size).append('\t');
+      if (area > 0) {
+        final double area = this.area * toUnit * toUnit;
+        sb.append(MathUtils.round(area)).append('\t');
+        sb.append(MathUtils.round(size / area)).append('\t');
+      } else {
+        sb.append("0\t\t");
+      }
+      sb.append('(').append(MathUtils.round(toUnit * bounds[0]));
+      sb.append(',').append(MathUtils.round(toUnit * bounds[2]));
+      sb.append(',').append(MathUtils.round(toUnit * bounds[4]));
+      sb.append(") ");
+      sb.append(MathUtils.round(toUnit * (bounds[1] - bounds[0]))).append('x');
+      sb.append(MathUtils.round(toUnit * (bounds[3] - bounds[2]))).append('x');
+      sb.append(MathUtils.round(toUnit * (bounds[5] - bounds[4])));
+      return sb.toString();
     }
   }
 
@@ -2913,6 +2994,7 @@ public class Optics implements PlugIn {
       final OpticsSettings settings = work.getKey();
       final SettingsList resultList = work.getValue();
       final MemoryPeakResults results = (MemoryPeakResults) resultList.get(0);
+      final OpticsManager opticsManager = (OpticsManager) resultList.get(1);
       final CachedClusteringResult clusteringResult = (CachedClusteringResult) resultList.get(2);
       if (!clusteringResult.isValid() || !settings.getShowTable()) {
         // Hide the table
@@ -2923,16 +3005,30 @@ public class Optics implements PlugIn {
         }
       } else {
         if (tableResults == null) {
-          final ConvexHull[] hulls = clusteringResult.getHulls();
-          final Rectangle2D[] bounds = clusteringResult.getBounds();
+          final Hull[] hulls = clusteringResult.getHulls();
+          final float[][] bounds = clusteringResult.getBounds();
 
           // Get the cluster sizes and level
           final int[] size = clusteringResult.getSize();
           final int[] level = clusteringResult.getLevel();
 
+          // Support 3D
+          // - Specialised 2D/3D table result
+          // - 2D/3D bounds
+          // TODO
+          // - 3D hull support
+          // - Area/volume in table
+          // Currently we only support a 2D hull in the XY plane for 3D data.
+          IntFunction<TableResult> factory;
+          if (opticsManager.is3d()) {
+            factory = c -> new TableResult3d(c, size[c], level[c], hulls[c], bounds[c]);
+          } else {
+            factory = c -> new TableResult2d(c, size[c], level[c], hulls[c], bounds[c]);
+          }
+
           tableResults = new LocalList<>(size.length);
           for (int c = 1; c < size.length; c++) {
-            tableResults.add(new TableResult(c, size[c], level[c], hulls[c], bounds[c]));
+            tableResults.add(factory.apply(c));
           }
         }
 
@@ -3186,6 +3282,8 @@ public class Optics implements PlugIn {
         table.setDistanceUnit(DistanceUnit.NM);
         table.setHideSourceText(true);
         table.setShowId(true);
+        // Always show to allow switching between 2D/3D
+        table.setShowZ(true);
         table.begin();
         tw = table.getResultsWindow();
         if (bounds == null) {
