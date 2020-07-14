@@ -101,6 +101,7 @@ import uk.ac.sussex.gdsc.core.match.RandIndex;
 import uk.ac.sussex.gdsc.core.match.Resequencer;
 import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
 import uk.ac.sussex.gdsc.core.math.hull.Hull;
+import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
@@ -2569,8 +2570,8 @@ public class Optics implements PlugIn {
     private double getArea(int clusterId, Hull hull) {
       if (area[clusterId] == -1) {
         // This will need to change if we compute a different hull
-        if (hull instanceof ConvexHull2d) {
-          area[clusterId] = ((ConvexHull2d) hull).getArea();
+        if (hull instanceof Hull2d) {
+          area[clusterId] = ((Hull2d) hull).getArea();
         }
       }
       return area[clusterId];
@@ -2578,8 +2579,8 @@ public class Optics implements PlugIn {
 
     private boolean contains(Hull hull, double[] point) {
       // This will need to change if we compute a different hull
-      if (hull instanceof ConvexHull2d) {
-        return ((ConvexHull2d) hull).contains(point);
+      if (hull instanceof Hull2d) {
+        return ((Hull2d) hull).contains(point);
       }
       return false;
     }
@@ -2770,8 +2771,8 @@ public class Optics implements PlugIn {
 
       if (hull != null) {
         // Modify if the type of hull changes
-        if (hull instanceof ConvexHull2d) {
-          area = ((ConvexHull2d) hull).getArea();
+        if (hull instanceof Hull2d) {
+          area = ((Hull2d) hull).getArea();
         }
 
         if (area != 0) {
@@ -2814,8 +2815,8 @@ public class Optics implements PlugIn {
 
       if (hull != null) {
         // Modify if the type of hull changes
-        if (hull instanceof ConvexHull2d) {
-          area = ((ConvexHull2d) hull).getArea();
+        if (hull instanceof Hull2d) {
+          area = ((Hull2d) hull).getArea();
         }
 
         if (area != 0) {
