@@ -1038,7 +1038,7 @@ public class Optics implements PlugIn {
             localClusters = clusteringResult.getClusters();
             max = MathUtils.max(localClusters);
             if (isOptics) {
-              topClusters = ((OpticsResult) clusteringResult).getTopLevelClusters(false);
+              topClusters = ((OpticsResult) clusteringResult).getTopLevelClusters();
             }
             clusters = localClusters;
           }
