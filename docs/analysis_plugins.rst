@@ -1441,6 +1441,9 @@ The following options are available (extra options are activated by holding the 
    * - Input
      - Select the input results to analyse.
 
+   * - Ignore Z
+     - Set to ``true`` to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
+
    * - Min points
      - The minimum number of neighbours required to create a cluster.
 
@@ -1611,6 +1614,9 @@ The following options are available:
 
    * - Input
      - Select the input results to analyse.
+
+   * - Ignore Z
+     - Set to ``true`` to ignore the z coordinate in 3D data and perform 2D clustering. The default is 3D clustering for 3D datasets. Note: The visualisation of clustering results is optimised for 2D. For 3D data the results will be viewed using a projection onto the XY plane.
 
    * - Min points
      - The minimum number of neighbours required to create a cluster.
