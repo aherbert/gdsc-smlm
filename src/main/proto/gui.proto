@@ -338,10 +338,10 @@ message OpticsSettings {
   // The plot mode for the reachability distance profile
   int32 plot_mode = 23;
 
-  // The outline mode for the reachability distance profile
+  // The outline mode for the cluster visualisation
   int32 outline_mode = 24;
 
-  // The spanningTree mode for the reachability distance profile
+  // The spanning tree mode for the OPTICS cluster visualisation
   int32 spanning_tree_mode = 25;
 
   // The number of standard deviations to consider for density computation using Local Outlier Probability (LoOP).
@@ -363,6 +363,9 @@ message OpticsSettings {
 
   // Set to true to force 2D processing of 3D data
   bool ignore_z = 31;
+
+  // The hull mode for constructing the outline hull
+  int32 hull_mode = 32;
 }
 
 enum TemplateType {

@@ -102,6 +102,7 @@ import uk.ac.sussex.gdsc.core.match.Resequencer;
 import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
 import uk.ac.sussex.gdsc.core.math.hull.Hull;
 import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
+import uk.ac.sussex.gdsc.core.math.hull.KnnConcaveHull2d;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
@@ -655,6 +656,49 @@ public class Optics implements PlugIn {
   }
 
   /**
+   * Options for plotting the cluster outline (hull).
+   */
+  public enum HullMode {
+    //@formatter:off
+    /** Use a k-nearest neighbour concave hull. */
+    KNN_CONCAVE_HULL {
+      @Override
+      public String getName() { return "KNN Concave Hull"; }
+    },
+    /** Use a convex hull. */
+    CONVEX_HULL {
+      @Override
+      public String getName() { return "Convex Hull"; }
+    };
+    //@formatter:on
+
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    public abstract String getName();
+
+    @Override
+    public String toString() {
+      return getName();
+    }
+
+    /**
+     * Gets the hull mode from the ordinal.
+     *
+     * @param ordinal the ordinal
+     * @return the hull mode
+     */
+    public static HullMode get(int ordinal) {
+      if (ordinal < 0 || ordinal >= values().length) {
+        ordinal = 0;
+      }
+      return values()[ordinal];
+    }
+  }
+
+  /**
    * Options for plotting the OPTICS results.
    */
   public enum SpanningTreeMode {
@@ -973,7 +1017,9 @@ public class Optics implements PlugIn {
     /** The cluster bounds. */
     volatile float[][] bounds;
     /** The cluster convex hulls. */
-    Hull[] hulls;
+    volatile Hull[] hulls;
+    /** The hull mode. */
+    volatile int hullMode = -1;
     /** The size of the clusters for each cluster Id. */
     volatile int[] size;
     /** The level of the clusters for each cluster Id. */
@@ -983,10 +1029,18 @@ public class Optics implements PlugIn {
     /** The cluster parents (can be cached for a set of cluster Ids). */
     int[] parents;
 
-    CachedClusteringResult(ClusteringResult clusteringResult) {
+    /**
+     * Create an instance.
+     *
+     * @param clusteringResult the clustering result
+     * @param settings the settings used when the result was created
+     */
+    CachedClusteringResult(ClusteringResult clusteringResult, OpticsSettings settings) {
       id = latestId.incrementAndGet();
       this.clusteringResult = clusteringResult;
+      this.hullMode = settings.getHullMode();
       isOptics = clusteringResult instanceof OpticsResult;
+      // TODO - configure the K for the KNN hull mode
     }
 
     /**
@@ -1149,14 +1203,9 @@ public class Optics implements PlugIn {
         synchronized (clusteringResult) {
           localBounds = bounds;
           if (localBounds == null) {
-            clusteringResult.computeHulls(ConvexHull2d.newBuilder());
-            localBounds = new float[getMaxClusterId() + 1][];
-            hulls = new Hull[localBounds.length];
-            for (int c = 1; c <= max; c++) {
-              localBounds[c] = clusteringResult.getBounds(c);
-              hulls[c] = clusteringResult.getHull(c);
-            }
-            bounds = localBounds;
+            // Use the default hull mode
+            computeHulls(this.hullMode);
+            localBounds = bounds;
           }
         }
       }
@@ -1167,11 +1216,49 @@ public class Optics implements PlugIn {
      * Gets the hulls. The hulls are stored for each cluster id. Index 0 is null as this is not a
      * cluster ID.
      *
+     * <p>Use of a new hull mode will recompute the hulls.
+     *
+     * @param hullMode the hull mode
      * @return the hulls
      */
-    Hull[] getHulls() {
-      getBounds();
-      return hulls;
+    Hull[] getHulls(int hullMode) {
+      Hull[] localHulls = hulls;
+      if (localHulls == null || this.hullMode != hullMode) {
+        // Double Checked Locking ...
+        synchronized (clusteringResult) {
+          localHulls = hulls;
+          if (localHulls == null || this.hullMode != hullMode) {
+            computeHulls(hullMode);
+            localHulls = hulls;
+          }
+        }
+      }
+      return localHulls;
+    }
+
+    /**
+     * Compute hulls. This should only be called within a block synchronized on the clustering
+     * result.
+     *
+     * @param hullMode the hull mode
+     */
+    private void computeHulls(int hullMode) {
+      Hull.Builder builder;
+      if (hullMode == HullMode.KNN_CONCAVE_HULL.ordinal()) {
+        builder = KnnConcaveHull2d.newBuilder();
+      } else {
+        builder = ConvexHull2d.newBuilder();
+      }
+      clusteringResult.computeHulls(builder);
+      final Hull[] localHulls = new Hull[getMaxClusterId() + 1];
+      final float[][] localBounds = new float[localHulls.length][];
+      for (int c = 1; c <= max; c++) {
+        localHulls[c] = clusteringResult.getHull(c);
+        localBounds[c] = clusteringResult.getBounds(c);
+      }
+      hulls = localHulls;
+      this.hullMode = hullMode;
+      bounds = localBounds;
     }
 
     int[] getSize() {
@@ -1306,8 +1393,8 @@ public class Optics implements PlugIn {
         }
       }
       // It may be null if cancelled. However return null Work will close down the next thread
-      return Pair.of(settings,
-          new SettingsList(results, opticsManager, new CachedClusteringResult(opticsResult)));
+      return Pair.of(settings, new SettingsList(results, opticsManager,
+          new CachedClusteringResult(opticsResult, settings)));
     }
   }
 
@@ -1404,7 +1491,7 @@ public class Optics implements PlugIn {
             TextUtils.pleural(clusterCount, "Cluster"));
 
         // We created a new clustering so create a new WorkerResult
-        clusteringResult = new CachedClusteringResult(opticsResult);
+        clusteringResult = new CachedClusteringResult(opticsResult, settings);
         return Pair.of(settings, new SettingsList(results, opticsManager, clusteringResult));
       }
       return work;
@@ -2056,6 +2143,10 @@ public class Optics implements PlugIn {
         }
         result = false;
       }
+      if (current.getHullMode() != previous.getHullMode()) {
+        outline = null;
+        result = false;
+      }
       if (current.getSpanningTreeMode() != previous.getSpanningTreeMode()) {
         if (SpanningTreeMode.get(current.getSpanningTreeMode()).isSpanningTree()
             && current.getSpanningTreeMode() != lastSpanningTreeMode) {
@@ -2251,45 +2342,46 @@ public class Optics implements PlugIn {
         if (outlineMode.isOutline()) {
           if (outline == null) {
             lastOutlineMode = settings.getOutlineMode();
-
-            final int max = clusteringResult.getMaxClusterId();
-            int max2 = max;
-            final int[] map = SimpleArrayUtils.natural(max + 1);
-
-            LUT lut = clusterLut;
-
-            if (clusteringResult.isOptics) {
-              if (outlineMode.isColourByDepth()) {
-                lut = clusterDepthLut;
-                final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
-                Arrays.fill(map, 0);
-                for (final OpticsCluster c : allClusters) {
-                  map[c.getClusterId()] = c.getLevel() + 1;
-                }
-                max2 = MathUtils.max(map);
-              }
-            }
-
             outline = new Overlay();
 
-            // Create a colour to match the LUT of the image
-            final LutMapper mapper = new LutHelper.NonZeroLutMapper(1, max2);
+            final int max = clusteringResult.getMaxClusterId();
+            if (max != 0) {
+              int max2 = max;
+              final int[] map = SimpleArrayUtils.natural(max + 1);
 
-            // Cache all the colours
-            final Color[] colors = new Color[max2 + 1];
-            for (int c = 1; c <= max2; c++) {
-              colors[c] = mapper.getColour(lut, c);
-            }
+              LUT lut = clusterLut;
 
-            // Extract the ConvexHull2d of each cluster
-            final Hull[] hulls = clusteringResult.getHulls();
-            for (int c = 1; c <= max; c++) {
-              final Hull hull = hulls[c];
-              if (hull != null) {
-                final Roi roi = createRoi(hull, true);
-                roi.setStrokeColor(colors[map[c]]);
-                // TODO: Options to set a fill colour?
-                outline.add(roi);
+              if (clusteringResult.isOptics) {
+                if (outlineMode.isColourByDepth()) {
+                  lut = clusterDepthLut;
+                  final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
+                  Arrays.fill(map, 0);
+                  for (final OpticsCluster c : allClusters) {
+                    map[c.getClusterId()] = c.getLevel() + 1;
+                  }
+                  max2 = MathUtils.max(map);
+                }
+              }
+
+              // Create a colour to match the LUT of the image
+              final LutMapper mapper = new LutHelper.NonZeroLutMapper(1, max2);
+
+              // Cache all the colours
+              final Color[] colors = new Color[max2 + 1];
+              for (int c = 1; c <= max2; c++) {
+                colors[c] = mapper.getColour(lut, c);
+              }
+
+              // Extract the hull of each cluster
+              final Hull[] hulls = clusteringResult.getHulls(settings.getHullMode());
+              for (int c = 1; c <= max; c++) {
+                final Hull hull = hulls[c];
+                if (hull != null) {
+                  final Roi roi = createRoi(hull, true);
+                  roi.setStrokeColor(colors[map[c]]);
+                  // TODO: Options to set a fill colour?
+                  outline.add(roi);
+                }
               }
             }
           }
@@ -2300,96 +2392,97 @@ public class Optics implements PlugIn {
             && SpanningTreeMode.get(settings.getSpanningTreeMode()).isSpanningTree()) {
           if (spanningTree == null) {
             lastSpanningTreeMode = settings.getSpanningTreeMode();
+            spanningTree = new Overlay();
 
             final int[] predecessor = clusteringResult.getPredecessor();
             final int[] clusters = clusteringResult.getClusters();
             // int[] topLevelClusters = clusteringResult.getTopClusters();
             final int max = clusteringResult.getMaxClusterId();
-            int max2 = max;
-            final int[] map = SimpleArrayUtils.natural(max + 1);
+            if (max != 0) {
+              int max2 = max;
+              final int[] map = SimpleArrayUtils.natural(max + 1);
 
-            LUT lut = clusterLut;
+              LUT lut = clusterLut;
 
-            if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
-              lut = clusterOrderLut;
-            } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal()) {
-              lut = clusterDepthLut;
-              final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
-              Arrays.fill(map, 0);
-              for (final OpticsCluster c : allClusters) {
-                map[c.getClusterId()] = c.getLevel() + 1;
-              }
-              max2 = MathUtils.max(map);
-            } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal()) {
-              lut = loopLut;
-            }
-
-            // Get the coordinates
-            if (sp.x == null) {
-              sp.getXy();
-            }
-
-            spanningTree = new Overlay();
-
-            // Cache all the colours
-            Color[] colors;
-            // Create a colour to match the LUT of the image
-            LutMapper mapper;
-
-            boolean useMap = false;
-            boolean useLoop = false;
-            int[] order = null;
-            if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
-              // We will use the order for the colour
-              order = clusteringResult.getOrder();
-              mapper = new LutHelper.DefaultLutMapper(0, 255);
-              colors = new Color[256];
-              for (int c = 1; c < colors.length; c++) {
-                colors[c] = mapper.getColour(lut, c);
-              }
-              mapper = new LutHelper.NonZeroLutMapper(1, clusters.length);
-            } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal()) {
-              // We will use the LoOP for the colour
-              useLoop = true;
-              mapper = new LutHelper.DefaultLutMapper(0, 255);
-              colors = new Color[256];
-              for (int c = 1; c < colors.length; c++) {
-                colors[c] = mapper.getColour(lut, c);
-              }
-              mapper = new LutHelper.NonZeroLutMapper(0, 1);
-            } else {
-              // Alternative is to colour by cluster Id/Depth using a map
-              useMap = true;
-              mapper = new LutHelper.NonZeroLutMapper(1, max2);
-              colors = new Color[max2 + 1];
-              for (int c = 1; c <= max2; c++) {
-                colors[c] = mapper.getColour(lut, c);
-              }
-            }
-
-            createLoopData(settings, opticsManager);
-
-            for (int i = 1; i < predecessor.length; i++) {
-              if (clusters[i] == 0 || predecessor[i] < 0) {
-                continue;
+              if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
+                lut = clusterOrderLut;
+              } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal()) {
+                lut = clusterDepthLut;
+                final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
+                Arrays.fill(map, 0);
+                for (final OpticsCluster c : allClusters) {
+                  map[c.getClusterId()] = c.getLevel() + 1;
+                }
+                max2 = MathUtils.max(map);
+              } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal()) {
+                lut = loopLut;
               }
 
-              final int j = predecessor[i];
+              // Get the coordinates
+              if (sp.x == null) {
+                sp.getXy();
+              }
 
-              final float xi = image.mapX(sp.x[i]);
-              final float yi = image.mapY(sp.y[i]);
-              final float xj = image.mapX(sp.x[j]);
-              final float yj = image.mapY(sp.y[j]);
+              // Cache all the colours
+              Color[] colors;
+              // Create a colour to match the LUT of the image
+              LutMapper mapper;
 
-              final Line roi = new Line(xi, yi, xj, yj);
-              if (useMap) {
-                roi.setStrokeColor(colors[map[clusters[i]]]);
-              } else if (useLoop) {
-                roi.setStrokeColor(colors[mapper.map(loop[i])]);
+              boolean useMap = false;
+              boolean useLoop = false;
+              int[] order = null;
+              if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
+                // We will use the order for the colour
+                order = clusteringResult.getOrder();
+                mapper = new LutHelper.DefaultLutMapper(0, 255);
+                colors = new Color[256];
+                for (int c = 1; c < colors.length; c++) {
+                  colors[c] = mapper.getColour(lut, c);
+                }
+                mapper = new LutHelper.NonZeroLutMapper(1, clusters.length);
+              } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal()) {
+                // We will use the LoOP for the colour
+                useLoop = true;
+                mapper = new LutHelper.DefaultLutMapper(0, 255);
+                colors = new Color[256];
+                for (int c = 1; c < colors.length; c++) {
+                  colors[c] = mapper.getColour(lut, c);
+                }
+                mapper = new LutHelper.NonZeroLutMapper(0, 1);
               } else {
-                roi.setStrokeColor(colors[mapper.map(order[i])]);
+                // Alternative is to colour by cluster Id/Depth using a map
+                useMap = true;
+                mapper = new LutHelper.NonZeroLutMapper(1, max2);
+                colors = new Color[max2 + 1];
+                for (int c = 1; c <= max2; c++) {
+                  colors[c] = mapper.getColour(lut, c);
+                }
               }
-              spanningTree.add(roi);
+
+              createLoopData(settings, opticsManager);
+
+              for (int i = 1; i < predecessor.length; i++) {
+                if (clusters[i] == 0 || predecessor[i] < 0) {
+                  continue;
+                }
+
+                final int j = predecessor[i];
+
+                final float xi = image.mapX(sp.x[i]);
+                final float yi = image.mapY(sp.y[i]);
+                final float xj = image.mapX(sp.x[j]);
+                final float yj = image.mapY(sp.y[j]);
+
+                final Line roi = new Line(xi, yi, xj, yj);
+                if (useMap) {
+                  roi.setStrokeColor(colors[map[clusters[i]]]);
+                } else if (useLoop) {
+                  roi.setStrokeColor(colors[mapper.map(loop[i])]);
+                } else {
+                  roi.setStrokeColor(colors[mapper.map(order[i])]);
+                }
+                spanningTree.add(roi);
+              }
             }
           }
           if (overlay == null) {
@@ -2515,7 +2608,7 @@ public class Optics implements PlugIn {
       eventWorkflow.run(new ClusterSelectedEvent(id) {
         @Override
         int[] computeClusters() {
-          //System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
+          // System.out.printf("Compute cluster @ %.2f,%.2f\n", x, y);
 
           // Find the regions that could have been clicked
           if (grid == null) {
@@ -2527,7 +2620,7 @@ public class Optics implements PlugIn {
           }
 
           int[] candidates = grid.find(x, y);
-          //System.out.println("Candidates: " + Arrays.toString(candidates));
+          // System.out.println("Candidates: " + Arrays.toString(candidates));
           if (candidates.length == 0) {
             return null;
           }
@@ -2538,7 +2631,7 @@ public class Optics implements PlugIn {
           // is faster and can be precomputed)
           final TIntArrayList ids = new TIntArrayList(candidates.length);
           final TDoubleArrayList area = new TDoubleArrayList(candidates.length);
-          final Hull[] hulls = clusteringResult.getHulls();
+          final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode());
           for (final int index : candidates) {
             final int clusterId = index + 1;
             final Hull hull = hulls[clusterId];
@@ -2625,7 +2718,7 @@ public class Optics implements PlugIn {
 
       final int[] clusters = event.getClusters();
       Roi roi = null;
-      final Hull[] hulls = clusteringResult.getHulls();
+      final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode());
 
       if (clusters != null && clusters.length > 0) {
         final LocalList<Roi> rois = new LocalList<>(clusters.length);
@@ -2978,6 +3071,10 @@ public class Optics implements PlugIn {
           return false;
         }
       }
+      // New hulls will have a different area
+      if (current.getHullMode() != previous.getHullMode()) {
+        return false;
+      }
       return true;
     }
 
@@ -3006,7 +3103,7 @@ public class Optics implements PlugIn {
         }
       } else {
         if (tableResults == null) {
-          final Hull[] hulls = clusteringResult.getHulls();
+          final Hull[] hulls = clusteringResult.getHulls(settings.getHullMode());
           final float[][] bounds = clusteringResult.getBounds();
 
           // Get the cluster sizes and level
@@ -3518,8 +3615,8 @@ public class Optics implements PlugIn {
         scrambleClusters(dbscanResult);
       }
       // It may be null if cancelled. However return null Work will close down the next thread
-      return Pair.of(settings,
-          new SettingsList(results, opticsManager, new CachedClusteringResult(dbscanResult)));
+      return Pair.of(settings, new SettingsList(results, opticsManager,
+          new CachedClusteringResult(dbscanResult, settings)));
     }
   }
 
@@ -3546,8 +3643,8 @@ public class Optics implements PlugIn {
           dbscanResult.extractClusters(settings.getCore());
         }
         // We created a new clustering
-        return Pair.of(settings,
-            new SettingsList(results, opticsManager, new CachedClusteringResult(dbscanResult)));
+        return Pair.of(settings, new SettingsList(results, opticsManager,
+            new CachedClusteringResult(dbscanResult, settings)));
       }
       return work;
     }
@@ -4117,7 +4214,35 @@ public class Optics implements PlugIn {
     outlineModeArray = outlineModeSet.toArray();
     final String[] outlineModes = SettingsManager.getNames(outlineModeArray);
     gd.addChoice("Outline", outlineModes,
-        OutlineMode.get(inputSettings.getOutlineMode()).toString());
+        OutlineMode.get(inputSettings.getOutlineMode()).toString(), new OptionListener<Integer>() {
+          @Override
+          public boolean collectOptions(Integer value) {
+            inputSettings.setOutlineMode(((OutlineMode) outlineModeArray[value]).ordinal());
+            return collectOptions(false);
+          }
+
+          @Override
+          public boolean collectOptions() {
+            return collectOptions(true);
+          }
+
+          private boolean collectOptions(boolean silent) {
+            final OutlineMode mode = OutlineMode.get(inputSettings.getOutlineMode());
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog(mode.toString() + " options");
+            final int hullMode = inputSettings.getHullMode();
+            final String[] hullModes = SettingsManager.getNames((Object[]) HullMode.values());
+            egd.addChoice("Hull_algorithm", hullModes, hullMode);
+            egd.setSilent(silent);
+            egd.showDialog(true, gd);
+            if (egd.wasCanceled()) {
+              return false;
+            }
+            inputSettings.setHullMode(egd.getNextChoiceIndex());
+            // Return true if new settings
+            return inputSettings.getHullMode() != hullMode;
+          }
+        });
 
     if (!isDbscan) {
       final String[] spanningTreeModes =
