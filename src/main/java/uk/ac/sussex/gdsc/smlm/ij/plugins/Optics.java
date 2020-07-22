@@ -66,8 +66,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
 import org.apache.commons.lang3.tuple.Pair;
@@ -184,6 +187,9 @@ public class Optics implements PlugIn {
 
   // Stack to which the work is first added
   private final Workflow<OpticsSettings, SettingsList> workflow = new Workflow<>();
+
+  /** The executor service. */
+  private ExecutorService executorService;
 
   /**
    * Options for displaying the clustering image.
@@ -1179,7 +1185,7 @@ public class Optics implements PlugIn {
         return null;
       }
       List<OpticsCluster> localAllClusters = allClusters;
-      if (allClusters == null) {
+      if (localAllClusters == null) {
         synchronized (clusteringResult) {
           localAllClusters = allClusters;
           if (localAllClusters == null) {
@@ -1365,7 +1371,8 @@ public class Optics implements PlugIn {
           sampleMode = SampleMode.forOrdinal(settings.getSampleMode());
         }
         synchronized (opticsManager) {
-          opticsManager.setNumberOfThreads(Prefs.getThreads());
+          opticsManager.setExecutorService(Optional.ofNullable(executorService)
+              .orElseGet(() -> executorService = Executors.newFixedThreadPool(Prefs.getThreads())));
           opticsResult = opticsManager.fastOptics(minPts, n, n, useRandomVectors,
               saveApproximateSets, sampleMode);
         }
@@ -3959,6 +3966,7 @@ public class Optics implements PlugIn {
     final boolean cancelled = !showDialog(false);
 
     shutdownWorkflows(cancelled);
+    Optional.ofNullable(executorService).ifPresent(es -> es.shutdown());
   }
 
   /**
