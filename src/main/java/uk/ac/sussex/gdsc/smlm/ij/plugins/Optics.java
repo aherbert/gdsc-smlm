@@ -61,7 +61,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -1783,8 +1782,10 @@ public class Optics implements PlugIn {
             // Ensure we correctly get colours for each value
             mapper = new LutHelper.DefaultLutMapper(0, 255);
           } else {
-            // Do all clusters so rank by level
-            Collections.sort(clusters, (o1, o2) -> Integer.compare(o1.getLevel(), o2.getLevel()));
+            // Do all clusters so rank by level.
+            // This adjusts a list that should be immutable.
+            clusters = new LocalList<>(clusters);
+            clusters.sort((o1, o2) -> Integer.compare(o1.getLevel(), o2.getLevel()));
 
             final boolean useLevel = mode.isColourProfileByDepth();
             if (useLevel) {
@@ -3280,13 +3281,16 @@ public class Optics implements PlugIn {
       } else {
         // Find the clusters.
         // Assume that the panel is showing the current results.
-        for (int i = 0; i < tableResults.size(); i++) {
-          final TableResult r = tableResults.unsafeGet(i);
-          if (r.id == clusters[0]) {
-            // We can only handle selecting continuous lines so
-            // for now just select the first cluster.
-            startLine = endLine = i;
-            break;
+        final LocalList<TableResult> localResults = tableResults;
+        if (localResults != null) {
+          for (int i = 0; i < localResults.size(); i++) {
+            final TableResult r = localResults.unsafeGet(i);
+            if (r.id == clusters[0]) {
+              // We can only handle selecting continuous lines so
+              // for now just select the first cluster.
+              startLine = endLine = i;
+              break;
+            }
           }
         }
       }
