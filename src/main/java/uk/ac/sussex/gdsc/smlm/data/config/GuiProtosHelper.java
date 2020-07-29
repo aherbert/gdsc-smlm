@@ -228,6 +228,7 @@ public final class GuiProtosHelper {
     builder.setOutlineMode(OutlineMode.COLOURED_BY_CLUSTER.ordinal());
     builder.setSpanningTreeMode(SpanningTreeMode.OFF.ordinal());
     builder.setLambda(3);
+    builder.setDiggingThreshold(2.0);
     final OpticsEventSettings.Builder b = builder.getOpticsEventSettingsBuilder();
     b.setShowSelectionTable(true);
     b.setTableCreateSelection(true);

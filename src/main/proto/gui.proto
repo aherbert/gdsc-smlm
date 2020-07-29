@@ -366,6 +366,9 @@ message OpticsSettings {
 
   // The hull mode for constructing the outline hull
   int32 hull_mode = 32;
+
+  // The edge distance to decision distance threshold for the digging concave hull algorithm
+  double digging_threshold = 33;
 }
 
 enum TemplateType {

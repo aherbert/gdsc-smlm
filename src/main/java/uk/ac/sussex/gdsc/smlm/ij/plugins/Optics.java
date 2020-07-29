@@ -102,6 +102,7 @@ import uk.ac.sussex.gdsc.core.ij.text.TextWindow2;
 import uk.ac.sussex.gdsc.core.match.RandIndex;
 import uk.ac.sussex.gdsc.core.match.Resequencer;
 import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
+import uk.ac.sussex.gdsc.core.math.hull.DiggingConcaveHull2d;
 import uk.ac.sussex.gdsc.core.math.hull.Hull;
 import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
 import uk.ac.sussex.gdsc.core.math.hull.KnnConcaveHull2d;
@@ -111,6 +112,7 @@ import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsEventSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.OpticsSettings;
@@ -670,6 +672,11 @@ public class Optics implements PlugIn {
       @Override
       public String getName() { return "KNN Concave Hull"; }
     },
+    /** Use a digging concave hull. */
+    DIGGING_CONCAVE_HULL {
+      @Override
+      public String getName() { return "Digging Concave Hull"; }
+    },
     /** Use a convex hull. */
     CONVEX_HULL {
       @Override
@@ -1025,6 +1032,8 @@ public class Optics implements PlugIn {
     volatile Hull[] hulls;
     /** The hull mode. */
     volatile int hullMode = -1;
+    /** The digging threshold. */
+    double diggingThreshold;
     /** The size of the clusters for each cluster Id. */
     volatile int[] size;
     /** The level of the clusters for each cluster Id. */
@@ -1044,6 +1053,7 @@ public class Optics implements PlugIn {
       id = latestId.incrementAndGet();
       this.clusteringResult = clusteringResult;
       this.hullMode = settings.getHullMode();
+      this.diggingThreshold = settings.getDiggingThreshold();
       isOptics = clusteringResult instanceof OpticsResult;
       // TODO - configure the K for the KNN hull mode
     }
@@ -1209,7 +1219,7 @@ public class Optics implements PlugIn {
           localBounds = bounds;
           if (localBounds == null) {
             // Use the default hull mode
-            computeHulls(this.hullMode);
+            computeHulls(this.hullMode, this.diggingThreshold);
             localBounds = bounds;
           }
         }
@@ -1224,16 +1234,17 @@ public class Optics implements PlugIn {
      * <p>Use of a new hull mode will recompute the hulls.
      *
      * @param hullMode the hull mode
+     * @param diggingThreshold the digging threshold
      * @return the hulls
      */
-    Hull[] getHulls(int hullMode) {
+    Hull[] getHulls(int hullMode, double diggingThreshold) {
       Hull[] localHulls = hulls;
-      if (localHulls == null || this.hullMode != hullMode) {
+      if (requireHulls(hullMode, diggingThreshold, localHulls)) {
         // Double Checked Locking ...
         synchronized (clusteringResult) {
           localHulls = hulls;
-          if (localHulls == null || this.hullMode != hullMode) {
-            computeHulls(hullMode);
+          if (requireHulls(hullMode, diggingThreshold, localHulls)) {
+            computeHulls(hullMode, diggingThreshold);
             localHulls = hulls;
           }
         }
@@ -1242,15 +1253,32 @@ public class Optics implements PlugIn {
     }
 
     /**
+     * Check if new hulls are required.
+     *
+     * @param hullMode the hull mode
+     * @param diggingThreshold the digging threshold
+     * @param localHulls the local hulls
+     * @return true if hulls are required
+     */
+    private boolean requireHulls(int hullMode, double diggingThreshold, Hull[] localHulls) {
+      return localHulls == null || this.hullMode != hullMode
+          || (hullMode == HullMode.DIGGING_CONCAVE_HULL.ordinal()
+              && this.diggingThreshold != diggingThreshold);
+    }
+
+    /**
      * Compute hulls. This should only be called within a block synchronized on the clustering
      * result.
      *
      * @param hullMode the hull mode
+     * @param diggingThreshold the digging threshold
      */
-    private void computeHulls(int hullMode) {
+    private void computeHulls(int hullMode, double diggingThreshold) {
       Hull.Builder builder;
       if (hullMode == HullMode.KNN_CONCAVE_HULL.ordinal()) {
         builder = KnnConcaveHull2d.newBuilder();
+      } else if (hullMode == HullMode.DIGGING_CONCAVE_HULL.ordinal()) {
+        builder = DiggingConcaveHull2d.newBuilder().setThreshold(diggingThreshold);
       } else {
         builder = ConvexHull2d.newBuilder();
       }
@@ -1263,6 +1291,7 @@ public class Optics implements PlugIn {
       }
       hulls = localHulls;
       this.hullMode = hullMode;
+      this.diggingThreshold = diggingThreshold;
       bounds = localBounds;
     }
 
@@ -2122,6 +2151,7 @@ public class Optics implements PlugIn {
     int lastOutlineMode = -1;
     Overlay outline;
     int lastSpanningTreeMode = -1;
+    double lastDiggingThreshold;
     Overlay spanningTree;
     double lastLambda;
     int lastMinpoints;
@@ -2152,6 +2182,11 @@ public class Optics implements PlugIn {
         result = false;
       }
       if (current.getHullMode() != previous.getHullMode()) {
+        outline = null;
+        result = false;
+      }
+      if (current.getHullMode() == HullMode.DIGGING_CONCAVE_HULL.ordinal()
+          && current.getDiggingThreshold() != lastDiggingThreshold) {
         outline = null;
         result = false;
       }
@@ -2350,6 +2385,7 @@ public class Optics implements PlugIn {
         if (outlineMode.isOutline()) {
           if (outline == null) {
             lastOutlineMode = settings.getOutlineMode();
+            lastDiggingThreshold = settings.getDiggingThreshold();
             outline = new Overlay();
 
             final int max = clusteringResult.getMaxClusterId();
@@ -2381,7 +2417,8 @@ public class Optics implements PlugIn {
               }
 
               // Extract the hull of each cluster
-              final Hull[] hulls = clusteringResult.getHulls(settings.getHullMode());
+              final Hull[] hulls =
+                  clusteringResult.getHulls(settings.getHullMode(), settings.getDiggingThreshold());
               for (int c = 1; c <= max; c++) {
                 final Hull hull = hulls[c];
                 if (hull != null) {
@@ -2639,7 +2676,8 @@ public class Optics implements PlugIn {
           // is faster and can be precomputed)
           final TIntArrayList ids = new TIntArrayList(candidates.length);
           final TDoubleArrayList area = new TDoubleArrayList(candidates.length);
-          final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode());
+          final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode(),
+              inputSettings.getDiggingThreshold());
           for (final int index : candidates) {
             final int clusterId = index + 1;
             final Hull hull = hulls[clusterId];
@@ -2726,7 +2764,8 @@ public class Optics implements PlugIn {
 
       final int[] clusters = event.getClusters();
       Roi roi = null;
-      final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode());
+      final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode(),
+          inputSettings.getDiggingThreshold());
 
       if (clusters != null && clusters.length > 0) {
         final LocalList<Roi> rois = new LocalList<>(clusters.length);
@@ -3111,7 +3150,8 @@ public class Optics implements PlugIn {
         }
       } else {
         if (tableResults == null) {
-          final Hull[] hulls = clusteringResult.getHulls(settings.getHullMode());
+          final Hull[] hulls =
+              clusteringResult.getHulls(settings.getHullMode(), settings.getDiggingThreshold());
           final float[][] bounds = clusteringResult.getBounds();
 
           // Get the cluster sizes and level
@@ -4243,16 +4283,23 @@ public class Optics implements PlugIn {
             final ExtendedGenericDialog egd =
                 new ExtendedGenericDialog(mode.toString() + " options");
             final int hullMode = inputSettings.getHullMode();
+            final double diggingThreshold = inputSettings.getDiggingThreshold();
             final String[] hullModes = SettingsManager.getNames((Object[]) HullMode.values());
             egd.addChoice("Hull_algorithm", hullModes, hullMode);
+            egd.addMessage("For the digging concave hull algorithm");
+            egd.addNumericField("Digging_threshold", diggingThreshold, 2);
             egd.setSilent(silent);
             egd.showDialog(true, gd);
             if (egd.wasCanceled()) {
               return false;
             }
             inputSettings.setHullMode(egd.getNextChoiceIndex());
+            inputSettings.setDiggingThreshold(
+                ValidationUtils.checkStrictlyPositive(egd.getNextNumber(), "Digging_threshold"));
             // Return true if new settings
-            return inputSettings.getHullMode() != hullMode;
+            return inputSettings.getHullMode() != hullMode
+                || (hullMode == HullMode.DIGGING_CONCAVE_HULL.ordinal()
+                    && inputSettings.getDiggingThreshold() != diggingThreshold);
           }
         });
 
