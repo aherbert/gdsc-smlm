@@ -1479,6 +1479,8 @@ The following options are available (extra options are activated by holding the 
    * - Outline
      - Specify how clusters should be outlined on the image. The outline algorithm can be configured using the ``...`` button to specify a convex hull or concave hull of the cluster points. The outline can be coloured by cluster ID.
 
+       The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
+
    * - Spanning tree
      - Specify how links between localisations should be outlined on the image. Links represent the connections made between points as they were included in the cluster following the imposed OPTICS order. The links create a spanning tree and can be coloured by coloured by cluster ID; depth in the clustering hierarchy; OPTICS order; or the LoOP (local outlier probability) score.
 
@@ -1653,6 +1655,8 @@ The following options are available:
 
    * - Outline
      - Specify how clusters should be outlined on the image. The outline algorithm can be configured using the ``...`` button to specify a convex hull or concave hull of the cluster points. The outline can be coloured by cluster ID.
+
+       The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
    * - Preview
      - Enables the live preview of results. Settings changes will result in live update of the displayed results.

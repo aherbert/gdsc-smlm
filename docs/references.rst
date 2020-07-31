@@ -83,6 +83,10 @@ Lin R, Clowsley AH, Jayasinghe ID, Baddeley D, Soeller C (2017)
 Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation of a computationally efficient localization approach.
 *Optical Express* 25(10): 11701-11716.
 
+Moreira and Santos (2007)
+Concave hull: A k-nearest neighbours approach for the computation of the region occupied by a set of points.
+* Conference: GRAPP 2007*, Proceedings of the Second International Conference on Computer Graphics Theory and Applications, Barcelona, Spain.
+
 Mortensen KI, Churchman LS, Spudich JA & Flyvbjerg H (2010)
 Optimized localization analysis for single-molecule tracking and super-resolution microscopy.
 *Nature Methods* 7(5): 377-81.
@@ -94,6 +98,10 @@ Efficient Non-Maximum Suppression.
 Nieuwenhuizen RPJ, Lidke KA, Bates M, Puig DL, Grunwald D, Stallinga S & Rieger B (2013)
 Measuring image resolution in optical nanoscopy.
 *Nature Methods* 10: 557.
+
+Park JS & Oh SJ (2012)
+A New Concave Hull Algorithm and Concaveness Measure for n-dimensional Datasets.
+*Journal of Information Science and Engineering* 28:587-600.
 
 Press WH, Teukolsky S, Vetterling W, Flannery B (2002)
 Numerical Recipes in C++: The Art of Scientific Computing.
