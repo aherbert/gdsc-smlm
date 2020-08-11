@@ -81,7 +81,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   /**
    * Instantiates a new double gaussian filter.
    *
-   * <p>Use the default accuracy of {@value GaussianFilter#DEFAULT_ACCURACY}.
+   * <p>Use the default accuracy of {@link GaussianFilter#DEFAULT_ACCURACY}.
    */
   public DoubleGaussianFilter() {
     this(GaussianFilter.DEFAULT_ACCURACY);

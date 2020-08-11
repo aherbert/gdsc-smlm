@@ -392,7 +392,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The xyz coordinates
    * @see #getSize()
-   * @If the requested molecule does not exist
+   * @throws IndexOutOfBoundsException if the requested molecule does not exist
    */
   public double[] getCoordinates(int n) {
     final double[] xyz = Arrays.copyOf(this.xyz, 3);
@@ -410,7 +410,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The xyz coordinates
    * @see #getSize()
-   * @If the requested molecule does not exist
+   * @throws IndexOutOfBoundsException if the requested molecule does not exist
    */
   public double[] getRelativeCoordinates(int n) {
     final MoleculeModel m = molecules.get(n);
@@ -425,7 +425,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
    * @param n The requested molecule (n &lt; {@link #getSize()})
    * @return The molecule
    * @see #getSize()
-   * @If the requested molecule does not exist
+   * @throws IndexOutOfBoundsException if the requested molecule does not exist
    */
   public MoleculeModel getMolecule(int n) {
     return molecules.get(n);

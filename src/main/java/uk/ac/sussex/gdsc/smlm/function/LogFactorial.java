@@ -178,7 +178,7 @@ public class LogFactorial {
    *
    * @param n the value n (must be positive)
    * @return log(n!)
-   * @if n is negative
+   * @throws IndexOutOfBoundsException if n is negative
    */
   public static double logF(int n) {
     // This is not synchronized.
