@@ -231,20 +231,6 @@ Software for single molecule localisation microscopy (SMLM)
     </extensions>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <configuration>
-            <excludes>Smlm_PlugIn*</excludes>
-            <archive>
-              <manifest>
-                <addClasspath>true</addClasspath>
-                <mainClass>uk.ac.sussex.gdsc.smlm.Version</mainClass>
-                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-              </manifest>
-            </archive>
-          </configuration>
-        </plugin>
 
         <!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT <plugin> <artifactId>maven-enforcer-plugin</artifactId> 
           <version>1.4.1</version> <executions> <execution> <id>enforce-rules</id> <goals> <goal>enforce</goal> </goals> <configuration> 
@@ -268,6 +254,20 @@ Software for single molecule localisation microscopy (SMLM)
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <excludes>Smlm_PlugIn*</excludes>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>uk.ac.sussex.gdsc.smlm.Version</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
