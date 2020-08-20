@@ -3548,12 +3548,12 @@ public class BenchmarkFilterAnalysis
       final Consumer<String> summaryWindow = createSummaryWindow();
       int count = 0;
       final double range = (settings.summaryDepth / simulationParameters.pixelPitch) * 0.5;
-      int np = 0;
-      for (final double depth : fitResultData.depthStats) {
+      final int[] np = {0};
+      fitResultData.depthStats.forEach(depth -> {
         if (Math.abs(depth) < range) {
-          np++;
+          np[0]++;
         }
-      }
+      });
       for (final ComplexFilterScore fs : filters) {
         final ArrayList<FractionalAssignment[]> list =
             new ArrayList<>(fitResultData.resultsList.length);
@@ -3594,7 +3594,7 @@ public class BenchmarkFilterAnalysis
         final double slope = regression.getSlope();
 
         sb.append('\t');
-        sb.append(MathUtils.rounded(tp / np)).append('\t');
+        sb.append(MathUtils.rounded(tp / np[0])).append('\t');
         sb.append(MathUtils.rounded(distance / scored)).append('\t');
         sb.append(MathUtils.rounded(sf / scored)).append('\t');
         sb.append(MathUtils.rounded(Math.sqrt(rmsd / scored))).append('\t');
