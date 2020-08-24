@@ -228,9 +228,8 @@ public class TraceLengthAnalysis implements PlugIn {
     gd.addMessage(msg);
     // Histogram the diffusion coefficients
     final WindowOrganiser wo = new WindowOrganiser();
-    final HistogramPlot histogramPlot =
-        new HistogramPlotBuilder("Trace diffusion coefficient", new StoredData(msds), "D (um^2/s)")
-            .setRemoveOutliersOption(1).setPlotLabel(msg).build();
+    final HistogramPlot histogramPlot = new HistogramPlotBuilder("Trace diffusion coefficient",
+        StoredData.create(msds), "D (um^2/s)").setRemoveOutliersOption(1).setPlotLabel(msg).build();
     histogramPlot.show(wo);
     final double[] xvalues = histogramPlot.getPlotXValues();
     final double min = xvalues[0];
