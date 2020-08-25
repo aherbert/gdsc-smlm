@@ -43,6 +43,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.FitMode;
@@ -473,6 +474,8 @@ public class TsfPeakResultsReader {
     // }
 
     final CalibrationWriter cal = new CalibrationWriter();
+    // Spots are associated with frames
+    cal.setTimeUnit(TimeUnit.FRAME);
 
     if (spotList.hasPixelSize()) {
       cal.setNmPerPixel(spotList.getPixelSize());
