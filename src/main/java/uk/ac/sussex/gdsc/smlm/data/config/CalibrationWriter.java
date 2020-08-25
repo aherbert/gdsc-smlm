@@ -33,6 +33,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 /**
  * Contains helper functions for the writing a Calibration class.
@@ -286,6 +287,19 @@ public class CalibrationWriter extends CalibrationReader {
       getBuilder().getAngleCalibrationBuilder().clearAngleUnit();
     } else {
       getBuilder().getAngleCalibrationBuilder().setAngleUnitValue(angleUnit.getNumber());
+    }
+  }
+
+  /**
+   * Set the time unit used for the results.
+   *
+   * @param timeUnit The new timeUnit
+   */
+  public void setTimeUnit(TimeUnit timeUnit) {
+    if (timeUnit == null) {
+      getBuilder().getTimeCalibrationBuilder().clearTimeUnit();
+    } else {
+      getBuilder().getTimeCalibrationBuilder().setTimeUnitValue(timeUnit.getNumber());
     }
   }
 

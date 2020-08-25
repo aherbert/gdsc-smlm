@@ -530,6 +530,37 @@ public class CalibrationReader {
   }
 
   /**
+   * Get the time unit used for the results.
+   *
+   * @return the time unit
+   */
+  public TimeUnit getTimeUnit() {
+    final CalibrationOrBuilder c = getCalibrationOrBuilder();
+    return (c.hasTimeCalibration()) ? c.getTimeCalibration().getTimeUnit()
+        : TimeUnit.TIME_UNIT_NA;
+  }
+
+  /**
+   * Get the time unit used for the results.
+   *
+   * @return the time unit
+   */
+  public int getTimeUnitValue() {
+    final CalibrationOrBuilder c = getCalibrationOrBuilder();
+    return (c.hasTimeCalibration()) ? c.getTimeCalibration().getTimeUnitValue()
+        : TimeUnit.TIME_UNIT_NA_VALUE;
+  }
+
+  /**
+   * Checks for time unit.
+   *
+   * @return true, if successful
+   */
+  public boolean hasTimeUnit() {
+    return getTimeUnit().getNumber() > 0;
+  }
+
+  /**
    * Get the precision method used for the results.
    *
    * @return the precision method
