@@ -58,6 +58,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedureX;
 import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
@@ -371,7 +372,7 @@ public class PeakResultsReader {
   }
 
   /**
-   * Gets the bounds specified in the results header..
+   * Gets the bounds specified in the results header.
    *
    * @return The bounds specified in the results header.
    */
@@ -394,7 +395,7 @@ public class PeakResultsReader {
   }
 
   /**
-   * Gets the name specified in the results header..
+   * Gets the name specified in the results header.
    *
    * @return The name specified in the results header.
    */
@@ -407,7 +408,7 @@ public class PeakResultsReader {
   }
 
   /**
-   * Gets the source specified in the results header..
+   * Gets the source specified in the results header.
    *
    * @return The source specified in the results header.
    */
@@ -426,7 +427,7 @@ public class PeakResultsReader {
   }
 
   /**
-   * Gets the calibration specified in the results header..
+   * Gets the calibration specified in the results header.
    *
    * @return The calibration specified in the results header.
    */
@@ -494,6 +495,7 @@ public class PeakResultsReader {
                 calibration.setDistanceUnit(DistanceUnit.PIXEL);
                 calibration.setIntensityUnit(IntensityUnit.COUNT);
                 calibration.setAngleUnit(AngleUnit.DEGREE);
+                calibration.setTimeUnit(TimeUnit.FRAME);
               } catch (final Exception ex) {
                 logger.log(Level.WARNING, "Unable to deserialise the Calibration settings", ex);
               }
@@ -503,6 +505,10 @@ public class PeakResultsReader {
                 final Calibration.Builder calibrationBuilder = Calibration.newBuilder();
                 JsonFormat.parser().merge(calibrationString, calibrationBuilder);
                 calibration = new CalibrationWriter(calibrationBuilder);
+                // Old results did not save the time unit
+                if (calibration.getTimeUnitValue() == TimeUnit.TIME_UNIT_NA_VALUE) {
+                  calibration.setTimeUnit(TimeUnit.FRAME);
+                }
               } catch (final InvalidProtocolBufferException ex) {
                 logger.log(Level.WARNING, "Unable to deserialise the Calibration settings", ex);
               }
@@ -515,6 +521,7 @@ public class PeakResultsReader {
             }
             calibration.setDistanceUnit(DistanceUnit.NM);
             calibration.setIntensityUnit(IntensityUnit.PHOTON);
+            calibration.setTimeUnit(TimeUnit.FRAME);
           }
         }
       }
