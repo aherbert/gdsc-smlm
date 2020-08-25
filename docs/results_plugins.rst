@@ -896,8 +896,11 @@ The following parameters are available:
 
        The selected option is configured using the ``...`` button.
 
+   * - Preserve bounds
+     - If **true** the bounds of the source results will be preserved as the bounds of the cropped results. The default is to recompute the bounds. This option can be used to allow the cropped results to be rendered with the original bounds to facilitate comparison with the original image.
+
    * - Reset origin
-     - If **true** the bounds and the localisations will be translated so the origin is (0,0).
+     - If **true** the bounds and the localisations will be translated so the origin is (0,0). This option is not used when ``Preserve bounds`` is set to ``true``.
 
 
 Note that the ROI method scales the ROI from the image to the current data bounds (width and height) of the selected results. If the ROI is on an image that does not match the width/height ratio of the data bounds then the scaling will be different in the X and Y dimensions. For the best results it is recommended to construct a super-resolution image of the target dataset using the ``Results Manager``. An ROI can then be drawn on the super-resolution image covering the desired results. This ensures the rectangle shape of the source image and the target dataset are identical.
@@ -926,6 +929,10 @@ The region to crop is defined using a ROI currently displayed on an image. If no
      - Select the naming option for the cropped results.
 
        These options are the same as the ``Crop Results`` plugin (see section :numref:`%s <results_plugins:Crop Results>`).
+
+   * - Preserve bounds
+     - If **true** the bounds of the source results will be preserved as the bounds of the cropped results. The default is to recompute the bounds. This option can be used to allow the cropped results to be rendered with the original bounds to facilitate comparison with the original image.
+
 
 When the plugin is executed the localisation coordinates are mapped from the bounds of the dataset to the bounds of the image containing the ROI. For example to map the x coordinate:
 

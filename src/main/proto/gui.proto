@@ -609,6 +609,7 @@ message CropResultsSettings {
   bool limit_z = 15;
   double min_z = 16;
   double max_z = 17;
+  bool preserve_bounds = 18;
 }
 
 // Contains settings for the Summarise Results plugin

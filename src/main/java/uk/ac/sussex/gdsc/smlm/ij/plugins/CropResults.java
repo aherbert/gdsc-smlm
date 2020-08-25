@@ -285,6 +285,7 @@ public class CropResults implements PlugIn {
             return true;
           }
         });
+    gd.addCheckbox("Preserve_bounds", settings.getPreserveBounds());
   }
 
   private void readStandardFields(ExtendedGenericDialog gd) {
@@ -297,6 +298,7 @@ public class CropResults implements PlugIn {
     }
 
     settings.setNameOption(gd.getNextChoiceIndex());
+    settings.setPreserveBounds(gd.getNextBoolean());
   }
 
   private boolean validateOutputName() {
@@ -386,13 +388,17 @@ public class CropResults implements PlugIn {
       });
     }
 
-    newResults
-        .setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
-            (int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
+    if (settings.getPreserveBounds()) {
+      newResults.setBounds(integerBounds);
+    } else {
+      newResults
+          .setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
+              (int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
 
-    if (settings.getResetOrigin()) {
-      final Rectangle b = newResults.getBounds();
-      newResults.translate(-b.x, -b.y);
+      if (settings.getResetOrigin()) {
+        final Rectangle b = newResults.getBounds();
+        newResults.translate(-b.x, -b.y);
+      }
     }
 
     IJ.showStatus(newResults.size() + " Cropped localisations");
@@ -483,8 +489,12 @@ public class CropResults implements PlugIn {
       }
     });
 
-    newResults.setBounds(null);
-    newResults.getBounds(true);
+    if (settings.getPreserveBounds()) {
+      newResults.setBounds(integerBounds);
+    } else {
+      newResults.setBounds(null);
+      newResults.getBounds(true);
+    }
 
     IJ.showStatus(newResults.size() + " Cropped localisations");
   }
