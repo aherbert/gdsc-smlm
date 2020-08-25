@@ -109,6 +109,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngine;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
@@ -1008,7 +1009,9 @@ public class PeakFit implements PlugInFilter {
     // cal.exposureTime *= ((double)dataBlock / (dataBlock + dataSkip));
     // }
 
-    results.setCalibration(fitConfig.getCalibration());
+    final CalibrationWriter cal = fitConfig.getCalibrationWriter();
+    cal.setTimeUnit(TimeUnit.FRAME);
+    results.setCalibration(cal.getCalibration());
     results.setPsf(fitConfig.getPsf());
     results.setConfiguration(SettingsManager.toJson(config.getFitEngineSettings()));
 
