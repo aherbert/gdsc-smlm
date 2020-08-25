@@ -28,7 +28,6 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -40,6 +39,7 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.rng.RadixStringSampler;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -48,6 +48,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
@@ -777,12 +778,7 @@ public class PeakResultsReaderTest {
     final PeakResult[] actual = actualResults.toArray();
     if (sort) {
       // Results should be sorted by time
-      Arrays.sort(expected, new Comparator<PeakResult>() {
-        @Override
-        public int compare(PeakResult o1, PeakResult o2) {
-          return o1.getFrame() - o2.getFrame();
-        }
-      });
+      Arrays.sort(expected, (o1, o2) -> o1.getFrame() - o2.getFrame());
     }
 
     // TSF requires the bias be subtracted
@@ -890,7 +886,24 @@ public class PeakResultsReaderTest {
 
     if (c1 != null) {
       Assertions.assertNotNull(c2, "Calibration");
-      Assertions.assertTrue(c1.equals(c2), "Calibration");
+      // Be lenient and allow no TimeUnit to match TimeUnit.FRAME
+      boolean ok = c1.equals(c2);
+      if (!ok && new CalibrationReader(c1).getTimeUnitValue() == TimeUnit.TIME_UNIT_NA_VALUE) {
+        switch (fileFormat) {
+          case BINARY:
+          case MALK:
+          case TEXT:
+          case TSF:
+            final CalibrationWriter writer = new CalibrationWriter(c1);
+            writer.setTimeUnit(TimeUnit.FRAME);
+            ok = writer.getCalibration().equals(c2);
+            break;
+          default:
+            // Do not assume frames for other file formats
+            break;
+        }
+      }
+      Assertions.assertTrue(ok, "Calibration");
     } else {
       Assertions.assertNull(c2, "Calibration");
     }
