@@ -418,7 +418,7 @@ public class PcPalmAnalysis implements PlugIn {
    * are converted using relative scaling to the limits of the PC-PALM molecules. If a
    * non-rectangular ROI is used then a mask is extracted and used for the crop. If no image is
    * provided then the full set of molecules is returned.
-   * 
+   *
    * <p>Set the area property to the region covered by the molecules.
    *
    * @param imp the image

@@ -394,7 +394,7 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
           d2udadb[kkkk + 3] = d2uDtsx2[xx] * deltaEy[yy] +
                             d2uDtsy2[yy] * deltaEx[xx] +
                             duDtsx[xx] * two_du_dtsy_tI[n];
-            //@formatter:on
+          //@formatter:on
         }
         procedure.executeExtended(value, duda, d2udadb);
       }

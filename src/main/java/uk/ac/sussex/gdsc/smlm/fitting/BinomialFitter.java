@@ -447,8 +447,8 @@ public class BinomialFitter {
   }
 
   /**
-   * Evaluates the binomial probability distribution. Assumes the input data is a
-   * cumulative histogram from 0 to N in integer increments.
+   * Evaluates the binomial probability distribution. Assumes the input data is a cumulative
+   * histogram from 0 to N in integer increments.
    */
   private class BinomialModel {
     int trials;

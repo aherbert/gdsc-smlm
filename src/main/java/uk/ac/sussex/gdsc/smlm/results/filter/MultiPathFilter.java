@@ -1172,15 +1172,14 @@ public class MultiPathFilter {
 
     // Check the width is reasonable given the size of the fitted region.
     //@formatter:off
-    if (  firstResult.getXSdFactor() < 1 || // Not a wide spot
+    if (firstResult.getXSdFactor() < 1 || // Not a wide spot
         firstResult.getXSd() > multiPathResult.getWidth() || // width covers more than the region
         firstResult.getYSdFactor() < 1 || // Not a wide spot
         firstResult.getYSd() > multiPathResult.getHeight()
-      )
-     {
+      ) {
       return false;
-    //@formatter:on
     }
+    //@formatter:on
 
     // Check the quadrant analysis on the fit residuals
     if (((singleQa) ? multiPathResult.getSingleQaScore()

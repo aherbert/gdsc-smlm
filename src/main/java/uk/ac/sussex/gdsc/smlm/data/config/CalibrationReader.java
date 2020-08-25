@@ -536,8 +536,7 @@ public class CalibrationReader {
    */
   public TimeUnit getTimeUnit() {
     final CalibrationOrBuilder c = getCalibrationOrBuilder();
-    return (c.hasTimeCalibration()) ? c.getTimeCalibration().getTimeUnit()
-        : TimeUnit.TIME_UNIT_NA;
+    return (c.hasTimeCalibration()) ? c.getTimeCalibration().getTimeUnit() : TimeUnit.TIME_UNIT_NA;
   }
 
   /**

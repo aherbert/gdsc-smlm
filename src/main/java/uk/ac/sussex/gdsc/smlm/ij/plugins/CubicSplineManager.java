@@ -161,10 +161,10 @@ public class CubicSplineManager implements PlugIn {
           imagePsf.getXCentre() > splineData.getMaxX() ||
           imagePsf.getYCentre() > splineData.getMaxY() ||
           imagePsf.getZCentre() > splineData.getMaxZ()
-          //@formatter:on
-      ) {
+        ) {
         throw new IllegalArgumentException("The centre is not within the function");
       }
+      //@formatter:on
     }
 
     /**

@@ -127,7 +127,7 @@ public class ResultsImageSampler {
     }
   }
 
-  private static enum IndexComparator implements Comparator<ResultsSample>  {
+  private static enum IndexComparator implements Comparator<ResultsSample> {
     /** An instance of the comparator. */
     INSTANCE;
 
@@ -137,7 +137,7 @@ public class ResultsImageSampler {
     }
   }
 
-  private static enum  CountComparator implements Comparator<ResultsSample>  {
+  private static enum CountComparator implements Comparator<ResultsSample> {
     /** An instance of the comparator. */
     INSTANCE;
 
