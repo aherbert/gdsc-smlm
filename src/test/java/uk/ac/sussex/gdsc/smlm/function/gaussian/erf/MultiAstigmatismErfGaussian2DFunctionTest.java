@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 @SuppressWarnings({"javadoc"})
-public class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest {
+class MultiAstigmatismErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest {
   @Override
   protected void init() {
     flags = GaussianFunctionFactory.FIT_ERF_ASTIGMATISM;

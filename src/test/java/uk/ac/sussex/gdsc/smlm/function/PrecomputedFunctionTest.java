@@ -32,9 +32,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PrecomputedFunctionTest {
+class PrecomputedFunctionTest {
   @SeededTest
-  public void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
@@ -58,7 +58,7 @@ public class PrecomputedFunctionTest {
   }
 
   @SeededTest
-  public void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;
@@ -91,7 +91,7 @@ public class PrecomputedFunctionTest {
   }
 
   @SeededTest
-  public void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final int size = 100;

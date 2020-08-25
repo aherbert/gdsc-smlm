@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class Image2DAlignerTest {
+class Image2DAlignerTest {
   private static Logger logger;
 
   @BeforeAll
@@ -63,32 +63,32 @@ public class Image2DAlignerTest {
   }
 
   @Test
-  public void canCorrelateSquareImage() {
+  void canCorrelateSquareImage() {
     canCorrelate(16, 16, false);
   }
 
   @Test
-  public void canCorrelateNonSquareImage() {
+  void canCorrelateNonSquareImage() {
     canCorrelate(16, 32, false);
   }
 
   @Test
-  public void canCorrelateNonPow2Image() {
+  void canCorrelateNonPow2Image() {
     canCorrelate(17, 29, false);
   }
 
   @Test
-  public void canCorrelateSquareImageUsingImageJImage() {
+  void canCorrelateSquareImageUsingImageJImage() {
     canCorrelate(16, 16, true);
   }
 
   @Test
-  public void canCorrelateNonSquareImageUsingImageJImage() {
+  void canCorrelateNonSquareImageUsingImageJImage() {
     canCorrelate(16, 32, true);
   }
 
   @Test
-  public void canCorrelateNonPow2ImageUsingImageJImage() {
+  void canCorrelateNonPow2ImageUsingImageJImage() {
     canCorrelate(17, 29, true);
   }
 

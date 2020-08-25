@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class QuadraticAstigmatismZModelTest {
+class QuadraticAstigmatismZModelTest {
   private static Logger logger;
 
   @BeforeAll
@@ -58,7 +58,7 @@ public class QuadraticAstigmatismZModelTest {
   protected double stepH = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   @Test
-  public void canStaticComputeGradient() {
+  void canStaticComputeGradient() {
     canStaticComputeGradient(1.2);
     canStaticComputeGradient(0.3);
   }

@@ -33,85 +33,85 @@ import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
  * Test the ToleranceChecker can converge as expected.
  */
 @SuppressWarnings({"javadoc"})
-public class ToleranceCheckerTest {
+class ToleranceCheckerTest {
   static final double NONE = ToleranceChecker.IGNORE_TOLERANCE;
   static final int IGNORE = ToleranceChecker.IGNORE_MAX_ITERATIONS;
 
   @Test
-  public void throwsIfCannotConverge() {
+  void throwsIfCannotConverge() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       canConverge(false, NONE, NONE, NONE, NONE, IGNORE, 0);
     });
   }
 
   @Test
-  public void canConvergeOnMaximumRelativeValue() {
+  void canConvergeOnMaximumRelativeValue() {
     canConverge(false, 1e-2, NONE, NONE, NONE, IGNORE, ToleranceChecker.STATUS_VALUE);
   }
 
   @Test
-  public void canConvergeOnMinimumRelativeValue() {
+  void canConvergeOnMinimumRelativeValue() {
     canConverge(true, 1e-2, NONE, NONE, NONE, IGNORE, ToleranceChecker.STATUS_VALUE);
   }
 
   @Test
-  public void canConvergeOnMaximumAbsoluteValue() {
+  void canConvergeOnMaximumAbsoluteValue() {
     canConverge(false, NONE, 1e-2, NONE, NONE, IGNORE, ToleranceChecker.STATUS_VALUE);
   }
 
   @Test
-  public void canConvergeOnMinimumAbsoluteValue() {
+  void canConvergeOnMinimumAbsoluteValue() {
     canConverge(true, NONE, 1e-2, NONE, NONE, IGNORE, ToleranceChecker.STATUS_VALUE);
   }
 
   @Test
-  public void cannotConvergeOnMaximumRelativeValueIfMinimising() {
+  void cannotConvergeOnMaximumRelativeValueIfMinimising() {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       canConverge(false, -1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
     });
   }
 
   @Test
-  public void cannotConvergeOnMaximumAbsoluteValueIfMinimising() {
+  void cannotConvergeOnMaximumAbsoluteValueIfMinimising() {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       canConverge(false, -1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
     });
   }
 
   @Test
-  public void cannotConvergeOnMinimumRelativeValueIfMaximising() {
+  void cannotConvergeOnMinimumRelativeValueIfMaximising() {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       canConverge(true, 1, 1e-2, NONE, NONE, NONE, IGNORE, 0);
     });
   }
 
   @Test
-  public void cannotConvergeOnMinimumAbsoluteValueIfMaximising() {
+  void cannotConvergeOnMinimumAbsoluteValueIfMaximising() {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       canConverge(true, 1, NONE, 1e-2, NONE, NONE, IGNORE, 0);
     });
   }
 
   @Test
-  public void canConvergeOnRelativeParameters() {
+  void canConvergeOnRelativeParameters() {
     canConverge(true, NONE, NONE, 1e-2, NONE, IGNORE, ToleranceChecker.STATUS_PARAMETERS);
     canConverge(false, NONE, NONE, 1e-2, NONE, IGNORE, ToleranceChecker.STATUS_PARAMETERS);
   }
 
   @Test
-  public void canConvergeOnAbsoluteParameters() {
+  void canConvergeOnAbsoluteParameters() {
     canConverge(true, NONE, NONE, NONE, 1e-2, IGNORE, ToleranceChecker.STATUS_PARAMETERS);
     canConverge(false, NONE, NONE, NONE, 1e-2, IGNORE, ToleranceChecker.STATUS_PARAMETERS);
   }
 
   @Test
-  public void canConvergeOnIterations() {
+  void canConvergeOnIterations() {
     canConverge(true, NONE, NONE, NONE, NONE, -10, ToleranceChecker.STATUS_TARGET_ITERATIONS);
     canConverge(false, NONE, NONE, NONE, NONE, -10, ToleranceChecker.STATUS_TARGET_ITERATIONS);
   }
 
   @Test
-  public void canConvergeOnMaxIterations() {
+  void canConvergeOnMaxIterations() {
     canConverge(true, NONE, NONE, NONE, NONE, 20, ToleranceChecker.STATUS_MAX_ITERATIONS);
     canConverge(false, NONE, NONE, NONE, NONE, 20, ToleranceChecker.STATUS_MAX_ITERATIONS);
   }
@@ -158,7 +158,7 @@ public class ToleranceCheckerTest {
   }
 
   @Test
-  public void canConvergeOnImprovedValueIfMaximising() {
+  void canConvergeOnImprovedValueIfMaximising() {
     final double tolerance = 1e-2;
     final ToleranceChecker tc = new ToleranceChecker(false, NONE, tolerance, NONE, NONE, 100);
     Assertions.assertEquals(0, tc.converged(0, null, 1, null));
@@ -171,7 +171,7 @@ public class ToleranceCheckerTest {
   }
 
   @Test
-  public void canConvergeOnImprovedValueIfMinimising() {
+  void canConvergeOnImprovedValueIfMinimising() {
     final double tolerance = 1e-2;
     final ToleranceChecker tc = new ToleranceChecker(true, NONE, tolerance, NONE, NONE, 100);
     Assertions.assertEquals(0, tc.converged(0, null, 1, null));
@@ -184,7 +184,7 @@ public class ToleranceCheckerTest {
   }
 
   @Test
-  public void canConvergeOnValueUsingZeroTolerance() {
+  void canConvergeOnValueUsingZeroTolerance() {
     final double tolerance = 0;
     ToleranceChecker tc;
 
@@ -222,7 +222,7 @@ public class ToleranceCheckerTest {
   }
 
   @Test
-  public void canConvergeOnParametersUsingZeroTolerance() {
+  void canConvergeOnParametersUsingZeroTolerance() {
     final double tolerance = 0;
     ToleranceChecker tc;
     final double[] p = new double[1];

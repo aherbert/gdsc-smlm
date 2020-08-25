@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class WPoissonGradientProcedureTest {
+class WPoissonGradientProcedureTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, double[]> dataCache;
 
@@ -91,7 +91,7 @@ public class WPoissonGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed) {
+  void gradientProcedureFactoryCreatesOptimisedProcedures(RandomSeed seed) {
     final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
     final double[] y = SimpleArrayUtils.newDoubleArray(var.length, 1);
     Assertions.assertEquals(
@@ -106,7 +106,7 @@ public class WPoissonGradientProcedureTest {
   }
 
   @SeededTest
-  public void poissonGradientProcedureComputesSameAsWLsqGradientProcedure(RandomSeed seed) {
+  void poissonGradientProcedureComputesSameAsWLsqGradientProcedure(RandomSeed seed) {
     poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 4);
     poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 5);
     poissonGradientProcedureComputesSameAsWLsqGradientProcedure(seed, 6);
@@ -315,7 +315,7 @@ public class WPoissonGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterThanWLseGradientProcedure(RandomSeed seed) {
+  void gradientProcedureIsFasterThanWLseGradientProcedure(RandomSeed seed) {
     gradientProcedureIsFasterThanWLseGradientProcedure(seed, 4);
     gradientProcedureIsFasterThanWLseGradientProcedure(seed, 5);
     gradientProcedureIsFasterThanWLseGradientProcedure(seed, 6);

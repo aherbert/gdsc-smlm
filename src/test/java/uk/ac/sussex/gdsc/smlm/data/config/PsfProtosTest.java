@@ -40,9 +40,9 @@ import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PsfProtosTest {
+class PsfProtosTest {
   @Test
-  public void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException {
+  void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException {
     final Logger logger = Logger.getLogger(PsfProtosTest.class.getName());
     final Level logLevel = Level.FINE;
     final PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();

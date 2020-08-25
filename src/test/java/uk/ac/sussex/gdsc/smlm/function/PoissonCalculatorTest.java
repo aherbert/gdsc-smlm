@@ -62,7 +62,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonCalculatorTest {
+class PoissonCalculatorTest {
   private static Logger logger;
 
   @BeforeAll
@@ -81,7 +81,7 @@ public class PoissonCalculatorTest {
   static double P_LIMIT = 0.999999;
 
   @Test
-  public void canComputeLikelihoodForIntegerData() {
+  void canComputeLikelihoodForIntegerData() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (final double u : photons) {
       final PoissonDistribution pd = new PoissonDistribution(u);
@@ -99,7 +99,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void canComputeFastLikelihoodForIntegerData() {
+  void canComputeFastLikelihoodForIntegerData() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-4, 0);
     for (final double u : photons) {
       final PoissonDistribution pd = new PoissonDistribution(u);
@@ -117,7 +117,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void canComputeFastLog_FastLikelihoodForIntegerData() {
+  void canComputeFastLog_FastLikelihoodForIntegerData() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-4, 0);
     final FastLog fastLog = FastLogFactory.getFastLog();
     for (final double u : photons) {
@@ -154,17 +154,17 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void likelihoodCumulativeProbabilityIsOneWithRealDataForCountAbove4() {
+  void likelihoodCumulativeProbabilityIsOneWithRealDataForCountAbove4() {
     cumulativeProbabilityIsOneWithRealDataForCountAbove4(0);
   }
 
   @Test
-  public void fastLikelihoodCumulativeProbabilityIsOneWithRealDataForCountAbove4() {
+  void fastLikelihoodCumulativeProbabilityIsOneWithRealDataForCountAbove4() {
     cumulativeProbabilityIsOneWithRealDataForCountAbove4(1);
   }
 
   @Test
-  public void fastLog_fastLikelihoodCumulativeProbabilityIsNotOneWithRealDataForCountAbove4() {
+  void fastLog_fastLikelihoodCumulativeProbabilityIsNotOneWithRealDataForCountAbove4() {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       cumulativeProbabilityIsOneWithRealDataForCountAbove4(2);
     });
@@ -278,7 +278,7 @@ public class PoissonCalculatorTest {
   }
 
   @SeededTest
-  public void canComputeLogLikelihoodRatio(RandomSeed seed) {
+  void canComputeLogLikelihoodRatio(RandomSeed seed) {
     final double n2 = maxx * maxx * 0.5;
     // Functions must produce a strictly positive output so add background
     canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic") {
@@ -412,7 +412,7 @@ public class PoissonCalculatorTest {
   }
 
   @SeededTest
-  public void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed) {
+  void canComputeFastLog_LogLikelihoodRatio(RandomSeed seed) {
     final double n2 = maxx * maxx * 0.5;
     // Functions must produce a strictly positive output so add background
     canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Quadratic") {
@@ -459,7 +459,7 @@ public class PoissonCalculatorTest {
   }
 
   @SeededTest
-  public void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(RandomSeed seed) {
+  void cannotSubtractConstantBackgroundAndComputeLogLikelihoodRatio(RandomSeed seed) {
     final int n = maxx * maxx;
     final double n2 = n * 0.5;
     final double n3 = n * 0.33;
@@ -560,7 +560,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void showRelativeErrorOfLogFactorialApproximation() {
+  void showRelativeErrorOfLogFactorialApproximation() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -591,7 +591,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void showRelativeErrorOfFastLogLikelihood() {
+  void showRelativeErrorOfFastLogLikelihood() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -621,7 +621,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void showRelativeErrorOfFastLog_FastLogLikelihood() {
+  void showRelativeErrorOfFastLog_FastLogLikelihood() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -652,7 +652,7 @@ public class PoissonCalculatorTest {
   }
 
   @Test
-  public void showRelativeErrorOfFastLog_LogLikelihoodRatio() {
+  void showRelativeErrorOfFastLog_LogLikelihoodRatio() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -683,7 +683,7 @@ public class PoissonCalculatorTest {
   }
 
   @SeededTest
-  public void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed) {
+  void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed) {
     final DoubleEquality eq = new DoubleEquality(3e-4, 0);
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     // Test for different x. The calculator approximation begins
@@ -846,7 +846,7 @@ public class PoissonCalculatorTest {
 
   @SpeedTag
   @Test
-  public void instanceMethodIsFaster() {
+  void instanceMethodIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int n = 1000;

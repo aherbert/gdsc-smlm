@@ -56,40 +56,40 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
  * Test the ResultsManager functionality to load results from file when the file has options.
  */
 @SuppressWarnings({"javadoc"})
-public class ResultsManagerTest {
+class ResultsManagerTest {
   @SeededTest
-  public void writeTsfMatchesRead(RandomSeed seed) {
+  void writeTsfMatchesRead(RandomSeed seed) {
     // This is redundant
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkWriteTsfMatchesRead(seed, 1, 1, 1, 1);
   }
 
   @SeededTest
-  public void writeTsfMatchesReadWithChannels(RandomSeed seed) {
+  void writeTsfMatchesReadWithChannels(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkWriteTsfMatchesRead(seed, 2, 1, 1, 1);
   }
 
   @SeededTest
-  public void writeTsfMatchesReadWithSlices(RandomSeed seed) {
+  void writeTsfMatchesReadWithSlices(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkWriteTsfMatchesRead(seed, 1, 2, 1, 1);
   }
 
   @SeededTest
-  public void writeTsfMatchesReadWithPositions(RandomSeed seed) {
+  void writeTsfMatchesReadWithPositions(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkWriteTsfMatchesRead(seed, 1, 1, 2, 1);
   }
 
   @SeededTest
-  public void writeTsfMatchesReadWithTypes(RandomSeed seed) {
+  void writeTsfMatchesReadWithTypes(RandomSeed seed) {
     // Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkWriteTsfMatchesRead(seed, 1, 1, 1, 2);
   }
 
   @SeededTest
-  public void writeTsfMatchesReadWithCombinations(RandomSeed seed) {
+  void writeTsfMatchesReadWithCombinations(RandomSeed seed) {
     // This takes longer
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkWriteTsfMatchesRead(seed, 2, 2, 2, 2);

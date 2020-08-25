@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 @SuppressWarnings({"javadoc"})
-public class CircularMeanWeightedFilterTest extends WeightedMeanFilterTest {
+class CircularMeanWeightedFilterTest extends WeightedMeanFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("circularMean", true) {

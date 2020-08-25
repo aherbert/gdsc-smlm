@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 @SuppressWarnings({"javadoc"})
-public class DoubleImage3DTest extends Image3DTest {
+class DoubleImage3DTest extends Image3DTest {
   @Override
   protected DoubleImage3D createData(int width, int height, int depth) {
     final double[] data = SimpleArrayUtils.newArray(width * height * depth, 1.0, 1.0);

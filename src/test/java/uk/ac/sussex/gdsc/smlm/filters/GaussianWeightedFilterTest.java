@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 @SuppressWarnings({"javadoc"})
-public class GaussianWeightedFilterTest extends WeightedKernelFilterTest {
+class GaussianWeightedFilterTest extends WeightedKernelFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("gaussian", true) {

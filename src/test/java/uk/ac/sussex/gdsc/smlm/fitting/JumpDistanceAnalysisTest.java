@@ -56,7 +56,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class JumpDistanceAnalysisTest {
+class JumpDistanceAnalysisTest {
   private static Logger logger;
 
   @BeforeAll
@@ -102,7 +102,7 @@ public class JumpDistanceAnalysisTest {
 
   @Disabled("Commented out as this test always passes")
   @Test
-  public void canIntegrateProbabilityToCumulativeWithSinglePopulation() {
+  void canIntegrateProbabilityToCumulativeWithSinglePopulation() {
     final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
     jd.setMinD(0);
     jd.setMinFraction(0);
@@ -135,7 +135,7 @@ public class JumpDistanceAnalysisTest {
 
   @Disabled("Commented out as this test always passes")
   @Test
-  public void canIntegrateProbabilityToCumulativeWithMixedPopulation() {
+  void canIntegrateProbabilityToCumulativeWithMixedPopulation() {
     final JumpDistanceAnalysis jd = new JumpDistanceAnalysis();
     jd.setMinD(0);
     jd.setMinFraction(0);
@@ -171,9 +171,9 @@ public class JumpDistanceAnalysisTest {
 
   // @formatter:off
   @SeededTest
-  public void canFitSinglePopulationMLE(RandomSeed seed)  { fitSinglePopulation(seed, true);  }
+  void canFitSinglePopulationMLE(RandomSeed seed)  { fitSinglePopulation(seed, true);  }
   @SeededTest
-  public void canFitSinglePopulation(RandomSeed seed) { fitSinglePopulation(seed, false); }
+  void canFitSinglePopulation(RandomSeed seed) { fitSinglePopulation(seed, false); }
   // @formatter:on
 
   private void fitSinglePopulation(RandomSeed seed, boolean mle) {
@@ -198,41 +198,41 @@ public class JumpDistanceAnalysisTest {
 
   // @formatter:off
   @SeededTest
-  public void canFitDual0_1PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.1); }
+  void canFitDual0_1PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.1); }
   @SeededTest
-  public void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.1); }
+  void canFitDual0_1Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.1); }
   @SeededTest
-  public void canFitDual0_2PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.2); }
+  void canFitDual0_2PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.2); }
   @SeededTest
-  public void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.2); }
+  void canFitDual0_2Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.2); }
   @SeededTest
-  public void canFitDual0_3PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.3); }
+  void canFitDual0_3PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.3); }
   @SeededTest
-  public void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.3); }
+  void canFitDual0_3Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.3); }
   @SeededTest
-  public void canFitDual0_4PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.4); }
+  void canFitDual0_4PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.4); }
   @SeededTest
-  public void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
+  void canFitDual0_4Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.4); }
   @SeededTest
-  public void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
+  void canFitDual0_5PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.5); }
   @SeededTest
-  public void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
+  void canFitDual0_5Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.5); }
   @SeededTest
-  public void canFitDual0_6PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.6); }
+  void canFitDual0_6PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.6); }
   @SeededTest
-  public void canFitDual0_6Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.6); }
+  void canFitDual0_6Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.6); }
   @SeededTest
-  public void canFitDual0_7PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.7); }
+  void canFitDual0_7PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.7); }
   @SeededTest
-  public void canFitDual0_7Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.7); }
+  void canFitDual0_7Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.7); }
   @SeededTest
-  public void canFitDual0_8PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.8); }
+  void canFitDual0_8PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.8); }
   @SeededTest
-  public void canFitDual0_8Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.8); }
+  void canFitDual0_8Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.8); }
   @SeededTest
-  public void canFitDual0_9PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.9); }
+  void canFitDual0_9PopulationMLE(RandomSeed seed) { fitDualPopulation(seed, true,  0.9); }
   @SeededTest
-  public void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.9); }
+  void canFitDual0_9Population(RandomSeed seed)    { fitDualPopulation(seed, false, 0.9); }
   // @formatter:on
 
   private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
@@ -267,7 +267,7 @@ public class JumpDistanceAnalysisTest {
    * to file.
    */
   @SeededTest
-  public void canDoBenchmark(RandomSeed seed) {
+  void canDoBenchmark(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());

@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGaussianFunction2Test {
+class PoissonGaussianFunction2Test {
   private static Logger logger;
 
   @BeforeAll
@@ -58,7 +58,7 @@ public class PoissonGaussianFunction2Test {
   double[] noise = PoissonGaussianFunctionTest.noise;
 
   @Test
-  public void cumulativeProbabilityIsOneWithPicard() {
+  void cumulativeProbabilityIsOneWithPicard() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -69,7 +69,7 @@ public class PoissonGaussianFunction2Test {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithPade() {
+  void cumulativeProbabilityIsOneWithPade() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -80,7 +80,7 @@ public class PoissonGaussianFunction2Test {
   }
 
   @Test
-  public void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow() {
+  void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow() {
     // The cumulative likelihood is poor for low mean and low noise.
     // It can over-predict or under predict. The pattern of over/under is unknown.
     // For example in the following:
@@ -187,7 +187,7 @@ public class PoissonGaussianFunction2Test {
   }
 
   @Test
-  public void probabilityMatchesLogProbability() {
+  void probabilityMatchesLogProbability() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {

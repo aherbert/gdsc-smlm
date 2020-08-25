@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class SearchSpaceTest {
+class SearchSpaceTest {
   @Test
-  public void canEnumerateSearchSpace() {
+  void canEnumerateSearchSpace() {
     final SearchDimension d1 = new SearchDimension(0, 10, 1, 1);
     final SearchDimension d2 = new SearchDimension(0, 10, 0.5, 2, 2.5, 7.5);
     final double[][] ss = SearchSpace.createSearchSpace(createDimensions(d1, d2));
@@ -40,7 +40,7 @@ public class SearchSpaceTest {
   }
 
   @Test
-  public void canEnumerateRefineSpace() {
+  void canEnumerateRefineSpace() {
     final SearchDimension d1 = new SearchDimension(0, 10, 2, 10);
     final SearchDimension d2 = new SearchDimension(0, 10, 1, 10);
 
@@ -61,7 +61,7 @@ public class SearchSpaceTest {
   }
 
   @Test
-  public void canMoveCentre() {
+  void canMoveCentre() {
     final SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
     final double[] v1 = d1.values();
     Assertions.assertTrue(d1.isAtBounds(0));
@@ -80,7 +80,7 @@ public class SearchSpaceTest {
   }
 
   @Test
-  public void canReduceSearchSpace() {
+  void canReduceSearchSpace() {
     final SearchDimension d1 = new SearchDimension(0, 10, 0, 1);
     d1.setCentre(0);
     final double[] v1 = d1.values();
@@ -94,7 +94,7 @@ public class SearchSpaceTest {
   }
 
   @Test
-  public void canPadRange() {
+  void canPadRange() {
     final SearchDimension d1 = new SearchDimension(0, 10, 0, 1, 2.5, 7.5);
     d1.setPad(false);
 

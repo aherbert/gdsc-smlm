@@ -30,9 +30,9 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 
 @SuppressWarnings({"unchecked", "javadoc"})
-public class AngleUnitTest {
+class AngleUnitTest {
   @Test
-  public void canConvert() {
+  void canConvert() {
     for (int a = -360; a <= 360; a++) {
       //@formatter:off
       check(

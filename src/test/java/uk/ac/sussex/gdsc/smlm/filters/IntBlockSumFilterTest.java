@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class IntBlockSumFilterTest extends AbstractFilterTest {
+class IntBlockSumFilterTest extends AbstractFilterTest {
   /**
    * Do a simple and stupid sum filter.
    *
@@ -142,7 +142,7 @@ public class IntBlockSumFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void rollingBlockFilterIsCorrect(RandomSeed seed) {
+  void rollingBlockFilterIsCorrect(RandomSeed seed) {
     final BlockSumDataFilter filter = new BlockSumDataFilter("rollingBlock", false) {
       @Override
       public void filter(int[] data, int width, int height, int boxSize) {

@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
  * Test the IJImagePeakResults functionality.
  */
 @SuppressWarnings({"javadoc"})
-public class ImageJImagePeakResultsTest {
+class ImageJImagePeakResultsTest {
   private static Logger logger;
 
   @BeforeAll
@@ -83,7 +83,7 @@ public class ImageJImagePeakResultsTest {
   Rectangle bounds = new Rectangle(0, 0, 3, 5);
 
   @Test
-  public void canAddToSinglePixels() {
+  void canAddToSinglePixels() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
     begin(r);
@@ -97,7 +97,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canAddToSinglePixelsWithInvalidPositions() {
+  void canAddToSinglePixelsWithInvalidPositions() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
     begin(r);
@@ -116,7 +116,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canAddToZeroSizeImage() {
+  void canAddToZeroSizeImage() {
     final Rectangle zeroBounds = new Rectangle();
     canAddToZeroSizeImage(zeroBounds);
     zeroBounds.width = 1;
@@ -150,7 +150,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateInMiddleOfPixel() {
+  void canInterpolateInMiddleOfPixel() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -164,7 +164,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInXAtPixelEdge() {
+  void canInterpolateDownInXAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -179,7 +179,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInXAtPixelEdge() {
+  void canInterpolateUpInXAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -194,7 +194,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInYAtPixelEdge() {
+  void canInterpolateDownInYAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -209,7 +209,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInYAtPixelEdge() {
+  void canInterpolateUpInYAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -224,7 +224,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInX() {
+  void canInterpolateDownInX() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -239,7 +239,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInX() {
+  void canInterpolateUpInX() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -254,7 +254,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInY() {
+  void canInterpolateDownInY() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -269,7 +269,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInY() {
+  void canInterpolateUpInY() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -284,7 +284,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInXyAtPixelEdge() {
+  void canInterpolateDownInXyAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -301,7 +301,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInXyAtPixelEdge() {
+  void canInterpolateUpInXyAtPixelEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -318,7 +318,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateDownInXy() {
+  void canInterpolateDownInXy() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -335,7 +335,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void canInterpolateUpInXy() {
+  void canInterpolateUpInXy() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -352,7 +352,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void noInterpolateDownInXAtImageEdge() {
+  void noInterpolateDownInXAtImageEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -366,7 +366,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void noInterpolateUpInXAtImageEdge() {
+  void noInterpolateUpInXAtImageEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -380,7 +380,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void noInterpolateDownInYAtImageEdge() {
+  void noInterpolateDownInYAtImageEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -394,7 +394,7 @@ public class ImageJImagePeakResultsTest {
   }
 
   @Test
-  public void noInterpolateUpInYAtImageEdge() {
+  void noInterpolateUpInYAtImageEdge() {
     final ImageJImagePeakResults r = new ImageJImagePeakResults(title, bounds, 1);
     r.setDisplayFlags(ImageJImagePeakResults.DISPLAY_WEIGHTED);
     final FloatProcessor fp = new FloatProcessor(bounds.width, bounds.height);
@@ -408,33 +408,33 @@ public class ImageJImagePeakResultsTest {
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethods(RandomSeed seed) {
+  void canAddUsingDifferentMethods(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed, 0);
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethodsEqualized(RandomSeed seed) {
+  void canAddUsingDifferentMethodsEqualized(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed, ImageJImagePeakResults.DISPLAY_EQUALIZED);
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethodsEqualizedWeighted(RandomSeed seed) {
+  void canAddUsingDifferentMethodsEqualizedWeighted(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed,
         ImageJImagePeakResults.DISPLAY_EQUALIZED | ImageJImagePeakResults.DISPLAY_WEIGHTED);
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethodsMax(RandomSeed seed) {
+  void canAddUsingDifferentMethodsMax(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed, ImageJImagePeakResults.DISPLAY_MAX);
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethodsReplace(RandomSeed seed) {
+  void canAddUsingDifferentMethodsReplace(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed, ImageJImagePeakResults.DISPLAY_REPLACE);
   }
 
   @SeededTest
-  public void canAddUsingDifferentMethodsWeighted(RandomSeed seed) {
+  void canAddUsingDifferentMethodsWeighted(RandomSeed seed) {
     checkCanAddUsingDifferentMethods(seed, ImageJImagePeakResults.DISPLAY_WEIGHTED);
   }
 

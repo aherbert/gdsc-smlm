@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
-public class PsfModelGradient1FunctionTest {
+class PsfModelGradient1FunctionTest {
   @Test
-  public void canComputeValueAndGradient() {
+  void canComputeValueAndGradient() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;

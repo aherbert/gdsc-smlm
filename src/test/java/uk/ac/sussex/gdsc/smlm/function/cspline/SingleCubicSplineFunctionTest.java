@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 @SuppressWarnings({"javadoc"})
-public class SingleCubicSplineFunctionTest extends CubicSplineFunctionTest {
+class SingleCubicSplineFunctionTest extends CubicSplineFunctionTest {
   @Override
   protected void init() {
     f1 = new SingleCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);

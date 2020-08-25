@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 @SuppressWarnings({"javadoc"})
-public class KernelWeightedFilterTest extends WeightedKernelFilterTest {
+class KernelWeightedFilterTest extends WeightedKernelFilterTest {
   @Override
   DataFilter createDataFilter() {
     // Do not support non-integer box sizes

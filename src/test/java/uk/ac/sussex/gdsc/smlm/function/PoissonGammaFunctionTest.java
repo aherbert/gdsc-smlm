@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGammaFunctionTest {
+class PoissonGammaFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -64,7 +64,7 @@ public class PoissonGammaFunctionTest {
   static double[] photons = {0.001, 0.1, 0.25, 0.5, 1, 2, 4, 10, 100, 1000};
 
   @Test
-  public void cumulativeProbabilityIsOneWithPmf() {
+  void cumulativeProbabilityIsOneWithPmf() {
     for (final double g : gain) {
       for (final double p : photons) {
         cumulativeProbabilityIsOne(g, p, false);
@@ -73,7 +73,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithPdf() {
+  void cumulativeProbabilityIsOneWithPdf() {
     for (final double g : gain) {
       for (final double p : photons) {
         cumulativeProbabilityIsOne(g, p, true);
@@ -185,7 +185,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbability() {
+  void probabilityMatchesLogProbability() {
     for (final double g : gain) {
       for (final double p : photons) {
         probabilityMatchesLogProbability(g, p);
@@ -219,7 +219,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void canComputePoissonGammaGradientWithInteger() {
+  void canComputePoissonGammaGradientWithInteger() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         canComputePoissonGammaGradient(gain[j], photons[i], false);
@@ -228,7 +228,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void canComputePoissonGammaGradientWithReal() {
+  void canComputePoissonGammaGradientWithReal() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         canComputePoissonGammaGradient(gain[j], photons[i], true);
@@ -322,7 +322,7 @@ public class PoissonGammaFunctionTest {
   }
 
   @Test
-  public void canComputeSeparatelyAtC0() {
+  void canComputeSeparatelyAtC0() {
     final TDoubleArrayList list = new TDoubleArrayList();
     for (int exp = -12; exp < 6; exp++) {
       list.add(Math.pow(10, exp * 0.5));

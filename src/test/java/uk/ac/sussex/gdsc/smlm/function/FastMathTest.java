@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class FastMathTest {
+class FastMathTest {
   private static Logger logger;
 
   @BeforeAll
@@ -105,7 +105,7 @@ public class FastMathTest {
 
   @SpeedTag
   @Test
-  public void cbrtIsFaster() {
+  void cbrtIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Q. What is a suitable range for this test?

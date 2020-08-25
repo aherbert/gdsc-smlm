@@ -32,20 +32,20 @@ import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class MemoryPeakResultsTest {
+class MemoryPeakResultsTest {
   private static Logger logger = Logger.getLogger(MemoryPeakResultsTest.class.getName());
 
   /** The margin of error when checking size against the fixed values. */
   private static final double SIZE_TOLERANCE = 0.2;
 
   @Test
-  public void canEstimatePeakResultMemorySize() {
+  void canEstimatePeakResultMemorySize() {
     checkSize(MemoryPeakResults.PEAK_RESULT_SIZE,
         () -> new PeakResult(0, 0, 0, 0, 0, 0, 0, new float[PeakResult.STANDARD_PARAMETERS], null));
   }
 
   @Test
-  public void canEstimatePeakResultMemorySizeWithDeviations() {
+  void canEstimatePeakResultMemorySizeWithDeviations() {
     checkSize(MemoryPeakResults.PEAK_RESULT_SIZE_WITH_DEVIATIONS,
         () -> new PeakResult(0, 0, 0, 0, 0, 0, 0, new float[PeakResult.STANDARD_PARAMETERS],
             new float[PeakResult.STANDARD_PARAMETERS]));

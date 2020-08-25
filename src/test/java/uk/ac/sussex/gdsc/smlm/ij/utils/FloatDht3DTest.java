@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 
 @SuppressWarnings({"javadoc"})
-public class FloatDht3DTest {
+class FloatDht3DTest {
   static int size = 16;
   static double centre = (size - 1) / 2.0;
 
@@ -104,7 +104,7 @@ public class FloatDht3DTest {
   }
 
   @Test
-  public void canSwapOctants() {
+  void canSwapOctants() {
     FloatDht3D dht;
 
     // Simple test
@@ -154,7 +154,7 @@ public class FloatDht3DTest {
   }
 
   @Test
-  public void canConvolveAndDeconvolve() {
+  void canConvolveAndDeconvolve() {
     final FloatDht3D dht = createData();
     final float[] pixels = dht.getData().clone();
     dht.transform();
@@ -191,7 +191,7 @@ public class FloatDht3DTest {
   }
 
   @Test
-  public void canCorrelate() {
+  void canCorrelate() {
     final FloatDht3D dht = createData();
     dht.transform();
 
@@ -235,7 +235,7 @@ public class FloatDht3DTest {
   }
 
   @Test
-  public void canConvertToDft() {
+  void canConvertToDft() {
     final FloatDht3D dht = createData();
     final float[] input = dht.getData().clone();
     dht.transform();

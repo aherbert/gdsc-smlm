@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 @SuppressWarnings({"javadoc"})
-public class SingleNsNbFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+class SingleNsNbFixedGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   @Override
   protected void init() {
     flags = GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED;

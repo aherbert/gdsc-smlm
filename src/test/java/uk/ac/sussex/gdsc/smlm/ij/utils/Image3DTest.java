@@ -36,7 +36,7 @@ public abstract class Image3DTest {
   protected abstract Image3D createEmptyData(int width, int height, int depth);
 
   @Test
-  public void canCrop() {
+  void canCrop() {
     canCrop(3, 4, 5, 6, 7, 8);
     canCrop(3, 4, 5, 1, 1, 1);
     canCrop(0, 0, 0, 1, 2, 3);
@@ -85,7 +85,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canInsert() {
+  void canInsert() {
     canInsert(3, 4, 5, 6, 7, 8);
     canInsert(3, 4, 5, 1, 1, 1);
     canInsert(0, 0, 0, 1, 2, 3);
@@ -124,7 +124,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canFindMin() {
+  void canFindMin() {
     final Image3D image = createData(2, 2, 2);
     Assertions.assertEquals(0, image.findMinIndex(0, 0, 0, 2, 2, 2));
     Assertions.assertEquals(1, image.findMinIndex(1, 0, 0, 2, 2, 2));
@@ -160,7 +160,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canFindMax() {
+  void canFindMax() {
     final Image3D image = createData(2, 2, 2);
     Assertions.assertEquals(7, image.findMaxIndex(0, 0, 0, 2, 2, 2));
     Assertions.assertEquals(6, image.findMaxIndex(0, 0, 0, 1, 2, 2));
@@ -196,7 +196,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canComputeSum() {
+  void canComputeSum() {
     // Bounds checks
     final Image3D image = createData(2, 2, 2);
     Assertions.assertEquals(36, image.computeSum(0, 0, 0, 2, 2, 2));
@@ -230,7 +230,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canComputeRollingSumTable() {
+  void canComputeRollingSumTable() {
     final int width = 2;
     final int height = 3;
     final int depth = 4;
@@ -248,7 +248,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canComputeSumUsingTable() {
+  void canComputeSumUsingTable() {
     // Bounds checks
     final Image3D image = createData(2, 2, 2);
     final double[] table = image.computeRollingSumTable(null);
@@ -295,7 +295,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canFill() {
+  void canFill() {
     canFill(3, 4, 5, 6, 7, 8);
     canFill(3, 4, 5, 1, 1, 1);
     canFill(0, 0, 0, 1, 2, 3);
@@ -323,7 +323,7 @@ public abstract class Image3DTest {
   }
 
   @Test
-  public void canFillOutside() {
+  void canFillOutside() {
     canFillOutside(3, 4, 5, 6, 7, 8);
     canFillOutside(3, 4, 5, 1, 1, 1);
     canFillOutside(0, 0, 0, 1, 2, 3);

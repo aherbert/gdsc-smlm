@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PerPixelCameraModelTest {
+class PerPixelCameraModelTest {
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
@@ -86,7 +86,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetDataWithFullBounds(RandomSeed seed) {
+  void canGetDataWithFullBounds(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
@@ -103,7 +103,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetCropData(RandomSeed seed) {
+  void canGetCropData(RandomSeed seed) {
     canGetCropData(seed, true);
     canGetCropData(seed, false);
   }
@@ -147,7 +147,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canCropAndGetData(RandomSeed seed) {
+  void canCropAndGetData(RandomSeed seed) {
     canCropAndGetData(seed, true);
     canCropAndGetData(seed, false);
   }
@@ -170,7 +170,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canConvertDataWithFullBounds(RandomSeed seed) {
+  void canConvertDataWithFullBounds(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
@@ -210,7 +210,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canConvertDataWithCropBounds(RandomSeed seed) {
+  void canConvertDataWithCropBounds(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
@@ -224,7 +224,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canCropAndConvertDataWithCropBounds(RandomSeed seed) {
+  void canCropAndConvertDataWithCropBounds(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final PerPixelCameraModel model =
@@ -238,7 +238,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetWeightsWithPositiveVariance(RandomSeed seed) {
+  void canGetWeightsWithPositiveVariance(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final float[] var = data.variance.clone();
@@ -257,7 +257,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetWeightsWithAllZeroVariance(RandomSeed seed) {
+  void canGetWeightsWithAllZeroVariance(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final float[] var = new float[data.variance.length];
@@ -269,7 +269,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetWeightsWithZeroVariance(RandomSeed seed) {
+  void canGetWeightsWithZeroVariance(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final float[] var = data.variance.clone();
@@ -285,13 +285,13 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetMeanVariance(RandomSeed seed) {
+  void canGetMeanVariance(RandomSeed seed) {
     canGetMeanVarianceData(seed, true, false);
     canGetMeanVarianceData(seed, false, false);
   }
 
   @SeededTest
-  public void canGetMeanNormalisedVariance(RandomSeed seed) {
+  void canGetMeanNormalisedVariance(RandomSeed seed) {
     canGetMeanVarianceData(seed, true, true);
     canGetMeanVarianceData(seed, false, true);
   }
@@ -315,7 +315,7 @@ public class PerPixelCameraModelTest {
   }
 
   @SeededTest
-  public void canGetCoordinateData(RandomSeed seed) {
+  void canGetCoordinateData(RandomSeed seed) {
     final PerPixelCameraModelTestData data = (PerPixelCameraModelTestData) dataCache
         .computeIfAbsent(seed, PerPixelCameraModelTest::createData);
     final int ox = 2;

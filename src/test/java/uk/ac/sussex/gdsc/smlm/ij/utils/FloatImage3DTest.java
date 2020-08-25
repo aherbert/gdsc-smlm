@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.utils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 @SuppressWarnings({"javadoc"})
-public class FloatImage3DTest extends Image3DTest {
+class FloatImage3DTest extends Image3DTest {
   @Override
   protected FloatImage3D createData(int width, int height, int depth) {
     final float[] data = SimpleArrayUtils.newArray(width * height * depth, 1f, 1f);

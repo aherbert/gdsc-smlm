@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class FisherInformationMatrixTest {
+class FisherInformationMatrixTest {
   private static Logger logger;
 
   @BeforeAll
@@ -63,7 +63,7 @@ public class FisherInformationMatrixTest {
   private final Level level = Level.FINE;
 
   @SeededTest
-  public void canComputeCrlb(RandomSeed seed) {
+  void canComputeCrlb(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       testComputeCrlb(rg, n, 0, true);
@@ -71,7 +71,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void canComputeCrlbWithZeros(RandomSeed seed) {
+  void canComputeCrlbWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (int n = 2; n < 10; n++) {
       testComputeCrlb(rg, n, 1, true);
@@ -80,7 +80,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void canComputeCrlbWithReciprocal(RandomSeed seed) {
+  void canComputeCrlbWithReciprocal(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       testComputeCrlb(rg, n, 0, false);
@@ -88,7 +88,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void canComputeCrlbWithReciprocalWithZeros(RandomSeed seed) {
+  void canComputeCrlbWithReciprocalWithZeros(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (int n = 2; n < 10; n++) {
       testComputeCrlb(rg, n, 1, false);
@@ -97,7 +97,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void inversionDoesNotMatchReciprocal(RandomSeed seed) {
+  void inversionDoesNotMatchReciprocal(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
@@ -197,7 +197,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void canProduceSubset(RandomSeed seed) {
+  void canProduceSubset(RandomSeed seed) {
     final int k = 5;
     final int n = 10;
 
@@ -233,7 +233,7 @@ public class FisherInformationMatrixTest {
   }
 
   @SeededTest
-  public void computeWithSubsetReducesTheCrlb(RandomSeed seed) {
+  void computeWithSubsetReducesTheCrlb(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final Gaussian2DFunction f = createFunction(10, 1);
     final int perPeak = f.getGradientParametersPerPeak();

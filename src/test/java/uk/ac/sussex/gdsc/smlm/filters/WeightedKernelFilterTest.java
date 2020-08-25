@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 @SuppressWarnings({"javadoc"})
 public abstract class WeightedKernelFilterTest extends WeightedFilterTest {
   @SeededTest
-  public void filterPerformsWeightedKernelFiltering(RandomSeed seed) {
+  void filterPerformsWeightedKernelFiltering(RandomSeed seed) {
     final DataFilter filter = createDataFilter();
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());

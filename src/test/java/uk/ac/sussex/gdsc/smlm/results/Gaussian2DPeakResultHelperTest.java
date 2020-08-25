@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class Gaussian2DPeakResultHelperTest {
+class Gaussian2DPeakResultHelperTest {
   private static Logger logger;
 
   @BeforeAll
@@ -76,7 +76,7 @@ public class Gaussian2DPeakResultHelperTest {
   int maxpoints = 20;
 
   @Test
-  public void canCalculateMaximumLikelihoodVariance() {
+  void canCalculateMaximumLikelihoodVariance() {
     int min = Gaussian2DPeakResultHelper.POINTS;
     int max = min;
     if (TestSettings.allow(TestComplexity.HIGH)) {
@@ -97,7 +97,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void lowerIntegrationpointsApproximateMaximumLikelihoodVariance() {
+  void lowerIntegrationpointsApproximateMaximumLikelihoodVariance() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -130,7 +130,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void runSpeedTest() {
+  void runSpeedTest() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -194,7 +194,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void canComputePixelAmplitude() {
+  void canComputePixelAmplitude() {
     final float[] x = new float[] {0f, 0.1f, 0.3f, 0.5f, 0.7f, 1f};
     final float[] s = new float[] {0.8f, 1f, 1.5f, 2.2f};
 
@@ -252,7 +252,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void canComputeCumulative() {
+  void canComputeCumulative() {
     Assertions.assertEquals(0, Gaussian2DPeakResultHelper.cumulative(0));
     Assertions.assertEquals(0.6827, Gaussian2DPeakResultHelper.cumulative(1), 1e-3);
     Assertions.assertEquals(0.9545, Gaussian2DPeakResultHelper.cumulative(2), 1e-3);
@@ -261,7 +261,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @Test
-  public void canComputeCumulative2DAndInverse() {
+  void canComputeCumulative2DAndInverse() {
     Assertions.assertEquals(0, Gaussian2DPeakResultHelper.cumulative2D(0));
     Assertions.assertTrue(1 == Gaussian2DPeakResultHelper.cumulative2D(Double.POSITIVE_INFINITY));
     Assertions.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0));
@@ -277,7 +277,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @SeededTest
-  public void canComputeMeanSignalUsingR(RandomSeed seed) {
+  void canComputeMeanSignalUsingR(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
@@ -304,7 +304,7 @@ public class Gaussian2DPeakResultHelperTest {
   }
 
   @SeededTest
-  public void canComputeMeanSignalUsingP(RandomSeed seed) {
+  void canComputeMeanSignalUsingP(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);

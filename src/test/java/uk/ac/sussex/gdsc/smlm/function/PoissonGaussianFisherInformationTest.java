@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGaussianFisherInformationTest {
+class PoissonGaussianFisherInformationTest {
   private static Logger logger;
 
   @BeforeAll
@@ -48,7 +48,7 @@ public class PoissonGaussianFisherInformationTest {
   }
 
   @Test
-  public void canComputeFisherInformation() {
+  void canComputeFisherInformation() {
     // org.junit.Assumptions.assumeTrue(false);
 
     // double mean;
@@ -109,7 +109,7 @@ public class PoissonGaussianFisherInformationTest {
   }
 
   @Test
-  public void canComputeFisherInformationWithLowestPossibleMean() {
+  void canComputeFisherInformationWithLowestPossibleMean() {
     // org.junit.Assumptions.assumeTrue(false);
 
     // Lowest value where the reciprocal is not infinity.

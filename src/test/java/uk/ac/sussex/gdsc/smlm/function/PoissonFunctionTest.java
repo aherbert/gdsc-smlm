@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"unused", "javadoc"})
-public class PoissonFunctionTest {
+class PoissonFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -57,7 +57,7 @@ public class PoissonFunctionTest {
   static double[] photons = {0.25, 0.5, 1, 2, 4, 10, 100, 1000};
 
   @Test
-  public void cumulativeProbabilityIsOne() {
+  void cumulativeProbabilityIsOne() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
@@ -170,7 +170,7 @@ public class PoissonFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbabilty() {
+  void probabilityMatchesLogProbabilty() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         probabilityMatchesLogProbabilty(gain[j], photons[i]);
@@ -202,7 +202,7 @@ public class PoissonFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesPoissonWithNoGain() {
+  void probabilityMatchesPoissonWithNoGain() {
     for (int i = 0; i < photons.length; i++) {
       probabilityMatchesPoissonWithNoGain(photons[i]);
     }

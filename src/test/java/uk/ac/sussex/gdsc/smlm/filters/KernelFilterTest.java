@@ -48,7 +48,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class KernelFilterTest {
+class KernelFilterTest {
   private static Logger logger;
 
   @BeforeAll
@@ -169,7 +169,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void canRotate180() {
+  void canRotate180() {
     for (int kw = 1; kw < 3; kw++) {
       for (int kh = 1; kh < 3; kh++) {
         final float[] kernel = createKernel(kw, kh);
@@ -183,7 +183,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void kernelFilterIsSameAsImageJFilter(RandomSeed seed) {
+  void kernelFilterIsSameAsImageJFilter(RandomSeed seed) {
     final int kw = 5;
     final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
@@ -192,7 +192,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void zeroKernelFilterIsSameAsImageJFilter(RandomSeed seed) {
+  void zeroKernelFilterIsSameAsImageJFilter(RandomSeed seed) {
     final int kw = 5;
     final int kh = 5;
     final float[] kernel = createKernel(kw, kh);
@@ -273,7 +273,7 @@ public class KernelFilterTest {
   }
 
   @SeededTest
-  public void floatFilterIsFasterThanImageJFilter(RandomSeed seed) {
+  void floatFilterIsFasterThanImageJFilter(RandomSeed seed) {
     floatFilterIsFasterThanImageJFilter(seed, 5);
     floatFilterIsFasterThanImageJFilter(seed, 11);
   }

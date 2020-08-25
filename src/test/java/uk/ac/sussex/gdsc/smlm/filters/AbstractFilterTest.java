@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class AbstractFilterTest {
+class AbstractFilterTest {
   protected static Logger logger;
 
   @BeforeAll

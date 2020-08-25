@@ -38,9 +38,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc", "unused"})
-public class ImageSourceTest {
+class ImageSourceTest {
   @Test
-  public void canConstructMemoryImageSource() {
+  void canConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -52,7 +52,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void nullDataThrowsConstructMemoryImageSource() {
+  void nullDataThrowsConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final float[][] data = null;
@@ -62,7 +62,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void nullArrayDataThrowsConstructMemoryImageSource() {
+  void nullArrayDataThrowsConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -73,7 +73,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidLengthArrayDataThrowsConstructMemoryImageSource() {
+  void invalidLengthArrayDataThrowsConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -84,7 +84,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidWidthThrowsConstructMemoryImageSource() {
+  void invalidWidthThrowsConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -106,7 +106,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidHeightThrowsConstructMemoryImageSource() {
+  void invalidHeightThrowsConstructMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -137,7 +137,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void memoryImageSourceCanReturnDataWithNext() {
+  void memoryImageSourceCanReturnDataWithNext() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -152,7 +152,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void memoryImageSourceCanReturnDataWithGet(RandomSeed seed) {
+  void memoryImageSourceCanReturnDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -176,7 +176,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void memoryImageSourceCanReturnCroppedDataWithNext() {
+  void memoryImageSourceCanReturnCroppedDataWithNext() {
     final int width = 5;
     final int height = 3;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
@@ -194,7 +194,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void memoryImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
+  void memoryImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final Rectangle bounds = new Rectangle(2, 1, 3, 1);
@@ -221,7 +221,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void memoryImageSourceThrowsWithInvalidBounds() {
+  void memoryImageSourceThrowsWithInvalidBounds() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -232,7 +232,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void canConstructInterlacedImageSource() {
+  void canConstructInterlacedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -251,7 +251,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void nullImageSourceThrowsConstructInterlacedImageSource() {
+  void nullImageSourceThrowsConstructInterlacedImageSource() {
     final int start = 4;
     final int size = 2;
     final int skip = 1;
@@ -261,7 +261,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidStartThrowsConstructInterlacedImageSource() {
+  void invalidStartThrowsConstructInterlacedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -275,7 +275,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidSizeThrowsConstructInterlacedImageSource() {
+  void invalidSizeThrowsConstructInterlacedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -289,7 +289,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidSkipThrowsConstructInterlacedImageSource() {
+  void invalidSkipThrowsConstructInterlacedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -303,7 +303,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void interlacedImageSourceCanReturnDataWithNext() {
+  void interlacedImageSourceCanReturnDataWithNext() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -330,7 +330,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void interlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
+  void interlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -364,7 +364,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void interlacedImageSourceCanReturnCroppedDataWithNext() {
+  void interlacedImageSourceCanReturnCroppedDataWithNext() {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -393,7 +393,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void interlacedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
+  void interlacedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final float[][] data = createData(width, height, 15);
@@ -429,7 +429,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void canConstructAggregatedImageSource() {
+  void canConstructAggregatedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -444,7 +444,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void nullImageSourceThrowsConstructAggregatedImageSource() {
+  void nullImageSourceThrowsConstructAggregatedImageSource() {
     final int aggregate = 3;
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new AggregatedImageSource(null, aggregate);
@@ -452,7 +452,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void invalidAggregateThrowsConstructAggregatedImageSource() {
+  void invalidAggregateThrowsConstructAggregatedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -464,7 +464,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void aggregatedImageSourceCanReturnDataWithNext() {
+  void aggregatedImageSourceCanReturnDataWithNext() {
     final int width = 5;
     final int height = 3;
     final int aggregate = 3;
@@ -489,7 +489,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void aggregatedImageSourceCanReturnDataWithGet(RandomSeed seed) {
+  void aggregatedImageSourceCanReturnDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final int aggregate = 3;
@@ -519,7 +519,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void aggregatedImageSourceCanReturnCroppedDataWithNext() {
+  void aggregatedImageSourceCanReturnCroppedDataWithNext() {
     final int width = 5;
     final int height = 3;
     final int aggregate = 3;
@@ -546,7 +546,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void aggregatedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
+  void aggregatedImageSourceCanReturnCroppedDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final int aggregate = 3;
@@ -578,7 +578,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void canConstructAggregatedInterlacedImageSource() {
+  void canConstructAggregatedInterlacedImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -599,7 +599,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void constructInterlacedAggregatedImageSourceThrows() {
+  void constructInterlacedAggregatedImageSourceThrows() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -616,7 +616,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void aggregatedInterlacedImageSourceCanReturnDataWithNext() {
+  void aggregatedInterlacedImageSourceCanReturnDataWithNext() {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -663,7 +663,7 @@ public class ImageSourceTest {
   }
 
   @SeededTest
-  public void aggregatedInterlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
+  void aggregatedInterlacedImageSourceCanReturnDataWithGet(RandomSeed seed) {
     final int width = 5;
     final int height = 3;
     final int n = 15;
@@ -727,7 +727,7 @@ public class ImageSourceTest {
   }
 
   @Test
-  public void canSerialiseMemoryImageSource() {
+  void canSerialiseMemoryImageSource() {
     final int width = 5;
     final int height = 3;
     final int n = 15;

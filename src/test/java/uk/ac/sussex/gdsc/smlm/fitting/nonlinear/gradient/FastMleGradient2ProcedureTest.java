@@ -68,7 +68,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
  * the LVM algorithm.
  */
 @SuppressWarnings({"javadoc"})
-public class FastMleGradient2ProcedureTest {
+class FastMleGradient2ProcedureTest {
   private static Logger logger;
 
   @BeforeAll
@@ -135,7 +135,7 @@ public class FastMleGradient2ProcedureTest {
   }
 
   @Test
-  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+  void gradientProcedureFactoryCreatesOptimisedProcedures() {
     final double[] y = new double[0];
     Assertions.assertEquals(
         FastMleGradient2ProcedureUtils.createUnrolled(y, new DummyGradientFunction(4)).getClass(),
@@ -149,7 +149,7 @@ public class FastMleGradient2ProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(RandomSeed seed) {
+  void gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(RandomSeed seed) {
     final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
     gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(seed, 4, equality);
     gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(seed, 5, equality);
@@ -183,7 +183,7 @@ public class FastMleGradient2ProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
+  void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
@@ -285,7 +285,7 @@ public class FastMleGradient2ProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     // Note: The procedure does not have a lot of work within loops. It is only a single loop
     // so unrolling does not produce performance gains. The JVM can optimise this.
 
@@ -358,7 +358,7 @@ public class FastMleGradient2ProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 5);
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 6);
@@ -422,7 +422,7 @@ public class FastMleGradient2ProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     gradientProcedureLinearIsFasterThanGradientProcedure(seed, 4);
     gradientProcedureLinearIsFasterThanGradientProcedure(seed, 5);
     gradientProcedureLinearIsFasterThanGradientProcedure(seed, 6);
@@ -495,7 +495,7 @@ public class FastMleGradient2ProcedureTest {
   }
 
   @SeededTest
-  public void gradientCalculatorComputesGradient(RandomSeed seed) {
+  void gradientCalculatorComputesGradient(RandomSeed seed) {
     gradientCalculatorComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
 

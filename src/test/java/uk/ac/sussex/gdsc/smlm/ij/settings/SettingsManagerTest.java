@@ -34,9 +34,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class SettingsManagerTest {
+class SettingsManagerTest {
   @SeededTest
-  public void canReadWriteConfiguration(RandomSeed seed) throws IOException {
+  void canReadWriteConfiguration(RandomSeed seed) throws IOException {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
 
     final Calibration.Builder builder = Calibration.newBuilder();

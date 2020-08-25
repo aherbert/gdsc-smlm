@@ -36,14 +36,14 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class CubicSplineDataTest {
+class CubicSplineDataTest {
   @SeededTest
-  public void canExternaliseDoubleFunction(RandomSeed seed) throws IOException {
+  void canExternaliseDoubleFunction(RandomSeed seed) throws IOException {
     canExternaliseFunction(seed, false);
   }
 
   @SeededTest
-  public void canExternaliseFloatFunction(RandomSeed seed) throws IOException {
+  void canExternaliseFloatFunction(RandomSeed seed) throws IOException {
     canExternaliseFunction(seed, true);
   }
 

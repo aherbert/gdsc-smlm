@@ -37,12 +37,12 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class ErfGaussian2DFunctionVsPsfModelTest {
+class ErfGaussian2DFunctionVsPsfModelTest {
   private final int width = 10;
   private final int height = 9;
 
   @SeededTest
-  public void computesSameAsPsfModel(RandomSeed seed) {
+  void computesSameAsPsfModel(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     for (int i = 0; i < 10; i++) {
       //@formatter:off

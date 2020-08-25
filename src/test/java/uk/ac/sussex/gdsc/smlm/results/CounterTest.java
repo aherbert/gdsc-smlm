@@ -29,9 +29,9 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 
 @SuppressWarnings({"javadoc"})
-public class CounterTest {
+class CounterTest {
   @Test
-  public void canIncrementAndGet() {
+  void canIncrementAndGet() {
     Counter counter = new Counter();
     Assertions.assertEquals(1, counter.incrementAndGet());
     Assertions.assertEquals(2, counter.incrementAndGet());
@@ -44,7 +44,7 @@ public class CounterTest {
   }
 
   @Test
-  public void canGetAndIncrement() {
+  void canGetAndIncrement() {
     Counter counter = new Counter();
     Assertions.assertEquals(0, counter.getAndIncrement());
     Assertions.assertEquals(1, counter.getAndIncrement());
@@ -57,7 +57,7 @@ public class CounterTest {
   }
 
   @Test
-  public void canDecrementAndGet() {
+  void canDecrementAndGet() {
     Counter counter = new Counter();
     Assertions.assertEquals(-1, counter.decrementAndGet());
     Assertions.assertEquals(-2, counter.decrementAndGet());
@@ -70,7 +70,7 @@ public class CounterTest {
   }
 
   @Test
-  public void canGetAndDecrement() {
+  void canGetAndDecrement() {
     Counter counter = new Counter();
     Assertions.assertEquals(0, counter.getAndDecrement());
     Assertions.assertEquals(-1, counter.getAndDecrement());

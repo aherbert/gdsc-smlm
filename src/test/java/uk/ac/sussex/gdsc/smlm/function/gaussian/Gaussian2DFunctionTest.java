@@ -150,7 +150,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionCreatesCorrectGradientIndices() {
+  void functionCreatesCorrectGradientIndices() {
     checkGradientIndices(1, f1);
     checkGradientIndices(2, f2);
   }
@@ -203,7 +203,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void factoryCreatesCorrectFunction() {
+  void factoryCreatesCorrectFunction() {
     Gaussian2DFunction func;
 
     if (f2 != null) {
@@ -216,7 +216,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesTargetWithAndWithoutGradient() {
+  void functionComputesTargetWithAndWithoutGradient() {
     final double[] dyda = new double[f1.gradientIndices().length];
     double[] params;
 
@@ -271,47 +271,47 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradient() {
+  void functionComputesBackgroundGradient() {
     Assumptions.assumeTrue(f1.evaluatesBackground());
     functionComputesTargetGradient(Gaussian2DFunction.BACKGROUND);
   }
 
   @Test
-  public void functionComputesSignalGradient() {
+  void functionComputesSignalGradient() {
     Assumptions.assumeTrue(f1.evaluatesSignal());
     functionComputesTargetGradient(Gaussian2DFunction.SIGNAL);
   }
 
   @Test
-  public void functionComputesXGradient() {
+  void functionComputesXGradient() {
     functionComputesTargetGradient(Gaussian2DFunction.X_POSITION);
   }
 
   @Test
-  public void functionComputesYGradient() {
+  void functionComputesYGradient() {
     functionComputesTargetGradient(Gaussian2DFunction.Y_POSITION);
   }
 
   @Test
-  public void functionComputesZGradient() {
+  void functionComputesZGradient() {
     Assumptions.assumeTrue(f1.evaluatesZ());
     functionComputesTargetGradient(Gaussian2DFunction.Z_POSITION);
   }
 
   @Test
-  public void functionComputesXWidthGradient() {
+  void functionComputesXWidthGradient() {
     Assumptions.assumeTrue(f1.evaluatesSD0());
     functionComputesTargetGradient(Gaussian2DFunction.X_SD);
   }
 
   @Test
-  public void functionComputesYWidthGradient() {
+  void functionComputesYWidthGradient() {
     Assumptions.assumeTrue(f1.evaluatesSD1());
     functionComputesTargetGradient(Gaussian2DFunction.Y_SD);
   }
 
   @Test
-  public void functionComputesAngleGradient() {
+  void functionComputesAngleGradient() {
     Assumptions.assumeTrue(f1.evaluatesAngle());
     functionComputesTargetGradient(Gaussian2DFunction.ANGLE);
   }
@@ -398,7 +398,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesTargetWithAndWithoutGradientWith2Peaks() {
+  void functionComputesTargetWithAndWithoutGradientWith2Peaks() {
     if (f2 == null) {
       return;
     }
@@ -472,14 +472,14 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradientWith2Peaks() {
+  void functionComputesBackgroundGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesBackground());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
   }
 
   @Test
-  public void functionComputesSignalGradientWith2Peaks() {
+  void functionComputesSignalGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesSignal());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
@@ -488,7 +488,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesXGradientWith2Peaks() {
+  void functionComputesXGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
     functionComputesTargetGradientWith2Peaks(
@@ -496,7 +496,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesYGradientWith2Peaks() {
+  void functionComputesYGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
     functionComputesTargetGradientWith2Peaks(
@@ -504,7 +504,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesZGradientWith2Peaks() {
+  void functionComputesZGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesZ());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
@@ -513,7 +513,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesXWidthGradientWith2Peaks() {
+  void functionComputesXWidthGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesSD0());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
@@ -522,7 +522,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesYWidthGradientWith2Peaks() {
+  void functionComputesYWidthGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesSD1());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
@@ -531,7 +531,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesAngleGradientWith2Peaks() {
+  void functionComputesAngleGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesAngle());
     functionComputesTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
@@ -634,7 +634,7 @@ public abstract class Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesGaussian() {
+  void functionComputesGaussian() {
     final double background = 0;
     final int maxx = 30;
 

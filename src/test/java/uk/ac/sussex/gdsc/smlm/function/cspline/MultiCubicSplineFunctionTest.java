@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 @SuppressWarnings({"javadoc"})
-public class MultiCubicSplineFunctionTest extends CubicSplineFunctionTest {
+class MultiCubicSplineFunctionTest extends CubicSplineFunctionTest {
   @Override
   protected void init() {
     f1 = new MultiCubicSplineFunction(splineData, maxx, maxy, cx, cy, cz, scale);

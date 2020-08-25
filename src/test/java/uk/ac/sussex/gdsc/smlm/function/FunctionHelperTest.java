@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class FunctionHelperTest {
+class FunctionHelperTest {
   @Test
-  public void canGetMeanValue() {
+  void canGetMeanValue() {
     final int n = 10;
     final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
     Assertions.assertEquals(10, FunctionHelper.getMeanValue(values.clone(), 0));
@@ -61,7 +61,7 @@ public class FunctionHelperTest {
   }
 
   @Test
-  public void canGetFractionalMeanValue() {
+  void canGetFractionalMeanValue() {
     final int n = 10;
     final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
     Assertions.assertEquals(1, FunctionHelper.getMeanValue(values.clone(), 0));
@@ -80,7 +80,7 @@ public class FunctionHelperTest {
   }
 
   @Test
-  public void canGetXValue() {
+  void canGetXValue() {
     final int n = 10;
     final double[] values = SimpleArrayUtils.newArray(n, 1.0, 1.0);
     Assertions.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0));
@@ -93,7 +93,7 @@ public class FunctionHelperTest {
   }
 
   @Test
-  public void canGetFractionalXValue() {
+  void canGetFractionalXValue() {
     final int n = 10;
     final double[] values = SimpleArrayUtils.newDoubleArray(n, 1.0);
     Assertions.assertEquals(0, FunctionHelper.getXValue(values.clone(), 0));
@@ -113,7 +113,7 @@ public class FunctionHelperTest {
   }
 
   @Test
-  public void canGetMeanValueForGaussian() {
+  void canGetMeanValueForGaussian() {
     final float intensity = 100;
     // Realistic standard deviations.
     // Only test the highest

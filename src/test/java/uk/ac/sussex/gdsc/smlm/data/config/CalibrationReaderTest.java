@@ -36,13 +36,13 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 @SuppressWarnings({"javadoc"})
-public class CalibrationReaderTest {
+class CalibrationReaderTest {
   double nmPerPixel = 104.5;
   double gain = 45;
   double bias = 100;
 
   @Test
-  public void canGetDistanceConverter() {
+  void canGetDistanceConverter() {
     final Calibration.Builder builder = Calibration.newBuilder();
     final DistanceCalibration.Builder distanceBuilder = builder.getDistanceCalibrationBuilder();
 
@@ -67,7 +67,7 @@ public class CalibrationReaderTest {
   }
 
   @Test
-  public void canGetIntensityConverter() {
+  void canGetIntensityConverter() {
     final Calibration.Builder builder = Calibration.newBuilder();
     final IntensityCalibration.Builder intensityBuilder = builder.getIntensityCalibrationBuilder();
 
@@ -92,7 +92,7 @@ public class CalibrationReaderTest {
   }
 
   @Test
-  public void canGetAngleConverter() {
+  void canGetAngleConverter() {
     final Calibration.Builder builder = Calibration.newBuilder();
     final AngleCalibration.Builder psfBuilder = builder.getAngleCalibrationBuilder();
 

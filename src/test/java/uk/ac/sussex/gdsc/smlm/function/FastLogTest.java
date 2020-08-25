@@ -50,7 +50,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"unused", "javadoc"})
-public class FastLogTest {
+class FastLogTest {
   private static Logger logger;
 
   @BeforeAll
@@ -161,42 +161,42 @@ public class FastLogTest {
   //@formatter:on
 
   @Test
-  public void canComputeFFastLog_fastLog() {
+  void canComputeFFastLog_fastLog() {
     canComputeLog(new TestFastLog(ffastLog), false);
   }
 
   @Test
-  public void canComputeFFastLog_log() {
+  void canComputeFFastLog_log() {
     canComputeLog(new TestLog(ffastLog), true);
   }
 
   @Test
-  public void canComputeDFastLog_fastLog() {
+  void canComputeDFastLog_fastLog() {
     canComputeLog(new TestFastLog(dfastLog), false);
   }
 
   @Test
-  public void canComputeDFastLog_log() {
+  void canComputeDFastLog_log() {
     canComputeLog(new TestLog(dfastLog), true);
   }
 
   @Test
-  public void canComputeIcscFastLog_fastLog() {
+  void canComputeIcscFastLog_fastLog() {
     canComputeLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
-  public void canComputeIcscFastLog_log() {
+  void canComputeIcscFastLog_log() {
     canComputeLog(new TestLog(icsiLog), true);
   }
 
   @Test
-  public void canComputeTurboLog_fastLog() {
+  void canComputeTurboLog_fastLog() {
     canComputeLog(new TestFastLog(turboLog), false);
   }
 
   @Test
-  public void canComputeTurboLog_log() {
+  void canComputeTurboLog_log() {
     canComputeLog(new TestLog(turboLog), true);
   }
 
@@ -236,42 +236,42 @@ public class FastLogTest {
   }
 
   @Test
-  public void canComputeDoubleFFast_fastLog() {
+  void canComputeDoubleFFast_fastLog() {
     canComputeDoubleLog(new TestFastLog(ffastLog), false);
   }
 
   @Test
-  public void canComputeDoubleFFastLog_log() {
+  void canComputeDoubleFFastLog_log() {
     canComputeDoubleLog(new TestLog(ffastLog), true);
   }
 
   @Test
-  public void canComputeDoubleDFast_fastLog() {
+  void canComputeDoubleDFast_fastLog() {
     canComputeDoubleLog(new TestFastLog(dfastLog), false);
   }
 
   @Test
-  public void canComputeDoubleDFastLog_log() {
+  void canComputeDoubleDFastLog_log() {
     canComputeDoubleLog(new TestLog(dfastLog), true);
   }
 
   @Test
-  public void canComputeDoubleIcscFast_fastLog() {
+  void canComputeDoubleIcscFast_fastLog() {
     canComputeDoubleLog(new TestFastLog(icsiLog), false);
   }
 
   @Test
-  public void canComputeDoubleIcscFastLog_log() {
+  void canComputeDoubleIcscFastLog_log() {
     canComputeDoubleLog(new TestLog(icsiLog), true);
   }
 
   @Test
-  public void canComputeDoubleTurbo_fastLog() {
+  void canComputeDoubleTurbo_fastLog() {
     canComputeDoubleLog(new TestFastLog(turboLog), false);
   }
 
   @Test
-  public void canComputeDoubleTurboLog_log() {
+  void canComputeDoubleTurboLog_log() {
     canComputeDoubleLog(new TestLog(turboLog), true);
   }
 
@@ -316,7 +316,7 @@ public class FastLogTest {
   // pre-computes using an exponent offset which can lead to rounding up.
 
   @SeededTest
-  public void canTestFloatError(RandomSeed seed) {
+  void canTestFloatError(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -376,7 +376,7 @@ public class FastLogTest {
   }
 
   @Test
-  public void canTestFloatErrorRange() {
+  void canTestFloatErrorRange() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -565,7 +565,7 @@ public class FastLogTest {
   }
 
   @SeededTest
-  public void canTestDoubleError(RandomSeed seed) {
+  void canTestDoubleError(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -604,7 +604,7 @@ public class FastLogTest {
   }
 
   @SeededTest
-  public void canTestDoubleErrorLog1P(RandomSeed seed) {
+  void canTestDoubleErrorLog1P(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -625,7 +625,7 @@ public class FastLogTest {
   }
 
   @SeededTest
-  public void canTestDoubleErrorRange(RandomSeed seed) {
+  void canTestDoubleErrorRange(RandomSeed seed) {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
@@ -760,7 +760,7 @@ public class FastLogTest {
 
   @SpeedTag
   @SeededTest
-  public void canTestFloatSpeed(RandomSeed seed) {
+  void canTestFloatSpeed(RandomSeed seed) {
     // No assertions, this is just a report
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
@@ -843,7 +843,7 @@ public class FastLogTest {
 
   @SpeedTag
   @SeededTest
-  public void canTestDoubleSpeed(RandomSeed seed) {
+  void canTestDoubleSpeed(RandomSeed seed) {
     // No assertions, this is just a report
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
@@ -892,7 +892,7 @@ public class FastLogTest {
 
   @SpeedTag
   @SeededTest
-  public void canTestDoubleSpeedLog1P(RandomSeed seed) {
+  void canTestDoubleSpeedLog1P(RandomSeed seed) {
     // No assertions, this is just a report
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
@@ -922,7 +922,7 @@ public class FastLogTest {
 
   @SpeedTag
   @SeededTest
-  public void canTestFloatVsDoubleSpeed(RandomSeed seed) {
+  void canTestFloatVsDoubleSpeed(RandomSeed seed) {
     // No assertions, this is just a report
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));

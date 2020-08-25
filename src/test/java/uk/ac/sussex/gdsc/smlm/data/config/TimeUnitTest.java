@@ -30,9 +30,9 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 
 @SuppressWarnings({"unchecked", "javadoc"})
-public class TimeUnitTest {
+class TimeUnitTest {
   @Test
-  public void canConvert() {
+  void canConvert() {
     final double msPerFrame = 35;
     for (int frame = 1; frame < 10; frame++) {
       //@formatter:off

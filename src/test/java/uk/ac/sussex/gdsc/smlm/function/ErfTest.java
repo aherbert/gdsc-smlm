@@ -49,7 +49,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class ErfTest {
+class ErfTest {
   private static Logger logger;
 
   @BeforeAll
@@ -105,17 +105,17 @@ public class ErfTest {
   //@formatter:on
 
   @SeededTest
-  public void erf0xHasLowError(RandomSeed seed) {
+  void erf0xHasLowError(RandomSeed seed) {
     checkErfxHasLowError(seed, new Erf0(), 5e-4);
   }
 
   @SeededTest
-  public void erfxHasLowError(RandomSeed seed) {
+  void erfxHasLowError(RandomSeed seed) {
     checkErfxHasLowError(seed, new Erf(), 3e-7);
   }
 
   @SeededTest
-  public void erf2xHasLowError(RandomSeed seed) {
+  void erf2xHasLowError(RandomSeed seed) {
     checkErfxHasLowError(seed, new Erf2(), 1.3e-4);
   }
 
@@ -141,22 +141,22 @@ public class ErfTest {
   }
 
   @Test
-  public void erfApachexIndistinguishableFrom1() {
+  void erfApachexIndistinguishableFrom1() {
     checkErfxIndistinguishableFrom1(new ApacheErf());
   }
 
   @Test
-  public void erf0xIndistinguishableFrom1() {
+  void erf0xIndistinguishableFrom1() {
     checkErfxIndistinguishableFrom1(new Erf0());
   }
 
   @Test
-  public void erfxIndistinguishableFrom1() {
+  void erfxIndistinguishableFrom1() {
     checkErfxIndistinguishableFrom1(new Erf());
   }
 
   @Test
-  public void erf2xIndistinguishableFrom1() {
+  void erf2xIndistinguishableFrom1() {
     checkErfxIndistinguishableFrom1(new Erf2());
   }
 
@@ -181,17 +181,17 @@ public class ErfTest {
   }
 
   @SeededTest
-  public void erf0xxHasLowError(RandomSeed seed) {
+  void erf0xxHasLowError(RandomSeed seed) {
     checkErfxxHasLowError(seed, new Erf0(), 4e-2);
   }
 
   @SeededTest
-  public void erfxxHasLowError(RandomSeed seed) {
+  void erfxxHasLowError(RandomSeed seed) {
     checkErfxxHasLowError(seed, new Erf(), 7e-4);
   }
 
   @SeededTest
-  public void erf2xxHasLowError(RandomSeed seed) {
+  void erf2xxHasLowError(RandomSeed seed) {
     checkErfxxHasLowError(seed, new Erf2(), 1.1e-2);
   }
 
@@ -226,17 +226,17 @@ public class ErfTest {
   }
 
   @Test
-  public void erf0xxHasLowErrorForUnitBlocks() {
+  void erf0xxHasLowErrorForUnitBlocks() {
     checkErfxxHasLowErrorForUnitBlocks(new Erf0(), 5e-4);
   }
 
   @Test
-  public void erfxxHasLowErrorForUnitBlocks() {
+  void erfxxHasLowErrorForUnitBlocks() {
     checkErfxxHasLowErrorForUnitBlocks(new Erf(), 5e-7);
   }
 
   @Test
-  public void erf2xxHasLowErrorForUnitBlocks() {
+  void erf2xxHasLowErrorForUnitBlocks() {
     checkErfxxHasLowErrorForUnitBlocks(new Erf2(), 1e-4);
   }
 
@@ -262,17 +262,17 @@ public class ErfTest {
   }
 
   @Test
-  public void erf0xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
+  void erf0xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
     checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf0());
   }
 
   @Test
-  public void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
+  void erfxxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
     checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf());
   }
 
   @Test
-  public void erf2xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
+  void erf2xxHasLowerErrorThanGaussianApproximationForUnitBlocks() {
     checkErfxxHasLowerErrorThanGaussianApproximationForUnitBlocks(new Erf2());
   }
 
@@ -368,7 +368,7 @@ public class ErfTest {
   }
 
   @Test
-  public void erfApproxIsFaster() {
+  void erfApproxIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int range = 5;
@@ -396,7 +396,7 @@ public class ErfTest {
   }
 
   @Test
-  public void gaussianIntegralApproximatesErf() {
+  void gaussianIntegralApproximatesErf() {
     final double x = 1.3;
     final double y = 2.2;
     final double s = 1.14;
@@ -472,7 +472,7 @@ public class ErfTest {
   }
 
   @Test
-  public void analyticErfGradientCorrectForErfApproximation() {
+  void analyticErfGradientCorrectForErfApproximation() {
     final BaseErf erf = new Erf();
     final int range = 7;
     final int steps = 10000;
@@ -495,7 +495,7 @@ public class ErfTest {
   }
 
   @Test
-  public void canComputePower4() {
+  void canComputePower4() {
     final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = -10; i <= 10; i++) {
       for (final double d : new double[] {0, 0.1, 0.01, 0.001}) {
@@ -508,7 +508,7 @@ public class ErfTest {
   }
 
   @Test
-  public void canComputePower16() {
+  void canComputePower16() {
     final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = -10; i <= 10; i++) {
       for (final double d : new double[] {0, 0.1, 0.01, 0.001}) {
@@ -597,7 +597,7 @@ public class ErfTest {
   }
 
   @Test
-  public void powerApproxIsFaster() {
+  void powerApproxIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int range = 5000;

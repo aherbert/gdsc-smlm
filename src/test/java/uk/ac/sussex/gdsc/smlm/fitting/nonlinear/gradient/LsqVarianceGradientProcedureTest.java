@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class LsqVarianceGradientProcedureTest {
+class LsqVarianceGradientProcedureTest {
   private static Logger logger;
 
   @BeforeAll
@@ -82,7 +82,7 @@ public class LsqVarianceGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+  void gradientProcedureFactoryCreatesOptimisedProcedures() {
     Assertions.assertEquals(
         LsqVarianceGradientProcedureUtils.create(new DummyGradientFunction(6)).getClass(),
         LsqVarianceGradientProcedure6.class);
@@ -95,7 +95,7 @@ public class LsqVarianceGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed, 4);
     gradientProcedureComputesSameAsGradientCalculator(seed, 5);
     gradientProcedureComputesSameAsGradientCalculator(seed, 6);
@@ -162,7 +162,7 @@ public class LsqVarianceGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4);
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5);
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6);
@@ -360,7 +360,7 @@ public class LsqVarianceGradientProcedureTest {
   }
 
   @SeededTest
-  public void crlbIsHigherWithPrecomputed(RandomSeed seed) {
+  void crlbIsHigherWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
@@ -404,7 +404,7 @@ public class LsqVarianceGradientProcedureTest {
   }
 
   @SeededTest
-  public void varianceMatchesFormula() {
+  void varianceMatchesFormula() {
     // Assumptions.assumeTrue(false);
 
     final double[] n_ = new double[] {20, 50, 100, 500};

@@ -64,7 +64,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class BlinkEstimatorTest {
+class BlinkEstimatorTest {
   private static Logger logger;
 
   @BeforeAll
@@ -106,7 +106,7 @@ public class BlinkEstimatorTest {
   boolean usePopulationStatistics = true;
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithLowNBlinksAndMediumOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithLowNBlinksAndMediumOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -125,7 +125,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithHighNBlinksAndMediumOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithHighNBlinksAndMediumOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -134,7 +134,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithLowNBlinksAndHighOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithLowNBlinksAndHighOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -143,7 +143,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndHighOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithMediumNBlinksAndHighOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -152,7 +152,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithHighNBlinksAndHighOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithHighNBlinksAndHighOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -161,7 +161,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithLowNBlinksAndLowOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithLowNBlinksAndLowOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -170,7 +170,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithMediumNBlinksAndLowOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithMediumNBlinksAndLowOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -179,7 +179,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void canEstimateBlinkingFromSimulationWithHighNBlinksAndLowOnOffTimesWithFixedMolecules(
+  void canEstimateBlinkingFromSimulationWithHighNBlinksAndLowOnOffTimesWithFixedMolecules(
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
@@ -188,7 +188,7 @@ public class BlinkEstimatorTest {
   }
 
   @SeededTest
-  public void findOptimalFittedPoints(RandomSeed seed) {
+  void findOptimalFittedPoints(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());

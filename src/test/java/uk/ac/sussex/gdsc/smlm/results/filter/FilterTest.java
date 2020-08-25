@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class FilterTest {
+class FilterTest {
   private static Logger logger;
 
   @BeforeAll
@@ -57,7 +57,7 @@ public class FilterTest {
   }
 
   @SeededTest
-  public void canCompareMultiFilter(RandomSeed seed) {
+  void canCompareMultiFilter(RandomSeed seed) {
     final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
     final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
@@ -72,7 +72,7 @@ public class FilterTest {
   }
 
   @SeededTest
-  public void canCompareMultiFilter2(RandomSeed seed) {
+  void canCompareMultiFilter2(RandomSeed seed) {
     final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
     final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
@@ -87,7 +87,7 @@ public class FilterTest {
   }
 
   @SeededTest
-  public void directCompareMultiFilterIsFaster(RandomSeed seed) {
+  void directCompareMultiFilterIsFaster(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
@@ -210,7 +210,7 @@ public class FilterTest {
   }
 
   @SeededTest
-  public void canSerialiseMultiFilter(RandomSeed seed) {
+  void canSerialiseMultiFilter(RandomSeed seed) {
     // Check the XStream serialisation supports inheritance
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);

@@ -54,7 +54,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class EjmlLinearSolverTest {
+class EjmlLinearSolverTest {
   private static Logger logger;
 
   @BeforeAll
@@ -69,7 +69,7 @@ public class EjmlLinearSolverTest {
 
   //@formatter:off
   @Test
-  public void canSolveLinearEquation()
+  void canSolveLinearEquation()
   {
     final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
@@ -108,7 +108,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canSolveLinearEquationWithZeroInB()
+  void canSolveLinearEquationWithZeroInB()
   {
     final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
@@ -147,7 +147,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canSolveLinearEquationWithZeroInA()
+  void canSolveLinearEquationWithZeroInA()
   {
     final EjmlLinearSolver solver = new EjmlLinearSolver(5e-3, 1e-6);
 
@@ -187,7 +187,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canSolveLinearEquationWithZerosInA()
+  void canSolveLinearEquationWithZerosInA()
   {
     final EjmlLinearSolver solver = new EjmlLinearSolver();
     final DoubleEquality eq = new DoubleEquality(5e-3, 1e-16);
@@ -233,7 +233,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canInvert()
+  void canInvert()
   {
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
@@ -265,7 +265,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canInvertWithZeros()
+  void canInvertWithZeros()
   {
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
@@ -303,7 +303,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canInvertDiagonal()
+  void canInvertDiagonal()
   {
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
@@ -329,7 +329,7 @@ public class EjmlLinearSolverTest {
   }
 
   @Test
-  public void canInvertDiagonalWithZeros()
+  void canInvertDiagonalWithZeros()
   {
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
 
@@ -484,31 +484,31 @@ public class EjmlLinearSolverTest {
   // Create a speed test of the different methods
   @SpeedTag
   @SeededTest
-  public void runSolverSpeedTest6(RandomSeed seed) {
+  void runSolverSpeedTest6(RandomSeed seed) {
     runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void runSolverSpeedTest5(RandomSeed seed) {
+  void runSolverSpeedTest5(RandomSeed seed) {
     runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void runSolverSpeedTest4(RandomSeed seed) {
+  void runSolverSpeedTest4(RandomSeed seed) {
     runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  public void runSolverSpeedTest3(RandomSeed seed) {
+  void runSolverSpeedTest3(RandomSeed seed) {
     runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  public void runSolverSpeedTest2(RandomSeed seed) {
+  void runSolverSpeedTest2(RandomSeed seed) {
     runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
   }
 
@@ -784,31 +784,31 @@ public class EjmlLinearSolverTest {
   // Create a speed test of the different methods
   @SpeedTag
   @SeededTest
-  public void runInversionSpeedTest6(RandomSeed seed) {
+  void runInversionSpeedTest6(RandomSeed seed) {
     runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void runInversionSpeedTest5(RandomSeed seed) {
+  void runInversionSpeedTest5(RandomSeed seed) {
     runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void runInversionSpeedTest4(RandomSeed seed) {
+  void runInversionSpeedTest4(RandomSeed seed) {
     runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  public void runInversionSpeedTest3(RandomSeed seed) {
+  void runInversionSpeedTest3(RandomSeed seed) {
     runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  public void runInversionSpeedTest2(RandomSeed seed) {
+  void runInversionSpeedTest2(RandomSeed seed) {
     runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
   }
 

@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class PeakResultHelperTest {
+class PeakResultHelperTest {
   @Test
-  public void canConvertLocalBackgroundToNoise() {
+  void canConvertLocalBackgroundToNoise() {
     final double gain = 6;
 
     final double[] photons = {0, 1, 2, 4, 10, 50, 100};
@@ -54,7 +54,7 @@ public class PeakResultHelperTest {
   }
 
   @Test
-  public void canConvertLocalBackgroundToNoiseAndBack() {
+  void canConvertLocalBackgroundToNoiseAndBack() {
     final double gain = 6;
 
     final double[] photons = {0, 1, 2, 4, 10, 50, 100};

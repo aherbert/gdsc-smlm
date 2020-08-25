@@ -31,9 +31,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 @SuppressWarnings({"javadoc"})
-public class PsfProtosHelperTest {
+class PsfProtosHelperTest {
   @Test
-  public void canConvertAstigmatismModel() {
+  void canConvertAstigmatismModel() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;

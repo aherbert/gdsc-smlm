@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class Image3DAlignerTest {
+class Image3DAlignerTest {
   private static Logger logger;
 
   @BeforeAll
@@ -79,22 +79,22 @@ public class Image3DAlignerTest {
   }
 
   @Test
-  public void canCorrelatePow2Image() {
+  void canCorrelatePow2Image() {
     canCorrelate(16, 16, 32, false);
   }
 
   @Test
-  public void canCorrelateNonPow2Image() {
+  void canCorrelateNonPow2Image() {
     canCorrelate(15, 17, 29, false);
   }
 
   @Test
-  public void canCorrelatePow2ImageUsingImageJImage() {
+  void canCorrelatePow2ImageUsingImageJImage() {
     canCorrelate(16, 16, 32, true);
   }
 
   @Test
-  public void canCorrelateNonPow2ImageUsingImageJImage() {
+  void canCorrelateNonPow2ImageUsingImageJImage() {
     canCorrelate(15, 17, 29, true);
   }
 

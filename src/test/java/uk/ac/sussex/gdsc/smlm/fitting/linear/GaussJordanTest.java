@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class GaussJordanTest {
+class GaussJordanTest {
   private static Logger logger;
 
   @BeforeAll
@@ -47,7 +47,7 @@ public class GaussJordanTest {
   }
 
   @Test
-  public void canSolveLinearEquation() {
+  void canSolveLinearEquation() {
     final GaussJordan solver = new GaussJordan();
 
     // Solves (one) linear equation, a x = b, for x[n]

@@ -32,9 +32,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonDistributionTest {
+class PoissonDistributionTest {
   @SeededTest
-  public void canComputeProbability(RandomSeed seed) {
+  void canComputeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
@@ -52,7 +52,7 @@ public class PoissonDistributionTest {
   }
 
   @SeededTest
-  public void canComputeCumulativeProbability(RandomSeed seed) {
+  void canComputeCumulativeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
@@ -70,7 +70,7 @@ public class PoissonDistributionTest {
   }
 
   @SeededTest
-  public void canComputeInverseCumulativeProbability(RandomSeed seed) {
+  void canComputeInverseCumulativeProbability(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
@@ -97,7 +97,7 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testMeanProperty() {
+  void testMeanProperty() {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(mean, fpd.getMean());
@@ -109,7 +109,7 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testProbabilityEdgeCases() {
+  void testProbabilityEdgeCases() {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.probability(-1));
@@ -118,7 +118,7 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testLogProbabilityEdgeCases() {
+  void testLogProbabilityEdgeCases() {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(-1));
@@ -127,7 +127,7 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testCumulativeProbabilityEdgeCases() {
+  void testCumulativeProbabilityEdgeCases() {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.cumulativeProbability(-1));
@@ -135,7 +135,7 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testInverseCumulativeProbabilityEdgeCases() {
+  void testInverseCumulativeProbabilityEdgeCases() {
     final double mean = 1.23;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(0, fpd.inverseCumulativeProbability(0));
@@ -147,14 +147,14 @@ public class PoissonDistributionTest {
   }
 
   @Test
-  public void testLogProbabilityAtExtremeValue() {
+  void testLogProbabilityAtExtremeValue() {
     final double mean = Double.MIN_VALUE;
     final PoissonDistribution fpd = new PoissonDistribution(mean);
     Assertions.assertEquals(Double.NEGATIVE_INFINITY, fpd.logProbability(Integer.MAX_VALUE - 1));
   }
 
   @Test
-  public void testInverseCumulativeProbabilityUpperLimitAtExtremeValue() {
+  void testInverseCumulativeProbabilityUpperLimitAtExtremeValue() {
     Assertions.assertEquals(Integer.MAX_VALUE, (int) Math.floor(Integer.MAX_VALUE + 0.5));
     Assertions.assertEquals(Integer.MAX_VALUE, (int) Math.floor(Double.MAX_VALUE));
     Assertions.assertEquals(Integer.MAX_VALUE, (int) Math.floor(Double.POSITIVE_INFINITY));

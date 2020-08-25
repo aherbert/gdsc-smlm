@@ -31,9 +31,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class NormaliserTest extends AbstractFilterTest {
+class NormaliserTest extends AbstractFilterTest {
   @SeededTest
-  public void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed) {
+  void nonNormaliserCanCopyToOutDataWithBorder(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     for (final int width : primes) {

@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class ChiSquaredDistributionTableTest {
+class ChiSquaredDistributionTableTest {
   // Taken from:
   // https://en.wikipedia.org/wiki/Chi-squared_distribution#Table_of_.CF.872_values_vs_p-values
   //@formatter:off
@@ -57,7 +57,7 @@ public class ChiSquaredDistributionTableTest {
   //@formatter:on
 
   @SeededTest
-  public void canComputeProbability() {
+  void canComputeProbability() {
     for (final int df : new int[] {5, 10}) {
       double obs;
       double exp;
@@ -82,7 +82,7 @@ public class ChiSquaredDistributionTableTest {
   }
 
   @SeededTest
-  public void canComputeChiSquared() {
+  void canComputeChiSquared() {
     // We have to use the transpose of the table
     final DenseMatrix64F m = new DenseMatrix64F(chi2);
     CommonOps.transpose(m);
@@ -116,7 +116,7 @@ public class ChiSquaredDistributionTableTest {
   }
 
   @SeededTest
-  public void canPerformChiSquaredTest(RandomSeed seed) {
+  void canPerformChiSquaredTest(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final ChiSquareTest test = new ChiSquareTest();
     for (final int n : new int[] {10, 50, 100}) {

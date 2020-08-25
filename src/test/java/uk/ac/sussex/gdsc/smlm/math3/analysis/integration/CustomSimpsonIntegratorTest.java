@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class CustomSimpsonIntegratorTest {
+class CustomSimpsonIntegratorTest {
   private static Logger logger;
 
   @BeforeAll
@@ -118,7 +118,7 @@ public class CustomSimpsonIntegratorTest {
   }
 
   @Test
-  public void canIntegrateFunction() {
+  void canIntegrateFunction() {
     TestUnivariateFunction func;
 
     func = new LinearTestUnivariateFunction();

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 @SuppressWarnings({"javadoc"})
-public class MultiFixedErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest {
+class MultiFixedErfGaussian2DFunctionTest extends ErfGaussian2DFunctionTest {
   @Override
   protected void init() {
     flags = GaussianFunctionFactory.FIT_ERF_FIXED;

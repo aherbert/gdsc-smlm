@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 
 @SuppressWarnings({"javadoc"})
-public class InterpolatedPoissonFisherInformationTest {
+class InterpolatedPoissonFisherInformationTest {
   @Test
-  public void canInterpolateFisherInformation() {
+  void canInterpolateFisherInformation() {
     for (int i = 0; i < 4; i++) {
       final double s = (1 << i) * 0.25;
       canInterpolateFisherInformation(s);
@@ -87,7 +87,7 @@ public class InterpolatedPoissonFisherInformationTest {
   }
 
   @Test
-  public void canInterpolateLowerFisherInformation() {
+  void canInterpolateLowerFisherInformation() {
     for (int i = 0; i < 4; i++) {
       final double s = (1 << i) * 0.25;
       canInterpolateLowerFisherInformation(s);

@@ -82,7 +82,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Move a set of molecules and calculates the diffusion rate. Uses settings from the CreateData
  * plugin so that the diffusion should be equivalent.
  */
-public class DiffusionRateTest implements PlugIn {
+class DiffusionRateTest implements PlugIn {
   private static final String TITLE = "Diffusion Rate Test";
 
   private static AtomicReference<TextWindow> msdTableRef = new AtomicReference<>();

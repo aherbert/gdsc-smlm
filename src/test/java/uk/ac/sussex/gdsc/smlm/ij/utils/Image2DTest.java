@@ -35,7 +35,7 @@ public abstract class Image2DTest {
   protected abstract Image2D createEmptyData(int width, int height);
 
   @Test
-  public void canCrop() {
+  void canCrop() {
     canCrop(3, 4, 5, 6);
     canCrop(3, 4, 1, 1);
     canCrop(0, 0, 1, 2);
@@ -76,7 +76,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canInsert() {
+  void canInsert() {
     canInsert(3, 4, 5, 6);
     canInsert(3, 4, 1, 1);
     canInsert(0, 0, 1, 1);
@@ -113,7 +113,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canFindMin() {
+  void canFindMin() {
     final Image2D image = createData(2, 2);
     Assertions.assertEquals(0, image.findMinIndex(0, 0, 2, 2));
     Assertions.assertEquals(1, image.findMinIndex(1, 0, 2, 2));
@@ -144,7 +144,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canFindMax() {
+  void canFindMax() {
     final Image2D image = createData(2, 2);
     Assertions.assertEquals(3, image.findMaxIndex(0, 0, 2, 2));
     Assertions.assertEquals(2, image.findMaxIndex(0, 0, 1, 2));
@@ -175,7 +175,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canComputeSum() {
+  void canComputeSum() {
     // Bounds checks
     final Image2D image = createData(2, 2);
     Assertions.assertEquals(10, image.computeSum(0, 0, 2, 2));
@@ -207,7 +207,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canComputeRollingSumTable() {
+  void canComputeRollingSumTable() {
     final int width = 2;
     final int height = 3;
     final Image2D image = createData(width, height);
@@ -222,7 +222,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canComputeSumUsingTable() {
+  void canComputeSumUsingTable() {
     // Bounds checks
     final Image2D image = createData(2, 2);
     final double[] table = image.computeRollingSumTable(null);
@@ -267,7 +267,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canFill() {
+  void canFill() {
     canFill(3, 4, 5, 6);
     canFill(3, 4, 1, 1);
     canFill(0, 0, 1, 1);
@@ -295,7 +295,7 @@ public abstract class Image2DTest {
   }
 
   @Test
-  public void canFillOutside() {
+  void canFillOutside() {
     canFillOutside(3, 4, 5, 6);
     canFillOutside(3, 4, 1, 1);
     canFillOutside(0, 0, 1, 1);

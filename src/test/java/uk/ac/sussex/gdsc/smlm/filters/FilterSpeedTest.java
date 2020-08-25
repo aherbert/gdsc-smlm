@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
-public class FilterSpeedTest extends AbstractFilterTest {
+class FilterSpeedTest extends AbstractFilterTest {
   @SpeedTag
   @SeededTest
   public void
@@ -118,7 +118,7 @@ public class FilterSpeedTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed) {
+  void floatRollingBlockMeanNxNInternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockMeanFilter filter1 = new BlockMeanFilter();
@@ -277,7 +277,7 @@ public class FilterSpeedTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal(RandomSeed seed) {
+  void floatRollingBlockMeanNxNInternalIsFasterThanGaussianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockMeanFilter filter1 = new BlockMeanFilter();
@@ -356,7 +356,7 @@ public class FilterSpeedTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed) {
+  void floatRollingBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockMeanFilter filter1 = new BlockMeanFilter();
@@ -444,7 +444,7 @@ public class FilterSpeedTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed) {
+  void floatStripedBlockMeanNxNInternalIsFasterThanAreaFilterNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final BlockMeanFilter filter1 = new BlockMeanFilter();

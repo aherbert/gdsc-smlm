@@ -33,9 +33,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class OffsetFunctionTest {
+class OffsetFunctionTest {
   @SeededTest
-  public void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final ValueFunction f0 = new FakeGradientFunction(3, n);
@@ -75,7 +75,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final Gradient1Function f0 = new FakeGradientFunction(3, n);
@@ -124,7 +124,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
+  void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final Gradient2Function f0 = new FakeGradientFunction(3, n);
@@ -179,7 +179,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetValueFunctionCanWrapPrecomputed() {
+  void offsetValueFunctionCanWrapPrecomputed() {
     final double[] a = new double[] {3.2, 5.6};
     final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
     final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
@@ -198,7 +198,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetGradient1FunctionCanWrapPrecomputed() {
+  void offsetGradient1FunctionCanWrapPrecomputed() {
     final double[] a = new double[] {3.2, 5.6};
     final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
     final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
@@ -217,7 +217,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetGradient2FunctionCanWrapPrecomputed() {
+  void offsetGradient2FunctionCanWrapPrecomputed() {
     final double[] a = new double[] {3.2, 5.6};
     final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
     final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);
@@ -236,7 +236,7 @@ public class OffsetFunctionTest {
   }
 
   @SeededTest
-  public void offsetExtendedGradient2FunctionCanWrapPrecomputed() {
+  void offsetExtendedGradient2FunctionCanWrapPrecomputed() {
     final double[] a = new double[] {3.2, 5.6};
     final FakeGradientFunction f = new FakeGradientFunction(10, a.length);
     final double[] b = SimpleArrayUtils.newArray(f.size(), 1.0, 0);

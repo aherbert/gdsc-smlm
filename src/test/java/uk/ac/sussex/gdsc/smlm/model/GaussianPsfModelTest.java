@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 
 @SuppressWarnings({"javadoc"})
-public class GaussianPsfModelTest {
+class GaussianPsfModelTest {
   @SuppressWarnings("unused")
   private static Logger logger;
 
@@ -51,7 +51,7 @@ public class GaussianPsfModelTest {
   }
 
   @Test
-  public void canComputeValue() {
+  void canComputeValue() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;
@@ -110,7 +110,7 @@ public class GaussianPsfModelTest {
   }
 
   @Test
-  public void canComputeValueAndGradient() {
+  void canComputeValueAndGradient() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;
@@ -170,7 +170,7 @@ public class GaussianPsfModelTest {
   }
 
   @Test
-  public void canComputeValueWithDifferentRange() {
+  void canComputeValueWithDifferentRange() {
     // Use a reasonable z-depth function from the Smith, et al (2010) paper (page 377)
     final double sx = 1.08;
     final double sy = 1.01;

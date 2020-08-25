@@ -36,9 +36,9 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 @SuppressWarnings({"javadoc"})
-public class CubicSplineCalculatorTest {
+class CubicSplineCalculatorTest {
   @Test
-  public void canComputeCoefficientsForDistanceFunction() {
+  void canComputeCoefficientsForDistanceFunction() {
     final double[] exp = new double[64];
     int count = 0;
     for (int k = 0; k < 4; k++) {
@@ -74,7 +74,7 @@ public class CubicSplineCalculatorTest {
   }
 
   @Test
-  public void canComputeCoefficientsForGaussianFunction() {
+  void canComputeCoefficientsForGaussianFunction() {
     final int x = 4;
     final int y = 4;
     final int z = 4;

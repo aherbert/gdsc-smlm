@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
-public class SphericalDistributionTest {
+class SphericalDistributionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -58,7 +58,7 @@ public class SphericalDistributionTest {
   }
 
   @SeededTest
-  public void canSampleUsingTransformationMethod(RandomSeed seed) {
+  void canSampleUsingTransformationMethod(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
@@ -69,7 +69,7 @@ public class SphericalDistributionTest {
   }
 
   @SeededTest
-  public void canSampleUsingRejectionMethod(RandomSeed seed) {
+  void canSampleUsingRejectionMethod(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
@@ -80,7 +80,7 @@ public class SphericalDistributionTest {
   }
 
   @SeededTest
-  public void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed) {
+  void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
@@ -117,12 +117,12 @@ public class SphericalDistributionTest {
   // Comment out for production code.
 
   // @SeededTest
-  public void rejectionMethodSamplesEvenly(RandomSeed seed) {
+  void rejectionMethodSamplesEvenly(RandomSeed seed) {
     drawImage(seed, true);
   }
 
   // @SeededTest
-  public void transformationMethodSamplesEvenly(RandomSeed seed) {
+  void transformationMethodSamplesEvenly(RandomSeed seed) {
     drawImage(seed, false);
   }
 

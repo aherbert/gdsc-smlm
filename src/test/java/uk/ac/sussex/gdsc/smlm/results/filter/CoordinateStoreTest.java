@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class CoordinateStoreTest {
+class CoordinateStoreTest {
   // TODO - test for a crop store ...
 
   @Test
-  public void canCreateStore() {
+  void canCreateStore() {
     CoordinateStore store;
     store = CoordinateStoreFactory.create(1, 2, 10, 11, -1, -1);
     Assertions.assertTrue(store instanceof NullCoordinateStore);
@@ -52,7 +52,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canDetectXyDuplicates() {
+  void canDetectXyDuplicates() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -84,7 +84,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canDetectZDuplicates() {
+  void canDetectZDuplicates() {
     final double x = 3.1;
     final double y = 4.3;
     final double z = 1.1;
@@ -129,7 +129,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canQueueToGrid() {
+  void canQueueToGrid() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -152,7 +152,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canClearGrid() {
+  void canClearGrid() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -192,7 +192,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotAddOutsideGrid1XLow() {
+  void cannotAddOutsideGrid1XLow() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
       s.add(s.getMinX() - 1, s.getMinY(), 0);
@@ -200,7 +200,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotAddOutsideGridXHigh() {
+  void cannotAddOutsideGridXHigh() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
       s.add(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
@@ -208,7 +208,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotAddOutsideGrid1YLow() {
+  void cannotAddOutsideGrid1YLow() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
       s.add(s.getMinX(), s.getMinY() - 1, 0);
@@ -216,7 +216,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotAddOutsideGridYHigh() {
+  void cannotAddOutsideGridYHigh() {
     Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
       final CoordinateStore s = CoordinateStoreFactory.create(1, 2, 10, 11, 1, 0);
       s.add(s.getMinX(), s.getMinY() + s.getHeight() + 1, 0);
@@ -224,7 +224,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canSafeAddOutsideGrid() {
+  void canSafeAddOutsideGrid() {
     final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
     s.safeAdd(s.getMinX() - 1, s.getMinY(), 0);
     s.safeAdd(s.getMinX() + s.getWidth() + 1, s.getMinY(), 0);
@@ -233,7 +233,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void containsOutsideGridIsFalse() {
+  void containsOutsideGridIsFalse() {
     final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
     Assertions.assertFalse(addAndFind(s, s.getMinX() - 1, s.getMinY(), 0));
     Assertions.assertFalse(addAndFind(s, s.getMinX() + s.getWidth() + 1, s.getMinY(), 0));
@@ -247,7 +247,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void findOutsideGridIsNull() {
+  void findOutsideGridIsNull() {
     final GridCoordinateStore s = new GridCoordinateStore(1, 2, 10, 11, 1, 0.0);
     s.safeAdd(-1, 0, 0);
     s.safeAdd(11, 0, 0);
@@ -260,7 +260,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canChangeXyResolution() {
+  void canChangeXyResolution() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -290,7 +290,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void canChangeXyResolutionOnFixedStore() {
+  void canChangeXyResolutionOnFixedStore() {
     final double[] datax = {1.1, 4.1};
     final double[] datay = {3.1, 7.1};
     final double[] dataz = {0, 0.1};
@@ -320,7 +320,7 @@ public class CoordinateStoreTest {
   }
 
   @Test
-  public void cannotChangeToBadXyResolutionOnFixedStore() {
+  void cannotChangeToBadXyResolutionOnFixedStore() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       final GridCoordinateStore1 s = new GridCoordinateStore1(1, 2, 10, 11, 0, 0.0);
       s.changeXyResolution(1.1);

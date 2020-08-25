@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
-public class AverageFilterTest extends AbstractFilterTest {
+class AverageFilterTest extends AbstractFilterTest {
   private static final int INTERNAL_ITER3 = 500;
   private static final int INTERNAL_ITER = 50;
   private static final int ITER3 = 200;
@@ -159,7 +159,7 @@ public class AverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void blockAverageIsCorrect(RandomSeed seed) {
+  void blockAverageIsCorrect(RandomSeed seed) {
     final DataFilter filter = new DataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -175,7 +175,7 @@ public class AverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void stripedBlockAverageIsCorrect(RandomSeed seed) {
+  void stripedBlockAverageIsCorrect(RandomSeed seed) {
     final DataFilter filter = new DataFilter("stripedBlock", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -191,7 +191,7 @@ public class AverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void rollingBlockAverageIsCorrect(RandomSeed seed) {
+  void rollingBlockAverageIsCorrect(RandomSeed seed) {
     final DataFilter filter = new DataFilter("rollingBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -361,7 +361,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlockIsFasterThanBlock(RandomSeed seed) {
+  void stripedBlockIsFasterThanBlock(RandomSeed seed) {
     final DataFilter slow = new DataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -391,7 +391,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void interpolatedStripedBlockIsFasterThanBlock(RandomSeed seed) {
+  void interpolatedStripedBlockIsFasterThanBlock(RandomSeed seed) {
     final DataFilter slow = new DataFilter("block", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -421,7 +421,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void rollingBlockIsFasterThanBlock(RandomSeed seed) {
+  void rollingBlockIsFasterThanBlock(RandomSeed seed) {
     final DataFilter slow = new DataFilter("block", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -451,7 +451,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void rollingBlockIsFasterThanStripedBlock(RandomSeed seed) {
+  void rollingBlockIsFasterThanStripedBlock(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlock", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -481,7 +481,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void stripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -512,7 +512,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void interpolatedStripedBlock3x3IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -543,7 +543,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void stripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -574,7 +574,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void interpolatedStripedBlock5x5IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -605,7 +605,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void stripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", false) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {
@@ -636,7 +636,7 @@ public class AverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed) {
+  void interpolatedStripedBlock7x7IsFasterThanStripedBlockNxN(RandomSeed seed) {
     final DataFilter slow = new DataFilter("stripedBlockNxN", true) {
       @Override
       public void filter(float[] data, int width, int height, float boxSize) {

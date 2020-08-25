@@ -63,7 +63,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class ScmosLikelihoodWrapperTest {
+class ScmosLikelihoodWrapperTest {
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
@@ -162,42 +162,42 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void fitFixedComputesGradientPerDatum(RandomSeed seed) {
+  void fitFixedComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_FIXED);
   }
 
   @SeededTest
-  public void fitCircleComputesGradientPerDatum(RandomSeed seed) {
+  void fitCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_CIRCLE);
   }
 
   @SeededTest
-  public void fitFreeCircleComputesGradientPerDatum(RandomSeed seed) {
+  void fitFreeCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitEllipticalComputesGradientPerDatum(RandomSeed seed) {
+  void fitEllipticalComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_ELLIPTICAL);
   }
 
   @SeededTest
-  public void fitNbFixedComputesGradientPerDatum(RandomSeed seed) {
+  void fitNbFixedComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SeededTest
-  public void fitNbCircleComputesGradientPerDatum(RandomSeed seed) {
+  void fitNbCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
   }
 
   @SeededTest
-  public void fitNbFreeCircleComputesGradientPerDatum(RandomSeed seed) {
+  void fitNbFreeCircleComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitNbEllipticalComputesGradientPerDatum(RandomSeed seed) {
+  void fitNbEllipticalComputesGradientPerDatum(RandomSeed seed) {
     functionComputesGradientPerDatum(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_ELLIPTICAL);
   }
 
@@ -361,22 +361,22 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void fitFixedComputesGradient(RandomSeed seed) {
+  void fitFixedComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_FIXED);
   }
 
   @SeededTest
-  public void fitCircleComputesGradient(RandomSeed seed) {
+  void fitCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_CIRCLE);
   }
 
   @SeededTest
-  public void fitFreeCircleComputesGradient(RandomSeed seed) {
+  void fitFreeCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitEllipticalComputesGradient(RandomSeed seed) {
+  void fitEllipticalComputesGradient(RandomSeed seed) {
     // The elliptical function gradient evaluation is worse
     final DoubleEquality tmp = eq;
     eq = eqPerDatum;
@@ -385,22 +385,22 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void fitNbFixedComputesGradient(RandomSeed seed) {
+  void fitNbFixedComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SeededTest
-  public void fitNbCircleComputesGradient(RandomSeed seed) {
+  void fitNbCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_CIRCLE);
   }
 
   @SeededTest
-  public void fitNbFreeCircleComputesGradient(RandomSeed seed) {
+  void fitNbFreeCircleComputesGradient(RandomSeed seed) {
     functionComputesGradient(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE);
   }
 
   @SeededTest
-  public void fitNbEllipticalComputesGradient(RandomSeed seed) {
+  void fitNbEllipticalComputesGradient(RandomSeed seed) {
     // The elliptical function gradient evaluation is worse
     final DoubleEquality tmp = eq;
     eq = eqPerDatum;
@@ -582,7 +582,7 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithRealDataForCountAbove8() {
+  void cumulativeProbabilityIsOneWithRealDataForCountAbove8() {
     for (final double mu : photons) {
       // Determine upper limit for a Poisson
       double max = new PoissonDistribution(mu).inverseCumulativeProbability(P_LIMIT);
@@ -617,7 +617,7 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @Test
-  public void instanceLikelihoodMatches() {
+  void instanceLikelihoodMatches() {
     for (final double mu : photons) {
       instanceLikelihoodMatches(mu, mu > 8);
     }
@@ -797,7 +797,7 @@ public class ScmosLikelihoodWrapperTest {
   }
 
   @SeededTest
-  public void canComputePValue(RandomSeed seed) {
+  void canComputePValue(RandomSeed seed) {
     final double n2 = maxx * maxx * 0.5;
     //@formatter:off
     canComputePValue(seed,new BaseNonLinearFunction("Linear")

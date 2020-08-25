@@ -53,7 +53,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class FrcTest {
+class FrcTest {
   private static Logger logger;
 
   @BeforeAll
@@ -67,7 +67,7 @@ public class FrcTest {
   }
 
   @SeededTest
-  public void canComputeSine() {
+  void canComputeSine() {
     final int steps = 1000;
     final double delta = 2 * Math.PI / steps;
     for (int i = 0; i <= steps; i++) {
@@ -81,7 +81,7 @@ public class FrcTest {
   }
 
   @SeededTest
-  public void canComputeMirrored(RandomSeed seed) {
+  void canComputeMirrored(RandomSeed seed) {
     // Sample lines through an image to create a structure.
     final int size = 1024;
     final double[][] data = new double[size * 2][];
@@ -207,7 +207,7 @@ public class FrcTest {
   }
 
   @SeededTest
-  public void computeSineIsFaster() {
+  void computeSineIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final int steps = 100000;
@@ -262,7 +262,7 @@ public class FrcTest {
   }
 
   @SeededTest
-  public void computeMirroredIsFaster(RandomSeed seed) {
+  void computeMirroredIsFaster(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Sample lines through an image to create a structure.

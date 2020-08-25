@@ -45,28 +45,28 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class SeriesImageSourceTest {
+class SeriesImageSourceTest {
   int width = 10;
   int height = 5;
   int depth = 7;
 
   @Test
-  public void canReadBigTiffSequentiallyLe() throws IOException {
+  void canReadBigTiffSequentiallyLe() throws IOException {
     canReadBigTiffSequentially(false, true);
   }
 
   @Test
-  public void canReadBigTiffSequentiallyInMemoryLe() throws IOException {
+  void canReadBigTiffSequentiallyInMemoryLe() throws IOException {
     canReadBigTiffSequentially(true, true);
   }
 
   @Test
-  public void canReadBigTiffSequentiallyBe() throws IOException {
+  void canReadBigTiffSequentiallyBe() throws IOException {
     canReadBigTiffSequentially(false, false);
   }
 
   @Test
-  public void canReadBigTiffSequentiallyInMemoryBe() throws IOException {
+  void canReadBigTiffSequentiallyInMemoryBe() throws IOException {
     canReadBigTiffSequentially(true, false);
   }
 
@@ -96,22 +96,22 @@ public class SeriesImageSourceTest {
   }
 
   @SeededTest
-  public void canReadBigTiffNonSequentiallyLe(RandomSeed seed) throws IOException {
+  void canReadBigTiffNonSequentiallyLe(RandomSeed seed) throws IOException {
     canReadBigTiffNonSequentially(seed, false, true);
   }
 
   @SeededTest
-  public void canReadBigTiffNonSequentiallyInMemoryLe(RandomSeed seed) throws IOException {
+  void canReadBigTiffNonSequentiallyInMemoryLe(RandomSeed seed) throws IOException {
     canReadBigTiffNonSequentially(seed, true, true);
   }
 
   @SeededTest
-  public void canReadBigTiffNonSequentiallyBe(RandomSeed seed) throws IOException {
+  void canReadBigTiffNonSequentiallyBe(RandomSeed seed) throws IOException {
     canReadBigTiffNonSequentially(seed, false, false);
   }
 
   @SeededTest
-  public void canReadBigTiffNonSequentiallyInMemoryBe(RandomSeed seed) throws IOException {
+  void canReadBigTiffNonSequentiallyInMemoryBe(RandomSeed seed) throws IOException {
     canReadBigTiffNonSequentially(seed, true, false);
   }
 

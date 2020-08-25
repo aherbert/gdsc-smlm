@@ -50,7 +50,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class GaussianFilterTest {
+class GaussianFilterTest {
   private static Logger logger;
 
   @BeforeAll
@@ -202,32 +202,32 @@ public class GaussianFilterTest {
   }
 
   @SeededTest
-  public void floatFilterIsSameAsImageJFilter(RandomSeed seed) {
+  void floatFilterIsSameAsImageJFilter(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new FloatFilter(false), new ImageJFilter(false), false, 1e-2);
   }
 
   @SeededTest
-  public void floatFilterInternalIsSameAsImageJFilter(RandomSeed seed) {
+  void floatFilterInternalIsSameAsImageJFilter(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new FloatFilter(true), new ImageJFilter(true), false, 1e-2);
   }
 
   @SeededTest
-  public void floatFilterIsSameAsDoubleFilter(RandomSeed seed) {
+  void floatFilterIsSameAsDoubleFilter(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), false, 1e-2);
   }
 
   @SeededTest
-  public void floatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
+  void floatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new FloatFilter(false), new DoubleFilter(false), true, 1e-2);
   }
 
   @SeededTest
-  public void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed) {
+  void dpFloatFilterIsSameAsDoubleFilter(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new DpFilter(false), new DoubleFilter(false), false, 1e-2);
   }
 
   @SeededTest
-  public void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
+  void dpFloatFilterIsSameAsDoubleFilterWeighted(RandomSeed seed) {
     filter1IsSameAsFilter2(seed, new DpFilter(false), new DoubleFilter(false), true, 1e-2);
   }
 
@@ -300,7 +300,7 @@ public class GaussianFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatFilterIsFasterThanDoubleFilter(RandomSeed seed) {
+  void floatFilterIsFasterThanDoubleFilter(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
@@ -333,7 +333,7 @@ public class GaussianFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed) {
+  void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());

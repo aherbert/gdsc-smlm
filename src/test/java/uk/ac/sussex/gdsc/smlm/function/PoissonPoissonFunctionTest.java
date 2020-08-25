@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonPoissonFunctionTest {
+class PoissonPoissonFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -82,7 +82,7 @@ public class PoissonPoissonFunctionTest {
   static double[] noise = PoissonGaussianFunctionTest.noise;
 
   @Test
-  public void cumulativeProbabilityIsOne() {
+  void cumulativeProbabilityIsOne() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -175,7 +175,7 @@ public class PoissonPoissonFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbability() {
+  void probabilityMatchesLogProbability() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {

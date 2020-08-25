@@ -35,9 +35,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class CalibrationWriterTest {
+class CalibrationWriterTest {
   @SeededTest
-  public void canWrite(RandomSeed seed) {
+  void canWrite(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     for (int i = 0; i < 100; i++) {
       canWrite(rng);

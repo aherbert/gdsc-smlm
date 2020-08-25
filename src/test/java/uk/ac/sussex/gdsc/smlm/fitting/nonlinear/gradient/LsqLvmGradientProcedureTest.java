@@ -64,7 +64,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
  * used for other gradient procedures.
  */
 @SuppressWarnings({"javadoc"})
-public class LsqLvmGradientProcedureTest {
+class LsqLvmGradientProcedureTest {
   private static Logger logger;
 
   @BeforeAll
@@ -126,7 +126,7 @@ public class LsqLvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+  void gradientProcedureFactoryCreatesOptimisedProcedures() {
     final double[] y = new double[0];
     Assertions.assertEquals(
         LsqLvmGradientProcedureMatrixUtils.create(y, null, new DummyGradientFunction(6)).getClass(),
@@ -150,19 +150,19 @@ public class LsqLvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLinearComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureLinearComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed,
         LsqLvmGradientProcedureLinearUtils::create);
   }
 
   @SeededTest
-  public void gradientProcedureMatrixComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureMatrixComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed,
         LsqLvmGradientProcedureMatrixUtils::create);
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed, LsqLvmGradientProcedureUtils::create);
   }
 
@@ -255,21 +255,21 @@ public class LsqLvmGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureLinearIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureLinearIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed,
         LsqLvmGradientProcedureLinearUtils::create);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureMatrixIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureMatrixIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed,
         LsqLvmGradientProcedureMatrixUtils::create);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, LsqLvmGradientProcedureUtils::create);
   }
 
@@ -346,7 +346,7 @@ public class LsqLvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     // Test the method that will be used for the standard and unrolled versions
     // for all other 'gradient procedures'
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, 4);
@@ -396,14 +396,14 @@ public class LsqLvmGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterUnrolledThanGradientProcedureMatrix(RandomSeed seed) {
+  void gradientProcedureIsFasterUnrolledThanGradientProcedureMatrix(RandomSeed seed) {
     gradientProcedure2IsFasterUnrolledThanGradientProcedure1(seed,
         LsqLvmGradientProcedureMatrixUtils::create, LsqLvmGradientProcedureUtils::create);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureLinearIsFasterUnrolledThanGradientProcedureMatrix(RandomSeed seed) {
+  void gradientProcedureLinearIsFasterUnrolledThanGradientProcedureMatrix(RandomSeed seed) {
     gradientProcedure2IsFasterUnrolledThanGradientProcedure1(seed,
         LsqLvmGradientProcedureMatrixUtils::create, LsqLvmGradientProcedureLinearUtils::create);
   }
@@ -490,7 +490,7 @@ public class LsqLvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureComputesGradient(RandomSeed seed) {
+  void gradientProcedureComputesGradient(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
   }
@@ -552,7 +552,7 @@ public class LsqLvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameOutputWithBias(RandomSeed seed) {
+  void gradientProcedureComputesSameOutputWithBias(RandomSeed seed) {
     final ErfGaussian2DFunction func =
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth);
     final int nparams = func.getNumberOfGradients();

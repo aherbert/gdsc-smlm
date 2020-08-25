@@ -35,9 +35,9 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
-public class AstigmatismModelManagerTest {
+class AstigmatismModelManagerTest {
   @Test
-  public void canConvertModel() {
+  void canConvertModel() {
     final DistanceUnit[] unit =
         new DistanceUnit[] {DistanceUnit.PIXEL, DistanceUnit.NM, DistanceUnit.UM};
     for (int i = 0; i < unit.length; i++) {

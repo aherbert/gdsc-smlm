@@ -30,9 +30,9 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 
 @SuppressWarnings({"unchecked", "javadoc"})
-public class DistanceUnitTest {
+class DistanceUnitTest {
   @Test
-  public void canConvert() {
+  void canConvert() {
     final double nmPerPixel = 104.5;
     for (int pixel = 1; pixel < 10; pixel++) {
       //@formatter:off

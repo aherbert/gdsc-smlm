@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGaussianFunctionTest {
+class PoissonGaussianFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -73,7 +73,7 @@ public class PoissonGaussianFunctionTest {
   static double[] noise = {1, 2, 4, 8}; // electrons
 
   @Test
-  public void cumulativeProbabilityIsOneWithPicard() {
+  void cumulativeProbabilityIsOneWithPicard() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -84,7 +84,7 @@ public class PoissonGaussianFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithPade() {
+  void cumulativeProbabilityIsOneWithPade() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -95,7 +95,7 @@ public class PoissonGaussianFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow() {
+  void cumulativeProbabilityIsNotOneWhenMeanIsLowAndNoiseIsLow() {
     // The cumulative probability is poor for low mean and low noise.
     // It can over-predict or under predict. The pattern of over/under is unknown.
     // For example in the following:
@@ -205,7 +205,7 @@ public class PoissonGaussianFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbability() {
+  void probabilityMatchesLogProbability() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -244,7 +244,7 @@ public class PoissonGaussianFunctionTest {
 
   @SpeedTag
   @Test
-  public void padeIsFaster() {
+  void padeIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final double[] noise2 = new double[noise.length];
@@ -297,7 +297,7 @@ public class PoissonGaussianFunctionTest {
   }
 
   @Test
-  public void staticMethodsMatchInstanceMethods() {
+  void staticMethodsMatchInstanceMethods() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {

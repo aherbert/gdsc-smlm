@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 
 @SuppressWarnings({"javadoc"})
-public class FloatDht2DTest {
+class FloatDht2DTest {
   static int size = 16;
   static double centre = (size - 1) / 2.0;
 
@@ -81,7 +81,7 @@ public class FloatDht2DTest {
   }
 
   @Test
-  public void canSwapQuadrants() {
+  void canSwapQuadrants() {
     FloatDht2D dht;
 
     // Simple test
@@ -118,7 +118,7 @@ public class FloatDht2DTest {
   }
 
   @Test
-  public void canConvolveAndDeconvolve() {
+  void canConvolveAndDeconvolve() {
     final FloatDht2D dht = createData();
 
     final float[] pixels = dht.getData().clone();
@@ -156,7 +156,7 @@ public class FloatDht2DTest {
   }
 
   @Test
-  public void canCorrelate() {
+  void canCorrelate() {
     final FloatDht2D dht = createData();
     dht.transform();
 
@@ -196,7 +196,7 @@ public class FloatDht2DTest {
   }
 
   @Test
-  public void canConvertToDft() {
+  void canConvertToDft() {
     final FloatDht2D dht = createData();
     final float[] input = dht.getData().clone();
     dht.transform();
@@ -230,7 +230,7 @@ public class FloatDht2DTest {
   }
 
   @Test
-  public void canMatchFht2() {
+  void canMatchFht2() {
     final FloatDht2D dht = createData();
     final FloatDht2D dht2 = createData(centre + 1, centre + 1);
 

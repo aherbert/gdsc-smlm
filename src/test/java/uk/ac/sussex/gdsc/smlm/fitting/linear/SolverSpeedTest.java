@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
-public class SolverSpeedTest {
+class SolverSpeedTest {
 
   private static Logger logger;
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
@@ -108,7 +108,7 @@ public class SolverSpeedTest {
   }
 
   @SeededTest
-  public void solveLinearAndGaussJordanReturnSameSolutionAndInversionResult(RandomSeed seed) {
+  void solveLinearAndGaussJordanReturnSameSolutionAndInversionResult(RandomSeed seed) {
     final int iter = 100;
     final SolverSpeedTestData data = ensureData(seed, iter);
     final ArrayList<double[][]> adata = copyAdouble(data.adata, iter);
@@ -151,7 +151,7 @@ public class SolverSpeedTest {
   }
 
   @SeededTest
-  public void solveLinearAndGaussJordanReturnSameSolutionResult(RandomSeed seed) {
+  void solveLinearAndGaussJordanReturnSameSolutionResult(RandomSeed seed) {
     final int iter = 100;
     final SolverSpeedTestData data = ensureData(seed, iter);
     final ArrayList<double[][]> adata = copyAdouble(data.adata, iter);
@@ -190,7 +190,7 @@ public class SolverSpeedTest {
   }
 
   @SeededTest
-  public void gaussJordanFloatAndDoubleReturnSameSolutionAndInversionResult(RandomSeed seed) {
+  void gaussJordanFloatAndDoubleReturnSameSolutionAndInversionResult(RandomSeed seed) {
     final int iter = 100;
     final SolverSpeedTestData data = ensureData(seed, iter);
     final ArrayList<float[][]> adata = copyAfloat(data.adata, iter);
@@ -237,7 +237,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveLinearWithInversionIsNotFasterThanGaussJordanFloat(RandomSeed seed) {
+  void solveLinearWithInversionIsNotFasterThanGaussJordanFloat(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -270,7 +270,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveLinearIsFasterThanGaussJordanFloat(RandomSeed seed) {
+  void solveLinearIsFasterThanGaussJordanFloat(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -310,7 +310,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveLinearWithInversionIsNotFasterThanGaussJordanDouble(RandomSeed seed) {
+  void solveLinearWithInversionIsNotFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -343,7 +343,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveLinearIsFasterThanGaussJordanDouble(RandomSeed seed) {
+  void solveLinearIsFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -376,7 +376,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveCholeskyIsFasterThanGaussJordanDouble(RandomSeed seed) {
+  void solveCholeskyIsFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -409,7 +409,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveCholeskyLdlTIsFasterThanGaussJordanDouble(RandomSeed seed) {
+  void solveCholeskyLdlTIsFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;
@@ -442,7 +442,7 @@ public class SolverSpeedTest {
 
   @SpeedTag
   @SeededTest
-  public void solveIsFasterThanGaussJordanDouble(RandomSeed seed) {
+  void solveIsFasterThanGaussJordanDouble(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int iter = 10000;

@@ -68,7 +68,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void factoryDefaultsToErfGaussian2DFunction() {
+  void factoryDefaultsToErfGaussian2DFunction() {
     Gaussian2DFunction f1;
     Gaussian2DFunction f2;
 
@@ -86,52 +86,52 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondBackgroundGradient() {
+  void functionComputesSecondBackgroundGradient() {
     if (f1.evaluatesBackground()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.BACKGROUND);
     }
   }
 
   @Test
-  public void functionComputesSecondSignalGradient() {
+  void functionComputesSecondSignalGradient() {
     if (f1.evaluatesSignal()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.SIGNAL);
     }
   }
 
   @Test
-  public void functionComputesSecondXGradient() {
+  void functionComputesSecondXGradient() {
     functionComputesSecondTargetGradient(Gaussian2DFunction.X_POSITION);
   }
 
   @Test
-  public void functionComputesSecondYGradient() {
+  void functionComputesSecondYGradient() {
     functionComputesSecondTargetGradient(Gaussian2DFunction.Y_POSITION);
   }
 
   @Test
-  public void functionComputesSecondZGradient() {
+  void functionComputesSecondZGradient() {
     if (f1.evaluatesZ()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.Z_POSITION);
     }
   }
 
   @Test
-  public void functionComputesSecondXWidthGradient() {
+  void functionComputesSecondXWidthGradient() {
     if (f1.evaluatesSD0()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.X_SD);
     }
   }
 
   @Test
-  public void functionComputesSecondYWidthGradient() {
+  void functionComputesSecondYWidthGradient() {
     if (f1.evaluatesSD1()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.Y_SD);
     }
   }
 
   @Test
-  public void functionComputesSecondAngleGradient() {
+  void functionComputesSecondAngleGradient() {
     if (f1.evaluatesAngle()) {
       functionComputesSecondTargetGradient(Gaussian2DFunction.ANGLE);
     }
@@ -215,7 +215,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondBackgroundGradientWith2Peaks() {
+  void functionComputesSecondBackgroundGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesBackground()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.BACKGROUND);
@@ -223,7 +223,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondSignalGradientWith2Peaks() {
+  void functionComputesSecondSignalGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesSignal()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.SIGNAL);
@@ -233,7 +233,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondXGradientWith2Peaks() {
+  void functionComputesSecondXGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_POSITION);
     functionComputesSecondTargetGradientWith2Peaks(
@@ -241,7 +241,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondYGradientWith2Peaks() {
+  void functionComputesSecondYGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_POSITION);
     functionComputesSecondTargetGradientWith2Peaks(
@@ -249,7 +249,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondZGradientWith2Peaks() {
+  void functionComputesSecondZGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesZ()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Z_POSITION);
@@ -259,7 +259,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondXWidthGradientWith2Peaks() {
+  void functionComputesSecondXWidthGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesSD0()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.X_SD);
@@ -269,7 +269,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondYWidthGradientWith2Peaks() {
+  void functionComputesSecondYWidthGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesSD1()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.Y_SD);
@@ -279,7 +279,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesSecondAngleGradientWith2Peaks() {
+  void functionComputesSecondAngleGradientWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     if (f2.evaluatesAngle()) {
       functionComputesSecondTargetGradientWith2Peaks(Gaussian2DFunction.ANGLE);
@@ -447,7 +447,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   // Speed test verses equivalent Gaussian2DFunction
   @SpeedTag
   @Test
-  public void functionIsFasterThanEquivalentGaussian2DFunction() {
+  void functionIsFasterThanEquivalentGaussian2DFunction() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int flags = this.flags & ~GaussianFunctionFactory.FIT_ERF;
@@ -510,7 +510,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesGradientForEach() {
+  void functionComputesGradientForEach() {
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
     final int n = f1.size();
@@ -611,7 +611,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesExtendedGradientForEach() {
+  void functionComputesExtendedGradientForEach() {
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
 
     final int nparams = f1.getNumberOfGradients();
@@ -696,7 +696,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesGradientForEachWith2Peaks() {
+  void functionComputesGradientForEachWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
@@ -820,7 +820,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionComputesExtendedGradientForEachWith2Peaks() {
+  void functionComputesExtendedGradientForEachWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
     final ErfGaussian2DFunction f2 = (ErfGaussian2DFunction) this.f2;
 
@@ -1050,7 +1050,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   // Speed test forEach verses equivalent eval() function calls
   @SpeedTag
   @Test
-  public void functionIsFasterUsingForEach() {
+  void functionIsFasterUsingForEach() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) this.f1;
@@ -1099,7 +1099,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionCanComputeIntegral() {
+  void functionCanComputeIntegral() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
     double[] params;
     for (final double background : testbackground) {
@@ -1125,7 +1125,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void computeIntegralIsFaster() {
+  void computeIntegralIsFaster() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final LocalList<double[]> p = new LocalList<>();
@@ -1170,7 +1170,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void functionCanComputeIntegralWith2Peaks() {
+  void functionCanComputeIntegralWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
@@ -1211,7 +1211,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   }
 
   @Test
-  public void computeIntegralIsFasterWith2Peaks() {
+  void computeIntegralIsFasterWith2Peaks() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     Assumptions.assumeTrue(null != f2);
 

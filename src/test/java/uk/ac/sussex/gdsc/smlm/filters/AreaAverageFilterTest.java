@@ -37,12 +37,12 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
-public class AreaAverageFilterTest extends AbstractFilterTest {
+class AreaAverageFilterTest extends AbstractFilterTest {
   private static final int ITER = 100;
   private static final int INTERNAL_ITER = 300;
 
   @SeededTest
-  public void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed) {
+  void areaAverageUsingSumsNxNInternalIsFasterThanAreaAverageNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -121,7 +121,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlockAverageIsFasterThanAreaAverage(RandomSeed seed) {
+  void stripedBlockAverageIsFasterThanAreaAverage(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -200,7 +200,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void stripedBlockAverageInternalIsFasterThanAreaAverageInternal(RandomSeed seed) {
+  void stripedBlockAverageInternalIsFasterThanAreaAverageInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -280,7 +280,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void areaAverageCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
+  void areaAverageCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final int max = 50;
     final float[] data = createData(rg, max, max);
@@ -333,7 +333,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void areaAverageInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
+  void areaAverageInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final int max = 50;
     final float[] data = createData(rg, max, max);
@@ -353,7 +353,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
+  void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final int max = 50;
     final float[] data = createData(rg, max, max);
@@ -374,7 +374,7 @@ public class AreaAverageFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
+  void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final int max = 50;
     final float[] data = createData(rg, max, max);

@@ -30,14 +30,14 @@ import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class ParameterBoundsTest {
+class ParameterBoundsTest {
   @Test
-  public void canUpperBoundParameter() {
+  void canUpperBoundParameter() {
     canBoundParameter(1);
   }
 
   @Test
-  public void canLowerBoundParameter() {
+  void canLowerBoundParameter() {
     canBoundParameter(-1);
   }
 
@@ -61,7 +61,7 @@ public class ParameterBoundsTest {
   }
 
   @Test
-  public void canDoubleBoundParameter() {
+  void canDoubleBoundParameter() {
     final ParameterBounds bounds = new ParameterBounds(new FakeGradientFunction(1, 1, 1));
     final double s = 2;
     bounds.setBounds(new double[] {-s}, new double[] {s});
@@ -75,7 +75,7 @@ public class ParameterBoundsTest {
   }
 
   @Test
-  public void canStepParameter() {
+  void canStepParameter() {
     canStepParameter(0.5);
     canStepParameter(1);
     canStepParameter(-0.5);

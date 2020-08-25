@@ -37,7 +37,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGammaGaussianFisherInformationTest {
+class PoissonGammaGaussianFisherInformationTest {
   private static Logger logger;
 
   @BeforeAll
@@ -51,7 +51,7 @@ public class PoissonGammaGaussianFisherInformationTest {
   }
 
   @Test
-  public void canFindMaximumAndUpperLimit() {
+  void canFindMaximumAndUpperLimit() {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
@@ -88,7 +88,7 @@ public class PoissonGammaGaussianFisherInformationTest {
   }
 
   @Test
-  public void canComputeFisherInformation() {
+  void canComputeFisherInformation() {
     // canComputeFisherInformation(250, 13);
     // double m1 = 500;
     // double u = 350;
@@ -148,7 +148,7 @@ public class PoissonGammaGaussianFisherInformationTest {
   }
 
   @Test
-  public void canComputeAlpha() {
+  void canComputeAlpha() {
     // This is a report as nothing is asserted
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
@@ -194,19 +194,19 @@ public class PoissonGammaGaussianFisherInformationTest {
   // will always contribute to each pixel. Values below 0.01 are rare.
 
   @Test
-  public void canComputeFisherInformationWithLowMean() {
+  void canComputeFisherInformationWithLowMean() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     computeFisherInformationWithMean(1e-100);
   }
 
   @Test
-  public void canComputeFisherInformationWithVeryLowMean() {
+  void canComputeFisherInformationWithVeryLowMean() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     computeFisherInformationWithMean(1e-300);
   }
 
   @Test
-  public void canComputeFisherInformationWithLowestPossibleMean() {
+  void canComputeFisherInformationWithLowestPossibleMean() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // Lowest value where the reciprocal is not infinity.

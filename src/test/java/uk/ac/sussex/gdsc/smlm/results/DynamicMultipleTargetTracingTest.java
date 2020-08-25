@@ -43,9 +43,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class DynamicMultipleTargetTracingTest {
+class DynamicMultipleTargetTracingTest {
   @SeededTest
-  public void checkBuilderDefaults(RandomSeed seed) {
+  void checkBuilderDefaults(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final double diffusionCoefficientMaximum = 1 + rng.nextDouble();
     final DmttConfiguration.Builder b = DmttConfiguration.newBuilder(diffusionCoefficientMaximum);
@@ -68,7 +68,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @SeededTest
-  public void checkBuilder(RandomSeed seed) {
+  void checkBuilder(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final int temporalWindow = 2 + rng.nextInt(10);
     final double localDiffusionWeight = rng.nextDouble();
@@ -104,7 +104,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
-  public void checkBuilderThrows() {
+  void checkBuilderThrows() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> DmttConfiguration.newBuilder(0));
 
     final DmttConfiguration.Builder b = DmttConfiguration.newBuilder(1.0);
@@ -123,7 +123,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
-  public void checkConstructorThrows() {
+  void checkConstructorThrows() {
     Assertions.assertThrows(NullPointerException.class,
         () -> new DynamicMultipleTargetTracing(null), "null results");
 
@@ -159,7 +159,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
-  public void testTrajectory() {
+  void testTrajectory() {
     final PeakResult p1 = new PeakResult(0, 1, 2);
     final PeakResult p2 = new PeakResult(1, 2, 3);
     final PeakResult p3 = new PeakResult(2, 3, 4);
@@ -217,7 +217,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
-  public void testTrajectoryWithNoOnFrames() {
+  void testTrajectoryWithNoOnFrames() {
     final PeakResult p1 = new PeakResult(0, 1, 2);
     final PeakResult p2 = new PeakResult(1, 2, 3);
     final PeakResult p3 = new PeakResult(2, 3, 4);
@@ -263,7 +263,7 @@ public class DynamicMultipleTargetTracingTest {
   }
 
   @Test
-  public void testIsOn() {
+  void testIsOn() {
     final double meanI = 1000;
     final double sdI = 100;
     Assertions.assertTrue(DynamicMultipleTargetTracing.isOn(1001, meanI, sdI));
@@ -277,7 +277,7 @@ public class DynamicMultipleTargetTracingTest {
    * intensity.
    */
   @Test
-  public void testTraceMolecules() {
+  void testTraceMolecules() {
     final UniformRandomProvider rng = RngUtils.create(125631236L);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     // localisation precision (in pixels)
@@ -350,7 +350,7 @@ public class DynamicMultipleTargetTracingTest {
    * should assign the fixed molecule correctly as it has a low local diffusion rate.
    */
   @Test
-  public void testTraceMoleculesDisableIntensityModel() {
+  void testTraceMoleculesDisableIntensityModel() {
     final UniformRandomProvider rng = RngUtils.create(125631236L);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     // localisation precision (in pixels)
@@ -423,7 +423,7 @@ public class DynamicMultipleTargetTracingTest {
    * should assign the fixed molecule correctly as it has a low local diffusion rate.
    */
   @Test
-  public void testTraceMoleculesDisableLocalDiffusionModel() {
+  void testTraceMoleculesDisableLocalDiffusionModel() {
     final UniformRandomProvider rng = RngUtils.create(125631236L);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     // localisation precision (in pixels)

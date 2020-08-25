@@ -63,7 +63,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.ObjectArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class PeakResultsReaderTest {
+class PeakResultsReaderTest {
   private static Logger logger;
 
   @BeforeAll
@@ -84,168 +84,168 @@ public class PeakResultsReaderTest {
   // -=-=-=-=-
 
   @SeededTest
-  public void writeTextMatchesRead(RandomSeed seed) {
+  void writeTextMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialTextMatchesRead(RandomSeed seed) {
+  void writeSequentialTextMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.TEXT, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTextWithDeviationsMatchesRead(RandomSeed seed) {
+  void writeTextWithDeviationsMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, true, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTextWithEndFrameMatchesRead(RandomSeed seed) {
+  void writeTextWithEndFrameMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, true, false, false, false);
   }
 
   @SeededTest
-  public void writeTextWithIdMatchesRead(RandomSeed seed) {
+  void writeTextWithIdMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, true, false, false);
   }
 
   @SeededTest
-  public void writeTextWithPrecisionMatchesRead(RandomSeed seed) {
+  void writeTextWithPrecisionMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeTextWithCombinationsMatchesRead(RandomSeed seed) {
+  void writeTextWithCombinationsMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TEXT, false);
   }
 
   // -=-=-=-=-
 
   @SeededTest
-  public void writeBinaryMatchesRead(RandomSeed seed) {
+  void writeBinaryMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialBinaryMatchesRead(RandomSeed seed) {
+  void writeSequentialBinaryMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.BINARY, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeBinaryWithDeviationsMatchesRead(RandomSeed seed) {
+  void writeBinaryWithDeviationsMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, true, false, false, false, false);
   }
 
   @SeededTest
-  public void writeBinaryWithEndFrameMatchesRead(RandomSeed seed) {
+  void writeBinaryWithEndFrameMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, true, false, false, false);
   }
 
   @SeededTest
-  public void writeBinaryWithIdMatchesRead(RandomSeed seed) {
+  void writeBinaryWithIdMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, true, false, false);
   }
 
   @SeededTest
-  public void writeBinaryWithPrecisionMatchesRead(RandomSeed seed) {
+  void writeBinaryWithPrecisionMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeBinaryWithCombinationsMatchesRead(RandomSeed seed) {
+  void writeBinaryWithCombinationsMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.BINARY, false);
   }
 
   // -=-=-=-=-
 
   @SeededTest
-  public void writeTextWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, false, true);
   }
 
   @SeededTest
-  public void writeSequentialTextWithSortMatchesRead(RandomSeed seed) {
+  void writeSequentialTextWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.TEXT, false, false, false, false, true);
   }
 
   @SeededTest
-  public void writeTextWithDeviationsWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithDeviationsWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, true, false, false, false, true);
   }
 
   @SeededTest
-  public void writeTextWithEndFrameWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithEndFrameWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, true, false, false, true);
   }
 
   @SeededTest
-  public void writeTextWithIdWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithIdWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, true, false, true);
   }
 
   @SeededTest
-  public void writeTextWithPrecisionWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithPrecisionWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TEXT, false, false, false, true, true);
   }
 
   @SeededTest
-  public void writeTextWithCombinationsWithSortMatchesRead(RandomSeed seed) {
+  void writeTextWithCombinationsWithSortMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TEXT, true);
   }
 
   // -=-=-=-=-
 
   @SeededTest
-  public void writeBinaryWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, false, true);
   }
 
   @SeededTest
-  public void writeSequentialBinaryWithSortMatchesRead(RandomSeed seed) {
+  void writeSequentialBinaryWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.BINARY, false, false, false, false, true);
   }
 
   @SeededTest
-  public void writeBinaryWithDeviationsWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithDeviationsWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, true, false, false, false, true);
   }
 
   @SeededTest
-  public void writeBinaryWithEndFrameWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithEndFrameWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, true, false, false, true);
   }
 
   @SeededTest
-  public void writeBinaryWithIdWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithIdWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, true, false, true);
   }
 
   @SeededTest
-  public void writeBinaryWithPrecisionWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithPrecisionWithSortMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.BINARY, false, false, false, true, true);
   }
 
   @SeededTest
-  public void writeBinaryWithCombinationsWithSortMatchesRead(RandomSeed seed) {
+  void writeBinaryWithCombinationsWithSortMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.BINARY, true);
   }
 
@@ -254,22 +254,22 @@ public class PeakResultsReaderTest {
   // Note: For Malk we cannot do all the tests as the format only contains X,Y,T,I
 
   @SeededTest
-  public void writeMalkMatchesRead(RandomSeed seed) {
+  void writeMalkMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialMalkMatchesRead(RandomSeed seed) {
+  void writeSequentialMalkMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeMalkWithSortMatchesRead(RandomSeed seed) {
+  void writeMalkWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, false, ResultsFileFormat.MALK, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeSequentialMalkWithSortMatchesRead(RandomSeed seed) {
+  void writeSequentialMalkWithSortMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.MALK, false, false, false, true, false);
   }
 
@@ -279,79 +279,79 @@ public class PeakResultsReaderTest {
   // different format and then back again.
 
   @SeededTest
-  public void writeTsfMatchesRead(RandomSeed seed) {
+  void writeTsfMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeSequentialTsfMatchesRead(RandomSeed seed) {
+  void writeSequentialTsfMatchesRead(RandomSeed seed) {
     writeMatchesRead(seed, true, ResultsFileFormat.TSF, false, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTsfWithDeviationsMatchesRead(RandomSeed seed) {
+  void writeTsfWithDeviationsMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, true, false, false, false, false);
   }
 
   @SeededTest
-  public void writeTsfWithEndFrameMatchesRead(RandomSeed seed) {
+  void writeTsfWithEndFrameMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, true, false, false, false);
   }
 
   @SeededTest
-  public void writeTsfWithIdMatchesRead(RandomSeed seed) {
+  void writeTsfWithIdMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, true, false, false);
   }
 
   @SeededTest
-  public void writeTsfWithPrecisionMatchesRead(RandomSeed seed) {
+  void writeTsfWithPrecisionMatchesRead(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     writeMatchesRead(seed, false, ResultsFileFormat.TSF, false, false, false, true, false);
   }
 
   @SeededTest
-  public void writeTsfWithCombinationsMatchesRead(RandomSeed seed) {
+  void writeTsfWithCombinationsMatchesRead(RandomSeed seed) {
     writeWithCombinationsMatchesRead(seed, false, ResultsFileFormat.TSF, false);
   }
 
   // -=-=-=-=-
 
   @SeededTest
-  public void readWithScannerMatchesNonScanner(RandomSeed seed) {
+  void readWithScannerMatchesNonScanner(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, false, false, false);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithDeviations(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithDeviations(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, true, false, false, false, false);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithEndFrame(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithEndFrame(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, true, false, false, false);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithId(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithId(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, true, false, false);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithPrecision(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithPrecision(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, false, true, false);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithCombinations(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithCombinations(RandomSeed seed) {
     // Scanner is not a default so do not always test
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkScannerMatchesNonScannerWithCombinations(seed, false);
@@ -360,37 +360,37 @@ public class PeakResultsReaderTest {
   // -=-=-=-=-
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithSort(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, false, false, true);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithDeviationsWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithDeviationsWithSort(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, true, false, false, false, true);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithEndFrameWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithEndFrameWithSort(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, true, false, false, true);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithIdWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithIdWithSort(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, true, false, true);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithPrecisionWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithPrecisionWithSort(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     checkScannerMatchesNonScanner(seed, false, false, false, true, true);
   }
 
   @SeededTest
-  public void readWithScannerMatchesNonScannerWithCombinationsWithSort(RandomSeed seed) {
+  void readWithScannerMatchesNonScannerWithCombinationsWithSort(RandomSeed seed) {
     // Scanner is not a default so do not always test
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     checkScannerMatchesNonScannerWithCombinations(seed, true);
@@ -399,7 +399,7 @@ public class PeakResultsReaderTest {
   // -=-=-=-=-
 
   @SeededTest
-  public void readTextWithNonScannerIsFasterThanScanner(RandomSeed seed) {
+  void readTextWithNonScannerIsFasterThanScanner(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, true,
         ResultsFileFormat.TEXT, false, 1);
   }
@@ -413,25 +413,25 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void readWithMalkIsFasterThanText(RandomSeed seed) {
+  void readWithMalkIsFasterThanText(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, false,
         ResultsFileFormat.MALK, false, 2);
   }
 
   @SeededTest
-  public void readWithBinaryIsFasterThanText(RandomSeed seed) {
+  void readWithBinaryIsFasterThanText(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TEXT, false,
         ResultsFileFormat.BINARY, false, 2);
   }
 
   @SeededTest
-  public void readWithBinaryIsFasterThanTsf(RandomSeed seed) {
+  void readWithBinaryIsFasterThanTsf(RandomSeed seed) {
     readWith2IsFasterThan1(seed, false, false, false, false, ResultsFileFormat.TSF, false,
         ResultsFileFormat.BINARY, false, 20);
   }
 
   @SeededTest
-  public void canConvertMalkToNmAndPhotons(RandomSeed seed) {
+  void canConvertMalkToNmAndPhotons(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false);
 
@@ -455,7 +455,7 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void writeTextWithComputedPrecisionMatchesRead(RandomSeed seed) {
+  void writeTextWithComputedPrecisionMatchesRead(RandomSeed seed) {
     // Create without precision
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MemoryPeakResults results = createResults(rg, 200, false, false, false, false);
@@ -481,17 +481,17 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void canReadTextIntoPreferredUnits(RandomSeed seed) {
+  void canReadTextIntoPreferredUnits(RandomSeed seed) {
     canReadIntoPreferredUnits(seed, ResultsFileFormat.TEXT);
   }
 
   @SeededTest
-  public void canReadBinaryIntoPreferredUnits(RandomSeed seed) {
+  void canReadBinaryIntoPreferredUnits(RandomSeed seed) {
     canReadIntoPreferredUnits(seed, ResultsFileFormat.BINARY);
   }
 
   @SeededTest
-  public void canReadTsfIntoPreferredUnits(RandomSeed seed) {
+  void canReadTsfIntoPreferredUnits(RandomSeed seed) {
     canReadIntoPreferredUnits(seed, ResultsFileFormat.TSF);
   }
 
@@ -523,17 +523,17 @@ public class PeakResultsReaderTest {
   }
 
   @SeededTest
-  public void canReadTextAndSimplifyGaussian2DPsf(RandomSeed seed) {
+  void canReadTextAndSimplifyGaussian2DPsf(RandomSeed seed) {
     canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.TEXT);
   }
 
   @SeededTest
-  public void canReadBinaryAndSimplifyGaussian2DPsf(RandomSeed seed) {
+  void canReadBinaryAndSimplifyGaussian2DPsf(RandomSeed seed) {
     canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.BINARY);
   }
 
   @SeededTest
-  public void canReadTsfAndSimplifyGaussian2DPsf(RandomSeed seed) {
+  void canReadTsfAndSimplifyGaussian2DPsf(RandomSeed seed) {
     canReadAndSimplifyGaussian2DPsf(seed, ResultsFileFormat.TSF);
   }
 

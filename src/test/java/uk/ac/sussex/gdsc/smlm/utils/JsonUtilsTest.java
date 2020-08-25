@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class JsonUtilsTest {
+class JsonUtilsTest {
   @Test
-  public void canSimplify() {
+  void canSimplify() {
     assertSimplify(null, "");
     assertSimplify("", "");
     assertSimplify("hello", "hello");
@@ -48,7 +48,7 @@ public class JsonUtilsTest {
   }
 
   @Test
-  public void canPrettyPrint() {
+  void canPrettyPrint() {
     assertPrettyPrint(null, "");
     assertPrettyPrint("", "");
     assertPrettyPrint("hello", "hello");

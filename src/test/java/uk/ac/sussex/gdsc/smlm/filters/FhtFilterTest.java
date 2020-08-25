@@ -44,19 +44,19 @@ import uk.ac.sussex.gdsc.test.utils.TestCounter;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 @SuppressWarnings({"javadoc"})
-public class FhtFilterTest {
+class FhtFilterTest {
   @SeededTest
-  public void canCorrelate(RandomSeed seed) {
+  void canCorrelate(RandomSeed seed) {
     canFilter(seed, Operation.CORRELATION);
   }
 
   @SeededTest
-  public void canConvolve(RandomSeed seed) {
+  void canConvolve(RandomSeed seed) {
     canFilter(seed, Operation.CONVOLUTION);
   }
 
   @SeededTest
-  public void canDeconvolve(RandomSeed seed) {
+  void canDeconvolve(RandomSeed seed) {
     canFilter(seed, Operation.DECONVOLUTION);
   }
 
@@ -181,7 +181,7 @@ public class FhtFilterTest {
   }
 
   @Test
-  public void canWindow() {
+  void canWindow() {
     final int size = 16;
     final float[] in = SimpleArrayUtils.newFloatArray(size * size, 1);
     final FhtFilter f = new FhtFilter(new float[1], 1, 1);

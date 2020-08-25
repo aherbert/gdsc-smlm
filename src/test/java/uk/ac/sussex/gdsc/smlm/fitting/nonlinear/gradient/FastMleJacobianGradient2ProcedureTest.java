@@ -51,48 +51,48 @@ import uk.ac.sussex.gdsc.test.utils.TestCounter;
  * the LVM algorithm.
  */
 @SuppressWarnings({"javadoc"})
-public class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTest {
+class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTest {
   // Skip super-class tests ...
   @Override
   @Test
-  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+  void gradientProcedureFactoryCreatesOptimisedProcedures() {
     Assumptions.assumeTrue(false);
   }
 
   @Override
   @SeededTest
-  public void gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(RandomSeed seed) {
-    Assumptions.assumeTrue(false);
-  }
-
-  @Override
-  @SpeedTag
-  @SeededTest
-  public void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    Assumptions.assumeTrue(false);
-  }
-
-  @Override
-  @SeededTest
-  public void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
-    Assumptions.assumeTrue(false);
-  }
-
-  @Override
-  @SeededTest
-  public void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(RandomSeed seed) {
     Assumptions.assumeTrue(false);
   }
 
   @Override
   @SpeedTag
   @SeededTest
-  public void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SeededTest
+  void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SeededTest
+  void gradientProcedureUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+    Assumptions.assumeTrue(false);
+  }
+
+  @Override
+  @SpeedTag
+  @SeededTest
+  void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     Assumptions.assumeTrue(false);
   }
 
   @SeededTest
-  public void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed) {
+  void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed) {
     // Test the base functionality of computing the partial derivatives is the same
     final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
     gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4, equality);
@@ -127,7 +127,7 @@ public class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2Proce
 
   @Override
   @SeededTest
-  public void gradientCalculatorComputesGradient(RandomSeed seed) {
+  void gradientCalculatorComputesGradient(RandomSeed seed) {
     gradientCalculatorComputesGradient(seed, 1,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth));
     gradientCalculatorComputesGradient(seed, 2,

@@ -36,9 +36,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class TraceManagerTest {
+class TraceManagerTest {
   @SeededTest
-  public void canTraceSinglePulseWithFixedCoords(RandomSeed seed) {
+  void canTraceSinglePulseWithFixedCoords(RandomSeed seed) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final float[] params = createParams(rand);
     final Trace trace = new Trace();
@@ -50,7 +50,7 @@ public class TraceManagerTest {
   }
 
   @SeededTest
-  public void canTraceSinglePulseWithMovingCoords(RandomSeed seed) {
+  void canTraceSinglePulseWithMovingCoords(RandomSeed seed) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final float distance = 0.5f;
 
@@ -65,7 +65,7 @@ public class TraceManagerTest {
   }
 
   @SeededTest
-  public void canTraceMultiplePulseWithFixedCoords(RandomSeed seed) {
+  void canTraceMultiplePulseWithFixedCoords(RandomSeed seed) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
 
     final float[] params = createParams(rand);
@@ -83,7 +83,7 @@ public class TraceManagerTest {
   }
 
   @SeededTest
-  public void canTraceMultiplePulseWithMovingCoords(RandomSeed seed) {
+  void canTraceMultiplePulseWithMovingCoords(RandomSeed seed) {
     final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
     final float distance = 0.5f;
 
@@ -115,22 +115,22 @@ public class TraceManagerTest {
   }
 
   @SeededTest
-  public void canTraceMultipleFluorophoresWithFixedCoords(RandomSeed seed) {
+  void canTraceMultipleFluorophoresWithFixedCoords(RandomSeed seed) {
     simulate(seed, 1000, 1, 5, 2, 0);
   }
 
   @SeededTest
-  public void canTraceMultiplePulsingFluorophoresWithFixedCoords(RandomSeed seed) {
+  void canTraceMultiplePulsingFluorophoresWithFixedCoords(RandomSeed seed) {
     simulate(seed, 1000, 5, 5, 10, 0);
   }
 
   @SeededTest
-  public void canTraceMultipleFluorophoresWithMovingCoords(RandomSeed seed) {
+  void canTraceMultipleFluorophoresWithMovingCoords(RandomSeed seed) {
     simulateMoving(seed, 1000, 1, 5, 2);
   }
 
   @SeededTest
-  public void canTraceMultiplePulsingFluorophoresWithMovingCoords(RandomSeed seed) {
+  void canTraceMultiplePulsingFluorophoresWithMovingCoords(RandomSeed seed) {
     simulateMoving(seed, 100, 5, 5, 10);
   }
 

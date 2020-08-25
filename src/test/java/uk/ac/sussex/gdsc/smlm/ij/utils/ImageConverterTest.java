@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class ImageConverterTest {
+class ImageConverterTest {
   private static ConcurrentHashMap<RandomSeed, Object> dataCache;
 
   @BeforeAll
@@ -78,7 +78,7 @@ public class ImageConverterTest {
   }
 
   @SeededTest
-  public void canGetData(RandomSeed seed) {
+  void canGetData(RandomSeed seed) {
     final ImageConverterTestData data =
         (ImageConverterTestData) dataCache.computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;
@@ -97,7 +97,7 @@ public class ImageConverterTest {
   }
 
   @SeededTest
-  public void canGetDataWithFullBounds(RandomSeed seed) {
+  void canGetDataWithFullBounds(RandomSeed seed) {
     final ImageConverterTestData data =
         (ImageConverterTestData) dataCache.computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;
@@ -116,7 +116,7 @@ public class ImageConverterTest {
   }
 
   @SeededTest
-  public void canGetCropData(RandomSeed seed) {
+  void canGetCropData(RandomSeed seed) {
     final ImageConverterTestData data =
         (ImageConverterTestData) dataCache.computeIfAbsent(seed, ImageConverterTest::createData);
     final byte[] bdata = data.bdata;

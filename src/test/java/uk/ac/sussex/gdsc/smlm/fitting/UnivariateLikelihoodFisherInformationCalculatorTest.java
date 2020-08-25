@@ -46,13 +46,13 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class UnivariateLikelihoodFisherInformationCalculatorTest {
+class UnivariateLikelihoodFisherInformationCalculatorTest {
   enum Model {
     POISSON, HALF_POISSON, POISSON_GAUSSIAN
   }
 
   @SeededTest
-  public void canComputePoissonFisherInformation(RandomSeed seed) {
+  void canComputePoissonFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON);
@@ -60,7 +60,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   }
 
   @SeededTest
-  public void canComputeHalfPoissonFisherInformation(RandomSeed seed) {
+  void canComputeHalfPoissonFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.HALF_POISSON);
@@ -68,7 +68,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   }
 
   @SeededTest
-  public void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed) {
+  void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
@@ -150,7 +150,7 @@ public class UnivariateLikelihoodFisherInformationCalculatorTest {
   }
 
   @SeededTest
-  public void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed) {
+  void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n < 10; n++) {
       canComputePerPixelPoissonGaussianApproximationFisherInformation(r);

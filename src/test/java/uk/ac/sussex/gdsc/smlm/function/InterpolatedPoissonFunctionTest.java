@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class InterpolatedPoissonFunctionTest {
+class InterpolatedPoissonFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -144,7 +144,7 @@ public class InterpolatedPoissonFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithInteger() {
+  void cumulativeProbabilityIsOneWithInteger() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         final int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
@@ -258,7 +258,7 @@ public class InterpolatedPoissonFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithReal() {
+  void cumulativeProbabilityIsOneWithReal() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         if (photons[i] / gain[j] >= 4) {
@@ -302,7 +302,7 @@ public class InterpolatedPoissonFunctionTest {
   }
 
   @Test
-  public void canComputeGradientWithInteger() {
+  void canComputeGradientWithInteger() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         canComputeGradient(gain[j], photons[i], false);
@@ -311,7 +311,7 @@ public class InterpolatedPoissonFunctionTest {
   }
 
   @Test
-  public void canComputeGradientWithReal() {
+  void canComputeGradientWithReal() {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         canComputeGradient(gain[j], photons[i], true);

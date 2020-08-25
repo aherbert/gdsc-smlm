@@ -28,12 +28,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"deprecation", "javadoc"})
-public class CalibrationTest {
+class CalibrationTest {
   int minpoints = 3;
   int maxpoints = 20;
 
   @Test
-  public void canGet() {
+  void canGet() {
     final Calibration c = new Calibration();
     c.getNmPerPixel();
     c.getGain();
@@ -45,7 +45,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void canGetWithNoException() {
+  void canGetWithNoException() {
     final Calibration c = new Calibration(true);
     c.setNmPerPixel(1);
     c.setGain(2);
@@ -65,56 +65,56 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getNmPerPixelThrowsException() {
+  void getNmPerPixelThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getNmPerPixel();
     });
   }
 
   @Test
-  public void getGainThrowsException() {
+  void getGainThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getGain();
     });
   }
 
   @Test
-  public void getExposureTimeThrowsException() {
+  void getExposureTimeThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getExposureTime();
     });
   }
 
   @Test
-  public void getReadNoiseThrowsException() {
+  void getReadNoiseThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getReadNoise();
     });
   }
 
   @Test
-  public void getBiasThrowsException() {
+  void getBiasThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getBias();
     });
   }
 
   @Test
-  public void isEmCcdThrowsException() {
+  void isEmCcdThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).isEmCcd();
     });
   }
 
   @Test
-  public void getAmplificationThrowsException() {
+  void getAmplificationThrowsException() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new Calibration(true).getAmplification();
     });
   }
 
   @Test
-  public void getNmPerPixelThrowsExceptionWhenInvalid() {
+  void getNmPerPixelThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setNmPerPixel(0);
@@ -123,7 +123,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getGainThrowsExceptionWhenInvalid() {
+  void getGainThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setGain(0);
@@ -132,7 +132,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getExposureTimeThrowsExceptionWhenInvalid() {
+  void getExposureTimeThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setExposureTime(0);
@@ -141,7 +141,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getReadNoiseThrowsExceptionWhenInvalid() {
+  void getReadNoiseThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setReadNoise(-1);
@@ -150,7 +150,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getBiasThrowsExceptionWhenInvalid() {
+  void getBiasThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setBias(-1);
@@ -159,7 +159,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getAmplificationThrowsExceptionWhenInvalid() {
+  void getAmplificationThrowsExceptionWhenInvalid() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setAmplification(0);
@@ -168,7 +168,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getNmPerPixelThrowsExceptionAfterClear() {
+  void getNmPerPixelThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setNmPerPixel(1);
@@ -178,7 +178,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getGainThrowsExceptionAfterClear() {
+  void getGainThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setGain(1);
@@ -188,7 +188,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getExposureTimeThrowsExceptionAfterClear() {
+  void getExposureTimeThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setExposureTime(1);
@@ -198,7 +198,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getReadNoiseThrowsExceptionAfterClear() {
+  void getReadNoiseThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setReadNoise(1);
@@ -208,7 +208,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getBiasThrowsExceptionAfterClear() {
+  void getBiasThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setBias(1);
@@ -218,7 +218,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getEmCcdThrowsExceptionAfterClear() {
+  void getEmCcdThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setEmCcd(true);
@@ -228,7 +228,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void getAmplificationThrowsExceptionAfterClear() {
+  void getAmplificationThrowsExceptionAfterClear() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setAmplification(1);
@@ -238,7 +238,7 @@ public class CalibrationTest {
   }
 
   @Test
-  public void clearDoesNotResetFieldMissingFlag() {
+  void clearDoesNotResetFieldMissingFlag() {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       final Calibration c = new Calibration(true);
       c.setAmplification(0);

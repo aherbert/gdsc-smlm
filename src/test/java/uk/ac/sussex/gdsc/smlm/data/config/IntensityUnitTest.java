@@ -30,9 +30,9 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 
 @SuppressWarnings({"unchecked", "javadoc"})
-public class IntensityUnitTest {
+class IntensityUnitTest {
   @Test
-  public void canConvert() {
+  void canConvert() {
     final double offset = 120;
     final double countPerPhoton = 45.5;
     for (int photon = 1; photon < 100; photon++) {

@@ -195,7 +195,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionCreatesCorrectGradientIndices() {
+  void functionCreatesCorrectGradientIndices() {
     checkGradientIndices(1, f1);
     checkGradientIndices(2, f2);
   }
@@ -235,7 +235,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void factoryCreatesCorrectFunction() {
+  void factoryCreatesCorrectFunction() {
     CubicSplineFunction func;
 
     if (f2 != null) {
@@ -250,7 +250,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesTargetWithAndWithoutGradient() {
+  void functionComputesTargetWithAndWithoutGradient() {
     final StandardValueProcedure p0 = new StandardValueProcedure();
     final StandardGradient1Procedure p1 = new StandardGradient1Procedure();
     final StandardGradient2Procedure p2 = new StandardGradient2Procedure();
@@ -280,29 +280,29 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradient1() {
+  void functionComputesBackgroundGradient1() {
     Assumptions.assumeTrue(f1.evaluatesBackground());
     functionComputesTargetGradient1(CubicSplineFunction.BACKGROUND);
   }
 
   @Test
-  public void functionComputesSignalGradient1() {
+  void functionComputesSignalGradient1() {
     Assumptions.assumeTrue(f1.evaluatesSignal());
     functionComputesTargetGradient1(CubicSplineFunction.SIGNAL);
   }
 
   @Test
-  public void functionComputesXGradient1() {
+  void functionComputesXGradient1() {
     functionComputesTargetGradient1(CubicSplineFunction.X_POSITION);
   }
 
   @Test
-  public void functionComputesYGradient1() {
+  void functionComputesYGradient1() {
     functionComputesTargetGradient1(CubicSplineFunction.Y_POSITION);
   }
 
   @Test
-  public void functionComputesZGradient1() {
+  void functionComputesZGradient1() {
     Assumptions.assumeTrue(f1.evaluatesZ());
     functionComputesTargetGradient1(CubicSplineFunction.Z_POSITION);
   }
@@ -383,29 +383,29 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradient2() {
+  void functionComputesBackgroundGradient2() {
     Assumptions.assumeTrue(f1.evaluatesBackground());
     functionComputesTargetGradient2(CubicSplineFunction.BACKGROUND);
   }
 
   @Test
-  public void functionComputesSignalGradient2() {
+  void functionComputesSignalGradient2() {
     Assumptions.assumeTrue(f1.evaluatesSignal());
     functionComputesTargetGradient2(CubicSplineFunction.SIGNAL);
   }
 
   @Test
-  public void functionComputesXGradient2() {
+  void functionComputesXGradient2() {
     functionComputesTargetGradient2(CubicSplineFunction.X_POSITION);
   }
 
   @Test
-  public void functionComputesYGradient2() {
+  void functionComputesYGradient2() {
     functionComputesTargetGradient2(CubicSplineFunction.Y_POSITION);
   }
 
   @Test
-  public void functionComputesZGradient2() {
+  void functionComputesZGradient2() {
     Assumptions.assumeTrue(f1.evaluatesZ());
     functionComputesTargetGradient2(CubicSplineFunction.Z_POSITION);
   }
@@ -489,7 +489,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesTargetWithAndWithoutGradientWith2Peaks() {
+  void functionComputesTargetWithAndWithoutGradientWith2Peaks() {
     if (f2 == null) {
       return;
     }
@@ -533,7 +533,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradient1With2Peaks() {
+  void functionComputesBackgroundGradient1With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesBackground());
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.BACKGROUND);
@@ -542,7 +542,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesSignalGradient1With2Peaks() {
+  void functionComputesSignalGradient1With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesSignal());
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.SIGNAL);
@@ -551,7 +551,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesXGradient1With2Peaks() {
+  void functionComputesXGradient1With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.X_POSITION);
     functionComputesTargetGradient1With2Peaks(
@@ -559,7 +559,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesYGradient1With2Peaks() {
+  void functionComputesYGradient1With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Y_POSITION);
     functionComputesTargetGradient1With2Peaks(
@@ -567,7 +567,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesZGradient1With2Peaks() {
+  void functionComputesZGradient1With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesZ());
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
@@ -654,7 +654,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesBackgroundGradient2With2Peaks() {
+  void functionComputesBackgroundGradient2With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesBackground());
     functionComputesTargetGradient2With2Peaks(CubicSplineFunction.BACKGROUND);
@@ -663,7 +663,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesSignalGradient2With2Peaks() {
+  void functionComputesSignalGradient2With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesSignal());
     functionComputesTargetGradient2With2Peaks(CubicSplineFunction.SIGNAL);
@@ -672,7 +672,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesXGradient2With2Peaks() {
+  void functionComputesXGradient2With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradient2With2Peaks(CubicSplineFunction.X_POSITION);
     functionComputesTargetGradient2With2Peaks(
@@ -680,7 +680,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesYGradient2With2Peaks() {
+  void functionComputesYGradient2With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     functionComputesTargetGradient2With2Peaks(CubicSplineFunction.Y_POSITION);
     functionComputesTargetGradient2With2Peaks(
@@ -688,7 +688,7 @@ public abstract class CubicSplineFunctionTest {
   }
 
   @Test
-  public void functionComputesZGradient2With2Peaks() {
+  void functionComputesZGradient2With2Peaks() {
     Assumptions.assumeTrue(null != f2);
     Assumptions.assumeTrue(f2.evaluatesZ());
     functionComputesTargetGradient1With2Peaks(CubicSplineFunction.Z_POSITION);
@@ -788,7 +788,7 @@ public abstract class CubicSplineFunctionTest {
 
   @SpeedTag
   @Test
-  public void runSpeedTestWith1Peak() {
+  void runSpeedTestWith1Peak() {
     speedTest(1, 0);
     speedTest(1, 1);
     speedTest(1, 2);
@@ -796,7 +796,7 @@ public abstract class CubicSplineFunctionTest {
 
   @SpeedTag
   @Test
-  public void runSpeedTestWith2Peaks() {
+  void runSpeedTestWith2Peaks() {
     speedTest(2, 0);
     speedTest(2, 1);
     speedTest(2, 2);

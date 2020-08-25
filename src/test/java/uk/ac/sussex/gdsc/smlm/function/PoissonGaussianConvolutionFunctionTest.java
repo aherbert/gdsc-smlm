@@ -49,7 +49,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGaussianConvolutionFunctionTest {
+class PoissonGaussianConvolutionFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -67,7 +67,7 @@ public class PoissonGaussianConvolutionFunctionTest {
   double[] noise = PoissonGaussianFunctionTest.noise;
 
   @Test
-  public void cumulativeProbabilityIsOneWithPdf() {
+  void cumulativeProbabilityIsOneWithPdf() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -78,7 +78,7 @@ public class PoissonGaussianConvolutionFunctionTest {
   }
 
   @Test
-  public void cumulativeProbabilityIsOneWithPmf() {
+  void cumulativeProbabilityIsOneWithPmf() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -89,7 +89,7 @@ public class PoissonGaussianConvolutionFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbabilityWithPdf() {
+  void probabilityMatchesLogProbabilityWithPdf() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -100,7 +100,7 @@ public class PoissonGaussianConvolutionFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbabilityWithPmf() {
+  void probabilityMatchesLogProbabilityWithPmf() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -230,7 +230,7 @@ public class PoissonGaussianConvolutionFunctionTest {
 
   @SpeedTag
   @SeededTest
-  public void pdfFasterThanPmf(RandomSeed seed) {
+  void pdfFasterThanPmf(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Realistic CCD parameters for speed test

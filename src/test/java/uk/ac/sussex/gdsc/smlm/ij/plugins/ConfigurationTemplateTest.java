@@ -53,7 +53,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class ConfigurationTemplateTest {
+class ConfigurationTemplateTest {
   private static Logger logger;
 
   @BeforeAll
@@ -67,7 +67,7 @@ public class ConfigurationTemplateTest {
   }
 
   @Test
-  public void canCreateResourceTemplate() throws IOException {
+  void canCreateResourceTemplate() throws IOException {
     // This is not really a test.
     // It creates some templates so that they can be put in the resources folder.
     final File tmpFile = File.createTempFile("template", ".json.txt");
@@ -98,7 +98,7 @@ public class ConfigurationTemplateTest {
   }
 
   @Test
-  public void canLoadResourceTemplates() {
+  void canLoadResourceTemplates() {
     ConfigurationTemplate.clearTemplates();
 
     final String[] before = ConfigurationTemplate.getTemplateNames(false);
@@ -128,7 +128,7 @@ public class ConfigurationTemplateTest {
   }
 
   @Test
-  public void canListTemplateNameInOrder() {
+  void canListTemplateNameInOrder() {
     ConfigurationTemplate.clearTemplates();
 
     final String[] names = new String[10];
@@ -142,7 +142,7 @@ public class ConfigurationTemplateTest {
   }
 
   @SeededTest
-  public void canLoadTemplateImageFromFile(RandomSeed seed) throws IOException {
+  void canLoadTemplateImageFromFile(RandomSeed seed) throws IOException {
     ConfigurationTemplate.clearTemplates();
 
     Assertions.assertEquals(0, ConfigurationTemplate.getTemplateNamesWithImage().length);
@@ -174,7 +174,7 @@ public class ConfigurationTemplateTest {
   }
 
   @Test
-  public void canLoadTemplateImageFromResources() {
+  void canLoadTemplateImageFromResources() {
     // This test requires that the system resources does have at least one template with an image
 
     ConfigurationTemplate.clearTemplates();

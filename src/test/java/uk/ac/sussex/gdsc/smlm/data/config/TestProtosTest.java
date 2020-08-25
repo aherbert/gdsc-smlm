@@ -31,9 +31,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"javadoc"})
-public class TestProtosTest {
+class TestProtosTest {
   @Test
-  public void canChangeFieldNameAndDeserialise() throws IOException {
+  void canChangeFieldNameAndDeserialise() throws IOException {
     final int value = 35;
     // These two messages have the same type for field 1 but a different name
     final TestProtos.Message1.Builder b1 = TestProtos.Message1.newBuilder();
@@ -61,7 +61,7 @@ public class TestProtosTest {
   }
 
   @Test
-  public void cannotChangeFieldTypeAndDeserialise() throws IOException {
+  void cannotChangeFieldTypeAndDeserialise() throws IOException {
     final int value = 35;
     // These two messages have a different type (and byte size) for field 1
     final TestProtos.Message1.Builder b1 = TestProtos.Message1.newBuilder();

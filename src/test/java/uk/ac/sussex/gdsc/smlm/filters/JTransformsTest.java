@@ -55,7 +55,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class JTransformsTest {
+class JTransformsTest {
   private static Logger logger;
 
   @BeforeAll
@@ -85,12 +85,12 @@ public class JTransformsTest {
   }
 
   @Test
-  public void canCorrelateUsingFft() {
+  void canCorrelateUsingFft() {
     canComputeUsingFft(false);
   }
 
   @Test
-  public void canConvolveUsingFft() {
+  void canConvolveUsingFft() {
     canComputeUsingFft(true);
   }
 
@@ -145,7 +145,7 @@ public class JTransformsTest {
   }
 
   @Test
-  public void canComputeFhtUsingJTransforms() {
+  void canComputeFhtUsingJTransforms() {
     // Note: no need to test the correlation as the transformed data
     // is the same format as FHT so we just test that.
 
@@ -287,7 +287,7 @@ public class JTransformsTest {
 
   @SpeedTag
   @SeededTest
-  public void jtransforms2DDhtIsFasterThanFht2(RandomSeed seed) {
+  void jtransforms2DDhtIsFasterThanFht2(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     // Test the forward DHT of data. and reverse transform or the pre-computed correlation.

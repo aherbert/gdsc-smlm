@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PoissonGammaGaussianConvolutionFunctionTest {
+class PoissonGammaGaussianConvolutionFunctionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -60,7 +60,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
   static double[] noise = {1, 10}; // ADUs
 
   @Test
-  public void cumulativeProbabilityIsOne() {
+  void cumulativeProbabilityIsOne() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {
@@ -169,7 +169,7 @@ public class PoissonGammaGaussianConvolutionFunctionTest {
   }
 
   @Test
-  public void probabilityMatchesLogProbability() {
+  void probabilityMatchesLogProbability() {
     for (final double g : gain) {
       for (final double p : photons) {
         for (final double s : noise) {

@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
-public class RampedSelectionStrategyTest {
+class RampedSelectionStrategyTest {
   private static Logger logger;
 
   @BeforeAll
@@ -54,7 +54,7 @@ public class RampedSelectionStrategyTest {
   }
 
   @Test
-  public void canSearchUsingActualKey() {
+  void canSearchUsingActualKey() {
     final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length - 1; i++) {
@@ -65,7 +65,7 @@ public class RampedSelectionStrategyTest {
   }
 
   @Test
-  public void canBinarySearchUsingActualKey() {
+  void canBinarySearchUsingActualKey() {
     final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length - 1; i++) {
@@ -76,7 +76,7 @@ public class RampedSelectionStrategyTest {
   }
 
   @Test
-  public void canSearchUsingNotActualKey() {
+  void canSearchUsingNotActualKey() {
     final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length; i++) {
@@ -87,7 +87,7 @@ public class RampedSelectionStrategyTest {
   }
 
   @Test
-  public void canBinarySearchUsingNotActualKey() {
+  void canBinarySearchUsingNotActualKey() {
     final long[] sum = RampedSelectionStrategy.createRampedSum(10);
 
     for (int i = 0; i < sum.length; i++) {
@@ -98,7 +98,7 @@ public class RampedSelectionStrategyTest {
   }
 
   @Test
-  public void binarySearchEqualsSearch() {
+  void binarySearchEqualsSearch() {
     final long[] sum = RampedSelectionStrategy.createRampedSum(100);
     for (int key = (int) sum[sum.length - 1]; key-- > 0;) {
       final int i = RampedSelectionStrategy.search(sum, key);
@@ -109,21 +109,21 @@ public class RampedSelectionStrategyTest {
 
   @SpeedTag
   @Test
-  public void speedTest50() {
+  void speedTest50() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.LOW));
     speedTest(50, false, 10);
   }
 
   @SpeedTag
   @Test
-  public void speedTest200() {
+  void speedTest200() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     speedTest(200, true, 5);
   }
 
   @SpeedTag
   @Test
-  public void speedTest1000() {
+  void speedTest1000() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
     speedTest(1000, true, 2);
   }
@@ -131,7 +131,7 @@ public class RampedSelectionStrategyTest {
   // Too slow for common use
   @SpeedTag
   @Test
-  public void speedTest5000() {
+  void speedTest5000() {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
     speedTest(5000, true, 1);
   }

@@ -40,9 +40,9 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
 @SuppressWarnings({"javadoc"})
-public class HelpUrlsTest {
+class HelpUrlsTest {
   @Test
-  public void canLoadMissingUrls() {
+  void canLoadMissingUrls() {
     Assertions.assertTrue(HelpUrls.loadUrls(null).isEmpty());
     Assertions.assertTrue(HelpUrls.loadUrls("").isEmpty());
     Assertions.assertTrue(HelpUrls.loadUrls("  ").isEmpty());
@@ -50,7 +50,7 @@ public class HelpUrlsTest {
   }
 
   @Test
-  public void canLoadTestUrls() {
+  void canLoadTestUrls() {
     final Properties props = HelpUrls.loadUrls("/uk/ac/sussex/gdsc/smlm/test.help.config");
     Assertions.assertEquals(1, props.size());
     Assertions.assertEquals("path/to/docs/page.html", props.get("testplugin"));
@@ -66,7 +66,7 @@ public class HelpUrlsTest {
   }
 
   @Test
-  public void canGetUrls() {
+  void canGetUrls() {
     final String url = HelpUrls.getUrl("non-existing key");
     Assertions.assertTrue(url.startsWith("http"));
     Assertions.assertEquals(url, HelpUrls.getUrl(), "Non-existent key should match base URL");
@@ -79,7 +79,7 @@ public class HelpUrlsTest {
    * @throws TestAbortedException the test aborted exception
    */
   @Test
-  public void canReachUrls() throws TestAbortedException {
+  void canReachUrls() throws TestAbortedException {
     // Test we are online
     Assumptions.assumeTrue(testInternetAvailable());
 

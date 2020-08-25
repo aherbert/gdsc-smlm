@@ -31,9 +31,9 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PeakResultTest {
+class PeakResultTest {
   @SeededTest
-  public void sameResultIsEqual(RandomSeed seed) {
+  void sameResultIsEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
     final PeakResult p = r1[0];
@@ -42,7 +42,7 @@ public class PeakResultTest {
   }
 
   @SeededTest
-  public void sameResultsAreEqual(RandomSeed seed) {
+  void sameResultsAreEqual(RandomSeed seed) {
     UniformRandomProvider rng;
     final int size = 10;
     final int n = 5;
@@ -67,7 +67,7 @@ public class PeakResultTest {
   }
 
   @SeededTest
-  public void differentResultsAreNotEqual(RandomSeed seed) {
+  void differentResultsAreNotEqual(RandomSeed seed) {
     UniformRandomProvider rng;
     final int size = 1;
     final int n = 5;

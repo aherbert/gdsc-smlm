@@ -36,21 +36,21 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PeakResultStoreTest {
+class PeakResultStoreTest {
   int capacity = 1;
 
   @SeededTest
-  public void canStoreResultsUsingArrayList(RandomSeed seed) {
+  void canStoreResultsUsingArrayList(RandomSeed seed) {
     canStoreResults(seed, new ArrayListPeakResultStore(capacity));
   }
 
   @SeededTest
-  public void canStoreResultsUsingArray(RandomSeed seed) {
+  void canStoreResultsUsingArray(RandomSeed seed) {
     canStoreResults(seed, new ArrayPeakResultStore(capacity));
   }
 
   @SeededTest
-  public void canStoreResultsUsingHashSet(RandomSeed seed) {
+  void canStoreResultsUsingHashSet(RandomSeed seed) {
     canStoreResults(seed, new SetPeakResultStore(capacity));
   }
 

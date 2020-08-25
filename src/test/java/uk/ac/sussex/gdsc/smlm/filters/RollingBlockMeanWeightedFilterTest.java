@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 @SuppressWarnings({"javadoc"})
-public class RollingBlockMeanWeightedFilterTest extends WeightedMeanFilterTest {
+class RollingBlockMeanWeightedFilterTest extends WeightedMeanFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("rollingBlockMean", false) {

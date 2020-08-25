@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 @SuppressWarnings({"javadoc"})
-public class BlockSumWeightedFilterTest extends WeightedSumFilterTest {
+class BlockSumWeightedFilterTest extends WeightedSumFilterTest {
   @Override
   DataFilter createDataFilter() {
     return new DataFilter("blockSum", true) {

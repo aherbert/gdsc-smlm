@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class TensorTest {
+class TensorTest {
   private static Logger logger;
 
   @BeforeAll
@@ -55,7 +55,7 @@ public class TensorTest {
   }
 
   @Test
-  public void canComputeTensor3D() {
+  void canComputeTensor3D() {
     //@formatter:off
     final float[][] data = new float[][] {
       { 2, 1, 0, 1, 2, 1, 0, 1, 2 },
@@ -92,7 +92,7 @@ public class TensorTest {
   }
 
   @Test
-  public void canComputeTensor2D() {
+  void canComputeTensor2D() {
     //@formatter:off
     // Line through [0][0], [1][1], [2][2]
     // longest axis of object is -45 degrees
@@ -115,7 +115,7 @@ public class TensorTest {
   }
 
   @SeededTest
-  public void canComputeSameTensor(RandomSeed seed) {
+  void canComputeSameTensor(RandomSeed seed) {
     final UniformRandomProvider random = RngUtils.create(seed.getSeed());
     final int w = 3;
     final int h = 4;

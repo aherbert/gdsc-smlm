@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 @SuppressWarnings({"javadoc"})
-public class SingleNbFreeCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest {
+class SingleNbFreeCircularGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   @Override
   protected void init() {
     flags = GaussianFunctionFactory.FIT_SIMPLE_NB_FREE_CIRCLE;

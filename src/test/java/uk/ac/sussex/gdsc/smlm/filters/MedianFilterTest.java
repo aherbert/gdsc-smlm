@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc", "unused"})
-public class MedianFilterTest extends AbstractFilterTest {
+class MedianFilterTest extends AbstractFilterTest {
   private static int INTERNAL_ITER3 = 200;
   private static int INTERNAL_ITER = 20;
   private static int ITER3 = 100;
@@ -110,7 +110,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed) {
+  void floatBlockMedianNxNInternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -212,7 +212,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed) {
+  void floatBlockMedian3x3InternalIsFasterThanBlockMedianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -280,7 +280,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal(RandomSeed seed) {
+  void floatBlockMedian3x3InternalIsFasterThanRollingMedian3x3Internal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -372,7 +372,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed) {
+  void floatRollingMedian3x3InternalIsFasterThanRollingMedianNxNInternal(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -439,7 +439,7 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed) {
+  void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -465,7 +465,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN(RandomSeed seed) {
+  void floatBlockMedianInternalNxNIsFasterThanBlockMedianNxN(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -541,7 +541,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedianNxNIsFasterThanRollingMedianNxN(RandomSeed seed) {
+  void floatBlockMedianNxNIsFasterThanRollingMedianNxN(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -617,7 +617,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN(RandomSeed seed) {
+  void floatRollingMedianInternalNxNIsFasterThanRollingMedianNxN(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -693,7 +693,7 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed) {
+  void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
@@ -716,7 +716,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatBlockMedian3x3IsFasterThanBlockMedianNxN(RandomSeed seed) {
+  void floatBlockMedian3x3IsFasterThanBlockMedianNxN(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -783,7 +783,7 @@ public class MedianFilterTest extends AbstractFilterTest {
   }
 
   @SeededTest
-  public void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed) {
+  void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final MedianFilter filter = new MedianFilter();
 
@@ -807,7 +807,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingMedian3x3IsFasterThanRollingMedianNxN(RandomSeed seed) {
+  void floatRollingMedian3x3IsFasterThanRollingMedianNxN(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();
@@ -875,7 +875,7 @@ public class MedianFilterTest extends AbstractFilterTest {
 
   @SpeedTag
   @SeededTest
-  public void floatRollingMedian3x3IsFasterThanBlockMedian3x3(RandomSeed seed) {
+  void floatRollingMedian3x3IsFasterThanBlockMedian3x3(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final MedianFilter filter = new MedianFilter();

@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
-public class SpotFilterHelperTest {
+class SpotFilterHelperTest {
   private static Spot[] createData(UniformRandomProvider rg, int width, int height, int n) {
     if (n == 0) {
       return new Spot[0];
@@ -60,7 +60,7 @@ public class SpotFilterHelperTest {
   }
 
   @SeededTest
-  public void canCountNeighbours(RandomSeed seed) {
+  void canCountNeighbours(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
 
     final int width = 64;

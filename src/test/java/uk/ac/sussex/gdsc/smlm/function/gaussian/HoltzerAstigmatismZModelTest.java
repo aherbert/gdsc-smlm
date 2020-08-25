@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
-public class HoltzerAstigmatismZModelTest {
+class HoltzerAstigmatismZModelTest {
   private static Logger logger;
 
   @BeforeAll
@@ -58,7 +58,7 @@ public class HoltzerAstigmatismZModelTest {
   protected double stepH = 0.0001; // (double) (Math.pow(1e-3f, 1.0 / 3));
 
   @Test
-  public void canStaticComputeGradient() {
+  void canStaticComputeGradient() {
     final double s0 = 1.234;
     final double d = 0.531;
     final double Ax = -0.0708;

@@ -38,11 +38,11 @@ import uk.ac.sussex.gdsc.test.utils.TestUtils;
  * Test the PulseActivationAnalysis unmixing functions.
  */
 @SuppressWarnings({"javadoc"})
-public class PulseActivationAnalysisTest {
+class PulseActivationAnalysisTest {
   // CHECKSTYLE.OFF: ParameterName
 
   @SeededTest
-  public void canLinearlyUnmix2Channels(RandomSeed seed) {
+  void canLinearlyUnmix2Channels(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n <= 2; n++) {
       for (int m = 1; m <= 2; m++) {
@@ -121,7 +121,7 @@ public class PulseActivationAnalysisTest {
   }
 
   @SeededTest
-  public void canLinearlyUnmix3Channels(RandomSeed seed) {
+  void canLinearlyUnmix3Channels(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int n = 1; n <= 3; n++) {
       for (int m = 1; m <= 6; m++) {

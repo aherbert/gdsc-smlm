@@ -77,7 +77,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
  * the LVM algorithm.
  */
 @SuppressWarnings({"javadoc"})
-public class LvmGradientProcedureTest {
+class LvmGradientProcedureTest {
   private static Logger logger;
 
   @BeforeAll
@@ -119,7 +119,7 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureFactoryCreatesOptimisedProcedures() {
+  void gradientProcedureFactoryCreatesOptimisedProcedures() {
     final DummyGradientFunction[] f = new DummyGradientFunction[7];
     for (int i = 1; i < f.length; i++) {
       f[i] = new DummyGradientFunction(i);
@@ -192,17 +192,17 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLsqComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureLsqComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed, Type.LSQ);
   }
 
   @SeededTest
-  public void gradientProcedureMleComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureMleComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed, Type.MLE);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleComputesSameAsGradientCalculator(RandomSeed seed) {
+  void gradientProcedureFastLogMleComputesSameAsGradientCalculator(RandomSeed seed) {
     gradientProcedureComputesSameAsGradientCalculator(seed, Type.FAST_LOG_MLE, 1e-3);
   }
 
@@ -310,19 +310,19 @@ public class LvmGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureLsqIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureLsqIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.LSQ);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.MLE);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureFastLogMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
+  void gradientProcedureFastLogMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
     gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.FAST_LOG_MLE);
   }
 
@@ -402,22 +402,22 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLsqUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureLsqUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.LSQ, false);
   }
 
   @SeededTest
-  public void gradientProcedureMleUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureMleUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.MLE, false);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureFastLogMleUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.FAST_LOG_MLE, false);
   }
 
   @SeededTest
-  public void gradientProcedureWLsqUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
+  void gradientProcedureWLsqUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.WLSQ, false);
   }
 
@@ -434,7 +434,7 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleUnrolledComputesSameAsGradientProcedureWithPrecomputed(
+  void gradientProcedureFastLogMleUnrolledComputesSameAsGradientProcedureWithPrecomputed(
       RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.FAST_LOG_MLE, true);
   }
@@ -515,25 +515,25 @@ public class LvmGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, false);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, false);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FAST_LOG_MLE, false);
   }
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureWLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
+  void gradientProcedureWLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, false);
   }
 
@@ -553,7 +553,7 @@ public class LvmGradientProcedureTest {
 
   @SpeedTag
   @SeededTest
-  public void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedureWithPrecomputed(
+  void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedureWithPrecomputed(
       RandomSeed seed) {
     gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FAST_LOG_MLE, true);
   }
@@ -652,19 +652,19 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLsqComputesGradient(RandomSeed seed) {
+  void gradientProcedureLsqComputesGradient(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ, false);
   }
 
   @SeededTest
-  public void gradientProcedureMleComputesGradient(RandomSeed seed) {
+  void gradientProcedureMleComputesGradient(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE, false);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleCannotComputeGradient(RandomSeed seed) {
+  void gradientProcedureFastLogMleCannotComputeGradient(RandomSeed seed) {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       gradientProcedureComputesGradient(seed,
           new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FAST_LOG_MLE,
@@ -675,7 +675,7 @@ public class LvmGradientProcedureTest {
   @Disabled("This test now passes as the tolerance for computing the gradient has been lowered "
       + " so that the tests pass under a stress test using many different random seeds.")
   @SeededTest
-  public void gradientProcedureFastLogMleCannotComputeGradientWithHighPrecision(RandomSeed seed) {
+  void gradientProcedureFastLogMleCannotComputeGradientWithHighPrecision(RandomSeed seed) {
     // Try different precision
     for (int n = FastLog.N; n < 23; n++) {
       try {
@@ -696,25 +696,25 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureWLsqComputesGradient(RandomSeed seed) {
+  void gradientProcedureWLsqComputesGradient(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.WLSQ, false);
   }
 
   @SeededTest
-  public void gradientProcedureLsqComputesGradientWithPrecomputed(RandomSeed seed) {
+  void gradientProcedureLsqComputesGradientWithPrecomputed(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.LSQ, true);
   }
 
   @SeededTest
-  public void gradientProcedureMleComputesGradientWithPrecomputed(RandomSeed seed) {
+  void gradientProcedureMleComputesGradientWithPrecomputed(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.MLE, true);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleCannotComputeGradientWithPrecomputed(RandomSeed seed) {
+  void gradientProcedureFastLogMleCannotComputeGradientWithPrecomputed(RandomSeed seed) {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       gradientProcedureComputesGradient(seed,
           new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FAST_LOG_MLE,
@@ -723,7 +723,7 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureWLsqComputesGradientWithPrecomputed(RandomSeed seed) {
+  void gradientProcedureWLsqComputesGradientWithPrecomputed(RandomSeed seed) {
     gradientProcedureComputesGradient(seed,
         new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.WLSQ, true);
   }
@@ -804,29 +804,29 @@ public class LvmGradientProcedureTest {
   }
 
   @SeededTest
-  public void gradientProcedureLsqSupportsPrecomputed(RandomSeed seed) {
+  void gradientProcedureLsqSupportsPrecomputed(RandomSeed seed) {
     gradientProcedureSupportsPrecomputed(seed, Type.LSQ);
   }
 
   @SeededTest
-  public void gradientProcedureMleSupportsPrecomputed(RandomSeed seed) {
+  void gradientProcedureMleSupportsPrecomputed(RandomSeed seed) {
     gradientProcedureSupportsPrecomputed(seed, Type.MLE);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleSupportsPrecomputed(RandomSeed seed) {
+  void gradientProcedureFastLogMleSupportsPrecomputed(RandomSeed seed) {
     gradientProcedureSupportsPrecomputed(seed, Type.FAST_LOG_MLE, false);
   }
 
   @SeededTest
-  public void gradientProcedureFastLogMleCannotSupportPrecomputedWithGradients(RandomSeed seed) {
+  void gradientProcedureFastLogMleCannotSupportPrecomputedWithGradients(RandomSeed seed) {
     Assertions.assertThrows(AssertionFailedError.class, () -> {
       gradientProcedureSupportsPrecomputed(seed, Type.FAST_LOG_MLE);
     });
   }
 
   @SeededTest
-  public void gradientProcedureWLsqSupportsPrecomputed(RandomSeed seed) {
+  void gradientProcedureWLsqSupportsPrecomputed(RandomSeed seed) {
     gradientProcedureSupportsPrecomputed(seed, Type.WLSQ);
   }
 

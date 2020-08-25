@@ -50,7 +50,7 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
  * single precision math.
  */
 @SuppressWarnings({"javadoc"})
-public class PrecisionTest {
+class PrecisionTest {
   private static Logger logger;
 
   @BeforeAll
@@ -393,19 +393,19 @@ public class PrecisionTest {
   }
 
   @Test
-  public void circularFunctionPrecisionIs3sf() {
+  void circularFunctionPrecisionIs3sf() {
     functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx),
         new DoubleCircularGaussian(maxx), 1e-3);
   }
 
   @Test
-  public void circularFunctionPrecisionIs4sf() {
+  void circularFunctionPrecisionIs4sf() {
     functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx),
         new DoubleCircularGaussian(maxx), 1e-4);
   }
 
   @Test
-  public void circularFunctionPrecisionIsNot5sf() {
+  void circularFunctionPrecisionIsNot5sf() {
     Assertions.assertThrows(AssertionError.class, () -> {
       functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx),
           new DoubleCircularGaussian(maxx), 1e-5);
@@ -413,7 +413,7 @@ public class PrecisionTest {
   }
 
   @Test
-  public void circularFunctionsPrecisionIsNot3sfAtLargeXy() {
+  void circularFunctionsPrecisionIsNot3sfAtLargeXy() {
     int maxx = this.maxx;
     try {
       maxx *= 2;
@@ -433,44 +433,44 @@ public class PrecisionTest {
 
   @SpeedTag
   @Test
-  public void circularDoublePrecisionIsFasterWithGradients() {
+  void circularDoublePrecisionIsFasterWithGradients() {
     isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
         false, true);
   }
 
   @SpeedTag
   @Test
-  public void circularDoublePrecisionIsFaster() {
+  void circularDoublePrecisionIsFaster() {
     isFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), false, true);
   }
 
   @SpeedTag
   @Test
-  public void circularDoublePrecisionIsFasterWithGradientsNoSum() {
+  void circularDoublePrecisionIsFasterWithGradientsNoSum() {
     isFasterWithGradients(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx),
         true, true);
   }
 
   @SpeedTag
   @Test
-  public void circularDoublePrecisionIsFasterNoSum() {
+  void circularDoublePrecisionIsFasterNoSum() {
     isFaster(maxx, new SingleCircularGaussian(maxx), new DoubleCircularGaussian(maxx), true, true);
   }
 
   @Test
-  public void fixedFunctionPrecisionIs3sf() {
+  void fixedFunctionPrecisionIs3sf() {
     functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx),
         1e-3);
   }
 
   @Test
-  public void fixedFunctionPrecisionIs4sf() {
+  void fixedFunctionPrecisionIs4sf() {
     functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx),
         1e-4);
   }
 
   @Test
-  public void fixedFunctionPrecisionIsNot6sf() {
+  void fixedFunctionPrecisionIsNot6sf() {
     Assertions.assertThrows(AssertionError.class, () -> {
       functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx),
           1e-6);
@@ -478,7 +478,7 @@ public class PrecisionTest {
   }
 
   @Test
-  public void fixedFunctionsPrecisionIsNot3sfAtLargeXy() {
+  void fixedFunctionsPrecisionIsNot3sfAtLargeXy() {
     int maxx = this.maxx;
     try {
       maxx *= 2;
@@ -498,27 +498,27 @@ public class PrecisionTest {
 
   @SpeedTag
   @Test
-  public void fixedDoublePrecisionIsFasterWithGradients() {
+  void fixedDoublePrecisionIsFasterWithGradients() {
     isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false,
         true);
   }
 
   @SpeedTag
   @Test
-  public void fixedDoublePrecisionIsFaster() {
+  void fixedDoublePrecisionIsFaster() {
     isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), false, true);
   }
 
   @SpeedTag
   @Test
-  public void fixedDoublePrecisionIsFasterWithGradientsNoSum() {
+  void fixedDoublePrecisionIsFasterWithGradientsNoSum() {
     isFasterWithGradients(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true,
         true);
   }
 
   @SpeedTag
   @Test
-  public void fixedDoublePrecisionIsFasterNoSum() {
+  void fixedDoublePrecisionIsFasterNoSum() {
     isFaster(maxx, new SingleFixedGaussian(maxx), new DoubleFixedGaussian(maxx), true, true);
   }
 

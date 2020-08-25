@@ -34,9 +34,9 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
-public class PeakResultDigestTest {
+class PeakResultDigestTest {
   @SeededTest
-  public void sameResultsAreEqual(RandomSeed seed) {
+  void sameResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -45,7 +45,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameSize1ResultsAreEqual(RandomSeed seed) {
+  void sameSize1ResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -54,7 +54,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameEmptyResultsAreEqual(RandomSeed seed) {
+  void sameEmptyResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -63,7 +63,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameResultsAreEqualWithDeviation(RandomSeed seed) {
+  void sameResultsAreEqualWithDeviation(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -72,7 +72,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameResultsAreEqualWithId(RandomSeed seed) {
+  void sameResultsAreEqualWithId(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -81,7 +81,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameResultsAreEqualWithEndFrame(RandomSeed seed) {
+  void sameResultsAreEqualWithEndFrame(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -90,7 +90,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void sameResultsAreEqualWithPrecision(RandomSeed seed) {
+  void sameResultsAreEqualWithPrecision(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -99,7 +99,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void differentResultsAreNotEqual(RandomSeed seed) {
+  void differentResultsAreNotEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -111,7 +111,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void digestMatchesPeakResultDigest(RandomSeed seed) {
+  void digestMatchesPeakResultDigest(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
     for (int size = 1; size < 5; size++) {
       final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
@@ -126,12 +126,12 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void digestIsEmptyStringWhenSizeIsZero() {
+  void digestIsEmptyStringWhenSizeIsZero() {
     Assertions.assertEquals("", new PeakResultsDigest(new PeakResult[0]).getDigest());
   }
 
   @SeededTest
-  public void digestHandlesNull() {
+  void digestHandlesNull() {
     final PeakResult[] r1 = null;
     final PeakResult[] r0 = new PeakResult[0];
     final PeakResultsDigest digest = new PeakResultsDigest(r1);
@@ -140,7 +140,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void digestHandlesEmptyArray() {
+  void digestHandlesEmptyArray() {
     final PeakResult[] r1 = null;
     final PeakResult[] r0 = new PeakResult[0];
     final PeakResultsDigest digest = new PeakResultsDigest(r0);
@@ -149,7 +149,7 @@ public class PeakResultDigestTest {
   }
 
   @SeededTest
-  public void timeDigest(RandomSeed seed) {
+  void timeDigest(RandomSeed seed) {
     Assumptions.assumeTrue(false);
     final Logger logger = Logger.getLogger(PeakResultDigestTest.class.getName());
 

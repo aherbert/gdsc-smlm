@@ -33,9 +33,9 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
-public class GaussianKernelTest {
+class GaussianKernelTest {
   @Test
-  public void canGetConversionFactor() {
+  void canGetConversionFactor() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
@@ -54,7 +54,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeGaussianKernelIncScaleIncRange() {
+  void canComputeGaussianKernelIncScaleIncRange() {
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -74,7 +74,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeGaussianKernelDecScaleIncRange() {
+  void canComputeGaussianKernelDecScaleIncRange() {
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -94,7 +94,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeGaussianKernelIncRangeIncScale() {
+  void canComputeGaussianKernelIncRangeIncScale() {
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -114,7 +114,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeGaussianKernelIncRangeDecScale() {
+  void canComputeGaussianKernelIncRangeDecScale() {
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -134,7 +134,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeDownscaleGaussianKernelIncScaleIncRange() {
+  void canComputeDownscaleGaussianKernelIncScaleIncRange() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
@@ -159,7 +159,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeDownscaleGaussianKernelDecScaleIncRange() {
+  void canComputeDownscaleGaussianKernelDecScaleIncRange() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
@@ -184,7 +184,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeDownscaleGaussianKernelIncRangeIncScale() {
+  void canComputeDownscaleGaussianKernelIncRangeIncScale() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
@@ -209,7 +209,7 @@ public class GaussianKernelTest {
   }
 
   @Test
-  public void canComputeDownscaleGaussianKernelIncRangeDecScale() {
+  void canComputeDownscaleGaussianKernelIncRangeDecScale() {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
