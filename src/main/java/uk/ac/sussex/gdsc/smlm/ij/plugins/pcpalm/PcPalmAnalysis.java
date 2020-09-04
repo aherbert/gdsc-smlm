@@ -749,7 +749,7 @@ public class PcPalmAnalysis implements PlugIn {
 
   private static ImageProcessor applyWindow(ImageProcessor im, ImageWindow imageWindow) {
     float[] image = (float[]) im.toFloat(0, null).getPixels();
-    image = imageWindow.applySeperable(image, im.getWidth(), im.getHeight(),
+    image = imageWindow.applySeparable(image, im.getWidth(), im.getHeight(),
         ImageWindow.WindowMethod.TUKEY);
     return new FloatProcessor(im.getWidth(), im.getHeight(), image, null);
   }
