@@ -227,7 +227,7 @@ public class About implements PlugIn, MacroExtension {
     final StringBuilder sb = new StringBuilder();
     sb.append("Configure resource '").append(resourceTitle).append("' at:\n \n").append(filename);
     if (notes != null) {
-      sb.append("\n \n").append(uk.ac.sussex.gdsc.core.utils.XmlUtils.lineWrap(notes, 80, 0, null));
+      sb.append("\n \n").append(uk.ac.sussex.gdsc.core.utils.TextUtils.wrap(notes, 80));
     }
 
     gd.addHelp(HelpUrls.getUrl(helpKey));
