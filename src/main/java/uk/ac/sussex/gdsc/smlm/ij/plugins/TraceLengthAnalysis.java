@@ -358,7 +358,7 @@ public class TraceLengthAnalysis implements PlugIn {
    * @param offset the offset
    * @return the x-axis
    */
-  public static float[] createHistogramAxis(int length, float offset) {
+  private static float[] createHistogramAxis(int length, float offset) {
     final float[] axis = new float[length * 4];
     int index = 0;
     final float offset2 = offset + WIDTH;
@@ -380,7 +380,7 @@ public class TraceLengthAnalysis implements PlugIn {
    * @param axis the axis
    * @return the float
    */
-  public static float createHistogramValues(int[] histogramY, double norm, float[] axis) {
+  private static float createHistogramValues(int[] histogramY, double norm, float[] axis) {
     // Assume axis[0] and axis[axis.length-1] == 0
     int index = 1;
     float max = 0;
