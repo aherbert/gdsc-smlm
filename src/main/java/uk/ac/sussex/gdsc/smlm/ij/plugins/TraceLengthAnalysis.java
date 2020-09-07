@@ -220,7 +220,7 @@ public class TraceLengthAnalysis implements PlugIn {
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
     ImageJUtils.addMessage(gd,
         "Split traces into fixed or moving using the track diffusion coefficient (D).\n"
-            + "Localistion error has been subtracted from jumps (%s nm).",
+            + "Localisation error has been subtracted from jumps (%s nm).",
         MathUtils.rounded(precision));
     final Statistics s = Statistics.create(msds);
     final double av = s.getMean();
