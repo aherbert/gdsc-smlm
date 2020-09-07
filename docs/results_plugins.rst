@@ -1060,6 +1060,36 @@ Note how the combined filters require that the contained filters are specified i
 When the filter is run on the selected data a new dataset is created with the suffix ``Free Filtered``.
 
 
+.. index:: ! Filter Molecules
+
+Filter Molecules
+----------------
+
+Filters a set of molecules using various criteria. Molecules are results that have been assigned an identifier (ID). For example unique IDs can be used to assign localisations to moving molecules that have been traced through a series of frames.
+
+When the plugin is run the user is presented with a dialog allowing the results set and the filter to be selected.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Input
+     - Select the results set to filter. Only results sets with localisation that have positive IDs are listed (i.e. the results must be assigned to molecules).
+
+   * - Filter Mode
+     - Select the filter mode. Each mode will use a separate dialog to configure the filter.
+
+When the filter has been selected the results will be filtered. Each filter may present another dialog to configure filter options. Each of the filters is described in the following sections.
+
+Filter Diffusion Coefficient
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Filter the molecules using their local diffusion coefficient.
+
+
 .. index:: ! Split Results
 
 Split Results
