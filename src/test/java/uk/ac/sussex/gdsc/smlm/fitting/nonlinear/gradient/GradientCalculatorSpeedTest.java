@@ -279,25 +279,33 @@ class GradientCalculatorSpeedTest {
 
     // Create messages
     IntArrayFormatSupplier msgR = new IntArrayFormatSupplier("Result: Not same @ %d", 1);
-    IntArrayFormatSupplier msgB = new IntArrayFormatSupplier("Observations: Not same beta @ %d", 1);
+    IntArrayFormatSupplier msgB =
+        new IntArrayFormatSupplier("Observations: Not same beta @ %d [%d]", 2);
     IntArrayFormatSupplier msgA =
-        new IntArrayFormatSupplier("Observations: Not same alpha @ %d", 1);
+        new IntArrayFormatSupplier("Observations: Not same alpha @ %d [%d][%d]", 3);
 
     for (int i = 0; i < paramsList.size(); i++) {
       final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
       final double s2 =
           calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
       Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
-      Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+      msgB.set(0, i);
+      for (int j = 0; j < beta.length; j++) {
+        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], beta2[j]), msgB.set(1, j));
+      }
       msgA.set(0, i);
       for (int j = 0; j < beta.length; j++) {
-        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]), msgA);
+        msgA.set(1, j);
+        for (int k = 0; k < alpha[j].length; k++) {
+          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j][k], alpha2[j][k]),
+              msgA.set(2, k));
+        }
       }
     }
 
     msgR = new IntArrayFormatSupplier("N-Result: Not same @ %d", 1);
-    msgB = new IntArrayFormatSupplier("N-Observations: Not same beta @ %d", 1);
-    msgA = new IntArrayFormatSupplier("N-Observations: Not same alpha @ %d", 1);
+    msgB = new IntArrayFormatSupplier("N-Observations: Not same beta @ %d [%d]", 2);
+    msgA = new IntArrayFormatSupplier("N-Observations: Not same alpha @ %d [%d][%d]", 3);
 
     for (int i = 0; i < paramsList.size(); i++) {
       final double s =
@@ -305,10 +313,17 @@ class GradientCalculatorSpeedTest {
       final double s2 =
           calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
       Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
-      Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+      msgB.set(0, i);
+      for (int j = 0; j < beta.length; j++) {
+        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], beta2[j]), msgB.set(1, j));
+      }
       msgA.set(0, i);
       for (int j = 0; j < beta.length; j++) {
-        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]), msgA);
+        msgA.set(1, j);
+        for (int k = 0; k < alpha[j].length; k++) {
+          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j][k], alpha2[j][k]),
+              msgA.set(2, k));
+        }
       }
     }
 
@@ -316,24 +331,32 @@ class GradientCalculatorSpeedTest {
       func.setNoiseModel(CameraNoiseModel.createNoiseModel(10, 0, true));
 
       msgR = new IntArrayFormatSupplier("Result+Noise: Not same @ %d", 1);
-      msgB = new IntArrayFormatSupplier("Observations+Noise: Not same beta @ %d", 1);
-      msgA = new IntArrayFormatSupplier("Observations+Noise: Not same alpha @ %d", 1);
+      msgB = new IntArrayFormatSupplier("Observations+Noise: Not same beta @ %d [%d]", 2);
+      msgA = new IntArrayFormatSupplier("Observations+Noise: Not same alpha @ %d [%d][%d]", 3);
 
       for (int i = 0; i < paramsList.size(); i++) {
         final double s = calc.findLinearised(x, yList.get(i), paramsList.get(i), alpha, beta, func);
         final double s2 =
             calc2.findLinearised(x, yList.get(i), paramsList.get(i), alpha2, beta2, func);
         Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
-        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+        msgB.set(0, i);
+        for (int j = 0; j < beta.length; j++) {
+          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], beta2[j]),
+              msgB.set(1, j));
+        }
         msgA.set(0, i);
         for (int j = 0; j < beta.length; j++) {
-          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]), msgA);
+          msgA.set(1, j);
+          for (int k = 0; k < alpha[j].length; k++) {
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j][k], alpha2[j][k]),
+                msgA.set(2, k));
+          }
         }
       }
 
       msgR = new IntArrayFormatSupplier("N-Result+Noise: Not same @ %d", 1);
-      msgB = new IntArrayFormatSupplier("N-Observations+Noise: Not same beta @ %d", 1);
-      msgA = new IntArrayFormatSupplier("N-Observations+Noise: Not same alpha @ %d", 1);
+      msgB = new IntArrayFormatSupplier("N-Observations+Noise: Not same beta @ %d [%d]", 2);
+      msgA = new IntArrayFormatSupplier("N-Observations+Noise: Not same alpha @ %d [%d][%d]", 3);
 
       for (int i = 0; i < paramsList.size(); i++) {
         final double s =
@@ -341,10 +364,18 @@ class GradientCalculatorSpeedTest {
         final double s2 =
             calc2.findLinearised(x.length, yList.get(i), paramsList.get(i), alpha2, beta2, func);
         Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(s, s2), msgR.set(0, i));
-        Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta, beta2), msgB.set(0, i));
+        msgB.set(0, i);
+        for (int j = 0; j < beta.length; j++) {
+          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[j], beta2[j]),
+              msgB.set(1, j));
+        }
         msgA.set(0, i);
         for (int j = 0; j < beta.length; j++) {
-          Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j], alpha2[j]), msgA);
+          msgA.set(1, j);
+          for (int k = 0; k < alpha[j].length; k++) {
+            Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(alpha[j][k], alpha2[j][k]),
+                msgA.set(2, k));
+          }
         }
       }
     }

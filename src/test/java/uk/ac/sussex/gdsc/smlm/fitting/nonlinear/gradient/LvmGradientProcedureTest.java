@@ -944,19 +944,18 @@ class LvmGradientProcedureTest {
         Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s",
             i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
       }
-      if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
+      if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
         Assertions
             .fail(FunctionUtils.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
-                DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-                Arrays.toString(p123.beta)));
+                relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
       }
       for (int j = 0; j < alpha.length; j++) {
         // logger.fine(FunctionUtils.getSupplier("%s !=\n%s", Arrays.toString(alpha[j]),
         // Arrays.toString(m123[j]));
-        if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j])) {
+        if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
           Assertions
               .fail(FunctionUtils.getSupplier("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s",
-                  i, j, DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+                  i, j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
                   Arrays.toString(m123[j])));
         }
       }
@@ -1015,10 +1014,9 @@ class LvmGradientProcedureTest {
           logger.log(TestLogUtils.getFailRecord("p12b3 Same value @ %d (error=%s) : %s == %s", i,
               DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
-        if (eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
+        if (almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
           logger.log(TestLogUtils.getFailRecord("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
-              DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-              Arrays.toString(p123.beta)));
+              relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
         }
 
         // Note: Test the matrix is different by finding 1 different column
@@ -1026,7 +1024,7 @@ class LvmGradientProcedureTest {
         for (int j = 0; j < alpha.length; j++) {
           // logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
           // Arrays.toString(m123[j]));
-          if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j])) {
+          if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
             dj = j; // Different column
             break;
           }
@@ -1036,7 +1034,7 @@ class LvmGradientProcedureTest {
           double error = 0;
           dj = -1;
           for (int j = 0; j < alpha.length; j++) {
-            final double e = DoubleEquality.relativeError(alpha[j], m123[j]);
+            final double e = relativeError(alpha[j], m123[j]);
             if (error <= e) {
               error = e;
               dj = j;
@@ -1050,19 +1048,18 @@ class LvmGradientProcedureTest {
           logger.log(TestLogUtils.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s",
               i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
-        if (!eq.almostEqualRelativeOrAbsolute(beta, p123.beta)) {
-          logger
-              .log(TestLogUtils.getFailRecord("p12b3 Not same gradient @ %d (error=%s) : %s vs %s",
-                  i, DoubleEquality.relativeError(beta, p123.beta), Arrays.toString(beta),
-                  Arrays.toString(p123.beta)));
+        if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
+          logger.log(TestLogUtils.getFailRecord(
+              "p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+              relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
         }
         for (int j = 0; j < alpha.length; j++) {
           // logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
           // Arrays.toString(m123[j]));
-          if (!eq.almostEqualRelativeOrAbsolute(alpha[j], m123[j])) {
+          if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
             logger.log(
                 TestLogUtils.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i,
-                    j, DoubleEquality.relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+                    j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
                     Arrays.toString(m123[j])));
           }
         }
@@ -1102,6 +1099,23 @@ class LvmGradientProcedureTest {
             });
       }
     }
+  }
+
+  private static boolean almostEqualRelativeOrAbsolute(DoubleEquality eq, double[] a, double[] b) {
+    for (int i = 0; i < a.length; i++) {
+      if (!eq.almostEqualRelativeOrAbsolute(a[i], b[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static double relativeError(double[] a, double[] b) {
+    double error = 0;
+    for (int i = 0; i < a.length; i++) {
+      error = Math.max(error, DoubleEquality.relativeError(a[i], b[i]));
+    }
+    return error;
   }
 
   /**
