@@ -276,14 +276,14 @@ public class FilterMolecules implements PlugIn {
       final String msg = String.format("Average D per track = %s um^2/s. Max = %s um^2/s",
           MathUtils.rounded(diffusionCoefficientMean), MathUtils.rounded(diffusionCoefficientMax));
       final HistogramPlot diffusionCoefficientHistogramPlot =
-          new HistogramPlotBuilder("Trace diffusion coefficient", StoredData.create(msds),
+          new HistogramPlotBuilder("Trace Diffusion Coefficient", StoredData.create(msds),
               "D (um^2/s)").setRemoveOutliersOption(1).setPlotLabel(msg).build();
       diffusionCoefficientHistogramPlot.show(wo);
       final Plot diffusionCoefficientPlot = diffusionCoefficientHistogramPlot.getPlot();
 
       // Histogram the lengths
       final HistogramPlot lengthHistogramPlot =
-          new HistogramPlotBuilder("Trace", StoredData.create(lengths), "Length").build();
+          new HistogramPlotBuilder("Trace Jumps", StoredData.create(lengths), "Length").build();
       lengthHistogramPlot.show(wo);
       final Plot lengthPlot = lengthHistogramPlot.getPlot();
 
