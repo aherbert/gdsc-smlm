@@ -1079,15 +1079,52 @@ When the plugin is run the user is presented with a dialog allowing the results 
    * - Input
      - Select the results set to filter. Only results sets with localisation that have positive IDs are listed (i.e. the results must be assigned to molecules).
 
-   * - Filter Mode
+   * - Filter mode
      - Select the filter mode. Each mode will use a separate dialog to configure the filter.
+
+   * - Remove singles
+     - Remove any singles from the dataset. This is any molecule with an ID of zero or negative (a special ID used to identify single localisations not part of a molecule) or any ID that is observed only once.
+
+   * - Output name
+     - Specify the output name to use when naming the filtered results.
+
+   * - Output suffix
+     - Specify if the ``Output name`` is a suffix to append to the name of the input dataset.
 
 When the filter has been selected the results will be filtered. Each filter may present another dialog to configure filter options. Each of the filters is described in the following sections.
 
 Filter Diffusion Coefficient
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Filter the molecules using their local diffusion coefficient.
+Filter the molecules using their local diffusion coefficient. Each molecule ID is assumed to be a track from a moving molecule. The track is analysed to compute the length of each track in frames and the mean squared displacement (MSD). The MSD is the mean of the sum of the squared jump distances between localisations in the trace. Each jump distance has the localisation precision subtracted from the jump length (i.e. the expected error in the measurement). The error uses the median precision for the results dataset.
+
+The MSD can be converted to the diffusion coefficient for 2D diffusion:
+
+.. math::
+
+    D = \frac{\mathit{MSD}}{4 * \Delta t}
+
+When the filter is initialised a histogram is displayed of the diffusion coefficient and the track length data. Outliers are removed from the diffusion coefficient histogram thus the upper range may not include all the molecules. The maximum value is shown in the label for reference. Note that there may be a large peak at 0 for the diffusion coefficient histogram. This is because small jumps below the localisation precision are set to zero. The peak at zero represents static molecules that are not diffusing.
+
+A dialog allows a region of data from the histograms to be selected interactively. The dialog will show the number of molecules in the output dataset after filtering. The filtered tracks must have a diffusion coefficient within the lower and upper threshold (inclusive) and be at least as long as the minimum length. For convenience if the upper threshold is below the lower threshold it is ignored and the upper threshold is set to the maximum observed value. To remove all molecules with a diffusion coefficient of zero set the lower threshold manually to a very small number (e.g. 1e-16) and the upper threshold to zero (i.e. ignored).
+
+The following parameters can be specified.
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Lower D threshold
+     - Specify the lower threshold for the diffusion coefficient (inclusive).
+
+   * - Upper D threshold
+     - Specify the upper threshold for the diffusion coefficient (inclusive). This is ignored if below the lower threshold.
+
+   * - Minimum length
+     - Specify the minimum length for a molecule track. The length is specified in number of jumps between localisations in the molecule track, e.g. length 1 is for a molecule with 2 localisations.
 
 
 .. index:: ! Split Results
