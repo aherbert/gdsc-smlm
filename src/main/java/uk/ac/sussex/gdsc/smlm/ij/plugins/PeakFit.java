@@ -724,8 +724,7 @@ public class PeakFit implements PlugInFilter {
       SeriesOpener series;
       if (extraOptions) {
         final String helpKey = maximaIdentification ? "spot-finder-series" : "peak-fit-series";
-        // The series opener does not support threads so use 0 threads
-        series = SeriesOpener.create(inputDirectory, true, 0, HelpUrls.getUrl(helpKey));
+        series = SeriesOpener.create(inputDirectory, true, HelpUrls.getUrl(helpKey));
       } else {
         series = new SeriesOpener(inputDirectory);
       }
