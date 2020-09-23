@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Computes the block sum for each point within the array.
  *
@@ -1041,8 +1039,8 @@ public class SumFilter {
     final float[] newData = floatBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -1114,8 +1112,8 @@ public class SumFilter {
     final float[] newData = floatBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -2018,8 +2016,8 @@ public class SumFilter {
     final int[] newData = intBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -2091,8 +2089,8 @@ public class SumFilter {
     final int[] newData = intBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 

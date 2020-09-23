@@ -621,14 +621,14 @@ public class Frc {
     progess.status("Calculating complex FFT images...");
 
     // Pad images to the same size if different
-    final int maxWidth = FastMath.max(ip1.getWidth(), ip2.getWidth());
-    final int maxHeight = FastMath.max(ip1.getHeight(), ip2.getHeight());
-    if (FastMath.max(maxWidth, maxHeight) > MAX_SIZE) {
+    final int maxWidth = Math.max(ip1.getWidth(), ip2.getWidth());
+    final int maxHeight = Math.max(ip1.getHeight(), ip2.getHeight());
+    if (Math.max(maxWidth, maxHeight) > MAX_SIZE) {
       progess.status("Error calculating FRC curve...");
       progess.incrementProgress(1);
       return null;
     }
-    final int fieldOfView = FastMath.max(maxWidth, maxHeight);
+    final int fieldOfView = Math.max(maxWidth, maxHeight);
     ip1 = pad(ip1, maxWidth, maxHeight);
     ip2 = pad(ip2, maxWidth, maxHeight);
 
@@ -1015,7 +1015,7 @@ public class Frc {
   public FloatProcessor getSquareTaperedImage(ImageProcessor dataImage) {
     taperedImageMean = 0;
 
-    final int size = FastMath.max(dataImage.getWidth(), dataImage.getHeight());
+    final int size = Math.max(dataImage.getWidth(), dataImage.getHeight());
     if (size > MAX_SIZE) {
       return null; // Too large so error
     }
@@ -1329,7 +1329,7 @@ public class Frc {
     // set reconstructions, will have twice the SNR value of each of the half
     // data sets"
     // Eq. (15) = log2(SNR+1) = n-bits
-    final double snr = (FastMath.pow(2, bits) - 1) / 2;
+    final double snr = (Math.pow(2, bits) - 1) / 2;
     final double snr_p_1 = snr + 1;
     final double twoRootSnr = 2 * Math.sqrt(snr);
     final double twoRootSnr_p_1 = twoRootSnr + 1;

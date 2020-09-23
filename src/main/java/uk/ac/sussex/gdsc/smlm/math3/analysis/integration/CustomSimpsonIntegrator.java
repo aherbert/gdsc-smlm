@@ -28,7 +28,6 @@ import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Implements <a href="http://mathworld.wolfram.com/SimpsonsRule.html"> Simpson's Rule</a> for
@@ -126,8 +125,8 @@ public class CustomSimpsonIntegrator extends SimpsonIntegrator {
       n *= 2L;
       lastSum = s;
       if (i >= getMinimalIterationCount()) {
-        final double delta = FastMath.abs(s - olds);
-        final double rLimit = getRelativeAccuracy() * (FastMath.abs(olds) + FastMath.abs(s)) * 0.5;
+        final double delta = Math.abs(s - olds);
+        final double rLimit = getRelativeAccuracy() * (Math.abs(olds) + Math.abs(s)) * 0.5;
         if ((delta <= rLimit) || (delta <= getAbsoluteAccuracy())) {
           return s;
         }

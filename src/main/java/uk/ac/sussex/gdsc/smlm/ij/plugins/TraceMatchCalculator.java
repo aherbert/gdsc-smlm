@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -774,7 +773,7 @@ public class TraceMatchCalculator implements PlugIn {
           score = p1.score(p2, distanceThreshold);
         }
         if (p3 != null) {
-          score = FastMath.max(score, p1.score(p2, distanceThreshold));
+          score = Math.max(score, p1.score(p2, distanceThreshold));
         }
       }
     }

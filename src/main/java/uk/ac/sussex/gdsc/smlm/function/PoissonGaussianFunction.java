@@ -395,7 +395,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
     // change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
     // saddlepoint -= change;
-    // } while (FastMath.abs(change) > EPSILON * FastMath.abs(saddlepoint));
+    // } while (Math.abs(change) > EPSILON * Math.abs(saddlepoint));
     // return saddlepoint;
 
     // Limit the number of iterations
@@ -403,7 +403,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
       final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
       change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
       saddlepoint -= change;
-      if (FastMath.abs(change) <= EPSILON * FastMath.abs(saddlepoint)) {
+      if (Math.abs(change) <= EPSILON * Math.abs(saddlepoint)) {
         return saddlepoint;
       }
     }

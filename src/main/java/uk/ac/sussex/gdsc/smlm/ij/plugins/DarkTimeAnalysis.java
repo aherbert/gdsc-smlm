@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringEngine;
@@ -217,7 +216,7 @@ public class DarkTimeAnalysis implements PlugIn {
     final double d = settings.searchDistance / results.getCalibrationReader().getNmPerPixel();
     int range = max - min + 1;
     if (settings.maxDarkTime > 0) {
-      range = FastMath.max(1, (int) Math.round(settings.maxDarkTime * 1000 / msPerFrame));
+      range = Math.max(1, (int) Math.round(settings.maxDarkTime * 1000 / msPerFrame));
     }
 
     final TrackProgress tracker = SimpleImageJTrackProgress.getInstance();

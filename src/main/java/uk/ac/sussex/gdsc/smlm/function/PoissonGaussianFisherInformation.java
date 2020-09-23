@@ -29,7 +29,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import java.util.Arrays;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
@@ -518,12 +517,12 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
         // Occurs when the convolution has grown too big
         return sum;
       }
-      final double delta = FastMath.abs(sum - oldSum);
+      final double delta = Math.abs(sum - oldSum);
       // System.out.printf("s=%g theta=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, theta,
       // iteration, sum, oldSum,
-      // delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
+      // delta / (Math.abs(oldSum) + Math.abs(sum)) * 0.5);
       final double rLimit =
-          getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5;
+          getRelativeAccuracy() * (Math.abs(oldSum) + Math.abs(sum)) * 0.5;
       if (delta <= rLimit) {
         break;
       }

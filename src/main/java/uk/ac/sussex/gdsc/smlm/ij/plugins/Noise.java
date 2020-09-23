@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -307,8 +306,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     final double[] b1 = Tools.getMinMax(yValues1);
     if (twoMethods) {
       final double[] b2 = Tools.getMinMax(yValues2);
-      b1[0] = FastMath.min(b1[0], b2[0]);
-      b1[1] = FastMath.max(b1[1], b2[1]);
+      b1[0] = Math.min(b1[0], b2[0]);
+      b1[1] = Math.max(b1[1], b2[1]);
     }
 
     final String title = imp.getTitle() + " Noise";

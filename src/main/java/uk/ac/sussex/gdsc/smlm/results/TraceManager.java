@@ -28,7 +28,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -267,7 +266,7 @@ public class TraceManager {
       final int currentIndex = nextIndex;
       final int t = localisations[currentIndex].time;
       nextIndex = indexes[t + 1];
-      int pastT = FastMath.max(t - timeThreshold, 0);
+      int pastT = Math.max(t - timeThreshold, 0);
       if (pulseInterval > 0) {
         // Support for splitting traces across pulse boundaries. Simply round the
         // previous timepoint to the next pulse boundary. Assume pulses start at t=1
@@ -1465,7 +1464,7 @@ public class TraceManager {
    * @param pulseInterval the pulse interval
    */
   public void setPulseInterval(int pulseInterval) {
-    this.pulseInterval = FastMath.max(0, pulseInterval);
+    this.pulseInterval = Math.max(0, pulseInterval);
   }
 
   /**
@@ -1551,10 +1550,10 @@ public class TraceManager {
           break;
         }
       }
-      final int pastEndIndex = endIndexes[FastMath.max(t - timeThreshold, 0)];
+      final int pastEndIndex = endIndexes[Math.max(t - timeThreshold, 0)];
       final int currentEndIndex = endIndexes[t];
       final int futureIndex =
-          FastMath.max(nextIndex, indexes[FastMath.min(t + 1 + timeThreshold, indexes.length - 1)]);
+          Math.max(nextIndex, indexes[Math.min(t + 1 + timeThreshold, indexes.length - 1)]);
 
       // Process all spots from this frame.
       for (int index = currentIndex; index < nextIndex; index++) {

@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -536,7 +535,7 @@ public class Gaussian2DFitter {
         }
       }
 
-      return new FitResult(result, FastMath.max(ySize - solver.getNumberOfFittedParameters(), 0),
+      return new FitResult(result, Math.max(ySize - solver.getNumberOfFittedParameters(), 0),
           solver.getValue(), initialParams, params, paramsDev, npeaks,
           solver.getNumberOfFittedParameters(), statusData, solver.getIterations(),
           solver.getEvaluations());

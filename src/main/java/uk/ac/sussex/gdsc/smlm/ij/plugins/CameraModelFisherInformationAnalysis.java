@@ -38,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -538,7 +537,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
     final double[] photons = new double[exp.length];
     for (int i = 0; i < photons.length; i++) {
-      photons[i] = FastMath.pow(10, exp[i]);
+      photons[i] = Math.pow(10, exp[i]);
     }
 
     // Get the alpha.
@@ -621,7 +620,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final double h = (exp[exp.length - 1] - exp[0]) / n;
     for (int i = 0; i <= n; i++) {
       iexp[i] = exp[0] + i * h;
-      iphotons[i] = FastMath.pow(10, iexp[i]);
+      iphotons[i] = Math.pow(10, iexp[i]);
     }
     final double[] ix = (logScaleX) ? iphotons : iexp;
     final double[] ialpha1 = getAlpha(if1, iphotons);
@@ -985,13 +984,13 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     // Sort.sortArrays(alpha, exp, true);
 
     // Test if we can use ImageJ support for a X log scale
-    final boolean logScaleX = ((float) FastMath.pow(10, exp[0]) != 0);
+    final boolean logScaleX = ((float) Math.pow(10, exp[0]) != 0);
     double[] x = exp;
     String xTitle = "log10(photons)";
     if (logScaleX) {
       final double[] photons = new double[exp.length];
       for (int i = 0; i < photons.length; i++) {
-        photons[i] = FastMath.pow(10, exp[i]);
+        photons[i] = Math.pow(10, exp[i]);
       }
       x = photons;
       xTitle = "photons";
@@ -1016,11 +1015,11 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       for (int j = 0; j < n; j++) {
         final double e = exp[i_1] + j * h;
         iexp.add(e);
-        iphotons.add(FastMath.pow(10, e));
+        iphotons.add(Math.pow(10, e));
       }
     }
     iexp.add(exp[exp.length - 1]);
-    iphotons.add(FastMath.pow(10, exp[exp.length - 1]));
+    iphotons.add(Math.pow(10, exp[exp.length - 1]));
     final double[] photons = iphotons.toArray();
     final double[] ix = (logScaleX) ? photons : iexp.toArray();
     final double[] ialpha1 = getAlpha(if1, photons);

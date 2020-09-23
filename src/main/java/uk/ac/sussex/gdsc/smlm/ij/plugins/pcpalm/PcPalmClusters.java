@@ -48,7 +48,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.clustering.Cluster;
 import uk.ac.sussex.gdsc.core.clustering.ClusterPoint;
 import uk.ac.sussex.gdsc.core.clustering.ClusteringAlgorithm;
@@ -788,11 +787,11 @@ public class PcPalmClusters implements PlugIn {
   private static boolean subtractNoise(HistogramData histogramData, HistogramData noiseData) {
     final float[] v1 = normalise(histogramData);
     final float[] v2 = normalise(noiseData);
-    final int length = v1.length; // FastMath.max(v1.length, v2.length)
+    final int length = v1.length; // Math.max(v1.length, v2.length)
     final double factor = (histogramData.frames * histogramData.area);
     for (int i = 0; i < length; i++) {
       histogramData.histogram[1][i] =
-          (float) (FastMath.max(0, v1[i] - ((i < v2.length) ? v2[i] : 0)) * factor);
+          (float) (Math.max(0, v1[i] - ((i < v2.length) ? v2[i] : 0)) * factor);
     }
     return true;
   }

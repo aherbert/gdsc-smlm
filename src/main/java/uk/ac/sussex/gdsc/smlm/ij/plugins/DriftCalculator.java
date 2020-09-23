@@ -64,7 +64,6 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
@@ -778,10 +777,10 @@ public class DriftCalculator implements PlugIn {
     // Check the bounds for the smoothing
     final int original = bandwidthInpoints;
     if (settings.minSmoothingPoints > 0) {
-      bandwidthInpoints = FastMath.max(bandwidthInpoints, settings.minSmoothingPoints);
+      bandwidthInpoints = Math.max(bandwidthInpoints, settings.minSmoothingPoints);
     }
     if (settings.maxSmoothingPoints > 0) {
-      bandwidthInpoints = FastMath.min(bandwidthInpoints, settings.maxSmoothingPoints);
+      bandwidthInpoints = Math.min(bandwidthInpoints, settings.maxSmoothingPoints);
     }
 
     final double newSmoothing = (double) bandwidthInpoints / n;
@@ -1374,7 +1373,7 @@ public class DriftCalculator implements PlugIn {
 
     // Calculate a scale to use when constructing the images for alignment
     final Rectangle bounds = results.getBounds(true);
-    final float scale = (reconstructionSize - 1f) / FastMath.max(bounds.width, bounds.height);
+    final float scale = (reconstructionSize - 1f) / Math.max(bounds.width, bounds.height);
 
     executor = Executors.newFixedThreadPool(Prefs.getThreads());
 
@@ -1600,7 +1599,7 @@ public class DriftCalculator implements PlugIn {
    * @return The images per thread
    */
   private static int getImagesPerThread(final ImageProcessor[] images) {
-    return FastMath.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
+    return Math.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
   }
 
   private static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
@@ -1628,7 +1627,7 @@ public class DriftCalculator implements PlugIn {
   private double[][] calculateUsingImageStack(ImageStack stack, int[] limits) {
     // Update the limits using the stack size
     final int upperT = settings.startFrame + settings.frameSpacing * (stack.getSize() - 1);
-    limits[1] = FastMath.max(limits[1], upperT);
+    limits[1] = Math.max(limits[1], upperT);
 
     // TODO - Truncate the stack if there are far too many frames for the localisation limits
 

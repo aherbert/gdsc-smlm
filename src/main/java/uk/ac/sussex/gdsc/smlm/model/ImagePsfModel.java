@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import java.util.Arrays;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
@@ -255,7 +254,7 @@ public class ImagePsfModel extends PsfModel {
 
     double max = 0;
     for (int i = 0; i < image.length; i++) {
-      max = FastMath.max(max, MathUtils.sum(image[i]));
+      max = Math.max(max, MathUtils.sum(image[i]));
     }
 
     if (max <= 0) {
@@ -502,7 +501,7 @@ public class ImagePsfModel extends PsfModel {
         continue;
       }
       final int lowerV = lv[y];
-      final int upperV = FastMath.min(lv[y + 1], psfWidth - 1);
+      final int upperV = Math.min(lv[y + 1], psfWidth - 1);
       for (int x = 0, i = y * x0range; x < x0range; x++, i++) {
         if (lu[x] > psfWidth - 1) {
           break;
@@ -565,8 +564,8 @@ public class ImagePsfModel extends PsfModel {
     // if (upperU < 0 || upperV < 0)
     // return 0;
 
-    upperU = FastMath.min(upperU, psfWidth - 1);
-    // upperV = FastMath.min(upperV, psfWidth - 1);
+    upperU = Math.min(upperU, psfWidth - 1);
+    // upperV = Math.min(upperV, psfWidth - 1);
 
     int index = upperV * psfWidth + upperU;
     double sum = rollingSum[index];
@@ -608,8 +607,8 @@ public class ImagePsfModel extends PsfModel {
       return 0;
     }
 
-    upperU = FastMath.min(upperU, psfWidth - 1);
-    upperV = FastMath.min(upperV, psfWidth - 1);
+    upperU = Math.min(upperU, psfWidth - 1);
+    upperV = Math.min(upperV, psfWidth - 1);
 
     int index = upperV * psfWidth + upperU;
     double sum = rollingSum[index];
@@ -635,8 +634,8 @@ public class ImagePsfModel extends PsfModel {
     if (upperU < 0 || upperV < 0) {
       return 0;
     }
-    upperU = FastMath.min(upperU, psfWidth - 1);
-    upperV = FastMath.min(upperV, psfWidth - 1);
+    upperU = Math.min(upperU, psfWidth - 1);
+    upperV = Math.min(upperV, psfWidth - 1);
 
     final int index = upperV * psfWidth + upperU;
     return rollingSum[index];

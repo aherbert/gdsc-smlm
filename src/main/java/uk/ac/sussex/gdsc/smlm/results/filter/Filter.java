@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import java.util.List;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.match.FractionClassificationResult;
@@ -1385,7 +1384,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
     // NOTE: If the distance is required for a certain type of analysis then this could be done
     // using injection of an interface for calculating the distance.
 
-    final int n = FastMath.min(length(), other.length());
+    final int n = Math.min(length(), other.length());
     final double[] s1 = sequence();
     final double[] s2 = other.sequence();
     double distance = 0;

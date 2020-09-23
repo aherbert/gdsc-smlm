@@ -141,7 +141,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
    */
   public CustomPowellOptimizer(double rel, double abs, ConvergenceChecker<PointValuePair> checker,
       boolean basisConvergence) {
-    this(rel, abs, FastMath.sqrt(rel), FastMath.sqrt(abs), checker, basisConvergence);
+    this(rel, abs, Math.sqrt(rel), Math.sqrt(abs), checker, basisConvergence);
   }
 
   /**

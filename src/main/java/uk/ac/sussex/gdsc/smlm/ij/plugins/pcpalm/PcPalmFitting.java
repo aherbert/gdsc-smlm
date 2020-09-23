@@ -399,7 +399,7 @@ public class PcPalmFitting implements PlugIn {
     int size = 0;
     for (final CorrelationResult r : results) {
       peakDensity += r.peakDensity;
-      size = FastMath.max(size, r.gr[0].length);
+      size = Math.max(size, r.gr[0].length);
     }
     peakDensity /= results.size();
 

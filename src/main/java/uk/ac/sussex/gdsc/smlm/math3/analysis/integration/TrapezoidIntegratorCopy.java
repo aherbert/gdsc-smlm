@@ -24,7 +24,6 @@ import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Implements the <a href="http://mathworld.wolfram.com/TrapezoidalRule.html">
@@ -201,9 +200,9 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
             final int i = getIterations();
             final double t = stage(this, i);
             if (i >= getMinimalIterationCount()) {
-                final double delta = FastMath.abs(t - oldt);
+                final double delta = Math.abs(t - oldt);
                 final double rLimit =
-                    getRelativeAccuracy() * (FastMath.abs(oldt) + FastMath.abs(t)) * 0.5;
+                    getRelativeAccuracy() * (Math.abs(oldt) + Math.abs(t)) * 0.5;
                 if ((delta <= rLimit) || (delta <= getAbsoluteAccuracy())) {
                     return t;
                 }

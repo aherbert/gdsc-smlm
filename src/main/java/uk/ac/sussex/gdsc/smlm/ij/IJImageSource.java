@@ -33,7 +33,6 @@ import ij.io.FileInfo;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import java.awt.Rectangle;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 
 /**
@@ -189,7 +188,7 @@ public class IJImageSource extends ImageSource {
     super(imp.getTitle());
     // Ensure only a single frame is processed
     singleFrame = startFrame;
-    this.extraFrames = FastMath.max(0, extraFrames);
+    this.extraFrames = Math.max(0, extraFrames);
     initialise(imp);
   }
 

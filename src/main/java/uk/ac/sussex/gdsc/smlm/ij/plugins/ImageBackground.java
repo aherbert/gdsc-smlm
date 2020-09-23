@@ -32,7 +32,6 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 
 /**
@@ -177,7 +176,7 @@ public class ImageBackground implements PlugInFilter {
   private void subtractBias(ImageProcessor background) {
     final float[] data = (float[]) background.getPixels();
     for (int i = 0; i < data.length; i++) {
-      data[i] = FastMath.max(0f, data[i] - settings.bias);
+      data[i] = Math.max(0f, data[i] - settings.bias);
     }
     background.resetMinAndMax();
   }

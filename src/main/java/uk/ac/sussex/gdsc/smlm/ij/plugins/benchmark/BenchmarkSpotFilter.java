@@ -48,7 +48,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -600,7 +599,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       // So for now I will use FP (anti-score) in the range 0-1.
 
       // Only ever allow an anti-score in the range 0-1
-      return FastMath.max(0, 1 - score);
+      return Math.max(0, 1 - score);
     }
 
     /**

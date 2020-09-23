@@ -33,7 +33,6 @@ import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -218,7 +217,7 @@ public class FilterResults implements PlugIn {
   }
 
   private static float getDrift(PeakResult result, float x, float y) {
-    return FastMath.max(Math.abs(result.getOrigX() + 0.5f - x),
+    return Math.max(Math.abs(result.getOrigX() + 0.5f - x),
         Math.abs(result.getOrigY() + 0.5f - y));
   }
 

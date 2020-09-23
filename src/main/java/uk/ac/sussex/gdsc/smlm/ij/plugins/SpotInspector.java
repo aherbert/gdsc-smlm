@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -321,8 +320,8 @@ public class SpotInspector implements PlugIn {
         final double upper = stats.getPercentile(75);
         final double iqr = upper - lower;
 
-        yMin = FastMath.max(lower - iqr, stats.getMin());
-        yMax = FastMath.min(upper + iqr, stats.getMax());
+        yMin = Math.max(lower - iqr, stats.getMin());
+        yMax = Math.min(upper + iqr, stats.getMax());
 
         IJ.log(String.format("Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),
             stats.getMax(), yMin, yMax));
@@ -360,8 +359,8 @@ public class SpotInspector implements PlugIn {
       // Extract a region but crop to the image bounds
       int minX = x - settings.radius;
       int minY = y - settings.radius;
-      final int maxX = FastMath.min(x + settings.radius + 1, w);
-      final int maxY = FastMath.min(y + settings.radius + 1, h);
+      final int maxX = Math.min(x + settings.radius + 1, w);
+      final int maxY = Math.min(y + settings.radius + 1, h);
 
       int padX = 0;
       int padY = 0;
@@ -452,12 +451,12 @@ public class SpotInspector implements PlugIn {
     switch (settings.sortOrderIndex) {
       case 9: // Shift
         // We do not have the original centroid so use the original X/Y
-        score = FastMath.max(sp.x[index] - result.getOrigX() + 0.5f,
+        score = Math.max(sp.x[index] - result.getOrigX() + 0.5f,
             sp.y[index] - result.getOrigY() + 0.5f);
         negative = true;
         break;
       case 8: // Width factor
-        score = getFactor(FastMath.max(wp.wx[index], wp.wy[index]), stdDevMax);
+        score = getFactor(Math.max(wp.wx[index], wp.wy[index]), stdDevMax);
         negative = true;
         break;
       case 7:

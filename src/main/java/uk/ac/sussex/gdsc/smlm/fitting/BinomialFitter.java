@@ -284,7 +284,7 @@ public class BinomialFitter {
 
     // The model is only fitting the probability p
     // For a binomial n*p = mean => p = mean/n
-    final double[] initialSolution = new double[] {FastMath.min(mean / n, 1)};
+    final double[] initialSolution = new double[] {Math.min(mean / n, 1)};
 
     // Create the function
     final BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);
@@ -648,7 +648,7 @@ public class BinomialFitter {
       // // Set the delta using the desired fractional accuracy.
       // // See Numerical Recipes, The Art of Scientific Computing (2nd edition) Chapter 5.7
       // // on numerical derivatives
-      // final double delta = FastMath.cbrt(1e-6);
+      // final double delta = Math.cbrt(1e-6);
       // final double h = delta * p;
       //
       // // Ensure we stay within the 0-1 bounds

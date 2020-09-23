@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 
@@ -40,7 +39,7 @@ public class GaussianOverlapAnalysis {
    * A constant holding the maximum value an {@code int} can have, 2<sup>31</sup>-1.
    */
   private static final long MAX_VALUE = Integer.MAX_VALUE;
-  private static final double SQRT2 = FastMath.sqrt(2.0);
+  private static final double SQRT2 = Math.sqrt(2.0);
 
   private final int flags;
   private final AstigmatismZModel zModel;

@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Computes the block average for each point within the array.
  *
@@ -1922,8 +1920,8 @@ public class AverageFilter {
     final float[] newData = floatBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -2008,8 +2006,8 @@ public class AverageFilter {
     final float[] newData = floatBuffer(data.length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n1, maxx - 1);
-    final int ywidth = FastMath.min(n1, maxy - 1);
+    final int xwidth = Math.min(n1, maxx - 1);
+    final int ywidth = Math.min(n1, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 

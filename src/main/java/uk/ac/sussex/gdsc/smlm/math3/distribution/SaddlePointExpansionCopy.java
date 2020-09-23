@@ -116,7 +116,7 @@ final class SaddlePointExpansionCopy {
         double ret;
         if (z < 15.0) {
             final double z2 = 2.0 * z;
-            if (FastMath.floor(z2) == z2) {
+            if (Math.floor(z2) == z2) {
                 ret = EXACT_STIRLING_ERRORS[(int) z2];
             } else {
                 ret = Gamma.logGamma(z + 1.0) - (z + 0.5) * FastMath.log(z) +
@@ -153,7 +153,7 @@ final class SaddlePointExpansionCopy {
      */
     static double getDeviancePart(double x, double mu) {
         double ret;
-        if (FastMath.abs(x - mu) < 0.1 * (x + mu)) {
+        if (Math.abs(x - mu) < 0.1 * (x + mu)) {
             final double d = x - mu;
             double v = d / (x + mu);
             double s1 = v * d;

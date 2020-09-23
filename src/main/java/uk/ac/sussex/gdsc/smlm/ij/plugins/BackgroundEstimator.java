@@ -42,7 +42,6 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -200,7 +199,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     IJ.showStatus("Estimating background ...");
 
     final int start = imp.getCurrentSlice();
-    final int end = FastMath.min(imp.getStackSize(), start + 100);
+    final int end = Math.min(imp.getStackSize(), start + 100);
     final int size = end - start + 1;
     final double[] xValues = new double[size];
     final double[] noise1 = new double[size];

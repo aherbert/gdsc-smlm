@@ -28,7 +28,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -639,7 +638,7 @@ class ImageSourceTest {
     float[] next = null;
     while ((next = source.next()) != null) {
       // Get the range for the data
-      final int endE = FastMath.min(i1 + 2, expected.length - 1);
+      final int endE = Math.min(i1 + 2, expected.length - 1);
       final int startFrame = expected[i1];
       final int endFrame = expected[endE];
 
@@ -691,7 +690,7 @@ class ImageSourceTest {
     for (int i = 0; i < frames.length; i++) {
       // Get the range for the data
       int startE = frames[i];
-      final int endE = FastMath.min(startE + 2, expected.length - 1);
+      final int endE = Math.min(startE + 2, expected.length - 1);
       final int startFrame = expected[startE];
       final int endFrame = expected[endE];
 

@@ -54,8 +54,7 @@ class FastMathTest {
   }
 
   //@formatter:off
-  private abstract class FunctionTimingTask extends BaseTimingTask
-  {
+  private abstract class FunctionTimingTask extends BaseTimingTask {
     double[] data;
     FunctionTimingTask(String name, double[] data) { super(name); this.data = data; }
     @Override
@@ -63,8 +62,7 @@ class FastMathTest {
     @Override
     public Object getData(int i) { return null;  }
     @Override
-    public Object run(Object o)
-    {
+    public Object run(Object o) {
       for (int i=0; i<data.length; i++) {
         value(data[i]);
       }
@@ -72,33 +70,34 @@ class FastMathTest {
     }
     abstract double value(double d);
   }
-  private class MathPow1_3 extends FunctionTimingTask
-  {
+  private class MathPow1_3 extends FunctionTimingTask {
     final double THIRD = 1.0/3.0;
     MathPow1_3(double[] data) { super("Math pow 1/3", data); }
     @Override
-    double value(double d)
-    {
+    double value(double d) {
       return Math.pow(d, THIRD);
     }
   }
-  private class FastMathPow1_3 extends FunctionTimingTask
-  {
+  private class FastMathPow1_3 extends FunctionTimingTask {
     final double THIRD = 1.0/3.0;
     FastMathPow1_3(double[] data) { super("FastMath pow 1/3", data); }
     @Override
-    double value(double d)
-    {
+    double value(double d) {
       return FastMath.pow(d, THIRD);
     }
   }
-  private class FastMathCbrt extends FunctionTimingTask
-  {
+  private class FastMathCbrt extends FunctionTimingTask {
     FastMathCbrt(double[] data) { super("FastMath cbrt", data); }
     @Override
-    double value(double d)
-    {
+    double value(double d) {
       return FastMath.cbrt(d);
+    }
+  }
+  private class MathCbrt extends FunctionTimingTask {
+    MathCbrt(double[] data) { super("Math cbrt", data); }
+    @Override
+    double value(double d) {
+      return Math.cbrt(d);
     }
   }
   //@formatter:on
@@ -121,6 +120,7 @@ class FastMathTest {
     final TimingService ts = new TimingService(5);
     ts.execute(new MathPow1_3(x));
     ts.execute(new FastMathPow1_3(x));
+    ts.execute(new MathCbrt(x));
     ts.execute(new FastMathCbrt(x));
 
     final int size = ts.getSize();

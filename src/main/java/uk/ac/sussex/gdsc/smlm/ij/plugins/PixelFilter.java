@@ -36,7 +36,6 @@ import ij.util.Tools;
 import java.awt.AWTEvent;
 import java.awt.Label;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Filters pixels using the surrounding region.
@@ -134,8 +133,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
         double sumSquares = 0;
 
         int minU = x - settings.radius - 1;
-        final int maxU = FastMath.min(x + settings.radius, maxx - 1);
-        final int maxV = FastMath.min(y + settings.radius, maxy - 1);
+        final int maxU = Math.min(x + settings.radius, maxx - 1);
+        final int maxV = Math.min(y + settings.radius, maxy - 1);
 
         // Compute sum from rolling sum using:
         // sum(u,v) =

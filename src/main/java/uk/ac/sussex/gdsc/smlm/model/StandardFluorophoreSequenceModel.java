@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.model;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
-import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 

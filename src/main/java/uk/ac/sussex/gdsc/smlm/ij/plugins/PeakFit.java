@@ -68,7 +68,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -2157,7 +2156,7 @@ public class PeakFit implements PlugInFilter {
       final ResultsImageSettings.Builder imageSettings =
           resultsSettings.getResultsImageSettingsBuilder();
       imageSettings.setImageType(ResultsImageType.DRAW_INTENSITY);
-      imageSettings.setScale(Math.ceil(1024.0 / FastMath.max(bounds.width, bounds.height)));
+      imageSettings.setScale(Math.ceil(1024.0 / Math.max(bounds.width, bounds.height)));
       imageSettings.setWeighted(true);
       imageSettings.setEqualised(true);
     }
@@ -3639,7 +3638,7 @@ public class PeakFit implements PlugInFilter {
    */
   private int getNumberOfThreads(int totalFrames) {
     final int t = Math.max(1, (int) (settings.fractionOfThreads * Prefs.getThreads()));
-    return FastMath.min(totalFrames, t);
+    return Math.min(totalFrames, t);
   }
 
   /**

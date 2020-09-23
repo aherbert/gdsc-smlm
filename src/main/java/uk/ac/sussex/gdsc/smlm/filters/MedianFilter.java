@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.FloatLinkedMedianWindow;
 
 /**
@@ -333,8 +332,8 @@ public class MedianFilter {
     final float[] newData = floatBuffer(floatDataBuffer, length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -639,8 +638,8 @@ public class MedianFilter {
     final float[] newData = floatBuffer(floatDataBuffer, length);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth - 1;
 
     // The size of the region

@@ -1081,7 +1081,7 @@ public class Fire implements PlugIn {
     final boolean equalised = false;
     double imageScale;
     if (fourierImageScale <= 0) {
-      double size = FastMath.max(bounds.width, bounds.height);
+      double size = Math.max(bounds.width, bounds.height);
       if (size <= 0) {
         size = 1;
       }
@@ -1347,8 +1347,8 @@ public class Fire implements PlugIn {
       final double fire = (result == null) ? 0 : result.fireNumber;
       y.add(fire);
 
-      yMin = FastMath.min(yMin, fire);
-      yMax = FastMath.max(yMax, fire);
+      yMin = Math.min(yMin, fire);
+      yMax = Math.max(yMax, fire);
     }
 
     // Add the final fire number
@@ -2497,8 +2497,8 @@ public class Fire implements PlugIn {
     } else {
       final double iqr = upper - lower;
 
-      yMin = FastMath.max(lower - iqr, stats.getMin());
-      yMax = FastMath.min(upper + iqr, stats.getMax());
+      yMin = Math.max(lower - iqr, stats.getMin());
+      yMax = Math.min(upper + iqr, stats.getMax());
 
       if (logFitParameters) {
         ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),

@@ -59,7 +59,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -1443,7 +1442,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       // Do some simple validation
 
       // Check if centre is within the region
-      final double border = FastMath.min(width, height) / 4.0;
+      final double border = Math.min(width, height) / 4.0;
       if ((params[Gaussian2DFunction.X_POSITION] < border
           || params[Gaussian2DFunction.X_POSITION] > width - border)
           || params[Gaussian2DFunction.Y_POSITION] < border
@@ -1452,7 +1451,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       }
 
       // Check the width is reasonable
-      final double regionSize = FastMath.max(width, height) * 0.5;
+      final double regionSize = Math.max(width, height) * 0.5;
       if (params[Gaussian2DFunction.X_SD] < 0 || params[Gaussian2DFunction.X_SD] > regionSize
           || params[Gaussian2DFunction.Y_SD] < 0 || params[Gaussian2DFunction.Y_SD] > regionSize) {
         return 1;
@@ -1487,7 +1486,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
       // Do some simple validation
 
-      final double regionSize = FastMath.max(width, height) * 0.5;
+      final double regionSize = Math.max(width, height) * 0.5;
       for (int n = 0; n < 2; n++) {
         // Check the width is reasonable
         if (params[n * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_SD] < 0
@@ -2717,7 +2716,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
             double shift = filterFitConfig.getCoordinateShift();
             if (shift == 0 || shift == Double.POSITIVE_INFINITY) {
               // Allow the shift to span half of the fitted window.
-              shift = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);
+              shift = 0.5 * Math.min(regionBounds.width, regionBounds.height);
             }
 
             // Set an upper limit on the shift that is not too far outside the fit window

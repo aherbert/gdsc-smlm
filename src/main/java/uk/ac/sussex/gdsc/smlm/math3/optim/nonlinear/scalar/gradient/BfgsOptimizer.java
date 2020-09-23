@@ -38,7 +38,6 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GradientMultivariateOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
 
 /**
@@ -376,13 +375,13 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
       // Test for convergence on zero gradient.
       double test = 0;
       for (int i = 0; i < n; i++) {
-        final double temp = Math.abs(gradient[i]) * FastMath.max(Math.abs(point[i]), 1);
+        final double temp = Math.abs(gradient[i]) * Math.max(Math.abs(point[i]), 1);
         if (test < temp) {
           test = temp;
         }
       }
       // Compute the biggest gradient relative to the objective function
-      test /= FastMath.max(Math.abs(fp), 1);
+      test /= Math.max(Math.abs(fp), 1);
       if (test < gradientTolerance) {
         converged = GRADIENT;
         return updated;
@@ -577,7 +576,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
       // Compute lambda min
       double test = 0.0;
       for (int i = 0; i < n; i++) {
-        final double temp = Math.abs(searchDirection[i]) / FastMath.max(Math.abs(oldX[i]), 1.0);
+        final double temp = Math.abs(searchDirection[i]) / Math.max(Math.abs(oldX[i]), 1.0);
         if (temp > test) {
           test = temp;
         }
@@ -652,7 +651,7 @@ public class BfgsOptimizer extends GradientMultivariateOptimizer {
         alam2 = alam;
         f2 = functionValue;
         // Ensure the lambda is >= 0.1 lamda1, i.e. we take reasonable step
-        alam = FastMath.max(tmplam, 0.1 * alam);
+        alam = Math.max(tmplam, 0.1 * alam);
       }
     }
   }

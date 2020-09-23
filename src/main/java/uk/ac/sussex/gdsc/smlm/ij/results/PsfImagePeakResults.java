@@ -218,14 +218,14 @@ public class PsfImagePeakResults extends ImageJImagePeakResults {
     x -= 0.5 / scale;
     y -= 0.5 / scale;
 
-    final int xmin = FastMath.max(0, (int) Math.floor(x - width * scale));
+    final int xmin = Math.max(0, (int) Math.floor(x - width * scale));
     int xmax = (int) Math.ceil(x + width * scale);
-    final int ymin = FastMath.max(0, (int) Math.floor(y - height * scale));
+    final int ymin = Math.max(0, (int) Math.floor(y - height * scale));
     int ymax = (int) Math.ceil(y + height * scale);
 
     // Clip range
-    xmax = (int) FastMath.min(xmax, xlimit);
-    ymax = (int) FastMath.min(ymax, ylimit);
+    xmax = (int) Math.min(xmax, xlimit);
+    ymax = (int) Math.min(ymax, ylimit);
 
     // Compute Gaussian PSF
     final int[] index = new int[(xmax - xmin + 1) * (ymax - ymin + 1)];

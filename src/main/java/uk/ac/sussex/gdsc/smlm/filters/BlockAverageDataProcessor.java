@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
@@ -105,7 +104,7 @@ public class BlockAverageDataProcessor extends DataProcessor {
       smoothData = Arrays.copyOf(data, width * height);
 
       // Check upper limits are safe
-      final int tmpSmooth = FastMath.min((int) smooth, FastMath.min(width, height) / 2);
+      final int tmpSmooth = Math.min((int) smooth, Math.min(width, height) / 2);
 
       if (tmpSmooth <= getBorder()) {
         filter.rollingBlockFilterInternal(smoothData, width, height, tmpSmooth);

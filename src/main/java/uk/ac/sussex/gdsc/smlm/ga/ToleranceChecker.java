@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Check if converged using a tolerance on the fitness and/or sequence change, and the number of
  * iterations.
@@ -127,7 +125,7 @@ public abstract class ToleranceChecker<T extends Comparable<T>> implements Conve
     if (difference <= absolute) {
       return true;
     }
-    final double size = FastMath.max(Math.abs(previous), Math.abs(current));
+    final double size = Math.max(Math.abs(previous), Math.abs(current));
     return (difference <= size * relative);
   }
 

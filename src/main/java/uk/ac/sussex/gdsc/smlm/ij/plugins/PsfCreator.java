@@ -69,7 +69,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
@@ -816,8 +815,8 @@ public class PsfCreator implements PlugInFilter {
     final double lower = stats.getPercentile(25);
     final double upper = stats.getPercentile(75);
     final double iqr = (upper - lower) * 2;
-    limits[0] = FastMath.max(lower - iqr, limits[0]);
-    limits[1] = FastMath.min(upper + iqr, limits[1]);
+    limits[0] = Math.max(lower - iqr, limits[0]);
+    limits[1] = Math.min(upper + iqr, limits[1]);
     return limits;
   }
 
@@ -1131,7 +1130,7 @@ public class PsfCreator implements PlugInFilter {
     // ImageWindow imageWindow = new ImageWindow();
     for (int i = 0; i < spot.length; i++) {
       for (int j = 0; j < spot[i].length; j++) {
-        spot[i][j] = FastMath.max(spot[i][j] - background, 0);
+        spot[i][j] = Math.max(spot[i][j] - background, 0);
       }
     }
 
@@ -1139,10 +1138,10 @@ public class PsfCreator implements PlugInFilter {
     if (lastWidth != spotWidth || lastHeight != spotHeight) {
       final double cx = spotWidth * 0.5;
       final double cy = spotHeight * 0.5;
-      minx = FastMath.max(0, (int) (cx - boxRadius * 0.5));
-      maxx = FastMath.min(spotWidth, (int) Math.ceil(cx + boxRadius * 0.5));
-      miny = FastMath.max(0, (int) (cy - boxRadius * 0.5));
-      maxy = FastMath.min(spotHeight, (int) Math.ceil(cy + boxRadius * 0.5));
+      minx = Math.max(0, (int) (cx - boxRadius * 0.5));
+      maxx = Math.min(spotWidth, (int) Math.ceil(cx + boxRadius * 0.5));
+      miny = Math.max(0, (int) (cy - boxRadius * 0.5));
+      maxy = Math.min(spotHeight, (int) Math.ceil(cy + boxRadius * 0.5));
 
       // Precompute square distances
       final double[] dx2 = new double[maxx - minx + 1];
@@ -1474,8 +1473,8 @@ public class PsfCreator implements PlugInFilter {
     float[] data = (float[]) psf.getPixels(n);
     double foregroundSum = 0;
     int foregroundN = 0;
-    final int min = FastMath.max(0, (int) (cx - 3 * sigma));
-    final int max = FastMath.min(psf.getWidth() - 1, (int) Math.ceil(cx + 3 * sigma));
+    final int min = Math.max(0, (int) (cx - 3 * sigma));
+    final int max = Math.min(psf.getWidth() - 1, (int) Math.ceil(cx + 3 * sigma));
 
     // Precompute square distances within 3 sigma of the centre
     final double r2 = 3 * sigma * 3 * sigma;
@@ -1617,8 +1616,8 @@ public class PsfCreator implements PlugInFilter {
     fitConfig = config.getFitConfiguration();
     nmPerPixel = fitConfig.getCalibrationReader().getNmPerPixel();
     if (settings.getRadius() < 5
-        * FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())) {
-      settings.setRadius(5 * FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd()));
+        * Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())) {
+      settings.setRadius(5 * Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd()));
       ImageJUtils.log("Radius is less than 5 * PSF standard deviation, increasing to %s",
           MathUtils.rounded(settings.getRadius()));
     }
@@ -1890,7 +1889,7 @@ public class PsfCreator implements PlugInFilter {
 
     // Set limits for the fit
     final float maxWidth =
-        (float) (FastMath.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())
+        (float) (Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())
             * settings.getMagnification() * 4);
     final float maxSignal = 2; // PSF is normalised to 1
 
@@ -1908,7 +1907,7 @@ public class PsfCreator implements PlugInFilter {
       int index = counter.getAndIncrement();
 
       // Remove bad fits where the width/signal is above the expected
-      final float w = FastMath.max(wp.wx[index], wp.wy[index]);
+      final float w = Math.max(wp.wx[index], wp.wy[index]);
       if (peak.getIntensity() > maxSignal || w > maxWidth) {
         return;
       }
@@ -2152,8 +2151,8 @@ public class PsfCreator implements PlugInFilter {
     if (signalZ == null) {
       // Get the bounds
       final int radius = (int) Math.round(fittedSd * factor);
-      final int min = FastMath.max(0, psf.getWidth() / 2 - radius);
-      final int max = FastMath.min(psf.getWidth() - 1, psf.getWidth() / 2 + radius);
+      final int min = Math.max(0, psf.getWidth() / 2 - radius);
+      final int max = Math.min(psf.getWidth() - 1, psf.getWidth() / 2 + radius);
 
       // Create a circle mask of the PSF projection
       final ByteProcessor circle = new ByteProcessor(max - min + 1, max - min + 1);

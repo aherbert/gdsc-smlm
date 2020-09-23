@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -273,7 +272,7 @@ public class Cluster {
     final double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
     final double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 
-    final double sPeak = FastMath.max(sxm, sym);
+    final double sPeak = Math.max(sxm, sym);
 
     return sPeak;
   }

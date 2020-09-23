@@ -46,7 +46,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
@@ -133,7 +132,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
     public double[] map(double[] point) {
       point = point.clone();
       for (final int i : map) {
-        point[i] = Math.sqrt(FastMath.abs(point[i])) * FastMath.signum(point[i]);
+        point[i] = Math.sqrt(Math.abs(point[i])) * Math.signum(point[i]);
       }
       return point;
     }
@@ -340,8 +339,8 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
 
         // Perhaps these thresholds should be tighter?
         // The default is to use the sqrt() of the overall tolerance
-        // final double lineRel = FastMath.sqrt(relativeThreshold);
-        // final double lineAbs = FastMath.sqrt(absoluteThreshold);
+        // final double lineRel = Math.sqrt(relativeThreshold);
+        // final double lineAbs = Math.sqrt(absoluteThreshold);
         // final double lineRel = relativeThreshold * 1e2;
         // final double lineAbs = absoluteThreshold * 1e2;
 
@@ -436,7 +435,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
         // The Apache commons documentations states that convergence should occur between 30N and
         // 300N^2
         // function evaluations
-        final int n30 = FastMath.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
+        final int n30 = Math.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
         evaluations = 0;
         final OptimizationData[] data = new OptimizationData[] {new InitialGuess(startPoint),
             new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
@@ -574,7 +573,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
         for (final double d : gradient) {
           length += d * d;
         }
-        final double bracketingStep = FastMath.min(0.001, ((length > 1) ? 1.0 / length : 1));
+        final double bracketingStep = Math.min(0.001, ((length > 1) ? 1.0 / length : 1));
 
         o.setUseGradientLineSearch(gradientLineMinimisation);
 

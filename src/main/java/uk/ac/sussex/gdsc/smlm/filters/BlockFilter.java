@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Computes the block filter for each point within the array.
  *
@@ -1903,8 +1901,8 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     final float[] wdata = initialise(data, maxx, maxy, n, false);
 
     // Boundary control
-    final int xwidth = FastMath.min(n, maxx - 1);
-    final int ywidth = FastMath.min(n, maxy - 1);
+    final int xwidth = Math.min(n, maxx - 1);
+    final int ywidth = Math.min(n, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 
@@ -1987,8 +1985,8 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     final float[] wdata = initialise(data, maxx, maxy, weight, false);
 
     // Boundary control
-    final int xwidth = FastMath.min(n1, maxx - 1);
-    final int ywidth = FastMath.min(n1, maxy - 1);
+    final int xwidth = Math.min(n1, maxx - 1);
+    final int ywidth = Math.min(n1, maxy - 1);
     final int xlimit = maxx - xwidth;
     final int ylimit = maxy - ywidth;
 

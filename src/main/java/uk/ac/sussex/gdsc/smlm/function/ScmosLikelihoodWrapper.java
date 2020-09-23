@@ -88,7 +88,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     double sum = 0;
     for (int i = 0; i < n; i++) {
       varG2[i] = var[i] / (gain[i] * gain[i]);
-      x[i] = FastMath.max(0, (data[i] - offset[i]) / gain[i] + varG2[i]);
+      x[i] = Math.max(0, (data[i] - offset[i]) / gain[i] + varG2[i]);
       logG[i] = Math.log(gain[i]);
 
       sum += logGamma1(x[i]) + logG[i];
@@ -214,7 +214,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     final int n = data.length;
     final double[] x = new double[n];
     for (int i = 0; i < n; i++) {
-      x[i] = FastMath.max(0, (data[i] - offset[i]) / gain[i] + varG2[i]);
+      x[i] = Math.max(0, (data[i] - offset[i]) / gain[i] + varG2[i]);
     }
     return x;
   }
@@ -453,7 +453,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
    */
   public static double likelihood(double ui, float var, float gain, float offset, double data) {
     // double varG2 = var / (g * g);
-    // double x = FastMath.max(0, (k - o) / g + varG2);
+    // double x = Math.max(0, (k - o) / g + varG2);
     // double l = u + varG2;
     // double v = FastMath.exp(-l) * Math.pow(l, x) / gamma1(x);
     // if (v != v)

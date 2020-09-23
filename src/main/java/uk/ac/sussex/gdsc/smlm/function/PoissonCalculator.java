@@ -363,7 +363,7 @@ public class PoissonCalculator {
     if (x <= 2.5) {
       return Gamma.logGamma1p((x - 0.5) - 0.5);
     } else if (x <= 8.0) {
-      final int n = (int) FastMath.floor(x - 1.5);
+      final int n = (int) Math.floor(x - 1.5);
       double prod = 1.0;
       for (int i = 1; i <= n; i++) {
         prod *= x - i;

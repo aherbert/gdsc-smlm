@@ -889,9 +889,9 @@ public class EmGainAnalysis implements PlugInFilter {
       settings.settingSimulate = gd.getNextBoolean();
       settings.settingBias = gd.getNextNumber();
       settings.settingGain = gd.getNextNumber();
-      settings.settingNoise = FastMath.abs(gd.getNextNumber());
-      settings.settingPhotons = FastMath.abs(gd.getNextNumber());
-      settings.simulationSize = (int) FastMath.abs(gd.getNextNumber());
+      settings.settingNoise = Math.abs(gd.getNextNumber());
+      settings.settingPhotons = Math.abs(gd.getNextNumber());
+      settings.simulationSize = (int) Math.abs(gd.getNextNumber());
       settings.usePdf = gd.getNextBoolean();
       if (gd.invalidNumber() || settings.settingBias < 0 || settings.settingGain < 1
           || settings.settingPhotons == 0 || settings.simulationSize == 0) {
@@ -901,7 +901,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     settings.bias = gd.getNextNumber();
     settings.gain = gd.getNextNumber();
-    settings.noise = FastMath.abs(gd.getNextNumber());
+    settings.noise = Math.abs(gd.getNextNumber());
     settings.showApproximation = gd.getNextBoolean();
 
     if (gd.invalidNumber() || settings.bias < 0 || settings.gain < 1) {
@@ -1163,15 +1163,15 @@ public class EmGainAnalysis implements PlugInFilter {
     }
 
     settings.settingGain = gd.getNextNumber();
-    settings.settingNoise = FastMath.abs(gd.getNextNumber());
-    settings.settingPhotons = FastMath.abs(gd.getNextNumber());
+    settings.settingNoise = Math.abs(gd.getNextNumber());
+    settings.settingPhotons = Math.abs(gd.getNextNumber());
     settings.approximationType = gd.getNextChoiceIndex();
     settings.showApproximation = gd.getNextBoolean();
     if (extraOptions) {
       settings.settingOffset = gd.getNextNumber();
     }
-    settings.head = FastMath.abs(gd.getNextNumber());
-    settings.tail = FastMath.abs(gd.getNextNumber());
+    settings.head = Math.abs(gd.getNextNumber());
+    settings.tail = Math.abs(gd.getNextNumber());
     settings.relativeDelta = gd.getNextBoolean();
     settings.save();
 

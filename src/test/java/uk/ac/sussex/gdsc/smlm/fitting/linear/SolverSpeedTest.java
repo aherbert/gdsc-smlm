@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
@@ -530,7 +529,7 @@ class SolverSpeedTest {
   }
 
   private static ArrayList<float[][]> copyAfloat(ArrayList<float[][]> a, int iter) {
-    iter = FastMath.min(a.size(), iter);
+    iter = Math.min(a.size(), iter);
     final ArrayList<float[][]> a2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
       a2.add(copyfloat(a.get(i)));
@@ -549,7 +548,7 @@ class SolverSpeedTest {
   }
 
   private static ArrayList<float[]> copyBfloat(ArrayList<float[]> bdata, int iter) {
-    iter = FastMath.min(bdata.size(), iter);
+    iter = Math.min(bdata.size(), iter);
     final ArrayList<float[]> b2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
       b2.add(Arrays.copyOf(bdata.get(i), bdata.get(i).length));
@@ -558,7 +557,7 @@ class SolverSpeedTest {
   }
 
   private static ArrayList<double[][]> copyAdouble(ArrayList<float[][]> adata, int iter) {
-    iter = FastMath.min(adata.size(), iter);
+    iter = Math.min(adata.size(), iter);
     final ArrayList<double[][]> a2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
       a2.add(copydouble(adata.get(i)));
@@ -567,7 +566,7 @@ class SolverSpeedTest {
   }
 
   private static ArrayList<double[]> copyA2double(ArrayList<float[][]> adata, int iter) {
-    iter = FastMath.min(adata.size(), iter);
+    iter = Math.min(adata.size(), iter);
     final ArrayList<double[]> a2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
       a2.add(new DenseMatrix64F(copydouble(adata.get(i))).data);
@@ -590,7 +589,7 @@ class SolverSpeedTest {
   }
 
   private static ArrayList<double[]> copyBdouble(ArrayList<float[]> bdata, int iter) {
-    iter = FastMath.min(bdata.size(), iter);
+    iter = Math.min(bdata.size(), iter);
     final ArrayList<double[]> b2 = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {
       b2.add(copydouble(bdata.get(i)));
@@ -600,7 +599,7 @@ class SolverSpeedTest {
 
   protected void solveGaussJordan(ArrayList<double[][]> adata, ArrayList<double[]> bdata, int iter,
       GaussJordan solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solve(adata.get(i), bdata.get(i));
     }
@@ -608,7 +607,7 @@ class SolverSpeedTest {
 
   protected void solveLinearWithInversion(ArrayList<double[]> adata, ArrayList<double[]> bdata,
       int iter, EjmlLinearSolver solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       final double[] data = adata.get(i);
       solver.solveLinear(data, bdata.get(i));
@@ -618,7 +617,7 @@ class SolverSpeedTest {
 
   protected void solveLinear(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
       EjmlLinearSolver solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveLinear(adata.get(i), bdata.get(i));
     }
@@ -626,7 +625,7 @@ class SolverSpeedTest {
 
   protected void solveCholesky(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
       EjmlLinearSolver solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveCholesky(adata.get(i), bdata.get(i));
     }
@@ -634,7 +633,7 @@ class SolverSpeedTest {
 
   protected void solveCholeskyLdlT(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
       EjmlLinearSolver solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solveCholeskyLdlT(adata.get(i), bdata.get(i));
     }
@@ -642,7 +641,7 @@ class SolverSpeedTest {
 
   protected void solve(ArrayList<double[]> adata, ArrayList<double[]> bdata, int iter,
       EjmlLinearSolver solver) {
-    iter = FastMath.min(iter, adata.size());
+    iter = Math.min(iter, adata.size());
     for (int i = 0; i < iter; i++) {
       solver.solve(adata.get(i), bdata.get(i));
     }

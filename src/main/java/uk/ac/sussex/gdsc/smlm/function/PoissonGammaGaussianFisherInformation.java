@@ -558,7 +558,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // Find the minimum value to determine if A^2/P can be unchecked
     // for divide by zero error.
     // The min is always at the end.
-    final double minP = FastMath.min(FastMath.min(p[0], p[1]), p[p.length - 1]);
+    final double minP = Math.min(Math.min(p[0], p[1]), p[p.length - 1]);
 
     // int iMinP = SimpleArrayUtils.findMinIndex(p);
     // int iMinA = SimpleArrayUtils.findMinIndex(a);
@@ -598,16 +598,16 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         // Occurs when the convolution has grown too big
         break;
       }
-      final double delta = FastMath.abs(sum - oldSum);
+      final double delta = Math.abs(sum - oldSum);
       // System.out.printf("s=%g theta=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, theta,
       // iteration,
       // sum, oldSum,
-      // delta / (FastMath.abs(oldSum) + FastMath.abs(sum)) * 0.5);
-      // final double rLimit = getRelativeAccuracy() * (FastMath.abs(oldSum) + FastMath.abs(sum)) *
+      // delta / (Math.abs(oldSum) + Math.abs(sum)) * 0.5);
+      // final double rLimit = getRelativeAccuracy() * (Math.abs(oldSum) + Math.abs(sum)) *
       // 0.5;
       // Avoid problems with very large sums by scaling each individually
       final double rLimit =
-          (getRelativeAccuracy() * FastMath.abs(oldSum) + getRelativeAccuracy() * FastMath.abs(sum))
+          (getRelativeAccuracy() * Math.abs(oldSum) + getRelativeAccuracy() * Math.abs(sum))
               * 0.5;
       if (delta <= rLimit) {
         break;

@@ -1405,7 +1405,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     double max = 0;
     for (int i = 1; i < x.length; i++) {
       final double value = y[i] + sd[i];
-      max = FastMath.max(max, value);
+      max = Math.max(max, value);
     }
     plot.setLimits(0, x[x.length - 1] + exposureTime * 0.5, 0, max);
     plot.setColor(Color.blue);
@@ -1686,7 +1686,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     double[][] jacobian;
 
     public LinearFunction(double[] x, double[] y, int length) {
-      final int to = FastMath.min(x.length, 1 + length);
+      final int to = Math.min(x.length, 1 + length);
       this.x = Arrays.copyOfRange(x, 1, to);
       this.y = Arrays.copyOfRange(y, 1, to);
       jacobian = calculateJacobian();
@@ -1753,7 +1753,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
     public LinearFunctionWithIntercept(double[] x, double[] y, int length, boolean fitIntercept) {
       this.fitIntercept = fitIntercept;
-      final int to = FastMath.min(x.length, 1 + length);
+      final int to = Math.min(x.length, 1 + length);
       // Optionally include the intercept
       final int from = (fitIntercept) ? 0 : 1;
       this.x = Arrays.copyOfRange(x, from, to);
@@ -1832,7 +1832,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     public LinearFunctionWithMsdCorrectedIntercept(double[] x, double[] y, int length,
         boolean fitIntercept) {
       this.fitIntercept = fitIntercept;
-      final int to = FastMath.min(x.length, 1 + length);
+      final int to = Math.min(x.length, 1 + length);
       // Optionally include the intercept
       final int from = (fitIntercept) ? 0 : 1;
       this.x = Arrays.copyOfRange(x, from, to);

@@ -77,7 +77,6 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
@@ -842,7 +841,7 @@ public class CreateData implements PlugIn {
           }
         } else {
           // Use the density to get the number per frame
-          count = (int) FastMath.max(1, Math.round(areaInUm * settings.getDensity()));
+          count = (int) Math.max(1, Math.round(areaInUm * settings.getDensity()));
         }
       }
 
@@ -1540,7 +1539,7 @@ public class CreateData implements PlugIn {
 
   private UniformDistribution createUniformDistributionWithPsfWidthBorder() {
     double border = getHwhm() * 3;
-    border = FastMath.min(border, settings.getSize() / 4.0);
+    border = Math.min(border, settings.getSize() / 4.0);
     return createUniformDistribution(border);
   }
 
@@ -3069,7 +3068,7 @@ public class CreateData implements PlugIn {
       // When the random sample of the PSF is small the min and max sample positions
       // may not represent the spot region. Ensure we use an area around the origin.
       final int n = 3;
-      final int width = FastMath.min(settings.getSize(), 2 * n + 1);
+      final int width = Math.min(settings.getSize(), 2 * n + 1);
       int x0min = limit(origX - n);
       int x0max = limit(origX + n);
       int x1min = limit(origY - n);
@@ -3213,7 +3212,7 @@ public class CreateData implements PlugIn {
           final double scale = settings.getBackground() / max;
           for (int i = 0; i < backgroundPixels.length; i++) {
             // Ignore pixels below zero
-            backgroundPixels[i] = (float) (FastMath.max(0, data[i]) * scale);
+            backgroundPixels[i] = (float) (Math.max(0, data[i]) * scale);
           }
           return;
         }

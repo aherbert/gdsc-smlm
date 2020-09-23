@@ -31,7 +31,6 @@ import ij.plugin.PlugIn;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Predicate;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -201,8 +200,8 @@ public class CropResults implements PlugIn {
       double min = minMax.getMinimum();
       double max = minMax.getMaximum();
 
-      final double maxz = FastMath.min(settings.getMaxZ(), max);
-      final double minz = FastMath.max(settings.getMinZ(), min);
+      final double maxz = Math.min(settings.getMaxZ(), max);
+      final double minz = Math.max(settings.getMinZ(), min);
 
       // Display in nm
       converter = new IdentityTypeConverter<>(null);

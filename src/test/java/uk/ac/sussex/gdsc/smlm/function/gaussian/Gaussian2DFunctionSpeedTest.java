@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -460,7 +459,7 @@ class Gaussian2DFunctionSpeedTest {
   }
 
   protected ArrayList<double[]> copyList(ArrayList<double[]> paramsList, int iter) {
-    iter = FastMath.min(iter, paramsList.size());
+    iter = Math.min(iter, paramsList.size());
 
     final ArrayList<double[]> params2List = new ArrayList<>(iter);
     for (int i = 0; i < iter; i++) {

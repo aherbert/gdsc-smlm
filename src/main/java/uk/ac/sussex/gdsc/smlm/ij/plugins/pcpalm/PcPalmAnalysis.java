@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.jtransforms.fft.DoubleFFT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
@@ -695,7 +694,7 @@ public class PcPalmAnalysis implements PlugIn {
       // Original Sengupta paper uses 800nm for the padding size.
       // Limit to within 80% of the minimum dimension of the image.
       double maxRadius = settings.correlationDistance / settings.nmPerPixel;
-      final int imageSize = FastMath.min(im.getWidth(), im.getHeight());
+      final int imageSize = Math.min(im.getWidth(), im.getHeight());
       if (imageSize < 1.25 * maxRadius) {
         maxRadius = imageSize / 1.25;
       }
@@ -1059,7 +1058,7 @@ public class PcPalmAnalysis implements PlugIn {
    */
   private static FloatProcessor pad(ImageProcessor ip) {
     // Pad to a power of 2
-    final int size = FastMath.max(ip.getWidth(), ip.getHeight());
+    final int size = Math.max(ip.getWidth(), ip.getHeight());
     final int newSize = nextPowerOfTwo(size);
     if (size > newSize) {
       return null; // Error

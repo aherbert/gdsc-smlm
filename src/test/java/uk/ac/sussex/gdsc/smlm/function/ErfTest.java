@@ -63,39 +63,34 @@ class ErfTest {
   }
 
   //@formatter:off
-  private abstract static class BaseErf
-  {
+  private abstract static class BaseErf {
     String name;
     BaseErf(String name) { this.name = name; }
     abstract double erf(double x);
     abstract double erf(double x1, double x2);
   }
-  private static class ApacheErf extends BaseErf
-  {
+  private static class ApacheErf extends BaseErf {
     ApacheErf() {  super("apache erf"); }
     @Override
     double erf(double x) { return org.apache.commons.math3.special.Erf.erf(x); }
     @Override
     double erf(double x1, double x2) { return org.apache.commons.math3.special.Erf.erf(x1, x2); }
   }
-  private static class Erf extends BaseErf
-  {
+  private static class Erf extends BaseErf {
     Erf() {  super("erf"); }
     @Override
     double erf(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.erf(x); }
     @Override
     double erf(double x1, double x2) { return uk.ac.sussex.gdsc.smlm.function.Erf.erf(x1, x2); }
   }
-  private static class Erf0 extends BaseErf
-  {
+  private static class Erf0 extends BaseErf {
     Erf0() { super("erf0"); }
     @Override
     double erf(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.erf0(x); }
     @Override
     double erf(double x1, double x2) { return uk.ac.sussex.gdsc.smlm.function.Erf.erf0(x1, x2); }
   }
-  private static class Erf2 extends BaseErf
-  {
+  private static class Erf2 extends BaseErf {
     Erf2() { super("erf2"); }
     @Override
     double erf(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.erf2(x); }
@@ -523,44 +518,37 @@ class ErfTest {
   // See if power functions are faster
 
   //@formatter:off
-  private abstract static class BasePow
-  {
+  private abstract static class BasePow {
     String name;
     BasePow(String name) { this.name = name; }
     abstract double pow(double x);
   }
-  private static class MathPow4 extends BasePow
-  {
+  private static class MathPow4 extends BasePow {
     MathPow4() {  super("Math pow4"); }
     @Override
     double pow(double x) { return Math.pow(x, 4); }
   }
-  private static class FastMathPow4 extends BasePow
-  {
+  private static class FastMathPow4 extends BasePow {
     FastMathPow4() {  super("FastMath pow4"); }
     @Override
     double pow(double x) { return FastMath.pow(x, 4L); }
   }
-  private static class Pow4 extends BasePow
-  {
+  private static class Pow4 extends BasePow {
     Pow4() {  super("pow4"); }
     @Override
     double pow(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.pow4(x); }
   }
-  private static class MathPow16 extends BasePow
-  {
+  private static class MathPow16 extends BasePow {
     MathPow16() {  super("Math pow16"); }
     @Override
     double pow(double x) { return Math.pow(x, 16); }
   }
-  private static class FastMathPow16 extends BasePow
-  {
+  private static class FastMathPow16 extends BasePow {
     FastMathPow16() {  super("FastMath pow16"); }
     @Override
-    double pow(double x) { return FastMath.pow(x, 16); }
+    double pow(double x) { return FastMath.pow(x, 16L); }
   }
-  private static class Pow16 extends BasePow
-  {
+  private static class Pow16 extends BasePow {
     Pow16() {  super("pow16"); }
     @Override
     double pow(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.pow16(x); }
@@ -598,7 +586,7 @@ class ErfTest {
 
   @Test
   void powerApproxIsFaster() {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
+    //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final int range = 5000;
     final int steps = 100000;

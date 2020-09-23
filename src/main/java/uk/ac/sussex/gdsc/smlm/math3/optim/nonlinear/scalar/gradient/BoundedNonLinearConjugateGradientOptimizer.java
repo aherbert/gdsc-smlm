@@ -66,7 +66,6 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.SimpleUnivariateValueChecker;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Non-linear conjugate gradient optimizer. <br> This class supports both the Fletcher-Reeves and
@@ -398,7 +397,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
       final double initialStep) {
     final double yA = func.value(a);
     double yB = yA;
-    for (double step = initialStep; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
+    for (double step = initialStep; step < Double.MAX_VALUE; step *= Math.max(2, yA / yB)) {
       final double b = a + step;
       yB = func.value(b);
       if (yA * yB <= 0) {
@@ -435,7 +434,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
 
     double yB = yA;
     double lastB = Double.NaN;
-    for (double step = initialStep; step < Double.MAX_VALUE; step *= FastMath.max(2, yA / yB)) {
+    for (double step = initialStep; step < Double.MAX_VALUE; step *= Math.max(2, yA / yB)) {
       double upper = lower + step;
       yB = func.value(upper);
       if (yA * yB <= 0) {

@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import java.util.Arrays;
-import org.apache.commons.math3.util.FastMath;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.utils.CommonUtils;
 
@@ -99,7 +98,7 @@ public class Convolution {
     // Straightforward implementation of the convolution sum
     for (int n = 0; n < totalLength; n++) {
       double yn = 0;
-      int hi = FastMath.max(0, n + 1 - xLen);
+      int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       while (hi < hLen && xi >= 0) {
         yn += x[xi--] * h[hi++];
@@ -146,7 +145,7 @@ public class Convolution {
     // Straightforward implementation of the convolution sum
     for (int n = 0; n < totalLength; n++) {
       double yn = 0;
-      int hi = FastMath.max(0, n + 1 - xLen);
+      int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       while (hi < hLen && xi >= 0) {
         yn += x[xi--] * h[hi++];
@@ -190,7 +189,7 @@ public class Convolution {
     for (int n = 0; n < totalLength; n++) {
       double yn1 = 0;
       double yn2 = 0;
-      int hi = FastMath.max(0, n + 1 - xLen);
+      int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       while (hi < hLen && xi >= 0) {
         yn1 += x[xi] * h1[hi];
@@ -244,7 +243,7 @@ public class Convolution {
     for (int n = 0; n < totalLength; n++) {
       double yn1 = 0;
       double yn2 = 0;
-      int hi = FastMath.max(0, n + 1 - xLen);
+      int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       while (hi < hLen && xi >= 0) {
         yn1 += x[xi] * h1[hi];
@@ -296,7 +295,7 @@ public class Convolution {
     for (int n = 0; n < totalLength; n++) {
       double yn = 0;
       // hi is the index in the scaled up distribution H
-      final int hi = FastMath.max(0, n + 1 - xLen);
+      final int hi = Math.max(0, n + 1 - xLen);
       // xi is the index in the input distribution x
       int xi = n - hi;
 
@@ -358,7 +357,7 @@ public class Convolution {
 
     for (int n = 0; n < totalLength; n++) {
       double yn = 0;
-      final int hi = FastMath.max(0, n + 1 - xLen);
+      final int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       final int mod = hi % scale;
       int ihi = hi / scale;
@@ -416,7 +415,7 @@ public class Convolution {
       double yn1 = 0;
       double yn2 = 0;
       // hi is the index in the scaled up distribution H
-      final int hi = FastMath.max(0, n + 1 - xLen);
+      final int hi = Math.max(0, n + 1 - xLen);
       // xi is the index in the input distribution x
       int xi = n - hi;
 
@@ -486,7 +485,7 @@ public class Convolution {
     for (int n = 0; n < totalLength; n++) {
       double yn1 = 0;
       double yn2 = 0;
-      final int hi = FastMath.max(0, n + 1 - xLen);
+      final int hi = Math.max(0, n + 1 - xLen);
       int xi = n - hi;
       final int mod = hi % scale;
       int ihi = hi / scale;

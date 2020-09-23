@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * Count the type of fit that was performed.
@@ -37,7 +36,8 @@ public class FitTypeCounter {
    * Instantiates a new fit type counter.
    */
   public FitTypeCounter() {
-    this.count = new AtomicInteger[(int) FastMath.pow(2, FitType.NO_OF_FLAGS)];
+    // 2 to the power FitType.NO_OF_FLAGS
+    this.count = new AtomicInteger[1 << FitType.NO_OF_FLAGS];
     for (int i = 0; i < count.length; i++) {
       count[i] = new AtomicInteger();
     }

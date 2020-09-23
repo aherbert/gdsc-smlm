@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -922,7 +921,7 @@ public class FitEngineConfiguration {
     // Only use the second width if this is part of the function.
     // This should be taken care of within the PSF helper.
     if (initialPeakStdDev1 > 0) {
-      widthMin = FastMath.min(initialPeakStdDev1, widthMin);
+      widthMin = Math.min(initialPeakStdDev1, widthMin);
     }
 
     return widthMin;
@@ -961,7 +960,7 @@ public class FitEngineConfiguration {
     // Only use the second width if this is part of the function.
     // This should be taken care of within the PSF helper.
     if (initialPeakStdDev1 > 0) {
-      widthMax = FastMath.max(initialPeakStdDev1, widthMax);
+      widthMax = Math.max(initialPeakStdDev1, widthMax);
     }
 
     return widthMax;

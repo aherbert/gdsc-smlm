@@ -29,7 +29,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
@@ -307,9 +306,9 @@ public class AiryPsfModel extends PsfModel {
     // widths)
     final double max = MathUtils.max(x0 / w0, x1 / w1, (x0range - x0) / w0, (x1range - x1) / w1);
     // Find the maximum distance needed to evaluate the Airy pattern
-    final double maxD = FastMath.min(RINGS[ring], Math.sqrt(2 * max * max));
+    final double maxD = Math.min(RINGS[ring], Math.sqrt(2 * max * max));
     // Limit the total samples used for interpolation but always sample at least every pixel:
-    final double samplesPerPixel = FastMath.max(200 / maxD, 1);
+    final double samplesPerPixel = Math.max(200 / maxD, 1);
     final int maxR = (int) Math.ceil(maxD * samplesPerPixel);
     final double[] radius = new double[maxR + 1];
     final double[] intensity = new double[maxR + 1];
@@ -356,8 +355,8 @@ public class AiryPsfModel extends PsfModel {
       final double nPixels = Math.PI * maxD * maxD;
       // Approximately 1000 (or so) samples across the image
       final double number = Math.sqrt(1000 / nPixels);
-      final int nSubintervals = FastMath.max(minSamplesPerDimension,
-          FastMath.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
+      final int nSubintervals = Math.max(minSamplesPerDimension,
+          Math.min(maxSamplesPerDimension, (int) Math.ceil(number * 0.5) * 2));
 
       final double range0 = 0.5 / w0;
       final double range1 = 0.5 / w1;

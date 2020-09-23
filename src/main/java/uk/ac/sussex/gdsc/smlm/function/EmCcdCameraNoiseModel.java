@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
-
 /**
  * Defines the expected variance of a signal recorded on a CCD or EM-CCD Camera. The model assumes a
  * Gaussian read noise, photon shot noise and an EM-gain noise factor.
@@ -52,7 +50,7 @@ public class EmCcdCameraNoiseModel extends CameraNoiseModel {
 
   @Override
   public double variance(final double value) {
-    return readNoise2 + FastMath.max(value - bias, 0.0) * 2.0;
+    return readNoise2 + Math.max(value - bias, 0.0) * 2.0;
   }
 
   @Override

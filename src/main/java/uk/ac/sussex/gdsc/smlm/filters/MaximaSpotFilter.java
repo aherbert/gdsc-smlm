@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.filters.NonMaximumSuppression;
 
 /**
@@ -116,8 +115,8 @@ public abstract class MaximaSpotFilter extends SpotFilter {
    */
   protected int[] getMaxima(float[] data, int width, int height) {
     // Check upper limits are safe
-    final int n = FastMath.min(search, FastMath.min(width, height));
-    final int validBorder = FastMath.min(this.border, FastMath.min(width, height) / 2);
+    final int n = Math.min(search, Math.min(width, height));
+    final int validBorder = Math.min(this.border, Math.min(width, height) / 2);
     return nms.blockFindInternal(data, width, height, n, validBorder);
   }
 

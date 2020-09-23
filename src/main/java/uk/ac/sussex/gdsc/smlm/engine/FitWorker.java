@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.filters.AreaStatistics;
 import uk.ac.sussex.gdsc.core.filters.FloatAreaSum;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
@@ -2446,7 +2445,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // This will be a single evaluation of the function against the data.
       int parameterCount =
           fitConfig.createGaussianFunction(1, width, height).gradientIndices().length;
-      final int degreesOfFreedom = FastMath.max(region.length - parameterCount, 0);
+      final int degreesOfFreedom = Math.max(region.length - parameterCount, 0);
       final double[] parameters =
           Arrays.copyOf(fittedParams, 1 + Gaussian2DFunction.PARAMETERS_PER_PEAK);
       final FitResult fitResult = new FitResult(FitStatus.OK, degreesOfFreedom, 0, null, parameters,
@@ -2601,7 +2600,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         //@formatter:off
         final FitResult mdoubletFitResult =
             doubletFitResult.toBuilder()
-            .setDegreesOfFreedom(FastMath.max(region.length - parameterCount, 0))
+            .setDegreesOfFreedom(Math.max(region.length - parameterCount, 0))
             .setError(doubletFitResult.getError())
             .setInitialParameters(initialParams)
             .setParameters(params)
@@ -3242,7 +3241,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       final int maxIterations = fitConfig.getMaxIterations();
       final int maxEvaluations = fitConfig.getMaxFunctionEvaluations();
 
-      final double coordinateShift = FastMath.min(width, height);
+      final double coordinateShift = Math.min(width, height);
       fitConfig.setCoordinateShift(coordinateShift);
       fitConfig.setFitRegion(0, 0, 0);
       fitConfig.setMaxIterations(maxIterations * ITERATION_INCREASE_FOR_DOUBLETS);
@@ -3385,7 +3384,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         final double[] initialParams = newFitResult.getInitialParameters();
 
         // Allow the shift to span half of the fitted window.
-        final double halfWindow = 0.5 * FastMath.min(regionBounds.width, regionBounds.height);
+        final double halfWindow = 0.5 * Math.min(regionBounds.width, regionBounds.height);
 
         final int[] position = new int[2];
         final int[] candidateIndex = new int[2];
@@ -3861,7 +3860,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // should be considered.
       // Use 2x the configured peak standard deviation.
       // final float range = 2f *
-      // (float) FastMath.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
+      // (float) Math.max(fitConfig.getInitialPeakStdDev0(), fitConfig.getInitialPeakStdDev1());
       // final float xmin2 = regionBounds.x - range;
       // final float xmax2 = regionBounds.x + regionBounds.width + range;
       // final float ymin2 = regionBounds.y - range;

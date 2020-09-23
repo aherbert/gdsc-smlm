@@ -64,7 +64,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -800,8 +799,8 @@ public class PcPalmMolecules implements PlugIn {
       } else {
         final double iqr = upper - lower;
 
-        yMin = FastMath.max(lower - iqr, stats.getMin());
-        yMax = FastMath.min(upper + iqr, stats.getMax());
+        yMin = Math.max(lower - iqr, stats.getMin());
+        yMax = Math.min(upper + iqr, stats.getMax());
 
         if (logFitParameters) {
           ImageJUtils.log("  Data range: %f - %f. Plotting 1.5x IQR: %f - %f", stats.getMin(),
@@ -1118,7 +1117,7 @@ public class PcPalmMolecules implements PlugIn {
     startLog();
 
     // Convert seconds to frames
-    final int timeInFrames = FastMath.max(1, (int) Math.round(settings.timeThreshold * 1000.0
+    final int timeInFrames = Math.max(1, (int) Math.round(settings.timeThreshold * 1000.0
         / settings.results.getCalibrationReader().getExposureTime()));
 
     // Get precisions
@@ -1674,7 +1673,7 @@ public class PcPalmMolecules implements PlugIn {
       final Plot2 plot = new Plot2(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
       double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
       if (interIdHist[1].length > 0) {
-        max = FastMath.max(max, interIdHist[1][interIdHist[1].length - 1]);
+        max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);
       }
       plot.setLimits(0, intraIdHist[0][intraIdHist[0].length - 1], 0, max);
       plot.setColor(Color.blue);
@@ -1836,7 +1835,7 @@ public class PcPalmMolecules implements PlugIn {
       if (gd.wasCanceled()) {
         return false;
       }
-      settings.pvalue = FastMath.max(FastMath.min(gd.getNextNumber(), 100), 0) / 100;
+      settings.pvalue = Math.max(Math.min(gd.getNextNumber(), 100), 0) / 100;
     }
     return true;
   }
@@ -1998,7 +1997,7 @@ public class PcPalmMolecules implements PlugIn {
     final double xrange = settings.maxx - settings.minx;
     final double yrange = settings.maxy - settings.miny;
     if (xrange > 0 || yrange > 0) {
-      lowResNmPerPixel = FastMath.max(xrange, yrange) / settings.lowResolutionImageSize;
+      lowResNmPerPixel = Math.max(xrange, yrange) / settings.lowResolutionImageSize;
     } else {
       // The resolution does not matter
       lowResNmPerPixel = 100;
