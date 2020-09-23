@@ -1412,7 +1412,20 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
   /**
    * Sets the lut name.
    *
+   * <p>Note: This only has an effect if the image is not already showing, i.e. the image window is
+   * newly created. If an image already exists with the output title then the image window is reused
+   * and the LUT is preserved. The LUT can be applied after rendering using for example:
+   *
+   * <pre>
+   * {@code  image.getImagePlus().setLut(
+   *   LutHelper.createLut(LutColour.forName(lutName), true));
+   * }
+   * </pre>
+   *
    * @param lutName the new lut name
+   * @see #getImagePlus()
+   * @see LutHelper
+   * @see LutColour
    */
   public void setLutName(String lutName) {
     this.lutName = lutName;
