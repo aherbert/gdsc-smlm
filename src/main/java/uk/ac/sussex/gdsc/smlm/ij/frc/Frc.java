@@ -776,7 +776,7 @@ public class Frc {
         int numSum = 0;
 
         while (angle < Math.PI) {
-          final double cosA = FastMath.cos(angle);
+          final double cosA = Math.cos(angle);
           final double x = centre + radius * cosA;
           final double sinA = getSine(angle, cosA);
           final double y = centre + radius * sinA;
