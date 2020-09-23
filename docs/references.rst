@@ -1,4 +1,4 @@
-.. index:: ! References
+  .. index:: ! References
 
 References
 ==========
@@ -34,6 +34,10 @@ Ultrahigh accuracy imaging modality for super-localization microscopy.
 Chao J, Ward ES & Ober RJ (2012)
 Fisher information matrix for branching processes with application to electron-multiplying charge-coupled devices.
 *Multidimens. Syst. Signal Process*. 23, 349–379.
+
+Cisse II, Izeddin I, Causse SZ, Boudarene L, Senecal A, Muresan L, Dugast-Darzacq C, Hajj B, Dahan M & Darzacq X (2013)
+Real-Time Dynamics of RNA Polymerase II Clustering in Live Human Cells.
+s*Science*. 341, 664–667.
 
 Coltharp C, Kessler RP & Xiao J (2012)
 Accurate Construction of Photoactivated Localization Microscopy (PALM) Images for Quantitative Measurements.

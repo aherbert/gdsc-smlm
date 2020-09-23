@@ -2088,6 +2088,16 @@ The following parameters can be set within the plugin to control the output:
     The curve data is plotted in black. The red circles show the fitted points. The blue crosses indicate where the fitted line will asymptote.
 
 
+.. index:: ! TC-PALM Analysis
+
+Time Correlated (TC-PALM) Analysis
+----------------------------------
+
+Performed time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al* 2013).
+
+This is under development.
+
+
 .. index:: ! Neighbour Analysis
 
 Neighbour Analysis
