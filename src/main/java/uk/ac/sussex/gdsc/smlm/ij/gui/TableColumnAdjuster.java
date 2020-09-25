@@ -206,7 +206,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   }
 
   /**
-   * Sets the max rows.
+   * Sets the maximum number of rows to adjust at the start and end of the table.
    *
    * @param maxRows the new max rows
    */
@@ -215,7 +215,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   }
 
   /**
-   * Gets the max rows.
+   * Gets the maximum number of rows to adjust at the start and end of the table.
    *
    * @return the max rows
    */

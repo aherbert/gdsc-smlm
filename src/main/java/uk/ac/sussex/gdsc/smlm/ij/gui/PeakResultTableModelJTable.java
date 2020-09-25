@@ -58,7 +58,7 @@ public class PeakResultTableModelJTable extends JTable {
 
     // Note that this is not dynamic and so must manually be called when columns change
     tca = new TableColumnAdjuster(this, 6, false);
-    // Only process 10 rows max.
+    // Only process 10 rows (5 at start, 5 at end).
     tca.setMaxRows(5);
     tca.adjustColumns();
 

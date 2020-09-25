@@ -809,6 +809,7 @@ public class PeakResultTableModel extends AbstractTableModel {
   public PSF getPsf() {
     return psf;
   }
+
   // *************************************************************************/
   // Table cell appearance (Rendering)
   // *************************************************************************/
@@ -846,9 +847,9 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
-   * Gets the double renderer.
+   * Gets the integer renderer.
    *
-   * @return the double renderer
+   * @return the integer renderer
    */
   TableCellRenderer getIntegerRenderer() {
     return createTableCellRenderer(new DefaultTableCellRenderer() {
