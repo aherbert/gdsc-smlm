@@ -32,6 +32,7 @@ import ij.gui.ImageCanvas;
 import ij.gui.Plot;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.text.TextWindow;
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -46,6 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.UnaryOperator;
 import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -76,6 +78,9 @@ public class TcPalmAnalysis implements PlugIn {
 
   /** The plugin title. */
   private static final String TITLE = "TC PALM Analysis";
+
+  /** Text window showing the current clusters. */
+  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -202,6 +207,8 @@ public class TcPalmAnalysis implements PlugIn {
     float width;
     float height;
     float[] frames;
+    int start;
+    int end;
 
     ClusterData(PeakResult result) {
       id = result.getId();
@@ -231,6 +238,8 @@ public class TcPalmAnalysis implements PlugIn {
       results.trimToSize();
       width -= x;
       height -= y;
+      start = results.unsafeGet(0).getFrame();
+      end = results.unsafeGet(results.size() - 1).getFrame();
     }
 
     /**
@@ -278,6 +287,20 @@ public class TcPalmAnalysis implements PlugIn {
         this.frames = frames;
       }
       return frames;
+    }
+
+    double[] getXyz() {
+      double[] xyz = new double[3];
+      results.forEach(r -> {
+        xyz[0] += r.getXPosition();
+        xyz[1] += r.getYPosition();
+        xyz[2] += r.getZPosition();
+      });
+      final int size = results.size();
+      for (int i = 0; i < 3; i++) {
+        xyz[i] /= size;
+      }
+      return xyz;
     }
   }
 
@@ -426,6 +449,18 @@ public class TcPalmAnalysis implements PlugIn {
     // Remove the first null object and compact the frame arrays
     clusterData.remove(0);
     clusterData.forEach(ClusterData::finalise);
+    // Sort by time then cluster ID
+    clusterData.sort((c1, c2) -> {
+      final int result = Integer.compare(c1.start, c2.start);
+      if (result != 0) {
+        return result;
+      }
+      // result = Integer.compare(c1.end, c2.end);
+      // if (result != 0) {
+      // return result;
+      // }
+      return Integer.compare(c1.id, c2.id);
+    });
     return clusterData;
   }
 
@@ -534,11 +569,11 @@ public class TcPalmAnalysis implements PlugIn {
     BiPredicate<ClusterData, Rectangle2D> test = null;
     if (settings.minFrame > minT) {
       final int min = settings.minFrame;
-      test = (c, r) -> c.results.unsafeGet(0).getFrame() >= min;
+      test = (c, r) -> c.start >= min;
     }
     if (settings.maxFrame < maxT) {
       final int max = settings.maxFrame;
-      test = and(test, (c, r) -> c.results.unsafeGet(c.results.size() - 1).getFrame() <= max);
+      test = and(test, (c, r) -> c.end <= max);
     }
     final BiPredicate<ClusterData, Rectangle2D> filter =
         and(test, settings.intersects ? ClusterData::intersects : ClusterData::isWithin);
@@ -604,6 +639,34 @@ public class TcPalmAnalysis implements PlugIn {
     ImageJUtils.display(title, plot2, wo);
 
     wo.tile();
+
+    // Add a table of the clusters (these should already be sorted by time then id).
+    final TextWindow resultsWindow = createTable();
+    resultsWindow.getTextPanel().clear();
+    try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+      StringBuilder sb = new StringBuilder();
+      clusters.forEach(c -> {
+        sb.setLength(0);
+        sb.append(c.id);
+        final double[] xyz = c.getXyz();
+        for (int i = 0; i < 3; i++) {
+          sb.append('\t').append(MathUtils.round(xyz[i]));
+        }
+        sb.append('\t').append(c.results.size());
+        sb.append('\t').append(c.start);
+        sb.append('\t').append(c.end);
+        tw.append(sb.toString());
+      });
+    }
+
+    // Add a selected listener to allow
+    // selected clusters to be drawn on the super-resolution image.
+
+    // Q. can the selection be individual lines selected with the ctrl key?
+    // IIRC this cannot be done for an ImageJ table.
+    // Look at using an interactive ImageJ table instead.
+
+    // And draw an activation plot of the selected clusters with analysis of bursts...
   }
 
   /**
@@ -620,5 +683,15 @@ public class TcPalmAnalysis implements PlugIn {
       return second;
     }
     return (T t, U u) -> first.test(t, u) && second.test(t, u);
+  }
+
+  /**
+   * Creates the table for the current clusters.
+   *
+   * @return the text window
+   */
+  private static TextWindow createTable() {
+    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Analysis Results",
+        "ID\tX\tY\tZ\tSize\tStart\tEnd", "", 600, 400));
   }
 }
