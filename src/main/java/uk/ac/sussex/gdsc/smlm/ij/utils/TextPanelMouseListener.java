@@ -56,12 +56,14 @@ public abstract class TextPanelMouseListener extends MouseAdapter {
    * @param textPanel the new text panel
    */
   public void setTextPanel(TextPanel textPanel) {
-    if (this.textPanel != null) {
-      this.textPanel.removeMouseListener(this);
-    }
-    this.textPanel = textPanel;
-    if (this.textPanel != null) {
-      this.textPanel.addMouseListener(this);
+    if (this.textPanel != textPanel) {
+      if (this.textPanel != null) {
+        this.textPanel.removeMouseListener(this);
+      }
+      this.textPanel = textPanel;
+      if (this.textPanel != null) {
+        this.textPanel.addMouseListener(this);
+      }
     }
   }
 
