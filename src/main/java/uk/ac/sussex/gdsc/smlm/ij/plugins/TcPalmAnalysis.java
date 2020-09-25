@@ -29,9 +29,12 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
+import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 import java.awt.AWTEvent;
 import java.awt.Rectangle;
@@ -66,6 +69,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
+import uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
@@ -89,7 +93,7 @@ public class TcPalmAnalysis implements PlugIn {
   private MemoryPeakResults results;
 
   /** The image. */
-  private ImagePlus imp;
+  private ImageJImagePeakResults image;
 
   /** The lock (must be held when processing the work queue). */
   private SoftLock lock;
@@ -111,6 +115,9 @@ public class TcPalmAnalysis implements PlugIn {
 
   /** The maximum time frame. */
   private int maxT;
+
+  /** The cluster selected listener. */
+  private TextPanelMouseListener clusterSelectedListener;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -201,6 +208,7 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static class ClusterData {
     final int id;
+    int index;
     LocalList<PeakResult> results;
     float x;
     float y;
@@ -290,7 +298,7 @@ public class TcPalmAnalysis implements PlugIn {
     }
 
     double[] getXyz() {
-      double[] xyz = new double[3];
+      final double[] xyz = new double[3];
       results.forEach(r -> {
         xyz[0] += r.getXPosition();
         xyz[1] += r.getYPosition();
@@ -323,6 +331,48 @@ public class TcPalmAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Class to display data from the selected clusters.
+   */
+  private class ClusterSelectedListener extends TextPanelMouseListener {
+    @Override
+    public void selected(int selectedIndex) {
+      selected(selectedIndex, selectedIndex);
+    }
+
+    @Override
+    public void selected(int selectionStart, int selectionEnd) {
+      // Overlay the clusters on the image.
+      final Overlay overlay = new Overlay();
+      // For each cluster create a track and add to the overlay.
+      for (int i = selectionStart; i <= selectionEnd; i++) {
+        final String line = textPanel.getLine(i);
+        final int indexOf = line.indexOf('\t');
+        final int index = Integer.parseInt(line.substring(0, indexOf));
+        final ClusterData data = clusterData.get(index);
+        appendRoi(overlay, data);
+      }
+      image.getImagePlus().setOverlay(overlay);
+
+      // TODO
+      // And draw an activation plot of the selected clusters with analysis of bursts.
+    }
+
+    private void appendRoi(Overlay overlay, ClusterData data) {
+      final int np = data.results.size();
+      final float[] xp = new float[np];
+      final float[] yp = new float[np];
+      for (int i = 0; i < np; i++) {
+        final PeakResult r = data.results.unsafeGet(i);
+        xp[i] = image.mapX(r.getXPosition());
+        yp[i] = image.mapY(r.getYPosition());
+      }
+      final PointRoi roi = new PointRoi(xp, yp, np);
+      roi.setShowLabels(false);
+      overlay.add(roi);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -348,9 +398,8 @@ public class TcPalmAnalysis implements PlugIn {
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
     final double scale = settings.imageSize / Math.max(bounds.width, bounds.height);
-    final ImageJImagePeakResults image =
-        ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_ID, false, false,
-            settings.inputOption, bounds, 0, 0, scale, 0, ResultsImageMode.IMAGE_MAX);
+    image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_ID, false, false,
+        settings.inputOption, bounds, 0, 0, scale, 0, ResultsImageMode.IMAGE_MAX);
     image.copySettings(results);
     image.begin();
     image.addAll(results.toArray());
@@ -358,7 +407,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Note: Setting the lut name in the image only has an effect if the image is not showing
     // thus the lut is applied afterwards.
-    imp = image.getImagePlus();
+    final ImagePlus imp = image.getImagePlus();
     imp.setLut(LutHelper.createLut(LutColour.forNumber(settings.lut), true));
 
     final ImageCanvas canvas = imp.getCanvas();
@@ -393,12 +442,16 @@ public class TcPalmAnalysis implements PlugIn {
     };
     canvas.addMouseListener(imageListener);
 
+    // Add monitor for the selection of clusters in the current clusters table
+    clusterSelectedListener = new ClusterSelectedListener();
+
     // Allow analysis of the activations-vs-time data for start/end of bursts based on a
     // steepness parameter: local window size (sec) and activation rate (per sec)
     try {
       showAnalysisDialog();
     } finally {
       canvas.removeMouseListener(imageListener);
+      clusterSelectedListener.setTextPanel(null);
       executor.shutdown();
     }
   }
@@ -461,6 +514,8 @@ public class TcPalmAnalysis implements PlugIn {
       // }
       return Integer.compare(c1.id, c2.id);
     });
+    final int[] index = {0};
+    clusterData.forEach(c -> c.index = index[0]++);
     return clusterData;
   }
 
@@ -556,13 +611,10 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private void runAnalysis(Rectangle bounds, Settings settings) {
     // Map the bounds to the data bounds
-    final Rectangle dataBounds = results.getBounds();
-    final double scalex = (double) dataBounds.width / imp.getWidth();
-    final double scaley = (double) dataBounds.height / imp.getHeight();
-    final double x = dataBounds.x + scalex * bounds.x;
-    final double y = dataBounds.y + scaley * bounds.y;
-    final double w = scalex * bounds.width;
-    final double h = scaley * bounds.height;
+    final double x = image.inverseMapX(bounds.x);
+    final double y = image.inverseMapY(bounds.y);
+    final double w = image.inverseMapX(bounds.x + bounds.width) - x;
+    final double h = image.inverseMapY(bounds.y + bounds.height) - y;
     final Rectangle2D scaledBounds = new Rectangle2D.Double(x, y, w, h);
 
     // Identify all clusters using a custom filter
@@ -642,12 +694,14 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add a table of the clusters (these should already be sorted by time then id).
     final TextWindow resultsWindow = createTable();
-    resultsWindow.getTextPanel().clear();
+    final TextPanel tp = resultsWindow.getTextPanel();
+    tp.clear();
     try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       clusters.forEach(c -> {
         sb.setLength(0);
-        sb.append(c.id);
+        sb.append(c.index);
+        sb.append('\t').append(c.id);
         final double[] xyz = c.getXyz();
         for (int i = 0; i < 3; i++) {
           sb.append('\t').append(MathUtils.round(xyz[i]));
@@ -661,12 +715,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add a selected listener to allow
     // selected clusters to be drawn on the super-resolution image.
-
-    // Q. can the selection be individual lines selected with the ctrl key?
-    // IIRC this cannot be done for an ImageJ table.
-    // Look at using an interactive ImageJ table instead.
-
-    // And draw an activation plot of the selected clusters with analysis of bursts...
+    clusterSelectedListener.setTextPanel(tp);
   }
 
   /**
@@ -692,6 +741,6 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static TextWindow createTable() {
     return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Analysis Results",
-        "ID\tX\tY\tZ\tSize\tStart\tEnd", "", 600, 400));
+        "#\tID\tX\tY\tZ\tSize\tStart\tEnd", "", 600, 400));
   }
 }
