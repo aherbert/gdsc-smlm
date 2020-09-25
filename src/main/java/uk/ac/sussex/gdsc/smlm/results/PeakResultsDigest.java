@@ -25,9 +25,13 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 
 /**
  * Class to allow fast comparison of peak results arrays without storing the array. Comparison is
@@ -212,21 +216,21 @@ public class PeakResultsDigest {
    */
   public static Future<PeakResultsDigest> digestLater(final ExecutorService executorService,
       final PeakResult... peakResults) {
-    return executorService.submit(new Callable<PeakResultsDigest>() {
-      @Override
-      public PeakResultsDigest call() {
-        return new PeakResultsDigest(peakResults);
-      }
-    });
+    return executorService
+        .submit((Callable<PeakResultsDigest>) () -> new PeakResultsDigest(peakResults));
   }
 
   /**
    * Wait for the result of {@link #digestLater(ExecutorService, PeakResult...)} for the given time
    * in milliseconds.
    *
+   * <p>If a TimeoutException occurs this is ignored and the method returns null.
+   *
    * @param future the future
    * @param timeout the timeout (in milliseconds). Set to negative to wait indefinitely.
    * @return the peak results digest (or null)
+   * @throws ConcurrentRuntimeException if interrupted while waiting, the future was cancelled or an
+   *         execution exception is thrown
    * @see #DEFAULT_TIMEOUT
    */
   public static PeakResultsDigest waitForDigest(Future<PeakResultsDigest> future, long timeout) {
@@ -235,11 +239,15 @@ public class PeakResultsDigest {
         return future.get(timeout, TimeUnit.MILLISECONDS);
       }
       return future.get();
-    } catch (final InterruptedException ie) {
-      // Ignore
-    } catch (final Exception ex) {
+    } catch (final InterruptedException ex) {
+      // Restore interrupted state...
+      Thread.currentThread().interrupt();
+      throw new ConcurrentRuntimeException(ex);
+    } catch (final CancellationException | ExecutionException ex) {
       // Report this
-      ex.printStackTrace();
+      throw new ConcurrentRuntimeException(ex);
+    } catch (final TimeoutException ex) {
+      // Ignore
     }
     return null;
   }
