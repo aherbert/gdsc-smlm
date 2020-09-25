@@ -24,7 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
+import java.util.Arrays;
 import javax.swing.ListSelectionModel;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * A helper class for the ListSelectionModel.
@@ -38,16 +40,17 @@ public final class ListSelectionModelHelper {
   /**
    * Gets the selected indices from the selection model.
    *
-   * <p>Copied from javax.swing.JList
+   * <p>Adapted from javax.swing.JList.
    *
-   * @param sm the sm
+   * @param sm the selection model
    * @return the selected indices
    */
   public static int[] getSelectedIndices(ListSelectionModel sm) {
     final int iMin = sm.getMinSelectionIndex();
     final int iMax = sm.getMaxSelectionIndex();
 
-    if ((iMin < 0) || (iMax < 0)) {
+    // Any negative
+    if ((iMin | iMax) < 0) {
       return new int[0];
     }
 
@@ -58,9 +61,7 @@ public final class ListSelectionModelHelper {
         rvTmp[count++] = i;
       }
     }
-    final int[] rv = new int[count];
-    System.arraycopy(rvTmp, 0, rv, 0, count);
-    return rv;
+    return Arrays.copyOf(rvTmp, count);
   }
 
   /**
@@ -70,7 +71,7 @@ public final class ListSelectionModelHelper {
    * @param indices the indices
    */
   public static void setSelectedIndices(ListSelectionModel sm, int[] indices) {
-    if (indices == null || indices.length == 0) {
+    if (ArrayUtils.getLength(indices) == 0) {
       return;
     }
 
