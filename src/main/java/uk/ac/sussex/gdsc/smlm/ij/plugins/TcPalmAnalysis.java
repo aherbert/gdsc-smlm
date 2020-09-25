@@ -37,6 +37,7 @@ import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -49,6 +50,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.UnaryOperator;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -118,6 +120,12 @@ public class TcPalmAnalysis implements PlugIn {
 
   /** The cluster selected listener. */
   private TextPanelMouseListener clusterSelectedListener;
+
+  /**
+   * The total activations plot data from the currently clusters. ALlows adding more lines to the
+   * plot when clusters are selected.
+   */
+  private ActivationsPlotData activationsPlotData;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -345,17 +353,35 @@ public class TcPalmAnalysis implements PlugIn {
       // Overlay the clusters on the image.
       final Overlay overlay = new Overlay();
       // For each cluster create a track and add to the overlay.
+      int start = maxT;
+      int end = minT;
       for (int i = selectionStart; i <= selectionEnd; i++) {
         final String line = textPanel.getLine(i);
         final int indexOf = line.indexOf('\t');
         final int index = Integer.parseInt(line.substring(0, indexOf));
         final ClusterData data = clusterData.get(index);
         appendRoi(overlay, data);
+        start = Math.min(data.start, start);
+        end = Math.max(data.end, end);
       }
       image.getImagePlus().setOverlay(overlay);
 
-      // TODO
-      // And draw an activation plot of the selected clusters with analysis of bursts.
+      // Draw an activation plot of the selected clusters with analysis of bursts.
+      final ActivationsPlotData activationsPlotData = TcPalmAnalysis.this.activationsPlotData;
+      // Find the start and end
+      final int is = ArrayUtils.indexOf(activationsPlotData.frames, start);
+      final int ie = ArrayUtils.indexOf(activationsPlotData.frames, end);
+      // Extract the lines.
+      final int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
+      final int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
+
+      // Add to the plot.
+      final Plot plot2 = activationsPlotData.plot;
+      plot2.restorePlotObjects();
+      plot2.setColor(Color.red);
+      plot2.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
+          SimpleArrayUtils.toFloat(counts), Plot.BAR);
+      plot2.updateImage();
     }
 
     private void appendRoi(Overlay overlay, ClusterData data) {
@@ -370,6 +396,25 @@ public class TcPalmAnalysis implements PlugIn {
       final PointRoi roi = new PointRoi(xp, yp, np);
       roi.setShowLabels(false);
       overlay.add(roi);
+    }
+  }
+
+  /**
+   * Class containing the data for the most recent total activations plot for current clusters.
+   */
+  private static class ActivationsPlotData {
+    Plot plot;
+    UnaryOperator<float[]> timeConverter;
+    int[] frames;
+    int[] counts;
+
+    ActivationsPlotData(Plot plot, UnaryOperator<float[]> timeConverter, int[] frames,
+        int[] counts) {
+      this.plot = plot;
+      this.timeConverter = timeConverter;
+      this.frames = frames;
+      this.counts = counts;
+      plot.savePlotObjects();
     }
   }
 
@@ -667,7 +712,7 @@ public class TcPalmAnalysis implements PlugIn {
       for (final float t : frames) {
         all.adjustOrPutValue((int) t, 1, 1);
       }
-      plot.addPoints(timeConverter.apply(frames), count.getCount(c.results.size()), Plot.LINE);
+      plot.addPoints(timeConverter.apply(frames), count.getCount(c.results.size()), Plot.BAR);
     });
     plot.draw();
     plot.setLimitsToFit(true);
@@ -687,8 +732,10 @@ public class TcPalmAnalysis implements PlugIn {
     plot2.addLabel(0, 0, TextUtils.pleural(localisations, "localisation") + " : " + clashes
         + TextUtils.pleuralise(clashes, " clash", " clashes"));
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-        SimpleArrayUtils.toFloat(counts), Plot.LINE);
+        SimpleArrayUtils.toFloat(counts), Plot.BAR);
     ImageJUtils.display(title, plot2, wo);
+
+    activationsPlotData = new ActivationsPlotData(plot2, timeConverter, frames, counts);
 
     wo.tile();
 
