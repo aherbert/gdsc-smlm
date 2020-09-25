@@ -69,7 +69,7 @@ public class PeakResultTableModelJTable extends JTable {
   public void tableChanged(final TableModelEvent event) {
     if (event.getType() == PeakResultTableModel.RENDERER) {
       // Special event when the rendering has changed,
-      // event.g. the rounding precision has changed
+      // e.g. the rounding precision has changed
       updateRenderer();
       return;
     }
