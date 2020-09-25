@@ -116,7 +116,8 @@ public class PeakResultTableModelJTable extends JTable {
       final int iMin = selectionModel.getMinSelectionIndex();
       final int iMax = selectionModel.getMaxSelectionIndex();
 
-      if ((iMin == -1) || (iMax == -1)) {
+      // Any negative
+      if ((iMin | iMax) < 0) {
         return new PeakResult[0];
       }
 
