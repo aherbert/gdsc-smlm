@@ -46,7 +46,6 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.Molecule;
@@ -292,7 +291,8 @@ public class BlinkEstimator implements PlugIn {
 
   private static void plot(String xAxisTitle, String yAxisTitle, double[] x, double[] y) {
     final String title = TITLE + " " + yAxisTitle;
-    final Plot2 plot = new Plot2(title, xAxisTitle, yAxisTitle, x, y);
+    final Plot plot = new Plot(title, xAxisTitle, yAxisTitle);
+    plot.addPoints(x, y, Plot.LINE);
     ImageJUtils.display(title, plot);
   }
 
@@ -328,7 +328,8 @@ public class BlinkEstimator implements PlugIn {
     // Display
     if (showPlots) {
       final String title = TITLE + " Molecule Counts";
-      final Plot2 plot = new Plot2(title, "td (ms)", "Count", td, ntd);
+      final Plot plot = new Plot(title, "td (ms)", "Count");
+      plot.addPoints(td, ntd, Plot.LINE);
       ImageJUtils.display(title, plot);
 
       plot.setColor(Color.red);

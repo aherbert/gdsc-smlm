@@ -36,7 +36,6 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -431,7 +430,8 @@ public class PsfCalculator implements PlugIn, DialogListener {
       y2[i] = AiryPattern.intensityGaussian(x[i] / factor);
     }
     final String title = "PSF profile";
-    final Plot2 p = new Plot2(title, "px", "", x2, y);
+    final Plot p = new Plot(title, "px", "");
+    p.addPoints(x2, y, Plot.LINE);
     p.addLabel(0, 0, "Blue = Airy; Red = Gaussian");
     p.setColor(Color.RED);
     p.addPoints(x2, y2, Plot.LINE);

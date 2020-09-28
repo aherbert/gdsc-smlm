@@ -63,7 +63,6 @@ import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
@@ -2072,10 +2071,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       }
     }
     final String[] labels = Settings.NAMES[index].split(":");
-    final Plot2 plot = new Plot2(labels[0], labels[1], "Count");
-    final double max = MathUtils.max(histogram);
-    plot.setLimits(0, histogram.length, 0, max * 1.05);
-    plot.addPoints(SimpleArrayUtils.newArray(histogram.length, 0, 1.0), histogram, Plot2.BAR);
+    final Plot plot = new Plot(labels[0], labels[1], "Count");
+    plot.addPoints(SimpleArrayUtils.newArray(histogram.length, 0, 1.0), histogram, Plot.BAR);
     ImageJUtils.display(labels[0], plot, windowOrganiser);
   }
 
@@ -2464,12 +2461,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final double[][] h = MathUtils.cumulativeHistogram(values, false);
 
     final String title = TITLE + " " + xTitle + " Cumulative";
-    final Plot2 plot = new Plot2(title, xTitle, "Frequency");
-    final double xMax = h[0][h[0].length - 1];
-    final double yMax = h[1][h[1].length - 1];
-    plot.setLimits(0, xMax, 0, 1.05 * yMax);
+    final Plot plot = new Plot(title, xTitle, "Frequency");
     plot.setColor(Color.blue);
-    plot.addPoints(h[0], h[1], Plot2.BAR);
+    plot.addPoints(h[0], h[1], Plot.BAR);
     ImageJUtils.display(title, plot, windowOrganiser);
   }
 

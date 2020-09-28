@@ -54,7 +54,6 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.math.GeometryUtils;
 import uk.ac.sussex.gdsc.core.threshold.IntHistogram;
@@ -436,13 +435,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // Plot
     final WindowOrganiser wo = new WindowOrganiser();
     String title = TITLE + " CDF";
-    Plot2 plot = new Plot2(title, "Count", "CDF");
+    Plot plot = new Plot(title, "Count", "CDF");
     final double max = 1.05 * MathUtils.maxDefault(1, y2);
     plot.setLimits(x2[0], x2[x2.length - 1], 0, max);
     plot.setColor(Color.blue);
-    plot.addPoints(x2, y1b, Plot2.BAR);
+    plot.addPoints(x2, y1b, Plot.BAR);
     plot.setColor(Color.red);
-    plot.addPoints(x2, y2, Plot2.BAR);
+    plot.addPoints(x2, y2, Plot.BAR);
     plot.setColor(Color.magenta);
     plot.drawLine(value, 0, value, max);
     plot.setColor(Color.black);
@@ -453,15 +452,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
     // Show the histogram
     title = TITLE + " Histogram";
-    plot = new Plot2(title, "Count", "Frequency");
-    // Update X1 so that the histogram bars are centred over the x value
-    for (int i = x1.length; i-- > 0;) {
-      x1[i] -= 0.5;
-    }
+    plot = new Plot(title, "Count", "Frequency");
     plot.setLimits(x1[0] - 0.5, x1[x1.length - 1] + 1.5, 0,
         MathUtils.max(h.histogramCounts) * 1.05);
     plot.setColor(Color.blue);
-    plot.addPoints(x1, SimpleArrayUtils.toDouble(h.histogramCounts), Plot2.BAR);
+    plot.addPoints(x1, SimpleArrayUtils.toDouble(h.histogramCounts), Plot.BAR);
 
     plot.setColor(Color.red);
     final double[] x = floatHistogram[0].clone();

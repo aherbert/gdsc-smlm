@@ -60,7 +60,6 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
  */
 public class TraceLengthAnalysis implements PlugIn {
   private static final String TITLE = "Trace Length Analysis";
-  private static final float WIDTH = 0.3f;
 
   private TypeConverter<DistanceUnit> distanceConverter;
   private TypeConverter<TimeUnit> timeConverter;
@@ -72,12 +71,9 @@ public class TraceLengthAnalysis implements PlugIn {
   private double[] msds; // MSD of trace
   private int[] lengths; // Length of trace
   private int[] ids; // trace id
-  private double minX;
-  private double maxX;
   private int[] h1;
   private int[] h2;
   private float[] x1;
-  private float[] x2;
   private float[] y1;
   private float[] y2;
 
@@ -195,12 +191,9 @@ public class TraceLengthAnalysis implements PlugIn {
     lengths = lengthList.toArray();
     ids = idList.toArray();
     final int[] limits = MathUtils.limits(lengths);
-    minX = limits[0] - 1.0;
-    maxX = limits[1] + 1.0;
     h1 = new int[limits[1] + 1];
     h2 = new int[h1.length];
-    x1 = createHistogramAxis(h1.length, -WIDTH);
-    x2 = createHistogramAxis(h1.length, 0f);
+    x1 = SimpleArrayUtils.newArray(h1.length, 0, 1f);
     y1 = new float[x1.length];
     y2 = new float[x1.length];
 
@@ -330,15 +323,15 @@ public class TraceLengthAnalysis implements PlugIn {
 
     final String title = "Trace length distribution";
     final Plot plot = new Plot(title, "Length", "Frequency");
-    plot.setLimits(minX, maxX, 0, Math.max(max1, max2) * 1.05);
     plot.setColor(Color.red);
-    plot.addPoints(x1, y1, Plot.LINE);
+    plot.addPoints(x1, y1, Plot.BAR);
     plot.setColor(Color.blue);
-    plot.addPoints(x2, y2, Plot.LINE);
+    plot.addPoints(x1, y2, Plot.BAR);
     plot.setColor(Color.black);
     final double p = 100.0 * sum1 / (sum1 + sum2);
     plot.addLabel(0, 0, String.format("Fixed (red) = %d (%s%%), Moving (blue) = %d (%s%%)", sum1,
         MathUtils.rounded(p), sum2, MathUtils.rounded(100 - p)));
+    plot.setLimits(Double.NaN, Double.NaN, 0, Math.max(max1, max2) * 1.05);
     ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT, wo);
   }
 
@@ -347,28 +340,6 @@ public class TraceLengthAnalysis implements PlugIn {
     while (index < end) {
       histogram[length[index++]]++;
     }
-  }
-
-  /**
-   * For the provided histogram x-axis bins, produce an x-axis for plotting. This functions doubles
-   * up the histogram x-positions to allow plotting a square line profile using the ImageJ plot
-   * command.
-   *
-   * @param length the length
-   * @param offset the offset
-   * @return the x-axis
-   */
-  private static float[] createHistogramAxis(int length, float offset) {
-    final float[] axis = new float[length * 4];
-    int index = 0;
-    final float offset2 = offset + WIDTH;
-    for (int i = 0; i < length; ++i) {
-      axis[index++] = i + offset;
-      axis[index++] = i + offset;
-      axis[index++] = i + offset2;
-      axis[index++] = i + offset2;
-    }
-    return axis;
   }
 
   /**
@@ -382,16 +353,13 @@ public class TraceLengthAnalysis implements PlugIn {
    */
   private static float createHistogramValues(int[] histogramY, double norm, float[] axis) {
     // Assume axis[0] and axis[axis.length-1] == 0
-    int index = 1;
     float max = 0;
     for (int i = 0; i < histogramY.length; ++i) {
       final float v = (float) (histogramY[i] / norm);
-      axis[index++] = v;
-      axis[index++] = v;
+      axis[i] = v;
       if (max < v) {
         max = v;
       }
-      index += 2;
     }
     return max;
   }

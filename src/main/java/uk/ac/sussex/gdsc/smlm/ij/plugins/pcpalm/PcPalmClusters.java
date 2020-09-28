@@ -57,7 +57,6 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -248,32 +247,17 @@ public class PcPalmClusters implements PlugIn {
     final String xTitle = "Molecules/cluster";
     final String yTitle = "Frequency";
 
-    // Create the data required for fitting and plotting
-    float[] xValues = HistogramPlot.createHistogramAxis(hist[0]);
-    float[] yValues = HistogramPlot.createHistogramValues(hist[1]);
-
     // Plot the histogram
-    float yMax = MathUtils.max(yValues);
-    Plot2 plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
-    if (xValues.length > 0) {
-      final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-      plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0, yMax * 1.05);
-    }
+    Plot plot = new Plot(title, xTitle, yTitle);
+    plot.addPoints(hist[0], hist[1], Plot.BAR);
     ImageJUtils.display(title, plot);
 
     final HistogramData noiseData = loadNoiseHistogram(histogramData);
     if (noiseData != null && subtractNoise(histogramData, noiseData)) {
       // Update the histogram
       title += " (noise subtracted)";
-      xValues = HistogramPlot.createHistogramAxis(hist[0]);
-      yValues = HistogramPlot.createHistogramValues(hist[1]);
-      yMax = MathUtils.max(yValues);
-      plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
-      if (xValues.length > 0) {
-        final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-        plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-            yMax * 1.05);
-      }
+      plot = new Plot(title, xTitle, yTitle);
+      plot.addPoints(hist[0], hist[1], Plot.BAR);
       ImageJUtils.display(title, plot);
 
       // Automatically save
@@ -314,21 +298,18 @@ public class PcPalmClusters implements PlugIn {
       // Scale the values to match those on the histogram
       final double normalisingFactor = count * pi;
       for (int i = 0; i <= n; i++) {
-        x[i] = i + 0.5;
+        x[i] = i;
         y[i] = dist.probability(i) * normalisingFactor;
       }
-      x[n + 1] = n + 1.5;
+      x[n + 1] = n + 1;
       y[n + 1] = 0;
 
       // Redraw the plot since the limits may have changed
-      plot = new Plot2(title, xTitle, yTitle, xValues, yValues);
-      final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-      plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-          MathUtils.maxDefault(yMax, y) * 1.05);
       plot.setColor(Color.magenta);
       plot.addPoints(x, y, Plot.LINE);
       plot.addPoints(x, y, Plot.CIRCLE);
       plot.setColor(Color.black);
+      plot.updateImage();
       ImageJUtils.display(title, plot);
     }
 
@@ -840,7 +821,7 @@ public class PcPalmClusters implements PlugIn {
 
     // Plot the cumulative histogram
     final String title = TITLE + " Cumulative Distribution";
-    Plot2 plot = null;
+    Plot plot = null;
     if (settings.showCumulativeHistogram) {
       // Create a cumulative histogram for fitting
       final double[] cumulativeHistogram = new double[histogram.length];
@@ -851,9 +832,11 @@ public class PcPalmClusters implements PlugIn {
       }
 
       final double[] values = SimpleArrayUtils.newArray(histogram.length, 0.0, 1.0);
-      plot = new Plot2(title, "N", "Cumulative Probability", values, cumulativeHistogram);
-      plot.setLimits(0, histogram.length - 1, 0, 1.05);
+      plot = new Plot(title, "N", "Cumulative Probability");
+      plot.addPoints(values, cumulativeHistogram, Plot.LINE);
       plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
+      //plot.addPoints(values, cumulativeHistogram, Plot.BAR);
+      plot.setLimits(0, histogram.length - 1, 0, 1.05);
       ImageJUtils.display(title, plot);
     }
 
@@ -911,7 +894,7 @@ public class PcPalmClusters implements PlugIn {
     return parameters;
   }
 
-  private static void addToPlot(int trials, double pvalue, String title, Plot2 plot, Color color) {
+  private static void addToPlot(int trials, double pvalue, String title, Plot plot, Color color) {
     final double[] x = new double[trials + 1];
     final double[] y = new double[trials + 1];
 
@@ -934,7 +917,8 @@ public class PcPalmClusters implements PlugIn {
 
     plot.setColor(color);
     plot.addPoints(x, y, Plot.LINE);
-    // plot.addPoints(x, y, Plot2.CIRCLE);
+    // plot.addPoints(x, y, Plot.CIRCLE);
+    plot.updateImage();
     ImageJUtils.display(title, plot);
   }
 }

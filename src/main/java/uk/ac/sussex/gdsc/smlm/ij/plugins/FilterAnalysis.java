@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -694,7 +693,8 @@ public class FilterAnalysis implements PlugIn {
     final int[] list = new int[plots.size()];
     int index = 0;
     for (final NamedPlot p : plots) {
-      final Plot2 plot = new Plot2(p.name, p.xAxisName, "Jaccard", p.xValues, p.yValues);
+      final Plot plot = new Plot(p.name, p.xAxisName, "Jaccard");
+      plot.addPoints(p.xValues, p.yValues, Plot.LINE);
       plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
       plot.setColor(Color.RED);
       plot.draw();

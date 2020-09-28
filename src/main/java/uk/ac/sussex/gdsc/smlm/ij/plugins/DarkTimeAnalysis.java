@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
 import ij.Prefs;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +39,6 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -281,7 +281,8 @@ public class DarkTimeAnalysis implements PlugIn {
     }
 
     final String title = "Cumulative Dark-time";
-    final Plot2 plot = new Plot2(title, "Time (ms)", "Percentile", x, y);
+    final Plot plot = new Plot(title, "Time (ms)", "Percentile");
+    plot.addPoints(x, y, Plot.LINE);
     ImageJUtils.display(title, plot);
 
     // Report percentile

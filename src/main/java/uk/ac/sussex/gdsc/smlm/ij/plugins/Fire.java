@@ -89,7 +89,6 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -446,7 +445,7 @@ public class Fire implements PlugIn {
 
     String name;
     FireResult result;
-    Plot2 plot;
+    Plot plot;
     /**
      * Flag to denote that an out-of-memory error occurred. This is probably due to using too many
      * threads to compute large Fourier transforms.
@@ -650,7 +649,7 @@ public class Fire implements PlugIn {
           logResult(name, result, mean, stats);
           if (settings.showFrcCurve) {
             curve.addResolution(mean);
-            final Plot2 plot = curve.getPlot();
+            final Plot plot = curve.getPlot();
             ImageJUtils.display(plot.getTitle(), plot);
           }
         }
@@ -1196,7 +1195,7 @@ public class Fire implements PlugIn {
   private class FrcCurvePlot {
     double[] xValues;
     double[] threshold;
-    Plot2 plot;
+    Plot plot;
 
     void add(String name, FireResult result, ThresholdMethod thresholdMethod, Color colorValues,
         Color colorThreshold, Color colorNoSmooth) {
@@ -1206,7 +1205,7 @@ public class Fire implements PlugIn {
 
       if (plot == null) {
         final String title = name + " FRC Curve";
-        plot = new Plot2(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
+        plot = new Plot(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
 
         xValues = new double[frcCurve.getSize()];
         final double L = frcCurve.fieldOfView;
@@ -1274,7 +1273,7 @@ public class Fire implements PlugIn {
       plot.addPoints(xValues, y, Plot.LINE);
     }
 
-    Plot2 getPlot() {
+    Plot getPlot() {
       plot.setLimitsToFit(false);
       // Q. For some reason the limits calculated are ignored,
       // so set them as the defaults.
@@ -1285,7 +1284,7 @@ public class Fire implements PlugIn {
     }
   }
 
-  private Plot2 createFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod) {
+  private Plot createFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod) {
     final FrcCurvePlot curve = new FrcCurvePlot();
     curve.add(name, result, thresholdMethod, Color.red, Color.blue, Color.black);
     curve.addResolution(result.fireNumber, result.correlation);
@@ -1298,7 +1297,7 @@ public class Fire implements PlugIn {
 
   private PlotWindow showFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod,
       int flags) {
-    final Plot2 plot = createFrcCurve(name, result, thresholdMethod);
+    final Plot plot = createFrcCurve(name, result, thresholdMethod);
     return ImageJUtils.display(plot.getTitle(), plot, flags);
   }
 
@@ -1364,8 +1363,7 @@ public class Fire implements PlugIn {
     }
 
     final String title = name + " FRC Time Evolution";
-    final Plot2 plot =
-        new Plot2(title, "Frames", "Resolution (" + units + ")", (float[]) null, (float[]) null);
+    final Plot plot = new Plot(title, "Frames", "Resolution (" + units + ")");
     final double range = Math.max(1, yMax - yMin) * 0.05;
     plot.setLimits(xValues[0], xValues[xValues.length - 1], yMin - range, yMax + range);
     plot.setColor(Color.red);
@@ -1664,7 +1662,7 @@ public class Fire implements PlugIn {
         line[i] = curve.value(q[i], estimate);
       }
       final String title = pluginTitle + " Initial fit";
-      final Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+      final Plot plot = new Plot(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
       final String label = String.format("Q = %.3f", qvalue);
       plot.addPoints(qScaled, smooth, Plot.LINE);
       plot.setColor(Color.red);
@@ -2208,7 +2206,7 @@ public class Fire implements PlugIn {
       // Add this to aid is manual adjustment
       final double plateauness = computePlateauness(qvalue, mu, sd);
 
-      Plot2 plot = new Plot2(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
+      Plot plot = new Plot(title, "Spatial Frequency (nm^-1)", "FRC Numerator");
 
       String label = String.format("Q = %.3f (Precision = %.3f +/- %.3f)", qvalue, mean, sigma);
       plot.setColor(Color.red);
@@ -2262,7 +2260,7 @@ public class Fire implements PlugIn {
       }
 
       // Produce a ratio plot. Plateauness is designed to achieve a value of 1 for this ratio.
-      plot = new Plot2(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
+      plot = new Plot(title2, "Spatial Frequency (nm^-1)", "FRC Numerator / Spurious component");
       final double xMax = qscaled[qscaled.length - 1];
       if (qvalue > 0) {
         plot.addLabel(0, 0, String.format("Cost = %.3f", plateauness));
@@ -2330,14 +2328,14 @@ public class Fire implements PlugIn {
 
     PrecisionHistogram(float[][] hist, StoredDataStatistics precision, String title) {
       this.title = title;
-      x = HistogramPlot.createHistogramAxis(hist[0]);
-      y = HistogramPlot.createHistogramValues(hist[1]);
+      x = hist[0];
+      y = hist[1];
       this.precision = precision;
 
       // Sum the area under the histogram to use for normalisation.
       // Amplitude = volume / (sigma * sqrt(2*pi))
       // Precompute the correct amplitude for a standard width Gaussian
-      double dx = (hist[0][1] - hist[0][0]);
+      double dx = (x[1] - x[0]);
       standardAmplitude = precision.getN() * dx / Math.sqrt(2 * Math.PI);
 
       // Set up for drawing the Gaussian curve
@@ -2373,10 +2371,10 @@ public class Fire implements PlugIn {
     }
 
     void plot(MyWindowOrganiser windowOrganiser) {
-      final Plot2 plot = new Plot2(title, "Precision (nm)", "Frequency");
+      final Plot plot = new Plot(title, "Precision (nm)", "Frequency");
       if (x != null) {
         plot.setColor(Color.black);
-        plot.addPoints(x, y, Plot.LINE);
+        plot.addPoints(x, y, Plot.BAR);
         plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
         // Add the Gaussian line
         // Compute the integral of the standard gaussian between the min and max
@@ -2541,12 +2539,11 @@ public class Fire implements PlugIn {
 
     // Extract non-zero data
     float[] x = Arrays.copyOf(hist[0], hist[0].length);
-    float[] y = hist[1];
+    float[] y = Arrays.copyOf(hist[1], hist[1].length);
     int count = 0;
-    final float dx = (x[1] - x[0]) * 0.5f;
     for (int i = 0; i < y.length; i++) {
       if (y[i] > 0) {
-        x[count] = x[i] + dx;
+        x[count] = x[i];
         y[count] = y[i];
         count++;
       }
@@ -2662,7 +2659,7 @@ public class Fire implements PlugIn {
       this.size = new AtomicInteger(size);
     }
 
-    public void display(String title, Plot2 plot, int flags) {
+    public void display(String title, Plot plot, int flags) {
       if (isTiled()) {
         ImageJUtils.display(title, plot, flags);
       } else {

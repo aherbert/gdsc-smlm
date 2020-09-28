@@ -655,8 +655,8 @@ class DiffusionRateTest implements PlugIn {
         values[values.length - 1] = x[x.length - 1] + 0.1;
       }
     }
-    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
-        jdHistogram[1]);
+    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability");
+    jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
     // This is the Chi-squared distribution: The sum of the squares of k independent
@@ -730,8 +730,8 @@ class DiffusionRateTest implements PlugIn {
     final double[] values = jumpDistances.values();
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
     final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
-        jdHistogram[1]);
+    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability");
+    jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
     // Plot the expected function

@@ -93,7 +93,6 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -1719,7 +1718,7 @@ public class Optics implements PlugIn {
 
         final double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
         final String title = pluginTitle + " Reachability Distance";
-        final Plot2 plot = new Plot2(title, "Order", "Reachability" + units);
+        final Plot plot = new Plot(title, "Order", "Reachability" + units);
         final double[] limits = MathUtils.limits(profile);
         // plot to zero
         limits[0] = 0;
@@ -3549,7 +3548,7 @@ public class Optics implements PlugIn {
 
       final double[] order = SimpleArrayUtils.newArray(profile.length, 1.0, 1.0);
       final String title = pluginTitle + " KNN Distance";
-      final Plot2 plot = new Plot2(title, "Sample", k + "-NN Distance" + units);
+      final Plot plot = new Plot(title, "Sample", k + "-NN Distance" + units);
       final double[] limits = new double[] {profile[profile.length - 1], profile[0]};
 
       plot.setLimits(1, order.length, limits[0], limits[1] * 1.05);

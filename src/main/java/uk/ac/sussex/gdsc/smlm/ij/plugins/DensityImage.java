@@ -28,6 +28,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import java.awt.Color;
@@ -42,7 +43,6 @@ import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
@@ -783,7 +783,8 @@ public class DensityImage implements PlugIn {
     }
 
     final String title = results.getName() + " Ripley's (L(r) - r) / r";
-    final Plot2 plot = new Plot2(title, "Radius", "(L(r) - r) / r", values[0], values[1]);
+    final Plot plot = new Plot(title, "Radius", "(L(r) - r) / r");
+    plot.addPoints(values[0], values[1], Plot.LINE);
     // Get the limits
     double yMin = min(0, values[1]);
     double yMax = max(0, values[1]);

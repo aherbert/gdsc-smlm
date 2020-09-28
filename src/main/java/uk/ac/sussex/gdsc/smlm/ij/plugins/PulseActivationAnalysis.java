@@ -33,6 +33,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
+import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
@@ -71,7 +72,6 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -801,12 +801,12 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     // Plot a histogram
-    final double[] x = SimpleArrayUtils.newArray(settings.channels, 0.5, 1);
+    final double[] x = SimpleArrayUtils.newArray(settings.channels, 1.0, 1);
     final double[] y = crosstalk;
-    final Plot2 plot = new Plot2(title, "Channel", "Fraction activations");
+    final Plot plot = new Plot(title, "Channel", "Fraction activations");
     plot.setLimits(0, settings.channels + 1.0, 0, 1);
     plot.setXMinorTicks(false);
-    plot.addPoints(x, y, Plot2.BAR);
+    plot.addPoints(x, y, Plot.BAR);
     String label = String.format("Crosstalk %s = %s", Settings.ctNames[index1],
         MathUtils.round(settings.ct[index1]));
     if (index2 > -1) {

@@ -87,7 +87,6 @@ import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -3754,11 +3753,10 @@ public class BenchmarkFilterAnalysis
     final int[] list = new int[filterAnalysisResult.plots.size()];
     int index = 0;
     for (final NamedPlot p : filterAnalysisResult.plots) {
-      final Plot2 plot = new Plot2(p.name, p.xAxisName, Settings.COLUMNS[settings.scoreIndex],
-          p.xValues, p.yValues);
+      final Plot plot = new Plot(p.name, p.xAxisName, Settings.COLUMNS[settings.scoreIndex]);
       plot.setLimits(p.xValues[0], p.xValues[p.xValues.length - 1], 0, 1);
       plot.setColor(Color.RED);
-      plot.draw();
+      plot.addPoints(p.xValues, p.yValues, Plot.LINE);
       plot.setColor(Color.BLUE);
       plot.addPoints(p.xValues, p.yValues, Plot.CROSS);
       final PlotWindow plotWindow = ImageJUtils.display(p.name, plot);
@@ -6201,15 +6199,15 @@ public class BenchmarkFilterAnalysis
 
     // Produce a histogram of the number of spots at each depth
     final String title1 = TITLE + " Depth Histogram";
-    final Plot2 plot1 = new Plot2(title1, "Depth (nm)", "Frequency");
+    final Plot plot1 = new Plot(title1, "Depth (nm)", "Frequency");
     plot1.setLimits(limits[0], limits[1], 0, MathUtils.max(h1[1]));
     plot1.setColor(Color.black);
-    plot1.addPoints(h1[0], h1[1], Plot2.BAR);
+    plot1.addPoints(h1[0], h1[1], Plot.BAR);
     plot1.addLabel(0, 0, "Black = Spots; Blue = Fitted; Red = Filtered");
     plot1.setColor(Color.blue);
-    plot1.addPoints(h1[0], h2[1], Plot2.BAR);
+    plot1.addPoints(h1[0], h2[1], Plot.BAR);
     plot1.setColor(Color.red);
-    plot1.addPoints(h1[0], h3[1], Plot2.BAR);
+    plot1.addPoints(h1[0], h3[1], Plot.BAR);
     plot1.setColor(Color.magenta);
     ImageJUtils.display(title1, plot1, wo);
 
@@ -6268,7 +6266,7 @@ public class BenchmarkFilterAnalysis
     final double halfSummaryDepth = settings.summaryDepth * 0.5;
 
     final String title2 = TITLE + " Depth Histogram (normalised)";
-    final Plot2 plot2 = new Plot2(title2, "Depth (nm)", "Recall");
+    final Plot plot2 = new Plot(title2, "Depth (nm)", "Recall");
     plot2.setLimits(limits[0] + halfBinWidth, limits[1] + halfBinWidth, 0,
         MathUtils.min(1, MathUtils.max(v2)));
     plot2.setColor(Color.black);
@@ -6398,7 +6396,7 @@ public class BenchmarkFilterAnalysis
 
     // Draw distance histogram first
     final String title2 = TITLE + " Distance Histogram";
-    final Plot2 plot2 = new Plot2(title2, "Distance (nm)", "Frequency");
+    final Plot plot2 = new Plot(title2, "Distance (nm)", "Frequency");
     plot2.setLimits(limits2[0], limits2[1], 0, MathUtils.maxDefault(MathUtils.max(h2[1]), h2b[1]));
     plot2.setColor(Color.black);
     plot2.addLabel(0, 0,
@@ -6406,14 +6404,14 @@ public class BenchmarkFilterAnalysis
             MathUtils.rounded(fitResultData.distanceStats.getMean()),
             MathUtils.rounded(sumDistance / count)));
     plot2.setColor(Color.blue);
-    plot2.addPoints(h2[0], h2[1], Plot2.BAR);
+    plot2.addPoints(h2[0], h2[1], Plot.BAR);
     plot2.setColor(Color.red);
-    plot2.addPoints(h2b[0], h2b[1], Plot2.BAR);
+    plot2.addPoints(h2b[0], h2b[1], Plot.BAR);
     ImageJUtils.display(title2, plot2, wo);
 
     // Draw signal factor histogram
     final String title1 = TITLE + " Signal Factor Histogram";
-    final Plot2 plot1 = new Plot2(title1, "Signal Factor", "Frequency");
+    final Plot plot1 = new Plot(title1, "Signal Factor", "Frequency");
     plot1.setLimits(limits1[0], limits1[1], 0, MathUtils.maxDefault(MathUtils.max(h1[1]), h1b[1]));
     plot1.setColor(Color.black);
     plot1.addLabel(0, 0,
@@ -6421,9 +6419,9 @@ public class BenchmarkFilterAnalysis
             MathUtils.rounded(fitResultData.signalFactorStats.getMean()),
             MathUtils.rounded(sumSignal / count)));
     plot1.setColor(Color.blue);
-    plot1.addPoints(h1[0], h1[1], Plot2.BAR);
+    plot1.addPoints(h1[0], h1[1], Plot.BAR);
     plot1.setColor(Color.red);
-    plot1.addPoints(h1b[0], h1b[1], Plot2.BAR);
+    plot1.addPoints(h1b[0], h1b[1], Plot.BAR);
     ImageJUtils.display(title1, plot1, wo);
 
     return allAssignments;
@@ -6923,11 +6921,11 @@ public class BenchmarkFilterAnalysis
       // }
       // double[][] h1 = Maths.cumulativeHistogram(stats.getValues(), false);
       // String title = TITLE + " Cumul Precision";
-      // Plot2 plot = new Plot2(title, "Precision", "Frequency");
+      // Plot plot = new Plot(title, "Precision", "Frequency");
       // // Find limits
       // double[] xlimit = Maths.limits(h1[0]);
       // plot.setLimits(xlimit[0] - 1, xlimit[1] + 1, 0, Maths.max(h1[1]) * 1.05);
-      // plot.addPoints(h1[0], h1[1], Plot2.BAR);
+      // plot.addPoints(h1[0], h1[1], Plot.BAR);
       // Utils.display(title, plot);
       // }
       // catch (ClassCastException e)

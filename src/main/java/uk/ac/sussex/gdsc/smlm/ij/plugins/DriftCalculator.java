@@ -70,7 +70,6 @@ import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
@@ -1153,7 +1152,7 @@ public class DriftCalculator implements PlugIn {
     double[] ylimits = MathUtils.limits(original[index]);
     ylimits = MathUtils.limits(ylimits, interpolated[index]);
 
-    final Plot2 plot = new Plot2(name, "Frame", "Drift (px)", (float[]) null, (float[]) null);
+    final Plot plot = new Plot(name, "Frame", "Drift (px)");
     plot.setLimits(xlimits[0], xlimits[1], ylimits[0], ylimits[1]);
     plot.setColor(new Color(0, 0, 155)); // De-saturated blue
     plot.addPoints(original[0], original[index], Plot.CROSS);

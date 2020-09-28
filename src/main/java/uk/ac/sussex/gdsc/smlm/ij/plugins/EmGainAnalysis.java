@@ -53,7 +53,6 @@ import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -426,7 +425,7 @@ public class EmGainAnalysis implements PlugInFilter {
     final double[] x = getX(limits);
     final double[] y = getY(histogram, limits);
 
-    Plot2 plot = new Plot2(TITLE, "ADU", "Frequency");
+    Plot plot = new Plot(TITLE, "ADU", "Frequency");
     double yMax = MathUtils.max(y);
     plot.setLimits(limits[0], limits[1], 0, yMax);
     plot.setColor(Color.black);
@@ -565,7 +564,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Replot
     pg = pdf(max, photons, settings.gain, settings.noise, (int) settings.bias);
-    plot = new Plot2(TITLE, "ADU", "Frequency");
+    plot = new Plot(TITLE, "ADU", "Frequency");
     plot.setLimits(limits[0], limits[1], 0, yMax * 1.05);
     plot.setColor(Color.black);
     plot.addPoints(x, y, Plot.DOT);
@@ -1007,7 +1006,7 @@ public class EmGainAnalysis implements PlugInFilter {
         String.format("Gain=%s, noise=%s, photons=%s", MathUtils.rounded(settings.settingGain),
             MathUtils.rounded(settings.settingNoise), MathUtils.rounded(settings.settingPhotons));
 
-    final Plot2 plot = new Plot2("PMF", "ADUs", "p");
+    final Plot plot = new Plot("PMF", "ADUs", "p");
     plot.setLimits(x[0], x[x.length - 1], 0, yMax);
     plot.setColor(Color.red);
     plot.addPoints(x, pmf, Plot.LINE);
@@ -1037,8 +1036,8 @@ public class EmGainAnalysis implements PlugInFilter {
       }
     }
 
-    final Plot2 plot2 =
-        new Plot2("PMF delta", "ADUs", (settings.relativeDelta) ? "Relative delta" : "delta");
+    final Plot plot2 =
+        new Plot("PMF delta", "ADUs", (settings.relativeDelta) ? "Relative delta" : "delta");
     final double[] limits = MathUtils.limits(delta);
     plot2.setLimits(x[0], x[x.length - 1], limits[0], limits[1]);
     plot2.setColor(Color.red);
@@ -1074,7 +1073,7 @@ public class EmGainAnalysis implements PlugInFilter {
     cdf1 = Arrays.copyOfRange(cdf1, min, max);
     cdf2 = Arrays.copyOfRange(cdf2, min, max);
 
-    final Plot2 plot3 = new Plot2("CDF", "ADUs", "p");
+    final Plot plot3 = new Plot("CDF", "ADUs", "p");
     yMax = 1.05;
     plot3.setLimits(x[0], x[x.length - 1], 0, yMax);
     plot3.setColor(Color.red);

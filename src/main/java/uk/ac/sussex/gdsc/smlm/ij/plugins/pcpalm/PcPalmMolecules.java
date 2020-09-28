@@ -79,7 +79,6 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -828,28 +827,22 @@ public class PcPalmMolecules implements PlugIn {
 
     final float[][] hist = HistogramPlot.calcHistogram(data, yMin, yMax, bins);
 
-    Plot2 plot = null;
+    Plot plot = null;
     if (title != null) {
-      plot = new Plot2(title, "Precision", "Frequency");
+      plot = new Plot(title, "Precision", "Frequency");
       final float[] xValues = hist[0];
       final float[] yValues = hist[1];
-      if (xValues.length > 0) {
-        final double xPadding = 0.05 * (xValues[xValues.length - 1] - xValues[0]);
-        plot.setLimits(xValues[0] - xPadding, xValues[xValues.length - 1] + xPadding, 0,
-            MathUtils.max(yValues) * 1.05);
-      }
-      plot.addPoints(xValues, yValues, Plot2.BAR);
+      plot.addPoints(xValues, yValues, Plot.BAR);
       ImageJUtils.display(title, plot);
     }
 
     // Extract non-zero data
     float[] x = Arrays.copyOf(hist[0], hist[0].length);
-    float[] y = hist[1];
+    float[] y = Arrays.copyOf(hist[1], hist[1].length);
     int count = 0;
-    final float dx = (x[1] - x[0]) * 0.5f;
     for (int i = 0; i < y.length; i++) {
       if (y[i] > 0) {
-        x[count] = x[i] + dx;
+        x[count] = x[i];
         y[count] = y[i];
         count++;
       }
@@ -916,12 +909,8 @@ public class PcPalmMolecules implements PlugIn {
 
     // Use original histogram x-axis to maintain all the bins
     if (plot != null) {
-      x = hist[0];
-      for (int i = 0; i < y.length; i++) {
-        x[i] += dx;
-      }
       plot.setColor(Color.red);
-      addToPlot(plot, x, skewParameters, Plot.LINE);
+      addToPlot(plot, hist[0], skewParameters, Plot.LINE);
 
       plot.setColor(Color.black);
       ImageJUtils.display(title, plot);
@@ -1009,7 +998,7 @@ public class PcPalmMolecules implements PlugIn {
    * @param parameters Gaussian parameters
    * @param shape the shape
    */
-  private static void addToPlot(Plot2 plot, float[] x, double[] parameters, int shape) {
+  private static void addToPlot(Plot plot, float[] x, double[] parameters, int shape) {
     final SkewNormalFunction sn = new SkewNormalFunction(parameters);
     final float[] y = new float[x.length];
     for (int i = 0; i < x.length; i++) {
@@ -1630,7 +1619,8 @@ public class PcPalmMolecules implements PlugIn {
 
     // Plot
     final String title = TITLE + " " + label;
-    final Plot2 plot = new Plot2(title, label, "Frequency", xValues, yValues);
+    final Plot plot = new Plot(title, label, "Frequency");
+    plot.addPoints(xValues, yValues, Plot.LINE);
     ImageJUtils.display(title, plot);
 
     return hist;
@@ -1670,7 +1660,8 @@ public class PcPalmMolecules implements PlugIn {
 
       // Plot
       final String title = TITLE + " molecule linkage distance";
-      final Plot2 plot = new Plot2(title, "Distance", "Frequency", intraIdHist[0], intraIdHist[1]);
+      final Plot plot = new Plot(title, "Distance", "Frequency");
+      plot.addPoints(intraIdHist[0], intraIdHist[1], Plot.LINE);
       double max = (intraIdHist[1].length > 0) ? intraIdHist[1][intraIdHist[1].length - 1] : 0;
       if (interIdHist[1].length > 0) {
         max = Math.max(max, interIdHist[1][interIdHist[1].length - 1]);

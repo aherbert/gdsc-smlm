@@ -84,7 +84,6 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -762,7 +761,7 @@ public class PsfCreator implements PlugInFilter {
         calculateCentreOfMass(psf, fitCom, nmPerPixel / settings.getMagnification());
     final double[] slice = SimpleArrayUtils.newArray(psf.getSize(), 1, 1.0);
     final String title = TITLE + " CoM Drift";
-    final Plot2 plot = new Plot2(title, "Slice", "Drift (nm)");
+    final Plot plot = new Plot(title, "Slice", "Drift (nm)");
     plot.addLabel(0, 0, "Red = X; Blue = Y");
     // double[] limitsX = Maths.limits(com[0]);
     // double[] limitsY = Maths.limits(com[1]);
@@ -993,7 +992,8 @@ public class PsfCreator implements PlugInFilter {
 
     // Draw a plot of the amplitude
     if (a != null) {
-      final Plot2 plot = new Plot2(TITLE_AMPLITUDE, "z", "Amplitude", smoothAz, smoothA);
+      final Plot plot = new Plot(TITLE_AMPLITUDE, "z", "Amplitude");
+      plot.addPoints(smoothAz, smoothA, Plot.LINE);
       final double[] limits2 = MathUtils.limits(MathUtils.limits(a), smoothA);
       plot.setLimits(z[0], z[z.length - 1], limits2[0], limits2[1]);
       plot.addPoints(z, a, Plot.CIRCLE);
@@ -1027,7 +1027,8 @@ public class PsfCreator implements PlugInFilter {
 
     // Show plot of width, X centre, Y centre
     if (xCoord != null) {
-      final Plot2 plot = new Plot2(TITLE_PSF_PARAMETERS, "z", "px", newZ, smoothSd);
+      final Plot plot = new Plot(TITLE_PSF_PARAMETERS, "z", "px");
+      plot.addPoints(newZ, smoothSd, Plot.LINE);
       // Get the limits
       final double[] sd2 = invert(sd);
       final double[] limits = MathUtils
@@ -2192,7 +2193,8 @@ public class PsfCreator implements PlugInFilter {
     final boolean alignWindows = (WindowManager.getFrame(signalTitle) == null);
 
     final double total = signal[slice - 1];
-    final Plot2 plot = new Plot2(signalTitle, "z", "Signal", signalZ, signal);
+    final Plot plot = new Plot(signalTitle, "z", "Signal");
+    plot.addPoints(signalZ, signal, Plot.LINE);
     plot.addLabel(0, 0, String.format("Total = %s. z = %s nm", MathUtils.rounded(total),
         MathUtils.rounded((slice - zCentre) * settings.getNmPerSlice())));
     plot.setColor(Color.green);
@@ -2341,7 +2343,8 @@ public class PsfCreator implements PlugInFilter {
 
     final boolean alignWindows = (WindowManager.getFrame(title) == null);
 
-    final Plot2 plot = new Plot2(title, "Distance (nm)", "Signal", distances, signal);
+    final Plot plot = new Plot(title, "Distance (nm)", "Signal");
+    plot.addPoints(distances, signal, Plot.LINE);
     plot.setLimits(0, distances[distances.length - 1], 0, maxCumulativeSignal);
     plot.addLabel(0, 0,
         String.format("Total = %s (@ %s nm). z = %s nm", MathUtils.rounded(sum),
@@ -3565,7 +3568,8 @@ public class PsfCreator implements PlugInFilter {
       // Convert to an alpha
       final double[] w = ImageWindow.tukeyEdge(size, plotWindow);
 
-      final Plot2 plot = new Plot2(TITLE_WINDOW, "x", "Weight", x, w);
+      final Plot plot = new Plot(TITLE_WINDOW, "x", "Weight");
+      plot.addPoints(x, w, Plot.LINE);
       plot.setLimits(0, size - 1, 0, 1.05);
       ImageJUtils.display(TITLE_WINDOW, plot, wo);
 

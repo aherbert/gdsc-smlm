@@ -46,7 +46,6 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -255,7 +254,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     }
 
     title = imp.getTitle() + " " + title;
-    final Plot2 plot = new Plot2(title, "Slice", title);
+    final Plot plot = new Plot(title, "Slice", title);
     double range = ylimits[1] - ylimits[0];
     if (range == 0) {
       range = 1;

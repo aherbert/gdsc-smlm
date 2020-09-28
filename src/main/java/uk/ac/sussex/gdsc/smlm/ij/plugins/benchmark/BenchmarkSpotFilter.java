@@ -51,7 +51,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.AssignmentComparator;
@@ -2149,13 +2148,9 @@ public class BenchmarkSpotFilter implements PlugIn {
     new HistogramPlotBuilder(TITLE, data, xTitle).setMinBinWidth(1).show(windowOrganiser);
 
     final String title = TITLE + " " + xTitle + " Cumulative";
-    final Plot2 plot = new Plot2(title, xTitle, "Frequency");
-    final double xMin = (data.size() == 0) ? 1 : h[0][0];
-    final double xMax = (data.size() == 0) ? 1 : h[0][h[0].length - 1] + 1;
-    final double xPadding = 0.05 * (xMax - xMin);
-    plot.setLimits(xMin - xPadding, xMax, 0, 1.05);
+    final Plot plot = new Plot(title, xTitle, "Frequency");
     plot.setColor(Color.blue);
-    plot.addPoints(h[0], h[1], Plot2.BAR);
+    plot.addPoints(h[0], h[1], Plot.BAR);
     ImageJUtils.display(title, plot, windowOrganiser);
   }
 
@@ -2493,8 +2488,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
 
     String title = TITLE + " Performance";
-    Plot2 plot =
-        new Plot2(title, (settings.rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
+    Plot plot =
+        new Plot(title, (settings.rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
     final double[] limits = MathUtils.limits(rank);
     plot.setLimits(limits[0], limits[1], 0, 1.05);
     plot.setColor(Color.blue);
@@ -2518,7 +2513,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     ImageJUtils.display(title, plot, windowOrganiser);
 
     title = TITLE + " Precision-Recall";
-    plot = new Plot2(title, "Recall", "Precision");
+    plot = new Plot(title, "Recall", "Precision");
     plot.setLimits(0, 1, 0, 1.05);
     plot.setColor(Color.red);
     plot.addPoints(r, p, Plot.LINE);
@@ -2528,7 +2523,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     ImageJUtils.display(title, plot, windowOrganiser);
 
     title = TITLE + " Intensity";
-    plot = new Plot2(title, "Candidate", "Spot");
+    plot = new Plot(title, "Candidate", "Spot");
     final double[] limits1 = MathUtils.limits(i1);
     final double[] limits2 = MathUtils.limits(i2);
     plot.setLimits(limits1[0], limits1[1], limits2[0], limits2[1]);

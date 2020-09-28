@@ -62,7 +62,6 @@ import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -130,7 +129,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   private String jdTitle = TITLE + " Jump Distance";
-  private Plot2 jdPlot;
+  private Plot jdPlot;
 
   /** The plugin settings. */
   private Settings settings;
@@ -483,7 +482,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       }
 
       final String title = TITLE + " MSD";
-      final Plot2 plot = plotMsd(x, y, sd, title);
+      final Plot plot = plotMsd(x, y, sd, title);
 
       // Fit the MSD using a linear fit
       fitMsdResult = fitMsd(x, y, title, plot);
@@ -499,8 +498,8 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
 
       // Always show the jump distance histogram
       jdTitle = TITLE + " Jump Distance";
-      jdPlot = new Plot2(jdTitle, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
-          jdHistogram[1]);
+      jdPlot = new Plot(jdTitle, "Distance (um^2)", "Cumulative Probability");
+      jdPlot.addPoints(jdHistogram[0], jdHistogram[1], Plot.LINE);
       display(jdTitle, jdPlot);
 
       // Fit Jump Distance cumulative probability
@@ -538,7 +537,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     return sizes;
   }
 
-  private void display(String title, Plot2 plot) {
+  private void display(String title, Plot plot) {
     ImageJUtils.display(title, plot, windowOrganiser);
   }
 
@@ -1395,12 +1394,13 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     return true;
   }
 
-  private Plot2 plotMsd(double[] x, double[] y, double[] sd, String title) {
+  private Plot plotMsd(double[] x, double[] y, double[] sd, String title) {
     if (settings.saveRawData) {
       saveMsd(x, y, sd);
     }
 
-    final Plot2 plot = new Plot2(title, "Time (s)", "Distance (um^2)", x, y);
+    final Plot plot = new Plot(title, "Time (s)", "Distance (um^2)");
+    plot.addPoints(x, y, Plot.LINE);
     // Set limits before any plotting
     double max = 0;
     for (int i = 1; i < x.length; i++) {
@@ -1428,7 +1428,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
    * @param plot the plot
    * @return [D, precision]
    */
-  private double[] fitMsd(double[] x, double[] y, String title, Plot2 plot) {
+  private double[] fitMsd(double[] x, double[] y, String title, Plot plot) {
     // The Weimann paper (Plos One e64287) fits:
     // MSD(n dt) = 4D n dt + 4s^2
     // n = number of jumps

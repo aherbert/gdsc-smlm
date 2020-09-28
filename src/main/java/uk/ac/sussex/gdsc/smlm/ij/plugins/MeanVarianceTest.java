@@ -47,7 +47,6 @@ import org.apache.commons.math3.util.MathArrays;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -463,8 +462,9 @@ public class MeanVarianceTest implements PlugIn {
       if (settings.showCharts) {
         // Plot the gain over time
         final String title = TITLE + " Gain vs Frame";
-        final Plot2 plot = new Plot2(title, "Slice", "Gain",
-            SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0), stats.getValues());
+        final Plot plot = new Plot(title, "Slice", "Gain");
+        plot.addPoints(SimpleArrayUtils.newArray(gainStats.getN(), 1, 1.0), stats.getValues(),
+            Plot.LINE);
         final PlotWindow pw = ImageJUtils.display(title, plot);
 
         // Show a histogram
@@ -513,7 +513,7 @@ public class MeanVarianceTest implements PlugIn {
       if (settings.showCharts) {
         // Plot mean verses variance. Gradient is gain in Count/e.
         final String title = TITLE + " results";
-        final Plot2 plot = new Plot2(title, "Mean", "Variance");
+        final Plot plot = new Plot(title, "Mean", "Variance");
         final double[] xlimits = MathUtils.limits(mean);
         final double[] ylimits = MathUtils.limits(variance);
         double xrange = (xlimits[1] - xlimits[0]) * 0.05;

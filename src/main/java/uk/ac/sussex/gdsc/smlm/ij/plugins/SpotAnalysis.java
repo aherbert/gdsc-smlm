@@ -92,7 +92,6 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -819,7 +818,8 @@ public class SpotAnalysis extends PlugInFrame
 
   private void showProfile(String title, String yTitle, double[] xValues, double[] yValues,
       double[] yValues2) {
-    final Plot2 plot = new Plot2(title, "Frame", yTitle, xValues, yValues);
+    final Plot plot = new Plot(title, "Frame", yTitle);
+    plot.addPoints(xValues, yValues, Plot.LINE);
     final double[] limits = MathUtils.limits(yValues);
     plot.setLimits(xValues[0], xValues[xValues.length - 1], limits[0], limits[1]);
     plot.draw();

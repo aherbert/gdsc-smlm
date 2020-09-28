@@ -57,7 +57,6 @@ import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -658,7 +657,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
       // Plot
       String title = TITLE + " Performance";
-      Plot2 plot = new Plot2(title, "Spot Rank", "");
+      Plot plot = new Plot(title, "Spot Rank", "");
       final double[] rank = SimpleArrayUtils.newArray(precision.length, 0, 1.0);
       plot.setLimits(0, nPredicted, 0, 1.05);
       plot.setColor(Color.blue);
@@ -674,7 +673,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       ImageJUtils.display(title, plot, 0, windowOrganiser);
 
       title = TITLE + " Precision-Recall";
-      plot = new Plot2(title, "Recall", "Precision");
+      plot = new Plot(title, "Recall", "Precision");
       plot.setLimits(0, 1, 0, 1.05);
       plot.setColor(Color.red);
       plot.addPoints(recall, precision, Plot.LINE);

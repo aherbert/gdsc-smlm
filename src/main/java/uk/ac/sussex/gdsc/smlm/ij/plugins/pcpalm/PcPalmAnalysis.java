@@ -56,7 +56,6 @@ import org.jtransforms.fft.DoubleFFT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -764,16 +763,16 @@ public class PcPalmAnalysis implements PlugIn {
    * @param showErrorBars the show error bars
    * @return the plot
    */
-  public static Plot2 plotCorrelation(double[][] gr, int offset, String plotTitle,
+  public static Plot plotCorrelation(double[][] gr, int offset, String plotTitle,
       String yAxisTitle, boolean barChart, boolean showErrorBars) {
     final double[] x = new double[gr[1].length - offset];
     final double[] y = new double[x.length];
     System.arraycopy(gr[0], offset, x, 0, x.length);
     System.arraycopy(gr[1], offset, y, 0, y.length);
 
-    final Plot2 plot = new Plot2(plotTitle, "r (nm)", yAxisTitle);
-    plot.setLimits(0, x[x.length - 1], MathUtils.min(y) * 0.95, MathUtils.max(y) * 1.05);
-    plot.addPoints(x, y, (barChart) ? Plot2.BAR : Plot.LINE);
+    final Plot plot = new Plot(plotTitle, "r (nm)", yAxisTitle);
+    plot.setLimits(Double.NaN, Double.NaN, MathUtils.min(y) * 0.95, MathUtils.max(y) * 1.05);
+    plot.addPoints(x, y, (barChart) ? Plot.BAR : Plot.LINE);
 
     ImageJUtils.display(plotTitle, plot);
 

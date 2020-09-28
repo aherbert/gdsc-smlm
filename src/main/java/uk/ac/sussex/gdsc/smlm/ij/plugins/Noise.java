@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.NoiseEstimator;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -311,7 +310,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
     }
 
     final String title = imp.getTitle() + " Noise";
-    final Plot2 plot = new Plot2(title, "Slice", yAxisTitle);
+    final Plot plot = new Plot(title, "Slice", yAxisTitle);
     double range = b1[1] - b1[0];
     if (range == 0) {
       range = 1;

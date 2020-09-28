@@ -59,7 +59,6 @@ import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -841,7 +840,7 @@ public class PsfDrift implements PlugIn {
     newY = Arrays.copyOf(newY, count);
 
     title = TITLE + " " + title;
-    final Plot2 plot = new Plot2(title, "z (nm)", yLabel);
+    final Plot plot = new Plot(title, "z (nm)", yLabel);
     final double[] limitsx = MathUtils.limits(x);
     double[] limitsy = new double[2];
     if (se != null) {

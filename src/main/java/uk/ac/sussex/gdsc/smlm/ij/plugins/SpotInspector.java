@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
@@ -48,7 +49,6 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -424,8 +424,8 @@ public class SpotInspector implements PlugIn {
   private void plotScore(float[] xValues, float[] yValues, double yMin, double yMax) {
     if (settings.plotScore) {
       final String title = TITLE + " Score";
-      final Plot2 plot =
-          new Plot2(title, "Rank", Settings.SORT_ORDER[settings.sortOrderIndex], xValues, yValues);
+      final Plot plot = new Plot(title, "Rank", Settings.SORT_ORDER[settings.sortOrderIndex]);
+      plot.addPoints(xValues, yValues, Plot.LINE);
       plot.setLimits(1, xValues.length, yMin, yMax);
 
       ImageJUtils.display(title, plot);
