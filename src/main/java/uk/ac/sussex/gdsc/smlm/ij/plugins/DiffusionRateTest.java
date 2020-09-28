@@ -50,7 +50,6 @@ import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
@@ -590,8 +589,8 @@ class DiffusionRateTest implements PlugIn {
   private void plotMsd(int totalSteps, double[] xValues, double[] yValues, double[] lower,
       double[] upper, PolynomialFunction fitted, int dimensions) {
     final String title = TITLE + " " + dimensions + "D";
-    final Plot2 plot =
-        new Plot2(title, "Time (seconds)", "Mean-squared Distance (um^2)", xValues, yValues);
+    final Plot plot = new Plot(title, "Time (seconds)", "Mean-squared Distance (um^2)");
+    plot.addPoints(xValues, yValues, Plot.LINE);
     double[] limits = MathUtils.limits(upper);
     limits = MathUtils.limits(limits, lower);
     plot.setLimits(0, totalSteps / settings.getStepsPerSecond(), limits[0], limits[1]);
@@ -656,7 +655,7 @@ class DiffusionRateTest implements PlugIn {
         values[values.length - 1] = x[x.length - 1] + 0.1;
       }
     }
-    Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
+    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
         jdHistogram[1]);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
@@ -731,7 +730,7 @@ class DiffusionRateTest implements PlugIn {
     final double[] values = jumpDistances.values();
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
     final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-    Plot2 jdPlot = new Plot2(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
+    Plot jdPlot = new Plot(title2, "Distance (um^2)", "Cumulative Probability", jdHistogram[0],
         jdHistogram[1]);
     ImageJUtils.display(title2, jdPlot, windowOrganiser);
 
@@ -990,7 +989,7 @@ class DiffusionRateTest implements PlugIn {
 
     // Plot x and y coords on a timeline
     final String title = TITLE + " example coordinates";
-    final Plot2 plot = new Plot2(title, "Time (seconds)", "Distance (um)");
+    final Plot plot = new Plot(title, "Time (seconds)", "Distance (um)");
     final float[] xUm = convertToUm(x);
     final float[] yUm = convertToUm(y);
     float[] limits = MathUtils.limits(xUm);

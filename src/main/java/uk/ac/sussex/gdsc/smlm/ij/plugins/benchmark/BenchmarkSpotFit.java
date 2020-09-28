@@ -65,7 +65,6 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.match.Assignment;
@@ -2555,7 +2554,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     final DescriptiveStatistics d = s1.getStatistics();
     double median = 0;
-    Plot2 plot = null;
+    Plot plot = null;
     String title = null;
 
     if (settings.showFilterScoreHistograms) {
@@ -2588,7 +2587,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
         if (hist[0].length > 0) {
           plot.setColor(Color.red);
-          plot.addPoints(hist[0], hist[1], Plot2.BAR);
+          plot.addPoints(hist[0], hist[1], Plot.BAR);
           ImageJUtils.display(title, plot);
         }
       }
@@ -2599,7 +2598,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
         if (hist[0].length > 0) {
           plot.setColor(Color.blue);
-          plot.addPoints(hist[0], hist[1], Plot2.BAR);
+          plot.addPoints(hist[0], hist[1], Plot.BAR);
           ImageJUtils.display(title, plot);
         }
       }
@@ -2612,7 +2611,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     if (settings.showFilterScoreHistograms) {
       title = TITLE + " Cumul " + xLabel;
-      plot = new Plot2(title, xLabel, "Frequency");
+      plot = new Plot(title, xLabel, "Frequency");
       // Find limits
       double[] xlimit = MathUtils.limits(h1[0]);
       xlimit = MathUtils.limits(xlimit, h2[0]);
