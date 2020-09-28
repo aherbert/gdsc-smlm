@@ -87,7 +87,6 @@ import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
-import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.Plot2;
@@ -178,7 +177,7 @@ public class Fire implements PlugIn {
   private double correctionMean;
   private double correctionSigma;
 
-  private TrackProgress progress = SimpleImageJTrackProgress.getInstance();
+  private TrackProgress progress = new ParallelTrackProgress(1);
 
   private int numberOfThreads;
 
@@ -580,6 +579,7 @@ public class Fire implements PlugIn {
       FireResult result = null;
 
       final int repeats = (settings.randomSplit) ? Math.max(1, settings.repeats) : 1;
+      setProgress(repeats);
       if (repeats == 1) {
         result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod,
             fourierImageScale, imageSize);
@@ -597,7 +597,6 @@ public class Fire implements PlugIn {
         final ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         final LocalList<Future<?>> futures = new LocalList<>(repeats);
         final LocalList<FireWorker> workers = new LocalList<>(repeats);
-        setProgress(repeats);
         IJ.showProgress(0);
         IJ.showStatus(pluginTitle + " computing ...");
         for (int i = 1; i <= repeats; i++) {
@@ -3044,10 +3043,6 @@ public class Fire implements PlugIn {
   }
 
   private void setProgress(int repeats) {
-    if (repeats > 1) {
-      progress = new ParallelTrackProgress(repeats);
-    } else {
-      progress = SimpleImageJTrackProgress.getInstance();
-    }
+    progress = new ParallelTrackProgress(repeats);
   }
 }
