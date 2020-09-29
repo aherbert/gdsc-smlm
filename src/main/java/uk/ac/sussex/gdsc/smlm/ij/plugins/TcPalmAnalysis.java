@@ -787,7 +787,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @return the text window
    */
   private static TextWindow createTable() {
-    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Analysis Results",
+    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Current Clusters",
         "#\tID\tX\tY\tZ\tSize\tStart\tEnd", "", 600, 400));
   }
 }

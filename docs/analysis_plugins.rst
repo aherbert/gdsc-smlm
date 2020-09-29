@@ -1963,9 +1963,7 @@ An example of Ripley's L-plot is shown in :numref:`Table %s <table_ripleys_l_plo
 Dark Time Analysis
 ------------------
 
-The
-``Dark Time Analysis``
-plugin computes a dark time histogram for blinking fluorophores and then outputs the time threshold required to capture a specified percentage of the blinks.
+The ``Dark Time Analysis`` plugin computes a dark time histogram for blinking fluorophores and then outputs the time threshold required to capture a specified percentage of the blinks.
 
 Fluorophores can be inactive (dark) for a variable amount of time between fluorescent bursts. If tracing is to be used to connect all separate bursts from the same fluorophore into a single molecule then the tracing must be done using the maximum dark time expected from the fluorophore. This can be estimated using the
 ``Dark Time Analysis``
@@ -2093,9 +2091,77 @@ The following parameters can be set within the plugin to control the output:
 Time Correlated (TC-PALM) Analysis
 ----------------------------------
 
-Performed time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al* 2013).
+Performs time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin requires that localisations have been traced into molecules composed of one or more localisations over a period of time frames.
 
-This is under development.
+The analysis uses a cumulative histogram of the number of localisations against time. The profile of the activation against time chart can be used to identify clustering that occurs continuously over the imaging lifetime or during a short interval of the entire imaging lifetime (time correlated activation). If the experiment had constant activation of fluorophores over the lifetime then the chart will show an initial steep gradient that gradually falls off as the fluorophores photo-bleach. If there is selective clustering of fluorophores, for example in response to a stage of the cell life cycle, these bursts of activations will appear as a steep gradient on the activation chart.
+
+Display of the activations against time chart for an entire set of localisations will contain too much information and the bursts may not be visible over the noise of constant activation, or the simultaneous bursts in multiple locations in the image. The plugin thus provides a super-resolution image for an overview of the localisation data. A region of interest (ROI) can be marked on the image and the plugin will create the activations verses time plot.
+
+When the plugin is executed the dataset and image rendering options must be specified. 
+
+.. list-table::
+    :widths: 20 80
+    :header-rows: 1
+
+    * - Parameter
+      - Description
+
+    * - Input
+      - Select the input results set.
+
+    * - Image size
+      - Select the size of the super-resolution image. This image is used to mark regions for analysis.
+
+    * - LUT
+      - Select the look-up table to colour the super-resolution image.
+
+When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. All clusters that fit entirely within the region are analysed. Alternatively all clusters that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the localisations extracted for analysis.
+
+.. list-table::
+    :widths: 20 80
+    :header-rows: 1
+
+    * - Parameter
+      - Description
+
+    * - ROI intersects
+      - Set to **true** to add all clusters that have at least one localisation within the region to the current clusters. If **false** then all localisations from the cluster must be within the region to be included in the current clusters.
+
+    * - Time in seconds
+      - Set to **true** to plot seconds on the activations verses time plot. The default is frames.
+
+    * - Min frame
+      - The minimum frame for localisations that are extracted for analysis.
+
+    * - Max Frame
+      - The maximum frame for localisations that are extracted for analysis.
+
+Output
+~~~~~~
+
+The ``TC-PALM Analysis`` plugin is interactive. The dialog controlling selection of the current clusters is non-blocking to allow interaction with other windows within ``ImageJ``. Updates to the ROI on the super-resolution image or the selection parameters will result in identification of a new set of current clusters. The data from the current clusters is then displayed in plots and a results table.
+
+The current clusters are shown on a activations verses time plot (see :numref:`Figure %s <fig_tc_palm_activations_vs_time>`). Each cluster is added as an individual line. High counts and occurrences close in time are easily visible on this plot.
+
+.. _fig_tc_palm_activations_vs_time:
+.. figure:: images/tc_palm_activations_vs_time.jpg
+    :align: center
+    :figwidth: 80%
+
+    TC-PALM cluster activations verses time plot. Each cluster is shown as a separate line on the plot.
+
+The current clusters are aggregated into a total activations verses time plot (see :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`). Note that multiple clusters may occur at the same time. This is named a clash and the total number of clashes are displayed as a label on the plot. Note that steep gradients on the plot may occur due to clashes and this may not be a time correlated clustering event, and is not a burst of a single flourophore.
+
+.. _fig_tc_palm_total_activations_vs_time:
+.. figure:: images/tc_palm_total_activations_vs_time.jpg
+    :align: center
+    :figwidth: 80%
+
+    TC-PALM total activations verses time plot. Highlighted clusters from the current clusters table are displayed using a red line.
+
+The current clusters are recorded in a table. The table records the average coordinates of the cluster, the size and the start and end frames. The table is sorted by the start frame of the cluster. To assist in identifying activation bursts the table allows selection of clusters. A double-click on a single line in the table will select one cluster; use the shift key to select multiple lines with a single mouse click starting from a single line.
+
+Selected clusters are drawn on the super-resolution image using a point ROI overlay. This can be used to determine if two or more entries from the table that are close in time are also close in space. This would indicate they may be part of the same cluster and provides feedback to update the clustering algorithm used to group the localisations into clusters (for example increasing distance or time thresholds). The time span covered by the selected clusters is highlighted in red on the total activations verses time plot. If the highlighting covers a steep region then this is an activation burst displaying time correlated clustering. An example of a highlighted steep region is shown in :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`.
 
 
 .. index:: ! Neighbour Analysis
@@ -2127,9 +2193,7 @@ The plugin requires a folder containing the results of running
 ``Peak Fit``
 on one or more images. The results will contain the X and Y coordinates, X and Y standard deviations and amplitude of the Gaussian function. The results will also contain the original pixel value of the peak candidate location. This column must be updated to contain a zero for any result that is incorrect and a non-zero value for any result that is correct. The classification of spots can be performed using any method.
 
-One successful data preparation method employed by the authors was to manually inspect a set of super-resolution images and extract entire stacks from the image containing suitable spots. These stacks should contain both on and off frames for the fluorophore and examples of good, medium and poor spots that could still be identified manually. The example spots were then manually scored by multiple researchers and a jury system used to score if the frame contained a spot or not. The images were fitted using
-``Peak Fit``
-and the results files updated using the jury classification to mark results as correct/incorrect.
+One successful data preparation method employed by the authors was to manually inspect a set of super-resolution images and extract entire stacks from the image containing suitable spots. These stacks should contain both on and off frames for the fluorophore and examples of good, medium and poor spots that could still be identified manually. The example spots were then manually scored by multiple researchers and a jury system used to score if the frame contained a spot or not. The images were fitted using ``Peak Fit`` and the results files updated using the jury classification to mark results as correct/incorrect.
 
 When the plugin is run the user must select a directory. The plugin will attempt to read all the files in the directory as PeakResults files. The results are cached in memory. If the same directory is selected the user can opt to re-use the results. Click 'No' to re-read the results, for example if the files have been modified with new classifications.
 
