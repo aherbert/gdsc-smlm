@@ -475,7 +475,6 @@ public class MeanVarianceTest implements PlugIn {
             .setRemoveOutliersOption(1).setPlotLabel(label).show(wo);
         if (wo.isNotEmpty()) {
           final Point point = pw.getLocation();
-          point.x = pw.getLocation().x;
           point.y += pw.getHeight();
           pw2.setLocation(point);
         }
