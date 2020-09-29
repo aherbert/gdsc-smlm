@@ -72,13 +72,10 @@ public class ResultsMatchCalculator implements PlugIn {
   private static final String TITLE = "Results Match Calculator";
 
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
-  private static AtomicReference<TextWindow> pairsWindowRef = new AtomicReference<>();
+  private static AtomicReference<PairsTextWindow> pairsWindowRef = new AtomicReference<>();
 
   /** The write header flag used in headless mode to ensure the header is only written once. */
   private static AtomicBoolean writeHeader = new AtomicBoolean(true);
-
-  /** Used to draw ROIs on an image when a line is clicked in the results table. */
-  private static AtomicReference<ImageRoiPainter> pairPainterRef = new AtomicReference<>();
 
   /** The rounder for the text output. */
   private static final Rounder rounder = RounderUtils.create(4);
@@ -323,6 +320,21 @@ public class ResultsMatchCalculator implements PlugIn {
     }
   }
 
+  /**
+   * Custom TextWindow to allow access to the associated ImageRoiPainter.
+   */
+  private static class PairsTextWindow extends TextWindow {
+    private static final long serialVersionUID = 1L;
+
+    final ImageRoiPainter painter;
+
+    public PairsTextWindow(String title, String headings, int width, int height) {
+      super(title, headings, "", width, height);
+      painter =
+          new ImageRoiPainter(getTextPanel(), null, ResultsMatchCalculator::getRoiCoordinates);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -543,9 +555,8 @@ public class ResultsMatchCalculator implements PlugIn {
     if (!settings.showPairs) {
       return;
     }
-    final TextWindow pairsWindow = createPairsWindow(resultsWindow);
+    final TextWindow pairsWindow = createPairsWindow(resultsWindow, results1.getSource());
     pairsWindow.getTextPanel().clear();
-    createPairPainter(pairsWindow, results1.getSource());
     final Ticker ticker = ImageJUtils.createTicker(pairs.size(), 0, "Writing pairs table");
     try (final BufferedTextWindow bw = new BufferedTextWindow(pairsWindow)) {
       final StringBuilder sb = new StringBuilder();
@@ -850,9 +861,10 @@ public class ResultsMatchCalculator implements PlugIn {
     return resultsWindow;
   }
 
-  private static TextWindow createPairsWindow(TextWindow resultsWindow) {
-    return ImageJUtils.refresh(pairsWindowRef, () -> {
-      final TextWindow window = new TextWindow(TITLE + " Pairs", createPairsHeader(), "", 900, 300);
+  private static TextWindow createPairsWindow(TextWindow resultsWindow, ImageSource source) {
+    final PairsTextWindow tw = ImageJUtils.refresh(pairsWindowRef, () -> {
+      final PairsTextWindow window =
+          new PairsTextWindow(TITLE + " Pairs", createPairsHeader(), 900, 300);
       // Position relative to results window
       if (resultsWindow != null) {
         final Point p = resultsWindow.getLocation();
@@ -861,6 +873,18 @@ public class ResultsMatchCalculator implements PlugIn {
       }
       return window;
     });
+
+    // Find if the source image is open
+    String title = null;
+    if (source != null && TextUtils.isNotEmpty(source.getOriginal().getName())) {
+      final String tmp = source.getOriginal().getName();
+      if (WindowManager.getImage(tmp) != null) {
+        title = tmp;
+      }
+    }
+    tw.painter.setTitle(title);
+
+    return tw;
   }
 
   private static String createResultsHeader(boolean idAnalysis) {
@@ -962,29 +986,6 @@ public class ResultsMatchCalculator implements PlugIn {
       sb.append(rounder.round(result.getX())).append('\t');
       sb.append(rounder.round(result.getY())).append('\t');
       sb.append(rounder.round(result.getZ())).append('\t');
-    }
-  }
-
-  private static void createPairPainter(TextWindow pairsWindow, ImageSource source) {
-    // Find if the image is open
-    if (source != null && TextUtils.isNotEmpty(source.getOriginal().getName())) {
-      final String title = source.getOriginal().getName();
-
-      if (WindowManager.getImage(title) == null) {
-        return;
-      }
-
-      // Create the pair painter if necessary
-      final ImageRoiPainter painter = pairPainterRef.updateAndGet(p -> {
-        if (p == null) {
-          p = new ImageRoiPainter(null, null, ResultsMatchCalculator::getRoiCoordinates);
-        }
-        return p;
-      });
-
-      // Update the painter
-      painter.setTextPanel(pairsWindow.getTextPanel());
-      painter.setTitle(title);
     }
   }
 

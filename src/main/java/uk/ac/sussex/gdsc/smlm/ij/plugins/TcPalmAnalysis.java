@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import gnu.trove.map.hash.TIntIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
@@ -39,6 +40,7 @@ import ij.text.TextWindow;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -59,6 +61,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.match.HopcroftKarpMatching.IntBiConsumer;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -86,7 +89,14 @@ public class TcPalmAnalysis implements PlugIn {
   private static final String TITLE = "TC PALM Analysis";
 
   /** Text window showing the current clusters. */
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static AtomicReference<CurrentClustersTextWindow> resultsWindowRef =
+      new AtomicReference<>();
+
+  /**
+   * The instance lock used to prevent multiple instances running. This is because the output
+   * results table and plots are reused and multiple instances cannot share the same output.
+   */
+  private static SoftLock instanceLock = new SoftLock();
 
   /** The plugin settings. */
   private Settings settings;
@@ -119,7 +129,7 @@ public class TcPalmAnalysis implements PlugIn {
   private int maxT;
 
   /** The cluster selected listener. */
-  private TextPanelMouseListener clusterSelectedListener;
+  private ClusterSelectedListener clusterSelectedListener;
 
   /**
    * The total activations plot data from the currently clusters. ALlows adding more lines to the
@@ -340,16 +350,72 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Class to display data from the selected clusters.
+   * Custom TextWindow to allow access to the associated TextPanelMouseListener.
    */
-  private class ClusterSelectedListener extends TextPanelMouseListener {
-    @Override
-    public void selected(int selectedIndex) {
-      selected(selectedIndex, selectedIndex);
+  private static class CurrentClustersTextWindow extends TextWindow {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Class to allow the events raised by the single instance of the current clusters table to pass
+     * to a custom handler.
+     */
+    private static class ClusterSelectedListenerHolder extends TextPanelMouseListener {
+      static final IntBiConsumer NOOP = (u, v) -> {
+        // noop
+      };
+
+      IntBiConsumer action = NOOP;
+
+      ClusterSelectedListenerHolder(TextPanel textPanel) {
+        super(textPanel);
+      }
+
+      @Override
+      public void selected(int selectionStart, int selectionEnd) {
+        action.accept(selectionStart, selectionEnd);
+      }
     }
 
+    private final ClusterSelectedListenerHolder listener;
+
+    /**
+     * Create a new instance.
+     *
+     * @param title the title
+     * @param headings the headings
+     * @param width the width
+     * @param height the height
+     */
+    public CurrentClustersTextWindow(String title, String headings, int width, int height) {
+      super(title, headings, "", width, height);
+      // Only one instance can bind to the text panel as it cannot be removed.
+      // So instead allow a swap of the action performed by the listener.
+      listener = new ClusterSelectedListenerHolder(getTextPanel());
+    }
+
+    /**
+     * Sets the action for the TextPanelMouseListener.
+     *
+     * @param action the new action
+     */
+    void setAction(ClusterSelectedListener action) {
+      if (action == null) {
+        listener.action = ClusterSelectedListenerHolder.NOOP;
+      } else {
+        action.textPanel = getTextPanel();
+        listener.action = action;
+      }
+    }
+  }
+
+  /**
+   * Class to display data from the selected clusters.
+   */
+  private class ClusterSelectedListener implements IntBiConsumer {
+    TextPanel textPanel;
+
     @Override
-    public void selected(int selectionStart, int selectionEnd) {
+    public void accept(int selectionStart, int selectionEnd) {
       // Overlay the clusters on the image.
       final Overlay overlay = new Overlay();
       // For each cluster create a track and add to the overlay.
@@ -427,7 +493,20 @@ public class TcPalmAnalysis implements PlugIn {
       return;
     }
 
+    // Only allow 1 instance to run
+    if (!instanceLock.acquire()) {
+      final Window w = WindowManager.getWindow(TITLE);
+      if (w != null) {
+        w.toFront();
+        return;
+      }
+      // Fall through to allow the plugin to run. This may still have concurrency issues if
+      // another version is running but the window is not currently showing/registered with
+      // the window manager. Perhaps show a dialog asking to continue.
+    }
+
     if (!showDialog()) {
+      instanceLock.release();
       return;
     }
 
@@ -435,6 +514,7 @@ public class TcPalmAnalysis implements PlugIn {
     results = ResultsManager.loadInputResults(settings.inputOption, false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
+      instanceLock.release();
       return;
     }
 
@@ -457,6 +537,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     final ImageCanvas canvas = imp.getCanvas();
     if (canvas == null) {
+      instanceLock.release();
       return;
     }
 
@@ -496,8 +577,12 @@ public class TcPalmAnalysis implements PlugIn {
       showAnalysisDialog();
     } finally {
       canvas.removeMouseListener(imageListener);
-      clusterSelectedListener.setTextPanel(null);
+      final CurrentClustersTextWindow tw = resultsWindowRef.get();
+      if (tw != null) {
+        tw.setAction(null);
+      }
       executor.shutdown();
+      instanceLock.release();
     }
   }
 
@@ -620,7 +705,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @param bounds the bounds
    */
   private void addWork(Rectangle bounds) {
-    if (bounds == null) {
+    if (bounds == null || executor.isShutdown()) {
       return;
     }
     workQueue.insert(Pair.of(new Rectangle(bounds), settings.copy()));
@@ -740,7 +825,7 @@ public class TcPalmAnalysis implements PlugIn {
     wo.tile();
 
     // Add a table of the clusters (these should already be sorted by time then id).
-    final TextWindow resultsWindow = createTable();
+    final CurrentClustersTextWindow resultsWindow = createTable();
     final TextPanel tp = resultsWindow.getTextPanel();
     tp.clear();
     try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
@@ -760,9 +845,9 @@ public class TcPalmAnalysis implements PlugIn {
       });
     }
 
-    // Add a selected listener to allow
-    // selected clusters to be drawn on the super-resolution image.
-    clusterSelectedListener.setTextPanel(tp);
+    // Add a selected listener to allow selected clusters to be drawn on the
+    // super-resolution image.
+    resultsWindow.setAction(clusterSelectedListener);
   }
 
   /**
@@ -786,8 +871,9 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @return the text window
    */
-  private static TextWindow createTable() {
-    return ImageJUtils.refresh(resultsWindowRef, () -> new TextWindow(TITLE + " Current Clusters",
-        "#\tID\tX\tY\tZ\tSize\tStart\tEnd", "", 600, 400));
+  private static CurrentClustersTextWindow createTable() {
+    return ImageJUtils.refresh(resultsWindowRef,
+        () -> new CurrentClustersTextWindow(TITLE + " Current Clusters",
+            "#\tID\tX\tY\tZ\tSize\tStart\tEnd", 600, 400));
   }
 }

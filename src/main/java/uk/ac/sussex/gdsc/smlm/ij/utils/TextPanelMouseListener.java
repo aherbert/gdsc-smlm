@@ -38,33 +38,15 @@ public abstract class TextPanelMouseListener extends MouseAdapter {
 
   /**
    * Instantiates a new text panel mouse listener.
-   */
-  public TextPanelMouseListener() {}
-
-  /**
-   * Instantiates a new text panel mouse listener.
    *
    * @param textPanel The text panel to listen to for mouse events
    */
   public TextPanelMouseListener(TextPanel textPanel) {
-    setTextPanel(textPanel);
-  }
-
-  /**
-   * Sets the text panel.
-   *
-   * @param textPanel the new text panel
-   */
-  public void setTextPanel(TextPanel textPanel) {
-    if (this.textPanel != textPanel) {
-      if (this.textPanel != null) {
-        this.textPanel.removeMouseListener(this);
-      }
-      this.textPanel = textPanel;
-      if (this.textPanel != null) {
-        this.textPanel.addMouseListener(this);
-      }
-    }
+    // Note: The TextPanel.addMouseListener passes through the listener to
+    // the backing TextCanvas. There is no corresponding TextPanel.removeMouseListener
+    // method. So this listener is bound for the entire the lifetime of the TextPanel.
+    textPanel.addMouseListener(this);
+    this.textPanel = textPanel;
   }
 
   @Override
@@ -78,9 +60,14 @@ public abstract class TextPanelMouseListener extends MouseAdapter {
   /**
    * Triggered when a single line from the panel has been selected.
    *
+   * <p>The default implementation calls {@link #selected(int, int)} with the provided selected
+   * index for the start and end.
+   *
    * @param selectedIndex the selected index
    */
-  public abstract void selected(int selectedIndex);
+  public void selected(int selectedIndex) {
+    selected(selectedIndex, selectedIndex);
+  }
 
   /**
    * Triggered when multiple lines from the panel have been selected.
