@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -53,6 +54,8 @@ import java.util.function.BiPredicate;
 import java.util.function.UnaryOperator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -502,6 +505,7 @@ public class TcPalmAnalysis implements PlugIn {
       }
       executor.shutdown();
       instanceLock.release();
+      SettingsManager.writeSettings(settings);
     }
   }
 
@@ -595,6 +599,7 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Min_frame", minT, maxT, settings.getMinFrame());
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
+    gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -609,6 +614,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setMinFrame((int) gd.getNextNumber());
     settings.setMaxFrame((int) gd.getNextNumber());
     settings.setFixedTimeAxis(gd.getNextBoolean());
+    settings.setRateWindow((int) gd.getNextNumber());
     addWork(previous.getLeft());
     return true;
   }
@@ -740,8 +746,8 @@ public class TcPalmAnalysis implements PlugIn {
 
     title = TITLE + " Total Activations vs Time";
     final Plot plot2 = new Plot(title, timeLabel, "Cumulative count");
-    final int[] frames = all.keys();
-    final int[] counts = all.values();
+    int[] frames = all.keys();
+    int[] counts = all.values();
     SortUtils.sortData(counts, frames, true, false);
     final int localisations = (int) MathUtils.sum(counts);
     final int clashes = localisations - all.size();
@@ -749,6 +755,25 @@ public class TcPalmAnalysis implements PlugIn {
     for (int i = 1; i < counts.length; i++) {
       counts[i] += counts[i - 1];
     }
+
+    // Expand the total activations with extra frames to allow large spans to plot as horizontal
+    final TIntArrayList frames2 = new TIntArrayList(frames.length);
+    final TIntArrayList counts2 = new TIntArrayList(frames.length);
+    int previousT = Integer.MIN_VALUE;
+    int previousC = 0;
+    for (int i = 0; i < frames.length; i++) {
+      if (frames[i] > previousT + 1) {
+        frames2.add(frames[i] - 1);
+        counts2.add(previousC);
+      }
+      previousT = frames[i];
+      previousC = counts[i];
+      frames2.add(previousT);
+      counts2.add(previousC);
+    }
+    frames = frames2.toArray();
+    counts = counts2.toArray();
+
     plot2.addLabel(0, 0, TextUtils.pleural(localisations, "localisation") + " : " + clashes
         + TextUtils.pleuralise(clashes, " clash", " clashes"));
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
@@ -759,6 +784,35 @@ public class TcPalmAnalysis implements PlugIn {
     ImageJUtils.display(title, plot2, wo);
 
     activationsPlotData = new ActivationsPlotData(plot2, timeConverter, frames, counts);
+
+    // Plot the gradient (activation rate) using a rolling window
+    final PolynomialSplineFunction fun = new LinearInterpolator()
+        .interpolate(SimpleArrayUtils.toDouble(frames), SimpleArrayUtils.toDouble(counts));
+    title = TITLE + " Activation rate vs Time";
+    final Plot plot4 = new Plot(title, timeLabel, "Activation rate (count/frame)");
+    // Clip to the range
+    final int min = frames[0];
+    final int max = frames[frames.length - 1];
+    final float[] frames3 = SimpleArrayUtils.newArray(max - min + 1, min, 1f);
+    // Configurable window. This works even for a window of zero. Here interpolation is not
+    // necessary but we leave it in place for simplicity.
+    final int window = settings.getRateWindow();
+    final float[] values = new float[frames3.length];
+    for (int i = 0; i < values.length; i++) {
+      final int low = Math.max(min, (int) frames3[i] - window - 1);
+      final int high = Math.min(max, (int) frames3[i] + window);
+      values[i] = (float) ((fun.value(high) - fun.value(low)) / (high - low));
+    }
+    // Note the initial frame will be an added frame with a count of zero. If the window is zero
+    // then this will be NaN. Replace this with no rate.
+    if (window == 0) {
+      values[0] = 0;
+    }
+    plot4.addPoints(timeConverter.apply(frames3), values, Plot.LINE);
+    if (settings.getFixedTimeAxis()) {
+      plot4.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
+    }
+    ImageJUtils.display(title, plot4, wo);
 
     wo.tile();
 
