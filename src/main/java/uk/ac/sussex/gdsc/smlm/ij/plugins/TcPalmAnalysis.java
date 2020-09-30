@@ -152,6 +152,7 @@ public class TcPalmAnalysis implements PlugIn {
     boolean timeInSeconds;
     int minFrame;
     int maxFrame;
+    boolean fixedTimeAxis;
 
     /**
      * Instantiates a new settings.
@@ -175,6 +176,7 @@ public class TcPalmAnalysis implements PlugIn {
       timeInSeconds = source.timeInSeconds;
       minFrame = source.minFrame;
       maxFrame = source.maxFrame;
+      fixedTimeAxis = source.fixedTimeAxis;
     }
 
     /**
@@ -209,7 +211,7 @@ public class TcPalmAnalysis implements PlugIn {
         return inputOption.equals(other.inputOption) && imageSize == other.imageSize
             && lut == other.lut && intersects == other.intersects
             && timeInSeconds == other.timeInSeconds && minFrame == other.minFrame
-            && maxFrame == other.maxFrame;
+            && maxFrame == other.maxFrame && fixedTimeAxis == other.fixedTimeAxis;
       }
       return super.equals(obj);
     }
@@ -217,7 +219,7 @@ public class TcPalmAnalysis implements PlugIn {
     @Override
     public int hashCode() {
       return Objects.hash(inputOption, imageSize, lut, intersects, timeInSeconds, minFrame,
-          maxFrame);
+          maxFrame, fixedTimeAxis);
     }
   }
 
@@ -670,6 +672,7 @@ public class TcPalmAnalysis implements PlugIn {
     }
     gd.addSlider("Min_frame", minT, maxT, settings.minFrame);
     gd.addSlider("Max_frame", minT, maxT, settings.maxFrame);
+    gd.addCheckbox("Fixed_time_axis", settings.fixedTimeAxis);
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -683,6 +686,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings.timeInSeconds = gd.getNextBoolean();
     settings.minFrame = (int) gd.getNextNumber();
     settings.maxFrame = (int) gd.getNextNumber();
+    settings.fixedTimeAxis = gd.getNextBoolean();
     addWork(previous.getLeft());
     return true;
   }
@@ -801,6 +805,13 @@ public class TcPalmAnalysis implements PlugIn {
     });
     plot.draw();
     plot.setLimitsToFit(true);
+    if (settings.fixedTimeAxis) {
+      final double[] limits = plot.getLimits();
+      limits[0] = minT - 1;
+      limits[1] = maxT + 1;
+      plot.setLimits(limits);
+      plot.updateImage();
+    }
     ImageJUtils.display(title, plot, wo);
 
     title = TITLE + " Total Activations vs Time";
@@ -818,6 +829,9 @@ public class TcPalmAnalysis implements PlugIn {
         + TextUtils.pleuralise(clashes, " clash", " clashes"));
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
         SimpleArrayUtils.toFloat(counts), Plot.LINE);
+    if (settings.fixedTimeAxis) {
+      plot2.setLimits(minT - 1, maxT + 1, Double.NaN, Double.NaN);
+    }
     ImageJUtils.display(title, plot2, wo);
 
     activationsPlotData = new ActivationsPlotData(plot2, timeConverter, frames, counts);
