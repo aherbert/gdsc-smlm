@@ -685,3 +685,14 @@ message SpotFitSettings {
   double snr_threshold = 8;
   int32 comparison_channel = 9;
 }
+
+// Contains settings for the TC PALM Analysis plugin
+message TcPalmAnalysisSettings {
+  string input_option = 1;
+  ResultsImageSettings results_image_settings = 2;
+  bool intersects = 3;
+  bool time_in_seconds = 4;
+  int32 min_frame = 5;
+  int32 max_frame = 6;
+  bool fixed_time_axis = 7;
+}

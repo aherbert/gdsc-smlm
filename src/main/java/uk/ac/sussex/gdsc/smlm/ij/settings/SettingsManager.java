@@ -81,6 +81,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SummariseResultsSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TranslateResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GuiProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.AstigmatismModelSettings;
@@ -1181,6 +1182,16 @@ public final class SettingsManager {
    */
   public static TranslateResultsSettings readTranslateResultsSettings(int flags) {
     return new ConfigurationReader<>(TranslateResultsSettings.getDefaultInstance()).read(flags);
+  }
+
+  /**
+   * Read the TcPalmAnalysisSettings from the settings file in the settings directory.
+   *
+   * @param flags the flags
+   * @return the TcPalmAnalysisSettings
+   */
+  public static TcPalmAnalysisSettings readTcPalmAnalysisSettings(int flags) {
+    return new ConfigurationReader<>(GuiProtosHelper.defaultTcPalmAnalysisSettings).read(flags);
   }
 
   /**

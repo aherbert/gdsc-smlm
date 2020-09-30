@@ -46,7 +46,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,14 +68,16 @@ import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
-import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
-import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
-import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
+import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
@@ -99,7 +100,7 @@ public class TcPalmAnalysis implements PlugIn {
   private static SoftLock instanceLock = new SoftLock();
 
   /** The plugin settings. */
-  private Settings settings;
+  private TcPalmAnalysisSettings.Builder settings;
 
   /** The results. */
   private MemoryPeakResults results;
@@ -111,10 +112,10 @@ public class TcPalmAnalysis implements PlugIn {
   private SoftLock lock;
 
   /** The work queue. */
-  private ConcurrentMonoStack<Pair<Rectangle, Settings>> workQueue;
+  private ConcurrentMonoStack<Pair<Rectangle, TcPalmAnalysisSettings>> workQueue;
 
   /** The previous work. */
-  private Pair<Rectangle, Settings> previous;
+  private Pair<Rectangle, TcPalmAnalysisSettings> previous;
 
   /** The executor. */
   private ExecutorService executor;
@@ -136,92 +137,6 @@ public class TcPalmAnalysis implements PlugIn {
    * plot when clusters are selected.
    */
   private ActivationsPlotData activationsPlotData;
-
-  /**
-   * Contains the settings that are the re-usable state of the plugin.
-   */
-  private static class Settings {
-    /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
-
-    String inputOption;
-    int imageSize;
-    int lut;
-    boolean intersects;
-    boolean timeInSeconds;
-    int minFrame;
-    int maxFrame;
-    boolean fixedTimeAxis;
-
-    /**
-     * Instantiates a new settings.
-     */
-    Settings() {
-      // Set defaults
-      inputOption = "";
-      imageSize = 1024;
-    }
-
-    /**
-     * Instantiates a new settings.
-     *
-     * @param source the source
-     */
-    Settings(Settings source) {
-      inputOption = source.inputOption;
-      imageSize = source.imageSize;
-      lut = source.lut;
-      intersects = source.intersects;
-      timeInSeconds = source.timeInSeconds;
-      minFrame = source.minFrame;
-      maxFrame = source.maxFrame;
-      fixedTimeAxis = source.fixedTimeAxis;
-    }
-
-    /**
-     * Copy.
-     *
-     * @return the settings
-     */
-    Settings copy() {
-      return new Settings(this);
-    }
-
-    /**
-     * Load a copy of the settings.
-     *
-     * @return the settings
-     */
-    static Settings load() {
-      return lastSettings.get().copy();
-    }
-
-    /**
-     * Save the settings.
-     */
-    void save() {
-      lastSettings.set(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof Settings) {
-        final Settings other = (Settings) obj;
-        return inputOption.equals(other.inputOption) && imageSize == other.imageSize
-            && lut == other.lut && intersects == other.intersects
-            && timeInSeconds == other.timeInSeconds && minFrame == other.minFrame
-            && maxFrame == other.maxFrame && fixedTimeAxis == other.fixedTimeAxis;
-      }
-      return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(inputOption, imageSize, lut, intersects, timeInSeconds, minFrame,
-          maxFrame, fixedTimeAxis);
-    }
-  }
 
   /**
    * Store data on each cluster.
@@ -513,7 +428,7 @@ public class TcPalmAnalysis implements PlugIn {
     }
 
     // Load the results
-    results = ResultsManager.loadInputResults(settings.inputOption, false, null, null);
+    results = ResultsManager.loadInputResults(settings.getInputOption(), false, null, null);
     if (MemoryPeakResults.isEmpty(results)) {
       IJ.error(TITLE, "No results could be loaded");
       instanceLock.release();
@@ -524,18 +439,20 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
-    final double scale = settings.imageSize / Math.max(bounds.width, bounds.height);
-    image = ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_ID, false, false,
-        settings.inputOption, bounds, 0, 0, scale, 0, ResultsImageMode.IMAGE_MAX);
-    image.copySettings(results);
-    image.begin();
-    image.addAll(results.toArray());
-    image.end();
+    final PeakResultsList resultsList = new PeakResultsList();
+    ResultsManager.addImageResults(resultsList, settings.getResultsImageSettings(), bounds, 0);
+    resultsList.copySettings(results);
+    resultsList.begin();
+    resultsList.addAll(results.toArray());
+    resultsList.end();
+    image = (ImageJImagePeakResults) resultsList.getOutput(0);
 
     // Note: Setting the lut name in the image only has an effect if the image is not showing
     // thus the lut is applied afterwards.
     final ImagePlus imp = image.getImagePlus();
-    imp.setLut(LutHelper.createLut(LutColour.forNumber(settings.lut), true));
+    if (TextUtils.isNotEmpty(image.getLutName())) {
+      imp.setLut(LutHelper.createLut(LutColour.forName(image.getLutName()), true));
+    }
 
     final ImageCanvas canvas = imp.getCanvas();
     if (canvas == null) {
@@ -554,7 +471,7 @@ public class TcPalmAnalysis implements PlugIn {
     // the monostack is empty
     lock = new SoftLock();
     workQueue = new ConcurrentMonoStack<>();
-    previous = Pair.of(null, settings);
+    previous = Pair.of(null, settings.build());
     executor = Executors.newSingleThreadExecutor();
 
     // Create the bounds and activation times for each cluster
@@ -594,21 +511,26 @@ public class TcPalmAnalysis implements PlugIn {
    * @return true, if successful
    */
   private boolean showDialog() {
-    settings = Settings.load();
+    settings = SettingsManager.readTcPalmAnalysisSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the time-correlated activation of traced data");
-    ResultsManager.addInput(gd, "Input", settings.inputOption, InputSource.MEMORY_CLUSTERED);
-    gd.addNumericField("Image_size", settings.imageSize, 0);
-    gd.addChoice("LUT", LutHelper.getLutNames(), settings.lut);
+    ResultsManager.addInput(gd, "Input", settings.getInputOption(), InputSource.MEMORY_CLUSTERED);
+    // Require results settings to use the standard ResultsManager image options
+    final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
+    tmp.setResultsImageSettings(settings.getResultsImageSettingsBuilder());
+    final int flags = ResultsManager.FLAG_NO_SECTION_HEADER | ResultsManager.FLAG_IMAGE_REMOVE_NONE;
+    ResultsManager.addImageResultsOptions(gd, tmp, flags);
     gd.addHelp(HelpUrls.getUrl("tc-palm-analysis"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
-    settings.inputOption = ResultsManager.getInputSource(gd);
-    settings.imageSize = MathUtils.clip(20, 1 << 16, (int) gd.getNextNumber());
-    settings.lut = gd.getNextChoiceIndex();
-    settings.save();
+    settings.setInputOption(ResultsManager.getInputSource(gd));
+    final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
+    // Note: The initial none option was removed
+    newImgSettings.setImageTypeValue(gd.getNextChoiceIndex() + 1);
+    settings.setResultsImageSettings(newImgSettings);
+    SettingsManager.writeSettings(settings);
     return true;
   }
 
@@ -659,20 +581,20 @@ public class TcPalmAnalysis implements PlugIn {
   private boolean showAnalysisDialog() {
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the time-correlated activation of traced data");
-    gd.addCheckbox("ROI_intersects", settings.intersects);
-    gd.addCheckbox("Time_in_seconds", settings.timeInSeconds);
+    gd.addCheckbox("ROI_intersects", settings.getIntersects());
+    gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
     minT = results.getMinFrame();
     maxT = results.getMaxFrame();
     // No need to check other end of the range as the dialog slider will clip to the range.
-    if (settings.minFrame > maxT) {
-      settings.minFrame = minT;
+    if (settings.getMinFrame() > maxT) {
+      settings.setMinFrame(minT);
     }
-    if (settings.maxFrame < minT) {
-      settings.maxFrame = maxT;
+    if (settings.getMaxFrame() < minT) {
+      settings.setMaxFrame(maxT);
     }
-    gd.addSlider("Min_frame", minT, maxT, settings.minFrame);
-    gd.addSlider("Max_frame", minT, maxT, settings.maxFrame);
-    gd.addCheckbox("Fixed_time_axis", settings.fixedTimeAxis);
+    gd.addSlider("Min_frame", minT, maxT, settings.getMinFrame());
+    gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
+    gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -682,11 +604,11 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   private boolean readDialog(GenericDialog gd, @SuppressWarnings("unused") AWTEvent e) {
-    settings.intersects = gd.getNextBoolean();
-    settings.timeInSeconds = gd.getNextBoolean();
-    settings.minFrame = (int) gd.getNextNumber();
-    settings.maxFrame = (int) gd.getNextNumber();
-    settings.fixedTimeAxis = gd.getNextBoolean();
+    settings.setIntersects(gd.getNextBoolean());
+    settings.setTimeInSeconds(gd.getNextBoolean());
+    settings.setMinFrame((int) gd.getNextNumber());
+    settings.setMaxFrame((int) gd.getNextNumber());
+    settings.setFixedTimeAxis(gd.getNextBoolean());
     addWork(previous.getLeft());
     return true;
   }
@@ -712,13 +634,13 @@ public class TcPalmAnalysis implements PlugIn {
     if (bounds == null || executor.isShutdown()) {
       return;
     }
-    workQueue.insert(Pair.of(new Rectangle(bounds), settings.copy()));
+    workQueue.insert(Pair.of(new Rectangle(bounds), settings.build()));
     if (lock.acquire()) {
       executor.submit(() -> {
-        Pair<Rectangle, Settings> current = previous;
+        Pair<Rectangle, TcPalmAnalysisSettings> current = previous;
         try {
           for (;;) {
-            final Pair<Rectangle, Settings> next = workQueue.poll();
+            final Pair<Rectangle, TcPalmAnalysisSettings> next = workQueue.poll();
             if (next == null) {
               // queue is empty
               break;
@@ -743,7 +665,7 @@ public class TcPalmAnalysis implements PlugIn {
    * @param bounds the bounds
    * @param settings the settings
    */
-  private void runAnalysis(Rectangle bounds, Settings settings) {
+  private void runAnalysis(Rectangle bounds, TcPalmAnalysisSettings settings) {
     // Map the bounds to the data bounds
     final double x = image.inverseMapX(bounds.x);
     final double y = image.inverseMapY(bounds.y);
@@ -753,16 +675,16 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Identify all clusters using a custom filter
     BiPredicate<ClusterData, Rectangle2D> test = null;
-    if (settings.minFrame > minT) {
-      final int min = settings.minFrame;
+    if (settings.getMinFrame() > minT) {
+      final int min = settings.getMinFrame();
       test = (c, r) -> c.start >= min;
     }
-    if (settings.maxFrame < maxT) {
-      final int max = settings.maxFrame;
+    if (settings.getMaxFrame() < maxT) {
+      final int max = settings.getMaxFrame();
       test = and(test, (c, r) -> c.end <= max);
     }
     final BiPredicate<ClusterData, Rectangle2D> filter =
-        and(test, settings.intersects ? ClusterData::intersects : ClusterData::isWithin);
+        and(test, settings.getIntersects() ? ClusterData::intersects : ClusterData::isWithin);
 
     final LocalList<ClusterData> clusters = new LocalList<>();
     clusterData.forEach(c -> {
@@ -778,7 +700,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     String timeLabel = "Time";
     UnaryOperator<float[]> timeConverter;
-    if (settings.timeInSeconds) {
+    if (settings.getTimeInSeconds()) {
       timeLabel += " (s)";
       final double scale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
       timeConverter = frames -> {
@@ -805,7 +727,7 @@ public class TcPalmAnalysis implements PlugIn {
     });
     plot.draw();
     plot.setLimitsToFit(true);
-    if (settings.fixedTimeAxis) {
+    if (settings.getFixedTimeAxis()) {
       final double[] limits = plot.getLimits();
       limits[0] = minT - 1;
       limits[1] = maxT + 1;
@@ -829,7 +751,7 @@ public class TcPalmAnalysis implements PlugIn {
         + TextUtils.pleuralise(clashes, " clash", " clashes"));
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
         SimpleArrayUtils.toFloat(counts), Plot.LINE);
-    if (settings.fixedTimeAxis) {
+    if (settings.getFixedTimeAxis()) {
       plot2.setLimits(minT - 1, maxT + 1, Double.NaN, Double.NaN);
     }
     ImageJUtils.display(title, plot2, wo);

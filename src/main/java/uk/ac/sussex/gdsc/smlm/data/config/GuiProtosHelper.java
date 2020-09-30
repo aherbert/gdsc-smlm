@@ -51,7 +51,10 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCreatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -484,6 +487,16 @@ public final class GuiProtosHelper {
     builder.setFitRadius(10);
     builder.setShowOverlay(true);
     defaultSpotFitSettings = builder.build();
+  }
+
+  /** The default TcPalmAnalysisSettings. */
+  public static final TcPalmAnalysisSettings defaultTcPalmAnalysisSettings;
+
+  static {
+    final TcPalmAnalysisSettings.Builder builder = TcPalmAnalysisSettings.newBuilder();
+    ResultsImageSettings.Builder resultsImageSettings = builder.getResultsImageSettingsBuilder();
+    resultsImageSettings.setImageType(ResultsImageType.DRAW_ID);
+    defaultTcPalmAnalysisSettings = builder.build();
   }
 
   /** No public constructor. */

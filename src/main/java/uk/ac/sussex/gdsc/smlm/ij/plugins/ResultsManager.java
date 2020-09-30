@@ -43,6 +43,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -800,6 +801,8 @@ public class ResultsManager implements PlugIn {
   public static final int FLAG_NO_SECTION_HEADER = 0x00000008;
   /** Use this to add a choice of table format to the dialog. */
   public static final int FLAG_TABLE_FORMAT = 0x00000010;
+  /** Use this to remove the None option from the results image options. */
+  public static final int FLAG_IMAGE_REMOVE_NONE = 0x00000020;
 
   /**
    * Adds the table results options.
@@ -927,6 +930,17 @@ public class ResultsManager implements PlugIn {
   /**
    * Adds the image results options.
    *
+   * <p>Note: If using the option {@link #FLAG_IMAGE_REMOVE_NONE} then the integer value returned
+   * from the dialog choice should be offset by 1.
+   *
+   * <pre>
+   * ExtendedGenericDialog gd;
+   * ResultsSettings.Builder settings;
+   * ResultsManager.addImageResultsOptions(gd, settings, ResultsManager.FLAG_IMAGE_REMOVE_NONE);
+   * // ...
+   * settings.getResultsImageSettings().setImageTypeValue(gd.getNextChoiceIndex() + 1);
+   * </pre>
+   *
    * @param gd the dialog
    * @param resultsSettings the results settings
    * @param flags the flags
@@ -944,58 +958,62 @@ public class ResultsManager implements PlugIn {
     final EnumSet<ResultsImageType> requireWeighted =
         EnumSet.of(ResultsImageType.DRAW_LOCALISATIONS, ResultsImageType.DRAW_INTENSITY,
             ResultsImageType.DRAW_FRAME_NUMBER, ResultsImageType.DRAW_FIT_ERROR);
-    gd.addChoice("Image", SettingsManager.getResultsImageTypeNames(),
-        imageSettings.getImageTypeValue(), new OptionListener<Integer>() {
-          @Override
-          public boolean collectOptions(Integer field) {
-            imageSettings.setImageTypeValue(field);
-            return collectOptions(false);
-          }
+    String[] names = SettingsManager.getResultsImageTypeNames();
+    final int offset = BitFlagUtils.areSet(flags, FLAG_IMAGE_REMOVE_NONE) ? 1 : 0;
+    if (offset != 0) {
+      names = Arrays.copyOfRange(names, 1, names.length);
+    }
+    gd.addChoice("Image", names, imageSettings.getImageTypeValue(), new OptionListener<Integer>() {
+      @Override
+      public boolean collectOptions(Integer field) {
+        imageSettings.setImageTypeValue(field + offset);
+        return collectOptions(false);
+      }
 
-          @Override
-          public boolean collectOptions() {
-            return collectOptions(true);
-          }
+      @Override
+      public boolean collectOptions() {
+        return collectOptions(true);
+      }
 
-          private boolean collectOptions(boolean silent) {
-            final ResultsImageType resultsImage = imageSettings.getImageType();
-            if (resultsImage.getNumber() <= 0) {
-              return false;
-            }
-            final boolean isExtraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
-            final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
-            if (requireWeighted.contains(resultsImage)) {
-              egd.addCheckbox("Weighted", imageSettings.getWeighted());
-            }
-            egd.addCheckbox("Equalised", imageSettings.getEqualised());
-            if (requirePrecision.contains(resultsImage)) {
-              egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
-            }
-            egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
-            if (isExtraOptions) {
-              egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
-            }
-            egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());
-            egd.setSilent(silent);
-            egd.showDialog(true, gd);
-            if (egd.wasCanceled()) {
-              return false;
-            }
-            if (requireWeighted.contains(resultsImage)) {
-              imageSettings.setWeighted(egd.getNextBoolean());
-            }
-            imageSettings.setEqualised(egd.getNextBoolean());
-            if (requirePrecision.contains(resultsImage)) {
-              imageSettings.setAveragePrecision(egd.getNextNumber());
-            }
-            imageSettings.setScale(egd.getNextNumber());
-            if (isExtraOptions) {
-              imageSettings.setRollingWindowSize((int) egd.getNextNumber());
-            }
-            imageSettings.setLutName(egd.getNextChoice());
-            return true;
-          }
-        });
+      private boolean collectOptions(boolean silent) {
+        final ResultsImageType resultsImage = imageSettings.getImageType();
+        if (resultsImage.getNumber() <= 0) {
+          return false;
+        }
+        final boolean isExtraOptions = BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS);
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog(TITLE, null);
+        if (requireWeighted.contains(resultsImage)) {
+          egd.addCheckbox("Weighted", imageSettings.getWeighted());
+        }
+        egd.addCheckbox("Equalised", imageSettings.getEqualised());
+        if (requirePrecision.contains(resultsImage)) {
+          egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
+        }
+        egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
+        if (isExtraOptions) {
+          egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
+        }
+        egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());
+        egd.setSilent(silent);
+        egd.showDialog(true, gd);
+        if (egd.wasCanceled()) {
+          return false;
+        }
+        if (requireWeighted.contains(resultsImage)) {
+          imageSettings.setWeighted(egd.getNextBoolean());
+        }
+        imageSettings.setEqualised(egd.getNextBoolean());
+        if (requirePrecision.contains(resultsImage)) {
+          imageSettings.setAveragePrecision(egd.getNextNumber());
+        }
+        imageSettings.setScale(egd.getNextNumber());
+        if (isExtraOptions) {
+          imageSettings.setRollingWindowSize((int) egd.getNextNumber());
+        }
+        imageSettings.setLutName(egd.getNextChoice());
+        return true;
+      }
+    });
   }
 
   /**
