@@ -700,17 +700,19 @@ public class TcPalmAnalysis implements PlugIn {
 
     String timeLabel = "Time";
     UnaryOperator<float[]> timeConverter;
+    double timeScale;
     if (settings.getTimeInSeconds()) {
       timeLabel += " (s)";
-      final double scale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
+      timeScale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
       timeConverter = frames -> {
         final float[] updated = frames.clone();
-        SimpleArrayUtils.apply(updated, f -> f *= scale);
+        SimpleArrayUtils.apply(updated, f -> f *= timeScale);
         return updated;
       };
     } else {
       timeLabel += " (frame)";
       timeConverter = UnaryOperator.identity();
+      timeScale = 1;
     }
 
     String title = TITLE + " Cluster Activations vs Time";
@@ -729,8 +731,8 @@ public class TcPalmAnalysis implements PlugIn {
     plot.setLimitsToFit(true);
     if (settings.getFixedTimeAxis()) {
       final double[] limits = plot.getLimits();
-      limits[0] = minT - 1;
-      limits[1] = maxT + 1;
+      limits[0] = timeScale * (minT - 1);
+      limits[1] = timeScale * (maxT + 1);
       plot.setLimits(limits);
       plot.updateImage();
     }
@@ -752,7 +754,7 @@ public class TcPalmAnalysis implements PlugIn {
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
         SimpleArrayUtils.toFloat(counts), Plot.LINE);
     if (settings.getFixedTimeAxis()) {
-      plot2.setLimits(minT - 1, maxT + 1, Double.NaN, Double.NaN);
+      plot2.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
     }
     ImageJUtils.display(title, plot2, wo);
 
