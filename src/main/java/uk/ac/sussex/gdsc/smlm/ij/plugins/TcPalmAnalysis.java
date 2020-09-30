@@ -440,8 +440,8 @@ public class TcPalmAnalysis implements PlugIn {
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
     final PeakResultsList resultsList = new PeakResultsList();
-    ResultsManager.addImageResults(resultsList, settings.getResultsImageSettings(), bounds, 0);
     resultsList.copySettings(results);
+    ResultsManager.addImageResults(resultsList, settings.getResultsImageSettings(), bounds, 0);
     resultsList.begin();
     resultsList.addAll(results.toArray());
     resultsList.end();
