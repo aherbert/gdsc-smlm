@@ -496,6 +496,7 @@ public final class GuiProtosHelper {
     final TcPalmAnalysisSettings.Builder builder = TcPalmAnalysisSettings.newBuilder();
     ResultsImageSettings.Builder resultsImageSettings = builder.getResultsImageSettingsBuilder();
     resultsImageSettings.setImageType(ResultsImageType.DRAW_ID);
+    resultsImageSettings.setLutName(LutColour.FIRE.getName());
     defaultTcPalmAnalysisSettings = builder.build();
   }
 
