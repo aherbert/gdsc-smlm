@@ -782,6 +782,7 @@ public class TcPalmAnalysis implements PlugIn {
         tw.append(sb.toString());
       });
     }
+    tp.scrollToTop();
 
     // Add a selected listener to allow selected clusters to be drawn on the
     // super-resolution image.
