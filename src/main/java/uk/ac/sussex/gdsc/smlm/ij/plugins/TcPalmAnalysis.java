@@ -797,7 +797,7 @@ public class TcPalmAnalysis implements PlugIn {
       for (final float t : frames) {
         all.adjustOrPutValue((int) t, 1, 1);
       }
-      plot.addPoints(timeConverter.apply(frames), count.getCount(c.results.size()), Plot.BAR);
+      plot.addPoints(timeConverter.apply(frames), count.getCount(c.results.size()), Plot.LINE);
     });
     plot.draw();
     plot.setLimitsToFit(true);
@@ -817,7 +817,7 @@ public class TcPalmAnalysis implements PlugIn {
     plot2.addLabel(0, 0, TextUtils.pleural(localisations, "localisation") + " : " + clashes
         + TextUtils.pleuralise(clashes, " clash", " clashes"));
     plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-        SimpleArrayUtils.toFloat(counts), Plot.BAR);
+        SimpleArrayUtils.toFloat(counts), Plot.LINE);
     ImageJUtils.display(title, plot2, wo);
 
     activationsPlotData = new ActivationsPlotData(plot2, timeConverter, frames, counts);
