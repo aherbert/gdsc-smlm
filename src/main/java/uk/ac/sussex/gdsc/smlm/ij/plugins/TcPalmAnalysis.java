@@ -404,15 +404,25 @@ public class TcPalmAnalysis implements PlugIn {
       final int is = ArrayUtils.indexOf(activationsPlotData.frames, start);
       final int ie = ArrayUtils.indexOf(activationsPlotData.frames, end);
       // Extract the lines.
-      final int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
-      final int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
+      int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
+      int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
+
+      // Pad the line with zeros at the end
+      TIntArrayList tmpFrames = new TIntArrayList(frames);
+      TIntArrayList tmpCounts = new TIntArrayList(counts);
+      tmpFrames.insert(0, frames[0]);
+      tmpFrames.add(frames[frames.length - 1]);
+      tmpCounts.insert(0, 0);
+      tmpCounts.add(0);
+      frames = tmpFrames.toArray();
+      counts = tmpCounts.toArray();
 
       // Add to the plot.
       final Plot plot2 = activationsPlotData.plot;
       plot2.restorePlotObjects();
       plot2.setColor(Color.red);
       plot2.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-          SimpleArrayUtils.toFloat(counts), Plot.BAR);
+          SimpleArrayUtils.toFloat(counts), Plot.LINE);
       plot2.updateImage();
     }
 
