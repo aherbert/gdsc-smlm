@@ -63,6 +63,8 @@ import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
+import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.match.HopcroftKarpMatching.IntBiConsumer;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -71,6 +73,7 @@ import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
+import uk.ac.sussex.gdsc.core.utils.function.FloatUnaryOperator;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
@@ -115,10 +118,10 @@ public class TcPalmAnalysis implements PlugIn {
   private SoftLock lock;
 
   /** The work queue. */
-  private ConcurrentMonoStack<Pair<Rectangle, TcPalmAnalysisSettings>> workQueue;
+  private ConcurrentMonoStack<Pair<Roi, TcPalmAnalysisSettings>> workQueue;
 
   /** The previous work. */
-  private Pair<Rectangle, TcPalmAnalysisSettings> previous;
+  private Pair<Roi, TcPalmAnalysisSettings> previous;
 
   /** The executor. */
   private ExecutorService executor;
@@ -199,10 +202,32 @@ public class TcPalmAnalysis implements PlugIn {
     }
 
     /**
+     * True if all points are within the coordinate predicate. The result coordinates are first
+     * mapped to the domain of the predicate.
+     *
+     * @param r the predicate
+     * @param mapX the function to map X
+     * @param mapY the function to map Y
+     * @return true if within
+     */
+    boolean isWithin(CoordinatePredicate r, FloatUnaryOperator mapX, FloatUnaryOperator mapY) {
+      final int size = results.size();
+      for (int i = 0; i < size; i++) {
+        final PeakResult result = results.unsafeGet(i);
+        if (!r.test(mapX.applyAsFloat(result.getXPosition()),
+            mapY.applyAsFloat(result.getYPosition()))) {
+          return false;
+        }
+      }
+      // Assume size is above zero, i.e. return size != 0
+      return true;
+    }
+
+    /**
      * True if any points are within the rectangle.
      *
      * @param r the rectangle
-     * @return true if within
+     * @return true if intersects
      */
     boolean intersects(Rectangle2D r) {
       if (r.intersects(x, y, width, height)) {
@@ -212,6 +237,27 @@ public class TcPalmAnalysis implements PlugIn {
           if (r.contains(result.getXPosition(), result.getYPosition())) {
             return true;
           }
+        }
+      }
+      return false;
+    }
+
+    /**
+     * True if any points are within the coordinate predicate. The result coordinates are first
+     * mapped to the domain of the predicate.
+     *
+     * @param r the predicate
+     * @param mapX the function to map X
+     * @param mapY the function to map Y
+     * @return true if intersects
+     */
+    boolean intersects(CoordinatePredicate r, FloatUnaryOperator mapX, FloatUnaryOperator mapY) {
+      final int size = results.size();
+      for (int i = 0; i < size; i++) {
+        final PeakResult result = results.unsafeGet(i);
+        if (r.test(mapX.applyAsFloat(result.getXPosition()),
+            mapY.applyAsFloat(result.getYPosition()))) {
+          return true;
         }
       }
       return false;
@@ -625,28 +671,16 @@ public class TcPalmAnalysis implements PlugIn {
    * @param roi the roi
    */
   private void addWork(Roi roi) {
-    if (roi == null || !roi.isArea()) {
+    if (roi == null || !roi.isArea() || executor.isShutdown()) {
       return;
     }
-    addWork(roi.getBounds());
-  }
-
-  /**
-   * Add work to the queue and submit a job to process the queue if one is not already running.
-   *
-   * @param bounds the bounds
-   */
-  private void addWork(Rectangle bounds) {
-    if (bounds == null || executor.isShutdown()) {
-      return;
-    }
-    workQueue.insert(Pair.of(new Rectangle(bounds), settings.build()));
+    workQueue.insert(Pair.of((Roi) roi.clone(), settings.build()));
     if (lock.acquire()) {
       executor.submit(() -> {
-        Pair<Rectangle, TcPalmAnalysisSettings> current = previous;
+        Pair<Roi, TcPalmAnalysisSettings> current = previous;
         try {
           for (;;) {
-            final Pair<Rectangle, TcPalmAnalysisSettings> next = workQueue.poll();
+            final Pair<Roi, TcPalmAnalysisSettings> next = workQueue.poll();
             if (next == null) {
               // queue is empty
               break;
@@ -668,18 +702,22 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Run the analysis of clusters inside the bounds with the provided analysis settings.
    *
-   * @param bounds the bounds
+   * @param roi the roi
    * @param settings the settings
    */
-  private void runAnalysis(Rectangle bounds, TcPalmAnalysisSettings settings) {
-    // Map the bounds to the data bounds
+  private void runAnalysis(Roi roi, TcPalmAnalysisSettings settings) {
+    // Support square ROI
+    // - Map image ROI bounds to the data
+    // - Check if the cluster is inside the rectangle bounds
+
+    final Rectangle bounds = roi.getBounds();
     final double x = image.inverseMapX(bounds.x);
     final double y = image.inverseMapY(bounds.y);
     final double w = image.inverseMapX(bounds.x + bounds.width) - x;
     final double h = image.inverseMapY(bounds.y + bounds.height) - y;
     final Rectangle2D scaledBounds = new Rectangle2D.Double(x, y, w, h);
 
-    // Identify all clusters using a custom filter
+    // Identify all clusters using a custom filter. Filter on time first as this is simple.
     BiPredicate<ClusterData, Rectangle2D> test = null;
     if (settings.getMinFrame() > minT) {
       final int min = settings.getMinFrame();
@@ -689,10 +727,23 @@ public class TcPalmAnalysis implements PlugIn {
       final int max = settings.getMaxFrame();
       test = and(test, (c, r) -> c.end <= max);
     }
-    final BiPredicate<ClusterData, Rectangle2D> filter =
-        and(test, settings.getIntersects() ? ClusterData::intersects : ClusterData::isWithin);
+    // Add square bounds check
+    test = and(test, settings.getIntersects() ? ClusterData::intersects : ClusterData::isWithin);
+
+    // - If non-square ROI:
+    // -- Map cluster coordinates back to image bounds
+    // -- Check if the cluster is inside the ROI using a CoordinatePredicate
+    if (roi.getType() != Roi.RECTANGLE || roi.getCornerDiameter() != 0) {
+      final CoordinatePredicate pred = CoordinatePredicateUtils.createContainsPredicate(roi);
+      if (settings.getIntersects()) {
+        test = and(test, (c, r) -> c.intersects(pred, image::mapX, image::mapY));
+      } else {
+        test = and(test, (c, r) -> c.isWithin(pred, image::mapX, image::mapY));
+      }
+    }
 
     final LocalList<ClusterData> clusters = new LocalList<>();
+    final BiPredicate<ClusterData, Rectangle2D> filter = test;
     clusterData.forEach(c -> {
       if (filter.test(c, scaledBounds)) {
         clusters.add(c);
