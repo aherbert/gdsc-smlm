@@ -2097,7 +2097,7 @@ The analysis uses a cumulative histogram of the number of localisations against 
 
 Display of the activations against time chart for an entire set of localisations will contain too much information and the bursts may not be visible over the noise of constant activation, or the simultaneous bursts in multiple locations in the image. The plugin thus provides a super-resolution image for an overview of the localisation data. A region of interest (ROI) can be marked on the image and the plugin will create the activations verses time plot.
 
-When the plugin is executed the dataset and image rendering options must be specified. 
+When the plugin is executed the dataset and image rendering options must be specified.
 
 .. list-table::
     :widths: 20 80
@@ -2109,13 +2109,12 @@ When the plugin is executed the dataset and image rendering options must be spec
     * - Input
       - Select the input results set.
 
-    * - Image size
-      - Select the size of the super-resolution image. This image is used to mark regions for analysis.
+    * - Image
+      - Specify the rendering settings for the super-resolution image. Extra options are available using the ``...`` button.
 
-    * - LUT
-      - Select the look-up table to colour the super-resolution image.
+        The options are the same as those available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Results Parameters>`).
 
-When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. All clusters that fit entirely within the region are analysed. Alternatively all clusters that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the localisations extracted for analysis.
+When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. The ROI may be created using any area ROI tool for example rectangle, oval, polygon or freehand. All clusters that fit entirely within the region are analysed. Alternatively all clusters that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the localisations extracted for analysis.
 
 .. list-table::
     :widths: 20 80
@@ -2135,6 +2134,16 @@ When the super-resolution image has been constructed a region of interest (ROI) 
 
     * - Max Frame
       - The maximum frame for localisations that are extracted for analysis.
+
+    * - Fixed time axis
+      - Set to **true** to use the full time length of the input data on the time axis of the plots. If ``false`` the plot will zoom to the range of the current clusters.
+
+    * - Rate window
+      - The window used to compute the activation rate from the cumulative count verses time plot. The rate is computed using the gradient of the cumulative count at time :math:`t`:
+
+        :math:`\mathit{Rate}(t) = \frac{\mathit{Count}(t+w) - \mathit{Count}(t-w-1)}{2w + 1}`
+
+        where :math:`w` is the ``Rate window``. Use a value of 0 to show the number of activations per frame.
 
 Output
 ~~~~~~
@@ -2158,6 +2167,15 @@ The current clusters are aggregated into a total activations verses time plot (s
     :figwidth: 80%
 
     TC-PALM total activations verses time plot. Highlighted clusters from the current clusters table are displayed using a red line.
+
+The activation rate is derived from the activations verses time plot using the local gradient (see :numref:`Figure %s <fig_tc_palm_activation_rate_vs_time>`). The gradient is computed using a range defined by the ``Rate window`` parameter. Using a value of zero for the ``Rate window`` will display a plot of activations per frame.
+
+.. _fig_tc_palm_activation_rate_vs_time:
+.. figure:: images/tc_palm_activation_rate_vs_time.jpg
+    :align: center
+    :figwidth: 80%
+
+    TC-PALM activation rate verses time plot. The ``Rate window`` parameter was set to 20 frames.
 
 The current clusters are recorded in a table. The table records the average coordinates of the cluster, the size and the start and end frames. The table is sorted by the start frame of the cluster. To assist in identifying activation bursts the table allows selection of clusters. A double-click on a single line in the table will select one cluster; use the shift key to select multiple lines with a single mouse click starting from a single line.
 
