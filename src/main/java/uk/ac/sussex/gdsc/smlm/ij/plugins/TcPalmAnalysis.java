@@ -408,8 +408,8 @@ public class TcPalmAnalysis implements PlugIn {
       int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
 
       // Pad the line with zeros at the end
-      TIntArrayList tmpFrames = new TIntArrayList(frames);
-      TIntArrayList tmpCounts = new TIntArrayList(counts);
+      final TIntArrayList tmpFrames = new TIntArrayList(frames);
+      final TIntArrayList tmpCounts = new TIntArrayList(counts);
       tmpFrames.insert(0, frames[0]);
       tmpFrames.add(frames[frames.length - 1]);
       tmpCounts.insert(0, 0);
