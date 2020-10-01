@@ -494,8 +494,6 @@ public class TcPalmAnalysis implements PlugIn {
       return;
     }
 
-    // Map all non-zero IDs to a natural series. This avoids issues with sparse cluster Ids.
-
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
     final PeakResultsList resultsList = new PeakResultsList();
