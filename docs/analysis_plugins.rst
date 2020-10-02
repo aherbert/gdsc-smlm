@@ -2109,6 +2109,9 @@ When the plugin is executed the dataset and image rendering options must be spec
     * - Input
       - Select the input results set.
 
+    * - Group singles
+      - Set to **true** to leave single localisations (with an ID of 0) as one large cluster. If **false** each localisation is assigned an ID to be included in analysis as a cluster of size 1.
+
     * - Image
       - Specify the rendering settings for the super-resolution image. Extra options are available using the ``...`` button.
 

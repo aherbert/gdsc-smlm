@@ -185,8 +185,10 @@ public class TcPalmAnalysis implements PlugIn {
 
     void finalise() {
       results.trimToSize();
-      width -= x;
-      height -= y;
+      // Set dimensions non-zero so the rectangle contains/intersects methods do not ignore
+      // the zero sized cluster.
+      width = Math.max(width - x, Float.MIN_VALUE);
+      height = Math.max(height - y, Float.MIN_VALUE);
       start = results.unsafeGet(0).getFrame();
       end = results.unsafeGet(results.size() - 1).getFrame();
     }
@@ -494,6 +496,10 @@ public class TcPalmAnalysis implements PlugIn {
       return;
     }
 
+    // Optionally group singles (id=0) together. The default is to allocated them an Id
+    // so noise localisations are included in counts from selected regions.
+    results = settings.getGroupSingles() ? results.copy() : results.copyAndAssignZeroIds();
+
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
     final PeakResultsList resultsList = new PeakResultsList();
@@ -573,6 +579,7 @@ public class TcPalmAnalysis implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the time-correlated activation of traced data");
     ResultsManager.addInput(gd, "Input", settings.getInputOption(), InputSource.MEMORY_CLUSTERED);
+    gd.addCheckbox("Group_singles", settings.getGroupSingles());
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
     tmp.setResultsImageSettings(settings.getResultsImageSettingsBuilder());
@@ -584,6 +591,7 @@ public class TcPalmAnalysis implements PlugIn {
       return false;
     }
     settings.setInputOption(ResultsManager.getInputSource(gd));
+    settings.setGroupSingles(gd.getNextBoolean());
     final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
     // Note: The initial none option was removed
     newImgSettings.setImageTypeValue(gd.getNextChoiceIndex() + 1);
@@ -594,7 +602,6 @@ public class TcPalmAnalysis implements PlugIn {
 
   @SuppressWarnings("null")
   private static LocalList<ClusterData> createClusterData(MemoryPeakResults results) {
-    results = results.copy();
     results.sort(IdFramePeakResultComparator.INSTANCE);
     final LocalList<ClusterData> clusterData = new LocalList<>();
     final FrameCounter counter = new FrameCounter(results.getFirst().getId() - 1);
