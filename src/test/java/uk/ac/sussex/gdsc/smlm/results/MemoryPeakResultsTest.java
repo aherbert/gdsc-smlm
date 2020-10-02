@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
@@ -67,5 +68,27 @@ class MemoryPeakResultsTest {
     // Assertions.assertEquals(size, expected, Math.abs(size) * SIZE_TOLERANCE);
     logger.log(TestLogUtils.getResultRecord(error < SIZE_TOLERANCE,
         "Memory expected=%d : measured=%d : error=%f", expected, actual, error));
+  }
+
+  @Test
+  void canCopyAndAssignZeroIds() {
+    final MemoryPeakResults results = new MemoryPeakResults(5);
+    results.add(new PeakResult(0, 1, 20));
+    results.add(new IdPeakResult(2, 3, 21, 99));
+    results.add(new IdPeakResult(4, 5, 22, 1));
+    results.add(new PeakResult(6, 7, 23));
+
+    final MemoryPeakResults results2 = results.copyAndAssignZeroIds();
+    assertResult(results2.get(0), 0, 1, 20, -1);
+    assertResult(results2.get(1), 2, 3, 21, 99);
+    assertResult(results2.get(2), 4, 5, 22, 1);
+    assertResult(results2.get(3), 6, 7, 23, -2);
+  }
+
+  private static void assertResult(PeakResult result, float x, float y, float intensity, int id) {
+    Assertions.assertEquals(x, result.getXPosition());
+    Assertions.assertEquals(y, result.getYPosition());
+    Assertions.assertEquals(intensity, result.getIntensity());
+    Assertions.assertEquals(id, result.getId());
   }
 }

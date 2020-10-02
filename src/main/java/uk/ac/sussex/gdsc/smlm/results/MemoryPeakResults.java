@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -338,6 +339,17 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @param copyResults Set to true to copy peak result objects
    */
   protected MemoryPeakResults(MemoryPeakResults source, boolean copyResults) {
+    copyState(source);
+    // Copy the results
+    results = (PeakResultStoreList) source.results.copy(copyResults);
+  }
+
+  /**
+   * Copy the state from the source.
+   *
+   * @param source the source
+   */
+  private void copyState(MemoryPeakResults source) {
     this.sortAfterEnd = source.sortAfterEnd;
     copySettings(source);
     // Deep copy the mutable bounds object
@@ -345,8 +357,6 @@ public class MemoryPeakResults extends AbstractPeakResults {
     if (bounds != null) {
       setBounds(new Rectangle(bounds));
     }
-    // Copy the results
-    results = (PeakResultStoreList) source.results.copy(copyResults);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -2040,5 +2050,33 @@ public class MemoryPeakResults extends AbstractPeakResults {
    */
   public int indexOf(PeakResult result) {
     return results.indexOf(result);
+  }
+
+  /**
+   * Create a deep copy of the results and assign Ids that are currently zero a negative Id.
+   *
+   * <p>This method is to be used on clustering results where an Id of zero indicates no cluster and
+   * an Id above zero is for an assigned cluster.
+   *
+   * @return the new results
+   */
+  public MemoryPeakResults copyAndAssignZeroIds() {
+    final int size = size();
+    MemoryPeakResults copy = new MemoryPeakResults(size);
+    copy.copyState(this);
+    // Copy the result. Assign any zero Id result a negative Id.
+    int nextId = 0;
+    final PeakResult[] results = new PeakResult[size];
+    for (int i = 0; i < size; i++) {
+      final PeakResult result = getfX(i);
+      final int id = result.getId() == 0 ? --nextId : result.getId();
+      final ExtendedPeakResult newResult = new ExtendedPeakResult(result.getFrame(),
+          result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+          result.getNoise(), result.getMeanIntensity(), result.getParameters().clone(),
+          ArrayUtils.clone(result.getParameterDeviations()), result.getEndFrame(), id);
+      results[i] = newResult;
+    }
+    copy.addAll(results);
+    return copy;
   }
 }
