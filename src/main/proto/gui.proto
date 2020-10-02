@@ -697,4 +697,5 @@ message TcPalmAnalysisSettings {
   bool fixed_time_axis = 7;
   int32 rate_window = 8;
   bool group_singles = 9;
+  int32 burst_maximum_gap = 10;
 }

@@ -36,8 +36,6 @@ import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
-import ij.text.TextPanel;
-import ij.text.TextWindow;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -45,33 +43,50 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
+import uk.ac.sussex.gdsc.core.data.utils.Rounder;
+import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
-import uk.ac.sussex.gdsc.core.match.HopcroftKarpMatching.IntBiConsumer;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.core.utils.function.FloatUnaryOperator;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
@@ -80,7 +95,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
@@ -96,9 +110,8 @@ public class TcPalmAnalysis implements PlugIn {
   private static final String TITLE = "TC PALM Analysis";
 
   /** Text window showing the current clusters. */
-  private static AtomicReference<CurrentClustersTextWindow> resultsWindowRef =
+  private static AtomicReference<ClusterDataTableModelFrame> currentClustersTable =
       new AtomicReference<>();
-
   /**
    * The instance lock used to prevent multiple instances running. This is because the output
    * results table and plots are reused and multiple instances cannot share the same output.
@@ -149,7 +162,6 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static class ClusterData {
     final int id;
-    int index;
     LocalList<PeakResult> results;
     float x;
     float y;
@@ -158,6 +170,7 @@ public class TcPalmAnalysis implements PlugIn {
     float[] frames;
     int start;
     int end;
+    double[] xyz;
 
     ClusterData(PeakResult result) {
       id = result.getId();
@@ -284,15 +297,19 @@ public class TcPalmAnalysis implements PlugIn {
     }
 
     double[] getXyz() {
-      final double[] xyz = new double[3];
-      results.forEach(r -> {
-        xyz[0] += r.getXPosition();
-        xyz[1] += r.getYPosition();
-        xyz[2] += r.getZPosition();
-      });
-      final int size = results.size();
-      for (int i = 0; i < 3; i++) {
-        xyz[i] /= size;
+      double[] xyz = this.xyz;
+      if (xyz == null) {
+        final double[] tmp = new double[3];
+        results.forEach(r -> {
+          tmp[0] += r.getXPosition();
+          tmp[1] += r.getYPosition();
+          tmp[2] += r.getZPosition();
+        });
+        final int size = results.size();
+        for (int i = 0; i < 3; i++) {
+          tmp[i] /= size;
+        }
+        xyz = this.xyz = tmp;
       }
       return xyz;
     }
@@ -318,113 +335,86 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Custom TextWindow to allow access to the associated TextPanelMouseListener.
-   */
-  private static class CurrentClustersTextWindow extends TextWindow {
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Class to allow the events raised by the single instance of the current clusters table to pass
-     * to a custom handler.
-     */
-    private static class ClusterSelectedListenerHolder extends TextPanelMouseListener {
-      static final IntBiConsumer NOOP = (u, v) -> {
-        // noop
-      };
-
-      IntBiConsumer action = NOOP;
-
-      ClusterSelectedListenerHolder(TextPanel textPanel) {
-        super(textPanel);
-      }
-
-      @Override
-      public void selected(int selectionStart, int selectionEnd) {
-        action.accept(selectionStart, selectionEnd);
-      }
-    }
-
-    private final ClusterSelectedListenerHolder listener;
-
-    /**
-     * Create a new instance.
-     *
-     * @param title the title
-     * @param headings the headings
-     * @param width the width
-     * @param height the height
-     */
-    public CurrentClustersTextWindow(String title, String headings, int width, int height) {
-      super(title, headings, "", width, height);
-      // Only one instance can bind to the text panel as it cannot be removed.
-      // So instead allow a swap of the action performed by the listener.
-      listener = new ClusterSelectedListenerHolder(getTextPanel());
-    }
-
-    /**
-     * Sets the action for the TextPanelMouseListener.
-     *
-     * @param action the new action
-     */
-    void setAction(ClusterSelectedListener action) {
-      if (action == null) {
-        listener.action = ClusterSelectedListenerHolder.NOOP;
-      } else {
-        action.textPanel = getTextPanel();
-        listener.action = action;
-      }
-    }
-  }
-
-  /**
    * Class to display data from the selected clusters.
    */
-  private class ClusterSelectedListener implements IntBiConsumer {
-    TextPanel textPanel;
-
+  private class ClusterSelectedListener implements Consumer<List<ClusterData>> {
     @Override
-    public void accept(int selectionStart, int selectionEnd) {
-      // Overlay the clusters on the image.
-      final Overlay overlay = new Overlay();
-      // For each cluster create a track and add to the overlay.
-      int start = maxT;
-      int end = minT;
-      for (int i = selectionStart; i <= selectionEnd; i++) {
-        final String line = textPanel.getLine(i);
-        final int indexOf = line.indexOf('\t');
-        final int index = Integer.parseInt(line.substring(0, indexOf));
-        final ClusterData data = clusterData.get(index);
-        appendRoi(overlay, data);
-        start = Math.min(data.start, start);
-        end = Math.max(data.end, end);
-      }
-      image.getImagePlus().setOverlay(overlay);
-
-      // Draw an activation plot of the selected clusters with analysis of bursts.
+    public void accept(List<ClusterData> clusters) {
       final ActivationsPlotData activationsPlotData = TcPalmAnalysis.this.activationsPlotData;
-      // Find the start and end
-      final int is = ArrayUtils.indexOf(activationsPlotData.frames, start);
-      final int ie = ArrayUtils.indexOf(activationsPlotData.frames, end);
-      // Extract the lines.
-      int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
-      int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
-
-      // Pad the line with zeros at the end
-      final TIntArrayList tmpFrames = new TIntArrayList(frames);
-      final TIntArrayList tmpCounts = new TIntArrayList(counts);
-      tmpFrames.insert(0, frames[0]);
-      tmpFrames.add(frames[frames.length - 1]);
-      tmpCounts.insert(0, 0);
-      tmpCounts.add(0);
-      frames = tmpFrames.toArray();
-      counts = tmpCounts.toArray();
-
-      // Add to the plot.
       final Plot plot2 = activationsPlotData.plot;
       plot2.restorePlotObjects();
+
+      // In case no cluster data is provided
+      if (clusters.isEmpty()) {
+        image.getImagePlus().setOverlay(null);
+        plot2.updateImage();
+        return;
+      }
+
+      // TODO
+      // Time linkage clustering to find bursts. Assume the distance is close enough.
+      // Note: A burst may be more than a single molecule as it can represent recruitment
+      // of multiple proteins to the same position.
+      // - Sort by start time.
+      // - Maintain start and end of current cluster
+      // - Join to next if the gap is below a threshold.
+      // - Else finish and start a new cluster.
+      // - Add all ranges to the plot.
+
+      // Overlay the clusters on the image.
+      final Overlay overlay = new Overlay();
+
+      // Find bursts of continuous time
+      final LocalList<int[]> bursts = new LocalList<>();
+      final int gap = settings.getBurstMaximumGap();
+      clusters.sort((c1, c2) -> Integer.compare(c1.start, c2.start));
+
+      int start = clusters.get(0).start;
+      int end = clusters.get(0).end;
+      for (int i = 1; i < clusters.size(); i++) {
+        // For each cluster add to the overlay.
+        final ClusterData data = clusters.get(i);
+        appendRoi(overlay, data);
+        if (data.start - end > gap) {
+          // Save the burst
+          bursts.add(new int[] {start, end});
+          start = data.start;
+          end = data.end;
+        } else {
+          // extend the burst
+          end = Math.max(data.end, end);
+        }
+      }
+      bursts.add(new int[] {start, end});
+      image.getImagePlus().setOverlay(overlay);
+
+      // For each cluster add to the plot.
       plot2.setColor(Color.red);
-      plot2.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-          SimpleArrayUtils.toFloat(counts), Plot.LINE);
+      final TIntArrayList tmpFrames = new TIntArrayList();
+      final TIntArrayList tmpCounts = new TIntArrayList();
+      bursts.forEach(range -> {
+        // Find the start and end points on the plotted data.
+        final int is = ArrayUtils.indexOf(activationsPlotData.frames, range[0]);
+        final int ie = ArrayUtils.indexOf(activationsPlotData.frames, range[1]);
+
+        // Pad the line with zeros at the end
+        tmpFrames.resetQuick();
+        tmpCounts.resetQuick();
+        int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
+        tmpFrames.add(frames[0]);
+        tmpFrames.add(frames);
+        tmpFrames.add(frames[frames.length - 1]);
+        tmpCounts.add(0);
+        int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
+        tmpCounts.add(counts);
+        tmpCounts.add(0);
+        frames = tmpFrames.toArray();
+        counts = tmpCounts.toArray();
+
+        // Add to the plot.
+        plot2.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
+            SimpleArrayUtils.toFloat(counts), Plot.LINE);
+      });
       plot2.updateImage();
     }
 
@@ -459,6 +449,203 @@ public class TcPalmAnalysis implements PlugIn {
       this.frames = frames;
       this.counts = counts;
       plot.savePlotObjects();
+    }
+  }
+
+  /**
+   * Class to show the ClusterData in a JTable.
+   */
+  private static class ClusterDataTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
+
+    List<ClusterData> data = Collections.emptyList();
+
+    /**
+     * Sets the data.
+     *
+     * @param data the new data
+     */
+    void setData(LocalList<ClusterData> data) {
+      this.data = data;
+      fireTableDataChanged();
+    }
+
+    @Override
+    public int getRowCount() {
+      return data.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+      // ID X Y Z Size Start End
+      return 7;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      switch (columnIndex) {
+        // @formatter:off
+        case 0: return "ID";
+        case 1: return "X";
+        case 2: return "Y";
+        case 3: return "Z";
+        case 4: return "Size";
+        case 5: return "Start";
+        case 6: return "End";
+        // @formatter:on
+        default:
+          throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
+      }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch (columnIndex) {
+        case 1:
+        case 2:
+        case 3:
+          return Double.class;
+        default:
+          return Integer.class;
+      }
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      final ClusterData c = data.get(rowIndex);
+      switch (columnIndex) {
+        // @formatter:off
+        case 0: return c.id;
+        case 1: return c.getXyz()[0];
+        case 2: return c.getXyz()[1];
+        case 3: return c.getXyz()[2];
+        case 4: return c.results.size();
+        case 5: return c.start;
+        case 6: return c.end;
+        // @formatter:on
+        default:
+          throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
+      }
+    }
+  }
+
+  /**
+   * Class to display ClusterDataTableModel in a JTable.
+   */
+  private static class ClusterDataJTable extends JTable {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Create a new instance.
+     *
+     * @param model the model
+     */
+    ClusterDataJTable(ClusterDataTableModel model) {
+      super(model);
+      final Rounder rounder = RounderUtils.create(4);
+      final DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected void setValue(Object value) {
+          // Boxed primitives should never be null
+          setText(rounder.toString(((Number) value).doubleValue()));
+        }
+      };
+      renderer.setHorizontalAlignment(SwingConstants.TRAILING);
+      setDefaultRenderer(Float.class, renderer);
+      setDefaultRenderer(Double.class, renderer);
+      setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      setAutoCreateRowSorter(true);
+    }
+
+    /**
+     * Returns the data of all selected rows. This maps the indices from the view to the data model.
+     *
+     * @return an array containing the data of all selected rows, or an empty array if no row is
+     *         selected
+     * @see #getSelectedRow
+     */
+    List<ClusterData> getSelectedData() {
+      final ClusterDataTableModel model = (ClusterDataTableModel) dataModel;
+      final List<ClusterData> data = model.data;
+      final int iMin = selectionModel.getMinSelectionIndex();
+      final int iMax = selectionModel.getMaxSelectionIndex();
+
+      // Any negative
+      if ((iMin | iMax) < 0) {
+        return Collections.emptyList();
+      }
+
+      final LocalList<ClusterData> rvTmp = new LocalList<>(1 + (iMax - iMin));
+
+      final RowSorter<?> sorter = getRowSorter();
+      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
+      for (int i = iMin; i <= iMax; i++) {
+        if (selectionModel.isSelectedIndex(i)) {
+          rvTmp.add(data.get(map.applyAsInt(i)));
+        }
+      }
+      return rvTmp;
+    }
+  }
+
+  /**
+   * Class to display ClusterDataTableModel in a window frame.
+   */
+  private static class ClusterDataTableModelFrame extends JFrame {
+    private static final long serialVersionUID = 1L;
+
+    final ClusterDataJTable table;
+    Consumer<List<ClusterData>> selectedAction;
+
+    /**
+     * Create a new instance.
+     *
+     * @param model the model
+     */
+    ClusterDataTableModelFrame(ClusterDataTableModel model) {
+      table = new ClusterDataJTable(model);
+      final JScrollPane scroll = new JScrollPane(table);
+
+      final ScreenDimensionHelper helper = new ScreenDimensionHelper();
+      helper.setMinHeight(300);
+      helper.setup(scroll);
+
+      add(scroll);
+      pack();
+
+      addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowOpened(WindowEvent event) {
+          WindowManager.addWindow(ClusterDataTableModelFrame.this);
+        }
+
+        @Override
+        public void windowClosing(WindowEvent event) {
+          WindowManager.removeWindow(ClusterDataTableModelFrame.this);
+        }
+      });
+
+      table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+          if (e.getValueIsAdjusting() || selectedAction == null) {
+            return;
+          }
+          // Notify the action of the current selection
+          selectedAction.accept(table.getSelectedData());
+        }
+      });
+    }
+
+    /**
+     * Gets the model.
+     *
+     * @return the model
+     */
+    ClusterDataTableModel getModel() {
+      return (ClusterDataTableModel) table.getModel();
     }
   }
 
@@ -559,9 +746,10 @@ public class TcPalmAnalysis implements PlugIn {
       showAnalysisDialog();
     } finally {
       canvas.removeMouseListener(imageListener);
-      final CurrentClustersTextWindow tw = resultsWindowRef.get();
-      if (tw != null) {
-        tw.setAction(null);
+      // Remove the action from the single instance of the current clusters table
+      final ClusterDataTableModelFrame frame = currentClustersTable.get();
+      if (frame != null) {
+        frame.selectedAction = null;
       }
       executor.shutdown();
       instanceLock.release();
@@ -633,8 +821,6 @@ public class TcPalmAnalysis implements PlugIn {
       // }
       return Integer.compare(c1.id, c2.id);
     });
-    final int[] index = {0};
-    clusterData.forEach(c -> c.index = index[0]++);
     return clusterData;
   }
 
@@ -661,6 +847,7 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
     gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
+    gd.addSlider("Burst_maximum_gap", 0, 100, settings.getBurstMaximumGap());
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -676,6 +863,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setMaxFrame((int) gd.getNextNumber());
     settings.setFixedTimeAxis(gd.getNextBoolean());
     settings.setRateWindow((int) gd.getNextNumber());
+    settings.setBurstMaximumGap((int) gd.getNextNumber());
     addWork(previous.getLeft());
     return true;
   }
@@ -882,31 +1070,12 @@ public class TcPalmAnalysis implements PlugIn {
 
     wo.tile();
 
-    // Add a table of the clusters (these should already be sorted by time then id).
-    final CurrentClustersTextWindow resultsWindow = createTable();
-    final TextPanel tp = resultsWindow.getTextPanel();
-    tp.clear();
-    try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
-      final StringBuilder sb = new StringBuilder();
-      clusters.forEach(c -> {
-        sb.setLength(0);
-        sb.append(c.index);
-        sb.append('\t').append(c.id);
-        final double[] xyz = c.getXyz();
-        for (int i = 0; i < 3; i++) {
-          sb.append('\t').append(MathUtils.round(xyz[i]));
-        }
-        sb.append('\t').append(c.results.size());
-        sb.append('\t').append(c.start);
-        sb.append('\t').append(c.end);
-        tw.append(sb.toString());
-      });
-    }
-    tp.scrollToTop();
+    // Add a table of the clusters.
+    final ClusterDataTableModelFrame clustersTable = createClustersTable();
+    clustersTable.getModel().setData(clusters);
 
-    // Add a selected listener to allow selected clusters to be drawn on the
-    // super-resolution image.
-    resultsWindow.setAction(clusterSelectedListener);
+    // Allow a configurable action that accepts the array of ClusterData that is selected.
+    clustersTable.selectedAction = clusterSelectedListener;
   }
 
   /**
@@ -930,9 +1099,13 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @return the text window
    */
-  private static CurrentClustersTextWindow createTable() {
-    return ImageJUtils.refresh(resultsWindowRef,
-        () -> new CurrentClustersTextWindow(TITLE + " Current Clusters",
-            "#\tID\tX\tY\tZ\tSize\tStart\tEnd", 600, 400));
+  private static ClusterDataTableModelFrame createClustersTable() {
+    return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
+      final ClusterDataTableModelFrame frame =
+          new ClusterDataTableModelFrame(new ClusterDataTableModel());
+      frame.setTitle(TITLE + " Selected Clusters");
+      frame.setVisible(true);
+      return frame;
+    });
   }
 }
