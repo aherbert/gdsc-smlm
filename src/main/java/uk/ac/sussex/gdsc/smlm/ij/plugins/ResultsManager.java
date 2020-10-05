@@ -719,7 +719,9 @@ public class ResultsManager implements PlugIn {
     gd.addMessage("Read the Peak Results and output to a new format");
 
     gd.addMessage("Select the Peak Results");
-    addInput(gd, settings.inputOption, InputSource.MEMORY, InputSource.FILE);
+    addInput(gd, "Input", settings.inputOption,
+        new FilenameLoadOption[] {new FilenameLoadOption(settings.inputFilename)},
+        InputSource.MEMORY, InputSource.FILE);
 
     final Choice inputChoice = gd.getLastChoice();
 
