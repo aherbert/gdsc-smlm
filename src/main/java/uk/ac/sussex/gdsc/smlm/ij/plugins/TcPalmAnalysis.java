@@ -351,7 +351,6 @@ public class TcPalmAnalysis implements PlugIn {
         return;
       }
 
-      // TODO
       // Time linkage clustering to find bursts. Assume the distance is close enough.
       // Note: A burst may be more than a single molecule as it can represent recruitment
       // of multiple proteins to the same position.
@@ -369,8 +368,10 @@ public class TcPalmAnalysis implements PlugIn {
       final int gap = settings.getBurstMaximumGap();
       clusters.sort((c1, c2) -> Integer.compare(c1.start, c2.start));
 
-      int start = clusters.get(0).start;
-      int end = clusters.get(0).end;
+      final ClusterData first = clusters.get(0);
+      appendRoi(overlay, first);
+      int start = first.start;
+      int end = first.end;
       for (int i = 1; i < clusters.size(); i++) {
         // For each cluster add to the overlay.
         final ClusterData data = clusters.get(i);
