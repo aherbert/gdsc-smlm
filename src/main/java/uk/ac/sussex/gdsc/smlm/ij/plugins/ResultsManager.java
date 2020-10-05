@@ -118,6 +118,9 @@ public class ResultsManager implements PlugIn {
   /** An empty array of load options. */
   private static final LoadOption[] EMPTY_LOAD_OPTIONS = new LoadOption[0];
 
+  /** The name of the input field. */
+  private static final String INPUT_NAME = "Input";
+
   /** The input file. */
   static final String INPUT_FILE = "File";
 
@@ -719,7 +722,7 @@ public class ResultsManager implements PlugIn {
     gd.addMessage("Read the Peak Results and output to a new format");
 
     gd.addMessage("Select the Peak Results");
-    addInput(gd, "Input", settings.inputOption,
+    addInput(gd, INPUT_NAME, settings.inputOption,
         new FilenameLoadOption[] {new FilenameLoadOption(settings.inputFilename)},
         InputSource.MEMORY, InputSource.FILE);
 
@@ -1132,7 +1135,7 @@ public class ResultsManager implements PlugIn {
    * @param inputs the inputs
    */
   public static void addInput(ExtendedGenericDialog gd, String inputOption, InputSource... inputs) {
-    addInput(gd, "Input", inputOption, inputs);
+    addInput(gd, INPUT_NAME, inputOption, inputs);
   }
 
   /**
