@@ -466,8 +466,12 @@ public class TcPalmAnalysis implements PlugIn {
      * @param data the new data
      */
     void setData(LocalList<ClusterData> data) {
-      this.data = data;
-      fireTableDataChanged();
+      // Only update if the data is different.
+      // This expects the selected clusters to not change very often.
+      if (!data.equals(this.data)) {
+        this.data = data;
+        fireTableDataChanged();
+      }
     }
 
     @Override
@@ -1076,6 +1080,9 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Allow a configurable action that accepts the array of ClusterData that is selected.
     clustersTable.selectedAction = clusterSelectedListener;
+
+    // In case the clusters are the same then ensure the selected clusters are redisplayed.
+    clusterSelectedListener.accept(clustersTable.table.getSelectedData());
   }
 
   /**
