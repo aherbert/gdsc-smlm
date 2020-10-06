@@ -30,19 +30,16 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
+import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Window;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
@@ -66,7 +63,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -131,10 +127,10 @@ public class TcPalmAnalysis implements PlugIn {
   private SoftLock lock;
 
   /** The work queue. */
-  private ConcurrentMonoStack<Pair<Roi, TcPalmAnalysisSettings>> workQueue;
+  private ConcurrentMonoStack<Work> workQueue;
 
   /** The previous work. */
-  private Pair<Roi, TcPalmAnalysisSettings> previous;
+  private Work previous;
 
   /** The executor. */
   private ExecutorService executor;
@@ -156,6 +152,28 @@ public class TcPalmAnalysis implements PlugIn {
    * plot when clusters are selected.
    */
   private ActivationsPlotData activationsPlotData;
+
+  /**
+   * Class to store the work.
+   */
+  private static class Work {
+    final long timeout;
+    final Roi roi;
+    final TcPalmAnalysisSettings settings;
+
+    /**
+     * Create an instance.
+     *
+     * @param time the time
+     * @param roi the roi
+     * @param settings the settings
+     */
+    Work(long time, Roi roi, TcPalmAnalysisSettings settings) {
+      this.timeout = time;
+      this.roi = roi;
+      this.settings = settings;
+    }
+  }
 
   /**
    * Store data on each cluster.
@@ -709,12 +727,6 @@ public class TcPalmAnalysis implements PlugIn {
       imp.setLut(LutHelper.createLut(LutColour.forName(image.getLutName()), true));
     }
 
-    final ImageCanvas canvas = imp.getCanvas();
-    if (canvas == null) {
-      instanceLock.release();
-      return;
-    }
-
     // Set-up analysis processing:
     // Store latest image ROI bounds and analysis settings.
     // ConcurrentMonoStack to store next image ROI bounds and analysis settings.
@@ -726,7 +738,7 @@ public class TcPalmAnalysis implements PlugIn {
     // the monostack is empty
     lock = new SoftLock();
     workQueue = new ConcurrentMonoStack<>();
-    previous = Pair.of(null, settings.build());
+    previous = new Work(0, null, settings.build());
     executor = Executors.newSingleThreadExecutor();
 
     // Create the bounds and activation times for each cluster
@@ -734,13 +746,15 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add interactive monitor to the image where clusters can be selected.
     // For all selected clusters show on an Activations-vs-Time plot.
-    final MouseListener imageListener = new MouseAdapter() {
+    final RoiListener roiListener = new RoiListener() {
       @Override
-      public void mouseReleased(MouseEvent e) {
-        addWork(imp.getRoi());
+      public void roiModified(ImagePlus imp2, int id) {
+        if (imp2 != null && imp.getID() == imp2.getID()) {
+          addWork(imp.getRoi());
+        }
       }
     };
-    canvas.addMouseListener(imageListener);
+    Roi.addRoiListener(roiListener);
 
     // Add monitor for the selection of clusters in the current clusters table
     clusterSelectedListener = new ClusterSelectedListener();
@@ -750,7 +764,7 @@ public class TcPalmAnalysis implements PlugIn {
     try {
       showAnalysisDialog();
     } finally {
-      canvas.removeMouseListener(imageListener);
+      Roi.removeRoiListener(roiListener);
       // Remove the action from the single instance of the current clusters table
       final ClusterDataTableModelFrame frame = currentClustersTable.get();
       if (frame != null) {
@@ -869,7 +883,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setFixedTimeAxis(gd.getNextBoolean());
     settings.setRateWindow((int) gd.getNextNumber());
     settings.setBurstMaximumGap((int) gd.getNextNumber());
-    addWork(previous.getLeft());
+    addWork(previous.roi);
     return true;
   }
 
@@ -882,23 +896,43 @@ public class TcPalmAnalysis implements PlugIn {
     if (roi == null || !roi.isArea() || executor.isShutdown()) {
       return;
     }
-    workQueue.insert(Pair.of((Roi) roi.clone(), settings.build()));
+    workQueue
+        .insert(new Work(System.currentTimeMillis() + 100, (Roi) roi.clone(), settings.build()));
     if (lock.acquire()) {
       executor.submit(() -> {
-        Pair<Roi, TcPalmAnalysisSettings> current = previous;
+        Work current = previous;
         try {
           for (;;) {
-            final Pair<Roi, TcPalmAnalysisSettings> next = workQueue.poll();
+            Work next = workQueue.poll();
             if (next == null) {
               // queue is empty
               break;
             }
+
+            // Respect the delay
+            if (next.timeout != 0) {
+              long timeout = next.timeout;
+              while (System.currentTimeMillis() < timeout) {
+                Thread.sleep(50);
+                // Assume new work can be added to the inbox.
+                final Work newWork = workQueue.poll();
+                if (newWork != null) {
+                  timeout = newWork.timeout;
+                  next = newWork;
+                }
+              }
+            }
+
             if (!current.equals(next)) {
               // Settings have changed
-              runAnalysis(next.getLeft(), next.getRight());
+              runAnalysis(next.roi, next.settings);
               current = next;
             }
           }
+        } catch (InterruptedException e) {
+          // Signal this was interrupted while waiting.
+          // Note: This currently does not matter and is ignored.
+          Thread.currentThread().interrupt();
         } finally {
           previous = current;
           lock.release();
