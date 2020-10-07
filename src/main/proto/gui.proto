@@ -698,4 +698,5 @@ message TcPalmAnalysisSettings {
   int32 rate_window = 8;
   bool group_singles = 9;
   int32 dark_time_tolerance = 10;
+  int32 min_cluster_size = 11;
 }
