@@ -383,7 +383,7 @@ public class TcPalmAnalysis implements PlugIn {
 
       // Find bursts of continuous time
       final LocalList<int[]> bursts = new LocalList<>();
-      final int gap = settings.getBurstMaximumGap();
+      final int gap = settings.getDarkTimeTolerance();
       clusters.sort((c1, c2) -> Integer.compare(c1.start, c2.start));
 
       final ClusterData first = clusters.get(0);
@@ -866,7 +866,7 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
     gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
-    gd.addSlider("Burst_maximum_gap", 0, 100, settings.getBurstMaximumGap());
+    gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -882,7 +882,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setMaxFrame((int) gd.getNextNumber());
     settings.setFixedTimeAxis(gd.getNextBoolean());
     settings.setRateWindow((int) gd.getNextNumber());
-    settings.setBurstMaximumGap((int) gd.getNextNumber());
+    settings.setDarkTimeTolerance((int) gd.getNextNumber());
     addWork(previous.roi);
     return true;
   }

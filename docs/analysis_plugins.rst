@@ -2148,6 +2148,9 @@ When the super-resolution image has been constructed a region of interest (ROI) 
 
         where :math:`w` is the ``Rate window``. Use a value of 0 to show the number of activations per frame.
 
+    * - Dark time tolerance
+      - The maximum dark time allowed between activations for connection into a continuous burst.
+
 Output
 ~~~~~~
 
@@ -2180,7 +2183,7 @@ The activation rate is derived from the activations verses time plot using the l
 
     TC-PALM activation rate verses time plot. The ``Rate window`` parameter was set to 20 frames.
 
-The current clusters are recorded in a table. The table records the average coordinates of the cluster, the size and the start and end frames. The default table sort order uses the start frame of the cluster. The sort can be changed by clicking on a table header to sort by that column. Lines can be selected using a single-click. Use the use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected clusters are sorted by start time and joined into bursts if the end of one cluster is within a maximum gap to the start of the next. Each burst is highlighted in red on the total activations verses time plot. If the highlighting covers a steep region then this is an activation burst displaying time correlated clustering. An example of a highlighted steep region is shown in :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`.
+The current clusters are recorded in a table. The table records the average coordinates of the cluster, the size and the start and end frames. The default table sort order uses the start frame of the cluster. The sort can be changed by clicking on a table header to sort by that column. Lines can be selected using a single-click. Use the use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected clusters are sorted by start time and joined into bursts if the end of one cluster is within a dark time tolerance to the start of the next. Each burst is highlighted in red on the total activations verses time plot. If the highlighting covers a steep region then this is an activation burst displaying time correlated clustering. An example of a highlighted steep region is shown in :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`.
 
 Selected clusters are drawn on the super-resolution image using a point ROI overlay. This can be used to determine if two or more entries from the table that are close in time are also close in space. This would indicate they may be part of the same cluster and provides feedback to update the clustering algorithm used to group the localisations into clusters (for example increasing distance or time thresholds).
 
