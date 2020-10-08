@@ -2091,7 +2091,7 @@ The following parameters can be set within the plugin to control the output:
 Time Correlated (TC-PALM) Analysis
 ----------------------------------
 
-Performs time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin requires that localisations have been traced into molecules composed of one or more localisations over a period of time frames.
+Performs time correlated photo-activated light microscopy (TC-PALM) analysis (see Cisse *et al*, 2013). This plugin accepts a results set from memory. The plugin will use any assigned IDs to group localisations for analysis. All localisations with an ID of zero are assigned an ID. The support for grouped localisations allows the plugin to analyse groups of localisations together: an entire group can be selected even if the region of interest only contains some of the localisations; and groups can be selected and displayed together. It is suggested that the input data is a results set that has been clustered using a distance threshold that collects data within the range of interest.
 
 The analysis uses a cumulative histogram of the number of localisations against time. The profile of the activation against time chart can be used to identify clustering that occurs continuously over the imaging lifetime or during a short interval of the entire imaging lifetime (time correlated activation). If the experiment had constant activation of fluorophores over the lifetime then the chart will show an initial steep gradient that gradually falls off as the fluorophores photo-bleach. If there is selective clustering of fluorophores, for example in response to a stage of the cell life cycle, these bursts of activations will appear as a steep gradient on the activation chart.
 
@@ -2109,15 +2109,12 @@ When the plugin is executed the dataset and image rendering options must be spec
     * - Input
       - Select the input results set.
 
-    * - Group singles
-      - Set to **true** to leave single localisations (with an ID of 0) as one large cluster. If **false** each localisation is assigned an ID to be included in analysis as a cluster of size 1.
-
     * - Image
       - Specify the rendering settings for the super-resolution image. Extra options are available using the ``...`` button.
 
         The options are the same as those available in the ``Peak Fit`` plugin (see :numref:`{number}: {name} <fitting_plugins:Results Parameters>`).
 
-When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. The ROI may be created using any area ROI tool for example rectangle, oval, polygon or freehand. All clusters that fit entirely within the region are analysed. Alternatively all clusters that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the localisations extracted for analysis.
+When the super-resolution image has been constructed a region of interest (ROI) is used to mark an area on the super-resolution image for analysis. The ROI may be created using any area ROI tool for example rectangle, oval, polygon or freehand. All groups that fit entirely within the region are analysed. Alternatively all groups that have at least one localisation within the region are analysed. To assist in analysing the activations verses time chart the range of localisations can be bracketed using a minimum and maximum frame. This allows zooming in on a part of the imaging lifetime. A dialog is shown to control the localisations extracted for analysis.
 
 .. list-table::
     :widths: 20 80
@@ -2127,10 +2124,7 @@ When the super-resolution image has been constructed a region of interest (ROI) 
       - Description
 
     * - ROI intersects
-      - Set to **true** to add all clusters that have at least one localisation within the region to the current clusters. If **false** then all localisations from the cluster must be within the region to be included in the current clusters.
-
-    * - Time in seconds
-      - Set to **true** to plot seconds on the activations verses time plot. The default is frames.
+      - Set to **true** to add all groups that have at least one localisation within the region to the current clusters. If **false** then all localisations from the group must be within the region to be included in the current groups.
 
     * - Min frame
       - The minimum frame for localisations that are extracted for analysis.
@@ -2141,51 +2135,41 @@ When the super-resolution image has been constructed a region of interest (ROI) 
     * - Fixed time axis
       - Set to **true** to use the full time length of the input data on the time axis of the plots. If ``false`` the plot will zoom to the range of the current clusters.
 
-    * - Rate window
-      - The window used to compute the activation rate from the cumulative count verses time plot. The rate is computed using the gradient of the cumulative count at time :math:`t`:
-
-        :math:`\mathit{Rate}(t) = \frac{\mathit{Count}(t+w) - \mathit{Count}(t-w-1)}{2w + 1}`
-
-        where :math:`w` is the ``Rate window``. Use a value of 0 to show the number of activations per frame.
+    * - Time in seconds
+      - Set to **true** to plot seconds on the activations verses time plot. The default is frames.
 
     * - Dark time tolerance
       - The maximum dark time allowed between activations for connection into a continuous burst.
 
+    * - Min cluster size
+      - The minimum size for a continuous burst of activations.
+
 Output
 ~~~~~~
 
-The ``TC-PALM Analysis`` plugin is interactive. The dialog controlling selection of the current clusters is non-blocking to allow interaction with other windows within ``ImageJ``. Updates to the ROI on the super-resolution image or the selection parameters will result in identification of a new set of current clusters. The data from the current clusters is then displayed in plots and a results table.
+The ``TC-PALM Analysis`` plugin is interactive. The dialog controlling selection of the current clusters is non-blocking to allow interaction with other windows within ``ImageJ``. Updates to the ROI on the super-resolution image or the selection parameters will result in identification of a new set of current groups. The data from the current groups is then displayed in plots and a results table.
 
-The current clusters are shown on a activations verses time plot (see :numref:`Figure %s <fig_tc_palm_activations_vs_time>`). Each cluster is added as an individual line. High counts and occurrences close in time are easily visible on this plot.
+The current groups are shown on a activations verses time plot (see :numref:`Figure %s <fig_tc_palm_activations_vs_time>`). Each frame where one or more activations occurred is added as an individual line. High counts and occurrences close in time are easily visible on this plot.
 
 .. _fig_tc_palm_activations_vs_time:
 .. figure:: images/tc_palm_activations_vs_time.jpg
     :align: center
     :figwidth: 80%
 
-    TC-PALM cluster activations verses time plot. Each cluster is shown as a separate line on the plot.
+    TC-PALM activations verses time plot. The number of activations for each frame is shown as a separate line on the plot.
 
-The current clusters are aggregated into a total activations verses time plot (see :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`). Note that multiple clusters may occur at the same time. This is named a clash and the total number of clashes are displayed as a label on the plot. Note that steep gradients on the plot may occur due to clashes and this may not be a time correlated clustering event, and is not a burst of a single flourophore.
+The activations are aggregated into a total activations verses time plot (see :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`). Note that multiple activations may occur at the same time. This is named a clash and the total number of clashes are displayed as a label on the plot. The number of clashes provides an indication of whether time correlated clustering is due to single or multiple fluorophores.
 
 .. _fig_tc_palm_total_activations_vs_time:
 .. figure:: images/tc_palm_total_activations_vs_time.jpg
     :align: center
     :figwidth: 80%
 
-    TC-PALM total activations verses time plot. Highlighted clusters from the current clusters table are displayed using a red line.
+    TC-PALM total activations verses time plot. Highlighted activation bursts are identified using continuous regions of increasing activations within an allowed dark time tolerance of 40 frames and minimum cluster size of 20.
 
-The activation rate is derived from the activations verses time plot using the local gradient (see :numref:`Figure %s <fig_tc_palm_activation_rate_vs_time>`). The gradient is computed using a range defined by the ``Rate window`` parameter. Using a value of zero for the ``Rate window`` will display a plot of activations per frame.
+The total activations plot is analysed to identify bursts of activations that occur within a continuous time period. A dark time tolerance allows periods of no activations within the same burst. All bursts above a minimum cluster size are highlighted on the total activations plot. The localisations from these bursts are drawn on the super-resolution image using a point ROI overlay. This can be used to determine if localisations that are close in time are also close in space. This is a time correlated clustering event. The ``Dark time tolerance`` and ``Min cluster size`` parameters can be adjusted and the results updated in real-time.
 
-.. _fig_tc_palm_activation_rate_vs_time:
-.. figure:: images/tc_palm_activation_rate_vs_time.jpg
-    :align: center
-    :figwidth: 80%
-
-    TC-PALM activation rate verses time plot. The ``Rate window`` parameter was set to 20 frames.
-
-The current clusters are recorded in a table. The table records the average coordinates of the cluster, the size and the start and end frames. The default table sort order uses the start frame of the cluster. The sort can be changed by clicking on a table header to sort by that column. Lines can be selected using a single-click. Use the use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected clusters are sorted by start time and joined into bursts if the end of one cluster is within a dark time tolerance to the start of the next. Each burst is highlighted in red on the total activations verses time plot. If the highlighting covers a steep region then this is an activation burst displaying time correlated clustering. An example of a highlighted steep region is shown in :numref:`Figure %s <fig_tc_palm_total_activations_vs_time>`.
-
-Selected clusters are drawn on the super-resolution image using a point ROI overlay. This can be used to determine if two or more entries from the table that are close in time are also close in space. This would indicate they may be part of the same cluster and provides feedback to update the clustering algorithm used to group the localisations into clusters (for example increasing distance or time thresholds).
+The current groups are recorded in a table. The table records the average coordinates of the group, the size and the start and end frames. The default table sort order uses the start frame of the group. The sort can be changed by clicking on a table header to sort by that column. Lines can be selected using a single-click. Use the shift key to select multiple lines with a single mouse click starting from a previously selected line. Use the control key to select lines to add or remove from the selection allowing selection of discontinuous ranges. The selected data are sorted by start time and joined into bursts if the end of one group is within a dark time tolerance to the start of the next. Each burst is highlighted on the total activations verses time plot. Note that for convenience the ``Min cluster size`` parameter is ignored allowing the manually selected data to always be displayed on the total activations plot. All the localisations from the selected data are overlaid on the super-resolution image. This manually selected data replaces the results from the automated analysis. The automated analysis results can be recreated by adjusting one of the parameters that affects the input data or the analysis.
 
 
 .. index:: ! Neighbour Analysis

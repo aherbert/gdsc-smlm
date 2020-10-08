@@ -32,12 +32,15 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
+import ij.process.LUT;
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
@@ -46,6 +49,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,8 +67,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -77,7 +79,6 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -138,6 +139,15 @@ public class TcPalmAnalysis implements PlugIn {
   /** The cluster data. */
   private LocalList<ClusterData> clusterData;
 
+  /** The currently selected clusters. */
+  private LocalList<ClusterData> clusters;
+
+  /** The count data of the selected clusters. */
+  private CumulativeCountData countData;
+
+  /** The current bursts of continuous time. */
+  private LocalList<int[]> bursts;
+
   /** The minimum time frame. */
   private int minT;
 
@@ -152,6 +162,9 @@ public class TcPalmAnalysis implements PlugIn {
    * plot when clusters are selected.
    */
   private ActivationsPlotData activationsPlotData;
+
+  /** The colour map used to colour selected bursts. */
+  private final ColourMap colourMap = new ColourMap();
 
   /**
    * Class to store the work.
@@ -173,6 +186,20 @@ public class TcPalmAnalysis implements PlugIn {
       this.roi = roi;
       this.settings = settings;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof Work) {
+        final Work other = (Work) obj;
+        return Objects.equals(roi, other.roi) && Objects.equals(settings, other.settings);
+      }
+      return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(roi) ^ Objects.hashCode(settings);
+    }
   }
 
   /**
@@ -185,7 +212,6 @@ public class TcPalmAnalysis implements PlugIn {
     float y;
     float width;
     float height;
-    float[] frames;
     int start;
     int end;
     double[] xyz;
@@ -296,24 +322,6 @@ public class TcPalmAnalysis implements PlugIn {
       return false;
     }
 
-    /**
-     * Gets the frames as a float[] for convenience when plotting.
-     *
-     * @return the frames
-     */
-    float[] getFrames() {
-      float[] frames = this.frames;
-      if (frames == null) {
-        frames = new float[results.size()];
-        final int size = results.size();
-        for (int i = 0; i < size; i++) {
-          frames[i] = results.unsafeGet(i).getFrame();
-        }
-        this.frames = frames;
-      }
-      return frames;
-    }
-
     double[] getXyz() {
       double[] xyz = this.xyz;
       if (xyz == null) {
@@ -334,21 +342,42 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Class to generate a cumulative count for plotting.
+   * Store the cumulative counts.
    */
-  private static class CumulativeCount {
-    private float[] count;
+  private static class CumulativeCountData {
+    final int[] frames;
+    final int[] counts;
 
-    CumulativeCount() {
-      count = SimpleArrayUtils.newArray(20, 1f, 1f);
-    }
+    /** The frames padded for plotting. */
+    final int[] plotFrames;
+    /** The cumulative counts padded for plotting. */
+    final int[] plotCounts;
 
-    float[] getCount(int size) {
-      float[] count = this.count;
-      if (count.length < size) {
-        count = this.count = SimpleArrayUtils.newArray(size, 1f, 1f);
+    CumulativeCountData(int[] frames, int[] counts) {
+      this.frames = frames;
+      this.counts = counts;
+
+      // Expand the total activations with extra frames to allow large spans to plot as horizontal
+      final TIntArrayList tmpFrames = new TIntArrayList(frames.length);
+      final TIntArrayList tmpCounts = new TIntArrayList(frames.length);
+      int previousT = Integer.MIN_VALUE;
+      int previousC = 0;
+      for (int i = 0; i < frames.length; i++) {
+        if (frames[i] > previousT + 1) {
+          tmpFrames.add(frames[i] - 1);
+          tmpCounts.add(previousC);
+        }
+        previousT = frames[i];
+        previousC = counts[i];
+        tmpFrames.add(previousT);
+        tmpCounts.add(previousC);
       }
-      return Arrays.copyOf(count, size);
+      plotFrames = tmpFrames.toArray();
+      plotCounts = tmpCounts.toArray();
+      // Make counts cumulative
+      for (int i = 1; i < plotCounts.length; i++) {
+        plotCounts[i] += plotCounts[i - 1];
+      }
     }
   }
 
@@ -358,14 +387,13 @@ public class TcPalmAnalysis implements PlugIn {
   private class ClusterSelectedListener implements Consumer<List<ClusterData>> {
     @Override
     public void accept(List<ClusterData> clusters) {
-      final ActivationsPlotData activationsPlotData = TcPalmAnalysis.this.activationsPlotData;
-      final Plot plot2 = activationsPlotData.plot;
-      plot2.restorePlotObjects();
+      final LocalList<LocalList<PeakResult>> burstLocalisations = new LocalList<>();
+      final LocalList<int[]> bursts = new LocalList<>();
 
       // In case no cluster data is provided
       if (clusters.isEmpty()) {
-        image.getImagePlus().setOverlay(null);
-        plot2.updateImage();
+        runBurstOverlay(burstLocalisations);
+        runBurstPlotSelection(bursts);
         return;
       }
 
@@ -378,77 +406,36 @@ public class TcPalmAnalysis implements PlugIn {
       // - Else finish and start a new cluster.
       // - Add all ranges to the plot.
 
-      // Overlay the clusters on the image.
-      final Overlay overlay = new Overlay();
-
       // Find bursts of continuous time
-      final LocalList<int[]> bursts = new LocalList<>();
-      final int gap = settings.getDarkTimeTolerance();
+      final int gap = settings.getDarkTimeTolerance() + 1;
       clusters.sort((c1, c2) -> Integer.compare(c1.start, c2.start));
 
       final ClusterData first = clusters.get(0);
-      appendRoi(overlay, first);
+      final LocalList<PeakResult> results = new LocalList<>();
+      results.addAll(first.results);
       int start = first.start;
       int end = first.end;
       for (int i = 1; i < clusters.size(); i++) {
         // For each cluster add to the overlay.
         final ClusterData data = clusters.get(i);
-        appendRoi(overlay, data);
         if (data.start - end > gap) {
           // Save the burst
           bursts.add(new int[] {start, end});
+          burstLocalisations.add(results.copy());
           start = data.start;
           end = data.end;
+          burstLocalisations.clear();
         } else {
           // extend the burst
           end = Math.max(data.end, end);
         }
+        results.addAll(data.results);
       }
       bursts.add(new int[] {start, end});
-      image.getImagePlus().setOverlay(overlay);
+      burstLocalisations.add(results);
 
-      // For each cluster add to the plot.
-      plot2.setColor(Color.red);
-      final TIntArrayList tmpFrames = new TIntArrayList();
-      final TIntArrayList tmpCounts = new TIntArrayList();
-      bursts.forEach(range -> {
-        // Find the start and end points on the plotted data.
-        final int is = ArrayUtils.indexOf(activationsPlotData.frames, range[0]);
-        final int ie = ArrayUtils.indexOf(activationsPlotData.frames, range[1]);
-
-        // Pad the line with zeros at the end
-        tmpFrames.resetQuick();
-        tmpCounts.resetQuick();
-        int[] frames = Arrays.copyOfRange(activationsPlotData.frames, is, ie + 1);
-        tmpFrames.add(frames[0]);
-        tmpFrames.add(frames);
-        tmpFrames.add(frames[frames.length - 1]);
-        tmpCounts.add(0);
-        int[] counts = Arrays.copyOfRange(activationsPlotData.counts, is, ie + 1);
-        tmpCounts.add(counts);
-        tmpCounts.add(0);
-        frames = tmpFrames.toArray();
-        counts = tmpCounts.toArray();
-
-        // Add to the plot.
-        plot2.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-            SimpleArrayUtils.toFloat(counts), Plot.LINE);
-      });
-      plot2.updateImage();
-    }
-
-    private void appendRoi(Overlay overlay, ClusterData data) {
-      final int np = data.results.size();
-      final float[] xp = new float[np];
-      final float[] yp = new float[np];
-      for (int i = 0; i < np; i++) {
-        final PeakResult r = data.results.unsafeGet(i);
-        xp[i] = image.mapX(r.getXPosition());
-        yp[i] = image.mapY(r.getYPosition());
-      }
-      final PointRoi roi = new PointRoi(xp, yp, np);
-      roi.setShowLabels(false);
-      overlay.add(roi);
+      runBurstOverlay(burstLocalisations);
+      runBurstPlotSelection(bursts);
     }
   }
 
@@ -456,17 +443,14 @@ public class TcPalmAnalysis implements PlugIn {
    * Class containing the data for the most recent total activations plot for current clusters.
    */
   private static class ActivationsPlotData {
-    Plot plot;
-    UnaryOperator<float[]> timeConverter;
-    int[] frames;
-    int[] counts;
+    final Plot plot;
+    final UnaryOperator<float[]> timeConverter;
+    final CumulativeCountData data;
 
-    ActivationsPlotData(Plot plot, UnaryOperator<float[]> timeConverter, int[] frames,
-        int[] counts) {
+    ActivationsPlotData(Plot plot, UnaryOperator<float[]> timeConverter, CumulativeCountData data) {
       this.plot = plot;
       this.timeConverter = timeConverter;
-      this.frames = frames;
-      this.counts = counts;
+      this.data = data;
       plot.savePlotObjects();
     }
   }
@@ -672,6 +656,21 @@ public class TcPalmAnalysis implements PlugIn {
     }
   }
 
+  private static class ColourMap {
+    /** This should be a 256 colour LUT with no black. */
+    final LUT lut = LutHelper.createLut(LutColour.PIMP);
+
+    /**
+     * Gets the colour.
+     *
+     * @param index the index
+     * @return the colour
+     */
+    Color getColour(int index) {
+      return LutHelper.getColour(lut, index & 0xff);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -706,9 +705,8 @@ public class TcPalmAnalysis implements PlugIn {
       return;
     }
 
-    // Optionally group singles (id=0) together. The default is to allocated them an Id
-    // so noise localisations are included in counts from selected regions.
-    results = settings.getGroupSingles() ? results.copy() : results.copyAndAssignZeroIds();
+    // Allocate singles an id for analysis.
+    results = results.copyAndAssignZeroIds();
 
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
@@ -785,8 +783,7 @@ public class TcPalmAnalysis implements PlugIn {
     settings = SettingsManager.readTcPalmAnalysisSettings(0).toBuilder();
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the time-correlated activation of traced data");
-    ResultsManager.addInput(gd, "Input", settings.getInputOption(), InputSource.MEMORY_CLUSTERED);
-    gd.addCheckbox("Group_singles", settings.getGroupSingles());
+    ResultsManager.addInput(gd, "Input", settings.getInputOption(), InputSource.MEMORY);
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
     tmp.setResultsImageSettings(settings.getResultsImageSettingsBuilder());
@@ -798,7 +795,6 @@ public class TcPalmAnalysis implements PlugIn {
       return false;
     }
     settings.setInputOption(ResultsManager.getInputSource(gd));
-    settings.setGroupSingles(gd.getNextBoolean());
     final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
     // Note: The initial none option was removed
     newImgSettings.setImageTypeValue(gd.getNextChoiceIndex() + 1);
@@ -852,7 +848,6 @@ public class TcPalmAnalysis implements PlugIn {
     final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
     gd.addMessage("Analyse the time-correlated activation of traced data");
     gd.addCheckbox("ROI_intersects", settings.getIntersects());
-    gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
     minT = results.getMinFrame();
     maxT = results.getMaxFrame();
     // No need to check other end of the range as the dialog slider will clip to the range.
@@ -865,8 +860,10 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Min_frame", minT, maxT, settings.getMinFrame());
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
-    gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
+    gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
+    // gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
     gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
+    gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
     gd.addDialogListener(this::readDialog);
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -877,12 +874,13 @@ public class TcPalmAnalysis implements PlugIn {
 
   private boolean readDialog(GenericDialog gd, @SuppressWarnings("unused") AWTEvent e) {
     settings.setIntersects(gd.getNextBoolean());
-    settings.setTimeInSeconds(gd.getNextBoolean());
     settings.setMinFrame((int) gd.getNextNumber());
     settings.setMaxFrame((int) gd.getNextNumber());
     settings.setFixedTimeAxis(gd.getNextBoolean());
-    settings.setRateWindow((int) gd.getNextNumber());
+    settings.setTimeInSeconds(gd.getNextBoolean());
+    // settings.setRateWindow((int) gd.getNextNumber());
     settings.setDarkTimeTolerance((int) gd.getNextNumber());
+    settings.setMinClusterSize((int) gd.getNextNumber());
     addWork(previous.roi);
     return true;
   }
@@ -925,11 +923,11 @@ public class TcPalmAnalysis implements PlugIn {
 
             if (!current.equals(next)) {
               // Settings have changed
-              runAnalysis(next.roi, next.settings);
+              runAnalysis(current, next);
               current = next;
             }
           }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           // Signal this was interrupted while waiting.
           // Note: This currently does not matter and is ignored.
           Thread.currentThread().interrupt();
@@ -944,14 +942,77 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Run the analysis of clusters inside the bounds with the provided analysis settings.
    *
-   * @param roi the roi
-   * @param settings the settings
+   * @param last the last work
+   * @param current the current work
    */
-  private void runAnalysis(Roi roi, TcPalmAnalysisSettings settings) {
+  private void runAnalysis(Work last, Work current) {
+    final boolean selectionChanged = selectionChanged(last, current);
+
+    if (selectionChanged) {
+      runSelection(current);
+    }
+
+    final TcPalmAnalysisSettings lastSettings = last.settings;
+    final TcPalmAnalysisSettings settings = current.settings;
+
+    final boolean plotChanged = selectionChanged || plotSettingsChanged(lastSettings, settings);
+
+    if (plotChanged) {
+      runPlot(settings);
+    }
+
+    final boolean analysisChanged =
+        selectionChanged || analysisSettingsChanged(lastSettings, settings);
+
+    if (analysisChanged) {
+      clearClustersTableSelection();
+      runBurstAnalysis(settings);
+      runBurstOverlay(createBurstLocalisations());
+    }
+
+    runBurstPlotSelection(bursts);
+  }
+
+  private static boolean selectionChanged(Work first, Work other) {
+    return !Objects.equals(first.roi, other.roi)
+        || selectionSettingsChanged(first.settings, other.settings);
+  }
+
+  private static boolean selectionSettingsChanged(TcPalmAnalysisSettings first,
+      TcPalmAnalysisSettings second) {
+    boolean result = (first.getIntersects() != second.getIntersects());
+    result = result || (first.getMinFrame() != second.getMinFrame());
+    result = result || (first.getMaxFrame() != second.getMaxFrame());
+    return result;
+  }
+
+  private static boolean plotSettingsChanged(TcPalmAnalysisSettings first,
+      TcPalmAnalysisSettings second) {
+    boolean result = (first.getTimeInSeconds() != second.getTimeInSeconds());
+    result = result || (first.getFixedTimeAxis() != second.getFixedTimeAxis());
+    // result = result || (first.getRateWindow() != second.getRateWindow());
+    return result;
+  }
+
+  private static boolean analysisSettingsChanged(TcPalmAnalysisSettings first,
+      TcPalmAnalysisSettings second) {
+    boolean result = (first.getDarkTimeTolerance() != second.getDarkTimeTolerance());
+    result = result || (first.getMinClusterSize() != second.getMinClusterSize());
+    return result;
+  }
+
+  /**
+   * Run selection of the current clusters.
+   *
+   * @param work the current work
+   */
+  private void runSelection(Work work) {
     // Support square ROI
     // - Map image ROI bounds to the data
     // - Check if the cluster is inside the rectangle bounds
 
+    final Roi roi = work.roi;
+    final TcPalmAnalysisSettings settings = work.settings;
     final Rectangle bounds = roi.getBounds();
     final double x = image.inverseMapX(bounds.x);
     final double y = image.inverseMapY(bounds.y);
@@ -984,130 +1045,22 @@ public class TcPalmAnalysis implements PlugIn {
       }
     }
 
-    final LocalList<ClusterData> clusters = new LocalList<>();
+    clusters = new LocalList<>();
     final BiPredicate<ClusterData, Rectangle2D> filter = test;
     clusterData.forEach(c -> {
       if (filter.test(c, scaledBounds)) {
         clusters.add(c);
       }
     });
-    if (clusters.isEmpty()) {
-      return;
-    }
 
-    final WindowOrganiser wo = new WindowOrganiser();
-
-    String timeLabel = "Time";
-    UnaryOperator<float[]> timeConverter;
-    double timeScale;
-    if (settings.getTimeInSeconds()) {
-      timeLabel += " (s)";
-      timeScale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
-      timeConverter = frames -> {
-        final float[] updated = frames.clone();
-        SimpleArrayUtils.apply(updated, f -> f *= timeScale);
-        return updated;
-      };
-    } else {
-      timeLabel += " (frame)";
-      timeConverter = UnaryOperator.identity();
-      timeScale = 1;
-    }
-
-    String title = TITLE + " Cluster Activations vs Time";
-    final Plot plot = new Plot(title, timeLabel, "Cumulative count");
-    plot.addLabel(0, 0, TextUtils.pleural(clusters.size(), "cluster"));
-    final CumulativeCount count = new CumulativeCount();
-    final TIntIntHashMap all = new TIntIntHashMap();
-    clusters.forEach(c -> {
-      final float[] frames = c.getFrames();
-      for (final float t : frames) {
-        all.adjustOrPutValue((int) t, 1, 1);
-      }
-      plot.addPoints(timeConverter.apply(frames), count.getCount(c.results.size()), Plot.LINE);
-    });
-    plot.draw();
-    plot.setLimitsToFit(true);
-    if (settings.getFixedTimeAxis()) {
-      final double[] limits = plot.getLimits();
-      limits[0] = timeScale * (minT - 1);
-      limits[1] = timeScale * (maxT + 1);
-      plot.setLimits(limits);
-      plot.updateImage();
-    }
-    ImageJUtils.display(title, plot, wo);
-
-    title = TITLE + " Total Activations vs Time";
-    final Plot plot2 = new Plot(title, timeLabel, "Cumulative count");
-    int[] frames = all.keys();
-    int[] counts = all.values();
+    // Build total activations data
+    final TIntIntHashMap all = new TIntIntHashMap(maxT - minT + 1);
+    clusters.forEach(c -> c.results.forEach(peak -> all.adjustOrPutValue(peak.getFrame(), 1, 1)));
+    final int[] frames = all.keys();
+    final int[] counts = all.values();
     SortUtils.sortData(counts, frames, true, false);
-    final int localisations = (int) MathUtils.sum(counts);
-    final int clashes = localisations - all.size();
-    // Make counts cumulative
-    for (int i = 1; i < counts.length; i++) {
-      counts[i] += counts[i - 1];
-    }
 
-    // Expand the total activations with extra frames to allow large spans to plot as horizontal
-    final TIntArrayList frames2 = new TIntArrayList(frames.length);
-    final TIntArrayList counts2 = new TIntArrayList(frames.length);
-    int previousT = Integer.MIN_VALUE;
-    int previousC = 0;
-    for (int i = 0; i < frames.length; i++) {
-      if (frames[i] > previousT + 1) {
-        frames2.add(frames[i] - 1);
-        counts2.add(previousC);
-      }
-      previousT = frames[i];
-      previousC = counts[i];
-      frames2.add(previousT);
-      counts2.add(previousC);
-    }
-    frames = frames2.toArray();
-    counts = counts2.toArray();
-
-    plot2.addLabel(0, 0, TextUtils.pleural(localisations, "localisation") + " : " + clashes
-        + TextUtils.pleuralise(clashes, " clash", " clashes"));
-    plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
-        SimpleArrayUtils.toFloat(counts), Plot.LINE);
-    if (settings.getFixedTimeAxis()) {
-      plot2.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
-    }
-    ImageJUtils.display(title, plot2, wo);
-
-    activationsPlotData = new ActivationsPlotData(plot2, timeConverter, frames, counts);
-
-    // Plot the gradient (activation rate) using a rolling window
-    final PolynomialSplineFunction fun = new LinearInterpolator()
-        .interpolate(SimpleArrayUtils.toDouble(frames), SimpleArrayUtils.toDouble(counts));
-    title = TITLE + " Activation rate vs Time";
-    final Plot plot4 = new Plot(title, timeLabel, "Activation rate (count/frame)");
-    // Clip to the range
-    final int min = frames[0];
-    final int max = frames[frames.length - 1];
-    final float[] frames3 = SimpleArrayUtils.newArray(max - min + 1, min, 1f);
-    // Configurable window. This works even for a window of zero. Here interpolation is not
-    // necessary but we leave it in place for simplicity.
-    final int window = settings.getRateWindow();
-    final float[] values = new float[frames3.length];
-    for (int i = 0; i < values.length; i++) {
-      final int low = Math.max(min, (int) frames3[i] - window - 1);
-      final int high = Math.min(max, (int) frames3[i] + window);
-      values[i] = (float) ((fun.value(high) - fun.value(low)) / (high - low));
-    }
-    // Note the initial frame will be an added frame with a count of zero. If the window is zero
-    // then this will be NaN. Replace this with no rate.
-    if (window == 0) {
-      values[0] = 0;
-    }
-    plot4.addPoints(timeConverter.apply(frames3), values, Plot.LINE);
-    if (settings.getFixedTimeAxis()) {
-      plot4.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
-    }
-    ImageJUtils.display(title, plot4, wo);
-
-    wo.tile();
+    countData = new CumulativeCountData(frames, counts);
 
     // Add a table of the clusters.
     final ClusterDataTableModelFrame clustersTable = createClustersTable();
@@ -1115,9 +1068,6 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Allow a configurable action that accepts the array of ClusterData that is selected.
     clustersTable.selectedAction = clusterSelectedListener;
-
-    // In case the clusters are the same then ensure the selected clusters are redisplayed.
-    clusterSelectedListener.accept(clustersTable.table.getSelectedData());
   }
 
   /**
@@ -1145,9 +1095,270 @@ public class TcPalmAnalysis implements PlugIn {
     return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel());
-      frame.setTitle(TITLE + " Selected Clusters");
+      frame.setTitle(TITLE + " Current Localisation Groups");
       frame.setVisible(true);
       return frame;
     });
+  }
+
+  /**
+   * Clear the manually created selection from the current clusters table.
+   */
+  private static void clearClustersTableSelection() {
+    final ClusterDataTableModelFrame frame = currentClustersTable.get();
+    if (frame != null) {
+      frame.table.clearSelection();
+    }
+  }
+
+  /**
+   * Create the activations and total activations plots.
+   *
+   * @param settings the settings
+   */
+  private void runPlot(TcPalmAnalysisSettings settings) {
+    final WindowOrganiser wo = new WindowOrganiser();
+
+    String timeLabel = "Time";
+    UnaryOperator<float[]> timeConverter;
+    double timeScale;
+    if (settings.getTimeInSeconds()) {
+      timeLabel += " (s)";
+      timeScale = 1.0 / results.getCalibration().getTimeCalibration().getExposureTime();
+      timeConverter = frames -> {
+        SimpleArrayUtils.apply(frames, f -> f *= timeScale);
+        return frames;
+      };
+    } else {
+      timeLabel += " (frame)";
+      timeConverter = UnaryOperator.identity();
+      timeScale = 1;
+    }
+
+    final CumulativeCountData data = this.countData;
+
+    String title = TITLE + " Activations vs Time";
+    final Plot plot1 = new Plot(title, timeLabel, "Count");
+    plot1.addLabel(0, 0, TextUtils.pleural(clusters.size(), "cluster"));
+    for (int i = 0; i < data.frames.length; i++) {
+      final int t = data.frames[i];
+      final int c = data.counts[i];
+      plot1.addPoints(timeConverter.apply(new float[] {t, t}), new float[] {0, c}, Plot.LINE);
+    }
+    plot1.draw();
+    plot1.setLimitsToFit(true);
+    if (settings.getFixedTimeAxis()) {
+      final double[] limits = plot1.getLimits();
+      limits[0] = timeScale * (minT - 1);
+      limits[1] = timeScale * (maxT + 1);
+      plot1.setLimits(limits);
+      plot1.updateImage();
+    }
+    final PlotWindow pw1 = ImageJUtils.display(title, plot1, ImageJUtils.NO_TO_FRONT, wo);
+
+    title = TITLE + " Total Activations vs Time";
+    final Plot plot2 = new Plot(title, timeLabel, "Cumulative count");
+    final int localisations =
+        data.counts.length == 0 ? 0 : data.plotCounts[data.plotCounts.length - 1];
+    final int clashes = localisations - data.counts.length;
+    plot2.addLabel(0, 0, TextUtils.pleural(localisations, "localisation") + " : " + clashes
+        + TextUtils.pleuralise(clashes, " clash", " clashes"));
+    plot2.addPoints(timeConverter.apply(SimpleArrayUtils.toFloat(data.plotFrames)),
+        SimpleArrayUtils.toFloat(data.plotCounts), Plot.LINE);
+    if (settings.getFixedTimeAxis()) {
+      plot2.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
+    }
+    final PlotWindow pw2 = ImageJUtils.display(title, plot2, ImageJUtils.NO_TO_FRONT, wo);
+
+    activationsPlotData = new ActivationsPlotData(plot2, timeConverter, data);
+
+    // // Plot the gradient (activation rate) using a rolling window
+    // final PolynomialSplineFunction fun = new LinearInterpolator()
+    // .interpolate(SimpleArrayUtils.toDouble(data.frames2),
+    // SimpleArrayUtils.toDouble(data.counts2));
+    // title = TITLE + " Activation rate vs Time";
+    // final Plot plot4 = new Plot(title, timeLabel, "Activation rate (count/frame)");
+    // // Clip to the range
+    // final int min = data.frames2[0];
+    // final int max = data.frames2[data.frames2.length - 1];
+    // final float[] frames3 = SimpleArrayUtils.newArray(max - min + 1, min, 1f);
+    // // Configurable window. This works even for a window of zero. Here interpolation is not
+    // // necessary but we leave it in place for simplicity.
+    // final int window = settings.getRateWindow();
+    // final float[] values = new float[frames3.length];
+    // for (int i = 0; i < values.length; i++) {
+    // final int low = Math.max(min, (int) frames3[i] - window - 1);
+    // final int high = Math.min(max, (int) frames3[i] + window);
+    // values[i] = (float) ((fun.value(high) - fun.value(low)) / (high - low));
+    // }
+    // // Note the initial frame will be an added frame with a count of zero. If the window is zero
+    // // then this will be NaN. Replace this with no rate.
+    // if (window == 0) {
+    // values[0] = 0;
+    // }
+    // plot4.addPoints(timeConverter.apply(frames3), values, Plot.LINE);
+    // if (settings.getFixedTimeAxis()) {
+    // plot4.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
+    // }
+    // ImageJUtils.display(title, plot4, wo);
+
+    // Simple tile one window above the other only if both are new.
+    if (wo.size() == 2) {
+      final Point p = pw1.getLocation();
+      p.y += pw1.getHeight();
+      pw2.setLocation(p);
+    }
+  }
+
+  /**
+   * Run the burst analysis on the activation counts. Identifies continuous bursts of activations
+   * that are connected within the dark time tolerance and above the minimum cluster size.
+   *
+   * @param settings the settings
+   */
+  private void runBurstAnalysis(TcPalmAnalysisSettings settings) {
+    final LocalList<int[]> bursts = new LocalList<>();
+    final CumulativeCountData data = this.countData;
+    final int[] frames = data.frames;
+    final int[] counts = data.counts;
+
+    if (frames.length != 0) {
+      final int gap = settings.getDarkTimeTolerance() + 1;
+      final int size = settings.getMinClusterSize();
+      int start = frames[0];
+      int end = start;
+      int count = counts[0];
+      for (int i = 1; i < frames.length; i++) {
+        final int t = frames[i];
+        if (t - end > gap) {
+          // Save the burst
+          if (count >= size) {
+            bursts.add(new int[] {start, end});
+          }
+          start = end = t;
+          count = counts[i];
+        } else {
+          end = t;
+          count += counts[i];
+        }
+      }
+      if (count >= size) {
+        bursts.add(new int[] {start, end});
+      }
+    }
+
+    this.bursts = bursts;
+  }
+
+  /**
+   * Creates the burst localisations using the ranges of the current bursts.
+   *
+   * @return the burst localisations
+   */
+  private LocalList<LocalList<PeakResult>> createBurstLocalisations() {
+    final LocalList<LocalList<PeakResult>> burstsLocalisations = new LocalList<>();
+    final LocalList<int[]> bursts = this.bursts;
+    // TODO: Make more efficient. Order results by frame and burst by frame
+    // Do a single sweep over the results and extract the peaks within the burst ranges.
+    bursts.forEach(range -> {
+      final int min = range[0];
+      final int max = range[1];
+      final LocalList<PeakResult> list = new LocalList<>();
+      // Build from the current selection
+      clusters.forEach(cluster -> {
+        cluster.results.forEach(peak -> {
+          final int t = peak.getFrame();
+          if (t >= min && t <= max) {
+            list.add(peak);
+          }
+        });
+      });
+      burstsLocalisations.add(list);
+    });
+    return burstsLocalisations;
+  }
+
+  /**
+   * Select the activation bursts on the cumulative activations plot. Also stores the bursts in the
+   * class property for future plot updates with the same selection.
+   *
+   * <p>This is synchronized so that the table selection events do not clash with the background
+   * analysis jobs.
+   *
+   * @param bursts the bursts
+   */
+  private synchronized void runBurstPlotSelection(LocalList<int[]> bursts) {
+    this.bursts = bursts;
+    final Plot plot = activationsPlotData.plot;
+    plot.restorePlotObjects();
+
+    if (!bursts.isEmpty()) {
+      final int[] plotFrames = activationsPlotData.data.plotFrames;
+      final int[] plotCounts = activationsPlotData.data.plotCounts;
+
+      // For each cluster add to the plot.
+      final TIntArrayList tmpFrames = new TIntArrayList();
+      final TIntArrayList tmpCounts = new TIntArrayList();
+      for (int i = 0; i < bursts.size(); i++) {
+        // Find the start and end points on the plotted data.
+        final int[] range = bursts.unsafeGet(i);
+        final int is = ArrayUtils.indexOf(plotFrames, range[0]);
+        final int ie = ArrayUtils.indexOf(plotFrames, range[1]);
+
+        // Pad the line with zeros at the end
+        tmpFrames.resetQuick();
+        tmpCounts.resetQuick();
+        int[] frames = Arrays.copyOfRange(plotFrames, is, ie + 1);
+        tmpFrames.add(frames[0]);
+        tmpFrames.add(frames);
+        tmpFrames.add(frames[frames.length - 1]);
+        tmpCounts.add(0);
+        int[] counts = Arrays.copyOfRange(plotCounts, is, ie + 1);
+        tmpCounts.add(counts);
+        tmpCounts.add(0);
+        frames = tmpFrames.toArray();
+        counts = tmpCounts.toArray();
+
+        // Add to the plot.
+        plot.setColor(colourMap.getColour(i));
+        plot.addPoints(activationsPlotData.timeConverter.apply(SimpleArrayUtils.toFloat(frames)),
+            SimpleArrayUtils.toFloat(counts), Plot.LINE);
+      }
+    }
+    plot.updateImage();
+  }
+
+  /**
+   * Select the activation burst localisations on the super-resolution image.
+   *
+   * @param bursts the bursts
+   */
+  private void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts) {
+    if (bursts.isEmpty()) {
+      image.getImagePlus().setOverlay(null);
+      return;
+    }
+    // Overlay the clusters on the image.
+    final Overlay overlay = new Overlay();
+    final ImageJImagePeakResults image = this.image;
+    for (int i = 0; i < bursts.size(); i++) {
+      final LocalList<PeakResult> results = bursts.unsafeGet(i);
+      final int np = results.size();
+      final float[] xp = new float[np];
+      final float[] yp = new float[np];
+      for (int j = 0; j < np; j++) {
+        final PeakResult r = results.unsafeGet(j);
+        xp[j] = image.mapX(r.getXPosition());
+        yp[j] = image.mapY(r.getYPosition());
+      }
+      final PointRoi roi = new PointRoi(xp, yp, np);
+      roi.setShowLabels(false);
+      roi.setPointType(3);
+      final Color c = colourMap.getColour(i);
+      roi.setFillColor(c);
+      roi.setStrokeColor(c);
+      overlay.add(roi);
+    }
+    image.getImagePlus().setOverlay(overlay);
   }
 }
