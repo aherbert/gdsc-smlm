@@ -1499,7 +1499,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add to an activation bursts (clusters) table
     final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
-    bursts.forEach(list -> clusters.add(new ClusterData(clusters.size(), list)));
+    bursts.forEach(list -> clusters.add(new ClusterData(clusters.size() + 1, list)));
     final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
     clustersTable.getModel().setData(clusters);
   }
