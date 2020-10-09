@@ -495,8 +495,12 @@ public final class GuiProtosHelper {
   static {
     final TcPalmAnalysisSettings.Builder builder = TcPalmAnalysisSettings.newBuilder();
     ResultsImageSettings.Builder resultsImageSettings = builder.getResultsImageSettingsBuilder();
-    resultsImageSettings.setImageType(ResultsImageType.DRAW_ID);
+    resultsImageSettings.setImageType(ResultsImageType.DRAW_LOCALISATIONS);
     resultsImageSettings.setLutName(LutColour.FIRE.getName());
+    builder.setLoopSize(512);
+    ResultsImageSettings.Builder loopImageSettings = builder.getLoopImageSettingsBuilder();
+    loopImageSettings.setImageType(ResultsImageType.DRAW_LOCALISATIONS);
+    // No LUT to use the grey default. This allows a colour overlay to be distinct.
     defaultTcPalmAnalysisSettings = builder.build();
   }
 

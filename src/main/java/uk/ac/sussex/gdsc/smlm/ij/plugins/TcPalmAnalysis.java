@@ -43,6 +43,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
@@ -57,6 +58,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -69,6 +71,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
@@ -79,6 +82,7 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -130,7 +134,7 @@ public class TcPalmAnalysis implements PlugIn {
   private ImageJImagePeakResults image;
 
   /** The loop image of the selected region. */
-  private ImageJImagePeakResults loopImage;
+  private LoopImage loopImage;
 
   /** The lock (must be held when processing the work queue). */
   private SoftLock lock;
@@ -236,7 +240,7 @@ public class TcPalmAnalysis implements PlugIn {
       this.id = id;
       results = new LocalList<>(list);
       results.sort((p1, p2) -> Integer.compare(p1.getFrame(), p2.getFrame()));
-      PeakResult result = results.unsafeGet(0);
+      final PeakResult result = results.unsafeGet(0);
       x = width = result.getXPosition();
       y = height = result.getYPosition();
       final int size = results.size();
@@ -687,6 +691,9 @@ public class TcPalmAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Map an index to a colour.
+   */
   private static class ColourMap {
     /** This should be a 256 colour LUT with no black. */
     final LUT lut = LutHelper.createLut(LutColour.PIMP);
@@ -699,6 +706,77 @@ public class TcPalmAnalysis implements PlugIn {
      */
     Color getColour(int index) {
       return LutHelper.getColour(lut, index & 0xff);
+    }
+  }
+
+  /**
+   * Encapsulate the high resolution loop image.
+   */
+  private static class LoopImage {
+    private MemoryPeakResults results;
+    private TcPalmAnalysisSettings settings;
+    private ColourMap colourMap;
+    private LocalList<LocalList<PeakResult>> bursts;
+    private ImageJImagePeakResults image;
+
+    LoopImage setResults(MemoryPeakResults results) {
+      this.results = results;
+      bursts = new LocalList<>();
+      return this;
+    }
+
+    LoopImage setSettings(TcPalmAnalysisSettings settings) {
+      this.settings = settings;
+      return this;
+    }
+
+    LoopImage setColourMap(ColourMap colourMap) {
+      this.colourMap = colourMap;
+      return this;
+    }
+
+    LoopImage setBursts(LocalList<LocalList<PeakResult>> bursts) {
+      this.bursts = bursts;
+      return this;
+    }
+
+    /**
+     * Update the image.
+     *
+     * @return the loop image
+     */
+    LoopImage update() {
+      final ResultsImageSettings imageSettings = settings.getLoopImageSettings();
+      if (imageSettings.getImageTypeValue() <= 0) {
+        // No loop image
+        if (image != null) {
+          image.getImagePlus().close();
+        }
+        return this;
+      }
+      final Rectangle bounds = results.getBounds(true);
+      final PeakResultsList resultsList = new PeakResultsList();
+      resultsList.copySettings(results);
+      // In case the selection is empty
+      bounds.width = Math.max(bounds.width, 1);
+      bounds.height = Math.max(bounds.height, 1);
+      resultsList.setBounds(bounds);
+      resultsList.setName(TITLE + " Loop");
+      // Compute the scale to generate a fixed size loop image
+      final ResultsImageSettings.Builder builder = imageSettings.toBuilder();
+      builder.setScale(settings.getLoopSize() / Math.max(bounds.width, bounds.height));
+      ResultsManager.addImageResults(resultsList, builder.build(), bounds, 0);
+      resultsList.begin();
+      resultsList.addAll(results.toArray());
+      resultsList.end();
+      image = (ImageJImagePeakResults) resultsList.getOutput(0);
+      final ImagePlus imp = image.getImagePlus();
+      if (TextUtils.isNotEmpty(image.getLutName())) {
+        imp.setLut(LutHelper.createLut(LutColour.forName(image.getLutName()), true));
+      }
+
+      runBurstOverlay(bursts, image, colourMap);
+      return this;
     }
   }
 
@@ -787,6 +865,9 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add monitor for the selection of clusters in the current clusters table
     clusterSelectedListener = new ClusterSelectedListener();
+
+    // Initialise the loop view
+    loopImage = new LoopImage().setSettings(previous.settings).setColourMap(colourMap);
 
     // Allow analysis of the activations-vs-time data for start/end of bursts based on a
     // steepness parameter: local window size (sec) and activation rate (per sec)
@@ -895,12 +976,43 @@ public class TcPalmAnalysis implements PlugIn {
     // gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
     gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
     gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
+    gd.addAndGetButton("Loop settings", this::showLoopDialog);
     gd.addDialogListener(this::readDialog);
+    gd.hideCancelButton();
+    gd.setOKLabel("Close");
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Show a dialog to change the loop settings.
+   *
+   * @param event the event
+   */
+  private void showLoopDialog(@SuppressWarnings("unused") ActionEvent event) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    // Require results settings to use the standard ResultsManager image options
+    final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
+    tmp.setResultsImageSettings(settings.getLoopImageSettingsBuilder());
+    final int flags = ResultsManager.FLAG_NO_SECTION_HEADER;
+    gd.addSlider("Loop_size", 128, 1024, settings.getLoopSize());
+    ResultsManager.addImageResultsOptions(gd, tmp, flags);
+    gd.addHelp(HelpUrls.getUrl("tc-palm-analysis"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+    // Restrict to a sensible range
+    settings.setLoopSize(MathUtils.clip(32, 4096, (int) gd.getNextNumber()));
+    final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
+    // Note: The initial none option was removed
+    newImgSettings.setImageTypeValue(gd.getNextChoiceIndex());
+    settings.setLoopImageSettings(newImgSettings);
+    SettingsManager.writeSettings(settings);
+    addWork(previous.roi);
   }
 
   private boolean readDialog(GenericDialog gd, @SuppressWarnings("unused") AWTEvent e) {
@@ -962,6 +1074,9 @@ public class TcPalmAnalysis implements PlugIn {
           // Signal this was interrupted while waiting.
           // Note: This currently does not matter and is ignored.
           Thread.currentThread().interrupt();
+        } catch (final RuntimeException ex) {
+          ImageJPluginLoggerHelper.getLogger(TcPalmAnalysis.class).log(Level.WARNING,
+              "Failed to execute work", ex);
         } finally {
           previous = current;
           lock.release();
@@ -977,14 +1092,16 @@ public class TcPalmAnalysis implements PlugIn {
    * @param current the current work
    */
   private void runAnalysis(Work last, Work current) {
+    final TcPalmAnalysisSettings lastSettings = last.settings;
+    final TcPalmAnalysisSettings settings = current.settings;
+
     final boolean selectionChanged = selectionChanged(last, current);
 
     if (selectionChanged) {
       runSelection(current);
+    } else if (loopSettingsChanged(lastSettings, settings)) {
+      loopImage.setSettings(settings).update();
     }
-
-    final TcPalmAnalysisSettings lastSettings = last.settings;
-    final TcPalmAnalysisSettings settings = current.settings;
 
     final boolean plotChanged = selectionChanged || plotSettingsChanged(lastSettings, settings);
 
@@ -1001,7 +1118,9 @@ public class TcPalmAnalysis implements PlugIn {
       runBurstOverlay(createBurstLocalisations());
     }
 
-    runBurstPlotSelection(bursts);
+    if (plotChanged || analysisChanged) {
+      runBurstPlotSelection(bursts);
+    }
   }
 
   private static boolean selectionChanged(Work first, Work other) {
@@ -1014,6 +1133,13 @@ public class TcPalmAnalysis implements PlugIn {
     boolean result = (first.getIntersects() != second.getIntersects());
     result = result || (first.getMinFrame() != second.getMinFrame());
     result = result || (first.getMaxFrame() != second.getMaxFrame());
+    return result;
+  }
+
+  private static boolean loopSettingsChanged(TcPalmAnalysisSettings first,
+      TcPalmAnalysisSettings second) {
+    boolean result = (first.getLoopSize() != second.getLoopSize());
+    result = result || !first.getLoopImageSettings().equals(second.getLoopImageSettings());
     return result;
   }
 
@@ -1044,7 +1170,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     final Roi roi = work.roi;
     final TcPalmAnalysisSettings settings = work.settings;
-    Rectangle bounds = roi.getBounds();
+    final Rectangle bounds = roi.getBounds();
     final double x = image.inverseMapX(bounds.x);
     final double y = image.inverseMapY(bounds.y);
     final double w = image.inverseMapX(bounds.x + bounds.width) - x;
@@ -1101,7 +1227,7 @@ public class TcPalmAnalysis implements PlugIn {
     clustersTable.selectedAction = clusterSelectedListener;
 
     // Extract the localisations into a loop view
-    MemoryPeakResults subset = new MemoryPeakResults();
+    final MemoryPeakResults subset = new MemoryPeakResults();
     subset.copySettings(results);
     clusters.forEach(c -> {
       c.results.forEach(peak -> {
@@ -1110,28 +1236,9 @@ public class TcPalmAnalysis implements PlugIn {
         }
       });
     });
-    // Recompute bounds
+    // Clear bounds to force a recompute
     subset.setBounds(null);
-    bounds = subset.getBounds(true);
-    final PeakResultsList resultsList = new PeakResultsList();
-    resultsList.copySettings(results);
-    // In case the selection is empty
-    bounds.width = Math.max(bounds.width, 1);
-    bounds.height = Math.max(bounds.height, 1);
-    resultsList.setBounds(bounds);
-    resultsList.setName(TITLE + " Loop");
-    // Compute the scale to generate a fixed size loop image
-    ResultsImageSettings.Builder builder = settings.getResultsImageSettings().toBuilder();
-    builder.setScale(512.0 / Math.max(bounds.width, bounds.height));
-    ResultsManager.addImageResults(resultsList, builder.build(), bounds, 0);
-    resultsList.begin();
-    resultsList.addAll(subset.toArray());
-    resultsList.end();
-    loopImage = (ImageJImagePeakResults) resultsList.getOutput(0);
-    final ImagePlus imp = loopImage.getImagePlus();
-    if (TextUtils.isNotEmpty(loopImage.getLutName())) {
-      imp.setLut(LutHelper.createLut(LutColour.forName(loopImage.getLutName()), true));
-    }
+    loopImage.setSettings(settings).setResults(subset).update();
   }
 
   /**
@@ -1177,7 +1284,7 @@ public class TcPalmAnalysis implements PlugIn {
           new ClusterDataTableModelFrame(new ClusterDataTableModel());
       frame.setTitle(TITLE + " Current Clusters");
       if (parent != null) {
-        Point p = parent.getLocation();
+        final Point p = parent.getLocation();
         p.y += parent.getHeight();
         frame.setLocation(p);
       }
@@ -1419,14 +1526,9 @@ public class TcPalmAnalysis implements PlugIn {
    * @param bursts the bursts
    */
   private void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts) {
-    if (bursts.isEmpty()) {
-      image.getImagePlus().setOverlay(null);
-      loopImage.getImagePlus().setOverlay(null);
-      return;
-    }
     // Overlay the clusters on the image.
-    runBurstOverlay(bursts, image);
-    runBurstOverlay(bursts, loopImage);
+    runBurstOverlay(bursts, image, colourMap);
+    loopImage.setBursts(bursts).update();
 
     // Add to an activation bursts (clusters) table
     final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
@@ -1440,9 +1542,14 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param bursts the bursts
    * @param image the image
+   * @param colourMap the colour map
    */
-  private void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts,
-      ImageJImagePeakResults image) {
+  private static void runBurstOverlay(LocalList<LocalList<PeakResult>> bursts,
+      ImageJImagePeakResults image, ColourMap colourMap) {
+    if (bursts.isEmpty()) {
+      image.getImagePlus().setOverlay(null);
+      return;
+    }
     final Overlay overlay = new Overlay();
     for (int i = 0; i < bursts.size(); i++) {
       final LocalList<PeakResult> results = bursts.unsafeGet(i);

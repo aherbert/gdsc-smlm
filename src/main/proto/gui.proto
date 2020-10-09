@@ -699,4 +699,6 @@ message TcPalmAnalysisSettings {
   bool group_singles = 9;
   int32 dark_time_tolerance = 10;
   int32 min_cluster_size = 11;
+  int32 loop_size = 12;
+  ResultsImageSettings loop_image_settings = 13;
 }
