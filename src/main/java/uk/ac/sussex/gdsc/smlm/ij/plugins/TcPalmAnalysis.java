@@ -973,7 +973,6 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
     gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
-    // gd.addSlider("Rate_window", 0, 100, settings.getRateWindow());
     gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
     gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
     gd.addAndGetButton("Loop settings", this::showLoopDialog);
@@ -1021,7 +1020,6 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setMaxFrame((int) gd.getNextNumber());
     settings.setFixedTimeAxis(gd.getNextBoolean());
     settings.setTimeInSeconds(gd.getNextBoolean());
-    // settings.setRateWindow((int) gd.getNextNumber());
     settings.setDarkTimeTolerance((int) gd.getNextNumber());
     settings.setMinClusterSize((int) gd.getNextNumber());
     addWork(previous.roi);
@@ -1147,7 +1145,6 @@ public class TcPalmAnalysis implements PlugIn {
       TcPalmAnalysisSettings second) {
     boolean result = (first.getTimeInSeconds() != second.getTimeInSeconds());
     result = result || (first.getFixedTimeAxis() != second.getFixedTimeAxis());
-    // result = result || (first.getRateWindow() != second.getRateWindow());
     return result;
   }
 
@@ -1363,36 +1360,6 @@ public class TcPalmAnalysis implements PlugIn {
     final PlotWindow pw2 = ImageJUtils.display(title, plot2, ImageJUtils.NO_TO_FRONT, wo);
 
     activationsPlotData = new ActivationsPlotData(plot2, timeConverter, data);
-
-    // // Plot the gradient (activation rate) using a rolling window
-    // final PolynomialSplineFunction fun = new LinearInterpolator()
-    // .interpolate(SimpleArrayUtils.toDouble(data.frames2),
-    // SimpleArrayUtils.toDouble(data.counts2));
-    // title = TITLE + " Activation rate vs Time";
-    // final Plot plot4 = new Plot(title, timeLabel, "Activation rate (count/frame)");
-    // // Clip to the range
-    // final int min = data.frames2[0];
-    // final int max = data.frames2[data.frames2.length - 1];
-    // final float[] frames3 = SimpleArrayUtils.newArray(max - min + 1, min, 1f);
-    // // Configurable window. This works even for a window of zero. Here interpolation is not
-    // // necessary but we leave it in place for simplicity.
-    // final int window = settings.getRateWindow();
-    // final float[] values = new float[frames3.length];
-    // for (int i = 0; i < values.length; i++) {
-    // final int low = Math.max(min, (int) frames3[i] - window - 1);
-    // final int high = Math.min(max, (int) frames3[i] + window);
-    // values[i] = (float) ((fun.value(high) - fun.value(low)) / (high - low));
-    // }
-    // // Note the initial frame will be an added frame with a count of zero. If the window is zero
-    // // then this will be NaN. Replace this with no rate.
-    // if (window == 0) {
-    // values[0] = 0;
-    // }
-    // plot4.addPoints(timeConverter.apply(frames3), values, Plot.LINE);
-    // if (settings.getFixedTimeAxis()) {
-    // plot4.setLimits(timeScale * (minT - 1), timeScale * (maxT + 1), Double.NaN, Double.NaN);
-    // }
-    // ImageJUtils.display(title, plot4, wo);
 
     // Simple tile one window above the other only if both are new.
     if (wo.size() == 2) {
