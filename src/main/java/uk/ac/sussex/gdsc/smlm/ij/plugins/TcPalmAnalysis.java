@@ -34,6 +34,7 @@ import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.gui.PointRoi;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
@@ -62,6 +63,7 @@ import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -81,6 +83,9 @@ import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicate;
 import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
+import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
+import uk.ac.sussex.gdsc.core.math.hull.Hull;
+import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -227,6 +232,7 @@ public class TcPalmAnalysis implements PlugIn {
     int start;
     int end;
     double[] xyz;
+    Hull2d hull;
 
     ClusterData(PeakResult result) {
       id = result.getId();
@@ -371,6 +377,18 @@ public class TcPalmAnalysis implements PlugIn {
         xyz = this.xyz = tmp;
       }
       return xyz;
+    }
+
+    Hull2d getHull() {
+      Hull2d hull = this.hull;
+      if (hull == null) {
+        final Hull.Builder builder = ConvexHull2d.newBuilder();
+        results.forEach(r -> {
+          builder.add(r.getXPosition(), r.getYPosition());
+        });
+        hull = this.hull = (Hull2d) builder.build();
+      }
+      return hull;
     }
   }
 
@@ -712,31 +730,49 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Encapsulate the high resolution loop image.
    */
-  private static class LoopImage {
+  private static class LoopImage implements Consumer<List<ClusterData>> {
+    private static final int STATE_IMAGE = 0;
+    private static final int STATE_OVERLAY = 1;
+    private static final int STATE_ROI = 2;
+    private static final int STATE_DONE = 3;
+
+    private int state;
     private MemoryPeakResults results;
     private TcPalmAnalysisSettings settings;
     private ColourMap colourMap;
     private LocalList<LocalList<PeakResult>> bursts;
+    private List<ClusterData> clusters;
     private ImageJImagePeakResults image;
 
     LoopImage setResults(MemoryPeakResults results) {
       this.results = results;
-      bursts = new LocalList<>();
+      setBursts(new LocalList<>());
+      state = STATE_IMAGE;
       return this;
     }
 
     LoopImage setSettings(TcPalmAnalysisSettings settings) {
       this.settings = settings;
+      state = STATE_IMAGE;
       return this;
     }
 
     LoopImage setColourMap(ColourMap colourMap) {
       this.colourMap = colourMap;
+      state = STATE_IMAGE;
       return this;
     }
 
     LoopImage setBursts(LocalList<LocalList<PeakResult>> bursts) {
       this.bursts = bursts;
+      setClusters(Collections.emptyList());
+      state = Math.min(state, STATE_OVERLAY);
+      return this;
+    }
+
+    LoopImage setClusters(List<ClusterData> clusters) {
+      this.clusters = clusters;
+      state = Math.min(state, STATE_ROI);
       return this;
     }
 
@@ -746,14 +782,30 @@ public class TcPalmAnalysis implements PlugIn {
      * @return the loop image
      */
     LoopImage update() {
-      final ResultsImageSettings imageSettings = settings.getLoopImageSettings();
-      if (imageSettings.getImageTypeValue() <= 0) {
-        // No loop image
-        if (image != null) {
-          image.getImagePlus().close();
+      if (state <= STATE_IMAGE) {
+        // Allow for no loop image
+        final ResultsImageSettings imageSettings = settings.getLoopImageSettings();
+        if (imageSettings.getImageTypeValue() <= 0) {
+          // No loop image
+          if (image != null) {
+            image.getImagePlus().close();
+            image = null;
+          }
+          return this;
         }
-        return this;
+        drawImage(imageSettings);
       }
+      if (state <= STATE_OVERLAY) {
+        drawOverlay();
+      }
+      if (state <= STATE_ROI) {
+        drawRoi();
+      }
+      state = STATE_DONE;
+      return this;
+    }
+
+    private void drawImage(final ResultsImageSettings imageSettings) {
       final Rectangle bounds = results.getBounds(true);
       final PeakResultsList resultsList = new PeakResultsList();
       resultsList.copySettings(results);
@@ -774,9 +826,36 @@ public class TcPalmAnalysis implements PlugIn {
       if (TextUtils.isNotEmpty(image.getLutName())) {
         imp.setLut(LutHelper.createLut(LutColour.forName(image.getLutName()), true));
       }
+    }
 
+    private void drawOverlay() {
       runBurstOverlay(bursts, image, colourMap);
-      return this;
+    }
+
+    private void drawRoi() {
+      // We are expecting only a single cluster
+      Hull2d hull;
+      if (clusters.isEmpty() || (hull = clusters.get(0).getHull()) == null) {
+        image.getImagePlus().deleteRoi();
+        return;
+      }
+      final double[][] vertices = hull.getVertices();
+      final int np = vertices.length;
+      final float[] xp = new float[np];
+      final float[] yp = new float[np];
+      for (int j = 0; j < np; j++) {
+        final double[] r = vertices[j];
+        xp[j] = image.mapX((float)r[0]);
+        yp[j] = image.mapY((float)r[1]);
+      }
+      final PolygonRoi roi = new PolygonRoi(xp, yp, Roi.POLYGON);
+      image.getImagePlus().setRoi(roi);
+    }
+
+    @Override
+    public void accept(List<ClusterData> clusters) {
+      setClusters(clusters);
+      update();
     }
   }
 
@@ -876,13 +955,17 @@ public class TcPalmAnalysis implements PlugIn {
     } finally {
       Roi.removeRoiListener(roiListener);
       // Remove the action from the single instance of the current clusters table
-      final ClusterDataTableModelFrame frame = currentGroupsTable.get();
-      if (frame != null) {
-        frame.selectedAction = null;
-      }
+      removeListener(currentGroupsTable.get());
+      removeListener(currentClustersTable.get());
       executor.shutdown();
       instanceLock.release();
       SettingsManager.writeSettings(settings);
+    }
+  }
+
+  private static void removeListener(ClusterDataTableModelFrame frame) {
+    if (frame != null) {
+      frame.selectedAction = null;
     }
   }
 
@@ -1280,6 +1363,7 @@ public class TcPalmAnalysis implements PlugIn {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel());
       frame.setTitle(TITLE + " Current Clusters");
+      frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       if (parent != null) {
         final Point p = parent.getLocation();
         p.y += parent.getHeight();
@@ -1501,6 +1585,7 @@ public class TcPalmAnalysis implements PlugIn {
     final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
     bursts.forEach(list -> clusters.add(new ClusterData(clusters.size() + 1, list)));
     final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
+    clustersTable.selectedAction = loopImage::accept;
     clustersTable.getModel().setData(clusters);
   }
 
