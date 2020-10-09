@@ -519,7 +519,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     @Override
     public int getColumnCount() {
-      // ID X Y Z Size Start End
+      // ID X Y Z Size Start Duration
       return 7;
     }
 
@@ -533,7 +533,7 @@ public class TcPalmAnalysis implements PlugIn {
         case 3: return "Z";
         case 4: return "Size";
         case 5: return "Start";
-        case 6: return "End";
+        case 6: return "Duration";
         // @formatter:on
         default:
           throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
@@ -563,7 +563,7 @@ public class TcPalmAnalysis implements PlugIn {
         case 3: return c.getXyz()[2];
         case 4: return c.results.size();
         case 5: return c.start;
-        case 6: return c.end;
+        case 6: return c.end - c.start + 1;
         // @formatter:on
         default:
           throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
