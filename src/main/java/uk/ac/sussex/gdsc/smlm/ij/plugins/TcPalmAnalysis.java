@@ -106,9 +106,14 @@ public class TcPalmAnalysis implements PlugIn {
   /** The plugin title. */
   private static final String TITLE = "TC PALM Analysis";
 
+  /** Text window showing the current localisation groups. */
+  private static AtomicReference<ClusterDataTableModelFrame> currentGroupsTable =
+      new AtomicReference<>();
+
   /** Text window showing the current clusters. */
   private static AtomicReference<ClusterDataTableModelFrame> currentClustersTable =
       new AtomicReference<>();
+
   /**
    * The instance lock used to prevent multiple instances running. This is because the output
    * results table and plots are reused and multiple instances cannot share the same output.
@@ -227,7 +232,26 @@ public class TcPalmAnalysis implements PlugIn {
       results.add(result);
     }
 
+    ClusterData(int id, List<PeakResult> list) {
+      this.id = id;
+      results = new LocalList<>(list);
+      results.sort((p1, p2) -> Integer.compare(p1.getFrame(), p2.getFrame()));
+      PeakResult result = results.unsafeGet(0);
+      x = width = result.getXPosition();
+      y = height = result.getYPosition();
+      final int size = results.size();
+      for (int i = 1; i < size; i++) {
+        updateBounds(results.unsafeGet(i));
+      }
+      finish();
+    }
+
     void add(PeakResult result) {
+      updateBounds(result);
+      results.add(result);
+    }
+
+    void updateBounds(PeakResult result) {
       float value = result.getXPosition();
       if (value < x) {
         x = value;
@@ -240,10 +264,12 @@ public class TcPalmAnalysis implements PlugIn {
       } else if (value > height) {
         height = value;
       }
-      results.add(result);
     }
 
-    void finalise() {
+    /**
+     * Called when no more results will be added to the cluster data.
+     */
+    void finish() {
       results.trimToSize();
       // Set dimensions non-zero so the rectangle contains/intersects methods do not ignore
       // the zero sized cluster.
@@ -621,7 +647,7 @@ public class TcPalmAnalysis implements PlugIn {
       final JScrollPane scroll = new JScrollPane(table);
 
       final ScreenDimensionHelper helper = new ScreenDimensionHelper();
-      helper.setMinHeight(300);
+      helper.setMinHeight(250);
       helper.setup(scroll);
 
       add(scroll);
@@ -769,7 +795,7 @@ public class TcPalmAnalysis implements PlugIn {
     } finally {
       Roi.removeRoiListener(roiListener);
       // Remove the action from the single instance of the current clusters table
-      final ClusterDataTableModelFrame frame = currentClustersTable.get();
+      final ClusterDataTableModelFrame frame = currentGroupsTable.get();
       if (frame != null) {
         frame.selectedAction = null;
       }
@@ -828,7 +854,7 @@ public class TcPalmAnalysis implements PlugIn {
     clusterData.add(data);
     // Remove the first null object and compact the frame arrays
     clusterData.remove(0);
-    clusterData.forEach(ClusterData::finalise);
+    clusterData.forEach(ClusterData::finish);
     // Sort by time then cluster ID
     clusterData.sort((c1, c2) -> {
       final int result = Integer.compare(c1.start, c2.start);
@@ -1068,7 +1094,7 @@ public class TcPalmAnalysis implements PlugIn {
     countData = new CumulativeCountData(frames, counts);
 
     // Add a table of the clusters.
-    final ClusterDataTableModelFrame clustersTable = createClustersTable();
+    final ClusterDataTableModelFrame clustersTable = createGroupsTable();
     clustersTable.getModel().setData(clusters);
 
     // Allow a configurable action that accepts the array of ClusterData that is selected.
@@ -1125,12 +1151,12 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Creates the table for the current clusters.
+   * Creates the table for the current groups.
    *
    * @return the text window
    */
-  private static ClusterDataTableModelFrame createClustersTable() {
-    return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
+  private static ClusterDataTableModelFrame createGroupsTable() {
+    return ConcurrencyUtils.refresh(currentGroupsTable, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel());
       frame.setTitle(TITLE + " Current Localisation Groups");
@@ -1140,10 +1166,31 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
+   * Creates the table for the current clusters and position it below the parent when created.
+   *
+   * @param parent the parent
+   * @return the text window
+   */
+  private static ClusterDataTableModelFrame createClustersTable(ClusterDataTableModelFrame parent) {
+    return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
+      final ClusterDataTableModelFrame frame =
+          new ClusterDataTableModelFrame(new ClusterDataTableModel());
+      frame.setTitle(TITLE + " Current Clusters");
+      if (parent != null) {
+        Point p = parent.getLocation();
+        p.y += parent.getHeight();
+        frame.setLocation(p);
+      }
+      frame.setVisible(true);
+      return frame;
+    });
+  }
+
+  /**
    * Clear the manually created selection from the current clusters table.
    */
   private static void clearClustersTableSelection() {
-    final ClusterDataTableModelFrame frame = currentClustersTable.get();
+    final ClusterDataTableModelFrame frame = currentGroupsTable.get();
     if (frame != null) {
       frame.table.clearSelection();
     }
@@ -1296,8 +1343,8 @@ public class TcPalmAnalysis implements PlugIn {
   private LocalList<LocalList<PeakResult>> createBurstLocalisations() {
     final LocalList<LocalList<PeakResult>> burstsLocalisations = new LocalList<>();
     final LocalList<int[]> bursts = this.bursts;
-    // TODO: Make more efficient. Order results by frame and burst by frame
-    // Do a single sweep over the results and extract the peaks within the burst ranges.
+    // TODO: Make more efficient. Order clusters by frame and burst by frame
+    // Do a single sweep over the clusters and extract the peaks within the burst ranges.
     bursts.forEach(range -> {
       final int min = range[0];
       final int max = range[1];
@@ -1380,6 +1427,12 @@ public class TcPalmAnalysis implements PlugIn {
     // Overlay the clusters on the image.
     runBurstOverlay(bursts, image);
     runBurstOverlay(bursts, loopImage);
+
+    // Add to an activation bursts (clusters) table
+    final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
+    bursts.forEach(list -> clusters.add(new ClusterData(clusters.size(), list)));
+    final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
+    clustersTable.getModel().setData(clusters);
   }
 
   /**
