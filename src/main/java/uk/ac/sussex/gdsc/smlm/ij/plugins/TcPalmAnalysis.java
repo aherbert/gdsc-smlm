@@ -41,6 +41,7 @@ import ij.plugin.PlugIn;
 import ij.process.LUT;
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -72,6 +73,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
@@ -666,12 +668,34 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
+   * A simple renderer to colour the ID column.
+   */
+  private static class ForegroundColouredTableCellRenderer extends DefaultTableCellRenderer {
+    private static final long serialVersionUID = 1L;
+
+    ForegroundColouredTableCellRenderer(Color colour) {
+      setBackground(colour);
+      setHorizontalAlignment(SwingConstants.TRAILING);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+      // Ignore selected status of the row. The cell will paint the same if selected or not.
+      return super.getTableCellRendererComponent(table, value, false, hasFocus, row, column);
+    }
+  }
+
+  /**
    * Class to display ClusterDataTableModel in a JTable.
    */
   private static class ClusterDataJTable extends JTable {
     private static final long serialVersionUID = 1L;
 
     private boolean sized;
+
+    /** The colour map used for the ID column. */
+    ColourMap colourMap;
 
     /**
      * Create a new instance.
@@ -695,6 +719,20 @@ public class TcPalmAnalysis implements PlugIn {
       setDefaultRenderer(Double.class, renderer);
       setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       setAutoCreateRowSorter(true);
+    }
+
+    @Override
+    public TableCellRenderer getCellRenderer(int row, int column) {
+      // Override to selectively colour the first column (using the cluster ID)
+      if (column == 0 && colourMap != null) {
+        final IntUnaryOperator map = getRowIndexToModelFunction();
+        final ClusterDataTableModel model = (ClusterDataTableModel) dataModel;
+        final List<ClusterData> data = model.data;
+        ClusterData c = data.get(map.applyAsInt(row));
+        Color colour = colourMap.getColour(c.id - 1);
+        return new ForegroundColouredTableCellRenderer(colour);
+      }
+      return super.getCellRenderer(row, column);
     }
 
     @Override
@@ -734,14 +772,19 @@ public class TcPalmAnalysis implements PlugIn {
 
       final LocalList<ClusterData> rvTmp = new LocalList<>(1 + (iMax - iMin));
 
-      final RowSorter<?> sorter = getRowSorter();
-      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
+      final IntUnaryOperator map = getRowIndexToModelFunction();
       for (int i = iMin; i <= iMax; i++) {
         if (selectionModel.isSelectedIndex(i)) {
           rvTmp.add(data.get(map.applyAsInt(i)));
         }
       }
       return rvTmp;
+    }
+
+    IntUnaryOperator getRowIndexToModelFunction() {
+      final RowSorter<?> sorter = getRowSorter();
+      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
+      return map;
     }
   }
 
@@ -1697,7 +1740,8 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Select the activation burst localisations on the super-resolution image.
+   * Select the activation burst localisations on the super-resolution image. Create a table of the
+   * clusters.
    *
    * @param bursts the bursts
    */
@@ -1714,6 +1758,7 @@ public class TcPalmAnalysis implements PlugIn {
       loopImage.accept(clusterData);
       runClusterPlotSelection(clusterData);
     };
+    clustersTable.table.colourMap = this.colourMap;
     clustersTable.getModel().setData(clusters, dataCalibration);
   }
 
