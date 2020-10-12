@@ -66,13 +66,17 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.lang3.ArrayUtils;
+import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -95,9 +99,15 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.core.utils.function.FloatUnaryOperator;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
+import uk.ac.sussex.gdsc.smlm.ij.gui.TableColumnAdjuster;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -134,6 +144,9 @@ public class TcPalmAnalysis implements PlugIn {
 
   /** The results. */
   private MemoryPeakResults results;
+
+  /** The data calibration. */
+  private DataCalibration dataCalibration;
 
   /** The image. */
   private ImageJImagePeakResults image;
@@ -233,6 +246,7 @@ public class TcPalmAnalysis implements PlugIn {
     int end;
     double[] xyz;
     Hull2d hull;
+    double area = -1;
 
     ClusterData(PeakResult result) {
       id = result.getId();
@@ -390,6 +404,15 @@ public class TcPalmAnalysis implements PlugIn {
       }
       return hull;
     }
+
+    double getArea() {
+      double area = this.area;
+      if (area < 0) {
+        final Hull2d hull = getHull();
+        area = this.area = hull == null ? 0 : hull.getArea();
+      }
+      return area;
+    }
   }
 
   /**
@@ -509,21 +532,65 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
+   * Class to calibration data from frames and pixels to a time unit and distance unit.
+   */
+  private static class DataCalibration {
+    static final DataCalibration DEFAULT = new DataCalibration();
+    final TypeConverter<TimeUnit> timeConverter;
+    final TypeConverter<DistanceUnit> distanceConverter;
+
+    DataCalibration() {
+      timeConverter = new IdentityTypeConverter<>(TimeUnit.TIME_UNIT_NA);
+      distanceConverter = new IdentityTypeConverter<>(DistanceUnit.DISTANCE_UNIT_NA);
+    }
+
+    DataCalibration(Calibration cal) {
+      timeConverter = CalibrationHelper.getTimeConverterSafe(cal, TimeUnit.SECOND);
+      distanceConverter = CalibrationHelper.getDistanceConverterSafe(cal, DistanceUnit.UM);
+    }
+
+    String getTimeUnitName() {
+      return UnitHelper.getShortName(timeConverter.to());
+    }
+
+    String getDistanceUnitName() {
+      return UnitHelper.getShortName(distanceConverter.to());
+    }
+
+    double convertArea(double area) {
+      return distanceConverter.convert(distanceConverter.convert(area));
+    }
+  }
+
+  /**
    * Class to show the ClusterData in a JTable.
    */
   private static class ClusterDataTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
+    /** Flag to indicate the cluster statistics (area, density) should be displayed. */
+    private final boolean withStatistics;
+
     List<ClusterData> data = Collections.emptyList();
+    DataCalibration calibration = DataCalibration.DEFAULT;
+
+    ClusterDataTableModel(boolean withStatistics) {
+      this.withStatistics = withStatistics;
+    }
 
     /**
      * Sets the data.
      *
      * @param data the new data
+     * @param calibration the calibration
      */
-    void setData(LocalList<ClusterData> data) {
+    void setData(LocalList<ClusterData> data, DataCalibration calibration) {
       // Only update if the data is different.
       // This expects the selected clusters to not change very often.
+      if (this.calibration != calibration) {
+        this.calibration = calibration;
+        fireTableStructureChanged();
+      }
       if (!data.equals(this.data)) {
         this.data = data;
         fireTableDataChanged();
@@ -537,8 +604,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     @Override
     public int getColumnCount() {
-      // ID X Y Z Size Start Duration
-      return 7;
+      return withStatistics ? 11 : 9;
     }
 
     @Override
@@ -551,7 +617,11 @@ public class TcPalmAnalysis implements PlugIn {
         case 3: return "Z";
         case 4: return "Size";
         case 5: return "Start";
-        case 6: return "Duration";
+        case 6: return "End";
+        case 7: return "Duration";
+        case 8: return "Duration (" + calibration.getTimeUnitName() + ")";
+        case 9: return "Area (" + calibration.getDistanceUnitName() + "^2)";
+        case 10: return "Density (" + calibration.getDistanceUnitName() + "^-2)";
         // @formatter:on
         default:
           throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
@@ -564,6 +634,9 @@ public class TcPalmAnalysis implements PlugIn {
         case 1:
         case 2:
         case 3:
+        case 8:
+        case 9:
+        case 10:
           return Double.class;
         default:
           return Integer.class;
@@ -581,7 +654,11 @@ public class TcPalmAnalysis implements PlugIn {
         case 3: return c.getXyz()[2];
         case 4: return c.results.size();
         case 5: return c.start;
-        case 6: return c.end - c.start + 1;
+        case 6: return c.end;
+        case 7: return c.end - c.start + 1;
+        case 8: return calibration.timeConverter.convert(c.end - c.start + 1);
+        case 9: return calibration.convertArea(c.getArea());
+        case 10: return c.results.size() / calibration.convertArea(c.getArea());
         // @formatter:on
         default:
           throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
@@ -594,6 +671,8 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static class ClusterDataJTable extends JTable {
     private static final long serialVersionUID = 1L;
+
+    private boolean sized;
 
     /**
      * Create a new instance.
@@ -617,6 +696,23 @@ public class TcPalmAnalysis implements PlugIn {
       setDefaultRenderer(Double.class, renderer);
       setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       setAutoCreateRowSorter(true);
+    }
+
+    @Override
+    public void tableChanged(final TableModelEvent event) {
+      super.tableChanged(event);
+
+      if (!sized && event.getFirstRow() >= 0) {
+        sized = true;
+        // The whole thing changed so resize the columns
+        SwingUtilities.invokeLater(() -> {
+          final TableColumnAdjuster tca = new TableColumnAdjuster(this, 6, false);
+          // Only process 10 rows (5 at start, 5 at end).
+          tca.setMaxRows(5);
+          tca.setOnlyAdjustLarger(true);
+          tca.adjustColumns();
+        });
+      }
     }
 
     /**
@@ -845,8 +941,8 @@ public class TcPalmAnalysis implements PlugIn {
       final float[] yp = new float[np];
       for (int j = 0; j < np; j++) {
         final double[] r = vertices[j];
-        xp[j] = image.mapX((float)r[0]);
-        yp[j] = image.mapY((float)r[1]);
+        xp[j] = image.mapX((float) r[0]);
+        yp[j] = image.mapY((float) r[1]);
       }
       final PolygonRoi roi = new PolygonRoi(xp, yp, Roi.POLYGON);
       image.getImagePlus().setRoi(roi);
@@ -895,6 +991,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Allocate singles an id for analysis.
     results = results.copyAndAssignZeroIds();
+    dataCalibration = new DataCalibration(results.getCalibration());
 
     // Show a super-resolution image where clusters can be selected.
     final Rectangle bounds = results.getBounds();
@@ -1301,7 +1398,7 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Add a table of the clusters.
     final ClusterDataTableModelFrame clustersTable = createGroupsTable();
-    clustersTable.getModel().setData(clusters);
+    clustersTable.getModel().setData(clusters, dataCalibration);
 
     // Allow a configurable action that accepts the array of ClusterData that is selected.
     clustersTable.selectedAction = clusterSelectedListener;
@@ -1345,7 +1442,7 @@ public class TcPalmAnalysis implements PlugIn {
   private static ClusterDataTableModelFrame createGroupsTable() {
     return ConcurrencyUtils.refresh(currentGroupsTable, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
-          new ClusterDataTableModelFrame(new ClusterDataTableModel());
+          new ClusterDataTableModelFrame(new ClusterDataTableModel(false));
       frame.setTitle(TITLE + " Current Localisation Groups");
       frame.setVisible(true);
       return frame;
@@ -1361,7 +1458,7 @@ public class TcPalmAnalysis implements PlugIn {
   private static ClusterDataTableModelFrame createClustersTable(ClusterDataTableModelFrame parent) {
     return ConcurrencyUtils.refresh(currentClustersTable, JFrame::isShowing, () -> {
       final ClusterDataTableModelFrame frame =
-          new ClusterDataTableModelFrame(new ClusterDataTableModel());
+          new ClusterDataTableModelFrame(new ClusterDataTableModel(true));
       frame.setTitle(TITLE + " Current Clusters");
       frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       if (parent != null) {
@@ -1586,7 +1683,7 @@ public class TcPalmAnalysis implements PlugIn {
     bursts.forEach(list -> clusters.add(new ClusterData(clusters.size() + 1, list)));
     final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
     clustersTable.selectedAction = loopImage::accept;
-    clustersTable.getModel().setData(clusters);
+    clustersTable.getModel().setData(clusters, dataCalibration);
   }
 
   /**
