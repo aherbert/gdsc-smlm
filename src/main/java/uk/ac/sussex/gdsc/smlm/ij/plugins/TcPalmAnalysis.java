@@ -72,7 +72,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
@@ -1642,8 +1641,8 @@ public class TcPalmAnalysis implements PlugIn {
       for (int i = 0; i < bursts.size(); i++) {
         // Find the start and end points on the plotted data.
         final int[] range = bursts.unsafeGet(i);
-        final int is = ArrayUtils.indexOf(plotFrames, range[0]);
-        final int ie = ArrayUtils.indexOf(plotFrames, range[1]);
+        final int is = Arrays.binarySearch(plotFrames, range[0]);
+        final int ie = Arrays.binarySearch(plotFrames, range[1]);
 
         // Pad the line with zeros at the end
         tmpFrames.resetQuick();
@@ -1669,6 +1668,35 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
+   * Select the data for the first cluster in the provided list on the cumulative activations plot.
+   *
+   * @param clusters the clusters
+   */
+  private void runClusterPlotSelection(List<ClusterData> clusters) {
+    final Plot plot = activationsPlotData.plot;
+    // We are expecting only a single cluster
+    if (clusters.isEmpty()) {
+      plot.getImagePlus().deleteRoi();
+      return;
+    }
+    final int[] plotFrames = activationsPlotData.data.plotFrames;
+    final int[] plotCounts = activationsPlotData.data.plotCounts;
+    final ClusterData data = clusters.get(0);
+    final int is = Arrays.binarySearch(plotFrames, data.start);
+    final int ie = Arrays.binarySearch(plotFrames, data.end);
+    final int low = plotCounts[is];
+    final int high = plotCounts[ie];
+    // Pad slightly. This handles the case where start == end to create a width and height
+    final float[] x =
+        activationsPlotData.timeConverter.apply(new float[] {data.start - 1, data.end + 1});
+    final double x1 = plot.scaleXtoPxl(x[0]);
+    final double x2 = plot.scaleXtoPxl(x[1]);
+    final double y1 = plot.scaleYtoPxl(high + 1);
+    final double y2 = plot.scaleYtoPxl(low - 1);
+    plot.getImagePlus().setRoi(new Roi(x1, y1, x2 - x1, y2 - y1));
+  }
+
+  /**
    * Select the activation burst localisations on the super-resolution image.
    *
    * @param bursts the bursts
@@ -1682,7 +1710,10 @@ public class TcPalmAnalysis implements PlugIn {
     final LocalList<ClusterData> clusters = new LocalList<>(bursts.size());
     bursts.forEach(list -> clusters.add(new ClusterData(clusters.size() + 1, list)));
     final ClusterDataTableModelFrame clustersTable = createClustersTable(currentGroupsTable.get());
-    clustersTable.selectedAction = loopImage::accept;
+    clustersTable.selectedAction = clusterData -> {
+      loopImage.accept(clusterData);
+      runClusterPlotSelection(clusterData);
+    };
     clustersTable.getModel().setData(clusters, dataCalibration);
   }
 
