@@ -38,6 +38,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.RoiManager;
 import ij.process.LUT;
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -115,6 +116,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
+import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
@@ -132,6 +134,10 @@ public class TcPalmAnalysis implements PlugIn {
 
   /** Text window showing the current clusters. */
   private static AtomicReference<ClusterDataTableModelFrame> currentClustersTable =
+      new AtomicReference<>();
+
+  /** Text window showing the clusters from all ROIs in the ROI Manager. */
+  private static AtomicReference<ClusterDataTableModelFrame> allClustersTable =
       new AtomicReference<>();
 
   /**
@@ -237,7 +243,7 @@ public class TcPalmAnalysis implements PlugIn {
    * Store data on each cluster.
    */
   private static class ClusterData {
-    final int id;
+    int id;
     LocalList<PeakResult> results;
     float x;
     float y;
@@ -428,33 +434,38 @@ public class TcPalmAnalysis implements PlugIn {
     /** The cumulative counts padded for plotting. */
     final int[] plotCounts;
 
-    CumulativeCountData(int[] frames, int[] counts) {
+    CumulativeCountData(int[] frames, int[] counts, boolean createPlotData) {
       this.frames = frames;
-      this.counts = counts.clone();
+      this.counts = counts;
 
       // Make counts cumulative
       for (int i = 1; i < counts.length; i++) {
         counts[i] += counts[i - 1];
       }
 
-      // Expand the total activations with extra frames to allow large spans to plot as horizontal
-      final TIntArrayList tmpFrames = new TIntArrayList(frames.length);
-      final TIntArrayList tmpCounts = new TIntArrayList(frames.length);
+      if (createPlotData) {
+        // Expand the total activations with extra frames to allow large spans to plot as horizontal
+        final TIntArrayList tmpFrames = new TIntArrayList(frames.length);
+        final TIntArrayList tmpCounts = new TIntArrayList(frames.length);
 
-      int previousT = Integer.MIN_VALUE;
-      int previousC = 0;
-      for (int i = 0; i < frames.length; i++) {
-        if (frames[i] > previousT + 1) {
-          tmpFrames.add(frames[i] - 1);
+        int previousT = Integer.MIN_VALUE;
+        int previousC = 0;
+        for (int i = 0; i < frames.length; i++) {
+          if (frames[i] > previousT + 1) {
+            tmpFrames.add(frames[i] - 1);
+            tmpCounts.add(previousC);
+          }
+          previousT = frames[i];
+          previousC = counts[i];
+          tmpFrames.add(previousT);
           tmpCounts.add(previousC);
         }
-        previousT = frames[i];
-        previousC = counts[i];
-        tmpFrames.add(previousT);
-        tmpCounts.add(previousC);
+        plotFrames = tmpFrames.toArray();
+        plotCounts = tmpCounts.toArray();
+      } else {
+        plotFrames = null;
+        plotCounts = null;
       }
-      plotFrames = tmpFrames.toArray();
-      plotCounts = tmpCounts.toArray();
     }
   }
 
@@ -585,7 +596,7 @@ public class TcPalmAnalysis implements PlugIn {
      * @param data the new data
      * @param calibration the calibration
      */
-    void setData(LocalList<ClusterData> data, DataCalibration calibration) {
+    void setData(List<ClusterData> data, DataCalibration calibration) {
       // Only update if the data is different.
       // This expects the selected clusters to not change very often.
       if (this.calibration != calibration) {
@@ -728,8 +739,8 @@ public class TcPalmAnalysis implements PlugIn {
         final IntUnaryOperator map = getRowIndexToModelFunction();
         final ClusterDataTableModel model = (ClusterDataTableModel) dataModel;
         final List<ClusterData> data = model.data;
-        ClusterData c = data.get(map.applyAsInt(row));
-        Color colour = colourMap.getColour(c.id - 1);
+        final ClusterData c = data.get(map.applyAsInt(row));
+        final Color colour = colourMap.getColour(c.id - 1);
         return new ForegroundColouredTableCellRenderer(colour);
       }
       return super.getCellRenderer(row, column);
@@ -1198,6 +1209,7 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
     gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
     gd.addAndGetButton("Loop settings", this::showLoopDialog);
+    gd.addAndGetButton("Analyse ROIs", this::analyseRois);
     gd.addDialogListener(this::readDialog);
     gd.hideCancelButton();
     gd.setOKLabel("Close");
@@ -1213,7 +1225,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param event the event
    */
-  private void showLoopDialog(@SuppressWarnings("unused") ActionEvent event) {
+  private void showLoopDialog(ActionEvent event) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
@@ -1334,8 +1346,8 @@ public class TcPalmAnalysis implements PlugIn {
 
     if (analysisChanged) {
       clearClustersTableSelection();
-      runBurstAnalysis(settings);
-      runBurstOverlay(createBurstLocalisations());
+      bursts = runBurstAnalysis(settings, countData);
+      runBurstOverlay(createBurstLocalisations(clusters, bursts));
     }
 
     if (plotChanged || analysisChanged) {
@@ -1389,40 +1401,10 @@ public class TcPalmAnalysis implements PlugIn {
 
     final Roi roi = work.roi;
     final TcPalmAnalysisSettings settings = work.settings;
-    final Rectangle bounds = roi.getBounds();
-    final double x = image.inverseMapX(bounds.x);
-    final double y = image.inverseMapY(bounds.y);
-    final double w = image.inverseMapX(bounds.x + bounds.width) - x;
-    final double h = image.inverseMapY(bounds.y + bounds.height) - y;
-    final Rectangle2D scaledBounds = new Rectangle2D.Double(x, y, w, h);
-
-    // Identify all clusters using a custom filter. Filter on time first as this is simple.
-    BiPredicate<ClusterData, Rectangle2D> test = null;
-    if (settings.getMinFrame() > minT) {
-      final int min = settings.getMinFrame();
-      test = (c, r) -> c.start >= min;
-    }
-    if (settings.getMaxFrame() < maxT) {
-      final int max = settings.getMaxFrame();
-      test = and(test, (c, r) -> c.end <= max);
-    }
-    // Add square bounds check
-    test = and(test, settings.getIntersects() ? ClusterData::intersects : ClusterData::isWithin);
-
-    // - If non-square ROI:
-    // -- Map cluster coordinates back to image bounds
-    // -- Check if the cluster is inside the ROI using a CoordinatePredicate
-    if (roi.getType() != Roi.RECTANGLE || roi.getCornerDiameter() != 0) {
-      final CoordinatePredicate pred = CoordinatePredicateUtils.createContainsPredicate(roi);
-      if (settings.getIntersects()) {
-        test = and(test, (c, r) -> c.intersects(pred, image::mapX, image::mapY));
-      } else {
-        test = and(test, (c, r) -> c.isWithin(pred, image::mapX, image::mapY));
-      }
-    }
+    final Rectangle2D scaledBounds = createScaledBounds(roi);
+    final BiPredicate<ClusterData, Rectangle2D> filter = createSelectionFilter(roi, settings);
 
     clusters = new LocalList<>();
-    final BiPredicate<ClusterData, Rectangle2D> filter = test;
     clusterData.forEach(c -> {
       if (filter.test(c, scaledBounds)) {
         clusters.add(c);
@@ -1430,13 +1412,7 @@ public class TcPalmAnalysis implements PlugIn {
     });
 
     // Build total activations data
-    final TIntIntHashMap all = new TIntIntHashMap(maxT - minT + 1);
-    clusters.forEach(c -> c.results.forEach(peak -> all.adjustOrPutValue(peak.getFrame(), 1, 1)));
-    final int[] frames = all.keys();
-    final int[] counts = all.values();
-    SortUtils.sortData(counts, frames, true, false);
-
-    countData = new CumulativeCountData(frames, counts);
+    countData = createCumulativeCountData(clusters, true);
 
     // Add a table of the clusters.
     final ClusterDataTableModelFrame clustersTable = createGroupsTable();
@@ -1461,6 +1437,58 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
+   * Creates the scaled bounds.
+   *
+   * @param roi the roi from the super-resolution image
+   * @return the bounds scaled to the original data
+   */
+  private Rectangle2D createScaledBounds(final Roi roi) {
+    final Rectangle bounds = roi.getBounds();
+    final double x = image.inverseMapX(bounds.x);
+    final double y = image.inverseMapY(bounds.y);
+    final double w = image.inverseMapX(bounds.x + bounds.width) - x;
+    final double h = image.inverseMapY(bounds.y + bounds.height) - y;
+    return new Rectangle2D.Double(x, y, w, h);
+  }
+
+  /**
+   * Creates the selection filter to identify all cluster groups using a custom filter.
+   *
+   * @param roi the roi
+   * @param settings the settings
+   * @return the bi predicate
+   */
+  private BiPredicate<ClusterData, Rectangle2D> createSelectionFilter(final Roi roi,
+      final TcPalmAnalysisSettings settings) {
+    // Filter on time first as this is simple.
+    BiPredicate<ClusterData, Rectangle2D> test = null;
+    if (settings.getMinFrame() > minT) {
+      final int min = settings.getMinFrame();
+      test = (c, r) -> c.start >= min;
+    }
+    if (settings.getMaxFrame() < maxT) {
+      final int max = settings.getMaxFrame();
+      test = and(test, (c, r) -> c.end <= max);
+    }
+    // Add square bounds check
+    test = and(test, settings.getIntersects() ? ClusterData::intersects : ClusterData::isWithin);
+
+    // - If non-square ROI:
+    // -- Map cluster coordinates back to image bounds
+    // -- Check if the cluster is inside the ROI using a CoordinatePredicate
+    if (roi.getType() != Roi.RECTANGLE || roi.getCornerDiameter() != 0) {
+      final CoordinatePredicate pred = CoordinatePredicateUtils.createContainsPredicate(roi);
+      if (settings.getIntersects()) {
+        test = and(test, (c, r) -> c.intersects(pred, image::mapX, image::mapY));
+      } else {
+        test = and(test, (c, r) -> c.isWithin(pred, image::mapX, image::mapY));
+      }
+    }
+
+    return test;
+  }
+
+  /**
    * Create a combined {@code AND} predicate. If the first predicate is null the second is returned.
    *
    * @param <T> the generic type
@@ -1474,6 +1502,22 @@ public class TcPalmAnalysis implements PlugIn {
       return second;
     }
     return (T t, U u) -> first.test(t, u) && second.test(t, u);
+  }
+
+  /**
+   * Creates the cumulative count data.
+   *
+   * @param createPlotData set to true to create the plot data arrays
+   * @return the cumulative count data
+   */
+  private CumulativeCountData createCumulativeCountData(LocalList<ClusterData> clusters,
+      boolean createPlotData) {
+    final TIntIntHashMap all = new TIntIntHashMap(maxT - minT + 1);
+    clusters.forEach(c -> c.results.forEach(peak -> all.adjustOrPutValue(peak.getFrame(), 1, 1)));
+    final int[] frames = all.keys();
+    final int[] counts = all.values();
+    SortUtils.sortData(counts, frames, true, false);
+    return new CumulativeCountData(frames, counts, createPlotData);
   }
 
   /**
@@ -1508,6 +1552,21 @@ public class TcPalmAnalysis implements PlugIn {
         p.y += parent.getHeight();
         frame.setLocation(p);
       }
+      frame.setVisible(true);
+      return frame;
+    });
+  }
+
+  /**
+   * Creates the table for the clusters from batch analysis of all ROIs in the ROI manager.
+   *
+   * @return the text window
+   */
+  private static ClusterDataTableModelFrame createAllClustersTable() {
+    return ConcurrencyUtils.refresh(allClustersTable, JFrame::isShowing, () -> {
+      final ClusterDataTableModelFrame frame =
+          new ClusterDataTableModelFrame(new ClusterDataTableModel(true));
+      frame.setTitle(TITLE + " All Clusters");
       frame.setVisible(true);
       return frame;
     });
@@ -1598,9 +1657,9 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param settings the settings
    */
-  private void runBurstAnalysis(TcPalmAnalysisSettings settings) {
+  private static LocalList<int[]> runBurstAnalysis(TcPalmAnalysisSettings settings,
+      CumulativeCountData data) {
     final LocalList<int[]> bursts = new LocalList<>();
-    final CumulativeCountData data = this.countData;
     final int[] frames = data.frames;
     final int[] counts = data.counts;
 
@@ -1629,17 +1688,19 @@ public class TcPalmAnalysis implements PlugIn {
       }
     }
 
-    this.bursts = bursts;
+    return bursts;
   }
 
   /**
    * Creates the burst localisations using the ranges of the current bursts.
    *
+   * @param clusters the clusters
+   * @param bursts the bursts
    * @return the burst localisations
    */
-  private LocalList<LocalList<PeakResult>> createBurstLocalisations() {
+  private static LocalList<LocalList<PeakResult>>
+      createBurstLocalisations(LocalList<ClusterData> clusters, LocalList<int[]> bursts) {
     final LocalList<LocalList<PeakResult>> burstsLocalisations = new LocalList<>();
-    final LocalList<int[]> bursts = this.bursts;
     // TODO: Make more efficient. Order clusters by frame and burst by frame
     // Do a single sweep over the clusters and extract the peaks within the burst ranges.
     bursts.forEach(range -> {
@@ -1795,5 +1856,64 @@ public class TcPalmAnalysis implements PlugIn {
       overlay.add(roi);
     }
     image.getImagePlus().setOverlay(overlay);
+  }
+
+  /**
+   * Analyses all the ROIs in the ROI manager.
+   *
+   * @param event the event
+   */
+  private void analyseRois(ActionEvent event) {
+    final RoiManager manager = RoiManager.getInstance();
+    if (manager == null) {
+      IJ.error(TITLE, "ROI manager is not open");
+      return;
+    }
+    final List<Roi> rois = Arrays.asList(manager.getRoisAsArray());
+    if (rois.isEmpty()) {
+      IJ.error(TITLE, "No ROIs");
+      return;
+    }
+    // For each ROI:
+    // - Extract the current groups
+    // - Build the cumulative count plot
+    // - Identify the bursts
+    // - Extract ClusterData for each burst
+    final TcPalmAnalysisSettings settings = this.settings.build();
+    final LocalList<ClusterData> allClusters = rois.parallelStream().map(roi -> {
+      final Rectangle2D scaledBounds = createScaledBounds(roi);
+      final BiPredicate<ClusterData, Rectangle2D> filter = createSelectionFilter(roi, settings);
+
+      // Filter all cluster groups
+      final LocalList<ClusterData> clusters = new LocalList<>();
+      clusterData.forEach(c -> {
+        if (filter.test(c, scaledBounds)) {
+          clusters.add(c);
+        }
+      });
+
+      // Extract activation bursts
+      final CumulativeCountData countData = createCumulativeCountData(clusters, false);
+      final LocalList<int[]> bursts = runBurstAnalysis(settings, countData);
+      final LocalList<LocalList<PeakResult>> burstLocalisations =
+          createBurstLocalisations(clusters, bursts);
+      clusters.clear();
+      burstLocalisations.forEach(list -> {
+        final ClusterData d = new ClusterData(clusters.size() + 1, list);
+        d.getArea();
+        clusters.add(d);
+      });
+      return clusters;
+    }).collect(LocalList::new, LocalList::addAll, LocalList::addAll);
+
+    // Reorder
+    final Counter count = new Counter();
+    allClusters.forEach(c -> c.id = count.incrementAndGet());
+
+    // Display in a table
+    final ClusterDataTableModelFrame frame = createAllClustersTable();
+    frame.getModel().setData(allClusters, dataCalibration);
+
+    // TODO: Show histogram of cluster size/duration
   }
 }
