@@ -1919,7 +1919,7 @@ public class TcPalmAnalysis implements PlugIn {
     frame.getModel().setData(allClusters, dataCalibration);
 
     // Show histogram of cluster size/duration
-    reportAnalysis(allClusters);
+    reportAnalysis(allClusters, dataCalibration);
 
     // Save clusters to memory
     final Trace[] traces = allClusters.stream().map(c -> {
@@ -1937,12 +1937,15 @@ public class TcPalmAnalysis implements PlugIn {
    * Report statistics on the analysis results.
    *
    * @param clusters the clusters
+   * @param calibration the data calibration
    */
-  private static void reportAnalysis(LocalList<ClusterData> clusters) {
+  private static void reportAnalysis(LocalList<ClusterData> clusters, DataCalibration calibration) {
     final WindowOrganiser wo = new WindowOrganiser();
     plotHistogram(wo, clusters, "Size", c -> c.results.size());
-    plotHistogram(wo, clusters, "Duration", ClusterData::getDuration);
-    plotHistogram(wo, clusters, "Area", ClusterData::getArea);
+    plotHistogram(wo, clusters, "Duration (" + calibration.getTimeUnitName() + ")",
+        c -> calibration.timeConverter.convert(c.getDuration()));
+    plotHistogram(wo, clusters, "Area (" + calibration.getDistanceUnitName() + "^2)",
+        c -> calibration.convertArea(c.getArea()));
     wo.tile();
   }
 
