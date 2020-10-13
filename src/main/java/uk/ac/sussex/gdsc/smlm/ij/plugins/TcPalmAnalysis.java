@@ -445,11 +445,6 @@ public class TcPalmAnalysis implements PlugIn {
       this.frames = frames;
       this.counts = counts;
 
-      // Make counts cumulative
-      for (int i = 1; i < counts.length; i++) {
-        counts[i] += counts[i - 1];
-      }
-
       if (createPlotData) {
         // Expand the total activations with extra frames to allow large spans to plot as horizontal
         final TIntArrayList tmpFrames = new TIntArrayList(frames.length);
@@ -463,7 +458,7 @@ public class TcPalmAnalysis implements PlugIn {
             tmpCounts.add(previousC);
           }
           previousT = frames[i];
-          previousC = counts[i];
+          previousC += counts[i];
           tmpFrames.add(previousT);
           tmpCounts.add(previousC);
         }
