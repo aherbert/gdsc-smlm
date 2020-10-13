@@ -764,7 +764,7 @@ public class TcPalmAnalysis implements PlugIn {
     public void tableChanged(final TableModelEvent event) {
       super.tableChanged(event);
 
-      if (!sized && event.getFirstRow() >= 0) {
+      if (!sized && getModel().getRowCount() != 0) {
         sized = true;
         // The whole thing changed so resize the columns
         SwingUtilities.invokeLater(() -> {
@@ -1975,6 +1975,11 @@ public class TcPalmAnalysis implements PlugIn {
       IJ.error(TITLE, "No ROIs");
       return;
     }
+
+    // TODO - Add method to extract all ROIs and determine if any areas overlap.
+    // If true then list the overlapping ROIs to the ImageJ log and add option to
+    // allow the analysis to stop (this allow overlapping clusters from a clustering
+    // analysis to be used).
 
     // For each ROI:
     // - Extract the current groups
