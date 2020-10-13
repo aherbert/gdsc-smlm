@@ -2178,7 +2178,7 @@ Batch ROI Analysis
 
 The interactive analysis can be used to explore the data by moving an ROI around the super-resolution image. Each ROI can be added to the ``ImageJ`` ROI manager (using ``Ctrl+T``) so it can be revisited. Clicking the ROI in the ROI manager will re-apply the region to the image and the results are updated in real-time. The ``Dark time tolerance`` and ``Min cluster size`` parameters can be adjusted using multiple regions so that the parameters are suitable for analysis of all the regions.
 
-The ``Analyse ROIs`` button will perform analysis on each ROI from the ROI manager. The localisation groups are extracted and the clusters identified using the total activations against time profile. The entire set of clusters from all ROIs are recorded in an ``All Clusters`` table. Summary histograms of cluster size, duration and area are displayed. The localisations from the activation clusters are saved to memory using the same name as the input results set with the text ``TC PALM`` appended.
+The ``Analyse ROIs`` button will perform analysis on each ROI from the ROI manager. The localisation groups are extracted and the clusters identified using the total activations against time profile. The entire set of clusters from all ROIs are recorded in an ``All Clusters`` table. Summary histograms of cluster size, duration, area and density are displayed. The localisations from the activation clusters are saved to memory using the same name as the input results set with the text ``TC PALM`` appended.
 
 
 .. index:: ! Neighbour Analysis

@@ -65,10 +65,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.DoublePredicate;
 import java.util.function.IntUnaryOperator;
 import java.util.function.ToDoubleFunction;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
+import java.util.stream.DoubleStream;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -2044,11 +2046,16 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private static void reportAnalysis(LocalList<ClusterData> clusters, DataCalibration calibration) {
     final WindowOrganiser wo = new WindowOrganiser();
-    plotHistogram(wo, clusters, "Size", c -> c.results.size());
+    final Consumer<HistogramPlotBuilder> action = builder -> {
+      /* noop. */
+    };
+    plotHistogram(wo, clusters, "Size", c -> c.results.size(), null, action);
     plotHistogram(wo, clusters, "Duration (" + calibration.getTimeUnitName() + ")",
-        c -> calibration.timeConverter.convert(c.getDuration()));
+        c -> calibration.timeConverter.convert(c.getDuration()), null, action);
     plotHistogram(wo, clusters, "Area (" + calibration.getDistanceUnitName() + "^2)",
-        c -> calibration.convertArea(c.getArea()));
+        c -> calibration.convertArea(c.getArea()), null, action);
+    plotHistogram(wo, clusters, "Density (" + calibration.getDistanceUnitName() + "^-2)",
+        c -> c.results.size() / calibration.convertArea(c.getArea()), Double::isFinite, action);
     wo.tile();
   }
 
@@ -2059,11 +2066,20 @@ public class TcPalmAnalysis implements PlugIn {
    * @param clusters the clusters
    * @param name the name
    * @param function the function to extract the plotted statistic
+   * @param predicate the predicate to filter the stream of data
+   * @param action the action to use on the histogram plot (to set non-standard options)
    */
   private static void plotHistogram(WindowOrganiser wo, LocalList<ClusterData> clusters,
-      String name, ToDoubleFunction<ClusterData> function) {
+      String name, ToDoubleFunction<ClusterData> function, DoublePredicate predicate,
+      Consumer<HistogramPlotBuilder> action) {
     final StoredData data = new StoredData(clusters.size());
-    clusters.stream().mapToDouble(function).forEach(data::add);
-    new HistogramPlotBuilder(TITLE, data, name).show(wo);
+    DoubleStream stream = clusters.stream().mapToDouble(function);
+    if (predicate != null) {
+      stream = stream.filter(predicate);
+    }
+    stream.forEach(data::add);
+    final HistogramPlotBuilder builder = new HistogramPlotBuilder(TITLE, data, name);
+    action.accept(builder);
+    builder.show(wo);
   }
 }
