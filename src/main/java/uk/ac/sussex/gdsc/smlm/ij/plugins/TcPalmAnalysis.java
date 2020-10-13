@@ -2028,7 +2028,7 @@ public class TcPalmAnalysis implements PlugIn {
     }).toArray(Trace[]::new);
     TraceMolecules.saveResults(results, traces, "TC PALM");
 
-    IJ.showStatus("Analysed " + TextUtils.pleural(allClusters.size(), "cluster"));
+    IJ.showStatus(TITLE + ": " + TextUtils.pleural(allClusters.size(), "cluster"));
   }
 
   /**
