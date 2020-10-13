@@ -119,6 +119,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsList;
+import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
@@ -1876,6 +1877,7 @@ public class TcPalmAnalysis implements PlugIn {
       IJ.error(TITLE, "No ROIs");
       return;
     }
+
     // For each ROI:
     // - Extract the current groups
     // - Build the cumulative count plot
@@ -1918,6 +1920,17 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Show histogram of cluster size/duration
     reportAnalysis(allClusters);
+
+    // Save clusters to memory
+    final Trace[] traces = allClusters.stream().map(c -> {
+      final Trace t = new Trace();
+      t.setId(c.id);
+      c.results.forEach(t::add);
+      return t;
+    }).toArray(Trace[]::new);
+    TraceMolecules.saveResults(results, traces, "TC PALM");
+
+    IJ.showStatus("Analysed " + TextUtils.pleural(allClusters.size(), "cluster"));
   }
 
   /**
@@ -1926,13 +1939,21 @@ public class TcPalmAnalysis implements PlugIn {
    * @param clusters the clusters
    */
   private static void reportAnalysis(LocalList<ClusterData> clusters) {
-    WindowOrganiser wo = new WindowOrganiser();
+    final WindowOrganiser wo = new WindowOrganiser();
     plotHistogram(wo, clusters, "Size", c -> c.results.size());
     plotHistogram(wo, clusters, "Duration", ClusterData::getDuration);
     plotHistogram(wo, clusters, "Area", ClusterData::getArea);
     wo.tile();
   }
 
+  /**
+   * Plot a histogram of the extracted statistic.
+   *
+   * @param wo the window organiser
+   * @param clusters the clusters
+   * @param name the name
+   * @param function the function to extract the plotted statistic
+   */
   private static void plotHistogram(WindowOrganiser wo, LocalList<ClusterData> clusters,
       String name, ToDoubleFunction<ClusterData> function) {
     final StoredData data = new StoredData(clusters.size());
