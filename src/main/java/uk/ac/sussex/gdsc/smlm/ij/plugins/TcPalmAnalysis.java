@@ -1148,7 +1148,7 @@ public class TcPalmAnalysis implements PlugIn {
     dataCalibration = new DataCalibration(results.getCalibration());
 
     // Show a super-resolution image where clusters can be selected.
-    final Rectangle bounds = results.getBounds();
+    final Rectangle bounds = results.getBounds(true);
     final PeakResultsList resultsList = new PeakResultsList();
     resultsList.copySettings(results);
     ResultsManager.addImageResults(resultsList, settings.getResultsImageSettings(), bounds, 0);
