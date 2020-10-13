@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
+import java.util.function.ToDoubleFunction;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import javax.swing.JFrame;
@@ -79,6 +80,7 @@ import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -97,6 +99,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
+import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
@@ -420,6 +423,10 @@ public class TcPalmAnalysis implements PlugIn {
       }
       return area;
     }
+
+    int getDuration() {
+      return end - start + 1;
+    }
   }
 
   /**
@@ -667,8 +674,8 @@ public class TcPalmAnalysis implements PlugIn {
         case 4: return c.results.size();
         case 5: return c.start;
         case 6: return c.end;
-        case 7: return c.end - c.start + 1;
-        case 8: return calibration.timeConverter.convert(c.end - c.start + 1);
+        case 7: return c.getDuration();
+        case 8: return calibration.timeConverter.convert(c.getDuration());
         case 9: return calibration.convertArea(c.getArea());
         case 10: return c.results.size() / calibration.convertArea(c.getArea());
         // @formatter:on
@@ -1914,6 +1921,27 @@ public class TcPalmAnalysis implements PlugIn {
     final ClusterDataTableModelFrame frame = createAllClustersTable();
     frame.getModel().setData(allClusters, dataCalibration);
 
-    // TODO: Show histogram of cluster size/duration
+    // Show histogram of cluster size/duration
+    reportAnalysis(allClusters);
+  }
+
+  /**
+   * Report statistics on the analysis results.
+   *
+   * @param clusters the clusters
+   */
+  private static void reportAnalysis(LocalList<ClusterData> clusters) {
+    WindowOrganiser wo = new WindowOrganiser();
+    plotHistogram(wo, clusters, "Size", c -> c.results.size());
+    plotHistogram(wo, clusters, "Duration", ClusterData::getDuration);
+    plotHistogram(wo, clusters, "Area", ClusterData::getArea);
+    wo.tile();
+  }
+
+  private static void plotHistogram(WindowOrganiser wo, LocalList<ClusterData> clusters,
+      String name, ToDoubleFunction<ClusterData> function) {
+    final StoredData data = new StoredData(clusters.size());
+    clusters.stream().mapToDouble(function).forEach(data::add);
+    new HistogramPlotBuilder(TITLE, data, name).show(wo);
   }
 }
