@@ -47,9 +47,15 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -64,8 +70,12 @@ import java.util.function.ToDoubleFunction;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
@@ -94,6 +104,7 @@ import uk.ac.sussex.gdsc.core.ij.roi.CoordinatePredicateUtils;
 import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
 import uk.ac.sussex.gdsc.core.math.hull.Hull;
 import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
+import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -584,7 +595,7 @@ public class TcPalmAnalysis implements PlugIn {
     private static final long serialVersionUID = 1L;
 
     /** Flag to indicate the cluster statistics (area, density) should be displayed. */
-    private final boolean withStatistics;
+    final boolean withStatistics;
 
     List<ClusterData> data = Collections.emptyList();
     DataCalibration calibration = DataCalibration.DEFAULT;
@@ -805,11 +816,13 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Class to display ClusterDataTableModel in a window frame.
    */
-  private static class ClusterDataTableModelFrame extends JFrame {
+  private static class ClusterDataTableModelFrame extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
 
+    private JMenuItem fileSave;
     final ClusterDataJTable table;
     Consumer<List<ClusterData>> selectedAction;
+    private String saveName;
 
     /**
      * Create a new instance.
@@ -817,6 +830,10 @@ public class TcPalmAnalysis implements PlugIn {
      * @param model the model
      */
     ClusterDataTableModelFrame(ClusterDataTableModel model) {
+      if (model.withStatistics) {
+        setJMenuBar(createMenuBar());
+      }
+
       table = new ClusterDataJTable(model);
       final JScrollPane scroll = new JScrollPane(table);
 
@@ -849,6 +866,87 @@ public class TcPalmAnalysis implements PlugIn {
           selectedAction.accept(table.getSelectedData());
         }
       });
+    }
+
+    private JMenuBar createMenuBar() {
+      final JMenuBar menubar = new JMenuBar();
+      menubar.add(createFileMenu());
+      return menubar;
+    }
+
+    private JMenu createFileMenu() {
+      final JMenu menu = new JMenu("File");
+      menu.setMnemonic(KeyEvent.VK_F);
+      menu.add(fileSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+      return menu;
+    }
+
+    private JMenuItem add(String text, int mnemonic, String keyStroke) {
+      final JMenuItem item = new JMenuItem(text, mnemonic);
+      if (keyStroke != null) {
+        item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
+      }
+      item.addActionListener(this);
+      return item;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent event) {
+      final Object src = event.getSource();
+      if (src == fileSave) {
+        doFileSave();
+      }
+    }
+
+    private void doFileSave() {
+      final ClusterDataTableModel model = getModel();
+      if (model == null || model.getRowCount() == 0) {
+        return;
+      }
+      final String filename = ImageJUtils.getFilename("Results_set_name", saveName);
+      if (filename == null) {
+        return;
+      }
+      saveName = FileUtils.replaceExtension(filename, ".csv");
+      final String newLine = System.lineSeparator();
+      try (BufferedWriter out = Files.newBufferedWriter(Paths.get(saveName))) {
+        final StringBuilder sb = new StringBuilder();
+        // Use the same column names
+        for (int i = 0, cols = model.getColumnCount(); i < cols; i++) {
+          sb.append(model.getColumnName(i)).append(',');
+        }
+        write(newLine, out, sb);
+        // Return the same order as the table
+        final IntUnaryOperator map = table.getRowIndexToModelFunction();
+        for (int j = 0, rows = model.getRowCount(); j < rows; j++) {
+          final int row = map.applyAsInt(j);
+          for (int i = 0, cols = model.getColumnCount(); i < cols; i++) {
+            sb.append(model.getValueAt(row, i)).append(',');
+          }
+          write(newLine, out, sb);
+        }
+      } catch (final IOException e) {
+        // Let ImageJ display the exception
+        throw new RuntimeException(e);
+      }
+    }
+
+    /**
+     * Clips the last character from the StringBuilder then writes to the output with a newline.
+     * Used to output delimited text to file which has a trailing delimiter. Resets the length to
+     * zero for fresh usage.
+     *
+     * @param newLine the new line
+     * @param out the out
+     * @param sb the StringBuilder
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private static void write(final String newLine, BufferedWriter out, final StringBuilder sb)
+        throws IOException {
+      sb.setLength(sb.length() - 1);
+      sb.append(newLine);
+      out.write(sb.toString());
+      sb.setLength(0);
     }
 
     /**
