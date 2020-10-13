@@ -371,10 +371,10 @@ public class LoadLocalisations implements PlugIn {
             l.intensity = Float.parseFloat(fields[ii]);
           }
           if (isx >= 0) {
-            l.sy = l.sx = Integer.parseInt(fields[isx]);
+            l.sy = l.sx = Float.parseFloat(fields[isx]);
           }
           if (isy >= 0) {
-            l.sy = Integer.parseInt(fields[isy]);
+            l.sy = Float.parseFloat(fields[isy]);
           }
           if (ip >= 0) {
             l.precision = Float.parseFloat(fields[ip]);
@@ -384,7 +384,8 @@ public class LoadLocalisations implements PlugIn {
         } catch (final NumberFormatException | IndexOutOfBoundsException ex) {
           // Log the first error line.
           if (errors++ == 0) {
-            ImageJUtils.log("%s error on record %d: %s", TITLE, count, ex.getMessage());
+            ImageJUtils.log("%s error on record number %d: '%s'. %s: %s", TITLE, count, line,
+                ex.getClass().getSimpleName(), ex.getMessage());
           }
         }
       }
