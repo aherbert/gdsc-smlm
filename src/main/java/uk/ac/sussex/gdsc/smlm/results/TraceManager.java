@@ -644,8 +644,9 @@ public class TraceManager {
         final int traceId = (newId) ? ++id : trace.getId();
         trace.getPoints().forEach((PeakResultProcedure) result -> {
           results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(),
-              result.getOrigY(), result.getOrigValue(), 0, result.getNoise(),
-              result.getMeanIntensity(), result.getParameters(), null, 0, traceId));
+              result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
+              result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
+              result.getEndFrame(), traceId));
 
         });
       }
