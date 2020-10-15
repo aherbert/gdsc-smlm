@@ -107,6 +107,7 @@ import uk.ac.sussex.gdsc.core.math.hull.ConvexHull2d;
 import uk.ac.sussex.gdsc.core.math.hull.Hull;
 import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalCollectors;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -1972,16 +1973,24 @@ public class TcPalmAnalysis implements PlugIn {
       IJ.error(TITLE, "ROI manager is not open");
       return;
     }
-    final List<Roi> rois = Arrays.asList(manager.getRoisAsArray());
+    final LocalList<Roi> rois = Arrays.stream(manager.getRoisAsArray()).filter(Roi::isArea)
+        .collect(LocalCollectors.toLocalList());
     if (rois.isEmpty()) {
-      IJ.error(TITLE, "No ROIs");
+      IJ.error(TITLE, "No area ROIs");
       return;
     }
 
-    // TODO - Add method to extract all ROIs and determine if any areas overlap.
-    // If true then list the overlapping ROIs to the ImageJ log and add option to
-    // allow the analysis to stop (this allow overlapping clusters from a clustering
-    // analysis to be used).
+    // Check for overlaps.
+    if (anyOverlap(rois)) {
+      final GenericDialog gd = new GenericDialog(TITLE);
+      gd.addMessage(TextUtils.wrap("WARNING - Bounding rectangles of ROIs overlap. You can verify "
+          + "the ROIs on the image using the ROI manager 'Show all' function.", 80));
+      gd.setOKLabel("Continue");
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return;
+      }
+    }
 
     // For each ROI:
     // - Extract the current groups
@@ -2036,6 +2045,24 @@ public class TcPalmAnalysis implements PlugIn {
     TraceMolecules.saveResults(results, traces, "TC PALM");
 
     IJ.showStatus(TITLE + ": " + TextUtils.pleural(allClusters.size(), "cluster"));
+  }
+
+  /**
+   * Determine if any areas overlap. Uses only the bounding rectangles
+   *
+   * @param rois the rois
+   * @return true if an overlap exists
+   */
+  private static boolean anyOverlap(LocalList<Roi> rois) {
+    for (int i = 0; i < rois.size(); i++) {
+      final Rectangle2D.Double bounds = rois.get(i).getFloatBounds();
+      for (int j = i + 1; j < rois.size(); j++) {
+        if (bounds.intersects(rois.get(j).getFloatBounds())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
