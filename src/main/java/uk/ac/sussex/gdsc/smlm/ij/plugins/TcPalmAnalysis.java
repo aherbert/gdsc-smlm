@@ -1312,7 +1312,8 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
     gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
     gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
-    gd.addAndGetButton("Loop settings", this::showLoopDialog);
+    gd.addAndGetButton("Loop settings", this::showLoopSettingsDialog);
+    gd.addAndGetButton("Analysis settings", this::showAnalysisSettingsDialog);
     gd.addAndGetButton("Analyse ROIs", this::analyseRois);
     gd.addDialogListener(this::readDialog);
     gd.hideCancelButton();
@@ -1329,7 +1330,7 @@ public class TcPalmAnalysis implements PlugIn {
    *
    * @param event the event
    */
-  private void showLoopDialog(ActionEvent event) {
+  private void showLoopSettingsDialog(ActionEvent event) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     // Require results settings to use the standard ResultsManager image options
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
@@ -1350,6 +1351,28 @@ public class TcPalmAnalysis implements PlugIn {
     settings.setLoopImageSettings(newImgSettings);
     SettingsManager.writeSettings(settings);
     addWork(previous.roi);
+  }
+
+  /**
+   * Show a dialog to change the analysis settings.
+   *
+   * @param event the event
+   */
+  private void showAnalysisSettingsDialog(ActionEvent event) {
+    final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addCheckbox("Show_size_histogram", settings.getShowSizeHistogram());
+    gd.addCheckbox("Show_duration_histogram", settings.getShowDurationHistogram());
+    gd.addCheckbox("Show_area_histogram", settings.getShowAreaHistogram());
+    gd.addCheckbox("Show_density_histogram", settings.getShowDensityHistogram());
+    gd.addHelp(HelpUrls.getUrl("tc-palm-analysis"));
+    gd.showDialog();
+    if (gd.wasCanceled()) {
+      return;
+    }
+    settings.setShowSizeHistogram(gd.getNextBoolean());
+    settings.setShowDurationHistogram(gd.getNextBoolean());
+    settings.setShowAreaHistogram(gd.getNextBoolean());
+    settings.setShowDensityHistogram(gd.getNextBoolean());
   }
 
   private boolean readDialog(GenericDialog gd, @SuppressWarnings("unused") AWTEvent e) {
@@ -2033,7 +2056,7 @@ public class TcPalmAnalysis implements PlugIn {
     frame.getModel().setData(allClusters, dataCalibration);
 
     // Show histogram of cluster size/duration
-    reportAnalysis(allClusters, dataCalibration);
+    reportAnalysis(settings, allClusters, dataCalibration);
 
     // Save clusters to memory
     final Trace[] traces = allClusters.stream().map(c -> {
@@ -2068,20 +2091,26 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Report statistics on the analysis results.
    *
+   * @param settings the settings
    * @param clusters the clusters
    * @param calibration the data calibration
    */
-  private static void reportAnalysis(LocalList<ClusterData> clusters, DataCalibration calibration) {
+  private static void reportAnalysis(TcPalmAnalysisSettings settings,
+      LocalList<ClusterData> clusters, DataCalibration calibration) {
     final WindowOrganiser wo = new WindowOrganiser();
     final Consumer<HistogramPlotBuilder> action = builder -> {
       /* noop. */
     };
-    plotHistogram(wo, clusters, "Size", c -> c.results.size(), null, action);
-    plotHistogram(wo, clusters, "Duration (" + calibration.getTimeUnitName() + ")",
+    plotHistogram(settings.getShowSizeHistogram(), wo, clusters, "Size", c -> c.results.size(),
+        null, action);
+    plotHistogram(settings.getShowDurationHistogram(), wo, clusters,
+        "Duration (" + calibration.getTimeUnitName() + ")",
         c -> calibration.timeConverter.convert(c.getDuration()), null, action);
-    plotHistogram(wo, clusters, "Area (" + calibration.getDistanceUnitName() + "^2)",
+    plotHistogram(settings.getShowAreaHistogram(), wo, clusters,
+        "Area (" + calibration.getDistanceUnitName() + "^2)",
         c -> calibration.convertArea(c.getArea()), null, action);
-    plotHistogram(wo, clusters, "Density (" + calibration.getDistanceUnitName() + "^-2)",
+    plotHistogram(settings.getShowDensityHistogram(), wo, clusters,
+        "Density (" + calibration.getDistanceUnitName() + "^-2)",
         c -> c.results.size() / calibration.convertArea(c.getArea()), Double::isFinite, action);
     wo.tile();
   }
@@ -2096,9 +2125,12 @@ public class TcPalmAnalysis implements PlugIn {
    * @param predicate the predicate to filter the stream of data
    * @param action the action to use on the histogram plot (to set non-standard options)
    */
-  private static void plotHistogram(WindowOrganiser wo, LocalList<ClusterData> clusters,
-      String name, ToDoubleFunction<ClusterData> function, DoublePredicate predicate,
-      Consumer<HistogramPlotBuilder> action) {
+  private static void plotHistogram(boolean show, WindowOrganiser wo,
+      LocalList<ClusterData> clusters, String name, ToDoubleFunction<ClusterData> function,
+      DoublePredicate predicate, Consumer<HistogramPlotBuilder> action) {
+    if (!show) {
+      return;
+    }
     final StoredData data = new StoredData(clusters.size());
     DoubleStream stream = clusters.stream().mapToDouble(function);
     if (predicate != null) {

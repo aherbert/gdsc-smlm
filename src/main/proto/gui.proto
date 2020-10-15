@@ -701,4 +701,8 @@ message TcPalmAnalysisSettings {
   int32 min_cluster_size = 11;
   int32 loop_size = 12;
   ResultsImageSettings loop_image_settings = 13;
+  bool show_size_histogram = 14;
+  bool show_duration_histogram = 15;
+  bool show_area_histogram = 16;
+  bool show_density_histogram = 17;
 }
