@@ -45,6 +45,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.TextField;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -221,6 +222,12 @@ public class TcPalmAnalysis implements PlugIn {
   /** The colour map used to colour selected bursts. */
   private final ColourMap colourMap = new ColourMap();
 
+  /** The dark time tolerance text field. */
+  private TextField darkTimeToleranceTextField;
+
+  /** The min cluster size text field. */
+  private TextField minClusterSizeTextField;
+
   /**
    * Class to store the work.
    */
@@ -272,6 +279,7 @@ public class TcPalmAnalysis implements PlugIn {
     double[] xyz;
     Hull2d hull;
     double area = -1;
+    Roi sourceRoi;
 
     ClusterData(PeakResult result) {
       id = result.getId();
@@ -814,6 +822,12 @@ public class TcPalmAnalysis implements PlugIn {
       final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
       return map;
     }
+
+    IntUnaryOperator getModelIndexToRowFunction() {
+      final RowSorter<?> sorter = getRowSorter();
+      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToView;
+      return map;
+    }
   }
 
   /**
@@ -959,6 +973,25 @@ public class TcPalmAnalysis implements PlugIn {
      */
     ClusterDataTableModel getModel() {
       return (ClusterDataTableModel) table.getModel();
+    }
+
+    /**
+     * Select the cluster in the table that matches the given cluster data. The match uses the start
+     * and end points which distinguish clusters.
+     *
+     * @param clusterData the cluster data
+     */
+    void select(ClusterData clusterData) {
+      final ClusterDataTableModel model = getModel();
+      final int rows = model.data.size();
+      for (int i = 0; i < rows; i++) {
+        final ClusterData tmp = model.data.get(i);
+        if (tmp.start == clusterData.start && tmp.end == clusterData.end) {
+          final int index = table.getModelIndexToRowFunction().applyAsInt(i);
+          SwingUtilities.invokeLater(() -> table.setRowSelectionInterval(index, index));
+          return;
+        }
+      }
     }
   }
 
@@ -1178,7 +1211,8 @@ public class TcPalmAnalysis implements PlugIn {
     // the monostack is empty
     lock = new SoftLock();
     workQueue = new ConcurrentMonoStack<>();
-    previous = new Work(0, null, settings.build());
+    // Use the current ROI (which may remain from previous plugin execution)
+    previous = new Work(0, imp.getRoi(), settings.build());
     executor = Executors.newSingleThreadExecutor();
 
     // Create the bounds and activation times for each cluster
@@ -1211,6 +1245,7 @@ public class TcPalmAnalysis implements PlugIn {
       // Remove the action from the single instance of the current clusters table
       removeListener(currentGroupsTable.get());
       removeListener(currentClustersTable.get());
+      removeListener(allClustersTable.get());
       executor.shutdown();
       instanceLock.release();
       SettingsManager.writeSettings(settings);
@@ -1310,8 +1345,10 @@ public class TcPalmAnalysis implements PlugIn {
     gd.addSlider("Max_frame", minT, maxT, settings.getMaxFrame());
     gd.addCheckbox("Fixed_time_axis", settings.getFixedTimeAxis());
     gd.addCheckbox("Time_in_seconds", settings.getTimeInSeconds());
-    gd.addSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
-    gd.addSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
+    darkTimeToleranceTextField =
+        gd.addAndGetSlider("Dark_time_tolerance", 0, 100, settings.getDarkTimeTolerance());
+    minClusterSizeTextField =
+        gd.addAndGetSlider("Min_cluster_size", 0, 100, settings.getMinClusterSize());
     gd.addAndGetButton("Loop settings", this::showLoopSettingsDialog);
     gd.addAndGetButton("Analysis settings", this::showAnalysisSettingsDialog);
     gd.addAndGetButton("Analyse ROIs", this::analyseRois);
@@ -1388,16 +1425,35 @@ public class TcPalmAnalysis implements PlugIn {
   }
 
   /**
-   * Add work to the queue and submit a job to process the queue if one is not already running.
+   * Add work to the queue and submit a job to process the queue if one is not already running. This
+   * method has no action if the ROI is not an area or the flag to ignore analysis events is set.
    *
    * @param roi the roi
    */
   private void addWork(Roi roi) {
-    if (roi == null || !roi.isArea() || executor.isShutdown()) {
+    if (roi == null || !roi.isArea()) {
       return;
     }
-    workQueue
-        .insert(new Work(System.currentTimeMillis() + 100, (Roi) roi.clone(), settings.build()));
+    addWork(System.currentTimeMillis() + 100, roi, settings.build(), null);
+  }
+
+  /**
+   * Add work to the queue and submit a job to process the queue if one is not already running.
+   *
+   * <p>Optionally supply an action to perform after analysis. This will execute when no further
+   * work is queued.
+   *
+   * @param timestamp the timeout timestamp
+   * @param roi the roi
+   * @param settings the settings
+   * @param postAnalysisAction the post analysis action (can be null)
+   */
+  private void addWork(long timestamp, Roi roi, TcPalmAnalysisSettings settings,
+      Runnable postAnalysisAction) {
+    if (executor.isShutdown()) {
+      return;
+    }
+    workQueue.insert(new Work(timestamp, (Roi) roi.clone(), settings));
     if (lock.acquire()) {
       executor.submit(() -> {
         Work current = previous;
@@ -1428,6 +1484,11 @@ public class TcPalmAnalysis implements PlugIn {
               runAnalysis(current, next);
               current = next;
             }
+          }
+          if (postAnalysisAction != null) {
+            // Set the latest work so any post analysis action uses the most recent settings
+            previous = current;
+            postAnalysisAction.run();
           }
         } catch (final InterruptedException e) {
           // Signal this was interrupted while waiting.
@@ -1694,6 +1755,7 @@ public class TcPalmAnalysis implements PlugIn {
       final ClusterDataTableModelFrame frame =
           new ClusterDataTableModelFrame(new ClusterDataTableModel(true));
       frame.setTitle(TITLE + " All Clusters");
+      frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       frame.setVisible(true);
       return frame;
     });
@@ -2041,6 +2103,8 @@ public class TcPalmAnalysis implements PlugIn {
       clusters.clear();
       burstLocalisations.forEach(list -> {
         final ClusterData d = new ClusterData(clusters.size() + 1, list);
+        // Save this for analysis
+        d.sourceRoi = roi;
         d.getArea();
         clusters.add(d);
       });
@@ -2054,6 +2118,29 @@ public class TcPalmAnalysis implements PlugIn {
     // Display in a table
     final ClusterDataTableModelFrame frame = createAllClustersTable();
     frame.getModel().setData(allClusters, dataCalibration);
+
+    // Allow the results to be repeated
+    frame.selectedAction = clusters -> {
+      // Expecting a single cluster.
+      final ClusterData c = clusters.get(0);
+      // Push the correct ROI and settings to the analysis action.
+      // We do not directly update the ROI or dialog settings as
+      // these trigger events that are processed to add work with a delay.
+      // Updating them at the end should generate events that are
+      // ignored when finally executed as the ROI/settings should be the same.
+      addWork(0, c.sourceRoi, settings, () -> {
+        // When analysis has finished update the settings and image ROI.
+        image.getImagePlus().setRoi(c.sourceRoi);
+        darkTimeToleranceTextField.setText(Integer.toString(settings.getDarkTimeTolerance()));
+        minClusterSizeTextField.setText(Integer.toString(settings.getMinClusterSize()));
+        // When analysis has finished the cluster should be selected in the
+        // current clusters table.
+        final ClusterDataTableModelFrame currentClusters = currentClustersTable.get();
+        if (currentClusters != null) {
+          currentClusters.select(c);
+        }
+      });
+    };
 
     // Show histogram of cluster size/duration
     reportAnalysis(settings, allClusters, dataCalibration);

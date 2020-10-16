@@ -2182,6 +2182,8 @@ The ``Analysis settings`` button configures the output settings for the analysis
 
 For each ROi the localisation groups are extracted and the total activations against time profile is constructed. This is used to identify clusters using the ``Dark time tolerance`` and ``Min cluster size`` parameters. The entire set of clusters from all ROIs are recorded in an ``All Clusters`` table. Summary histograms of cluster size, duration, area and density can be displayed. The localisations from the activation clusters are saved to memory using the same name as the input results set with the text ``TC PALM`` appended.
 
+The ``All clusters`` table stores settings and ROI used to generate each result. Clicking a line in the table will repeat the analysis for the ROI with the saved settings. The ROI and settings will be applied to the super-resolution image and the plugin dialog.
+
 
 .. index:: ! Neighbour Analysis
 
