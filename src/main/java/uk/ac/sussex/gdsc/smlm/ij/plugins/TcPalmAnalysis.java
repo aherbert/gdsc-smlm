@@ -1397,6 +1397,7 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private void showAnalysisSettingsDialog(ActionEvent event) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+    gd.addCheckbox("Disable_overlap_check", settings.getDisableOverlapCheck());
     gd.addCheckbox("Show_size_histogram", settings.getShowSizeHistogram());
     gd.addCheckbox("Show_duration_histogram", settings.getShowDurationHistogram());
     gd.addCheckbox("Show_area_histogram", settings.getShowAreaHistogram());
@@ -1406,6 +1407,7 @@ public class TcPalmAnalysis implements PlugIn {
     if (gd.wasCanceled()) {
       return;
     }
+    settings.setDisableOverlapCheck(gd.getNextBoolean());
     settings.setShowSizeHistogram(gd.getNextBoolean());
     settings.setShowDurationHistogram(gd.getNextBoolean());
     settings.setShowAreaHistogram(gd.getNextBoolean());
@@ -2066,7 +2068,7 @@ public class TcPalmAnalysis implements PlugIn {
     }
 
     // Check for overlaps.
-    if (anyOverlap(rois)) {
+    if (!settings.getDisableOverlapCheck() && anyOverlap(rois)) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage(TextUtils.wrap("WARNING - Bounding rectangles of ROIs overlap. You can verify "
           + "the ROIs on the image using the ROI manager 'Show all' function.", 80));
