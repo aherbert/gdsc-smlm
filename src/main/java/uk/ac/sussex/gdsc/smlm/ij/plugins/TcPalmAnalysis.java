@@ -1100,9 +1100,14 @@ public class TcPalmAnalysis implements PlugIn {
       bounds.height = Math.max(bounds.height, 1);
       resultsList.setBounds(bounds);
       resultsList.setName(TITLE + " Loop");
-      // Compute the scale to generate a fixed size loop image
       final ResultsImageSettings.Builder builder = imageSettings.toBuilder();
-      builder.setScale(settings.getLoopSize() / Math.max(bounds.width, bounds.height));
+      if (settings.getLoopScale() > 0) {
+        // Fixed scale loop image
+        builder.setScale(settings.getLoopScale());
+      } else {
+        // Compute the scale to generate a fixed size loop image
+        builder.setScale(settings.getLoopSize() / Math.max(bounds.width, bounds.height));
+      }
       ResultsManager.addImageResults(resultsList, builder.build(), bounds, 0);
       resultsList.begin();
       resultsList.addAll(results.toArray());
@@ -1374,6 +1379,7 @@ public class TcPalmAnalysis implements PlugIn {
     tmp.setResultsImageSettings(settings.getLoopImageSettingsBuilder());
     final int flags = ResultsManager.FLAG_NO_SECTION_HEADER;
     gd.addSlider("Loop_size", 128, 1024, settings.getLoopSize());
+    gd.addNumericField("Loop_scale", settings.getLoopScale(), 2);
     ResultsManager.addImageResultsOptions(gd, tmp, flags);
     gd.addHelp(HelpUrls.getUrl("tc-palm-analysis"));
     gd.showDialog();
@@ -1382,6 +1388,7 @@ public class TcPalmAnalysis implements PlugIn {
     }
     // Restrict to a sensible range
     settings.setLoopSize(MathUtils.clip(32, 4096, (int) gd.getNextNumber()));
+    settings.setLoopScale(gd.getNextNumber());
     final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
     // Note: The initial none option was removed
     newImgSettings.setImageTypeValue(gd.getNextChoiceIndex());
@@ -1561,6 +1568,7 @@ public class TcPalmAnalysis implements PlugIn {
   private static boolean loopSettingsChanged(TcPalmAnalysisSettings first,
       TcPalmAnalysisSettings second) {
     boolean result = (first.getLoopSize() != second.getLoopSize());
+    result = result || first.getLoopScale() != second.getLoopScale();
     result = result || !first.getLoopImageSettings().equals(second.getLoopImageSettings());
     return result;
   }

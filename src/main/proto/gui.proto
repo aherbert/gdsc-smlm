@@ -709,4 +709,5 @@ message TcPalmAnalysisSettings {
   bool show_area_histogram = 16;
   bool show_density_histogram = 17;
   bool disable_overlap_check = 18;
+  double loop_scale = 19;
 }
