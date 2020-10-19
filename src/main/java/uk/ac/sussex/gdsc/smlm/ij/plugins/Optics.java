@@ -44,6 +44,7 @@ import ij.gui.Roi;
 import ij.gui.ShapeRoi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
+import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
 import ij.process.LUT;
 import ij.text.TextPanel;
@@ -2180,6 +2181,14 @@ public class Optics implements PlugIn {
         }
         result = false;
       }
+      // Only register a change from 'no save' to 'save'. This means setting to 'no save'
+      // leaves all the previous ROIs in the manager. This is a feature but could be changed
+      // in the future to clear the ROI manager.
+      if (current.getSaveOutlines() && !previous.getSaveOutlines()) {
+        // Remove the outline to force a redraw
+        outline = null;
+        result = false;
+      }
       if (current.getHullMode() != previous.getHullMode()) {
         outline = null;
         result = false;
@@ -2373,8 +2382,8 @@ public class Optics implements PlugIn {
       }
 
       // Note: If the image scale is set to zero then the image cache will be cleared and the image
-      // will be null.
-      // This will prevent computing an overlay even if the 'outline' setting is enabled.
+      // will be null. This will prevent computing an overlay even if the 'outline' setting is
+      // enabled.
 
       if (image != null) {
         final ImagePlus imp = image.getImagePlus();
@@ -2418,6 +2427,11 @@ public class Optics implements PlugIn {
               // Extract the hull of each cluster
               final Hull[] hulls =
                   clusteringResult.getHulls(settings.getHullMode(), settings.getDiggingThreshold());
+              final RoiManager manager =
+                  settings.getSaveOutlines() ? RoiManager.getRoiManager() : null;
+              if (manager != null) {
+                manager.reset();
+              }
               for (int c = 1; c <= max; c++) {
                 final Hull hull = hulls[c];
                 if (hull != null) {
@@ -2425,6 +2439,10 @@ public class Optics implements PlugIn {
                   roi.setStrokeColor(colors[map[c]]);
                   // TODO: Options to set a fill colour?
                   outline.add(roi);
+                  // TODO: In the case of OPTICS add only top level ROIs
+                  if (manager != null) {
+                    manager.add(roi, c);
+                  }
                 }
               }
             }
@@ -4282,9 +4300,11 @@ public class Optics implements PlugIn {
             final ExtendedGenericDialog egd =
                 new ExtendedGenericDialog(mode.toString() + " options");
             final int hullMode = inputSettings.getHullMode();
+            final boolean saveOutlines = inputSettings.getSaveOutlines();
             final double diggingThreshold = inputSettings.getDiggingThreshold();
             final String[] hullModes = SettingsManager.getNames((Object[]) HullMode.values());
             egd.addChoice("Hull_algorithm", hullModes, hullMode);
+            egd.addCheckbox("Save_to_ROI_manager", saveOutlines);
             egd.addMessage("For the digging concave hull algorithm");
             egd.addNumericField("Digging_threshold", diggingThreshold, 2);
             egd.setSilent(silent);
@@ -4293,10 +4313,12 @@ public class Optics implements PlugIn {
               return false;
             }
             inputSettings.setHullMode(egd.getNextChoiceIndex());
+            inputSettings.setSaveOutlines(egd.getNextBoolean());
             inputSettings.setDiggingThreshold(
                 ValidationUtils.checkStrictlyPositive(egd.getNextNumber(), "Digging_threshold"));
             // Return true if new settings
             return inputSettings.getHullMode() != hullMode
+                || inputSettings.getSaveOutlines() != saveOutlines
                 || (hullMode == HullMode.DIGGING_CONCAVE_HULL.ordinal()
                     && inputSettings.getDiggingThreshold() != diggingThreshold);
           }
@@ -4412,6 +4434,9 @@ public class Optics implements PlugIn {
       }
       Recorder.recordOption("Outline", OutlineMode.get(inputSettings.getOutlineMode()).toString());
       Recorder.recordOption("Hull_algorithm", HullMode.get(inputSettings.getHullMode()).toString());
+      if (inputSettings.getSaveOutlines()) {
+        Recorder.recordOption("Save_to_ROI_manager");
+      }
       Recorder.recordOption("Digging_threshold",
           Double.toString(inputSettings.getDiggingThreshold()));
 

@@ -369,6 +369,9 @@ message OpticsSettings {
 
   // The edge distance to decision distance threshold for the digging concave hull algorithm
   double digging_threshold = 33;
+
+  // Set to true to save the outlines to the ROI manager
+  bool save_outlines = 34;
 }
 
 enum TemplateType {

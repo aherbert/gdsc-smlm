@@ -1479,6 +1479,8 @@ The following options are available (extra options are activated by holding the 
    * - Outline
      - Specify how clusters should be outlined on the image. The outline algorithm can be configured using the ``...`` button to specify a convex hull or concave hull of the cluster points. The outline can be coloured by cluster ID.
 
+       Outlines can be optionally saved to the ``ImageJ`` ROI manager.
+
        The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
    * - Spanning tree
@@ -1655,6 +1657,8 @@ The following options are available:
 
    * - Outline
      - Specify how clusters should be outlined on the image. The outline algorithm can be configured using the ``...`` button to specify a convex hull or concave hull of the cluster points. The outline can be coloured by cluster ID.
+
+       Outlines can be optionally saved to the ``ImageJ`` ROI manager.
 
        The concave hull can use the K-nearest neighbour method of Moreira and Santos (2007), or the digging algorithm of Park and Oh (2012). For the digging algorithm the threshold is the allowed ratio between the edge distance and the distance to the internal point; a higher threshold results in a less concave hull.
 
