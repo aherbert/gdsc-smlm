@@ -2207,6 +2207,7 @@ public class TcPalmAnalysis implements PlugIn {
   /**
    * Plot a histogram of the extracted statistic.
    *
+   * @param show set to true to show the histogram
    * @param wo the window organiser
    * @param clusters the clusters
    * @param name the name
