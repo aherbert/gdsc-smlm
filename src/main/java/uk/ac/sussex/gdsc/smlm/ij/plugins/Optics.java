@@ -4411,6 +4411,9 @@ public class Optics implements PlugIn {
         Recorder.recordOption("LoOP_lambda", Double.toString(inputSettings.getLambda()));
       }
       Recorder.recordOption("Outline", OutlineMode.get(inputSettings.getOutlineMode()).toString());
+      Recorder.recordOption("Hull_algorithm", HullMode.get(inputSettings.getHullMode()).toString());
+      Recorder.recordOption("Digging_threshold",
+          Double.toString(inputSettings.getDiggingThreshold()));
 
       if (!isDbscan) {
         Recorder.recordOption("Spanning_tree",
