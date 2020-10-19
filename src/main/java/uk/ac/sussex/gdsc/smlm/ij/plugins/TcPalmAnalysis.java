@@ -2123,25 +2123,27 @@ public class TcPalmAnalysis implements PlugIn {
 
     // Allow the results to be repeated
     frame.selectedAction = clusters -> {
-      // Expecting a single cluster.
-      final ClusterData c = clusters.get(0);
-      // Push the correct ROI and settings to the analysis action.
-      // We do not directly update the ROI or dialog settings as
-      // these trigger events that are processed to add work with a delay.
-      // Updating them at the end should generate events that are
-      // ignored when finally executed as the ROI/settings should be the same.
-      addWork(0, c.sourceRoi, settings, () -> {
-        // When analysis has finished update the settings and image ROI.
-        image.getImagePlus().setRoi(c.sourceRoi);
-        darkTimeToleranceTextField.setText(Integer.toString(settings.getDarkTimeTolerance()));
-        minClusterSizeTextField.setText(Integer.toString(settings.getMinClusterSize()));
-        // When analysis has finished the cluster should be selected in the
-        // current clusters table.
-        final ClusterDataTableModelFrame currentClusters = currentClustersTable.get();
-        if (currentClusters != null) {
-          currentClusters.select(c);
-        }
-      });
+      // Expecting a single cluster. No clusters occurs when the table (and selection) is cleared.
+      if (clusters.size() == 1) {
+        final ClusterData c = clusters.get(0);
+        // Push the correct ROI and settings to the analysis action.
+        // We do not directly update the ROI or dialog settings as
+        // these trigger events that are processed to add work with a delay.
+        // Updating them at the end should generate events that are
+        // ignored when finally executed as the ROI/settings should be the same.
+        addWork(0, c.sourceRoi, settings, () -> {
+          // When analysis has finished update the settings and image ROI.
+          image.getImagePlus().setRoi(c.sourceRoi);
+          darkTimeToleranceTextField.setText(Integer.toString(settings.getDarkTimeTolerance()));
+          minClusterSizeTextField.setText(Integer.toString(settings.getMinClusterSize()));
+          // When analysis has finished the cluster should be selected in the
+          // current clusters table.
+          final ClusterDataTableModelFrame currentClusters = currentClustersTable.get();
+          if (currentClusters != null) {
+            currentClusters.select(c);
+          }
+        });
+      }
     };
 
     // Show histogram of cluster size/duration
