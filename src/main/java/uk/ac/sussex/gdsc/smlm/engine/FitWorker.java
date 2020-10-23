@@ -1963,7 +1963,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       final FastGaussianOverlapAnalysis overlap =
           new FastGaussianOverlapAnalysis(flags, null, spotParams, maxx, maxy);
       overlap.add(extractOtherParams(params, n, npeaks));
-      final double o = overlap.getOverlap();
+      final double o = overlap.getOverlap() / overlap.getSize();
 
       // XXX Test verses the standard overlap analysis
       // GaussianOverlapAnalysis overlap2 = new GaussianOverlapAnalysis(flags, null, spotParams,
@@ -1971,7 +1971,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // overlap2.setFraction(1);
       // overlap2.add(extractOtherParams(params, n, npeaks), true);
       // double[] overlapData = overlap2.getOverlapData();
-      // double o2 = overlapData[1];
+      // double o2 = overlapData[1] / overlap2.getOverlap();
 
       // System.out.printf("Overlap %f vs %f\n", o, o2);
 
@@ -1980,11 +1980,12 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     /**
-     * Gets the background contribution from the precomputed function.
+     * Gets the mean background contribution from the precomputed function in a 3x3 area around the
+     * centre.
      *
      * @param precomputedFunction the precomputed function
      * @param params the params
-     * @return the background contribution
+     * @return the mean background contribution
      */
     private double getBackgroundContribution(double[] precomputedFunction, double[] params) {
       if (precomputedFunction == null) {
@@ -2009,7 +2010,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         }
       }
 
-      return sum;
+      return sum / (r.width * r.height);
     }
 
     // Local Background
@@ -2052,7 +2053,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      * <p>The local background is computed using the sum of the region minus the sum of the function
      * to get the region average.
      *
-     * <p>The noise is computed using the standard deviation of the region.
+     * <p>The noise is computed using the local background as Poisson noise added to the camera read
+     * noise from the local region.
      *
      * @param peakNumber the peak number
      * @param params the params
@@ -2168,7 +2170,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
      * <p>The local background is computed using the fitted background plus the contribution from
      * the pre-computed peaks.
      *
-     * <p>The noise is computed using the standard deviation of the region.
+     * <p>The noise is computed using the local background as Poisson noise added to the camera read
+     * noise from the local region.
      *
      * @param params the params
      * @param precomputedFunction the precomputed function
