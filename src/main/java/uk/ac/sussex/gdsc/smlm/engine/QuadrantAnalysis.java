@@ -85,13 +85,13 @@ public class QuadrantAnalysis {
   /**
    * {@link #sumA2} + {@link #sumC2}.
    */
-  public double sumAC2;
+  public double sumAc2;
   /**
    * {@link #sumB2} + {@link #sumD2}.
    */
-  public double sumBD2;
+  public double sumBd2;
   /**
-   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAC2} - {@link #sumBD2}) /
+   * The asymmetry score for the + dividing lines. Math.abs({@link #sumAc2} - {@link #sumBd2}) /
    * {@link #sumAbcd2}.
    */
   public double score2;
@@ -243,6 +243,8 @@ public class QuadrantAnalysis {
           sumD2 += residuals[index];
         } else if (x > cx) {
           sumC2 += residuals[index];
+        } else {
+          sumAbcd2 -= Math.abs(residuals[index]);
         }
       }
     }
@@ -253,6 +255,8 @@ public class QuadrantAnalysis {
           sumA2 += residuals[index];
         } else if (x > cx) {
           sumB2 += residuals[index];
+        } else {
+          sumAbcd2 -= Math.abs(residuals[index]);
         }
       }
     }
@@ -265,7 +269,7 @@ public class QuadrantAnalysis {
     // .CCC.
     sumAc = sumA + sumC;
     sumBd = sumB + sumD;
-    score1 = Math.abs(sumAc - sumBd) / sumAbcd;
+    score1 = MathUtils.div0(Math.abs(sumAc - sumBd), sumAbcd);
 
     // + quadrant:
     // AA.BB
@@ -273,15 +277,15 @@ public class QuadrantAnalysis {
     // .....
     // DD.CC
     // DD.CC
-    sumAC2 = sumA2 + sumC2;
-    sumBD2 = sumB2 + sumD2;
-    score2 = Math.abs(sumAC2 - sumBD2) / sumAbcd2;
+    sumAc2 = sumA2 + sumC2;
+    sumBd2 = sumB2 + sumD2;
+    score2 = MathUtils.div0(Math.abs(sumAc2 - sumBd2), sumAbcd2);
 
     if (score1 > score2) {
       vector = (sumAc > sumBd) ? new int[] {0, 1} : new int[] {1, 0};
       score = score1;
     } else {
-      vector = (sumAC2 > sumBD2) ? new int[] {1, 1} : new int[] {1, -1};
+      vector = (sumAc2 > sumBd2) ? new int[] {1, 1} : new int[] {1, -1};
       score = score2;
     }
 
@@ -358,7 +362,9 @@ public class QuadrantAnalysis {
   }
 
   /**
-   * Gets the angle between two vectors.
+   * Gets the angle between 2D vectors.
+   *
+   * <p>Returns {@code 999} when undefined due to no length.
    *
    * @param v1 the first vector
    * @param v2 the second vector
@@ -373,36 +379,9 @@ public class QuadrantAnalysis {
       final double sum = v1[0] * v2[0] + v1[1] * v2[1];
       final double cosang = sum / (d1 * d2);
 
-      if (cosang > 1.0) {
+      if (cosang >= 1.0) {
         return 0;
-      } else if (cosang < -1.0) {
-        return Math.PI;
-      }
-
-      return Math.acos(cosang);
-    }
-    return 999;
-  }
-
-  /**
-   * Gets the angle between two vectors.
-   *
-   * @param v1 the first vector
-   * @param v2 the second vector
-   * @return the angle (in radians)
-   */
-  public static double getAngle(double[] v1, double[] v2) {
-    double d1 = v1[0] * v1[0] + v1[1] * v1[1];
-    double d2 = v2[0] * v2[0] + v2[1] * v2[1];
-    if (d1 > 0.0 && d2 > 0.0) {
-      d1 = Math.sqrt(d1);
-      d2 = Math.sqrt(d2);
-      final double sum = v1[0] * v2[0] + v1[1] * v2[1];
-      final double cosang = sum / (d1 * d2);
-
-      if (cosang > 1.0) {
-        return 0;
-      } else if (cosang < -1.0) {
+      } else if (cosang <= -1.0) {
         return Math.PI;
       }
 
