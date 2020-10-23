@@ -599,7 +599,7 @@ The following equation specifies the elliptical 2D Gaussian (named ``Rotating El
 
 .. math::
 
-    f(x,y)=B+\frac{\mathit{Signal}}{2\pi \sigma _{x}\sigma_{y}}e^{-a(x-x_{0})^{2}-2b(x-x_{0})(y-y_{0})+c(y-y_{0})^{2}}
+    u_k(x,y)=B+\frac{\mathit{Signal}}{2\pi \sigma _{x}\sigma_{y}}e^{-a(x-x_{0})^{2}-2b(x-x_{0})(y-y_{0})+c(y-y_{0})^{2}}
 
 where
 
@@ -625,6 +625,9 @@ with
 
 .. list-table::
     :widths: 20 80
+
+    * - :math:`u_k(x,y)`
+      - The expected value in the *k*\ :sup:`th` pixel.
 
     * - :math:`B`
       - The background level.
