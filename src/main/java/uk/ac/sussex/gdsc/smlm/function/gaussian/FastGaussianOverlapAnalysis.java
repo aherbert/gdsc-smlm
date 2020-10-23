@@ -41,7 +41,6 @@ public class FastGaussianOverlapAnalysis {
 
   private final int maxx;
   private final int maxy;
-  private final int size;
   private final double centrex;
   private final double centrey;
 
@@ -55,6 +54,7 @@ public class FastGaussianOverlapAnalysis {
    * @param params The parameters for the Gaussian (assumes a single peak)
    * @param maxx The x-range over which to compute the function (assumed to be strictly positive)
    * @param maxy The y-range over which to compute the function (assumed to be strictly positive)
+   * @throws IllegalArgumentException if {@code maxx * maxy} overflows an int
    */
   public FastGaussianOverlapAnalysis(int flags, AstigmatismZModel zModel, double[] params, int maxx,
       int maxy) {
@@ -63,10 +63,9 @@ public class FastGaussianOverlapAnalysis {
 
     this.maxx = Math.max(1, maxx);
     this.maxy = Math.max(1, maxy);
-    size = maxx * maxy;
-    if (size < 0) {
-      throw new IllegalArgumentException(
-          "Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
+    final long r = (long) maxx * (long) maxy;
+    if ((int) r != r) {
+      throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + r);
     }
     // We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
     // Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss
@@ -148,5 +147,15 @@ public class FastGaussianOverlapAnalysis {
    */
   public double getOverlap() {
     return overlap;
+  }
+
+  /**
+   * Gets the size of the overlap region. Typically this is the product of the x and y range used in
+   * the constructor.
+   *
+   * @return the size
+   */
+  public int getSize() {
+    return maxx * maxy;
   }
 }

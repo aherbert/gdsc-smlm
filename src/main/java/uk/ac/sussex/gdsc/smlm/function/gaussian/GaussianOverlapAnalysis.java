@@ -74,10 +74,10 @@ public class GaussianOverlapAnalysis {
 
     this.maxx = Math.max(1, maxx);
     this.maxy = Math.max(1, maxy);
-    size = maxx * maxy;
-    if (size < 0) {
-      throw new IllegalArgumentException(
-          "Input range is too large: maxx * maxy = " + ((long) maxx) * maxy);
+    final long r = (long) maxx * (long) maxy;
+    size = (int) r;
+    if (size != r) {
+      throw new IllegalArgumentException("Input range is too large: maxx * maxy = " + r);
     }
     // We will sample the Gaussian at integer intervals, i.e. on a pixel grid.
     // Pixels centres should be at 0.5,0.5. So if we want to draw a Gauss
@@ -345,5 +345,15 @@ public class GaussianOverlapAnalysis {
       throw new IllegalArgumentException("Fraction must be in the range 0-1");
     }
     this.fraction = fraction;
+  }
+
+  /**
+   * Gets the size of the overlap region. Typically this is the product of the x and y range used in
+   * the constructor.
+   *
+   * @return the size
+   */
+  public int getSize() {
+    return size;
   }
 }
