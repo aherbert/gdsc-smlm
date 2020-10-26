@@ -147,7 +147,8 @@ public class QuadrantAnalysis {
   public int yi2;
 
   /**
-   * Perform quadrant analysis as per rapidSTORM.
+   * Perform quadrant analysis as per rapidSTORM (Wolter, et al (2010) Journal of Microscopy 237:
+   * 12–22).
    *
    * <p>When two fluorophores emit close to each other, typically the nonlinear fit will result in a
    * suspected fluorophore position midway between the two fluorophores and with a high amplitude.
@@ -198,30 +199,34 @@ public class QuadrantAnalysis {
     sumD = 0;
     for (int y = cy, xa = cx, xb = cx; y < height; y++, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumAbcd += Math.abs(residuals[index]);
+        final double value = residuals[index];
         if (x < xa) {
-          sumD += residuals[index];
-        } else if (x < xb && x > xa) {
-          sumC += residuals[index];
+          sumD += value;
         } else if (x > xb) {
-          sumB += residuals[index];
+          sumB += value;
+        } else if (x != xb && x != xa) {
+          sumC += value;
         } else {
-          sumAbcd -= Math.abs(residuals[index]);
+          // Ignore value on the division line from the total sum
+          continue;
         }
+        sumAbcd += Math.abs(value);
       }
     }
     for (int y = cy - 1, xa = cx - 1, xb = cx + 1; y >= 0; y--, xa--, xb++) {
       for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumAbcd += Math.abs(residuals[index]);
+        final double value = residuals[index];
         if (x < xa) {
-          sumD += residuals[index];
-        } else if (x < xb && x > xa) {
-          sumA += residuals[index];
+          sumD += value;
         } else if (x > xb) {
-          sumB += residuals[index];
+          sumB += value;
+        } else if (x != xb && x != xa) {
+          sumA += value;
         } else {
-          sumAbcd -= Math.abs(residuals[index]);
+          // Ignore value on the division line from the total sum
+          continue;
         }
+        sumAbcd += Math.abs(value);
       }
     }
 
@@ -237,27 +242,31 @@ public class QuadrantAnalysis {
     sumC2 = 0;
     sumD2 = 0;
     for (int y = cy + 1; y < height; y++) {
-      for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumAbcd2 += Math.abs(residuals[index]);
-        if (x < cx) {
-          sumD2 += residuals[index];
-        } else if (x > cx) {
-          sumC2 += residuals[index];
-        } else {
-          sumAbcd2 -= Math.abs(residuals[index]);
-        }
+      int index = y * width;
+      for (int x = 0; x < cx; x++) {
+        final double value = residuals[index++];
+        sumD2 += value;
+        sumAbcd2 += Math.abs(value);
+      }
+      index++;
+      for (int x = cx + 1; x < width; x++) {
+        final double value = residuals[index++];
+        sumC2 += value;
+        sumAbcd2 += Math.abs(value);
       }
     }
     for (int y = cy - 1; y >= 0; y--) {
-      for (int x = 0, index = y * width; x < width; x++, index++) {
-        sumAbcd2 += Math.abs(residuals[index]);
-        if (x < cx) {
-          sumA2 += residuals[index];
-        } else if (x > cx) {
-          sumB2 += residuals[index];
-        } else {
-          sumAbcd2 -= Math.abs(residuals[index]);
-        }
+      int index = y * width;
+      for (int x = 0; x < cx; x++) {
+        final double value = residuals[index++];
+        sumA2 += value;
+        sumAbcd2 += Math.abs(value);
+      }
+      index++;
+      for (int x = cx + 1; x < width; x++) {
+        final double value = residuals[index++];
+        sumB2 += value;
+        sumAbcd2 += Math.abs(value);
       }
     }
 
