@@ -409,7 +409,8 @@ public class FitEngineConfiguration {
     if (failCounter == null) {
       final int failuresLimit = getFailuresLimit();
       final FailCounter f1 =
-          (failuresLimit >= 1) ? ConsecutiveFailCounter.create(failuresLimit) : null;
+          // Negative will disable
+          (failuresLimit >= 0) ? ConsecutiveFailCounter.create(failuresLimit) : null;
       final double passRate = getPassRate();
       // TODO - the allowed counts could be an input
       final FailCounter f2 = (passRate > 0) ? PassRateFailCounter.create(5, passRate) : null;

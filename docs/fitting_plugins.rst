@@ -580,7 +580,7 @@ The fitting parameters control the fitting algorithm. Fitting is performed on ea
    * - Fail Limit
      - Stop processing the image frame when more than N *consecutive* candidates are rejected. The candidate may be rejected due to a failure to fit the PSF or due to the PSF filter parameters.
 
-       Set to ``0`` to disable.
+       Set to negative to disable. Zero will stop at the first failure.
 
    * - Pass rate
      - Stop processing the image frame when the fraction of successful candidates is below the pass rate. E.g. set to 0.5 to stop processing when less than 50% of the candidates are successful. Note: The pass rate is only evaluated when 5 candidates have been processed to allow a fraction to be computed.
