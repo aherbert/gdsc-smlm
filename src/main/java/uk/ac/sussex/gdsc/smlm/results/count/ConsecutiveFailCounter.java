@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results.count;
 
 /**
- * Stop evaluating when a number of consecutive failures occurs.
+ * Stop evaluating when a number of consecutive failures is exceeded.
  */
 public class ConsecutiveFailCounter extends BaseFailCounter {
   /** The fail count. */
@@ -51,7 +51,11 @@ public class ConsecutiveFailCounter extends BaseFailCounter {
   /**
    * Instantiates a new consecutive fail counter.
    *
-   * @param allowedFailures the number of allowed failures
+   * <p>The {@code allowedFailures} specifies the number of failures allowed before a fail status.
+   * Use of zero will fail on the first failure; use of one will fail on the second consecutive
+   * failure.
+   *
+   * @param allowedFailures the number of allowed failures before failure
    * @return the consecutive fail counter
    */
   public static ConsecutiveFailCounter create(int allowedFailures) {
