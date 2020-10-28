@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -319,7 +320,7 @@ public class OverlayResults implements PlugIn {
         }
       }
 
-      final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+      final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
       roi.setPointType(3);
       imp.getWindow().toFront();
       imp.setOverlay(new Overlay(roi));

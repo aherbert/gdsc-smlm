@@ -94,6 +94,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -2580,7 +2581,7 @@ public class Optics implements PlugIn {
       // Note: The hull can be a single point or a line
       if (!forcePolygon) {
         if (x2.length == 1) {
-          return new PointRoi(x2[0], y2[0]);
+          return new OffsetPointRoi(x2[0], y2[0]);
         }
         if (x2.length == 2) {
           return new Line(x2[0], y2[0], x2[1], y2[1]);
@@ -2591,7 +2592,7 @@ public class Optics implements PlugIn {
 
     private Roi createRoi(float[] bounds, int size) {
       if (bounds[0] == bounds[1] && bounds[2] == bounds[3]) {
-        return new PointRoi(bounds[0], bounds[2]);
+        return new OffsetPointRoi(bounds[0], bounds[2]);
       }
       // It may be a cluster of size 2 so we should create a line for these.
       if (size == 2) {
@@ -2808,7 +2809,7 @@ public class Optics implements PlugIn {
               x[i] = (float) b.getX();
               y[i] = (float) b.getY();
             }
-            roi = new PointRoi(x, y);
+            roi = new OffsetPointRoi(x, y);
           } else {
             // We cannot handle combining points and polygons unless
             // we draw in the overlay. So for now the tiny shape will

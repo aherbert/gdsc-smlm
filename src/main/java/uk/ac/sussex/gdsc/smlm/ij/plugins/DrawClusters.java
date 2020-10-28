@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -262,7 +263,7 @@ public class DrawClusters implements PlugIn {
           ((PolygonRoi) roi).fitSpline();
         }
       } else {
-        roi = new PointRoi(xpoints, ypoints, npoints);
+        roi = new OffsetPointRoi(xpoints, ypoints, npoints);
         ((PointRoi) roi).setShowLabels(false);
       }
 
@@ -315,7 +316,7 @@ public class DrawClusters implements PlugIn {
         // For each frame in the track, add the ROI track and a point ROI for the current position
         for (int j = 0; j < frames[index].length; j++) {
           addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
-          final PointRoi pointRoi = new PointRoi(fp.xpoints[j], fp.ypoints[j]);
+          final PointRoi pointRoi = new OffsetPointRoi(fp.xpoints[j], fp.ypoints[j]);
           pointRoi.setPointType(3);
           pointRoi.setFillColor(c);
           pointRoi.setStrokeColor(Color.black);

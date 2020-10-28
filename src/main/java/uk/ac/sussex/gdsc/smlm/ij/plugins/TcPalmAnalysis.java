@@ -98,6 +98,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
@@ -2046,7 +2047,7 @@ public class TcPalmAnalysis implements PlugIn {
         xp[j] = image.mapX(r.getXPosition());
         yp[j] = image.mapY(r.getYPosition());
       }
-      final PointRoi roi = new PointRoi(xp, yp, np);
+      final PointRoi roi = new OffsetPointRoi(xp, yp, np);
       roi.setShowLabels(false);
       roi.setPointType(3);
       final Color c = colourMap.getColour(i);

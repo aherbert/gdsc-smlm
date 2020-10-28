@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -474,7 +475,7 @@ public class SpotFit implements PlugIn {
       if (overlay == null) {
         overlay = new Overlay();
       }
-      final PointRoi roi = new PointRoi(params[Gaussian2DFunction.X_POSITION],
+      final PointRoi roi = new OffsetPointRoi(params[Gaussian2DFunction.X_POSITION],
           params[Gaussian2DFunction.Y_POSITION]);
       roi.setPointType(3);
       if (imp.isDisplayedHyperStack()) {

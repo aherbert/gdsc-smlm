@@ -36,7 +36,6 @@ import ij.gui.Line;
 import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
-import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
@@ -84,6 +83,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedEvent;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionCollectedListener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.BasePoint;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -2837,7 +2837,7 @@ public class PsfCreator implements PlugInFilter {
         ox[i] = centres[i].getX();
         oy[i] = centres[i].getY();
       }
-      imp.setRoi(new PointRoi(ox, oy));
+      imp.setRoi(new OffsetPointRoi(ox, oy));
     }
 
     // For an image PSF we can just enlarge the PSF and window.
@@ -2936,7 +2936,7 @@ public class PsfCreator implements PlugInFilter {
     imagePsf.setZCentre(zCentre - 1);
     psfImp.setProperty("Info", ImagePsfHelper.toString(imagePsf));
 
-    psfImp.setRoi(new PointRoi(com[0], com[1]));
+    psfImp.setRoi(new OffsetPointRoi(com[0], com[1]));
     psfImp.setSlice(zCentre);
     psfImp.resetDisplayRange();
     psfImp.updateAndDraw();
@@ -4123,7 +4123,7 @@ public class PsfCreator implements PlugInFilter {
   }
 
   private static Roi createRoi(float x, float y, Color color) {
-    final Roi roi = new PointRoi(x, y);
+    final Roi roi = new OffsetPointRoi(x, y);
     roi.setStrokeColor(color);
     roi.setFillColor(color);
     return roi;

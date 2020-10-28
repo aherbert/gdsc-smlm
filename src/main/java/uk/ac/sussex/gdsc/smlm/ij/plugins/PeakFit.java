@@ -74,6 +74,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
@@ -3616,7 +3617,7 @@ public class PeakFit implements PlugInFilter {
       final Counter j = new Counter(size);
       final ImagePlus finalImp = localImp;
       memoryResults.forEach(DistanceUnit.PIXEL, (XyResultProcedure) (x, y) -> {
-        final PointRoi roi = new PointRoi(x, y);
+        final PointRoi roi = new OffsetPointRoi(x, y);
         final Color c = LutHelper.getColour(lut, j.decrementAndGet(), size);
         roi.setStrokeColor(c);
         roi.setFillColor(c);

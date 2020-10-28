@@ -72,6 +72,7 @@ import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -2303,7 +2304,7 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private static void add(Overlay overlay, double x, double y, Color color) {
-    final PointRoi roi = new PointRoi(x, y);
+    final PointRoi roi = new OffsetPointRoi(x, y);
     roi.setStrokeColor(color);
     roi.setFillColor(color);
     roi.setPointType(1); // PointRoi.CROSSHAIR

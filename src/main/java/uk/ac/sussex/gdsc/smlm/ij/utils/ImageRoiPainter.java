@@ -31,6 +31,7 @@ import ij.gui.PointRoi;
 import ij.text.TextPanel;
 import java.awt.Color;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.smlm.utils.CoordinateProvider;
@@ -85,7 +86,7 @@ public class ImageRoiPainter extends TextPanelMouseListener {
     final double x = position[1];
     final double y = position[2];
 
-    addRoi(imp, slice, new PointRoi(x, y));
+    addRoi(imp, slice, new OffsetPointRoi(x, y));
 
     ImageJUtils.adjustSourceRect(imp, 0, (int) x, (int) y);
   }
@@ -133,7 +134,7 @@ public class ImageRoiPainter extends TextPanelMouseListener {
     }
 
     // Simple code to add the ROI onto a single slice:
-    // addRoi(imp, slice[0], new PointRoi(x, y, points))
+    // addRoi(imp, slice[0], new OffsetPointRoi(x, y, points))
 
     // Add the ROI to each relevant slice
 
@@ -183,7 +184,7 @@ public class ImageRoiPainter extends TextPanelMouseListener {
       x2[ii] = x[indices[j]];
       y2[ii] = y[indices[j]];
     }
-    final PointRoi roi = new PointRoi(x2, y2, p);
+    final PointRoi roi = new OffsetPointRoi(x2, y2, p);
     roi.setPosition(slice[indices[start]]);
     overlay.add(roi);
   }

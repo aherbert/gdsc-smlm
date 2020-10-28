@@ -57,6 +57,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -846,7 +847,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     if (npoints == 0) {
       return;
     }
-    final PointRoi roi = new PointRoi(x, y, npoints);
+    final PointRoi roi = new OffsetPointRoi(x, y, npoints);
     roi.setPointType(pointType);
     roi.setFillColor(colour);
     roi.setStrokeColor(colour);

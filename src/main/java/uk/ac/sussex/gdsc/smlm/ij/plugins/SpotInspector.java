@@ -49,6 +49,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -607,7 +608,7 @@ public class SpotInspector implements PlugIn {
         // Require the Shift key to add all spots
         if (!event.isShiftDown()) {
           // Add the single clicked spot
-          imp.setRoi(new PointRoi(rx - minX, ry - minY));
+          imp.setRoi(new OffsetPointRoi(rx - minX, ry - minY));
           return;
         }
 
@@ -632,7 +633,7 @@ public class SpotInspector implements PlugIn {
           ox[c.getCount()] = p.x;
           oy[c.getAndIncrement()] = p.y;
         });
-        imp.setRoi(new PointRoi(ox, oy, points));
+        imp.setRoi(new OffsetPointRoi(ox, oy, points));
       }
     }
   }

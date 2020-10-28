@@ -37,6 +37,7 @@ import java.util.Comparator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.simple.internal.SeedFactory;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
@@ -505,7 +506,7 @@ public class ResultsImageSampler {
           sb.append(MathUtils.rounded(p.getZPosition() * nmPerPixel)).append(' ');
           sb.append(MathUtils.rounded(p.getIntensity())).append('\n');
         }
-        final PointRoi roi = new PointRoi(ox, oy, sampleSize);
+        final PointRoi roi = new OffsetPointRoi(ox, oy, sampleSize);
         roi.setPosition(position);
         overlay.add(roi);
       }

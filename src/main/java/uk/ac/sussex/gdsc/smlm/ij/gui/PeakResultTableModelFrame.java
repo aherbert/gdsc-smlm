@@ -54,6 +54,7 @@ import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
@@ -474,8 +475,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
       if (list.length == 1) {
         final PeakResult p = list[0];
-        final PointRoi roi =
-            new PointRoi(converter.convert(p.getXPosition()), converter.convert(p.getYPosition()));
+        final PointRoi roi = new OffsetPointRoi(converter.convert(p.getXPosition()),
+            converter.convert(p.getYPosition()));
         roi.setPointType(3);
         roi.setPosition(p.getFrame());
         o.add(roi);
@@ -487,7 +488,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
         for (int i = 0; i < list.length; i++) {
           if (frame != list[i].getFrame()) {
             if (ox.size() > 0) {
-              final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+              final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
               roi.setPointType(3);
               roi.setPosition(frame);
               ox.resetQuick();
@@ -500,7 +501,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
           oy.add(converter.convert(list[i].getYPosition()));
         }
         if (ox.size() > 0) {
-          final PointRoi roi = new PointRoi(ox.toArray(), oy.toArray());
+          final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
           roi.setPointType(3);
           roi.setPosition(frame);
           o.add(roi);

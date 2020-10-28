@@ -50,6 +50,7 @@ import uk.ac.sussex.gdsc.core.filters.FilteredNonMaximumSuppression;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -484,7 +485,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    * @param ypoints the y points
    */
   private void setOverlay(int npoints, float[] xpoints, float[] ypoints) {
-    final PointRoi roi = new PointRoi(xpoints, ypoints, npoints);
+    final PointRoi roi = new OffsetPointRoi(xpoints, ypoints, npoints);
 
     final Color strokeColor = Color.yellow;
     final Color fillColor = Color.green;

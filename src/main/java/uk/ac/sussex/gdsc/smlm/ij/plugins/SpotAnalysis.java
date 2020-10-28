@@ -35,7 +35,6 @@ import ij.WindowManager;
 import ij.gui.GUI;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
-import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.plugin.ZProjector;
 import ij.plugin.filter.GaussianBlur;
@@ -92,6 +91,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -1274,8 +1274,8 @@ public class SpotAnalysis extends PlugInFrame
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
         rawFittedLabel.setText(String.format("Raw fit: Signal = %s, SNR = %s",
             MathUtils.rounded(spotSignal, 4), MathUtils.rounded(spotSignal / noise, 3)));
-        ImageRoiPainter.addRoi(rawImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
-            params[Gaussian2DFunction.Y_POSITION]));
+        ImageRoiPainter.addRoi(rawImp, slice, new OffsetPointRoi(
+            params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
       } else {
         rawFittedLabel.setText("");
         rawImp.setOverlay(null);
@@ -1300,8 +1300,8 @@ public class SpotAnalysis extends PlugInFrame
         final double spotSignal = params[Gaussian2DFunction.SIGNAL] / gain;
         blurFittedLabel.setText(String.format("Blur fit: Signal = %s, SNR = %s",
             MathUtils.rounded(spotSignal, 4), MathUtils.rounded(spotSignal / noise, 3)));
-        ImageRoiPainter.addRoi(blurImp, slice, new PointRoi(params[Gaussian2DFunction.X_POSITION],
-            params[Gaussian2DFunction.Y_POSITION]));
+        ImageRoiPainter.addRoi(blurImp, slice, new OffsetPointRoi(
+            params[Gaussian2DFunction.X_POSITION], params[Gaussian2DFunction.Y_POSITION]));
       } else {
         blurFittedLabel.setText("");
         blurImp.setOverlay(null);
