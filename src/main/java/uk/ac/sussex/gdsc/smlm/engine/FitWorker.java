@@ -202,6 +202,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
   private final boolean isEmCcd;
 
   /**
+   * Count the number of successful fits.
+   */
+  private int success;
+
+  /**
    * Encapsulate all conversion of coordinates between the frame of data (data bounds) and the
    * sub-section currently used in fitting (region bounds) and the global coordinate system.
    */
@@ -870,6 +875,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // Allocate enough room for all fits to be doublets
     fittedNeighbours = allocateArray(fittedNeighbours, length * 2);
 
+    success = 0;
     clearEstimates(length);
 
     final int width = cc.dataBounds.width;
@@ -4332,11 +4338,6 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     // This is the total number of candidates Ids we may produce
     return candidates.getLength();
   }
-
-  /**
-   * Count the number of successful fits.
-   */
-  private int success;
 
   @Override
   public void add(SelectedResult selectedResult) {
