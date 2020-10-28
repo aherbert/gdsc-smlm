@@ -49,7 +49,7 @@ public class FitTypeCounter {
    * @param fitType the fit type
    */
   public void add(FitType fitType) {
-    count[fitType.getFlags()].incrementAndGet();
+    count[fitType.getFlags()].getAndIncrement();
   }
 
   /**
@@ -59,7 +59,7 @@ public class FitTypeCounter {
    * @param value the value
    */
   public void add(FitType fitType, int value) {
-    count[fitType.getFlags()].addAndGet(value);
+    count[fitType.getFlags()].getAndAdd(value);
   }
 
   /**

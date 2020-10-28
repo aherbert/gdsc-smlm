@@ -277,6 +277,12 @@ public class FitEngine {
     if (counter != null) {
       // Get the stats we want...
 
+      // Note: The total localisations may be less than 'fit single' + 2 * 'fit doublet':
+      // - Duplicates are eliminated from the results
+      // - Doublet fitting may result in excluded spots due to bad shifts, fitting an existing
+      // result or fitting a candidate which creates an estimate for re-use when the candidate
+      // is processed.
+
       // System.out.println(results.getName()); // Dataset name
       logger.info("Fitting paths...");
       final int total = counter.getTotal();

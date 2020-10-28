@@ -28,28 +28,31 @@ import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 
 /**
  * Define the type of fit that was performed.
+ *
+ * <p>This class functions as a set of bit flags that indicate the fitting path execution that
+ * occurred in the FitWorker.
  */
 public class FitType {
   /** Flag used for a single candidate fit with neighbours. */
-  public static final int MULTI = 1;
+  public static final int MULTI = 0x1;
 
   /** Flag used for a single candidate fit with neighbours was OK. */
-  public static final int MULTI_OK = 2;
+  public static final int MULTI_OK = 0x2;
 
   /** Flag used for a double candidate fit. */
-  public static final int DOUBLET = 4;
+  public static final int DOUBLET = 0x4;
 
   /** Flag used for a double candidate fit was OK. */
-  public static final int DOUBLET_OK = 8;
+  public static final int DOUBLET_OK = 0x8;
 
   /** Flag used for a double candidate fit with neighbours. */
-  public static final int MULTI_DOUBLET = 16;
+  public static final int MULTI_DOUBLET = 0x10;
 
   /** Flag used for a double candidate fit with neighbours was OK. */
-  public static final int MULTI_DOUBLET_OK = 32;
+  public static final int MULTI_DOUBLET_OK = 0x20;
 
   /** Flag used when a fit was OK. */
-  public static final int OK = 64;
+  public static final int OK = 0x40;
 
   /** The number of flags. */
   public static final int NO_OF_FLAGS = 7;
@@ -275,5 +278,12 @@ public class FitType {
    */
   public FitType copy() {
     return new FitType(this);
+  }
+
+  /**
+   * Clear the flags.
+   */
+  public void clear() {
+    flags = 0;
   }
 }

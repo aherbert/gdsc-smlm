@@ -4102,7 +4102,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     double[] region2;
     double[] varG2;
     CandidateSpotFitter spotFitter;
-    FitType fitType;
+    final FitType fitType = new FitType();
     boolean isValid;
     @SuppressWarnings("unused")
     int extra;
@@ -4120,7 +4120,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
     public void reset(int candidateId) {
       this.setCandidateId(candidateId);
-      fitType = new FitType();
+      fitType.clear();
 
       // Reset results
       this.setMultiQaScore(NO_QA_SCORE);
@@ -4360,6 +4360,11 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
             (selectedResult.fitResult!=null && selectedResult.fitResult.data!=null) ?
             ((FitResult) selectedResult.fitResult.data).getStatus().toString() : "");
         //@formatter:on
+      }
+      // Reporting
+      if (this.counter != null) {
+        final FitType fitType = dynamicMultiPathFitResult.fitType;
+        addFitType(fitType);
       }
       return;
     }
