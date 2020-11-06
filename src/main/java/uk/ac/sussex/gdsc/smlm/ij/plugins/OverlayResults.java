@@ -404,6 +404,9 @@ public class OverlayResults implements PlugIn {
       checkbox.addItemListener(worker);
       label = (Label) gd.getMessage();
 
+      // Initialise
+      worker.refresh();
+
       // Listen for changes to an image
       ImagePlus.addImageListener(worker);
 
