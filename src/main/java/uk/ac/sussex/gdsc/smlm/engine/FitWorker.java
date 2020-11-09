@@ -2786,22 +2786,22 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       if (fitResult.getStatus() == FitStatus.OK) {
         residualsSingle = gf.getResiduals();
 
-        // // Debug background estimates
-        // double base = params[0] - fitConfig.getBias();
-        // System.out.printf("[%d] %d %.1f : %.1f %.2f %.1f %.2f %.1f %.2f %.1f %.2f %.1f %.2f\n",
-        // slice,
+        // Debug background estimates
+        // if (slice == 691 && candidateId == 0) {
+        // double base = params[0];
+        // System.out.printf("[%d] %d %.1f : %.1f %.2f %.1f %.2f %.1f %.2f %.1f %.2f\n", slice,
         // candidateId, params[0], background, (background - params[0]) / base,
-        // getMultiFittingBackground(), (getMultiFittingBackground() - params[0]) / base,
         // getSingleFittingBackground(), (getSingleFittingBackground() - params[0]) / base,
         // getDefaultBackground(this.region, width, height),
         // (getDefaultBackground(this.region, width, height) - params[0]) / base,
         // getDefaultBackground(region, width, height),
         // (getDefaultBackground(region, width, height) - params[0]) / base);
-
-        // Debug estimates verses fit.
-        // Distinguish those we have estimated using the amplitudeEstimate array.
-        // Trivial analysis shows that estimates have a lower relative error than a default initial
-        // guess.
+        //
+        // // Debug estimates verses fit.
+        // // Distinguish those we have estimated using the amplitudeEstimate array.
+        // // Trivial analysis shows that estimates have a lower relative error than a default
+        // // initial
+        // // guess.
         // int offset = 0;
         // System.out.printf("[%d] %d C %b %.2f %.2f %.2f %.2f %.2f %.2f\n", slice, candidateId,
         // !amplitudeEstimate[0],
@@ -2811,6 +2811,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // DoubleEquality.relativeError(initialParams[offset + 4], params[offset + 4]),
         // DoubleEquality.relativeError(initialParams[offset + 5], params[offset + 5]),
         // DoubleEquality.relativeError(initialParams[offset + 6], params[offset + 6]));
+        // }
 
         // The primary candidate is not bounded. Check it has not drifted close to
         // a neighbour.
