@@ -7368,6 +7368,20 @@ public class BenchmarkFilterAnalysis
   /**
    * Show overlay.
    *
+   * <ul>
+   *
+   * <li>Green = TP
+   *
+   * <li>Red = FP
+   *
+   * <li>Magenta = FP (Ignored from analysis)
+   *
+   * <li>Yellow = FN
+   *
+   * <li>Orange = FN (Outside border)
+   *
+   * </ul>
+   *
    * @param allAssignments The assignments generated from running the filter (or null)
    * @param filter the filter
    * @return The results from running the filter (or null)
@@ -7473,7 +7487,7 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    // Do TN (all remaining peaks that have not been matched)
+    // Do FN (all remaining peaks that have not been matched)
     if (settings.showFN) {
       final boolean checkBorder =
           (filterResult.analysisBorder != null && filterResult.analysisBorder.x != 0);
