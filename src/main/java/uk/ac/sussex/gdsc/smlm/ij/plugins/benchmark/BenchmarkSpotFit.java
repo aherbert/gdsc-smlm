@@ -435,6 +435,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Set some default fit settings here ...
       fitConfig.setDisableSimpleFilter(false);
       fitConfig.setMinPhotons(1); // Do not allow negative photons
+      fitConfig.setSignalStrength(2); // Lower than the default of 5
       fitConfig.setCoordinateShiftFactor(0);
       fitConfig.setPrecisionThreshold(0);
       fitConfig.setMinWidthFactor(0);
@@ -2867,34 +2868,42 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Updates the given configuration using the latest settings used in benchmarking.
    *
-   * @param configuration the configuration
+   * @param targetConfiguration the configuration
    * @return true, if successful
    */
-  public static boolean updateConfiguration(FitEngineConfiguration configuration) {
-    final FitConfiguration fitConfiguration = configuration.getFitConfiguration();
+  public static boolean updateConfiguration(FitEngineConfiguration targetConfiguration) {
+    final FitConfiguration targetFitConfiguration = targetConfiguration.getFitConfiguration();
 
-    fitConfiguration.setPsf(fitConfiguration.getPsf());
-    fitConfiguration.setFitSolverSettings(fitConfiguration.getFitSolverSettings());
-    fitConfiguration.setFilterSettings(fitConfiguration.getFilterSettings());
+    // Q. Why are the settings set to themselves?
+    // Removed this for now.
+    //targetFitConfiguration.setPsf(targetFitConfiguration.getPsf());
+    //targetFitConfiguration.setFitSolverSettings(targetFitConfiguration.getFitSolverSettings());
+    //targetFitConfiguration.setFilterSettings(targetFitConfiguration.getFilterSettings());
 
+    final FitEngineConfiguration sourceConfig = Settings.lastSettings.get().config;
+    final FitConfiguration sourceFitConfiguration = sourceConfig.getFitConfiguration();
     // Set the fit engine settings manually to avoid merging all child settings
-    final FitEngineConfiguration config = Settings.lastSettings.get().config;
-    configuration.setFitting(config.getFitting());
-    configuration.setIncludeNeighbours(config.isIncludeNeighbours());
-    configuration.setNeighbourHeightThreshold(config.getNeighbourHeightThreshold());
-    configuration.setDuplicateDistance(config.getDuplicateDistance());
-    configuration.setDuplicateDistanceAbsolute(config.getDuplicateDistanceAbsolute());
+    // i.e. do not do a global update using:
+    //targetConfiguration.setFitEngineSettings(sourceConfig.getFitEngineSettings());
+    targetFitConfiguration.setPsf(sourceFitConfiguration.getPsf());
+    targetFitConfiguration.setFitSolverSettings(sourceFitConfiguration.getFitSolverSettings());
+    targetFitConfiguration.setFilterSettings(sourceFitConfiguration.getFilterSettings());
+    targetConfiguration.setFitting(sourceConfig.getFitting());
+    targetConfiguration.setIncludeNeighbours(sourceConfig.isIncludeNeighbours());
+    targetConfiguration.setNeighbourHeightThreshold(sourceConfig.getNeighbourHeightThreshold());
+    targetConfiguration.setDuplicateDistance(sourceConfig.getDuplicateDistance());
+    targetConfiguration.setDuplicateDistanceAbsolute(sourceConfig.getDuplicateDistanceAbsolute());
 
     if (getComputeDoublets()) {
-      configuration.setResidualsThreshold(0);
-      fitConfiguration.setComputeResiduals(true);
+      targetConfiguration.setResidualsThreshold(0);
+      targetFitConfiguration.setComputeResiduals(true);
     } else {
-      configuration.setResidualsThreshold(1);
-      fitConfiguration.setComputeResiduals(false);
+      targetConfiguration.setResidualsThreshold(1);
+      targetFitConfiguration.setComputeResiduals(false);
     }
 
     // We used simple filtering.
-    fitConfiguration.setSmartFilter(false);
+    targetFitConfiguration.setSmartFilter(false);
 
     return true;
   }
