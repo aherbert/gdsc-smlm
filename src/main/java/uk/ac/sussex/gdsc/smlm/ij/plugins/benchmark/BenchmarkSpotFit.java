@@ -213,8 +213,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   // Used to try and guess the range for filtering the results
   private enum LowerLimit {
-    ZERO(false), ONE_PERCENT(false), MAX_NEGATIVE_CUMUL_DELTA(true), HALF_MAX_JACCARD_VALUE(false,
-        true);
+    ZERO(false), MIN(false), ONE_PERCENT(false), MAX_NEGATIVE_CUMUL_DELTA(
+        true), HALF_MAX_JACCARD_VALUE(false, true);
 
     final boolean requiresDelta;
     final boolean requiresJaccard;
@@ -2288,9 +2288,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       criteria = new FilterCriteria[9];
       int index = 0;
       //@formatter:off
-      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.ONE_PERCENT, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
-      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.ONE_PERCENT, UpperLimit.ZERO);
+      criteria[index++] = new FilterCriteria(ParameterType.SIGNAL,     LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.SNR,        LowerLimit.MIN, UpperLimit.MAX_POSITIVE_CUMUL_DELTA);
+      criteria[index++] = new FilterCriteria(ParameterType.MIN_WIDTH,  LowerLimit.MIN, UpperLimit.ZERO);
       criteria[index++] = new FilterCriteria(ParameterType.MAX_WIDTH,  LowerLimit.ZERO,        UpperLimit.NINETY_NINE_PERCENT);
       criteria[index++] = new FilterCriteria(ParameterType.SHIFT,      LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
       criteria[index++] = new FilterCriteria(ParameterType.ESHIFT,     LowerLimit.MAX_NEGATIVE_CUMUL_DELTA, UpperLimit.NINETY_NINE_PERCENT);
@@ -2700,6 +2700,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         // fall-through
       case ONE_PERCENT:
         lowerBound = getPercentile(h2, 0.01);
+        break;
+      case MIN:
+        lowerBound = getPercentile(h2, 0.0);
         break;
       case ZERO:
         lowerBound = 0;
