@@ -1888,7 +1888,7 @@ public class BenchmarkFilterAnalysis
     final Map<String, ComplexFilterScore> localIterBestFilter = iterBestFilter.get();
     // The result best filter will never be a null reference. If it the same reference then
     // the result is from an iteration analysis.
-    if (localIterBestFilter == filterAnalysisResult.bestFilter) {
+    if (filterAnalysisResult.bestFilter.equals(localIterBestFilter)) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.enableYesNoCancel();
       gd.addMessage("Iteration results are held in memory.\n \nReport these results?");
@@ -2085,6 +2085,8 @@ public class BenchmarkFilterAnalysis
 
   private void reportIterationResults() {
     residualsThreshold = settings.residualsThreshold;
+    spotFitResults = BenchmarkSpotFit.getBenchmarkSpotFitResults();
+    fitResultData = fitResultDataCache.get();
     if (!showReportDialog()) {
       return;
     }
