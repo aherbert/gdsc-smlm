@@ -460,8 +460,6 @@ public class ResultsImageSampler {
     final int[] xyz = new int[3];
     final Rectangle stackBounds = new Rectangle(stack.getWidth(), stack.getHeight());
     final Overlay overlay = new Overlay();
-    final float[] ox = new float[10];
-    final float[] oy = new float[10];
     final StringBuilder sb = new StringBuilder();
     if (nmPerPixel == 1) {
       sb.append("Sample X Y Z Signal\n");
@@ -494,6 +492,8 @@ public class ResultsImageSampler {
 
       final int sampleSize = sample.size();
       if (sampleSize > 0) {
+        final float[] ox = new float[sampleSize];
+        final float[] oy = new float[sampleSize];
         final int position = out.getSize() + 1;
         // Create an ROI with the localisations
         for (int i = 0; i < sampleSize; i++) {
