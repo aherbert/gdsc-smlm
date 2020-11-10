@@ -698,7 +698,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
 
       // Debug where the fit config may be different between benchmarking and fitting
       if (slice == -1) {
-        fitConfig.initialise(1, 1, 1, null);
+        fitConfig.initialise(1, 1, 1);
 
         final String newLine = System.lineSeparator();
         SettingsManager.toJson(config.getFitEngineSettings(),

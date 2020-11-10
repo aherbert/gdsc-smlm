@@ -652,10 +652,9 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
    * @param npeaks The number of peaks to fit
    * @param maxx The height of the XY data
    * @param maxy the maxy
-   * @param params The Gaussian parameters
    */
   @Override
-  public void initialise(int npeaks, int maxx, int maxy, double[] params) {
+  public void initialise(int npeaks, int maxx, int maxy) {
     {
       // XXX: For debugging thread safety require new objects for each fit
       // invalidateGaussianFunction();

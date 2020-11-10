@@ -345,7 +345,7 @@ public class BenchmarkFit implements PlugIn {
         params[Gaussian2DFunction.X_POSITION] = origin[0] + offset[0];
         params[Gaussian2DFunction.Y_POSITION] = origin[1] + offset[1];
         params[Gaussian2DFunction.Z_POSITION] = origin[2] + offset[2];
-        fitConfig.initialise(1, size, size, params);
+        fitConfig.initialise(1, size, size);
         final FunctionSolver solver = fitConfig.getFunctionSolver();
         if (solver.isBounded()) {
           bounds = setBounds(solver, initialParams, bounds);

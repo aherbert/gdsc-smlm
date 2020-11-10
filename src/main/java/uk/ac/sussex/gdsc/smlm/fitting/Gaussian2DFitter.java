@@ -463,15 +463,19 @@ public class Gaussian2DFitter {
           null, npeaks, 0, null, 0, 0);
     }
 
-    // Re-copy the parameters now they have all been set
-    initialParams = params.clone();
-
     // -----------------------
     // Use alternative fitters
     // -----------------------
 
-    fitConfiguration.initialise(npeaks, maxx, maxy, initialParams);
+    fitConfiguration.initialise(npeaks, maxx, maxy);
     solver = fitConfiguration.getFunctionSolver();
+
+    // TODO
+    // Initial parameters to respect isStrictlyPositiveFunction(), i.e. ensure that the Gaussian
+    // cannot be negative.
+
+    // Re-copy the parameters now they have all been set
+    initialParams = params.clone();
 
     // Bounds are more restrictive than constraints
     if (solver.isBounded()) {
@@ -1175,7 +1179,7 @@ public class Gaussian2DFitter {
     // Use alternative fitters
     // -----------------------
 
-    fitConfiguration.initialise(npeaks, maxx, maxy, params);
+    fitConfiguration.initialise(npeaks, maxx, maxy);
     solver = fitConfiguration.getFunctionSolver();
 
     // Note: Do not apply bounds and constraints as it is assumed the input parameters are good
@@ -1215,7 +1219,7 @@ public class Gaussian2DFitter {
     // Use alternative fitters
     // -----------------------
 
-    fitConfiguration.initialise(npeaks, maxx, maxy, params);
+    fitConfiguration.initialise(npeaks, maxx, maxy);
     solver = fitConfiguration.getFunctionSolver();
 
     // Note: Do not apply bounds and constraints as it is assumed the input parameters are good

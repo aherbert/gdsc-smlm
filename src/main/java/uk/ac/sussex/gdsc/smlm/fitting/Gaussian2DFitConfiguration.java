@@ -32,11 +32,10 @@ public interface Gaussian2DFitConfiguration {
    * Creates the appropriate stopping criteria and Gaussian function for the configuration.
    *
    * @param npeaks The number of peaks to fit
-   * @param maxx The height of the XY data
-   * @param maxy the maxy
-   * @param params The Gaussian parameters
+   * @param maxx The width of the XY data
+   * @param maxy The height of the XY data
    */
-  void initialise(int npeaks, int maxx, int maxy, double[] params);
+  void initialise(int npeaks, int maxx, int maxy);
 
   /**
    * True if the fit residuals should be computed.
