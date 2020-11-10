@@ -134,7 +134,6 @@ public class OverlayResults implements PlugIn {
     private int currentIndex;
     private int currentSlice = -1;
 
-
     @Override
     public void itemStateChanged(ItemEvent event) {
       // Read other options from the dialog
@@ -170,18 +169,12 @@ public class OverlayResults implements PlugIn {
           }
           final int index = job.intValue();
           if (index == 0) {
-            // This may be selection of no image
+            // This is selection of no image
             clearOldOverlay();
             continue;
           }
 
-          // Check name of the image
-          if (currentIndex != index) {
-            clearOldOverlay();
-          }
-
-          currentIndex = index;
-          drawOverlay();
+          drawOverlay(index);
         } catch (final InterruptedException ex) {
           running = false;
           Logger.getLogger(OverlayResults.class.getName()).log(Level.WARNING,
@@ -217,10 +210,25 @@ public class OverlayResults implements PlugIn {
      * Draw the overlay.
      *
      * <p>This is only called when index > 0.
+     *
+     * @param newIndex the new index
      */
-    private void drawOverlay() {
-      final ImagePlus imp = WindowManager.getImage(ids[currentIndex]);
-      final String name = names[currentIndex];
+    private void drawOverlay(int newIndex) {
+      // Get new and old image Id
+      final int oldIndex = currentIndex;
+      final int oldId = ids[oldIndex];
+      final int newId = ids[newIndex];
+
+      // Check identity of the image
+      final boolean newImage = oldId != newId;
+      if (newImage) {
+        clearOldOverlay();
+      }
+
+      currentIndex = newIndex;
+
+      final ImagePlus imp = WindowManager.getImage(newId);
+      final String name = names[newIndex];
 
       if (imp == null) {
         // Image has been closed.
@@ -228,14 +236,19 @@ public class OverlayResults implements PlugIn {
         return;
       }
 
-      // Check slice
       final int newSlice = imp.getCurrentSlice();
-      if (currentSlice == newSlice) {
-        final boolean isShowing = tw != null;
-        if (settings.showTable == isShowing) {
-          // No change from last time
-          return;
+      // If same results then check if the slice has changed
+      if (newIndex == oldIndex) {
+        if (currentSlice == newSlice) {
+          final boolean isShowing = tw != null;
+          if (settings.showTable == isShowing) {
+            // No change from last time
+            return;
+          }
         }
+      } else {
+        // Get a new snapshot view
+        view = null;
       }
       currentSlice = newSlice;
 
@@ -322,7 +335,10 @@ public class OverlayResults implements PlugIn {
 
       final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
       roi.setPointType(3);
-      imp.getWindow().toFront();
+      if (newImage) {
+        // New windows to the front
+        imp.getWindow().toFront();
+      }
       imp.setOverlay(new Overlay(roi));
 
       if (table != null) {
