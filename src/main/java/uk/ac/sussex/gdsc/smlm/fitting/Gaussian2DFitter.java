@@ -470,9 +470,15 @@ public class Gaussian2DFitter {
     fitConfiguration.initialise(npeaks, maxx, maxy);
     solver = fitConfiguration.getFunctionSolver();
 
-    // TODO
     // Initial parameters to respect isStrictlyPositiveFunction(), i.e. ensure that the Gaussian
     // cannot be negative.
+    if (solver.isStrictlyPositiveFunction()) {
+      params[Gaussian2DFunction.BACKGROUND] = Math.max(0, params[Gaussian2DFunction.BACKGROUND]);
+      // TODO
+      // Comment this out and find where the estimates are created badly. Try and fix that.
+      setStrictlyPositiveLimits(npeaks, paramsPerPeak, initialParams,
+          fitConfiguration.isZFitting());
+    }
 
     // Re-copy the parameters now they have all been set
     initialParams = params.clone();
@@ -868,21 +874,7 @@ public class Gaussian2DFitter {
     }
 
     if (solver.isStrictlyPositiveFunction()) {
-      // If the lower bounds are zero it causes problems when computing gradients since
-      // the Gaussian function may not exist. So use a small value instead.
-      for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
-        if (lower[j + Gaussian2DFunction.SIGNAL] <= 0) {
-          lower[j + Gaussian2DFunction.SIGNAL] = 0.1;
-        }
-        if (!isZFitting) {
-          if (lower[j + Gaussian2DFunction.X_SD] <= 0) {
-            lower[j + Gaussian2DFunction.X_SD] = 0.01;
-          }
-          if (lower[j + Gaussian2DFunction.Y_SD] <= 0) {
-            lower[j + Gaussian2DFunction.Y_SD] = 0.01;
-          }
-        }
-      }
+      setStrictlyPositiveLimits(npeaks, paramsPerPeak, lower, isZFitting);
     }
 
     // Check against the configured bounds
@@ -920,6 +912,33 @@ public class Gaussian2DFitter {
     }
 
     solver.setBounds(lower, upper);
+  }
+
+  /**
+   * Sets the strictly positive limits. If the Gaussian parameters are zero or below it causes
+   * problems when computing gradients since the Gaussian function may not exist. So use a small
+   * value instead.
+   * 
+   * @param npeaks the number of peaks
+   * @param paramsPerPeak the parameters per peak
+   * @param params the parameters
+   * @param isZFitting true if Z fitting
+   */
+  private static void setStrictlyPositiveLimits(final int npeaks, final int paramsPerPeak,
+      final double[] params, final boolean isZFitting) {
+    for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
+      if (params[j + Gaussian2DFunction.SIGNAL] <= 0) {
+        params[j + Gaussian2DFunction.SIGNAL] = 0.1;
+      }
+      if (!isZFitting) {
+        if (params[j + Gaussian2DFunction.X_SD] <= 0) {
+          params[j + Gaussian2DFunction.X_SD] = 0.01;
+        }
+        if (params[j + Gaussian2DFunction.Y_SD] <= 0) {
+          params[j + Gaussian2DFunction.Y_SD] = 0.01;
+        }
+      }
+    }
   }
 
   /**
