@@ -1241,7 +1241,7 @@ public class PeakFit implements PlugInFilter {
 
       gd.addCheckbox("Smart_filter", fitConfig.isSmartFilter());
       gd.addCheckbox("Disable_simple_filter", fitConfig.isDisableSimpleFilter());
-      gd.addSlider("Shift_factor", 0.01, 2, fitConfig.getCoordinateShiftFactor());
+      gd.addSlider("Shift_factor", 0.0, 2.5, fitConfig.getCoordinateShiftFactor());
       if (isShowGenericDialog) {
         sliderCoordinateShiftFactor = gd.getLastScrollbar();
       }
