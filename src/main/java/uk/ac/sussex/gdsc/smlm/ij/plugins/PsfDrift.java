@@ -329,7 +329,7 @@ public class PsfDrift implements PlugIn {
         final double[] params = initialParams.clone();
         params[Gaussian2DFunction.X_POSITION] = cx + centre[0];
         params[Gaussian2DFunction.Y_POSITION] = cy + centre[1];
-        fitConfig2.initialise(1, width, width, params);
+        fitConfig2.initialise(1, width, width);
         final FunctionSolver solver = fitConfig2.getFunctionSolver();
         if (solver.isBounded()) {
           setBounds(solver);
