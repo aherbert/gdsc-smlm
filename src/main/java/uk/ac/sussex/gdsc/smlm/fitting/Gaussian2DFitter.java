@@ -474,9 +474,9 @@ public class Gaussian2DFitter {
     // cannot be negative.
     if (solver.isStrictlyPositiveFunction()) {
       params[Gaussian2DFunction.BACKGROUND] = Math.max(0, params[Gaussian2DFunction.BACKGROUND]);
-      // TODO
-      // Comment this out and find where the estimates are created badly. Try and fix that.
-      setStrictlyPositiveLimits(npeaks, paramsPerPeak, initialParams,
+      // Note: Comment this out and find where the estimates are created badly.
+      // These occurrences should be fixed with better estimates.
+      setStrictlyPositiveLimits(npeaks, paramsPerPeak, params,
           fitConfiguration.isZFitting());
     }
 
@@ -918,7 +918,7 @@ public class Gaussian2DFitter {
    * Sets the strictly positive limits. If the Gaussian parameters are zero or below it causes
    * problems when computing gradients since the Gaussian function may not exist. So use a small
    * value instead.
-   * 
+   *
    * @param npeaks the number of peaks
    * @param paramsPerPeak the parameters per peak
    * @param params the parameters
