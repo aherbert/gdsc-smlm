@@ -885,16 +885,17 @@ public class Gaussian2DFitter {
       setStrictlyPositiveLimits(npeaks, paramsPerPeak, lower, isZFitting);
     }
 
-    // Check against the configured bounds
-    if (lower2 != null) {
-      for (int i = Math.max(lower.length, lower2.length); i-- > 0;) {
+    // Check against the configured bounds.
+    // The lengths must match otherwise they are ignored.
+    if (lower2 != null && lower2.length == lower.length) {
+      for (int i = lower.length; i-- > 0;) {
         if (lower[i] < lower2[i]) {
           lower[i] = lower2[i];
         }
       }
     }
-    if (upper2 != null) {
-      for (int i = Math.max(upper.length, upper2.length); i-- > 0;) {
+    if (upper2 != null && upper2.length == upper.length) {
+      for (int i = upper.length; i-- > 0;) {
         if (upper[i] > upper2[i]) {
           upper[i] = upper2[i];
         }
