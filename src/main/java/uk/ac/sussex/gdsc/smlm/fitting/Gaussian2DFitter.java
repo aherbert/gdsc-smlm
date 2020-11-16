@@ -36,7 +36,13 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  * <p>Performs fitting using the configured algorithm.
  */
 public class Gaussian2DFitter {
+  /** 2 * pi. */
   private static final double TWO_PI = 2 * Math.PI;
+  /** The minimum signal when fitting a strictly positive Gaussian function. */
+  private static final double STRICTLY_POSITIVE_MIN_SIGNAL = 0.1;
+  /** The minimum width when fitting a strictly positive Gaussian function. */
+  private static final double STRICTLY_POSITIVE_MIN_WIDTH = 0.01;
+
   /** The fit configuration. */
   protected Gaussian2DFitConfiguration fitConfiguration;
   /** The solver. */
@@ -476,7 +482,9 @@ public class Gaussian2DFitter {
     if (solver.isStrictlyPositiveFunction()) {
       params[Gaussian2DFunction.BACKGROUND] = Math.max(0, params[Gaussian2DFunction.BACKGROUND]);
       // Note: Comment this out and find where the estimates are created badly.
-      // These occurrences should be fixed with better estimates.
+      // These occurrences should be fixed with better estimates. This is most likely to occur
+      // when signal and/or background have not been estimated correctly and the signal estimate
+      // is very low.
       setStrictlyPositiveLimits(npeaks, paramsPerPeak, params, fitConfiguration.isZFitting());
     }
 
@@ -666,7 +674,7 @@ public class Gaussian2DFitter {
 
       // Convert amplitudes to signal
       if (amplitudeEstimate[i]) {
-        signal *= 2 * Math.PI * sx * sy;
+        signal *= TWO_PI * sx * sy;
       }
 
       // Set all the parameters
@@ -811,7 +819,7 @@ public class Gaussian2DFitter {
       // Signal = height * 2 * pi * sd0 * sd1
       // Allow a maximum using the width factor that defines the bounds on the width.
       // Increase the height by 2 to allow for error.
-      final double factor = 2 * height * 2 * Math.PI * wf * wf;
+      final double factor = 2 * height * TWO_PI * wf * wf;
       // System.out.printf("%f or %f\n", upper[Gaussian2DFunction.SIGNAL], factor *
       // params[Gaussian2DFunction.X_SD] *
       // params[Gaussian2DFunction.Y_SD]);
@@ -927,15 +935,15 @@ public class Gaussian2DFitter {
   private static void setStrictlyPositiveLimits(final int npeaks, final int paramsPerPeak,
       final double[] params, final boolean isZFitting) {
     for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
-      if (params[j + Gaussian2DFunction.SIGNAL] <= 0) {
-        params[j + Gaussian2DFunction.SIGNAL] = 0.1;
+      if (params[j + Gaussian2DFunction.SIGNAL] < STRICTLY_POSITIVE_MIN_SIGNAL) {
+        params[j + Gaussian2DFunction.SIGNAL] = STRICTLY_POSITIVE_MIN_SIGNAL;
       }
       if (!isZFitting) {
-        if (params[j + Gaussian2DFunction.X_SD] <= 0) {
-          params[j + Gaussian2DFunction.X_SD] = 0.01;
+        if (params[j + Gaussian2DFunction.X_SD] < STRICTLY_POSITIVE_MIN_WIDTH) {
+          params[j + Gaussian2DFunction.X_SD] = STRICTLY_POSITIVE_MIN_WIDTH;
         }
-        if (params[j + Gaussian2DFunction.Y_SD] <= 0) {
-          params[j + Gaussian2DFunction.Y_SD] = 0.01;
+        if (params[j + Gaussian2DFunction.Y_SD] < STRICTLY_POSITIVE_MIN_WIDTH) {
+          params[j + Gaussian2DFunction.Y_SD] = STRICTLY_POSITIVE_MIN_WIDTH;
         }
       }
     }
@@ -1055,7 +1063,7 @@ public class Gaussian2DFitter {
       angle += Math.PI / 2.0;
       // Check domain
       if (angle > Math.PI) {
-        angle -= 2 * Math.PI;
+        angle -= TWO_PI;
       }
     }
 
