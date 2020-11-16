@@ -413,46 +413,47 @@ public class Gaussian2DFitter {
 
     // Set all zero height peaks to a fraction of the maximum to allow fitting
     if (zeroHeight > 0) {
-      // Amplitude estimates
-      double max = 0;
+      // Find max amplitude and signal estimate
+      double maxAmplitude = 0;
+      double maxSignal = 0;
       for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++) {
-        if (amplitudeEstimate[i] && max < params[j]) {
-          max = params[j];
+        if (amplitudeEstimate[i]) {
+          if (maxAmplitude < params[j]) {
+            maxAmplitude = params[j];
+          }
+        } else if (maxSignal < params[j]) {
+          maxSignal = params[j];
         }
       }
-      if (max == 0) {
-        max = y[0];
+
+      // Amplitude estimates
+      if (maxAmplitude == 0) {
+        maxAmplitude = y[0];
         for (int i = maxx * maxy; --i > 0;) {
-          if (max < y[i]) {
-            max = y[i];
+          if (maxAmplitude < y[i]) {
+            maxAmplitude = y[i];
           }
         }
-        max -= getBackground(y, maxx, maxy, 2);
+        maxAmplitude -= getBackground(y, maxx, maxy, 2);
       }
-      max *= 0.1; // Use fraction of the max peak
+      maxAmplitude *= 0.1; // Use fraction of the max peak
       for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++) {
         if (amplitudeEstimate[i] && params[j] <= 0) {
-          params[j] = max;
+          params[j] = maxAmplitude;
         }
       }
 
       // Signal estimates
-      max = 0;
-      for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++) {
-        if (!amplitudeEstimate[i] && max < params[j]) {
-          max = params[j];
-        }
-      }
-      if (max == 0) {
+      if (maxSignal == 0) {
         for (int i = maxx * maxy; --i > 0;) {
-          max += y[i];
+          maxSignal += y[i];
         }
-        max -= ySize * getBackground(y, maxx, maxy, 2);
+        maxSignal -= ySize * getBackground(y, maxx, maxy, 2);
       }
-      max *= 0.1; // Use fraction of the max peak
+      maxSignal *= 0.1; // Use fraction of the max peak
       for (int j = Gaussian2DFunction.SIGNAL, i = 0; j < params.length; j += paramsPerPeak, i++) {
         if (!amplitudeEstimate[i] && params[j] <= 0) {
-          params[j] = max;
+          params[j] = maxSignal;
         }
       }
     }
@@ -476,8 +477,7 @@ public class Gaussian2DFitter {
       params[Gaussian2DFunction.BACKGROUND] = Math.max(0, params[Gaussian2DFunction.BACKGROUND]);
       // Note: Comment this out and find where the estimates are created badly.
       // These occurrences should be fixed with better estimates.
-      setStrictlyPositiveLimits(npeaks, paramsPerPeak, params,
-          fitConfiguration.isZFitting());
+      setStrictlyPositiveLimits(npeaks, paramsPerPeak, params, fitConfiguration.isZFitting());
     }
 
     // Re-copy the parameters now they have all been set
