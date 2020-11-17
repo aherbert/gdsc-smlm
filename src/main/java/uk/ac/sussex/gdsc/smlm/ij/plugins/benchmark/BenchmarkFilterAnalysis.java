@@ -5830,7 +5830,7 @@ public class BenchmarkFilterAnalysis
   }
 
   /**
-   * Gets the filename (with a .xml extension).
+   * Gets the filename (with a .json extension).
    *
    * @param title the title
    * @param filename the filename
@@ -5838,9 +5838,9 @@ public class BenchmarkFilterAnalysis
    */
   static String getFilename(String title, String filename) {
     filename = ImageJUtils.getFilename(title, filename);
-    // Use XML extension
+    // Use JSON extension
     if (filename != null) {
-      filename = FileUtils.replaceExtension(filename, ".xml");
+      filename = FileUtils.replaceExtension(filename, ".json");
     }
     return filename;
   }
