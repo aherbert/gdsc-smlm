@@ -2497,7 +2497,7 @@ public class PeakFit implements PlugInFilter {
         ParameterUtils.isPositive("Residuals threshold", config.getResidualsThreshold());
         ParameterUtils.isPositive("Duplicate distance", config.getDuplicateDistance());
 
-        if (!fitConfig.isSmartFilter()) {
+        if (!fitConfig.isDisableSimpleFilter()) {
           ParameterUtils.isPositive("Coordinate Shift factor",
               fitConfig.getCoordinateShiftFactor());
           ParameterUtils.isPositive("Signal strength", fitConfig.getSignalStrength());
@@ -2506,7 +2506,7 @@ public class PeakFit implements PlugInFilter {
         if (extraOptions) {
           ParameterUtils.isPositive("Noise", fitConfig.getNoise());
         }
-        if (!fitConfig.isSmartFilter()) {
+        if (!fitConfig.isDisableSimpleFilter()) {
           ParameterUtils.isPositive("Min width factor", fitConfig.getMinWidthFactor());
           ParameterUtils.isPositive("Width factor", fitConfig.getMaxWidthFactor());
           ParameterUtils.isPositive("Precision threshold", fitConfig.getPrecisionThreshold());
