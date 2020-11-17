@@ -758,6 +758,7 @@ public class ConfigurationTemplate implements PlugIn {
     title = "Template Manager";
     final GenericDialog gd = new GenericDialog(title);
     final String[] options = SettingsManager.getNames((Object[]) TemplateOption.values());
+    gd.addMessage("Current template count = " + templates.size());
     gd.addChoice("Option", options, options[settings.getOption()]);
     gd.addHelp(HelpUrls.getUrl("template-manager"));
     gd.showDialog();
@@ -824,7 +825,7 @@ public class ConfigurationTemplate implements PlugIn {
     settings.clearSelectedStandardTemplates();
     settings.addAllSelectedStandardTemplates(selected);
 
-    int count = 0;
+    int count = templates.size();
 
     // Keep a hash of those not loaded from inline resources
     final HashSet<String> remaining = new HashSet<>(selected.size());
@@ -833,7 +834,6 @@ public class ConfigurationTemplate implements PlugIn {
       // Try and get the template from inline resources
       final Template t = inlineTemplates.get(name);
       if (t != null) {
-        count++;
         templates.put(name, t);
       } else {
         remaining.add(name);
@@ -848,13 +848,14 @@ public class ConfigurationTemplate implements PlugIn {
           list.add(t);
         }
       }
-      count += loadTemplateResources(list.toArray(new TemplateResource[0]));
+      loadTemplateResources(list.toArray(new TemplateResource[0]));
     }
 
+    count = templates.size() - count;
     if (count > 0) {
       saveLoadedTemplates(templates);
+      IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "new standard template"));
     }
-    IJ.showMessage("Loaded " + TextUtils.pleural(count, "standard template"));
   }
 
   /**
@@ -909,13 +910,12 @@ public class ConfigurationTemplate implements PlugIn {
     settings.clearSelectedCustomTemplates();
     settings.addAllSelectedCustomTemplates(selected);
 
-    int count = 0;
+    int count = templates.size();
     final TemplateSettings.Builder builder = TemplateSettings.newBuilder();
     for (final String path : selected) {
       builder.clear();
       final File file = new File(path);
       if (SettingsManager.fromJson(file, builder, 0)) {
-        count++;
         final String name = FileUtils.removeExtension(file.getName());
         // Assume the tif image will be detected automatically
         addTemplate(templates, name, builder.build(), TemplateType.CUSTOM, file, null);
@@ -925,10 +925,11 @@ public class ConfigurationTemplate implements PlugIn {
       }
     }
 
+    count = templates.size() - count;
     if (count > 0) {
       saveLoadedTemplates(templates);
+      IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "new custom template"));
     }
-    IJ.showMessage(TITLE, "Loaded " + TextUtils.pleural(count, "custom template"));
   }
 
   private void removeLoadedTemplates() {
