@@ -1879,7 +1879,9 @@ The plugin presents a non-blocking dialog allowing other windows in ``ImageJ`` t
 
 When the dialog is shown the input image is taken as the currently active image and the spot filter settings can be configured. In the ``Peak Fit`` plugin the type of camera can be selected. In this plugin the type of camera is only relevant if it is a sCMOS camera with a per-pixel model. The dialog only allows the camera model to be chosen. If the dimensions of the image are different from the camera model then a crop selection from the camera model must be made. The camera model is then used to subtract the bias and apply the gain on a per-pixel basis before the spot filter is applied. The intensities will be in photons. If the camera was a CCD-type camera then the bias and gain are global and the filter will identify the same candidates before and after transformation to photons. For simplicity this step is omitted and the intensities will be in camera counts.
 
-The following preview specific parameters can be configured:
+The plugin will begin analysing the image when the ``Preview`` button is clicked and the spot candidates are overlaid on the image. The output of the preview is dependent on whether there is ground truth data loaded for the true localisations in the image. If the ``Save`` button is pressed then all the settings will be saved to the existing settings. If the ``Close`` button is pressed then changes to the settings are discarded. The image overlay on the input image is removed when the plugin dialog closes.
+
+By default the plugin will apply the spot filter to the image data and show a preview of the identified spot candidates. The following preview specific parameters can be configured:
 
 .. list-table::
    :widths: 20 80
@@ -1908,7 +1910,32 @@ The following preview specific parameters can be configured:
    * - Preview
      - Results are shown when the ``Preview`` checkbox is selected. The plugin will update the results dynamically when the settings are changed, or the active frame in the input image is changed.
 
-If the ``Save`` button is pressed then all the settings will be saved to the existing settings. If the ``Close`` button is pressed then changes to the settings are discarded. The image overlay on the input image is removed when the plugin dialog closes.
+If the current image is a simulated image and there is associated ground truth data loaded (see :numref:`{number}: {name} <model_plugins:Load Benchmark Data>`) then the candidate spots are compared to the true localisations. The candidates can then be overlaid as true positives or false positives on the image. The following preview specific parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Match distance
+     - The distance (in pixels) between a spot candidate and a localisation for a match.
+
+   * - Lower match distance
+     - The fraction of the match distance for a perfect match. When less than 100% there is a lower and upper match distance. Any spot within the lower distance to a localisation scores a perfect match of 1. Above the upper distance is no match. In between the two the match is counted as both a match and not a match using a weighting so the total is 1. The effect is that the match statistics are computed as if an average of the scores using all distances between the lower and upper match distance.
+
+   * - Multiple matches
+     - Allow a candidate to match more than one localisation. Note that this is relevant for high density samples where true localisations may overlap and appear as a single larger spot. A candidate that matches multiple localisations has the match scores summed (which may be above 1) and the false positive score for the candidate is the larger of 1 minus the matched score, or zero. Thus a candidates false positive score cannot be negative but the true positive score may be above one.
+
+   * - Show TP
+     - Show the true positives on the overlay in green.
+
+   * - Show FP
+     - Show the false positives on the overlay in red.
+
+   * - Preview
+     - Results are shown when the ``Preview`` checkbox is selected. The plugin will update the results dynamically when the settings are changed, or the active frame in the input image is changed.
 
 The results created by the plugin are described in the following sections.
 
@@ -1931,9 +1958,11 @@ Image Overlay
 
 Shows the pixel image after the spot filter has been applied to the current image frame. Note that the image is shown as an overlay and the original image data is not changed. The image contrast is mapped to show the full minimum to maximum range.
 
-If the ``Top N`` option is active then the overlay will include spots for the top N candidates. These are shown using a colour map of intensities that avoids white and black extremes. This is for use over a greyscale image.
+In the default mode if the ``Top N`` option is active then the overlay will include spots for the top N candidates. These are shown using a colour map of intensities that avoids white and black extremes. This is for use over a greyscale image.
 
 If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a circle. This can be used in conjuction with the candidate intensity plot to find spots with a selected intensity by adjusting the selected candidate based on the plot profile.
+
+When ground-truth data is available the ``Top N`` option is not active. The overlay will optionally show true positives in green and false positives in red.
 
 
 .. index:: Candidate Intensity Plot
@@ -1941,7 +1970,7 @@ If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is mar
 Candidate Intensity Plot
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Shows the candidate spot intensity against the rank.
+Shows the candidate spot intensity against the rank. Displayed when ground-truth data is not available.
 
 If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is marked using a line. This moves dynamically when the ``Select`` option is adjusted.
 
@@ -1951,7 +1980,29 @@ If the ``Select`` option is active then the N\ :sup:`th` ranked candidate is mar
 Neighbour Histogram
 ~~~~~~~~~~~~~~~~~~~
 
-Shows a histogram of the count of neighbours around a candidate. The size of the box around each candidate is configured using the ``Neighbour radius``. The box dimensions are :math:`2r + 1` where *r* is the radius.
+Shows a histogram of the count of neighbours around a candidate. Displayed when ground-truth data is not available.
+
+The size of the box around each candidate is configured using the ``Neighbour radius``. The box dimensions are :math:`2r + 1` where *r* is the radius.
+
+
+.. index:: Candidate Performance Plot
+
+Candidate Performance Plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Shows the match statistics against the candidate spot rank. Displayed when ground-truth data is available.
+
+The collection of spot candidates is scored against the ground truth data using each set of top N candidates starting from N=1. The Jaccard, precision and recall are plotted against the spot rank (see :numref:`{number}: {name} <comparison_metrics:Comparison Metrics>`).
+
+
+.. index:: Candidate Precision-Recall Plot
+
+Candidate Precision-Recall Plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Shows the precision against the recall. Displayed when ground-truth data is available.
+
+The collection of spot candidates is scored against the ground truth data using each set of top N candidates starting from N=1. The precision and recall are plotted against each other. As the number of candidates increases the recall will increase but the precision typically reduces. The area under the precision-recall curve (AUC) score has a maximum of 1 and is an indicator of the quality of the spot candidate identification and ranking.
 
 
 .. index:: ! Fit Maxima
