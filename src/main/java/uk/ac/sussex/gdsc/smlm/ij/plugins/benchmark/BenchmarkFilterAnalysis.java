@@ -2782,8 +2782,7 @@ public class BenchmarkFilterAnalysis
 
       localFitResultData.maxUniqueId = uniqueId.get();
 
-      localFitResultData.resultsList =
-          multiPathFitResults.toArray(new MultiPathFitResults[0]);
+      localFitResultData.resultsList = multiPathFitResults.toArray(new MultiPathFitResults[0]);
 
       Arrays.sort(localFitResultData.resultsList,
           (o1, o2) -> Integer.compare(o1.getFrame(), o2.getFrame()));
@@ -5907,7 +5906,7 @@ public class BenchmarkFilterAnalysis
       getNotes(templateSettings, topFilterSummary);
       templateSettings.setFitEngineSettings(config.getFitEngineSettings());
       if (!SettingsManager.toJson(templateSettings.build(), filename,
-          SettingsManager.FLAG_SILENT)) {
+          SettingsManager.FLAG_SILENT | SettingsManager.FLAG_JSON_WHITESPACE)) {
         IJ.log("Unable to save the template configuration");
         return;
       }
