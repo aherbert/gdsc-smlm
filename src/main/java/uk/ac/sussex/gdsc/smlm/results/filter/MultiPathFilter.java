@@ -1750,7 +1750,7 @@ public class MultiPathFilter {
       // }
       // }
     }
-    return list.toArray(new PreprocessedPeakResult[list.size()]);
+    return list.toArray(new PreprocessedPeakResult[0]);
   }
 
   /**
@@ -2253,7 +2253,7 @@ public class MultiPathFilter {
       return null;
     }
     final FractionalAssignment[] tmp =
-        assignments.toArray(new FractionalAssignment[assignments.size()]);
+        assignments.toArray(new FractionalAssignment[0]);
     final RankedScoreCalculator calc = RankedScoreCalculator.create(tmp, actual, predicted);
     final double[] result = calc.score(predicted, false, save);
     score[0] += result[0];

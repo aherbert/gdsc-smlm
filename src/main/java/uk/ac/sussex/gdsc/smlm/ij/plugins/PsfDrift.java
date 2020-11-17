@@ -455,7 +455,7 @@ public class PsfDrift implements PlugIn {
     settings = Settings.load();
     fitConfig = fitConfigRef.get().createCopy();
     gd.addMessage("Select the input PSF image");
-    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), settings.title);
+    gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addNumericField("Scale", settings.scale, 2);
     gd.addNumericField("z_depth", settings.zDepth, 2, 6, "nm");
@@ -1080,7 +1080,7 @@ public class PsfDrift implements PlugIn {
     gd.addMessage("Approximate the volume of the PSF as a Gaussian and\n"
         + "compute the equivalent Gaussian width.");
     settings = Settings.load();
-    gd.addChoice("PSF", titles.toArray(new String[titles.size()]), settings.title);
+    gd.addChoice("PSF", titles.toArray(new String[0]), settings.title);
     gd.addCheckbox("Use_offset", settings.useOffset);
     gd.addSlider("Smoothing", 0, 0.5, settings.smoothing);
 

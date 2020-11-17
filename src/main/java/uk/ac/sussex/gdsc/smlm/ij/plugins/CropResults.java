@@ -163,7 +163,7 @@ public class CropResults implements PlugIn {
     gd.addNumericField("Height", settings.getHeight(), 2);
     if (!titles.isEmpty()) {
       gd.addCheckbox("Use_ROI", settings.getUseRoi());
-      final String[] items = titles.toArray(new String[titles.size()]);
+      final String[] items = titles.toArray(new String[0]);
       gd.addChoice("Image", items, settings.getRoiImage());
     }
     addStandardFields(gd);
@@ -435,7 +435,7 @@ public class CropResults implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("roi-crop-results"));
 
-    final String[] items = titles.toArray(new String[titles.size()]);
+    final String[] items = titles.toArray(new String[0]);
     gd.addMessage("Use ROI from ...");
     gd.addChoice("Image", items, settings.getRoiImage());
     addStandardFields(gd);

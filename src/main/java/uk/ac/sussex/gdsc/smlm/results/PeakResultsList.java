@@ -82,7 +82,7 @@ public class PeakResultsList extends AbstractPeakResults {
    * @return The outputs.
    */
   public PeakResults[] toArray() {
-    return results.toArray(new PeakResults[results.size()]);
+    return results.toArray(new PeakResults[0]);
   }
 
   @Override

@@ -110,7 +110,7 @@ public final class CustomContentHelper {
       index = addFace(map, vertices, faces, list.get(i + 2), index);
     }
 
-    return Pair.of(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[0]), faces.toArray());
   }
 
   private static int addFace(TObjectIntHashMap<Point3f> map, LocalList<Point3f> vertices,

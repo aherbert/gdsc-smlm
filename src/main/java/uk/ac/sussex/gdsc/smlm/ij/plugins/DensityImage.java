@@ -693,7 +693,7 @@ public class DensityImage implements PlugIn {
         settings.roiImage = titles.get(0);
         Recorder.recordOption("Image", settings.roiImage);
       } else {
-        final String[] items = titles.toArray(new String[titles.size()]);
+        final String[] items = titles.toArray(new String[0]);
         gd = new ExtendedGenericDialog(TITLE);
         gd.addMessage("Select the source image for the ROI");
         gd.addChoice("Image", items, settings.roiImage);

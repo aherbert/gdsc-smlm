@@ -495,7 +495,7 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     // The normals can be copied as they are unchanged.
     // The mesh should contain the same coordinates as the geometry array.
     final int objectSize = objectVertices.length;
-    final Point3f[] oldCoords = mesh.toArray(new Point3f[mesh.size()]);
+    final Point3f[] oldCoords = mesh.toArray(new Point3f[0]);
     final float[] oldColors = new float[oldCoords.length * 3];
     ga.getColors(0, oldColors);
     final Point3f[] coords = new Point3f[size * objectSize];

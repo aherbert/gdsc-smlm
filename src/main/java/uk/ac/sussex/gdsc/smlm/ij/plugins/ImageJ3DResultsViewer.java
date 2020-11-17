@@ -1063,7 +1063,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final List<String> titleList = new LocalList<>();
     titleList.add("New window");
     buildWindowList(title, univList, titleList);
-    final String[] titles = titleList.toArray(new String[titleList.size()]);
+    final String[] titles = titleList.toArray(new String[0]);
 
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addMessage("Select a dataset to display");
@@ -1873,7 +1873,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final LocalList<Point3f> points = data.points;
 
     final PeakResult[] originalPeakResults = results.toArray();
-    final Point3f[] originalPoints = points.toArray(new Point3f[points.size()]);
+    final Point3f[] originalPoints = points.toArray(new Point3f[0]);
 
     // We need another array to store the output
     final PeakResult[] peakResults = new PeakResult[originalPeakResults.length];
@@ -3571,10 +3571,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
       appearance.getPointAttributes().setPointSize(sphereSize[0].x);
     }
     if (settings.getSupportDynamicTransparency()) {
-      return new ItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
+      return new ItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance,
           sphereSize, colors, alpha);
     }
-    return new OrderedItemGeometryGroup(points.toArray(new Point3f[points.size()]), ga, appearance,
+    return new OrderedItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance,
         sphereSize, colors, alpha);
   }
 
@@ -3671,7 +3671,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     // Support drawing as points ...
     if (settings.getRendering() == 0) {
-      final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga,
+      final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga,
           appearance, null, null, transparency);
       if (alpha != null) {
         mesh.setItemAlpha(alpha);
@@ -3694,7 +3694,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     IJ.showStatus("Creating 3D mesh ...");
-    final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[points.size()]), ga,
+    final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga,
         appearance, sphereSize, null, transparency);
     if (alpha != null) {
       mesh.setItemAlpha(alpha);
@@ -3791,14 +3791,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final ImageJTrackProgress progress = null; // Used for debugging construction time
     if (alpha != null) {
       final TransparentItemTriangleMesh mesh = new TransparentItemTriangleMesh(
-          point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[points.size()]),
+          point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[0]),
           sphereSize, null, transparency, creaseAngle, progress);
       mesh.setItemAlpha(alpha);
       return mesh;
     }
 
     return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-        points.toArray(new Point3f[points.size()]), sphereSize, null, transparency, creaseAngle,
+        points.toArray(new Point3f[0]), sphereSize, null, transparency, creaseAngle,
         progress);
   }
 }

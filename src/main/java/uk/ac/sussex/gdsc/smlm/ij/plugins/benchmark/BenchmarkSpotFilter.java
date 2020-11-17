@@ -1032,7 +1032,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
 
         final FractionalAssignment[] assignments =
-            fractionalAssignments.toArray(new FractionalAssignment[fractionalAssignments.size()]);
+            fractionalAssignments.toArray(new FractionalAssignment[0]);
         // sort the assignments
         AssignmentComparator.sort(assignments);
 
@@ -1671,7 +1671,7 @@ public class BenchmarkSpotFilter implements PlugIn {
         break;
       }
     }
-    return result.toArray(new BatchResult[result.size()]);
+    return result.toArray(new BatchResult[0]);
   }
 
   private boolean showDialog() {

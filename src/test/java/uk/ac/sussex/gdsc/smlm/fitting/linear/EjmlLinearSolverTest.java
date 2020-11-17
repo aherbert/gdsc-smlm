@@ -562,8 +562,8 @@ class EjmlLinearSolverTest {
       }
     }
 
-    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
-    final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[bList.size()]);
+    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
+    final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[0]);
     final int runs = 100000 / a.length;
     final TimingService ts = new TimingService(runs);
     final LocalList<SolverTimingTask> tasks = new LocalList<>();
@@ -860,7 +860,7 @@ class EjmlLinearSolverTest {
       }
     }
 
-    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[aList.size()]);
+    final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
     final boolean[] ignore = new boolean[a.length];
     final double[][] answer = new double[a.length][];
     final int runs = 100000 / a.length;

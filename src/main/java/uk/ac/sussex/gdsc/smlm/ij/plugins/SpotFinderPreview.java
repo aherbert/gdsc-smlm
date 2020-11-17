@@ -632,7 +632,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       }
 
       final FractionalAssignment[] assignments =
-          fractionalAssignments.toArray(new FractionalAssignment[fractionalAssignments.size()]);
+          fractionalAssignments.toArray(new FractionalAssignment[0]);
 
       // Compute matches
       final RankedScoreCalculator calc =

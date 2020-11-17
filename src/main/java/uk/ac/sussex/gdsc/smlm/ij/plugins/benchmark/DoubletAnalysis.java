@@ -1064,7 +1064,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         }
 
         final List<PointPair> pairs = new ArrayList<>();
-        MatchCalculator.analyseResults2D(actual, f1.toArray(new ResultCoordinate[f1.size()]),
+        MatchCalculator.analyseResults2D(actual, f1.toArray(new ResultCoordinate[0]),
             settings.matchDistance, null, null, null, pairs);
         for (final PointPair pair : pairs) {
           final ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();
@@ -1085,7 +1085,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
         // This may not matter unless the density is high.
 
-        MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[f2.size()]),
+        MatchCalculator.analyseResults2D(actual, f2.toArray(new Coordinate[0]),
             settings.matchDistance, null, null, null, pairs);
         for (final PointPair pair : pairs) {
           final ResultCoordinate coord = (ResultCoordinate) pair.getPoint2();

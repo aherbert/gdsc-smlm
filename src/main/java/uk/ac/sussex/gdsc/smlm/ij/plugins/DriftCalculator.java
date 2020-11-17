@@ -500,7 +500,7 @@ public class DriftCalculator implements PlugIn {
     if (stackTitles != null) {
       methods.add(Settings.STACK_ALIGNMENT);
     }
-    final String[] items = methods.toArray(new String[methods.size()]);
+    final String[] items = methods.toArray(new String[0]);
     gd.addChoice("Method", items, settings.method);
     gd.addMessage("Stopping criteria");
     gd.addSlider("Max_iterations", 0, 100, settings.maxIterations);
@@ -935,7 +935,7 @@ public class DriftCalculator implements PlugIn {
         roiSpots.add(spots);
       }
     }
-    return roiSpots.toArray(new Spot[roiSpots.size()][]);
+    return roiSpots.toArray(new Spot[0][]);
   }
 
   private static Spot[] findSpots(MemoryPeakResults results, Rectangle bounds, int[] limits) {
@@ -965,7 +965,7 @@ public class DriftCalculator implements PlugIn {
       }
     }
 
-    return newList.toArray(new Spot[newList.size()]);
+    return newList.toArray(new Spot[0]);
   }
 
   /**

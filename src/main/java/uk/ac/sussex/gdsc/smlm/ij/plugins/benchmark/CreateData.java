@@ -4621,7 +4621,7 @@ public class CreateData implements PlugIn {
     final String[] images;
     if (!imageNames.isEmpty()) {
       availableModels.add(PSF_MODELS[PSF_MODEL_IMAGE]);
-      images = imageNames.toArray(new String[imageNames.size()]);
+      images = imageNames.toArray(new String[0]);
     } else {
       images = null;
     }
@@ -4629,7 +4629,7 @@ public class CreateData implements PlugIn {
     if (astigmatismModels.length != 0) {
       availableModels.add(PSF_MODELS[PSF_MODEL_ASTIGMATISM]);
     }
-    final String[] models = availableModels.toArray(new String[availableModels.size()]);
+    final String[] models = availableModels.toArray(new String[0]);
     gd.addChoice("PSF_model", models, settings.getPsfModel(), new OptionListener<Integer>() {
       @Override
       public boolean collectOptions(Integer value) {

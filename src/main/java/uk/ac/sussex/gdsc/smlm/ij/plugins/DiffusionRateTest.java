@@ -1172,7 +1172,7 @@ class DiffusionRateTest implements PlugIn {
     IJ.showProgress(1, myMsdAnalysisSteps);
 
     // This will only be fast if the list is an array
-    final Point[] list = points.toArray(new Point[points.size()]);
+    final Point[] list = points.toArray(new Point[0]);
 
     // Compute the base MSD
     final Point origin = new Point(0, 0, 0);

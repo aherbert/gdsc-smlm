@@ -487,7 +487,7 @@ public class PcPalmFitting implements PlugIn {
       // Use blank default value so bad macro parameters return nothing
       gd.addStringField("R_" + n, "");
     } else {
-      gd.addChoice("R_" + n, titles.toArray(new String[titles.size()]), "");
+      gd.addChoice("R_" + n, titles.toArray(new String[0]), "");
     }
 
     gd.addMessage("Cancel to finish");

@@ -2783,7 +2783,7 @@ public class BenchmarkFilterAnalysis
       localFitResultData.maxUniqueId = uniqueId.get();
 
       localFitResultData.resultsList =
-          multiPathFitResults.toArray(new MultiPathFitResults[multiPathFitResults.size()]);
+          multiPathFitResults.toArray(new MultiPathFitResults[0]);
 
       Arrays.sort(localFitResultData.resultsList,
           (o1, o2) -> Integer.compare(o1.getFrame(), o2.getFrame()));
@@ -2811,14 +2811,14 @@ public class BenchmarkFilterAnalysis
       // Add the results to the lists
       results.forEach((PeakResultProcedure) result -> {
         if (counter.advanceAndReset(result.getFrame()) && !tmp.isEmpty()) {
-          coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
+          coords.put(counter.previousFrame(), tmp.toArray(new UniqueIdPeakResult[0]));
           tmp.clear();
         }
         tmp.add(new UniqueIdPeakResult(tmp.size(), uniqueId.getAndIncrement(), result));
       });
 
       if (!tmp.isEmpty()) {
-        coords.put(counter.currentFrame(), tmp.toArray(new UniqueIdPeakResult[tmp.size()]));
+        coords.put(counter.currentFrame(), tmp.toArray(new UniqueIdPeakResult[0]));
       }
     }
     return coords;
@@ -4921,7 +4921,7 @@ public class BenchmarkFilterAnalysis
       final ArrayList<double[]> merged = new ArrayList<>(sample.length + seed.length);
       merged.addAll(Arrays.asList(seed));
       merged.addAll(Arrays.asList(sample));
-      seed = merged.toArray(new double[merged.size()][]);
+      seed = merged.toArray(new double[0][]);
     }
     return seed;
   }

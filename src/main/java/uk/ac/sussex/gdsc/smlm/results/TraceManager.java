@@ -418,7 +418,7 @@ public class TraceManager {
             traces.add(new Trace(peakResult));
           }
         }
-        return traces.toArray(new Trace[traces.size()]);
+        return traces.toArray(new Trace[0]);
       }
       final Trace[] traces = new Trace[localisations.length];
       for (int i = 0; i < traces.length; i++) {

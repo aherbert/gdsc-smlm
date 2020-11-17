@@ -767,7 +767,7 @@ public final class Shape3DHelper {
     }
 
     if (rendering.is2D()) {
-      gi.setCoordinates(coords.toArray(new Point3f[coords.size()]));
+      gi.setCoordinates(coords.toArray(new Point3f[0]));
       gi.setStripCounts(stripsCounts);
 
       if (colorDepth == 3) {
@@ -846,7 +846,7 @@ public final class Shape3DHelper {
       faces.add(value);
     }
 
-    return Pair.of(vertices.toArray(new Point3f[vertices.size()]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[0]), faces.toArray());
   }
 
   /**

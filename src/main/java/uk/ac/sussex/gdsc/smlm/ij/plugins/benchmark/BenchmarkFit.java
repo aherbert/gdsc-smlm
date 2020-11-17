@@ -1101,7 +1101,7 @@ public class BenchmarkFit implements PlugIn {
       }
     }
 
-    startPoints = list.toArray(new double[list.size()][]);
+    startPoints = list.toArray(new double[0][]);
     return startPoints;
   }
 

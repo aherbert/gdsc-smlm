@@ -1867,7 +1867,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final FractionScoreStore scoreStore = set::add;
 
     final MultiPathFitResults[] multiResults =
-        multiPathResults.toArray(new MultiPathFitResults[multiPathResults.size()]);
+        multiPathResults.toArray(new MultiPathFitResults[0]);
     // Filter with no filter
     final MultiPathFilter mpf =
         new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);

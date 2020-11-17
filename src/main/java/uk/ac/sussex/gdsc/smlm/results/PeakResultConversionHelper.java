@@ -269,7 +269,7 @@ public class PeakResultConversionHelper {
         // Ignore
       }
     }
-    return list.toArray(new Converter[list.size()]);
+    return list.toArray(new Converter[0]);
   }
 
   /**
@@ -297,7 +297,7 @@ public class PeakResultConversionHelper {
         // Ignore
       }
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   /**
@@ -346,7 +346,7 @@ public class PeakResultConversionHelper {
         // Ignore
       }
     }
-    return list.toArray(new String[list.size()]);
+    return list.toArray(new String[0]);
   }
 
   private String getOrCreateAngleUnit(String angleUnit) {

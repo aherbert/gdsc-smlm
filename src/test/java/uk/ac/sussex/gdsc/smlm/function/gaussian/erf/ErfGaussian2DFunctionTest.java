@@ -485,8 +485,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
         }
       }
     }
-    final double[][] x = params1.toArray(new double[params1.size()][]);
-    final double[][] x2 = (zDepth) ? params2.toArray(new double[params2.size()][]) : x;
+    final double[][] x = params1.toArray(new double[0][]);
+    final double[][] x2 = (zDepth) ? params2.toArray(new double[0][]) : x;
 
     final int runs = 10000 / x.length;
     final TimingService ts = new TimingService(runs);
@@ -1074,7 +1074,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
         }
       }
     }
-    final double[][] x = params.toArray(new double[params.size()][]);
+    final double[][] x = params.toArray(new double[0][]);
 
     final int runs = 10000 / x.length;
     final TimingService ts = new TimingService(runs);

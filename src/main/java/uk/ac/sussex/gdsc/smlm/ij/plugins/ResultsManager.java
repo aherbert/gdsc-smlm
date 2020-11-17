@@ -1197,7 +1197,7 @@ public class ResultsManager implements PlugIn {
    */
   private static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
       String inputOption, List<String> source, String filename) {
-    final String[] options = source.toArray(new String[source.size()]);
+    final String[] options = source.toArray(new String[0]);
     // Find the option
     inputOption = removeFormatting(inputOption);
 

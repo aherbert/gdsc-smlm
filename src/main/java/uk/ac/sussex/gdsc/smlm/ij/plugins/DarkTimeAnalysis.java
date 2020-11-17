@@ -69,7 +69,7 @@ public class DarkTimeAnalysis implements PlugIn {
     for (final ClusteringAlgorithm c : algorithms) {
       methods.add("Clustering (" + c.toString() + ")");
     }
-    METHOD = methods.toArray(new String[methods.size()]);
+    METHOD = methods.toArray(new String[0]);
   }
 
   private double msPerFrame;

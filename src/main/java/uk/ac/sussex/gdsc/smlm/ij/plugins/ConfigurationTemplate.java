@@ -848,7 +848,7 @@ public class ConfigurationTemplate implements PlugIn {
           list.add(t);
         }
       }
-      count += loadTemplateResources(list.toArray(new TemplateResource[list.size()]));
+      count += loadTemplateResources(list.toArray(new TemplateResource[0]));
     }
 
     if (count > 0) {

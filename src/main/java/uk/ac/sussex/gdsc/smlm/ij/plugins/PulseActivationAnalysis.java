@@ -173,9 +173,9 @@ public class PulseActivationAnalysis implements PlugIn {
 
     static {
       final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
-      specificCorrection = correction.toArray(new Correction[correction.size()]);
+      specificCorrection = correction.toArray(new Correction[0]);
       correction.remove(Correction.SUBTRACTION);
-      nonSpecificCorrection = correction.toArray(new Correction[correction.size()]);
+      nonSpecificCorrection = correction.toArray(new Correction[0]);
 
       // Produce 2^k for k in [0, 8]
       magnifications =

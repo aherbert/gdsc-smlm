@@ -131,7 +131,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
 
   @Override
   public boolean addCollection(Collection<PeakResult> results) {
-    return addArray(results.toArray(new PeakResult[results.size()]));
+    return addArray(results.toArray(new PeakResult[0]));
   }
 
   @Override

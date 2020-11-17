@@ -139,7 +139,7 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
 
   @Override
   public PeakResult[] toArray() {
-    return results.toArray(new PeakResult[size()]);
+    return results.toArray(new PeakResult[0]);
   }
 
   @Override

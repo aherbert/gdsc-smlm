@@ -171,7 +171,7 @@ public final class SettingsManager {
     static {
       final EnumSet<DistanceUnit> d = EnumSet.allOf(DistanceUnit.class);
       d.remove(DistanceUnit.UNRECOGNIZED);
-      values = d.toArray(new DistanceUnit[d.size()]);
+      values = d.toArray(new DistanceUnit[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
@@ -209,7 +209,7 @@ public final class SettingsManager {
     static {
       final EnumSet<IntensityUnit> d = EnumSet.allOf(IntensityUnit.class);
       d.remove(IntensityUnit.UNRECOGNIZED);
-      values = d.toArray(new IntensityUnit[d.size()]);
+      values = d.toArray(new IntensityUnit[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
@@ -247,7 +247,7 @@ public final class SettingsManager {
     static {
       final EnumSet<AngleUnit> d = EnumSet.allOf(AngleUnit.class);
       d.remove(AngleUnit.UNRECOGNIZED);
-      values = d.toArray(new AngleUnit[d.size()]);
+      values = d.toArray(new AngleUnit[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
@@ -285,7 +285,7 @@ public final class SettingsManager {
     static {
       final EnumSet<TimeUnit> d = EnumSet.allOf(TimeUnit.class);
       d.remove(TimeUnit.UNRECOGNIZED);
-      values = d.toArray(new TimeUnit[d.size()]);
+      values = d.toArray(new TimeUnit[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = getName(UnitHelper.getName(values[i]), UnitHelper.getShortName(values[i]));
@@ -323,7 +323,7 @@ public final class SettingsManager {
     static {
       final EnumSet<ResultsImageType> d = EnumSet.allOf(ResultsImageType.class);
       d.remove(ResultsImageType.UNRECOGNIZED);
-      values = d.toArray(new ResultsImageType[d.size()]);
+      values = d.toArray(new ResultsImageType[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = ResultsProtosHelper.getName(values[i]);
@@ -361,7 +361,7 @@ public final class SettingsManager {
     static {
       final EnumSet<ResultsFileFormat> d = EnumSet.allOf(ResultsFileFormat.class);
       d.remove(ResultsFileFormat.UNRECOGNIZED);
-      values = d.toArray(new ResultsFileFormat[d.size()]);
+      values = d.toArray(new ResultsFileFormat[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = ResultsProtosHelper.getName(values[i]);
@@ -399,7 +399,7 @@ public final class SettingsManager {
     static {
       final EnumSet<ResultsTableFormat> d = EnumSet.allOf(ResultsTableFormat.class);
       d.remove(ResultsTableFormat.UNRECOGNIZED);
-      values = d.toArray(new ResultsTableFormat[d.size()]);
+      values = d.toArray(new ResultsTableFormat[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = ResultsProtosHelper.getName(values[i]);
@@ -437,7 +437,7 @@ public final class SettingsManager {
     static {
       final EnumSet<DataFilterType> d = EnumSet.allOf(DataFilterType.class);
       d.remove(DataFilterType.UNRECOGNIZED);
-      values = d.toArray(new DataFilterType[d.size()]);
+      values = d.toArray(new DataFilterType[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = FitProtosHelper.getName(values[i]);
@@ -475,7 +475,7 @@ public final class SettingsManager {
     static {
       final EnumSet<DataFilterMethod> d = EnumSet.allOf(DataFilterMethod.class);
       d.remove(DataFilterMethod.UNRECOGNIZED);
-      values = d.toArray(new DataFilterMethod[d.size()]);
+      values = d.toArray(new DataFilterMethod[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = FitProtosHelper.getName(values[i]);
@@ -513,7 +513,7 @@ public final class SettingsManager {
     static {
       final EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
       d.remove(FitSolver.UNRECOGNIZED);
-      values = d.toArray(new FitSolver[d.size()]);
+      values = d.toArray(new FitSolver[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = FitProtosHelper.getName(values[i]);
@@ -551,7 +551,7 @@ public final class SettingsManager {
     static {
       final EnumSet<NoiseEstimatorMethod> d = EnumSet.allOf(NoiseEstimatorMethod.class);
       d.remove(NoiseEstimatorMethod.UNRECOGNIZED);
-      values = d.toArray(new NoiseEstimatorMethod[d.size()]);
+      values = d.toArray(new NoiseEstimatorMethod[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = FitProtosHelper.getName(values[i]);
@@ -589,7 +589,7 @@ public final class SettingsManager {
     static {
       final EnumSet<CameraType> d = EnumSet.allOf(CameraType.class);
       d.remove(CameraType.UNRECOGNIZED);
-      values = d.toArray(new CameraType[d.size()]);
+      values = d.toArray(new CameraType[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = CalibrationProtosHelper.getName(values[i]);
@@ -627,7 +627,7 @@ public final class SettingsManager {
     static {
       final EnumSet<PrecisionMethod> d = EnumSet.allOf(PrecisionMethod.class);
       d.remove(PrecisionMethod.UNRECOGNIZED);
-      values = d.toArray(new PrecisionMethod[d.size()]);
+      values = d.toArray(new PrecisionMethod[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {
         names[i] = FitProtosHelper.getName(values[i]);

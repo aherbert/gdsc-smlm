@@ -363,6 +363,6 @@ public class About implements PlugIn, MacroExtension {
     list.add(ExtensionDescriptor.newDescriptor("getSpecies", this, MacroExtension.ARG_NUMBER,
         MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT,
         MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
-    return list.toArray(new ExtensionDescriptor[list.size()]);
+    return list.toArray(new ExtensionDescriptor[0]);
   }
 }

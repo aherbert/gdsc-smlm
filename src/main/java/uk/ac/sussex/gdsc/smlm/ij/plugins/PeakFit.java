@@ -632,7 +632,7 @@ public class PeakFit implements PlugInFilter {
           PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D,
           PSFType.ASTIGMATIC_GAUSSIAN_2D);
       //@formatter:on
-      psfTypeValues = d.toArray(new PSFType[d.size()]);
+      psfTypeValues = d.toArray(new PSFType[0]);
       psfTypeNames = new String[psfTypeValues.length];
       for (int i = 0; i < psfTypeValues.length; i++) {
         psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);

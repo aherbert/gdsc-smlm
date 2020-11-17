@@ -165,7 +165,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
   @Override
   public PeakResult[] toArray() {
-    return results.toArray(new PeakResult[size()]);
+    return results.toArray(new PeakResult[0]);
   }
 
   @Override

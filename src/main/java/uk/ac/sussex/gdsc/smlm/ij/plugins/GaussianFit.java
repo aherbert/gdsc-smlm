@@ -227,7 +227,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
           PSFType.TWO_AXIS_GAUSSIAN_2D,
           PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
       //@formatter:on
-      psfTypeValues = set.toArray(new PSFType[set.size()]);
+      psfTypeValues = set.toArray(new PSFType[0]);
       psfTypeNames = new String[psfTypeValues.length];
       for (int i = 0; i < psfTypeValues.length; i++) {
         psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);

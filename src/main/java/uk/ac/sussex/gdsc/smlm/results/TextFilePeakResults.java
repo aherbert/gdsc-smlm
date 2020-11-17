@@ -223,7 +223,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     if (isShowPrecision()) {
       names.add("Precision (nm)");
     }
-    return names.toArray(new String[names.size()]);
+    return names.toArray(new String[0]);
   }
 
   @Override

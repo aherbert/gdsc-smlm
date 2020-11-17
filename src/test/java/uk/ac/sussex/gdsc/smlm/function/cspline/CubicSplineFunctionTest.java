@@ -951,9 +951,9 @@ public abstract class CubicSplineFunctionTest {
         }
       }
     }
-    final double[][] x1 = l1.toArray(new double[l1.size()][]);
-    final double[][] x2 = l2.toArray(new double[l2.size()][]);
-    final double[][] x3 = l3.toArray(new double[l3.size()][]);
+    final double[][] x1 = l1.toArray(new double[0][]);
+    final double[][] x2 = l2.toArray(new double[0][]);
+    final double[][] x3 = l3.toArray(new double[0][]);
 
     final TimingService ts = new TimingService(5);
     ts.execute(new FunctionTimingTask(gf, x2, order));

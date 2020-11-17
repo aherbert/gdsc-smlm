@@ -339,8 +339,8 @@ public class PeakResultTableModel extends AbstractTableModel {
       namesList.add("Precision (nm)");
     }
 
-    values = valuesList.toArray(new PeakResultData<?>[valuesList.size()]);
-    names = namesList.toArray(new String[namesList.size()]);
+    values = valuesList.toArray(new PeakResultData<?>[0]);
+    names = namesList.toArray(new String[0]);
 
     fireTableStructureChanged();
   }

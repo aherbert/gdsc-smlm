@@ -454,7 +454,7 @@ public class ResultsImageSampler {
     }
 
     // Sort descending by number in the frame
-    final ResultsSample[] samples = sampleList.toArray(new ResultsSample[sampleList.size()]);
+    final ResultsSample[] samples = sampleList.toArray(new ResultsSample[0]);
     Arrays.sort(samples, ReverseCountComparator.INSTANCE);
 
     final int[] xyz = new int[3];

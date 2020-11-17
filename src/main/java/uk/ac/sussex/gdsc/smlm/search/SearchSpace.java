@@ -882,7 +882,7 @@ public class SearchSpace {
       final ArrayList<double[]> merged = new ArrayList<>(sample.length + currentSearchSpace.length);
       merged.addAll(Arrays.asList(currentSearchSpace));
       merged.addAll(Arrays.asList(sample));
-      currentSearchSpace = merged.toArray(new double[merged.size()][]);
+      currentSearchSpace = merged.toArray(new double[0][]);
     }
 
     // Score

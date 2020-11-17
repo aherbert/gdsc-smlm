@@ -57,7 +57,7 @@ public abstract class AbstractPeakResults implements PeakResults {
   @Override
   public void addAll(Collection<PeakResult> results) {
     // Utility function
-    addAll(results.toArray(new PeakResult[results.size()]));
+    addAll(results.toArray(new PeakResult[0]));
   }
 
   @Override
