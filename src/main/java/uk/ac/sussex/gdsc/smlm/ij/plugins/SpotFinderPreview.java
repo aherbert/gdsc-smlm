@@ -285,11 +285,6 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     PeakFit.addSearchOptions(gd, provider);
     PeakFit.addBorderOptions(gd, provider);
-    gd.addSlider("Top_N", 0, 100, settings.topN);
-    topNScrollBar = gd.getLastScrollbar();
-    gd.addSlider("Select", 0, 100, settings.select);
-    selectScrollBar = gd.getLastScrollbar();
-    gd.addSlider("Neigbour_radius", 0, 10, settings.neighbourRadius);
 
     // Find if this image was created with ground truth data
     if (imp.getID() == CreateData.getImageId()) {
@@ -305,6 +300,15 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         final boolean integerCoords = false;
         actualCoordinates = ResultsMatchCalculator.getCoordinates(results, integerCoords);
       }
+    }
+    if (label == null) {
+      // If no ground truth data add options to show the spots by their rank
+      // and number of neighbours
+      gd.addSlider("Top_N", 0, 100, settings.topN);
+      topNScrollBar = gd.getLastScrollbar();
+      gd.addSlider("Select", 0, 100, settings.select);
+      selectScrollBar = gd.getLastScrollbar();
+      gd.addSlider("Neigbour_radius", 0, 10, settings.neighbourRadius);
     }
 
     ImageListener imageListener = null;
@@ -389,11 +393,11 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), 1);
     config.setSearch(gd.getNextNumber());
     config.setBorder(gd.getNextNumber());
-    settings.topN = (int) gd.getNextNumber();
-    settings.select = (int) gd.getNextNumber();
-    settings.neighbourRadius = (int) gd.getNextNumber();
-
-    if (label != null) {
+    if (label == null) {
+      settings.topN = (int) gd.getNextNumber();
+      settings.select = (int) gd.getNextNumber();
+      settings.neighbourRadius = (int) gd.getNextNumber();
+    } else {
       settings.distance = gd.getNextNumber();
       settings.lowerDistance = gd.getNextNumber();
       settings.multipleMatches = gd.getNextBoolean();
@@ -418,10 +422,9 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   }
 
   private void setLabel(String message) {
-    if (label == null) {
-      return;
+    if (label != null) {
+      label.setText(message);
     }
-    label.setText(message);
   }
 
   @Override
@@ -562,8 +565,10 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
     data = filter.getPreprocessedData();
 
     final int size = spots.length;
-    topNScrollBar.setMaximum(size);
-    selectScrollBar.setMaximum(size);
+    if (topNScrollBar != null) {
+      topNScrollBar.setMaximum(size);
+      selectScrollBar.setMaximum(size);
+    }
 
     fp = new FloatProcessor(width, height, data);
     final FloatProcessor out = new FloatProcessor(ip.getWidth(), ip.getHeight());
