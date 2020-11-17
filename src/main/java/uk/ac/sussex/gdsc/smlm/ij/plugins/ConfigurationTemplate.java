@@ -67,15 +67,11 @@ import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
-import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
-import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
-import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.ConfigurationTemplateSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.DefaultTemplate;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.DefaultTemplateSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
-import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
@@ -279,62 +275,13 @@ public class ConfigurationTemplate implements PlugIn {
   private static Map<String, Template> createInlineTemplates() {
     final Map<String, Template> inlineTemplates = new LinkedHashMap<>();
 
-    // Q. What settings should be in the template?
+    // Add the default.
+    // This will be a simple least squares estimator applicable to non-calibrated data.
     final FitEngineConfiguration config = new FitEngineConfiguration();
-    final FitConfiguration fitConfig = config.getFitConfiguration();
+    addInlineTemplate(inlineTemplates, "Default", config);
 
-    fitConfig.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND);
-    config.setFailuresLimit(1);
-
-    // LSE
-    fitConfig.setFitSolver(FitSolver.LVM_LSE);
-    config.setDataFilter(DataFilterMethod.MEAN, 1.2, false, 0);
-    fitConfig.setCoordinateShiftFactor(1.2);
-    fitConfig.setSignalStrength(5);
-    fitConfig.setMinPhotons(30);
-    fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setMaxWidthFactor(1.8);
-    fitConfig.setPrecisionThreshold(45);
-    addInlineTemplate(inlineTemplates, "PALM LSE", config);
-
-    // Add settings for STORM ...
-    config.setResidualsThreshold(0.4);
-    config.setFailuresLimit(3);
-    addInlineTemplate(inlineTemplates, "STORM LSE", config);
-    config.setResidualsThreshold(1);
-    config.setFailuresLimit(1);
-
-    // Change settings for different fit engines
-    fitConfig.setFitSolver(FitSolver.MLE);
-    config.setDataFilter(DataFilterMethod.GAUSSIAN, 1.2, false, 0);
-    fitConfig.setCoordinateShiftFactor(1.2);
-    fitConfig.setSignalStrength(4.5);
-    fitConfig.setMinPhotons(30);
-    fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setMaxWidthFactor(1.8);
-    fitConfig.setPrecisionThreshold(47);
-    addInlineTemplate(inlineTemplates, "PALM MLE", config);
-
-    // Add settings for STORM ...
-    config.setResidualsThreshold(0.4);
-    config.setFailuresLimit(3);
-    addInlineTemplate(inlineTemplates, "STORM MLE", config);
-    config.setResidualsThreshold(1);
-    config.setFailuresLimit(1);
-
-    fitConfig.setModelCamera(true);
-    fitConfig.setCoordinateShiftFactor(1.5);
-    fitConfig.setSignalStrength(4.5);
-    fitConfig.setMinPhotons(30);
-    fitConfig.setMinWidthFactor(1 / 1.8); // Original code used the reciprocal
-    fitConfig.setMaxWidthFactor(1.8);
-    fitConfig.setPrecisionThreshold(50);
-    addInlineTemplate(inlineTemplates, "PALM MLE Camera", config);
-
-    // Add settings for STORM ...
-    config.setResidualsThreshold(0.4);
-    config.setFailuresLimit(3);
-    addInlineTemplate(inlineTemplates, "STORM MLE Camera", config);
+    // Other templates are no longer hard coded.
+    // Some examples are included as resources.
 
     return inlineTemplates;
   }
