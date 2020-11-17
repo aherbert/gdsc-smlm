@@ -4562,6 +4562,9 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       case POISSON_CRLB:
         return new MultiFilterCrlb(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ,
             maxZ);
+      case PRECISION_METHOD_NA:
+        // Turn off precision
+        return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, 0, minZ, maxZ);
       default:
         throw new IllegalArgumentException("Unknown precision method: " + precisionMethod);
     }

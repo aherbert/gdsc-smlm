@@ -3316,6 +3316,9 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
       case PrecisionMethod.POISSON_CRLB_VALUE:
         return new MultiFilterCrlb(signal, snr, minWidth, maxWidth, shift, eshift, precision, minZ,
             maxZ);
+      case PrecisionMethod.PRECISION_METHOD_NA_VALUE:
+        // Turn off precision
+        return new MultiFilter(signal, snr, minWidth, maxWidth, shift, eshift, 0, minZ, maxZ);
       default:
         throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
     }
@@ -3578,6 +3581,9 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
         if (peak.getLocationVarianceCrlb() > varianceThreshold) {
           return FilterValidationFlag.LOCATION_VARIANCE_CRLB;
         }
+        break;
+      case PrecisionMethod.PRECISION_METHOD_NA_VALUE:
+        // Do nothing
         break;
       default:
         throw new IllegalStateException("Unknown precision method: " + getPrecisionMethod());
