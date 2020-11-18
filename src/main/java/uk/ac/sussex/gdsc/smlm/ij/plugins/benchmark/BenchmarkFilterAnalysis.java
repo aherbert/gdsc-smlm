@@ -5904,10 +5904,12 @@ public class BenchmarkFilterAnalysis
 
     // Only get this once when doing iterative analysis
     String filename;
-    if (saveTemplateIsSet) {
+    final boolean localSaveTemplateIsSet = saveTemplateIsSet;
+    if (localSaveTemplateIsSet) {
       filename = settings.templateFilename;
     } else {
       filename = getFilename("Template_File", settings.templateFilename);
+      saveTemplateIsSet = true;
     }
     if (filename != null) {
       settings.templateFilename = filename;
@@ -5918,6 +5920,12 @@ public class BenchmarkFilterAnalysis
       if (!SettingsManager.toJson(templateSettings.build(), filename,
           SettingsManager.FLAG_SILENT | SettingsManager.FLAG_JSON_WHITESPACE)) {
         IJ.log("Unable to save the template configuration");
+        return;
+      }
+
+      // The rest of the code below extracts an example image for the template.
+      // This need only be performed once as the sample image is the same for all iterations.
+      if (localSaveTemplateIsSet) {
         return;
       }
 
@@ -5954,7 +5962,7 @@ public class BenchmarkFilterAnalysis
       final ImagePlus[] out = new ImagePlus[1];
       out[0] = sampler.getSample(settings.countNo, settings.countLow, settings.countHigh);
 
-      if (!ImageJUtils.isMacro() && !saveTemplateIsSet) {
+      if (!ImageJUtils.isMacro()) {
         // Show the template results
         final ConfigurationTemplate configTemplate = new ConfigurationTemplate();
 
@@ -6065,9 +6073,6 @@ public class BenchmarkFilterAnalysis
       final ImagePlus example = out[0];
       filename = FileUtils.replaceExtension(filename, ".tif");
       IJ.save(example, filename);
-
-      // Do not repeat the prompts in save template
-      saveTemplateIsSet = true;
     }
   }
 
