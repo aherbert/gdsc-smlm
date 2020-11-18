@@ -331,6 +331,9 @@ public class BenchmarkFilterAnalysis
   /** The plugin settings. */
   private Settings settings;
 
+  /** Flag used to indicate that the template filename has been set during iterative analysis. */
+  private boolean saveTemplateIsSet;
+
   /**
    * Store the filter candidates data.
    */
@@ -5898,8 +5901,15 @@ public class BenchmarkFilterAnalysis
     // Remove the PSF width to make the template generic
     config.getFitConfiguration().setInitialPeakStdDev(0);
 
-    String filename = getFilename("Template_File", settings.templateFilename);
+    // Only get this once when doing iterative analysis
+    String filename;
+    if (saveTemplateIsSet) {
+      filename = settings.templateFilename;
+    } else {
+      filename = getFilename("Template_File", settings.templateFilename);
+    }
     if (filename != null) {
+      saveTemplateIsSet = true;
       settings.templateFilename = filename;
       Prefs.set(Settings.KEY_TEMPLATE_FILENAME, filename);
       final TemplateSettings.Builder templateSettings = TemplateSettings.newBuilder();
