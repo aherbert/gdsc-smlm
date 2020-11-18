@@ -319,8 +319,7 @@ public class ResultsImageSampler {
 
     // Create an array of all the sample entries.
     // This is used to sample regions by density.
-    data = new ResultsSample[map.size()];
-    map.values(data);
+    data = map.values(new ResultsSample[map.size()]);
   }
 
   /**
