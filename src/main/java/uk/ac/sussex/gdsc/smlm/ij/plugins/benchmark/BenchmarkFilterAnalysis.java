@@ -5910,7 +5910,6 @@ public class BenchmarkFilterAnalysis
       filename = getFilename("Template_File", settings.templateFilename);
     }
     if (filename != null) {
-      saveTemplateIsSet = true;
       settings.templateFilename = filename;
       Prefs.set(Settings.KEY_TEMPLATE_FILENAME, filename);
       final TemplateSettings.Builder templateSettings = TemplateSettings.newBuilder();
@@ -5955,7 +5954,7 @@ public class BenchmarkFilterAnalysis
       final ImagePlus[] out = new ImagePlus[1];
       out[0] = sampler.getSample(settings.countNo, settings.countLow, settings.countHigh);
 
-      if (!ImageJUtils.isMacro()) {
+      if (!ImageJUtils.isMacro() && !saveTemplateIsSet) {
         // Show the template results
         final ConfigurationTemplate configTemplate = new ConfigurationTemplate();
 
@@ -6066,6 +6065,9 @@ public class BenchmarkFilterAnalysis
       final ImagePlus example = out[0];
       filename = FileUtils.replaceExtension(filename, ".tif");
       IJ.save(example, filename);
+
+      // Do not repeat the prompts in save template
+      saveTemplateIsSet = true;
     }
   }
 
