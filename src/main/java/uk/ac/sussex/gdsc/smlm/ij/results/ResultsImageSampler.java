@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
-import org.apache.commons.rng.simple.internal.SeedFactory;
+import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -74,7 +74,7 @@ public class ResultsImageSampler {
   private int lower;
   private int upper;
   private final LocalList<ResultsSample> sampleList = new LocalList<>();
-  private UniformRandomProvider rng = new SplitMix64(SeedFactory.createLong());
+  private UniformRandomProvider rng = new SplitMix64(RandomSource.createLong());
 
   private static class PeakResultList {
     int size;
@@ -304,6 +304,7 @@ public class ResultsImageSampler {
       if (p.getFrame() < 1 || p.getFrame() > stack.getSize()) {
         continue;
       }
+
       final long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 
       ResultsSample current = map.putIfAbsent(index, next);
