@@ -38,11 +38,15 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
 import org.apache.commons.rng.simple.RandomSource;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
+import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.Statistics;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
+import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
@@ -75,6 +79,12 @@ public class ResultsImageSampler {
   private int upper;
   private final LocalList<ResultsSample> sampleList = new LocalList<>();
   private UniformRandomProvider rng = new SplitMix64(RandomSource.createLong());
+
+  /**
+   * The SNR threshold. The Rose criterion for a visible object is SNR > 5. Here we use 3 so poor
+   * but not invisible spots can be viewed.
+   */
+  private double snrThreshold = 3;
 
   private static class PeakResultList {
     int size;
@@ -179,6 +189,7 @@ public class ResultsImageSampler {
     if (results.getDistanceUnit() != DistanceUnit.PIXEL) {
       throw new IllegalArgumentException("Results must be in pixel units");
     }
+    ValidationUtils.checkStrictlyPositive(size, "size");
 
     this.results = results;
     this.stack = stack;
@@ -299,23 +310,41 @@ public class ResultsImageSampler {
   private void createResultSamples() {
     final TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<>(results.size());
     ResultsSample next = ResultsSample.create(-1);
+    // For SNR computation
+    Object[] pixelArray = stack.getImageArray();
+    int width = stack.getWidth();
+    int height = stack.getHeight();
+    float[] buffer = null;
+    // Use a null float[] as this is not used for the getBoxRegionBounds method
+    ImageExtractor ie = ImageExtractor.wrap(null, width, height);
     for (final PeakResult p : results.toArray()) {
       // Avoid invalid slices
       if (p.getFrame() < 1 || p.getFrame() > stack.getSize()) {
         continue;
       }
 
-      final long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
+      // Avoid low SNR results. Get the SNR using a 3x3 region around the spot.
+      final Rectangle bounds =
+          ie.getBoxRegionBounds((int) p.getXPosition(), (int) p.getYPosition(), 1);
+      buffer =
+          ImageJImageConverter.getData(pixelArray[p.getFrame()], width, height, bounds, buffer);
+      final Statistics stats = new Statistics();
+      stats.add(buffer, 0, bounds.width * bounds.height);
+      // SNR will be NaN if the region has no size
+      final double snr = stats.getMean() / stats.getStandardDeviation();
+      if (snr > 3) {
+        final long index = getIndex(p.getXPosition(), p.getYPosition(), p.getFrame());
 
-      ResultsSample current = map.putIfAbsent(index, next);
-      if (current == null) {
-        // If the return value is null then this is a new insertion.
-        // Set the current value as the one we just added and create the next insertion object.
-        current = next;
-        current.index = index;
-        next = ResultsSample.create(-1);
+        ResultsSample current = map.putIfAbsent(index, next);
+        if (current == null) {
+          // If the return value is null then this is a new insertion.
+          // Set the current value as the one we just added and create the next insertion object.
+          current = next;
+          current.index = index;
+          next = ResultsSample.create(-1);
+        }
+        current.add(p);
       }
-      current.add(p);
     }
 
     // Create an array of all the sample entries.
@@ -563,5 +592,25 @@ public class ResultsImageSampler {
    */
   public void setMaxNumberOfEmptySamples(int maxNumberOfEmptySamples) {
     this.maxNumberOfEmptySamples = maxNumberOfEmptySamples;
+  }
+
+  /**
+   * Gets the Signal-to-Noise (SNR) threshold that results must exceed to be included.
+   *
+   * @return the SNR threshold
+   */
+  public double getSnrThreshold() {
+    return snrThreshold;
+  }
+
+  /**
+   * Sets the Signal-to-Noise (SNR) threshold that results must exceed to be included. The SNR is
+   * computed using the mean of a 3x3 pixel block around the result divided by the standard
+   * deviation within the same region.
+   *
+   * @param snrThreshold the new SNR threshold
+   */
+  public void setSnrThreshold(double snrThreshold) {
+    this.snrThreshold = snrThreshold;
   }
 }
