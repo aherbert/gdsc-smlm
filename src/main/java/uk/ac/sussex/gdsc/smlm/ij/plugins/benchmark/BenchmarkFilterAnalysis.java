@@ -631,6 +631,7 @@ public class BenchmarkFilterAnalysis
       countLow = 4;
       countHigh = 4;
       reUseFilters = true;
+      expandFilters = true;
       showColumns = new boolean[COLUMNS.length];
       Arrays.fill(showColumns, true);
       scoreDuplicateDistance = -1;
