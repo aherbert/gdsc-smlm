@@ -436,7 +436,7 @@ public class FitEngineConfiguration {
   /**
    * Include neighbour maxima in the fitting.
    *
-   * <p>Use this option when the fitting search region is large relative the the smoothing, thus
+   * <p>Use this option when the fitting search region is large relative to the smoothing, thus
    * other peaks may be within the region used for fitting.
    *
    * @param includeNeighbours the new include neighbours
