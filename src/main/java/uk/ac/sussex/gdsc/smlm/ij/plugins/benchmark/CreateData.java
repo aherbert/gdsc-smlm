@@ -243,6 +243,10 @@ public class CreateData implements PlugIn {
   private static final int PSF_MODEL_IMAGE = 2;
   private static final int PSF_MODEL_ASTIGMATISM = 3;
 
+  private static final String KEY_BENCHMARK_IMAGE = "gdsc.smlm.createData.benchmarkImage";
+  private static final String KEY_BENCHMARK_RESULTS_FILE =
+      "gdsc.smlm.createData.benchmarkResultsFile";
+
   /**
    * The PSF model type. This is set when validating the PSF settings.
    */
@@ -308,6 +312,19 @@ public class CreateData implements PlugIn {
     alwaysRemoveOutliers[PRECISION] = true;
     alwaysRemoveOutliers[PRECISION_IN_FOCUS] = true;
   }
+
+  /** The last benchmark parameters. */
+  private static BenchmarkParameters benchmarkParameters;
+
+  /** The last simulation parameters. */
+  private static SimulationParameters simulationParameters;
+
+  private static String benchmarkFile = "";
+  private static LoadLocalisationsSettings.Builder loadSettings;
+  private static String benchmarkImage = Prefs.get(KEY_BENCHMARK_IMAGE, "");
+  private static boolean benchmarkAuto;
+  private static int benchmarkImageId;
+  private static String benchmarkResultsName = Prefs.get(KEY_BENCHMARK_RESULTS_FILE, "");
 
   private String resultsFileHeader;
   private AtomicInteger photonsRemoved;
@@ -724,19 +741,6 @@ public class CreateData implements PlugIn {
       return background;
     }
   }
-
-  /** The last benchmark parameters. */
-  private static BenchmarkParameters benchmarkParameters;
-
-  /** The last simulation parameters. */
-  private static SimulationParameters simulationParameters;
-
-  private static String benchmarkFile = "";
-  private static LoadLocalisationsSettings.Builder loadSettings;
-  private static String benchmarkImage = "";
-  private static boolean benchmarkAuto;
-  private static int benchmarkImageId;
-  private static String benchmarkResultsName = "";
 
   @Override
   public void run(String arg) {
@@ -5899,6 +5903,9 @@ public class CreateData implements PlugIn {
     benchmarkImage = gd.getNextChoice();
     benchmarkFile = gd.getNextString();
     benchmarkAuto = gd.getNextBoolean();
+
+    Prefs.set(KEY_BENCHMARK_IMAGE, benchmarkImage);
+    Prefs.set(KEY_BENCHMARK_RESULTS_FILE, benchmarkFile);
 
     return true;
   }
