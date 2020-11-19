@@ -53,6 +53,7 @@ import uk.ac.sussex.gdsc.core.match.MatchCalculator;
 import uk.ac.sussex.gdsc.core.match.MatchResult;
 import uk.ac.sussex.gdsc.core.match.PointPair;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -625,8 +626,10 @@ public class ResultsMatchCalculator implements PlugIn {
       final int fp2 = n2 - tp2;
       final int fn2 = n1 - tp2;
 
+      // RMSD to be the root mean square deviation in a single dimension so divide by 2.
+      // (This assumes 2D Euclidean distances.)
       final MatchResult result =
-          new MatchResult(tp2, fp2, fn2, (tp2 > 0) ? Math.sqrt(rms / tp2) : 0);
+          new MatchResult(tp2, fp2, fn2, Math.sqrt(MathUtils.div0(rms / 2, tp2)));
 
       MatchResult idResult1 = null;
       MatchResult idResult2 = null;

@@ -3601,7 +3601,9 @@ public class BenchmarkFilterAnalysis
         sb.append(MathUtils.rounded(tp / np[0])).append('\t');
         sb.append(MathUtils.rounded(distance / scored)).append('\t');
         sb.append(MathUtils.rounded(sf / scored)).append('\t');
-        sb.append(MathUtils.rounded(Math.sqrt(rmsd / scored))).append('\t');
+        // RMSD to be the root mean square deviation in a single dimension so divide by 2.
+        // (This assumes 2D Euclidean distances.)
+        sb.append(MathUtils.rounded(Math.sqrt(MathUtils.div0(rmsd / 2, scored)))).append('\t');
         sb.append(MathUtils.rounded(slope)).append('\t');
         if (fs.atLimit() != null) {
           sb.append(fs.atLimit());
