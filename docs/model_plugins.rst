@@ -3645,7 +3645,11 @@ The summary table contains the same fields as the results table. The following a
      - The average signal factor between fitted results and the true localisation.
 
    * - RMSD
-     - The root mean squared distance (RMSD) between fitted results and the true localisation.
+     - The root mean squared distance (RMSD) between fitted results and the true localisation computed over all true positives.
+
+       The RMSD is the 2D axial error in a single dimension and is the effective localisation precision.
+
+       :math:`\text{RMSD} = \sqrt{ \frac{1}{TP} \sum _{i=1}^{TP} { ( (x_i - x_{0i})^2 + (y_i - y_{0i})^2 ) / 2 } }`
 
    * - Slope
      - The slope of the best line fit of the simulated localisation signal and the fitted signal.
