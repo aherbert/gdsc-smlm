@@ -52,6 +52,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -123,9 +124,11 @@ import uk.ac.sussex.gdsc.smlm.results.filter.DirectFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.EShiftFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.Filter;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterSet;
+import uk.ac.sussex.gdsc.smlm.results.filter.FilterValidationFlag;
 import uk.ac.sussex.gdsc.smlm.results.filter.FilterXStreamUtils;
-import uk.ac.sussex.gdsc.smlm.results.filter.IDirectFilter;
+import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
+import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilterCrlb;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFilter.FractionScoreStore;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
@@ -334,8 +337,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     static final MultiPathFilter defaultMultiFilter;
     /** The default parameters. */
     static final double[] defaultParameters;
-    /** The default minimal filter. */
-    static final IDirectFilter defaultMinimalFilter;
 
     static {
       // Add a filter to use for storing the slice results:
@@ -345,15 +346,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
       tmp.setPrecisionMethod(precisionMethod);
 
-      // Add a minimum filter to use for storing estimates
-      defaultMinimalFilter = FitWorker.createMinimalFilter(precisionMethod);
-
       final DirectFilter primaryFilter = tmp.getDefaultSmartFilter();
 
       // We might as well use the doublet fits given we will compute them.
       final double residualsThreshold = 0.4;
-      defaultMultiFilter =
-          new MultiPathFilter(primaryFilter, defaultMinimalFilter, residualsThreshold);
+      defaultMultiFilter = new MultiPathFilter(primaryFilter,
+          FitWorker.createMinimalFilter(precisionMethod), residualsThreshold);
       defaultParameters = createParameters(createDefaultConfig());
     }
 
@@ -1152,7 +1150,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     // Reset the filter
-    multiFilter = new MultiPathFilter(filter, Settings.defaultMinimalFilter, residualsThreshold);
+    multiFilter = new MultiPathFilter(filter,
+        FitWorker.createMinimalFilter(getPrecisionMethod(filter)), residualsThreshold);
     // Update the appropriate fitting settings
     config.setFailuresLimit(failuresLimit);
     config.setDuplicateDistance(duplicateDistance);
@@ -1320,8 +1319,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
         final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
         final double residualsThreshold = tmp.getResidualsThreshold();
-        myMultiFilter =
-            new MultiPathFilter(primaryFilter, Settings.defaultMinimalFilter, residualsThreshold);
+        myMultiFilter = new MultiPathFilter(primaryFilter,
+            FitWorker.createMinimalFilter(tmpFitConfig.getFilterPrecisionMethod()),
+            residualsThreshold);
       }
     } else {
       myMultiFilter = MultiPathFilter.fromXml(xml);
@@ -1866,8 +1866,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final TIntHashSet set = new TIntHashSet(uniqueIdCount);
     final FractionScoreStore scoreStore = set::add;
 
-    final MultiPathFitResults[] multiResults =
-        multiPathResults.toArray(new MultiPathFitResults[0]);
+    final MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[0]);
     // Filter with no filter
     final MultiPathFilter mpf =
         new MultiPathFilter(new SignalFilter(0), null, multiFilter.residualsThreshold);
@@ -2247,11 +2246,32 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       filterSettings = filterSettings.toBuilder().setFilterSetFilename(filename).build();
 
       // Create a filter set using the ranges
-      ArrayList<Filter> filters = new ArrayList<>(3);
-      // Do not support z
-      filters.add(createMultiFilter(lower));
-      filters.add(createMultiFilter(upper));
-      filters.add(createMultiFilter(increment));
+      final ArrayList<Filter> filters = new ArrayList<>(4);
+      // Create the multi-filter using the same precision type as that used during fitting.
+      // Currently no support for z-filter as 3D astigmatism fitting is experimental.
+      final PrecisionMethod precisionMethod =
+          getPrecisionMethod((DirectFilter) multiFilter.getFilter());
+      Function<double[], Filter> generator;
+      if (precisionMethod == PrecisionMethod.POISSON_CRLB) {
+        generator = parameters -> new MultiFilterCrlb(parameters[FILTER_SIGNAL],
+            (float) parameters[FILTER_SNR], parameters[FILTER_MIN_WIDTH],
+            parameters[FILTER_MAX_WIDTH], parameters[FILTER_SHIFT], parameters[FILTER_ESHIFT],
+            parameters[FILTER_PRECISION], 0f, 0f);
+      } else if (precisionMethod == PrecisionMethod.MORTENSEN) {
+        generator = parameters -> new MultiFilter(parameters[FILTER_SIGNAL],
+            (float) parameters[FILTER_SNR], parameters[FILTER_MIN_WIDTH],
+            parameters[FILTER_MAX_WIDTH], parameters[FILTER_SHIFT], parameters[FILTER_ESHIFT],
+            parameters[FILTER_PRECISION], 0f, 0f);
+      } else {
+        // Default
+        generator = parameters -> new MultiFilter2(parameters[FILTER_SIGNAL],
+            (float) parameters[FILTER_SNR], parameters[FILTER_MIN_WIDTH],
+            parameters[FILTER_MAX_WIDTH], parameters[FILTER_SHIFT], parameters[FILTER_ESHIFT],
+            parameters[FILTER_PRECISION], 0f, 0f);
+      }
+      filters.add(generator.apply(lower));
+      filters.add(generator.apply(upper));
+      filters.add(generator.apply(increment));
       if (saveFilters(filename, filters)) {
         SettingsManager.writeSettings(filterSettings);
       }
@@ -2263,24 +2283,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       max[FILTER_PRECISION] = Math.min(max[FILTER_PRECISION], 100);
 
       // Make the 4-set filters the same as the 3-set filters.
-
-      filters = new ArrayList<>(4);
-      filters.add(createMultiFilter(min));
-      filters.add(createMultiFilter(lower));
-      filters.add(createMultiFilter(upper));
-      filters.add(createMultiFilter(max));
+      filters.clear();
+      filters.add(generator.apply(min));
+      filters.add(generator.apply(lower));
+      filters.add(generator.apply(upper));
+      filters.add(generator.apply(max));
       saveFilters(FileUtils.replaceExtension(filename, ".4.xml"), filters);
     }
 
     spotFitResults.min = min;
     spotFitResults.max = max;
-  }
-
-  private static Filter createMultiFilter(double[] parameters) {
-    // Currently no support for z-filter as 3D astigmatism fitting is experimental.
-    return new MultiFilter2(parameters[FILTER_SIGNAL], (float) parameters[FILTER_SNR],
-        parameters[FILTER_MIN_WIDTH], parameters[FILTER_MAX_WIDTH], parameters[FILTER_SHIFT],
-        parameters[FILTER_ESHIFT], parameters[FILTER_PRECISION], 0f, 0f);
   }
 
   private static FilterCriteria[] createFilterCriteria() {
@@ -2493,7 +2505,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     if (index <= FILTER_PRECISION
         && (settings.showFilterScoreHistograms || upper.requiresJaccard || lower.requiresJaccard)) {
       // Jaccard score verses the range of the metric
-      for (double[] d : matchScores) {
+      for (final double[] d : matchScores) {
         if (!Double.isFinite(d[index])) {
           System.out.printf("Error in fit data [%d]: %s%n", index, d[index]);
         }
@@ -2876,15 +2888,15 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     // Q. Why are the settings set to themselves?
     // Removed this for now.
-    //targetFitConfiguration.setPsf(targetFitConfiguration.getPsf());
-    //targetFitConfiguration.setFitSolverSettings(targetFitConfiguration.getFitSolverSettings());
-    //targetFitConfiguration.setFilterSettings(targetFitConfiguration.getFilterSettings());
+    // targetFitConfiguration.setPsf(targetFitConfiguration.getPsf());
+    // targetFitConfiguration.setFitSolverSettings(targetFitConfiguration.getFitSolverSettings());
+    // targetFitConfiguration.setFilterSettings(targetFitConfiguration.getFilterSettings());
 
     final FitEngineConfiguration sourceConfig = Settings.lastSettings.get().config;
     final FitConfiguration sourceFitConfiguration = sourceConfig.getFitConfiguration();
     // Set the fit engine settings manually to avoid merging all child settings
     // i.e. do not do a global update using:
-    //targetConfiguration.setFitEngineSettings(sourceConfig.getFitEngineSettings());
+    // targetConfiguration.setFitEngineSettings(sourceConfig.getFitEngineSettings());
     targetFitConfiguration.setPsf(sourceFitConfiguration.getPsf());
     targetFitConfiguration.setFitSolverSettings(sourceFitConfiguration.getFitSolverSettings());
     targetFitConfiguration.setFilterSettings(sourceFitConfiguration.getFilterSettings());
@@ -2931,8 +2943,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
           final DirectFilter primaryFilter = tmpFitConfig.getSmartFilter();
           final double residualsThreshold = tmp.getResidualsThreshold();
-          myMultiFilter =
-              new MultiPathFilter(primaryFilter, Settings.defaultMinimalFilter, residualsThreshold);
+          myMultiFilter = new MultiPathFilter(primaryFilter,
+              FitWorker.createMinimalFilter(tmpFitConfig.getFilterPrecisionMethod()),
+              residualsThreshold);
         } else {
           IJ.log("Failed to update settings using the filter analysis");
           checkbox.setState(false);
@@ -3123,5 +3136,24 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   static double getLowerDistanceInPixels() {
     final BenchmarkSpotFitResult results = spotFitResults.get();
     return results == null ? 0 : results.lowerDistanceInPixels;
+  }
+
+  /**
+   * Gets the precision method from the direct filter, or use the default of Mortensen with a local
+   * background.
+   *
+   * @param filter the filter
+   * @return the precision method
+   */
+  private static PrecisionMethod getPrecisionMethod(DirectFilter filter) {
+    final int flags = filter.getValidationFlags();
+    if (DirectFilter.areSet(flags, FilterValidationFlag.LOCATION_VARIANCE_CRLB)) {
+      return PrecisionMethod.POISSON_CRLB;
+    }
+    if (DirectFilter.areSet(flags, FilterValidationFlag.LOCATION_VARIANCE)) {
+      return PrecisionMethod.MORTENSEN;
+    }
+    // Default
+    return PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
   }
 }

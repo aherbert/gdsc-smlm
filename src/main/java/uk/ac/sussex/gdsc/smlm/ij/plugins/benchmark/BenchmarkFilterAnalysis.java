@@ -7312,6 +7312,9 @@ public class BenchmarkFilterAnalysis
    * residuals threshold will be copied only if the input FitConfiguration has isComputeResiduals()
    * set to true.
    *
+   * <p>This calls {@link FitConfiguration#setDirectFilter(DirectFilter)} and sets the precision
+   * method using the method in the direct filter.
+   *
    * @param config the configuration
    * @param useLatest Use the latest best filter. Otherwise use the highest scoring.
    * @return true, if successful
@@ -7332,6 +7335,9 @@ public class BenchmarkFilterAnalysis
     // New smart filter support
     final FitConfiguration fitConfig = config.getFitConfiguration();
     fitConfig.setDirectFilter(best.getFilter());
+
+    // Set the precision method using the direct filter
+    fitConfig.setPrecisionMethod(fitConfig.getFilterPrecisionMethod());
 
     if (fitConfig.isComputeResiduals()) {
       config.setResidualsThreshold(best.residualsThreshold);
