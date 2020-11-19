@@ -1682,7 +1682,7 @@ public class BenchmarkFilterAnalysis
       final MultiPathFilter multiPathFilter =
           new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, localResidualsThreshold);
       final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
+          gaResultsListToScore, createFailCounter(failCount), fitResultData.countActual,
           null, null, createCoordinateStore(duplicateDistance));
 
       final StringBuilder text = createResult(searchScoreFilter, r,
@@ -1751,7 +1751,7 @@ public class BenchmarkFilterAnalysis
       final MultiPathFilter multiPathFilter =
           new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, residualsThreshold);
       final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, ConsecutiveFailCounter.create(failCount), fitResultData.countActual,
+          gaResultsListToScore, createFailCounter(failCount), fitResultData.countActual,
           null, null, createCoordinateStore(duplicateDistance));
 
       final StringBuilder text = createResult(searchScoreFilter, r,
@@ -5646,7 +5646,7 @@ public class BenchmarkFilterAnalysis
     // Note: We always use the subset method since fail counts have been accumulated when we read in
     // the results.
     return multiPathFilter.fractionScoreSubset(resultsList,
-        ConsecutiveFailCounter.create(settings.failCount), fitResultData.countActual,
+        createFailCounter(settings.failCount), fitResultData.countActual,
         allAssignments, scoreStore, coordinateStore);
   }
 
@@ -5681,7 +5681,7 @@ public class BenchmarkFilterAnalysis
         new MultiPathFilter(filter, minFilter, residualsThreshold);
 
     final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(gaResultsListToScore,
-        ConsecutiveFailCounter.create(failCount), fitResultData.countActual, null, null,
+        createFailCounter(failCount), fitResultData.countActual, null, null,
         coordinateStore);
 
     final double score = getScore(r);
@@ -5711,7 +5711,7 @@ public class BenchmarkFilterAnalysis
     final ArrayList<FractionalAssignment[]> allAssignments =
         new ArrayList<>(fitResultData.resultsList.length);
     multiPathFilter.fractionScoreSubset(fitResultData.resultsList,
-        ConsecutiveFailCounter.create(settings.failCount), fitResultData.countActual,
+        createFailCounter(settings.failCount), fitResultData.countActual,
         allAssignments, null, coordinateStore);
     return allAssignments;
   }
@@ -6982,7 +6982,7 @@ public class BenchmarkFilterAnalysis
       gaSubset = true;
 
       gaResultsListToScore = createMpf((DirectFilter) weakest, defaultMinimalFilter)
-          .filterSubset(gaResultsList, ConsecutiveFailCounter.create(settings.failCount), true);
+          .filterSubset(gaResultsList, createFailCounter(settings.failCount), true);
 
       // MultiPathFilter.resetValidationFlag(ga_resultsListToScore);
 
@@ -7685,7 +7685,7 @@ public class BenchmarkFilterAnalysis
 
   private PreprocessedPeakResult[] filterResults(final MultiPathFilter multiPathFilter) {
     return multiPathFilter.filter(fitResultData.resultsList,
-        ConsecutiveFailCounter.create(settings.failCount), true, coordinateStore);
+        createFailCounter(settings.failCount), true, coordinateStore);
   }
 
   private CoordinateStore createCoordinateStore() {
@@ -7722,6 +7722,17 @@ public class BenchmarkFilterAnalysis
       return results.getBounds(true);
     }
     return bounds;
+  }
+
+  /**
+   * Creates the fail counter.
+   *
+   * @param failCount the fail count
+   * @return the consecutive fail counter
+   */
+  private static ConsecutiveFailCounter createFailCounter(final int failCount) {
+    // TODO - What about pass rate?
+    return ConsecutiveFailCounter.create(failCount);
   }
 
   /**
