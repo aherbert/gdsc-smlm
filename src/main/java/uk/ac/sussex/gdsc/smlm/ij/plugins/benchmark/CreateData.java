@@ -319,12 +319,12 @@ public class CreateData implements PlugIn {
   /** The last simulation parameters. */
   private static SimulationParameters simulationParameters;
 
-  private static String benchmarkFile = "";
+  private static String benchmarkFile = Prefs.get(KEY_BENCHMARK_RESULTS_FILE, "");
   private static LoadLocalisationsSettings.Builder loadSettings;
   private static String benchmarkImage = Prefs.get(KEY_BENCHMARK_IMAGE, "");
   private static boolean benchmarkAuto;
   private static int benchmarkImageId;
-  private static String benchmarkResultsName = Prefs.get(KEY_BENCHMARK_RESULTS_FILE, "");
+  private static String benchmarkResultsName = "";
 
   private String resultsFileHeader;
   private AtomicInteger photonsRemoved;
