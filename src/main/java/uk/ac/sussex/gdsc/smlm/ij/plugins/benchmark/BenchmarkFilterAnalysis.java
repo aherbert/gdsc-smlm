@@ -7399,6 +7399,11 @@ public class BenchmarkFilterAnalysis
     return null;
   }
 
+  /**
+   * Checks if any of the settings require an overlay.
+   *
+   * @return true if an overlay is required
+   */
   private boolean isShowOverlay() {
     return (settings.showTP || settings.showFP || settings.showFN);
   }
