@@ -2149,6 +2149,7 @@ public class BenchmarkFilterAnalysis
       if (r != null) {
         scoreFilter = r.getFilter();
         settings.scoreFailCount = r.failCount;
+        settings.scoreDuplicateDistance = r.duplicateDistance;
         settings.scoreResidualsThreshold = r.residualsThreshold;
       } else {
         // Default to the fit config settings
