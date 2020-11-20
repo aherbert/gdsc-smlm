@@ -7363,27 +7363,38 @@ public class BenchmarkFilterAnalysis
 
   private static FilterResult getBestResult(List<FilterResult> scores) {
     if (!scores.isEmpty()) {
-      // Copy so we can sort the list by fail count
-      final ArrayList<FilterResult> scores2 = new ArrayList<>(scores);
-      Collections.sort(scores2, (o1, o2) -> o1.failCount - o2.failCount);
+      // Copy so we can sort the list
+      final LocalList<FilterResult> scores2 = new LocalList<>(scores);
 
-      int maxi = 0;
-      double max = 0;
-      for (int i = 0; i < scores2.size(); i++) {
-        final double score = scores2.get(i).score;
-        if (max >= score) {
-          continue;
-        }
+      // Ideally we pick the top score. However if many filters are close we should
+      // pick the filter with the most favourable properties for fitting.
 
-        // Round this so that small differences are ignored.
-        // This should favour filters with lower fail count.
-        final double diff = MathUtils.round(score - max, 3);
-        if (diff > 0) {
-          max = score;
-          maxi = i;
-        }
+      // Sort by score.
+      scores2.sort((o1, o2) -> Double.compare(o2.score, o1.score));
+
+      // For any scores close to the top score sort again using
+      // other filter parameters: fail count, residuals threshold, duplicate distance
+      // This should favour filters with lower fail count, higher residuals threshold and
+      // lower duplicate distance.
+      final double threshold = scores2.unsafeGet(0).score * 0.9999;
+      final int index = scores2.findIndex(result -> result.score < threshold);
+      if (index > 0) {
+        scores2.subList(0, index).sort((o1, o2) -> {
+          // Lower fail count will be faster during fitting
+          int result = Integer.compare(o1.failCount, o2.failCount);
+          if (result != 0) {
+            return result;
+          }
+          // Higher residuals threshold is more conservative
+          result = Double.compare(o2.residualsThreshold, o1.residualsThreshold);
+          if (result != 0) {
+            return result;
+          }
+          // Lower duplicate distance is more conservative
+          return Double.compare(o1.duplicateDistance, o2.duplicateDistance);
+        });
       }
-      return scores2.get(maxi);
+      return scores2.unsafeGet(0);
     }
     return null;
   }
