@@ -357,27 +357,27 @@ public class LoadLocalisations implements PlugIn {
         final Localisation l = new Localisation();
         try {
           if (it >= 0) {
-            l.time = Integer.parseInt(fields[it]);
+            l.time = Integer.parseInt(fields[it].trim());
           }
           if (iid >= 0) {
-            l.id = Integer.parseInt(fields[iid]);
+            l.id = Integer.parseInt(fields[iid].trim());
           }
-          l.x = Float.parseFloat(fields[ix]);
-          l.y = Float.parseFloat(fields[iy]);
+          l.x = Float.parseFloat(fields[ix].trim());
+          l.y = Float.parseFloat(fields[iy].trim());
           if (iz >= 0) {
-            l.z = Float.parseFloat(fields[iz]);
+            l.z = Float.parseFloat(fields[iz].trim());
           }
           if (ii >= 0) {
-            l.intensity = Float.parseFloat(fields[ii]);
+            l.intensity = Float.parseFloat(fields[ii].trim());
           }
           if (isx >= 0) {
-            l.sy = l.sx = Float.parseFloat(fields[isx]);
+            l.sy = l.sx = Float.parseFloat(fields[isx].trim());
           }
           if (isy >= 0) {
-            l.sy = Float.parseFloat(fields[isy]);
+            l.sy = Float.parseFloat(fields[isy].trim());
           }
           if (ip >= 0) {
-            l.precision = Float.parseFloat(fields[ip]);
+            l.precision = Float.parseFloat(fields[ip].trim());
           }
 
           localisations.add(l);
