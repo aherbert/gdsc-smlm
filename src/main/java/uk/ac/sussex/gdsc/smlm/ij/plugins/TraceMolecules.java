@@ -463,6 +463,7 @@ public class TraceMolecules implements PlugIn {
         // The point Id was the position in the original results array
         trace.add(results.get(point.getId()));
       }
+      trace.sort();
       traces[index++] = trace;
     }
     return traces;
@@ -816,7 +817,8 @@ public class TraceMolecules implements PlugIn {
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Distance threshold", settings.getDistanceThreshold());
+      // Allow distance of 0 for exact clustering
+      ParameterUtils.isPositive("Distance threshold", settings.getDistanceThreshold());
       ParameterUtils.isAboveZero("Time threshold", settings.getTimeThreshold());
       ParameterUtils.isPositive("Pulse interval", settings.getPulseInterval());
       ParameterUtils.isPositive("Pulse window", settings.getPulseWindow());
@@ -928,7 +930,8 @@ public class TraceMolecules implements PlugIn {
 
     // Check arguments
     try {
-      ParameterUtils.isAboveZero("Distance threshold", settings.getDistanceThreshold());
+      // Allow distance of 0 for exact clustering
+      ParameterUtils.isPositive("Distance threshold", settings.getDistanceThreshold());
       final ClusteringAlgorithm clusteringAlgorithm =
           getClusteringAlgorithm(settings.getClusteringAlgorithm());
       if (clusteringAlgorithm == ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY

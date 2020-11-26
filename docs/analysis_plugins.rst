@@ -345,6 +345,8 @@ The following parameters can be configured:
    * - Distance Threshold (nm)
      - Maximum distance (in nm) for two localisations to belong to the same trace.
 
+       Zero is supported to find colocated localisations. This is useful for analysis of ground-truth data from a simulation.
+
    * - Distance exclusion (nm)
      - Exclusion distance (in nm) where no other localisations are allowed. Use this setting to be sure that a trace links together localisations that are not close to any other localisations.
 
@@ -577,6 +579,8 @@ This plugin is very similar to the ``Trace Molecules`` plugin (section :numref:`
 
    * - Distance Threshold (nm)
      - Maximum distance (in nm) for two localisations to belong to the same cluster.
+
+       Zero is supported to find colocated localisations. This is useful for analysis of ground-truth data from a simulation.
 
    * - Time Threshold
      - Maximum time separation for two localisations to belong to the same trace (should cover a minimum of 1 frame).
