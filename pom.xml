@@ -323,6 +323,7 @@ Software for single molecule localisation microscopy (SMLM)
             <exclude>**/*Protos.java</exclude>
             <exclude>**/math3/**/*Copy.java</exclude>
             <exclude>**/math3/**/PoissonDistribution.java</exclude>
+            <exclude>**/math3/**/MultivariateGaussianMixtureExpectationMaximization.java</exclude>
           </excludes>
         </configuration>
       </plugin>
