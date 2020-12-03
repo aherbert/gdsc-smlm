@@ -1410,6 +1410,14 @@ If the ``Save datasets`` button is pressed the input dataset will be saved to me
 Note: An ideal dual population of fixed and moving molecules will be a bimodel histogram of the diffusion coefficient, for example DNA binding proteins that are either diffusing freely or bound to the DNA. If this plugin is run on data which does not contain an obvious dual population of fixed and moving molecules then the histogram will be unimodal. If the population contains only moving molecules then the diffusion coefficients will have a mode far above zero. If the population contains only fixed molecules then the diffusion coefficients will be very low with a mode close to zero. A split of mixed populations of diffusing molecules with different diffusion coefficients is not supported.
 
 
+.. index:: ! Track Population Analysis
+
+Track Population Analysis
+-------------------------
+
+Under construction.
+
+
 .. index:: ! OPTICS
 
 OPTICS
