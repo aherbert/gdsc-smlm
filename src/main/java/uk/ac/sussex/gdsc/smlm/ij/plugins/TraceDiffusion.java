@@ -2180,7 +2180,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     final double exposureTime = cal.getExposureTime();
     final DistanceUnit distanceUnit = cal.getDistanceUnit();
     for (int i = 1; i < allResults.size(); i++) {
-      final MemoryPeakResults results = allResults.get(1);
+      final MemoryPeakResults results = allResults.get(i);
 
       if (!results.hasCalibration()
           || results.getCalibrationReader().getExposureTime() != exposureTime
