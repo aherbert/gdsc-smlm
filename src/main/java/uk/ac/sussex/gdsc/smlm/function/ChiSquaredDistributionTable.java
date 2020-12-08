@@ -181,7 +181,8 @@ public class ChiSquaredDistributionTable {
    * Compute the q-value of the Chi-squared distribution.
    *
    * <p>This is the probability of obtaining a value more extreme than this point by chance. A
-   * chi-squared value is significant if q is higher than the p-value for significance (e.g. 0.05).
+   * chi-squared value is not significant (rejected) if q is higher than the probability value for
+   * significance (e.g. 0.05).
    *
    * @param chiSquared the chi squared
    * @param degreesOfFreedom the degrees of freedom
