@@ -90,7 +90,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
       private final double densityPrefactor;
 
       /**
-       * Creates a multivariate normal distribution with the given mean vector and covariance
+       * Creates a multivariate Gaussian distribution with the given mean vector and covariance
        * matrix. The data is stored by reference and not copied.
        *
        * @param means the means
@@ -129,7 +129,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
       }
 
       /**
-       * Creates a multivariate normal distribution with the given mean vector and covariance
+       * Creates a multivariate Gaussian distribution with the given mean vector and covariance
        * matrix. The data is stored by reference and not copied.
        *
        * @param means the means
@@ -211,7 +211,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     }
 
     /**
-     * Creates a multivariate normal mixture distribution.
+     * Creates a multivariate Gaussian mixture distribution.
      *
      * @param weights Weights of each component
      * @param distributions Mixture components
@@ -223,7 +223,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     }
 
     /**
-     * Creates a multivariate normal mixture distribution. This normalises the input weights
+     * Creates a multivariate Gaussian mixture distribution. This normalises the input weights
      * in-place to sum to 1.
      *
      * @param weights weights of each component
@@ -250,7 +250,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     }
 
     /**
-     * Creates a multivariate normal mixture distribution.
+     * Creates a multivariate Gaussian mixture distribution.
      *
      * @param weights weights of each component
      * @param means means for each component
@@ -366,7 +366,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
   }
 
   /**
-   * Creates an object to fit a multivariate normal mixture model to data. The data is stored by
+   * Creates an object to fit a multivariate Gaussian mixture model to data. The data is stored by
    * reference and not copied.
    *
    * @param data data to use in fitting procedure
@@ -572,7 +572,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
   }
 
   /**
-   * Helper method to create a multivariate normal mixture model which can be used to initialize
+   * Helper method to create a multivariate Gaussian mixture model which can be used to initialize
    * {@link #fit(MixtureMultivariateGaussianDistribution)}.
    *
    * <p>This sums the values of each data point to create a metric for ranking. It produces an
@@ -582,7 +582,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    *
    * @param data data to estimate distribution
    * @param numComponents number of components for estimated mixture
-   * @return Multivariate normal mixture model estimated from the data
+   * @return Multivariate Gaussian mixture model estimated from the data
    * @throws IllegalArgumentException if data has less than 2 rows, if {@code numComponents < 2}, or
    *         if {@code numComponents} is greater than the number of data rows.
    * @see #estimate(double[][], int, ToDoubleFunction)
@@ -593,7 +593,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
   }
 
   /**
-   * Helper method to create a multivariate normal mixture model which can be used to initialize
+   * Helper method to create a multivariate Gaussian mixture model which can be used to initialize
    * {@link #fit(MixtureMultivariateGaussianDistribution)}.
    *
    * <p>The function is used to extract a value for ranking all points. These are then split
@@ -622,7 +622,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    * @param data data to estimate distribution
    * @param numComponents number of components for estimated mixture
    * @param rankingMetric the function to generate the ranking metric
-   * @return Multivariate normal mixture model estimated from the data
+   * @return Multivariate Gaussian mixture model estimated from the data
    * @throws IllegalArgumentException if data has less than 2 rows, if {@code numComponents < 2}, or
    *         if {@code numComponents} is greater than the number of data rows.
    */
@@ -686,6 +686,36 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     final double[] weights = SimpleArrayUtils.newDoubleArray(numComponents, 1.0 / numComponents);
 
     return new MixtureMultivariateGaussianDistribution(weights, distributions);
+  }
+
+  /**
+   * Helper method to create a multivariate Gaussian model from the multivariate data.
+   *
+   * <p>This method can be used to create an unmixed model that can be compared with any mixture
+   * model output from the expectation maximisation fitting algorithm.
+   *
+   * @param data data for the distribution
+   * @return Multivariate Gaussian mixture model estimated from the data
+   * @throws IllegalArgumentException if data has less than 2 rows.
+   */
+  public static MultivariateGaussianDistribution createUnmixed(double[][] data) {
+    ValidationUtils.checkArgument(data.length >= 2,
+        "Estimation requires at least 2 data points: %d", data.length);
+    final int numRows = data.length;
+    final int numCols = data[0].length;
+
+    // mean of each column for the data
+    final double[] columnMeans = new double[numCols];
+
+    for (final double[] values : data) {
+      for (int j = 0; j < numCols; j++) {
+        columnMeans[j] += values[j];
+      }
+    }
+
+    SimpleArrayUtils.multiply(columnMeans, 1.0 / numRows);
+
+    return new MultivariateGaussianDistribution(columnMeans, covariance(columnMeans, data));
   }
 
   /**
@@ -758,7 +788,8 @@ public class MultivariateGaussianMixtureExpectationMaximization {
   }
 
   /**
-   * Gets the log likelihood of the data under the fitted model.
+   * Gets the log likelihood of the data under the fitted model. This is the sum of log likelihood
+   * of each point divided by the number of points (i.e. the mean log likelihood).
    *
    * @return log likelihood of data or zero of no data has been fit
    */

@@ -141,6 +141,33 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
   }
 
   @Test
+  void testCreateUnmixedMultivariateGaussianDistributionThrows() {
+    Assertions.assertThrows(NullPointerException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createUnmixed(null);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createUnmixed(new double[0][]);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createUnmixed(new double[1][]);
+    });
+  }
+
+  @Test
+  void canCreateUnmixedMultivariateGaussianDistribution() {
+    final double[][] data = {{1, 2}, {2.5, 1.5}, {3.5, 1.0}};
+    final double[] means = getColumnMeans(data);
+    final double[][] covariances = getCovariance(data);
+    final MultivariateGaussianDistribution exp =
+        MultivariateGaussianDistribution.create(means, covariances);
+    final MultivariateGaussianDistribution obs =
+        MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
+    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-6);
+    TestAssertions.assertArrayTest(exp.getMeans(), obs.getMeans(), test);
+    TestAssertions.assertArrayTest(exp.getCovariances(), obs.getCovariances(), test);
+  }
+
+  @Test
   void testCreateMixtureMultivariateGaussianDistributionThrows() {
     // Will be normalised
     final double[] weights = {1, 3};
