@@ -104,7 +104,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
 
         // Note: Simple testing with a version based on EJML show that there is no
         // difference to the speed of the Expectation-Maximization algorithm.
-        // This is left using the Commons Math inverse and determinant so the 
+        // This is left using the Commons Math inverse and determinant so the
         // distribution should match the source implementation.
 
         // Covariance matrix eigen decomposition.
