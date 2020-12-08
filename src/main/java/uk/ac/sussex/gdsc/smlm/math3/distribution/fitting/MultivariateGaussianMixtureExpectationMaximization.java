@@ -95,8 +95,10 @@ public class MultivariateGaussianMixtureExpectationMaximization {
        *
        * @param means the means
        * @param covariances the covariances
-       * @throws IllegalArgumentException if the inverse cannot be performed on the provided
+       * @throws SingularMatrixException if the inverse cannot be performed on the provided
        *         covariance matrix (the matrix is singular).
+       * @throws NonPositiveDefiniteMatrixException if the Eigen values of the matrix are not
+       *         positive
        */
       MultivariateGaussianDistribution(double[] means, double[][] covariances) {
         this.means = means;
@@ -398,8 +400,12 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    * @param initialMixture model containing initial values of weights and multivariate normals
    * @return true if converged within the threshold
    * @throws SingularMatrixException if any component's covariance matrix is singular during fitting
-   * @throws IllegalArgumentException if initialMixture mean vector and data number of columns are
-   *         not equal, or if any component's covariance matrix is singular during fitting.
+   * @throws IllegalArgumentException if maxIterations is less than one or if initialMixture mean
+   *         vector and data number of columns are not equal
+   * @throws SingularMatrixException if any component's covariance matrix is singular during
+   *         fitting.
+   * @throws NonPositiveDefiniteMatrixException if any component's covariance matrix is not positive
+   *         definite during fitting.
    */
   public boolean fit(MixtureMultivariateGaussianDistribution initialMixture) {
     // Normalise the log-likelihood by the number of data points.
@@ -422,9 +428,12 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    * @param convergencePredicate convergence predicated used to test the logLikelihoods between
    *        successive iterations
    * @return true if converged within the threshold
-   * @throws IllegalArgumentException if maxIterations is less than one, if initialMixture mean
-   *         vector and data number of columns are not equal, or if any component's covariance
-   *         matrix is singular during fitting.
+   * @throws IllegalArgumentException if maxIterations is less than one or if initialMixture mean
+   *         vector and data number of columns are not equal
+   * @throws SingularMatrixException if any component's covariance matrix is singular during
+   *         fitting.
+   * @throws NonPositiveDefiniteMatrixException if any component's covariance matrix is not positive
+   *         definite during fitting.
    */
   public boolean fit(MixtureMultivariateGaussianDistribution initialMixture, int maxIterations,
       DoubleDoubleBiPredicate convergencePredicate) {
