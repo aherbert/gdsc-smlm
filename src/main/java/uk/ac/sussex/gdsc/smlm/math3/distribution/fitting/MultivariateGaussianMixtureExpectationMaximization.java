@@ -402,8 +402,10 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    *         not equal, or if any component's covariance matrix is singular during fitting.
    */
   public boolean fit(MixtureMultivariateGaussianDistribution initialMixture) {
+    // Normalise the log-likelihood by the number of data points.
+    final int n = data.length;
     return fit(initialMixture, DEFAULT_MAX_ITERATIONS,
-        (prev, curr) -> Math.abs(prev - curr) < DEFAULT_THRESHOLD);
+        (prev, curr) -> Math.abs(prev - curr) / n < DEFAULT_THRESHOLD);
   }
 
   /**
@@ -488,7 +490,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
         }
       }
 
-      logLikelihood = sumLogLikelihood / n;
+      logLikelihood = sumLogLikelihood;
 
       // M-step: compute the new parameters based on the expectation function.
       final double[] newWeights = new double[k];
@@ -788,8 +790,11 @@ public class MultivariateGaussianMixtureExpectationMaximization {
   }
 
   /**
-   * Gets the log likelihood of the data under the fitted model. This is the sum of log likelihood
-   * of each point divided by the number of points (i.e. the mean log likelihood).
+   * Gets the log likelihood of the data under the fitted model. This is the sum of the log
+   * likelihood of each point.
+   *
+   * <p>Note: In contrast to the the Apache Commons Math class this is not divided by the number of
+   * points (i.e. the mean log likelihood).
    *
    * @return log likelihood of data or zero of no data has been fit
    */

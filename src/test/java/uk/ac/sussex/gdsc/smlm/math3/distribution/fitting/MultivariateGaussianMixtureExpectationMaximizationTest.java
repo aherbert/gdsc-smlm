@@ -358,14 +358,15 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     // Test verses the Commons Math estimation
     final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
     final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5, 1e-16);
+    final int sampleSize = 1000;
     // Number of components
     for (int n = 2; n <= 3; n++) {
       final double[] sampleWeights = createWeights(n, rng);
       final double[][] sampleMeans = create(n, 2, rng, -5, 5);
       final double[][] sampleStdDevs = create(n, 2, rng, 1, 10);
       final double[] sampleCorrelations = create(n, rng, -0.9, 0.9);
-      final double[][] data =
-          createData2d(1000, rng, sampleWeights, sampleMeans, sampleStdDevs, sampleCorrelations);
+      final double[][] data = createData2d(sampleSize, rng, sampleWeights, sampleMeans,
+          sampleStdDevs, sampleCorrelations);
 
       final MixtureMultivariateGaussianDistribution initialModel1 =
           MultivariateGaussianMixtureExpectationMaximization.estimate(data, n);
@@ -377,7 +378,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
           new MultivariateNormalMixtureExpectationMaximization(data);
       fitter2.fit(MultivariateNormalMixtureExpectationMaximization.estimate(data, n));
 
-      final double ll1 = fitter1.getLogLikelihood();
+      final double ll1 = fitter1.getLogLikelihood() / sampleSize;
       Assertions.assertNotEquals(0, ll1);
       final double ll2 = fitter2.getLogLikelihood();
       TestAssertions.assertTest(ll2, ll1, test);
