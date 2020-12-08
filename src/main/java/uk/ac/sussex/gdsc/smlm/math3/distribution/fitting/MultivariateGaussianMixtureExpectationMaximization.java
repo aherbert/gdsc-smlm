@@ -17,6 +17,8 @@ package uk.ac.sussex.gdsc.smlm.math3.distribution.fitting;
 
 import java.util.Arrays;
 import java.util.function.ToDoubleFunction;
+import org.apache.commons.math3.exception.MathArithmeticException;
+import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.NonPositiveDefiniteMatrixException;
@@ -110,8 +112,12 @@ public class MultivariateGaussianMixtureExpectationMaximization {
         // distribution should match the source implementation.
 
         // Covariance matrix eigen decomposition.
-        final EigenDecomposition covMatDec =
-            new EigenDecomposition(new Array2DRowRealMatrix(covariances));
+        final EigenDecomposition covMatDec;
+        try {
+          covMatDec = new EigenDecomposition(new Array2DRowRealMatrix(covariances));
+        } catch (MaxCountExceededException | MathArithmeticException ex) {
+          throw (SingularMatrixException) new SingularMatrixException().initCause(ex);
+        }
 
         // Compute and store the inverse.
         covarianceMatrixInverse = covMatDec.getSolver().getInverse().getData();

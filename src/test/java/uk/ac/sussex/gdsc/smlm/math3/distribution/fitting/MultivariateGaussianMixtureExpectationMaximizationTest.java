@@ -121,6 +121,18 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
       final double[][] covariances = {{1.1, 2.3}, {2.3, 2.0}};
       MultivariateGaussianDistribution.create(means, covariances);
     });
+    // Failure of Eigen decomposition
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      final double[] means =
+          {3.2394652282161466E-159, 0.9874091290326361, 0.3148579631286939, 0.3718812084490761};
+      final double[][] covariances = {
+          {4.7656408265957816E-164, 1.1864890699789289E-160, 3.486364577999923E-160,
+              2.799059273090178E-160},
+          {1.1864890699789289E-160, 0.24556306971562533, 0.03418519684554344, 0.04106282423640166},
+          {3.486364577999923E-160, 0.03418519684554344, 0.005991172243435974, 0.007750670597351695},
+          {2.799059273090178E-160, 0.04106282423640166, 0.007750670597351695, 0.03725445634104687}};
+      MultivariateGaussianDistribution.create(means, covariances);
+    });
   }
 
   @Test
