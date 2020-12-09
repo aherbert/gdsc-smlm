@@ -191,6 +191,9 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     covariances[0] = getCovariance(data);
     means[1] = getColumnMeans(data2);
     covariances[1] = getCovariance(data2);
+
+    // Test with means and covariances
+
     // Non positive weights
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       MixtureMultivariateGaussianDistribution.create(new double[] {-1, 1}, means, covariances);
@@ -213,11 +216,19 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
       MixtureMultivariateGaussianDistribution.create(weights, means, covariances2);
     });
 
-    // Weights sum is not finite in package-private create method
+    // Test with the weights and distributions.
+    // Create a valid mixture to use the distributions.
+    final MixtureMultivariateGaussianDistribution dist =
+        MixtureMultivariateGaussianDistribution.create(weights, means, covariances);
+
+    // Weights sum is not finite
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      // The distributions are not validated so use null
       MixtureMultivariateGaussianDistribution
-          .create(new double[] {Double.MAX_VALUE, Double.MAX_VALUE}, null);
+          .create(new double[] {Double.MAX_VALUE, Double.MAX_VALUE}, dist.getDistributions());
+    });
+    // Weights and distributions length mismatch
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MixtureMultivariateGaussianDistribution.create(new double[] {1}, dist.getDistributions());
     });
   }
 

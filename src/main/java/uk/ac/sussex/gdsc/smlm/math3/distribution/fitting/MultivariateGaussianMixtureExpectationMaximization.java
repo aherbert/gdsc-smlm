@@ -237,12 +237,15 @@ public class MultivariateGaussianMixtureExpectationMaximization {
      * @param weights weights of each component
      * @param distributions the distributions
      * @return the mixture multivariate gaussian distribution
-     * @throws IllegalArgumentException if the sum of the weights is infinite
+     * @throws IllegalArgumentException if the arrays length are inconsistent, or if the sum of the
+     *         weights is infinite
      */
-    static MixtureMultivariateGaussianDistribution create(double[] weights,
+    public static MixtureMultivariateGaussianDistribution create(double[] weights,
         MultivariateGaussianDistribution[] distributions) {
       double sum = 0;
       final int numComp = weights.length;
+      ValidationUtils.checkArgument(numComp == distributions.length,
+          "Weights and distributions size mismatch: %d != %d", numComp, distributions.length);
       for (int i = 0; i < numComp; i++) {
         sum += weights[i];
       }
