@@ -65,6 +65,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
@@ -94,6 +95,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static final String TITLE = "Track Population Analysis";
   private static final String[] FEATURE_NAMES = {"Anomalous exponent",
       "Effective diffusion coefficient", "Length of confinement", "Drift Vector"};
+  private static final int SORT_DIMENSION = 1;
 
   /** The plugin settings. */
   private Settings settings;
@@ -239,8 +241,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       return;
     }
 
-    final MixtureMultivariateGaussianDistribution model = mixed.getFittedModel();
-    // TODO - Sort the components by e.g. the mean of the diffusion coefficient.
+    MixtureMultivariateGaussianDistribution model = mixed.getFittedModel();
+    model = sortComponents(model, SORT_DIMENSION);
 
     // For the best model, assign to the most likely population.
     final int[] component = assignData(data, model);
@@ -676,6 +678,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       ImageJUtils.log("%d component log-likelihood=%s. AIC=%s. BIC=%s. LLR significance=%s.",
           numComponents, logLikelihood2, aic2, bic2, MathUtils.rounded(q));
       final double[] weights = mixed2.getFittedModel().getWeights();
+
+      // For consistency sort the mixture by the mean of the diffusion coefficient
+      final double[] values = Arrays.stream(mixed2.getFittedModel().getDistributions())
+          .mapToDouble(d -> d.getMeans()[SORT_DIMENSION]).toArray();
+      SortUtils.sortData(weights, values, false, false);
       ImageJUtils.log("Population weights: " + Arrays.toString(weights));
 
       if (MathUtils.min(weights) < settings.minWeight) {
@@ -769,6 +776,31 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static DoubleDoubleBiPredicate createConvergenceTest(double relativeError) {
     return (v1, v2) -> DoubleEquality.relativeError(v1, v2) < relativeError;
+  }
+
+  /**
+   * Sort the components by the mean of the given dimension.
+   *
+   * @param model the model
+   * @param dimension the dimension
+   * @return the mixture multivariate gaussian distribution
+   */
+  private static MixtureMultivariateGaussianDistribution
+      sortComponents(MixtureMultivariateGaussianDistribution model, int dimension) {
+    final double[] weights = model.getWeights();
+    final MultivariateGaussianDistribution[] distributions = model.getDistributions();
+    final LocalList<Pair<Double, MultivariateGaussianDistribution>> list =
+        new LocalList<>(weights.length);
+    for (int i = 0; i < weights.length; i++) {
+      list.add(Pair.create(weights[i], distributions[i]));
+    }
+    list.sort((o1, o2) -> Double.compare(o1.getSecond().getMeans()[dimension],
+        o2.getSecond().getMeans()[dimension]));
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = list.unsafeGet(i).getFirst();
+      distributions[i] = list.unsafeGet(i).getSecond();
+    }
+    return MixtureMultivariateGaussianDistribution.create(weights, distributions);
   }
 
   /**
