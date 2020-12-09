@@ -115,7 +115,7 @@ Given that the under-prediction is only relevant to experimental data when the n
 
 This correction factor effectively states that the diffusion of the objects within the start and end frames has reduced the time interval by a fixed constant of 1/3. This is logical since any frames added in between the start and end frames will be measured entirely. Only the start and end frames are composed of an average location of a diffusing particle.
 
-When performing jump distance analysis it is not necessary to the correct each observed squared distance before fitting the MSD. Since the correction is a single scaling factor the computed diffusion coefficient can be adjusted by applying the linear correction factor.
+When performing jump distance analysis when the jump length is fixed it is not necessary to correct each observed squared distance before fitting the MSD data. Since the correction is a single scaling factor the computed diffusion coefficient can be adjusted by applying the linear correction factor.
 
 
 Fitting the Plot of MSD verses N Frames
