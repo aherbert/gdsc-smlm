@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import ij.process.LUT;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -51,11 +52,14 @@ import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
-import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
+import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -210,77 +214,62 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Histogram the raw data.
     final Array2DRowRealMatrix raw = new Array2DRowRealMatrix(data, false);
     final WindowOrganiser wo = new WindowOrganiser();
+    // Store the histogram data for plotting the components
+    final double[][] columns = new double[FEATURE_NAMES.length][];
+    final double[][] limits = new double[FEATURE_NAMES.length][];
+    final int[] bins = new int[FEATURE_NAMES.length];
+    final Plot[] plots = new Plot[FEATURE_NAMES.length];
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
-      new HistogramPlotBuilder(TITLE, StoredData.create(raw.getColumn(i)), FEATURE_NAMES[i]).build()
-          .show(wo);
+      columns[i] = raw.getColumn(i);
+      limits[i] = MathUtils.limits(columns[i]);
+      final StoredData colData = StoredData.create(columns[i]);
+      bins[i] = HistogramPlot.getBins(colData, BinMethod.SCOTT);
+      final double[][] hist =
+          HistogramPlot.calcHistogram(columns[i], limits[i][0], limits[i][1], bins[i]);
+      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], FEATURE_NAMES[i], "Frequency");
+      plots[i].addPoints(hist[0], hist[1], Plot.BAR);
+      ImageJUtils.display(plots[i].getTitle(), plots[i], 0, wo);
     }
     wo.tile();
 
-    // Get the unmixed multivariate Guassian.
-    final MultivariateGaussianDistribution unmixed =
-        MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
-
-    // Record the likelihood of the unmixed model
-    double logLikelihood = Arrays.stream(data).mapToDouble(unmixed::density).map(Math::log).sum();
-    // 4 means, 16 covariances
-    final int parametersPerGaussian = 4 + 4 * 4;
-    double aic = MathUtils.getAkaikeInformationCriterion(logLikelihood, parametersPerGaussian);
-    double bic = MathUtils.getBayesianInformationCriterion(logLikelihood, data.length,
-        parametersPerGaussian);
-    ImageJUtils.log("1 component log-likelihood=%s. AIC=%s. BIC=%s", logLikelihood, aic, bic);
-
-    // Fit a mixed component model.
-    // Increment the number of components up to a maximim or when the model does not improve.
-    MultivariateGaussianMixtureExpectationMaximization mixed = null;
-    for (int numComponents = 2; numComponents <= settings.maxComponents; numComponents++) {
-      final MultivariateGaussianMixtureExpectationMaximization mixed2 =
-          createMixed(data, numComponents);
-      if (mixed2 == null) {
-        ImageJUtils.log("Failed to fit a %d component mixture model", numComponents);
-        break;
-      }
-      final double logLikelihood2 = mixed2.getLogLikelihood();
-      // n * (means, covariances, 1 weight) - 1
-      // (Note: subtract 1 as the weights are constrained by summing to 1)
-      final int param2 = numComponents * (parametersPerGaussian + 1) - 1;
-      final double aic2 = MathUtils.getAkaikeInformationCriterion(logLikelihood2, param2);
-      final double bic2 =
-          MathUtils.getBayesianInformationCriterion(logLikelihood2, data.length, param2);
-
-      // Log-likelihood ratio test statistic
-      final double lambdaLr = -2 * (logLikelihood - logLikelihood2);
-      // DF = difference in dimensionality from previous number of components
-      // means, covariances, 1 weight
-      final int degreesOfFreedom = parametersPerGaussian + 1;
-      final double q = ChiSquaredDistributionTable.computeQValue(lambdaLr, degreesOfFreedom);
-      ImageJUtils.log("%d component log-likelihood=%s. AIC=%s. BIC=%s. LLR significance=%s.",
-          numComponents, logLikelihood2, aic2, bic2, MathUtils.rounded(q));
-      final double[] weights = mixed2.getFittedModel().getWeights();
-      ImageJUtils.log("Population weights: " + Arrays.toString(weights));
-
-      if (MathUtils.min(weights) < settings.minWeight) {
-        ImageJUtils.log("%d component model has population weight %s under minimum level %s",
-            numComponents, MathUtils.min(weights), settings.minWeight);
-        break;
-      }
-      if (aic <= aic2 || bic <= bic2 || q > 0.001) {
-        ImageJUtils.log("%d component model is not significant", numComponents);
-        break;
-      }
-      aic = aic2;
-      bic = bic2;
-      logLikelihood = logLikelihood2;
-      mixed = mixed2;
-    }
+    final MultivariateGaussianMixtureExpectationMaximization mixed = fitGaussianMixture(data);
 
     if (mixed == null) {
       IJ.error(TITLE, "Failed to fit a mixture model");
       return;
     }
 
+    final MixtureMultivariateGaussianDistribution model = mixed.getFittedModel();
+    // TODO - Sort the components by e.g. the mean of the diffusion coefficient.
+
     // For the best model, assign to the most likely population.
+    final int[] component = assignData(data, model);
+    final int numComponents = mixed.getFittedModel().getWeights().length;
 
     // Output coloured histograms of the populations.
+    final LUT lut = LutHelper.createLut(LutColour.INTENSE);
+    for (int i = 0; i < FEATURE_NAMES.length; i++) {
+      // Extract the data for each component
+      final double[] col = columns[i];
+      final Plot plot = plots[i];
+      for (int n = 0; n < numComponents; n++) {
+        final StoredData feature = new StoredData();
+        for (int j = 0; j < component.length; j++) {
+          if (component[j] == n) {
+            feature.add(col[j]);
+          }
+        }
+        if (feature.size() == 0) {
+          continue;
+        }
+        final double[][] hist =
+            HistogramPlot.calcHistogram(feature.values(), limits[i][0], limits[i][1], bins[i]);
+        // Colour the points
+        plot.setColor(LutHelper.getColour(lut, n));
+        plot.addPoints(hist[0], hist[1], Plot.BAR);
+      }
+      plot.updateImage();
+    }
   }
 
   private boolean showInputDialog(List<MemoryPeakResults> combinedResults) {
@@ -589,9 +578,23 @@ public class TrackPopulationAnalysis implements PlugIn {
           // RealVector res = lvmSolution.getResiduals();
           // double ss = res.dotProduct(res);
           values[0] = lvmSolution.getPoint().getEntry(0);
+          // Debug
+          if (values[0] > 10 && values[0] < 0.6) {
+            final RealVector p = lvmSolution.getPoint();
+            final String title = "anomalous exponent";
+            final Plot plot = new Plot(title, "time", "MSD");
+            final double[] t = SimpleArrayUtils.newArray(s.length, 1.0, 1.0);
+            plot.addPoints(t, s, Plot.CROSS);
+            plot.addPoints(t, model.value(p).getFirst().toArray(), Plot.LINE);
+            plot.addLabel(0, 0, lvmSolution.getPoint().toString());
+            ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
+            System.out.println(lvmSolution.getPoint());
+          }
         } catch (TooManyIterationsException | ConvergenceException ex) {
+          if (settings.debug) {
+            ImageJUtils.log("Failed to fit anomalous exponent", ex.getMessage());
+          }
           // Ignore this and set to Brownian motion
-          System.out.println(ex.getMessage());
           values[0] = 1.0;
         }
 
@@ -622,6 +625,75 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.finished();
     return data.toArray(new double[0][0]);
+  }
+
+  /**
+   * Fit the Gaussian mixture to the data. The fitter with the highest likelihood from a number of
+   * repeats is returned.
+   *
+   * @param data the data
+   * @return the multivariate gaussian mixture
+   */
+  private MultivariateGaussianMixtureExpectationMaximization
+      fitGaussianMixture(final double[][] data) {
+    // Get the unmixed multivariate Guassian.
+    final MultivariateGaussianDistribution unmixed =
+        MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
+
+    // Record the likelihood of the unmixed model
+    double logLikelihood = Arrays.stream(data).mapToDouble(unmixed::density).map(Math::log).sum();
+    // 4 means, 16 covariances
+    final int parametersPerGaussian = 4 + 4 * 4;
+    double aic = MathUtils.getAkaikeInformationCriterion(logLikelihood, parametersPerGaussian);
+    double bic = MathUtils.getBayesianInformationCriterion(logLikelihood, data.length,
+        parametersPerGaussian);
+    ImageJUtils.log("1 component log-likelihood=%s. AIC=%s. BIC=%s", logLikelihood, aic, bic);
+
+    // Fit a mixed component model.
+    // Increment the number of components up to a maximim or when the model does not improve.
+    MultivariateGaussianMixtureExpectationMaximization mixed = null;
+    for (int numComponents = 2; numComponents <= settings.maxComponents; numComponents++) {
+      final MultivariateGaussianMixtureExpectationMaximization mixed2 =
+          createMixed(data, numComponents);
+      if (mixed2 == null) {
+        ImageJUtils.log("Failed to fit a %d component mixture model", numComponents);
+        break;
+      }
+      final double logLikelihood2 = mixed2.getLogLikelihood();
+      // n * (means, covariances, 1 weight) - 1
+      // (Note: subtract 1 as the weights are constrained by summing to 1)
+      final int param2 = numComponents * (parametersPerGaussian + 1) - 1;
+      final double aic2 = MathUtils.getAkaikeInformationCriterion(logLikelihood2, param2);
+      final double bic2 =
+          MathUtils.getBayesianInformationCriterion(logLikelihood2, data.length, param2);
+
+      // Log-likelihood ratio test statistic
+      final double lambdaLr = -2 * (logLikelihood - logLikelihood2);
+      // DF = difference in dimensionality from previous number of components
+      // means, covariances, 1 weight
+      final int degreesOfFreedom = parametersPerGaussian + 1;
+      final double q = ChiSquaredDistributionTable.computeQValue(lambdaLr, degreesOfFreedom);
+      ImageJUtils.log("%d component log-likelihood=%s. AIC=%s. BIC=%s. LLR significance=%s.",
+          numComponents, logLikelihood2, aic2, bic2, MathUtils.rounded(q));
+      final double[] weights = mixed2.getFittedModel().getWeights();
+      ImageJUtils.log("Population weights: " + Arrays.toString(weights));
+
+      if (MathUtils.min(weights) < settings.minWeight) {
+        ImageJUtils.log("%d component model has population weight %s under minimum level %s",
+            numComponents, MathUtils.min(weights), settings.minWeight);
+        break;
+      }
+      if (aic <= aic2 || bic <= bic2 || q > 0.001) {
+        ImageJUtils.log("%d component model is not significant", numComponents);
+        break;
+      }
+      aic = aic2;
+      bic = bic2;
+      logLikelihood = logLikelihood2;
+      mixed = mixed2;
+    }
+
+    return mixed;
   }
 
   /**
@@ -697,6 +769,53 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static DoubleDoubleBiPredicate createConvergenceTest(double relativeError) {
     return (v1, v2) -> DoubleEquality.relativeError(v1, v2) < relativeError;
+  }
+
+  /**
+   * Assign the data using the mixture model.
+   *
+   * @param data the data
+   * @param model the model
+   * @return the assignments
+   */
+  private static int[] assignData(double[][] data, MixtureMultivariateGaussianDistribution model) {
+    final double[] weights = model.getWeights();
+    final MultivariateGaussianDistribution[] distributions = model.getDistributions();
+    // All initialised as component 0
+    final int[] comp = new int[data.length];
+    for (int i = 0; i < comp.length; i++) {
+      // Assign using the highest probability.
+      final double[] x = data[i];
+      double max = weights[0] * distributions[0].density(x);
+      for (int j = 1; j < weights.length; j++) {
+        final double p = weights[j] * distributions[j].density(x);
+        if (max < p) {
+          max = p;
+          comp[i] = j;
+        }
+      }
+    }
+    // Median smoothing window of 3 eliminates isolated assignments, e.g. C in between U:
+    // U C U => U U U
+    // Note: For more than two components this does nothing to isolated assignments
+    // between different neighbours:
+    // U C X => U C X
+    int n = 0;
+    if (comp.length >= 3) {
+      int p0 = comp[0];
+      int p1 = comp[1];
+      for (int i = 2; i < comp.length; i++) {
+        final int p2 = comp[i];
+        if (p0 != p1 && p0 == p2) {
+          comp[i - 1] = p2;
+          n++;
+        }
+        p0 = p1;
+        p1 = p2;
+      }
+    }
+    ImageJUtils.log("Re-labelled isolated assignments: %d / %d", n, comp.length);
+    return comp;
   }
 
   /**
