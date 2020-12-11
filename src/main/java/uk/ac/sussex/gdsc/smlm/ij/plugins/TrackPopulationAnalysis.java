@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.distribution.FDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
@@ -49,6 +50,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -64,7 +66,6 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -96,6 +97,10 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static final String[] FEATURE_NAMES = {"Anomalous exponent",
       "Effective diffusion coefficient", "Length of confinement", "Drift Vector"};
   private static final int SORT_DIMENSION = 1;
+  // Limits for fitting the MSD
+  private static final double MIN_D = Double.MIN_NORMAL;
+  private static final double MIN_SIGMA = Double.MIN_NORMAL;
+  private static final double MIN_ALPHA = Math.ulp(1.0);
 
   /** The plugin settings. */
   private Settings settings;
@@ -117,6 +122,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean debug;
     int maxComponents;
     double minWeight;
+    double minAlpha;
+    double significance;
+    boolean ignoreAlpha;
 
     Settings() {
       // Set defaults
@@ -127,6 +135,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       seed = 42;
       maxComponents = 2;
       minWeight = 0.1;
+      significance = 0.05;
     }
 
     Settings(Settings source) {
@@ -139,6 +148,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.debug = source.debug;
       this.maxComponents = source.maxComponents;
       this.minWeight = source.minWeight;
+      this.significance = source.significance;
+      this.minAlpha = source.minAlpha;
+      this.ignoreAlpha = source.ignoreAlpha;
     }
 
     Settings copy() {
@@ -234,7 +246,18 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     wo.tile();
 
-    final MultivariateGaussianMixtureExpectationMaximization mixed = fitGaussianMixture(data);
+    // Provide option to not use the anomalous exponent in the population mix.
+    int sortDimension = SORT_DIMENSION;
+    double[][] fitData = data;
+    if (settings.ignoreAlpha) {
+      // Remove index 0. This shifts the sort dimension.
+      sortDimension--;
+      fitData =
+          Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length)).toArray(double[][]::new);
+    }
+
+    final MultivariateGaussianMixtureExpectationMaximization mixed =
+        fitGaussianMixture(fitData, sortDimension);
 
     if (mixed == null) {
       IJ.error(TITLE, "Failed to fit a mixture model");
@@ -242,10 +265,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     MixtureMultivariateGaussianDistribution model = mixed.getFittedModel();
-    model = sortComponents(model, SORT_DIMENSION);
+    model = sortComponents(model, sortDimension);
 
     // For the best model, assign to the most likely population.
-    final int[] component = assignData(data, model);
+    final int[] component = assignData(fitData, model);
     final int numComponents = mixed.getFittedModel().getWeights().length;
 
     // Output coloured histograms of the populations.
@@ -364,8 +387,12 @@ public class TrackPopulationAnalysis implements PlugIn {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("track-population-analysis"));
 
-    gd.addSlider("Window", 3, 20, settings.window);
+    gd.addSlider("Window", 5, 20, settings.window);
+    gd.addMessage("Anomalous diffusion coefficient");
+    gd.addNumericField("Fit_significance", settings.significance, -2);
+    gd.addNumericField("Min_alpha", settings.minAlpha, -3);
     gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
+    gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
     gd.addSlider("Max_components", 2, 10, settings.maxComponents);
     gd.addSlider("Min_weight", 0.01, 1, settings.minWeight);
     gd.addNumericField("Max_iterations", settings.maxIterations, 0);
@@ -381,6 +408,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     settings.window = (int) gd.getNextNumber();
+    settings.significance = gd.getNextNumber();
+    settings.minAlpha = gd.getNextNumber();
+    settings.ignoreAlpha = gd.getNextBoolean();
     settings.maxComponents = (int) gd.getNextNumber();
     settings.minWeight = gd.getNextNumber();
     settings.maxIterations = (int) gd.getNextNumber();
@@ -395,8 +425,11 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     // Check arguments
     try {
-      ParameterUtils.isAbove("Window", settings.window, 2);
-      ParameterUtils.isAbove("Max components", settings.maxComponents, 1);
+      // For fitting the alpha coefficient there should be:
+      // (number of parameters) < (number of points)
+      // where the number of points is the window size minus 1.
+      ParameterUtils.isEqualOrAbove("Window", settings.window, 5);
+      ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 2);
       ParameterUtils.isPositive("Min_weight", settings.minWeight);
       ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
       ParameterUtils.isAboveZero("Maximum N", settings.relativeError);
@@ -486,32 +519,67 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Use for fitting
     final double[] s = new double[wm1];
     final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-    final MultivariateJacobianFunction model = new OffsetPowerFunction1(window);
     final RealVector observed = new ArrayRealVector(s, false);
-    final RealVector start = new ArrayRealVector(3);
     final RealMatrix weight = null;
     final ConvergenceChecker<Evaluation> checker = (iteration, previous,
         current) -> DoubleEquality.relativeError(previous.getCost(), current.getCost()) < 1e-6;
     final int maxEvaluations = Integer.MAX_VALUE;
     final int maxIterations = 3000;
     final boolean lazyEvaluation = false;
-    final ParameterValidator paramValidator = point -> {
-      // Ensure alpha and beta are positive
-      final double alpha = point.getEntry(0);
-      final double beta = point.getEntry(1);
-      if (alpha <= 0) {
-        point.setEntry(0, Double.MIN_VALUE);
+
+    // Linear model for Brownian motion
+    final MultivariateJacobianFunction model1 = new BrownianDiffusionFunction(wm1);
+    final RealVector start1 = new ArrayRealVector(2);
+    final ParameterValidator paramValidator1 = point -> {
+      // Ensure diffusion coefficient and precision are positive
+      final double d = point.getEntry(0);
+      final double sigma = point.getEntry(1);
+      // Do not use MIN_VALUE here to avoid sub-normal numbers
+      if (d < MIN_D) {
+        point.setEntry(0, MIN_D);
       }
-      if (beta <= 0) {
-        point.setEntry(1, Double.MIN_VALUE);
+      if (sigma < MIN_SIGMA) {
+        point.setEntry(1, MIN_SIGMA);
       }
       return point;
     };
+
+    // Non-linear model for anomalous diffusion coefficient
+    final MultivariateJacobianFunction model2 = new FbmDiffusionFunction(wm1);
+    final RealVector start2 = new ArrayRealVector(3);
+    final double minAlpha = Math.max(settings.minAlpha, MIN_ALPHA);
+    final ParameterValidator paramValidator2 = point -> {
+      // Ensure diffusion coefficient and precision are positive.
+      paramValidator1.validate(point);
+      // Ensure alpha in range (0, 2]
+      final double alpha = point.getEntry(2);
+      // Since the computations require (alpha + 1) limit this to the ULP of 1.0
+      // so the parameter always has an effect.
+      if (alpha < minAlpha) {
+        point.setEntry(2, MIN_ALPHA);
+      } else if (alpha > 2) {
+        point.setEntry(2, 2);
+      }
+      return point;
+    };
+
+    // For linear fit estimation
+    final SimpleRegression reg = new SimpleRegression(true);
+    // For significance test of the least squares fit.
+    // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
+    // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
+    final int denominatorDegreesOfFreedom = wm1 - 3;
+    final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+    final double significance = settings.significance;
+
+    int insignificant = 0;
 
     // Used for the standard deviations
     final Statistics statsX = new Statistics();
     final Statistics statsY = new Statistics();
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
+
+    // Process each track
     for (final Trace track : tracks) {
       // Get xy coordinates
       final int size = track.size();
@@ -534,6 +602,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         final int end = k + wm1;
 
         // 1. Anomalous exponent.
+
         // Compute the MSD for all distances from m=0, to m=window-1
         for (int m = 1; m <= wm1; m++) {
           // Use intermediate points to compute an average
@@ -544,59 +613,91 @@ public class TrackPopulationAnalysis implements PlugIn {
           // Number of points = window - m
           s[m - 1] = msd / (window - m);
         }
-        // TODO - Should this also fit using a fixed alpha of 1 (i.e. a straight line).
+
+        // Note:
         // If the alpha cannot significantly improve the fit then its value is likely to be
         // bad and the feature is noise. This can be judged using an F-test.
         // The local MSD curve can be highly variable, especially
         // if the molecule has switched from bound to unbound or vice versa. In this case there
-        // is no good value for alpha. The identification of bound or unbound localisations
-        // should be tested with and without the use of the alpha factor. The other features
-        // are smoothly varying when switching from bound to unbound. The alpha factor is not.
-        // Q. Is there a way to reject bad fits using the residuals score?
+        // is no good value for alpha.
+        // Setting alpha to 1.0 for insignificant fits can result in no variance in the feature
+        // and failure to invert the covariance matrix during Expectation-Maximisation.
+        // Thus the user has the option to remove alpha from the features
+        // before fitting the Gaussian mixture. The value is still computed for the results.
 
-        // Compute SimpleRegression
-        // Compare significance using RegressionUtils
+        // The data is small so compute the gradient and intercept using a linear regression.
+        // This could exploit pre-computation of the regression x components.
+        reg.clear();
+        for (int n = 1; n < window; n++) {
+          reg.addData(n, s[n - 1]);
+        }
 
-        // Provide option to not use the anomalous exponent in the population mix.
-
-        // Fit the anomalous exponent alpha using an additional parameter beta:
-        // s(t) = c + beta * t^alpha
-        // Note: Time is in frames and distance in native units. Scaling to other units is
-        // a transform that does not effect alpha:
-        // s(t) = scale2 * (c + beta) * (scale1*t)^alpha
-        // = scale2 * (c + beta) * scale1^alpha * t^alpha
-        // alpha = 1.0 for Brownian diffusion
-        start.setEntry(0, 1.0);
-        // beta = linear gradient
-        start.setEntry(1, s[s.length - 1] / wm1);
-        // Initialise with no offset
-        start.setEntry(2, 0);
-        // This relies on the modification in place of RealVector observed
-        final LeastSquaresProblem problem = LeastSquaresFactory.create(model, observed, start,
-            weight, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator);
+        // Compute linear fit with the (n-1/3) correction factor:
+        // MSD = 4D n - (4D) / 3 + 4 s^2
+        final double slope = reg.getSlope();
+        if (slope > 4 * MIN_D) {
+          start1.setEntry(0, slope / 4);
+          start1.setEntry(1, Math.sqrt(Math.max(0, reg.getIntercept() + slope / 3) / 4));
+        } else {
+          // Do not allow negative slope. Use a flat line and
+          // precision is derived from the mean of the MSD.
+          // Using D=0 has no gradient and the fit does not explore the parameter space.
+          // TODO: Check if any useful values come out of this situation. If not then fitting
+          // should be skipped and the alpha set to 1.0 (insignificant).
+          start1.setEntry(0, MIN_D);
+          start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
+        }
+        final LeastSquaresProblem problem1 = LeastSquaresFactory.create(model1, observed, start1,
+            weight, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
         try {
-          final Optimum lvmSolution = optimizer.optimize(problem);
+          final Optimum lvmSolution1 = optimizer.optimize(problem1);
+
+          // Fit the anomalous exponent alpha. Start from the linear fit result.
+          final RealVector fit1 = lvmSolution1.getPoint();
+          start2.setEntry(0, fit1.getEntry(0));
+          start2.setEntry(1, fit1.getEntry(1));
+          start2.setEntry(2, 1.0);
+          final LeastSquaresProblem problem2 = LeastSquaresFactory.create(model2, observed, start2,
+              weight, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
+          final Optimum lvmSolution2 = optimizer.optimize(problem2);
+
           // Check for model improvement
-          // RealVector res = lvmSolution.getResiduals();
-          // double ss = res.dotProduct(res);
-          values[0] = lvmSolution.getPoint().getEntry(0);
-          // Debug
-          if (values[0] > 10 && values[0] < 0.6) {
-            final RealVector p = lvmSolution.getPoint();
-            final String title = "anomalous exponent";
-            final Plot plot = new Plot(title, "time", "MSD");
-            final double[] t = SimpleArrayUtils.newArray(s.length, 1.0, 1.0);
-            plot.addPoints(t, s, Plot.CROSS);
-            plot.addPoints(t, model.value(p).getFirst().toArray(), Plot.LINE);
-            plot.addLabel(0, 0, lvmSolution.getPoint().toString());
-            ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
-            System.out.println(lvmSolution.getPoint());
+          final double rss1 = getResidualSumOfSquares(lvmSolution1);
+          final double rss2 = getResidualSumOfSquares(lvmSolution2);
+
+          // Compare significance using the method from RegressionUtils
+          // F = ((rss1 - rss2) / (p2 - p1)) / (rss2 / (n - p2))
+          final double num = rss1 - rss2;
+          final double denom = rss2 / denominatorDegreesOfFreedom;
+          // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
+          // and the p-value will be accepted
+          final double fStatistic = MathUtils.div0(num, denom);
+          final double pValue = 1.0 - distribution.cumulativeProbability(fStatistic);
+
+          // If better then this is anomalous diffusion
+          final double alpha = lvmSolution2.getPoint().getEntry(2);
+          values[0] = alpha;
+          if (pValue > significance) {
+            insignificant++;
           }
+
+          // // Debug
+          // if (pValue < 0.01 /*alpha > 0.0 && alpha < 0.2*/) {
+          // final RealVector p = lvmSolution2.getPoint();
+          // final String title = "anomalous exponent";
+          // final Plot plot = new Plot(title, "time", "MSD");
+          // final double[] t = SimpleArrayUtils.newArray(s.length, 1.0, 1.0);
+          // plot.addPoints(t, s, Plot.CROSS);
+          // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
+          // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue);
+          // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
+          // System.out.println(lvmSolution2.getPoint());
+          // }
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
-            ImageJUtils.log("Failed to fit anomalous exponent", ex.getMessage());
+            ImageJUtils.log("Failed to fit anomalous exponent: " + ex.getMessage());
           }
-          // Ignore this and set to Brownian motion
+          // Ignore this and leave as Brownian motion
           values[0] = 1.0;
         }
 
@@ -626,7 +727,19 @@ public class TrackPopulationAnalysis implements PlugIn {
       ticker.tick();
     }
     ImageJUtils.finished();
+    ImageJUtils.log("Insignificant anomalous coefficients: %d / %d", insignificant, data.size());
     return data.toArray(new double[0][0]);
+  }
+
+  /**
+   * Gets the residual sum of squares.
+   *
+   * @param lvmSolution1 the lvm solution
+   * @return the residual sum of squares
+   */
+  private static double getResidualSumOfSquares(final Optimum lvmSolution1) {
+    final RealVector res = lvmSolution1.getResiduals();
+    return res.dotProduct(res);
   }
 
   /**
@@ -634,18 +747,21 @@ public class TrackPopulationAnalysis implements PlugIn {
    * repeats is returned.
    *
    * @param data the data
+   * @param sortDimension the sort dimension
    * @return the multivariate gaussian mixture
    */
   private MultivariateGaussianMixtureExpectationMaximization
-      fitGaussianMixture(final double[][] data) {
+      fitGaussianMixture(final double[][] data, int sortDimension) {
     // Get the unmixed multivariate Guassian.
     final MultivariateGaussianDistribution unmixed =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
 
+    final int dimensions = unmixed.getMeans().length;
+
     // Record the likelihood of the unmixed model
     double logLikelihood = Arrays.stream(data).mapToDouble(unmixed::density).map(Math::log).sum();
-    // 4 means, 16 covariances
-    final int parametersPerGaussian = 4 + 4 * 4;
+    // x means, x*x covariances
+    final int parametersPerGaussian = dimensions + dimensions * dimensions;
     double aic = MathUtils.getAkaikeInformationCriterion(logLikelihood, parametersPerGaussian);
     double bic = MathUtils.getBayesianInformationCriterion(logLikelihood, data.length,
         parametersPerGaussian);
@@ -656,7 +772,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     MultivariateGaussianMixtureExpectationMaximization mixed = null;
     for (int numComponents = 2; numComponents <= settings.maxComponents; numComponents++) {
       final MultivariateGaussianMixtureExpectationMaximization mixed2 =
-          createMixed(data, numComponents);
+          createMixed(data, dimensions, numComponents);
       if (mixed2 == null) {
         ImageJUtils.log("Failed to fit a %d component mixture model", numComponents);
         break;
@@ -681,7 +797,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       // For consistency sort the mixture by the mean of the diffusion coefficient
       final double[] values = Arrays.stream(mixed2.getFittedModel().getDistributions())
-          .mapToDouble(d -> d.getMeans()[SORT_DIMENSION]).toArray();
+          .mapToDouble(d -> d.getMeans()[sortDimension]).toArray();
       SortUtils.sortData(weights, values, false, false);
       ImageJUtils.log("Population weights: " + Arrays.toString(weights));
 
@@ -705,17 +821,18 @@ public class TrackPopulationAnalysis implements PlugIn {
 
   /**
    * Creates the multivariate gaussian mixture as the best of many repeats of the expectation
-   * maximisation algorithm..
+   * maximisation algorithm.
    *
    * @param data the data
+   * @param dimensions the dimensions
    * @param numComponents the number of components
    * @return the multivariate gaussian mixture expectation maximization
    */
   private MultivariateGaussianMixtureExpectationMaximization createMixed(final double[][] data,
-      int numComponents) {
+      int dimensions, int numComponents) {
     // Fit a mixed multivariate Gaussian with different repeats.
     final UnitSphereSampler sampler =
-        new UnitSphereSampler(4, UniformRandomProviders.create(settings.seed++));
+        new UnitSphereSampler(dimensions, UniformRandomProviders.create(settings.seed++));
     final LocalList<CompletableFuture<MultivariateGaussianMixtureExpectationMaximization>> results =
         new LocalList<>(settings.repeats);
     final DoubleDoubleBiPredicate test = createConvergenceTest(settings.relativeError);
@@ -729,16 +846,17 @@ public class TrackPopulationAnalysis implements PlugIn {
       results.add(CompletableFuture.supplyAsync(() -> {
         final MultivariateGaussianMixtureExpectationMaximization fitter =
             new MultivariateGaussianMixtureExpectationMaximization(data);
-        final MixtureMultivariateGaussianDistribution initialMixture =
-            MultivariateGaussianMixtureExpectationMaximization.estimate(data, numComponents,
-                point -> {
-                  double dot = 0;
-                  for (int j = 0; j < 4; j++) {
-                    dot += vector[j] * point[j];
-                  }
-                  return dot;
-                });
         try {
+          // This may also throw the same exceptions due to inversion of the covariance matrix
+          final MixtureMultivariateGaussianDistribution initialMixture =
+              MultivariateGaussianMixtureExpectationMaximization.estimate(data, numComponents,
+                  point -> {
+                    double dot = 0;
+                    for (int j = 0; j < dimensions; j++) {
+                      dot += vector[j] * point[j];
+                    }
+                    return dot;
+                  });
           final boolean result = fitter.fit(initialMixture, settings.maxIterations, test);
           // Log the result. Note: The ImageJ log is synchronized.
           if (settings.debug) {
@@ -758,7 +876,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       }));
     }
     ImageJUtils.finished();
-    if (failures.get() != 0) {
+    if (failures.get() != 0 && settings.debug) {
       ImageJUtils.log("  %d component fit failed %d/%d", numComponents, failures.get(),
           settings.repeats);
     }
@@ -848,6 +966,150 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.log("Re-labelled isolated assignments: %d / %d", n, comp.length);
     return comp;
+  }
+
+  /**
+   * Define a Brownian motion diffusion function for use in fitting MSD for the case of pure
+   * Brownian motion. The function is corrected for static (localisation precision) and dynamic
+   * error (localisation error due to diffusion):
+   *
+   * <pre>
+   * MSD = 4Dt * (n - 1/3) + 4s^2
+   *     = 4Dtn - 4Dt/3 + 4s^2
+   * </pre>
+   *
+   * <p>D is the diffusion coefficient; t is the acquisition time step; n is the number of frames;
+   * and s is the static localisation precision (see Backlund, et al (2015), Physical Review E 91:
+   * 062716, eq. 1). Note s is composed of the localisation precision of an unmoving particle (s0)
+   * and a contribution due to the effect of a moving particle (see eq. 5).
+   *
+   * <p>This is a special case power function assuming n is an integer in {@code [1, size]} and t is
+   * 1 (thus can be ignored).
+   */
+  @VisibleForTesting
+  static final class BrownianDiffusionFunction implements MultivariateJacobianFunction {
+    private static final double THIRD = 1 / 3.0;
+    private final int size;
+    /** The pre-compute 4 * (n - 1/3). */
+    private final double[] scale;
+
+    /**
+     * Create an instance.
+     *
+     * @param size the maximum size of n (inclusive)
+     */
+    BrownianDiffusionFunction(int size) {
+      this.size = size;
+      // Pre-computation of the scale for n
+      scale = new double[size];
+      for (int n = 1; n <= size; n++) {
+        scale[n - 1] = 4 * (n - THIRD);
+      }
+    }
+
+    @Override
+    public Pair<RealVector, RealMatrix> value(RealVector point) {
+      final double[] value = new double[size];
+      final double[][] jacobian = new double[size][2];
+      final double d = point.getEntry(0);
+      final double s = point.getEntry(1);
+      // MSD = 4D * (n - 1/3) + 4s^2
+      // dy_dD = 4 * (n - 1/3)
+      // dy_ds = 8s
+      final double ss4 = 4 * s * s;
+      final double s8 = 8 * s;
+      // Here the variable n represents (n+1) but is used as an index to a pre-computed scale
+      for (int n = 0; n < size; n++) {
+        value[n] = d * scale[n] + ss4;
+        jacobian[n][0] = scale[n];
+        jacobian[n][1] = s8;
+      }
+      return new Pair<>(new ArrayRealVector(value, false),
+          new Array2DRowRealMatrix(jacobian, false));
+    }
+  }
+
+
+  /**
+   * Define a fractional Brownian motion (FBM) diffusion function for use in fitting MSD for the
+   * case of anomalous diffusion. The function is corrected for static (localisation precision) and
+   * dynamic error (localisation error due to diffusion):
+   *
+   * <pre>
+   * MSD = [4Dt^a / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)]
+   *       - [8Dt^a / (a+2)(a+1)] + 4s^2
+   * </pre>
+   *
+   * <p>D is the diffusion coefficient; t is the acquisition time step; n is the number of frames; a
+   * is the anomalous coefficient alpha; and s is the static localisation precision (see Backlund,
+   * et al (2015), Physical Review E 91: 062716, eq. 8). Note s is composed of the localisation
+   * precision of an unmoving particle (s0) and a contribution due to the effect of a moving
+   * particle (see eq. 5). The factor alpha should be in the range {@code (0, 2]}.
+   *
+   * <p>This is a special case power function assuming n is an integer in {@code [1, size]} and t is
+   * 1 (thus can be ignored).
+   */
+  @VisibleForTesting
+  static final class FbmDiffusionFunction implements MultivariateJacobianFunction {
+    private final int size;
+    private final double[] log;
+
+    /**
+     * Create an instance.
+     *
+     * @param size the maximum size of n (inclusive)
+     */
+    FbmDiffusionFunction(int size) {
+      this.size = size;
+      log = new double[size + 2];
+      for (int n = 2; n < log.length; n++) {
+        log[n] = Math.log(n);
+      }
+    }
+
+    @Override
+    public Pair<RealVector, RealMatrix> value(RealVector point) {
+      final double[] value = new double[size];
+      final double[][] jacobian = new double[size][3];
+      final double d = point.getEntry(0);
+      final double s = point.getEntry(1);
+      final double a = point.getEntry(2);
+      // MSD = [4D / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)]
+      // - [8D / (a+2)(a+1)] + 4s^2
+      // dy_dD = [4 / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)] - 8 / (a+2)(a+1)
+      // dy_ds = 8s
+      // Use product rule with the following parts:
+      // f(a) = 4D / (a+2)(a+1)
+      // f'(a) = -4D / (a+2)(a+1)(a+2) -4 / (a+2)(a+1)(a+1)
+      // g(a) = (n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)
+      // g'(a) = (n+1)^(a+2)*log(n+1) + (n-1)^(a+2)*log(n-1) - 2n^(a+2)*log(n)
+      // dy_da = (f'(a) * g(a) + f * g'(a)) - 2 * f'(a)
+      final double ss4 = 4 * s * s;
+      final double s8 = 8 * s;
+      final double a1 = a + 1;
+      final double a2 = a + 2;
+      final double a2a1 = a2 * a1;
+      final double fa = 4 / a2a1;
+
+      // Pre-compute powers of n^(a+2)
+      final double[] na = new double[size + 2];
+      for (int n = 1; n < na.length; n++) {
+        na[n] = Math.pow(n, a2);
+      }
+
+      for (int n = 1; n <= size; n++) {
+        final int i = n - 1;
+        final double ga = na[n + 1] + na[i] - 2 * na[n];
+        jacobian[i][0] = fa * ga - 2 * fa;
+        value[i] = d * jacobian[i][0] + ss4;
+        jacobian[i][1] = s8;
+        final double fpa = -fa / a2 - fa / a1;
+        final double gpa = (na[n + 1] * log[n + 1] + na[i] * log[i] - 2 * na[n] * log[n]);
+        jacobian[i][2] = d * ((fpa * ga + fa * gpa) - 2 * fpa);
+      }
+      return new Pair<>(new ArrayRealVector(value, false),
+          new Array2DRowRealMatrix(jacobian, false));
+    }
   }
 
   /**
