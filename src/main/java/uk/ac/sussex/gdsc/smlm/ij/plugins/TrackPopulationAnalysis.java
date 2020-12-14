@@ -69,6 +69,7 @@ import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -610,7 +611,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
     final double significance = settings.significance;
 
-    int insignificant = 0;
+    final int[] fitResult = new int[4];
 
     // Factor for the diffusion coefficient: 1/N * 1/(2*dimensions*deltaT) = 1 / 4Nt
     // with N the number of points to average.
@@ -677,6 +678,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Compute linear fit with the (n-1/3) correction factor:
         // MSD = 4D n - (4D) / 3 + 4 s^2
         final double slope = reg.getSlope();
+        int fitIndex = 0;
         if (slope > 4 * MIN_D) {
           start1.setEntry(0, slope / 4);
           start1.setEntry(1, Math.sqrt(Math.max(0, reg.getIntercept() + slope / 3) / 4));
@@ -684,8 +686,9 @@ public class TrackPopulationAnalysis implements PlugIn {
           // Do not allow negative slope. Use a flat line and
           // precision is derived from the mean of the MSD.
           // Using D=0 has no gradient and the fit does not explore the parameter space.
-          // TODO: Check if any useful values come out of this situation. If not then fitting
-          // should be skipped and the alpha set to 1.0 (insignificant).
+          // Note: If there is no gradient then the alpha value is very likely to
+          // be insignificant as the FBM model assumes an upward slope.
+          fitIndex = 2;
           start1.setEntry(0, MIN_D);
           start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
         }
@@ -720,18 +723,24 @@ public class TrackPopulationAnalysis implements PlugIn {
           final double alpha = lvmSolution2.getPoint().getEntry(2);
           values[0] = alpha;
           if (pValue > significance) {
-            insignificant++;
+            fitIndex++;
           }
+          fitResult[fitIndex]++;
 
           // // Debug
-          // if (pValue < 0.01 /*alpha > 0.0 && alpha < 0.2*/) {
+          // if (
+          // // pValue < 0.01
+          // alpha > 0.0 && alpha < 0.2) {
           // final RealVector p = lvmSolution2.getPoint();
           // final String title = "anomalous exponent";
           // final Plot plot = new Plot(title, "time", "MSD");
           // final double[] t = SimpleArrayUtils.newArray(s.length, 1.0, 1.0);
           // plot.addPoints(t, s, Plot.CROSS);
           // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
-          // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue);
+          // plot.addPoints(t, model1.value(lvmSolution1.getPoint()).getFirst().toArray(),
+          // Plot.LINE);
+          // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue + ". "
+          // + lvmSolution1.getPoint().toString());
           // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
           // System.out.println(lvmSolution2.getPoint());
           // }
@@ -782,7 +791,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       ticker.tick();
     }
     ImageJUtils.finished();
-    ImageJUtils.log("Insignificant anomalous coefficients: %d / %d", insignificant, data.size());
+    if (settings.debug) {
+      ImageJUtils.log("+Slope, significant:   %d", fitResult[0]);
+      ImageJUtils.log("+Slope, insignificant: %d", fitResult[1]);
+      ImageJUtils.log("-Slope, significant:   %d", fitResult[2]);
+      ImageJUtils.log("-Slope, insignificant: %d", fitResult[3]);
+    }
+    ImageJUtils.log("Insignificant anomalous coefficients: %d / %d", fitResult[1] + fitResult[3],
+        data.size());
     return data.toArray(new double[0][0]);
   }
 
@@ -923,8 +939,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           failures.getAndIncrement();
           if (settings.debug) {
             ImageJUtils.log("  Fit failed during iteration %d. No variance in a sub-population "
-                + "component (check alpha is not always 1.0).",
-                fitter.getIterations());
+                + "component (check alpha is not always 1.0).", fitter.getIterations());
           }
         } finally {
           ticker.tick();
@@ -1064,7 +1079,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   static final class BrownianDiffusionFunction implements MultivariateJacobianFunction {
     private static final double THIRD = 1 / 3.0;
     private final int size;
-    /** The pre-compute 4 * (n - 1/3). */
+    /** The pre-compute 4t * (n - 1/3). */
     private final double[] scale;
 
     /**
