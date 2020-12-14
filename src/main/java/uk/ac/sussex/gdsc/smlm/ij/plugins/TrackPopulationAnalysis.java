@@ -28,11 +28,13 @@ import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.process.LUT;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
 import org.apache.commons.math3.distribution.FDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -54,6 +56,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -95,7 +98,8 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 public class TrackPopulationAnalysis implements PlugIn {
   private static final String TITLE = "Track Population Analysis";
   private static final String[] FEATURE_NAMES = {"Anomalous exponent",
-      "Effective diffusion coefficient", "Length of confinement", "Drift Vector"};
+      "Effective diffusion coefficient", "Length of confinement", "Drift vector magnitude"};
+  private static final String[] FEATURE_UNITS = {null, "μm^2/s", "μm", "μm"};
   private static final int SORT_DIMENSION = 1;
   // Limits for fitting the MSD
   private static final double MIN_D = Double.MIN_NORMAL;
@@ -125,6 +129,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     double minAlpha;
     double significance;
     boolean ignoreAlpha;
+    int lutIndex;
 
     Settings() {
       // Set defaults
@@ -136,6 +141,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       maxComponents = 2;
       minWeight = 0.1;
       significance = 0.05;
+      lutIndex = LutColour.RED_BLUE.ordinal();
     }
 
     Settings(Settings source) {
@@ -151,6 +157,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.significance = source.significance;
       this.minAlpha = source.minAlpha;
       this.ignoreAlpha = source.ignoreAlpha;
+      this.lutIndex = source.lutIndex;
     }
 
     Settings copy() {
@@ -191,16 +198,12 @@ public class TrackPopulationAnalysis implements PlugIn {
     // All datasets must have the same pixel pitch and exposure time
     // Get parameters
     // Convert datasets to tracks
-    // For each track compute the 4 local track parameters using the configured window
+    // For each track compute the 4 local track features using the configured window
     // Fit a multi-variate Gaussian mixture model to the data
     // (using the configured number of components/populations)
     // Assign each point in the track using the model.
     // Smooth the assignments.
     // Plot histograms of each track parameter, coloured by component
-    //
-    // Output for the bound component and free components track parameters
-    // Compute dwell times
-    // Other ...
 
     final List<MemoryPeakResults> combinedResults = new LocalList<>();
 
@@ -223,7 +226,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       return;
     }
 
-    final double[][] data = extractTrackData(tracks);
+    final CalibrationReader cal = combinedResults.get(0).getCalibrationReader();
+    // Use micrometer / second
+    final TypeConverter<DistanceUnit> distanceConverter = cal.getDistanceConverter(DistanceUnit.UM);
+    final double exposureTime = cal.getExposureTime() / 1000.0;
+    final double[][] data = extractTrackData(tracks, distanceConverter, exposureTime);
 
     // Histogram the raw data.
     final Array2DRowRealMatrix raw = new Array2DRowRealMatrix(data, false);
@@ -240,7 +247,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       bins[i] = HistogramPlot.getBins(colData, BinMethod.SCOTT);
       final double[][] hist =
           HistogramPlot.calcHistogram(columns[i], limits[i][0], limits[i][1], bins[i]);
-      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], FEATURE_NAMES[i], "Frequency");
+      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], getXAxisLabel(i), "Frequency");
       plots[i].addPoints(hist[0], hist[1], Plot.BAR);
       ImageJUtils.display(plots[i].getTitle(), plots[i], 0, wo);
     }
@@ -272,7 +279,13 @@ public class TrackPopulationAnalysis implements PlugIn {
     final int numComponents = mixed.getFittedModel().getWeights().length;
 
     // Output coloured histograms of the populations.
-    final LUT lut = LutHelper.createLut(LutColour.INTENSE);
+    final LUT lut = LutHelper.createLut(settings.lutIndex);
+    IntFunction<Color> colourMap;
+    if (LutHelper.getColour(lut, 0).equals(Color.BLACK)) {
+      colourMap = i -> LutHelper.getNonZeroColour(lut, i, 0, numComponents - 1);
+    } else {
+      colourMap = i -> LutHelper.getColour(lut, i, 0, numComponents - 1);
+    }
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       // Extract the data for each component
       final double[] col = columns[i];
@@ -290,11 +303,27 @@ public class TrackPopulationAnalysis implements PlugIn {
         final double[][] hist =
             HistogramPlot.calcHistogram(feature.values(), limits[i][0], limits[i][1], bins[i]);
         // Colour the points
-        plot.setColor(LutHelper.getColour(lut, n));
+        plot.setColor(colourMap.apply(n));
         plot.addPoints(hist[0], hist[1], Plot.BAR);
       }
       plot.updateImage();
     }
+
+    // Analysis.
+    // Assign the original localisations to their track component.
+    // Q. What about the start/end not covered by the window?
+
+    // Save tracks as a dataset labelled with the sub-track ID.
+    // Show table of tracks and sub-tracks.
+    // Click on a track and show an image of the track coloured by the component.
+
+    // Output for the bound component and free components track parameters.
+    // Compute dwell times.
+    // Other ...
+
+    // Extract all continuous segments of the same component.
+    // Produce MSD plot with error bars.
+    // Fit using FBM model.
   }
 
   private boolean showInputDialog(List<MemoryPeakResults> combinedResults) {
@@ -400,6 +429,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addNumericField("Repeats", settings.repeats, 0);
     gd.addNumericField("Seed", settings.seed, 0);
     gd.addCheckbox("Debug", settings.debug);
+    gd.addMessage("Output options");
+    gd.addChoice("LUT", LutHelper.getLutNames(), settings.lutIndex);
 
     gd.showDialog();
 
@@ -417,6 +448,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     settings.relativeError = gd.getNextNumber();
     settings.repeats = (int) gd.getNextNumber();
     settings.seed = (int) gd.getNextNumber();
+    settings.lutIndex = gd.getNextChoiceIndex();
     settings.debug = gd.getNextBoolean();
 
     if (gd.invalidNumber()) {
@@ -507,10 +539,16 @@ public class TrackPopulationAnalysis implements PlugIn {
    * Extract the track data. This extracts different descriptors of the track using a rolling local
    * window.
    *
+   * <p>Distances are converted to {@code unit} using the provided converter and time units are
+   * converted from frame to seconds (s). The diffusion coefficients is in unit^2/s.
+   *
    * @param tracks the tracks
-   * @return the double[][]
+   * @param distanceConverter the distance converter
+   * @param deltaT the time step of each frame in seconds (delta T)
+   * @return the track data
    */
-  private double[][] extractTrackData(List<Trace> tracks) {
+  private double[][] extractTrackData(List<Trace> tracks,
+      TypeConverter<DistanceUnit> distanceConverter, double deltaT) {
     final List<double[]> data = new LocalList<>(tracks.size());
     double[] x = new double[0];
     double[] y = new double[0];
@@ -528,7 +566,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final boolean lazyEvaluation = false;
 
     // Linear model for Brownian motion
-    final MultivariateJacobianFunction model1 = new BrownianDiffusionFunction(wm1);
+    final MultivariateJacobianFunction model1 = new BrownianDiffusionFunction(wm1, deltaT);
     final RealVector start1 = new ArrayRealVector(2);
     final ParameterValidator paramValidator1 = point -> {
       // Ensure diffusion coefficient and precision are positive
@@ -545,7 +583,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     };
 
     // Non-linear model for anomalous diffusion coefficient
-    final MultivariateJacobianFunction model2 = new FbmDiffusionFunction(wm1);
+    final MultivariateJacobianFunction model2 = new FbmDiffusionFunction(wm1, deltaT);
     final RealVector start2 = new ArrayRealVector(3);
     final double minAlpha = Math.max(settings.minAlpha, MIN_ALPHA);
     final ParameterValidator paramValidator2 = point -> {
@@ -574,6 +612,10 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     int insignificant = 0;
 
+    // Factor for the diffusion coefficient: 1/N * 1/(2*dimensions*deltaT) = 1 / 4Nt
+    // with N the number of points to average.
+    final double diffusionCoefficientFactor = 1.0 / (4 * wm1 * deltaT);
+
     // Used for the standard deviations
     final Statistics statsX = new Statistics();
     final Statistics statsY = new Statistics();
@@ -589,8 +631,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       for (int i = 0; i < size; i++) {
         final PeakResult peak = track.get(i);
-        x[i] = peak.getXPosition();
-        y[i] = peak.getYPosition();
+        x[i] = distanceConverter.convert(peak.getXPosition());
+        y[i] = distanceConverter.convert(peak.getYPosition());
       }
       final int smwm1 = size - wm1;
       for (int k = 0; k < smwm1; k++) {
@@ -701,15 +743,25 @@ public class TrackPopulationAnalysis implements PlugIn {
           values[0] = 1.0;
         }
 
-        // 2. Effective diffusion coefficient.
-        // Sum the squared jump distances and normalise by 1 / 2dim, i.e. 1 / 4
+        // Referenced papers:
+        // Hozé, N. H., D. Statistical methods for large ensembles of super-resolution
+        // stochastic single particle trajectories in cell biology.
+        // Annual Review of Statistics and Its Application 4, 189-223
+        //
+        // Amitai, A., Seeber, A., Gasser, S. M. & Holcman, D. Visualization of Chromatin
+        // Decompaction and Break Site Extrusion as Predicted by Statistical Polymer
+        // Modeling of Single-Locus Trajectories. Cell reports 18
+
+        // 2. Effective diffusion coefficient (Hozé, eq 10).
+        // This is the average squared jump distance between successive points
+        // divided by 1 / (2 * dimensions * deltaT), i.e. 1 / 4t.
         double sum = 0;
         for (int i = k; i < end; i++) {
           sum += MathUtils.distance2(x[i], y[i], x[i + 1], y[i + 1]);
         }
-        values[1] = 0.25 * sum;
+        values[1] = sum * diffusionCoefficientFactor;
 
-        // 3. Length of confinement.
+        // 3. Length of confinement (Amitai et al, eq 1).
         // Compute the average of the standard deviation of the position in each dimension.
         statsX.reset();
         statsY.reset();
@@ -719,10 +771,13 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
         values[2] = (statsX.getStandardDeviation() + statsY.getStandardDeviation()) / 2;
 
-        // 4. Magnitude of drift vector.
-        // Note: The vector is given as a sum of the distance between successive points.
-        // This cancels and the result is the distance between the first and last point.
-        values[3] = MathUtils.distance(x[k], y[k], x[end], y[end]);
+        // 4. Magnitude of drift vector (Hozé, eq 9).
+        // Note: The drift field is given as the expected distance between successive points, i.e.
+        // the average step. Since all track windows are the same length this is the same
+        // as the distance between the first and last point divided by the number of points.
+        // The drift field in each dimension is combined to create a drift norm, i.e. Euclidean
+        // distance.
+        values[3] = MathUtils.distance(x[k], y[k], x[end], y[end]) / wm1;
       }
       ticker.tick();
     }
@@ -867,7 +922,9 @@ public class TrackPopulationAnalysis implements PlugIn {
         } catch (NonPositiveDefiniteMatrixException | SingularMatrixException ex) {
           failures.getAndIncrement();
           if (settings.debug) {
-            ImageJUtils.log("  Fit failed during iteration %d", fitter.getIterations());
+            ImageJUtils.log("  Fit failed during iteration %d. No variance in a sub-population "
+                + "component (check alpha is not always 1.0).",
+                fitter.getIterations());
           }
         } finally {
           ticker.tick();
@@ -919,6 +976,17 @@ public class TrackPopulationAnalysis implements PlugIn {
       distributions[i] = list.unsafeGet(i).getSecond();
     }
     return MixtureMultivariateGaussianDistribution.create(weights, distributions);
+  }
+
+  /**
+   * Gets the x axis label.
+   *
+   * @param feature the feature
+   * @return the x axis label
+   */
+  private static String getXAxisLabel(int feature) {
+    return FEATURE_UNITS[feature] == null ? FEATURE_NAMES[feature]
+        : FEATURE_NAMES[feature] + " (" + FEATURE_UNITS[feature] + ")";
   }
 
   /**
@@ -983,8 +1051,14 @@ public class TrackPopulationAnalysis implements PlugIn {
    * 062716, eq. 1). Note s is composed of the localisation precision of an unmoving particle (s0)
    * and a contribution due to the effect of a moving particle (see eq. 5).
    *
-   * <p>This is a special case power function assuming n is an integer in {@code [1, size]} and t is
-   * 1 (thus can be ignored).
+   * <pre>
+   * s^2 = s0^2 + 2Dt / 3p
+   * </pre>
+   *
+   * <p>where p is the number of photons. This term typically results in a small inflation of s and
+   * is ignored in fitting.
+   *
+   * <p>This function assumes {@code n} is an integer in {@code [1, size]}.
    */
   @VisibleForTesting
   static final class BrownianDiffusionFunction implements MultivariateJacobianFunction {
@@ -997,13 +1071,14 @@ public class TrackPopulationAnalysis implements PlugIn {
      * Create an instance.
      *
      * @param size the maximum size of n (inclusive)
+     * @param deltaT the time step (delta T)
      */
-    BrownianDiffusionFunction(int size) {
+    BrownianDiffusionFunction(int size, double deltaT) {
       this.size = size;
       // Pre-computation of the scale for n
       scale = new double[size];
       for (int n = 1; n <= size; n++) {
-        scale[n - 1] = 4 * (n - THIRD);
+        scale[n - 1] = 4 * deltaT * (n - THIRD);
       }
     }
 
@@ -1013,8 +1088,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       final double[][] jacobian = new double[size][2];
       final double d = point.getEntry(0);
       final double s = point.getEntry(1);
-      // MSD = 4D * (n - 1/3) + 4s^2
-      // dy_dD = 4 * (n - 1/3)
+      // MSD = 4Dt * (n - 1/3) + 4s^2
+      // dy_dD = 4t * (n - 1/3)
       // dy_ds = 8s
       final double ss4 = 4 * s * s;
       final double s8 = 8 * s;
@@ -1028,7 +1103,6 @@ public class TrackPopulationAnalysis implements PlugIn {
           new Array2DRowRealMatrix(jacobian, false));
     }
   }
-
 
   /**
    * Define a fractional Brownian motion (FBM) diffusion function for use in fitting MSD for the
@@ -1044,27 +1118,38 @@ public class TrackPopulationAnalysis implements PlugIn {
    * is the anomalous coefficient alpha; and s is the static localisation precision (see Backlund,
    * et al (2015), Physical Review E 91: 062716, eq. 8). Note s is composed of the localisation
    * precision of an unmoving particle (s0) and a contribution due to the effect of a moving
-   * particle (see eq. 5). The factor alpha should be in the range {@code (0, 2]}.
+   * particle (see eq. 6).
    *
-   * <p>This is a special case power function assuming n is an integer in {@code [1, size]} and t is
-   * 1 (thus can be ignored).
+   * <pre>
+   * s^2 = s0^2 + 4Dt / (a+2)(a+1)p
+   * </pre>
+   *
+   * <p>where p is the number of photons. This term typically results in a small inflation of s and
+   * is ignored in fitting. The factor alpha should be in the range {@code (0, 2]}.
+   *
+   * <p>This function assumes {@code n} is an integer in {@code [1, size]}.
    */
   @VisibleForTesting
   static final class FbmDiffusionFunction implements MultivariateJacobianFunction {
     private final int size;
     private final double[] log;
+    private final double deltaT;
+    private final double logt;
 
     /**
      * Create an instance.
      *
      * @param size the maximum size of n (inclusive)
+     * @param deltaT the time step (delta T)
      */
-    FbmDiffusionFunction(int size) {
+    FbmDiffusionFunction(int size, double deltaT) {
       this.size = size;
       log = new double[size + 2];
       for (int n = 2; n < log.length; n++) {
         log[n] = Math.log(n);
       }
+      this.deltaT = deltaT;
+      logt = Math.log(deltaT);
     }
 
     @Override
@@ -1074,21 +1159,28 @@ public class TrackPopulationAnalysis implements PlugIn {
       final double d = point.getEntry(0);
       final double s = point.getEntry(1);
       final double a = point.getEntry(2);
-      // MSD = [4D / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)]
-      // - [8D / (a+2)(a+1)] + 4s^2
-      // dy_dD = [4 / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)] - 8 / (a+2)(a+1)
+      // MSD = [4Dt^a / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)]
+      // - [8Dt^a / (a+2)(a+1)] + 4s^2
+      // dy_dD = [4t^a / (a+2)(a+1)] * [(n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)] - 8t^a / (a+2)(a+1)
       // dy_ds = 8s
       // Use product rule with the following parts:
+      // e(a) = t^a
+      // e'(a) = t^a * log(t)
       // f(a) = 4D / (a+2)(a+1)
       // f'(a) = -4D / (a+2)(a+1)(a+2) -4 / (a+2)(a+1)(a+1)
       // g(a) = (n+1)^(a+2) + (n-1)^(a+2) - 2n^(a+2)
       // g'(a) = (n+1)^(a+2)*log(n+1) + (n-1)^(a+2)*log(n-1) - 2n^(a+2)*log(n)
-      // dy_da = (f'(a) * g(a) + f * g'(a)) - 2 * f'(a)
+      // y = e(a) * f(a) * g(a) - 2 * e(a) * f(a)
+      // dy_da = e(a) * (f'(a) * g(a) + f * g'(a)) + e'(a) * (f(a) * g(a))
+      // - 2 * (e(a) * f'(a) + e'(a) + f(a))
       final double ss4 = 4 * s * s;
       final double s8 = 8 * s;
       final double a1 = a + 1;
       final double a2 = a + 2;
       final double a2a1 = a2 * a1;
+      final double ea = Math.pow(deltaT, a);
+      final double epa = ea * logt;
+      // Missing the factor D which is multiplied in later
       final double fa = 4 / a2a1;
 
       // Pre-compute powers of n^(a+2)
@@ -1100,12 +1192,13 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int n = 1; n <= size; n++) {
         final int i = n - 1;
         final double ga = na[n + 1] + na[i] - 2 * na[n];
-        jacobian[i][0] = fa * ga - 2 * fa;
+        jacobian[i][0] = ea * fa * ga - 2 * ea * fa;
         value[i] = d * jacobian[i][0] + ss4;
         jacobian[i][1] = s8;
         final double fpa = -fa / a2 - fa / a1;
         final double gpa = (na[n + 1] * log[n + 1] + na[i] * log[i] - 2 * na[n] * log[n]);
-        jacobian[i][2] = d * ((fpa * ga + fa * gpa) - 2 * fpa);
+        jacobian[i][2] =
+            d * ((ea * (fpa * ga + fa * gpa) + epa * fa * ga) - 2 * (ea * fpa + epa * fa));
       }
       return new Pair<>(new ArrayRealVector(value, false),
           new Array2DRowRealMatrix(jacobian, false));
