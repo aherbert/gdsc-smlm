@@ -840,10 +840,22 @@ public class TrackPopulationAnalysis implements PlugIn {
   private MultivariateGaussianMixtureExpectationMaximization
       fitGaussianMixture(final double[][] data, int sortDimension) {
     // Get the unmixed multivariate Guassian.
-    final MultivariateGaussianDistribution unmixed =
+    MultivariateGaussianDistribution unmixed =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
 
-    final int dimensions = unmixed.getMeans().length;
+    // Normalise the columns of the data
+    // Get means and SD of each column
+    final double[] means = unmixed.getMeans();
+    final double[] sd = unmixed.getStandardDeviations();
+    final int dimensions = means.length;
+    for (double[] value : data) {
+      for (int i = 0; i < dimensions; i++) {
+        value[i] = (value[i] - means[i]) / sd[i];
+      }
+    }
+
+    // Repeat. The mean should be approximately 0 and std.dev. 1.
+    unmixed = MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
 
     // Record the likelihood of the unmixed model
     double logLikelihood = Arrays.stream(data).mapToDouble(unmixed::density).map(Math::log).sum();
