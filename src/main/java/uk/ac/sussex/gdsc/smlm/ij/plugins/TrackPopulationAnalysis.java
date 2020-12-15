@@ -47,6 +47,7 @@ import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunctio
 import org.apache.commons.math3.fitting.leastsquares.ParameterValidator;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.NonPositiveDefiniteMatrixException;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -555,11 +556,14 @@ public class TrackPopulationAnalysis implements PlugIn {
     double[] y = new double[0];
     final int window = settings.window;
     final int wm1 = window - 1;
-    // Use for fitting
+    // Use for fitting.
+    // This uses a weighted linear regression as the MSD(n) is a mean of individual distances
+    // using the frame gap n.
     final double[] s = new double[wm1];
     final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
     final RealVector observed = new ArrayRealVector(s, false);
-    final RealMatrix weight = null;
+    final double[] weight = SimpleArrayUtils.newArray(wm1, wm1, -1.0);
+    final RealMatrix weightMatrix = new DiagonalMatrix(weight, false);
     final ConvergenceChecker<Evaluation> checker = (iteration, previous,
         current) -> DoubleEquality.relativeError(previous.getCost(), current.getCost()) < 1e-6;
     final int maxEvaluations = Integer.MAX_VALUE;
@@ -596,8 +600,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       // so the parameter always has an effect.
       if (alpha < minAlpha) {
         point.setEntry(2, MIN_ALPHA);
-      } else if (alpha > 2) {
-        point.setEntry(2, 2);
+      } else if (alpha > 20) {
+        point.setEntry(2, 20);
       }
       return point;
     };
@@ -607,7 +611,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     // For significance test of the least squares fit.
     // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
     // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
-    final int denominatorDegreesOfFreedom = wm1 - 3;
+    final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
     final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
     final double significance = settings.significance;
 
@@ -647,11 +651,17 @@ public class TrackPopulationAnalysis implements PlugIn {
         // 1. Anomalous exponent.
 
         // Compute the MSD for all distances from m=0, to m=window-1
+        // For the MSD fit compute the gradient and intercept using a linear regression.
+        // (This could exploit pre-computation of the regression x components.)
+        reg.clear();
         for (int m = 1; m <= wm1; m++) {
           // Use intermediate points to compute an average
           double msd = 0;
+          final double t = m * deltaT;
           for (int i = end - m; i >= k; i--) {
-            msd += MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
+            final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
+            msd += d;
+            reg.addData(t, d);
           }
           // Number of points = window - m
           s[m - 1] = msd / (window - m);
@@ -667,13 +677,6 @@ public class TrackPopulationAnalysis implements PlugIn {
         // and failure to invert the covariance matrix during Expectation-Maximisation.
         // Thus the user has the option to remove alpha from the features
         // before fitting the Gaussian mixture. The value is still computed for the results.
-
-        // The data is small so compute the gradient and intercept using a linear regression.
-        // This could exploit pre-computation of the regression x components.
-        reg.clear();
-        for (int n = 1; n < window; n++) {
-          reg.addData(n, s[n - 1]);
-        }
 
         // Compute linear fit with the (n-1/3) correction factor:
         // MSD = 4D n - (4D) / 3 + 4 s^2
@@ -693,7 +696,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
         }
         final LeastSquaresProblem problem1 = LeastSquaresFactory.create(model1, observed, start1,
-            weight, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
+            weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
         try {
           final Optimum lvmSolution1 = optimizer.optimize(problem1);
 
@@ -702,8 +705,9 @@ public class TrackPopulationAnalysis implements PlugIn {
           start2.setEntry(0, fit1.getEntry(0));
           start2.setEntry(1, fit1.getEntry(1));
           start2.setEntry(2, 1.0);
-          final LeastSquaresProblem problem2 = LeastSquaresFactory.create(model2, observed, start2,
-              weight, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
+          final LeastSquaresProblem problem2 =
+              LeastSquaresFactory.create(model2, observed, start2, weightMatrix, checker,
+                  maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
           final Optimum lvmSolution2 = optimizer.optimize(problem2);
 
           // Check for model improvement
@@ -729,18 +733,24 @@ public class TrackPopulationAnalysis implements PlugIn {
 
           // // Debug
           // if (
-          // // pValue < 0.01
-          // alpha > 0.0 && alpha < 0.2) {
+          // pValue < 0.2
+          // // alpha > 0.0 && alpha < 0.2
+          // //slope < 0
+          // ) {
           // final RealVector p = lvmSolution2.getPoint();
           // final String title = "anomalous exponent";
-          // final Plot plot = new Plot(title, "time", "MSD");
-          // final double[] t = SimpleArrayUtils.newArray(s.length, 1.0, 1.0);
-          // plot.addPoints(t, s, Plot.CROSS);
-          // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
-          // plot.addPoints(t, model1.value(lvmSolution1.getPoint()).getFirst().toArray(),
-          // Plot.LINE);
+          // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+          // final double[] t = SimpleArrayUtils.newArray(s.length, deltaT, deltaT);
           // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue + ". "
           // + lvmSolution1.getPoint().toString());
+          // plot.addPoints(t, s, Plot.CROSS);
+          // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
+          // plot.setColor(Color.BLUE);
+          // plot.addPoints(t, model1.value(lvmSolution1.getPoint()).getFirst().toArray(),
+          // Plot.LINE);
+          // plot.setColor(Color.RED);
+          // final double[] yy = Arrays.stream(t).map(reg::predict).toArray();
+          // plot.addPoints(t, yy, Plot.CIRCLE);
           // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
           // System.out.println(lvmSolution2.getPoint());
           // }
