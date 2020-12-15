@@ -133,13 +133,14 @@ public class TrackPopulationAnalysis implements PlugIn {
     double significance;
     boolean ignoreAlpha;
     int lutIndex;
+    int histogramBins;
 
     Settings() {
       // Set defaults
       window = 11;
       maxIterations = 1000;
       relativeError = 1e-6;
-      repeats = 20;
+      repeats = 30;
       seed = 42;
       maxComponents = 2;
       minWeight = 0.1;
@@ -162,6 +163,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.maxAlpha = source.maxAlpha;
       this.significance = source.significance;
       this.ignoreAlpha = source.ignoreAlpha;
+      this.histogramBins = source.histogramBins;
       this.lutIndex = source.lutIndex;
     }
 
@@ -243,13 +245,25 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Store the histogram data for plotting the components
     final double[][] columns = new double[FEATURE_NAMES.length][];
     final double[][] limits = new double[FEATURE_NAMES.length][];
-    final int[] bins = new int[FEATURE_NAMES.length];
-    final Plot[] plots = new Plot[FEATURE_NAMES.length];
+    // Get column data
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       columns[i] = raw.getColumn(i);
       limits[i] = MathUtils.limits(columns[i]);
-      final StoredData colData = StoredData.create(columns[i]);
-      bins[i] = HistogramPlot.getBins(colData, BinMethod.SCOTT);
+    }
+    // Compute histogram bins
+    final int[] bins = new int[FEATURE_NAMES.length];
+    if (settings.histogramBins > 0) {
+      Arrays.fill(bins, settings.histogramBins);
+    } else {
+      for (int i = 0; i < FEATURE_NAMES.length; i++) {
+        bins[i] = HistogramPlot.getBins(StoredData.create(columns[i]), BinMethod.FD);
+      }
+      // Use the maximum so all histograms look the same
+      Arrays.fill(bins, MathUtils.max(bins));
+    }
+    // Compute plots
+    final Plot[] plots = new Plot[FEATURE_NAMES.length];
+    for (int i = 0; i < FEATURE_NAMES.length; i++) {
       final double[][] hist =
           HistogramPlot.calcHistogram(columns[i], limits[i][0], limits[i][1], bins[i]);
       plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], getXAxisLabel(i), "Frequency");
@@ -436,6 +450,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addNumericField("Seed", settings.seed, 0);
     gd.addCheckbox("Debug", settings.debug);
     gd.addMessage("Output options");
+    gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
     gd.addChoice("LUT", LutHelper.getLutNames(), settings.lutIndex);
 
     gd.showDialog();
@@ -455,8 +470,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     settings.relativeError = gd.getNextNumber();
     settings.repeats = (int) gd.getNextNumber();
     settings.seed = (int) gd.getNextNumber();
-    settings.lutIndex = gd.getNextChoiceIndex();
     settings.debug = gd.getNextBoolean();
+    settings.histogramBins = (int) gd.getNextNumber();
+    settings.lutIndex = gd.getNextChoiceIndex();
 
     if (gd.invalidNumber()) {
       return false;
@@ -808,10 +824,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.finished();
     if (settings.debug) {
-      ImageJUtils.log("+Slope, significant:   %d", fitResult[0]);
-      ImageJUtils.log("+Slope, insignificant: %d", fitResult[1]);
-      ImageJUtils.log("-Slope, significant:   %d", fitResult[2]);
-      ImageJUtils.log("-Slope, insignificant: %d", fitResult[3]);
+      ImageJUtils.log("  +Slope, significant:   %d", fitResult[0]);
+      ImageJUtils.log("  +Slope, insignificant: %d", fitResult[1]);
+      ImageJUtils.log("  -Slope, significant:   %d", fitResult[2]);
+      ImageJUtils.log("  -Slope, insignificant: %d", fitResult[3]);
     }
     ImageJUtils.log("Insignificant anomalous exponents: %d / %d", fitResult[1] + fitResult[3],
         data.size());
