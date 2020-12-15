@@ -813,7 +813,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       ImageJUtils.log("-Slope, significant:   %d", fitResult[2]);
       ImageJUtils.log("-Slope, insignificant: %d", fitResult[3]);
     }
-    ImageJUtils.log("Insignificant anomalous coefficients: %d / %d", fitResult[1] + fitResult[3],
+    ImageJUtils.log("Insignificant anomalous exponents: %d / %d", fitResult[1] + fitResult[3],
         data.size());
     return data.toArray(new double[0][0]);
   }
