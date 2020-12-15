@@ -129,6 +129,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     int maxComponents;
     double minWeight;
     double minAlpha;
+    double maxAlpha;
     double significance;
     boolean ignoreAlpha;
     int lutIndex;
@@ -142,6 +143,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       seed = 42;
       maxComponents = 2;
       minWeight = 0.1;
+      maxAlpha = 2;
       significance = 0.05;
       lutIndex = LutColour.RED_BLUE.ordinal();
     }
@@ -156,8 +158,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.debug = source.debug;
       this.maxComponents = source.maxComponents;
       this.minWeight = source.minWeight;
-      this.significance = source.significance;
       this.minAlpha = source.minAlpha;
+      this.maxAlpha = source.maxAlpha;
+      this.significance = source.significance;
       this.ignoreAlpha = source.ignoreAlpha;
       this.lutIndex = source.lutIndex;
     }
@@ -422,6 +425,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addMessage("Anomalous diffusion coefficient");
     gd.addNumericField("Fit_significance", settings.significance, -2);
     gd.addNumericField("Min_alpha", settings.minAlpha, -3);
+    gd.addNumericField("Max_alpha", settings.maxAlpha, -3);
     gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
     gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
     gd.addSlider("Max_components", 2, 10, settings.maxComponents);
@@ -443,6 +447,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     settings.window = (int) gd.getNextNumber();
     settings.significance = gd.getNextNumber();
     settings.minAlpha = gd.getNextNumber();
+    settings.maxAlpha = gd.getNextNumber();
     settings.ignoreAlpha = gd.getNextBoolean();
     settings.maxComponents = (int) gd.getNextNumber();
     settings.minWeight = gd.getNextNumber();
@@ -591,17 +596,18 @@ public class TrackPopulationAnalysis implements PlugIn {
     final MultivariateJacobianFunction model2 = new FbmDiffusionFunction(wm1, deltaT);
     final RealVector start2 = new ArrayRealVector(3);
     final double minAlpha = Math.max(settings.minAlpha, MIN_ALPHA);
+    final double maxAlpha = settings.maxAlpha;
     final ParameterValidator paramValidator2 = point -> {
       // Ensure diffusion coefficient and precision are positive.
       paramValidator1.validate(point);
-      // Ensure alpha in range (0, 2]
+      // Ensure alpha in the specified range. Default is (0, 2].
       final double alpha = point.getEntry(2);
       // Since the computations require (alpha + 1) limit this to the ULP of 1.0
       // so the parameter always has an effect.
       if (alpha < minAlpha) {
         point.setEntry(2, MIN_ALPHA);
-      } else if (alpha > 20) {
-        point.setEntry(2, 20);
+      } else if (alpha > maxAlpha) {
+        point.setEntry(2, maxAlpha);
       }
       return point;
     };
