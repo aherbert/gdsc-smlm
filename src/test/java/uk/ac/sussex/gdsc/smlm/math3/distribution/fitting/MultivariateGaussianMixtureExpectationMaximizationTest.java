@@ -144,6 +144,11 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
         MultivariateGaussianDistribution.create(means, covariances);
     Assertions.assertSame(means, dist.getMeans());
     Assertions.assertSame(covariances, dist.getCovariances());
+    final double[] sd = dist.getStandardDeviations();
+    Assertions.assertEquals(covariances.length, sd.length);
+    for (int i = 0; i < sd.length; i++) {
+      Assertions.assertEquals(Math.sqrt(covariances[i][i]), sd[i]);
+    }
     // Test against Apache commons
     final MultivariateNormalDistribution expDist =
         new MultivariateNormalDistribution(means, covariances);

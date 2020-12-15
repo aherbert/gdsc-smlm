@@ -177,6 +177,22 @@ public class MultivariateGaussianMixtureExpectationMaximization {
       }
 
       /**
+       * Gets the square root of each element on the diagonal of the covariance matrix. Returns a
+       * new array.
+       *
+       * @return the standard deviations.
+       */
+      public double[] getStandardDeviations() {
+        final double[][] s = covarianceMatrix;
+        final int dim = s.length;
+        final double[] std = new double[dim];
+        for (int i = 0; i < dim; i++) {
+          std[i] = Math.sqrt(s[i][i]);
+        }
+        return std;
+      }
+
+      /**
        * Returns the probability density function (PDF) of this distribution evaluated at the
        * specified point x.
        *
