@@ -158,6 +158,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     List<String> input;
     int window;
+    int minTrackLength;
     int maxIterations;
     double relativeError;
     int repeats;
@@ -179,6 +180,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     Settings() {
       // Set defaults
       window = 11;
+      minTrackLength = 5;
       maxIterations = 1000;
       relativeError = 1e-6;
       repeats = 30;
@@ -197,6 +199,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     Settings(Settings source) {
       this.input = source.input;
       this.window = source.window;
+      this.minTrackLength = source.minTrackLength;
       this.maxIterations = source.maxIterations;
       this.relativeError = source.relativeError;
       this.repeats = source.repeats;
@@ -713,7 +716,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       // Add the classified points using the correct colour
       final int[] component = track.component;
-      int current = component[1];
+      int current = component[0];
       xx[0] = (float) x[offset];
       yy[0] = (float) y[offset];
       n = 1;
@@ -919,7 +922,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     ImageJUtils.log(TITLE + "...");
 
-    final List<Trace> tracks = getTracks(combinedResults, settings.window);
+    final List<Trace> tracks = getTracks(combinedResults, settings.window, settings.minTrackLength);
     if (tracks.isEmpty()) {
       return;
     }
@@ -1170,6 +1173,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addHelp(HelpUrls.getUrl("track-population-analysis"));
 
     gd.addSlider("Window", 5, 20, settings.window);
+    gd.addSlider("Min_track_length", 2, 20, settings.minTrackLength);
     gd.addMessage("Anomalous diffusion coefficient");
     gd.addNumericField("Fit_significance", settings.significance, -2);
     gd.addNumericField("Min_alpha", settings.minAlpha, -3);
@@ -1194,6 +1198,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     settings.window = (int) gd.getNextNumber();
+    settings.minTrackLength = (int) gd.getNextNumber();
     settings.significance = gd.getNextNumber();
     settings.minAlpha = gd.getNextNumber();
     settings.maxAlpha = gd.getNextNumber();
@@ -1218,8 +1223,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       // (number of parameters) < (number of points)
       // where the number of points is the window size minus 1.
       ParameterUtils.isEqualOrAbove("Window", settings.window, 5);
+      ParameterUtils.isEqualOrAbove("Min track length", settings.minTrackLength, 2);
       ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 2);
-      ParameterUtils.isPositive("Min_weight", settings.minWeight);
+      ParameterUtils.isPositive("Min weight", settings.minWeight);
       ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
       ParameterUtils.isAboveZero("Maximum N", settings.relativeError);
       ParameterUtils.isAboveZero("Repeats", settings.repeats);
@@ -1232,14 +1238,23 @@ public class TrackPopulationAnalysis implements PlugIn {
   }
 
   /**
-   * Gets the tracks. Each track has contiguous frames and the length is at least the window size.
+   * Gets the tracks. Each track has contiguous frames and the length is enough to fit
+   * {@code minTrackLength} overlapping windows of the specified size:
+   *
+   * <pre>
+   * length >= window + minTrackLength - 1
+   * </pre>
    *
    * @param combinedResults the combined results
+   * @param window the window size
+   * @param minTrackLength the minimum track length (assumed to be {@code >= 1})
    * @return the tracks
    */
-  private static List<Trace> getTracks(List<MemoryPeakResults> combinedResults, int window) {
+  private static List<Trace> getTracks(List<MemoryPeakResults> combinedResults, int window,
+      int minTrackLength) {
     final LocalList<Trace> tracks = new LocalList<>();
     final Statistics stats = new Statistics();
+    final int minSize = window + Math.max(minTrackLength, 1) - 1;
     combinedResults.forEach(results -> {
       final int start = tracks.size();
       // Sort by id then frame
@@ -1259,14 +1274,14 @@ public class TrackPopulationAnalysis implements PlugIn {
         final PeakResult result = results.get(index);
         // Same ID and contiguous frames
         if (result.getId() != id || result.getFrame() != frame + 1) {
-          addTrack(window, tracks, track);
+          addTrack(minSize, tracks, track);
           track = new Trace();
         }
         id = result.getId();
         frame = result.getFrame();
         track.add(result);
       }
-      addTrack(window, tracks, track);
+      addTrack(minSize, tracks, track);
 
       stats.reset();
       for (int i = start; i < tracks.size(); i++) {
@@ -1280,14 +1295,14 @@ public class TrackPopulationAnalysis implements PlugIn {
   }
 
   /**
-   * Adds the track to the list of tracks if it is {@code >= window}.
+   * Adds the track to the list of tracks if it is {@code >= minimumSize}.
    *
-   * @param window the window
+   * @param minimumSize the minimum size
    * @param tracks the tracks
    * @param track the track
    */
-  private static void addTrack(int window, final List<Trace> tracks, Trace track) {
-    if (track.size() >= window) {
+  private static void addTrack(int minimumSize, final List<Trace> tracks, Trace track) {
+    if (track.size() >= minimumSize) {
       tracks.add(track);
     }
   }
