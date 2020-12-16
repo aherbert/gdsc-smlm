@@ -24,17 +24,52 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.ImageWindow;
+import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.PointRoi;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.measure.Calibration;
 import ij.plugin.PlugIn;
+import ij.process.ByteProcessor;
 import ij.process.LUT;
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import org.apache.commons.math3.distribution.FDistribution;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
@@ -63,6 +98,7 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
@@ -79,6 +115,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
+import uk.ac.sussex.gdsc.smlm.ij.gui.TableColumnAdjuster;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution;
@@ -134,6 +171,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean ignoreAlpha;
     int lutIndex;
     int histogramBins;
+    // Track Data table
+    boolean showTrackImage;
+    boolean showTrackProbabilityPlot;
+    boolean[] showFeaturePlot;
 
     Settings() {
       // Set defaults
@@ -147,6 +188,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       maxAlpha = 2;
       significance = 0.05;
       lutIndex = LutColour.RED_BLUE.ordinal();
+      showTrackImage = true;
+      showTrackProbabilityPlot = true;
+      showFeaturePlot = new boolean[FEATURE_NAMES.length];
+      Arrays.fill(showFeaturePlot, true);
     }
 
     Settings(Settings source) {
@@ -165,6 +210,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.ignoreAlpha = source.ignoreAlpha;
       this.histogramBins = source.histogramBins;
       this.lutIndex = source.lutIndex;
+      this.showTrackImage = source.showTrackImage;
+      this.showTrackProbabilityPlot = source.showTrackProbabilityPlot;
+      this.showFeaturePlot = source.showFeaturePlot.clone();
     }
 
     Settings copy() {
@@ -185,6 +233,649 @@ public class TrackPopulationAnalysis implements PlugIn {
      */
     void save() {
       lastSettings.set(this);
+    }
+  }
+
+  /**
+   * Class to hold data for each track.
+   */
+  private static class TrackData {
+    final int id;
+    final int[] component;
+    final double[][] data;
+    final double[][] fitData;
+    final Trace trace;
+
+    /**
+     * Create an instance.
+     *
+     * @param id the id
+     * @param component the component
+     * @param data the data
+     * @param fitData the fit data
+     * @param trace the trace
+     */
+    TrackData(int id, int[] component, double[][] data, double[][] fitData, Trace trace) {
+      this.id = id;
+      this.component = component;
+      this.data = data;
+      this.fitData = fitData;
+      this.trace = trace;
+    }
+
+    /**
+     * Gets the count of the different components.
+     *
+     * @return the component count
+     */
+    int getComponentCount() {
+      final BitSet bits = new BitSet();
+      for (final int c : component) {
+        bits.set(c);
+      }
+      return bits.cardinality();
+    }
+
+    /**
+     * Gets the count of transitions between components.
+     *
+     * @return the transition count
+     */
+    int getTransitionCount() {
+      int change = 0;
+      int current = component[0];
+      for (int i = 1; i < component.length; i++) {
+        if (current != component[i]) {
+          current = component[i];
+          change++;
+        }
+      }
+      return change;
+    }
+
+    BitSet getComponents() {
+      final BitSet bits = new BitSet();
+      for (final int c : component) {
+        bits.set(c);
+      }
+      return bits;
+    }
+  }
+
+  /**
+   * Class to show the track data in a JTable.
+   */
+  private static class TrackDataTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
+
+    List<TrackData> data;
+
+    /**
+     * Create an instance.
+     *
+     * @param trackData the track data
+     */
+    TrackDataTableModel(List<TrackData> trackData) {
+      this.data = trackData;
+    }
+
+    @Override
+    public int getRowCount() {
+      return data.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+      return 5;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      switch (columnIndex) {
+        // @formatter:off
+        case 0: return "ID";
+        case 1: return "Length";
+        case 2: return "Component count";
+        case 3: return "Transitions";
+        case 4: return "Components";
+        // @formatter:on
+        default:
+          throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
+      }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch (columnIndex) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+          return Integer.class;
+        default:
+          return String.class;
+      }
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      final TrackData c = data.get(rowIndex);
+      switch (columnIndex) {
+        // @formatter:off
+        case 0: return c.id;
+        case 1: return c.component.length;
+        case 2: return c.getComponentCount();
+        case 3: return c.getTransitionCount();
+        case 4: return c.getComponents().toString();
+        // @formatter:on
+        default:
+          throw new IndexOutOfBoundsException("Bad column: " + columnIndex);
+      }
+    }
+  }
+
+  /**
+   * Class to display TrackDataTableModel in a JTable.
+   */
+  private static class TrackDataJTable extends JTable {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Create a new instance.
+     *
+     * @param model the model
+     */
+    TrackDataJTable(TrackDataTableModel model) {
+      super(model);
+      ((DefaultTableCellRenderer) getDefaultRenderer(Number.class))
+          .setHorizontalAlignment(SwingConstants.TRAILING);
+      setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      setAutoCreateRowSorter(true);
+
+      final TableColumnAdjuster tca = new TableColumnAdjuster(this, 6, false);
+      // Only process 10 rows (5 at start, 5 at end).
+      tca.setMaxRows(5);
+      tca.setOnlyAdjustLarger(true);
+      tca.adjustColumns();
+    }
+
+    /**
+     * Returns the data of all selected rows. This maps the indices from the view to the data model.
+     *
+     * @return an array containing the data of all selected rows, or an empty array if no row is
+     *         selected
+     * @see #getSelectedRow
+     */
+    List<TrackData> getSelectedData() {
+      final TrackDataTableModel model = (TrackDataTableModel) dataModel;
+      final List<TrackData> data = model.data;
+      final int iMin = selectionModel.getMinSelectionIndex();
+      final int iMax = selectionModel.getMaxSelectionIndex();
+
+      // Any negative
+      if ((iMin | iMax) < 0) {
+        return Collections.emptyList();
+      }
+
+      final LocalList<TrackData> rvTmp = new LocalList<>(1 + (iMax - iMin));
+
+      final IntUnaryOperator map = getRowIndexToModelFunction();
+      for (int i = iMin; i <= iMax; i++) {
+        if (selectionModel.isSelectedIndex(i)) {
+          rvTmp.add(data.get(map.applyAsInt(i)));
+        }
+      }
+      return rvTmp;
+    }
+
+    IntUnaryOperator getRowIndexToModelFunction() {
+      final RowSorter<?> sorter = getRowSorter();
+      final IntUnaryOperator map = sorter == null ? i -> i : sorter::convertRowIndexToModel;
+      return map;
+    }
+  }
+
+  /**
+   * Class to display TrackDataTableModel in a window frame.
+   */
+  private static class TrackDataTableModelFrame extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
+
+    private final Settings settings;
+    private final TrackDataJTable table;
+    private final MixtureMultivariateGaussianDistribution model;
+    private final TypeConverter<DistanceUnit> distanceConverter;
+    private final double deltaT;
+    private final IntFunction<Color> colourMap;
+    private JMenuItem optionsTrackData;
+    private Consumer<List<TrackData>> selectedAction;
+
+    /**
+     * Create a new instance.
+     *
+     * @param settings the settings
+     * @param tableModel the model
+     * @param model the model
+     * @param distanceConverter the distance converter
+     * @param deltaT the delta T
+     * @param colourMap the colour map
+     */
+    TrackDataTableModelFrame(Settings settings, TrackDataTableModel tableModel,
+        MixtureMultivariateGaussianDistribution model,
+        TypeConverter<DistanceUnit> distanceConverter, final double deltaT,
+        final IntFunction<Color> colourMap) {
+      this.settings = settings;
+      this.model = model;
+      this.distanceConverter = distanceConverter;
+      this.deltaT = deltaT;
+      this.colourMap = colourMap;
+
+      setJMenuBar(createMenuBar());
+      createSelectedAction();
+
+      table = new TrackDataJTable(tableModel);
+      final JScrollPane scroll = new JScrollPane(table);
+
+      final ScreenDimensionHelper helper = new ScreenDimensionHelper();
+      helper.setMinHeight(250);
+      helper.setup(scroll);
+
+      add(scroll);
+      pack();
+
+      addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowOpened(WindowEvent event) {
+          WindowManager.addWindow(TrackDataTableModelFrame.this);
+        }
+
+        @Override
+        public void windowClosing(WindowEvent event) {
+          WindowManager.removeWindow(TrackDataTableModelFrame.this);
+        }
+      });
+
+      table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+          if (e.getValueIsAdjusting()) {
+            return;
+          }
+          // Notify the action of the current selection
+          selectedAction.accept(table.getSelectedData());
+        }
+      });
+    }
+
+    private JMenuBar createMenuBar() {
+      final JMenuBar menubar = new JMenuBar();
+      menubar.add(createOptionsMenu());
+      return menubar;
+    }
+
+    private JMenu createOptionsMenu() {
+      final JMenu menu = new JMenu("Options");
+      menu.setMnemonic(KeyEvent.VK_O);
+      menu.add(optionsTrackData = add("Track Data ...", KeyEvent.VK_S, "ctrl pressed T"));
+      return menu;
+    }
+
+    private JMenuItem add(String text, int mnemonic, String keyStroke) {
+      final JMenuItem item = new JMenuItem(text, mnemonic);
+      if (keyStroke != null) {
+        item.setAccelerator(KeyStroke.getKeyStroke(keyStroke));
+      }
+      item.addActionListener(this);
+      return item;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent event) {
+      final Object src = event.getSource();
+      if (src == optionsTrackData) {
+        doOptionsTrackData();
+      }
+    }
+
+    private void doOptionsTrackData() {
+      // Show dialog to choose the track data
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(getTitle() + " options");
+      gd.addCheckbox("Show_track_image", settings.showTrackImage);
+      gd.addCheckbox("Show_track_probability_plot", settings.showTrackProbabilityPlot);
+      for (int i = 0; i < FEATURE_NAMES.length; i++) {
+        gd.addCheckbox("Show_" + FEATURE_NAMES[i] + "_plot", settings.showFeaturePlot[i]);
+      }
+      gd.showDialog();
+      if (!gd.wasCanceled()) {
+        return;
+      }
+
+      settings.showTrackImage = gd.getNextBoolean();
+      settings.showTrackProbabilityPlot = gd.getNextBoolean();
+      for (int i = 0; i < FEATURE_NAMES.length; i++) {
+        settings.showFeaturePlot[i] = gd.getNextBoolean();
+      }
+
+      createSelectedAction();
+    }
+
+    private void createSelectedAction() {
+      // Avoid null pointer by always having an action
+      selectedAction = NoopAction.INSTANCE;
+
+      final WindowOrganiser wo = new WindowOrganiser();
+
+      // Show an image of the track coloured by the component.
+      if (settings.showTrackImage) {
+        selectedAction =
+            selectedAction.andThen(new TrackImage(distanceConverter, 10, colourMap, wo));
+      }
+
+      // Show probability of each component verses time.
+      if (settings.showTrackProbabilityPlot) {
+        selectedAction =
+            selectedAction.andThen(new TrackProbabilityPlot(model, deltaT, colourMap, wo));
+      }
+
+      // Show plot of feature verses time.
+      for (int i = 0; i < FEATURE_NAMES.length; i++) {
+        if (settings.showFeaturePlot[i]) {
+          selectedAction = selectedAction.andThen(new TrackFeaturePlot(deltaT, i, colourMap, wo));
+        }
+      }
+
+      if (selectedAction != NoopAction.INSTANCE) {
+        // Tile the windows once
+        final boolean[] tiled = {false};
+        selectedAction = selectedAction.andThen(selected -> {
+          if (!tiled[0]) {
+            wo.tile();
+            tiled[0] = true;
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * No operation implementation of the consumer interface.
+   */
+  private static class NoopAction implements Consumer<List<TrackData>> {
+    static final NoopAction INSTANCE = new NoopAction();
+
+    @Override
+    public void accept(List<TrackData> t) {
+      // Do nothing
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Consumer<List<TrackData>> andThen(Consumer<? super List<TrackData>> after) {
+      return (Consumer<List<TrackData>>) after;
+    }
+  }
+
+  /**
+   * Show a plot of the selected track feature.
+   */
+  private static class TrackImage implements Consumer<List<TrackData>> {
+    private static final BasicStroke DASHED = new BasicStroke(1, BasicStroke.CAP_SQUARE,
+        BasicStroke.JOIN_MITER, 10.0f, new float[] {3, 3}, 0.0f);
+    final double nmPerPixel;
+    final double scale;
+    final IntFunction<Color> colourMap;
+    final WindowOrganiser wo;
+
+    /**
+     * Create an instance.
+     *
+     * @param distanceConverter the distance converter to get the coordinates in micrometers
+     * @param nmPerPixel the nm per pixel for the output track image
+     * @param colourMap the colour map
+     * @param wo the window organiser
+     */
+    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel,
+        IntFunction<Color> colourMap, WindowOrganiser wo) {
+      this.nmPerPixel = nmPerPixel;
+      // Get the scale factor
+      final double unitsToUm = distanceConverter.convert(1);
+      // Create a distance converter to convert the units to the desired nm per pixel
+      this.scale = unitsToUm * 1000 / nmPerPixel;
+      this.colourMap = colourMap;
+      this.wo = wo;
+    }
+
+    @Override
+    public void accept(List<TrackData> tracks) {
+      if (tracks.isEmpty()) {
+        return;
+      }
+      final TrackData track = tracks.get(0);
+      final Trace trace = track.trace;
+      final int length = track.component.length;
+      final int points = trace.size();
+      final double[] x = new double[points];
+      final double[] y = new double[points];
+      for (int i = 0; i < points; i++) {
+        x[i] = (float) (trace.get(i).getXPosition() * scale);
+        y[i] = (float) (trace.get(i).getYPosition() * scale);
+      }
+      final double[] xlimits = MathUtils.limits(x);
+      final double[] ylimits = MathUtils.limits(y);
+      // Add border
+      final float border = 1;
+      xlimits[0] = Math.floor(xlimits[0] - border);
+      ylimits[0] = Math.floor(ylimits[0] - border);
+      xlimits[1] = Math.ceil(xlimits[1] + border);
+      ylimits[1] = Math.ceil(ylimits[1] + border);
+      final int width = (int) (xlimits[1] - xlimits[0]);
+      final int height = (int) (ylimits[1] - ylimits[0]);
+      // Blank white image
+      final ByteProcessor bp = new ByteProcessor(width, height);
+      bp.setValue(255);
+      bp.fill();
+      // Offset the coordinates
+      for (int i = 0; i < points; i++) {
+        x[i] -= xlimits[0];
+        y[i] -= ylimits[0];
+      }
+      // Create a track overlay
+      final Overlay overlay = new Overlay();
+      // The window means that some of the coordinates at the start and end are not classified.
+      // Find the offset to the first classified point.
+      final int offset = (points - length) / 2;
+      // Add the unclassified start/end as dashed black lines.
+      int n = 0;
+      final float[] xx = new float[x.length];
+      final float[] yy = new float[x.length];
+      for (int i = 0; i <= offset; i++) {
+        xx[n] = (float) x[i];
+        yy[n] = (float) y[i];
+        n++;
+      }
+      Roi roi = createRoi(xx, yy, n, Color.LIGHT_GRAY);
+      roi.setStroke(DASHED);
+      overlay.add(roi);
+      n = 0;
+      for (int i = offset + length - 1; i < points; i++) {
+        xx[n] = (float) x[i];
+        yy[n] = (float) y[i];
+        n++;
+      }
+      roi = createRoi(xx, yy, n, Color.GRAY);
+      roi.setStroke(DASHED);
+      overlay.add(roi);
+      // Add the track end
+      final PointRoi end = new PointRoi(x[points - 1], y[points - 1]);
+      end.setStrokeColor(Color.GRAY);
+      end.setPointType(PointRoi.CIRCLE);
+      overlay.add(end);
+
+      // Add the classified points using the correct colour
+      final int[] component = track.component;
+      int current = component[1];
+      xx[0] = (float) x[offset];
+      yy[0] = (float) y[offset];
+      n = 1;
+      for (int i = 1; i < length; i++) {
+        if (current != component[i]) {
+          // Add ROI
+          overlay.add(createRoi(xx, yy, n, current));
+          current = component[i];
+          xx[0] = (float) x[i + offset - 1];
+          yy[0] = (float) y[i + offset - 1];
+          n = 1;
+        }
+        xx[n] = (float) x[i + offset];
+        yy[n] = (float) y[i + offset];
+        n++;
+      }
+      // Add final ROI
+      overlay.add(createRoi(xx, yy, n, current));
+
+      // Show the image.
+      final ImagePlus imp = ImageJUtils.display("Track Image", bp, ImageJUtils.NO_TO_FRONT, wo);
+      imp.setIgnoreGlobalCalibration(true);
+      final Calibration cal = imp.getCalibration();
+      cal.pixelWidth = cal.pixelHeight = nmPerPixel;
+      cal.setUnit("nm");
+      // Use a pixel offset to output the correct coordinate values
+      cal.xOrigin = -xlimits[0] / nmPerPixel;
+      cal.yOrigin = -ylimits[0] / nmPerPixel;
+      imp.setOverlay(overlay);
+      // Zoom in
+      final ImageWindow iw = imp.getWindow();
+      for (int i = 9; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 500;) {
+        iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
+      }
+    }
+
+    private Roi createRoi(float[] x, float[] y, int n, int current) {
+      return createRoi(x, y, n, colourMap.apply(current));
+    }
+
+    private static Roi createRoi(float[] x, float[] y, int n, Color c) {
+      final PolygonRoi roi = new PolygonRoi(x, y, n, Roi.POLYLINE);
+      roi.setStrokeColor(c);
+      return roi;
+    }
+  }
+
+  /**
+   * Show a plot of the selected track feature.
+   */
+  private static class TrackProbabilityPlot implements Consumer<List<TrackData>> {
+    final MixtureMultivariateGaussianDistribution model;
+    final double deltaT;
+    final IntFunction<Color> colourMap;
+    final WindowOrganiser wo;
+
+    TrackProbabilityPlot(MixtureMultivariateGaussianDistribution model, double deltaT,
+        IntFunction<Color> colourMap, WindowOrganiser wo) {
+      this.model = model;
+      this.deltaT = deltaT;
+      this.colourMap = colourMap;
+      this.wo = wo;
+    }
+
+    @Override
+    public void accept(List<TrackData> tracks) {
+      if (tracks.isEmpty()) {
+        return;
+      }
+      final TrackData track = tracks.get(0);
+      final int length = track.component.length;
+      final float[] x = new float[length];
+      for (int i = 0; i < length; i++) {
+        x[i] = (float) ((i + 1) * deltaT);
+      }
+      final Plot plot = new Plot("Track Probability", "Time (s)", "Probability");
+      final double[] weights = model.getWeights();
+      final MultivariateGaussianDistribution[] distributions = model.getDistributions();
+      final float[][] y = new float[weights.length][x.length];
+      final double[] p = new double[weights.length];
+      for (int i = 0; i < x.length; i++) {
+        double sum = 0;
+        for (int n = 0; n < weights.length; n++) {
+          p[n] = weights[n] * distributions[n].density(track.fitData[i]);
+          sum += p[n];
+        }
+        for (int n = 0; n < weights.length; n++) {
+          y[n][i] = (float) (p[n] / sum);
+        }
+      }
+      for (int n = 0; n < weights.length; n++) {
+        plot.setColor(colourMap.apply(n));
+        plot.addPoints(x, y[n], Plot.LINE);
+      }
+      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
+          .setLimitsToFit(true);
+    }
+  }
+
+  /**
+   * Show a plot of the selected track feature.
+   */
+  private static class TrackFeaturePlot implements Consumer<List<TrackData>> {
+    final double deltaT;
+    final int featureIndex;
+    final IntFunction<Color> colourMap;
+    final WindowOrganiser wo;
+
+    TrackFeaturePlot(double deltaT, int featureIndex, IntFunction<Color> colourMap,
+        WindowOrganiser wo) {
+      this.deltaT = deltaT;
+      this.featureIndex = featureIndex;
+      this.colourMap = colourMap;
+      this.wo = wo;
+    }
+
+    @Override
+    public void accept(List<TrackData> tracks) {
+      if (tracks.isEmpty()) {
+        return;
+      }
+      final TrackData track = tracks.get(0);
+      final int length = track.component.length;
+      final float[] x = new float[length];
+      final float[] y = new float[length];
+      for (int i = 0; i < length; i++) {
+        x[i] = (float) ((i + 1) * deltaT);
+        y[i] = (float) track.data[i][featureIndex];
+      }
+      final Plot plot = new Plot("Track " + FEATURE_NAMES[featureIndex], "Time (s)",
+          getFeatureLabel(featureIndex));
+      // Get the number of different components.
+      final BitSet bits = track.getComponents();
+      final int n = bits.cardinality();
+      final int[] component = track.component;
+      // Add each component using the correct colour.
+      if (n == 1) {
+        plot.setColor(colourMap.apply(component[0]));
+        plot.addPoints(x, y, Plot.CIRCLE);
+        plot.addPoints(x, y, Plot.LINE);
+      } else {
+        final TFloatArrayList xx = new TFloatArrayList(x.length);
+        final TFloatArrayList yy = new TFloatArrayList(x.length);
+        bits.stream().forEach(com -> {
+          plot.setColor(colourMap.apply(com));
+          xx.resetQuick();
+          yy.resetQuick();
+          for (int i = 0; i < x.length; i++) {
+            if (component[i] == com) {
+              xx.add(x[i]);
+              yy.add(y[i]);
+              // Add lines using the colour of the second component.
+              if (i != 0) {
+                plot.drawLine(x[i - 1], y[i - 1], x[i], y[i]);
+              }
+            }
+          }
+          plot.addPoints(xx.toArray(), yy.toArray(), Plot.CIRCLE);
+        });
+      }
+      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
+          .setLimitsToFit(true);
     }
   }
 
@@ -237,7 +928,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Use micrometer / second
     final TypeConverter<DistanceUnit> distanceConverter = cal.getDistanceConverter(DistanceUnit.UM);
     final double exposureTime = cal.getExposureTime() / 1000.0;
-    final double[][] data = extractTrackData(tracks, distanceConverter, exposureTime);
+    final Pair<int[], double[][]> trackData =
+        extractTrackData(tracks, distanceConverter, exposureTime);
+    final double[][] data = trackData.getValue();
 
     // Histogram the raw data.
     final Array2DRowRealMatrix raw = new Array2DRowRealMatrix(data, false);
@@ -266,20 +959,22 @@ public class TrackPopulationAnalysis implements PlugIn {
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       final double[][] hist =
           HistogramPlot.calcHistogram(columns[i], limits[i][0], limits[i][1], bins[i]);
-      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], getXAxisLabel(i), "Frequency");
+      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], getFeatureLabel(i), "Frequency");
       plots[i].addPoints(hist[0], hist[1], Plot.BAR);
-      ImageJUtils.display(plots[i].getTitle(), plots[i], 0, wo);
+      ImageJUtils.display(plots[i].getTitle(), plots[i], ImageJUtils.NO_TO_FRONT, wo);
     }
     wo.tile();
 
     // Provide option to not use the anomalous exponent in the population mix.
     int sortDimension = SORT_DIMENSION;
-    double[][] fitData = data;
+    double[][] fitData;
     if (settings.ignoreAlpha) {
       // Remove index 0. This shifts the sort dimension.
       sortDimension--;
       fitData =
           Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length)).toArray(double[][]::new);
+    } else {
+      fitData = SimpleArrayUtils.deepCopy(data);
     }
 
     final MultivariateGaussianMixtureExpectationMaximization mixed =
@@ -328,21 +1023,60 @@ public class TrackPopulationAnalysis implements PlugIn {
       plot.updateImage();
     }
 
+    createTrackDataTable(tracks, trackData, fitData, model, component, distanceConverter,
+        exposureTime, colourMap);
+
     // Analysis.
     // Assign the original localisations to their track component.
     // Q. What about the start/end not covered by the window?
-
-    // Save tracks as a dataset labelled with the sub-track ID.
-    // Show table of tracks and sub-tracks.
-    // Click on a track and show an image of the track coloured by the component.
+    // Save tracks as a dataset labelled with the sub-track ID?
 
     // Output for the bound component and free components track parameters.
     // Compute dwell times.
     // Other ...
 
+    // Track analysis plugin:
     // Extract all continuous segments of the same component.
     // Produce MSD plot with error bars.
     // Fit using FBM model.
+  }
+
+  /**
+   * Creates the track data table.
+   *
+   * @param tracks the tracks
+   * @param trackData the track data
+   * @param fitData the fit data
+   * @param model the model
+   * @param component the component
+   * @param distanceConverter the distance converter (to get the coordinates in micrometers)
+   * @param deltaT the time step of each frame in seconds (delta T)
+   * @param colourMap the colour map
+   */
+  private void createTrackDataTable(List<Trace> tracks, Pair<int[], double[][]> trackData,
+      double[][] fitData, MixtureMultivariateGaussianDistribution model, int[] component,
+      TypeConverter<DistanceUnit> distanceConverter, double deltaT, IntFunction<Color> colourMap) {
+    // Get the track data
+    final LocalList<TrackData> list = new LocalList<>(tracks.size());
+    final int[] lengths = trackData.getFirst();
+    final double[][] data = trackData.getSecond();
+    int from = 0;
+    for (int i = 0; i < lengths.length; i++) {
+      final int to = from + lengths[i];
+      list.add(new TrackData(i, Arrays.copyOfRange(component, from, to),
+          Arrays.copyOfRange(data, from, to), Arrays.copyOfRange(fitData, from, to),
+          tracks.get(i)));
+      from = to;
+    }
+
+    // Track viewer:
+    // Show table of tracks. Summarise:
+    // length, set of components, count of component switches
+    final TrackDataTableModelFrame frame = new TrackDataTableModelFrame(settings,
+        new TrackDataTableModel(list), model, distanceConverter, deltaT, colourMap);
+    frame.setTitle(TITLE + " Track Data");
+    frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    frame.setVisible(true);
   }
 
   private boolean showInputDialog(List<MemoryPeakResults> combinedResults) {
@@ -568,9 +1302,9 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param tracks the tracks
    * @param distanceConverter the distance converter
    * @param deltaT the time step of each frame in seconds (delta T)
-   * @return the track data
+   * @return the track data (track lengths and descriptors)
    */
-  private double[][] extractTrackData(List<Trace> tracks,
+  private Pair<int[], double[][]> extractTrackData(List<Trace> tracks,
       TypeConverter<DistanceUnit> distanceConverter, double deltaT) {
     final List<double[]> data = new LocalList<>(tracks.size());
     double[] x = new double[0];
@@ -649,6 +1383,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
 
     // Process each track
+    final TIntArrayList lengths = new TIntArrayList(tracks.size());
     for (final Trace track : tracks) {
       // Get xy coordinates
       final int size = track.size();
@@ -662,6 +1397,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         y[i] = distanceConverter.convert(peak.getYPosition());
       }
       final int smwm1 = size - wm1;
+      final int previousSize = data.size();
       for (int k = 0; k < smwm1; k++) {
         final double[] values = new double[4];
         data.add(values);
@@ -820,6 +1556,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         // distance.
         values[3] = MathUtils.distance(x[k], y[k], x[end], y[end]) / wm1;
       }
+      lengths.add(data.size() - previousSize);
       ticker.tick();
     }
     ImageJUtils.finished();
@@ -831,7 +1568,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.log("Insignificant anomalous exponents: %d / %d", fitResult[1] + fitResult[3],
         data.size());
-    return data.toArray(new double[0][0]);
+    return Pair.create(lengths.toArray(), data.toArray(new double[0][0]));
   }
 
   /**
@@ -864,7 +1601,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final double[] means = unmixed.getMeans();
     final double[] sd = unmixed.getStandardDeviations();
     final int dimensions = means.length;
-    for (double[] value : data) {
+    for (final double[] value : data) {
       for (int i = 0; i < dimensions; i++) {
         value[i] = (value[i] - means[i]) / sd[i];
       }
@@ -1038,12 +1775,12 @@ public class TrackPopulationAnalysis implements PlugIn {
   }
 
   /**
-   * Gets the x axis label.
+   * Gets the feature label.
    *
    * @param feature the feature
-   * @return the x axis label
+   * @return the feature label
    */
-  private static String getXAxisLabel(int feature) {
+  private static String getFeatureLabel(int feature) {
     return FEATURE_UNITS[feature] == null ? FEATURE_NAMES[feature]
         : FEATURE_NAMES[feature] + " (" + FEATURE_UNITS[feature] + ")";
   }
@@ -1084,7 +1821,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = 2; i < comp.length; i++) {
         final int p2 = comp[i];
         if (p0 != p1 && p0 == p2) {
-          comp[i - 1] = p2;
+          comp[i - 1] = p1 = p2;
           n++;
         }
         p0 = p1;
