@@ -572,12 +572,6 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       final WindowOrganiser wo = new WindowOrganiser();
 
-      // Show an image of the track coloured by the component.
-      if (settings.showTrackImage) {
-        selectedAction =
-            selectedAction.andThen(new TrackImage(distanceConverter, 10, colourMap, wo));
-      }
-
       // Show probability of each component verses time.
       if (settings.showTrackProbabilityPlot) {
         selectedAction =
@@ -589,6 +583,13 @@ public class TrackPopulationAnalysis implements PlugIn {
         if (settings.showFeaturePlot[i]) {
           selectedAction = selectedAction.andThen(new TrackFeaturePlot(deltaT, i, colourMap, wo));
         }
+      }
+
+      // Show an image of the track coloured by the component.
+      // DO this last as all the plot are the same size and will tile nicely.
+      if (settings.showTrackImage) {
+        selectedAction =
+            selectedAction.andThen(new TrackImage(distanceConverter, 10, colourMap, wo));
       }
 
       if (selectedAction != NoopAction.INSTANCE) {
