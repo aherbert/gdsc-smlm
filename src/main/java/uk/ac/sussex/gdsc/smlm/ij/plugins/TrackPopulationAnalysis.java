@@ -112,6 +112,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
+import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
@@ -1587,13 +1588,13 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
 
         // Referenced papers:
-        // Hozé, N. H., D. Statistical methods for large ensembles of super-resolution
+        // Hozé, N. H., D. (2017) Statistical methods for large ensembles of super-resolution
         // stochastic single particle trajectories in cell biology.
         // Annual Review of Statistics and Its Application 4, 189-223
         //
-        // Amitai, A., Seeber, A., Gasser, S. M. & Holcman, D. Visualization of Chromatin
+        // Amitai, A., Seeber, A., Gasser, S. M. & Holcman, D. (2017) Visualization of Chromatin
         // Decompaction and Break Site Extrusion as Predicted by Statistical Polymer
-        // Modeling of Single-Locus Trajectories. Cell reports 18
+        // Modeling of Single-Locus Trajectories. Cell reports 18, 1200-1214
 
         // 2. Effective diffusion coefficient (Hozé, eq 10).
         // This is the average squared jump distance between successive points
@@ -1749,8 +1750,8 @@ public class TrackPopulationAnalysis implements PlugIn {
   private MultivariateGaussianMixtureExpectationMaximization createMixed(final double[][] data,
       int dimensions, int numComponents) {
     // Fit a mixed multivariate Gaussian with different repeats.
-    final UnitSphereSampler sampler =
-        new UnitSphereSampler(dimensions, UniformRandomProviders.create(settings.seed++));
+    final UnitSphereSampler sampler = new UnitSphereSampler(dimensions,
+        UniformRandomProviders.create(Mixers.stafford13(settings.seed++)));
     final LocalList<CompletableFuture<MultivariateGaussianMixtureExpectationMaximization>> results =
         new LocalList<>(settings.repeats);
     final DoubleDoubleBiPredicate test = createConvergenceTest(settings.relativeError);
