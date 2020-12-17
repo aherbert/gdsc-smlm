@@ -24,6 +24,7 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.NonPositiveDefiniteMatrixException;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
@@ -359,12 +360,33 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     final double value;
 
     /**
-     * Create a data row.
+     * Create an instance.
      *
      * @param data the data
      * @param value the projected value to use for the sort
      */
     ProjectedData(final double[] data, double value) {
+      this.data = data;
+      this.value = value;
+    }
+  }
+
+  /**
+   * Class used for sorting user-supplied data.
+   */
+  private static class ClassifiedData {
+    /** The data. */
+    final double[] data;
+    /** The classification. */
+    final int value;
+
+    /**
+     * Create an instance.
+     *
+     * @param data the data
+     * @param value the value to use for the sort
+     */
+    ClassifiedData(final double[] data, int value) {
       this.data = data;
       this.value = value;
     }
@@ -674,6 +696,8 @@ public class MultivariateGaussianMixtureExpectationMaximization {
 
     final int numRows = data.length;
     final int numCols = data[0].length;
+    ValidationUtils.checkArgument(numCols >= 2,
+        "Multivariate Gaussian requires at least 2 data columns: %d", numCols);
 
     // Sort the data
     final ProjectedData[] sortedData = new ProjectedData[numRows];
@@ -731,7 +755,7 @@ public class MultivariateGaussianMixtureExpectationMaximization {
    * model output from the expectation maximisation fitting algorithm.
    *
    * @param data data for the distribution
-   * @return Multivariate Gaussian mixture model estimated from the data
+   * @return Multivariate Gaussian model created from the data
    * @throws IllegalArgumentException if data has less than 2 rows.
    */
   public static MultivariateGaussianDistribution createUnmixed(double[][] data) {
@@ -739,6 +763,8 @@ public class MultivariateGaussianMixtureExpectationMaximization {
         "Estimation requires at least 2 data points: %d", data.length);
     final int numRows = data.length;
     final int numCols = data[0].length;
+    ValidationUtils.checkArgument(numCols >= 2,
+        "Multivariate Gaussian requires at least 2 data columns: %d", numCols);
 
     // mean of each column for the data
     final double[] columnMeans = new double[numCols];
@@ -752,6 +778,90 @@ public class MultivariateGaussianMixtureExpectationMaximization {
     SimpleArrayUtils.multiply(columnMeans, 1.0 / numRows);
 
     return new MultivariateGaussianDistribution(columnMeans, covariance(columnMeans, data));
+  }
+
+  /**
+   * Helper method to create a multivariate Gaussian mixture model which can be used to initialize
+   * {@link #fit(MixtureMultivariateGaussianDistribution)}.
+   *
+   * <p>This method can be used with the data supplied to the instance constructor to try to
+   * determine a good mixture model at which to start the fit, but it is not guaranteed to supply a
+   * model which will find the optimal solution or even converge.
+   *
+   * <p>The weights for each component will be uniform.
+   *
+   * @param data data for the distribution
+   * @param component the component for each data point
+   * @return Multivariate Gaussian mixture model estimated from the data
+   * @throws IllegalArgumentException if data has less than 2 rows, if there is a size mismatch
+   *         between the data and components length, or if the number of components is less than 2.
+   */
+  public static MixtureMultivariateGaussianDistribution createMixed(double[][] data,
+      int[] component) {
+    ValidationUtils.checkArgument(data.length >= 2,
+        "Estimation requires at least 2 data points: %d", data.length);
+    ValidationUtils.checkArgument(data.length == component.length,
+        "Data and component size mismatch: %d != %d", data.length, component.length);
+    final int numRows = data.length;
+    final int numCols = data[0].length;
+    ValidationUtils.checkArgument(numCols >= 2,
+        "Multivariate Gaussian requires at least 2 data columns: %d", numCols);
+
+    // Sort the data
+    final ClassifiedData[] sortedData = new ClassifiedData[data.length];
+    for (int i = 0; i < numRows; i++) {
+      sortedData[i] = new ClassifiedData(data[i], component[i]);
+    }
+    Arrays.sort(sortedData, (o1, o2) -> Integer.compare(o1.value, o2.value));
+
+    ValidationUtils.checkArgument(sortedData[0].value != sortedData[sortedData.length - 1].value,
+        "Mixture model requires at least 2 data components");
+
+    // components of mixture model to be created
+    final LocalList<MultivariateGaussianDistribution> distributions = new LocalList<>();
+
+
+    int from = 0;
+    while (from < sortedData.length) {
+      // Find the end
+      int to = from + 1;
+      final int comp = sortedData[from].value;
+      while (to < sortedData.length && sortedData[to].value == comp) {
+        to++;
+      }
+
+      // number of data records that will be in this component
+      final int numCompRows = to - from;
+
+      // data for this component
+      final double[][] compData = new double[numCompRows][];
+
+      // mean of each column for the data
+      final double[] columnMeans = new double[numCols];
+
+      // populate and create component
+      int count = 0;
+      for (int i = from; i < to; i++) {
+        final double[] values = sortedData[i].data;
+        compData[count++] = values;
+        for (int j = 0; j < numCols; j++) {
+          columnMeans[j] += values[j];
+        }
+      }
+
+      SimpleArrayUtils.multiply(columnMeans, 1.0 / numCompRows);
+      distributions.add(
+          new MultivariateGaussianDistribution(columnMeans, covariance(columnMeans, compData)));
+
+      from = to;
+    }
+
+    // uniform weight for each bin
+    final int numComponents = distributions.size();
+    final double[] weights = SimpleArrayUtils.newDoubleArray(numComponents, 1.0 / numComponents);
+
+    return new MixtureMultivariateGaussianDistribution(weights,
+        distributions.toArray(new MultivariateGaussianDistribution[0]));
   }
 
   /**

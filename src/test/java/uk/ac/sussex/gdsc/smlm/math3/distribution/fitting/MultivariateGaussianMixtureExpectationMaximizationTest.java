@@ -46,9 +46,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution.MultivariateGaussianDistribution;
@@ -162,11 +164,16 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     Assertions.assertThrows(NullPointerException.class, () -> {
       MultivariateGaussianMixtureExpectationMaximization.createUnmixed(null);
     });
+    // Not enough data
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       MultivariateGaussianMixtureExpectationMaximization.createUnmixed(new double[0][]);
     });
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       MultivariateGaussianMixtureExpectationMaximization.createUnmixed(new double[1][]);
+    });
+    // Not enough columns
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createUnmixed(new double[2][1]);
     });
   }
 
@@ -182,6 +189,81 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-6);
     TestAssertions.assertArrayTest(exp.getMeans(), obs.getMeans(), test);
     TestAssertions.assertArrayTest(exp.getCovariances(), obs.getCovariances(), test);
+  }
+
+  @Test
+  void testCreateMixedMultivariateGaussianDistributionThrows() {
+    final double[][] data = new double[2][2];
+    final int[] component = {0, 1};
+    Assertions.assertThrows(NullPointerException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(null, component);
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(data, null);
+    });
+    // Not enough data
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(new double[0][2], component);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(new double[1][2], component);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(new double[3][2], component);
+    });
+    // Not enough columns
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(new double[2][1], component);
+    });
+    // Array length mismatch
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(data, new int[1]);
+    });
+    // Not enough components
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.createMixed(data, new int[2]);
+    });
+  }
+
+  @SeededTest
+  void canCreateMixedMultivariateGaussianDistribution(RandomSeed seed) {
+    // Will be normalised
+    final double[] weights = {1, 1};
+    final double[][] means = new double[2][];
+    final double[][][] covariances = new double[2][][];
+    final double[][] data1 = {{1, 2}, {2.5, 1.5}, {3.5, 1.0}};
+    final double[][] data2 = {{4, 2}, {3.5, -1.5}, {-3.5, 1.0}};
+    means[0] = getColumnMeans(data1);
+    covariances[0] = getCovariance(data1);
+    means[1] = getColumnMeans(data2);
+    covariances[1] = getCovariance(data2);
+
+    // Create components. This does not have to be zero based.
+    final LocalList<double[]> list = new LocalList<>();
+    list.addAll(Arrays.asList(data1));
+    list.addAll(Arrays.asList(data2));
+    final double[][] data = list.toArray(new double[0][]);
+    final int[] components = {-1, -1, -1, 3, 3, 3};
+
+    // Randomise the data
+    for (int n = 0; n < 3; n++) {
+      final long start = n + seed.getSeedAsLong();
+      // This relies on the shuffle being the same
+      RandomUtils.shuffle(data, RngUtils.create(start));
+      RandomUtils.shuffle(components, RngUtils.create(start));
+
+      final MixtureMultivariateGaussianDistribution dist =
+          MultivariateGaussianMixtureExpectationMaximization.createMixed(data, components);
+
+      Assertions.assertArrayEquals(new double[] {0.5, 0.5}, dist.getWeights());
+      final MultivariateGaussianDistribution[] distributions = dist.getDistributions();
+      Assertions.assertEquals(weights.length, distributions.length);
+      final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-8);
+      for (int i = 0; i < means.length; i++) {
+        TestAssertions.assertArrayTest(means[i], distributions[i].getMeans(), test);
+        TestAssertions.assertArrayTest(covariances[i], distributions[i].getCovariances(), test);
+      }
+    }
   }
 
   @Test
@@ -289,6 +371,10 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     // Components > data length
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       MultivariateGaussianMixtureExpectationMaximization.estimate(new double[2][2], 3);
+    });
+    // Not enough columns
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      MultivariateGaussianMixtureExpectationMaximization.estimate(new double[2][1], 2);
     });
   }
 
@@ -729,7 +815,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     int count = 0;
     final int dimensions = means[0].length;
     // Ensure we have the correct number of samples
-    int[] nSamples = new int[weights.length];
+    final int[] nSamples = new int[weights.length];
     for (int i = 0; i < weights.length; i++) {
       // Sample from n ND Gaussian distributions
       nSamples[i] = (int) Math.round(weights[i] * sampleSize);
