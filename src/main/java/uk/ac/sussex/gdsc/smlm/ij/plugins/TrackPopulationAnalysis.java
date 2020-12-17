@@ -593,13 +593,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
 
       if (selectedAction != NoopAction.INSTANCE) {
-        // Tile the windows once
-        final boolean[] tiled = {false};
+        // Tile only new windows
         selectedAction = selectedAction.andThen(selected -> {
-          if (!tiled[0]) {
-            wo.tile();
-            tiled[0] = true;
-          }
+          wo.tile();
+          wo.clear();
         });
       }
     }
