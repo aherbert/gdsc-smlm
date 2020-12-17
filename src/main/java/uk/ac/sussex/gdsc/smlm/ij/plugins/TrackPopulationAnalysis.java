@@ -252,6 +252,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     final double[][] data;
     final double[][] fitData;
     final Trace trace;
+    BitSet bits;
+    int transitionsCount = -1;
 
     /**
      * Create an instance.
@@ -276,11 +278,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @return the component count
      */
     int getComponentCount() {
-      final BitSet bits = new BitSet();
-      for (final int c : component) {
-        bits.set(c);
-      }
-      return bits.cardinality();
+      return getComponents().cardinality();
     }
 
     /**
@@ -289,21 +287,29 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @return the transition count
      */
     int getTransitionCount() {
-      int change = 0;
-      int current = component[0];
-      for (int i = 1; i < component.length; i++) {
-        if (current != component[i]) {
-          current = component[i];
-          change++;
+      int change = transitionsCount;
+      if (change < 0) {
+        change = 0;
+        int current = component[0];
+        for (int i = 1; i < component.length; i++) {
+          if (current != component[i]) {
+            current = component[i];
+            change++;
+          }
         }
+        transitionsCount = change;
       }
       return change;
     }
 
     BitSet getComponents() {
-      final BitSet bits = new BitSet();
-      for (final int c : component) {
-        bits.set(c);
+      BitSet bits = this.bits;
+      if (bits == null) {
+        bits = new BitSet();
+        for (final int c : component) {
+          bits.set(c);
+        }
+        this.bits = bits;
       }
       return bits;
     }
