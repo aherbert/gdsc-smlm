@@ -39,6 +39,7 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.LUT;
+import ij.text.TextWindow;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -93,6 +94,7 @@ import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -144,6 +146,8 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static final double MIN_D = Double.MIN_NORMAL;
   private static final double MIN_SIGMA = Double.MIN_NORMAL;
   private static final double MIN_ALPHA = Math.ulp(1.0);
+
+  private static AtomicReference<TextWindow> modelTableRef = new AtomicReference<>();
 
   /** The plugin settings. */
   private Settings settings;
@@ -988,15 +992,19 @@ public class TrackPopulationAnalysis implements PlugIn {
       return;
     }
 
-    MixtureMultivariateGaussianDistribution model = mixed.getFittedModel();
-    model = sortComponents(model, sortDimension);
+    final MixtureMultivariateGaussianDistribution model =
+        sortComponents(mixed.getFittedModel(), sortDimension);
 
     // For the best model, assign to the most likely population.
     final int[] component = assignData(fitData, model);
-    final int numComponents = mixed.getFittedModel().getWeights().length;
+
+    // Table of the final model using the original data (i.e. not normalised)
+    final double[] weights = model.getWeights();
+    createModelTable(data, weights, component);
 
     // Output coloured histograms of the populations.
     final LUT lut = LutHelper.createLut(settings.lutIndex);
+    final int numComponents = weights.length;
     IntFunction<Color> colourMap;
     if (LutHelper.getColour(lut, 0).equals(Color.BLACK)) {
       colourMap = i -> LutHelper.getNonZeroColour(lut, i, 0, numComponents - 1);
@@ -1042,6 +1050,45 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Extract all continuous segments of the same component.
     // Produce MSD plot with error bars.
     // Fit using FBM model.
+  }
+
+  /**
+   * Creates a table to show the final model. This uses the assignments to create a mixture model
+   * from the original data.
+   *
+   * @param data the data
+   * @param weights the weights for each component
+   * @param component the component
+   */
+  private static void createModelTable(double[][] data, double[] weights, int[] component) {
+    final MixtureMultivariateGaussianDistribution model =
+        MultivariateGaussianMixtureExpectationMaximization.createMixed(data, component);
+    final MultivariateGaussianDistribution[] distributions = model.getDistributions();
+
+    try (BufferedTextWindow tw = new BufferedTextWindow(ImageJUtils.refresh(modelTableRef,
+        () -> new TextWindow("Track Population Model", createHeader(), "", 800, 300)))) {
+      final StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < weights.length; i++) {
+        sb.setLength(0);
+        sb.append(i).append('\t');
+        sb.append(MathUtils.rounded(weights[i]));
+        final double[] means = distributions[i].getMeans();
+        final double[] sd = distributions[i].getStandardDeviations();
+        for (int j = 0; j < means.length; j++) {
+          sb.append('\t').append(MathUtils.rounded(means[j])).append('\t')
+              .append(MathUtils.rounded(sd[j]));
+        }
+        tw.append(sb.toString());
+      }
+    }
+  }
+
+  private static String createHeader() {
+    final StringBuilder sb = new StringBuilder("Component\tWeight");
+    for (int i = 0; i < FEATURE_NAMES.length; i++) {
+      sb.append('\t').append(getFeatureLabel(i)).append("\t+/-");
+    }
+    return sb.toString();
   }
 
   /**
