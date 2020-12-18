@@ -42,6 +42,7 @@ import ij.process.LUT;
 import ij.text.TextWindow;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -57,6 +58,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -181,6 +183,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean showTrackImage;
     boolean showTrackProbabilityPlot;
     boolean[] showFeaturePlot;
+    double nmPerPixel;
+    int minDisplaySize;
 
     Settings() {
       // Set defaults
@@ -199,6 +203,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       showTrackProbabilityPlot = true;
       showFeaturePlot = new boolean[FEATURE_NAMES.length];
       Arrays.fill(showFeaturePlot, true);
+      nmPerPixel = 10;
+      minDisplaySize = 400;
     }
 
     Settings(Settings source) {
@@ -221,6 +227,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.showTrackImage = source.showTrackImage;
       this.showTrackProbabilityPlot = source.showTrackProbabilityPlot;
       this.showFeaturePlot = source.showFeaturePlot.clone();
+      this.nmPerPixel = source.nmPerPixel;
+      this.minDisplaySize = source.minDisplaySize;
     }
 
     Settings copy() {
@@ -552,25 +560,60 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     private void doOptionsTrackData() {
+      // So we know what to close
+      final Settings oldSettings = settings.copy();
+
       // Show dialog to choose the track data
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(getTitle() + " options");
       gd.addCheckbox("Show_track_image", settings.showTrackImage);
+      gd.addNumericField("nm_per_pixel", settings.nmPerPixel);
+      gd.addNumericField("Min_display_size", settings.minDisplaySize, 0);
       gd.addCheckbox("Show_track_probability_plot", settings.showTrackProbabilityPlot);
       for (int i = 0; i < FEATURE_NAMES.length; i++) {
         gd.addCheckbox("Show_" + FEATURE_NAMES[i] + "_plot", settings.showFeaturePlot[i]);
       }
       gd.showDialog();
-      if (!gd.wasCanceled()) {
+      if (gd.wasCanceled()) {
         return;
       }
 
       settings.showTrackImage = gd.getNextBoolean();
+      final double nmPerPixel = gd.getNextNumber();
+      settings.minDisplaySize = (int) gd.getNextNumber();
       settings.showTrackProbabilityPlot = gd.getNextBoolean();
       for (int i = 0; i < FEATURE_NAMES.length; i++) {
         settings.showFeaturePlot[i] = gd.getNextBoolean();
       }
 
+      // Check arguments
+      try {
+        ParameterUtils.isAboveZero("nm/pixel", nmPerPixel);
+      } catch (final IllegalArgumentException ex) {
+        IJ.error(TITLE, ex.getMessage());
+        return;
+      }
+      settings.nmPerPixel = nmPerPixel;
+
+      // Close data no longer required
+      close(oldSettings.showTrackImage, settings.showTrackImage, () -> TrackImage.TITLE);
+      close(oldSettings.showTrackProbabilityPlot, settings.showTrackProbabilityPlot,
+          () -> TrackProbabilityPlot.TITLE);
+      for (int i = 0; i < FEATURE_NAMES.length; i++) {
+        final int index = i;
+        close(oldSettings.showFeaturePlot[i], settings.showFeaturePlot[i],
+            () -> "Track " + FEATURE_NAMES[index]);
+      }
+
       createSelectedAction();
+    }
+
+    private static void close(boolean wasVisible, boolean visible, Supplier<String> title) {
+      if (wasVisible && !visible) {
+        final Window window = WindowManager.getWindow(title.get());
+        if (window != null) {
+          window.setVisible(false);
+        }
+      }
     }
 
     private void createSelectedAction() {
@@ -593,10 +636,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
 
       // Show an image of the track coloured by the component.
-      // DO this last as all the plot are the same size and will tile nicely.
+      // Do this last as all the plot are the same size and will tile nicely.
       if (settings.showTrackImage) {
-        selectedAction =
-            selectedAction.andThen(new TrackImage(distanceConverter, 10, colourMap, wo));
+        selectedAction = selectedAction.andThen(new TrackImage(distanceConverter,
+            settings.nmPerPixel, settings.minDisplaySize, colourMap, wo));
       }
 
       if (selectedAction != NoopAction.INSTANCE) {
@@ -631,9 +674,11 @@ public class TrackPopulationAnalysis implements PlugIn {
    * Show a plot of the selected track feature.
    */
   private static class TrackImage implements Consumer<List<TrackData>> {
+    static final String TITLE = "Track Image";
     private static final BasicStroke DASHED = new BasicStroke(1, BasicStroke.CAP_SQUARE,
         BasicStroke.JOIN_MITER, 10.0f, new float[] {3, 3}, 0.0f);
     final double nmPerPixel;
+    final int minDisplaySize;
     final double scale;
     final IntFunction<Color> colourMap;
     final WindowOrganiser wo;
@@ -643,12 +688,14 @@ public class TrackPopulationAnalysis implements PlugIn {
      *
      * @param distanceConverter the distance converter to get the coordinates in micrometers
      * @param nmPerPixel the nm per pixel for the output track image
+     * @param minDisplaySize the min display size for the image window (in pixels)
      * @param colourMap the colour map
      * @param wo the window organiser
      */
-    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel,
+    TrackImage(TypeConverter<DistanceUnit> distanceConverter, double nmPerPixel, int minDisplaySize,
         IntFunction<Color> colourMap, WindowOrganiser wo) {
       this.nmPerPixel = nmPerPixel;
+      this.minDisplaySize = minDisplaySize;
       // Get the scale factor
       final double unitsToUm = distanceConverter.convert(1);
       // Create a distance converter to convert the units to the desired nm per pixel
@@ -746,7 +793,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       overlay.add(createRoi(xx, yy, n, current));
 
       // Show the image.
-      final ImagePlus imp = ImageJUtils.display("Track Image", bp, ImageJUtils.NO_TO_FRONT, wo);
+      final ImagePlus imp = ImageJUtils.display(TITLE, bp, ImageJUtils.NO_TO_FRONT, wo);
       imp.setIgnoreGlobalCalibration(true);
       final Calibration cal = imp.getCalibration();
       cal.pixelWidth = cal.pixelHeight = nmPerPixel;
@@ -757,7 +804,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       imp.setOverlay(overlay);
       // Zoom in
       final ImageWindow iw = imp.getWindow();
-      for (int i = 9; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < 500;) {
+      for (int i = 9; i-- > 0 && Math.max(iw.getWidth(), iw.getHeight()) < minDisplaySize;) {
         iw.getCanvas().zoomIn(imp.getWidth() / 2, imp.getHeight() / 2);
       }
     }
@@ -777,6 +824,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    * Show a plot of the selected track feature.
    */
   private static class TrackProbabilityPlot implements Consumer<List<TrackData>> {
+    static final String TITLE = "Track Probability";
     final MixtureMultivariateGaussianDistribution model;
     final double deltaT;
     final IntFunction<Color> colourMap;
@@ -801,7 +849,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = 0; i < length; i++) {
         x[i] = (float) ((i + 1) * deltaT);
       }
-      final Plot plot = new Plot("Track Probability", "Time (s)", "Probability");
+      final Plot plot = new Plot(TITLE, "Time (s)", "Probability");
       final double[] weights = model.getWeights();
       final MultivariateGaussianDistribution[] distributions = model.getDistributions();
       final float[][] y = new float[weights.length][x.length];
@@ -1876,7 +1924,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
       }
     }
-    // Median smoothing window of 3 eliminates isolated assignments, e.g. C in between U:
+    // Neighbour smoothing window of 3 eliminates isolated assignments, e.g. C in between U:
     // U C U => U U U
     // Note: For more than two components this does nothing to isolated assignments
     // between different neighbours:
