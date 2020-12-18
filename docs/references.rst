@@ -7,6 +7,10 @@ Abraham AV, Ram S, Chao J, Ward ES & Ober RJ (2009)
 Quantitative study of single molecule location techniques.
 *Optical Express* 17: 23352.
 
+Amitai A, Seeber A, Gasser SM & Holcman D (2017)
+Visualization of Chromatin Decompaction and Break Site Extrusion as Predicted by Statistical Polymer Modeling of Single-Locus Trajectories. 
+*Cell reports* 18, 1200-1214.
+
 Ankerst M, Breunig MM, Kriegel HP & Sander J (1999)
 OPTICS: ordering points to identify the clustering structure.
 *Proceedings of the 1999 ACM SIGMOD international conference on Management of data (SIGMOD '99)* ACM, New York, NY, USA, 49-60.
@@ -66,6 +70,10 @@ A Stochastic Model for Electron Multiplication Charge-Coupled Devices – From T
 Holtzer L, Meckel T, Schmidt T (2007)
 Nanometric three-dimensional tracking of individual quantum dots in cells.
 *Appl. Phys. Lett*. 90: 053902.
+
+Hozé NHD (2017)
+Statistical methods for large ensembles of super-resolution stochastic single particle trajectories in cell biology.
+*Annual Review of Statistics and Its Application* 4, 189-223.
 
 Huang F, Hartwich T, Rivera-Molina FE *et al* (2013)
 Video-rate nanoscopy using sCMOS camera–specific single-molecule localization algorithms.

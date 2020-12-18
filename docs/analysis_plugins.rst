@@ -1415,8 +1415,144 @@ Note: An ideal dual population of fixed and moving molecules will be a bimodel h
 Track Population Analysis
 -------------------------
 
-Under construction.
+The ``Track Population Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of sub-tracks. A sliding window (of size :math:`w`) is used over each sub-track to extract local features describing the diffusion of the molecule. The time step :math:`\Delta t` is the frame exposure time. Each time point in each sub-track is described as a feature vector. A multivariate Gaussian mixture model is fit to the data using the Expectation-Maximisation algorithm to estimate sub-populations of tracks that have different diffusion characteristics, for example a stationary and a moving population of molecules.
 
+Anomalous exponent
+~~~~~~~~~~~~~~~~~~
+
+The anomalous exponent is obtained from fitting the mean squared distance (MSD) curve. The MSD is computed for each jump distance (:math:`n`) within the window:
+
+.. math::
+
+    \text{MSD}(n) = \left \langle \left( X(t_i + n\Delta t) - X(t_i) \right)^2 \right \rangle
+
+for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD is fit using a weighted linear regression with the weights equal to the number of points used to compute each average. A linear model is fit for standard Brownian motion diffusion [Backlund, et al (2015), eq. 1]:
+
+.. math::
+
+    \text{MSD}(n) = 4Dn\Delta t - \frac{4}{3}D\Delta t + 4s^2
+
+where :math:`D` is the diffusion coefficient and :math:`s` is the static localisation precision.
+
+A fractional Brownian motion (FBM) diffusion function is fit for the case of anomalous diffusion [Backlund, et al (2015), eq. 8]:
+
+.. math::
+
+    \text{MSD}(n) = \frac{4D\Delta t^\alpha}{(\alpha+2)(\alpha+1)} \left[(n+1)^{\alpha+2} + (n-1)^{\alpha+2} -2n^{\alpha+2} \right] \\
+    - \frac{8D\Delta t^\alpha}{(\alpha+2)(\alpha+1)} + 4s^2
+
+where :math:`\alpha` is the anomalous diffusion coefficient. A value of 1 denotes standard Brownian motion, :math:`\alpha > 1` is super-diffusion (containing elements of deterministic directed motion) and :math:`\alpha < 1` is sub-diffusive motion.
+
+The Brownian model is a nested model of the FBM model. The significance of the FBM model can be computed using an F-test on the residual sum of squares. The number of insignificant fits is reported to the ``ImageJ`` log window. When the number of insignificant fits is high then the data may contain only standard Brownian motion and the anomalous coefficient :math:`\alpha` can be ignored during the population analysis.
+
+Note: The fit assumes an increasing MSD with time. If a negative slope occurs for the MSD then the data likely corresponds to a stationary molecule and the variation is the static localisation precision. In this case the anomalous coefficient is meaningless and a value of 1 is used.
+
+Effective diffusion coefficient
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The effective diffusion coefficient is computed using the empirical estimator [Hozé, 2017, eq 10]:
+
+.. math::
+
+    D = \frac{1}{4 (w-1) \Delta t} \sum_{n=0}^{w-2} \left( X((n+1) \Delta t) - X(n \Delta t) \right)^2
+
+This is the average squared distance between successive localisations within the analysis window.
+
+Length of confinement
+~~~~~~~~~~~~~~~~~~~~~
+
+The length of confinement is computed using the standard deviation of the position of the localisations within the window. The standard deviation in dimensions X and Y are averaged to create the length of confinement. Note the standard deviation in a single dimension for a stationary molecule is equivalent to the static localisation precision.
+
+Drift vector magnitude
+~~~~~~~~~~~~~~~~~~~~~~
+
+The drift vector is computed as the expected distance between successive points in each dimension, i.e. the average step size [Hozé, 2017, eq 9]. This analysis uses the Euclidean distance between the first and last point in the window to characterise the magnitude of the displacement. This is normalised by the number of steps in the window.
+
+Gaussian Mixture Model
+~~~~~~~~~~~~~~~~~~~~~~
+
+The features of each point are modelled as a dimension in a multi-variate Gaussian distribution. The population may be composed of different types of diffusing molecules; each sub-population will have a different multi-variate Gaussian distribution and the components are combined in a weighted mixture. The Expectation-Maximisation (EM) algorithm is used to fit a mixture multi-variate Gaussian distribution to the data using an increasing number of components. The likelihood of the fit is compared to the previous model to determine if the increase in the number of components is significant. This is done using an Akaike Information Criterion (AIC), Bayesian Information Criterion (BIC) and a log-likelihood ratio test. If these show no significant improvement then the fit is rejected. The fit can also be rejected if the weight of one of the sub-populations in the mixture is below a threshold.
+
+Fitting the model using the EM algorithm requires an initial seed model. Convergence may not be possible from a given seed and the result may not achieve the maximum likelihood. The plugin provides the option to configure the random seed, the number of initial models and the convergence criteria for the algorithm. The results of each fit can be logged to the ``ImageJ`` log window; the best model is used for analysis.
+
+Parameters
+~~~~~~~~~~
+
+When the plugin runs a dialog is shown containing all the localisation datasets in memory that contain track IDs. The user can select one or more datasets for analysis. The plugin will verify that the exposure time and spatial calibration are the same across all datasets. This ensures analysis of the same sliding window across datasets is comparable.
+
+The following analysis parameters can be configured:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Window
+     - The window size used to create the local diffusion features. Must be at least 5 to satisfy the fit of the MSD.
+
+   * - Min track length
+     - The minimum length of consecutive windows to include a track (must be at least 1).
+
+       Note: This does not refer to the original track length but to the length of the track where local features can be computed. The minimum number of localisations in an original diffusion track is the window size plus the minimum track length minus 1.
+
+   * - Fit significance
+     - The level to use in the F-test to determine if the significance of the fit of the anomalous diffusion coefficient alpha (compared to the standard Brownian diffusion model).
+
+       The significance level is used to record insignificant fits to the ``ImageJ`` log window. The fitted alpha coefficient is still used in the feature vector even if insignificant.
+
+   * - Min alpha
+     - The minimum anomalous diffusion coefficient alpha to allow during fitting.
+
+   * - Max alpha
+     - The maximum anomalous diffusion coefficient alpha to allow during fitting.
+
+   * - Ignore alpha
+     - Set to **true** to ignore the anomalous diffusion coefficient alpha in the multivariate Gaussian. Use this setting when the populations are expected to follow standard Brownian diffusion or fitting of the alpha produces many insignificant fits.
+
+   * - Max components
+     - The maximum number of components in the multivariate Gaussian mixture. Fitting will incrementally increase the number of components until additions do not significantly increase the likelihood score of the population.
+
+   * - Min weight
+     - The minimum weight for a component in the multivariate Gaussian mixture. If the Expectation-Maximisation algorithm generates a mixture with a component weight less than this fraction then the mixture will be rejected.
+
+   * - Max iterations
+     - The maximum number of iterations of the Expectation-Maximisation algorithm.
+
+   * - Relative error
+     - The relative error for the likelihood score for convergence in the Expectation-Maximisation algorithm.
+
+   * - Repeats
+     - The number of initial mixtures to use for the Expectation-Maximisation algorithm.
+
+   * - Seed
+     - The random seed to use to create the initial mixtures for the Expectation-Maximisation algorithm.
+
+   * - Histogram bins
+     - The number of bins to use in the histogram. Set to zero for automatic bin size based on the data.
+
+   * - LUT
+     - The look-up table used to colour the different components of the population mixture. This is used on the plot outputs and the track image output.
+
+Results
+~~~~~~~
+
+The plugin will extract all the contiguous tracks from all the input datasets that sistisfy the length criteria. The number of tracks and their average length are recorded to the ``ImageJ`` log window. For each track the diffusion features are computed. The count of insignificant anomalous diffusion coefficients is recorded in the ``ImageJ`` log window. This can be used to assess if the alpha coefficient should be ignored when fitting a mixture multivariate Gaussian model to the data. For reference an unmixed (1 component) model is created and the log-likelihood recorded. The number of components is increased up to the ``Max components`` limit until either the Expectation-Maximisation algorithm fails to converge, the new model is not significant or the mixture contains a fraction below the configured ``Min weight`` level. At each increase in number of components the log-likelihood of the model is recorded to the ``ImageJ`` log window.
+
+The model is used to classify each data point into a component. The data point is assigned to the component with the highest weighted probability from the mixture. A smoothing window of size 3 is used on the initial assignments to eliminate isolated assignments. If an assignment's two immediate neighbours are the same class and different from the assignment then the point is reassigned using the neighbour class. The number of re-labelled assignments is reported to the ``ImageJ`` log window.
+
+The population parameters of the final multivariate Gaussian mixture model are recorded in a results table. The components are ordered by the mean of their effective diffusion coefficient.
+
+A histogram is created for each of the local diffusion features. Black bars represent the single population. Coloured bars represent each component. The colour is specified using the ``LUT`` parameter.
+
+A table is presented summarising the track data. This lists the track length, the number of components in the track and the number of transitions between components (diffusion states). The table is interactive. Clicking a track in the table will create:
+
+* A plot of the weighted probability for each component against the track length.
+* Plots of each local diffusion feature against the track length. The plots are coloured using the component class assigned to the time point.
+* An image of the track. The pixel size of the image can be specified in the table options. This is enlarged by magnifying the image until the long edge of the image window is above a pixel size threshold. The track is coloured using the component class for the time point. The unclassified time points in the track, before/after the extent of the sliding window, are shown in dashed lines using light/dark grey for the start/end points respectively. The final localisation is shown using a circle.
+
+Display of the track data can be configured using ``Options > Track Data...`` menu in the track data table.
 
 .. index:: ! OPTICS
 
