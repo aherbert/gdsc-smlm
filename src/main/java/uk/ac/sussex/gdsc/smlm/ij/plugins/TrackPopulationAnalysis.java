@@ -56,6 +56,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -102,6 +103,7 @@ import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.NonBlockingExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
@@ -469,6 +471,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final TypeConverter<DistanceUnit> distanceConverter;
     private final double deltaT;
     private final IntFunction<Color> colourMap;
+    private JMenuItem analysisAnomalousExponentView;
     private JMenuItem optionsTrackData;
     private Consumer<List<TrackData>> selectedAction;
 
@@ -531,14 +534,23 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     private JMenuBar createMenuBar() {
       final JMenuBar menubar = new JMenuBar();
+      menubar.add(createAnalysisMenu());
       menubar.add(createOptionsMenu());
       return menubar;
+    }
+
+    private JMenu createAnalysisMenu() {
+      final JMenu menu = new JMenu("Analysis");
+      menu.setMnemonic(KeyEvent.VK_A);
+      menu.add(analysisAnomalousExponentView =
+          add("Anomalous exponent view", KeyEvent.VK_E, "ctrl pressed E"));
+      return menu;
     }
 
     private JMenu createOptionsMenu() {
       final JMenu menu = new JMenu("Options");
       menu.setMnemonic(KeyEvent.VK_O);
-      menu.add(optionsTrackData = add("Track Data ...", KeyEvent.VK_S, "ctrl pressed T"));
+      menu.add(optionsTrackData = add("Track Data ...", KeyEvent.VK_T, "ctrl pressed T"));
       return menu;
     }
 
@@ -556,6 +568,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       final Object src = event.getSource();
       if (src == optionsTrackData) {
         doOptionsTrackData();
+      } else if (src == analysisAnomalousExponentView) {
+        doAnalysisAnomalousExponentView();
       }
     }
 
@@ -649,6 +663,83 @@ public class TrackPopulationAnalysis implements PlugIn {
           wo.clear();
         });
       }
+    }
+
+    private void doAnalysisAnomalousExponentView() {
+      // Get the current selected track
+      final List<TrackData> selected = table.getSelectedData();
+      if (selected.isEmpty()) {
+        return;
+      }
+      final TrackData trackData = selected.get(0);
+
+      // Extract the track coordinates
+      Trace track = trackData.trace;
+      final int size = track.size();
+      double[] x = new double[size];
+      double[] y = new double[size];
+      for (int i = 0; i < size; i++) {
+        final PeakResult peak = track.get(i);
+        x[i] = distanceConverter.convert(peak.getXPosition());
+        y[i] = distanceConverter.convert(peak.getYPosition());
+      }
+
+      final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
+      msdFitter.setData(x, y);
+      final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
+
+      // For the selected anomalous exponent data point:
+      final IntConsumer action = frame -> {
+        // Extract the jump distances
+        // Fit with regression, Brownian and FBM models
+        try {
+          msdFitter.fit(frame - 1);
+        } catch (TooManyIterationsException | ConvergenceException ex) {
+          if (settings.debug) {
+            ImageJUtils.log("Failed to fit anomalous exponent: " + ex.getMessage());
+          }
+          return;
+        }
+
+        // Plot the raw data and the fit results.
+        final RealVector p1 = msdFitter.lvmSolution1.getPoint();
+        final RealVector p2 = msdFitter.lvmSolution2.getPoint();
+        final String title = TITLE + " MSD vs Time";
+        final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+        plot.addLabel(0, 0,
+            String.format("Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
+                MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
+                MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
+                MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
+
+        plot.addPoints(t, msdFitter.s, Plot.CROSS);
+        plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
+        plot.setColor(Color.BLUE);
+        plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
+        // plot.setColor(Color.RED);
+        // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
+        // plot.addPoints(t, yy, Plot.CIRCLE);
+        ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
+      };
+      action.accept(1);
+
+      // Show a dialog with the number of anomalous exponents
+      final NonBlockingExtendedGenericDialog gd =
+          new NonBlockingExtendedGenericDialog(TITLE + " Anomalous Exponent View");
+      gd.addMessage("Track " + trackData.id + " Anomalous Exponent View");
+      gd.addSlider("Data window", 1, trackData.data.length, 1);
+      gd.addDialogListener((egd, e) -> {
+        // Read the frame
+        final int frame = (int) egd.getNextNumber();
+        // Show the data point
+        action.accept(frame);
+        return true;
+      });
+      gd.hideCancelButton();
+      gd.setOKLabel("Close");
+      // This will block the executing thread which may be the event dispatch thread.
+      // Run on a new thread so events are still processed.
+      new Thread(gd::showDialog).start();
     }
   }
 
@@ -1424,68 +1515,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     final List<double[]> data = new LocalList<>(tracks.size());
     double[] x = new double[0];
     double[] y = new double[0];
-    final int window = settings.window;
-    final int wm1 = window - 1;
-    // Use for fitting.
-    // This uses a weighted linear regression as the MSD(n) is a mean of individual distances
-    // using the frame gap n.
-    final double[] s = new double[wm1];
-    final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-    final RealVector observed = new ArrayRealVector(s, false);
-    final double[] weight = SimpleArrayUtils.newArray(wm1, wm1, -1.0);
-    final RealMatrix weightMatrix = new DiagonalMatrix(weight, false);
-    final ConvergenceChecker<Evaluation> checker = (iteration, previous,
-        current) -> DoubleEquality.relativeError(previous.getCost(), current.getCost()) < 1e-6;
-    final int maxEvaluations = Integer.MAX_VALUE;
-    final int maxIterations = 3000;
-    final boolean lazyEvaluation = false;
+    final int wm1 = settings.window - 1;
 
-    // Linear model for Brownian motion
-    final MultivariateJacobianFunction model1 = new BrownianDiffusionFunction(wm1, deltaT);
-    final RealVector start1 = new ArrayRealVector(2);
-    final ParameterValidator paramValidator1 = point -> {
-      // Ensure diffusion coefficient and precision are positive
-      final double d = point.getEntry(0);
-      final double sigma = point.getEntry(1);
-      // Do not use MIN_VALUE here to avoid sub-normal numbers
-      if (d < MIN_D) {
-        point.setEntry(0, MIN_D);
-      }
-      if (sigma < MIN_SIGMA) {
-        point.setEntry(1, MIN_SIGMA);
-      }
-      return point;
-    };
-
-    // Non-linear model for anomalous diffusion coefficient
-    final MultivariateJacobianFunction model2 = new FbmDiffusionFunction(wm1, deltaT);
-    final RealVector start2 = new ArrayRealVector(3);
-    final double minAlpha = Math.max(settings.minAlpha, MIN_ALPHA);
-    final double maxAlpha = settings.maxAlpha;
-    final ParameterValidator paramValidator2 = point -> {
-      // Ensure diffusion coefficient and precision are positive.
-      paramValidator1.validate(point);
-      // Ensure alpha in the specified range. Default is (0, 2].
-      final double alpha = point.getEntry(2);
-      // Since the computations require (alpha + 1) limit this to the ULP of 1.0
-      // so the parameter always has an effect.
-      if (alpha < minAlpha) {
-        point.setEntry(2, MIN_ALPHA);
-      } else if (alpha > maxAlpha) {
-        point.setEntry(2, maxAlpha);
-      }
-      return point;
-    };
-
-    // For linear fit estimation
-    final SimpleRegression reg = new SimpleRegression(true);
-    // For significance test of the least squares fit.
-    // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
-    // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
-    final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
-    final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+    final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
     final double significance = settings.significance;
-
     final int[] fitResult = new int[4];
 
     // Factor for the diffusion coefficient: 1/N * 1/(2*dimensions*deltaT) = 1 / 4Nt
@@ -1522,84 +1555,15 @@ public class TrackPopulationAnalysis implements PlugIn {
         final int end = k + wm1;
 
         // 1. Anomalous exponent.
-
-        // Compute the MSD for all distances from m=0, to m=window-1
-        // For the MSD fit compute the gradient and intercept using a linear regression.
-        // (This could exploit pre-computation of the regression x components.)
-        reg.clear();
-        for (int m = 1; m <= wm1; m++) {
-          // Use intermediate points to compute an average
-          double msd = 0;
-          final double t = m * deltaT;
-          for (int i = end - m; i >= k; i--) {
-            final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
-            msd += d;
-            reg.addData(t, d);
-          }
-          // Number of points = window - m
-          s[m - 1] = msd / (window - m);
-        }
-
-        // Note:
-        // If the alpha cannot significantly improve the fit then its value is likely to be
-        // bad and the feature is noise. This can be judged using an F-test.
-        // The local MSD curve can be highly variable, especially
-        // if the molecule has switched from bound to unbound or vice versa. In this case there
-        // is no good value for alpha.
-        // Setting alpha to 1.0 for insignificant fits can result in no variance in the feature
-        // and failure to invert the covariance matrix during Expectation-Maximisation.
-        // Thus the user has the option to remove alpha from the features
-        // before fitting the Gaussian mixture. The value is still computed for the results.
-
-        // Compute linear fit with the (n-1/3) correction factor:
-        // MSD = 4D n - (4D) / 3 + 4 s^2
-        final double slope = reg.getSlope();
-        int fitIndex = 0;
-        if (slope > 4 * MIN_D) {
-          start1.setEntry(0, slope / 4);
-          start1.setEntry(1, Math.sqrt(Math.max(0, reg.getIntercept() + slope / 3) / 4));
-        } else {
-          // Do not allow negative slope. Use a flat line and
-          // precision is derived from the mean of the MSD.
-          // Using D=0 has no gradient and the fit does not explore the parameter space.
-          // Note: If there is no gradient then the alpha value is very likely to
-          // be insignificant as the FBM model assumes an upward slope.
-          fitIndex = 2;
-          start1.setEntry(0, MIN_D);
-          start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
-        }
-        final LeastSquaresProblem problem1 = LeastSquaresFactory.create(model1, observed, start1,
-            weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
+        msdFitter.setData(x, y);
         try {
-          final Optimum lvmSolution1 = optimizer.optimize(problem1);
-
-          // Fit the anomalous exponent alpha. Start from the linear fit result.
-          final RealVector fit1 = lvmSolution1.getPoint();
-          start2.setEntry(0, fit1.getEntry(0));
-          start2.setEntry(1, fit1.getEntry(1));
-          start2.setEntry(2, 1.0);
-          final LeastSquaresProblem problem2 =
-              LeastSquaresFactory.create(model2, observed, start2, weightMatrix, checker,
-                  maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
-          final Optimum lvmSolution2 = optimizer.optimize(problem2);
-
-          // Check for model improvement
-          final double rss1 = getResidualSumOfSquares(lvmSolution1);
-          final double rss2 = getResidualSumOfSquares(lvmSolution2);
-
-          // Compare significance using the method from RegressionUtils
-          // F = ((rss1 - rss2) / (p2 - p1)) / (rss2 / (n - p2))
-          final double num = rss1 - rss2;
-          final double denom = rss2 / denominatorDegreesOfFreedom;
-          // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
-          // and the p-value will be accepted
-          final double fStatistic = MathUtils.div0(num, denom);
-          final double pValue = 1.0 - distribution.cumulativeProbability(fStatistic);
+          msdFitter.fit(k);
+          int fitIndex = msdFitter.positiveSlope ? 0 : 2;
 
           // If better then this is anomalous diffusion
-          final double alpha = lvmSolution2.getPoint().getEntry(2);
+          final double alpha = msdFitter.lvmSolution2.getPoint().getEntry(2);
           values[0] = alpha;
-          if (pValue > significance) {
+          if (msdFitter.pValue > significance) {
             fitIndex++;
           }
           fitResult[fitIndex]++;
@@ -1945,6 +1909,237 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.log("Re-labelled isolated assignments: %d / %d", n, comp.length);
     return comp;
+  }
+
+  /**
+   * Class to encapsulate the fitting of the mean square distance data.
+   */
+  private static class MsdFitter {
+    // CHECKSTYLE.OFF: MemberName
+    double deltaT;
+    final int window;
+    final int wm1;
+    final double[] s;
+
+    final LevenbergMarquardtOptimizer optimizer;
+    final RealVector observed;
+    final RealMatrix weightMatrix;
+    final ConvergenceChecker<Evaluation> checker;
+
+    // Linear model for Brownian motion
+    final MultivariateJacobianFunction model1;
+    final RealVector start1;
+    final ParameterValidator paramValidator1;
+
+    // Non-linear model for anomalous diffusion coefficient
+    final MultivariateJacobianFunction model2;
+    final RealVector start2;
+    final ParameterValidator paramValidator2;
+
+    final SimpleRegression reg;
+    final int denominatorDegreesOfFreedom;
+    final FDistribution distribution;
+
+    double[] x;
+    double[] y;
+
+    boolean positiveSlope;
+    Optimum lvmSolution1;
+    Optimum lvmSolution2;
+    double pValue;
+    // CHECKSTYLE.ON: MemberName
+
+    /**
+     * Create an instance.
+     *
+     * @param settings the settings
+     * @param deltaT the time step of each frame in seconds (delta T)
+     */
+    MsdFitter(Settings settings, double deltaT) {
+      this.deltaT = deltaT;
+      window = settings.window;
+      wm1 = window - 1;
+      // Use for fitting.
+      // This uses a weighted linear regression as the MSD(n) is a mean of individual distances
+      // using the frame gap n.
+      s = new double[wm1];
+      optimizer = new LevenbergMarquardtOptimizer();
+      observed = new ArrayRealVector(s, false);
+      final double[] weight = SimpleArrayUtils.newArray(wm1, wm1, -1.0);
+      weightMatrix = new DiagonalMatrix(weight, false);
+      checker = (iteration, previous,
+          current) -> DoubleEquality.relativeError(previous.getCost(), current.getCost()) < 1e-6;
+
+      // Linear model for Brownian motion
+      model1 = new BrownianDiffusionFunction(wm1, deltaT);
+      start1 = new ArrayRealVector(2);
+      paramValidator1 = point -> {
+        // Ensure diffusion coefficient and precision are positive
+        final double d = point.getEntry(0);
+        final double sigma = point.getEntry(1);
+        // Do not use MIN_VALUE here to avoid sub-normal numbers
+        if (d < MIN_D) {
+          point.setEntry(0, MIN_D);
+        }
+        if (sigma < MIN_SIGMA) {
+          point.setEntry(1, MIN_SIGMA);
+        }
+        return point;
+      };
+
+      // Non-linear model for anomalous diffusion coefficient
+      model2 = new FbmDiffusionFunction(wm1, deltaT);
+      start2 = new ArrayRealVector(3);
+      final double minAlpha = Math.max(settings.minAlpha, MIN_ALPHA);
+      final double maxAlpha = settings.maxAlpha;
+      paramValidator2 = point -> {
+        // Ensure diffusion coefficient and precision are positive.
+        paramValidator1.validate(point);
+        // Ensure alpha in the specified range. Default is (0, 2].
+        final double alpha = point.getEntry(2);
+        // Since the computations require (alpha + 1) limit this to the ULP of 1.0
+        // so the parameter always has an effect.
+        if (alpha < minAlpha) {
+          point.setEntry(2, MIN_ALPHA);
+        } else if (alpha > maxAlpha) {
+          point.setEntry(2, maxAlpha);
+        }
+        return point;
+      };
+
+      // For linear fit estimation
+      reg = new SimpleRegression(true);
+      // For significance test of the least squares fit.
+      // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
+      // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
+      denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
+      distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+    }
+
+    /**
+     * Sets the data.
+     *
+     * @param x the x
+     * @param y the y
+     */
+    void setData(double[] x, double[] y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    /**
+     * Fit the mean squared jump distances computed from the data points {@code k} to
+     * {@code k + window - 1}. The window was defined in the settings passed to the constructor.
+     *
+     * <p>Fitting exceptions are thrown.
+     *
+     * @param k the k
+     */
+    void fit(int k) {
+      final int maxEvaluations = Integer.MAX_VALUE;
+      final int maxIterations = 3000;
+      final boolean lazyEvaluation = false;
+
+      // First point in window = k
+      // Last point in window = k + w - 1 = k + wm1
+      final int end = k + wm1;
+
+      // 1. Anomalous exponent.
+
+      // Compute the MSD for all distances from m=0, to m=window-1
+      // For the MSD fit compute the gradient and intercept using a linear regression.
+      // (This could exploit pre-computation of the regression x components.)
+      reg.clear();
+      for (int m = 1; m <= wm1; m++) {
+        // Use intermediate points to compute an average
+        double msd = 0;
+        final double t = m * deltaT;
+        for (int i = end - m; i >= k; i--) {
+          final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
+          msd += d;
+          reg.addData(t, d);
+        }
+        // Number of points = window - m
+        s[m - 1] = msd / (window - m);
+      }
+
+      // Note:
+      // If the alpha cannot significantly improve the fit then its value is likely to be
+      // bad and the feature is noise. This can be judged using an F-test.
+      // The local MSD curve can be highly variable, especially
+      // if the molecule has switched from bound to unbound or vice versa. In this case there
+      // is no good value for alpha.
+      // Setting alpha to 1.0 for insignificant fits can result in no variance in the feature
+      // and failure to invert the covariance matrix during Expectation-Maximisation.
+      // Thus the user has the option to remove alpha from the features
+      // before fitting the Gaussian mixture. The value is still computed for the results.
+
+      // Compute linear fit with the (n-1/3) correction factor:
+      // MSD = 4D n - (4D) / 3 + 4 s^2
+      final double slope = reg.getSlope();
+      positiveSlope = slope > 4 * MIN_D;
+      if (positiveSlope) {
+        start1.setEntry(0, slope / 4);
+        start1.setEntry(1, Math.sqrt(Math.max(0, reg.getIntercept() + slope / 3) / 4));
+      } else {
+        // Do not allow negative slope. Use a flat line and
+        // precision is derived from the mean of the MSD.
+        // Using D=0 has no gradient and the fit does not explore the parameter space.
+        // Note: If there is no gradient then the alpha value is very likely to
+        // be insignificant as the FBM model assumes an upward slope.
+        start1.setEntry(0, MIN_D);
+        start1.setEntry(1, Math.sqrt((MathUtils.sum(s) / wm1) / 4));
+      }
+      final LeastSquaresProblem problem1 = LeastSquaresFactory.create(model1, observed, start1,
+          weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator1);
+      lvmSolution1 = optimizer.optimize(problem1);
+
+      // Fit the anomalous exponent alpha. Start from the linear fit result.
+      final RealVector fit1 = lvmSolution1.getPoint();
+      start2.setEntry(0, fit1.getEntry(0));
+      start2.setEntry(1, fit1.getEntry(1));
+      start2.setEntry(2, 1.0);
+      final LeastSquaresProblem problem2 = LeastSquaresFactory.create(model2, observed, start2,
+          weightMatrix, checker, maxEvaluations, maxIterations, lazyEvaluation, paramValidator2);
+      lvmSolution2 = optimizer.optimize(problem2);
+
+      // Check for model improvement
+      final double rss1 = getResidualSumOfSquares(lvmSolution1);
+      final double rss2 = getResidualSumOfSquares(lvmSolution2);
+
+      // Compare significance using the method from RegressionUtils
+      // F = ((rss1 - rss2) / (p2 - p1)) / (rss2 / (n - p2))
+      final double num = rss1 - rss2;
+      final double denom = rss2 / denominatorDegreesOfFreedom;
+      // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
+      // and the p-value will be accepted
+      final double fStatistic = MathUtils.div0(num, denom);
+      pValue = 1.0 - distribution.cumulativeProbability(fStatistic);
+
+      // // Debug
+      // if (
+      // pValue < 0.2
+      // // alpha > 0.0 && alpha < 0.2
+      // //slope < 0
+      // ) {
+      // final RealVector p = lvmSolution2.getPoint();
+      // final String title = "anomalous exponent";
+      // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+      // final double[] t = SimpleArrayUtils.newArray(s.length, deltaT, deltaT);
+      // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue + ". "
+      // + lvmSolution1.getPoint().toString());
+      // plot.addPoints(t, s, Plot.CROSS);
+      // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
+      // plot.setColor(Color.BLUE);
+      // plot.addPoints(t, model1.value(lvmSolution1.getPoint()).getFirst().toArray(),
+      // Plot.LINE);
+      // plot.setColor(Color.RED);
+      // final double[] yy = Arrays.stream(t).map(reg::predict).toArray();
+      // plot.addPoints(t, yy, Plot.CIRCLE);
+      // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
+      // System.out.println(lvmSolution2.getPoint());
+      // }
+    }
   }
 
   /**

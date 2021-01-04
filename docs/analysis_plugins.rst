@@ -1554,6 +1554,9 @@ A table is presented summarising the track data. This lists the track length, th
 
 Display of the track data can be configured using ``Options > Track Data...`` menu in the track data table.
 
+Display of the jump distances used to fit the anomalous exponent can be viewed using ``Analysis > Anomalous exponent view`` menu in the track data table. This will present a dialog for the currently selected track where the data window can be selected; this corresponds to a contiguous set of localisations of the configured analysis window size. The mean squared jump distances for each time gap in the analysis window are extracted and the fit of the standard Brownian model and the fractional Brownian motion (FBM) model are shown.
+
+
 .. index:: ! OPTICS
 
 OPTICS
