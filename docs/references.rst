@@ -83,6 +83,10 @@ Hurvich CM & Tsai CL (1989)
 Regression and time series model selection in small samples.
 *Biometrika* 76: 297–307.
 
+Izeddin I, Récamier V, Bosanac L Cissé II, Boudarene L, Dugast-Darzacq C Proux F, Bénichou O, Voituriez R, Bensaude O, Dahan M & Darzacq X (2014)
+Single-molecule tracking in live cells reveals distinct target-search strategies of transcription factors in the nucleus.
+*eLife* e02230.
+
 Kriegel HP, Kröger P, Schubert E & Zimek A (2009)
 LoOP: local outlier probabilities.
 *Proceedings of the 18th ACM conference on Information and knowledge management (CIKM '09)* ACM, New York, NY, USA, 1649-1652.
@@ -91,7 +95,7 @@ Laurence TA & Chromy BA (2010)
 Efficient maximum likelihood estimator fitting of histograms.
 *Nature Methods* 7: 338-339.
 
-Lin R, Clowsley AH, Jayasinghe ID, Baddeley D, Soeller C (2017)
+Lin R, Clowsley AH, Jayasinghe ID, Baddeley D & Soeller C (2017)
 Algorithmic corrections for localization microscopy with sCMOS cameras - characterisation of a computationally efficient localization approach.
 *Optical Express* 25(10): 11701-11716.
 

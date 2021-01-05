@@ -1556,6 +1556,14 @@ Display of the track data can be configured using ``Options > Track Data...`` me
 
 Display of the jump distances used to fit the anomalous exponent can be viewed using ``Analysis > Anomalous exponent view`` menu in the track data table. This will present a dialog for the currently selected track where the data window can be selected; this corresponds to a contiguous set of localisations of the configured analysis window size. The mean squared jump distances for each time gap in the analysis window are extracted and the fit of the standard Brownian model and the fractional Brownian motion (FBM) model are shown.
 
+Display of the jump angles for each component can be viewed using ``Analysis > Jump angles`` menu in the track data table. This will compute the angle between consecutive jumps as the angle between the vectors p1 to p2 and p2 to p3. Angles are computed in the range 0 to 360 where an angle of 0 is the exact same direction; an angle of 180 is a complete reversal of the direction. A histogram is presented of the jump angles using 15 degree bins and the asymmetry coefficient is computed using the ratio of forward (fwd) and backward (bwd) jumps computed using the angles within 30 degrees of the forward or backward directions [Izeddin *et al*, 2014]:
+
+.. math::
+
+    \text{asymmetry coefficient} = \log_2 \left (\frac{\text{fwd}}{\text{bwd}} \right )
+
+A value above zero indicates more forward jumps, and below zero is more backward jumps (confined diffusion).
+
 
 .. index:: ! OPTICS
 

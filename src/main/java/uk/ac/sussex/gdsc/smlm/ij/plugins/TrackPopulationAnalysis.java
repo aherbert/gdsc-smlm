@@ -24,8 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -100,6 +102,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.BinMethod;
+import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
@@ -109,6 +112,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -464,6 +468,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static class TrackDataTableModelFrame extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
+    /** Used to convert an angle in radians to turns. */
+    private static final double FROM_RADIANS = 1.0 / (2 * Math.PI);
 
     private final Settings settings;
     private final TrackDataJTable table;
@@ -472,6 +478,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final double deltaT;
     private final IntFunction<Color> colourMap;
     private JMenuItem analysisAnomalousExponentView;
+    private JMenuItem analysisJumpAngles;
     private JMenuItem optionsTrackData;
     private Consumer<List<TrackData>> selectedAction;
 
@@ -544,6 +551,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       menu.setMnemonic(KeyEvent.VK_A);
       menu.add(analysisAnomalousExponentView =
           add("Anomalous exponent view", KeyEvent.VK_E, "ctrl pressed E"));
+      menu.add(analysisJumpAngles = add("Jump angles", KeyEvent.VK_J, "ctrl pressed J"));
       return menu;
     }
 
@@ -566,13 +574,24 @@ public class TrackPopulationAnalysis implements PlugIn {
     @Override
     public void actionPerformed(ActionEvent event) {
       final Object src = event.getSource();
+      Runnable action = null;
       if (src == optionsTrackData) {
-        doOptionsTrackData();
+        action = this::doOptionsTrackData;
       } else if (src == analysisAnomalousExponentView) {
-        doAnalysisAnomalousExponentView();
+        action = this::doAnalysisAnomalousExponentView;
+      } else if (src == analysisJumpAngles) {
+        action = this::doAnalysisJumpAngles;
+      }
+      // This will block the executing thread which may be the event dispatch thread.
+      // Run on a new thread so events are still processed.
+      if (action != null) {
+        new Thread(action).start();
       }
     }
 
+    /**
+     * Show a dialog to select what to display for a selected track.
+     */
     private void doOptionsTrackData() {
       // So we know what to close
       final Settings oldSettings = settings.copy();
@@ -665,6 +684,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
     }
 
+    /**
+     * For the currently selected track, extract the coordinates and show a dialog that allows the
+     * mean squared jump distances to be plotted for a selected window from the track. The plot is
+     * fit with the Brownian and Fractional Brownian Motion diffusion models.
+     */
     private void doAnalysisAnomalousExponentView() {
       // Get the current selected track
       final List<TrackData> selected = table.getSelectedData();
@@ -674,10 +698,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       final TrackData trackData = selected.get(0);
 
       // Extract the track coordinates
-      Trace track = trackData.trace;
+      final Trace track = trackData.trace;
       final int size = track.size();
-      double[] x = new double[size];
-      double[] y = new double[size];
+      final double[] x = new double[size];
+      final double[] y = new double[size];
       for (int i = 0; i < size; i++) {
         final PeakResult peak = track.get(i);
         x[i] = distanceConverter.convert(peak.getXPosition());
@@ -737,9 +761,128 @@ public class TrackPopulationAnalysis implements PlugIn {
       });
       gd.hideCancelButton();
       gd.setOKLabel("Close");
-      // This will block the executing thread which may be the event dispatch thread.
-      // Run on a new thread so events are still processed.
-      new Thread(gd::showDialog).start();
+      gd.showDialog();
+    }
+
+    /**
+     * For each component extract the jump angles between successive jumps using 3 consecutive
+     * localisation positions. The component label before and after the central position is not
+     * required to match.
+     */
+    private void doAnalysisJumpAngles() {
+      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
+      final List<TrackData> data = model.data;
+      if (data.isEmpty()) {
+        return;
+      }
+      final TIntObjectHashMap<TDoubleArrayList> angleMap = getAngleMap(data);
+      final WindowOrganiser wo = new WindowOrganiser();
+      // Histogram each angle bin from 0 to 360 in 15 degree increments (24 bins).
+      // The limits max is inclusive so subtract a single bin width to ensure there is no empty
+      // bin at [360, 375)
+      final double binWidth = 15;
+      final HistogramPlotBuilder builder = new HistogramPlotBuilder("title").setName("Jump Angle")
+          .setLimits(new double[] {0, 360 - binWidth}).setMinBinWidth(binWidth)
+          // This is a higher number than 360/binWidth to force use of the bin width
+          .setNumberOfBins((int) (2 * 360 / binWidth));
+      angleMap.forEachEntry((comp, angles) -> {
+        angles.transformValues(d -> d * 360);
+        // @formatter:off
+        final HistogramPlot plot = builder.setTitle(String.format("Component %d", comp))
+            .setData(DoubleData.wrap(angles.toArray()))
+            .build();
+        // @formatter:on
+        plot.show(wo);
+        // Get the measure of asymmetry.
+        // See Izeddin, et al (2014)
+        // eLife 2014;3:e02230 DOI: 10.7554/eLife.02230
+        // Figure 4
+        final double[] y = plot.getPlotYValues();
+        final double fwd = y[0] + y[1] + y[y.length - 1] + y[y.length - 2];
+        final int mid = y.length / 2;
+        final double bwd = y[mid] + y[mid + 1] + y[mid - 1] + y[mid - 2];
+        final double asymmetryCoefficient = Math.log(fwd / bwd) / Math.log(2);
+        plot.getPlot().addLabel(0, 0,
+            "Asymmetry Coefficient = " + MathUtils.rounded(asymmetryCoefficient));
+        plot.getPlot().updateImage();
+        return true;
+      });
+      wo.tile();
+    }
+
+    /**
+     * Gets the angle map containing all the clockwise turns for each component. The turns are in
+     * the range {@code [0, 1]}.
+     *
+     * @param data the data
+     * @return the angle map
+     */
+    private static TIntObjectHashMap<TDoubleArrayList> getAngleMap(List<TrackData> data) {
+      final TIntObjectHashMap<TDoubleArrayList> angleMap = new TIntObjectHashMap<>();
+      data.forEach(track -> {
+        final int[] component = track.component;
+        final Trace trace = track.trace;
+        final int offset = (trace.size() - component.length) / 2;
+        for (int i = 0; i < component.length; i++) {
+          // Compute an angle in range [0, 360]
+          final PeakResult p1 = trace.get(i + offset - 1);
+          final PeakResult p2 = trace.get(i + offset);
+          final PeakResult p3 = trace.get(i + offset + 1);
+          final double x1 = p1.getXPosition();
+          final double y1 = p1.getYPosition();
+          final double x2 = p2.getXPosition();
+          final double y2 = p2.getYPosition();
+          final double x3 = p3.getXPosition();
+          final double y3 = p3.getYPosition();
+          TDoubleArrayList list = angleMap.get(component[i]);
+          if (list == null) {
+            angleMap.put(component[i], list = new TDoubleArrayList());
+          }
+          // Angle between vector p1 -> p2 and p2 -> p3.
+          // An angle of 0 is the same direction. 0.5 is a reverse.
+          list.add(clockwiseTurns(angle(x1, y1, x2, y2), angle(x2, y2, x3, y3)));
+        }
+      });
+      return angleMap;
+    }
+
+    /**
+     * Compute the angle of the vector between the point and the origin.
+     *
+     * <p>Uses {@link Math#atan2(double, double)} thus increasing angle is for the
+     * <em>counter-clockwise</em> direction.
+     *
+     * @param ox the origin x
+     * @param oy the origin y
+     * @param px the point x
+     * @param py the point y
+     * @return the angle
+     */
+    private static double angle(double ox, double oy, double px, double py) {
+      final double dx = px - ox;
+      final double dy = py - oy;
+      return Math.atan2(dy, dx);
+    }
+
+    /**
+     * Compute the number of turns <em>clockwise</em> to move from angle 1 to 2. The angles should
+     * be in radians in the range -pi to pi with increasing angle for the <em>counter-clockwise</em>
+     * direction (as computed by {@link Math#atan2(double, double)}).
+     *
+     * <p>The returned number of turns is in the range {@code [0, 1]}.
+     *
+     * @param angle1 the first angle
+     * @param angle2 the second angle
+     * @return the number of turns clockwise
+     */
+    private static double clockwiseTurns(double angle1, double angle2) {
+      // Adapted from org.apache.commons.numbers.angle.PlaneAngle.normalize(...)
+      // Convert radians to turns.
+      // Expected range is [-0.5, 0.5] turns for each angle.
+      // Result is in the range [-1, 1].
+      final double turns = (angle1 - angle2) * FROM_RADIANS;
+      // Normalise into the range [0, 1]
+      return turns - Math.floor(turns);
     }
   }
 
