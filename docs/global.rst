@@ -2,4 +2,5 @@
 
     <br/>
 
-.. |micro|  unicode:: U+000B5
+.. |micro| unicode:: U+03BC
+   :rtrim:
