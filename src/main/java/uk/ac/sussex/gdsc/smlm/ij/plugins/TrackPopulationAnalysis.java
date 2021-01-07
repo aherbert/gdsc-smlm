@@ -112,6 +112,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.math.RollingFirstMoment;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -120,6 +121,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -479,6 +481,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final IntFunction<Color> colourMap;
     private JMenuItem analysisAnomalousExponentView;
     private JMenuItem analysisJumpAngles;
+    private JMenuItem analysisFitJumpDistances;
     private JMenuItem optionsTrackData;
     private Consumer<List<TrackData>> selectedAction;
 
@@ -552,6 +555,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       menu.add(analysisAnomalousExponentView =
           add("Anomalous exponent view", KeyEvent.VK_E, "ctrl pressed E"));
       menu.add(analysisJumpAngles = add("Jump angles", KeyEvent.VK_J, "ctrl pressed J"));
+      menu.add(
+          analysisFitJumpDistances = add("Fit jump distances", KeyEvent.VK_D, "ctrl pressed D"));
       return menu;
     }
 
@@ -581,6 +586,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         action = this::doAnalysisAnomalousExponentView;
       } else if (src == analysisJumpAngles) {
         action = this::doAnalysisJumpAngles;
+      } else if (src == analysisFitJumpDistances) {
+        action = this::doAnalysisFitJumpDistances;
       }
       // This will block the executing thread which may be the event dispatch thread.
       // Run on a new thread so events are still processed.
@@ -640,6 +647,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       createSelectedAction();
     }
 
+    /**
+     * Close a window of the given title if it was previously visible and has been set to not
+     * visible.
+     *
+     * @param wasVisible the previous visible flag
+     * @param visible the current visible flag
+     * @param title the title of the window
+     */
     private static void close(boolean wasVisible, boolean visible, Supplier<String> title) {
       if (wasVisible && !visible) {
         final Window window = WindowManager.getWindow(title.get());
@@ -649,6 +664,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
     }
 
+    /**
+     * Creates the action to perform on a selected track.
+     */
     private void createSelectedAction() {
       // Avoid null pointer by always having an action
       selectedAction = NoopAction.INSTANCE;
@@ -838,7 +856,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           if (list == null) {
             angleMap.put(component[i], list = new TDoubleArrayList());
           }
-          // Angle between vector p1 -> p2 and p2 -> p3.
+          // Turn angle between vector p1 -> p2 and p2 -> p3.
           // An angle of 0 is the same direction. 0.5 is a reverse.
           list.add(clockwiseTurns(angle(x1, y1, x2, y2), angle(x2, y2, x3, y3)));
         }
@@ -883,6 +901,141 @@ public class TrackPopulationAnalysis implements PlugIn {
       final double turns = (angle1 - angle2) * FROM_RADIANS;
       // Normalise into the range [0, 1]
       return turns - Math.floor(turns);
+    }
+
+    /**
+     * For each component extract the mean squared jump distances using all jump intervals up to the
+     * configured window size. The component label must be the same for all coordinates used to
+     * extract the jumps. A track must be at least the length of the window to be included in the
+     * analysis. This reduces jump errors when the state of the component switches by reducing
+     * exposure to transitions and eliminating short tracks.
+     *
+     * <p>Fit the combined MSD curve with a Brownian and FBM model.
+     */
+    private void doAnalysisFitJumpDistances() {
+      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
+      final List<TrackData> data = model.data;
+      if (data.isEmpty()) {
+        return;
+      }
+      final TIntObjectHashMap<RollingFirstMoment[]> msdMap = getMsdMap(data);
+      final WindowOrganiser wo = new WindowOrganiser();
+      final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
+      final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
+      msdMap.forEachEntry((comp, msds) -> {
+        // Get the means and weights
+        final double[] s =
+            Arrays.stream(msds).mapToDouble(RollingFirstMoment::getFirstMoment).toArray();
+        final double[] w = Arrays.stream(msds).mapToDouble(RollingFirstMoment::getN).toArray();
+        // Do fitting
+        try {
+          msdFitter.fit(s, w);
+        } catch (TooManyIterationsException | ConvergenceException ex) {
+          if (settings.debug) {
+            ImageJUtils.log("Failed to fit anomalous exponent for component %d: ", comp,
+                ex.getMessage());
+          }
+          return true;
+        }
+
+        // Show the result
+        final RealVector p1 = msdFitter.lvmSolution1.getPoint();
+        final RealVector p2 = msdFitter.lvmSolution2.getPoint();
+        final String title = String.format("Component %d MSD vs Time", comp);
+        final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+        // Note:
+        // The number of windows is the count of samples of the longest jump.
+        final int numberOfWindows = (int) w[w.length - 1];
+        // The number of tracks is the number of additional samples that can be obtained with
+        // a jump size 1 smaller.
+        final int numberOfTracks = (int) (w[0] - w[1]);
+        // This is the total number of data points minus the 3 fit parameters
+        final int denominatorDegreesOfFreedom = (int) (MathUtils.sum(w) - 3);
+        plot.addLabel(0, 0, String.format(
+            "Tracks=%d, N=%d, DF=%d. Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
+            numberOfTracks, numberOfWindows, denominatorDegreesOfFreedom,
+            MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
+            MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
+            MathUtils.rounded(p2.getEntry(2)), msdFitter.pValue));
+
+        plot.addPoints(t, msdFitter.s, Plot.CROSS);
+        plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
+        plot.setColor(Color.BLUE);
+        plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
+        ImageJUtils.display(title, plot, wo);
+
+        return true;
+      });
+      wo.tile();
+    }
+
+    /**
+     * Gets the map containing the MSD for each component for each jump distance up to the window
+     * size minus 1.
+     *
+     * @param data the data
+     * @return the MSD map
+     */
+    private TIntObjectHashMap<RollingFirstMoment[]> getMsdMap(List<TrackData> data) {
+      final TIntObjectHashMap<RollingFirstMoment[]> msdMap = new TIntObjectHashMap<>();
+      data.forEach(track -> {
+        final int[] component = track.component;
+        final Trace trace = track.trace;
+        // Window - 1
+        final int wm1 = trace.size() - component.length;
+        // Extract coordinates
+        final double[] x = new double[component.length];
+        final double[] y = new double[component.length];
+        final int offset = wm1 / 2;
+        for (int i = 0; i < x.length; i++) {
+          final PeakResult peak = trace.get(i + offset);
+          x[i] = distanceConverter.convert(peak.getXPosition());
+          y[i] = distanceConverter.convert(peak.getYPosition());
+        }
+        // Find contiguous regions of the same component at least the length of the window
+        int start = 0;
+        while (start < component.length) {
+          int end = start + 1;
+          while (end < component.length && component[start] == component[end]) {
+            end++;
+          }
+          addMsd(msdMap, component[start], start, end - 1, wm1, x, y);
+          start = end;
+        }
+      });
+
+      return msdMap;
+    }
+
+    /**
+     * Compute the squared jump distances and add them to the means for the component.
+     *
+     * @param msdMap the MSD map
+     * @param component the component
+     * @param start the start (inclusive)
+     * @param end the end (inclusive)
+     * @param wm1 the window size minus 1
+     * @param x the x coords
+     * @param y the y coords
+     */
+    private static void addMsd(TIntObjectHashMap<RollingFirstMoment[]> msdMap, int component,
+        int start, int end, int wm1, double[] x, double[] y) {
+      final int length = end - start;
+      if (length < wm1) {
+        return;
+      }
+      RollingFirstMoment[] msds = msdMap.get(component);
+      if (msds == null) {
+        msds = SimpleArrayUtils.fill(new RollingFirstMoment[wm1], RollingFirstMoment::new);
+        msdMap.put(component, msds);
+      }
+      for (int m = 1; m <= wm1; m++) {
+        final RollingFirstMoment m1 = msds[m - 1];
+        for (int i = end - m; i >= start; i--) {
+          final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
+          m1.add(d);
+        }
+      }
     }
   }
 
@@ -2171,6 +2324,33 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     /**
+     * Fit the provided mean squared jump distances with the given weights. This ignores any data
+     * provided by the {@link #setData(double[], double[])} method as the MSDs are already computed.
+     * The input arrays must match the expected length defined by the window size minus 1.
+     *
+     * <p>Fitting exceptions are thrown.
+     *
+     * @param msds the msds
+     * @param weights the weights (assumed to be integer)
+     */
+    void fit(double[] msds, double[] weights) {
+      // Set the data
+      ValidationUtils.checkArgument(msds.length == s.length);
+      System.arraycopy(msds, 0, s, 0, s.length);
+      // Initialise the regression used to estimate the slope.
+      // This is not a true weighted regression but is only used as a start point so this is OK.
+      reg.clear();
+      for (int i = 0; i < msds.length; i++) {
+        reg.addData((i + 1) * deltaT, msds[i]);
+      }
+      // Set the weights and degrees of freedom
+      final RealMatrix weightMatrix = new DiagonalMatrix(weights, false);
+      final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weights) - 3;
+      final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+      fit(weightMatrix, denominatorDegreesOfFreedom, distribution);
+    }
+
+    /**
      * Fit the mean squared jump distances computed from the data points {@code k} to
      * {@code k + window - 1}. The window was defined in the settings passed to the constructor.
      *
@@ -2179,10 +2359,6 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param k the k
      */
     void fit(int k) {
-      final int maxEvaluations = Integer.MAX_VALUE;
-      final int maxIterations = 3000;
-      final boolean lazyEvaluation = false;
-
       // First point in window = k
       // Last point in window = k + w - 1 = k + wm1
       final int end = k + wm1;
@@ -2205,6 +2381,24 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Number of points = window - m
         s[m - 1] = msd / (window - m);
       }
+
+      fit(weightMatrix, denominatorDegreesOfFreedom, distribution);
+    }
+
+    /**
+     * Fit the prepared mean squared jump distances.
+     *
+     * <p>Fitting exceptions are thrown.
+     *
+     * @param weightMatrix the weight matrix
+     * @param denominatorDegreesOfFreedom the denominator degrees of freedom
+     * @param distribution the distribution
+     */
+    private void fit(RealMatrix weightMatrix, double denominatorDegreesOfFreedom,
+        FDistribution distribution) {
+      final int maxEvaluations = Integer.MAX_VALUE;
+      final int maxIterations = 3000;
+      final boolean lazyEvaluation = false;
 
       // Note:
       // If the alpha cannot significantly improve the fit then its value is likely to be
