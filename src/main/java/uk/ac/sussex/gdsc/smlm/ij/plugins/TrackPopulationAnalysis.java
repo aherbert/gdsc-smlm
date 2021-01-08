@@ -1035,7 +1035,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       SumOfSquaredDeviations[] msds = msdMap.get(component);
       if (msds == null) {
-        msds = SimpleArrayUtils.fill(new SumOfSquaredDeviations[wm1], SumOfSquaredDeviations::new);
+        msds = SimpleArrayUtils.fill(new SumOfSquaredDeviations[wm1],
+            (Supplier<SumOfSquaredDeviations>) SumOfSquaredDeviations::new);
         msdMap.put(component, msds);
       }
       for (int m = 1; m <= wm1; m++) {
