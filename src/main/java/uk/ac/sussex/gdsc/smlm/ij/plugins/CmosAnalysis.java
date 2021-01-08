@@ -887,7 +887,7 @@ public class CmosAnalysis implements PlugIn {
         for (final ImageWorker w : workers) {
           moment.add(w.moment);
         }
-        data[2 * n] = moment.getFirstMoment();
+        data[2 * n] = moment.getMean();
         data[2 * n + 1] = moment.getVariance();
 
         // Get the processing speed.
