@@ -112,7 +112,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
-import uk.ac.sussex.gdsc.core.math.RollingFirstMoment;
+import uk.ac.sussex.gdsc.core.math.SumOfSquaredDeviations;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
@@ -918,18 +918,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       if (data.isEmpty()) {
         return;
       }
-      final TIntObjectHashMap<RollingFirstMoment[]> msdMap = getMsdMap(data);
+      final TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap = getMsdMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
       msdMap.forEachEntry((comp, msds) -> {
-        // Get the means and weights
-        final double[] s =
-            Arrays.stream(msds).mapToDouble(RollingFirstMoment::getFirstMoment).toArray();
-        final double[] w = Arrays.stream(msds).mapToDouble(RollingFirstMoment::getN).toArray();
         // Do fitting
         try {
-          msdFitter.fit(s, w);
+          msdFitter.fit(msds);
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
             ImageJUtils.log("Failed to fit anomalous exponent for component %d: ", comp,
@@ -945,18 +941,19 @@ public class TrackPopulationAnalysis implements PlugIn {
         final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
         // Note:
         // The number of windows is the count of samples of the longest jump.
-        final int numberOfWindows = (int) w[w.length - 1];
+        final int numberOfWindows = (int) msds[msds.length - 1].getN();
         // The number of tracks is the number of additional samples that can be obtained with
         // a jump size 1 smaller.
-        final int numberOfTracks = (int) (w[0] - w[1]);
+        final int numberOfTracks = (int) (msds[0].getN() - msds[1].getN());
         // This is the total number of data points minus the 3 fit parameters
-        final int denominatorDegreesOfFreedom = (int) (MathUtils.sum(w) - 3);
+        final int denominatorDegreesOfFreedom =
+            (int) (Arrays.stream(msds).mapToLong(SumOfSquaredDeviations::getN).sum() - 3);
         plot.addLabel(0, 0, String.format(
             "Tracks=%d, N=%d, DF=%d. Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
             numberOfTracks, numberOfWindows, denominatorDegreesOfFreedom,
             MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
             MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
-            MathUtils.rounded(p2.getEntry(2)), msdFitter.pValue));
+            MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
 
         plot.addPoints(t, msdFitter.s, Plot.CROSS);
         plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
@@ -976,8 +973,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param data the data
      * @return the MSD map
      */
-    private TIntObjectHashMap<RollingFirstMoment[]> getMsdMap(List<TrackData> data) {
-      final TIntObjectHashMap<RollingFirstMoment[]> msdMap = new TIntObjectHashMap<>();
+    private TIntObjectHashMap<SumOfSquaredDeviations[]> getMsdMap(List<TrackData> data) {
+      final TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap = new TIntObjectHashMap<>();
       data.forEach(track -> {
         final int[] component = track.component;
         final Trace trace = track.trace;
@@ -1018,19 +1015,19 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param x the x coords
      * @param y the y coords
      */
-    private static void addMsd(TIntObjectHashMap<RollingFirstMoment[]> msdMap, int component,
+    private static void addMsd(TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap, int component,
         int start, int end, int wm1, double[] x, double[] y) {
       final int length = end - start;
       if (length < wm1) {
         return;
       }
-      RollingFirstMoment[] msds = msdMap.get(component);
+      SumOfSquaredDeviations[] msds = msdMap.get(component);
       if (msds == null) {
-        msds = SimpleArrayUtils.fill(new RollingFirstMoment[wm1], RollingFirstMoment::new);
+        msds = SimpleArrayUtils.fill(new SumOfSquaredDeviations[wm1], SumOfSquaredDeviations::new);
         msdMap.put(component, msds);
       }
       for (int m = 1; m <= wm1; m++) {
-        final RollingFirstMoment m1 = msds[m - 1];
+        final SumOfSquaredDeviations m1 = msds[m - 1];
         for (int i = end - m; i >= start; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
           m1.add(d);
@@ -2324,30 +2321,32 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
 
     /**
-     * Fit the provided mean squared jump distances with the given weights. This ignores any data
-     * provided by the {@link #setData(double[], double[])} method as the MSDs are already computed.
-     * The input arrays must match the expected length defined by the window size minus 1.
+     * Fit the provided mean squared jump distances. This ignores any data provided by the
+     * {@link #setData(double[], double[])} method as the MSDs are already computed. The input array
+     * must match the expected length defined by the window size minus 1.
      *
      * <p>Fitting exceptions are thrown.
      *
      * @param msds the msds
-     * @param weights the weights (assumed to be integer)
      */
-    void fit(double[] msds, double[] weights) {
-      // Set the data
+    void fit(SumOfSquaredDeviations[] msds) {
       ValidationUtils.checkArgument(msds.length == s.length);
-      System.arraycopy(msds, 0, s, 0, s.length);
       // Initialise the regression used to estimate the slope.
       // This is not a true weighted regression but is only used as a start point so this is OK.
       reg.clear();
+      final double[] weights = new double[msds.length];
+      double ssy = 0;
       for (int i = 0; i < msds.length; i++) {
-        reg.addData((i + 1) * deltaT, msds[i]);
+        s[i] = msds[i].getMean();
+        reg.addData((i + 1) * deltaT, s[i]);
+        weights[i] = msds[i].getN();
+        ssy += msds[i].getSumOfSquaredDeviations();
       }
       // Set the weights and degrees of freedom
       final RealMatrix weightMatrix = new DiagonalMatrix(weights, false);
       final int denominatorDegreesOfFreedom = (int) MathUtils.sum(weights) - 3;
       final FDistribution distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
-      fit(weightMatrix, denominatorDegreesOfFreedom, distribution);
+      fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
     }
 
     /**
@@ -2369,32 +2368,40 @@ public class TrackPopulationAnalysis implements PlugIn {
       // For the MSD fit compute the gradient and intercept using a linear regression.
       // (This could exploit pre-computation of the regression x components.)
       reg.clear();
+      double ssy = 0;
       for (int m = 1; m <= wm1; m++) {
         // Use intermediate points to compute an average
-        double msd = 0;
+        SumOfSquaredDeviations msd = new SumOfSquaredDeviations();
         final double t = m * deltaT;
         for (int i = end - m; i >= k; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
-          msd += d;
+          msd.add(d);
           reg.addData(t, d);
         }
-        // Number of points = window - m
-        s[m - 1] = msd / (window - m);
+        s[m - 1] = msd.getMean();
+        ssy += msd.getSumOfSquaredDeviations();
       }
 
-      fit(weightMatrix, denominatorDegreesOfFreedom, distribution);
+      fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
     }
 
     /**
      * Fit the prepared mean squared jump distances.
      *
+     * <p>The total sum of squared deviations of the raw jump distances from the mean is required to
+     * compute the correct residual sum of squares for the significance test. The weighted fit (with
+     * weights equal to the count of data points for each mean) is therefore a least squared fit of
+     * all jump distances.
+     *
      * <p>Fitting exceptions are thrown.
      *
      * @param weightMatrix the weight matrix
+     * @param ssy the sum-of-squared deviations of all data points y (jump distances) from the mean
+     *        squared distance (msd) for each jump interval
      * @param denominatorDegreesOfFreedom the denominator degrees of freedom
      * @param distribution the distribution
      */
-    private void fit(RealMatrix weightMatrix, double denominatorDegreesOfFreedom,
+    private void fit(RealMatrix weightMatrix, double ssy, double denominatorDegreesOfFreedom,
         FDistribution distribution) {
       final int maxEvaluations = Integer.MAX_VALUE;
       final int maxIterations = 3000;
@@ -2447,7 +2454,21 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Compare significance using the method from RegressionUtils
       // F = ((rss1 - rss2) / (p2 - p1)) / (rss2 / (n - p2))
       final double num = rss1 - rss2;
-      final double denom = rss2 / denominatorDegreesOfFreedom;
+
+      // TODO - Adjust RSS from the weighted model to the equivalent for a full regression
+      // on all the data (not the means).
+      // For a collection yi sum of squares to a point x:
+      // sum (yi - x)^2 = sum (yi - u)^2 + sum (x - u)^2 * n
+      // x = the point
+      // u = mean of yi
+      // n = number of yi
+      // Currently RSS is sum ( (x - u)^2 * n ) where:
+      // x is the model value
+      // u is the MSD
+      // n is the number of MSD observations
+      // Thus we adjust using the sum (yi - u)^2 for each MSD.
+
+      final double denom = (ssy + rss2) / denominatorDegreesOfFreedom;
       // Note: If ss2 = 0 then f-statistic is +infinity and the cumulative probability is NaN
       // and the p-value will be accepted
       final double fStatistic = MathUtils.div0(num, denom);
