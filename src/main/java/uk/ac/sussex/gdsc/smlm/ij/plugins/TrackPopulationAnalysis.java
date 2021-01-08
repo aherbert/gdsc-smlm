@@ -729,13 +729,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       msdFitter.setData(x, y);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
+      final SumOfSquaredDeviations[] msds = new SumOfSquaredDeviations[t.length];
 
       // For the selected anomalous exponent data point:
       final IntConsumer action = frame -> {
         // Extract the jump distances
         // Fit with regression, Brownian and FBM models
         try {
-          msdFitter.fit(frame - 1);
+          msdFitter.fit(frame - 1, msds);
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
             ImageJUtils.log("Failed to fit anomalous exponent: " + ex.getMessage());
@@ -754,7 +755,10 @@ public class TrackPopulationAnalysis implements PlugIn {
                 MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
                 MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
 
-        plot.addPoints(t, msdFitter.s, Plot.CROSS);
+        // Add error bars
+        final double[] error = Arrays.stream(msds)
+            .mapToDouble(ss -> ss.getStandardDeviation() / Math.sqrt(ss.getN())).toArray();
+        plot.addPoints(t, msdFitter.s, error, Plot.CROSS);
         plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
         plot.setColor(Color.BLUE);
         plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
@@ -803,7 +807,10 @@ public class TrackPopulationAnalysis implements PlugIn {
           .setLimits(new double[] {0, 360 - binWidth}).setMinBinWidth(binWidth)
           // This is a higher number than 360/binWidth to force use of the bin width
           .setNumberOfBins((int) (2 * 360 / binWidth));
-      angleMap.forEachEntry((comp, angles) -> {
+      int[] comps = angleMap.keys();
+      Arrays.sort(comps);
+      for (int comp : comps) {
+        final TDoubleArrayList angles = angleMap.get(comp);
         angles.transformValues(d -> d * 360);
         // @formatter:off
         final HistogramPlot plot = builder.setTitle(String.format("Component %d", comp))
@@ -823,8 +830,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         plot.getPlot().addLabel(0, 0,
             "Asymmetry Coefficient = " + MathUtils.rounded(asymmetryCoefficient));
         plot.getPlot().updateImage();
-        return true;
-      });
+      }
       wo.tile();
     }
 
@@ -922,7 +928,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       final WindowOrganiser wo = new WindowOrganiser();
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
-      msdMap.forEachEntry((comp, msds) -> {
+      int[] comps = msdMap.keys();
+      Arrays.sort(comps);
+      for (int comp : comps) {
+        final SumOfSquaredDeviations[] msds = msdMap.get(comp);
         // Do fitting
         try {
           msdFitter.fit(msds);
@@ -931,7 +940,7 @@ public class TrackPopulationAnalysis implements PlugIn {
             ImageJUtils.log("Failed to fit anomalous exponent for component %d: ", comp,
                 ex.getMessage());
           }
-          return true;
+          return;
         }
 
         // Show the result
@@ -948,21 +957,24 @@ public class TrackPopulationAnalysis implements PlugIn {
         // This is the total number of data points minus the 3 fit parameters
         final int denominatorDegreesOfFreedom =
             (int) (Arrays.stream(msds).mapToLong(SumOfSquaredDeviations::getN).sum() - 3);
-        plot.addLabel(0, 0, String.format(
-            "Tracks=%d, N=%d, DF=%d. Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
-            numberOfTracks, numberOfWindows, denominatorDegreesOfFreedom,
-            MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
-            MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
-            MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
+        plot.addLabel(0, 0,
+            String.format(
+                "Sub-tracks=%d, N=%d, DF=%d. Brownian D=%s, s=%s : "
+                    + "FBM D=%s, s=%s, alpha=%s (p-value=%s)",
+                numberOfTracks, numberOfWindows, denominatorDegreesOfFreedom,
+                MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
+                MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
+                MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
 
-        plot.addPoints(t, msdFitter.s, Plot.CROSS);
+        // Add error bars
+        final double[] error = Arrays.stream(msds)
+            .mapToDouble(ss -> ss.getStandardDeviation() / Math.sqrt(ss.getN())).toArray();
+        plot.addPoints(t, msdFitter.s, error, Plot.CROSS);
         plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
         plot.setColor(Color.BLUE);
         plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
         ImageJUtils.display(title, plot, wo);
-
-        return true;
-      });
+      }
       wo.tile();
     }
 
@@ -1850,7 +1862,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         // 1. Anomalous exponent.
         msdFitter.setData(x, y);
         try {
-          msdFitter.fit(k);
+          msdFitter.fit(k, null);
           int fitIndex = msdFitter.positiveSlope ? 0 : 2;
 
           // If better then this is anomalous diffusion
@@ -2356,8 +2368,9 @@ public class TrackPopulationAnalysis implements PlugIn {
      * <p>Fitting exceptions are thrown.
      *
      * @param k the k
+     * @param msds the msds (can be null)
      */
-    void fit(int k) {
+    void fit(int k, SumOfSquaredDeviations[] msds) {
       // First point in window = k
       // Last point in window = k + w - 1 = k + wm1
       final int end = k + wm1;
@@ -2380,6 +2393,9 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
         s[m - 1] = msd.getMean();
         ssy += msd.getSumOfSquaredDeviations();
+        if (msds != null) {
+          msds[m - 1] = msd;
+        }
       }
 
       fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
