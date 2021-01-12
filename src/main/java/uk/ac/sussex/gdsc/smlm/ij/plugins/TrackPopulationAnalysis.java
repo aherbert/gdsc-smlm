@@ -62,6 +62,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -193,6 +194,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean[] showFeaturePlot;
     double nmPerPixel;
     int minDisplaySize;
+    boolean showMsdOverT;
 
     Settings() {
       // Set defaults
@@ -238,6 +240,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.showFeaturePlot = source.showFeaturePlot.clone();
       this.nmPerPixel = source.nmPerPixel;
       this.minDisplaySize = source.minDisplaySize;
+      this.showMsdOverT = source.showMsdOverT;
     }
 
     Settings copy() {
@@ -759,10 +762,29 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Add error bars
         final double[] error = Arrays.stream(msds)
             .mapToDouble(ss -> ss.getStandardDeviation() / Math.sqrt(ss.getN())).toArray();
-        plot.addPoints(t, msdFitter.s, error, Plot.CROSS);
-        plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
+
+        // Convert the plot y axis by optionally dividing by the time and plot on a log scale.
+        UnaryOperator<double[]> converter;
+        if (settings.showMsdOverT) {
+          plot.setLogScaleX();
+          plot.setLogScaleY();
+          plot.setXYLabels("time (s)", "MSD/t (um^2/s)");
+          converter = yy -> {
+            for (int i = 0; i < yy.length; i++) {
+              yy[i] /= t[i];
+            }
+            return yy;
+          };
+        } else {
+          converter = UnaryOperator.identity();
+        }
+
+        plot.addPoints(t, converter.apply(msdFitter.s), converter.apply(error), Plot.CROSS);
+        plot.addPoints(t, converter.apply(msdFitter.model2.value(p2).getFirst().toArray()),
+            Plot.LINE);
         plot.setColor(Color.BLUE);
-        plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
+        plot.addPoints(t, converter.apply(msdFitter.model1.value(p1).getFirst().toArray()),
+            Plot.LINE);
         // plot.setColor(Color.RED);
         // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
         // plot.addPoints(t, yy, Plot.CIRCLE);
@@ -775,7 +797,9 @@ public class TrackPopulationAnalysis implements PlugIn {
           new NonBlockingExtendedGenericDialog(TITLE + " Anomalous Exponent View");
       gd.addMessage("Track " + trackData.id + " Anomalous Exponent View");
       gd.addSlider("Data window", 1, trackData.data.length, 1);
+      gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
       gd.addDialogListener((egd, e) -> {
+        settings.showMsdOverT = egd.getNextBoolean();
         // Read the frame
         final int frame = (int) egd.getNextNumber();
         // Show the data point
@@ -808,9 +832,9 @@ public class TrackPopulationAnalysis implements PlugIn {
           .setLimits(new double[] {0, 360 - binWidth}).setMinBinWidth(binWidth)
           // This is a higher number than 360/binWidth to force use of the bin width
           .setNumberOfBins((int) (2 * 360 / binWidth));
-      int[] comps = angleMap.keys();
+      final int[] comps = angleMap.keys();
       Arrays.sort(comps);
-      for (int comp : comps) {
+      for (final int comp : comps) {
         final TDoubleArrayList angles = angleMap.get(comp);
         angles.transformValues(d -> d * 360);
         // @formatter:off
@@ -925,13 +949,23 @@ public class TrackPopulationAnalysis implements PlugIn {
       if (data.isEmpty()) {
         return;
       }
+
+      // Configure options
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return;
+      }
+      settings.showMsdOverT = gd.getNextBoolean();
+
       final TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap = getMsdMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
-      int[] comps = msdMap.keys();
+      final int[] comps = msdMap.keys();
       Arrays.sort(comps);
-      for (int comp : comps) {
+      for (final int comp : comps) {
         final SumOfSquaredDeviations[] msds = msdMap.get(comp);
         // Do fitting
         try {
@@ -970,10 +1004,29 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Add error bars
         final double[] error = Arrays.stream(msds)
             .mapToDouble(ss -> ss.getStandardDeviation() / Math.sqrt(ss.getN())).toArray();
-        plot.addPoints(t, msdFitter.s, error, Plot.CROSS);
-        plot.addPoints(t, msdFitter.model2.value(p2).getFirst().toArray(), Plot.LINE);
+
+        // Convert the plot y axis by optionally dividing by the time and plot on a log scale.
+        UnaryOperator<double[]> converter;
+        if (settings.showMsdOverT) {
+          plot.setLogScaleX();
+          plot.setLogScaleY();
+          plot.setXYLabels("time (s)", "MSD/t (um^2/s)");
+          converter = yy -> {
+            for (int i = 0; i < yy.length; i++) {
+              yy[i] /= t[i];
+            }
+            return yy;
+          };
+        } else {
+          converter = UnaryOperator.identity();
+        }
+
+        plot.addPoints(t, converter.apply(msdFitter.s), converter.apply(error), Plot.CROSS);
+        plot.addPoints(t, converter.apply(msdFitter.model2.value(p2).getFirst().toArray()),
+            Plot.LINE);
         plot.setColor(Color.BLUE);
-        plot.addPoints(t, msdFitter.model1.value(p1).getFirst().toArray(), Plot.LINE);
+        plot.addPoints(t, converter.apply(msdFitter.model1.value(p1).getFirst().toArray()),
+            Plot.LINE);
         ImageJUtils.display(title, plot, wo);
       }
       wo.tile();
@@ -2386,7 +2439,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       double ssy = 0;
       for (int m = 1; m <= wm1; m++) {
         // Use intermediate points to compute an average
-        SumOfSquaredDeviations msd = new SumOfSquaredDeviations();
+        final SumOfSquaredDeviations msd = new SumOfSquaredDeviations();
         final double t = m * deltaT;
         for (int i = end - m; i >= k; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
