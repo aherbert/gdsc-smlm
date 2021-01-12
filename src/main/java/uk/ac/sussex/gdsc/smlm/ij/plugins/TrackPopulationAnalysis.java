@@ -206,6 +206,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       minWeight = 0.1;
       maxAlpha = 2;
       significance = 0.05;
+      ignoreAlpha = true;
       lutIndex = LutColour.RED_BLUE.ordinal();
       showTrackImage = true;
       showTrackProbabilityPlot = true;
