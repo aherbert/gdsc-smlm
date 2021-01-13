@@ -1575,6 +1575,13 @@ Fitting of the jump distances for each component can be performed using ``Analys
 
 Note: The population model contains an average of the anomalous diffusion coefficients for each window in the population. These individual values are produced from fitting a low number of jumps, the windows may contain localisations in different component classes (e.g. a moving molecule transitioning to a fixed molecule) which invalidates the fitted model, and the FBM model may not be significant. In addition averages will use windows that overlap each other therefore using duplicate jumps. Thus average diffusion coefficients may not be comparable to the fit of the entire set of jump distances for each component.
 
+The residence times for the length of time spent in each component can be displayed using ``Analysis > Residence times``. This will create a histogram and observed cumulative distribution function of the residence times. The length of time for the component at the start and end of the track is ignored so that the data only contains lengths with a defined start and end. The data is thus generated only for tracks with at least 2 transitions between component states. The observations are fit assuming an exponential distribution where :math:`T_R` is the mean residence time:
+
+.. math::
+
+    P(t) = \frac{1}{T_R} \exp \left( \frac{-t}{T_R} \right)
+
+The histograms are overlaid with the fitted exponential function. Bootstrapping is used on the data to produce a 95% confidence interval for the mean residence time.
 
 .. index:: ! OPTICS
 

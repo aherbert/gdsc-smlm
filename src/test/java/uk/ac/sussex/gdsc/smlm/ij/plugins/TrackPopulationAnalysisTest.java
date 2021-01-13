@@ -24,18 +24,24 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.BrownianDiffusionFunction;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.ExponentialDataFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.FbmDiffusionFunction;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
+import uk.ac.sussex.gdsc.test.rng.RngUtils;
 
 @SuppressWarnings({"javadoc"})
 class TrackPopulationAnalysisTest {
@@ -163,6 +169,41 @@ class TrackPopulationAnalysisTest {
           TestAssertions.assertArrayTest(dfda1, dfda2, test, "jacobian dfda");
           TestAssertions.assertArrayTest(dfdb1, dfdb2, test, "jacobian dfdb");
         }
+      }
+    }
+  }
+
+  @Test
+  void canComputeExponentialLogLikelihood() {
+    final RandomGenerator rng = new RandomGeneratorAdapter(RngUtils.createWithFixedSeed());
+    final double delta = 1e-6;
+    for (final double mean : new double[] {2, 10}) {
+      // Create exponential data
+      ExponentialDistribution ed = new ExponentialDistribution(rng, mean);
+      final double[] values = ed.sample(1000);
+      // Discretise
+      final double factor = mean / 10;
+      for (int i = 0; i < values.length; i++) {
+        values[i] = Math.round(values[i] / factor) * factor;
+      }
+      // Histogram these
+      final double[][] h = MathUtils.cumulativeHistogram(values, false);
+      final ExponentialDataFunction ef = ExponentialDataFunction.fromCdf(h);
+      // Test with different means
+      for (final double du : new double[] {-0.1, 0, 0.1}) {
+        final double mu = mean + du;
+        ed = new ExponentialDistribution(rng, mu);
+        double ll = 0;
+        for (final double x : values) {
+          ll += ed.logDensity(x);
+        }
+        final double ll2 = ef.value(mu);
+        Assertions.assertEquals(ll, ll2, 1e-10, "Log likelihood");
+        // Check for gradient
+        final double ll2a = ef.value(mu + delta);
+        final double ll2b = ef.value(mu - delta);
+        final double gradient = (ll2a - ll2b) / (2 * delta);
+        Assertions.assertEquals(gradient, ef.gradient(mu), Math.abs(gradient) * 1e-5, "Gradient");
       }
     }
   }

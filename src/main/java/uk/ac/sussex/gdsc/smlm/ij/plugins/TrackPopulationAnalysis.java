@@ -58,11 +58,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -97,6 +99,7 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
@@ -486,6 +489,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private JMenuItem analysisAnomalousExponentView;
     private JMenuItem analysisJumpAngles;
     private JMenuItem analysisFitJumpDistances;
+    private JMenuItem analysisResidenceTime;
     private JMenuItem optionsTrackData;
     private Consumer<List<TrackData>> selectedAction;
 
@@ -561,6 +565,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       menu.add(analysisJumpAngles = add("Jump angles", KeyEvent.VK_J, "ctrl pressed J"));
       menu.add(
           analysisFitJumpDistances = add("Fit jump distances", KeyEvent.VK_D, "ctrl pressed D"));
+      menu.add(analysisResidenceTime = add("Residence Time", KeyEvent.VK_R, "ctrl pressed R"));
       return menu;
     }
 
@@ -592,6 +597,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         action = this::doAnalysisJumpAngles;
       } else if (src == analysisFitJumpDistances) {
         action = this::doAnalysisFitJumpDistances;
+      } else if (src == analysisResidenceTime) {
+        action = this::doAnalysisResidenceTime;
       }
       // This will block the executing thread which may be the event dispatch thread.
       // Run on a new thread so events are still processed.
@@ -1100,6 +1107,255 @@ public class TrackPopulationAnalysis implements PlugIn {
           m1.add(d);
         }
       }
+    }
+
+    /**
+     * For each component extract a histogram of the length of time a molecule is in each state.
+     *
+     * <p>Fit the combined MSD curve with a Brownian and FBM model.
+     */
+    private void doAnalysisResidenceTime() {
+      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
+      final List<TrackData> data = model.data;
+      if (data.isEmpty()) {
+        return;
+      }
+
+      final TIntObjectHashMap<TIntArrayList> timeMap = getTimeMap(data);
+      final WindowOrganiser wo = new WindowOrganiser();
+      final int[] comps = timeMap.keys();
+      Arrays.sort(comps);
+      final HistogramPlotBuilder builder =
+          new HistogramPlotBuilder("title").setName("Residence Time").setMinBinWidth(deltaT);
+      final UniformRandomProvider rng = UniformRandomProviders.create();
+      for (final int comp : comps) {
+        final int[] times = timeMap.get(comp).toArray();
+        final int total = times.length;
+        final double[] dtimes = Arrays.stream(times).mapToDouble(t -> t * deltaT).toArray();
+        // Build histogram
+        final String compName = String.format("Component %d", comp);
+        final HistogramPlot plot =
+            builder.setTitle(compName).setData(DoubleData.wrap(dtimes)).build();
+
+        // Cumulative histogram
+        final double[][] h = MathUtils.cumulativeHistogram(dtimes, false);
+        final ExponentialDataFunction ef = ExponentialDataFunction.fromCdf(h);
+
+        final double mean = ef.sumx / ef.nx;
+
+        // Fit the residence time to: y = A exp(-t/Td)
+        // with A = scaling factor, t = time and Td = Dissociation time
+        // Using the histogram as a PMF approximation is error prone. Instead use
+        // maximum likelihood fitting of the observations to an exponential.
+        // Note:
+        // Actual iterative fitting is not required as the log-likelihood gradient is zero
+        // when the mean (t) is equal to sum(x) / n. See ExponentialDataFunction#gradient(double).
+        // TODO: Try an alternative to maximum likelihood that optimises a different
+        // goodness-of-fit function.
+        // try {
+        // final BrentSolver bs = new BrentSolver(1e-9, 1e-20);
+        // final BracketFinder bf = new BracketFinder();
+        // final int maxEval = 3000;
+        // final double initialMean = mean;
+        // bf.search(ef::value, GoalType.MAXIMIZE, initialMean * 0.5, initialMean * 2);
+        // mean = bs.solve(maxEval, ef::gradient, bf.getLo(), bf.getHi(), bf.getMid());
+        // } catch (TooManyEvaluationsException | NoBracketingException ex) {
+        // ImageJUtils.log("Failed to fit exponential distribution: " + ex.getMessage());
+        // }
+
+        plot.show(wo);
+
+        // Plot CDF
+        SimpleArrayUtils.multiply(h[1], 1.0 / total);
+        final String title = compName + " Cumulative Residence Time";
+        final Plot plot2 = new Plot(title, "Residence Time (s)", "CDF");
+        plot2.addPoints(h[0], h[1], Plot.BAR);
+
+        if (mean != 0) {
+          // Bootstrap the data to get an estimate:
+          // 1. arrange all values in an array (i.e. times)
+          // 2. sample the same number of values from the array with replacement
+          // 3. compute parameters of exponential (i.e. the mean)
+          // 4. repeat n times and compute confidence interval from the mean and SD of parameter
+          final Statistics ss = new Statistics();
+          for (int i = 0; i < 100; i++) {
+            long sum = 0;
+            for (int n = 0; n < total; n++) {
+              sum += times[rng.nextInt(total)];
+            }
+            // maximum likelihood estimate of the mean
+            ss.add(deltaT * sum / total);
+          }
+          final double ci = ss.getConfidenceInterval(0.95);
+
+          final String label =
+              String.format("Td = %s (n = %d; %s +/- %s (95%% ci))", MathUtils.rounded(mean), total,
+                  MathUtils.rounded(ss.getMean()), MathUtils.rounded(ci));
+          plot.getPlot().addLabel(0, 0, label);
+          plot2.addLabel(0, 0, label);
+
+          // Create the exponential CDF
+          final double meanT = mean;
+          final DoubleUnaryOperator cdf = x -> 1 - Math.exp(-x / meanT);
+
+          // Show exponential on histogram:
+          // y = 1/T exp(-x/T)
+          // This must be rescaled by the number of observations. This does not work as the
+          // histogram is a poor representation of the PMF. So instead we use the CDF to compute
+          // the expected number of observations in the range of each bin.
+          final double[] x = plot.getPlotXValues();
+          final double dx2 = (x[1] - x[0]) / 2;
+          double[] y = Arrays.stream(x)
+              .map(xi -> total * (cdf.applyAsDouble(xi + dx2) - cdf.applyAsDouble(xi - dx2)))
+              .toArray();
+          plot.getPlot().setColor(Color.red);
+          plot.getPlot().addPoints(x, y, Plot.LINE);
+          plot.getPlot().updateImage();
+
+          // Show exponential on cumulative histogram
+          // y = 1 - exp(-x/T)
+          final double x0 = h[0][0];
+          final double dxx = (h[0][h[0].length - 1] - x0) / 100;
+          final double[] xx =
+              IntStream.rangeClosed(0, 100).mapToDouble(i -> x0 + i * dxx).toArray();
+          y = Arrays.stream(xx).map(cdf).toArray();
+          plot2.setColor(Color.red);
+          plot2.addPoints(xx, y, Plot.LINE);
+        }
+
+        ImageJUtils.display(title, plot2, wo);
+      }
+      wo.tile();
+    }
+
+    /**
+     * Gets the map containing the residence time in frames for each component.
+     *
+     * <p>Ignore the first and last component in each track, thus only processes lengths with a
+     * defined start and end.
+     *
+     * @param data the data
+     * @return the time map
+     */
+    private static TIntObjectHashMap<TIntArrayList> getTimeMap(List<TrackData> data) {
+      final TIntObjectHashMap<TIntArrayList> timeMap = new TIntObjectHashMap<>();
+      data.forEach(track -> {
+        final int[] component = track.component;
+        int current = component[0];
+        int start = 0;
+        for (int i = 1; i < component.length; i++) {
+          if (current != component[i]) {
+            // Ignore first component as it does not have a defined start point
+            if (start != 0) {
+              addTime(timeMap, current, start, i);
+            }
+            current = component[i];
+            start = i;
+          }
+        }
+        // Ignore last component as it does not have a defined end point
+      });
+
+      return timeMap;
+    }
+
+    /**
+     * Add the residence time in the component to the time map.
+     *
+     * @param timeMap the time map
+     * @param component the component
+     * @param start the start (inclusive)
+     * @param end the end (exclusive)
+     */
+    private static void addTime(TIntObjectHashMap<TIntArrayList> timeMap, int component, int start,
+        int end) {
+      TIntArrayList times = timeMap.get(component);
+      if (times == null) {
+        times = new TIntArrayList();
+        timeMap.put(component, times);
+      }
+      times.add(end - start);
+    }
+  }
+
+  /**
+   * Class use to compute the log likelihood of exponentially distributed data.
+   */
+  @VisibleForTesting
+  static class ExponentialDataFunction {
+    /** The sum of all observations x. */
+    final double sumx;
+    /** The total number of observations. */
+    final int nx;
+
+    /**
+     * Create an instance.
+     *
+     * @param x the x observations
+     * @param count the count of each observation
+     */
+    ExponentialDataFunction(double[] x, int[] count) {
+      // y = 1/T exp(-x/T)
+      // log(y) = -x/T - log(T)
+      // Precompute sum of x and the total count
+      double sumx = 0;
+      int n = 0;
+      for (int i = 0; i < x.length; i++) {
+        sumx += x[i] * count[i];
+        n += count[i];
+      }
+      this.sumx = sumx;
+      this.nx = n;
+    }
+
+    /**
+     * Create from a cumulative distribution function. The CDF must not be normalised.
+     *
+     * @param h the CDF ([x, count])
+     * @return the exponential function
+     * @see MathUtils#cumulativeHistogram(double[], boolean)
+     */
+    static ExponentialDataFunction fromCdf(double[][] h) {
+      final int[] counts = new int[h[1].length];
+      // Convert cumulative frequency to counts
+      int previous = 0;
+      for (int i = 0; i < counts.length; i++) {
+        final int value = (int) h[1][i];
+        counts[i] = value - previous;
+        previous = value;
+      }
+      return new ExponentialDataFunction(h[0], counts);
+    }
+
+    /**
+     * Compute the log-likelihood for the given mean.
+     *
+     * @param t the mean
+     * @return the log-likelihood
+     */
+    double value(double t) {
+      // y = 1/T exp(-x/T)
+      // log(y) = -x/T - log(T)
+      // This can be partially precomputed
+      return -sumx / t - nx * Math.log(t);
+    }
+
+    /**
+     * Compute the first derivative (gradient) of the log-likelihood for the given mean.
+     *
+     * @param t the mean
+     * @return the gradient of the log-likelihood
+     */
+    double gradient(double t) {
+      // Note:
+      // The gradient will be zero when t is the mean: sum(x) / n
+      // sumx / (t * t) - n / t
+      // = sumx / (sumx^2 / n^2) - n / (sumx / n)
+      // = sumx * n^2 / sumx^2 - n^2 / sumx
+      // = n^2 / sumx - n^2 / sumx
+      // = 0
+
+      return sumx / (t * t) - nx / t;
     }
   }
 
@@ -1890,6 +2146,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Statistics statsY = new Statistics();
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
 
+    // final StoredDataStatistics statsAlpha = new StoredDataStatistics(tracks.size());
+
     // Process each track
     final TIntArrayList lengths = new TIntArrayList(tracks.size());
     for (final Trace track : tracks) {
@@ -1918,6 +2176,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         msdFitter.setData(x, y);
         try {
           msdFitter.fit(k, null);
+          // statsAlpha.add(msdFitter.alpha);
           int fitIndex = msdFitter.positiveSlope ? 0 : 2;
 
           // If better then this is anomalous diffusion
@@ -1928,28 +2187,32 @@ public class TrackPopulationAnalysis implements PlugIn {
           }
           fitResult[fitIndex]++;
 
+          // values[0] = msdFitter.alpha;
+
           // // Debug
           // if (
-          // pValue < 0.2
-          // // alpha > 0.0 && alpha < 0.2
-          // //slope < 0
+          // // msdFitter.pValue < 0.2
+          // msdFitter.pValue < 0.2 && values[0] < 0
+          // // !msdFitter.positiveSlope
           // ) {
-          // final RealVector p = lvmSolution2.getPoint();
+          // final RealVector p = msdFitter.lvmSolution2.getPoint();
           // final String title = "anomalous exponent";
           // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
-          // final double[] t = SimpleArrayUtils.newArray(s.length, deltaT, deltaT);
-          // plot.addLabel(0, 0, lvmSolution2.getPoint().toString() + " p=" + pValue + ". "
-          // + lvmSolution1.getPoint().toString());
-          // plot.addPoints(t, s, Plot.CROSS);
-          // plot.addPoints(t, model2.value(p).getFirst().toArray(), Plot.LINE);
+          // final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
+          // plot.addLabel(0, 0, msdFitter.lvmSolution2.getPoint().toString() + " p="
+          // + msdFitter.pValue + ". " + msdFitter.lvmSolution1.getPoint().toString());
+          // plot.addPoints(t, msdFitter.s, Plot.CROSS);
+          // plot.addPoints(t, msdFitter.model2.value(p).getFirst().toArray(), Plot.LINE);
           // plot.setColor(Color.BLUE);
-          // plot.addPoints(t, model1.value(lvmSolution1.getPoint()).getFirst().toArray(),
+          // plot.addPoints(t,
+          // msdFitter.model1.value(msdFitter.lvmSolution1.getPoint()).getFirst().toArray(),
           // Plot.LINE);
           // plot.setColor(Color.RED);
-          // final double[] yy = Arrays.stream(t).map(reg::predict).toArray();
+          // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
           // plot.addPoints(t, yy, Plot.CIRCLE);
+          // System.out.printf("%s : %s", msdFitter.lvmSolution2.getPoint(), values[0]);
           // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
-          // System.out.println(lvmSolution2.getPoint());
+          // System.out.println();
           // }
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
@@ -2007,6 +2270,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     ImageJUtils.log("Insignificant anomalous exponents: %d / %d", fitResult[1] + fitResult[3],
         data.size());
+    // System.out.println(statsAlpha.getStatistics().toString());
     return Pair.create(lengths.toArray(), data.toArray(new double[0][0]));
   }
 
@@ -2276,7 +2540,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static class MsdFitter {
     // CHECKSTYLE.OFF: MemberName
-    double deltaT;
+    final double deltaT;
     final int window;
     final int wm1;
     final double[] s;
@@ -2308,6 +2572,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     Optimum lvmSolution2;
     double pValue;
     // CHECKSTYLE.ON: MemberName
+
+    // double alpha;
 
     /**
      * Create an instance.
@@ -2435,16 +2701,25 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Compute the MSD for all distances from m=0, to m=window-1
       // For the MSD fit compute the gradient and intercept using a linear regression.
       // (This could exploit pre-computation of the regression x components.)
+
+      // Do a regression of log(MSD/t) vs log(t):
+      // MSD = A t^alpha
+      // log(MSD/t) = log(A) + (alpha - 1) log(t)
+      // The slope is alpha - 1
+      // SimpleRegression reg2 = new SimpleRegression();
+
       reg.clear();
       double ssy = 0;
       for (int m = 1; m <= wm1; m++) {
         // Use intermediate points to compute an average
         final SumOfSquaredDeviations msd = new SumOfSquaredDeviations();
         final double t = m * deltaT;
+        // double logT = Math.log(t);
         for (int i = end - m; i >= k; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
           msd.add(d);
           reg.addData(t, d);
+          // reg2.addData(logT, Math.log(d / t));
         }
         s[m - 1] = msd.getMean();
         ssy += msd.getSumOfSquaredDeviations();
@@ -2452,6 +2727,8 @@ public class TrackPopulationAnalysis implements PlugIn {
           msds[m - 1] = msd;
         }
       }
+
+      // alpha = reg2.getSlope() + 1;
 
       fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
     }
@@ -2526,7 +2803,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // F = ((rss1 - rss2) / (p2 - p1)) / (rss2 / (n - p2))
       final double num = rss1 - rss2;
 
-      // TODO - Adjust RSS from the weighted model to the equivalent for a full regression
+      // Adjust RSS from the weighted model to the equivalent for a full regression
       // on all the data (not the means).
       // For a collection yi sum of squares to a point x:
       // sum (yi - x)^2 = sum (yi - u)^2 + sum (x - u)^2 * n
