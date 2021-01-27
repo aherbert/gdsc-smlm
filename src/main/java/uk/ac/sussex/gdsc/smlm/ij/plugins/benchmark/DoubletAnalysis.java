@@ -541,7 +541,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
     final int fitting;
     final FitConfiguration fitConfig;
     final MaximaSpotFilter spotFilter;
@@ -575,7 +575,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      * @param ticker the ticker
      */
     Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates, FitEngineConfiguration config,
+        TIntObjectHashMap<List<Coordinate>> actualCoordinates, FitEngineConfiguration config,
         Overlay overlay, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
@@ -1924,7 +1924,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final ImageStack stack = imp.getImageStack();
 
     // Get the coordinates per frame
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates =
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates =
         ResultsMatchCalculator.getCoordinates(results, false);
 
     final long[] sumCount = new long[1];

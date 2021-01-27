@@ -1388,7 +1388,7 @@ public class BenchmarkFilterAnalysis
   private class IterationConvergenceChecker {
     InterruptChecker scoreChecker;
     InterruptConvergenceChecker filterChecker;
-    TIntObjectHashMap<ArrayList<Coordinate>> previousResults;
+    TIntObjectHashMap<List<Coordinate>> previousResults;
     boolean canContinue = true;
 
     public IterationConvergenceChecker(FilterScore current) {
@@ -1403,7 +1403,7 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    private TIntObjectHashMap<ArrayList<Coordinate>> getResults(FilterScore current) {
+    private TIntObjectHashMap<List<Coordinate>> getResults(FilterScore current) {
       return ResultsMatchCalculator
           .getCoordinates(createResults(null, (DirectFilter) current.filter, false));
     }
@@ -1442,7 +1442,7 @@ public class BenchmarkFilterAnalysis
       }
 
       if (settings.iterationCompareResults) {
-        final TIntObjectHashMap<ArrayList<Coordinate>> currentResults = getResults(current);
+        final TIntObjectHashMap<List<Coordinate>> currentResults = getResults(current);
         final MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults,
             previousResults, settings.iterationCompareDistance);
         if (r.getJaccard() == 1) {

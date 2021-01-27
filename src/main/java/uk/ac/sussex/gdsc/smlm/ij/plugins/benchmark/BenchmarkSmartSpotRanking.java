@@ -100,7 +100,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>>> coordinateCache =
+      Pair<Integer, TIntObjectHashMap<List<Coordinate>>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
@@ -325,7 +325,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
     final TIntObjectHashMap<FilterCandidates> filterCandidates;
     final TIntObjectHashMap<RankResults> results;
     final int fitting;
@@ -336,7 +336,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     double[] region;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+        TIntObjectHashMap<List<Coordinate>> actualCoordinates,
         TIntObjectHashMap<FilterCandidates> filterCandidates, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
@@ -718,9 +718,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    final Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+    final Pair<Integer, TIntObjectHashMap<List<Coordinate>>> coords = coordinateCache.get();
 
-    TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    TIntObjectHashMap<List<Coordinate>> actualCoordinates;
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult

@@ -166,7 +166,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>>> coordinateCache =
+      Pair<Integer, TIntObjectHashMap<List<Coordinate>>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
@@ -800,7 +800,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final FitWorker fitWorker;
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
     final TIntObjectHashMap<FilterCandidates> filterCandidates;
     final TIntObjectHashMap<FilterCandidates> results;
     final Rectangle bounds;
@@ -811,7 +811,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     List<PointPair> matches = new ArrayList<>();
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
+        TIntObjectHashMap<List<Coordinate>> actualCoordinates,
         TIntObjectHashMap<FilterCandidates> filterCandidates, PeakResults peakResults,
         Ticker ticker) {
       this.jobs = jobs;
@@ -1412,7 +1412,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private BenchmarkSpotFitResult runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    Pair<Integer, TIntObjectHashMap<ArrayList<Coordinate>>> coords = coordinateCache.get();
+    Pair<Integer, TIntObjectHashMap<List<Coordinate>>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
@@ -1424,7 +1424,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       refresh = true;
     }
 
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = coords.getValue();
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates = coords.getValue();
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
@@ -1728,7 +1728,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   private void summariseResults(BenchmarkSpotFitResult spotFitResults, long runTime,
       final PreprocessedPeakResult[] preprocessedPeakResults, int uniqueIdCount,
-      CandidateData candidateData, TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates) {
+      CandidateData candidateData, TIntObjectHashMap<List<Coordinate>> actualCoordinates) {
 
     // Summarise the fitting results. N fits, N failures.
     // Optimal match statistics if filtering is perfect (since fitting is not perfect).
@@ -1856,7 +1856,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final int frame = frames[i];
       final MultiPathFitResult[] multiPathFitResults = candidates[i].fitResult;
       final int totalCandidates = candidates[i].spots.length;
-      final ArrayList<Coordinate> list = actualCoordinates.get(frame);
+      final List<Coordinate> list = actualCoordinates.get(frame);
       final int nActual = (list == null) ? 0 : list.size();
       multiPathResults
           .add(new MultiPathFitResults(frame, multiPathFitResults, totalCandidates, nActual));

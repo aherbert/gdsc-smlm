@@ -669,12 +669,12 @@ public class BenchmarkSpotFilter implements PlugIn {
   private class OverlapWorker implements Runnable {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
-    final TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates;
+    final TIntObjectHashMap<List<Coordinate>> originalCoordinates;
     final TIntObjectHashMap<PsfSpot[]> coordinates;
     final Ticker overlapTicker;
 
     public OverlapWorker(BlockingQueue<Integer> jobs,
-        TIntObjectHashMap<ArrayList<Coordinate>> originalCoordinates, Ticker overlapTicker) {
+        TIntObjectHashMap<List<Coordinate>> originalCoordinates, Ticker overlapTicker) {
       this.jobs = jobs;
       this.originalCoordinates = originalCoordinates;
       this.coordinates = new TIntObjectHashMap<>();
@@ -798,8 +798,8 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param time the time
      * @return The array list
      */
-    public PsfSpot[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords, int time) {
-      final ArrayList<Coordinate> list1 = coords.get(time);
+    public PsfSpot[] getCoordinates(TIntObjectHashMap<List<Coordinate>> coords, int time) {
+      final List<Coordinate> list1 = coords.get(time);
       if (list1 != null) {
         final PsfSpot[] list2 = new PsfSpot[list1.size()];
         int index = 0;
@@ -2029,7 +2029,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     if (coords.getKey() != simulationParameters.id) {
       // Always use float coordinates.
       // The Worker adds a pixel offset for the spot coordinates.
-      final TIntObjectHashMap<ArrayList<Coordinate>> coordinates =
+      final TIntObjectHashMap<List<Coordinate>> coordinates =
           ResultsMatchCalculator.getCoordinates(results, false);
 
       // Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude

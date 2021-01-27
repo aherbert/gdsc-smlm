@@ -457,16 +457,16 @@ public class ResultsMatchCalculator implements PlugIn {
     final double maxDistance = settings.distanceThreshold + settings.increments * settings.delta;
 
     // Divide the results into time points
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates =
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates =
         getCoordinates(results1, settings.coordinateMethod1);
-    final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates =
+    final TIntObjectHashMap<List<Coordinate>> predictedCoordinates =
         getCoordinates(results2, settings.coordinateMethod2);
 
     int n1 = 0;
     int n2 = 0;
 
     // Process each time point
-    for (final Integer t : getTimepoints(actualCoordinates, predictedCoordinates)) {
+    for (final int t : getTimepoints(actualCoordinates, predictedCoordinates)) {
       final Coordinate[] actual = getCoordinates(actualCoordinates, t);
       final Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
 
@@ -716,7 +716,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param results the results
    * @return the coordinates
    */
-  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results) {
+  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results) {
     return getCoordinates(results, CoordinateMethod.ALL, false);
   }
 
@@ -727,7 +727,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param coordinateMethod the coordinate method
    * @return the coordinates
    */
-  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       CoordinateMethod coordinateMethod) {
     return getCoordinates(results, coordinateMethod, false);
   }
@@ -740,7 +740,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param integerCoordinates True if the values should be rounded down to integers
    * @return the coordinates
    */
-  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       final boolean integerCoordinates) {
     return getCoordinates(results, CoordinateMethod.ALL, integerCoordinates);
   }
@@ -753,9 +753,9 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param integerCoordinates True if the values should be rounded down to integers
    * @return the coordinates
    */
-  public static TIntObjectHashMap<ArrayList<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       CoordinateMethod coordinateMethod, final boolean integerCoordinates) {
-    final TIntObjectHashMap<ArrayList<Coordinate>> coords = new TIntObjectHashMap<>();
+    final TIntObjectHashMap<List<Coordinate>> coords = new TIntObjectHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -808,9 +808,9 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param time the time
    * @return the coordinates
    */
-  public static Coordinate[] getCoordinates(TIntObjectHashMap<ArrayList<Coordinate>> coords,
+  public static Coordinate[] getCoordinates(TIntObjectHashMap<List<Coordinate>> coords,
       int time) {
-    final ArrayList<Coordinate> tmp = coords.get(time);
+    final List<Coordinate> tmp = coords.get(time);
     if (tmp != null) {
       return tmp.toArray(EMPTY_COORD_ARRAY);
     }
@@ -838,8 +838,8 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param predictedCoordinates the predicted coordinates
    * @return a list of time points
    */
-  private static int[] getTimepoints(TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
-      TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates) {
+  private static int[] getTimepoints(TIntObjectHashMap<List<Coordinate>> actualCoordinates,
+      TIntObjectHashMap<List<Coordinate>> predictedCoordinates) {
 
     // Do inline to avoid materialising the keys arrays
     final TIntHashSet hashset =
@@ -1101,8 +1101,8 @@ public class ResultsMatchCalculator implements PlugIn {
   public static MatchResult compareCoordinates(MemoryPeakResults results1,
       MemoryPeakResults results2, double distance) {
     // Divide the results into time points
-    final TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates = getCoordinates(results1);
-    final TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates = getCoordinates(results2);
+    final TIntObjectHashMap<List<Coordinate>> actualCoordinates = getCoordinates(results1);
+    final TIntObjectHashMap<List<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
     return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
   }
@@ -1116,14 +1116,14 @@ public class ResultsMatchCalculator implements PlugIn {
    * @return the match result
    */
   public static MatchResult compareCoordinates(
-      TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates,
-      TIntObjectHashMap<ArrayList<Coordinate>> predictedCoordinates, double distance) {
+      TIntObjectHashMap<List<Coordinate>> actualCoordinates,
+      TIntObjectHashMap<List<Coordinate>> predictedCoordinates, double distance) {
     int tp = 0;
     int fp = 0;
     int fn = 0;
 
     // Process each time point
-    for (final Integer t : getTimepoints(actualCoordinates, predictedCoordinates)) {
+    for (final int t : getTimepoints(actualCoordinates, predictedCoordinates)) {
       final Coordinate[] actual = getCoordinates(actualCoordinates, t);
       final Coordinate[] predicted = getCoordinates(predictedCoordinates, t);
 
