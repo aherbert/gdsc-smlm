@@ -48,8 +48,8 @@ import java.awt.Rectangle;
 import java.awt.Scrollbar;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -108,7 +108,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private ImagePlus imp;
   private boolean preview;
   private Label label;
-  private TIntObjectHashMap<ArrayList<Coordinate>> actualCoordinates;
+  private TIntObjectHashMap<List<Coordinate>> actualCoordinates;
 
   private int currentSlice;
   private MaximaSpotFilter filter;
