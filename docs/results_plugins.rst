@@ -795,7 +795,7 @@ The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format.
      - The track Id.
 
    * - Time
-     - Frame time (in seconds).
+     - Frame time (in seconds). This is the length of the frame (i.e. exposure time). It will be the same for the entire set of localisations.
 
 The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single matrix named ``tracks`` of `n` rows by 5 columns of type double. It can be loaded in to Matlab using::
 

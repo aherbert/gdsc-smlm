@@ -394,9 +394,6 @@ public class TraceExporter implements PlugIn {
     // 4. track id
     // 5. frame time (s)
 
-    final TypeConverter<TimeUnit> converter = UnitConverterUtils.createConverter(TimeUnit.FRAME,
-        TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
-
     // Count the number of localisations including start/end frames
     final int[] row = new int[1];
     results.forEach((PeakResultProcedure) result -> {
@@ -416,6 +413,10 @@ public class TraceExporter implements PlugIn {
     final int col3 = rows * 3;
     final int col4 = rows * 4;
 
+    // Frame time in seconds. This is not the frame time point converted to seconds
+    // but the exposure duration of the frame.
+    final double frameTime = results.getCalibrationReader().getExposureTime() / 1000;
+
     row[0] = 0;
     results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
       if (result.hasEndFrame()) {
@@ -425,7 +426,7 @@ public class TraceExporter implements PlugIn {
           out.setDouble(index + col1, y);
           out.setDouble(index + col2, t);
           out.setDouble(index + col3, result.getId());
-          out.setDouble(index + col4, converter.convert(t));
+          out.setDouble(index + col4, frameTime);
         }
       } else {
         // Column major index: row + rows * col
@@ -434,7 +435,7 @@ public class TraceExporter implements PlugIn {
         out.setDouble(index + col1, y);
         out.setDouble(index + col2, result.getFrame());
         out.setDouble(index + col3, result.getId());
-        out.setDouble(index + col4, converter.convert(result.getFrame()));
+        out.setDouble(index + col4, frameTime);
       }
     });
 
