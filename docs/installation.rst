@@ -74,6 +74,9 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - protobuf-java-*
      - Google protocol buffers library for readin/writing data.
 
+   * - mfl-core
+     - A library for reading/writing Matlab Mat5 matrix files.
+
    * - xstream
      - A library for reading/writing XML.
 

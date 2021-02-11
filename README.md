@@ -93,13 +93,14 @@ required are:
         commons-rng-core
         commons-rng-simple
         commons-rng-sampling
-        xstream
-        xpp3_min
         ejml
         JTransforms
         JLargeArrays
         protobuf-java
         protobuf-java-util
+        mfl-core
+        xstream
+        xpp3_min
 
 Libraries required if not using the Fiji distribution of ImageJ:
 
