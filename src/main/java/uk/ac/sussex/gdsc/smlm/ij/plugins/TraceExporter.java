@@ -36,14 +36,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.simple.internal.SeedFactory;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
+import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -56,6 +55,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
+import us.hebi.matlab.mat.format.Mat5;
+import us.hebi.matlab.mat.types.MatFile;
+import us.hebi.matlab.mat.types.Matrix;
 
 /**
  * Plugin to export traced datasets.
@@ -78,6 +80,8 @@ public class TraceExporter implements PlugIn {
 
     static {
       formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
+      // We do not want capitalisation of 'ana'
+      formatNames[ExportFormat.ANA_DNA.ordinal()] = ExportFormat.ANA_DNA.getName();
     }
 
     String directory;
@@ -123,9 +127,7 @@ public class TraceExporter implements PlugIn {
   }
 
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On");
-
-    private static final ExportFormat[] values = values();
+    SPOT_ON("Spot-On"), ANA_DNA("anaDDA");
 
     private final String name;
 
@@ -136,17 +138,6 @@ public class TraceExporter implements PlugIn {
     @Override
     public String getName() {
       return name;
-    }
-
-    /**
-     * Get the enum value from the index ordinal.
-     *
-     * @param index the index
-     * @return the export format
-     */
-    @SuppressWarnings("unused")
-    public static ExportFormat fromOrdinal(int index) {
-      return values[MathUtils.clip(0, values.length - 1, index)];
     }
   }
 
@@ -218,7 +209,7 @@ public class TraceExporter implements PlugIn {
       return false;
     }
 
-    List<String> selected = md.getSelectedResults();
+    final List<String> selected = md.getSelectedResults();
     if (selected.isEmpty()) {
       IJ.error(TITLE, "No results were selected");
       return false;
@@ -276,8 +267,8 @@ public class TraceExporter implements PlugIn {
       // Just leave any exceptions to trickle up and kill the plugin
       final TypeConverter<DistanceUnit> c = results.getDistanceConverter(DistanceUnit.NM);
       final double w = c.convertBack(settings.wobble);
-      final SplitMix sm = SplitMix.new64(SeedFactory.createLong());
-      final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(sm);
+      final UniformRandomProvider rng = UniformRandomProviders.create();
+      final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
       final boolean is3D = results.is3D();
       results.forEach((PeakResultProcedure) peakResult -> {
         peakResult.setXPosition((float) (peakResult.getXPosition() + w * gauss.sample()));
@@ -288,8 +279,11 @@ public class TraceExporter implements PlugIn {
       });
     }
 
-    // Only one format at the moment ...
-    exportSpotOn(results);
+    if (settings.format == 1) {
+      exportAnaDda(results);
+    } else {
+      exportSpotOn(results);
+    }
   }
 
   private MemoryPeakResults splitTraces(MemoryPeakResults results) {
@@ -380,9 +374,73 @@ public class TraceExporter implements PlugIn {
             writer.newLine();
           }
         } catch (final IOException ex) {
-          handleException(ex);
+          throw new RuntimeException(ex);
         }
       });
+    } catch (final IOException | RuntimeException ex) {
+      handleException(ex);
+    }
+  }
+
+  @SuppressWarnings("resource")
+  private void exportAnaDda(MemoryPeakResults results) {
+    // anaDDA list of tracked localisations file format:
+    // https://github.com/HohlbeinLab/anaDDA
+    // Matlab matrix file.
+    // 5 columns for n rows of localisations
+    // 1. x coordinate (μm)
+    // 2. y coordinate (μm)
+    // 3. frame number
+    // 4. track id
+    // 5. frame time (s)
+
+    final TypeConverter<TimeUnit> converter = UnitConverterUtils.createConverter(TimeUnit.FRAME,
+        TimeUnit.SECOND, results.getCalibrationReader().getExposureTime());
+
+    // Count the number of localisations including start/end frames
+    final int[] row = new int[1];
+    results.forEach((PeakResultProcedure) result -> {
+      if (result.hasEndFrame()) {
+        row[0] += result.getEndFrame() - result.getFrame() + 1;
+      } else {
+        row[0]++;
+      }
+    });
+
+    // Create the matrix
+    final int rows = row[0];
+    final Matrix out = Mat5.newMatrix(rows, 5);
+    // Set up column offsets
+    final int col1 = rows * 1;
+    final int col2 = rows * 2;
+    final int col3 = rows * 3;
+    final int col4 = rows * 4;
+
+    row[0] = 0;
+    results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
+      if (result.hasEndFrame()) {
+        for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
+          final int index = row[0]++;
+          out.setDouble(index, x);
+          out.setDouble(index + col1, y);
+          out.setDouble(index + col2, t);
+          out.setDouble(index + col3, result.getId());
+          out.setDouble(index + col4, converter.convert(t));
+        }
+      } else {
+        // Column major index: row + rows * col
+        final int index = row[0]++;
+        out.setDouble(index, x);
+        out.setDouble(index + col1, y);
+        out.setDouble(index + col2, result.getFrame());
+        out.setDouble(index + col3, result.getId());
+        out.setDouble(index + col4, converter.convert(result.getFrame()));
+      }
+    });
+
+    try (MatFile matFile = Mat5.newMatFile()) {
+      matFile.addArray("tracks", out);
+      Mat5.writeToFile(matFile, Paths.get(settings.directory, results.getName() + ".mat").toFile());
     } catch (final IOException ex) {
       handleException(ex);
     }

@@ -743,7 +743,10 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
 Available Formats
 ~~~~~~~~~~~~~~~~~
 
-Currently the exporter only supports the `Spot-On CSV file format <https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats>`_. This is a simple CSV format containing the localisation positions in time and space (XY) for each trace. The format has the following columns:
+Spot-On
+^^^^^^^
+
+The `Spot-On CSV file format <https://spoton.berkeley.edu/SPTGUI/docs/latest#input-formats>`_. This is a simple CSV format containing the localisation positions in time and space (XY) for each trace. The format has the following columns:
 
 .. list-table::
    :widths: 20 80
@@ -766,6 +769,42 @@ Currently the exporter only supports the `Spot-On CSV file format <https://spoto
 
    * - Y
      - The y position (in |micro|\ m).
+
+anaDDA Localisations
+^^^^^^^^^^^^^^^^^^^^
+
+The `anaDDA <https://github.com/HohlbeinLab/anaDDA>`_ localisations file format. This is a Matlab matrix file consisting of 5 columns and `n` rows where `n` is the number of localisations. The format has the following columns:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Column
+     - Description
+
+   * - X
+     - The x position (in |micro|\ m).
+
+   * - Y
+     - The y position (in |micro|\ m).
+
+   * - Frame
+     - Frame number.
+
+   * - ID
+     - The track Id.
+
+   * - Time
+     - Frame time (in seconds).
+
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single matrix named ``tracks`` of `n` rows by 5 columns of type double. It can be loaded in to Matlab using::
+
+    load('/path/to/file.mat')
+
+This will create the variable ``tracks`` containing the localisation data. To avoid overwriting any existing variable named ``tracks`` load the data into a named structure (e.g. ``input``) and reference the matrix using::
+
+    input = load('/path/to/file.mat')
+    input.tracks
 
 
 .. index:: Exporting Datasets
