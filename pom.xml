@@ -99,6 +99,7 @@ Software for single molecule localisation microscopy (SMLM)
     <JTransforms.version>3.1</JTransforms.version>
     <protobuf.version>3.6.1</protobuf.version>
     <jsoup.version>1.13.1</jsoup.version>
+    <mfl-core.version>0.5.6</mfl-core.version>
 
     <!-- Other maven plugin versions -->
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
@@ -145,6 +146,11 @@ Software for single molecule localisation microscopy (SMLM)
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java-util</artifactId>
       <version>${protobuf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>us.hebi.matlab.mat</groupId>
+      <artifactId>mfl-core</artifactId>
+      <version>${mfl-core.version}</version>
     </dependency>
 
     <!-- Managed dependencies -->
