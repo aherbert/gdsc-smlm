@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,8 +40,11 @@ import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
@@ -52,6 +56,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
@@ -86,9 +91,11 @@ public class TraceExporter implements PlugIn {
 
     String directory;
     int minLength;
+    int maxLength;
     int maxJump;
     double wobble;
     int format;
+    boolean showTraceLengths;
 
     Settings() {
       // Set defaults
@@ -100,9 +107,11 @@ public class TraceExporter implements PlugIn {
     Settings(Settings source) {
       directory = source.directory;
       minLength = source.minLength;
+      maxLength = source.maxLength;
       maxJump = source.maxJump;
       wobble = source.wobble;
       format = source.format;
+      showTraceLengths = source.showTraceLengths;
     }
 
     Settings copy() {
@@ -175,22 +184,26 @@ public class TraceExporter implements PlugIn {
     gd.addMessage("Export traces to a directory");
     gd.addDirectoryField("Directory", settings.directory, 30);
     gd.addNumericField("Min_length", settings.minLength, 0);
+    gd.addNumericField("Max_length", settings.maxLength, 0);
     gd.addMessage("Specify the maximum jump allowed within a trace.\n"
         + "Traces with larger jumps will be split.");
     gd.addNumericField("Max_jump", settings.maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
     gd.addChoice("Format", Settings.formatNames, settings.format);
+    gd.addCheckbox("Histogram_trace_lengths", settings.showTraceLengths);
     gd.addHelp(HelpUrls.getUrl("trace-exporter"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return false;
     }
     settings.directory = gd.getNextString();
-    settings.minLength = (int) Math.abs(gd.getNextNumber());
-    settings.maxJump = (int) Math.abs(gd.getNextNumber());
-    settings.wobble = Math.abs(gd.getNextNumber());
+    settings.minLength = Math.max(0, (int) gd.getNextNumber());
+    settings.maxLength = Math.max(0, (int) gd.getNextNumber());
+    settings.maxJump = Math.max(0, (int) gd.getNextNumber());
+    settings.wobble = Math.max(0, gd.getNextNumber());
     settings.format = gd.getNextChoiceIndex();
+    settings.showTraceLengths = gd.getNextBoolean();
     settings.save();
     return true;
   }
@@ -236,26 +249,36 @@ public class TraceExporter implements PlugIn {
     // Sort by ID then time
     results.sort(IdFramePeakResultComparator.INSTANCE);
 
-    // Split traces with big jumps
+    // Split traces with big jumps and long tracks into smaller tracks
     results = splitTraces(results);
+    results = splitLongTraces(results);
 
     // Count each ID and remove short traces
     int id = 0;
     int count = 0;
+    int tracks = 0;
+    int maxLength = 0;
     final TIntHashSet remove = new TIntHashSet();
     for (int i = 0, size = results.size(); i < size; i++) {
-      if (results.get(i).getId() != id) {
+      final PeakResult result = results.get(i);
+      if (result.getId() != id) {
         if (count < settings.minLength) {
           remove.add(id);
+        } else {
+          tracks++;
+          maxLength = Math.max(maxLength, count);
         }
         count = 0;
-        id = results.get(i).getId();
+        id = result.getId();
       }
-      count++;
+      count += getLength(result);
     }
     // Final ID
     if (count < settings.minLength) {
       remove.add(id);
+    } else {
+      tracks++;
+      maxLength = Math.max(maxLength, count);
     }
 
     if (!remove.isEmpty()) {
@@ -284,6 +307,33 @@ public class TraceExporter implements PlugIn {
     } else {
       exportSpotOn(results);
     }
+    ImageJUtils.log("Exported %s: %s", results.getName(), TextUtils.pleural(tracks, "track"));
+
+    if (settings.showTraceLengths) {
+      // We store and index (count-1)
+      final int[] h = new int[maxLength];
+      id = 0;
+      for (int i = 0, size = results.size(); i < size; i++) {
+        final PeakResult result = results.get(i);
+        if (result.getId() != id) {
+          h[count - 1]++;
+          count = 0;
+          id = result.getId();
+        }
+        count += getLength(result);
+      }
+      h[count - 1]++;
+      final String title = TITLE + ": " + results.getName();
+      final Plot plot = new Plot(title, "Length", "Frequency");
+      plot.addPoints(SimpleArrayUtils.newArray(h.length, 1, 1.0f), SimpleArrayUtils.toFloat(h),
+          Plot.BAR);
+      plot.setLimits(SimpleArrayUtils.findIndex(h, i -> i != 0) + 1, maxLength, 0, Double.NaN);
+      ImageJUtils.display(title, plot);
+    }
+  }
+
+  private static int getLength(PeakResult result) {
+    return (result.hasEndFrame()) ? (result.getEndFrame() - result.getFrame() + 1) : 1;
   }
 
   private MemoryPeakResults splitTraces(MemoryPeakResults results) {
@@ -324,6 +374,37 @@ public class TraceExporter implements PlugIn {
       r2.setId(idOut);
       results2.add(r2);
       lastT = r.getEndFrame();
+    }
+    return results2;
+  }
+
+  private MemoryPeakResults splitLongTraces(MemoryPeakResults results) {
+    if (settings.maxLength < 1) {
+      // Disabled
+      return results;
+    }
+
+    final MemoryPeakResults results2 = new MemoryPeakResults(results.size());
+    results2.copySettings(results);
+    int nextId = results.getLast().getId();
+    int id = 0;
+    int idOut = 0;
+    // The length that has been output under the current ID
+    int length = 0;
+    for (int i = 0, size = results.size(); i < size; i++) {
+      final PeakResult r = results.get(i);
+      if (r.getId() != id) {
+        id = r.getId();
+        idOut = id;
+        length = 0;
+      } else if (length >= settings.maxLength) {
+        idOut = ++nextId;
+        length = 0;
+      }
+      final AttributePeakResult r2 = new AttributePeakResult(r);
+      r2.setId(idOut);
+      results2.add(r2);
+      length += getLength(r);
     }
     return results2;
   }
@@ -395,17 +476,13 @@ public class TraceExporter implements PlugIn {
     // 5. frame time (s)
 
     // Count the number of localisations including start/end frames
-    final int[] row = new int[1];
+    final Counter row = new Counter();
     results.forEach((PeakResultProcedure) result -> {
-      if (result.hasEndFrame()) {
-        row[0] += result.getEndFrame() - result.getFrame() + 1;
-      } else {
-        row[0]++;
-      }
+      row.increment(getLength(result));
     });
 
     // Create the matrix
-    final int rows = row[0];
+    final int rows = row.getCount();
     final Matrix out = Mat5.newMatrix(rows, 5);
     // Set up column offsets
     final int col1 = rows * 1;
@@ -417,11 +494,11 @@ public class TraceExporter implements PlugIn {
     // but the exposure duration of the frame.
     final double frameTime = results.getCalibrationReader().getExposureTime() / 1000;
 
-    row[0] = 0;
+    row.reset();
     results.forEach(DistanceUnit.UM, (XyrResultProcedure) (x, y, result) -> {
       if (result.hasEndFrame()) {
         for (int t = result.getFrame(); t <= result.getEndFrame(); t++) {
-          final int index = row[0]++;
+          final int index = row.getAndIncrement();
           out.setDouble(index, x);
           out.setDouble(index + col1, y);
           out.setDouble(index + col2, t);
@@ -430,7 +507,7 @@ public class TraceExporter implements PlugIn {
         }
       } else {
         // Column major index: row + rows * col
-        final int index = row[0]++;
+        final int index = row.getAndIncrement();
         out.setDouble(index, x);
         out.setDouble(index + col1, y);
         out.setDouble(index + col2, result.getFrame());

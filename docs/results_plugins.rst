@@ -726,7 +726,10 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
      - The output directory.
 
    * - Min length
-     - The minimum length of each trace. Any trace shorter then this will not be exported.
+     - The minimum length of each trace. Any trace shorter than this will not be exported.
+
+   * - Max length
+     - The maximum length of each trace. Any trace longer than this will not be split into sub-traces. This option can be used to increase the number of short traces.
 
    * - Max jump
      - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique Id.
@@ -736,6 +739,9 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
 
    * - Format
      - Select the output format (see :numref:`%s <results_plugins:Available Formats>`).
+
+   * - Histogram trace lengths
+     - Plot a histogram of the length of traces for each exported dataset.
 
 
 .. index:: Available Formats
