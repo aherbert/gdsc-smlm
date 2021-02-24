@@ -156,6 +156,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   private static final String[] FEATURE_NAMES = {"Anomalous exponent",
       "Effective diffusion coefficient", "Length of confinement", "Drift vector magnitude"};
   private static final String[] FEATURE_UNITS = {null, "μm^2/s", "μm", "μm"};
+  private static final int FEATURE_D = 1;
   private static final int SORT_DIMENSION = 1;
   // Limits for fitting the MSD
   private static final double MIN_D = Double.MIN_NORMAL;
@@ -1708,6 +1709,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Get column data
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       columns[i] = raw.getColumn(i);
+      if (i == FEATURE_D) {
+        // Plot using a logarithmic scale
+        SimpleArrayUtils.apply(columns[i], Math::log10);
+      }
       limits[i] = MathUtils.limits(columns[i]);
     }
     // Compute histogram bins
@@ -1726,7 +1731,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       final double[][] hist =
           HistogramPlot.calcHistogram(columns[i], limits[i][0], limits[i][1], bins[i]);
-      plots[i] = new Plot(TITLE + " " + FEATURE_NAMES[i], getFeatureLabel(i), "Frequency");
+      plots[i] =
+          new Plot(TITLE + " " + FEATURE_NAMES[i], getFeatureLabel(i, i == FEATURE_D), "Frequency");
       plots[i].addPoints(hist[0], hist[1], Plot.BAR);
       ImageJUtils.display(plots[i].getTitle(), plots[i], ImageJUtils.NO_TO_FRONT, wo);
     }
@@ -2484,8 +2490,33 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @return the feature label
    */
   private static String getFeatureLabel(int feature) {
-    return FEATURE_UNITS[feature] == null ? FEATURE_NAMES[feature]
-        : FEATURE_NAMES[feature] + " (" + FEATURE_UNITS[feature] + ")";
+    return getFeatureLabel(feature, false);
+  }
+
+  /**
+   * Gets the feature label.
+   *
+   * @param feature the feature
+   * @param log10 true if the units are logarithmic using log10
+   * @return the feature label
+   */
+  private static String getFeatureLabel(int feature, boolean log10) {
+    if (FEATURE_UNITS[feature] == null) {
+      return FEATURE_NAMES[feature];
+    }
+    final StringBuilder sb = new StringBuilder(FEATURE_NAMES[feature]);
+    if (log10) {
+      sb.append(" (log(");
+    } else {
+      sb.append(" (");
+    }
+    sb.append(FEATURE_UNITS[feature]);
+    if (log10) {
+      sb.append("))");
+    } else {
+      sb.append(')');
+    }
+    return sb.toString();
   }
 
   /**
