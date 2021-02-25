@@ -327,7 +327,7 @@ public class TraceExporter implements PlugIn {
       final Plot plot = new Plot(title, "Length", "Frequency");
       plot.addPoints(SimpleArrayUtils.newArray(h.length, 1, 1.0f), SimpleArrayUtils.toFloat(h),
           Plot.BAR);
-      plot.setLimits(SimpleArrayUtils.findIndex(h, i -> i != 0) + 1, maxLength, 0, Double.NaN);
+      plot.setLimits(SimpleArrayUtils.findIndex(h, i -> i != 0), maxLength + 1, 0, Double.NaN);
       ImageJUtils.display(title, plot);
     }
   }
