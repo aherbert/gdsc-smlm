@@ -605,10 +605,9 @@ public class Fire implements PlugIn {
         }
 
         // Wait for all to finish
+        executor.shutdown();
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
         IJ.showProgress(1);
-
-        executor.shutdown();
 
         // Show a combined FRC curve plot of all the smoothed curves if we have multiples.
         final LUT valuesLut = LutHelper.createLut(LutColour.FIRE_GLOW);

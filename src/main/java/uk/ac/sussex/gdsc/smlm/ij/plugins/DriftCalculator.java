@@ -444,21 +444,28 @@ public class DriftCalculator implements PlugIn {
     }
     double[][] drift = null;
     final int[] limits = findTimeLimits(results);
-    if (settings.method.equals(Settings.MARKED_ROIS)) {
-      drift = calculateUsingMarkers(results, limits, rois);
-    } else if (settings.method.equals(Settings.STACK_ALIGNMENT)) {
-      final ImageStack stack = showStackDialog(stackTitles);
-      if (stack == null) {
-        return;
+    try {
+      if (settings.method.equals(Settings.MARKED_ROIS)) {
+        drift = calculateUsingMarkers(results, limits, rois);
+      } else if (settings.method.equals(Settings.STACK_ALIGNMENT)) {
+        final ImageStack stack = showStackDialog(stackTitles);
+        if (stack == null) {
+          return;
+        }
+        drift = calculateUsingImageStack(stack, limits);
+      } else if (settings.method.equals(Settings.DRIFT_FILE)) {
+        drift = calculateUsingDriftFile(limits);
+      } else {
+        if (!showSubImageDialog()) {
+          return;
+        }
+        drift =
+            calculateUsingFrames(results, limits, Integer.parseInt(settings.reconstructionSize));
       }
-      drift = calculateUsingImageStack(stack, limits);
-    } else if (settings.method.equals(Settings.DRIFT_FILE)) {
-      drift = calculateUsingDriftFile(limits);
-    } else {
-      if (!showSubImageDialog()) {
-        return;
+    } finally {
+      if (executor != null) {
+        executor.shutdown();
       }
-      drift = calculateUsingFrames(results, limits, Integer.parseInt(settings.reconstructionSize));
     }
 
     if (drift == null) {

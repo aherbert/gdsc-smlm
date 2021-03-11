@@ -663,8 +663,8 @@ public class SpotAnalysis extends PlugInFrame
       }
 
       IJ.showStatus("Calculating blur ... Finishing");
-      ConcurrencyUtils.waitForCompletionUnchecked(futures);
       threadPool.shutdown();
+      ConcurrencyUtils.waitForCompletionUnchecked(futures);
       ImageJUtils.clearSlowProgress();
       IJ.showStatus("Calculating blur ... Drawing");
 

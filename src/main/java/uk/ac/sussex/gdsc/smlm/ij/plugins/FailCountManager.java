@@ -1029,8 +1029,8 @@ public class FailCountManager implements PlugIn {
       }));
     }
 
-    ConcurrencyUtils.waitForCompletionUnchecked(futures);
     executor.shutdown();
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
     IJ.showProgress(1);
     if (IJ.escapePressed()) {
       IJ.showStatus("");

@@ -256,9 +256,8 @@ public class CubicSplineManager implements PlugIn {
     }
     ticker.stop();
 
+    threadPool.shutdown();
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
-
-    threadPool.shutdownNow();
 
     // Normalise
     double maxSum = 0;

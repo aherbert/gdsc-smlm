@@ -432,6 +432,7 @@ public class MedianFilter implements PlugInFilter {
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
     if (ImageJUtils.isInterrupted()) {
+      threadPool.shutdown();
       return;
     }
 
@@ -446,6 +447,8 @@ public class MedianFilter implements PlugInFilter {
       // Finish processing data
       ConcurrencyUtils.waitForCompletionUnchecked(futures);
     }
+
+    threadPool.shutdown();
 
     // Update the image
     final ImageStack outputStack =
