@@ -307,7 +307,8 @@ public class TraceExporter implements PlugIn {
     } else {
       exportSpotOn(results);
     }
-    ImageJUtils.log("Exported %s: %s", results.getName(), TextUtils.pleural(tracks, "track"));
+    ImageJUtils.log("Exported %s: %s in %s", results.getName(),
+        TextUtils.pleural(results.size(), "localisation"), TextUtils.pleural(tracks, "track"));
 
     if (settings.showTraceLengths) {
       // We store and index (count-1)
