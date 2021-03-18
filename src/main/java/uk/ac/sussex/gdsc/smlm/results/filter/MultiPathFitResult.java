@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
 /**
- * Specifies a the result of fitting a position using different fitting methods.
+ * Specifies the result of fitting a position using different fitting methods.
  *
  * <p>The multi-path result can be evaluated by the MultiPathFilter to determine which result from
  * the different paths should be accepted.
