@@ -413,7 +413,7 @@ public class CropResults implements PlugIn {
       return new MinMaxPeakResultPredicate((float) settings.getMinZ(), (float) settings.getMaxZ(),
           new PeakResultValueParameter(PeakResult.Z));
     }
-    return new PassPeakResultPredicate();
+    return PassPeakResultPredicate.INSTANCE;
   }
 
   private MemoryPeakResults createNewResults() {
