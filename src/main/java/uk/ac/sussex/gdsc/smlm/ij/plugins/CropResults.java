@@ -30,6 +30,7 @@ import ij.WindowManager;
 import ij.plugin.PlugIn;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.IdentityTypeConverter;
@@ -374,15 +375,14 @@ public class CropResults implements PlugIn {
     final Rectangle2D bounds = pixelBounds;
 
     final Predicate<PeakResult> testZ = getZFilter();
+    // Copy the results if the origin is reset
+    final Consumer<PeakResult> consumer =
+        settings.getResetOrigin() ? r -> newResults.add(r.copy()) : newResults::add;
 
     if (bounds.getWidth() > 0 && bounds.getHeight() > 0) {
       results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
         if (bounds.contains(x, y) && testZ.test(result)) {
-          if (settings.getResetOrigin()) {
-            newResults.add(result.copy());
-          } else {
-            newResults.add(result);
-          }
+          consumer.accept(result);
         }
       });
     }
@@ -390,13 +390,16 @@ public class CropResults implements PlugIn {
     if (settings.getPreserveBounds()) {
       newResults.setBounds(integerBounds);
     } else {
-      newResults
-          .setBounds(new Rectangle((int) Math.floor(bounds.getX()), (int) Math.floor(bounds.getY()),
-              (int) Math.ceil(bounds.getWidth()), (int) Math.ceil(bounds.getHeight())));
+      // Get the lower and upper integer limits
+      final int x = (int) Math.floor(bounds.getX());
+      final int y = (int) Math.floor(bounds.getY());
+      final int ux = (int) Math.ceil(bounds.getX() + bounds.getWidth());
+      final int uy = (int) Math.ceil(bounds.getY() + bounds.getHeight());
+      // Ensure the width and height are at least 1
+      newResults.setBounds(new Rectangle(x, y, Math.max(1, ux - x), Math.max(1, uy - y)));
 
       if (settings.getResetOrigin()) {
-        final Rectangle b = newResults.getBounds();
-        newResults.translate(-b.x, -b.y);
+        newResults.translate(-x, -y);
       }
     }
 
@@ -478,7 +481,7 @@ public class CropResults implements PlugIn {
     final double ox = integerBounds.getX();
     final double oy = integerBounds.getY();
     final double xscale = roiImageWidth / integerBounds.getWidth();
-    final double yscale = roiImageHeight / integerBounds.getWidth();
+    final double yscale = roiImageHeight / integerBounds.getHeight();
 
     final Predicate<PeakResult> testZ = getZFilter();
 
