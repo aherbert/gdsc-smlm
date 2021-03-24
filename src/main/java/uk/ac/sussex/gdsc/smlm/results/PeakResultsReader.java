@@ -131,6 +131,7 @@ public class PeakResultsReader {
   private String configuration;
   private TrackProgress tracker;
   private ResultOption[] options;
+  private int position;
 
   private boolean deviations;
   private boolean readEndFrame;
@@ -695,7 +696,7 @@ public class PeakResultsReader {
           simplifyPsf(results);
 
           // Add mean intensity if a Gaussian 2D function
-          addMeanIntensity(results);
+          Gaussian2DPeakResultHelper.addMeanIntensity(psf, results);
         }
 
         // Convert to the preferred units if possible
@@ -795,28 +796,6 @@ public class PeakResultsReader {
       results.forEach((PeakResultProcedure) peakResult -> peakResult.resizeParameters(newLength));
     }
   }
-
-  /**
-   * Add mean intensity if a Gaussian 2D function and no mean intensity has been read.
-   *
-   * @param results the results
-   */
-  private void addMeanIntensity(MemoryPeakResults results) {
-    // Some formats already read the mean intensity, e.g. SMLM, TSF
-    if (PsfHelper.isGaussian2D(psf) && !results.hasMeanIntensity()) {
-      final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
-      final int isx = indices[0];
-      final int isy = indices[1];
-      results.forEach((PeakResultProcedure) peakResult -> {
-        final float[] p = peakResult.getParameters();
-        final float u = (float) Gaussian2DPeakResultHelper
-            .getMeanSignalUsingP05(p[PeakResult.INTENSITY], p[isx], p[isy]);
-        peakResult.setMeanIntensity(u);
-      });
-    }
-  }
-
-  private int position;
 
   private MemoryPeakResults readBinary() {
     final MemoryPeakResults results = createResults();

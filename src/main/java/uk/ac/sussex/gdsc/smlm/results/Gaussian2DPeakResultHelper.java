@@ -39,12 +39,14 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
+import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.Erf;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
  * Contains helper functions for working with Gaussian 2D peak results.
@@ -1283,5 +1285,30 @@ public final class Gaussian2DPeakResultHelper {
    */
   public static double getMeanSignalUsingP05(double intensity, double sx, double sy) {
     return intensity * P05 / (sx * sy);
+  }
+
+  /**
+   * Add mean intensity if the PSF is a Gaussian 2D function and no mean intensity is present in the
+   * results. The mean intensity is the mean signal within the elliptical area of the half-width
+   * half-maxima of the Gaussian.
+   *
+   * @param psf the psf
+   * @param results the results
+   * @see MemoryPeakResults#hasMeanIntensity()
+   * @see #getMeanSignalUsingP05(double, double, double)
+   */
+  public static void addMeanIntensity(PSFOrBuilder psf, MemoryPeakResults results) {
+    // Some formats already read the mean intensity, e.g. SMLM, TSF
+    if (PsfHelper.isGaussian2D(psf) && !results.hasMeanIntensity()) {
+      final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
+      final int isx = indices[0];
+      final int isy = indices[1];
+      results.forEach((PeakResultProcedure) peakResult -> {
+        final float[] p = peakResult.getParameters();
+        final float u = (float) Gaussian2DPeakResultHelper
+            .getMeanSignalUsingP05(p[PeakResult.INTENSITY], p[isx], p[isy]);
+        peakResult.setMeanIntensity(u);
+      });
+    }
   }
 }
