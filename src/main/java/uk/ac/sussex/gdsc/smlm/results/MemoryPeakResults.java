@@ -756,7 +756,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Checks for noise. At least one result must have a positive mean intensity.
+   * Checks for mean intensity. At least one result must have a positive mean intensity.
    *
    * @return true, if successful
    */
