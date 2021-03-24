@@ -189,7 +189,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
     }
     // Let gc do its work
     while (fromIndex++ < toIndex) {
-      results[size--] = null;
+      results[--size] = null;
     }
   }
 
