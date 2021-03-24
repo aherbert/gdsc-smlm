@@ -5496,18 +5496,23 @@ public class CreateData implements PlugIn {
     simulationParameters = showSimulationParametersDialog(imp, results);
     if (simulationParameters != null) {
       // Convert data to allow analysis as if a Gaussian2D PSF
-      if (simulationParameters.sd > 0 && !PsfHelper.isGaussian2D(results.getPsf())) {
+      final boolean isGaussian2D = PsfHelper.isGaussian2D(results.getPsf());
+      if (isGaussian2D) {
+        Gaussian2DPeakResultHelper.addMeanIntensity(results.getPsf(), results);
+      } else if (simulationParameters.sd > 0) {
         final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.NM);
         final PSF.Builder psf =
             PsfProtosHelper.getDefaultPsf(PSFType.ONE_AXIS_GAUSSIAN_2D).toBuilder();
         psf.getParametersBuilder(0).setValue(dc.convertBack(simulationParameters.sd));
         results.setPsf(psf.build());
-        // Update all the results. This assume the results do not have data for a custom PSF,
+        // Update all the results. This assumes the results do not have data for a custom PSF,
         // i.e. the parameters only have [t,i,x,y,z]
         final LocalList<PeakResult> newResults = new LocalList<>(results.size());
         final float sd = (float) dc.convertBack(simulationParameters.sd);
+        final double meanFactor = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(1, sd, sd);
         results.forEach((PeakResultProcedure) r -> {
           final PeakResult peak = r.resize(PeakResult.STANDARD_PARAMETERS + 1);
+          peak.setMeanIntensity((float) (peak.getIntensity() * meanFactor));
           peak.setParameter(PeakResult.STANDARD_PARAMETERS, sd);
           newResults.add(peak);
         });
