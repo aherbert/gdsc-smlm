@@ -2197,11 +2197,11 @@ The plugin allows the spot filter and the analysis settings to be configured. Th
 The two sets of coordinates are assigned as matches if they are within a configured distance.
 By default matching is performed using a nearest-neighbour algorithm assigning the closest pairs. This can be changed to process the candidates in order, attempting to find a free localisation that is within the match distance to the candidate. This simulates the way the candidates will be used during fitting with the highest ranked candidates being processed first, thus they will be likely to be fit to a localisation, even if it has a closer candidate (as that will be processed later). Optionally multiple matching can be used where a candidate can be matched to more than one localisation. This is useful when simulating high density data with overlapping localisations.
 
-In addition the spot candidates can be assessed as matches if they are within a factor of the true signal for the localisation (Note: all spot filters produce an estimate of the signal, for example using the maximum height of the spot). The relative signal factor is simply the estimated spot signal divided by the true signal. The relative signal factor (rsf) above or below the true signal (which has 1 for a perfect match) is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
+In addition the spot candidates can be assessed as matches if they are within a factor of the true signal for the localisation (Note: all spot filters produce an estimate of the signal, for example using the maximum height of the spot). The relative signal factor is the ratio between the larger of the estimated spot signal and the true signal and the other smaller signal. The relative signal factor (rsf) has 1 for a perfect match and is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
 
 .. math::
 
-    \mathit{sf}=(\mathit{rsf}<1)?1-\frac{1}{\mathit{rsf}}:\mathit{rsf}-1
+    \mathit{sf}=(s_1<s_2)\ ?\ \frac{s_2}{s_1}-1 : \frac{s_1}{s_2}-1
 
 The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``.
 
