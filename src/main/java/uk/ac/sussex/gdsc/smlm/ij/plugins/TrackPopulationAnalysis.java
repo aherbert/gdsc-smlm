@@ -842,8 +842,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * required to match.
      */
     private void doAnalysisJumpAngles() {
-      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
-      final List<TrackData> data = model.data;
+      final List<TrackData> data = getMultiSelectedDataOrAll();
       if (data.isEmpty()) {
         return;
       }
@@ -969,8 +968,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * <p>Fit the combined MSD curve with a Brownian and FBM model.
      */
     private void doAnalysisFitJumpDistances() {
-      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
-      final List<TrackData> data = model.data;
+      final List<TrackData> data = getMultiSelectedDataOrAll();
       if (data.isEmpty()) {
         return;
       }
@@ -1133,8 +1131,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * <p>Fit the combined MSD curve with a Brownian and FBM model.
      */
     private void doAnalysisResidenceTime() {
-      final TrackDataTableModel model = (TrackDataTableModel) table.getModel();
-      final List<TrackData> data = model.data;
+      final List<TrackData> data = getMultiSelectedDataOrAll();
       if (data.isEmpty()) {
         return;
       }
@@ -1339,6 +1336,19 @@ public class TrackPopulationAnalysis implements PlugIn {
         newResults.addAll(track.trace.getPoints());
       });
       MemoryPeakResults.addResults(newResults);
+    }
+
+    /**
+     * Gets the selected tracks if a multi-selection, or else all tracks.
+     *
+     * @return the tracks
+     */
+    private List<TrackData> getMultiSelectedDataOrAll() {
+      final List<TrackData> selected = table.getSelectedData();
+      if (selected.size() > 1) {
+        return selected;
+      }
+      return ((TrackDataTableModel) table.getModel()).data;
     }
   }
 
