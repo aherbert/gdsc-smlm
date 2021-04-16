@@ -31,6 +31,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Overlay;
 import ij.gui.Plot;
@@ -125,6 +126,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
+import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
@@ -199,6 +201,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     double nmPerPixel;
     int minDisplaySize;
     boolean showMsdOverT;
+    String dataSaveName;
+    boolean dataSaveSelected;
 
     Settings() {
       // Set defaults
@@ -245,6 +249,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.nmPerPixel = source.nmPerPixel;
       this.minDisplaySize = source.minDisplaySize;
       this.showMsdOverT = source.showMsdOverT;
+      this.dataSaveName = source.dataSaveName;
+      this.dataSaveSelected = source.dataSaveSelected;
     }
 
     Settings copy() {
@@ -487,6 +493,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final TypeConverter<DistanceUnit> distanceConverter;
     private final double deltaT;
     private final IntFunction<Color> colourMap;
+    private JMenuItem dataSave;
     private JMenuItem analysisAnomalousExponentView;
     private JMenuItem analysisJumpAngles;
     private JMenuItem analysisFitJumpDistances;
@@ -553,9 +560,17 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     private JMenuBar createMenuBar() {
       final JMenuBar menubar = new JMenuBar();
+      menubar.add(createDataMenu());
       menubar.add(createAnalysisMenu());
       menubar.add(createOptionsMenu());
       return menubar;
+    }
+
+    private JMenu createDataMenu() {
+      final JMenu menu = new JMenu("Data");
+      menu.setMnemonic(KeyEvent.VK_D);
+      menu.add(dataSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+      return menu;
     }
 
     private JMenu createAnalysisMenu() {
@@ -600,6 +615,8 @@ public class TrackPopulationAnalysis implements PlugIn {
         action = this::doAnalysisFitJumpDistances;
       } else if (src == analysisResidenceTime) {
         action = this::doAnalysisResidenceTime;
+      } else if (src == dataSave) {
+        action = this::doDataSave;
       }
       // This will block the executing thread which may be the event dispatch thread.
       // Run on a new thread so events are still processed.
@@ -1276,6 +1293,51 @@ public class TrackPopulationAnalysis implements PlugIn {
         timeMap.put(component, times);
       }
       times.add(end - start);
+    }
+
+    /**
+     * Save the selected data to a new dataset.
+     */
+    private void doDataSave() {
+      // Get the currently selected track(s), or else all the data
+      final List<TrackData> selected = table.getSelectedData();
+      final List<TrackData> all = ((TrackDataTableModel) table.getModel()).data;
+      // Get the name for the dataset
+      final GenericDialog gd = new GenericDialog(TITLE);
+      gd.addMessage("Save track data to a results set");
+      gd.addStringField("Name", settings.dataSaveName);
+      if (!selected.isEmpty()) {
+        gd.addCheckbox("Save_selected", settings.dataSaveSelected);
+      }
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return;
+      }
+      final String name = gd.getNextString();
+      boolean saveSelected = false;
+      if (!selected.isEmpty()) {
+        settings.dataSaveSelected = saveSelected = gd.getNextBoolean();
+      }
+      if (TextUtils.isNullOrEmpty(name)) {
+        return;
+      }
+      settings.dataSaveName = name;
+      final List<TrackData> data = saveSelected ? selected : all;
+
+      // This may be a combined dataset with overlapping traces from the same frames.
+      // Save with simple calibration (i.e. no PSF or full calibration).
+      final MemoryPeakResults newResults = new MemoryPeakResults();
+      newResults.setName(name);
+      final CalibrationWriter cal = new CalibrationWriter();
+      // Delta T is in seconds, set as milliseconds
+      cal.setExposureTime(deltaT * 1000);
+      // Distance converter is to convert to um, set as nm
+      cal.setNmPerPixel(distanceConverter.convert(1.0) * 1000);
+      newResults.setCalibration(cal.getCalibration());
+      data.forEach(track -> {
+        newResults.addAll(track.trace.getPoints());
+      });
+      MemoryPeakResults.addResults(newResults);
     }
   }
 
@@ -2299,8 +2361,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param sortDimension the sort dimension
    * @return the multivariate gaussian mixture
    */
-  private MultivariateGaussianMixtureExpectationMaximization
-      fitGaussianMixture(final double[][] data, int sortDimension) {
+  private MultivariateGaussianMixtureExpectationMaximization fitGaussianMixture(
+      final double[][] data, int sortDimension) {
     // Get the unmixed multivariate Guassian.
     MultivariateGaussianDistribution unmixed =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
@@ -2465,8 +2527,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param dimension the dimension
    * @return the mixture multivariate gaussian distribution
    */
-  private static MixtureMultivariateGaussianDistribution
-      sortComponents(MixtureMultivariateGaussianDistribution model, int dimension) {
+  private static MixtureMultivariateGaussianDistribution sortComponents(
+      MixtureMultivariateGaussianDistribution model, int dimension) {
     final double[] weights = model.getWeights();
     final MultivariateGaussianDistribution[] distributions = model.getDistributions();
     final LocalList<Pair<Double, MultivariateGaussianDistribution>> list =
