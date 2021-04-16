@@ -73,7 +73,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -130,8 +129,8 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
@@ -1955,7 +1954,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     final TrackDataTableModelFrame frame = new TrackDataTableModelFrame(settings,
         new TrackDataTableModel(list), model, calibration, colourMap);
     frame.setTitle(TITLE + " Track Data");
-    frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    // Single selection is required for plotting. But some actions can work on multiple selection.
+    //frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     frame.setVisible(true);
   }
 
