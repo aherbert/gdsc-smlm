@@ -1552,7 +1552,9 @@ A table is presented summarising the track data. This lists the track length, th
 * Plots of each local diffusion feature against the track length. The plots are coloured using the component class assigned to the time point.
 * An image of the track. The pixel size of the image can be specified in the table options. This is enlarged by magnifying the image until the long edge of the image window is above a pixel size threshold. The track is coloured using the component class for the time point. The unclassified time points in the track, before/after the extent of the sliding window, are shown in dashed lines using light/dark grey for the start/end points respectively. The final localisation is shown using a circle.
 
-Display of the track data can be configured using ``Options > Track Data...`` menu in the track data table.
+Display of the track data can be configured using ``Options > Track Data...`` menu in the track data table. This will display the first track if multiple tracks are selected.
+
+The table allows selection of multiple tracks to perform analysis. If more than one track is selected then analysis will target the selected tracks. Otherwise analysis will use the entire set of tracks.
 
 The track data can be saved to a dataset using the ``Data > Save...`` menu in the track data table. This supports saving the currently selected tracks or the entire set of tracks.
 
