@@ -1554,6 +1554,8 @@ A table is presented summarising the track data. This lists the track length, th
 
 Display of the track data can be configured using ``Options > Track Data...`` menu in the track data table.
 
+The track data can be saved to a dataset using the ``Data > Save...`` menu in the track data table. This supports saving the currently selected tracks or the entire set of tracks.
+
 Display of the jump distances used to fit the anomalous exponent can be viewed using ``Analysis > Anomalous exponent view`` menu in the track data table. This will present a dialog for the currently selected track where the data window can be selected; this corresponds to a contiguous set of localisations of the configured analysis window size. The mean squared jump distances for each time gap in the analysis window are extracted and the fit of the standard Brownian model and the fractional Brownian motion (FBM) model are shown. Optionally the plot can be changed to divide the MSD by the time and use a log scale for visualisation; the fitting is unaffected. Assuming a simple exponential equation for the MSD the plot of MSD/t verses time is a straight line where the gradient is the anomalous exponent minus 1:
 
 .. math::
