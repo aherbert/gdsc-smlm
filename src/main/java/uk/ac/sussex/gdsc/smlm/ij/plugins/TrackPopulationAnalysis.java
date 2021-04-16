@@ -131,6 +131,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
@@ -490,6 +491,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final Settings settings;
     private final TrackDataJTable table;
     private final MixtureMultivariateGaussianDistribution model;
+    private final CalibrationOrBuilder cal;
     private final TypeConverter<DistanceUnit> distanceConverter;
     private final double deltaT;
     private final IntFunction<Color> colourMap;
@@ -507,18 +509,17 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param settings the settings
      * @param tableModel the model
      * @param model the model
-     * @param distanceConverter the distance converter
-     * @param deltaT the delta T
+     * @param calibration the calibration
      * @param colourMap the colour map
      */
     TrackDataTableModelFrame(Settings settings, TrackDataTableModel tableModel,
-        MixtureMultivariateGaussianDistribution model,
-        TypeConverter<DistanceUnit> distanceConverter, final double deltaT,
+        MixtureMultivariateGaussianDistribution model, CalibrationReader calibration,
         final IntFunction<Color> colourMap) {
       this.settings = settings;
       this.model = model;
-      this.distanceConverter = distanceConverter;
-      this.deltaT = deltaT;
+      cal = calibration.getCalibrationOrBuilder();
+      distanceConverter = calibration.getDistanceConverter(DistanceUnit.UM);
+      deltaT = calibration.getExposureTime() / 1000.0;
       this.colourMap = colourMap;
 
       setJMenuBar(createMenuBar());
@@ -1328,12 +1329,13 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Save with simple calibration (i.e. no PSF or full calibration).
       final MemoryPeakResults newResults = new MemoryPeakResults();
       newResults.setName(name);
-      final CalibrationWriter cal = new CalibrationWriter();
-      // Delta T is in seconds, set as milliseconds
-      cal.setExposureTime(deltaT * 1000);
-      // Distance converter is to convert to um, set as nm
-      cal.setNmPerPixel(distanceConverter.convert(1.0) * 1000);
-      newResults.setCalibration(cal.getCalibration());
+      final CalibrationWriter cw = new CalibrationWriter();
+      final CalibrationReader cr = new CalibrationReader(cal);
+      cw.setDistanceUnit(cr.getDistanceUnit());
+      cw.setNmPerPixel(cr.getNmPerPixel());
+      cw.setTimeUnit(cr.getTimeUnit());
+      cw.setExposureTime(cr.getExposureTime());
+      newResults.setCalibration(cw.getCalibration());
       data.forEach(track -> {
         newResults.addAll(track.trace.getPoints());
       });
@@ -1862,8 +1864,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       plot.updateImage();
     }
 
-    createTrackDataTable(tracks, trackData, fitData, model, component, distanceConverter,
-        exposureTime, colourMap);
+    createTrackDataTable(tracks, trackData, fitData, model, component, cal, colourMap);
 
     // Analysis.
     // Assign the original localisations to their track component.
@@ -1927,13 +1928,14 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param fitData the fit data
    * @param model the model
    * @param component the component
+   * @param calibration the calibration
    * @param distanceConverter the distance converter (to get the coordinates in micrometers)
    * @param deltaT the time step of each frame in seconds (delta T)
    * @param colourMap the colour map
    */
   private void createTrackDataTable(List<Trace> tracks, Pair<int[], double[][]> trackData,
       double[][] fitData, MixtureMultivariateGaussianDistribution model, int[] component,
-      TypeConverter<DistanceUnit> distanceConverter, double deltaT, IntFunction<Color> colourMap) {
+      CalibrationReader calibration, IntFunction<Color> colourMap) {
     // Get the track data
     final LocalList<TrackData> list = new LocalList<>(tracks.size());
     final int[] lengths = trackData.getFirst();
@@ -1951,7 +1953,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Show table of tracks. Summarise:
     // length, set of components, count of component switches
     final TrackDataTableModelFrame frame = new TrackDataTableModelFrame(settings,
-        new TrackDataTableModel(list), model, distanceConverter, deltaT, colourMap);
+        new TrackDataTableModel(list), model, calibration, colourMap);
     frame.setTitle(TITLE + " Track Data");
     frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     frame.setVisible(true);
@@ -2361,8 +2363,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param sortDimension the sort dimension
    * @return the multivariate gaussian mixture
    */
-  private MultivariateGaussianMixtureExpectationMaximization fitGaussianMixture(
-      final double[][] data, int sortDimension) {
+  private MultivariateGaussianMixtureExpectationMaximization
+      fitGaussianMixture(final double[][] data, int sortDimension) {
     // Get the unmixed multivariate Guassian.
     MultivariateGaussianDistribution unmixed =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
@@ -2527,8 +2529,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    * @param dimension the dimension
    * @return the mixture multivariate gaussian distribution
    */
-  private static MixtureMultivariateGaussianDistribution sortComponents(
-      MixtureMultivariateGaussianDistribution model, int dimension) {
+  private static MixtureMultivariateGaussianDistribution
+      sortComponents(MixtureMultivariateGaussianDistribution model, int dimension) {
     final double[] weights = model.getWeights();
     final MultivariateGaussianDistribution[] distributions = model.getDistributions();
     final LocalList<Pair<Double, MultivariateGaussianDistribution>> list =
