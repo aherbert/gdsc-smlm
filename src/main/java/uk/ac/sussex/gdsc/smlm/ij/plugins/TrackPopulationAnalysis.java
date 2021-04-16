@@ -1305,7 +1305,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Get the name for the dataset
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Save track data to a results set");
-      gd.addStringField("Name", settings.dataSaveName);
+      gd.addStringField("Name", settings.dataSaveName, 30);
       if (!selected.isEmpty()) {
         gd.addCheckbox("Save_selected", settings.dataSaveSelected);
       }
