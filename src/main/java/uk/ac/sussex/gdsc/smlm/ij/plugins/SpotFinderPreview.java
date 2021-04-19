@@ -600,7 +600,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
           new LocalList<>(3 * predicted.length);
       final double matchDistance = settings.distance * fitConfig.getInitialPeakStdDev();
       final RampedScore score =
-          new RampedScore(matchDistance * settings.lowerDistance / 100, matchDistance);
+          RampedScore.of(matchDistance, matchDistance * settings.lowerDistance / 100, false);
       final double dmin = matchDistance * matchDistance;
       final int nActual = actual.length;
       final int nPredicted = predicted.length;

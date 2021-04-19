@@ -1020,8 +1020,7 @@ public class BenchmarkFilterAnalysis
           peak.setIgnore(false);
 
           // Note: We cannot remove bad candidates as we do not know what the minimum filter will
-          // be.
-          // Instead this is done when we create a subset for scoring.
+          // be. Instead this is done when we create a subset for scoring.
 
           if (!peak.isNewResult()) {
             continue;
@@ -1411,12 +1410,20 @@ public class BenchmarkFilterAnalysis
     public boolean converged(String prefix, FilterScore previous, FilterScore current,
         double[] previousParameters, double[] currentParameters) {
       // Stop if interrupted
+
+      // TODO - Allow the latest results to remain in memory if escape is pressed during iteration
+      // as a checkpoint. Currently pressing escape seems to break the reporting of iterations
+      // when a previous iteration may have stored good results.
+
       if (IJ.escapePressed()) {
         ImageJUtils.log("STOPPED");
         // Do not reset escape: IJ.resetEscape()
         canContinue = false;
         return true;
       }
+
+      // TODO - This may not be necessary. If the target score is the same then
+      // does it matter if the non-filter parameters have not converged?
 
       // Must converge on the non-filter parameters
       if (!converged(previousParameters, currentParameters)) {
@@ -1681,9 +1688,9 @@ public class BenchmarkFilterAnalysis
 
       final MultiPathFilter multiPathFilter =
           new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, localResidualsThreshold);
-      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, createFailCounter(failCount), fitResultData.countActual,
-          null, null, createCoordinateStore(duplicateDistance));
+      final FractionClassificationResult r =
+          multiPathFilter.fractionScoreSubset(gaResultsListToScore, createFailCounter(failCount),
+              fitResultData.countActual, null, null, createCoordinateStore(duplicateDistance));
 
       final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, localResidualsThreshold, duplicateDistance));
@@ -1750,9 +1757,9 @@ public class BenchmarkFilterAnalysis
       final double duplicateDistance = parameters[2];
       final MultiPathFilter multiPathFilter =
           new MultiPathFilter(searchScoreFilter, defaultMinimalFilter, residualsThreshold);
-      final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(
-          gaResultsListToScore, createFailCounter(failCount), fitResultData.countActual,
-          null, null, createCoordinateStore(duplicateDistance));
+      final FractionClassificationResult r =
+          multiPathFilter.fractionScoreSubset(gaResultsListToScore, createFailCounter(failCount),
+              fitResultData.countActual, null, null, createCoordinateStore(duplicateDistance));
 
       final StringBuilder text = createResult(searchScoreFilter, r,
           buildResultsPrefix2(failCount, residualsThreshold, duplicateDistance));
@@ -2689,31 +2696,31 @@ public class BenchmarkFilterAnalysis
       // @formatter:on
 
       final RampedScore distanceScore =
-          new RampedScore(spotFitResults.distanceInPixels * settings.partialMatchDistance / 100.0,
-              spotFitResults.distanceInPixels * settings.upperMatchDistance / 100.0);
-      localFitResultData.lowerDistanceInPixels = distanceScore.lower;
-      localFitResultData.distanceInPixels = distanceScore.upper;
+          RampedScore.of(spotFitResults.distanceInPixels * settings.upperMatchDistance / 100.0,
+              spotFitResults.distanceInPixels * settings.partialMatchDistance / 100.0, false);
+      localFitResultData.lowerDistanceInPixels = distanceScore.edge1;
+      localFitResultData.distanceInPixels = distanceScore.edge0;
       final double matchDistance = MathUtils.pow2(localFitResultData.distanceInPixels);
 
       localFitResultData.resultsPrefix3 =
-          "\t" + MathUtils.rounded(distanceScore.lower * simulationParameters.pixelPitch) + "\t"
-              + MathUtils.rounded(distanceScore.upper * simulationParameters.pixelPitch);
+          "\t" + MathUtils.rounded(distanceScore.edge1 * simulationParameters.pixelPitch) + "\t"
+              + MathUtils.rounded(distanceScore.edge0 * simulationParameters.pixelPitch);
       localFitResultData.limitRange =
-          ", d=" + MathUtils.rounded(distanceScore.lower * simulationParameters.pixelPitch) + "-"
-              + MathUtils.rounded(distanceScore.upper * simulationParameters.pixelPitch);
+          ", d=" + MathUtils.rounded(distanceScore.edge1 * simulationParameters.pixelPitch) + "-"
+              + MathUtils.rounded(distanceScore.edge0 * simulationParameters.pixelPitch);
 
       // Signal factor must be greater than 1
       final RampedScore signalScore;
       final double spotSignalFactor = BenchmarkSpotFit.getSignalFactor();
       if (spotSignalFactor > 0 && settings.upperSignalFactor > 0) {
-        signalScore = new RampedScore(spotSignalFactor * settings.partialSignalFactor / 100.0,
-            spotSignalFactor * settings.upperSignalFactor / 100.0);
-        localFitResultData.lowerSignalFactor = signalScore.lower;
-        localFitResultData.signalFactor = signalScore.upper;
-        localFitResultData.resultsPrefix3 += "\t" + MathUtils.rounded(signalScore.lower) + "\t"
-            + MathUtils.rounded(signalScore.upper);
-        localFitResultData.limitRange += ", s=" + MathUtils.rounded(signalScore.lower) + "-"
-            + MathUtils.rounded(signalScore.upper);
+        signalScore = RampedScore.of(spotSignalFactor * settings.upperSignalFactor / 100.0,
+            spotSignalFactor * settings.partialSignalFactor / 100.0, false);
+        localFitResultData.lowerSignalFactor = signalScore.edge1;
+        localFitResultData.signalFactor = signalScore.edge0;
+        localFitResultData.resultsPrefix3 += "\t" + MathUtils.rounded(signalScore.edge1) + "\t"
+            + MathUtils.rounded(signalScore.edge0);
+        localFitResultData.limitRange += ", s=" + MathUtils.rounded(signalScore.edge1) + "-"
+            + MathUtils.rounded(signalScore.edge0);
       } else {
         signalScore = null;
         localFitResultData.resultsPrefix3 += "\t0\t0";
@@ -5646,9 +5653,8 @@ public class BenchmarkFilterAnalysis
     final MultiPathFilter multiPathFilter = createMpf(filter, minFilter);
     // Note: We always use the subset method since fail counts have been accumulated when we read in
     // the results.
-    return multiPathFilter.fractionScoreSubset(resultsList,
-        createFailCounter(settings.failCount), fitResultData.countActual,
-        allAssignments, scoreStore, coordinateStore);
+    return multiPathFilter.fractionScoreSubset(resultsList, createFailCounter(settings.failCount),
+        fitResultData.countActual, allAssignments, scoreStore, coordinateStore);
   }
 
   private FilterScoreResult scoreFilter(DirectFilter filter, DirectFilter minFilter,
@@ -5682,8 +5688,7 @@ public class BenchmarkFilterAnalysis
         new MultiPathFilter(filter, minFilter, residualsThreshold);
 
     final FractionClassificationResult r = multiPathFilter.fractionScoreSubset(gaResultsListToScore,
-        createFailCounter(failCount), fitResultData.countActual, null, null,
-        coordinateStore);
+        createFailCounter(failCount), fitResultData.countActual, null, null, coordinateStore);
 
     final double score = getScore(r);
     final double criteria = getCriteria(r);
@@ -5712,8 +5717,8 @@ public class BenchmarkFilterAnalysis
     final ArrayList<FractionalAssignment[]> allAssignments =
         new ArrayList<>(fitResultData.resultsList.length);
     multiPathFilter.fractionScoreSubset(fitResultData.resultsList,
-        createFailCounter(settings.failCount), fitResultData.countActual,
-        allAssignments, null, coordinateStore);
+        createFailCounter(settings.failCount), fitResultData.countActual, allAssignments, null,
+        coordinateStore);
     return allAssignments;
   }
 
@@ -7701,8 +7706,8 @@ public class BenchmarkFilterAnalysis
   }
 
   private PreprocessedPeakResult[] filterResults(final MultiPathFilter multiPathFilter) {
-    return multiPathFilter.filter(fitResultData.resultsList,
-        createFailCounter(settings.failCount), true, coordinateStore);
+    return multiPathFilter.filter(fitResultData.resultsList, createFailCounter(settings.failCount),
+        true, coordinateStore);
   }
 
   private CoordinateStore createCoordinateStore() {

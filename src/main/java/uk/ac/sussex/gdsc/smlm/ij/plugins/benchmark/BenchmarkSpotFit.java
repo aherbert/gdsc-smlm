@@ -883,6 +883,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final ParameterisedFitJob job = new ParameterisedFitJob(parameters, frame, data, bounds);
       fitWorker.run(job); // Results will be stored in the fit job
 
+      // TODO - Check how may candidates after the maxCandidate are fit (because a good estimate
+      // was stored during multi-fit).
+      // This may be taking a long time to perform. Somehow we need to speed up fitting during
+      // the iteration.
+
+      // Check why we need to store all the fit results.
       for (int i = 0; i < totalCandidates; i++) {
         fitResult[i] = job.getMultiPathFitResult(i);
       }
@@ -894,9 +900,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final double[] zPosition = new double[actual.length];
       SpotMatch[] match = new SpotMatch[actual.length];
       int matchCount = 0;
-      final RampedScore rampedScore = new RampedScore(lowerDistanceInPixels, distanceInPixels);
+      final RampedScore rampedScore = RampedScore.of(distanceInPixels, lowerDistanceInPixels, false);
       final RampedScore signalScore = (settings.signalFactor > 0)
-          ? new RampedScore(settings.lowerSignalFactor, settings.signalFactor)
+          ? RampedScore.of(settings.signalFactor, settings.lowerSignalFactor, false)
           : null;
       if (actual.length > 0) {
         // Build a list of the coordinates z-depth using the PeakResultPoint
@@ -906,6 +912,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         }
 
         // Allow for doublets the predicted array
+        // TODO - Check why we need to store all candidates in the predicted list. Those that are
+        // not fitted are stored as MultiPathPoint.SPOT. Why do we need these?
         final ArrayList<MultiPathPoint> predicted = new ArrayList<>(totalCandidates * 2);
         matches.clear();
 
@@ -918,9 +926,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
           add(predicted, fitResult[i].getSingleFitResult(), MultiPathPoint.SINGLE, i);
           add(predicted, fitResult[i].getMultiFitResult(), MultiPathPoint.MULTI, i);
           add(predicted, fitResult[i].getDoubletFitResult(), MultiPathPoint.DOUBLET, i);
+
+          // TODO - why is this not MULTI_DOUBLET?
+
           add(predicted, fitResult[i].getMultiDoubletFitResult(), MultiPathPoint.MULTI, i);
           if (size == predicted.size()) {
             // Use the candidate position instead
+            // TODO - Why store these?
             predicted.add(new MultiPathPoint(spots[i].x + 0.5f, spots[i].y + 0.5f, i,
                 MultiPathPoint.SPOT, i));
           }
@@ -1215,7 +1227,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     gd.addSlider("Fraction_positives", 50, 100, settings.fractionPositives);
     gd.addSlider("Fraction_negatives_after_positives", 0, 100,
         settings.fractionNegativesAfterAllPositives);
-    gd.addSlider("Min_negatives_after_positives", 0, 10, settings.negativesAfterAllPositives);
+    gd.addSlider("Min_negatives_after_positives", 0, 30, settings.negativesAfterAllPositives);
     gd.addSlider("Match_distance", 0.5, 3.5, settings.distance);
     gd.addSlider("Lower_distance", 0, 3.5, settings.lowerDistance);
     gd.addSlider("Match_signal", 0, 3.5, settings.signalFactor);

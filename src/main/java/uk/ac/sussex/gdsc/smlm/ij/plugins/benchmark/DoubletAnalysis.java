@@ -596,9 +596,9 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       resultHistogram = new int[spotHistogram.length];
       neighbourHistogram = new int[3][spotHistogram.length];
       almostNeighbourHistogram = new int[3][spotHistogram.length];
-      rampedScore = new RampedScore(settings.lowerDistance, settings.matchDistance);
+      rampedScore = RampedScore.of(settings.matchDistance, settings.lowerDistance, false);
       if (settings.signalFactor > 0) {
-        signalScore = new RampedScore(settings.lowerSignalFactor, settings.signalFactor);
+        signalScore = RampedScore.of(settings.signalFactor, settings.lowerSignalFactor, false);
       }
     }
 

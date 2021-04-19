@@ -913,9 +913,9 @@ public class BenchmarkSpotFilter implements PlugIn {
         final int analysisBorder = border.x;
         final int xlimit = border.x + border.width;
         final int ylimit = border.y + border.height;
-        // Create a Tukey window weighting from the border to the edge.
+        // Create a window weighting from the border to the edge.
         // The type of weighting could be user configurable, e.g. Hard, Tukey, Linear, etc.
-        final RampedScore weighting = new RampedScore(0, analysisBorder);
+        final RampedScore weighting = RampedScore.of(analysisBorder, 0, false);
         for (int i = 0; i < actual.length; i++) {
           final PsfSpot c = actual[i];
           actualWeight[i] =
@@ -975,9 +975,9 @@ public class BenchmarkSpotFilter implements PlugIn {
         final SpotCoordinate[] predicted = getCoordinates(spots);
 
         // Use the distance to the true location to score the candidate
-        final RampedScore rampedScore = new RampedScore(lowerMatchDistance, matchDistance);
+        final RampedScore rampedScore = RampedScore.of(matchDistance, lowerMatchDistance, false);
         final RampedScore rampedSignalScore = (settings.upperSignalFactor > 0)
-            ? new RampedScore(settings.lowerSignalFactor, settings.upperSignalFactor)
+            ? RampedScore.of(settings.upperSignalFactor, settings.lowerSignalFactor, false)
             : null;
 
         // Candidates may be close to many localisations. In order to compute the signal
