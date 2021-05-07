@@ -43,6 +43,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.MultiDialog;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -57,10 +58,13 @@ import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.count.Counter;
+import uk.ac.sussex.gdsc.smlm.results.count.FrameCounter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.results.procedures.XyzrResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 import us.hebi.matlab.mat.format.Mat5;
+import us.hebi.matlab.mat.types.Cell;
 import us.hebi.matlab.mat.types.MatFile;
 import us.hebi.matlab.mat.types.Matrix;
 
@@ -85,8 +89,9 @@ public class TraceExporter implements PlugIn {
 
     static {
       formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
-      // We do not want capitalisation of 'ana'
+      // We do not want capitalisation of 'ana' or 'vb'
       formatNames[ExportFormat.ANA_DNA.ordinal()] = ExportFormat.ANA_DNA.getName();
+      formatNames[ExportFormat.VB_SPT.ordinal()] = ExportFormat.VB_SPT.getName();
     }
 
     String directory;
@@ -136,7 +141,7 @@ public class TraceExporter implements PlugIn {
   }
 
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On"), ANA_DNA("anaDDA");
+    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT");
 
     private final String name;
 
@@ -302,7 +307,9 @@ public class TraceExporter implements PlugIn {
       });
     }
 
-    if (settings.format == 1) {
+    if (settings.format == 2) {
+      exportVbSpt(results);
+    } else if (settings.format == 1) {
       exportAnaDda(results);
     } else {
       exportSpotOn(results);
@@ -523,6 +530,90 @@ public class TraceExporter implements PlugIn {
     } catch (final IOException ex) {
       handleException(ex);
     }
+  }
+
+
+  @SuppressWarnings("resource")
+  private void exportVbSpt(MemoryPeakResults results) {
+    // vbSPT file format:
+    // https://sourceforge.net/projects/vbspt/
+    // Matlab matrix file (.mat) containing at least one variable that is a cell
+    // array where each element, representing a trajectory, is a matrix
+    // where the rows define the coordinates in one, two or three dimensions
+    // in subsequent timesteps. The number of dimensions to be used for the
+    // analysis will be set by the runinputfile.
+    // The units are arbitrary but vbSPT starting estimates must be in the same
+    // units. Either nm or μm are recommended.
+    // 3 columns for n rows of localisations
+    // 1. x coordinate (μm)
+    // 2. y coordinate (μm)
+    // 3. z coordinate (μm)
+
+    // Count the IDs. Each new result ID will increment the count.
+    final FrameCounter idCounter = new FrameCounter(results.getFirst().getId() - 1);
+    results.forEach((PeakResultProcedure) result -> {
+      if (idCounter.advance(result.getId())) {
+        idCounter.increment();
+      }
+    });
+
+    // Create the cell array as 1xN
+    final Cell out = Mat5.newCell(1, idCounter.getCount());
+
+    // This will reset the counter to zero and ensure the current frame does not match
+    // in the event of a single track
+    idCounter.advanceAndReset(idCounter.currentFrame() + 1);
+
+    final boolean is3d = results.is3D();
+
+    // Write the tracks
+    final LocalList<double[]> list = new LocalList<>();
+    results.forEach(DistanceUnit.UM, (XyzrResultProcedure) (x, y, z, result) -> {
+      if (idCounter.advance(result.getId())) {
+        addTrack(out, idCounter.getCount() - 1, list, is3d);
+        idCounter.increment();
+        list.clear();
+      }
+      list.add(new double[] {x, y, z});
+    });
+    addTrack(out, idCounter.getCount() - 1, list, is3d);
+
+    try (MatFile matFile = Mat5.newMatFile()) {
+      matFile.addArray("tracks", out);
+      Mat5.writeToFile(matFile, Paths.get(settings.directory, results.getName() + ".mat").toFile());
+    } catch (final IOException ex) {
+      handleException(ex);
+    }
+  }
+
+  /**
+   * Adds the track to the cell at the given row index.
+   *
+   * @param cell the output cell
+   * @param index the index
+   * @param list the list
+   * @param is3d true if the data is 3D, otherwise write 2D data
+   */
+  @SuppressWarnings("resource")
+  private static void addTrack(Cell cell, int index, LocalList<double[]> list, boolean is3d) {
+    if (list.isEmpty()) {
+      return;
+    }
+    // Create the matrix
+    final int rows = list.size();
+    final Matrix m = Mat5.newMatrix(rows, is3d ? 3 : 2);
+    // Set up column offsets
+    final int col1 = rows * 1;
+    final int col2 = rows * 2;
+    for (int i = 0; i < rows; i++) {
+      final double[] xyz = list.unsafeGet(i);
+      m.setDouble(i, xyz[0]);
+      m.setDouble(i + col1, xyz[1]);
+      if (is3d) {
+        m.setDouble(i + col2, xyz[2]);
+      }
+    }
+    cell.set(index, m);
   }
 
   private static void handleException(Exception ex) {

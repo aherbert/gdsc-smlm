@@ -29,6 +29,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.hebi.matlab.mat.format.Mat5;
+import us.hebi.matlab.mat.types.Cell;
 import us.hebi.matlab.mat.types.MatFile;
 import us.hebi.matlab.mat.types.Matrix;
 import us.hebi.matlab.mat.types.Source;
@@ -36,12 +37,12 @@ import us.hebi.matlab.mat.types.Sources;
 
 @SuppressWarnings({"javadoc"})
 class TraceExporterTest {
+  @SuppressWarnings("resource")
   @Test
   void canReadWriteMatFile() throws IOException {
     // Write a double matrix
     final int rows = 4;
     final int cols = 5;
-    @SuppressWarnings("resource")
     final Matrix out = Mat5.newMatrix(rows, cols);
 
     // row, col
@@ -63,19 +64,64 @@ class TraceExporterTest {
     file.deleteOnExit();
 
     final String name = "tracks";
-    @SuppressWarnings("resource")
     final MatFile matFile = Mat5.newMatFile().addArray(name, out);
     Mat5.writeToFile(matFile, file);
 
     try (Source source = Sources.openFile(file)) {
-      @SuppressWarnings("resource")
       final MatFile mat = Mat5.newReader(source).readMat();
-      @SuppressWarnings("resource")
       final Matrix in = mat.getMatrix(name);
       Assertions.assertEquals(rows, in.getNumRows());
       Assertions.assertEquals(cols, in.getNumCols());
       for (int i = 0, size = rows * cols; i < size; i++) {
         Assertions.assertEquals(i + 1, in.getDouble(i));
+      }
+    }
+  }
+
+  @SuppressWarnings("resource")
+  @Test
+  void canReadWriteMatCellFile() throws IOException {
+    // Create a cell: cell(1,2)
+    final int crows = 1;
+    final int ccols = 2;
+    final Cell cell = Mat5.newCell(crows, ccols);
+
+    // Write a matrix to two cells
+    final int rows1 = 2;
+    final int cols1 = 3;
+    final Matrix m1 = Mat5.newMatrix(rows1, cols1);
+    for (int i = 0, size = rows1 * cols1; i < size; i++) {
+      m1.setDouble(i, i + 1);
+    }
+    final int rows2 = 4;
+    final int cols2 = 3;
+    final Matrix m2 = Mat5.newMatrix(rows2, cols2);
+    for (int i = 0, size = rows2 * cols2; i < size; i++) {
+      m2.setDouble(i, i + 10);
+    }
+    // zero-indexed not 1-indexed as per matlab
+    cell.set(0, 0, m1);
+    cell.set(0, 1, m2);
+
+    final File file = File.createTempFile("double", ".mat");
+    file.deleteOnExit();
+
+    final String name = "tracks";
+    final MatFile matFile = Mat5.newMatFile().addArray(name, cell);
+    Mat5.writeToFile(matFile, file);
+
+    try (Source source = Sources.openFile(file)) {
+      final MatFile mat = Mat5.newReader(source).readMat();
+      final Cell in = mat.getCell(name);
+      Assertions.assertEquals(crows, in.getNumRows());
+      Assertions.assertEquals(ccols, in.getNumCols());
+      final Matrix m1b = in.getMatrix(0, 0);
+      for (int i = 0, size = rows1 * cols1; i < size; i++) {
+        Assertions.assertEquals(i + 1, m1b.getDouble(i));
+      }
+      final Matrix m2b = in.getMatrix(0, 1);
+      for (int i = 0, size = rows2 * cols2; i < size; i++) {
+        Assertions.assertEquals(i + 10, m2b.getDouble(i));
       }
     }
   }

@@ -812,6 +812,34 @@ This will create the variable ``tracks`` containing the localisation data. To av
     input = load('/path/to/file.mat')
     input.tracks
 
+vbSPT Localisations
+^^^^^^^^^^^^^^^^^^^
+
+The `vbSPT <https://sourceforge.net/projects/vbspt/>`_ localisations file format. This is a Matlab matrix file containing a cell array where each element, representing a trajectory, is a matrix
+where the rows define the coordinates in two or three dimensions at each timestep. Each matrix entry of the cell array has the following columns:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Column
+     - Description
+
+   * - X
+     - The x position (in |micro|\ m).
+
+   * - Y
+     - The y position (in |micro|\ m).
+
+   * - Z
+     - The z position (in |micro|\ m). Only included if the results set contains non-zero z coordinates.
+
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single cell array named ``tracks`` of 1 row by `n` columns, where `n` is the number of tracks. It can be specified as the input within the ``vbSPT`` run input file using::
+
+    % Inputs
+    inputfile = '/path/to/file.mat';
+    trajectoryfield = 'tracks';
+
 
 .. index:: Exporting Datasets
 
