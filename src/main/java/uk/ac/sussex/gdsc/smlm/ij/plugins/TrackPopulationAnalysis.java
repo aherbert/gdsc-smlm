@@ -24,9 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -203,6 +205,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean showMsdOverT;
     String dataSaveName;
     boolean dataSaveSelected;
+    double angleMinJumpDistance;
 
     Settings() {
       // Set defaults
@@ -224,6 +227,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       Arrays.fill(showFeaturePlot, true);
       nmPerPixel = 10;
       minDisplaySize = 400;
+      angleMinJumpDistance = 125;
     }
 
     Settings(Settings source) {
@@ -251,6 +255,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.showMsdOverT = source.showMsdOverT;
       this.dataSaveName = source.dataSaveName;
       this.dataSaveSelected = source.dataSaveSelected;
+      this.angleMinJumpDistance = source.angleMinJumpDistance;
     }
 
     Settings copy() {
@@ -846,7 +851,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       if (data.isEmpty()) {
         return;
       }
-      final TIntObjectHashMap<TDoubleArrayList> angleMap = getAngleMap(data);
+      // Exclude angles between jumps under a threshold. This excludes jumps that are
+      // within the localisation precision for static molecules.
+      // Show dialog to choose the track data
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(getTitle() + " options");
+      gd.addMessage("Specify the minimum distance for both jumps to include their angle.");
+      gd.addSlider("Min_jump_distance (nm)", 50, 200, settings.angleMinJumpDistance);
+      gd.showDialog();
+      if (gd.wasCanceled()) {
+        return;
+      }
+      settings.angleMinJumpDistance = gd.getNextNumber();
+
+      final TIntObjectHashMap<TDoubleArrayList> angleMap =
+          getAngleMap(data, distanceConverter, settings.angleMinJumpDistance);
       final WindowOrganiser wo = new WindowOrganiser();
       // Histogram each angle bin from 0 to 360 in 15 degree increments (24 bins).
       // The limits max is inclusive so subtract a single bin width to ensure there is no empty
@@ -866,7 +884,10 @@ public class TrackPopulationAnalysis implements PlugIn {
             .setData(DoubleData.wrap(angles.toArray()))
             .build();
         // @formatter:on
-        plot.show(wo);
+        if (plot.show(wo) == null) {
+          // Not enough data
+          continue;
+        }
         // Get the measure of asymmetry.
         // See Izeddin, et al (2014)
         // eLife 2014;3:e02230 DOI: 10.7554/eLife.02230
@@ -875,10 +896,13 @@ public class TrackPopulationAnalysis implements PlugIn {
         final double fwd = y[0] + y[1] + y[y.length - 1] + y[y.length - 2];
         final int mid = y.length / 2;
         final double bwd = y[mid] + y[mid + 1] + y[mid - 1] + y[mid - 2];
+        // log2( (0 +/- 30) / (180 +/- 30) )
         final double asymmetryCoefficient = Math.log(fwd / bwd) / Math.log(2);
-        plot.getPlot().addLabel(0, 0,
-            "Asymmetry Coefficient = " + MathUtils.rounded(asymmetryCoefficient));
-        plot.getPlot().updateImage();
+        final Plot p = plot.getPlot();
+        p.addLabel(0, 0, String.format("Asymmetry Coefficient = %s (n = %d)",
+            MathUtils.rounded(asymmetryCoefficient), angles.size()));
+        p.setOptions("xinterval=45");
+        p.updateImage();
       }
       wo.tile();
     }
@@ -888,19 +912,33 @@ public class TrackPopulationAnalysis implements PlugIn {
      * the range {@code [0, 1]}.
      *
      * @param data the data
+     * @param distanceConverter the distance converter (converts native units to um)
+     * @param minJumpDistance the minimum distance for each jump to include the angle (in nm)
      * @return the angle map
      */
-    private static TIntObjectHashMap<TDoubleArrayList> getAngleMap(List<TrackData> data) {
+    private static TIntObjectHashMap<TDoubleArrayList> getAngleMap(List<TrackData> data,
+        TypeConverter<DistanceUnit> distanceConverter, double minJumpDistance) {
       final TIntObjectHashMap<TDoubleArrayList> angleMap = new TIntObjectHashMap<>();
+      // Set the small jump distance using a squared threshold.
+      // Convert min jump distance in nm to the native units.
+      // Note: The distance converter is for micrometres.
+      final double min2 = minJumpDistance <= 0 ? 0
+          : MathUtils.pow2(distanceConverter.convertBack(minJumpDistance / 1000));
+      final TIntIntHashMap excluded = new TIntIntHashMap();
       data.forEach(track -> {
         final int[] component = track.component;
         final Trace trace = track.trace;
         final int offset = (trace.size() - component.length) / 2;
         for (int i = 0; i < component.length; i++) {
-          // Compute an angle in range [0, 360]
           final PeakResult p1 = trace.get(i + offset - 1);
           final PeakResult p2 = trace.get(i + offset);
           final PeakResult p3 = trace.get(i + offset + 1);
+          // Exclude small jump distances
+          if (min2 > 0 && (p1.distance2(p2) < min2 || p2.distance2(p3) < min2)) {
+            // Count the number of excluded angles
+            excluded.adjustOrPutValue(component[i], 1, 1);
+            continue;
+          }
           final double x1 = p1.getXPosition();
           final double y1 = p1.getYPosition();
           final double x2 = p2.getXPosition();
@@ -916,6 +954,25 @@ public class TrackPopulationAnalysis implements PlugIn {
           list.add(clockwiseTurns(angle(x1, y1, x2, y2), angle(x2, y2, x3, y3)));
         }
       });
+
+      // Report the number excluded
+      if (min2 > 0) {
+        angleMap.forEachKey(key -> {
+          excluded.adjustOrPutValue(key, 0, 0);
+          return true;
+        });
+        final int[] comp = excluded.keys();
+        Arrays.sort(comp);
+        ImageJUtils.log("Jump angle analysis: Min distance=%.1fnm", minJumpDistance);
+        for (final int c : comp) {
+          final int ex = excluded.get(c);
+          final TDoubleList list = angleMap.get(c);
+          final int total = ex + (list == null ? 0 : list.size());
+          ImageJUtils.log("Component %d: Excluded %d / %d angles (%.2f%%)", c, ex, total,
+              100.0 * ex / total);
+        }
+      }
+
       return angleMap;
     }
 
@@ -1965,7 +2022,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         new TrackDataTableModel(list), model, calibration, colourMap);
     frame.setTitle(TITLE + " Track Data");
     // Single selection is required for plotting. But some actions can work on multiple selection.
-    //frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    // frame.table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     frame.setVisible(true);
   }
 
