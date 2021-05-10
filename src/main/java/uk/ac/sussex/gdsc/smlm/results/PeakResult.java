@@ -270,6 +270,13 @@ public class PeakResult implements Serializable {
     } else if (r2.hasId()) {
       return false;
     }
+    if (r1.hasCategory()) {
+      if (!r2.hasCategory() || r1.getCategory() != r2.getCategory()) {
+        return false;
+      }
+    } else if (r2.hasCategory()) {
+      return false;
+    }
     if (r1.hasEndFrame()) {
       if (!r2.hasEndFrame() || r1.getEndFrame() != r2.getEndFrame()) {
         return false;
@@ -589,6 +596,24 @@ public class PeakResult implements Serializable {
    * @return The results identifier
    */
   public int getId() {
+    return 0;
+  }
+
+  /**
+   * Checks for category. Derived classes can override this.
+   *
+   * @return true, if successful
+   */
+  public boolean hasCategory() {
+    return false;
+  }
+
+  /**
+   * Gets the category. Default = 0. Derived classes can override this.
+   *
+   * @return The results category
+   */
+  public int getCategory() {
     return 0;
   }
 

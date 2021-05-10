@@ -35,7 +35,7 @@ class PeakResultTest {
   @SeededTest
   void sameResultIsEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngUtils.create(seed.getSeed());
-    final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
+    final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false, false);
     final PeakResult p = r1[0];
     Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
     Assertions.assertTrue(PeakResult.equals(null, null), "Null object");
@@ -49,16 +49,18 @@ class PeakResultTest {
     final boolean[] both = {true, false};
     for (final boolean withDeviations : both) {
       for (final boolean withId : both) {
-        for (final boolean withEndFrame : both) {
-          for (final boolean withPrecision : both) {
-            rng = RngUtils.create(seed.getSeed());
-            final PeakResult[] r1 =
-                createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
-            rng = RngUtils.create(seed.getSeed());
-            final PeakResult[] r2 =
-                createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
-            for (int i = 0; i < r1.length; i++) {
-              Assertions.assertTrue(PeakResult.equals(r1[i], r2[i]));
+        for (final boolean withCategory : both) {
+          for (final boolean withEndFrame : both) {
+            for (final boolean withPrecision : both) {
+              rng = RngUtils.create(seed.getSeed());
+              final PeakResult[] r1 = createResults(rng, size, n, withDeviations, withId,
+                  withCategory, withEndFrame, withPrecision);
+              rng = RngUtils.create(seed.getSeed());
+              final PeakResult[] r2 = createResults(rng, size, n, withDeviations, withId,
+                  withCategory, withEndFrame, withPrecision);
+              for (int i = 0; i < r1.length; i++) {
+                Assertions.assertTrue(PeakResult.equals(r1[i], r2[i]));
+              }
             }
           }
         }
@@ -74,15 +76,17 @@ class PeakResultTest {
     final boolean[] both = {true, false};
     for (final boolean withDeviations : both) {
       for (final boolean withId : both) {
-        for (final boolean withEndFrame : both) {
-          for (final boolean withPrecision : both) {
-            rng = RngUtils.create(seed.getSeed());
-            final PeakResult[] r1 =
-                createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
-            final PeakResult[] r2 =
-                createResults(rng, size, n, withDeviations, withId, withEndFrame, withPrecision);
-            for (int i = 0; i < r1.length; i++) {
-              Assertions.assertFalse(PeakResult.equals(r1[i], r2[i]));
+        for (final boolean withCategory : both) {
+          for (final boolean withEndFrame : both) {
+            for (final boolean withPrecision : both) {
+              rng = RngUtils.create(seed.getSeed());
+              final PeakResult[] r1 = createResults(rng, size, n, withDeviations, withId,
+                  withCategory, withEndFrame, withPrecision);
+              final PeakResult[] r2 = createResults(rng, size, n, withDeviations, withId,
+                  withCategory, withEndFrame, withPrecision);
+              for (int i = 0; i < r1.length; i++) {
+                Assertions.assertFalse(PeakResult.equals(r1[i], r2[i]));
+              }
             }
           }
         }
@@ -91,7 +95,8 @@ class PeakResultTest {
   }
 
   private static PeakResult[] createResults(UniformRandomProvider rng, int size, int np,
-      boolean withDeviations, boolean withId, boolean withEndFrame, boolean withPrecision) {
+      boolean withDeviations, boolean withId, boolean withCategory, boolean withEndFrame,
+      boolean withPrecision) {
     final ArrayPeakResultStore store = new ArrayPeakResultStore(10);
     while (size-- > 0) {
       final float[] params = createParams(np, rng);
@@ -101,6 +106,9 @@ class PeakResultTest {
               rng.nextDouble(), rng.nextFloat(), rng.nextFloat(), params, paramsDev);
       if (withId) {
         p.setId(rng.nextInt());
+      }
+      if (withCategory) {
+        p.setCategory(rng.nextInt());
       }
       if (withEndFrame) {
         // p.setEndFrame(p.getFrame() + 1 + rng.nextInt(5));

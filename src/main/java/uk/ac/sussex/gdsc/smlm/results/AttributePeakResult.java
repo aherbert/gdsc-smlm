@@ -37,9 +37,11 @@ public class AttributePeakResult extends PeakResult {
   private static final int FIELD_ID = 0x01;
   private static final int FIELD_END_FRAME = 0x02;
   private static final int FIELD_PRECISION = 0x04;
+  private static final int FIELD_CATEGORY = 0x08;
   private int fields;
 
   private int id;
+  private int category;
   private int endFrame;
   private float precision;
 
@@ -58,8 +60,17 @@ public class AttributePeakResult extends PeakResult {
     return ((fields & FIELD_PRECISION) == FIELD_PRECISION);
   }
 
+  @Override
+  public boolean hasCategory() {
+    return ((fields & FIELD_CATEGORY) == FIELD_CATEGORY);
+  }
+
   private void setHasId() {
     fields |= FIELD_ID;
+  }
+
+  private void setHasCategory() {
+    fields |= FIELD_CATEGORY;
   }
 
   private void setHasEndFrame() {
@@ -75,6 +86,13 @@ public class AttributePeakResult extends PeakResult {
    */
   public void clearHasId() {
     fields = fields & ~FIELD_ID;
+  }
+
+  /**
+   * Clear has category.
+   */
+  public void clearHasCategory() {
+    fields = fields & ~FIELD_CATEGORY;
   }
 
   /**
@@ -108,6 +126,25 @@ public class AttributePeakResult extends PeakResult {
     // Allow ID to be anything, including zero
     setHasId();
     this.id = id;
+  }
+
+  @Override
+  public int getCategory() {
+    if (hasCategory()) {
+      return category;
+    }
+    return super.getCategory();
+  }
+
+  /**
+   * Sets the category.
+   *
+   * @param category the new category
+   */
+  public void setCategory(int category) {
+    // Allow category to be anything, including zero
+    setHasCategory();
+    this.category = category;
   }
 
   @Override
@@ -217,6 +254,9 @@ public class AttributePeakResult extends PeakResult {
     super(peakResult);
     if (peakResult.hasId()) {
       setId(peakResult.getId());
+    }
+    if (peakResult.hasCategory()) {
+      setCategory(peakResult.getCategory());
     }
     if (peakResult.hasEndFrame()) {
       setEndFrame(peakResult.getEndFrame());
