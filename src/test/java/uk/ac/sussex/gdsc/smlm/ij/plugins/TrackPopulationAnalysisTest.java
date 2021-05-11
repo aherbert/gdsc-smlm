@@ -203,7 +203,7 @@ class TrackPopulationAnalysisTest {
         final double ll2a = ef.value(mu + delta);
         final double ll2b = ef.value(mu - delta);
         final double gradient = (ll2a - ll2b) / (2 * delta);
-        Assertions.assertEquals(gradient, ef.gradient(mu), Math.abs(gradient) * 1e-5, "Gradient");
+        Assertions.assertEquals(gradient, ef.gradient(mu), Math.abs(gradient) * 1e-4, "Gradient");
       }
     }
   }
