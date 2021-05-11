@@ -29,28 +29,38 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public abstract class SmlmFilePeakResults extends FilePeakResults {
   /** The flag for the end frame. Used in the file format version string. */
-  public static final int FLAG_END_FRAME = 0x0001;
+  public static final int FLAG_END_FRAME = 0x1;
   /** The flag for the id. Used in the file format version string. */
-  public static final int FLAG_ID = 0x0002;
+  public static final int FLAG_ID = 0x2;
   /** The flag for the precision. Used in the file format version string. */
-  public static final int FLAG_PRECISION = 0x0004;
+  public static final int FLAG_PRECISION = 0x4;
+  /** The flag for the category. Used in the file format version string. */
+  public static final int FLAG_CATEGORY = 0x8;
 
   /**
    * The version.
    *
-   * <ul> <li>V1 = Version 1 had signal and amplitude in the results. It did not have the version
-   * string. <li>V2 = Version 2 has only signal in the results <li>V3 = Version 3 has an improved
-   * calibration header with dynamic fields <li>V4 = Version 4 added mean intensity field to the
-   * standard data </ul>
+   * <ul>
+   *
+   * <li>V1 = Version 1 had signal and amplitude in the results. It did not have the version string.
+   *
+   * <li>V2 = Version 2 has only signal in the results
+   *
+   * <li>V3 = Version 3 has an improved calibration header with dynamic fields
+   *
+   * <li>V4 = Version 4 added mean intensity field to the standard data
+   *
+   * </ul>
    */
   public static final int VERSION = 4;
 
   private final boolean showDeviations;
   private final boolean showEndFrame;
   private final boolean showId;
+  private final boolean showCategory;
   private final boolean showPrecision;
 
-  /** The peak id column name. */
+  /** The peak number column name. */
   protected String peakIdColumnName = "Frame";
 
   /**
@@ -108,11 +118,27 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
    */
   public SmlmFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame,
       boolean showId, boolean showPrecision) {
+    this(filename, showDeviations, showEndFrame, showId, showPrecision, false);
+  }
+
+  /**
+   * Instantiates a new SMLM file peak results.
+   *
+   * @param filename the filename
+   * @param showDeviations Set to true to show deviations
+   * @param showEndFrame Set to true to show the end frame
+   * @param showId Set to true to show the id
+   * @param showPrecision Set to true to show the precision
+   * @param showCategory Set to true to show the category
+   */
+  public SmlmFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame,
+      boolean showId, boolean showPrecision, boolean showCategory) {
     super(filename);
     this.showDeviations = showDeviations;
     this.showEndFrame = showEndFrame;
     this.showId = showId;
     this.showPrecision = showPrecision;
+    this.showCategory = showCategory;
   }
 
   /**
@@ -132,7 +158,7 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
    * Check size of the parameter arrays. The array size must match the number of parameters.
    *
    * @param numberOfParams the number of params
-   * @param a the a
+   * @param a the parameter array
    * @throws IllegalArgumentException if the parameter array is the wrong size
    */
   protected static void checkSize(int numberOfParams, float[] a) {
@@ -163,6 +189,9 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
     }
     if (isShowPrecision()) {
       extended += FLAG_PRECISION;
+    }
+    if (isShowCategory()) {
+      extended += FLAG_CATEGORY;
     }
     sb.append(extended);
     sb.append(".V").append(VERSION);
@@ -221,5 +250,14 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
    */
   public boolean isShowPrecision() {
     return showPrecision;
+  }
+
+  /**
+   * Checks if the records contain a result category.
+   *
+   * @return True if the records contain a result category
+   */
+  public boolean isShowCategory() {
+    return showCategory;
   }
 }

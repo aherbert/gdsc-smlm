@@ -221,6 +221,7 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
     builder.setNoise(noise);
     builder.setMeanIntensity(meanIntensity);
     builder.setOriginalValue(origValue);
+
     if (paramsStdDev != null) {
       addNewParamStdDevs(builder, paramsStdDev);
     }
@@ -232,43 +233,72 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
 
   @Override
   public void add(PeakResult result) {
-    final float[] params = result.getParameters();
-
     final Spot.Builder builder = Spot.newBuilder();
-    builder.setMolecule(id.incrementAndGet());
+    addStandardFields(builder, result);
+    if (result.hasParameterDeviations()) {
+      addNewParamStdDevs(builder, result.getParameterDeviations());
+    }
+    writeResult(1, builder.build());
+  }
+
+  /**
+   * Adds the standard fields from the result. This adds all the fields except the parameter
+   * deviations. A new Spot.Builder can add the deviations directly. An existing Spot.Builder
+   * can recycle the array space for the deviations or clear it.
+   *
+   * @param builder the builder
+   * @param result the result
+   * @see #addNewParamStdDevs(Builder, float[])
+   * @see #addParamStdDevs(Builder, float[])
+   */
+  private void addStandardFields(Spot.Builder builder, PeakResult result) {
     builder.setChannel(1);
     builder.setFluorophoreType(1);
     builder.setFrame(result.getFrame());
     builder.setXPosition(result.getOrigX());
     builder.setYPosition(result.getOrigY());
 
-    setParam(params, builder);
+    setParam(result.getParameters(), builder);
+
+    builder.setError(result.getError());
+    builder.setNoise(result.getNoise());
+    builder.setMeanIntensity(result.getMeanIntensity());
+    builder.setOriginalValue(result.getOrigValue());
+
+    if (result.hasId()) {
+      // Currently ID is used in the GDSC SMLM code for tracing molecules and
+      // also for clustering localisations. Typically localisations are traced to
+      // a single centroid representing the molecule. This dataset can then be clustered.
+      // This may change in the future to separate the two cases.
+      builder.setMolecule(result.getId());
+      builder.setCluster(result.getId());
+    } else {
+      // Assume all results have no ID and assign a different molecule ID to each localisation
+      builder.setMolecule(id.incrementAndGet());
+      builder.clearCluster();
+    }
+
+    if (result.hasCategory()) {
+      builder.setCategory(result.getCategory());
+    } else {
+      builder.clearCategory();
+    }
+
+    if (result.hasEndFrame()) {
+      builder.setEndFrame(result.getEndFrame());
+    } else {
+      builder.clearEndFrame();
+    }
 
     if (result.hasPrecision()) {
       // Use the actual precision
       final float precision = (float) result.getPrecision();
       builder.setXPrecision(precision);
       builder.setYPrecision(precision);
+    } else {
+      builder.clearXPrecision();
+      builder.clearYPrecision();
     }
-
-    if (result.hasId()) {
-      builder.setCluster(result.getId());
-    }
-
-    builder.setError(result.getError());
-    builder.setNoise(result.getNoise());
-    builder.setMeanIntensity(result.getMeanIntensity());
-    if (result.hasEndFrame()) {
-      builder.setEndFrame(result.getEndFrame());
-    }
-    builder.setOriginalValue(result.getOrigValue());
-    if (result.hasParameterDeviations()) {
-      addNewParamStdDevs(builder, result.getParameterDeviations());
-    }
-
-    final Spot spot = builder.build();
-
-    writeResult(1, spot);
   }
 
   /**
@@ -330,39 +360,7 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
     int count = 0;
     final Spot.Builder builder = Spot.newBuilder();
     for (final PeakResult result : results) {
-      final float[] params = result.getParameters();
-
-      builder.setMolecule(id.incrementAndGet());
-      builder.setChannel(1);
-      builder.setFluorophoreType(1);
-      builder.setFrame(result.getFrame());
-      builder.setXPosition(result.getOrigX());
-      builder.setYPosition(result.getOrigY());
-
-      setParam(params, builder);
-
-      if (result.hasPrecision()) {
-        // Use the actual precision
-        final float precision = (float) result.getPrecision();
-        builder.setXPrecision(precision);
-        builder.setYPrecision(precision);
-      }
-
-      if (result.hasId()) {
-        builder.setCluster(result.getId());
-      } else {
-        builder.clearCluster();
-      }
-
-      builder.setError(result.getError());
-      builder.setNoise(result.getNoise());
-      builder.setMeanIntensity(result.getMeanIntensity());
-      if (result.hasEndFrame()) {
-        builder.setEndFrame(result.getEndFrame());
-      } else {
-        builder.clearEndFrame();
-      }
-      builder.setOriginalValue(result.getOrigValue());
+      addStandardFields(builder, result);
       addParamStdDevs(builder, result.getParameterDeviations());
 
       spots[count++] = builder.build();

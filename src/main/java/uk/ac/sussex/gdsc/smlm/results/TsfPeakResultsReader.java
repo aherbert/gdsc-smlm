@@ -352,14 +352,16 @@ public class TsfPeakResultsReader {
         float noise = 0;
         float meanIntensity = 0;
         float[] paramsStdDev = null;
-        int id = 0;
-        int endFrame = frame;
+        int id = Integer.MIN_VALUE;
+        int category = Integer.MIN_VALUE;
+        int endFrame = Integer.MIN_VALUE;
 
         if (isGdsc) {
           error = spot.getError();
           noise = spot.getNoise();
           meanIntensity = spot.getMeanIntensity();
           id = spot.getCluster();
+          category = spot.getCategory();
           origValue = spot.getOriginalValue();
           endFrame = spot.getEndFrame();
           if (spot.getParamStdDevsCount() != 0) {
@@ -369,16 +371,29 @@ public class TsfPeakResultsReader {
             }
           }
         } else if (spot.hasCluster()) {
-          // Use the standard cluster field for the ID
+          // Use the standard cluster field for the ID.
+          // Note: The GDSC SMLM results do not distinguish molecule or cluster so here
+          // we pick cluster first.
           id = spot.getCluster();
+        } else if (spot.hasMolecule()) {
+          // If no cluster then use the molecule.
+          // Note: This may just be a natural series with a unique number for each localisation.
+          id = spot.getMolecule();
         }
 
         // Allow storing any of the optional attributes
         final AttributePeakResult peakResult = new AttributePeakResult(frame, origX, origY,
             origValue, error, noise, meanIntensity, params, paramsStdDev);
 
-        peakResult.setEndFrame(endFrame);
-        peakResult.setId(id);
+        if (id != Integer.MIN_VALUE) {
+          peakResult.setId(id);
+        }
+        if (category != Integer.MIN_VALUE) {
+          peakResult.setCategory(category);
+        }
+        if (endFrame != Integer.MIN_VALUE) {
+          peakResult.setEndFrame(endFrame);
+        }
         if (spot.hasXPrecision() || spot.hasYPrecision()) {
           // Use the average. Note this is not the Euclidean distance since we divide by n
           double sumSq = 0;
@@ -668,7 +683,6 @@ public class TsfPeakResultsReader {
    *
    * @return the options
    */
-  @SuppressWarnings("null")
   public @NotNull ResultOption[] getOptions() {
     if (!isMulti()) {
       return ResultOption.EMPTY_ARRAY;

@@ -29,26 +29,26 @@ package uk.ac.sussex.gdsc.smlm.results;
  */
 public enum FileFormat {
   //@formatter:off
-  /** SMLM Text. */
-    SMLM_TEXT{
+    /** SMLM Text. */
+    SMLM_TEXT {
       @Override public String getName() { return "SMLM Text"; }
-        @Override public boolean isSmlm(){return true;}},
+      @Override public boolean isSmlm(){return true;}},
     /** SMLM Binary. */
-    SMLM_BINARY{
-        @Override public String getName() { return "SMLM Binary"; }
-        @Override public boolean isSmlm(){return true;}},
+    SMLM_BINARY {
+      @Override public String getName() { return "SMLM Binary"; }
+      @Override public boolean isSmlm(){return true;}},
     /** RapidSTORM. */
-    RAPID_STORM{ @Override public String getName() { return "RapidSTORM"; }},
+    RAPID_STORM { @Override public String getName() { return "RapidSTORM"; }},
     /** NSTORM. */
-    NSTORM{ @Override public String getName() { return "NSTORM"; }},
+    NSTORM { @Override public String getName() { return "NSTORM"; }},
     /** SMLM Table. */
-    SMLM_TABLE{ @Override public String getName() { return "SMLM Table"; }},
-    /** MALK. */
-    MALK{ @Override public String getName() { return "MALK"; }},
+    SMLM_TABLE { @Override public String getName() { return "SMLM Table"; }},
+    /** MALK (Molecular Accuracy Localisation Keep). */
+    MALK { @Override public String getName() { return "MALK"; }},
     /** TSF Binary. */
-    TSF_BINARY{ @Override public String getName() { return "TSF Binary"; }},
+    TSF_BINARY { @Override public String getName() { return "TSF Binary"; }},
     /** Unknown. */
-    UNKNOWN{ @Override public String getName() { return "Unknown"; }};
+    UNKNOWN { @Override public String getName() { return "Unknown"; }};
   //@formatter:on
 
   @Override

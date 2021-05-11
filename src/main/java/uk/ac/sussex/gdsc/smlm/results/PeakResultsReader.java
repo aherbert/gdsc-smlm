@@ -136,6 +136,7 @@ public class PeakResultsReader {
   private boolean deviations;
   private boolean readEndFrame;
   private boolean readId;
+  private boolean readCategory;
   private boolean readPrecision;
   private boolean readSource;
   private int smlmVersion = 4; // Assume the current
@@ -294,6 +295,10 @@ public class PeakResultsReader {
               readEndFrame = BitFlagUtils.areSet(flags, SmlmFilePeakResults.FLAG_END_FRAME);
               readId = BitFlagUtils.areSet(flags, SmlmFilePeakResults.FLAG_ID);
               readPrecision = BitFlagUtils.areSet(flags, SmlmFilePeakResults.FLAG_PRECISION);
+              // Category is supported only in V4 onwards
+              if (smlmVersion >= 4) {
+                readCategory = BitFlagUtils.areSet(flags, SmlmFilePeakResults.FLAG_CATEGORY);
+              }
             } catch (final NumberFormatException ex) {
               // Ignore
             }
@@ -834,6 +839,9 @@ public class PeakResultsReader {
         if (readId) {
           flags += SmlmFilePeakResults.FLAG_ID;
         }
+        if (readCategory) {
+          flags += SmlmFilePeakResults.FLAG_CATEGORY;
+        }
         if (readPrecision) {
           flags += SmlmFilePeakResults.FLAG_PRECISION;
         }
@@ -856,6 +864,7 @@ public class PeakResultsReader {
 
           position = 0;
           final int id = (readId) ? readInt(buffer) : 0;
+          final int category = (readCategory) ? readInt(buffer) : 0;
           final int peak = readInt(buffer);
           final int endPeak = (readEndFrame) ? readInt(buffer) : peak;
           final int origX = readInt(buffer);
@@ -880,10 +889,10 @@ public class PeakResultsReader {
 
           if (readPrecision) {
             results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal,
-                params, paramsStdDev, endPeak, id, readFloat(buffer)));
+                params, paramsStdDev, endPeak, id, category, readFloat(buffer)));
           } else {
             results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal,
-                params, paramsStdDev, endPeak, id));
+                params, paramsStdDev, endPeak, id, category));
           }
 
           reporter.showProgress();
@@ -905,10 +914,20 @@ public class PeakResultsReader {
    */
   private PeakResult createResult(int startFrame, int origX, int origY, float origValue,
       double error, float noise, float meanIntensity, float[] params, float[] paramsStdDev,
-      int endFrame, int id) {
+      int endFrame, int id, int category) {
     if (readEndFrame) {
+      if (readCategory) {
+        // Must use an AttributePeakResult to support end frame and category.
+        // Read without precision
+        return createResult(startFrame, origX, origY, origValue, error, noise, meanIntensity,
+            params, paramsStdDev, endFrame, id, category, -1.0);
+      }
       return new ExtendedPeakResult(startFrame, origX, origY, origValue, error, noise,
           meanIntensity, params, paramsStdDev, endFrame, id);
+    }
+    if (readCategory) {
+      return new IdCategoryPeakResult(startFrame, origX, origY, origValue, error, noise,
+          meanIntensity, params, paramsStdDev, id, category);
     }
     if (readId) {
       return new IdPeakResult(startFrame, origX, origY, origValue, error, noise, meanIntensity,
@@ -926,7 +945,7 @@ public class PeakResultsReader {
    */
   private PeakResult createResult(int startFrame, int origX, int origY, float origValue,
       double error, float noise, float meanIntensity, float[] params, float[] paramsStdDev,
-      int endFrame, int id, double precision) {
+      int endFrame, int id, int category, double precision) {
     final AttributePeakResult r = new AttributePeakResult(startFrame, origX, origY, origValue,
         error, noise, meanIntensity, params, paramsStdDev);
     if (readEndFrame) {
@@ -934,6 +953,9 @@ public class PeakResultsReader {
     }
     if (readId) {
       r.setId(id);
+    }
+    if (readCategory) {
+      r.setCategory(category);
     }
     r.setPrecision(precision);
     return r;
@@ -1518,12 +1540,12 @@ public class PeakResultsReader {
         // The format appends a * to computed precision. We ignore these.
         if (readPrecision && !line.endsWith("*")) {
           return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-              id,
+              id, 0,
               // Read precision here because it is the final field
               scanner.nextFloat());
         }
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-            id);
+            id, 0);
       } catch (final NoSuchElementException ex) {
         // Ignore and return null
       }
@@ -1547,12 +1569,12 @@ public class PeakResultsReader {
       // The format appends a * to computed precision. We ignore these.
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-            id,
+            id, 0,
             // Read precision here because it is the final field
             Float.parseFloat(fields[fi]));
       }
-      return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
-          id);
+      return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
+          0);
     } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
@@ -1588,12 +1610,12 @@ public class PeakResultsReader {
         }
         if (readPrecision && !line.endsWith("*")) {
           return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-              endPeak, id,
+              endPeak, id, 0,
               // Read precision here because it is the final field
               scanner.nextFloat());
         }
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-            endPeak, id);
+            endPeak, id, 0);
       } catch (final NoSuchElementException ex) {
         // Ignore and return null
       }
@@ -1617,12 +1639,12 @@ public class PeakResultsReader {
       }
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-            endPeak, id,
+            endPeak, id, 0,
             // Read precision here because it is the final field
             Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
-          endPeak, id);
+          endPeak, id, 0);
     } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
@@ -1638,9 +1660,13 @@ public class PeakResultsReader {
         scanner.useDelimiter(tabPattern);
         scanner.useLocale(Locale.US);
         int id = 0;
+        int category = 0;
         int endPeak = 0;
         if (readId) {
           id = scanner.nextInt();
+        }
+        if (readCategory) {
+          category = scanner.nextInt();
         }
         final int peak = scanner.nextInt();
         if (readEndFrame) {
@@ -1658,12 +1684,12 @@ public class PeakResultsReader {
         // The format appends a * to computed precision. We ignore these.
         if (readPrecision && !line.endsWith("*")) {
           return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-              null, endPeak, id,
+              null, endPeak, id, category,
               // Read precision here because it is the final field
               scanner.nextFloat());
         }
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-            null, endPeak, id);
+            null, endPeak, id, category);
       } catch (final NoSuchElementException ex) {
         // Ignore and return null
       }
@@ -1674,6 +1700,7 @@ public class PeakResultsReader {
       final String[] fields = tabPattern.split(line);
       int fi = 0;
       final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int category = (readCategory) ? Integer.parseInt(fields[fi++]) : 0;
       final int peak = Integer.parseInt(fields[fi++]);
       final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
       final int origX = Integer.parseInt(fields[fi++]);
@@ -1688,12 +1715,12 @@ public class PeakResultsReader {
       // The format appends a * to computed precision. We ignore these.
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-            null, endPeak, id,
+            null, endPeak, id, category,
             // Read precision here because it is the final field
             Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
-          endPeak, id);
+          endPeak, id, category);
     } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }
@@ -1710,9 +1737,13 @@ public class PeakResultsReader {
         scanner.useDelimiter(tabPattern);
         scanner.useLocale(Locale.US);
         int id = 0;
+        int category = 0;
         int endPeak = 0;
         if (readId) {
           id = scanner.nextInt();
+        }
+        if (readCategory) {
+          category = scanner.nextInt();
         }
         final int peak = scanner.nextInt();
         if (readEndFrame) {
@@ -1730,12 +1761,12 @@ public class PeakResultsReader {
         }
         if (readPrecision && !line.endsWith("*")) {
           return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-              paramsStdDev, endPeak, id,
+              paramsStdDev, endPeak, id, category,
               // Read precision here because it is the final field
               scanner.nextFloat());
         }
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-            paramsStdDev, endPeak, id);
+            paramsStdDev, endPeak, id, category);
       } catch (final NoSuchElementException ex) {
         // Ignore and return null
       }
@@ -1746,6 +1777,7 @@ public class PeakResultsReader {
       final String[] fields = tabPattern.split(line);
       int fi = 0;
       final int id = (readId) ? Integer.parseInt(fields[fi++]) : 0;
+      final int category = (readCategory) ? Integer.parseInt(fields[fi++]) : 0;
       final int peak = Integer.parseInt(fields[fi++]);
       final int endPeak = (readEndFrame) ? Integer.parseInt(fields[fi++]) : 0;
       final int origX = Integer.parseInt(fields[fi++]);
@@ -1760,12 +1792,12 @@ public class PeakResultsReader {
       }
       if (readPrecision && !line.endsWith("*")) {
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-            paramsStdDev, endPeak, id,
+            paramsStdDev, endPeak, id, category,
             // Read precision here because it is the final field
             Float.parseFloat(fields[fi]));
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
-          paramsStdDev, endPeak, id);
+          paramsStdDev, endPeak, id, category);
     } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
       // Ignore and return null
     }

@@ -50,10 +50,14 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
  * Saves the fit results to file.
  */
 public class TextFilePeakResults extends SmlmFilePeakResults {
+  /** The batch size to write to file in one operation. */
+  private static final int BATCH_SIZE = 20;
+
   private Gaussian2DPeakResultCalculator calculator;
 
   private PeakResultConversionHelper helper;
   private Converter[] converters;
+  private int recordSize;
 
   private DistanceUnit distanceUnit;
   private IntensityUnit intensityUnit;
@@ -120,6 +124,21 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     super(filename, showDeviations, showEndFrame, showId, showPrecision);
   }
 
+  /**
+   * Instantiates a new text file peak results.
+   *
+   * @param filename the filename
+   * @param showDeviations Set to true to show deviations
+   * @param showEndFrame Set to true to show the end frame
+   * @param showId Set to true to show the id
+   * @param showPrecision Set to true to show the precision
+   * @param showCategory Set to true to show the category
+   */
+  public TextFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame,
+      boolean showId, boolean showPrecision, boolean showCategory) {
+    super(filename, showDeviations, showEndFrame, showId, showPrecision, showCategory);
+  }
+
   @Override
   protected void openOutput() {
     out = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
@@ -184,31 +203,51 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
   protected String[] getFieldNames() {
     final String[] unitNames = helper.getUnitNames();
 
+    // Count the field types: int, float, double
+    // CHECKSTYLE.OFF: VariableDeclarationUsageDistanceCheck
+    int ci = 0;
+    int cf = 0;
+    int cd = 0;
+    // CHECKSTYLE.ON: VariableDeclarationUsageDistanceCheck
+
     final ArrayList<String> names = new ArrayList<>(20);
     if (isShowId()) {
       names.add("Id");
+      ci++;
+    }
+    if (isShowCategory()) {
+      names.add("Category");
+      ci++;
     }
     names.add(peakIdColumnName);
+    ci++;
     if (isShowEndFrame()) {
       names.add("End " + peakIdColumnName);
+      ci++;
     }
     names.add("origX");
     names.add("origY");
+    ci += 2;
     names.add("origValue");
+    cf++;
     names.add("Error");
+    cd++;
     String noiseField = "Noise";
     if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY])) {
       noiseField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
     }
     names.add(noiseField);
+    cf++;
     String meanIntensityField = "Mean";
     if (!TextUtils.isNullOrEmpty(unitNames[PeakResult.INTENSITY])) {
       meanIntensityField += " (" + (unitNames[PeakResult.INTENSITY] + ")");
     }
     names.add(meanIntensityField);
+    cf++;
 
     final String[] fields = helper.getNames();
 
+    cf += fields.length * (isShowDeviations() ? 2 : 1);
     for (int i = 0; i < fields.length; i++) {
       String field = fields[i];
       // Add units
@@ -222,7 +261,22 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     }
     if (isShowPrecision()) {
       names.add("Precision (nm)");
+      cf++;
     }
+
+    // Get the estimate record size.
+    // Count a tab delimiter for each field and the line separator
+    recordSize = ci + cf + cd + System.lineSeparator().length();
+    // Integer fields:
+    // Integer.toString(Integer.MIN_VALUE).length() == len(-2147483648) == 11
+    recordSize += ci * 11;
+    // Float fields:
+    // Float.toString(-Float.MIN_NORMAL).length() == len(-1.17549435E-38) == 15
+    recordSize += cf * 15;
+    // Double fields:
+    // Double.toString(-Double.MIN_NORMAL).length() == len(-2.2250738585072014E-308) == 24
+    recordSize += cd * 24;
+
     return names.toArray(new String[0]);
   }
 
@@ -233,8 +287,8 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
       return;
     }
 
-    final StringBuilder sb = new StringBuilder();
-    addStandardData(sb, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity);
+    final StringBuilder sb = new StringBuilder(recordSize);
+    addStandardData(sb, 0, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity);
 
     // Add the parameters
     if (isShowDeviations()) {
@@ -274,15 +328,15 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
       return;
     }
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(recordSize);
     add(sb, result);
     writeResult(1, sb.toString());
   }
 
   private void add(StringBuilder sb, PeakResult result) {
-    addStandardData(sb, result.getId(), result.getFrame(), result.getEndFrame(), result.getOrigX(),
-        result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-        result.getMeanIntensity());
+    addStandardData(sb, result.getId(), result.getCategory(), result.getFrame(),
+        result.getEndFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+        result.getError(), result.getNoise(), result.getMeanIntensity());
 
     // Add the parameters
     final float[] params = result.getParameters();
@@ -319,12 +373,14 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     sb.append(System.lineSeparator());
   }
 
-  private void addStandardData(StringBuilder sb, final int id, final int peak, final int endPeak,
-      final int origX, final int origY, final float origValue, final double error,
-      final float noise, float meanIntensity) {
+  private void addStandardData(StringBuilder sb, final int id, final int category, final int peak,
+      final int endPeak, final int origX, final int origY, final float origValue,
+      final double error, final float noise, float meanIntensity) {
     if (isShowId()) {
-      sb.append(id);
-      sb.append('\t');
+      sb.append(id).append('\t');
+    }
+    if (isShowCategory()) {
+      sb.append(category).append('\t');
     }
     sb.append(peak);
     if (isShowEndFrame()) {
@@ -361,12 +417,12 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
 
     int count = 0;
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(BATCH_SIZE * recordSize);
     for (final PeakResult result : results) {
       add(sb, result);
 
       // Flush the output to allow for very large input lists
-      if (++count >= 20) {
+      if (++count >= BATCH_SIZE) {
         writeResult(count, sb.toString());
         if (!isActive()) {
           return;
@@ -394,10 +450,10 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
         if (result.getId() == id) {
           results2.add(result);
         } else {
-          results2.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(),
-              result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-              result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-              result.getEndFrame(), id));
+          // This will maintain the category but change the ID to the cluster id
+          final AttributePeakResult r = new AttributePeakResult(result);
+          r.setId(id);
+          results2.add(r);
         }
       });
       addAll(results2.toArray());
@@ -496,24 +552,27 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
   @Override
   protected void sort() throws IOException {
     final LocalList<Result> results = new LocalList<>(size);
-    final StringBuilder header = new StringBuilder();
+    final StringBuilder header = new StringBuilder(2048);
 
     final Path path = Paths.get(filename);
     try (BufferedReader input = Files.newBufferedReader(path)) {
+
+      // Skip optional columns before the slice
+      final int skipCount = (isShowId() ? 1 : 0) + (isShowCategory() ? 1 : 0);
 
       String line;
       // Skip the header
       while ((line = input.readLine()) != null) {
         if (!line.isEmpty() && line.charAt(0) != '#') {
           // This is the first record
-          results.add(new Result(line));
+          results.add(new Result(line, skipCount));
           break;
         }
         header.append(line).append(System.lineSeparator());
       }
 
       while ((line = input.readLine()) != null) {
-        results.add(new Result(line));
+        results.add(new Result(line, skipCount));
       }
     }
 
@@ -529,23 +588,27 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     }
   }
 
-  private class Result {
+  private static class Result {
     String line;
     int slice;
 
-    public Result(String line) {
+    Result(String line, int skipCount) {
       this.line = line;
-      extractSlice();
-    }
-
-    private void extractSlice() {
       try (Scanner scanner = new Scanner(line)) {
         scanner.useDelimiter("\t");
-        slice = scanner.nextInt();
-        if (isShowId()) {
-          // The peak is the second column
-          slice = scanner.nextInt();
+        // Skip optional columns before the slice
+        // CHECKSTYLE.OFF: FallThroughCheck
+        switch (skipCount) {
+          case 2:
+            scanner.nextInt();
+            // FALL-THROUGH
+          case 1:
+            scanner.nextInt();
+            // FALL-THROUGH
+          default:
+            slice = scanner.nextInt();
         }
+        // CHECKSTYLE.ON: FallThroughCheck
       } catch (final NoSuchElementException ex) {
         // Ignore
       }

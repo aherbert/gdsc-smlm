@@ -44,9 +44,12 @@ import uk.ac.sussex.gdsc.core.utils.LocalList;
 public class BinaryFilePeakResults extends SmlmFilePeakResults {
   /** The constant used to mark the end of the header. */
   public static final String END_HEADER = "END_HEADER";
+  /** The batch size to write to file in one operation. */
+  private static final int BATCH_SIZE = 20;
 
   private String[] fieldNames;
   private int fieldCount;
+  private int recordSize;
 
   private BufferedOutputStream out;
 
@@ -107,6 +110,21 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     super(filename, showDeviations, showEndFrame, showId, showPrecision);
   }
 
+  /**
+   * Instantiates a new binary file peak results.
+   *
+   * @param filename the filename
+   * @param showDeviations Set to true to show deviations
+   * @param showEndFrame Set to true to show the end frame
+   * @param showId Set to true to show the id
+   * @param showPrecision Set to true to show the precision
+   * @param showCategory Set to true to show the category
+   */
+  public BinaryFilePeakResults(String filename, boolean showDeviations, boolean showEndFrame,
+      boolean showId, boolean showPrecision, boolean showCategory) {
+    super(filename, showDeviations, showEndFrame, showId, showPrecision, showCategory);
+  }
+
   @Override
   protected void openOutput() {
     out = new BufferedOutputStream(fos);
@@ -130,15 +148,22 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
   protected String[] getHeaderComments() {
     fieldNames = new PeakResultConversionHelper(null, getPsf()).getNames();
     fieldCount = fieldNames.length;
+    int flags = 0;
 
     final String[] comments = new String[2];
     comments[0] = "Records start after the final comment line";
     final StringBuilder sb = new StringBuilder();
     if (isShowEndFrame()) {
       sb.append('i');
+      flags += FLAG_END_FRAME;
     }
     if (isShowId()) {
       sb.append('i');
+      flags += FLAG_ID;
+    }
+    if (isShowCategory()) {
+      sb.append('i');
+      flags += FLAG_CATEGORY;
     }
     sb.append("iiifdff");
     if (isShowDeviations()) {
@@ -152,7 +177,9 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     }
     if (isShowPrecision()) {
       sb.append("f");
+      flags += FLAG_PRECISION;
     }
+    recordSize = getDataSize(isShowDeviations(), flags, fieldCount);
     comments[1] = "Binary Format (raw Java bytes) = " + sb.toString();
     return comments;
   }
@@ -162,6 +189,9 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     final ArrayList<String> names = new ArrayList<>(20);
     if (isShowId()) {
       names.add("Id");
+    }
+    if (isShowCategory()) {
+      names.add("Category");
     }
     names.add(peakIdColumnName);
     if (isShowEndFrame()) {
@@ -211,13 +241,12 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     }
 
     // Buffer the output for the synchronized write method
-    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-      try (DataOutputStream buffer = new DataOutputStream(bytes)) {
-        addResult(buffer, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity,
-            params, paramsStdDev, 0.0);
-        buffer.flush();
-        writeResult(1, bytes);
-      }
+    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream(recordSize);
+        DataOutputStream buffer = new DataOutputStream(bytes)) {
+      addResult(buffer, 0, 0, peak, peak, origX, origY, origValue, error, noise, meanIntensity,
+          params, paramsStdDev, 0.0);
+      buffer.flush();
+      writeResult(1, bytes);
     } catch (final IOException ex) {
       // Do nothing - This result will not be added to the file
     }
@@ -229,27 +258,31 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
       return;
     }
 
+    // TODO: Rewrite using a ByteBuffer?
+
     // Buffer the output for the synchronized write method
-    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-      try (DataOutputStream buffer = new DataOutputStream(bytes)) {
-        addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(),
-            result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-            result.getNoise(), result.getMeanIntensity(), result.getParameters(),
-            result.getParameterDeviations(), result.getPrecision());
-        buffer.flush();
-        writeResult(1, bytes);
-      }
+    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream(recordSize);
+        DataOutputStream buffer = new DataOutputStream(bytes)) {
+      addResult(buffer, result.getId(), result.getCategory(), result.getFrame(),
+          result.getEndFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+          result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+          result.getParameterDeviations(), result.getPrecision());
+      buffer.flush();
+      writeResult(1, bytes);
     } catch (final IOException ex) {
       // Do nothing - This result will not be added to the file
     }
   }
 
-  private void addResult(DataOutputStream buffer, final int id, final int peak, final int endPeak,
-      final int origX, final int origY, final float origValue, final double error,
-      final float noise, float meanIntensity, final float[] params, float[] paramsStdDev,
-      double precision) throws IOException {
+  private void addResult(DataOutputStream buffer, final int id, final int category, final int peak,
+      final int endPeak, final int origX, final int origY, final float origValue,
+      final double error, final float noise, float meanIntensity, final float[] params,
+      float[] paramsStdDev, double precision) throws IOException {
     if (isShowId()) {
       buffer.writeInt(id);
+    }
+    if (isShowCategory()) {
+      buffer.writeInt(category);
     }
     buffer.writeInt(peak);
     if (isShowEndFrame()) {
@@ -292,16 +325,16 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     int count = 0;
 
     // Buffer the output for the synchronized write method
-    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream(BATCH_SIZE * recordSize);
         DataOutputStream buffer = new DataOutputStream(bytes)) {
       for (final PeakResult result : results) {
-        addResult(buffer, result.getId(), result.getFrame(), result.getEndFrame(),
-            result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
-            result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+        addResult(buffer, result.getId(), result.getCategory(), result.getFrame(),
+            result.getEndFrame(), result.getOrigX(), result.getOrigY(), result.getOrigValue(),
+            result.getError(), result.getNoise(), result.getMeanIntensity(), result.getParameters(),
             result.getParameterDeviations(), result.getPrecision());
 
         // Flush the output to allow for very large input lists
-        if (++count >= 20) {
+        if (++count >= BATCH_SIZE) {
           if (!isActive()) {
             return;
           }
@@ -347,12 +380,16 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
       if (isShowId()) {
         flags += FLAG_ID;
       }
+      if (isShowCategory()) {
+        flags += FLAG_CATEGORY;
+      }
       if (isShowPrecision()) {
         flags += FLAG_PRECISION;
       }
       final byte[] line = new byte[getDataSize(isShowDeviations(), flags, fieldCount)];
+      final int offset = (isShowId() ? 4 : 0) + (isShowCategory() ? 4 : 0);
       while (input.read(line) == line.length) {
-        results.add(new Result(line));
+        results.add(new Result(line, offset));
       }
     }
 
@@ -381,27 +418,45 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public static String readHeader(DataInputStream input) throws IOException {
-    final StringBuilder sb = new StringBuilder();
-    String line;
+    final StringBuilder header = new StringBuilder(1024);
+    final StringBuilder line = new StringBuilder(256);
     do {
-      line = readLine(input);
+      readLine(line, input);
       if (line.charAt(0) == '#') {
-        sb.append(line);
+        header.append(line);
       } else {
         break;
       }
-    } while (!line.startsWith("#" + END_HEADER));
-    return sb.toString();
+    } while (!startsWithEndHeader(line));
+    return header.toString();
   }
 
-  private static String readLine(DataInputStream input) throws IOException {
-    final StringBuilder sb = new StringBuilder();
+  private static void readLine(StringBuilder sb, DataInputStream input) throws IOException {
+    sb.setLength(0);
     byte bi;
     do {
       bi = input.readByte();
       sb.append((char) bi);
     } while (bi != '\n');
-    return sb.toString();
+  }
+
+  /**
+   * Check if the line starts with the end header text. Assumes the first character is the '#'
+   * comment character.
+   *
+   * @param line the line
+   * @return true if this is the end header text
+   */
+  private static boolean startsWithEndHeader(StringBuilder line) {
+    if (line.length() - 1 < END_HEADER.length()) {
+      return false;
+    }
+    for (int i = END_HEADER.length(); i > 0; i--) {
+      if (line.charAt(i) != END_HEADER.charAt(i - 1)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -416,8 +471,10 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     // iiifdff + n*f
     // or
     // iiifdff + 2*n*f
-    // + Extra i added for the end frame after the first integer
-    // + Extra i added for the id in the first field
+    // + Extra i added for the end frame
+    // + Extra i added for the id
+    // + Extra i added for the category
+    // + Extra f added for the precision
     int size = 3 * Integer.BYTES + Float.BYTES + Double.BYTES + Float.BYTES + Float.BYTES
         + fieldCount * Float.BYTES;
     if (deviations) {
@@ -429,27 +486,25 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     if (BitFlagUtils.areSet(flags, FLAG_ID)) {
       size += Integer.BYTES;
     }
-    if (BitFlagUtils.areSet(flags, FLAG_PRECISION)) {
+    if (BitFlagUtils.areSet(flags, FLAG_CATEGORY)) {
       size += Integer.BYTES;
+    }
+    if (BitFlagUtils.areSet(flags, FLAG_PRECISION)) {
+      size += Float.BYTES;
     }
     return size;
   }
 
-  private class Result {
+  private static class Result {
     byte[] line;
     int slice;
 
-    public Result(byte[] line) {
+    Result(byte[] line, int offset) {
       this.line = Arrays.copyOf(line, line.length);
-      extractSlice();
-    }
-
-    private void extractSlice() {
-      final int offset = (isShowId()) ? 4 : 0;
       slice = makeInt(line[offset + 0], line[offset + 1], line[offset + 2], line[offset + 3]);
     }
 
-    private int makeInt(byte b3, byte b2, byte b1, byte b0) {
+    private static int makeInt(byte b3, byte b2, byte b1, byte b0) {
       // @formatter:off
       return (( b3         << 24) |
               ((b2 & 0xff) << 16) |
