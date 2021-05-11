@@ -900,7 +900,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       final double[] zPosition = new double[actual.length];
       SpotMatch[] match = new SpotMatch[actual.length];
       int matchCount = 0;
-      final RampedScore rampedScore = RampedScore.of(distanceInPixels, lowerDistanceInPixels, false);
+      final RampedScore rampedScore =
+          RampedScore.of(distanceInPixels, lowerDistanceInPixels, false);
       final RampedScore signalScore = (settings.signalFactor > 0)
           ? RampedScore.of(settings.signalFactor, settings.lowerSignalFactor, false)
           : null;
