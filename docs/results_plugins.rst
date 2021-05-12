@@ -461,7 +461,7 @@ The ``Show table`` option can be used to present a results table of the localisa
 The ``Overlay Results`` dialog is non-blocking allowing the user to interact with ``ImageJ`` as normal. However if the results are cleared from memory or the image is no longer available then the dialog list will be out-of-date and an error is logged to the ``ImageJ`` log window and shown on the dialog. Restarting the plugin will refresh the list of available results.
 
 
-.. index:: ! Load Localisations
+.. index:: ! load localisations
 
 Load Localisations
 ------------------
@@ -591,6 +591,12 @@ The fields must be defined so the plugin knows how to read the data. Note that t
 
    * - ID
      - The identifier for the localisation. This can be used to group localisations of the same molecule.
+     - Integer
+     -
+     - 0
+
+   * - Category
+     - The category for the localisation. This can be used to sub-classify localisations of the same molecule, for example diffusion states.
      - Integer
      -
      - 0

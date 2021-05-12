@@ -185,6 +185,7 @@ message LoadLocalisationsSettings {
   double min_z = 23;
   double max_z = 24;
   bool hide_field_dataset_name = 25;
+  int32 field_category = 26;
 }
 
 // Contain the settings for the clustering algorithm

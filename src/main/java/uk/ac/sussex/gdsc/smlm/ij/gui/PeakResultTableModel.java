@@ -54,6 +54,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultConversionHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
+import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataCategory;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataEndFrame;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataError;
 import uk.ac.sussex.gdsc.smlm.results.data.PeakResultDataFloat;
@@ -94,6 +95,7 @@ public class PeakResultTableModel extends AbstractTableModel {
   private boolean showDeviations;
   private boolean showEndFrame;
   private boolean showId;
+  private boolean showCategory;
   private boolean showZ;
 
   // Used for the columns
@@ -124,6 +126,7 @@ public class PeakResultTableModel extends AbstractTableModel {
     setShowDeviations(resultsSource.hasDeviations());
     setShowZ(resultsSource.is3D());
     setShowId(resultsSource.hasId());
+    setShowCategory(resultsSource.hasCategory());
     setShowEndFrame(resultsSource.hasEndFrame());
     setSource(resultsSource.getSource());
     setConfiguration(resultsSource.getConfiguration());
@@ -261,6 +264,10 @@ public class PeakResultTableModel extends AbstractTableModel {
     }
     if (showId) {
       valuesList.add(new PeakResultDataId());
+      addName(valuesList, namesList);
+    }
+    if (showCategory) {
+      valuesList.add(new PeakResultDataCategory());
       addName(valuesList, namesList);
     }
     if (tableSettings.getShowFittingData()) {
@@ -739,6 +746,26 @@ public class PeakResultTableModel extends AbstractTableModel {
   public void setShowId(boolean showId) {
     final boolean changed = this.showId != showId;
     this.showId = showId;
+    createTableStructure(changed);
+  }
+
+  /**
+   * Checks if showing the results category in the table.
+   *
+   * @return If true show the results category in the table.
+   */
+  public boolean isShowCategory() {
+    return showCategory;
+  }
+
+  /**
+   * Set whether to show the results category in the table.
+   *
+   * @param showCategory If true show the results category in the table
+   */
+  public void setShowCategory(boolean showCategory) {
+    final boolean changed = this.showCategory != showCategory;
+    this.showCategory = showCategory;
     createTableStructure(changed);
   }
 

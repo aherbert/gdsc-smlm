@@ -114,7 +114,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * The results. This is encapsulated to allow changing the data structure used to store the
    * results.
    */
-  protected PeakResultStoreList results;
+  protected final PeakResultStoreList results;
 
   /**
    * Gets the result.
@@ -819,6 +819,20 @@ public class MemoryPeakResults extends AbstractPeakResults {
   public boolean hasId() {
     for (int i = 0, size = size(); i < size; i++) {
       if (getf(i).getId() != 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks for category. At least one result must have a non-zero category.
+   *
+   * @return true, if successful
+   */
+  public boolean hasCategory() {
+    for (int i = 0, size = size(); i < size; i++) {
+      if (getf(i).getCategory() != 0) {
         return true;
       }
     }

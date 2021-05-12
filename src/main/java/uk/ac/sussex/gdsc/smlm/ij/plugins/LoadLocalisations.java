@@ -112,6 +112,8 @@ public class LoadLocalisations implements PlugIn {
     int time;
     /** The id. */
     int id;
+    /** The category. */
+    int category;
     /** The x. */
     float x;
     /** The y. */
@@ -214,6 +216,7 @@ public class LoadLocalisations implements PlugIn {
           final AttributePeakResult peakResult =
               new AttributePeakResult(loc.time, (int) x, (int) y, 0, 0, 0, 0, params, null);
           peakResult.setId(loc.id);
+          peakResult.setCategory(loc.category);
           if (loc.precision > 0) {
             // Convert to nm
             peakResult.setPrecision(distanceConverter.convert(loc.precision));
@@ -328,6 +331,7 @@ public class LoadLocalisations implements PlugIn {
 
       final int it = settings.getFieldT();
       final int iid = settings.getFieldId();
+      final int ic = settings.getFieldCategory();
       final int ix = settings.getFieldX();
       final int iy = settings.getFieldY();
       final int iz = settings.getFieldZ();
@@ -361,6 +365,9 @@ public class LoadLocalisations implements PlugIn {
           }
           if (iid >= 0) {
             l.id = Integer.parseInt(fields[iid].trim());
+          }
+          if (ic >= 0) {
+            l.category = Integer.parseInt(fields[ic].trim());
           }
           l.x = Float.parseFloat(fields[ix].trim());
           l.y = Float.parseFloat(fields[iy].trim());
@@ -434,6 +441,7 @@ public class LoadLocalisations implements PlugIn {
     gd.addMessage("Define the fields:");
     gd.addNumericField("Frame", settings.getFieldT(), 0);
     gd.addNumericField("ID", settings.getFieldId(), 0);
+    gd.addNumericField("Category", settings.getFieldCategory(), 0);
     gd.addNumericField("X", settings.getFieldX(), 0);
     gd.addNumericField("Y", settings.getFieldY(), 0);
     gd.addNumericField("Z", settings.getFieldZ(), 0);
@@ -468,7 +476,7 @@ public class LoadLocalisations implements PlugIn {
     cw.setDistanceUnit(DistanceUnit.forNumber(gd.getNextChoiceIndex()));
     cw.setIntensityUnit(IntensityUnit.forNumber(gd.getNextChoiceIndex()));
 
-    final int[] columns = new int[9];
+    final int[] columns = new int[10];
     for (int i = 0; i < columns.length; i++) {
       columns[i] = (int) gd.getNextNumber();
     }
@@ -476,6 +484,7 @@ public class LoadLocalisations implements PlugIn {
     int index = 0;
     settings.setFieldT(columns[index++]);
     settings.setFieldId(columns[index++]);
+    settings.setFieldCategory(columns[index++]);
     settings.setFieldX(columns[index++]);
     settings.setFieldY(columns[index++]);
     settings.setFieldZ(columns[index++]);

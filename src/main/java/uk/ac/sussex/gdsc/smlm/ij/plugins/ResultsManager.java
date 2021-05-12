@@ -366,6 +366,7 @@ public class ResultsManager implements PlugIn {
         resultsSettings.getShowDeviations() && canShowDeviations(results);
     final boolean showEndFrame = canShowEndFrame(results);
     final boolean showId = canShowId(results);
+    final boolean showCategory = canShowCategory(results);
 
     // Display the configured output
     final PeakResultsList outputList = new PeakResultsList();
@@ -375,14 +376,14 @@ public class ResultsManager implements PlugIn {
     final int tableFormat = resultsSettings.getResultsTableSettings().getResultsTableFormatValue();
     if (tableFormat == ResultsTableFormat.IMAGEJ_VALUE) {
       addImageJTableResults(outputList, resultsSettings.getResultsTableSettings(), showDeviations,
-          showEndFrame, results.is3D(), showId);
+          showEndFrame, results.is3D(), showId, showCategory);
     } else if (tableFormat == ResultsTableFormat.INTERACTIVE_VALUE) {
       showInteractiveTable(results, resultsSettings.getResultsTableSettings());
     }
 
     addImageResults(outputList, resultsSettings.getResultsImageSettings(), bounds,
         (extraOptions) ? FLAG_EXTRA_OPTIONS : 0);
-    addFileResults(outputList, showDeviations, showEndFrame, showId);
+    addFileResults(outputList, showDeviations, showEndFrame, showId, showCategory);
 
     if (outputList.numberOfOutputs() == 0) {
       // This occurs when only using the interactive table
@@ -545,6 +546,10 @@ public class ResultsManager implements PlugIn {
     return results.hasId();
   }
 
+  private static boolean canShowCategory(MemoryPeakResults results) {
+    return results.hasCategory();
+  }
+
   /**
    * Adds the table results.
    *
@@ -554,21 +559,22 @@ public class ResultsManager implements PlugIn {
    * @param showEndFrame the show end frame
    * @param showZ the show Z
    * @param showId the show id
+   * @param showCategory the show category
    * @return the IJ table peak results
    */
   public static ImageJTablePeakResults addTableResults(PeakResultsList resultsList,
       ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame,
-      boolean showZ, boolean showId) {
+      boolean showZ, boolean showId, boolean showCategory) {
     if (resultsSettings.getShowTable()) {
       return addImageJTableResults(resultsList, resultsSettings, showDeviations, showEndFrame,
-          showZ, showId);
+          showZ, showId, showCategory);
     }
     return null;
   }
 
   private static ImageJTablePeakResults addImageJTableResults(PeakResultsList resultsList,
       ResultsTableSettings resultsSettings, boolean showDeviations, boolean showEndFrame,
-      boolean showZ, boolean showId) {
+      boolean showZ, boolean showId, boolean showCategory) {
     final ImageJTablePeakResults r = new ImageJTablePeakResults(showDeviations);
     r.setDistanceUnit(resultsSettings.getDistanceUnit());
     r.setIntensityUnit(resultsSettings.getIntensityUnit());
@@ -583,6 +589,7 @@ public class ResultsManager implements PlugIn {
     r.setShowFittingData(resultsSettings.getShowFittingData());
     r.setShowNoiseData(resultsSettings.getShowNoiseData());
     r.setShowId(showId);
+    r.setShowCategory(showCategory);
     resultsList.addOutput(r);
     return r;
   }
@@ -630,7 +637,7 @@ public class ResultsManager implements PlugIn {
   }
 
   private void addFileResults(PeakResultsList resultsList, boolean showDeviations,
-      boolean showEndFrame, boolean showId) {
+      boolean showEndFrame, boolean showId, boolean showCategory) {
     final ResultsFileSettings resultsFileSettings = this.resultsSettings.getResultsFileSettings();
     if (!TextUtils.isNullOrEmpty(resultsFileSettings.getResultsFilename())) {
       // Remove extension
@@ -658,7 +665,7 @@ public class ResultsManager implements PlugIn {
       }
 
       addFileResults(resultsList, resultsFileSettings, resultsFilename, showDeviations,
-          showEndFrame, showId);
+          showEndFrame, showId, showCategory);
     }
   }
 
@@ -671,11 +678,12 @@ public class ResultsManager implements PlugIn {
    * @param showDeviations the show deviations
    * @param showEndFrame the show end frame
    * @param showId the show id
+   * @param showCategory the show category
    * @return the peak results
    */
   public static PeakResults addFileResults(PeakResultsList resultsList,
       ResultsFileSettings resultsSettings, String resultsFilename, boolean showDeviations,
-      boolean showEndFrame, boolean showId) {
+      boolean showEndFrame, boolean showId, boolean showCategory) {
     if (resultsSettings.getFileFormatValue() > 0 && resultsFilename != null) {
       final File file = new File(resultsFilename);
       final File parent = file.getParentFile();
@@ -684,11 +692,11 @@ public class ResultsManager implements PlugIn {
         switch (resultsSettings.getFileFormat()) {
           case BINARY:
             results = new BinaryFilePeakResults(resultsFilename, showDeviations, showEndFrame,
-                showId, resultsSettings.getShowPrecision());
+                showId, resultsSettings.getShowPrecision(), showCategory);
             break;
           case TEXT:
             final TextFilePeakResults f = new TextFilePeakResults(resultsFilename, showDeviations,
-                showEndFrame, showId, resultsSettings.getShowPrecision());
+                showEndFrame, showId, resultsSettings.getShowPrecision(), showCategory);
             f.setDistanceUnit(resultsSettings.getDistanceUnit());
             f.setIntensityUnit(resultsSettings.getIntensityUnit());
             f.setAngleUnit(resultsSettings.getAngleUnit());

@@ -160,6 +160,7 @@ public final class GuiProtosHelper {
     final LoadLocalisationsSettings.Builder builder = LoadLocalisationsSettings.newBuilder();
     builder.setFieldT(0);
     builder.setFieldId(-1);
+    builder.setFieldCategory(-1);
     builder.setFieldX(1);
     builder.setFieldY(2);
     builder.setFieldZ(-1);

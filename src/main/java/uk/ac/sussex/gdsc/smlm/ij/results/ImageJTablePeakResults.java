@@ -92,6 +92,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
   private boolean showDeviations;
   private boolean showEndFrame;
   private boolean showId;
+  private boolean showCategory;
   private boolean showFittingData;
   private boolean showNoiseData;
   private boolean showZ;
@@ -306,7 +307,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     final String[] names = helper.getNames();
     final String[] unitNames = helper.getUnitNames();
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(1024);
     if (addCounter) {
       sb.append("#\t");
     }
@@ -319,6 +320,9 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     }
     if (showId) {
       sb.append("\tId");
+    }
+    if (showCategory) {
+      sb.append("\tCategory");
     }
     if (showFittingData) {
       sb.append("\torigX");
@@ -356,7 +360,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       sourceText = null;
       return;
     }
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(1024);
     if (source != null) {
       sb.append(source);
     } else if (getSource() != null) {
@@ -383,27 +387,27 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
   @Override
   public void add(int frame, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsDev) {
-    addPeak(frame, frame, 0, origX, origY, origValue, error, noise, meanIntensity, params,
+    addPeak(frame, frame, 0, 0, origX, origY, origValue, error, noise, meanIntensity, params,
         paramsDev, -1);
   }
 
   @Override
   public void add(PeakResult result) {
-    addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(),
-        result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-        result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-        result.getPrecision());
+    addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getCategory(),
+        result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+        result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+        result.getParameterDeviations(), result.getPrecision());
   }
 
-  private void addPeak(int frame, int endFrame, int id, int origX, int origY, float origValue,
-      double error, float noise, float meanIntensity, float[] params, float[] paramsStdDev,
-      double precision) {
+  private void addPeak(int frame, int endFrame, int id, int category, int origX, int origY,
+      float origValue, double error, float noise, float meanIntensity, float[] params,
+      float[] paramsStdDev, double precision) {
     if (!tableActive) {
       return;
     }
 
-    final StringBuilder sb =
-        addStandardData(frame, endFrame, id, origX, origY, origValue, error, noise, meanIntensity);
+    final StringBuilder sb = addStandardData(frame, endFrame, id, category, origX, origY, origValue,
+        error, noise, meanIntensity);
     if (isShowDeviations()) {
       if (paramsStdDev != null) {
         for (int i = 0; i < outIndices.length; i++) {
@@ -434,9 +438,9 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     append(sb.toString());
   }
 
-  private StringBuilder addStandardData(int frame, int endFrame, int id, int origX, int origY,
-      float origValue, double error, float noise, float meanIntensity) {
-    final StringBuilder sb = new StringBuilder();
+  private StringBuilder addStandardData(int frame, int endFrame, int id, int category, int origX,
+      int origY, float origValue, double error, float noise, float meanIntensity) {
+    final StringBuilder sb = new StringBuilder(1024);
     if (addCounter) {
       sb.append(size + 1).append('\t');
     }
@@ -449,6 +453,9 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     }
     if (showId) {
       sb.append('\t').append(id);
+    }
+    if (showCategory) {
+      sb.append('\t').append(category);
     }
     if (showFittingData) {
       // Note: Do not calibrate the original values. They are always in pixels.
@@ -520,10 +527,10 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     }
     int counter = 0;
     for (final PeakResult result : results) {
-      addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getOrigX(),
-          result.getOrigY(), result.getOrigValue(), result.getError(), result.getNoise(),
-          result.getMeanIntensity(), result.getParameters(), result.getParameterDeviations(),
-          result.getPrecision());
+      addPeak(result.getFrame(), result.getEndFrame(), result.getId(), result.getCategory(),
+          result.getOrigX(), result.getOrigY(), result.getOrigValue(), result.getError(),
+          result.getNoise(), result.getMeanIntensity(), result.getParameters(),
+          result.getParameterDeviations(), result.getPrecision());
       if (counter++ > 31) {
         if (!tableActive) {
           return;
@@ -733,6 +740,24 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
    */
   public void setShowId(boolean showId) {
     this.showId = showId;
+  }
+
+  /**
+   * Check if showing the results category in the table.
+   *
+   * @return True if showing the results category in the table.
+   */
+  public boolean isShowCategory() {
+    return showCategory;
+  }
+
+  /**
+   * Set whether to show the results category in the table.
+   *
+   * @param showCategory True to show the results category in the table
+   */
+  public void setShowCategory(boolean showCategory) {
+    this.showCategory = showCategory;
   }
 
   /**

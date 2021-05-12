@@ -3387,7 +3387,7 @@ public class PeakFit implements PlugInFilter {
   private void addTableResults(PeakResultsList resultsList) {
     final ImageJTablePeakResults peakResults =
         ResultsManager.addTableResults(resultsList, resultsSettings.getResultsTableSettings(),
-            resultsSettings.getShowDeviations(), false, false, false);
+            resultsSettings.getShowDeviations(), false, false, false, false);
     if (peakResults != null) {
       peakResults.setShowZ(PsfHelper.is3D(resultsList.getPsf()));
       peakResults.setClearAtStart(simpleFit);
@@ -3414,8 +3414,9 @@ public class PeakFit implements PlugInFilter {
       } else if (pluginFlags == 0) {
         resultsFilename = resultsFileSettings.getResultsFilename();
       }
-      final PeakResults r = ResultsManager.addFileResults(resultsList, resultsFileSettings,
-          resultsFilename, this.resultsSettings.getShowDeviations(), getShowEndFrame(), false);
+      final PeakResults r =
+          ResultsManager.addFileResults(resultsList, resultsFileSettings, resultsFilename,
+              this.resultsSettings.getShowDeviations(), getShowEndFrame(), false, false);
       if (r instanceof FilePeakResults) {
         final FilePeakResults fr = (FilePeakResults) r;
         fr.setSortAfterEnd(Prefs.getThreads() > 1);
