@@ -83,7 +83,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   private static final long serialVersionUID = -3671174621388288975L;
 
   private final PeakResultTableModelJTable table;
-  private JMenuItem fileSave;
+  private JMenuItem resultsSave;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
   private JMenuItem editDeleteAll;
@@ -180,16 +180,16 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   private JMenuBar createMenuBar() {
     final JMenuBar menubar = new JMenuBar();
-    menubar.add(createFileMenu());
+    menubar.add(createResultsMenu());
     menubar.add(createEditMenu());
     menubar.add(createSourceMenu());
     return menubar;
   }
 
-  private JMenu createFileMenu() {
-    final JMenu menu = new JMenu("File");
-    menu.setMnemonic(KeyEvent.VK_F);
-    menu.add(fileSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+  private JMenu createResultsMenu() {
+    final JMenu menu = new JMenu("Results");
+    menu.setMnemonic(KeyEvent.VK_R);
+    menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
     return menu;
   }
 
@@ -251,7 +251,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   @Override
   public void actionPerformed(ActionEvent event) {
     final Object src = event.getSource();
-    if (src == fileSave) {
+    if (src == resultsSave) {
       doFileSave();
     } else if (src == editDelete) {
       doEditDelete();

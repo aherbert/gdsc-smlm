@@ -75,7 +75,7 @@ The menu provides the following options:
      - Command
      - Description
 
-   * - File
+   * - Results
      - Save
      - Save the results in the table to a dataset in memory.
 
