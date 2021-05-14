@@ -28,6 +28,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -103,6 +104,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   private PeakResultData<?>[] values;
   private String[] names;
   private boolean rowCounter;
+
+  private Consumer<ResultsTableSettings> settingsUpdatedAction;
 
   /**
    * Instantiates a new peak result model using settings from the resultsSource.
@@ -187,6 +190,23 @@ public class PeakResultTableModel extends AbstractTableModel {
     }
     this.tableSettings = tableSettings;
     createTableStructure(true);
+    if (settingsUpdatedAction != null) {
+      settingsUpdatedAction.accept(tableSettings);
+    }
+  }
+
+  /**
+   * Add an action to perform if the table settings have changed.
+   * This is combined with any previous actions.
+   *
+   * @param action the action
+   */
+  public void addSettingsUpdatedAction(Consumer<ResultsTableSettings> action) {
+    if (settingsUpdatedAction != null) {
+      settingsUpdatedAction = settingsUpdatedAction.andThen(action);
+    } else {
+      this.settingsUpdatedAction = action;
+    }
   }
 
   /**

@@ -607,6 +607,14 @@ public class ResultsManager implements PlugIn {
     final PeakResultTableModelFrame frame = new PeakResultTableModelFrame(model);
     frame.setTitle(results.getName());
     frame.setVisible(true);
+    // Save changes to the interactive table settings
+    model.addSettingsUpdatedAction(s -> {
+      // Load the latest settings and save the table options
+      final ResultsSettings.Builder resultsSettings =
+          SettingsManager.readResultsSettings(0).toBuilder();
+      resultsSettings.setResultsTableSettings(s);
+      SettingsManager.writeSettings(resultsSettings.build());
+    });
   }
 
   /**
