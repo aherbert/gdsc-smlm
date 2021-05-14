@@ -32,6 +32,7 @@ import ij.text.TextWindow;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -66,7 +67,6 @@ public class SummariseResults implements PlugIn {
   private static final int NO = -1;
   private static final int UNKNOWN = 0;
   private static final int YES = 1;
-  private int removeNullResults = UNKNOWN;
 
   private static AtomicReference<TextWindow> summaryRef = new AtomicReference<>();
 
@@ -80,11 +80,26 @@ public class SummariseResults implements PlugIn {
       return;
     }
 
+    final int[] removeNullResults = {UNKNOWN};
+    showSummary(MemoryPeakResults.getAllResults(), removeNullResults);
+  }
+
+  /**
+   * Show the results in the summary table.
+   *
+   * @param results the results
+   */
+  public static void showSummary(Collection<MemoryPeakResults> results) {
+    final int[] removeNullResults = {NO};
+    showSummary(results, removeNullResults);
+  }
+
+  private static void showSummary(Collection<MemoryPeakResults> results, int[] removeNullResults) {
     final TextWindow summary = createSummaryTable();
     final StringBuilder sb = new StringBuilder();
     try (BufferedTextWindow tw = new BufferedTextWindow(summary)) {
-      for (final MemoryPeakResults result : MemoryPeakResults.getAllResults()) {
-        tw.append(createSummary(sb, result));
+      for (final MemoryPeakResults result : results) {
+        tw.append(createSummary(sb, result, removeNullResults));
       }
       tw.append("");
     }
@@ -134,7 +149,8 @@ public class SummariseResults implements PlugIn {
     return sb.toString();
   }
 
-  private String createSummary(StringBuilder sb, MemoryPeakResults result) {
+  private static String createSummary(StringBuilder sb, MemoryPeakResults result,
+      int[] removeNullResults) {
     sb.setLength(0);
 
     final DescriptiveStatistics[] stats = new DescriptiveStatistics[2];
@@ -144,15 +160,15 @@ public class SummariseResults implements PlugIn {
 
     if (result.hasNullResults()) {
       IJ.log("Null results in dataset: " + result.getName());
-      if (removeNullResults == UNKNOWN) {
+      if (removeNullResults[0] == UNKNOWN) {
         final GenericDialog gd = new GenericDialog(TITLE);
         gd.addMessage("There are invalid results in memory.\n \nClean these results?");
         gd.enableYesNoCancel();
         gd.hideCancelButton();
         gd.showDialog();
-        removeNullResults = (gd.wasOKed()) ? YES : NO;
+        removeNullResults[0] = (gd.wasOKed()) ? YES : NO;
       }
-      if (removeNullResults == NO) {
+      if (removeNullResults[0] == NO) {
         result = result.copy();
       }
       result.removeNullResults();

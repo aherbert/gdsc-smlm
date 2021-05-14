@@ -81,6 +81,10 @@ The menu provides the following options:
 
        The dataset can be saved to file using the ``Results Manager``.
 
+   * - Results
+     - Show Info
+     - Show the result information. This displays the results in the ``Summarise Results`` window.
+
    * - Edit
      - Read-only
      - If **true** then the table cannot be edited. This is the default.

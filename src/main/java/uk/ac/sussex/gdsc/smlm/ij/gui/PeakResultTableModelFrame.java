@@ -38,6 +38,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -66,6 +67,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
+import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TiffSeriesViewer.TiffSeriesVirtualStack;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
@@ -84,6 +86,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
 
   private final PeakResultTableModelJTable table;
   private JMenuItem resultsSave;
+  private JMenuItem resultsShowInfo;
   private JCheckBoxMenuItem editReadOnly;
   private JMenuItem editDelete;
   private JMenuItem editDeleteAll;
@@ -190,6 +193,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final JMenu menu = new JMenu("Results");
     menu.setMnemonic(KeyEvent.VK_R);
     menu.add(resultsSave = add("Save ...", KeyEvent.VK_S, "ctrl pressed S"));
+    menu.add(resultsShowInfo = add("Show Info", KeyEvent.VK_I, null));
     return menu;
   }
 
@@ -252,7 +256,9 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   public void actionPerformed(ActionEvent event) {
     final Object src = event.getSource();
     if (src == resultsSave) {
-      doFileSave();
+      doResultsSave();
+    } else if (src == resultsShowInfo) {
+      doResultsShowInfo();
     } else if (src == editDelete) {
       doEditDelete();
     } else if (src == editDeleteAll) {
@@ -274,7 +280,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     }
   }
 
-  private void doFileSave() {
+  private void doResultsSave() {
     final PeakResultTableModel model = getModel();
     if (model == null || model.getRowCount() == 0) {
       return;
@@ -296,6 +302,14 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     final MemoryPeakResults results = model.toMemoryPeakResults();
     results.setName(saveName);
     MemoryPeakResults.addResults(results);
+  }
+
+  private void doResultsShowInfo() {
+    // Delegate to Summarise Results
+    final PeakResultTableModel model = getModel();
+    final MemoryPeakResults results = model.toMemoryPeakResults();
+    results.setName("Table data: " + getTitle());
+    SummariseResults.showSummary(Collections.singletonList(results));
   }
 
   /**
