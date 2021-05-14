@@ -1415,7 +1415,10 @@ Note: An ideal dual population of fixed and moving molecules will be a bimodel h
 Track Population Analysis
 -------------------------
 
-The ``Track Population Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of sub-tracks. A sliding window (of size :math:`w`) is used over each sub-track to extract local features describing the diffusion of the molecule. The time step :math:`\Delta t` is the frame exposure time. Each time point in each sub-track is described as a feature vector. A multivariate Gaussian mixture model is fit to the data using the Expectation-Maximisation algorithm to estimate sub-populations of tracks that have different diffusion characteristics, for example a stationary and a moving population of molecules.
+The ``Track Population Analysis`` plugin runs on one or more datasets stored in memory that contain track IDs. All contiguous localisations from each track are extracted into a dataset of sub-tracks. A sliding window (of size :math:`w`) is used over each sub-track to extract local features describing the diffusion of the molecule. The time step :math:`\Delta t` is the frame exposure time. Each time point in each sub-track is described as a feature vector.
+
+The plugin will detect if the input localisations have been assigned a category. If present the category can optionally be used to identify sub-populations within the tracks. Alternatively a multivariate Gaussian mixture model is fit to the data using the Expectation-Maximisation algorithm to estimate sub-populations of tracks that have different diffusion characteristics, for example a stationary and a moving population of molecules.
+
 
 Anomalous exponent
 ~~~~~~~~~~~~~~~~~~
@@ -1480,6 +1483,8 @@ Parameters
 
 When the plugin runs a dialog is shown containing all the localisation datasets in memory that contain track IDs. The user can select one or more datasets for analysis. The plugin will verify that the exposure time and spatial calibration are the same across all datasets. This ensures analysis of the same sliding window across datasets is comparable.
 
+If the input data contains categories in the localisations the plugin will ask if these should be used as the populations. If ``Yes`` is selected then the options for fitting the multivariate Gaussian mixture are not shown in the parameter input dialog.
+
 The following analysis parameters can be configured:
 
 .. list-table::
@@ -1538,7 +1543,7 @@ The following analysis parameters can be configured:
 Results
 ~~~~~~~
 
-The plugin will extract all the contiguous tracks from all the input datasets that sistisfy the length criteria. The number of tracks and their average length are recorded to the ``ImageJ`` log window. For each track the diffusion features are computed. The count of insignificant anomalous diffusion coefficients is recorded in the ``ImageJ`` log window. This can be used to assess if the alpha coefficient should be ignored when fitting a mixture multivariate Gaussian model to the data. For reference an unmixed (1 component) model is created and the log-likelihood recorded. The number of components is increased up to the ``Max components`` limit until either the Expectation-Maximisation algorithm fails to converge, the new model is not significant or the mixture contains a fraction below the configured ``Min weight`` level. At each increase in number of components the log-likelihood of the model is recorded to the ``ImageJ`` log window.
+The plugin will extract all the contiguous tracks from all the input datasets that satisfy the length criteria. The number of tracks and their average length are recorded to the ``ImageJ`` log window. For each track the diffusion features are computed. The count of insignificant anomalous diffusion coefficients is recorded in the ``ImageJ`` log window. This can be used to assess if the alpha coefficient should be ignored when fitting a mixture multivariate Gaussian model to the data. For reference an unmixed (1 component) model is created and the log-likelihood recorded. The number of components is increased up to the ``Max components`` limit until either the Expectation-Maximisation algorithm fails to converge, the new model is not significant or the mixture contains a fraction below the configured ``Min weight`` level. At each increase in number of components the log-likelihood of the model is recorded to the ``ImageJ`` log window.
 
 The model is used to classify each data point into a component. The data point is assigned to the component with the highest weighted probability from the mixture. A smoothing window of size 3 is used on the initial assignments to eliminate isolated assignments. If an assignment's two immediate neighbours are the same class and different from the assignment then the point is reassigned using the neighbour class. The number of re-labelled assignments is reported to the ``ImageJ`` log window.
 
@@ -1586,6 +1591,7 @@ The residence times for the length of time spent in each component can be displa
     P(t) = \frac{1}{T_R} \exp \left( \frac{-t}{T_R} \right)
 
 The histograms are overlaid with the fitted exponential function. Bootstrapping is used on the data to produce a 95% confidence interval for the mean residence time.
+
 
 .. index:: ! OPTICS
 

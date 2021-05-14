@@ -297,7 +297,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param id the id
      * @param component the component
      * @param data the data
-     * @param fitData the fit data
+     * @param fitData the fit data (can be null if no fitting was done)
      * @param trace the trace
      */
     TrackData(int id, int[] component, double[][] data, double[][] fitData, Trace trace) {
@@ -512,7 +512,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      *
      * @param settings the settings
      * @param tableModel the model
-     * @param model the model
+     * @param model the model (can be null if no fitting was done)
      * @param calibration the calibration
      * @param colourMap the colour map
      */
@@ -708,7 +708,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       final WindowOrganiser wo = new WindowOrganiser();
 
       // Show probability of each component verses time.
-      if (settings.showTrackProbabilityPlot) {
+      if (settings.showTrackProbabilityPlot && model != null) {
         selectedAction =
             selectedAction.andThen(new TrackProbabilityPlot(model, deltaT, colourMap, wo));
       }
@@ -1795,10 +1795,15 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Get parameters
     // Convert datasets to tracks
     // For each track compute the 4 local track features using the configured window
+    //
+    // Optional:
     // Fit a multi-variate Gaussian mixture model to the data
     // (using the configured number of components/populations)
     // Assign each point in the track using the model.
     // Smooth the assignments.
+    //
+    // The alternative is to use the localisation category to assign populations.
+    //
     // Plot histograms of each track parameter, coloured by component
 
     final List<MemoryPeakResults> combinedResults = new LocalList<>();
@@ -1807,11 +1812,9 @@ public class TrackPopulationAnalysis implements PlugIn {
       return;
     }
 
-    if (!showDialog()) {
-      return;
-    }
+    final boolean hasCategory = showHasCategoryDialog(combinedResults);
 
-    if (combinedResults.isEmpty()) {
+    if (!showDialog(hasCategory)) {
       return;
     }
 
@@ -1819,6 +1822,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     final List<Trace> tracks = getTracks(combinedResults, settings.window, settings.minTrackLength);
     if (tracks.isEmpty()) {
+      IJ.error(TITLE, "No tracks. Please check the input data and min track length setting.");
       return;
     }
 
@@ -1827,7 +1831,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final TypeConverter<DistanceUnit> distanceConverter = cal.getDistanceConverter(DistanceUnit.UM);
     final double exposureTime = cal.getExposureTime() / 1000.0;
     final Pair<int[], double[][]> trackData =
-        extractTrackData(tracks, distanceConverter, exposureTime);
+        extractTrackData(tracks, distanceConverter, exposureTime, hasCategory);
     final double[][] data = trackData.getValue();
 
     // Histogram the raw data.
@@ -1868,39 +1872,68 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
     wo.tile();
 
-    // Provide option to not use the anomalous exponent in the population mix.
-    int sortDimension = SORT_DIMENSION;
+    // The component for each data point
+    int[] component;
+    // The number of components
+    int numComponents;
+
+    // Data used to fit the Gaussian mixture model
     double[][] fitData;
-    if (settings.ignoreAlpha) {
-      // Remove index 0. This shifts the sort dimension.
-      sortDimension--;
-      fitData =
-          Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length)).toArray(double[][]::new);
+    // The fitted model
+    MixtureMultivariateGaussianDistribution model;
+
+    if (hasCategory) {
+      // Use the category as the component.
+      // No fit data and no output model
+      fitData = null;
+      model = null;
+
+      // The component is stored at the end of the raw track data.
+      final int end = data[0].length - 1;
+      component = Arrays.stream(data).mapToInt(d -> (int) d[end]).toArray();
+      numComponents = MathUtils.max(component) + 1;
+
+      // Remove the trailing component to show the 'model' in a table.
+      // This is not a fitted model but the input model so use
+      // zero weights to indicate no fitting was performed.
+      final double[] weights = new double[numComponents];
+      createModelTable(Arrays.stream(data).map(d -> Arrays.copyOf(d, end)).toArray(double[][]::new),
+          weights, component);
     } else {
-      fitData = SimpleArrayUtils.deepCopy(data);
+      // Multivariate Gaussian mixture EM
+
+      // Provide option to not use the anomalous exponent in the population mix.
+      int sortDimension = SORT_DIMENSION;
+      if (settings.ignoreAlpha) {
+        // Remove index 0. This shifts the sort dimension.
+        sortDimension--;
+        fitData = Arrays.stream(data).map(d -> Arrays.copyOfRange(d, 1, d.length))
+            .toArray(double[][]::new);
+      } else {
+        fitData = SimpleArrayUtils.deepCopy(data);
+      }
+
+      final MultivariateGaussianMixtureExpectationMaximization mixed =
+          fitGaussianMixture(fitData, sortDimension);
+
+      if (mixed == null) {
+        IJ.error(TITLE, "Failed to fit a mixture model");
+        return;
+      }
+
+      model = sortComponents(mixed.getFittedModel(), sortDimension);
+
+      // For the best model, assign to the most likely population.
+      component = assignData(fitData, model);
+
+      // Table of the final model using the original data (i.e. not normalised)
+      final double[] weights = model.getWeights();
+      numComponents = weights.length;
+      createModelTable(data, weights, component);
     }
-
-    final MultivariateGaussianMixtureExpectationMaximization mixed =
-        fitGaussianMixture(fitData, sortDimension);
-
-    if (mixed == null) {
-      IJ.error(TITLE, "Failed to fit a mixture model");
-      return;
-    }
-
-    final MixtureMultivariateGaussianDistribution model =
-        sortComponents(mixed.getFittedModel(), sortDimension);
-
-    // For the best model, assign to the most likely population.
-    final int[] component = assignData(fitData, model);
-
-    // Table of the final model using the original data (i.e. not normalised)
-    final double[] weights = model.getWeights();
-    createModelTable(data, weights, component);
 
     // Output coloured histograms of the populations.
     final LUT lut = LutHelper.createLut(settings.lutIndex);
-    final int numComponents = weights.length;
     IntFunction<Color> colourMap;
     if (LutHelper.getColour(lut, 0).equals(Color.BLACK)) {
       colourMap = i -> LutHelper.getNonZeroColour(lut, i, 0, numComponents - 1);
@@ -1991,8 +2024,8 @@ public class TrackPopulationAnalysis implements PlugIn {
    *
    * @param tracks the tracks
    * @param trackData the track data
-   * @param fitData the fit data
-   * @param model the model
+   * @param fitData the fit data (can be null if no fitting was done)
+   * @param model the model (can be null if no fitting was done)
    * @param component the component
    * @param calibration the calibration
    * @param distanceConverter the distance converter (to get the coordinates in micrometers)
@@ -2010,8 +2043,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     for (int i = 0; i < lengths.length; i++) {
       final int to = from + lengths[i];
       list.add(new TrackData(i, Arrays.copyOfRange(component, from, to),
-          Arrays.copyOfRange(data, from, to), Arrays.copyOfRange(fitData, from, to),
-          tracks.get(i)));
+          Arrays.copyOfRange(data, from, to),
+          fitData == null ? null : Arrays.copyOfRange(fitData, from, to), tracks.get(i)));
       from = to;
     }
 
@@ -2112,7 +2145,23 @@ public class TrackPopulationAnalysis implements PlugIn {
     return true;
   }
 
-  private boolean showDialog() {
+  private static boolean showHasCategoryDialog(List<MemoryPeakResults> combinedResults) {
+    // Check if all results have a category
+    if (combinedResults.stream().filter(MemoryPeakResults::hasCategory).count() == combinedResults
+        .size()) {
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
+      gd.addHelp(HelpUrls.getUrl("track-population-analysis"));
+      gd.addMessage(
+          "Input results contain categories.\n \nUse the categories as the track sub-populations?");
+      gd.enableYesNoCancel();
+      gd.hideCancelButton();
+      gd.showDialog();
+      return gd.wasOKed();
+    }
+    return false;
+  }
+
+  private boolean showDialog(boolean hasCategory) {
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
     gd.addHelp(HelpUrls.getUrl("track-population-analysis"));
 
@@ -2122,15 +2171,17 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addNumericField("Fit_significance", settings.significance, -2);
     gd.addNumericField("Min_alpha", settings.minAlpha, -3);
     gd.addNumericField("Max_alpha", settings.maxAlpha, -3);
-    gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
-    gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
-    gd.addSlider("Max_components", 2, 10, settings.maxComponents);
-    gd.addSlider("Min_weight", 0.01, 1, settings.minWeight);
-    gd.addNumericField("Max_iterations", settings.maxIterations, 0);
-    gd.addNumericField("Relative_error", settings.relativeError, -1);
-    gd.addNumericField("Repeats", settings.repeats, 0);
-    gd.addNumericField("Seed", settings.seed, 0);
-    gd.addCheckbox("Debug", settings.debug);
+    if (!hasCategory) {
+      gd.addMessage("Multi-variate Gaussian mixture Expectation-Maximisation");
+      gd.addCheckbox("Ignore_alpha", settings.ignoreAlpha);
+      gd.addSlider("Max_components", 2, 10, settings.maxComponents);
+      gd.addSlider("Min_weight", 0.01, 1, settings.minWeight);
+      gd.addNumericField("Max_iterations", settings.maxIterations, 0);
+      gd.addNumericField("Relative_error", settings.relativeError, -1);
+      gd.addNumericField("Repeats", settings.repeats, 0);
+      gd.addNumericField("Seed", settings.seed, 0);
+      gd.addCheckbox("Debug", settings.debug);
+    }
     gd.addMessage("Output options");
     gd.addNumericField("Histogram_bins", settings.histogramBins, 0);
     gd.addChoice("LUT", LutHelper.getLutNames(), settings.lutIndex);
@@ -2146,14 +2197,16 @@ public class TrackPopulationAnalysis implements PlugIn {
     settings.significance = gd.getNextNumber();
     settings.minAlpha = gd.getNextNumber();
     settings.maxAlpha = gd.getNextNumber();
-    settings.ignoreAlpha = gd.getNextBoolean();
-    settings.maxComponents = (int) gd.getNextNumber();
-    settings.minWeight = gd.getNextNumber();
-    settings.maxIterations = (int) gd.getNextNumber();
-    settings.relativeError = gd.getNextNumber();
-    settings.repeats = (int) gd.getNextNumber();
-    settings.seed = (int) gd.getNextNumber();
-    settings.debug = gd.getNextBoolean();
+    if (!hasCategory) {
+      settings.ignoreAlpha = gd.getNextBoolean();
+      settings.maxComponents = (int) gd.getNextNumber();
+      settings.minWeight = gd.getNextNumber();
+      settings.maxIterations = (int) gd.getNextNumber();
+      settings.relativeError = gd.getNextNumber();
+      settings.repeats = (int) gd.getNextNumber();
+      settings.seed = (int) gd.getNextNumber();
+      settings.debug = gd.getNextBoolean();
+    }
     settings.histogramBins = (int) gd.getNextNumber();
     settings.lutIndex = gd.getNextChoiceIndex();
 
@@ -2168,11 +2221,13 @@ public class TrackPopulationAnalysis implements PlugIn {
       // where the number of points is the window size minus 1.
       ParameterUtils.isEqualOrAbove("Window", settings.window, 5);
       ParameterUtils.isEqualOrAbove("Min track length", settings.minTrackLength, 2);
-      ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 2);
-      ParameterUtils.isPositive("Min weight", settings.minWeight);
-      ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
-      ParameterUtils.isAboveZero("Maximum N", settings.relativeError);
-      ParameterUtils.isAboveZero("Repeats", settings.repeats);
+      if (!hasCategory) {
+        ParameterUtils.isEqualOrAbove("Max components", settings.maxComponents, 2);
+        ParameterUtils.isPositive("Min weight", settings.minWeight);
+        ParameterUtils.isAboveZero("Max iterations", settings.maxIterations);
+        ParameterUtils.isAboveZero("Maximum N", settings.relativeError);
+        ParameterUtils.isAboveZero("Repeats", settings.repeats);
+      }
     } catch (final IllegalArgumentException ex) {
       IJ.error(TITLE, ex.getMessage());
       return false;
@@ -2258,17 +2313,22 @@ public class TrackPopulationAnalysis implements PlugIn {
    * <p>Distances are converted to {@code unit} using the provided converter and time units are
    * converted from frame to seconds (s). The diffusion coefficients is in unit^2/s.
    *
+   * <p>If categories are added they are remapped to be a natural sequence starting from 0.
+   *
    * @param tracks the tracks
    * @param distanceConverter the distance converter
    * @param deltaT the time step of each frame in seconds (delta T)
+   * @param hasCategory if true add the category from the result to the end of the data
    * @return the track data (track lengths and descriptors)
    */
   private Pair<int[], double[][]> extractTrackData(List<Trace> tracks,
-      TypeConverter<DistanceUnit> distanceConverter, double deltaT) {
+      TypeConverter<DistanceUnit> distanceConverter, double deltaT, boolean hasCategory) {
     final List<double[]> data = new LocalList<>(tracks.size());
     double[] x = new double[0];
     double[] y = new double[0];
     final int wm1 = settings.window - 1;
+    final int valuesLength = hasCategory ? 5 : 4;
+    final int mid = settings.window / 2;
 
     final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
     final double significance = settings.significance;
@@ -2282,6 +2342,9 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Statistics statsX = new Statistics();
     final Statistics statsY = new Statistics();
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
+
+    // Remap the track categories
+    final TIntIntHashMap catMap = new TIntIntHashMap();
 
     // final StoredDataStatistics statsAlpha = new StoredDataStatistics(tracks.size());
 
@@ -2302,8 +2365,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       final int smwm1 = size - wm1;
       final int previousSize = data.size();
       for (int k = 0; k < smwm1; k++) {
-        final double[] values = new double[4];
+        final double[] values = new double[valuesLength];
         data.add(values);
+
+        // Append the category to the data. This works best for odd sized windows as the
+        // middle of even sized windows is between two localisations.
+        if (hasCategory) {
+          values[4] = catMap.adjustOrPutValue(track.get(k + mid).getCategory(), 0, catMap.size());
+        }
 
         // First point in window = k
         // Last point in window = k + w - 1 = k + wm1
