@@ -1893,10 +1893,14 @@ public class TrackPopulationAnalysis implements PlugIn {
       component = Arrays.stream(data).mapToInt(d -> (int) d[end]).toArray();
       numComponents = MathUtils.max(component) + 1;
 
-      // Remove the trailing component to show the 'model' in a table.
+      // In the EM algorithm the probability of each data point is computed and normalised to
+      // sum to 1. The normalised probabilities are averaged to create the weights.
+      // Note the probability of each data point uses the previous weight and the algorithm
+      // iterates.
       // This is not a fitted model but the input model so use
       // zero weights to indicate no fitting was performed.
       final double[] weights = new double[numComponents];
+      // Remove the trailing component to show the 'model' in a table.
       createModelTable(Arrays.stream(data).map(d -> Arrays.copyOf(d, end)).toArray(double[][]::new),
           weights, component);
     } else {
@@ -1993,12 +1997,17 @@ public class TrackPopulationAnalysis implements PlugIn {
         MultivariateGaussianMixtureExpectationMaximization.createMixed(data, component);
     final MultivariateGaussianDistribution[] distributions = model.getDistributions();
 
+    // Get the fraction of each component
+    final int[] count = new int[MathUtils.max(component) + 1];
+    Arrays.stream(component).forEach(c -> count[c]++);
+
     try (BufferedTextWindow tw = new BufferedTextWindow(ImageJUtils.refresh(modelTableRef,
         () -> new TextWindow("Track Population Model", createHeader(), "", 800, 300)))) {
       final StringBuilder sb = new StringBuilder();
       for (int i = 0; i < weights.length; i++) {
         sb.setLength(0);
         sb.append(i).append('\t');
+        sb.append(MathUtils.rounded((double) count[i] / component.length)).append('\t');
         sb.append(MathUtils.rounded(weights[i]));
         final double[] means = distributions[i].getMeans();
         final double[] sd = distributions[i].getStandardDeviations();
@@ -2012,7 +2021,7 @@ public class TrackPopulationAnalysis implements PlugIn {
   }
 
   private static String createHeader() {
-    final StringBuilder sb = new StringBuilder("Component\tWeight");
+    final StringBuilder sb = new StringBuilder("Component\tFraction\tGaussian Weight");
     for (int i = 0; i < FEATURE_NAMES.length; i++) {
       sb.append('\t').append(getFeatureLabel(i)).append("\t+/-");
     }
