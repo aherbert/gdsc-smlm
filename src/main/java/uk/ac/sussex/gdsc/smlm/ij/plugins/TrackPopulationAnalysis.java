@@ -30,6 +30,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -2352,8 +2353,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Statistics statsY = new Statistics();
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
 
-    // Remap the track categories
-    final TIntIntHashMap catMap = new TIntIntHashMap();
+    // Collect the track categories. Later these are renumbered to a natural sequence from 0.
+    final TIntHashSet catSet = new TIntHashSet();
 
     // final StoredDataStatistics statsAlpha = new StoredDataStatistics(tracks.size());
 
@@ -2380,7 +2381,9 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Append the category to the data. This works best for odd sized windows as the
         // middle of even sized windows is between two localisations.
         if (hasCategory) {
-          values[4] = catMap.adjustOrPutValue(track.get(k + mid).getCategory(), 0, catMap.size());
+          final int cat = track.get(k + mid).getCategory();
+          values[4] = cat;
+          catSet.add(cat);
         }
 
         // First point in window = k
@@ -2486,7 +2489,25 @@ public class TrackPopulationAnalysis implements PlugIn {
     ImageJUtils.log("Insignificant anomalous exponents: %d / %d", fitResult[1] + fitResult[3],
         data.size());
     // System.out.println(statsAlpha.getStatistics().toString());
-    return Pair.create(lengths.toArray(), data.toArray(new double[0][0]));
+
+    final double[][] trackData = data.toArray(new double[0][0]);
+    if (hasCategory) {
+      final int[] categories = catSet.toArray();
+      Arrays.sort(categories);
+      // Only remap if non-compact (i.e. not 0 to n)
+      final int max = categories[categories.length - 1];
+      if (categories[0] != 0 || max + 1 != categories.length) {
+        int[] remap = new int[max + 1];
+        for (int i = 0; i < categories.length; i++) {
+          remap[categories[i]] = i;
+        }
+        final int end = valuesLength - 1;
+        for (double[] values : trackData) {
+          values[end] = remap[(int) values[end]];
+        }
+      }
+    }
+    return Pair.create(lengths.toArray(), trackData);
   }
 
   /**
