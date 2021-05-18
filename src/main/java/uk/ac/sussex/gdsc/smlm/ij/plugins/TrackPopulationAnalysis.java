@@ -104,6 +104,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
+import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
@@ -119,6 +120,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
+import uk.ac.sussex.gdsc.core.math.Mean;
 import uk.ac.sussex.gdsc.core.math.SumOfSquaredDeviations;
 import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -145,6 +147,7 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMix
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
+import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 
 /**
@@ -2407,9 +2410,34 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = start; i < tracks.size(); i++) {
         stats.add(tracks.unsafeGet(i).size());
       }
-      ImageJUtils.log("%s tracks=%d, length=%s +/- %s", results.getName(), stats.getN(),
+
+      final StringBuilder sb = new StringBuilder(256);
+      TextUtils.formatTo(sb, "%s tracks=%d, length=%s +/- %s", results.getName(), stats.getN(),
           MathUtils.rounded(stats.getMean(), 3),
           MathUtils.rounded(stats.getStandardDeviation(), 3));
+
+      // Limit of diffusion coefficient from the localisation precision.
+      // Just use the entire dataset for simplicity (i.e. not the tracks of min length).
+      final PrecisionResultProcedure pp = new PrecisionResultProcedure(results);
+      try {
+        pp.getPrecision();
+        final Mean mean = new Mean();
+        for (final double p : pp.precisions) {
+          mean.add(p);
+        }
+        // 2nDt = MSD  (n = number of dimensions)
+        // D = MSD / 2nt
+        final CalibrationReader reader = results.getCalibrationReader();
+        final double t = reader.getExposureTime() / 1000.0;
+        // Assume computed in nm. Convert to um.
+        final double x = mean.getMean() / 1000;
+        final double d = x * x / (2 * t);
+        TextUtils.formatTo(sb, ", precision=%s nm, D limit=%s um^2/s",
+            MathUtils.rounded(x * 1000, 4), MathUtils.rounded(d, 4));
+      } catch (final DataException ex) {
+        // No precision
+      }
+      IJ.log(sb.toString());
     });
     return tracks;
   }
