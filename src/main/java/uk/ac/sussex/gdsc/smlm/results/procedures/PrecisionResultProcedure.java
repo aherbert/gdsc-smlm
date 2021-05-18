@@ -25,7 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
+import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 
 /**
@@ -74,6 +76,9 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
    * attempt is made to compute the precision using {@link #getLsePrecision()}. If no exception is
    * thrown then the precision has been computed.
    *
+   * <p>Note: Computed precisions are returned in nm. Any stored precisions are converted to nm for
+   * convenience.
+   *
    * @param stored the stored flag
    * @return the precision method
    * @throws DataException if conversion to the required units for precision is not possible
@@ -82,6 +87,11 @@ public class PrecisionResultProcedure extends AbstractResultProcedure implements
     if (stored) {
       getStoredPrecision();
       if (results.hasCalibration()) {
+        // Convert to nm for convenience
+        final TypeConverter<DistanceUnit> dc = results.getDistanceConverter(DistanceUnit.NM);
+        for (int i = 0; i < precisions.length; i++) {
+          precisions[i] = dc.convert(precisions[i]);
+        }
         return results.getCalibrationReader().getPrecisionMethod();
       }
       return PrecisionMethod.PRECISION_METHOD_NA;
