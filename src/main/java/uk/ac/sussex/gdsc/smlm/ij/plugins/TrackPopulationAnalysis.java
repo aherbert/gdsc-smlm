@@ -200,6 +200,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Track Data table
     boolean showTrackImage;
     boolean showTrackProbabilityPlot;
+    boolean showSingleJumpPlot;
     boolean[] showFeaturePlot;
     double nmPerPixel;
     int minDisplaySize;
@@ -224,6 +225,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       lutIndex = LutColour.RED_BLUE.ordinal();
       showTrackImage = true;
       showTrackProbabilityPlot = true;
+      showSingleJumpPlot = true;
       showFeaturePlot = new boolean[FEATURE_NAMES.length];
       Arrays.fill(showFeaturePlot, true);
       nmPerPixel = 10;
@@ -250,6 +252,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.lutIndex = source.lutIndex;
       this.showTrackImage = source.showTrackImage;
       this.showTrackProbabilityPlot = source.showTrackProbabilityPlot;
+      this.showSingleJumpPlot = source.showSingleJumpPlot;
       this.showFeaturePlot = source.showFeaturePlot.clone();
       this.nmPerPixel = source.nmPerPixel;
       this.minDisplaySize = source.minDisplaySize;
@@ -647,6 +650,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = 0; i < FEATURE_NAMES.length; i++) {
         gd.addCheckbox("Show_" + FEATURE_NAMES[i] + "_plot", settings.showFeaturePlot[i]);
       }
+      gd.addCheckbox("Show_single_jump_plot", settings.showSingleJumpPlot);
       gd.showDialog();
       if (gd.wasCanceled()) {
         return;
@@ -659,6 +663,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       for (int i = 0; i < FEATURE_NAMES.length; i++) {
         settings.showFeaturePlot[i] = gd.getNextBoolean();
       }
+      settings.showSingleJumpPlot = gd.getNextBoolean();
 
       // Check arguments
       try {
@@ -719,6 +724,11 @@ public class TrackPopulationAnalysis implements PlugIn {
         if (settings.showFeaturePlot[i]) {
           selectedAction = selectedAction.andThen(new TrackFeaturePlot(deltaT, i, colourMap, wo));
         }
+      }
+
+      if (settings.showSingleJumpPlot) {
+        selectedAction =
+            selectedAction.andThen(new TrackDPlot(deltaT, distanceConverter, colourMap, wo));
       }
 
       // Show an image of the track coloured by the component.
@@ -1778,6 +1788,107 @@ public class TrackPopulationAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Show a plot of the effective diffusion coefficient from a single jump, i.e. not over the
+   * analysis window.
+   */
+  private static class TrackDPlot implements Consumer<List<TrackData>> {
+    final double deltaT;
+    final double scale;
+    final IntFunction<Color> colourMap;
+    final WindowOrganiser wo;
+
+    TrackDPlot(double deltaT, TypeConverter<DistanceUnit> distanceConverter,
+        IntFunction<Color> colourMap, WindowOrganiser wo) {
+      this.deltaT = deltaT;
+      // Extract effective diffusion coefficient in um^2/s:
+      // d = MSD / (4 * deltaT)
+      scale = MathUtils.pow2(distanceConverter.convert(1)) / (4 * deltaT);
+      this.colourMap = colourMap;
+      this.wo = wo;
+    }
+
+    @Override
+    public void accept(List<TrackData> tracks) {
+      if (tracks.isEmpty()) {
+        return;
+      }
+      final TrackData track = tracks.get(0);
+      // Extract effective diffusion coefficient in um^2/s:
+      // d = MSD / (4 * deltaT)
+      final Trace trace = track.trace;
+      final int length = track.component.length;
+      final int points = trace.size();
+      // The window means that some of the coordinates at the start and end are not classified.
+      // Find the offset to the first classified point.
+      // Reduce by 1 as we have jumps and not raw XY coordinates.
+      // jump[i + offset] == component[i]
+      final int offset = ((points - length) / 2) - 1;
+      final float[] t = new float[points - 1];
+      final float[] d = new float[points - 1];
+      double x = trace.get(0).getXPosition();
+      double y = trace.get(0).getYPosition();
+      for (int i = 1; i < points; i++) {
+        final double x1 = trace.get(i).getXPosition();
+        final double y1 = trace.get(i).getYPosition();
+        // Offset the time so the classified points match with the other plots
+        t[i - 1] = (float) ((i - offset) * deltaT);
+        d[i - 1] = (float) (scale * (MathUtils.pow2(x1 - x) + MathUtils.pow2(y1 - y)));
+        x = x1;
+        y = y1;
+      }
+
+      final Plot plot = new Plot("Track " + FEATURE_NAMES[FEATURE_D] + " (single jump)", "Time (s)",
+          getFeatureLabel(FEATURE_D));
+      // Get colours for the different components.
+      final int[] component = track.component;
+      final Color[] map = new Color[MathUtils.max(component) + 1];
+      final Color[] colours = new Color[t.length];
+      // Grey for no classification before the components
+      for (int i = 0; i < offset; i++) {
+        colours[i] = Color.GRAY;
+      }
+      // Colour the classified points
+      for (int i = 0; i < component.length; i++) {
+        Color c = map[component[i]];
+        if (c == null) {
+          c = map[component[i]] = colourMap.apply(component[i]);
+        }
+        colours[i + offset] = c;
+      }
+      // Grey for no classification after the components
+      for (int i = component.length + offset; i < colours.length; i++) {
+        colours[i] = Color.GRAY;
+      }
+      // Add lines using the colour of the second component.
+      for (int i = 1; i < t.length; i++) {
+        plot.setColor(colours[i]);
+        plot.drawLine(t[i - 1], d[i - 1], t[i], d[i]);
+      }
+      // Add points of the same colour
+      final TFloatArrayList xx = new TFloatArrayList(t.length);
+      final TFloatArrayList yy = new TFloatArrayList(t.length);
+      for (final Color c : colours) {
+        if (c == null) {
+          continue;
+        }
+        xx.resetQuick();
+        yy.resetQuick();
+        plot.setColor(c);
+        for (int i = 0; i < component.length; i++) {
+          final int j = i + offset;
+          if (colours[j] == c) {
+            xx.add(t[j]);
+            yy.add(d[j]);
+          }
+        }
+        plot.addPoints(xx.toArray(), yy.toArray(), Plot.CIRCLE);
+      }
+      ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
+          .setLimitsToFit(true);
+    }
+  }
+
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -2497,12 +2608,12 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Only remap if non-compact (i.e. not 0 to n)
       final int max = categories[categories.length - 1];
       if (categories[0] != 0 || max + 1 != categories.length) {
-        int[] remap = new int[max + 1];
+        final int[] remap = new int[max + 1];
         for (int i = 0; i < categories.length; i++) {
           remap[categories[i]] = i;
         }
         final int end = valuesLength - 1;
-        for (double[] values : trackData) {
+        for (final double[] values : trackData) {
           values[end] = remap[(int) values[end]];
         }
       }
