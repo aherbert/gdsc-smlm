@@ -24,11 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.awt.Rectangle;
+import java.util.BitSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.function.IntDoubleConsumer;
 
 @SuppressWarnings({"javadoc"})
 class LocalDensityTest {
@@ -55,20 +59,58 @@ class LocalDensityTest {
   }
 
   @Test
-  void estimateReturnsZeroForZeroOrOnePoint() {
-    final int[] x0 = new int[0];
-    final int[] x1 = new int[1];
+  void estimateReturnsZeroForZeroPoints() {
+    final int[] x = {};
     final int border = 1;
-    Assertions.assertEquals(0, LocalDensity.estimate(x0, x0, border));
-    Assertions.assertEquals(0, LocalDensity.estimate(x1, x1, border));
+    final RegionConsumer consumer = new RegionConsumer();
+    Assertions.assertEquals(0, LocalDensity.estimate(x, x, border));
+    Assertions.assertEquals(0, LocalDensity.estimate(x, x, border, consumer::accept));
+    Assertions.assertEquals(0, consumer.size());
   }
 
   @Test
-  void estimateReturnsZeroForNoPossibleInteraction() {
-    final int border = 1;
-    Assertions.assertEquals(0, LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 5}, border));
-    Assertions.assertEquals(0, LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 0}, border));
-    Assertions.assertEquals(0, LocalDensity.estimate(new int[] {0, 0}, new int[] {0, 5}, border));
+  void estimateReturnsMinDensityForOnePoint() {
+    final int[] x = {0};
+    final RegionConsumer consumer = new RegionConsumer();
+    final int[] counts = {1};
+    for (int border = 0; border <= 3; border++) {
+      final int size = 2 * border + 1;
+      final double expected = 1.0 / (size * size);
+      final double[] areas = {size * size};
+      Assertions.assertEquals(expected, LocalDensity.estimate(x, x, border));
+      Assertions.assertEquals(expected, LocalDensity.estimate(x, x, border, consumer::accept));
+      Assertions.assertTrue(consumer.equals(counts, areas));
+      consumer.clear();
+    }
+  }
+
+  @Test
+  void estimateReturnsMinDensityForNoPossibleInteraction() {
+    final RegionConsumer consumer = new RegionConsumer();
+    final int[] counts = {1, 1};
+    for (int border = 0; border <= 2; border++) {
+      final int size = 2 * border + 1;
+      final double density = 1.0 / (size * size);
+      final double[] areas = {size * size, size * size};
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 5}, border));
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 0}, border));
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 0}, new int[] {0, 5}, border));
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 5}, border, consumer::accept));
+      Assertions.assertTrue(consumer.equals(counts, areas));
+      consumer.clear();
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 5}, new int[] {0, 0}, border, consumer::accept));
+      Assertions.assertTrue(consumer.equals(counts, areas));
+      consumer.clear();
+      Assertions.assertEquals(density,
+          LocalDensity.estimate(new int[] {0, 0}, new int[] {0, 5}, border, consumer::accept));
+      Assertions.assertTrue(consumer.equals(counts, areas));
+      consumer.clear();
+    }
   }
 
   @Test
@@ -96,13 +138,24 @@ class LocalDensityTest {
     final Rectangle r0 = new Rectangle(x0, y0, size, size);
     final Rectangle r1 = new Rectangle(x1, y1, size, size);
     final Rectangle intersection = r0.intersection(r1);
-    double expected = 0;
+    final double minArea = (double) size * size;
+    int[] counts;
+    double[] areas;
     if (!intersection.isEmpty()) {
       final double area = 2.0 * size * size - (double) intersection.width * intersection.height;
-      expected = 2 / area;
+      counts = new int[] {2};
+      areas = new double[] {area};
+    } else {
+      counts = new int[] {1, 1};
+      areas = new double[] {minArea, minArea};
     }
+    final double expected = 2 / MathUtils.sum(areas);
     Assertions.assertEquals(expected,
         LocalDensity.estimate(new int[] {x0, x1}, new int[] {y0, y1}, border));
+    final RegionConsumer consumer = new RegionConsumer();
+    Assertions.assertEquals(expected,
+        LocalDensity.estimate(new int[] {x0, x1}, new int[] {y0, y1}, border, consumer::accept));
+    Assertions.assertTrue(consumer.equals(counts, areas));
   }
 
   @Test
@@ -136,24 +189,39 @@ class LocalDensityTest {
     final boolean r0r2 = r0.intersects(r2);
     final boolean r1r2 = r1.intersects(r2);
     // Add overlapping areas
-    double expected = 0;
+    final double minArea = (double) size * size;
+    int[] counts;
+    double[] areas;
     if (r0r1) {
       if (r0r2 || r1r2) {
-        expected = 3 / area(r0, r1, r2);
+        counts = new int[] {3};
+        areas = new double[] {area(r0, r1, r2)};
       } else {
-        expected = 2 / area(r0, r1);
+        counts = new int[] {2, 1};
+        areas = new double[] {area(r0, r1), minArea};
       }
     } else if (r0r2) {
       if (r1r2) {
-        expected = 3 / area(r0, r1, r2);
+        counts = new int[] {3};
+        areas = new double[] {area(r0, r1, r2)};
       } else {
-        expected = 2 / area(r0, r2);
+        counts = new int[] {2, 1};
+        areas = new double[] {area(r0, r2), minArea};
       }
     } else if (r1r2) {
-      expected = 2 / area(r1, r2);
+      counts = new int[] {2, 1};
+      areas = new double[] {area(r1, r2), minArea};
+    } else {
+      counts = new int[] {1, 1, 1};
+      areas = new double[] {minArea, minArea, minArea};
     }
+    final double expected = 3 / MathUtils.sum(areas);
     Assertions.assertEquals(expected,
         LocalDensity.estimate(new int[] {x0, x1, x2}, new int[] {y0, y1, y2}, border));
+    final RegionConsumer consumer = new RegionConsumer();
+    Assertions.assertEquals(expected, LocalDensity.estimate(new int[] {x0, x1, x2},
+        new int[] {y0, y1, y2}, border, consumer::accept));
+    Assertions.assertTrue(consumer.equals(counts, areas));
   }
 
   private static double area(Rectangle... rectangles) {
@@ -203,5 +271,50 @@ class LocalDensityTest {
     // squares below the minimum bounds
     final int[] x = SimpleArrayUtils.newArray(20, 0, -2);
     Assertions.assertEquals(20.0 / (9 + 8 * 19), LocalDensity.estimate(x, x, 1));
+  }
+
+  /**
+   * Simple consumer of the regions.
+   */
+  private static class RegionConsumer implements IntDoubleConsumer {
+    TIntArrayList list1 = new TIntArrayList();
+    TDoubleArrayList list2 = new TDoubleArrayList();
+
+    @Override
+    public void accept(int t, double value) {
+      list1.add(t);
+      list2.add(value);
+    }
+
+    int size() {
+      return list1.size();
+    }
+
+    boolean equals(int[] ts, double[] values) {
+      if (ts.length == list1.size()) {
+        if (ts.length == 0) {
+          return true;
+        }
+        final BitSet set = new BitSet(ts.length);
+        for (int n = 0; n < ts.length; n++) {
+          final int t = ts[n];
+          final double value = values[n];
+          for (int i = list1.size() - 1; i >= 0; i--) {
+            if (!set.get(i) && list1.getQuick(i) == t && list2.getQuick(i) == value) {
+              // Found, mark as used
+              set.set(i);
+              break;
+            }
+          }
+        }
+        return set.cardinality() == ts.length;
+      }
+      return false;
+    }
+
+    void clear() {
+      list1.resetQuick();
+      list2.resetQuick();
+    }
   }
 }

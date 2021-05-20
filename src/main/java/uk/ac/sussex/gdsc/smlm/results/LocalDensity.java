@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+import uk.ac.sussex.gdsc.core.utils.function.IntDoubleConsumer;
 
 /**
  * Contains functions to compute the local density of 2D coordinates.
@@ -200,13 +201,11 @@ public final class LocalDensity {
     /**
      * Compute the area of the multi-square.
      *
-     * <p>Returns 0 if the region contains only 1 square.
-     *
      * @return the area
      */
     double area() {
       if (np == 0) {
-        return 0;
+        return (double) size * size;
       }
       if (np == 2) {
         return LocalDensity.getArea(xp[0], yp[0], xp[1], yp[1], size);
@@ -278,14 +277,13 @@ public final class LocalDensity {
     }
 
     /**
-     * Get the size. This is the number of squares in the multi-square, otherwise 0.
-     *
-     * <p>Returns 0 if the region contains only 1 square.
+     * Get the size. This is the number of squares in the multi-square.
      *
      * @return the size
      */
     int size() {
-      return np;
+      // np is zero when there is only one square
+      return np == 0 ? 1 : np;
     }
   }
 
@@ -298,38 +296,53 @@ public final class LocalDensity {
    * Estimate the local density of points. The border should be the extent around the point
    * considered to be close to the point, for example the extent of the point spread function (PSF).
    *
+   * <p>This function calls {@link #estimate(int[], int[], int, IntDoubleConsumer) estimate} with a
+   * {@code null} consumer for the regions.
+   *
+   * @param x the x positions
+   * @param y the y positions
+   * @param border the border
+   * @return the local density
+   * @see #estimate(int[], int[], int, IntDoubleConsumer)
+   * @throw {@link IllegalArgumentException} if x and y lengths do not match; or if
+   *        {@code 2 * border + 1} is greater than the maximum integer size.
+   */
+  public static double estimate(int[] x, int[] y, int border) {
+    return estimate(x, y, border, null);
+  }
+
+  /**
+   * Estimate the local density of points. The border should be the extent around the point
+   * considered to be close to the point, for example the extent of the point spread function (PSF).
+   *
    * <p>A bounding box is placed around each XY point defining the local region of interest. Any
    * other point's bounding box that overlap the bounding box is considered to be local. The
    * overlapping bounding box regions are combined to an area and the density computed as:
    *
    * <pre>
-   * density = local points / area
+   * density = points / (sum local areas)
    * </pre>
    *
-   * <p>Any points that do not interact with other points are ignored. A non-zero return value from
-   * this method indicates that points are above the minimum density of
-   * {@code 1 / Math.pow(2 * border + 1, 2)}.
+   * <p>The count of points and area of each local region can be obtained using the {@code regions}
+   * consumer.
    *
-   * <p>A negative border is set to 0 and in this case density is only non-zero for coincident
-   * points.
+   * <p>Any points that do not interact with other points have a minimum density of
+   * {@code Math.pow(2 * border + 1, -2)}.
    *
    * <p>Note: This estimate requires that each square can be represented using the {@link Rectangle}
    * class. Thus the width and height of each square is limited to the maximum integer size.
    *
    * @param x the x positions
    * @param y the y positions
-   * @param border the border
-   * @return the density (or zero)
+   * @param border the border (negative values are set to zero)
+   * @param regions the regions (can be {@code null})
+   * @return the local density
    * @throw {@link IllegalArgumentException} if x and y lengths do not match; or if
    *        {@code 2 * border + 1} is greater than the maximum integer size.
    */
-  public static double estimate(int[] x, int[] y, int border) {
+  public static double estimate(int[] x, int[] y, int border, IntDoubleConsumer regions) {
     final int n = x.length;
     ValidationUtils.checkArgument(n == y.length, "xy length mismatch: %d != %d", n, y.length);
-    if (n < 2) {
-      // No density possible
-      return 0;
-    }
     // Check the border is positive and within the limit
     if (border < 0) {
       border = 0;
@@ -337,13 +350,33 @@ public final class LocalDensity {
       ValidationUtils.checkArgument(border <= BORDER_LIMIT, "border too large: %d", border);
     }
     final int size = 2 * border + 1;
+    if (n == 0) {
+      return 0;
+    }
+    if (n == 1) {
+      final double area = (double) size * size;
+      if (regions != null) {
+        regions.accept(1, area);
+      }
+      return 1.0 / area;
+    }
     // Edge case for 2 points
     if (n == 2) {
       // The points interact if they are within the size for x and y.
       if (withinReach(x[0], y[0], x[1], y[1], size)) {
-        return 2.0 / getArea(x[0], y[0], x[1], y[1], size);
+        final double area = getArea(x[0], y[0], x[1], y[1], size);
+        if (regions != null) {
+          regions.accept(2, area);
+        }
+        return 2.0 / area;
       }
-      return 0;
+      // Minimum density
+      final double area = (double) size * size;
+      if (regions != null) {
+        regions.accept(1, area);
+        regions.accept(1, area);
+      }
+      return 1.0 / area;
     }
 
     // Construct bounding boxes and test for intersections.
@@ -378,14 +411,19 @@ public final class LocalDensity {
     }
 
     // Compute the density of interacting regions
-    int count = 0;
-    double area = 0;
+    int sumCount = 0;
+    double sumArea = 0;
     for (final MultiSquare mr : areas) {
-      count += mr.size();
-      area += mr.area();
+      final int count = mr.size();
+      final double area = mr.area();
+      sumCount += count;
+      sumArea += area;
+      if (regions != null) {
+        regions.accept(count, area);
+      }
     }
 
-    return MathUtils.div0(count, area);
+    return MathUtils.div0(sumCount, sumArea);
   }
 
   /**
