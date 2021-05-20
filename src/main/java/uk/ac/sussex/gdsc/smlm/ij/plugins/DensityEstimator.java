@@ -187,12 +187,8 @@ public class DensityEstimator implements PlugIn {
     // Collect results
     final LocalList<FrameDensity> densities = new LocalList<>(futures.size());
     futures.stream().forEach(f -> {
-      FrameDensity fd;
       try {
-        fd = f.get();
-        if (fd.density != 0) {
-          densities.push(fd);
-        }
+        densities.push(f.get());
       } catch (InterruptedException | ExecutionException ex) {
         if (ex instanceof InterruptedException) {
           // Restore interrupted state...
