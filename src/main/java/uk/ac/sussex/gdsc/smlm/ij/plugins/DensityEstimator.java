@@ -283,12 +283,12 @@ public class DensityEstimator implements PlugIn {
     gd.addHelp(HelpUrls.getUrl("density-estimator"));
 
     gd.addMessage(TextUtils
-        .wrap("Compute local density using NxN squares around localisations. The border size N "
-            + "should reflect the extent of the PSF in pixels. The density is zero unless PSFs "
-            + "are overlapping. All overlapping PSFs are joined to an area and the density of "
-            + "localisations in each area is computed.", 80));
+        .wrap("Compute local density using NxN squares around localisations. The border size "
+            + "should reflect the extent of the PSF in pixels (N=2*border+1). All overlapping "
+            + "PSFs are joined to an area and the density of localisations in each area is "
+            + "computed.", 80));
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
-    gd.addSlider("Border (N)", 0, 20, settings.border);
+    gd.addSlider("Border", 0, 20, settings.border);
     gd.addCheckbox("Include_singles", settings.includeSingles);
 
     gd.showDialog();

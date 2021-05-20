@@ -3232,6 +3232,32 @@ Each computation of new results will be saved to memory with the prefix of the i
     Each cross hair represents an activation. Colours represent the channel: red (1); green (2); and blue (3). Subtraction correction was performed by removing all activations with a correct assignment probability of below 50%.
 
 
+.. index:: ! Density Estimator
+
+Density Estimator
+-----------------
+
+Estimates the local density using squares of size :math:`N` around localisations. The size :math:`N` should reflect the extent of the PSF in pixels. All overlapping PSFs are joined to an area and the density of localisations in each area is computed. Non-overlapping PSFs are single isolated localisations which have a minimum density defined as :math:`N^-2`. These can optionally be included in the analysis or excluded (as the density of neighbours around the singles is effectively zero).
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Input
+     - The results set to analyse.
+
+   * - Border
+     - The border around each localisation. The size of the square region is :math:`N = 2b+1` with :math:`b` the border.
+
+   * - Include singles
+     - Include singles in the analysis.
+
+All localisations from each frame are analysed independently. The results are then displayed as an XY scatter plot of the local density against the frame and the local density is shown as a histogram.
+
+
 .. index:: ! Fourier Image Resolution
 
 Fourier Image Resolution

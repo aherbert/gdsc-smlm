@@ -188,6 +188,9 @@ Results Plugins
    * - :ref:`results_plugins:Free Filter Results`
      - Filters a list of localisations using a custom filter specified using a text description. Multiple filters can be combined with AND/OR operators.
 
+   * - :ref:`results_plugins:Filter Molecules`
+     - Filters a set of molecules using various criteria.
+
    * - :ref:`results_plugins:Split Results`
      - Splits a set of localisation results using a 2D mask.
 
@@ -232,6 +235,9 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Cluster Molecules`
      - Clusters molecules through time using time and distance thresholds (using centroid-linkage clustering).
 
+   * - :ref:`analysis_plugins:Dynamic Trace Molecules`
+     - Traces localisations through time and collates them into traces using a probability model to connect localisations.
+
    * - :ref:`analysis_plugins:Trace Diffusion`
      - Trace molecules through consecutive frames. Mean-squared displacement analysis is performed on the traces to calculate a diffusion coefficient.
 
@@ -240,6 +246,9 @@ Analysis Plugins
 
    * - :ref:`analysis_plugins:Trace Length Analysis`
      - Analyses the track length of traced data.
+
+   * - :ref:`analysis_plugins:Track Population Analysis`
+     - Analyses the local diffusion of tracks within a window and classifies tracks into sub-populations based on diffusion metrics.
 
    * - :ref:`analysis_plugins:OPTICS`
      - Runs the OPTICS algorithm to perform interactive density-based clustering of localisation data.
@@ -258,6 +267,9 @@ Analysis Plugins
 
    * - :ref:`analysis_plugins:Blink Estimator`
      - Estimate the blinking rate of fluorophores in a results set.
+
+   * - :ref:`analysis_plugins:TC PALM Analysis`
+     - Performs time correlated photo-activated light microscopy (TC-PALM) analysis.
 
    * - :ref:`analysis_plugins:Neighbour Analysis`
      - Saves all localisations paired with their neighbour (if present) to file.
@@ -282,6 +294,9 @@ Analysis Plugins
 
    * - :ref:`analysis_plugins:Pulse Activation Analysis`
      - Perform multi-channel super-resolution imaging by means of photo-switchable probes and pulsed light activation.
+
+   * - :ref:`analysis_plugins:Density Estimator`
+     - Estimates the local density using NxN squares around localisations.
 
    * - :ref:`analysis_plugins:Fourier Image Resolution`
      - Analyses the resolution of an image using Fourier Ring Correlation.
