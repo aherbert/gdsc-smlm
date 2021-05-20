@@ -29,12 +29,12 @@ import ij.IJ;
 import ij.Prefs;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
-import java.util.concurrent.ExecutionException;
+import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
@@ -44,6 +44,8 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
+import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.function.IntDoubleConsumer;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.results.LocalDensity;
@@ -70,6 +72,7 @@ public class DensityEstimator implements PlugIn {
 
     String inputOption;
     int border;
+    boolean includeSingles;
 
     Settings() {
       // Set defaults
@@ -80,6 +83,7 @@ public class DensityEstimator implements PlugIn {
     Settings(Settings source) {
       inputOption = source.inputOption;
       border = source.border;
+      includeSingles = source.includeSingles;
     }
 
     Settings copy() {
@@ -106,19 +110,56 @@ public class DensityEstimator implements PlugIn {
   /**
    * Store the density for a frame.
    */
-  private static class FrameDensity {
+  private static class FrameDensity implements Runnable, IntDoubleConsumer {
     final int frame;
-    final double density;
+    int[] x;
+    int[] y;
+    final int border;
+    final boolean includeSingles;
+    int[] counts;
+    double[] values;
+    int size;
+    int singles;
 
     /**
      * Create an instance.
      *
      * @param frame the frame
-     * @param density the density
+     * @param x the x
+     * @param y the y
+     * @param border the border
+     * @param includeSingles the include singles
      */
-    FrameDensity(int frame, double density) {
+    FrameDensity(int frame, int[] x, int[] y, int border, boolean includeSingles) {
       this.frame = frame;
-      this.density = density;
+      this.x = x;
+      this.y = y;
+      this.border = border;
+      this.includeSingles = includeSingles;
+    }
+
+    @Override
+    public void run() {
+      counts = new int[x.length];
+      values = new double[x.length];
+      LocalDensity.estimate(x, y, border, this);
+      // Free memory; prevent running again by forcing a NPE
+      x = y = null;
+      counts = Arrays.copyOf(counts, size);
+      values = Arrays.copyOf(values, size);
+    }
+
+    @Override
+    public void accept(int t, double value) {
+      if (t == 1) {
+        singles++;
+        if (!includeSingles) {
+          return;
+        }
+      }
+      counts[size] = t;
+      values[size] = value;
+      size++;
     }
   }
 
@@ -145,87 +186,91 @@ public class DensityEstimator implements PlugIn {
       return;
     }
 
-    // Scale to um^2 from px^2
-    final double scale = Math.pow(results.getDistanceConverter(DistanceUnit.UM).convert(1), -2);
-
     final long start = System.currentTimeMillis();
     IJ.showStatus("Calculating density ...");
 
-
-    final int border = settings.border;
-    final int size = 2 * border + 1;
-    final double minDensity = Math.pow(size, -2);
-    ImageJUtils.log("%s : %s : Minimum density in %dx%d px = %s um^-2", TITLE, results.getName(),
-        size, size, MathUtils.rounded(minDensity * scale));
+    // Scale to um^2 from px^2
+    final double scale = Math.pow(results.getDistanceConverter(DistanceUnit.UM).convertBack(1), 2);
 
     results.sort();
     final FrameCounter counter = results.newFrameCounter();
+
+    final double localisationsPerFrame =
+        (double) results.size() / (results.getLastFrame() - counter.currentFrame() + 1);
+    final Rectangle bounds = results.getBounds(true);
+    final double globalDensity = localisationsPerFrame / bounds.width / bounds.height;
+
+    final int border = settings.border;
+    final boolean includeSingles = settings.includeSingles;
+    final int size = 2 * border + 1;
+    final double minDensity = Math.pow(size, -2);
+    ImageJUtils.log("%s : %s : Global density %s. Minimum density in %dx%d px = %s um^-2", TITLE,
+        results.getName(), MathUtils.rounded(globalDensity * scale), size, size,
+        MathUtils.rounded(minDensity * scale));
+
     final TIntArrayList x = new TIntArrayList();
     final TIntArrayList y = new TIntArrayList();
     final ExecutorService es = Executors.newFixedThreadPool(Prefs.getThreads());
-    final LocalList<Future<FrameDensity>> futures = new LocalList<>();
+    final LocalList<FrameDensity> densities = new LocalList<>();
+    final LocalList<Future<?>> futures = new LocalList<>();
     results.forEach((PeakResultProcedure) (peak) -> {
       if (counter.advance(peak.getFrame())) {
-        final int frame = peak.getFrame();
-        final int[] xx = x.toArray();
-        final int[] yy = y.toArray();
-        futures.add(es.submit(() -> {
-          return new FrameDensity(frame, LocalDensity.estimate(xx, yy, border));
-        }));
+        final FrameDensity fd =
+            new FrameDensity(peak.getFrame(), x.toArray(), y.toArray(), border, includeSingles);
+        densities.add(fd);
+        futures.add(es.submit(fd));
         x.resetQuick();
         y.resetQuick();
       }
       x.add((int) peak.getXPosition());
       y.add((int) peak.getYPosition());
     });
-    futures.add(es.submit(() -> {
-      return new FrameDensity(counter.currentFrame(),
-          LocalDensity.estimate(x.toArray(), y.toArray(), border));
-    }));
+    densities.add(
+        new FrameDensity(counter.currentFrame(), x.toArray(), y.toArray(), border, includeSingles));
+    futures.add(es.submit(densities.get(densities.size() - 1)));
     es.shutdown();
 
-    // Collect results
-    final LocalList<FrameDensity> densities = new LocalList<>(futures.size());
-    futures.stream().forEach(f -> {
-      try {
-        densities.push(f.get());
-      } catch (InterruptedException | ExecutionException ex) {
-        if (ex instanceof InterruptedException) {
-          // Restore interrupted state...
-          Thread.currentThread().interrupt();
-        }
-        throw new ConcurrentRuntimeException(ex);
-      }
-    });
+    // Wait
+    ConcurrencyUtils.waitForCompletionUnchecked(futures);
 
     densities.sort((o1, o2) -> Integer.compare(o1.frame, o2.frame));
 
+    final int total = densities.stream().mapToInt(fd -> fd.counts.length).sum();
+
     // Plot density
     final Statistics stats = new Statistics();
-    final float[] frame = new float[densities.size()];
-    final float[] density = new float[densities.size()];
+    final float[] frame = new float[total];
+    final float[] density = new float[total];
     densities.stream().forEach(fd -> {
-      final double d = fd.density * scale;
-      frame[stats.getN()] = fd.frame;
-      density[stats.getN()] = (float) d;
-      stats.add(d);
+      for (int i = 0; i < fd.counts.length; i++) {
+        final double d = (fd.counts[i] / fd.values[i]) * scale;
+        frame[stats.getN()] = fd.frame;
+        density[stats.getN()] = (float) d;
+        stats.add(d);
+      }
     });
     final double mean = stats.getMean();
     final double sd = stats.getStandardDeviation();
+
+    final String label =
+        String.format("Density = %s +/- %s um^-2", MathUtils.rounded(mean), MathUtils.rounded(sd));
+
     final Plot plot = new Plot("Frame vs Density", "Frame", "Density (um^-2)");
     plot.addPoints(frame, density, Plot.CIRCLE);
-    plot.addLabel(0, 0,
-        String.format("Density = %s +/- %s um^-2", MathUtils.rounded(mean), MathUtils.rounded(sd)));
+    plot.addLabel(0, 0, label);
     final WindowOrganiser wo = new WindowOrganiser();
     ImageJUtils.display(plot.getTitle(), plot, wo);
 
     // Histogram density
     new HistogramPlotBuilder("Local", StoredData.create(density), "Density (um^-2)")
-        .setPlotLabel(String.format("Minimum density in %dx%d px = %s um^-2", size, size,
-            MathUtils.rounded(minDensity * scale)))
-        .show(wo);
+        .setPlotLabel(label).show(wo);
 
     wo.tile();
+
+    // Log the number of singles
+    final int singles = densities.stream().mapToInt(fd -> fd.singles).sum();
+    ImageJUtils.log("Singles %d / %d (%s%%)", singles, results.size(),
+        MathUtils.rounded(100.0 * singles / results.size()));
 
     IJ.showStatus(
         TITLE + " complete : " + TextUtils.millisToString(System.currentTimeMillis() - start));
@@ -244,6 +289,7 @@ public class DensityEstimator implements PlugIn {
             + "localisations in each area is computed.", 80));
     ResultsManager.addInput(gd, settings.inputOption, InputSource.MEMORY);
     gd.addSlider("Border (N)", 0, 20, settings.border);
+    gd.addCheckbox("Include_singles", settings.includeSingles);
 
     gd.showDialog();
 
@@ -253,6 +299,7 @@ public class DensityEstimator implements PlugIn {
 
     settings.inputOption = ResultsManager.getInputSource(gd);
     settings.border = (int) gd.getNextNumber();
+    settings.includeSingles = gd.getNextBoolean();
 
     settings.save();
 
