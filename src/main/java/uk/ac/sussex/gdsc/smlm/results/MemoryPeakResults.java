@@ -2016,8 +2016,8 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Creates the frame counter. It will be initialised with the value of {@link #getFirstFrame()} -
-   * 1. This ensures that the frame from the first result will be recognised as a new frame.
+   * Creates the frame counter. It will be initialised with the value of {@link #getFirstFrame()}.
+   * This ensures that the next frame after the first frame will be recognised as a new frame.
    *
    * @return the frame counter
    */
