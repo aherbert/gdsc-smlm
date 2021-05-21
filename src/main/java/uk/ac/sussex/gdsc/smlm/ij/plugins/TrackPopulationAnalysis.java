@@ -41,7 +41,6 @@ import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.LUT;
@@ -134,7 +133,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Mixers;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -144,8 +143,10 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMix
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution.MultivariateGaussianDistribution;
+import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
+import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
@@ -502,7 +503,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private final Settings settings;
     private final TrackDataJTable table;
     private final MixtureMultivariateGaussianDistribution model;
-    private final CalibrationOrBuilder cal;
+    private final Calibration cal;
     private final TypeConverter<DistanceUnit> distanceConverter;
     private final double deltaT;
     private final IntFunction<Color> colourMap;
@@ -524,13 +525,14 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param colourMap the colour map
      */
     TrackDataTableModelFrame(Settings settings, TrackDataTableModel tableModel,
-        MixtureMultivariateGaussianDistribution model, CalibrationReader calibration,
+        MixtureMultivariateGaussianDistribution model, Calibration calibration,
         final IntFunction<Color> colourMap) {
       this.settings = settings;
       this.model = model;
-      cal = calibration.getCalibrationOrBuilder();
-      distanceConverter = calibration.getDistanceConverter(DistanceUnit.UM);
-      deltaT = calibration.getExposureTime() / 1000.0;
+      cal = calibration;
+      final CalibrationReader cr = new CalibrationReader(cal);
+      distanceConverter = cr.getDistanceConverter(DistanceUnit.UM);
+      deltaT = cr.getExposureTime() / 1000.0;
       this.colourMap = colourMap;
 
       setJMenuBar(createMenuBar());
@@ -1396,6 +1398,10 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Save with simple calibration (i.e. no PSF or full calibration).
       final MemoryPeakResults newResults = new MemoryPeakResults();
       newResults.setName(name);
+      // This will pass through the camera calibration:
+      // newResults.setCalibration(cal);
+      // The input may be multiple datasets so we do not assume the same camera model.
+      // The only requirement was the same exposure time, distance unit and nm/pixel.
       final CalibrationWriter cw = new CalibrationWriter();
       final CalibrationReader cr = new CalibrationReader(cal);
       cw.setDistanceUnit(cr.getDistanceUnit());
@@ -1404,7 +1410,28 @@ public class TrackPopulationAnalysis implements PlugIn {
       cw.setExposureTime(cr.getExposureTime());
       newResults.setCalibration(cw.getCalibration());
       data.forEach(track -> {
-        newResults.addAll(track.trace.getPoints());
+        // Add categories using:
+        // track.component
+        // The window means that some of the coordinates at the start and end are not classified.
+        // Find the offset to the first classified point.
+        final PeakResultStoreList points = track.trace.getPoints();
+        final int[] component = track.component;
+        final int offset = (points.size() - component.length) / 2;
+        int i = 0;
+        // No category before the component categories
+        while (i < offset) {
+          newResults.add(new AttributePeakResult(points.get(i++)));
+        }
+        // Set the component using 1-based indexing
+        for (final int c : component) {
+          final AttributePeakResult r = new AttributePeakResult(points.get(i++));
+          r.setCategory(c + 1);
+          newResults.add(r);
+        }
+        // No category after the component categories
+        while (i < points.size()) {
+          newResults.add(new AttributePeakResult(points.get(i++)));
+        }
       });
       MemoryPeakResults.addResults(newResults);
     }
@@ -1647,7 +1674,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Show the image.
       final ImagePlus imp = ImageJUtils.display(TITLE, bp, ImageJUtils.NO_TO_FRONT, wo);
       imp.setIgnoreGlobalCalibration(true);
-      final Calibration cal = imp.getCalibration();
+      final ij.measure.Calibration cal = imp.getCalibration();
       cal.pixelWidth = cal.pixelHeight = nmPerPixel;
       cal.setUnit("nm");
       // Use a pixel offset to output the correct coordinate values
@@ -1941,10 +1968,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       return;
     }
 
-    final CalibrationReader cal = combinedResults.get(0).getCalibrationReader();
+    final Calibration cal = combinedResults.get(0).getCalibration();
+    final CalibrationReader cr = new CalibrationReader(cal);
     // Use micrometer / second
-    final TypeConverter<DistanceUnit> distanceConverter = cal.getDistanceConverter(DistanceUnit.UM);
-    final double exposureTime = cal.getExposureTime() / 1000.0;
+    final TypeConverter<DistanceUnit> distanceConverter = cr.getDistanceConverter(DistanceUnit.UM);
+    final double exposureTime = cr.getExposureTime() / 1000.0;
     final Pair<int[], double[][]> trackData =
         extractTrackData(tracks, distanceConverter, exposureTime, hasCategory);
     final double[][] data = trackData.getValue();
@@ -2158,7 +2186,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private void createTrackDataTable(List<Trace> tracks, Pair<int[], double[][]> trackData,
       double[][] fitData, MixtureMultivariateGaussianDistribution model, int[] component,
-      CalibrationReader calibration, IntFunction<Color> colourMap) {
+      Calibration calibration, IntFunction<Color> colourMap) {
     // Get the track data
     final LocalList<TrackData> list = new LocalList<>(tracks.size());
     final int[] lengths = trackData.getFirst();
@@ -2425,7 +2453,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         for (final double p : pp.precisions) {
           mean.add(p);
         }
-        // 2nDt = MSD  (n = number of dimensions)
+        // 2nDt = MSD (n = number of dimensions)
         // D = MSD / 2nt
         final CalibrationReader reader = results.getCalibrationReader();
         final double t = reader.getExposureTime() / 1000.0;
