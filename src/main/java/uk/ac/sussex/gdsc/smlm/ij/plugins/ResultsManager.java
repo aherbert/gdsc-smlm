@@ -1737,7 +1737,9 @@ public class ResultsManager implements PlugIn {
       fileInput = true;
       loadOption = new FilenameLoadOption(settings.inputFilename);
     }
-    return loadInputResults(inputOption, true, null, null, loadOption);
+    // Only check file input results for calibration. Other results are in memory
+    // and have already been loaded or created by analysis.
+    return loadInputResults(inputOption, fileInput, null, null, loadOption);
   }
 
   /**
