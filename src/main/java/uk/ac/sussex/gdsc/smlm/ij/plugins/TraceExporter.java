@@ -548,6 +548,9 @@ public class TraceExporter implements PlugIn {
     // 1. x coordinate (μm)
     // 2. y coordinate (μm)
     // 3. z coordinate (μm)
+    //
+    // Note: An extra column is added containing the frame. This allows results to
+    // be uniquely identified using frame,x,y,z
 
     // Count the IDs. Each new result ID will increment the count.
     final FrameCounter idCounter = new FrameCounter(results.getFirst().getId() - 1);
@@ -574,7 +577,7 @@ public class TraceExporter implements PlugIn {
         idCounter.increment();
         list.clear();
       }
-      list.add(new double[] {x, y, z});
+      list.add(new double[] {x, y, z, result.getFrame()});
     });
     addTrack(out, idCounter.getCount() - 1, list, is3d);
 
@@ -601,16 +604,20 @@ public class TraceExporter implements PlugIn {
     }
     // Create the matrix
     final int rows = list.size();
-    final Matrix m = Mat5.newMatrix(rows, is3d ? 3 : 2);
+    final Matrix m = Mat5.newMatrix(rows, is3d ? 4 : 3);
     // Set up column offsets
     final int col1 = rows * 1;
     final int col2 = rows * 2;
+    final int col3 = rows * 3;
     for (int i = 0; i < rows; i++) {
       final double[] xyz = list.unsafeGet(i);
       m.setDouble(i, xyz[0]);
       m.setDouble(i + col1, xyz[1]);
       if (is3d) {
         m.setDouble(i + col2, xyz[2]);
+        m.setDouble(i + col3, xyz[3]);
+      } else {
+        m.setDouble(i + col2, xyz[3]);
       }
     }
     cell.set(index, m);

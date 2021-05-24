@@ -844,11 +844,20 @@ where the rows define the coordinates in two or three dimensions at each timeste
    * - Z
      - The z position (in |micro|\ m). Only included if the results set contains non-zero z coordinates.
 
+   * - Frame
+     - The frame. This is not specified by the vbSPT format. It is added to the required XYZ data to allow localisations to be correctly identified and exported following analysis by vbSPT. It is ignored by vbSPT analysis which uses the first 2 or 3 columns only.
+
 The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single cell array named ``tracks`` of 1 row by `n` columns, where `n` is the number of tracks. It can be specified as the input within the ``vbSPT`` run input file using::
 
     % Inputs
     inputfile = '/path/to/file.mat';
     trajectoryfield = 'tracks';
+
+The cell contents can be displayed for verification using::
+
+    % Example loading and display of track data from the first 2 cells
+    input = load(inputfile, 'tracks');
+    celldisp(input.tracks(1,1:2))
 
 
 .. index:: Exporting Datasets
