@@ -25,20 +25,26 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
+import java.awt.Font;
+import java.awt.TextArea;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -406,10 +412,48 @@ public class LoadLocalisations implements PlugIn {
     return localisations;
   }
 
+  /**
+   * Load a given number of lines from the localisations file.
+   *
+   * @param settings the settings
+   * @param count the count of lines to load
+   * @return the list
+   */
+  private static List<String> loadLines(LoadLocalisationsSettings.Builder settings, int count) {
+    final List<String> lines = new LocalList<>(count);
+    try (BufferedReader input = new BufferedReader(
+        new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null))) {
+      String line;
+      while ((line = input.readLine()) != null && lines.size() < count) {
+        lines.add(line);
+      }
+    } catch (final IOException ex) {
+      ImageJUtils.log("%s IO error: %s", TITLE, ex.getMessage());
+    }
+    return lines;
+  }
+
   private static boolean getFields(LoadLocalisationsSettings.Builder settings) {
+    settings.getLocalisationsFilename();
+
     final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
 
     gd.addMessage("Load delimited localisations");
+
+    // Show a preview of the file in a text area
+    final List<String> preview = loadLines(settings, 100);
+    if (!preview.isEmpty()) {
+      // Add a TextArea. This cannot add scroll bars after the constructor so we put up
+      // with this. But we can use a monospaced font and size the text area nicely.
+      gd.addTextAreas(preview.stream().collect(Collectors.joining("\n")), null,
+          Math.min(10, preview.size()),
+          Math.min(80, preview.stream().mapToInt(String::length).max().getAsInt()));
+      final TextArea ta = gd.getTextArea1();
+      final Font font = new Font(Font.MONOSPACED, Font.PLAIN, (int) (10 * Prefs.getGuiScale()));
+      ta.setFont(font);
+      ta.setEditable(false);
+    }
+
     if (!settings.getHideFieldDatasetName()) {
       gd.addStringField("Dataset_name", settings.getName(), 30);
     }
