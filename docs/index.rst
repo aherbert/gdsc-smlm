@@ -206,6 +206,9 @@ Results Plugins
    * - :ref:`results_plugins:Trace Match Calculator`
      - Calculate the match statistics between two sets of traced molecules.
 
+   * - :ref:`results_plugins:Classification Match Calculator`
+     - Calculate the match between two classifications of the same localisations.
+
    * - :ref:`results_plugins:Spot Inspector`
      - Extracts the fitted spots from an image into a stack ordered by the user-selected score.
 

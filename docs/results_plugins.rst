@@ -1872,6 +1872,72 @@ The following parameters can be set:
      - Specify the sort method for the pairs: Time or Score.
 
 
+.. index:: ! Classification Match Calculator
+
+Classification Match Calculator
+-------------------------------
+
+Calculate the match between two classifications of the same localisations
+
+The ``Classification Match Calculator`` allows two different classifications of the same localisations to be compared. Classifications can use the id and/or category of the localisations. The input requires two datasets containing the same localisations. Localisations are paired using the frame and XYZ position (converted to pixels). The id and/or category from each pair is extracted and used to create a classification index. The similarity of the classifications is computed using the `Rand Index <https://en.wikipedia.org/wiki/Rand_index>`_.
+
+The following parameters can be set:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Resuls1
+     - The first results set.
+
+   * - Results2
+     - The second results set.
+
+   * - Match distance
+     - The distance for a match between localisations. Used to pair identical localisations from the two results sets.
+
+   * - Use id
+     - Configure how to use the id to create the classification. Ignore: do not use the localisation id; Ignore zero: use localisations with a non-zero id; or ALL: use the localisation id.
+
+   * - Use category
+     - Configure how to use the category to create the classification. Ignore; Ignore zero; or ALL.
+
+The results are displayed in a table. Additional fields not in the parameter table are described below:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Field
+     - Description
+
+   * - n1
+     - The number of localisations from results 1 included for analysis.
+
+   * - c1
+     - The number of unique classifications in results 1.
+
+   * - n2
+     - The number of localisations from results 2 included for analysis.
+
+   * - c2
+     - The number of unique classifications in results 2.
+
+   * - Matched
+     - The number of matched localisations in the analysis. This is the number of localisations that have their classification compared.
+
+   * - Rand Index
+     - The Rand index. This represents the probability that ``X`` and ``Y`` will agree on a randomly chosen pair of classifications. Has a value between 0 and 1.
+
+       For any pair of classifications in ``X``, the classifications can be the same or different. The identical pair of classifications in ``Y`` can also be the same or different. The Rand index is the probability that the pair is either the same in ``X`` and ``Y`` or different in ``X`` and ``Y`` divided by the total ((same ``X``, same ``Y``) + (different ``X``, different ``Y``) + (same ``X``, different ``Y``) + (different ``X``, same ``Y``)).
+
+   * - Adjusted RI
+     - The adjusted Rand index (the Rand index adjusted for the chance of grouping elements by chance). Has a maximum value of 1 and can yield negative values if the index is less than the expected index.
+
+
 .. index:: ! Spot Inspector
 
 Spot Inspector
