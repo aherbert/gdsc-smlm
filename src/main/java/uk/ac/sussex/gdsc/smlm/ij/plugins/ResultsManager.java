@@ -47,8 +47,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -219,9 +221,13 @@ public class ResultsManager implements PlugIn {
     MEMORY_SINGLE_FRAME{ @Override
     public String getName() { return "Memory (Single-Frame)"; }},
 
-    /** Memory input with clustered results (ID above zero). */
+    /** Memory input with identified results (ID above zero). */
     MEMORY_CLUSTERED{ @Override
-    public String getName() { return "Memory (Clustered)"; }},
+    public String getName() { return "Memory (Id)"; }},
+
+    /** Memory input with categorised results (category above zero). */
+    MEMORY_CATEGORY{ @Override
+    public String getName() { return "Memory (Category)"; }},
 
     /** No input. */
     NONE{ @Override
@@ -1186,7 +1192,7 @@ public class ResultsManager implements PlugIn {
    */
   public static void addInput(ExtendedGenericDialog gd, String inputName, String inputOption,
       LoadOption[] extraOptions, InputSource... inputs) {
-    final ArrayList<String> source = new ArrayList<>();
+    final Set<String> source = new LinkedHashSet<>();
     String filename = null;
     for (final InputSource input : inputs) {
       ResultsManager.addInputSource(source, input);
@@ -1212,7 +1218,7 @@ public class ResultsManager implements PlugIn {
    * @param filename the filename
    */
   private static void addInputSourceToDialog(final ExtendedGenericDialog gd, String inputName,
-      String inputOption, List<String> source, String filename) {
+      String inputOption, Set<String> source, String filename) {
     final String[] options = source.toArray(new String[0]);
     // Find the option
     inputOption = removeFormatting(inputOption);
@@ -1275,7 +1281,7 @@ public class ResultsManager implements PlugIn {
    * @param source the source
    * @param input the input
    */
-  private static void addInputSource(List<String> source, InputSource input) {
+  private static void addInputSource(Set<String> source, InputSource input) {
     switch (input) {
       case FILE:
         source.add(INPUT_FILE);
@@ -1285,6 +1291,7 @@ public class ResultsManager implements PlugIn {
       case MEMORY_MULTI_FRAME:
       case MEMORY_SINGLE_FRAME:
       case MEMORY_CLUSTERED:
+      case MEMORY_CATEGORY:
         for (final String name : MemoryPeakResults.getResultNames()) {
           addInputSource(source, MemoryPeakResults.getResults(name), input);
         }
@@ -1306,7 +1313,7 @@ public class ResultsManager implements PlugIn {
    *        frames, MEMORY_CLUSTERED : Select only those results which have at least some IDs above
    *        zero (allowing zero to be a valid cluster Id for no cluster)
    */
-  private static void addInputSource(List<String> source, MemoryPeakResults memoryResults,
+  private static void addInputSource(Set<String> source, MemoryPeakResults memoryResults,
       InputSource input) {
     if (memoryResults.size() > 0) {
       switch (input) {
@@ -1322,6 +1329,11 @@ public class ResultsManager implements PlugIn {
           break;
         case MEMORY_CLUSTERED:
           if (!hasId(memoryResults)) {
+            return;
+          }
+          break;
+        case MEMORY_CATEGORY:
+          if (!hasCategory(memoryResults)) {
             return;
           }
           break;
@@ -1380,6 +1392,16 @@ public class ResultsManager implements PlugIn {
    */
   public static boolean isId(MemoryPeakResults memoryResults) {
     return memoryResults.forEach((PeakResultProcedureX) result -> result.getId() <= 0);
+  }
+
+  /**
+   * Check for any categories above zero.
+   *
+   * @param memoryResults the memory results
+   * @return True if any results have categories above zero
+   */
+  public static boolean hasCategory(MemoryPeakResults memoryResults) {
+    return memoryResults.forEach((PeakResultProcedureX) result -> result.getCategory() > 0);
   }
 
   /**
