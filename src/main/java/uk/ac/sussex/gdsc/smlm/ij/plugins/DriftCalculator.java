@@ -36,7 +36,6 @@ import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
 import ij.process.Blitter;
-import ij.process.FHT;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import java.awt.Color;
@@ -71,6 +70,7 @@ import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.SimpleImageJTrackProgress;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
+import uk.ac.sussex.gdsc.core.ij.process.Fht;
 import uk.ac.sussex.gdsc.core.logging.Ticker;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -349,13 +349,13 @@ public class DriftCalculator implements PlugIn {
     final ImageStack stack;
     final ImageProcessor[] images;
     final AlignImagesFft aligner;
-    final FHT[] fhtImages;
+    final Fht[] fhtImages;
     final int from;
     final int to;
     final Ticker ticker;
 
     public ImageFhtInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
-        FHT[] fhtImages, int from, int to, final Ticker ticker) {
+        Fht[] fhtImages, int from, int to, final Ticker ticker) {
       this.stack = stack;
       this.images = images;
       this.aligner = aligner;
@@ -1643,7 +1643,7 @@ public class DriftCalculator implements PlugIn {
 
     // Built an image and FHT image for each slice
     final ImageProcessor[] images = new ImageProcessor[stack.getSize()];
-    final FHT[] fhtImages = new FHT[stack.getSize()];
+    final Fht[] fhtImages = new Fht[stack.getSize()];
 
     final List<Future<?>> futures = new LinkedList<>();
     final Ticker ticker = Ticker.createStarted(tracker, images.length, true);
@@ -1728,7 +1728,7 @@ public class DriftCalculator implements PlugIn {
    * @return The change in the drift (NaN is an error occurred)
    */
   private double calculateDriftUsingImageStack(FloatProcessor reference, ImageProcessor[] images,
-      FHT[] fhtImages, int[] blockT, double[] dx, double[] dy, double[] originalDriftTimePoints,
+      Fht[] fhtImages, int[] blockT, double[] dx, double[] dy, double[] originalDriftTimePoints,
       double smoothing, int iterations) {
     Ticker ticker = Ticker.createStarted(tracker, images.length, true);
 
