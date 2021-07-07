@@ -1071,7 +1071,7 @@ public class Fire implements PlugIn {
             : new FixedSignalProvider();
 
     // Draw images using the existing IJ routines.
-    final Rectangle bounds = new Rectangle(0, 0, (int) Math.ceil(dataBounds.getWidth()),
+    final Rectangle bounds = new Rectangle((int) Math.ceil(dataBounds.getWidth()),
         (int) Math.ceil(dataBounds.getHeight()));
 
     final boolean weighted = true;
