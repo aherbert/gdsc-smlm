@@ -426,6 +426,7 @@ public class SpotFit implements PlugIn {
       sb.append("X\t");
       sb.append("Y\t");
       sb.append("S\t");
+      sb.append("Mean (PWHM)\t");
       sb.append("Noise\t");
       sb.append("SNR\t");
       sb.append("C2\t");
@@ -454,7 +455,9 @@ public class SpotFit implements PlugIn {
       final double xsd = params[Gaussian2DFunction.X_SD];
       sb.append('\t').append(MathUtils.rounded(xsd));
       final double noise = validationData.getNoise();
-      final double snr = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd) / noise;
+      final double mean = Gaussian2DPeakResultHelper.getMeanSignalUsingP05(signal, xsd, xsd);
+      final double snr = mean / noise;
+      sb.append('\t').append(MathUtils.rounded(mean));
       sb.append('\t').append(MathUtils.rounded(noise));
       sb.append('\t').append(MathUtils.rounded(snr));
       if (comparisonResult != null) {
