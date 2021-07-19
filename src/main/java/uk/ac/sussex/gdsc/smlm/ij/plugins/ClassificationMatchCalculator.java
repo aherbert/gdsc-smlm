@@ -401,8 +401,8 @@ public class ClassificationMatchCalculator implements PlugIn {
 
     final TextWindow resultsWindow = ImageJUtils.refresh(resultsWindowRef,
         () -> new TextWindow(TITLE + " Results",
-            "Results1\tResults2\tID\tCategory\tn1\tc1\tn2\tc2\tMatched\tRand Index\tAdjusted RI", "",
-            900, 300));
+            "Results1\tResults2\tID\tCategory\tn1\tc1\tn2\tc2\tMatched\tRand Index\tAdjusted RI",
+            "", 900, 300));
     try (BufferedTextWindow bw = new BufferedTextWindow(resultsWindow)) {
       final StringBuilder sb = new StringBuilder(2048);
       sb.append(results1.getName()).append('\t');
