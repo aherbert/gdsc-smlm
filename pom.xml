@@ -98,7 +98,7 @@ Software for single molecule localisation microscopy (SMLM)
     <ejml.version>0.24</ejml.version>
     <JTransforms.version>3.1</JTransforms.version>
     <protobuf.version>3.6.1</protobuf.version>
-    <jsoup.version>1.13.1</jsoup.version>
+    <jsoup.version>1.14.2</jsoup.version>
     <mfl-core.version>0.5.6</mfl-core.version>
 
     <!-- Other maven plugin versions -->
