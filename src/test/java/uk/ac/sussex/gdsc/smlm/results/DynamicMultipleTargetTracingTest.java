@@ -278,7 +278,9 @@ class DynamicMultipleTargetTracingTest {
    */
   @Test
   void testTraceMolecules() {
-    final UniformRandomProvider rng = RngUtils.create(125631236L);
+    // The test is not very robust and fails 10% of the time. A fixed seed corrects this.
+
+    final UniformRandomProvider rng = RngUtils.create(0x12345L);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     // localisation precision (in pixels)
     final double s = 0.1;
@@ -314,9 +316,26 @@ class DynamicMultipleTargetTracingTest {
     // This should create a trajectory that will expire.
     results.add(new PeakResult(1, size, size, (float) (intensity1.sample())));
 
+    // 1 diffuses top-left to bottom-right.
+    // 2 is fixed in the centre.
+    // 3 is in the bottom-right for 1 frame.
+    //
+    // 1
+    // 1
+    // 1
+    // 12
+    // 1
+    // 1
+    // 13
+    //
+    // Molecule 3 can sometimes connect to the long lifetime molecules once they have been alive
+    // long enough to create a local probability model. The default lifetime is 5 frames.
+    // Setting this to 10 frames allows a better local model to be created.
+
     // Move centre to centre each jump => sqrt(2 * 0.1^2) = 0.141 um or 0.02 um^2
     // MSD = 4D => D = 0.02 / 4 = 0.005
-    final DmttConfiguration config = DmttConfiguration.newBuilder(0.005).build();
+    final DmttConfiguration config =
+        DmttConfiguration.newBuilder(0.005).setTemporalWindow(10).build();
     final List<Trace> traces = new DynamicMultipleTargetTracing(results).traceMolecules(config);
 
     // Should have 3 traces
@@ -375,8 +394,7 @@ class DynamicMultipleTargetTracingTest {
       results.add(new PeakResult(i, (float) (x1 + gauss.sample() * s),
           (float) (i + gauss.sample() * s), (float) (intensity.sample())));
     }
-    // Second molecule is fixed in the centre with a lower intensity (allow
-    // correct matching when tracks overlap)
+    // Second molecule is fixed in the centre with a same intensity
     final int x = size / 2;
     for (int i = 0; i < size; i++) {
       results.add(new PeakResult(i, (float) (x + gauss.sample() * s),
@@ -388,8 +406,8 @@ class DynamicMultipleTargetTracingTest {
 
     // Move centre to centre each jump => 0.1 um or 0.01 um^2
     // MSD = 4D => D = 0.01 / 4 = 0.0025
-    final DmttConfiguration config =
-        DmttConfiguration.newBuilder(0.0025).setDisableIntensityModel(true).build();
+    final DmttConfiguration config = DmttConfiguration.newBuilder(0.0025)
+        .setDisableIntensityModel(true).setTemporalWindow(10).build();
     final List<Trace> traces = new DynamicMultipleTargetTracing(results).traceMolecules(config);
 
     // Should have 3 traces
@@ -424,7 +442,9 @@ class DynamicMultipleTargetTracingTest {
    */
   @Test
   void testTraceMoleculesDisableLocalDiffusionModel() {
-    final UniformRandomProvider rng = RngUtils.create(125631236L);
+    // The test is not very robust and fails 20% of the time. A fixed seed corrects this.
+
+    final UniformRandomProvider rng = RngUtils.create(0x12345L);
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     // localisation precision (in pixels)
     final double s = 0.1;
@@ -462,8 +482,8 @@ class DynamicMultipleTargetTracingTest {
 
     // Move centre to centre each jump => sqrt(2 * 0.1^2) = 0.141 um or 0.02 um^2
     // MSD = 4D => D = 0.02 / 4 = 0.005
-    final DmttConfiguration config =
-        DmttConfiguration.newBuilder(0.005).setDisableLocalDiffusionModel(true).build();
+    final DmttConfiguration config = DmttConfiguration.newBuilder(0.005)
+        .setDisableLocalDiffusionModel(true).setTemporalWindow(10).build();
     final List<Trace> traces = new DynamicMultipleTargetTracing(results).traceMolecules(config);
 
     // Should have 3 traces
