@@ -34,15 +34,15 @@ public class ToleranceChecker {
   public static final int IGNORE_MAX_ITERATIONS = 0;
 
   /** Flag to indicate the max iterations have been reached. This is a failure to converge. */
-  public static final int STATUS_MAX_ITERATIONS = 0x00000001;
+  public static final int STATUS_MAX_ITERATIONS = 0x1;
   /** Flag to indicate convergence on the value. */
-  public static final int STATUS_VALUE = 0x00000002;
+  public static final int STATUS_VALUE = 0x2;
   /** Flag to indicate convergence on the parameters. */
-  public static final int STATUS_PARAMETERS = 0x00000004;
+  public static final int STATUS_PARAMETERS = 0x4;
   /** Flag to indicate convergence on the target number of iterations. */
-  public static final int STATUS_TARGET_ITERATIONS = 0x00000008;
+  public static final int STATUS_TARGET_ITERATIONS = 0x8;
   /** Flag to indicate convergence was set manually. */
-  public static final int STATUS_MANUAL_CONVERGENCE = 0x00000010;
+  public static final int STATUS_MANUAL_CONVERGENCE = 0x10;
   /** Flag to indicate all valid convergence flags. */
   public static final int STATUS_CONVERGED =
       STATUS_VALUE | STATUS_PARAMETERS | STATUS_TARGET_ITERATIONS | STATUS_MANUAL_CONVERGENCE;
