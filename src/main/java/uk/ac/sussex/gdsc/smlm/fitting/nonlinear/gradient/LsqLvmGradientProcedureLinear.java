@@ -68,12 +68,10 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
     for (int i = 0, index = 0; i < numberOfGradients; i++, index += i) {
       final double wgt = dyDa[i];
       for (int k = i; k < numberOfGradients; k++) {
-        // System.out.printf("alpha[%d] += dyDa[%d] * dyDa[%d];\n", index, i, k);
         alpha[index++] += wgt * dyDa[k];
       }
       beta[i] += wgt * dy;
     }
-    // if (true) throw new RuntimeException();
 
     this.value += dy * dy;
   }
@@ -83,11 +81,9 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
     for (int i = 0, index = 0; i < numberOfGradients; i++, index += i) {
       beta[i] = 0;
       for (int k = i; k < numberOfGradients; k++) {
-        // System.out.printf("alpha[%d] = 0;\n", index);
         alpha[index++] = 0;
       }
     }
-    // if (true) throw new RuntimeException();
   }
 
   @Override
@@ -97,7 +93,6 @@ public class LsqLvmGradientProcedureLinear extends BaseLsqLvmGradientProcedure {
     for (int i = 0, index = 1; i < numberOfGradients; i++, index += i + 1) {
       for (int k = i + 1, indexOther = (i + 1) * numberOfGradients + i; k < numberOfGradients;
           k++, index++, indexOther += numberOfGradients) {
-        // System.out.printf("alpha[%d] = alpha[%d];\n", indexOther, index);
         alpha[indexOther] = alpha[index];
       }
     }

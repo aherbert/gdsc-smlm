@@ -149,7 +149,6 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
   protected void initialise() {
     for (int a = 0; a < numberOfGradients; a++) {
       for (int b = 0, j = a * numberOfGradients; b <= a; b++, j++) {
-        // System.out.printf("I[%d] = 0; E[%d] = 0;\n", j, j);
         I[j] = 0;
         E[j] = 0;
       }
@@ -164,23 +163,18 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
    * @return true, if the gradient computation failed (e.g. NaN gradients
    */
   protected boolean finish() {
-    // System.out.printf("if (");
     for (int a = 0; a < numberOfGradients; a++) {
       for (int b = 0, j = a * numberOfGradients; b <= a; b++, j++) {
-        // System.out.printf("%s I[%d]!=I[%d] ", (a+b==0)?"":"||", j, j);
         if (Double.isNaN(I[j])) {
           return true;
         }
       }
     }
-    // System.out.printf(") return true;\n");
     // Generate symmetric matrix
     for (int a = 0; a < numberOfGradients; a++) {
       for (int b = 0; b < a; b++) {
         final int j = a * numberOfGradients + b;
         final int k = b * numberOfGradients + a;
-        // System.out.printf("I[%d] = I[%d];\n", k, j);
-        // System.out.printf("E[%d] = E[%d];\n", k, j);
         I[k] = I[j];
         E[k] = E[j];
       }
@@ -195,17 +189,13 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
   protected void computeVariance() {
     for (int a = 0; a < numberOfGradients; a++) {
       // Note: b==a as we only do the diagonal
-      // System.out.printf("variance[%d] = \n", a);
       double var = 0;
       for (int ap = 0; ap < numberOfGradients; ap++) {
         for (int bp = 0; bp < numberOfGradients; bp++) {
-          // System.out.printf("%s I[%d]*E[%d]*I[%d]\n", (ap+bp==0)?"":"+", a*n+ap, ap*n+bp,
-          // bp*n+a);
           var += I[a * numberOfGradients + ap] * E[ap * numberOfGradients + bp]
               * I[bp * numberOfGradients + a];
         }
       }
-      // System.out.printf(";\n");
       variance[a] = var;
     }
   }

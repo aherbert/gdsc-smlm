@@ -945,10 +945,6 @@ public class GradientCalculator {
       return null;
     }
 
-    // System.out.println("Gradient calc");
-    // System.out.println(new DenseMatrix64F(I).toString());
-    // System.out.println(new DenseMatrix64F(Ei_Eia_Eib).toString());
-
     return LseBaseFunctionSolver.variance(I, Ei_Eia_Eib);
   }
 }

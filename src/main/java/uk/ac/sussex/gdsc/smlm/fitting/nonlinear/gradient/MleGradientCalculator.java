@@ -296,15 +296,6 @@ public class MleGradientCalculator extends GradientCalculator {
         chisq += (fi - xi - xi * Math.log(fi / xi));
         compute(alpha, beta, dfiDa, fi, xi);
       }
-
-      // checkGradients(alpha, beta, nparams, 0);
-      // if (isNaNGradients())
-      // {
-      // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
-      // xi,
-      // Arrays.toString(dfiDa));
-      // return 0;
-      // }
     }
 
     symmetric(alpha);
@@ -369,15 +360,6 @@ public class MleGradientCalculator extends GradientCalculator {
 
         compute(alpha, beta, dfiDa, fi, xi, indices, nnparams);
       }
-
-      // checkGradients(alpha, beta, nparams, 0);
-      // if (isNaNGradients())
-      // {
-      // System.out.printf("Bad gradients generated: %s / %function : %s\n", Double.toString(fi),
-      // xi,
-      // Arrays.toString(dfiDa));
-      // return 0;
-      // }
     }
 
     symmetric(alpha);

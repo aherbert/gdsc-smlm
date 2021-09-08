@@ -111,9 +111,6 @@ class GradientProcedureHelper {
     // Generate symmetric matrix
     for (int j = 0, i = 0; j < n; j++) {
       for (int k = 0; k <= j; k++) {
-        // System.out.printf("matrix[%d][%d] = data[%d];\n", j, k, i);
-        // if (j != k)
-        // System.out.printf("matrix[%d][%d] = data[%d];\n", k, j, i);
         matrix[j][k] = matrix[k][j] = data[i++];
       }
     }
@@ -235,9 +232,6 @@ class GradientProcedureHelper {
     // Generate symmetric matrix
     for (int j = 0, i = 0; j < n; j++) {
       for (int k = 0; k <= j; k++) {
-        // System.out.printf("matrix[%d] = data[%d];\n", j * n + k, i);
-        // if (j != k)
-        // System.out.printf("matrix[%d] = data[%d];\n", k * n + j, i);
         matrix[j * n + k] = matrix[k * n + j] = data[i++];
       }
     }

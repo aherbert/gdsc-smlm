@@ -81,12 +81,10 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
       final double wgt = dyDa[j];
 
       for (int k = 0; k <= j; k++) {
-        // System.out.printf("alpha[%d] += dyDa[%d] * dyDa[%d];\n", i, j, k);
         alpha[i++] += wgt * dyDa[k];
       }
       beta[j] += wgt * dy;
     }
-    // if (true) throw new RuntimeException();
 
     this.value += dy * dy;
   }

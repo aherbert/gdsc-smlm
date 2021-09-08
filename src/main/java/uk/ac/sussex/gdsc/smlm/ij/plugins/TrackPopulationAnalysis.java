@@ -2238,12 +2238,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
     }
 
-    if (combinedResults.isEmpty()) {
-      return false;
-    }
-
     // Check calibration exists for the first set of results
-    if (!checkCalibration(combinedResults.get(0))) {
+    if (combinedResults.isEmpty() || !checkCalibration(combinedResults.get(0))) {
       return false;
     }
 
