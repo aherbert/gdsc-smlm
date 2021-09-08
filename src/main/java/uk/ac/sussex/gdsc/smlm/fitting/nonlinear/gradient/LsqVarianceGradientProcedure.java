@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
@@ -88,12 +89,10 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
    * @param func Gradient function
    * @param solver The solver used to invert the Fisher information matrix to find the Cramér–Rao
    *        lower bound (CRLB).
-   * @throws IllegalArgumentException if the solver is null
+   * @throws NullPointerException if the solver is null
    */
   public LsqVarianceGradientProcedure(final Gradient1Function func, EjmlLinearSolver solver) {
-    if (solver == null) {
-      throw new IllegalArgumentException("The solver cannot be null");
-    }
+    this.solver = Objects.requireNonNull(solver, "The solver cannot be null");
 
     this.func = func;
     this.numberOfGradients = func.getNumberOfGradients();
@@ -101,8 +100,6 @@ public class LsqVarianceGradientProcedure implements Gradient1Procedure {
     I = new double[numberOfGradients * numberOfGradients];
     E = new double[I.length];
     variance = new double[numberOfGradients];
-
-    this.solver = solver;
   }
 
   /**

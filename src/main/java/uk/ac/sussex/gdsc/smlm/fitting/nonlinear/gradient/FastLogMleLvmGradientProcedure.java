@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.function.FastLog;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
@@ -54,10 +55,7 @@ public class FastLogMleLvmGradientProcedure extends MleLvmGradientProcedure {
   public FastLogMleLvmGradientProcedure(final double[] y, final Gradient1Function func,
       FastLog fastLog) {
     super(y, func);
-    if (fastLog == null) {
-      throw new IllegalArgumentException("FastLog must not be null");
-    }
-    this.fastLog = fastLog;
+    this.fastLog = Objects.requireNonNull(fastLog, "FastLog must not be null");
   }
 
   @Override
