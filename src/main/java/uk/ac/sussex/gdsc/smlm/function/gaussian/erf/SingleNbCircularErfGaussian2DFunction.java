@@ -91,9 +91,10 @@ public class SingleNbCircularErfGaussian2DFunction extends SingleCircularErfGaus
     // Working example of this in GraspJ source code:
     // https://github.com/isman7/graspj/blob/master/graspj/src/main/java/eu/brede/graspj/opencl/src/functions/psfmodel_derivatives_sigma.cl
     //@formatter:off
-    d2uda2[3] = d2uDtsx2[xx] * deltaEy[yy] +
-            d2uDtsy2[yy] * deltaEx[xx] +
-            2 * duDtsx[xx] * duDtsy[yy] / tI;
+    d2uda2[3] =
+        d2uDtsx2[xx] * deltaEy[yy] +
+        d2uDtsy2[yy] * deltaEx[xx] +
+        2 * duDtsx[xx] * duDtsy[yy] / tI;
     //@formatter:on
 
     return tb + tI * duda[0];
@@ -198,9 +199,10 @@ public class SingleNbCircularErfGaussian2DFunction extends SingleCircularErfGaus
         d2uda2[1] = d2uDtx2[x] * deltaEy;
         d2uda2[2] = d2u_dty2 * deltaEx[x];
         //@formatter:off
-        d2uda2[3] = d2uDtsx2[x] * deltaEy +
-                  d2u_dtsy2 * deltaEx[x] +
-                  duDtsx[x] * two_du_dtsy_tI;
+        d2uda2[3] =
+            d2uDtsx2[x] * deltaEy +
+            d2u_dtsy2 * deltaEx[x] +
+            duDtsx[x] * two_du_dtsy_tI;
         //@formatter:on
         procedure.execute(tb + tI * duda[0], duda, d2uda2);
       }
@@ -267,9 +269,10 @@ public class SingleNbCircularErfGaussian2DFunction extends SingleCircularErfGaus
         d2udadb[14] = d2udadb[11];
         // X SD,X SD
         //@formatter:off
-        d2udadb[15] = d2uDtsx2[x] * deltaEy +
-                       d2u_dtsy2 * deltaEx[x] +
-                       duDtsx[x] * two_du_dtsy_tI;
+        d2udadb[15] =
+            d2uDtsx2[x] * deltaEy +
+            d2u_dtsy2 * deltaEx[x] +
+            duDtsx[x] * two_du_dtsy_tI;
         //@formatter:on
 
         procedure.executeExtended(tb + tI * duda[0], duda, d2udadb);

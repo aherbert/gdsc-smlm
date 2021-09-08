@@ -223,9 +223,10 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
       d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
       duda[a] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
       //@formatter:off
-      d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy] +
-                d2uDtsy2[yy] * deltaEx[xx] +
-                2 * duDtsx[xx] * duDtsy[yy] / tI[n];
+      d2uda2[a++] =
+          d2uDtsx2[xx] * deltaEy[yy] +
+          d2uDtsy2[yy] * deltaEx[xx] +
+          2 * duDtsx[xx] * duDtsy[yy] / tI[n];
       //@formatter:on
     }
     return value;
@@ -307,9 +308,10 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
           d2uda2[a++] = d2uDty2[yy] * deltaEx[xx];
           duda[a] = duDtsx[xx] * deltaEy[yy] + duDtsy[yy] * deltaEx[xx];
           //@formatter:off
-          d2uda2[a++] = d2uDtsx2[xx] * deltaEy[yy] +
-                  d2uDtsy2[yy] * deltaEx[xx] +
-                    duDtsx[xx] * two_du_dtsy_tI[n];
+          d2uda2[a++] =
+              d2uDtsx2[xx] * deltaEy[yy] +
+              d2uDtsy2[yy] * deltaEx[xx] +
+              duDtsx[xx] * two_du_dtsy_tI[n];
           //@formatter:on
         }
         procedure.execute(value, duda, d2uda2);
@@ -391,9 +393,10 @@ public class MultiCircularErfGaussian2DFunction extends MultiFreeCircularErfGaus
           d2udadb[kkkk + 2] = d2udadb[kkk + 3];
           // X SD,X SD
           //@formatter:off
-          d2udadb[kkkk + 3] = d2uDtsx2[xx] * deltaEy[yy] +
-                            d2uDtsy2[yy] * deltaEx[xx] +
-                            duDtsx[xx] * two_du_dtsy_tI[n];
+          d2udadb[kkkk + 3] =
+              d2uDtsx2[xx] * deltaEy[yy] +
+              d2uDtsy2[yy] * deltaEx[xx] +
+              duDtsx[xx] * two_du_dtsy_tI[n];
           //@formatter:on
         }
         procedure.executeExtended(value, duda, d2udadb);
