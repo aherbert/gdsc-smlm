@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
@@ -47,9 +48,7 @@ public class MleLvmGradientProcedureX5 extends MleLvmGradientProcedure {
    */
   public MleLvmGradientProcedureX5(final double[] y, final Gradient1Function func) {
     super(y, func);
-    if (numberOfGradients != 5) {
-      throw new IllegalArgumentException("Function must compute 5 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 5, "Function must compute 5 gradients");
   }
 
   @Override

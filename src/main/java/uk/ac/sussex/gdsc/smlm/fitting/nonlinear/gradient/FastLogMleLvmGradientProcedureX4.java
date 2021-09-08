@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.FastLog;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
@@ -49,9 +50,7 @@ public class FastLogMleLvmGradientProcedureX4 extends FastLogMleLvmGradientProce
   public FastLogMleLvmGradientProcedureX4(final double[] y, final Gradient1Function func,
       FastLog fastLog) {
     super(y, func, fastLog);
-    if (numberOfGradients != 4) {
-      throw new IllegalArgumentException("Function must compute 4 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 4, "Function must compute 4 gradients");
   }
 
   @Override

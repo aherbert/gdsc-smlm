@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
@@ -41,9 +42,7 @@ public class PoissonGradientProcedure4 extends PoissonGradientProcedure {
    */
   public PoissonGradientProcedure4(final Gradient1Function func) {
     super(func);
-    if (numberOfGradients != 4) {
-      throw new IllegalArgumentException("Function must compute 4 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 4, "Function must compute 4 gradients");
   }
 
   @Override

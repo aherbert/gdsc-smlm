@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.linear.EjmlLinearSolver;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
@@ -42,9 +43,7 @@ public class LsqVarianceGradientProcedure6 extends LsqVarianceGradientProcedure 
    */
   public LsqVarianceGradientProcedure6(final Gradient1Function func) {
     super(func);
-    if (numberOfGradients != 6) {
-      throw new IllegalArgumentException("Function must compute 6 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 6, "Function must compute 6 gradients");
   }
 
   /**
@@ -57,9 +56,7 @@ public class LsqVarianceGradientProcedure6 extends LsqVarianceGradientProcedure 
    */
   public LsqVarianceGradientProcedure6(final Gradient1Function func, EjmlLinearSolver solver) {
     super(func, solver);
-    if (numberOfGradients != 6) {
-      throw new IllegalArgumentException("Function must compute 6 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 6, "Function must compute 6 gradients");
   }
 
   @Override

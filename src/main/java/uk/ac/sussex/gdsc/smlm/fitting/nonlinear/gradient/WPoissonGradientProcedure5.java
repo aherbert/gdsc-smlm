@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 
 /**
@@ -49,9 +50,7 @@ public class WPoissonGradientProcedure5 extends WPoissonGradientProcedure {
   public WPoissonGradientProcedure5(final double[] y, final double[] var,
       final Gradient1Function func) {
     super(y, var, func);
-    if (numberOfGradients != 5) {
-      throw new IllegalArgumentException("Function must compute 5 gradients");
-    }
+    ValidationUtils.checkArgument(numberOfGradients == 5, "Function must compute 5 gradients");
   }
 
   @Override
