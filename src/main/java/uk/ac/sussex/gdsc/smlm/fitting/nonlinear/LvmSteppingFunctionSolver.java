@@ -227,6 +227,12 @@ public abstract class LvmSteppingFunctionSolver extends SteppingFunctionSolver {
       beta = wbeta;
       wbeta = tmp;
 
+      // TODO:
+      // Allow different configurations for adjusting the damping parameter, see
+      // Transtrum, Mark K; Sethna, James P (2012)
+      // Improvements to the Levenberg-Marquardt algorithm for nonlinear least-squares minimization
+      // https://arxiv.org/abs/1201.5885
+
       // Decrease Lambda
       lambda *= 0.1;
       return true;
