@@ -27,9 +27,10 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -242,7 +243,7 @@ class BlockMeanFilterTest extends AbstractFilterTest {
 
   private static void checkIsCorrect(RandomSeed seed, BlockMeanDataFilter filter) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
-    final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, 57);
+    final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, 57);
 
     for (final int width : primes) {
       for (final int height : primes) {

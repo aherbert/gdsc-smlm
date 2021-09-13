@@ -59,7 +59,6 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.inference.TestUtils;
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -555,7 +554,7 @@ public class CmosAnalysis implements PlugIn {
     final UniformRandomProvider rg = UniformRandomProviders.create();
 
     final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, settings.offset);
-    final ContinuousSampler ed = AhrensDieterExponentialSampler.of(rg, settings.variance);
+    final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, settings.variance);
     final SharedStateContinuousSampler gauss =
         SamplerUtils.createGaussianSampler(rg, settings.gain, settings.gainStdDev);
     Ticker ticker = ImageJUtils.createTicker(n, 0);

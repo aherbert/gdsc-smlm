@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 /**
  * Contains a model for an image of blinking fluorophores under pulsed activation illumination.
@@ -89,8 +89,7 @@ public class ActivationEnergyImageModel extends ImageModel {
   }
 
   private double getimeActivationTime(double[] xyz, int frames) {
-    final double activation =
-        new AhrensDieterExponentialSampler(getRandom(), activationEnergy).sample();
+    final double activation = SamplerUtils.createExponentialSampler(getRandom(), activationEnergy).sample();
     double energy = 0;
     for (int t = 0; t < frames; t++) {
       // Q. Should the molecule be moving during the activation phase?

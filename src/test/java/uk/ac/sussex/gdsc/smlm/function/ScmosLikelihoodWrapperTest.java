@@ -37,7 +37,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
@@ -151,7 +151,7 @@ class ScmosLikelihoodWrapperTest {
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
     final DiscreteSampler pd = GdscSmlmTestUtils.createPoissonSampler(rg, O);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
-    final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, VAR);
+    final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, VAR);
     for (int i = 0; i < n; i++) {
       data.offset[i] = pd.sample();
       data.var[i] = (float) ed.sample();

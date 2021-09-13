@@ -26,7 +26,7 @@ package uk.ac.sussex.gdsc.smlm.model;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
@@ -58,8 +58,8 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
       double onTime, double offTime, double offTime2, double blinks1, double blinks2,
       boolean useGeometricBlinkingDistribution, UniformRandomProvider rng) {
     super(id, xyz);
-    init(new AhrensDieterExponentialSampler(rng, averageActivationTime).sample(), onTime, offTime,
-        offTime2, blinks1, blinks2, useGeometricBlinkingDistribution, rng);
+    init(SamplerUtils.createExponentialSampler(rng, averageActivationTime).sample(), onTime,
+        offTime, offTime2, blinks1, blinks2, useGeometricBlinkingDistribution, rng);
   }
 
   /**
@@ -102,7 +102,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
     final TDoubleArrayList sequence = new TDoubleArrayList();
 
     // The exponential distribution is just scaled by the mean
-    final AhrensDieterExponentialSampler sampler = new AhrensDieterExponentialSampler(rand, 1);
+    final ContinuousSampler sampler = SamplerUtils.createExponentialSampler(rand);
 
     // Perform a set number of long blinks
     final int nLongBlinks = getBlinks(useGeometricBlinkingDistribution, rand, blinks2);

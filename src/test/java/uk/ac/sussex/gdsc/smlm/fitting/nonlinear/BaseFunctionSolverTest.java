@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
@@ -233,7 +233,7 @@ public abstract class BaseFunctionSolverTest {
     // Per observation read noise.
     // This is generated once so create the randon generator here.
     final UniformRandomProvider rg = RngUtils.create(source.getSeed());
-    final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rg, variance);
+    final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, variance);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
     final double[] w = new double[size * size];
     final double[] n = new double[size * size];

@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
 /**
  * Contains a model for an image of blinking fluorophores under constant activation illumination.
@@ -71,7 +71,7 @@ public class ActivationTimeImageModel extends ImageModel {
 
   @Override
   protected double createActivationTime(double[] xyz) {
-    return new AhrensDieterExponentialSampler(getRandom(), activationTime).sample();
+    return SamplerUtils.createExponentialSampler(getRandom(), activationTime).sample();
   }
 
   @Override

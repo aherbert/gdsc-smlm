@@ -30,13 +30,14 @@ import java.awt.Rectangle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
@@ -237,7 +238,7 @@ class GaussianFilterTest {
     final float[] data = createData(rand, size, size);
     float[] weights = null;
     if (weighted) {
-      final AhrensDieterExponentialSampler ed = new AhrensDieterExponentialSampler(rand, 57);
+      final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rand, 57);
 
       weights = new float[data.length];
       for (int i = 0; i < weights.length; i++) {
