@@ -2785,8 +2785,8 @@ public class TrackPopulationAnalysis implements PlugIn {
   private MultivariateGaussianMixtureExpectationMaximization createMixed(final double[][] data,
       int dimensions, int numComponents) {
     // Fit a mixed multivariate Gaussian with different repeats.
-    final UnitSphereSampler sampler = new UnitSphereSampler(dimensions,
-        UniformRandomProviders.create(Mixers.stafford13(settings.seed++)));
+    final UnitSphereSampler sampler = UnitSphereSampler
+        .of(UniformRandomProviders.create(Mixers.stafford13(settings.seed++)), dimensions);
     final LocalList<CompletableFuture<MultivariateGaussianMixtureExpectationMaximization>> results =
         new LocalList<>(settings.repeats);
     final DoubleDoubleBiPredicate test = createConvergenceTest(settings.relativeError);
@@ -2796,7 +2796,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Ticker ticker = ImageJUtils.createTicker(settings.repeats, 2, "Fitting...");
     final AtomicInteger failures = new AtomicInteger();
     for (int i = 0; i < settings.repeats; i++) {
-      final double[] vector = sampler.nextVector();
+      final double[] vector = sampler.sample();
       results.add(CompletableFuture.supplyAsync(() -> {
         final MultivariateGaussianMixtureExpectationMaximization fitter =
             new MultivariateGaussianMixtureExpectationMaximization(data);

@@ -670,7 +670,7 @@ public class AiryPsfModel extends PsfModel {
     double[] x = new double[n];
     double[] y = new double[n];
 
-    final UnitSphereSampler vg = new UnitSphereSampler(2, rng);
+    final UnitSphereSampler vg = UnitSphereSampler.of(rng, 2);
 
     int count = 0;
     for (int i = 0; i < n; i++) {
@@ -682,7 +682,7 @@ public class AiryPsfModel extends PsfModel {
       final double radius = spline.value(p);
 
       // Convert to xy using a random vector generator
-      final double[] v = vg.nextVector();
+      final double[] v = vg.sample();
       x[count] = v[0] * radius * w0 + x0;
       y[count] = v[1] * radius * w1 + x1;
       count++;

@@ -422,7 +422,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     @Override
     float[] sample(UniformRandomProvider rng) {
-      final double[] v = new UnitSphereSampler(2, rng).nextVector();
+      final double[] v = UnitSphereSampler.of(rng, 2).sample();
       return new float[] {(float) (v[0] * radius + x), (float) (v[1] * radius + y)};
     }
   }

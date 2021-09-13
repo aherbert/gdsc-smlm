@@ -219,7 +219,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double[] axis = new UnitSphereSampler(3, random).nextVector();
+    final double[] axis = UnitSphereSampler.of(random, 3).sample();
 
     final double angle = (-maxAngle + random.nextDouble() * 2.0 * maxAngle);
     if (angle == 0) {
@@ -268,7 +268,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double[] axis = new UnitSphereSampler(3, random).nextVector();
+    final double[] axis = UnitSphereSampler.of(random, 3).sample();
 
     rotateMolecules(axis, angle);
   }
