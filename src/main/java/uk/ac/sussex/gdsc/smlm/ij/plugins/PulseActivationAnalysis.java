@@ -37,7 +37,6 @@ import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
-import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ByteProcessor;
