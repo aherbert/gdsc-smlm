@@ -28,9 +28,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
-import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.AstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.NullAstigmatismZModel;
@@ -357,7 +357,7 @@ public class GaussianPsfModel extends PsfModel {
       final double s1, UniformRandomProvider rng) {
     this.s0 = s0;
     this.s1 = s1;
-    final ZigguratNormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     final double[] x = sample(n, x0, s0, gauss);
     final double[] y = sample(n, x1, s1, gauss);
     return new double[][] {x, y};

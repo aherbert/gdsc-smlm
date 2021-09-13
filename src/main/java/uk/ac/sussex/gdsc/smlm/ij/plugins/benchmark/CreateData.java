@@ -84,7 +84,6 @@ import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSamp
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSamplerCache;
-import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.clustering.DensityManager;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -2782,7 +2781,7 @@ public class CreateData implements PlugIn {
       // Create read noise now so that we can calculate the true background noise.
       // Note: The read noise is in electrons.
       if (readNoise != null) {
-        final NormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
+        final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
         for (int i = 0; i < background.length; i++) {
           background[i] += (float) (readNoise[i] * gauss.sample());
         }

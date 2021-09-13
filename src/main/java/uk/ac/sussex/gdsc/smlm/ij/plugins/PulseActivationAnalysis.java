@@ -37,6 +37,7 @@ import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
+import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ByteProcessor;
@@ -65,7 +66,6 @@ import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
-import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter;
 import uk.ac.sussex.gdsc.core.clustering.DensityCounter.Molecule;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -2112,7 +2112,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final int size = molecules.length;
     final int numberOfSamples = bd.sample();
     // Sample
-    final NormalizedGaussianSampler gauss = new ZigguratNormalizedGaussianSampler(rng);
+    final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(rng);
     final int[] samples = RandomUtils.sample(numberOfSamples, size, rng);
     for (final int index : samples) {
       final float[] xy = molecules[index];
