@@ -42,7 +42,7 @@ public class GdscSmlmTestUtils {
    * @return the continuous sampler
    */
   public static DiscreteSampler createPoissonSampler(UniformRandomProvider rng, double mean) {
-    return POISSON_CACHE.createPoissonSampler(rng, mean);
+    return POISSON_CACHE.createSharedStateSampler(rng, mean);
   }
 
   /**

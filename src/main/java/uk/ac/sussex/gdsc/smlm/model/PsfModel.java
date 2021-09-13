@@ -274,7 +274,7 @@ public abstract class PsfModel {
       final PoissonSamplerCache cache = new PoissonSamplerCache(0, MathUtils.max(psf));
       for (int i = 0; i < psf.length; i++) {
         if (psf[i] > 0) {
-          psf[i] = cache.createPoissonSampler(rng, psf[i]).sample();
+          psf[i] = cache.createSharedStateSampler(rng, psf[i]).sample();
         }
       }
     }

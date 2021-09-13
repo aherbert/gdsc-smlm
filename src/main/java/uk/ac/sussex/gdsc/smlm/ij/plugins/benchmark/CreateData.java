@@ -2821,7 +2821,7 @@ public class CreateData implements PlugIn {
               // TODO record all the positions we draw and the number of photons.
               // This can be used later to compute the Fisher information for each spot.
               if (poissonNoise) {
-                final int samples = cache.createPoissonSampler(rng, intensity).sample();
+                final int samples = cache.createSharedStateSampler(rng, intensity).sample();
                 photonsRendered = psfModel.sample3D(data, settings.getSize(), settings.getSize(),
                     samples, localisation.getX(), localisation.getY(), localisation.getZ(), rng);
                 samplePositions = psfModel.getSamplePositions();
