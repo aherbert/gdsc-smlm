@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
@@ -66,6 +67,7 @@ import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
+import uk.ac.sussex.gdsc.smlm.ij.utils.TextPanelMouseListener;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.utils.ImageConverter;
 
@@ -76,13 +78,62 @@ public class SpotFit implements PlugIn {
   private static final String TITLE = "Spot Fit";
 
   /**
+   * Custom text window to redraw the fit region when the result is double-clicked in the table.
+   */
+  private static class CustomTextWindow extends TextWindow {
+    private static final long serialVersionUID = 1L;
+
+    boolean draw;
+
+    CustomTextWindow(String title, String headings, int width, int height) {
+      super(title, headings, "", width, height);
+
+      @SuppressWarnings("unused")
+      final TextPanelMouseListener ml = new TextPanelMouseListener(getTextPanel()) {
+        @Override
+        public void selected(int selectionStart, int selectionEnd) {
+          // Only if drawing fit region is enabled
+          if (!draw || selectionStart < 0 || selectionStart >= textPanel.getLineCount()) {
+            return;
+          }
+          final String line = this.textPanel.getLine(selectionStart);
+          String[] fields = line.split("\t");
+          // Require Image, C, Z, T, Region
+          if (fields.length < 5) {
+            return;
+          }
+          final ImagePlus imp = WindowManager.getImage(fields[0]);
+          if (imp == null) {
+            return;
+          }
+          try {
+            int c = Integer.parseInt(fields[1]);
+            int z = Integer.parseInt(fields[2]);
+            int t = Integer.parseInt(fields[3]);
+            // Parse the rectangle data
+            fields = fields[4].split("[, x]");
+            int x = Integer.parseInt(fields[0]);
+            int y = Integer.parseInt(fields[1]);
+            int w = Integer.parseInt(fields[2]);
+
+            imp.setPosition(c, z, t);
+            imp.setRoi(new Rectangle(x, y, w, w));
+          } catch (final NumberFormatException ex) {
+            return;
+          }
+        }
+      };
+    }
+  }
+
+  /**
    * All the work for this plugin is done with the plugin tool. It handles mouse click events from
    * an image.
    */
   private static class SpotFitPluginTool extends PlugInTool {
     private static SpotFitPluginTool toolInstance = new SpotFitPluginTool();
 
-    private static final AtomicReference<TextWindow> resultsWindow = new AtomicReference<>();
+    private static final AtomicReference<CustomTextWindow> resultsWindow = new AtomicReference<>();
     private static final Pattern pattern = Pattern.compile("\t");
 
     /**
@@ -150,6 +201,10 @@ public class SpotFit implements PlugIn {
      */
     private synchronized void setSpotFitSettings(SpotFitSettings settings) {
       settingsInstance = settings;
+      final CustomTextWindow tw = resultsWindow.get();
+      if (tw != null) {
+        tw.draw = settings.getShowFitRoi();
+      }
       updateActive(settings);
     }
 
@@ -306,7 +361,8 @@ public class SpotFit implements PlugIn {
         final ComparisonResult comparisonResult = createComparisonResult(imp, settings, fitResult);
 
         // Add result
-        addResult(imp, channel, slice, frame, bounds, fitResult, comparisonResult);
+        addResult(imp, channel, slice, frame, bounds, fitResult, comparisonResult,
+            settings.getShowFitRoi());
 
         if (settings.getShowOverlay()) {
           addOverlay(imp, channel, slice, frame, fitResult, settings.getAttachToSlice());
@@ -407,11 +463,16 @@ public class SpotFit implements PlugIn {
     /**
      * Create the result window (if it is not available).
      *
+     * @param drawSelected Set to true to enable drawing of the selected results
      * @return the text window
      */
-    private static TextWindow createResultsWindow() {
-      return ImageJUtils.refresh(resultsWindow,
-          () -> new TextWindow(TITLE + " Results", createHeader(), "", 700, 300));
+    private static CustomTextWindow createResultsWindow(boolean drawSelected) {
+      return ImageJUtils.refresh(resultsWindow, () -> {
+        final CustomTextWindow tw =
+            new CustomTextWindow(TITLE + " Results", createHeader(), 700, 300);
+        tw.draw = drawSelected;
+        return tw;
+      });
     }
 
     private static String createHeader() {
@@ -436,7 +497,7 @@ public class SpotFit implements PlugIn {
     }
 
     private void addResult(ImagePlus imp, int channel, int slice, int frame, Rectangle bounds,
-        FitResult fitResult, ComparisonResult comparisonResult) {
+        FitResult fitResult, ComparisonResult comparisonResult, boolean drawSelected) {
       final StringBuilder sb = new StringBuilder();
       sb.append(imp.getTitle()).append('\t');
       sb.append(channel).append('\t');
@@ -468,7 +529,7 @@ public class SpotFit implements PlugIn {
         sb.append("\t\t\t");
       }
 
-      createResultsWindow().append(sb.toString());
+      createResultsWindow(drawSelected).append(sb.toString());
     }
 
     private static void addOverlay(ImagePlus imp, int channel, int slice, int frame,
@@ -609,8 +670,8 @@ public class SpotFit implements PlugIn {
       final double y = params[Gaussian2DFunction.Y_POSITION];
       final double xsd = params[Gaussian2DFunction.X_SD];
 
-      final int cx = (int) x;
-      final int cy = (int) y;
+      final int cx = (int) Math.round(x);
+      final int cy = (int) Math.round(y);
       final int width = (int) Math.ceil(3 * xsd);
       final int ox = cx - width;
       final int oy = cy - width;
@@ -628,6 +689,7 @@ public class SpotFit implements PlugIn {
       // Find the weighted intensity using the 2D Gaussian
       final double[] gaussParams = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK];
       gaussParams[Gaussian2DFunction.SIGNAL] = 1;
+
       gaussParams[Gaussian2DFunction.X_POSITION] = x - bounds.x;
       gaussParams[Gaussian2DFunction.Y_POSITION] = y - bounds.y;
       gaussParams[Gaussian2DFunction.X_SD] = xsd;
