@@ -51,8 +51,9 @@ public final class Erf {
    *
    * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
    *
-   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
-   * maximum absolute error is about 5e-4 for all x. </p>
+   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun, (1972)
+   * Handbook of Mathematical Functions. New York: Dover. Formulas 7.1.27, p299. The maximum
+   * absolute error is about 5e-4 for all x. </p>
    *
    * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
@@ -95,8 +96,9 @@ public final class Erf {
    *
    * <p>erf(x) = 2/&radic;&pi; <sub>0</sub>&int;<sup>x</sup> e<sup>-t*t</sup>dt </p>
    *
-   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun. The
-   * maximum absolute error is about 3e-7 for all x. </p>
+   * <p>This implementation computes erf(x) using the approximation by Abramowitz and Stegun, (1972)
+   * Handbook of Mathematical Functions. New York: Dover. Formulas 7.1.28, p299. The maximum
+   * absolute error is about 3e-7 for all x. </p>
    *
    * <p>The value returned is always between -1 and 1 (inclusive). If {@code abs(x) > 40}, then
    * {@code erf(x)} is indistinguishable from either 1 or -1 as a double, so the appropriate extreme
@@ -165,7 +167,7 @@ public final class Erf {
 
     final double x2 = x * x;
     final double ax2 = 0.147 * x2;
-    final double ret = Math.sqrt(1 - FastMath.exp(-x2 * (FOUR_OVER_PI + ax2) / (1 + ax2)));
+    final double ret = Math.sqrt(-FastMath.expm1(-x2 * (FOUR_OVER_PI + ax2) / (1 + ax2)));
 
     return negative ? -ret : ret;
   }
