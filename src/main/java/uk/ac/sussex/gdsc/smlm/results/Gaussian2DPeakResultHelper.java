@@ -1134,7 +1134,8 @@ public final class Gaussian2DPeakResultHelper {
    * </pre>
    *
    * <p>This formula is provided in <a href=
-   * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
+   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions">
+   * Wikipedia: Mahalanobis distance - Normal distributions</a>
    *
    * @param r the distance r
    * @return the cumulative 2D normal distribution {@code F(r)}
@@ -1155,7 +1156,8 @@ public final class Gaussian2DPeakResultHelper {
    * </pre>
    *
    * <p>This formula is provided in <a href=
-   * "https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function">https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function</a>
+   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions">
+   * Wikipedia: Mahalanobis distance - Normal distributions</a>
    *
    * @param p the cumulative 2D normal distribution {@code F(r)}
    * @return Mahalanobis distance r from the Gaussian
