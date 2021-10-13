@@ -29,7 +29,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -1143,7 +1142,8 @@ public final class Gaussian2DPeakResultHelper {
   public static double cumulative2D(double r) {
     // https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Cumulative_distribution_function
     // https://upload.wikimedia.org/wikipedia/commons/a/a2/Cumulative_function_n_dimensional_Gaussians_12.2013.pdf
-    return 1 - FastMath.exp(-r * r / 2.0);
+    // 1 - exp(x) == -(exp(x) - 1)
+    return -Math.expm1(-r * r * 0.5);
   }
 
   /**
@@ -1164,13 +1164,13 @@ public final class Gaussian2DPeakResultHelper {
    * @throws IllegalArgumentException If p is not in the range 0-1
    */
   public static double inverseCumulative2D(double p) {
-    if (p < 0 || p > 1) {
+    if (p <= 0 || p > 1) {
+      if (p == 0) {
+        return 0; // Avoid returning -0 (the result of Math.sqrt(-0))
+      }
       throw new IllegalArgumentException("P must be in the range 0 - 1");
     }
-    if (p == 0) {
-      return 0; // Avoid returning -0 (the result of Math.sqrt(-0))
-    }
-    return Math.sqrt(-2 * Math.log(1.0 - p));
+    return Math.sqrt(-2 * Math.log1p(-p));
   }
 
   /**
