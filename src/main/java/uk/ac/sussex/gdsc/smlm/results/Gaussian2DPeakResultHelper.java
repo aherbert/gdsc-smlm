@@ -57,7 +57,7 @@ public final class Gaussian2DPeakResultHelper {
   // b = background
   // CHECKSTYLE.OFF: ParameterName
 
-  private static final double ROOT2 = Math.sqrt(2);
+  private static final double ONE_OVER_ROOT2 = Math.sqrt(0.5);
   private static final double R1 = cumulative2D(1) / Math.PI;
   private static final double R2 = cumulative2D(2) / (Math.PI * 4);
   /**
@@ -114,7 +114,6 @@ public final class Gaussian2DPeakResultHelper {
     private static final String NO_CALIBRATION = "No calibration";
 
     static final double TWO_PI = 2 * Math.PI;
-    static final double ONE_OVER_ROOT2 = 1.0 / ROOT2;
 
     final CalibrationReader calibration;
     final int isx;
@@ -1120,7 +1119,7 @@ public final class Gaussian2DPeakResultHelper {
    * @return the cumulative normal distribution {@code CDF(X<x)}
    */
   public static double cumulative(double x) {
-    return Erf.erf(x / ROOT2);
+    return Erf.erf(x * ONE_OVER_ROOT2);
   }
 
   /**
