@@ -2054,7 +2054,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     /**
      * Gets the local background and noise for the given peak assuming that multiple peaks were fit.
      *
-     * <p>The local region is defined using the region within 1 SD of the centre.
+     * <p>The local region is defined using the region within 50% of the volume of the Gaussian,
+     * clipped to {@code +/-[1, 3]}.
      *
      * <p>The local background is computed using the sum of the region minus the sum of the function
      * to get the region average.
@@ -2171,7 +2172,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     /**
      * Gets the local background and noise for a single fitted peak.
      *
-     * <p>The local region is defined using the region within 1 SD of the centre.
+     * <p>The local region is defined using the region within 50% of the volume of the Gaussian,
+     * clipped to {@code +/-[1, 3]}.
      *
      * <p>The local background is computed using the fitted background plus the contribution from
      * the pre-computed peaks.
