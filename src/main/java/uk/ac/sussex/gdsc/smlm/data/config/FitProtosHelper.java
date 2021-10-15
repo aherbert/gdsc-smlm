@@ -61,8 +61,9 @@ public final class FitProtosHelper {
     builder.setMaxIterations(20);
     builder.setRelativeThreshold(1e-6);
     builder.setAbsoluteThreshold(1e-16);
-    builder.setParameterRelativeThreshold(1e-3);
-    builder.setParameterAbsoluteThreshold(1e-6);
+    // Disabled. These are rarely used
+    //builder.setParameterRelativeThreshold(1e-3);
+    //builder.setParameterAbsoluteThreshold(1e-6);
 
     builder.setLambda(10);
 
