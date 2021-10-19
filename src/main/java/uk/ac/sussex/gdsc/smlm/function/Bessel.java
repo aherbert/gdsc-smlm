@@ -102,23 +102,6 @@ public final class Bessel {
   }
 
   /**
-   * Compute the second order Bessel function of the first kind.
-   *
-   * <p>This is stable when {@code abs(x) > n}.
-   *
-   * @param x the x value
-   * @return the Bessel function J2
-   */
-  public static double j2(double x) {
-    if (x == 0.0) {
-      return 0.0;
-    }
-    final double value0 = j0(x);
-    final double value1 = j1(x);
-    return 2.0 * value1 / x + value0;
-  }
-
-  /**
    * Compute the zero th order modified Bessel function of the first kind.
    *
    * @param x the x value
