@@ -89,7 +89,8 @@ public class ActivationEnergyImageModel extends ImageModel {
   }
 
   private double getimeActivationTime(double[] xyz, int frames) {
-    final double activation = SamplerUtils.createExponentialSampler(getRandom(), activationEnergy).sample();
+    final double activation =
+        SamplerUtils.createExponentialSampler(getRandom(), activationEnergy).sample();
     double energy = 0;
     for (int t = 0; t < frames; t++) {
       // Q. Should the molecule be moving during the activation phase?
