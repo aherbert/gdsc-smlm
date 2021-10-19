@@ -472,7 +472,6 @@ public abstract class ImageSource {
   public String toXml() {
     final XStream xs = new XStream(new DomDriver());
     try {
-      XStream.setupDefaultSecurity(xs); // to be removed after 1.5
       xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
       xs.autodetectAnnotations(true);
       return xs.toXML(this);
@@ -492,7 +491,6 @@ public abstract class ImageSource {
   public static ImageSource fromXml(String xml) {
     final XStream xs = new XStream(new DomDriver());
     try {
-      XStream.setupDefaultSecurity(xs); // to be removed after 1.5
       xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
       xs.autodetectAnnotations(true);
       // Support package gdsc.smlm renamed to uk.ac.sussex.gdsc.smlm
