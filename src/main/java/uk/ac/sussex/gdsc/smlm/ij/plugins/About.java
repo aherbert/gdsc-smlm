@@ -36,10 +36,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.smlm.Version;
@@ -353,7 +353,7 @@ public class About implements PlugIn, MacroExtension {
 
   @Override
   public ExtensionDescriptor[] getExtensionFunctions() {
-    final ArrayList<ExtensionDescriptor> list = new ArrayList<>(3);
+    final LocalList<ExtensionDescriptor> list = new LocalList<>(4);
     list.add(ExtensionDescriptor.newDescriptor("getNumberOfSpecies", this,
         MacroExtension.ARG_NUMBER + MacroExtension.ARG_OUTPUT));
     list.add(ExtensionDescriptor.newDescriptor("getD", this, MacroExtension.ARG_NUMBER,
