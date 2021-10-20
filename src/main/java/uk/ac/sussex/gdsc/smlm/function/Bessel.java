@@ -533,7 +533,6 @@ public final class Bessel {
       // for the values of Math.sin/Math.cos of 3PI/4 which then cancel
       // out with corresponding terms in "factor".
       //
-      // Updated to use x in-place of x
       final double sx = Math.sin(x);
       final double cx = Math.cos(x);
       return s * factor * (rc * (sx - cx) + y * rs * (sx + cx));
