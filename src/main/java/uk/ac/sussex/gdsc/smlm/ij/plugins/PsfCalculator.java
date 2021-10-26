@@ -431,15 +431,15 @@ public class PsfCalculator implements PlugIn, DialogListener {
     }
     final String title = "PSF profile";
     final Plot p = new Plot(title, "px", "");
-    p.addPoints(x2, y, Plot.LINE);
     p.addLabel(0, 0, "Blue = Airy; Red = Gaussian");
+    p.setColor(Color.BLUE);
+    p.addPoints(x2, y, Plot.LINE);
     p.setColor(Color.RED);
     p.addPoints(x2, y2, Plot.LINE);
     final double sd = airyWidth * AIRY_TO_GAUSSIAN * factor;
     final double sdHeight = 0.606530659; // intensityGaussian(1)
     p.drawLine(-sd, 0, -sd, sdHeight);
     p.drawLine(sd, 0, sd, sdHeight);
-    p.setColor(Color.BLUE);
     ImageJUtils.display(title, p);
   }
 
