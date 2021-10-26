@@ -37,6 +37,7 @@ import ij.gui.Roi;
 import ij.gui.Toolbar;
 import ij.plugin.PlugIn;
 import ij.plugin.tool.PlugInTool;
+import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.text.TextPanel;
@@ -47,9 +48,16 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
+import uk.ac.sussex.gdsc.core.ij.gui.ObjectOutliner;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
+import uk.ac.sussex.gdsc.core.math.RadialStatisticsUtils;
+import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -107,14 +115,14 @@ public class SpotFit implements PlugIn {
             return;
           }
           try {
-            int c = Integer.parseInt(fields[1]);
-            int z = Integer.parseInt(fields[2]);
-            int t = Integer.parseInt(fields[3]);
+            final int c = Integer.parseInt(fields[1]);
+            final int z = Integer.parseInt(fields[2]);
+            final int t = Integer.parseInt(fields[3]);
             // Parse the rectangle data
             fields = fields[4].split("[, x]");
-            int x = Integer.parseInt(fields[0]);
-            int y = Integer.parseInt(fields[1]);
-            int w = Integer.parseInt(fields[2]);
+            final int x = Integer.parseInt(fields[0]);
+            final int y = Integer.parseInt(fields[1]);
+            final int w = Integer.parseInt(fields[2]);
 
             imp.setPosition(c, z, t);
             imp.setRoi(new Rectangle(x, y, w, w));
@@ -135,6 +143,8 @@ public class SpotFit implements PlugIn {
 
     private static final AtomicReference<CustomTextWindow> resultsWindow = new AtomicReference<>();
     private static final Pattern pattern = Pattern.compile("\t");
+    private static final AtomicReference<Pair<Integer, Roi>> analysisOutline =
+        new AtomicReference<>(Pair.of(0, null));
 
     /**
      * The single reference to the settings.
@@ -159,11 +169,22 @@ public class SpotFit implements PlugIn {
       final int channel;
       final double background;
       final double intensity;
+      final double m1;
+      final double m2;
+      final double corr;
+      final double[] r1;
+      final double[] r2;
 
-      ComparisonResult(int channel, double background, double intensity) {
+      ComparisonResult(int channel, double background, double intensity, double m1, double m2,
+          double corr, double[] r1, double[] r2) {
         this.channel = channel;
         this.background = background;
         this.intensity = intensity;
+        this.m1 = m1;
+        this.m2 = m2;
+        this.corr = corr;
+        this.r1 = r1;
+        this.r2 = r2;
       }
     }
 
@@ -248,10 +269,10 @@ public class SpotFit implements PlugIn {
       gd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
       gd.addCheckbox("Log_progress", settings.getLogProgress());
       gd.addMessage(TextUtils.wrap(
-          "Optionally perform a weighted mean intensity in a second "
-              + "channel using the fitted Gaussian to weight the region. Channel 0 is ignored",
+          "Optionally perform comparison analysis in a second channel. Channel 0 is ignored.",
           80));
       gd.addNumericField("Comparison_channel", settings.getComparisonChannel(), 0);
+      gd.addSlider("Analysis_radius", 3, 10, settings.getAnalysisRadius());
 
       gd.addHelp(HelpUrls.getUrl("spot-fit-tool"));
       gd.showDialog();
@@ -269,6 +290,7 @@ public class SpotFit implements PlugIn {
       builder.setAttachToSlice(gd.getNextBoolean());
       builder.setLogProgress(gd.getNextBoolean());
       builder.setComparisonChannel(Math.max(0, (int) gd.getNextNumber()));
+      builder.setAnalysisRadius((int) gd.getNextNumber());
       settings = builder.build();
 
       // Only active if the settings are valid
@@ -357,15 +379,17 @@ public class SpotFit implements PlugIn {
           return;
         }
 
-        // Perform a weighted mean using the fitted Gaussian on the comparison channel
-        final ComparisonResult comparisonResult = createComparisonResult(imp, settings, fitResult);
+        // Perform comparison analysis against a second channel
+        final ComparisonResult comparisonResult =
+            createComparisonResult(ip, imp, settings, fitResult);
 
         // Add result
         addResult(imp, channel, slice, frame, bounds, fitResult, comparisonResult,
             settings.getShowFitRoi());
 
         if (settings.getShowOverlay()) {
-          addOverlay(imp, channel, slice, frame, fitResult, settings.getAttachToSlice());
+          addOverlay(imp, channel, slice, frame, fitResult, settings.getAttachToSlice(),
+              settings.getAnalysisRadius());
         }
       }
     }
@@ -493,6 +517,11 @@ public class SpotFit implements PlugIn {
       sb.append("C2\t");
       sb.append("C2 Background\t");
       sb.append("C2 Intensity\t");
+      sb.append("Corr\t");
+      sb.append("C1 Mean\t");
+      sb.append("C2 Mean\t");
+      sb.append("C1 Radial means\t");
+      sb.append("C2 Radial means\t");
       return sb.toString();
     }
 
@@ -525,15 +554,22 @@ public class SpotFit implements PlugIn {
         sb.append('\t').append(comparisonResult.channel);
         sb.append('\t').append(MathUtils.rounded(comparisonResult.background));
         sb.append('\t').append(MathUtils.rounded(comparisonResult.intensity));
+        sb.append('\t').append(MathUtils.rounded(comparisonResult.corr));
+        sb.append('\t').append(MathUtils.rounded(comparisonResult.m1));
+        sb.append('\t').append(MathUtils.rounded(comparisonResult.m2));
+        sb.append('\t').append(Arrays.stream(comparisonResult.r1)
+            .mapToObj(i -> MathUtils.rounded(i)).collect(Collectors.joining(", ")));
+        sb.append('\t').append(Arrays.stream(comparisonResult.r2)
+            .mapToObj(i -> MathUtils.rounded(i)).collect(Collectors.joining(", ")));
       } else {
-        sb.append("\t\t\t");
+        sb.append("\t\t\t\t\t\t\t\t");
       }
 
       createResultsWindow(drawSelected).append(sb.toString());
     }
 
     private static void addOverlay(ImagePlus imp, int channel, int slice, int frame,
-        FitResult fitResult, boolean attachToSlice) {
+        FitResult fitResult, boolean attachToSlice, int analysisRadius) {
       final double[] params = fitResult.getParameters();
       Overlay overlay = imp.getOverlay();
       if (overlay == null) {
@@ -542,13 +578,55 @@ public class SpotFit implements PlugIn {
       final PointRoi roi = new OffsetPointRoi(params[Gaussian2DFunction.X_POSITION],
           params[Gaussian2DFunction.Y_POSITION]);
       roi.setPointType(3);
+      setPosition(imp, channel, slice, frame, attachToSlice, roi);
+      overlay.add(roi);
+
+      final Roi analysisRoi = createAnalysisRoi(analysisRadius);
+      if (analysisRoi != null) {
+        final int ox = (int) params[Gaussian2DFunction.X_POSITION];
+        final int oy = (int) params[Gaussian2DFunction.Y_POSITION];
+        analysisRoi.setLocation(ox - analysisRadius, oy - analysisRadius);
+        setPosition(imp, channel, slice, frame, attachToSlice, analysisRoi);
+        overlay.add(analysisRoi);
+      }
+
+      imp.setOverlay(overlay);
+    }
+
+    private static void setPosition(ImagePlus imp, int channel, int slice, int frame,
+        boolean attachToSlice, final Roi roi) {
       if (imp.isDisplayedHyperStack()) {
         roi.setPosition(channel, (attachToSlice) ? slice : 0, frame);
       } else if (attachToSlice) {
         roi.setPosition(imp.getStackIndex(channel, slice, frame));
       }
-      overlay.add(roi);
-      imp.setOverlay(overlay);
+    }
+
+    private static Roi createAnalysisRoi(int analysisRadius) {
+      final Pair<Integer, Roi> outline = analysisOutline.get();
+      Roi roi;
+      if (outline.getKey() != analysisRadius) {
+        final int size = 2 * analysisRadius + 1;
+        final ByteProcessor bp = new ByteProcessor(size, size);
+        // Create offsets
+        final double[] d2 = IntStream.rangeClosed(-analysisRadius, analysisRadius)
+            .mapToDouble(i -> i * i).toArray();
+        // Analysis of pixels within radius r in [n, n+1). Set max n = analysisRadius.
+        final double threshold = MathUtils.pow2(analysisRadius + 1);
+        for (int y = 0, i = 0; y < size; y++) {
+          for (int x = 0; x < size; x++, i++) {
+            if (d2[y] + d2[x] < threshold) {
+              bp.set(i, 255);
+            }
+          }
+        }
+        final ObjectOutliner oo = new ObjectOutliner(bp);
+        roi = oo.outline(analysisRadius, analysisRadius);
+        analysisOutline.set(Pair.of(analysisRadius, roi));
+      } else {
+        roi = outline.getValue();
+      }
+      return (Roi) roi.clone();
     }
 
     private static void removeSpots(ImagePlus imp, int channel, int slice, int frame, int x, int y,
@@ -647,8 +725,8 @@ public class SpotFit implements PlugIn {
     }
 
     // "data" will not be null as the width and height from the image processor are correct
-    private static @Nullable ComparisonResult createComparisonResult(ImagePlus imp,
-        SpotFitSettings settings, FitResult fitResult) {
+    private static @Nullable ComparisonResult createComparisonResult(ImageProcessor ip1,
+        ImagePlus imp, SpotFitSettings settings, FitResult fitResult) {
       if (settings.getComparisonChannel() == 0
           || settings.getComparisonChannel() > imp.getNChannels()) {
         // No comparison channel
@@ -662,9 +740,12 @@ public class SpotFit implements PlugIn {
       final int stackIndex = imp.getStackIndex(channel, slice, frame);
 
       final ImageStack stack = imp.getImageStack();
-      final ImageProcessor ip = stack.getProcessor(stackIndex);
+      final ImageProcessor ip2 = stack.getProcessor(stackIndex);
 
-      // Extract the region
+      // Use the fitted Gaussian to compute a single pixel Gaussian blur on the comparison channel.
+      // This creates an approximate value for the other channel at the fit location.
+
+      // Extract the fitted region
       final double[] params = fitResult.getParameters();
       final double x = params[Gaussian2DFunction.X_POSITION];
       final double y = params[Gaussian2DFunction.Y_POSITION];
@@ -672,20 +753,104 @@ public class SpotFit implements PlugIn {
 
       final int cx = (int) Math.round(x);
       final int cy = (int) Math.round(y);
-      final int width = (int) Math.ceil(3 * xsd);
-      final int ox = cx - width;
-      final int oy = cy - width;
-      // Clip to the image
-      final Rectangle bounds = new Rectangle(ox, oy, 2 * width + 1, 2 * width + 1)
-          .intersection(new Rectangle(imp.getWidth(), imp.getHeight()));
+      Rectangle bounds = getBounds(cx, cy, (int) Math.ceil(3 * xsd), imp);
 
-      final double[] data = new ImageConverter().getDoubleData(ip.getPixels(), ip.getWidth(),
-          ip.getHeight(), bounds, null);
+      final ImageConverter ic = new ImageConverter();
+      final double[] data =
+          ic.getDoubleData(ip2.getPixels(), ip2.getWidth(), ip2.getHeight(), bounds, null);
 
       // Find the background using the edge pixels assuming a single peak
       final double background =
           Gaussian2DFitter.getBackground(data, bounds.width, bounds.height, 1);
 
+      final double intensity = getIntensity(cx, cy, xsd, bounds, data, background);
+
+      // Extract the pixels for each region using the analysis radius
+      bounds = getBounds(cx, cy, settings.getAnalysisRadius(), imp);
+
+      final float[] data1 =
+          ic.getData(ip1.getPixels(), ip1.getWidth(), ip1.getHeight(), bounds, null);
+      final float[] data2 =
+          ic.getData(ip2.getPixels(), ip2.getWidth(), ip2.getHeight(), bounds, null);
+
+      // Compute a correlation between the pixels
+      double corr;
+      double m1;
+      double m2;
+      if (imp.getBitDepth() == 32) {
+        // 32-bit image
+        final SimpleRegression regression = new SimpleRegression();
+        m1 = 0;
+        m2 = 0;
+        for (int i = 0; i < data1.length; i++) {
+          regression.addData(data1[i], data2[i]);
+          m1 += data1[i];
+          m2 += data2[i];
+        }
+        corr = regression.getR();
+        m1 /= regression.getN();
+        m2 /= regression.getN();
+      } else {
+        // 8/16-bit images
+        final FastCorrelator fc = new FastCorrelator();
+        for (int i = 0; i < data1.length; i++) {
+          fc.add((int) data1[i], (int) data2[i]);
+        }
+        corr = fc.getCorrelation();
+        m1 = (double) fc.getSumX() / fc.getN();
+        m2 = (double) fc.getSumY() / fc.getN();
+      }
+
+      // If square:
+      // Compute radial statistics
+      double[] r1;
+      double[] r2;
+      if (bounds.width == bounds.height) {
+        final double[][] stats =
+            RadialStatisticsUtils.radialSumAndCount(bounds.width, data1, data2);
+        r1 = stats[0];
+        r2 = stats[1];
+        final double[] c = stats[2];
+        // Create a mean for each from the radial statistics or the entire pixel set.
+        m1 = m2 = 0;
+        double n = 0;
+        for (int i = 0; i < r1.length; i++) {
+          m1 += r1[i];
+          m2 += r2[i];
+          n += c[i];
+          // Normalise radial sums to radial means
+          r1[i] /= c[i];
+          r2[i] /= c[i];
+        }
+        m1 /= n;
+        m2 /= n;
+      } else {
+        r1 = r2 = null;
+      }
+
+      return new ComparisonResult(channel, background, intensity, m1, m2, corr, r1, r2);
+    }
+
+    /**
+     * Gets the bounds around the given centre. The bounds are clipped to the image bounds.
+     *
+     * @param cx centre x
+     * @param cy centre y
+     * @param width the width
+     * @param imp the imp
+     * @return the bounds
+     */
+    private static Rectangle getBounds(int cx, int cy, int width, ImagePlus imp) {
+      final int ox = cx - width;
+      final int oy = cy - width;
+
+      // Clip to the image
+      return new Rectangle(ox, oy, 2 * width + 1, 2 * width + 1)
+          .intersection(new Rectangle(imp.getWidth(), imp.getHeight()));
+    }
+
+    private static double getIntensity(double x, double y, double xsd, Rectangle bounds,
+        double[] data, double background) {
       // Find the weighted intensity using the 2D Gaussian
       final double[] gaussParams = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK];
       gaussParams[Gaussian2DFunction.SIGNAL] = 1;
@@ -707,11 +872,8 @@ public class SpotFit implements PlugIn {
         intensity += weights[i] * Math.max(0, data[i] - background);
       }
 
-      // If there is no Gaussian then return null
-      if (sumWeights == 0) {
-        return null;
-      }
-      return new ComparisonResult(channel, background, intensity / sumWeights);
+      // Avoid divide by zero error
+      return MathUtils.div0(intensity, sumWeights);
     }
   }
 

@@ -487,6 +487,7 @@ public final class GuiProtosHelper {
     builder.setSearchRadius(3);
     builder.setFitRadius(10);
     builder.setShowOverlay(true);
+    builder.setAnalysisRadius(5);
     defaultSpotFitSettings = builder.build();
   }
 

@@ -688,6 +688,7 @@ message SpotFitSettings {
   bool show_fit_roi = 7;
   double snr_threshold = 8;
   int32 comparison_channel = 9;
+  int32 analysis_radius = 10;
 }
 
 // Contains settings for the TC PALM Analysis plugin
