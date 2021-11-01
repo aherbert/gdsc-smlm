@@ -554,7 +554,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Store details of spot candidates that match actual spots.
    */
-  public abstract class SpotMatch {
+  public static abstract class SpotMatch {
     /**
      * The index for the spot candidate.
      */
@@ -624,7 +624,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Store details of a fitted spot candidate that matches an actual spot.
    */
-  public class FitMatch extends SpotMatch {
+  public static class FitMatch extends SpotMatch {
     /** The point. */
     final MultiPathPoint point;
 
@@ -684,7 +684,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   /**
    * Store details of a spot candidate that matches an actual spot.
    */
-  public class CandidateMatch extends SpotMatch {
+  public static class CandidateMatch extends SpotMatch {
 
     /**
      * Instantiates a new candidate match.
@@ -1731,7 +1731,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * Create an abstract class to allow a count to be passed to the constructor. The procedure can be
    * coded inline using final object references.
    */
-  private abstract class CustomTIntProcedure implements TIntProcedure {
+  private static abstract class CustomTIntProcedure implements TIntProcedure {
     int count;
 
     CustomTIntProcedure(int count) {
