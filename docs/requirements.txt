@@ -1,0 +1,11 @@
+# Read the Docs : Reproducible builds
+# https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
+
+sphinx==3.4.3
+sphinx_rtd_theme==0.5.1
+readthedocs-sphinx-search==0.1.0
+
+# Workaround docutils 0.18 bug
+# https://github.com/readthedocs/readthedocs.org/issues/8616
+
+docutils<0.18

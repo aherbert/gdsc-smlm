@@ -1,0 +1,12 @@
+# Read the Docs : Reproducible builds
+# https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
+
+name: docs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - sphinx==3.4.3
+  - nbsphinx==0.8.1
+  - pip:
+    - sphinx_rtd_theme==0.5.1

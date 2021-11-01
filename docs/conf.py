@@ -20,7 +20,7 @@ import os
 # -- Project information -----------------------------------------------------
 
 project = u'GDSC SMLM'
-copyright = u'2020, Alex Herbert'
+copyright = u'2021, Alex Herbert'
 author = u'Alex Herbert'
 
 # The short X.Y version
