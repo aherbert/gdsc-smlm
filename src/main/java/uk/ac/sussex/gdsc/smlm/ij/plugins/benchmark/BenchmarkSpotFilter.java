@@ -2491,15 +2491,16 @@ public class BenchmarkSpotFilter implements PlugIn {
         new Plot(title, (settings.rankByIntensity) ? "Relative Intensity" : "Spot Rank", "");
     final double[] limits = MathUtils.limits(rank);
     plot.setLimits(limits[0], limits[1], 0, 1.05);
+    final float[] frank = SimpleArrayUtils.toFloat(rank);
     plot.setColor(Color.blue);
-    plot.addPoints(rank, p, Plot.LINE);
+    plot.addPoints(frank, SimpleArrayUtils.toFloat(p), null, Plot.LINE, "Precision");
     plot.setColor(Color.red);
-    plot.addPoints(rank, r, Plot.LINE);
+    plot.addPoints(frank, SimpleArrayUtils.toFloat(r), null, Plot.LINE, "Recall");
     plot.setColor(Color.black);
-    plot.addPoints(rank, j, Plot.LINE);
+    plot.addPoints(frank, SimpleArrayUtils.toFloat(j), null, Plot.LINE, "Jaccard");
     // Plot correlation - update the scale to be 0-1?
-    plot.setColor(Color.yellow);
-    plot.addPoints(rank, c, Plot.LINE);
+    plot.setColor(Color.gray);
+    plot.addPoints(frank, SimpleArrayUtils.toFloat(c), null, Plot.LINE, "Correlation");
     plot.setColor(Color.magenta);
     plot.drawLine(rank[fractionIndex], 0, rank[fractionIndex],
         MathUtils.max(p[fractionIndex], r[fractionIndex], j[fractionIndex], c[fractionIndex]));
@@ -2507,7 +2508,8 @@ public class BenchmarkSpotFilter implements PlugIn {
     plot.drawLine(rank[maxIndex], 0, rank[maxIndex],
         MathUtils.max(p[maxIndex], r[maxIndex], j[maxIndex], c[maxIndex]));
     plot.setColor(Color.black);
-    plot.addLabel(0, 0, "Precision=Blue, Recall=Red, Jaccard=Black, Correlation=Yellow");
+    plot.setFontSize(10);
+    plot.addLegend("", "top-right");
 
     ImageJUtils.display(title, plot, windowOrganiser);
 
