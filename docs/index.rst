@@ -271,7 +271,7 @@ Analysis Plugins
    * - :ref:`analysis_plugins:Blink Estimator`
      - Estimate the blinking rate of fluorophores in a results set.
 
-   * - :ref:`analysis_plugins:TC PALM Analysis`
+   * - :ref:`analysis_plugins:Time Correlated (TC-PALM) Analysis`
      - Performs time correlated photo-activated light microscopy (TC-PALM) analysis.
 
    * - :ref:`analysis_plugins:Neighbour Analysis`
