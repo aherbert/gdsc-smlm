@@ -1004,10 +1004,9 @@ public class BenchmarkSpotFilter implements PlugIn {
               final double intensity = getIntensity(actual[i]);
               if (rampedSignalScore != null) {
                 // Adjust intensity using the surrounding PSF contributions
-                final double rsf = (actual[i].getBackgroundOffset() + intensity)
-                    / (predicted[j].spot.intensity - background);
-                // Normalise so perfect is zero
-                final double sf = (rsf < 1) ? 1 / rsf - 1 : rsf - 1;
+                final double sf = BenchmarkSpotFit.computeSignalFactor(
+                    actual[i].getBackgroundOffset() + intensity,
+                    predicted[j].spot.intensity - background);
                 score *= rampedSignalScore.score(sf);
               }
               score = RampedScore.flatten(score, 256);

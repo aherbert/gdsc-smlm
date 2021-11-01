@@ -2197,13 +2197,13 @@ The plugin allows the spot filter and the analysis settings to be configured. Th
 The two sets of coordinates are assigned as matches if they are within a configured distance.
 By default matching is performed using a nearest-neighbour algorithm assigning the closest pairs. This can be changed to process the candidates in order, attempting to find a free localisation that is within the match distance to the candidate. This simulates the way the candidates will be used during fitting with the highest ranked candidates being processed first, thus they will be likely to be fit to a localisation, even if it has a closer candidate (as that will be processed later). Optionally multiple matching can be used where a candidate can be matched to more than one localisation. This is useful when simulating high density data with overlapping localisations.
 
-In addition the spot candidates can be assessed as matches if they are within a factor of the true signal for the localisation (Note: all spot filters produce an estimate of the signal, for example using the maximum height of the spot). The relative signal factor is the ratio between the larger of the estimated spot signal and the true signal and the other smaller signal. The relative signal factor (rsf) has 1 for a perfect match and is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
+In addition the spot candidates can be assessed as matches if they are within a factor of the true signal for the localisation (Note: all spot filters produce an estimate of the signal, for example using the maximum height of the spot). The relative signal factor is the ratio between the estimated spot signal and the true signal. The relative signal factor has 1 for a perfect match and is adjusted so that the signal factor (sf) score is 0 for a perfect match:
 
 .. math::
 
-    \mathit{sf}=(s_1<s_2)\ ?\ \frac{s_2}{s_1}-1 : \frac{s_1}{s_2}-1
+    \mathit{sf}= |\log_2(s_1 / s_2)|
 
-The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``.
+where :math:`\log_2` is the logarithm using base 2. The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``.
 
 Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a cosine function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
 
@@ -2688,13 +2688,13 @@ For the purpose of benchmarking it is possible to speed up processing by ignorin
 
 The algorithm used to fit the spots can be configured in the plugin options. However all fit results are accepted as long as the fitted signal is above zero, the coordinates are within the fit region and the fitted width is within a factor of 5 of the initial estimate. There is no further filtering performed by the plugin on the fit results. This provides an upper limit for the recall that is possible using this fitting configuration. Filtering of the results using limits on the signal, peak width, precision, etc. is done using the ``Benchmark Filter Analysis`` plugin.
 
-When all the fitting has been done the fitted coordinates and any candidates coordinates that were not fitted or failed to fit are compared with the actual coordinates that were simulated. The two sets of coordinates are assigned as matches if they are within a configured distance. In addition the fitted candidates can be set as matches if they are within a factor of the true signal for the localisation. The relative signal factor is simply the fitted signal divided by the true signal. The relative signal factor (rsf) above or below the true signal (which has 1 for a perfect match) is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
+When all the fitting has been done the fitted coordinates and any candidates coordinates that were not fitted or failed to fit are compared with the actual coordinates that were simulated. The two sets of coordinates are assigned as matches if they are within a configured distance. In addition the fitted candidates can be set as matches if they are within a factor of the true signal for the localisation. The relative signal factor is the fitted signal divided by the true signal. The relative signal factor above or below the true signal (which has 1 for a perfect match) is adjusted so that the new signal factor (sf) score is 0 for a perfect match:
 
 .. math::
 
-    \mathit{sf}=(\mathit{rsf}<1)?1-\frac{1}{\mathit{rsf}}:\mathit{rsf}-1
+    \mathit{sf}= |\log_2(s_1 / s_2)|
 
-The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``. Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a cosine function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
+where :math:`\log_2` is the logarithm with base 2. The matches are then assigned a score. The score is created using a ramped function between the ``Lower distance`` and the ``Match distance``. Any distance below the ``Lower distance`` is 1. Anything above the ``Match distance`` is 0. In between uses a ramp to set the score. The ramp is not linear but uses a cosine function. This smooths the transition at the ends of the range to make selection of the end points for assessment less critical; the ramp is linear in the exact centre of the range. Thus the ideal end points should be above and below the ideal scoring threshold.
 
 If using a signal factor a similar ramp is applied to produce a signal score and the final score computed as a product of the two. The match score is then used to accumulate a score for how accurate the fitting was performed.
 
@@ -3979,7 +3979,7 @@ The following parameters can be configured:
        Set to the same as the ``Match distance`` to ignore the ramped scoring function.
 
    * - Signal factor
-     - Define the limit for the difference between the fitted signal and the actual signal for a match. A value of (N-1) indicates the fit is allowed to be N-fold different, i.e. use 2 for a 3-fold difference.
+     - Define the limit for the difference between the fitted signal and the actual signal for a match. A value of :math:`N` indicates the fit is allowed to be :math:`2^N`-fold different, i.e. use 2 for a 4-fold difference.
 
        Set to zero to ignore.
 

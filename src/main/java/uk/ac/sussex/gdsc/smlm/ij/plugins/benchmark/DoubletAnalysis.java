@@ -1405,8 +1405,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           default:
             s2 = result.fitResult2.getParameters()[Gaussian2DFunction.SIGNAL];
         }
-        final double rsf = s1 / s2;
-        final double sf = Math.abs((rsf < 1) ? 1 - 1 / rsf : rsf - 1);
+        final double sf = BenchmarkSpotFit.computeSignalFactor(s1, s2);
         final double fScore = signalScore.scoreAndFlatten(sf, 256);
         matchScore = RampedScore.flatten(matchScore * fScore, 256);
       }

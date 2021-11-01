@@ -676,9 +676,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   static double computeSignalFactor(double predictedSignal, double actualSignal) {
     final double rsf = predictedSignal / actualSignal;
     // The relative signal factor is 1 for a perfect fit, less than 1 for below and above 1 for
-    // above.
-    // Reset the signal factor from 0
-    return (rsf < 1) ? 1 - 1 / rsf : rsf - 1;
+    // above. Reset the signal factor from 0.
+    // abs(log(s/t)) / log(2): 1x=0, 1.5x= 0.58, 2x=1, 3x=1.58, 4x=2
+    return Math.abs(MathUtils.log2(rsf));
   }
 
   /**
