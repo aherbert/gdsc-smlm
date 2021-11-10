@@ -84,6 +84,8 @@ public class SmlmUsageTracker implements PlugIn {
    * <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialisation on
    * demand</a>
    */
+  // The plugins config input stream is closed in the buildPluginMap method
+  @SuppressWarnings("resource")
   private static class LazyMapHolder {
     private static final HashMap<String, String[]> map;
 
