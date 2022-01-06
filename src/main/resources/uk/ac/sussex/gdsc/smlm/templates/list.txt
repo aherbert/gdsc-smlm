@@ -1,3 +1,6 @@
-MT0.N1.HD.json
-MT0.N1.HDb.json
-missing.txt
+# List of standard templates for the configuration of
+# super-resolution localisation analysers for
+# single-molecule microscopy images.
+
+# Uncomment the following line to add the template example.
+# template_example.json
