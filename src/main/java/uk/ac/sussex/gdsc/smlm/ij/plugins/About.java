@@ -4,7 +4,7 @@
  *
  * Software for single molecule localisation microscopy (SMLM)
  * %%
- * Copyright (C) 2011 - 2020 Alex Herbert
+ * Copyright (C) 2011 - 2022 Alex Herbert
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -49,7 +49,7 @@ import uk.ac.sussex.gdsc.smlm.Version;
  */
 public class About implements PlugIn, MacroExtension {
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
-  private static final String YEAR = "2020";
+  private static final String YEAR = "2022";
 
   /**
    * The configure option.

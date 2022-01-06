@@ -1,27 +1,3 @@
-/*-
- * #%L
- * Genome Damage and Stability Centre SMLM ImageJ Plugins
- *
- * Software for single molecule localisation microscopy (SMLM)
- * %%
- * Copyright (C) 2011 - 2020 Alex Herbert
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
- */
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
  * agreements. See the NOTICE file distributed with this work for additional information regarding
@@ -68,11 +44,15 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 
 /**
- * Non-linear conjugate gradient optimizer. <br> This class supports both the Fletcher-Reeves and
- * the Polak-Ribière update formulas for the conjugate search directions. It also supports optional
- * preconditioning. <br> The class is based on the
- * org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer but
- * updated to support bounds checking on the current point within the optimisation space.
+ * Non-linear conjugate gradient optimizer.
+ *
+ * <p>This class supports both the Fletcher-Reeves and the Polak-Ribière update formulas for the
+ * conjugate search directions. It also supports optional preconditioning.
+ *
+ * <p>The class is based on the Apache Commons Math 3 class
+ * {@link org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer
+ * NonLinearConjugateGradientOptimizer}. It has been updated to support bounds checking on the
+ * current point within the optimisation space.
  */
 public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivariateOptimizer {
   /** Update formula for the beta parameter. */

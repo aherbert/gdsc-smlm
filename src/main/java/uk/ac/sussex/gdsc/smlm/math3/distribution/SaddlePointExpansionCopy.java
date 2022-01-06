@@ -23,12 +23,10 @@ import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathUtils;
 
 /**
- * <p>
  * Utility class used by various distributions to accurately compute their
  * respective probability mass functions. The implementation for this class is
  * based on the Catherine Loader's <a target="_blank"
  * href="http://www.herine.net/stat/software/dbinom.html">dbinom</a> routines.
- * </p>
  *
  * <p>
  * This class is not intended to be called directly.

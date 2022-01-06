@@ -26,7 +26,8 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 /**
  * Implementation of the Poisson distribution for computation of the probability mass function.
  *
- * <p>Adapted from org.apache.commons.math3.distribution.PoissonDistribution. The code has been
+ * <p>This implementation is an adaption of the Apache Commons Math 3 class
+ * {@link org.apache.commons.math3.distribution.PoissonDistribution}. The code has been
  * updated to: remove the sampling functionality and requirement for the random generator; allow the
  * mean to be altered using properties; use {@link java.lang.Math} and remove the {@code FastMath}
  * dependency.
@@ -36,6 +37,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
  * @see <a href="http://mathworld.wolfram.com/PoissonDistribution.html">Poisson distribution
  *      (MathWorld)</a>
  */
+// TODO - replace with the Commons Statistics implementation when v1.0 is released.
 public final class PoissonDistribution {
   /** Mean of the distribution. */
   private double mean;

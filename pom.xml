@@ -88,6 +88,16 @@ Software for single molecule localisation microscopy (SMLM)
   <properties>
     <license.licenseName>gpl_v3</license.licenseName>
     <license.copyrightOwners>Alex Herbert</license.copyrightOwners>
+    <license.excludes>${scijava.excludedLicensePatterns},
+        **/*.json,
+        **/*Protos.java,
+        **/math3/**/*Copy.java,
+        **/math3/**/PoissonDistribution.java,
+        **/math3/**/CustomSimpsonIntegrator.java,
+        **/math3/**/CustomPowellOptimizer.java,
+        **/math3/**/BoundedNonLinearConjugateGradientOptimizer.java,
+        **/math3/**/MultivariateGaussianMixtureExpectationMaximization.java
+    </license.excludes>
 
     <!-- Workaround to avoid duplicating config files. -->
     <gdsc.parent.dir>${basedir}</gdsc.parent.dir>
@@ -319,19 +329,6 @@ Software for single molecule localisation microscopy (SMLM)
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/*.json</exclude>
-            <exclude>**/*Protos.java</exclude>
-            <exclude>**/math3/**/*Copy.java</exclude>
-            <exclude>**/math3/**/PoissonDistribution.java</exclude>
-            <exclude>**/math3/**/MultivariateGaussianMixtureExpectationMaximization.java</exclude>
-          </excludes>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
