@@ -1089,14 +1089,14 @@ public class Fire implements PlugIn {
 
     ImageJImagePeakResults image1 =
         ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
-            equalised, "IP1", bounds, 1, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
+            equalised, "IP1", bounds, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
     image1.setDisplayImage(false);
     image1.setUncalibrated(true);
     image1.begin();
 
     ImageJImagePeakResults image2 =
         ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
-            equalised, "IP2", bounds, 1, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
+            equalised, "IP2", bounds, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
     image2.setDisplayImage(false);
     image2.setUncalibrated(true);
     image2.begin();

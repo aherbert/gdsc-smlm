@@ -637,7 +637,7 @@ public class ResultsManager implements PlugIn {
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
           resultsSettings.getImageType(), resultsSettings.getWeighted(),
           resultsSettings.getEqualised(), resultsList.getName(), bounds,
-          resultsList.getNmPerPixel(), resultsList.getGain(), resultsSettings.getScale(),
+          resultsList.getNmPerPixel(), resultsSettings.getScale(),
           resultsSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
       if (BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS)) {
         image.setRollingWindowSize(resultsSettings.getRollingWindowSize());

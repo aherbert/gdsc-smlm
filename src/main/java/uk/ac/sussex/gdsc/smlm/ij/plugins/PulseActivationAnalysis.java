@@ -1806,7 +1806,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // Draw the super-resolution image
     final Rectangle bounds = results.getBounds(true);
     addImageResults(outputList, results.getName(), bounds, results.getNmPerPixel(),
-        results.getGain(), resultsSettingsBuilder.getResultsImageSettings());
+        resultsSettingsBuilder.getResultsImageSettings());
 
     outputList.begin();
 
@@ -1814,11 +1814,11 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
-      double nmPerPixel, double gain, ResultsImageSettings imageSettings) {
+      double nmPerPixel, ResultsImageSettings imageSettings) {
     if (imageSettings.getImageType() != ResultsImageType.DRAW_NONE) {
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
           imageSettings.getImageType(), imageSettings.getWeighted(), imageSettings.getEqualised(),
-          title, bounds, nmPerPixel, gain, imageSettings.getScale(),
+          title, bounds, nmPerPixel, imageSettings.getScale(),
           imageSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
       image.setLiveImage(false);
       image.setDisplayImage(settings.channels == 1);
@@ -1907,7 +1907,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
       // Draw the unmixed activations
       final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, settings.nmPerPixel, 1,
+          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, settings.nmPerPixel,
           1024.0 / settings.size, 0, ResultsImageMode.IMAGE_ADD);
       image.setCalibration(calibration);
       image.setLiveImage(false);

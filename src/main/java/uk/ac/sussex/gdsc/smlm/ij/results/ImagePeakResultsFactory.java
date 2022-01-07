@@ -32,6 +32,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
  * A factory for creating ImagePeakResults objects.
  */
 public class ImagePeakResultsFactory {
+
   /**
    * Create a PeakResults image using the specified parameters.
    *
@@ -42,7 +43,6 @@ public class ImagePeakResultsFactory {
    * @param title The title of the image
    * @param bounds Define the bounding rectangle of the result coordinates
    * @param nmPerPixel The results scale in nanometers per pixel
-   * @param gain The results gain
    * @param imageScale Define the scale of the image relative to the bounding rectangle
    * @param precision For average precision plots this parameter specifies the fixed width of the
    *        PSF (in nm). If less than zero then defaults to the nmPerPixel value.
@@ -51,7 +51,7 @@ public class ImagePeakResultsFactory {
    */
   public static ImageJImagePeakResults createPeakResultsImage(ResultsImageType resultsImage,
       boolean weighted, boolean equalised, String title, Rectangle bounds, double nmPerPixel,
-      double gain, double imageScale, double precision, ResultsImageMode mode) {
+      double imageScale, double precision, ResultsImageMode mode) {
     ImageJImagePeakResults image;
     switch (resultsImage) {
       case DRAW_FITTED_PSF:
@@ -121,7 +121,7 @@ public class ImagePeakResultsFactory {
       flags |= ImageJImagePeakResults.DISPLAY_EQUALIZED;
     }
     image.setDisplayFlags(flags);
-    image.setCalibration(nmPerPixel, gain);
+    image.setCalibration(nmPerPixel, 1);
     return image;
   }
 }

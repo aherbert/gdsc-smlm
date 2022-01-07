@@ -1611,7 +1611,7 @@ public class DriftCalculator implements PlugIn {
   private static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
     final ImageJImagePeakResults image =
         ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true, false,
-            "", bounds, 100, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
+            "", bounds, 100, imageScale, 0, ResultsImageMode.IMAGE_ADD);
     image.setDisplayImage(false);
     image.begin();
     return image;
