@@ -35,7 +35,8 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 @SuppressWarnings({"javadoc"})
 class BesselTest {
   // Require doublesEqual to compare infinity == infinity
-  private static final DoubleDoubleBiPredicate tolerance5e16 = TestHelper.doublesEqual().or(TestHelper.doublesAreClose(5e-16));
+  private static final DoubleDoubleBiPredicate tolerance5e16 =
+      TestHelper.doublesEqual().or(TestHelper.doublesAreClose(5e-16));
   private static final DoubleDoubleBiPredicate tolerance1e15 = TestHelper.doublesAreClose(1e-15);
   private static final DoubleDoubleBiPredicate tolerance5e15 = TestHelper.doublesAreClose(5e-15);
 
@@ -66,8 +67,6 @@ class BesselTest {
   private static void assertBessel(String name, DoubleUnaryOperator bessel, boolean odd, double x,
       double expected, DoubleDoubleBiPredicate test) {
     final double i = bessel.applyAsDouble(x);
-    //System.out.printf("%s %25s %25s vs %25s %s%n", name, x, expected, i,
-    //uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(expected, i));
     TestAssertions.assertTest(expected, i, test, name);
     Assertions.assertEquals(odd ? -i : i, bessel.applyAsDouble(-x),
         () -> name + " is not " + (odd ? "odd" : "even"));

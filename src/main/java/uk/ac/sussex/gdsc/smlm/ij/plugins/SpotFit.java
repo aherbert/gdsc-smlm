@@ -32,7 +32,6 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.Overlay;
-import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.gui.Roi;
 import ij.gui.Toolbar;
@@ -567,8 +566,8 @@ public class SpotFit implements PlugIn {
       }
 
       // TODO Experiments with the radial means plot ...
-//      Plot p = new Plot("", "", "");
-//      p.addPoints(x, y, shape);
+      // Plot p = new Plot("", "", "");
+      // p.addPoints(x, y, shape);
 
       createResultsWindow(drawSelected).append(sb.toString());
     }
