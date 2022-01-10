@@ -54,6 +54,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.SpotFitSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.TcPalmAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -500,8 +501,14 @@ public final class GuiProtosHelper {
     resultsImageSettings.setImageType(ResultsImageType.DRAW_LOCALISATIONS);
     resultsImageSettings.setLutName(LutColour.FIRE.getName());
     builder.setLoopSize(512);
-    ResultsImageSettings.Builder loopImageSettings = builder.getLoopImageSettingsBuilder();
-    loopImageSettings.setImageType(ResultsImageType.DRAW_LOCALISATIONS);
+    // @formatter:off
+    builder.getLoopImageSettingsBuilder()
+      .setImageType(ResultsImageType.DRAW_LOCALISATIONS)
+      .setImageSizeMode(ResultsImageSizeMode.IMAGE_SIZE)
+      .setScale(10)
+      .setImageSize(512)
+      .setPixelSize(5);
+    // @formatter:on
     // No LUT to use the grey default. This allows a colour overlay to be distinct.
     defaultTcPalmAnalysisSettings = builder.build();
   }

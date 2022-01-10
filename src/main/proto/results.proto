@@ -10,7 +10,7 @@ import "unit.proto";
 
 // The type of results image
 enum ResultsImageType {
-// No results image
+  // No results image
   DRAW_NONE = 0;
   // Draw each localisation using an intensity of 1
   DRAW_LOCALISATIONS = 1;
@@ -40,9 +40,9 @@ enum ResultsImageType {
   DRAW_ID = 11;
 }
 
-// The mode for the results image
+// The update mode for the results image
 enum ResultsImageMode {
-// Add the value to the image
+  // Add the value to the image
   IMAGE_ADD = 0;
   // Replace the current value
   IMAGE_REPLACE = 1;
@@ -50,9 +50,19 @@ enum ResultsImageMode {
   IMAGE_MAX = 2;
 }
 
+// The mode for the results image size
+enum ResultsImageSizeMode {
+  // Scale the source bounds
+  SCALED = 0;
+  // Use a fixed size image
+  IMAGE_SIZE = 1;
+  // Use a fixed size pixel
+  PIXEL_SIZE = 2;
+}
+
 // Define the results image settings
 message ResultsImageSettings {
-// Define the type of results image
+  // Define the type of results image
   ResultsImageType image_type = 1;
   // Set to true to weight the result over nearest-neighbour pixels
   bool weighted = 2;
@@ -60,17 +70,27 @@ message ResultsImageSettings {
   bool equalised = 3;
   // The average precision to use when drawing a Gaussian 2D PSF (in nm)
   double average_precision = 4;
-  // The scale of the results image
+  // The scale of the results image (when using a scaled image size mode)
   double scale = 5;
   // The rolling window size for the results image
   int32 rolling_window_size = 6;
   // The look-up table name
   string lut_name = 7;
+  // Define the mode to put results on to pixels
+  ResultsImageMode image_mode = 8;
+  // Define the method to compute the results image size
+  ResultsImageSizeMode image_size_mode = 9;
+  // The fixed size of the results image (when using a fixed image size mode).
+  // Assuming the results bounds are known: scale = image_size / max(width, height).
+  int32 image_size = 10;
+  // The fixed size of the pixels in the results image (when using a fixed pixel size mode).
+  // Assuming the units are in nm: scale = (nm/pixel results) / pixel_size.
+  double pixel_size = 11;
 }
 
 // The type of results file
 enum ResultsFileFormat {
-// None
+  // None
   FILE_NONE = 0;
   // Text
   TEXT = 1;
@@ -84,7 +104,7 @@ enum ResultsFileFormat {
 
 // The results file settings
 message ResultsFileSettings {
-// The results directory
+  // The results directory
   string results_directory = 1;
   // The results filename
   string results_filename = 2;
@@ -112,7 +132,7 @@ enum ResultsTableFormat {
 
 // Define the results table settings
 message ResultsTableSettings {
-// Set to true to show the results table
+  // Set to true to show the results table
   bool show_table = 1;
   // The distance unit
   DistanceUnit distance_unit = 2;
@@ -138,13 +158,13 @@ message ResultsTableSettings {
 
 // Define the in-memory results settings
 message ResultsInMemorySettings {
-// Set to true to save the results to memory
+  // Set to true to save the results to memory
   bool in_memory = 1;
 }
 
 // Define the results settings
 message ResultsSettings {
-// Set to true to log progress during fitting
+  // Set to true to log progress during fitting
   bool log_progress = 1;
   // Set to true to show the parameter deviations. This applies to table and file results output.
   bool show_deviations = 2;

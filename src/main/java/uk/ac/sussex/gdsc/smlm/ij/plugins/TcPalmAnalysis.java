@@ -111,7 +111,6 @@ import uk.ac.sussex.gdsc.core.math.hull.Hull2d;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalCollectors;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -131,6 +130,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.ij.gui.TableColumnAdjuster;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
+import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -1094,27 +1094,21 @@ public class TcPalmAnalysis implements PlugIn {
 
     private void drawImage(final ResultsImageSettings imageSettings) {
       final Rectangle bounds = results.getBounds(true);
-      final PeakResultsList resultsList = new PeakResultsList();
-      resultsList.copySettings(results);
       // In case the selection is empty
       bounds.width = Math.max(bounds.width, 1);
       bounds.height = Math.max(bounds.height, 1);
-      resultsList.setBounds(bounds);
-      resultsList.setName(TITLE + " Loop");
-      final ResultsImageSettings.Builder builder = imageSettings.toBuilder();
-      if (settings.getLoopScale() > 0) {
-        // Fixed scale loop image
-        builder.setScale(settings.getLoopScale());
-      } else {
-        // Compute the scale to generate a fixed size loop image
-        builder.setScale(settings.getLoopSize() / Math.max(bounds.width, bounds.height));
-      }
-      ResultsManager.addImageResults(resultsList, builder.build(), bounds, 0);
-      resultsList.begin();
-      resultsList.addAll(results.toArray());
-      resultsList.end();
-      image = (ImageJImagePeakResults) resultsList.getOutput(0);
+      // For fixed output pixel size mode
+      final double nmPerPixel = results.getNmPerPixel();
+      final ImageJImagePeakResults newImage = ImagePeakResultsFactory
+          .createPeakResultsImage(imageSettings, TITLE + " Loop", bounds, nmPerPixel);
+      newImage.setCalibration(results.getCalibration());
+      newImage.setLiveImage(false);
+      newImage.begin();
+      newImage.addAll(results.toArray());
+      newImage.end();
+      image = newImage;
       final ImagePlus imp = image.getImagePlus();
+      // Ensure LUT changes happen when the ImagePlus is reused
       if (TextUtils.isNotEmpty(image.getLutName())) {
         imp.setLut(LutHelper.createLut(LutColour.forName(image.getLutName()), true));
       }
@@ -1379,19 +1373,13 @@ public class TcPalmAnalysis implements PlugIn {
     final ResultsSettings.Builder tmp = ResultsSettings.newBuilder();
     tmp.setResultsImageSettings(settings.getLoopImageSettingsBuilder());
     final int flags = ResultsManager.FLAG_NO_SECTION_HEADER;
-    gd.addSlider("Loop_size", 128, 1024, settings.getLoopSize());
-    gd.addNumericField("Loop_scale", settings.getLoopScale(), 2);
     ResultsManager.addImageResultsOptions(gd, tmp, flags);
     gd.addHelp(HelpUrls.getUrl("tc-palm-analysis"));
     gd.showDialog();
     if (gd.wasCanceled()) {
       return;
     }
-    // Restrict to a sensible range
-    settings.setLoopSize(MathUtils.clip(32, 4096, (int) gd.getNextNumber()));
-    settings.setLoopScale(gd.getNextNumber());
     final ResultsImageSettings.Builder newImgSettings = tmp.getResultsImageSettingsBuilder();
-    // Note: The initial none option was removed
     newImgSettings.setImageTypeValue(gd.getNextChoiceIndex());
     settings.setLoopImageSettings(newImgSettings);
     SettingsManager.writeSettings(settings);

@@ -264,7 +264,7 @@ public class ResultsManager implements PlugIn {
       final Collection<MemoryPeakResults> allResults = MemoryPeakResults.getAllResults();
       for (final MemoryPeakResults results : allResults) {
         if (filter.test(results)) {
-          String name = results.getName();
+          final String name = results.getName();
           add(name);
           nameMap.put(name, ResultsManager.getName(results));
         }
@@ -626,6 +626,8 @@ public class ResultsManager implements PlugIn {
   /**
    * Adds the image results.
    *
+   * <p>Note: This always uses {@link ResultsImageMode#IMAGE_ADD}.
+   *
    * @param resultsList the results list
    * @param resultsSettings the results settings
    * @param bounds the bounds
@@ -634,16 +636,13 @@ public class ResultsManager implements PlugIn {
   public static void addImageResults(PeakResultsList resultsList,
       ResultsImageSettings resultsSettings, Rectangle bounds, int flags) {
     if (resultsSettings.getImageTypeValue() > 0) {
-      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          resultsSettings.getImageType(), resultsSettings.getWeighted(),
-          resultsSettings.getEqualised(), resultsList.getName(), bounds,
-          resultsList.getNmPerPixel(), resultsSettings.getScale(),
-          resultsSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
-      if (BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS)) {
-        image.setRollingWindowSize(resultsSettings.getRollingWindowSize());
-      }
-      if (TextUtils.isNotEmpty(resultsSettings.getLutName())) {
-        image.setLutName(resultsSettings.getLutName());
+      final ResultsImageSettings.Builder builder = resultsSettings.toBuilder();
+      builder.setImageMode(ResultsImageMode.IMAGE_ADD);
+      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(builder,
+          resultsList.getName(), bounds, resultsList.getNmPerPixel());
+      // Rolling window size is set by the factory method. Unset it if not using extra options.
+      if (!BitFlagUtils.anySet(flags, FLAG_EXTRA_OPTIONS)) {
+        image.setRollingWindowSize(0);
       }
       image.setRepaintDelay(2000);
       resultsList.addOutput(image);
@@ -830,6 +829,8 @@ public class ResultsManager implements PlugIn {
   public static final int FLAG_TABLE_FORMAT = 0x00000010;
   /** Use this to remove the None option from the results image options. */
   public static final int FLAG_IMAGE_REMOVE_NONE = 0x00000020;
+  /** Use this to avoid adding the LUT option to the results image options. */
+  public static final int FLAG_IMAGE_NO_LUT = 0x00000040;
 
   /**
    * Adds the table results options.
@@ -990,6 +991,7 @@ public class ResultsManager implements PlugIn {
     if (offset != 0) {
       names = Arrays.copyOfRange(names, 1, names.length);
     }
+
     gd.addChoice("Image", names, imageSettings.getImageTypeValue() - offset,
         new OptionListener<Integer>() {
           @Override
@@ -1017,11 +1019,53 @@ public class ResultsManager implements PlugIn {
             if (requirePrecision.contains(resultsImage)) {
               egd.addSlider("Image_Precision (nm)", 5, 30, imageSettings.getAveragePrecision());
             }
+            egd.addChoice("Image_Size_mode", SettingsManager.getResultsImageSizeModeNames(),
+                imageSettings.getImageSizeModeValue());
+            final Choice choice = egd.getLastChoice();
+
+            // Selectively show the fields based on the image size mode
+            final Label[] labels = new Label[3];
+            final Panel[] panels = new Panel[3];
+            // Adds a Label and Panel
             egd.addSlider("Image_Scale", 1, 15, imageSettings.getScale());
+            labels[0] = egd.getLabel();
+            panels[0] = egd.getLastPanel();
+            // Adds a Label and Panel (panel contains a label)
+            egd.addNumericField("Image_Size", imageSettings.getImageSize(), 0, 6, "px");
+            labels[1] = egd.getLabel();
+            panels[1] = egd.getLastPanel();
+            // Adds a Label and Panel
+            egd.addSlider("Image_Pixel_size (nm)", 5, 30, imageSettings.getPixelSize());
+            labels[2] = egd.getLabel();
+            panels[2] = egd.getLastPanel();
+
+            // Setting each to visible = false does not work without manually revalidating.
+            // The alternative is to remove the components and add back the one to draw.
+            // This requires storing the constraints of the component when first added
+            // to the grid layout or controlling a dedicated display panel.
+            // Here the first option is used to simplify supporting any underlying layout.
+            // It relies on the layout manager to process and ignore the invisible components.
+
+            final ItemListener l = e -> {
+              for (int i = 0; i < panels.length; i++) {
+                labels[i].setVisible(false);
+                panels[i].setVisible(false);
+              }
+              final int index = choice.getSelectedIndex();
+              labels[index].setVisible(true);
+              panels[index].setVisible(true);
+              labels[index].revalidate();
+              panels[index].revalidate();
+            };
+            l.itemStateChanged(null);
+            choice.addItemListener(l);
+
             if (isExtraOptions) {
               egd.addNumericField("Image_Window", imageSettings.getRollingWindowSize(), 0);
             }
-            egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());
+            if (BitFlagUtils.anyNotSet(flags, FLAG_IMAGE_NO_LUT)) {
+              egd.addChoice("LUT", LutHelper.getLutNames(), imageSettings.getLutName());
+            }
             egd.setSilent(silent);
             egd.showDialog(true, gd);
             if (egd.wasCanceled()) {
@@ -1034,11 +1078,16 @@ public class ResultsManager implements PlugIn {
             if (requirePrecision.contains(resultsImage)) {
               imageSettings.setAveragePrecision(egd.getNextNumber());
             }
+            imageSettings.setImageSizeModeValue(egd.getNextChoiceIndex());
             imageSettings.setScale(egd.getNextNumber());
+            imageSettings.setImageSize((int) egd.getNextNumber());
+            imageSettings.setPixelSize(egd.getNextNumber());
             if (isExtraOptions) {
               imageSettings.setRollingWindowSize((int) egd.getNextNumber());
             }
-            imageSettings.setLutName(egd.getNextChoice());
+            if (BitFlagUtils.anyNotSet(flags, FLAG_IMAGE_NO_LUT)) {
+              imageSettings.setLutName(egd.getNextChoice());
+            }
             return true;
           }
         });
@@ -1528,7 +1577,7 @@ public class ResultsManager implements PlugIn {
    * @return the filename (or empty)
    */
   private static String findFileName(LoadOption... extraOptions) {
-    for (LoadOption option : extraOptions) {
+    for (final LoadOption option : extraOptions) {
       if (option instanceof FilenameLoadOption) {
         return ((FilenameLoadOption) option).getFilename();
       }
@@ -1631,10 +1680,10 @@ public class ResultsManager implements PlugIn {
    */
   private static boolean checkCalibration(MemoryPeakResults results, PeakResultsReader reader) {
     // Check for Calibration
-    String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
+    final String msg = (results.hasCalibration()) ? "partially calibrated" : "uncalibrated";
     final CalibrationWriter calibration = results.getCalibrationWriterSafe();
 
-    Settings settings = Settings.load();
+    final Settings settings = Settings.load();
     boolean missing = isEssentialCalibrationMissing(calibration, settings);
 
     if (missing) {
@@ -1696,7 +1745,7 @@ public class ResultsManager implements PlugIn {
    */
   private static boolean isEssentialCalibrationMissing(final CalibrationWriter calibration,
       Settings settings) {
-    LocalList<String> missing = new LocalList<>();
+    final LocalList<String> missing = new LocalList<>();
     if (!calibration.hasNmPerPixel()) {
       missing.add("nm/pixel");
       calibration.setNmPerPixel(settings.inputNmPerPixel);

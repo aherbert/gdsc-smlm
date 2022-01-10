@@ -106,6 +106,8 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -212,9 +214,9 @@ public class Fire implements PlugIn {
       int size = 512; // Start at a reasonable size. Too small does not work.
       int count = 0;
       while (size <= 16384) {
-        // Image sizes are 1 smaller so that rounding error when scaling does not create an image
-        // too large for the power of 2
-        imageSizeValues[count] = size - 1;
+        // Assumes the scaling works correctly for exact power of 2
+        // (no rounding errors creating images 1 pixel too large)
+        imageSizeValues[count] = size;
         imageSizeItems[count] = Integer.toString(size);
         size *= 2;
         count++;
@@ -1074,32 +1076,19 @@ public class Fire implements PlugIn {
     final Rectangle bounds = new Rectangle((int) Math.ceil(dataBounds.getWidth()),
         (int) Math.ceil(dataBounds.getHeight()));
 
-    final boolean weighted = true;
-    final boolean equalised = false;
-    double imageScale;
-    if (fourierImageScale <= 0) {
-      double size = Math.max(bounds.width, bounds.height);
-      if (size <= 0) {
-        size = 1;
-      }
-      imageScale = imageSize / size;
+    final ResultsImageSettings.Builder builder =
+        ResultsImageSettings.newBuilder().setImageType(ResultsImageType.DRAW_NONE).setWeighted(true)
+            .setEqualised(false).setImageMode(ResultsImageMode.IMAGE_ADD);
+    if (fourierImageScale > 0) {
+      builder.setImageSizeMode(ResultsImageSizeMode.SCALED);
+      builder.setScale(fourierImageScale);
     } else {
-      imageScale = fourierImageScale;
+      builder.setImageSizeMode(ResultsImageSizeMode.IMAGE_SIZE);
+      builder.setImageSize(imageSize);
     }
 
-    ImageJImagePeakResults image1 =
-        ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
-            equalised, "IP1", bounds, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
-    image1.setDisplayImage(false);
-    image1.setUncalibrated(true);
-    image1.begin();
-
-    ImageJImagePeakResults image2 =
-        ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_NONE, weighted,
-            equalised, "IP2", bounds, 1, imageScale, 0, ResultsImageMode.IMAGE_ADD);
-    image2.setDisplayImage(false);
-    image2.setUncalibrated(true);
-    image2.begin();
+    ImageJImagePeakResults image1 = createPeakResultsImage(bounds, builder, "IP1");
+    ImageJImagePeakResults image2 = createPeakResultsImage(bounds, builder, "IP2");
 
     final float minx = (float) dataBounds.getX();
     final float miny = (float) dataBounds.getY();
@@ -1185,7 +1174,25 @@ public class Fire implements PlugIn {
       }
     }
 
-    return new FireImages(ip1, ip2, nmPerUnit / imageScale);
+    return new FireImages(ip1, ip2, nmPerUnit / image1.getScale());
+  }
+
+  /**
+   * Creates the peak results image.
+   *
+   * @param bounds the bounds
+   * @param builder the builder
+   * @param title the title
+   * @return the peak results image
+   */
+  private static ImageJImagePeakResults createPeakResultsImage(final Rectangle bounds,
+      final ResultsImageSettings.Builder builder, String title) {
+    final ImageJImagePeakResults image1 =
+        ImagePeakResultsFactory.createPeakResultsImage(builder, title, bounds, 1);
+    image1.setDisplayImage(false);
+    image1.setUncalibrated(true);
+    image1.begin();
+    return image1;
   }
 
   /**
@@ -2929,10 +2936,7 @@ public class Fire implements PlugIn {
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
       // Delay reading the dialog when in interactive mode. This is a workaround for a bug
       // where the dialog has not yet been drawn.
-      if (notActive && !isMacro && System.currentTimeMillis() < time) {
-        return true;
-      }
-      if (ignore-- > 0) {
+      if ((notActive && !isMacro && System.currentTimeMillis() < time) || (ignore-- > 0)) {
         return true;
       }
 
@@ -2975,10 +2979,7 @@ public class Fire implements PlugIn {
     @Override
     public void mouseClicked(MouseEvent event) {
       // Reset the slider on double-click
-      if (event.getClickCount() < 2) {
-        return;
-      }
-      if (!(event.getSource() instanceof Scrollbar)) {
+      if ((event.getClickCount() < 2) || !(event.getSource() instanceof Scrollbar)) {
         return;
       }
       final Scrollbar sl = (Scrollbar) event.getSource();

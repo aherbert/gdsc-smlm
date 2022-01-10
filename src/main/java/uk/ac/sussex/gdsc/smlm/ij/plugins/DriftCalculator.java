@@ -79,6 +79,8 @@ import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -1379,7 +1381,9 @@ public class DriftCalculator implements PlugIn {
 
     // Calculate a scale to use when constructing the images for alignment
     final Rectangle bounds = results.getBounds(true);
-    final float scale = (reconstructionSize - 1f) / Math.max(bounds.width, bounds.height);
+    final ResultsImageSettings.Builder builder = ResultsImageSettings.newBuilder()
+        .setImageSizeMode(ResultsImageSizeMode.IMAGE_SIZE).setImageSize(reconstructionSize);
+    final float scale = ImagePeakResultsFactory.getScale(builder, bounds, 1);
 
     executor = Executors.newFixedThreadPool(Prefs.getThreads());
 
@@ -1459,26 +1463,17 @@ public class DriftCalculator implements PlugIn {
     // Construct images using the current drift
     tracker.status("Constructing images");
 
-    // Built an image for each block of results.
+    // Build an image for each block of results.
     final ImageProcessor[] images = new ImageProcessor[blocks.size()];
 
     final List<Future<?>> futures = new LinkedList<>();
-    final Ticker ticker = Ticker.createStarted(tracker, images.length * 2L, true);
+    final Ticker ticker = Ticker.createStarted(tracker, images.length, true);
 
     for (int i = 0; i < images.length; i++) {
       futures.add(executor
           .submit(new ImageBuilder(blocks.get(i), images, i, bounds, scale, dx, dy, ticker)));
     }
     ConcurrencyUtils.waitForCompletionUnchecked(futures);
-
-    for (int i = 0; i < blocks.size(); i++) {
-      tracker.progress(i, blocks.size());
-      final ImageJImagePeakResults blockImage = newImage(bounds, scale);
-      for (final Localisation r : blocks.get(i)) {
-        blockImage.add(r.time, (float) (r.x + dx[r.time]), (float) (r.y + dy[r.time]), r.signal);
-      }
-      images[i] = getImage(blockImage);
-    }
 
     // Build an image with all results.
     final FloatProcessor allIp = new FloatProcessor(images[0].getWidth(), images[0].getHeight());
@@ -1609,10 +1604,13 @@ public class DriftCalculator implements PlugIn {
   }
 
   private static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
+    final ResultsImageSettings.Builder builder = ResultsImageSettings.newBuilder()
+        .setImageType(ResultsImageType.DRAW_INTENSITY).setImageMode(ResultsImageMode.IMAGE_ADD)
+        .setWeighted(true).setImageSizeMode(ResultsImageSizeMode.SCALED).setScale(imageScale);
     final ImageJImagePeakResults image =
-        ImagePeakResultsFactory.createPeakResultsImage(ResultsImageType.DRAW_INTENSITY, true, false,
-            "", bounds, 100, imageScale, 0, ResultsImageMode.IMAGE_ADD);
+        ImagePeakResultsFactory.createPeakResultsImage(builder, "", bounds, 1);
     image.setDisplayImage(false);
+    image.setUncalibrated(true);
     image.begin();
     return image;
   }

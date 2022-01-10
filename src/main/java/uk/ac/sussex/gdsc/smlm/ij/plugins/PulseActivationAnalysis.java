@@ -85,6 +85,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSettings;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -1133,7 +1134,8 @@ public class PulseActivationAnalysis implements PlugIn {
     }
 
     resultsSettingsBuilder = SettingsManager.readResultsSettings(0).toBuilder();
-    ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder, 0);
+    ResultsManager.addImageResultsOptions(gd, resultsSettingsBuilder,
+        ResultsManager.FLAG_IMAGE_NO_LUT);
 
     final Checkbox previewCheckBox = gd.addAndGetCheckbox("Preview", false);
 
@@ -1202,7 +1204,11 @@ public class PulseActivationAnalysis implements PlugIn {
         Recorder.recordOption("Equalised");
       }
       Recorder.recordOption("Image_Precision", Double.toString(s.getAveragePrecision()));
+      Recorder.recordOption("Image_Size_mode",
+          SettingsManager.getResultsImageSizeModeNames()[s.getImageSizeModeValue()]);
       Recorder.recordOption("Image_Scale", Double.toString(s.getScale()));
+      Recorder.recordOption("Image_Size", Integer.toString(s.getImageSize()));
+      Recorder.recordOption("Image_Pixel_size", Double.toString(s.getPixelSize()));
     }
 
     SettingsManager.writeSettings(resultsSettingsBuilder);
@@ -1815,11 +1821,11 @@ public class PulseActivationAnalysis implements PlugIn {
 
   private void addImageResults(PeakResultsList resultsList, String title, Rectangle bounds,
       double nmPerPixel, ResultsImageSettings imageSettings) {
-    if (imageSettings.getImageType() != ResultsImageType.DRAW_NONE) {
-      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          imageSettings.getImageType(), imageSettings.getWeighted(), imageSettings.getEqualised(),
-          title, bounds, nmPerPixel, imageSettings.getScale(),
-          imageSettings.getAveragePrecision(), ResultsImageMode.IMAGE_ADD);
+    if (imageSettings.getImageTypeValue() > 0) {
+      final ResultsImageSettings.Builder builder = imageSettings.toBuilder();
+      builder.setImageMode(ResultsImageMode.IMAGE_ADD);
+      final ImageJImagePeakResults image =
+          ImagePeakResultsFactory.createPeakResultsImage(builder, title, bounds, nmPerPixel);
       image.setLiveImage(false);
       image.setDisplayImage(settings.channels == 1);
       resultsList.addOutput(image);
@@ -1875,7 +1881,7 @@ public class PulseActivationAnalysis implements PlugIn {
     final float[][][] molecules = new float[3][][];
     final MemoryPeakResults[] channelResults = new MemoryPeakResults[3];
     final Calibration calibration = CalibrationHelper.create(settings.nmPerPixel, 1, 100);
-    final Rectangle bounds = new Rectangle(0, 0, settings.size, settings.size);
+    final Rectangle bounds = new Rectangle(settings.size, settings.size);
     for (int c = 0; c < 3; c++) {
       molecules[c] = simulateMolecules(rng, c);
 
@@ -1906,9 +1912,12 @@ public class PulseActivationAnalysis implements PlugIn {
       r.addAll(list);
 
       // Draw the unmixed activations
-      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(
-          ResultsImageType.DRAW_LOCALISATIONS, true, true, title, bounds, settings.nmPerPixel,
-          1024.0 / settings.size, 0, ResultsImageMode.IMAGE_ADD);
+      final ResultsImageSettings.Builder builder =
+          ResultsImageSettings.newBuilder().setImageType(ResultsImageType.DRAW_LOCALISATIONS)
+              .setImageMode(ResultsImageMode.IMAGE_ADD).setWeighted(true).setEqualised(true)
+              .setImageSizeMode(ResultsImageSizeMode.IMAGE_SIZE).setImageSize(1024);
+      final ImageJImagePeakResults image = ImagePeakResultsFactory.createPeakResultsImage(builder,
+          title, bounds, settings.nmPerPixel);
       image.setCalibration(calibration);
       image.setLiveImage(false);
       image.setDisplayImage(false);

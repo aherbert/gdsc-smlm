@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.data.config;
 
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
@@ -39,11 +40,17 @@ public final class ResultsProtosHelper {
 
   static {
     final ResultsSettings.Builder builder = ResultsSettings.newBuilder();
-    builder.getResultsImageSettingsBuilder().setWeighted(true);
-    builder.getResultsImageSettingsBuilder().setEqualised(true);
-    builder.getResultsImageSettingsBuilder().setAveragePrecision(30);
-    builder.getResultsImageSettingsBuilder().setScale(1);
-    builder.getResultsImageSettingsBuilder().setLutName(LutColour.FIRE.getName());
+    // @formatter:off
+    builder.getResultsImageSettingsBuilder()
+      .setWeighted(true)
+      .setEqualised(true)
+      .setAveragePrecision(30)
+      .setImageSizeMode(ResultsImageSizeMode.SCALED)
+      .setScale(1)
+      .setImageSize(2048)
+      .setPixelSize(10)
+      .setLutName(LutColour.FIRE.getName());
+    // @formatter:on
     builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
     builder.getResultsInMemorySettingsBuilder().setInMemory(true);
     defaultResultsSettings = builder.build();
@@ -109,6 +116,27 @@ public final class ResultsProtosHelper {
         return "Z position";
       case DRAW_ID:
         return "ID";
+      case UNRECOGNIZED:
+        return ProtosHelperUtils.UNKNOWN;
+      default:
+        throw new IllegalArgumentException(ProtosHelperUtils.unknownNameMessage(value));
+    }
+  }
+
+  /**
+   * Gets the name.
+   *
+   * @param value the results image
+   * @return the name
+   */
+  public static String getName(ResultsImageSizeMode value) {
+    switch (value) {
+      case SCALED:
+        return "Scaled";
+      case IMAGE_SIZE:
+        return "Image size";
+      case PIXEL_SIZE:
+        return "Pixel size";
       case UNRECOGNIZED:
         return ProtosHelperUtils.UNKNOWN;
       default:

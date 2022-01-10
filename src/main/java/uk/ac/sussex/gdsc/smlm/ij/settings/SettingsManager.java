@@ -89,6 +89,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.CubicSplineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsFileFormat;
+import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageSizeMode;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsImageType;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
@@ -347,6 +348,44 @@ public final class SettingsManager {
    */
   public static String[] getResultsImageTypeNames() {
     return ResultsImageTypeLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link ResultsImageSizeMode} enum.
+   */
+  private static class ResultsImageSizeModeLoader {
+    /** The enum values. */
+    static final ResultsImageSizeMode[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<ResultsImageSizeMode> d = EnumSet.allOf(ResultsImageSizeMode.class);
+      d.remove(ResultsImageSizeMode.UNRECOGNIZED);
+      values = d.toArray(new ResultsImageSizeMode[0]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = ResultsProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the results image type values.
+   *
+   * @return the results image type values
+   */
+  public static ResultsImageSizeMode[] getResultsImageSizeModeValues() {
+    return ResultsImageSizeModeLoader.values.clone();
+  }
+
+  /**
+   * Gets the results image type names.
+   *
+   * @return the results image type names
+   */
+  public static String[] getResultsImageSizeModeNames() {
+    return ResultsImageSizeModeLoader.names.clone();
   }
 
   /**

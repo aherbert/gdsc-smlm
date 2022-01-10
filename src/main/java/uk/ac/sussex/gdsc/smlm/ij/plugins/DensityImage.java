@@ -591,6 +591,7 @@ public class DensityImage implements PlugIn {
         (settings.cumulativeImage) ? ResultsImageMode.IMAGE_ADD : ResultsImageMode.IMAGE_MAX);
     image.setDisplayFlags(image.getDisplayFlags() | ImageJImagePeakResults.DISPLAY_NEGATIVES);
     image.setLutName("grays");
+    image.setLiveImage(false);
     image.begin();
     final StandardResultProcedure sp = new StandardResultProcedure(newResults, DistanceUnit.PIXEL);
     sp.getXyr();

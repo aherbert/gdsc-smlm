@@ -1454,10 +1454,27 @@ The results parameters control where the list of localisations will be recorded.
    * - Image Precision
      - The Gaussian standard deviation to use for the average precision plotting options (in pixels).
 
+   * - Image Size mode
+     - The mode used to create the output image size.
+
+       * ``Scaled``: Scale the results using a scaling factor.
+       * ``Image size``: Create a fixed output image size (in pixels).
+       * ``Pixel size``: Create a fixed output pixel size (in nm).
+
    * - Image Scale
-     - The factor used to enlarge the image.
+     - The factor used to enlarge the image for ``Scaled`` mode.
 
        The image will be rendered using the original fit bounds multiplied by the scale, e.g. a 64x64 image with a scale of 8 will draw a 512x512 super resolution image.
+
+   * - Image Size
+     - The size of the image for ``Image size`` mode (in pixels).
+
+       The size refers to the maximum of the width or height required to display the results given the known bounds, e.g. a 64x100 image with an image size of 300 will draw a 192x300 super resolution image (with an effective scale of 3).
+
+   * - Pixel Size
+     - The size of the pixels for ``Pixel size`` mode (in nm).
+
+       Creates a scale using the results pixel size divided by the output pixel size, e.g. a 64x100 image with a calibration of 100nm/pixel and an output pixel size of 10nm will draw a 640x1000 super resolution image (with an effective scale of 10).
 
    * - LUT
      - Specify the look-up table used colour the image.
