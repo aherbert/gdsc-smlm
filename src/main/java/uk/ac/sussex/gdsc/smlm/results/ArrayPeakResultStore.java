@@ -331,7 +331,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
    *
    * <pre>
    * int newSize = 0;
-   * for (int i = 0; i < size; i++) {
+   * for (int i = 0; i &lt; size; i++) {
    *   if (filter.test(data[i])) {
    *     // remove
    *     continue;

@@ -41,14 +41,14 @@ public final class JsonUtils {
    * <p>If the input is null then an empty string will be returned.
    *
    * <pre>
-   * null                   -> ""
-   * ""                     -> ""
-   * "hello"                -> "hello"
-   * "\"hello\""            -> "hello"
-   * "\"hello world\""      -> "\"hello world\""
-   * "\"hello_world\""      -> "hello_world"
-   * "\"hello.world\""      -> "\"hello.world\""
-   * "\"Say \\\"hello\\\"." -> "\"Say \\\"hello\\\"."
+   * null                   -&lt; ""
+   * ""                     -&lt; ""
+   * "hello"                -&lt; "hello"
+   * "\"hello\""            -&lt; "hello"
+   * "\"hello world\""      -&lt; "\"hello world\""
+   * "\"hello_world\""      -&lt; "hello_world"
+   * "\"hello.world\""      -&lt; "\"hello.world\""
+   * "\"Say \\\"hello\\\"." -&lt; "\"Say \\\"hello\\\"."
    * </pre>
    *
    * @param json the JSON

@@ -27,10 +27,9 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
  * Implementation of the Poisson distribution for computation of the probability mass function.
  *
  * <p>This implementation is an adaption of the Apache Commons Math 3 class
- * {@link org.apache.commons.math3.distribution.PoissonDistribution}. The code has been
- * updated to: remove the sampling functionality and requirement for the random generator; allow the
- * mean to be altered using properties; use {@link java.lang.Math} and remove the {@code FastMath}
- * dependency.
+ * {@link org.apache.commons.math3.distribution.PoissonDistribution}. The code has been updated to:
+ * remove the sampling functionality and requirement for the random generator; allow the mean to be
+ * altered using properties; use {@link java.lang.Math} and remove the {@code FastMath} dependency.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution
  *      (Wikipedia)</a>
@@ -140,8 +139,13 @@ public final class PoissonDistribution {
    * Computes the quantile function of this distribution. For a random variable {@code X}
    * distributed according to this distribution, the returned value is:
    *
-   * <ul> <li><code>inf{x in Z | P(X<=x) >= p}</code> for {@code 0 < p <= 1},</li> <li><code>inf{x
-   * in Z | P(X<=x) > 0}</code> for {@code p = 0}.</li> </ul>
+   * <ul>
+   *
+   * <li>{@code inf[x in Z | P(X<=x) >= p]} for {@code 0 < p <= 1},</li>
+   *
+   * <li>{@code inf[x in Z | P(X<=x) > 0]}</code> for {@code p = 0}.</li>
+   *
+   * </ul>
    *
    * <p>If the result exceeds the range of the data type {@code int}, then {@code 0} or
    * {@code Integer.MAX_VALUE} is returned.
