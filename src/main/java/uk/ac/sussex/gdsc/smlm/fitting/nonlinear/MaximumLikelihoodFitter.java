@@ -330,10 +330,9 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
           || searchMethod == SearchMethod.POWELL_ADAPTER) {
         // Non-differentiable version using Powell Optimiser
 
-        // This is as per the method in Numerical Recipes 10.5 (Direction Set (Powell's) method)
-        // I could extend the optimiser and implement bounds on the directions moved. However the
-        // mapping
-        // adapter seems to work OK.
+        // Background: see Numerical Recipes 10.5 (Direction Set (Powell's) method).
+        // The optimiser could be extended to implement bounds on the directions moved.
+        // However the mapping adapter seems to work OK.
 
         final boolean basisConvergence = false;
 
@@ -413,7 +412,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
         // TODO - Understand why the CMAES optimiser does not fit very well on test data. It appears
         // to converge too early and the likelihood scores are not as low as the other optimisers.
 
-        // CMAESOptimiser based on Matlab code:
+        // The CMAESOptimiser is based on Matlab code:
         // https://www.lri.fr/~hansen/cmaes.m
         // Take the defaults from the Matlab documentation
         final double stopFitness = 0;
