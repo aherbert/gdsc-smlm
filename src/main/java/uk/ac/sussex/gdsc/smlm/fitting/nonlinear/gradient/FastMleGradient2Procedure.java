@@ -259,10 +259,12 @@ public class FastMleGradient2Procedure
    * @return the poisson calculator
    */
   private PoissonCalculator getPoissonCalculator() {
-    if (poissonCalculator == null) {
-      poissonCalculator = new PoissonCalculator(x);
+    PoissonCalculator c = poissonCalculator;
+    if (c == null) {
+      c = new PoissonCalculator(x);
+      poissonCalculator = c;
     }
-    return poissonCalculator;
+    return c;
   }
 
   /**
