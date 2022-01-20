@@ -412,7 +412,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
 
   /**
    * Initialise and run the procedure using the fitted parameters. Provided to allow the
-   * backtracking sub-class to initialise the function for gradients.
+   * a sub-class to initialise the function for gradients.
    *
    * @param procedure the procedure
    */

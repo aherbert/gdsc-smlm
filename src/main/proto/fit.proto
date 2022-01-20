@@ -27,7 +27,7 @@ enum FitSolver {
   FAST_MLE = 4;
   // Maximum Likelihood Estimator for Poisson data using the method of Smith et al, (2010) Nature Methods 7, 373-375.
   // Uses a Newton-Raphson (NR) update step for fast convergence close to the optimum. The algorithm uses a backtracking algorithm to choose an appropriate step in the search direction when the NR step results in a worse estimation.
-  BACKTRACKING_FAST_MLE = 5;
+  BACKTRACKING_FAST_MLE = 5 [deprecated = true];
 }
 
 // Define the search method for the configurable maximum likelihood estimator.

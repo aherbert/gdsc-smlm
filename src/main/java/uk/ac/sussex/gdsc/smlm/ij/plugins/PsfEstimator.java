@@ -49,6 +49,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -263,7 +264,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     gd.addMessage("--- Gaussian fitting ---");
 
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
 
     // Parameters specific to each Fit solver are collected in a second dialog
 
@@ -319,7 +320,8 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
       integrateFrames = pluginSettings.integrateFrames = (int) gd.getNextNumber();
     }
 
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
     config.setFailuresLimit((int) gd.getNextNumber());
     config.setPassRate(gd.getNextNumber());
     config.setIncludeNeighbours(gd.getNextBoolean());

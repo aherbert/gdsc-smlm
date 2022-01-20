@@ -52,7 +52,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
 
   enum SteppingFunctionSolverType {
     // Enum names should all be uppercase but this is just for a test so ignore that convention
-    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE, BtFastMLE
+    MLELVM, FastLogMLELVM, LSELVM, WLSELVM, FastMLE
   }
 
   // For convenience declare variables of the enum type
@@ -65,7 +65,6 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
   static final SteppingFunctionSolverType LSELVM = SteppingFunctionSolverType.LSELVM;
   static final SteppingFunctionSolverType WLSELVM = SteppingFunctionSolverType.WLSELVM;
   static final SteppingFunctionSolverType FastMLE = SteppingFunctionSolverType.FastMLE;
-  static final SteppingFunctionSolverType BtFastMLE = SteppingFunctionSolverType.BtFastMLE;
   static final boolean BOUNDED = true;
   static final boolean NO_BOUND = false;
 
@@ -127,11 +126,6 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
         break;
       case FastMLE:
         solver = new FastMleSteppingFunctionSolver(f, tc, bounds);
-        // MLE requires a positive function value so use a lower bound
-        solver.setBounds(getLb(), null);
-        break;
-      case BtFastMLE:
-        solver = new BacktrackingFastMleSteppingFunctionSolver(f, tc, bounds);
         // MLE requires a positive function value so use a lower bound
         solver.setBounds(getLb(), null);
         break;

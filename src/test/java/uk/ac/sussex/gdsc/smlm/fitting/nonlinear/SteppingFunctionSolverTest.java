@@ -188,38 +188,8 @@ class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
   }
 
   @SeededTest
-  void canFitSingleGaussianEmCcd_B_DC_FastMle(RandomSeed seed) {
+  void canFitSingleGaussianEmCcd_B_DC_FastMle(RandomSeed seed) { 
     fitSingleGaussian(seed, BOUNDED, DYNAMIC_CLAMP, FastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_x_x__BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, BtFastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_x_C__BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, NO_BOUND, CLAMP, BtFastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_x_DC_BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, NO_BOUND, DYNAMIC_CLAMP, BtFastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_B_x__BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, BOUNDED, NO_CLAMP, BtFastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_B_C__BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, BOUNDED, CLAMP, BtFastMLE, NoiseModel.EMCCD);
-  }
-
-  @SeededTest
-  void canFitSingleGaussianEmCcd_B_DC_BtFastMle(RandomSeed seed) {
-    fitSingleGaussian(seed, BOUNDED, DYNAMIC_CLAMP, BtFastMLE, NoiseModel.EMCCD);
   }
 
   // Weighted solvers for sCMOS
@@ -547,21 +517,6 @@ class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
     canFitAndComputeDeviations(seed, SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
   }
 
-  @SeededTest
-  void canFitAndComputeDeviationsEmCcd_BtFastMle(RandomSeed seed) {
-    canFitAndComputeDeviations(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.EMCCD, false);
-  }
-
-  @SeededTest
-  void canFitAndComputeDeviationsScmos_BtFastMle(RandomSeed seed) {
-    canFitAndComputeDeviations(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.SCMOS, false);
-  }
-
-  @SeededTest
-  void canFitAndComputeDeviationsScmos_BtFastMle_Weighted(RandomSeed seed) {
-    canFitAndComputeDeviations(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.SCMOS, true);
-  }
-
   private void canFitAndComputeDeviations(RandomSeed seed, SteppingFunctionSolverType type,
       NoiseModel noiseModel, boolean useWeights) {
     final SteppingFunctionSolver solver1 =
@@ -624,21 +579,6 @@ class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
   @SeededTest
   void canFitAndComputeValueScmos_FastMle_Weighted(RandomSeed seed) {
     canFitAndComputeValue(seed, SteppingFunctionSolverType.FastMLE, NoiseModel.SCMOS, true);
-  }
-
-  @SeededTest
-  void canFitAndComputeValueEmCcd_BtFastMle(RandomSeed seed) {
-    canFitAndComputeValue(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.EMCCD, false);
-  }
-
-  @SeededTest
-  void canFitAndComputeValueScmos_BtFastMle(RandomSeed seed) {
-    canFitAndComputeValue(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.SCMOS, false);
-  }
-
-  @SeededTest
-  void canFitAndComputeValueScmos_BtFastMle_Weighted(RandomSeed seed) {
-    canFitAndComputeValue(seed, SteppingFunctionSolverType.BtFastMLE, NoiseModel.SCMOS, true);
   }
 
   private void canFitAndComputeValue(RandomSeed seed, SteppingFunctionSolverType type,

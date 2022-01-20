@@ -569,8 +569,7 @@ public class PeakFit implements PlugInFilter {
       textBorder.setText("" + config.getBorder());
       textFitting.setText("" + config.getFitting());
       if (!maximaIdentification) {
-        textFitSolver
-            .select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+        textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
         if (extraOptions) {
           textFitBackground.setState(fitConfig.isBackgroundFitting());
         }
@@ -1221,7 +1220,7 @@ public class PeakFit implements PlugInFilter {
     if (!maximaIdentification) {
       gd.addMessage("--- Gaussian fitting ---");
       gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-          fitConfig.getFitSolver().ordinal());
+          FitProtosHelper.getName(fitConfig.getFitSolver()));
       if (extraOptions) {
         gd.addCheckbox("Fit_background", fitConfig.isBackgroundFitting());
       }
@@ -2418,7 +2417,8 @@ public class PeakFit implements PlugInFilter {
     }
 
     if (!maximaIdentification) {
-      fitConfig.setFitSolver(gd.getNextChoiceIndex());
+      // Some enum values are not supported
+      fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
       if (extraOptions) {
         fitConfig.setBackgroundFitting(gd.getNextBoolean());
       }

@@ -59,7 +59,6 @@ import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
 import uk.ac.sussex.gdsc.smlm.fitting.FunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitConfiguration;
 import uk.ac.sussex.gdsc.smlm.fitting.MleScaledFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BacktrackingFastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.BaseFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.LseLvmSteppingFunctionSolver;
@@ -3164,12 +3163,6 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
         // the Gradient2Function interface
         solver =
             new FastMleSteppingFunctionSolver((Gradient2Function) gaussianFunction, tc, bounds);
-        break;
-
-      case FitSolver.BACKTRACKING_FAST_MLE_VALUE:
-        checkCameraCalibration();
-        solver = new BacktrackingFastMleSteppingFunctionSolver((Gradient2Function) gaussianFunction,
-            tc, bounds);
         break;
 
       default:

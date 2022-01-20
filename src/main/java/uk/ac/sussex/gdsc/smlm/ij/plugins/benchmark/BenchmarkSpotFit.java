@@ -87,6 +87,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
@@ -1244,7 +1245,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     PeakFit.addPsfOptions(gd, fitConfig);
     PeakFit.addFittingOptions(gd, fitEngineConfigurationProvider);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
 
     gd.addMessage("Multi-path filter (used to pick optimum results during fitting)");
 
@@ -1298,7 +1299,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
 
     boolean myUseBenchmarkSettings = false;
     if (benchmarkSettingsCheckbox) {

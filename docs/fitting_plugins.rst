@@ -573,8 +573,6 @@ The fitting parameters control the fitting algorithm. Fitting is performed on ea
 
        *   ``Fast MLE``: Use a fast Newton-Raphson gradient based maximum likelihood estimation (MLE). The probability model uses Poisson shot noise and Gaussian read noise.
 
-       *   ``Backtracking Fast MLE``: Use a modified ``Fast MLE`` algorithm. This allows backtracking along the search direction when the initial update step did not improve the fit.
-
        Each ``Fit Solver`` requires further parameters that are collected in a separate dialog.
 
    * - Fail Limit
@@ -1160,24 +1158,6 @@ The solver dialog will ask for the same parameters as the ``LVM LSE`` solver but
        * ``Partial ignore``: Progressively ignore any search direction that is in the opposite direction to the first derivative gradient. Do this in order of the magnitude of the error until the combined slope direction is correct.
 
        Note: If all updates are ignored then there is no step and the iteration stops. This may be undesirable.
-
-
-.. index:: Backtracking Fast Maximum Likelihood Estimation
-
-Backtracking Fast Maximum Likelihood Estimation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This is an extension to the ``Fast MLE`` method suggested by Numerical Recipes, pp 338 [Press *et al*, 2002]. The algorithm is modified as follows:
-
-#. Compute the full Newton-Raphson update step.
-
-#. Compute the log-likelihood function value before and after the full Newton-Raphson update has been applied to the parameters.
-
-#. If the function value is improved then the step is accepted.
-
-#. If not then it is assumed the direction is correct but the step may be too large. A backtracking algorithm is used to reduced the size of the step along the step direction until the log-likelihood value is improved.
-
-Note that if the backtracking fails then the iteration stops as the algorithm has no known step to improve the fit.
 
 
 .. index:: Which Fit Solver to Choose

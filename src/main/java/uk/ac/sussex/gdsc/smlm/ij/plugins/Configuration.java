@@ -43,6 +43,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
@@ -192,7 +193,7 @@ public class Configuration implements PlugIn {
     gd.addMessage("--- Gaussian fitting ---");
 
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
 
     // Parameters specific to each Fit solver are collected in a second dialog
 
@@ -287,7 +288,8 @@ public class Configuration implements PlugIn {
     config.setBorder(gd.getNextNumber());
     config.setFitting(gd.getNextNumber());
 
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
 
     config.setFailuresLimit((int) gd.getNextNumber());
     config.setPassRate(gd.getNextNumber());
@@ -526,7 +528,7 @@ public class Configuration implements PlugIn {
     textSearch.setText("" + config.getSearch());
     textBorder.setText("" + config.getBorder());
     textFitting.setText("" + config.getFitting());
-    textFitSolver.select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+    textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
     textFailuresLimit.setText("" + config.getFailuresLimit());
     textPassRate.setText("" + config.getPassRate());
     textIncludeNeighbours.setState(config.isIncludeNeighbours());

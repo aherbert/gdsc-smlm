@@ -552,6 +552,7 @@ public final class SettingsManager {
     static {
       final EnumSet<FitSolver> d = EnumSet.allOf(FitSolver.class);
       d.remove(FitSolver.UNRECOGNIZED);
+      d.remove(FitSolver.BACKTRACKING_FAST_MLE);
       values = d.toArray(new FitSolver[0]);
       names = new String[values.length];
       for (int i = 0; i < values.length; i++) {

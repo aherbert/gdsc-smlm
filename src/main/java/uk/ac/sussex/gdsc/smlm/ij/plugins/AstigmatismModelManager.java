@@ -74,6 +74,7 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.DataFilterType;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
@@ -565,7 +566,7 @@ public class AstigmatismModelManager implements PlugIn {
         new PeakFit.SimpleFitEngineConfigurationProvider(config);
     PeakFit.addFittingOptions(gd, provider);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
     gd.addCheckbox("Log_fit_progress", pluginSettings.getLogFitProgress());
 
     gd.addMessage(
@@ -597,7 +598,8 @@ public class AstigmatismModelManager implements PlugIn {
     fitConfig.setCalibration(calibration.getCalibration());
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setFitting(gd.getNextNumber());
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
     pluginSettings.setLogFitProgress(gd.getNextBoolean());
     fitConfig.setSmartFilter(gd.getNextBoolean());
     fitConfig.setDisableSimpleFilter(gd.getNextBoolean());

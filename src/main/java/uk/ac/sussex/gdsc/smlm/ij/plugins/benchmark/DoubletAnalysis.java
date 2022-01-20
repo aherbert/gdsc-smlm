@@ -80,6 +80,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
@@ -1782,7 +1783,8 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     config.setSearch(gd.getNextNumber());
     config.setBorder(gd.getNextNumber());
     config.setFitting(gd.getNextNumber());
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
 
     // Avoid stupidness. Note: We are mostly ignoring the validation result and
     // checking the results for the doublets manually.
@@ -3240,8 +3242,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
           textSearch.setText("" + config2.getSearch());
           textBorder.setText("" + config2.getBorder());
           textFitting.setText("" + config2.getFitting());
-          textFitSolver
-              .select(SettingsManager.getFitSolverNames()[fitConfig2.getFitSolver().ordinal()]);
+          textFitSolver.select(FitProtosHelper.getName(fitConfig2.getFitSolver()));
 
           // Copy settings not in the dialog for the fit solver
           final FitConfiguration fitConfig = config.getFitConfiguration();
@@ -3285,8 +3286,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         textSearch.setText("" + config.getSearch());
         textBorder.setText("" + config.getBorder());
         textFitting.setText("" + config.getFitting());
-        textFitSolver
-            .select(SettingsManager.getFitSolverNames()[fitConfig.getFitSolver().ordinal()]);
+        textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
         textMatchDistance.setText("" + settings.matchDistance);
         textLowerDistance.setText("" + settings.lowerDistance);
         textSignalFactor.setText("" + settings.signalFactor);

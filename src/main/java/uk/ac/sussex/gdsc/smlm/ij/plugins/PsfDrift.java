@@ -466,7 +466,7 @@ public class PsfDrift implements PlugIn {
     gd.addCheckbox("Background_fitting", settings.backgroundFitting);
     PeakFit.addPsfOptions(gd, fitConfig);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
     // We need these to set bounds for any bounded fitters
     gd.addSlider("Min_width_factor", 0, 0.99, fitConfig.getMinWidthFactor());
     gd.addSlider("Width_factor", 1, 4.5, fitConfig.getMaxWidthFactor());
@@ -493,7 +493,8 @@ public class PsfDrift implements PlugIn {
     settings.regionSize = (int) Math.abs(gd.getNextNumber());
     settings.backgroundFitting = gd.getNextBoolean();
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
     fitConfig.setMinWidthFactor(gd.getNextNumber());
     fitConfig.setMaxWidthFactor(gd.getNextNumber());
     settings.offsetFitting = gd.getNextBoolean();

@@ -60,6 +60,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
@@ -617,7 +618,7 @@ public class BenchmarkFit implements PlugIn {
     gd.addSlider("Region_size", 2, 20, regionSize);
     PeakFit.addPsfOptions(gd, fitConfig);
     gd.addChoice("Fit_solver", SettingsManager.getFitSolverNames(),
-        fitConfig.getFitSolver().ordinal());
+        FitProtosHelper.getName(fitConfig.getFitSolver()));
     gd.addChoice("Origin_XY", ORIGIN_XY, originXY, new OptionListener<Integer>() {
       @Override
       public boolean collectOptions(Integer value) {
@@ -775,7 +776,8 @@ public class BenchmarkFit implements PlugIn {
 
     regionSize = (int) Math.abs(gd.getNextNumber());
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
-    fitConfig.setFitSolver(gd.getNextChoiceIndex());
+    // Some enum values are not supported
+    fitConfig.setFitSolver(SettingsManager.getFitSolverValues()[gd.getNextChoiceIndex()]);
     originXY = gd.getNextChoiceIndex();
     originZ = gd.getNextChoiceIndex();
     zeroOffset = gd.getNextBoolean();
