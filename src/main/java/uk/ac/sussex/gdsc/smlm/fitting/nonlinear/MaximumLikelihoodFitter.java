@@ -56,7 +56,6 @@ import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianLikelihoodWrapper;
 import uk.ac.sussex.gdsc.smlm.function.PoissonLikelihoodWrapper;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer.Formula;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
@@ -229,11 +228,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
      * <p>This is a bounded search using simple truncation of coordinates at the bounds of the
      * search space.
      */
-    CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière", true),
-    /**
-     * Search using a Broyden-Fletcher-Goldfarb-Shanno (BFGS) gradient optimiser.
-     */
-    BFGS("BFGS", true);
+    CONJUGATE_GRADIENT_PR("Conjugate Gradient Polak-Ribière", true);
 
     private final String name;
     private final boolean usesGradient;
@@ -465,35 +460,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
         }
         // Prevent incrementing the iterations again
         baseOptimiser = null;
-      } else if (searchMethod == SearchMethod.BFGS) {
-        // BFGS can use an approximate line search minimisation where as Powell and conjugate
-        // gradient methods require a more accurate line minimisation. The BFGS search does not do a
-        // full minimisation but takes appropriate steps in the direction of the current gradient.
-
-        // Do not use the convergence checker on the value of the function. Use the convergence on
-        // the point coordinate and gradient.
-        // BFGSOptimizer o = new BFGSOptimizer(new SimpleValueChecker(rel, abs))
-        final BfgsOptimizer o = new BfgsOptimizer();
-        baseOptimiser = o;
-
-        // Configure maximum step length for each dimension using the bounds
-        final double[] stepLength = new double[lower.length];
-        for (int i = 0; i < stepLength.length; i++) {
-          stepLength[i] = (upper[i] - lower[i]) * 0.3333333;
-          if (stepLength[i] <= 0) {
-            stepLength[i] = Double.POSITIVE_INFINITY;
-          }
-        }
-
-        // The GoalType is always minimise so no need to pass this in
-        final OptimizationData positionChecker = null;
-        optimum = o.optimize(new MaxEval(getMaxEvaluations()),
-            new ObjectiveFunctionGradient(
-                new MultivariateVectorLikelihood(maximumLikelihoodFunction)),
-            new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),
-            new InitialGuess(startPoint), new SimpleBounds(lowerConstraint, upperConstraint),
-            new BfgsOptimizer.GradientTolerance(relativeThreshold), positionChecker,
-            new BfgsOptimizer.StepLength(stepLength));
       } else {
         // The line search algorithm often fails. This is due to searching into a region where the
         // function evaluates to a negative so has been clipped. This means the upper bound of the
@@ -614,8 +580,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
     } catch (final ConvergenceException ex) {
       // Occurs when QR decomposition fails - mark as a singular non-linear model (no solution)
       return FitStatus.SINGULAR_NON_LINEAR_MODEL;
-    } catch (final BfgsOptimizer.LineSearchRoundoffException ex) {
-      return FitStatus.FAILED_TO_CONVERGE;
     } catch (final Exception ex) {
       Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Failed to fit", ex);
       return FitStatus.UNKNOWN;
@@ -850,7 +814,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
       case POWELL_BOUNDED:
       case BOBYQA:
       case CMAES:
-      case BFGS:
         return true;
       default:
         return false;
@@ -868,7 +831,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
     switch (searchMethod) {
       case CONJUGATE_GRADIENT_FR:
       case CONJUGATE_GRADIENT_PR:
-      case BFGS:
         return true;
       default:
         return false;

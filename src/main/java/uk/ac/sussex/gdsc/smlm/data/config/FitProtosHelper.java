@@ -382,8 +382,6 @@ public final class FitProtosHelper {
   public static MaximumLikelihoodFitter.SearchMethod
       convertSearchMethod(SearchMethod searchMethod) {
     switch (searchMethod) {
-      case BFGS:
-        return MaximumLikelihoodFitter.SearchMethod.BFGS;
       case BOBYQA:
         return MaximumLikelihoodFitter.SearchMethod.BOBYQA;
       case CMAES:
@@ -398,6 +396,8 @@ public final class FitProtosHelper {
         return MaximumLikelihoodFitter.SearchMethod.POWELL_ADAPTER;
       case POWELL_BOUNDED:
         return MaximumLikelihoodFitter.SearchMethod.POWELL_BOUNDED;
+      // BFGS is unsupported
+      case BFGS:
       case UNRECOGNIZED:
       default:
         throw new IllegalArgumentException(ProtosHelperUtils.unknownMethodMessage(searchMethod));

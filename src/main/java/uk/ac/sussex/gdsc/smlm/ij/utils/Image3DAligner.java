@@ -33,6 +33,7 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import uk.ac.sussex.gdsc.core.math.interpolation.CubicSplinePosition;
@@ -44,7 +45,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.cspline.CubicSplineCalculator;
 import uk.ac.sussex.gdsc.smlm.math3.optim.PositionChecker;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
 
 /**
  * Perform 3D image alignment using normalised cross-correlation.
@@ -91,16 +92,6 @@ public class Image3DAligner {
   /** The bounds of the spline are always 0-1. */
   private static final SimpleBounds bounds =
       new SimpleBounds(new double[3], SimpleArrayUtils.newDoubleArray(3, 1));
-
-  /** Set a maximum step length at 1 pixel scaled to the spline dimensions. */
-  private static final BfgsOptimizer.StepLength stepLength =
-      new BfgsOptimizer.StepLength(SimpleArrayUtils.newDoubleArray(3, 1.0 / 3));
-  /**
-   * This is the cut-off for the maximum gradient relative to the function value. When gradients are
-   * too small then the optimisation will end.
-   */
-  private static final BfgsOptimizer.GradientTolerance gradientTolerance =
-      new BfgsOptimizer.GradientTolerance(1e-6);
 
   /**
    * The search mode for sub-pixel refinement.
@@ -1084,13 +1075,15 @@ public class Image3DAligner {
         try {
           final SplineFunction sf = new SplineFunction(f, origin);
 
-          final BfgsOptimizer optimiser = new BfgsOptimizer(
-              // Use a simple check on the relative value change and
-              // set the number of refinements
-              new SimpleValueChecker(relativeThreshold, -1, refinements));
+          final BoundedNonLinearConjugateGradientOptimizer optimiser =
+              new BoundedNonLinearConjugateGradientOptimizer(
+                  BoundedNonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
+                  // Use a simple check on the relative value change and
+                  // set the number of refinements
+                  new SimpleValueChecker(relativeThreshold, -1, refinements));
 
-          final PointValuePair opt = optimiser.optimize(maxEvaluations, bounds, gradientTolerance,
-              stepLength, new InitialGuess(origin),
+          final PointValuePair opt = optimiser.optimize(maxEvaluations, bounds, GoalType.MINIMIZE,
+              new InitialGuess(origin),
               // Scale the error for the position check
               new PositionChecker(-1, error / 3.0), new ObjectiveFunction(sf::value),
               new ObjectiveFunctionGradient(point -> {

@@ -80,7 +80,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ParameterUtils;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
-import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BfgsOptimizer;
+import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
@@ -100,7 +100,7 @@ public class PcPalmFitting implements PlugIn {
 
   private RandomModelFunction randomModel;
   private ClusteredModelFunctionGradient clusteredModel;
-  private EmulsionModelFunctionGradient emulsionModel;
+  private EmulsionModelFunctionGradient emulsionModel; 
 
   private int boundedEvaluations;
 
@@ -1210,30 +1210,24 @@ public class PcPalmFitting implements PlugIn {
 
     final boolean debug = false;
 
-    // Try a BFGS optimiser since this will produce a deterministic solution and can respect bounds.
+    // Try a gradient optimiser since this will produce a deterministic solution
     PointValuePair optimum = null;
     boundedEvaluations = 0;
     final MaxEval maxEvaluations = new MaxEval(2000);
     MultivariateOptimizer opt = null;
     for (int iteration = 0; iteration <= settings.fitRestarts; iteration++) {
       try {
-        opt = new BfgsOptimizer();
         final double relativeThreshold = 1e-6;
+        opt = new BoundedNonLinearConjugateGradientOptimizer(
+            BoundedNonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
+            new SimpleValueChecker(relativeThreshold, -1));
 
-        // Configure maximum step length for each dimension using the bounds
-        final double[] stepLength = new double[lowerB.length];
-        for (int i = 0; i < stepLength.length; i++) {
-          stepLength[i] = (upperB[i] - lowerB[i]) * 0.3333333;
-        }
-
-        // The GoalType is always minimise so no need to pass this in
         optimum = opt.optimize(maxEvaluations, gradient, objective,
+            GoalType.MINIMIZE,
             new InitialGuess((optimum == null) ? initialSolution : optimum.getPointRef()),
-            new SimpleBounds(lowerB, upperB),
-            new BfgsOptimizer.GradientTolerance(relativeThreshold),
-            new BfgsOptimizer.StepLength(stepLength));
+            new SimpleBounds(lowerB, upperB));
         if (debug) {
-          System.out.printf("BFGS Iter %d = %g (%d)\n", iteration, optimum.getValue(),
+          System.out.printf("Bounded Iter %d = %g (%d)\n", iteration, optimum.getValue(),
               opt.getEvaluations());
         }
       } catch (final RuntimeException ex) {

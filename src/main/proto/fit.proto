@@ -56,7 +56,7 @@ enum SearchMethod
   // This is a bounded search using simple truncation of coordinates at the bounds of the search space.
   CONJUGATE_GRADIENT_PR = 6;
   // Search using a Broyden-Fletcher-Goldfarb-Shanno (BFGS) gradient optimiser.
-  BFGS = 7;
+  BFGS = 7 [deprecated = true];
 }
 
 // Define the method to use when the Fast MLE line search direction is not in the same direction as

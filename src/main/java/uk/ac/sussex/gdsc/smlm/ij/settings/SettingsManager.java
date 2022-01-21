@@ -59,6 +59,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitSolver;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.NoiseEstimatorMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
+import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.SearchMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.AstigmatismModelManagerSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.CameraModelAnalysisSettings;
@@ -577,6 +578,45 @@ public final class SettingsManager {
    */
   public static String[] getFitSolverNames() {
     return FitSolverLoader.names.clone();
+  }
+
+  /**
+   * Lazy loader for the {@link SearchMethod} enum.
+   */
+  private static class SearchMethodLoader {
+    /** The enum values. */
+    static final SearchMethod[] values;
+    /** The enum names. */
+    static final String[] names;
+
+    static {
+      final EnumSet<SearchMethod> d = EnumSet.allOf(SearchMethod.class);
+      d.remove(SearchMethod.UNRECOGNIZED);
+      d.remove(SearchMethod.BFGS);
+      values = d.toArray(new SearchMethod[0]);
+      names = new String[values.length];
+      for (int i = 0; i < values.length; i++) {
+        names[i] = FitProtosHelper.getName(values[i]);
+      }
+    }
+  }
+
+  /**
+   * Gets the fit solver values.
+   *
+   * @return the fit solver values
+   */
+  public static SearchMethod[] getSearchMethodValues() {
+    return SearchMethodLoader.values.clone();
+  }
+
+  /**
+   * Gets the fit solver names.
+   *
+   * @return the fit solver names
+   */
+  public static String[] getSearchMethodNames() {
+    return SearchMethodLoader.names.clone();
   }
 
   /**

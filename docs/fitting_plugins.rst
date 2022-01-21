@@ -1016,7 +1016,7 @@ The Maximum Likelihood Estimator requires the following additional parameters:
      - Select this if using an EM-CCD camera. The Poisson-Gamma-Gaussian function will be used to model camera noise. The alternative is the Poisson-Gaussian function. Only applicable if using ``Model Camera Noise``.
 
    * - Search method
-     - The search method to use. It is recommended to use the Powell algorithm for any model. The BFGS algorithm is a good alternative for the Poisson noise model.
+     - The search method to use. It is recommended to use the Powell algorithm for any model.
 
        The methods are detailed in section :numref:`{number}: {name} <fitting_plugins:Search Methods>`.
 
@@ -1031,7 +1031,7 @@ The Maximum Likelihood Estimator requires the following additional parameters:
 Search Methods
 ^^^^^^^^^^^^^^
 
-Brief notes on the different algorithms and where to find more information are shown below for completeness. It is recommended to use the ``Powell`` or ``BFGS`` methods.
+Brief notes on the different algorithms and where to find more information are shown below for completeness. It is recommended to use the ``Powell`` method.
 
 Note that some algorithms support a bounded search. This is a way to constrain the values for the parameters to a range, for example keep the XY coordinates of the localisation within the pixel region used for fitting. When using a bounded search the bounds are set at the following limits:
 
@@ -1099,16 +1099,6 @@ Search using a `non-linear conjugate gradient optimiser <https://en.wikipedia.or
 This is a bounded search using simple truncation of coordinates at the bounds of the search space. Note that this method has poor robustness (fails to converge) on test data and is not recommended.
 
 This method requires derivatives.
-
-
-.. index:: BFGS
-
-BFGS
-""""
-
-Search using a Broyden-Fletcher-Goldfarb-Shanno (`BFGS <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`_) gradient optimiser.
-
-This method requires derivatives. This is a good alternative to the Powell method for the Poisson noise model.
 
 
 .. index:: Fast Maximum Likelihood Estimation
@@ -1193,7 +1183,7 @@ The most general fit solver is the least-squares estimator (``LVM LSE``). It doe
 
 Maximum likelihood estimation (MLE) should return a solution that is more precise than least-squares estimation, i.e. has less variation between the fitted result and the actual answer. MLE should be operating at the theoretical limit for fitting given how much information is actually present in the pixels. This limit is the Cramér-Roa lower bound which expresses a lower bound on the variance of estimators of a deterministic parameter. MLE has also been proven to be robust to the position of the localisation within the pixel whereas least-squares estimation is less precise the further the localisation is from the pixel centre [Abraham *et al*, 2009]. Therefore MLE should be used if you would like the best possible fitting. However it requires camera calibration parameters which if configured incorrectly will lead to fitting results that are not as precise as the least-squares estimator.
 
-If you are fitting localisations with a high signal-to-noise ratio (SNR) then the Poisson model will work. At low SNR levels other sources of noise beyond shot noise become more significant and the fitting will produce better results if they are included in the model. The Poisson-Gaussian model will include the read noise in the likelihood function. For CCD-type cameras the Poisson-Gaussian model is enabled if the read noise is non-zero. For sCMOS cameras the Poisson-Gaussian model is always enabled. For either the Poisson model or Poisson-Gaussian model the recommended fitter is ``LVM MLE`` but other gradient-based methods are also available (``LVM WLSE``, ``Fast MLE``, ``MLE + BFGS``).
+If you are fitting localisations with a high signal-to-noise ratio (SNR) then the Poisson model will work. At low SNR levels other sources of noise beyond shot noise become more significant and the fitting will produce better results if they are included in the model. The Poisson-Gaussian model will include the read noise in the likelihood function. For CCD-type cameras the Poisson-Gaussian model is enabled if the read noise is non-zero. For sCMOS cameras the Poisson-Gaussian model is always enabled. For either the Poisson model or Poisson-Gaussian model the recommended fitter is ``LVM MLE`` but other gradient-based methods are also available (``LVM WLSE``, ``Fast MLE``).
 
 For explicit modelling of the EM-gain of a EM-CCD camera the Poisson-Gamma-Gaussian model must be used with the ``MLE`` fit solver. This is slow as it is not a gradient based solver. This is recommended for very low SNR localisations. If the signal is moderate then similar results will be obtained using the much faster Poisson-Gaussian model which assumes the EM-gain does not significantly alter the shape of the Poisson distributed photon signal.
 

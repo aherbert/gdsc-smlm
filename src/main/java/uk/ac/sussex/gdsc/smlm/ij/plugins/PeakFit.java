@@ -121,7 +121,6 @@ import uk.ac.sussex.gdsc.smlm.engine.FitWorker;
 import uk.ac.sussex.gdsc.smlm.engine.ParameterisedFitJob;
 import uk.ac.sussex.gdsc.smlm.filters.SpotFilter;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.FastMleSteppingFunctionSolver;
-import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -2951,10 +2950,10 @@ public class PeakFit implements PlugInFilter {
    *
    * <p>The bounds are used to validate the camera model. The camera model must be large enough to
    * cover the source bounds. If larger then it will be cropped. Optionally an internal region of
-   * the input image can be specifed. This is relative to the width and height of the input image.
+   * the input image can be specified. This is relative to the width and height of the input image.
    * If no camera model is present then the bounds can be null.
    *
-   * @param config the config
+   * @param config the configuration
    * @param sourceBounds the source image bounds (used to validate the camera model dimensions)
    * @param bounds the crop bounds (relative to the input image, used to validate the camera model
    *        dimensions)
@@ -2974,6 +2973,7 @@ public class PeakFit implements PlugInFilter {
 
     final boolean isLvm = fitSolver == FitSolver.LVM_LSE || fitSolver == FitSolver.LVM_WLSE
         || fitSolver == FitSolver.LVM_MLE;
+    // Support the deprecated backtracking FastMLE solver as a plain FastMLE solver
     final boolean isFastMml =
         fitSolver == FitSolver.FAST_MLE || fitSolver == FitSolver.BACKTRACKING_FAST_MLE;
     final boolean isSteppingFunctionSolver = isLvm || isFastMml;
@@ -2991,11 +2991,9 @@ public class PeakFit implements PlugInFilter {
       } else {
         gd.addMessage("Maximum Likelihood Estimation requires additional parameters");
       }
-      // This works because the proto configuration enum matches the named enum
-      final String[] searchNames =
-          SettingsManager.getNames((Object[]) MaximumLikelihoodFitter.SearchMethod.values());
+      final String[] searchNames = SettingsManager.getSearchMethodNames();
       gd.addChoice("Search_method", searchNames,
-          searchNames[fitConfig.getSearchMethod().getNumber()]);
+          FitProtosHelper.getName(fitConfig.getSearchMethod()));
       gd.addStringField("Relative_threshold", MathUtils.rounded(fitConfig.getRelativeThreshold()));
       gd.addStringField("Absolute_threshold", MathUtils.rounded(fitConfig.getAbsoluteThreshold()));
       gd.addNumericField("Max_iterations", fitConfig.getMaxIterations(), 0);
@@ -3015,7 +3013,7 @@ public class PeakFit implements PlugInFilter {
         calibration.setCameraType((gd.getNextBoolean()) ? CameraType.EMCCD : CameraType.CCD);
         fitConfig.setCalibration(calibration.getCalibration());
       }
-      fitConfig.setSearchMethod(gd.getNextChoiceIndex());
+      fitConfig.setSearchMethod(SettingsManager.getSearchMethodValues()[gd.getNextChoiceIndex()]);
       fitConfig.setRelativeThreshold(getThresholdNumber(gd));
       fitConfig.setAbsoluteThreshold(getThresholdNumber(gd));
       fitConfig.setMaxIterations((int) gd.getNextNumber());
