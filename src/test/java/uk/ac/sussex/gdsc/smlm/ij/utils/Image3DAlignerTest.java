@@ -99,7 +99,7 @@ class Image3DAlignerTest {
   }
 
   private void canCorrelate(int maxx, int maxy, int maxz, boolean ijMode) {
-    // Not as much information in the z dimension due to axila imaging.
+    // Not as much information in the z dimension due to axial imaging.
     // Q. How to address in real PSF alignment? Perhaps the z-dimension should be
     // sampled N-times more than the XY dimension.
 
