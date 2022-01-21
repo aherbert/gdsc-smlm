@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.FitEngineSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
@@ -314,7 +315,7 @@ public class FitEngine {
 
   private void report(String name, int count, int total) {
     LoggerUtils.log(logger, Level.INFO, "%s %d / %d = %.2f", name, count, total,
-        (100.00 * count) / total);
+        MathUtils.div0(100.00 * count, total));
   }
 
   /**
