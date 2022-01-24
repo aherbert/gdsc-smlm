@@ -18,10 +18,6 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.distribution;
 
-import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathUtils;
-
 /**
  * Utility class used by various distributions to accurately compute their
  * respective probability mass functions. The implementation for this class is
@@ -44,47 +40,46 @@ import org.apache.commons.math3.util.MathUtils;
  *
  * <p>
  * <strong>Note:</strong> This class has been copied from
- * {@code org.apache.commons.math3.distribution} for use in the {@link PoissonDistribution}.
+ * {@code org.apache.commons.statistics.distribution} for use in the {@link PoissonDistribution}.
  * A copy is required since the original version is package private.
  * </p>
  */
 final class SaddlePointExpansionCopy {
-
-    /** 1./2 * log(2 &#960;). */
-    private static final double HALF_LOG_2_PI = 0.5 * FastMath.log(MathUtils.TWO_PI);
+    /** 2 &pi;. */
+    private static final double TWO_PI = 2 * Math.PI;
 
     /** exact Stirling expansion error for certain values. */
     private static final double[] EXACT_STIRLING_ERRORS = { 0.0, /* 0.0 */
-    0.1534264097200273452913848, /* 0.5 */
-    0.0810614667953272582196702, /* 1.0 */
-    0.0548141210519176538961390, /* 1.5 */
-    0.0413406959554092940938221, /* 2.0 */
-    0.03316287351993628748511048, /* 2.5 */
-    0.02767792568499833914878929, /* 3.0 */
-    0.02374616365629749597132920, /* 3.5 */
-    0.02079067210376509311152277, /* 4.0 */
-    0.01848845053267318523077934, /* 4.5 */
-    0.01664469118982119216319487, /* 5.0 */
-    0.01513497322191737887351255, /* 5.5 */
-    0.01387612882307074799874573, /* 6.0 */
-    0.01281046524292022692424986, /* 6.5 */
-    0.01189670994589177009505572, /* 7.0 */
-    0.01110455975820691732662991, /* 7.5 */
-    0.010411265261972096497478567, /* 8.0 */
-    0.009799416126158803298389475, /* 8.5 */
-    0.009255462182712732917728637, /* 9.0 */
-    0.008768700134139385462952823, /* 9.5 */
-    0.008330563433362871256469318, /* 10.0 */
-    0.007934114564314020547248100, /* 10.5 */
-    0.007573675487951840794972024, /* 11.0 */
-    0.007244554301320383179543912, /* 11.5 */
-    0.006942840107209529865664152, /* 12.0 */
-    0.006665247032707682442354394, /* 12.5 */
-    0.006408994188004207068439631, /* 13.0 */
-    0.006171712263039457647532867, /* 13.5 */
-    0.005951370112758847735624416, /* 14.0 */
-    0.005746216513010115682023589, /* 14.5 */
-    0.005554733551962801371038690 /* 15.0 */
+        0.1534264097200273452913848, /* 0.5 */
+        0.0810614667953272582196702, /* 1.0 */
+        0.0548141210519176538961390, /* 1.5 */
+        0.0413406959554092940938221, /* 2.0 */
+        0.03316287351993628748511048, /* 2.5 */
+        0.02767792568499833914878929, /* 3.0 */
+        0.02374616365629749597132920, /* 3.5 */
+        0.02079067210376509311152277, /* 4.0 */
+        0.01848845053267318523077934, /* 4.5 */
+        0.01664469118982119216319487, /* 5.0 */
+        0.01513497322191737887351255, /* 5.5 */
+        0.01387612882307074799874573, /* 6.0 */
+        0.01281046524292022692424986, /* 6.5 */
+        0.01189670994589177009505572, /* 7.0 */
+        0.01110455975820691732662991, /* 7.5 */
+        0.010411265261972096497478567, /* 8.0 */
+        0.009799416126158803298389475, /* 8.5 */
+        0.009255462182712732917728637, /* 9.0 */
+        0.008768700134139385462952823, /* 9.5 */
+        0.008330563433362871256469318, /* 10.0 */
+        0.007934114564314020547248100, /* 10.5 */
+        0.007573675487951840794972024, /* 11.0 */
+        0.007244554301320383179543912, /* 11.5 */
+        0.006942840107209529865664152, /* 12.0 */
+        0.006665247032707682442354394, /* 12.5 */
+        0.006408994188004207068439631, /* 13.0 */
+        0.006171712263039457647532867, /* 13.5 */
+        0.005951370112758847735624416, /* 14.0 */
+        0.005746216513010115682023589, /* 14.5 */
+        0.005554733551962801371038690 /* 15.0 */
     };
 
     /**
@@ -107,29 +102,22 @@ final class SaddlePointExpansionCopy {
      * </ol>
      * </p>
      *
+     * <p>Note: This function has been modified for integer {@code z}.</p>
+     *
      * @param z the value.
      * @return the Stirling's series error.
      */
-    static double getStirlingError(double z) {
-        double ret;
-        if (z < 15.0) {
-            final double z2 = 2.0 * z;
-            if (Math.floor(z2) == z2) {
-                ret = EXACT_STIRLING_ERRORS[(int) z2];
-            } else {
-                ret = Gamma.logGamma(z + 1.0) - (z + 0.5) * FastMath.log(z) +
-                      z - HALF_LOG_2_PI;
-            }
-        } else {
-            final double z2 = z * z;
-            ret = (0.083333333333333333333 -
-                    (0.00277777777777777777778 -
-                            (0.00079365079365079365079365 -
-                                    (0.000595238095238095238095238 -
-                                            0.0008417508417508417508417508 /
-                                            z2) / z2) / z2) / z2) / z;
+    static double getStirlingError(int z) {
+        if (z <= 15) {
+            return EXACT_STIRLING_ERRORS[2 * z];
         }
-        return ret;
+        final double z2 = (double) z * z;
+        return (0.083333333333333333333 -
+                       (0.00277777777777777777778 -
+                               (0.00079365079365079365079365 -
+                                       (0.000595238095238095238095238 -
+                                               0.0008417508417508417508417508 /
+                                               z2) / z2) / z2) / z2) / z;
     }
 
     /**
@@ -145,12 +133,13 @@ final class SaddlePointExpansionCopy {
      * </ol>
      * </p>
      *
+     * <p>Note: This function has been modified for integer {@code x}.</p>
+     *
      * @param x the x value.
      * @param mu the average.
      * @return a part of the deviance.
      */
-    static double getDeviancePart(double x, double mu) {
-        double ret;
+    static double getDeviancePart(int x, double mu) {
         if (Math.abs(x - mu) < 0.1 * (x + mu)) {
             final double d = x - mu;
             double v = d / (x + mu);
@@ -165,11 +154,11 @@ final class SaddlePointExpansionCopy {
                 s1 = s + ej / ((j * 2) + 1);
                 ++j;
             }
-            ret = s1;
-        } else {
-            ret = x * FastMath.log(x / mu) + mu - x;
+            return s1;
+        } else if (x == 0) {
+            return mu;
         }
-        return ret;
+        return x * Math.log(x / mu) + mu - x;
     }
 
     /**
@@ -183,26 +172,23 @@ final class SaddlePointExpansionCopy {
      * @return log(p(x)).
      */
     static double logBinomialProbability(int x, int n, double p, double q) {
-        double ret;
         if (x == 0) {
             if (p < 0.1) {
-                ret = -getDeviancePart(n, n * q) - n * p;
-            } else {
-                ret = n * FastMath.log(q);
+                return -getDeviancePart(n, n * q) - n * p;
+            } else if (n == 0) {
+                return 0;
             }
+            return n * Math.log(q);
         } else if (x == n) {
             if (q < 0.1) {
-                ret = -getDeviancePart(n, n * p) - n * q;
-            } else {
-                ret = n * FastMath.log(p);
+                return -getDeviancePart(n, n * p) - n * q;
             }
-        } else {
-            ret = getStirlingError(n) - getStirlingError(x) -
-                  getStirlingError(n - x) - getDeviancePart(x, n * p) -
-                  getDeviancePart(n - x, n * q);
-            final double f = (MathUtils.TWO_PI * x * (n - x)) / n;
-            ret = -0.5 * FastMath.log(f) + ret;
+            return n * Math.log(p);
         }
-        return ret;
+        final double ret = getStirlingError(n) - getStirlingError(x) -
+                           getStirlingError(n - x) - getDeviancePart(x, n * p) -
+                           getDeviancePart(n - x, n * q);
+        final double f = (TWO_PI * x * (n - x)) / n;
+        return -0.5 * Math.log(f) + ret;
     }
 }
