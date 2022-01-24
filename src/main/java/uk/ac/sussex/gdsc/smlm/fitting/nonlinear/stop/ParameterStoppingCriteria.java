@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
@@ -154,7 +153,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
   public void setSignificantDigits(int significantDigits) {
     this.significantDigits = significantDigits;
     eq.setMaxRelativeError(DoubleEquality.getRelativeErrorTerm(significantDigits));
-    angleLimit = 1.0 / FastMath.pow(10, significantDigits - 1);
+    angleLimit = 1.0 / Math.pow(10, significantDigits - 1);
   }
 
   /**

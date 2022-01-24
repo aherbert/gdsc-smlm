@@ -80,7 +80,6 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.CombinatoricsUtils;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
@@ -6701,7 +6700,7 @@ public class BenchmarkFilterAnalysis
    * @return the combinations
    */
   private static long countComponentCombinations(int n) {
-    return (long) FastMath.pow(2, n) - 1;
+    return (long) Math.pow(2, n) - 1;
 
     // This returns the same as (2^n)-1:
     // long total = 0

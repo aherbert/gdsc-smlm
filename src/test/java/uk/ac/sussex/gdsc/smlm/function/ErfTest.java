@@ -418,7 +418,7 @@ class ErfTest {
     // Numeric integration
     final double twos2 = 2 * s * s;
     final double norm = 1 / (Math.PI * twos2);
-    for (int i = 0, steps = 1; i < 4; i++, steps = (int) FastMath.pow(10, i)) {
+    for (int i = 0, steps = 1; i < 4; i++, steps = (int) Math.pow(10, i)) {
       // Gaussian is: FastMath.exp(-(x * x + y * y) / twos2) over all x and y
       // But we can do this by separating x and y:
       // FastMath.exp(-(x * x) / twos2) * FastMath.exp(-(y * y) / twos2)

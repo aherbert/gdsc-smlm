@@ -51,7 +51,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.CombinatoricsUtils;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
@@ -597,18 +596,16 @@ public class BinomialFitter {
       // Compute the gradient using analytical differentiation
       final int n = trials;
 
-      // Note FastMath has specific case for integer power argument which is faster.
-
       if (startIndex == 0) {
         for (int k = 0; k <= n; ++k) {
           // jacobian[k][0] = nC[k] * k * Math.pow(p, k - 1) * Math.pow(1 - p, n - k) +
           // nC[k] * Math.pow(p, k) * (n - k) * Math.pow(1 - p, n - k - 1) * -1
 
           // Optimise
-          final double pk_1 = FastMath.pow(p, k - 1);
+          final double pk_1 = Math.pow(p, k - 1);
           final double pk = p * pk_1;
           final double q = 1 - p;
-          final double q_n_k_1 = FastMath.pow(q, n - k - 1);
+          final double q_n_k_1 = Math.pow(q, n - k - 1);
           final double q_n_k = q * q_n_k_1;
           jacobian[k][0] = nchoose[k] * (k * pk_1 * q_n_k - pk * (n - k) * q_n_k_1);
         }
@@ -626,14 +623,14 @@ public class BinomialFitter {
 
         // double pi = dist.probability(0)
         final double q = 1 - p;
-        final double p_n = FastMath.pow(1 - p, n);
+        final double p_n = Math.pow(1 - p, n);
         final double f = 1.0 / (1.0 - nchoose[0] * p_n);
-        final double ff = -1 / FastMath.pow(1.0 - nchoose[0] * p_n, 2) + n * FastMath.pow(q, n - 1);
+        final double ff = -1 / Math.pow(1.0 - nchoose[0] * p_n, 2) + n * Math.pow(q, n - 1);
 
         for (int k = 1; k <= n; ++k) {
-          final double pk_1 = FastMath.pow(p, k - 1);
+          final double pk_1 = Math.pow(p, k - 1);
           final double pk = p * pk_1;
-          final double q_n_k_1 = FastMath.pow(q, n - k - 1);
+          final double q_n_k_1 = Math.pow(q, n - k - 1);
           final double q_n_k = q * q_n_k_1;
 
           final double g = nchoose[k] * pk * q_n_k;
