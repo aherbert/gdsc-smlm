@@ -49,6 +49,8 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
+// TODO: Update this using the new Erf implementation in Commons Numbers 1.1
+
 @SuppressWarnings({"javadoc"})
 class ErfTest {
   private static Logger logger;
