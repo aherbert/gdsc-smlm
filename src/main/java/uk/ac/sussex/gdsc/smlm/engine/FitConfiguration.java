@@ -2203,8 +2203,7 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
 
     // Check if outside the fit window.
     // TODO - Make this configurable per peak. At the moment we only use this in BenchmarkSpotFit
-    // where
-    // additional peaks will be neighbours. In the future we may want to control this better.
+    // where additional peaks will be neighbours. In the future we may want to control this better.
     if (isRegionValidation()) {
       final int offset = n * Gaussian2DFunction.PARAMETERS_PER_PEAK;
       final double x = params[Gaussian2DFunction.X_POSITION + offset] + coordinateOffset;
