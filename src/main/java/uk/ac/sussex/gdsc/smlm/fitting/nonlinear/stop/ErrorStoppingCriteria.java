@@ -32,14 +32,14 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 
 /**
  * Defines the stopping criteria for the
- * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit} class.
  *
  * <p>Stop when N successive iterations reduce error by a negligible amount.
  */
 public class ErrorStoppingCriteria extends StoppingCriteria {
   private int iterationCount;
   private int iterationLimit = 1;
-  private int significantDigits;
+  private int significantBits;
   private double maxRelativeError;
   private boolean avoidPlateau;
 
@@ -52,16 +52,16 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
    * Instantiates a new error stopping criteria.
    */
   public ErrorStoppingCriteria() {
-    this(5);
+    this(17);
   }
 
   /**
    * Instantiates a new error stopping criteria.
    *
-   * @param significantDigits the significant digits for a negligible change in error
+   * @param significantBits the significant bits for a negligible change in error
    */
-  public ErrorStoppingCriteria(int significantDigits) {
-    setSignificantDigits(significantDigits);
+  public ErrorStoppingCriteria(int significantBits) {
+    setSignificantBits(significantBits);
   }
 
   @Override
@@ -205,22 +205,23 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
-   * Sets the significant digits for a negligible change in error.
+   * Sets the significant bits for a negligible change in error. Specified using the number of
+   * binary significant digits (range [1, 52]).
    *
-   * @param significantDigits the significant digits for a negligible change in error
+   * @param significantBits the significant bits for a negligible change in error
    */
-  public void setSignificantDigits(int significantDigits) {
-    this.significantDigits = significantDigits;
-    maxRelativeError = DoubleEquality.getRelativeErrorTerm(significantDigits);
+  public void setSignificantBits(int significantBits) {
+    this.significantBits = significantBits;
+    maxRelativeError = DoubleEquality.getRelativeEpsilon(significantBits);
   }
 
   /**
-   * Gets the significant digits for a negligible change in error.
+   * Gets the significant bits for a negligible change in error.
    *
-   * @return the significantDigits.
+   * @return the significant bits.
    */
-  public int getSignificantDigits() {
-    return significantDigits;
+  public int getSignificantBits() {
+    return significantBits;
   }
 
   /**

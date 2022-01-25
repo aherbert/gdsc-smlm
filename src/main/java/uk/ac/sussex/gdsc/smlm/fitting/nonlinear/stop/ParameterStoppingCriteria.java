@@ -29,17 +29,16 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Defines the stopping criteria for the
- * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit} class.
  *
  * <p>Stop when successive iterations with a reduced error move the fitted coordinates by less than
  * a specified distance.
- *
  *
  * <p>The criteria also ensure that signal, coordinates and peak-widths are held positive, otherwise
  * fitting is stopped.
  */
 public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
-  private int significantDigits = 3;
+  private int significantBits = 10;
   private double angleLimit = 1e-3f;
 
   private final DoubleEquality eq;
@@ -51,7 +50,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
    */
   public ParameterStoppingCriteria(Gaussian2DFunction func) {
     super(func);
-    eq = new DoubleEquality(DoubleEquality.getRelativeErrorTerm(significantDigits), 1e-16);
+    eq = new DoubleEquality(DoubleEquality.getRelativeEpsilon(significantBits), 1e-16);
   }
 
   @Override
@@ -147,21 +146,22 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
 
   /**
    * Set the change in parameters that defines a negligible amount.
+   * Specified using the number of binary significant digits (range [1, 52]).
    *
-   * @param significantDigits the significantDigits to set
+   * @param significantBits the significant bits to set
    */
-  public void setSignificantDigits(int significantDigits) {
-    this.significantDigits = significantDigits;
-    eq.setMaxRelativeError(DoubleEquality.getRelativeErrorTerm(significantDigits));
-    angleLimit = 1.0 / Math.pow(10, significantDigits - 1);
+  public void setSignificantBits(int significantBits) {
+    this.significantBits = significantBits;
+    eq.setMaxRelativeError(DoubleEquality.getRelativeEpsilon(significantBits));
+    angleLimit = 1.0 / Math.pow(10, significantBits - 1);
   }
 
   /**
-   * Gets the significant digits.
+   * Gets the significant bits.
    *
-   * @return the significantDigits.
+   * @return the significant bits.
    */
-  public int getSignificantDigits() {
-    return significantDigits;
+  public int getSignificantBits() {
+    return significantBits;
   }
 }

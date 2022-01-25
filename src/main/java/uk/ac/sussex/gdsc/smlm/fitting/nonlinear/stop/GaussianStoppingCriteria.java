@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 
 /**
  * Defines the stopping criteria for the
- * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit } class.
+ * {@link uk.ac.sussex.gdsc.smlm.fitting.nonlinear.NonLinearFit} class.
  *
  * <p>Stop when successive iterations with a reduced error move the fitted X,Y coordinates by less
  * than a specified distance (delta).
