@@ -305,7 +305,7 @@ class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
 
   private static NonLinearFit getLvm(int bounded, int clamping, boolean mle) {
     final Gaussian2DFunction f = GaussianFunctionFactory.create2D(1, size, size, flags, null);
-    final StoppingCriteria sc = new ErrorStoppingCriteria(5);
+    final StoppingCriteria sc = new ErrorStoppingCriteria();
     sc.setMaximumIterations(100);
     final NonLinearFit solver =
         (bounded != 0 || clamping != 0) ? new BoundedNonLinearFit(f, sc, null)
