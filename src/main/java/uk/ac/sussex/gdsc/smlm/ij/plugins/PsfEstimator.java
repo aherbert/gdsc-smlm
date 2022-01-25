@@ -49,6 +49,8 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
+import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtosHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFEstimatorSettings;
@@ -183,6 +185,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
       config = new FitEngineConfiguration();
       final Calibration calibration = SettingsManager.readCalibration(0);
       config.getFitConfiguration().setCalibration(calibration);
+      config.getFitConfiguration().setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
     } else {
       config = SettingsManager.readFitEngineConfiguration(0);
     }
@@ -212,7 +215,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
       initialPeakStdDev0 = fitConfig.getInitialXSd();
       initialPeakStdDev1 = fitConfig.getInitialYSd();
       initialPeakAngle = fitConfig.getInitialAngle();
-    } catch (final IllegalStateException ex) {
+    } catch (final IllegalStateException | ConfigurationException ex) {
       // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
     }
 
@@ -308,6 +311,9 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     settings.setHistogramBins((int) gd.getNextNumber());
 
     final FitConfiguration fitConfig = config.getFitConfiguration();
+    final CalibrationWriter calibration = fitConfig.getCalibrationWriter();
+    calibration.setCameraType(SettingsManager.getCameraTypeValues()[gd.getNextChoiceIndex()]);
+    fitConfig.setCalibration(calibration.getCalibration());
     fitConfig.setPsfType(PeakFit.getPsfTypeValues()[gd.getNextChoiceIndex()]);
     config.setDataFilterType(gd.getNextChoiceIndex());
     config.setDataFilter(gd.getNextChoiceIndex(), Math.abs(gd.getNextNumber()), false, 0);
@@ -352,7 +358,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
       ParameterUtils.isAboveZero("P-value", settings.getPValue());
       ParameterUtils.isEqualOrBelow("P-value", settings.getPValue(), 0.5);
       if (settings.getShowHistograms()) {
-        ParameterUtils.isAboveZero("Histogram bins", settings.getHistogramBins());
+        ParameterUtils.isPositive("Histogram bins", settings.getHistogramBins());
       }
       ParameterUtils.isAboveZero("Search width", config.getSearch());
       ParameterUtils.isAboveZero("Fitting width", config.getFitting());
@@ -517,8 +523,12 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
           if (settings.getUpdatePreferences()) {
             config.getFitConfiguration().setInitialPeakStdDev0((float) params[X]);
-            config.getFitConfiguration().setInitialPeakStdDev1((float) params[Y]);
-            config.getFitConfiguration().setInitialAngle((float) params[ANGLE]);
+            try {
+              config.getFitConfiguration().setInitialPeakStdDev1((float) params[Y]);
+              config.getFitConfiguration().setInitialAngle((float) params[ANGLE]);
+            } catch (final IllegalStateException | ConfigurationException ex) {
+              // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
+            }
           }
 
           break;
@@ -641,9 +651,13 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
     // Create the fit engine using the PeakFit plugin
     final FitConfiguration fitConfig = config.getFitConfiguration();
-    fitConfig.setInitialAngle((float) params[0]);
     fitConfig.setInitialPeakStdDev0((float) params[1]);
-    fitConfig.setInitialPeakStdDev1((float) params[2]);
+    try {
+      fitConfig.setInitialPeakStdDev1((float) params[2]);
+      fitConfig.setInitialAngle((float) Math.toRadians(params[0]));
+    } catch (IllegalStateException ex) {
+      // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
+    }
 
     final ImageStack stack = imp.getImageStack();
     final Rectangle roi = stack.getProcessor(1).getRoi();
@@ -833,13 +847,13 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   public synchronized void add(int peak, int origX, int origY, float origValue, double chiSquared,
       float noise, float meanIntensity, float[] params, float[] paramsStdDev) {
     if (!sampleSizeReached()) {
+      // Assume fitting a 2D Gaussian
       if (!ignore[ANGLE]) {
-        // Assume fitting a 2D Gaussian
-        sampleNew[ANGLE].addValue(params[Gaussian2DFunction.ANGLE]);
+        sampleNew[ANGLE].addValue(Math.toDegrees(params[Gaussian2DFunction.ANGLE]));
       }
-      sampleNew[X].addValue(params[PeakResult.X]);
+      sampleNew[X].addValue(params[Gaussian2DFunction.X_SD]);
       if (!ignore[Y]) {
-        sampleNew[Y].addValue(params[PeakResult.Y]);
+        sampleNew[Y].addValue(params[Gaussian2DFunction.Y_SD]);
       }
     }
   }
