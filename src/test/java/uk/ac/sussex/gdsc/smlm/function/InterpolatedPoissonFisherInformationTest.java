@@ -24,10 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 @SuppressWarnings({"javadoc"})
 class InterpolatedPoissonFisherInformationTest {
@@ -52,7 +52,7 @@ class InterpolatedPoissonFisherInformationTest {
 
     for (int exp = min, i = 0; exp <= max; exp++, i++) {
       logU[i] = exp;
-      alpha[i] = fi.getAlpha(FastMath.exp(exp));
+      alpha[i] = fi.getAlpha(StdMath.exp(exp));
     }
 
     final InterpolatedPoissonFisherInformation intFi =
@@ -75,7 +75,7 @@ class InterpolatedPoissonFisherInformationTest {
 
   private static void check(BasePoissonFisherInformation fi,
       InterpolatedPoissonFisherInformation intFi, double logU, double tol) {
-    final double u = FastMath.exp(logU);
+    final double u = StdMath.exp(logU);
     final double e = fi.getAlpha(u);
     final double o = intFi.getAlpha(u);
     // logger.fine(FunctionUtils.getSupplier("logU=%g u=%g e=%g o=%g error=%g", logU, u, e, o,
@@ -107,14 +107,14 @@ class InterpolatedPoissonFisherInformationTest {
 
     for (int exp = min, i = 0; exp <= max; exp++, i++) {
       logU[i] = exp;
-      alpha[i] = fi.getAlpha(FastMath.exp(exp));
+      alpha[i] = fi.getAlpha(StdMath.exp(exp));
     }
 
     // Lower fixed I
     InterpolatedPoissonFisherInformation intFi =
         new InterpolatedPoissonFisherInformation(logU, alpha, true, fi);
 
-    final double I = fi.getFisherInformation(FastMath.exp(min));
+    final double I = fi.getFisherInformation(StdMath.exp(min));
     final BasePoissonFisherInformation fixedI = new BasePoissonFisherInformation() {
       @Override
       public double getFisherInformation(double theta) {

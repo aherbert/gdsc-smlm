@@ -81,7 +81,6 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -129,6 +128,7 @@ import uk.ac.sussex.gdsc.smlm.results.count.Counter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 import uk.ac.sussex.gdsc.smlm.results.procedures.XyrResultProcedure;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Computes the Fourier Image Resolution of an image
@@ -1586,7 +1586,7 @@ public class Fire implements PlugIn {
         double s2 = precision.getValue(sample[j]) / images.nmPerPixel;
         s2 *= s2;
         for (int i = 1; i < q.length; i++) {
-          hq[i] += FastMath.exp(pre[i] * s2);
+          hq[i] += StdMath.exp(pre[i] * s2);
         }
       }
       for (int i = 1; i < q.length; i++) {
@@ -1656,7 +1656,7 @@ public class Fire implements PlugIn {
       points.add(q[i], smooth[i]);
     }
     final double[] estimate = fit.fit(points.toList());
-    double qvalue = FastMath.exp(estimate[0]);
+    double qvalue = StdMath.exp(estimate[0]);
 
     // This could be made an option. Just use for debugging
     final boolean debug = false;
@@ -1904,7 +1904,7 @@ public class Fire implements PlugIn {
         // Original cost function. Note that each observation has a
         // contribution of 0 to 1.
         final double diff = (pre[i] / qvalue) - 1;
-        value += 1 - FastMath.exp(-diff * diff / n2);
+        value += 1 - StdMath.exp(-diff * diff / n2);
 
         // Modified cost function so that the magnitude of difference over or
         // under 1 is penalised the same. This has a problem if FRC numerator
@@ -1968,12 +1968,12 @@ public class Fire implements PlugIn {
       double value = 0;
       for (int i = 0; i < pre.length; i++) {
         final double d = 1 + eight_pi2_s2 * q2[i];
-        final double hq = FastMath.exp((factor * q2[i]) / d) / Math.sqrt(d);
+        final double hq = StdMath.exp((factor * q2[i]) / d) / Math.sqrt(d);
 
         // Original cost function. Note that each observation has a
         // contribution of 0 to 1.
         final double diff = (pre[i] / (qvalue * hq)) - 1;
-        value += 1 - FastMath.exp(-diff * diff / n2);
+        value += 1 - StdMath.exp(-diff * diff / n2);
       }
       return value;
     }

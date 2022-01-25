@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
@@ -52,6 +51,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -702,7 +702,7 @@ class ScmosLikelihoodWrapperTest {
       total += nll;
       TestAssertions.assertTest(nll3, nll, predicate, msg1.set(0, i));
       TestAssertions.assertTest(nll3, nll2, predicate, msg2.set(0, i));
-      final double pp = FastMath.exp(-nll);
+      final double pp = StdMath.exp(-nll);
       if (maxp < pp) {
         maxp = pp;
         maxi = i;
@@ -818,7 +818,7 @@ class ScmosLikelihoodWrapperTest {
     canComputePValue(seed,new BaseNonLinearFunction("Gaussian")
     {
       @Override
-      public double eval(int x) {  return 100 * FastMath.exp(
+      public double eval(int x) {  return 100 * StdMath.exp(
           -0.5 * Math.pow(x - n2, 2) / (params[0] * params[0])); }
     });
     //@formatter:on

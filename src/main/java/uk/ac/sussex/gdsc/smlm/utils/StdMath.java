@@ -22,7 +22,7 @@
  * #L%
  */
 
-package uk.ac.sussex.gdsc.smlm.function;
+package uk.ac.sussex.gdsc.smlm.utils;
 
 /**
  * Class for computing standard math functions.
@@ -42,7 +42,7 @@ public final class StdMath {
    * @see Math#exp(double)
    */
   public static double exp(double x) {
-    // return FastMath.exp(x)
+    // return StdMath.exp(x)
     return Math.exp(x);
   }
 }

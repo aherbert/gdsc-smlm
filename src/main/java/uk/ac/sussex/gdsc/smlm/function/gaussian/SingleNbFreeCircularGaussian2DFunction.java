@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
@@ -83,7 +83,7 @@ public class SingleNbFreeCircularGaussian2DFunction extends SingleFreeCircularGa
     // Calculate gradients
 
     if (zeroAngle) {
-      final double exp = FastMath.exp(aa * dx2 + cc * dy2);
+      final double exp = StdMath.exp(aa * dx2 + cc * dy2);
       dyDa[0] = norm * exp;
       final double y = height * exp;
 
@@ -95,7 +95,7 @@ public class SingleNbFreeCircularGaussian2DFunction extends SingleFreeCircularGa
       return y;
     }
 
-    final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+    final double exp = StdMath.exp(aa * dx2 + bb * dxy + cc * dy2);
     dyDa[0] = norm * exp;
     final double y = height * exp;
 

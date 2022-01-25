@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a configured number of peaks.
@@ -162,7 +162,7 @@ public class NsFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
     // Calculate gradients
 
     final double aadx2dy2 = factors[AA] * (dx * dx + dy * dy);
-    final double y = factors[HEIGHT] * FastMath.exp(aadx2dy2);
+    final double y = factors[HEIGHT] * StdMath.exp(aadx2dy2);
     final double yaa2 = y * factors[AA2];
     dyDa[dydapos] = yaa2 * dx;
     dyDa[dydapos + 1] = yaa2 * dy;
@@ -183,7 +183,7 @@ public class NsFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
     final double dx = x0 - params[apos + X_POSITION];
     final double dy = x1 - params[apos + Y_POSITION];
 
-    return factors[HEIGHT] * FastMath.exp(factors[AA] * (dx * dx + dy * dy));
+    return factors[HEIGHT] * StdMath.exp(factors[AA] * (dx * dx + dy * dy));
   }
 
   @Override

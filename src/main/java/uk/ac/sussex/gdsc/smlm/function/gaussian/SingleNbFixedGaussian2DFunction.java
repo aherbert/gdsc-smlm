@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
@@ -79,7 +79,7 @@ public class SingleNbFixedGaussian2DFunction extends SingleFixedGaussian2DFuncti
 
     // Calculate gradients
 
-    final double exp = FastMath.exp(aa * (dx * dx + dy * dy));
+    final double exp = StdMath.exp(aa * (dx * dx + dy * dy));
     dyDa[0] = norm * exp;
     final double y = height * exp;
     final double yaa2 = y * aa2;

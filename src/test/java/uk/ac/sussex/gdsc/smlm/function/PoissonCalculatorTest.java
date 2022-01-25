@@ -34,7 +34,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -48,6 +47,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -290,7 +290,7 @@ class PoissonCalculatorTest {
     canComputeLogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian") {
       @Override
       public double eval(int x) {
-        return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+        return 0.1 + 100 * StdMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
       }
     });
   }
@@ -424,7 +424,7 @@ class PoissonCalculatorTest {
     canComputeFastLog_LogLikelihoodRatio(seed, new BaseNonLinearFunction("Gaussian") {
       @Override
       public double eval(int x) {
-        return 0.1 + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+        return 0.1 + 100 * StdMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
       }
     });
   }
@@ -487,17 +487,17 @@ class PoissonCalculatorTest {
           @Override
           public double eval(int x) {
             return 0.1
-                + 100 * FastMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+                + 100 * StdMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
           }
         }, new BaseNonLinearFunction("Gaussian") {
           @Override
           public double eval(int x) {
-            return 0.2 + 50 * FastMath.exp(-0.5 * MathUtils.pow2(x - n3) / (params[0] * params[0]));
+            return 0.2 + 50 * StdMath.exp(-0.5 * MathUtils.pow2(x - n3) / (params[0] * params[0]));
           }
         }, new BaseNonLinearFunction("Gaussian") {
           @Override
           public double eval(int x) {
-            return 0.3 + 75 * FastMath.exp(-0.5 * MathUtils.pow2(x - n4) / (params[0] * params[0]));
+            return 0.3 + 75 * StdMath.exp(-0.5 * MathUtils.pow2(x - n4) / (params[0] * params[0]));
           }
         });
   }

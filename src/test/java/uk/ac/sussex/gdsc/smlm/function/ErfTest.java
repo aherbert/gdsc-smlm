@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -297,7 +298,7 @@ class ErfTest {
 
         final double o = o1 * o2;
         final double e = e1 * e2;
-        final double oo = norm * FastMath.exp(-(x * x + y * y) / twos2);
+        final double oo = norm * Math.exp(-(x * x + y * y) / twos2);
 
         sum1 += e;
         sum2 += o;
@@ -419,23 +420,23 @@ class ErfTest {
     final double twos2 = 2 * s * s;
     final double norm = 1 / (Math.PI * twos2);
     for (int i = 0, steps = 1; i < 4; i++, steps = (int) Math.pow(10, i)) {
-      // Gaussian is: FastMath.exp(-(x * x + y * y) / twos2) over all x and y
+      // Gaussian is: exp(-(x * x + y * y) / twos2) over all x and y
       // But we can do this by separating x and y:
-      // FastMath.exp(-(x * x) / twos2) * FastMath.exp(-(y * y) / twos2)
+      // exp(-(x * x) / twos2) * exp(-(y * y) / twos2)
 
       // pre-compute
       final double[] ex = new double[steps];
       double sumey = 0;
       if (steps == 1) {
         // Use the actual values for x and y
-        ex[0] = FastMath.exp(-(x * x) / twos2);
-        sumey = FastMath.exp(-(y * y) / twos2);
+        ex[0] = StdMath.exp(-(x * x) / twos2);
+        sumey = StdMath.exp(-(y * y) / twos2);
       } else {
         for (int j = 0; j < steps; j++) {
           final double xx = minx + (double) j / steps;
           final double yy = miny + (double) j / steps;
-          ex[j] = FastMath.exp(-(xx * xx) / twos2);
-          sumey += FastMath.exp(-(yy * yy) / twos2);
+          ex[j] = StdMath.exp(-(xx * xx) / twos2);
+          sumey += StdMath.exp(-(yy * yy) / twos2);
         }
       }
 
@@ -452,7 +453,7 @@ class ErfTest {
       // for (int k = 0; k <= steps; k++)
       // {
       // double yy = miny + (double) k / steps;
-      // sum2 += FastMath.exp(-(xx * xx + yy * yy) / twos2);
+      // sum2 += StdMath.exp(-(xx * xx + yy * yy) / twos2);
       // }
       // }
       // logger.fine(FunctionUtils.getSupplier("sum=%f, sum2=%f", sum, sum2);

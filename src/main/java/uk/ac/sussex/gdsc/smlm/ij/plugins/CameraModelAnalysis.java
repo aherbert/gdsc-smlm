@@ -45,7 +45,6 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
@@ -79,6 +78,7 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Model the on-chip amplification from an EM-CCD camera, CCD or sCMOS camera.
@@ -779,7 +779,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
             final double c_m = c / m;
             final double logc = Math.log(c);
             for (int n = minn; n <= maxn; n++) {
-              sum += FastMath.exp(f[n] + (n - 1) * logc - c_m);
+              sum += StdMath.exp(f[n] + (n - 1) * logc - c_m);
             }
             // sum2 += pd[n] * gd[n].density(c);
             list.add(sum);

@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Computes likelihood values for a Poisson function.
@@ -571,8 +572,8 @@ public class PoissonCalculator {
    */
   public static double likelihood(double mean, double x) {
     // This has a smaller range before computation fails:
-    // return Math.pow(mean, x) * FastMath.exp(-mean) / factorial(x)
-    return FastMath.exp(logLikelihood(mean, x));
+    // return Math.pow(mean, x) * StdMath.exp(-mean) / factorial(x)
+    return StdMath.exp(logLikelihood(mean, x));
   }
 
   /**
@@ -584,7 +585,7 @@ public class PoissonCalculator {
    * @return the likelihood
    */
   public static double likelihood(double[] mean, double[] x) {
-    return FastMath.exp(logLikelihood(mean, x));
+    return StdMath.exp(logLikelihood(mean, x));
   }
 
   /**
@@ -596,7 +597,7 @@ public class PoissonCalculator {
    * @return the likelihood
    */
   public static double fastLikelihood(double mean, double x) {
-    return FastMath.exp(fastLogLikelihood(mean, x));
+    return StdMath.exp(fastLogLikelihood(mean, x));
   }
 
   /**
@@ -611,7 +612,7 @@ public class PoissonCalculator {
    * @return the likelihood
    */
   public static double fastLikelihood(double[] mean, double[] x) {
-    return FastMath.exp(fastLogLikelihood(mean, x));
+    return StdMath.exp(fastLogLikelihood(mean, x));
   }
 
   /**
@@ -624,7 +625,7 @@ public class PoissonCalculator {
    * @return the likelihood
    */
   public static double fastLikelihood(double mean, double x, FastLog fastLog) {
-    return FastMath.exp(fastLogLikelihood(mean, x, fastLog));
+    return StdMath.exp(fastLogLikelihood(mean, x, fastLog));
   }
 
   /**
@@ -640,7 +641,7 @@ public class PoissonCalculator {
    * @return the likelihood
    */
   public static double fastLikelihood(double[] mean, double[] x, FastLog fastLog) {
-    return FastMath.exp(fastLogLikelihood(mean, x, fastLog));
+    return StdMath.exp(fastLogLikelihood(mean, x, fastLog));
   }
 
   /**
@@ -759,7 +760,7 @@ public class PoissonCalculator {
    * @return the maximum likelihood
    */
   public static double maximumLikelihood(double[] x) {
-    return FastMath.exp(maximumLogLikelihood(x));
+    return StdMath.exp(maximumLogLikelihood(x));
   }
 
   /**
@@ -769,7 +770,7 @@ public class PoissonCalculator {
    * @return the maximum likelihood
    */
   public static double fastMaximumLikelihood(double x) {
-    return (x > 0.0) ? FastMath.exp(fastLogLikelihoodX(x, x)) : 1;
+    return (x > 0.0) ? StdMath.exp(fastLogLikelihoodX(x, x)) : 1;
   }
 
   /**
@@ -779,7 +780,7 @@ public class PoissonCalculator {
    * @return the maximum likelihood
    */
   public static double fastMaximumLikelihood(double[] x) {
-    return FastMath.exp(fastMaximumLogLikelihood(x));
+    return StdMath.exp(fastMaximumLogLikelihood(x));
   }
 
   /**
@@ -790,7 +791,7 @@ public class PoissonCalculator {
    * @return the maximum likelihood
    */
   public static double fastMaximumLikelihood(double x, FastLog fastLog) {
-    return (x > 0.0) ? FastMath.exp(fastLogLikelihoodX(x, x, fastLog)) : 1;
+    return (x > 0.0) ? StdMath.exp(fastLogLikelihoodX(x, x, fastLog)) : 1;
   }
 
   /**
@@ -801,7 +802,7 @@ public class PoissonCalculator {
    * @return the maximum likelihood
    */
   public static double fastMaximumLikelihood(double[] x, FastLog fastLog) {
-    return FastMath.exp(fastMaximumLogLikelihood(x, fastLog));
+    return StdMath.exp(fastMaximumLogLikelihood(x, fastLog));
   }
 
   /**

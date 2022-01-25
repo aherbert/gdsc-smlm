@@ -33,7 +33,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+
 
 /**
  * Class for computing various Bessel functions
@@ -138,7 +139,7 @@ public final class Bessel {
       p0 = p0 * a2 + 4.98677850604961985e-02;
       p1 = p1 * a2 + 3.98942280401425088e-01;
       final double p = p0 * a + p1;
-      return FastMath.exp(x) * p / Math.sqrt(x);
+      return StdMath.exp(x) * p / Math.sqrt(x);
     } else {
       // Max error in interpolated form : 2.437e-18
       // Max Error found at double precision = Poly : 1.216719e-16
@@ -150,7 +151,7 @@ public final class Bessel {
       p1 = 2.92179096853915176e-02 * a2 + 4.98677850491434560e-02;
       p0 = p0 * a2 + 3.98942280401432905e-01;
       final double p = p0 + p1 * a;
-      final double ex = FastMath.exp(x / 2);
+      final double ex = StdMath.exp(x / 2);
       double result = ex * p / Math.sqrt(x);
       result *= ex;
       return result;
@@ -233,7 +234,7 @@ public final class Bessel {
       p0 = p0 * a2 + -1.496033551613111533e-01;
       p1 = p1 * a2 + 3.989422804014406054e-01;
       final double p = p0 * a + p1;
-      return s * FastMath.exp(x) * p / Math.sqrt(x);
+      return s * StdMath.exp(x) * p / Math.sqrt(x);
     } else {
       // Max error in interpolated form: 1.320e-19
       // Max Error found at double precision = Poly: 7.065357e-17
@@ -245,7 +246,7 @@ public final class Bessel {
       p1 = -4.090421597376992892e-02 * a2 + -1.496033551467584157e-01;
       p0 = p0 * a2 + 3.989422804014314820e-01;
       final double p = p0 + p1 * a;
-      final double ex = FastMath.exp(x / 2);
+      final double ex = StdMath.exp(x / 2);
       double result = ex * p / Math.sqrt(x);
       result *= ex;
       return s * result;

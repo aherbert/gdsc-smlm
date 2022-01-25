@@ -30,9 +30,9 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * This is a function to compute the likelihood assuming a Poisson-Gamma-Gaussian distribution.
@@ -402,7 +402,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
     // This is the value of the Poisson-Gamma at c=0:
     // PoissonGammaFunction.poissonGammaN(0, eta, m);
-    final double exp_eta = FastMath.exp(-eta);
+    final double exp_eta = StdMath.exp(-eta);
     final double f0 = exp_eta * eta / gain;
 
     // ?
@@ -414,15 +414,15 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
 
     // [Noise * Gaussian PMF at observed count] +
     // [observed count * cumulative distribution of read noise at observed count]
-    // [sigma*FastMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
-    final double conv1 = sigma * FastMath.exp(-(cij * cij) / twoSigma2) / SQRT_2PI + cij * conv0;
+    // [sigma*StdMath.exp(-cij**2/(twoSigma2))/Math.sqrt(2*pi)] + [cij*conv0]
+    final double conv1 = sigma * StdMath.exp(-(cij * cij) / twoSigma2) / SQRT_2PI + cij * conv0;
 
     // ?
     double temp = f0 * conv0 + fp0 * conv1 + exp_eta * gaussianPdf(cij);
 
     // // TESTING
     // // Simple method:
-    // temp = FastMath.exp(-eta) * gauss(cij); // G(c==0) * Gaussian;
+    // temp = StdMath.exp(-eta) * gauss(cij); // G(c==0) * Gaussian;
     // if (cij <= 0)
     // return temp;
     // // Reset. The remaining will be the Poisson-Gamma and no convolution
@@ -471,7 +471,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
    * @return the density
    */
   double gaussianPdf(final double x) {
-    return FastMath.exp(-(x * x) / twoSigma2) / sqrt2piSigma2;
+    return StdMath.exp(-(x * x) / twoSigma2) / sqrt2piSigma2;
   }
 
   /**

@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.utils;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import java.util.Arrays;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
 /**
@@ -173,7 +172,7 @@ public class GaussianKernel {
         if (j < halfKernel.size()) {
           kernel[i] = halfKernel.getQuick(j);
         } else {
-          kernel[i] = FastMath.exp(MathUtils.pow2(i * step) / var2);
+          kernel[i] = StdMath.exp(MathUtils.pow2(i * step) / var2);
           // Check if zero
           if (kernel[i] == 0) {
             break;
@@ -245,7 +244,7 @@ public class GaussianKernel {
       if (j < halfKernel.size()) {
         kernel[i] = halfKernel.getQuick(j);
       } else {
-        kernel[i] = FastMath.exp(MathUtils.pow2(i * step) / var2);
+        kernel[i] = StdMath.exp(MathUtils.pow2(i * step) / var2);
         // Check if zero
         if (kernel[i] == 0) {
           break;
@@ -284,7 +283,7 @@ public class GaussianKernel {
 
       for (int i = 1, j = 0; i < kradius; i++, j += upsample) {
         for (int k = 1; k < upsample; k++) {
-          halfKernel.add(FastMath.exp(MathUtils.pow2((j + k) * step) / var2));
+          halfKernel.add(StdMath.exp(MathUtils.pow2((j + k) * step) / var2));
         }
         halfKernel.add(g[i]);
       }
@@ -295,7 +294,7 @@ public class GaussianKernel {
     if (halfKernel.size() < kradius) {
       final double step = 1.0 / currentScale;
       for (int i = halfKernel.size(); i < kradius; i++) {
-        final double v = FastMath.exp(MathUtils.pow2(i * step) / var2);
+        final double v = StdMath.exp(MathUtils.pow2(i * step) / var2);
         if (v == 0) {
           break;
         }
@@ -380,7 +379,7 @@ public class GaussianKernel {
     final double s2 = sigma * sigma;
     for (int i = 1; i < kradius; i++) {
       // Gaussian function
-      kernel[i] = FastMath.exp(-0.5 * i * i / s2);
+      kernel[i] = StdMath.exp(-0.5 * i * i / s2);
       if (kernel[i] == 0) {
         break;
       }

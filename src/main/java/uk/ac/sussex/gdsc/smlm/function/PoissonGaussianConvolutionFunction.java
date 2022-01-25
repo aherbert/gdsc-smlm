@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
@@ -132,7 +132,7 @@ public class PoissonGaussianConvolutionFunction
         final double x = Math.round(observed);
         return (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
       }
-      return FastMath.exp((-0.5 * observed * observed / var) + logNormalisationGaussian);
+      return StdMath.exp((-0.5 * observed * observed / var) + logNormalisationGaussian);
     }
     // Use same nomenclature as Huang et al
 
@@ -173,7 +173,7 @@ public class PoissonGaussianConvolutionFunction
     // the Poisson PMF and Gaussian PDF
     if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
-        final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        final double poisson = StdMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
         final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
@@ -184,7 +184,7 @@ public class PoissonGaussianConvolutionFunction
         final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
         final double x = getX(D, q);
         final double logGaussian = -(MathUtils.pow2(x) / twoVar) + logNormalisationGaussian;
-        pvalue += FastMath.exp(logPoisson + logGaussian);
+        pvalue += StdMath.exp(logPoisson + logGaussian);
       }
     }
 
@@ -256,7 +256,7 @@ public class PoissonGaussianConvolutionFunction
     double pvalue = 0;
     if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
-        final double poisson = FastMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        final double poisson = StdMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
         final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
@@ -267,8 +267,8 @@ public class PoissonGaussianConvolutionFunction
         final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
         final double x = getX(D, q);
         // final double logGaussian = (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
-        // p += FastMath.exp(logPoisson - logGaussian);
-        pvalue += FastMath.exp(logPoisson
+        // p += StdMath.exp(logPoisson - logGaussian);
+        pvalue += StdMath.exp(logPoisson
             // Gaussian
             - (MathUtils.pow2(x) / twoVar) + logNormalisationGaussian);
       }

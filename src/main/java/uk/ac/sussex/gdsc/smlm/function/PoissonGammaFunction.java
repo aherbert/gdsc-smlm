@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson-Gamma Mixture.
@@ -98,13 +98,13 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(p * c_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
-        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+        // return StdMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
+        return (x / (2 * c)) * StdMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
       }
-      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.i1(x)
-      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
+      // return Math.sqrt(p / (c * m)) * StdMath.exp(_c_m_p) * Bessel.i1(x)
+      return (x / (2 * c)) * StdMath.exp(_c_m_p) * Bessel.i1(x);
     } else if (c == 0.0) {
-      return FastMath.exp(-p) * (1 + p / m);
+      return StdMath.exp(-p) * (1 + p / m);
     } else {
       return 0;
     }
@@ -138,7 +138,7 @@ public class PoissonGammaFunction
       if (x > 709 || _c_m_p < -709) {
         // Approximate Bessel function i0(x)/i1(x) when using large x:
         // In(x) ~ exp(x)/sqrt(2*pi*x)
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+        final double exp_transform = StdMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
         gradient[0] = exp_transform / m - G;
         return G;
@@ -157,7 +157,7 @@ public class PoissonGammaFunction
       // dG(c)/dp = e^-p . e^-c/m . 1/m . I0(2*sqrt(cp/m)) - G(c)
       // dG(c)/dp = e^(-c/m -p) . I0(2*sqrt(cp/m))/m - G(c)
 
-      final double exp_c_m_p = FastMath.exp(_c_m_p);
+      final double exp_c_m_p = StdMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.i1(x);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
@@ -165,7 +165,7 @@ public class PoissonGammaFunction
     } else if (c == 0.0) {
       // f(p) = exp(-p) * (1 + p / m)
       // df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)
-      final double exp_p = FastMath.exp(-p);
+      final double exp_p = StdMath.exp(-p);
       final double G = exp_p * (1 + p / m);
       gradient[0] = exp_p / m - G;
       return G;
@@ -200,14 +200,14 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(p * c_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        // return FastMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
-        return (x / (2 * c)) * FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+        // return StdMath.exp(0.5 * Math.log(p / (c * m)) + _c_m_p + x - 0.5 * Math.log(twoPi * x))
+        return (x / (2 * c)) * StdMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
       }
-      // return Math.sqrt(p / (c * m)) * FastMath.exp(_c_m_p) * Bessel.i1(x)
-      return (x / (2 * c)) * FastMath.exp(_c_m_p) * Bessel.i1(x);
+      // return Math.sqrt(p / (c * m)) * StdMath.exp(_c_m_p) * Bessel.i1(x)
+      return (x / (2 * c)) * StdMath.exp(_c_m_p) * Bessel.i1(x);
     } else if (c == 0.0) {
       // No Dirac delta function
-      return FastMath.exp(-p) * p / m;
+      return StdMath.exp(-p) * p / m;
     } else {
       return 0;
     }
@@ -240,18 +240,18 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(cp_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+        final double exp_transform = StdMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
         gradient[0] = exp_transform / m - G;
         return G;
       }
-      final double exp_c_m_p = FastMath.exp(_c_m_p);
+      final double exp_c_m_p = StdMath.exp(_c_m_p);
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
     } else if (c == 0.0) {
       // No Dirac delta function
-      final double exp_p_m = FastMath.exp(-p) / m;
+      final double exp_p_m = StdMath.exp(-p) / m;
       final double G = exp_p_m * p;
       gradient[0] = exp_p_m - G;
       return G;
@@ -272,7 +272,7 @@ public class PoissonGammaFunction
    * @see #poissonGamma(double, double, double)
    */
   public static double dirac(double p) {
-    return FastMath.exp(-p);
+    return StdMath.exp(-p);
   }
 
   /**
@@ -287,7 +287,7 @@ public class PoissonGammaFunction
    * @see #poissonGamma(double, double, double)
    */
   public static double dirac(double p, double[] gradient) {
-    final double exp_p = FastMath.exp(-p);
+    final double exp_p = StdMath.exp(-p);
     gradient[0] = -exp_p;
     return exp_p;
   }
@@ -314,18 +314,18 @@ public class PoissonGammaFunction
       final double x = 2 * Math.sqrt(cp_m);
       final double _c_m_p = -c_m - p;
       if (x > 709 || _c_m_p < -709) {
-        final double exp_transform = FastMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
+        final double exp_transform = StdMath.exp(_c_m_p + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
         gradient[0] = exp_transform / m;
         return G;
       }
-      final double exp_c_m_p = FastMath.exp(_c_m_p);
+      final double exp_c_m_p = StdMath.exp(_c_m_p);
       // double G = Math.sqrt(p / (c * m)) * exp_c_m_p * Bessel.i1(x)
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m;
       return G;
     } else if (c == 0.0) {
-      final double exp_p = FastMath.exp(-p);
+      final double exp_p = StdMath.exp(-p);
       final double G = exp_p * (1 + p / m);
       gradient[0] = exp_p / m;
       return G;
@@ -362,12 +362,12 @@ public class PoissonGammaFunction
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
       if (x > 709 || -c_m < -709) {
-        final double exp_transform = FastMath.exp(-c_m + x - 0.5 * Math.log(TWO_PI * x));
+        final double exp_transform = StdMath.exp(-c_m + x - 0.5 * Math.log(TWO_PI * x));
         final double G = (x / (2 * c)) * exp_transform;
         gradient[0] = exp_transform / m;
         return G;
       }
-      final double exp_c_m = FastMath.exp(-c_m);
+      final double exp_c_m = StdMath.exp(-c_m);
       final double G = (x / (2 * c)) * exp_c_m * Bessel.i1(x);
       gradient[0] = exp_c_m * Bessel.i0(x) / m;
       return G;
@@ -403,7 +403,7 @@ public class PoissonGammaFunction
       }
       return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.i1(x));
     } else if (c == 0.0) {
-      // log (FastMath.exp(-p) * (1 + p / m))
+      // log (StdMath.exp(-p) * (1 + p / m))
       return -p + Math.log(1 + p / m);
     } else {
       return Double.NEGATIVE_INFINITY;

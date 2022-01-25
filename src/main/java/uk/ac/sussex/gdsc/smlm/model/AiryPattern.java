@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.function.Bessel;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Simple class to calculate AiryPattern.
@@ -67,7 +67,7 @@ public class AiryPattern {
       return 1;
     }
     x /= FACTOR;
-    return FastMath.exp(-0.5 * (x * x));
+    return StdMath.exp(-0.5 * (x * x));
   }
 
   /**

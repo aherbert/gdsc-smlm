@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
@@ -157,7 +157,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // convert to photons
     x *= alpha;
 
-    return (noPoisson) ? FastMath.exp(-0.5 * x * x / sigmaSquared) * probabilityNormalisation
+    return (noPoisson) ? StdMath.exp(-0.5 * x * x / sigmaSquared) * probabilityNormalisation
         : getProbability(x, mu, sigmaSquared, usePicardApproximation) * probabilityNormalisation;
   }
 
@@ -176,7 +176,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
       final boolean usePicardApproximation) {
     // If no Poisson mean then just use the Gaussian
     if (mu <= 0) {
-      return FastMath.exp(-0.5 * x * x / sigmaSquared) * getProbabilityNormalisation(sigmaSquared);
+      return StdMath.exp(-0.5 * x * x / sigmaSquared) * getProbabilityNormalisation(sigmaSquared);
     }
     return getProbability(x, mu, sigmaSquared, usePicardApproximation);
   }
@@ -208,7 +208,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
         (usePicardApproximation) ? picard(x, mu, sigmaSquared) : pade(x, mu, sigmaSquared);
     saddlepoint = newtonIteration(x, mu, sigmaSquared, saddlepoint);
     final double logP = spApprox(x, mu, sigmaSquared, saddlepoint);
-    return FastMath.exp(logP) * NORMALISATION;
+    return StdMath.exp(logP) * NORMALISATION;
   }
 
   /**
@@ -392,7 +392,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // Original code can infinite loop
     // do
     // {
-    // final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
+    // final double mu_exp_minus_s = mu * StdMath.exp(-saddlepoint);
     // change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
     // saddlepoint -= change;
     // } while (Math.abs(change) > EPSILON * Math.abs(saddlepoint));
@@ -400,7 +400,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
     // Limit the number of iterations
     for (int i = 0; i < 20; i++) {
-      final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
+      final double mu_exp_minus_s = mu * StdMath.exp(-saddlepoint);
       change = (x + sigmaSquared * saddlepoint - mu_exp_minus_s) / (sigmaSquared + mu_exp_minus_s);
       saddlepoint -= change;
       if (Math.abs(change) <= EPSILON * Math.abs(saddlepoint)) {
@@ -412,7 +412,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
     // System.out.printf("No Newton convergence: x=%f, mu=%f, s2=%f, %s -> %s : logP=%f, p=%f\n", x,
     // mu, sigmaSquared,
     // initial_saddlepoint, saddlepoint, sp_approx(x, mu, sigmaSquared, initial_saddlepoint),
-    // FastMath.exp(sp_approx(x, mu, sigmaSquared, initial_saddlepoint)) * NORMALISATION);
+    // StdMath.exp(sp_approx(x, mu, sigmaSquared, initial_saddlepoint)) * NORMALISATION);
 
     return saddlepoint; // initial_saddlepoint;
   }
@@ -429,7 +429,7 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
    */
   static double spApprox(final double x, final double mu, final double sigmaSquared,
       final double saddlepoint) {
-    final double mu_exp_minus_s = mu * FastMath.exp(-saddlepoint);
+    final double mu_exp_minus_s = mu * StdMath.exp(-saddlepoint);
     final double phi2 = sigmaSquared + mu_exp_minus_s;
     return -mu + (saddlepoint * (x + 0.5 * sigmaSquared * saddlepoint)) + mu_exp_minus_s
         - 0.5 * Math.log(phi2);

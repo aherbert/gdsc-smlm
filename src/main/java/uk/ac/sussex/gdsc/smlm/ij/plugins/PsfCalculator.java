@@ -34,7 +34,6 @@ import java.awt.Color;
 import java.awt.Label;
 import java.awt.SystemColor;
 import java.awt.TextField;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.GUIProtos.PSFCalculatorSettings;
@@ -44,6 +43,7 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.AiryPattern;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Calculates the expected PSF width for a Gaussian approximation to the Airy disk.
@@ -453,7 +453,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
     if (x == 0) {
       return 1;
     }
-    return FastMath.exp(-0.5 * (x * x));
+    return StdMath.exp(-0.5 * (x * x));
   }
 
   private static String getPixelPitchLabel(double pixelPitch) {

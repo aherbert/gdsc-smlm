@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;

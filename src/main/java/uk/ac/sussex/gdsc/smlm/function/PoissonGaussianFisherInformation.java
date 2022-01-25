@@ -233,7 +233,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   /**
    * Compute the limit of a usable probability above 0.
    *
-   * <p>Find the point where probability will return above 0. Using FastMath.exp this is -746.
+   * <p>Find the point where probability will return above 0. Using StdMath.exp this is -746.
    * However sub-normal output occurs at -709. This is a good limit for computation.
    *
    * @param mean the mean
@@ -739,7 +739,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
   private static int checkRange(int range) {
     // Gaussian = Math.exp(-0.5 * x^2)
-    // FastMath.exp(-746) == 0
+    // StdMath.exp(-746) == 0
     // => range for the Gaussian is sqrt(2*746) = 38.6
     return MathUtils.clip(1, MAX_RANGE, range);
   }

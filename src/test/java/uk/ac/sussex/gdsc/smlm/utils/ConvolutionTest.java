@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.utils;
 import gnu.trove.list.array.TDoubleArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -350,7 +349,7 @@ class ConvolutionTest {
     final double[] kernel = new double[2 * radius + 1];
     final double norm = -0.5 / (sd * sd);
     for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--) {
-      kernel[j] = kernel[jj] = FastMath.exp(norm * i * i);
+      kernel[j] = kernel[jj] = StdMath.exp(norm * i * i);
     }
     // Normalise
     double sum = 0;

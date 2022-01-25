@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * This is a wrapper for any function to compute the negative log-likelihood assuming a per-pixel
@@ -455,13 +455,13 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     // double varG2 = var / (g * g);
     // double x = Math.max(0, (k - o) / g + varG2);
     // double l = u + varG2;
-    // double v = FastMath.exp(-l) * Math.pow(l, x) / gamma1(x);
+    // double v = StdMath.exp(-l) * Math.pow(l, x) / gamma1(x);
     // if (v != v)
     // throw new RuntimeException("Failed computation");
     // return v;
 
     final double nll = negativeLogLikelihood(ui, var, gain, offset, data);
-    return FastMath.exp(-nll);
+    return StdMath.exp(-nll);
   }
 
   @Override

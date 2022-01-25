@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
@@ -112,7 +112,7 @@ public class SingleSimpleGaussian2DFunction extends Gaussian2DFunction {
     final double dx = x0 - x0pos;
     final double dy = x1 - x1pos;
 
-    return height * FastMath.exp(aa * (dx * dx + dy * dy));
+    return height * StdMath.exp(aa * (dx * dx + dy * dy));
   }
 
   @Override

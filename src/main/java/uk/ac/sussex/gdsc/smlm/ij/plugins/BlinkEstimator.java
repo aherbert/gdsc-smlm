@@ -39,7 +39,6 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optim
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
@@ -53,6 +52,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Estimates the flourophore blinking rate from a set of localisations.
@@ -692,7 +692,7 @@ public class BlinkEstimator implements PlugIn {
         final double td = this.x.get(i);
 
         final double a = (1 - td) / tOff;
-        final double b = FastMath.exp(a);
+        final double b = StdMath.exp(a);
 
         // value = N * (1 + nBlink * b)
         // = N + N * nBlink * exp(a)
@@ -758,7 +758,7 @@ public class BlinkEstimator implements PlugIn {
      * @return the value
      */
     public double evaluate(double td, double numberOfMolecules, double blinkingRate, double toff) {
-      return numberOfMolecules * (1.0 + blinkingRate * FastMath.exp((1 - td) / toff));
+      return numberOfMolecules * (1.0 + blinkingRate * StdMath.exp((1 - td) / toff));
     }
 
     /**

@@ -25,8 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson distribution.
@@ -88,10 +88,10 @@ public class InterpolatedPoissonFunction
     // PMF(l,k) = e^-l * l^k / gamma(k+1)
     // log(PMF) = -l + k * log(l) - logGamma(k+1)
     if (nonInteger) {
-      // return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
+      // return (StdMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
 
       final double ll = -mu + x * Math.log(mu) - logFactorial(x);
-      return FastMath.exp(ll) * alpha;
+      return StdMath.exp(ll) * alpha;
     }
 
     pd.setMeanUnsafe(mu);
@@ -126,7 +126,7 @@ public class InterpolatedPoissonFunction
     if (nonInteger) {
       final double loge = Math.log(mu);
       double ll = -mu + x * loge - logFactorial(x);
-      lk = FastMath.exp(ll);
+      lk = StdMath.exp(ll);
       if (x == mu) {
         // Special case
         dpDmu[0] = 0;
@@ -138,7 +138,7 @@ public class InterpolatedPoissonFunction
         // this continues to use the logGamma function even when o-1 < 1.
         // It creates the correct gradient down to o==1.
         ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
-        lkm1 = FastMath.exp(ll);
+        lkm1 = StdMath.exp(ll);
       } else if (x > 0) {
         // x is between 0 and 1.
         // There is no definition for the factorial (x-1)!
@@ -150,7 +150,7 @@ public class InterpolatedPoissonFunction
         // even though it is impossible. It works because the gamma function is still
         // defined when x>0.
         ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
-        lkm1 = FastMath.exp(ll);
+        lkm1 = StdMath.exp(ll);
       } else {
         lkm1 = 0;
       }
@@ -215,7 +215,7 @@ public class InterpolatedPoissonFunction
     // PMF(l,k) = e^-l * l^k / gamma(k+1)
     // log(PMF) = -l + k * log(l) - logGamma(k+1)
     if (nonInteger) {
-      // return (FastMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
+      // return (StdMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
 
       final double ll = -mu + x * Math.log(mu) - logFactorial(x);
       return ll + logAlpha;

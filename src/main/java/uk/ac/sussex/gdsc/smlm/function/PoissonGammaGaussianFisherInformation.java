@@ -41,6 +41,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Calculate the Fisher information for a Poisson-Gamma-Gaussian distribution.
@@ -963,7 +964,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
 
     // Correct the unscaled function to the scaled function
-    final double dirac = FastMath.exp(-lastT);
+    final double dirac = StdMath.exp(-lastT);
     scaleFactor *= dirac;
 
     final double[] f = new double[gradientA.length];
@@ -997,7 +998,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
   private static int checkRange(int range) {
     // Gaussian = Math.exp(-0.5 * x^2)
-    // FastMath.exp(-746) == 0
+    // StdMath.exp(-746) == 0
     // => range for the Gaussian is sqrt(2*746) = 38.6
     return MathUtils.clip(1, MAX_RANGE, range);
   }

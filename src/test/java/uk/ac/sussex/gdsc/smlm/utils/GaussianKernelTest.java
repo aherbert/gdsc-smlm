@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -47,7 +46,7 @@ class GaussianKernelTest {
       final double[] o = k.getGaussianKernel(1, 5, false);
       final double f = k.getConversionFactor(o);
       for (int u = o.length / 2, x = u; x >= 0; x--) {
-        final double e = norm * FastMath.exp(-(x - u) * (x - u) / var2);
+        final double e = norm * StdMath.exp(-(x - u) * (x - u) / var2);
         TestAssertions.assertTest(e, f * o[x], predicate);
       }
     }

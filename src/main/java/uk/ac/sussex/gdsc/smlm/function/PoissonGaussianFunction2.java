@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson-Gaussian Mixture. The Gaussian is
@@ -136,7 +136,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
     x *= alpha;
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return FastMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisationNoPoisson;
+      return StdMath.exp(-0.5 * x * x / sigmasquared) * probabilityNormalisationNoPoisson;
     }
 
     // e *= alpha;
@@ -145,7 +145,7 @@ public class PoissonGaussianFunction2 implements LikelihoodFunction, LogLikeliho
             : PoissonGaussianFunction.pade(x, mu, sigmasquared);
     saddlepoint = PoissonGaussianFunction.newtonIteration(x, mu, sigmasquared, saddlepoint);
     final double logP = PoissonGaussianFunction.spApprox(x, mu, sigmasquared, saddlepoint);
-    return FastMath.exp(logP) * probabilityNormalisation;
+    return StdMath.exp(logP) * probabilityNormalisation;
   }
 
   @Override

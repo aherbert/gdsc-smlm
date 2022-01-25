@@ -67,7 +67,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
@@ -81,6 +80,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm.PcPalmMolecules.MoleculesResults;
 import uk.ac.sussex.gdsc.smlm.ij.utils.LoggingOptimiserFunction;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.gradient.BoundedNonLinearConjugateGradientOptimizer;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Use the PC-PALM protocol to fit correlation curve(s) using the random or clustered model.
@@ -1562,15 +1562,15 @@ public class PcPalmFitting implements PlugIn {
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
-        final double c = FastMath.exp(b);
+        final double c = StdMath.exp(b);
 
         // value = a * c
         lastValue[i] = a * c;
 
         // Differentiate with respect to sigma:
         // value' = a' * c + a * c' [ Product rule ]
-        // c = FastMath.exp(b)
-        // c' = b' * FastMath.exp(b) [ Chain rule ]
+        // c = StdMath.exp(b)
+        // c' = b' * StdMath.exp(b) [ Chain rule ]
         // value' = a' * c + a * b' * c
         jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -1618,7 +1618,7 @@ public class PcPalmFitting implements PlugIn {
      */
     double evaluate(double radius, final double sigma, final double density) {
       return (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-radius * radius / (4 * sigma * sigma)) + 1;
+          * StdMath.exp(-radius * radius / (4 * sigma * sigma)) + 1;
     }
 
     /**
@@ -1697,10 +1697,10 @@ public class PcPalmFitting implements PlugIn {
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
-        final double c = FastMath.exp(b);
+        final double c = StdMath.exp(b);
 
         final double d = -r / range;
-        final double e = FastMath.exp(d);
+        final double e = StdMath.exp(d);
 
         // value = a * c +
         // amplitude * e + 1
@@ -1708,8 +1708,8 @@ public class PcPalmFitting implements PlugIn {
 
         // Differentiate with respect to sigma:
         // value' = a' * c + a * c' [ Product rule ]
-        // c = FastMath.exp(b)
-        // c' = b' * FastMath.exp(b) [ Chain rule ]
+        // c = StdMath.exp(b)
+        // c' = b' * StdMath.exp(b) [ Chain rule ]
         // value' = a' * c + a * b' * c
         jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -1720,8 +1720,8 @@ public class PcPalmFitting implements PlugIn {
 
         // Differentiate with respect to range:
         // value' = amplitude * e'
-        // e = FastMath.exp(d)
-        // e' = d' * FastMath.exp(d) [ Chain rule ]
+        // e = StdMath.exp(d)
+        // e' = d' * StdMath.exp(d) [ Chain rule ]
         jacobian[i][2] = amplitude * (-1 * d / range) * e;
 
         // Differentiate with respect to amplitude:
@@ -1772,8 +1772,8 @@ public class PcPalmFitting implements PlugIn {
     public double evaluate(double radius, final double sigma, final double density,
         final double range, final double amplitude) {
       final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-radius * radius / (4 * sigma * sigma));
-      final double gr_protein = amplitude * FastMath.exp(-radius / range) + 1;
+          * StdMath.exp(-radius * radius / (4 * sigma * sigma));
+      final double gr_protein = amplitude * StdMath.exp(-radius / range) + 1;
       return gr_stoch + gr_protein;
     }
 
@@ -1967,10 +1967,10 @@ public class PcPalmFitting implements PlugIn {
 
         final double a = 1.0 / (4 * Math.PI * density * sigma * sigma);
         final double b = -r * r / (4 * sigma * sigma);
-        final double c = FastMath.exp(b);
+        final double c = StdMath.exp(b);
 
         final double d = -r / alpha;
-        final double e = FastMath.exp(d);
+        final double e = StdMath.exp(d);
         final double f = 0.5 * Math.PI * r / range;
         final double g = Math.cos(f);
 
@@ -1980,8 +1980,8 @@ public class PcPalmFitting implements PlugIn {
 
         // Differentiate with respect to sigma:
         // value' = a' * c + a * c' [ Product rule ]
-        // c = FastMath.exp(b)
-        // c' = b' * FastMath.exp(b) [ Chain rule ]
+        // c = StdMath.exp(b)
+        // c' = b' * StdMath.exp(b) [ Chain rule ]
         // value' = a' * c + a * b' * c
         jacobian[i][0] = (-2 * a / sigma) * c + a * (-2 * b / sigma) * c;
 
@@ -2001,8 +2001,8 @@ public class PcPalmFitting implements PlugIn {
 
         // Differentiate with respect to alpha:
         // value' = amplitude * e' * g
-        // e = FastMath.exp(d)
-        // e' = d' * FastMath.exp(d) [ Chain rule ]
+        // e = StdMath.exp(d)
+        // e' = d' * StdMath.exp(d) [ Chain rule ]
         // e' = d' * e
         jacobian[i][4] = amplitude * (-1 * d / alpha) * e * g;
       }
@@ -2053,9 +2053,9 @@ public class PcPalmFitting implements PlugIn {
     public double evaluate(double radius, final double sigma, final double density,
         final double range, final double amplitude, final double alpha) {
       final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
-          * FastMath.exp(-radius * radius / (4 * sigma * sigma));
+          * StdMath.exp(-radius * radius / (4 * sigma * sigma));
       final double gr_protein =
-          amplitude * FastMath.exp(-radius / alpha) * Math.cos(0.5 * Math.PI * radius / range) + 1;
+          amplitude * StdMath.exp(-radius / alpha) * Math.cos(0.5 * Math.PI * radius / range) + 1;
       return gr_stoch + gr_protein;
     }
 

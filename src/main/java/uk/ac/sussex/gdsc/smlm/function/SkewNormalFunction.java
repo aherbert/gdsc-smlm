@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Calculate the value of the Skew Normal distribution.
@@ -155,11 +155,11 @@ public class SkewNormalFunction {
    */
   private static double normal(double x) {
     // 1/sqrt(2*pi) = 0.39894228
-    // return 0.39894228 * FastMath.exp(-0.5 * x*x);
+    // return 0.39894228 * StdMath.exp(-0.5 * x*x);
 
     // Do not normalise the area under the graph to 1. This allows the amplitude to be correctly
     // modelled.
-    return FastMath.exp(-0.5 * x * x);
+    return StdMath.exp(-0.5 * x * x);
   }
 
   /**

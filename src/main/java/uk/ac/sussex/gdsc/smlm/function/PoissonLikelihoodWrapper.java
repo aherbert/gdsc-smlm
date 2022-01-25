@@ -25,7 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 //@formatter:off
 /**
@@ -292,7 +292,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
    */
   public static double likelihood(double mean, double count) {
     final double nll = negativeLogLikelihood(mean, count);
-    return FastMath.exp(-nll);
+    return StdMath.exp(-nll);
   }
 
   @Override

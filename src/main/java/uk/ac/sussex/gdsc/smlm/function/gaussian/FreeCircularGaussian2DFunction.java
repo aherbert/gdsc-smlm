@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a configured number of peaks.
@@ -237,7 +237,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final double cc = factors[CC];
 
     if (zeroAngle) {
-      final double exp = FastMath.exp(aa * dx2 + cc * dy2);
+      final double exp = StdMath.exp(aa * dx2 + cc * dy2);
       dyDa[dydapos] = factors[N] * exp;
       final double y = factors[HEIGHT] * exp;
 
@@ -252,7 +252,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
 
     final double bb = factors[BB];
 
-    final double exp = FastMath.exp(aa * dx2 + bb * dxy + cc * dy2);
+    final double exp = StdMath.exp(aa * dx2 + bb * dxy + cc * dy2);
     dyDa[dydapos] = factors[N] * exp;
     final double y = factors[HEIGHT] * exp;
 
@@ -283,11 +283,11 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final double dy = x1 - params[apos + Y_POSITION];
 
     if (zeroAngle) {
-      return factors[HEIGHT] * FastMath.exp(factors[AA] * dx * dx + factors[CC] * dy * dy);
+      return factors[HEIGHT] * StdMath.exp(factors[AA] * dx * dx + factors[CC] * dy * dy);
     }
 
     return factors[HEIGHT]
-        * FastMath.exp(factors[AA] * dx * dx + factors[BB] * dx * dy + factors[CC] * dy * dy);
+        * StdMath.exp(factors[AA] * dx * dx + factors[BB] * dx * dy + factors[CC] * dy * dy);
   }
 
   @Override

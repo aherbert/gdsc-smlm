@@ -29,7 +29,6 @@ import ij.process.ImageProcessor;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.math3.util.FastMath;
 import org.jtransforms.fft.FloatFFT_2D;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -38,6 +37,7 @@ import uk.ac.sussex.gdsc.core.logging.NullTrackProgress;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
 import uk.ac.sussex.gdsc.core.math.RadialStatisticsUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Compute the Fourier Ring Correlation, a measure of the resolution of a microscopy image.
@@ -1706,7 +1706,7 @@ public class Frc {
     for (int i = 1; i < qvalues.length; i++) {
       final double q2 = qvalues[i] * qvalues[i];
       final double d = 1 + eight_pi2_s2 * q2;
-      hq[i] = FastMath.exp((-FOUR_PI_2 * mean * mean * q2) / d) / Math.sqrt(d);
+      hq[i] = StdMath.exp((-FOUR_PI_2 * mean * mean * q2) / d) / Math.sqrt(d);
     }
     return hq;
   }

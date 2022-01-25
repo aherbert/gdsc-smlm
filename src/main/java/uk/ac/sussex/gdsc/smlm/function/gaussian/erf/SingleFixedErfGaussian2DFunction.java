@@ -24,11 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.function.ExtendedGradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Procedure;
 import uk.ac.sussex.gdsc.smlm.function.Gradient2Procedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Evaluates a 2-dimensional Gaussian function for a single peak.
@@ -145,14 +145,14 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 
     double x_u_p12 = -u;
     double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
-    double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+    double exp_x_minus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
     for (int i = 0, n = deltaE.length; i < n; i++) {
       x_u_p12 += 1.0;
       final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
       deltaE[i] = erf_x_plus - erf_x_minus;
       erf_x_minus = erf_x_plus;
 
-      final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+      final double exp_x_plus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
       duDx[i] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
 
       exp_x_minus = exp_x_plus;
@@ -178,7 +178,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
 
     double x_u_p12 = -u;
     double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
-    double exp_x_minus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+    double exp_x_minus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
     for (int i = 0, n = deltaE.length; i < n; i++) {
       final double x_u_m12 = x_u_p12;
       x_u_p12 += 1.0;
@@ -186,7 +186,7 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
       deltaE[i] = erf_x_plus - erf_x_minus;
       erf_x_minus = erf_x_plus;
 
-      final double exp_x_plus = FastMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
+      final double exp_x_plus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
       duDx[i] = I_sSqrt2pi * (exp_x_minus - exp_x_plus);
       d2uDx2[i] = I_sssSqrt2pi * (x_u_m12 * exp_x_minus - x_u_p12 * exp_x_plus);
 

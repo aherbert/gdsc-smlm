@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -165,7 +164,7 @@ class PrecisionTest {
       final double dx = x0 - x0pos;
       final double dy = x1 - x1pos;
 
-      return background + amplitude * FastMath.exp(aa * (dx * dx + dy * dy));
+      return background + amplitude * Math.exp(aa * (dx * dx + dy * dy));
     }
 
     private double gaussian(final int x0, final int x1, final double[] dyda) {
@@ -175,7 +174,7 @@ class PrecisionTest {
       final double dy = x1 - x1pos;
       final double dx2dy2 = dx * dx + dy * dy;
 
-      dyda[1] = FastMath.exp(aa * (dx2dy2));
+      dyda[1] = Math.exp(aa * (dx2dy2));
       final double y = h * dyda[1];
       final double yaa2 = y * aa2;
       dyda[2] = yaa2 * dx;
@@ -236,7 +235,7 @@ class PrecisionTest {
       final float dx = x0 - x0pos;
       final float dy = x1 - x1pos;
 
-      return background + amplitude * (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+      return background + amplitude * (float) (Math.exp(aa * (dx * dx + dy * dy)));
     }
 
     private float gaussian(final int x0, final int x1, final float[] dyda) {
@@ -246,7 +245,7 @@ class PrecisionTest {
       final float dy = x1 - x1pos;
       final float dx2dy2 = dx * dx + dy * dy;
 
-      dyda[1] = (float) FastMath.exp(aa * (dx2dy2));
+      dyda[1] = (float) Math.exp(aa * (dx2dy2));
       final float y = h * dyda[1];
       final float yaa2 = y * aa2;
       dyda[2] = yaa2 * dx;
@@ -306,7 +305,7 @@ class PrecisionTest {
       final double dx = x0 - x0pos;
       final double dy = x1 - x1pos;
 
-      return background + amplitude * FastMath.exp(aa * (dx * dx + dy * dy));
+      return background + amplitude * Math.exp(aa * (dx * dx + dy * dy));
     }
 
     private double gaussian(final int x0, final int x1, final double[] dyda) {
@@ -315,7 +314,7 @@ class PrecisionTest {
       final double dx = x0 - x0pos;
       final double dy = x1 - x1pos;
 
-      dyda[1] = FastMath.exp(aa * (dx * dx + dy * dy));
+      dyda[1] = Math.exp(aa * (dx * dx + dy * dy));
       final double y = h * dyda[1];
       final double yaa2 = y * aa2;
       dyda[2] = yaa2 * dx;
@@ -373,7 +372,7 @@ class PrecisionTest {
       final float dx = x0 - x0pos;
       final float dy = x1 - x1pos;
 
-      return background + amplitude * (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+      return background + amplitude * (float) (Math.exp(aa * (dx * dx + dy * dy)));
     }
 
     private float gaussian(final int x0, final int x1, final float[] dyda) {
@@ -382,7 +381,7 @@ class PrecisionTest {
       final float dx = x0 - x0pos;
       final float dy = x1 - x1pos;
 
-      dyda[1] = (float) (FastMath.exp(aa * (dx * dx + dy * dy)));
+      dyda[1] = (float) (Math.exp(aa * (dx * dx + dy * dy)));
       final float y = h * dyda[1];
       final float yaa2 = y * aa2;
       dyda[2] = yaa2 * dx;

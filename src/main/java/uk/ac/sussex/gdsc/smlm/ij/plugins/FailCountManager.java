@@ -324,7 +324,7 @@ public class FailCountManager implements PlugIn {
       // 4 0.9816843611
       // 5 0.993262053
       // 10 0.9999546001
-      // return 1.0 - FastMath.exp(-overrun);
+      // return 1.0 - StdMath.exp(-overrun);
     }
   }
 

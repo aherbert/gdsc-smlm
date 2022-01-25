@@ -46,7 +46,6 @@ import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.PoissonSampler;
@@ -69,6 +68,7 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianFunction2;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Analysis a white light image from an EM-CCD camera, construct a histogram of pixel intensity and
@@ -626,7 +626,7 @@ public class EmGainAnalysis implements PlugInFilter {
    */
   private static double[] pdfEmGain(final double step, final double photons, final double gain) {
     final StoredDataStatistics stats = new StoredDataStatistics(100);
-    stats.add(FastMath.exp(-photons));
+    stats.add(StdMath.exp(-photons));
     for (int c = 1;; c++) {
       final double g = probabilityEmGain(c * step, photons, gain);
       stats.add(g);
@@ -655,7 +655,7 @@ public class EmGainAnalysis implements PlugInFilter {
       return pdfEmGain(step, photons, gain);
     }
     final double[] g = new double[max + 1];
-    g[0] = FastMath.exp(-photons);
+    g[0] = StdMath.exp(-photons);
     for (int c = 1;; c++) {
       final double count = c * step;
       g[c] = probabilityEmGain(count, photons, gain);
@@ -706,7 +706,7 @@ public class EmGainAnalysis implements PlugInFilter {
       final double[] kernel = new double[2 * radius + 1];
       final double norm = -0.5 / (sd * sd);
       for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--) {
-        kernel[j] = kernel[jj] = FastMath.exp(norm * MathUtils.pow2(i * step));
+        kernel[j] = kernel[jj] = StdMath.exp(norm * MathUtils.pow2(i * step));
       }
       // Normalise
       double sum = 0;
@@ -770,7 +770,7 @@ public class EmGainAnalysis implements PlugInFilter {
       final double[] kernel = new double[2 * radius + 1];
       final double norm = -0.5 / (sd * sd);
       for (int i = 0, j = radius, jj = radius; j < kernel.length; i++, j++, jj--) {
-        kernel[j] = kernel[jj] = FastMath.exp(norm * i * i);
+        kernel[j] = kernel[jj] = StdMath.exp(norm * i * i);
       }
       // Normalise
       double sum = 0;

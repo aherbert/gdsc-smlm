@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -41,6 +40,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
@@ -661,7 +661,7 @@ class PoissonLikelihoodWrapperTest {
       index++;
       Assertions.assertEquals(nll, nll2, 1e-10, "computeLikelihood(i)");
       total += nll;
-      final double pp = FastMath.exp(-nll);
+      final double pp = StdMath.exp(-nll);
       // logger.fine(FunctionUtils.getSupplier("mu=%f, o=%f, i=%d, pp=%f", mu, mu / alpha, i, pp);
       pvalue += pp;
       if (pvalue > 0.5 && pp / pvalue < changeTolerance) {

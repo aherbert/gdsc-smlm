@@ -53,7 +53,6 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.data.utils.Converter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -90,6 +89,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 import uk.ac.sussex.gdsc.smlm.results.Trace;
 import uk.ac.sussex.gdsc.smlm.results.TraceManager;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
@@ -1671,7 +1671,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // Cumul P(r^2) = 1 - exp(-r^2 / 4dt)
       final double r = clusteringSettings.getDistanceThreshold() / 1000;
       final double msd = 4 * d * t;
-      final double p = 1 - FastMath.exp(-r * r / msd);
+      final double p = 1 - StdMath.exp(-r * r / msd);
       ImageJUtils.log("Checking trace distance: r = %s nm, D = %s um^2/s, Cumul p(r^2|frame) = %s",
           clusteringSettings.getDistanceThreshold(), MathUtils.rounded(d), MathUtils.rounded(p));
       if (p < 0.95) {

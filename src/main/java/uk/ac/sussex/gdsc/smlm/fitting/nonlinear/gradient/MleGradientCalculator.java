@@ -25,8 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -656,9 +656,9 @@ public class MleGradientCalculator extends GradientCalculator {
    */
   public static double likelihood(double mean, double x) {
     if (x == 0) {
-      return FastMath.exp(-mean);
+      return StdMath.exp(-mean);
     }
-    return Math.pow(mean, x) * FastMath.exp(-mean) / factorial(x);
+    return Math.pow(mean, x) * StdMath.exp(-mean) / factorial(x);
   }
 
   /**

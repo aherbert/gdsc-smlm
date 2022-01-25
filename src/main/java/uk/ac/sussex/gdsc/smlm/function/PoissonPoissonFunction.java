@@ -25,8 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a combined Poisson distribution used to model a
@@ -139,7 +139,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     }
 
     // Scale the output so the cumulative probability is 1
-    return FastMath.exp(ll) * alpha;
+    return StdMath.exp(ll) * alpha;
   }
 
   /**

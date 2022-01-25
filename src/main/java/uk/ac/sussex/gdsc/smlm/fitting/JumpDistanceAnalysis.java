@@ -48,7 +48,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -58,6 +57,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.function.ChiSquaredDistributionTable;
 import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellOptimizer;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Perform curve fitting on a cumulative histogram of the mean-squared displacement (MSD) per second
@@ -1332,7 +1332,7 @@ public class JumpDistanceAnalysis {
       // p = 1/4D * exp(-x/4D)
       // final double fourD = 4 * getD(params[0]);
       final double fourD = 4 * params[0];
-      return FastMath.exp(-x / fourD) / fourD;
+      return StdMath.exp(-x / fourD) / fourD;
     }
 
     /**
@@ -1348,7 +1348,7 @@ public class JumpDistanceAnalysis {
       // final double one_fourD = 1 / (4 * getD(params[0]));
       final double one_fourD = 1 / (4 * params[0]);
       for (int i = 0; i < values.length; i++) {
-        values[i] = one_fourD * FastMath.exp(-x[i] * one_fourD);
+        values[i] = one_fourD * StdMath.exp(-x[i] * one_fourD);
       }
       return values;
     }
@@ -1400,7 +1400,7 @@ public class JumpDistanceAnalysis {
     //
     // for (int i = 0; i < jacobian.length; ++i)
     // {
-    // jacobian[i][0] = aa * FastMath.exp(-x[i] * aa) * (c + x[i] * cc);
+    // jacobian[i][0] = aa * StdMath.exp(-x[i] * aa) * (c + x[i] * cc);
     // }
     //
     // //// Check numerically ...
@@ -1436,7 +1436,7 @@ public class JumpDistanceAnalysis {
 
     @Override
     public double evaluate(double x, double[] params) {
-      return 1 - FastMath.exp(-x / (4 * params[0]));
+      return 1 - StdMath.exp(-x / (4 * params[0]));
     }
 
     @Override
@@ -1444,7 +1444,7 @@ public class JumpDistanceAnalysis {
       final double[] values = new double[x.length];
       final double fourD = 4 * variables[0];
       for (int i = 0; i < values.length; i++) {
-        values[i] = 1 - FastMath.exp(-x[i] / fourD);
+        values[i] = 1 - StdMath.exp(-x[i] / fourD);
       }
       return values;
     }
@@ -1470,7 +1470,7 @@ public class JumpDistanceAnalysis {
 
       for (int i = 0; i < jacobian.length; ++i) {
         final double b = -x[i] / fourD;
-        jacobian[i][0] = FastMath.exp(b) * b / d;
+        jacobian[i][0] = StdMath.exp(b) * b / d;
       }
 
       //// Check numerically ...
@@ -1512,7 +1512,7 @@ public class JumpDistanceAnalysis {
       for (int i = 0; i < numberOfFractions; i++) {
         final double f = params[i * 2];
         final double fourD = 4 * params[i * 2 + 1];
-        sum += (f / fourD) * FastMath.exp(-x / fourD);
+        sum += (f / fourD) * StdMath.exp(-x / fourD);
         total += f;
       }
       return MathUtils.div0(sum, total);
@@ -1546,7 +1546,7 @@ public class JumpDistanceAnalysis {
       for (int i = 0; i < x.length; i++) {
         double sum = 0;
         for (int j = 0; j < numberOfFractions; j++) {
-          sum += fOver4D[j] * FastMath.exp(-x[i] / fourD[j]);
+          sum += fOver4D[j] * StdMath.exp(-x[i] / fourD[j]);
         }
         values[i] = sum;
       }
@@ -1599,7 +1599,7 @@ public class JumpDistanceAnalysis {
       double total = 0;
       for (int i = 0; i < numberOfFractions; i++) {
         final double f = params[i * 2];
-        sum += f * FastMath.exp(-x / (4 * params[i * 2 + 1]));
+        sum += f * StdMath.exp(-x / (4 * params[i * 2 + 1]));
         total += f;
       }
       return 1 - sum / total;
@@ -1628,7 +1628,7 @@ public class JumpDistanceAnalysis {
       for (int i = 0; i < values.length; i++) {
         double sum = 0;
         for (int j = 0; j < numberOfFractions; j++) {
-          sum += f[j] * FastMath.exp(-x[i] / fourD[j]);
+          sum += f[j] * StdMath.exp(-x[i] / fourD[j]);
         }
         values[i] = 1 - sum;
       }
@@ -1724,15 +1724,15 @@ public class JumpDistanceAnalysis {
 
         for (int j = 0; j < numberOfFractions; j++) {
           // Gradient for the diffusion coefficient
-          jacobian[i][j * 2 + 1] = fraction[j] * FastMath.exp(b[j]) * b[j] / variables[j * 2 + 1];
+          jacobian[i][j * 2 + 1] = fraction[j] * StdMath.exp(b[j]) * b[j] / variables[j * 2 + 1];
 
           // Gradient for the fraction f
-          jacobian[i][j * 2] = totalMfOverTotal2[j] * FastMath.exp(b[j]);
+          jacobian[i][j * 2] = totalMfOverTotal2[j] * StdMath.exp(b[j]);
           for (int k = 0; k < numberOfFractions; k++) {
             if (j == k) {
               continue;
             }
-            jacobian[i][j * 2] += fOverTotal2[k] * FastMath.exp(b[k]);
+            jacobian[i][j * 2] += fOverTotal2[k] * StdMath.exp(b[k]);
           }
         }
       }

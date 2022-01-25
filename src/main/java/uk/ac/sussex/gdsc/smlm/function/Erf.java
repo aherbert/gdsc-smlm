@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Class for computing the error function using approximations.
@@ -167,7 +167,7 @@ public final class Erf {
 
     final double x2 = x * x;
     final double ax2 = 0.147 * x2;
-    final double ret = Math.sqrt(-FastMath.expm1(-x2 * (FOUR_OVER_PI + ax2) / (1 + ax2)));
+    final double ret = Math.sqrt(-Math.expm1(-x2 * (FOUR_OVER_PI + ax2) / (1 + ax2)));
 
     return negative ? -ret : ret;
   }
@@ -193,7 +193,7 @@ public final class Erf {
    * @return the first derivative
    */
   public static double erfDerivative(double x) {
-    return DERIVATIVE_FACTOR * FastMath.exp(-x * x);
+    return DERIVATIVE_FACTOR * StdMath.exp(-x * x);
   }
 
   /**

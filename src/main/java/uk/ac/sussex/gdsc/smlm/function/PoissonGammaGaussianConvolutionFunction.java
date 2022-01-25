@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a Poisson-Gamma-Gaussian Mixture. The Gaussian is
@@ -119,7 +119,7 @@ public class PoissonGammaGaussianConvolutionFunction
   public double likelihood(final double x, final double mu) {
     if (mu <= 0) {
       // If no Poisson mean then just use the Gaussian
-      return FastMath.exp((-x * x / twoVar) + logNormalisationGaussian);
+      return StdMath.exp((-x * x / twoVar) + logNormalisationGaussian);
     }
 
     // Note:
@@ -150,7 +150,7 @@ public class PoissonGammaGaussianConvolutionFunction
 
     if (cmin == cmax) {
       // Edge case with no range
-      return FastMath.exp(
+      return StdMath.exp(
           // Poisson-Gamma
           PoissonGammaFunction.logPoissonGamma(cmin, mu, gain)
               // Gaussian
@@ -182,7 +182,7 @@ public class PoissonGammaGaussianConvolutionFunction
     // for (int i = 0; i <= 10; i++)
     // {
     // double c = min + i * step;
-    // p += FastMath.exp(
+    // p += StdMath.exp(
     // // Poisson-Gamma
     // logPoissonGamma(c, e, g)
     // // Gaussian
@@ -194,7 +194,7 @@ public class PoissonGammaGaussianConvolutionFunction
     // {
 
     for (int c = cmin; c <= cmax; c++) {
-      pvalue += FastMath.exp(
+      pvalue += StdMath.exp(
           // Poisson-Gamma
           PoissonGammaFunction.logPoissonGamma(c, mu, gain)
               // Gaussian
