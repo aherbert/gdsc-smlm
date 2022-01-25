@@ -106,7 +106,7 @@ public final class FitProtosHelper {
     builder.setMinWidthFactor(0.5);
     builder.setMaxWidthFactor(2);
     builder.setDisableSimpleFilter(false);
-    builder.setSmartFilter(true);
+    builder.setSmartFilter(false);
     builder.setSmartFilterString("");
     defaultFilterSettings = builder.build();
   }
