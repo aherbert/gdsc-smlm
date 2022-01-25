@@ -42,7 +42,7 @@ public final class StdMath {
    * @see Math#exp(double)
    */
   public static double exp(double x) {
-    // return StdMath.exp(x)
-    return Math.exp(x);
+    return org.apache.commons.math3.util.FastMath.exp(x);
+    //return Math.exp(x);
   }
 }
