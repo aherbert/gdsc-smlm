@@ -24,12 +24,27 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
+import java.util.function.DoubleUnaryOperator;
+
 /**
  * Class for computing standard math functions.
  *
  * <p>Provides an entry point to routines, or their equivalent, found in {@link java.lang.Math}.
  */
 public final class StdMath {
+  /** Exponential function. */
+  private static final DoubleUnaryOperator exp;
+
+  static {
+    // The Math.exp function in Java 8 is slower than FastMath.
+    // From Java 9 onwards the Math.exp function is faster.
+    if (System.getProperty("java.specification.version").startsWith("1.8")) {
+      exp = org.apache.commons.math3.util.FastMath::exp;
+    } else {
+      exp = Math::exp;
+    }
+  }
+
   /** No public constructor. */
   private StdMath() {}
 
@@ -42,7 +57,6 @@ public final class StdMath {
    * @see Math#exp(double)
    */
   public static double exp(double x) {
-    return org.apache.commons.math3.util.FastMath.exp(x);
-    //return Math.exp(x);
+    return exp.applyAsDouble(x);
   }
 }
