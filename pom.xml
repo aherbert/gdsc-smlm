@@ -277,8 +277,6 @@ Software for single molecule localisation microscopy (SMLM)
           <excludes>Smlm_PlugIn*</excludes>
           <archive>
             <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>uk.ac.sussex.gdsc.smlm.Version</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
