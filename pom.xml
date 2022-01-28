@@ -99,6 +99,8 @@ Software for single molecule localisation microscopy (SMLM)
         **/math3/**/MultivariateGaussianMixtureExpectationMaximization.java
     </license.excludes>
 
+    <gdsc.automatic.module.name>uk.ac.sussex.gdsc.smlm</gdsc.automatic.module.name>
+
     <!-- Workaround to avoid duplicating config files. -->
     <gdsc.parent.dir>${basedir}</gdsc.parent.dir>
 
