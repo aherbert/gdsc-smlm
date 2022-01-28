@@ -2055,8 +2055,8 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Find the index of the given result. More formally, returns the lowest index <tt>i</tt> such
-   * that <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>, or -1
+   * Find the index of the given result. More formally, returns the lowest index {@code i} such
+   * that {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1
    * if there is no such index.
    *
    * @param result the result

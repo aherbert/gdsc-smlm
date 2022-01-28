@@ -81,9 +81,9 @@ public interface PeakResultStoreList extends PeakResultStore {
 
   /**
    * Returns the index of the first occurrence of the specified result in this store, or -1 if this
-   * list does not contain the element. More formally, returns the lowest index <tt>i</tt> such that
-   * <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>, or -1 if
-   * there is no such index.
+   * list does not contain the element. More formally, returns the lowest index {@code i} such
+   * that {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1
+   * if there is no such index.
    *
    * @param result the result
    * @return the index (or -1)
@@ -92,8 +92,8 @@ public interface PeakResultStoreList extends PeakResultStore {
 
   /**
    * Returns the index of the last occurrence of the specified result in this store, or -1 if this
-   * list does not contain the element. More formally, returns the highest index <tt>i</tt> such
-   * that <tt>(result==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;result.equals(get(i)))</tt>, or -1
+   * list does not contain the element. More formally, returns the lowest index {@code i} such
+   * that {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1
    * if there is no such index.
    *
    * @param result the result

@@ -2074,7 +2074,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
   /**
    * Macro extension function.
    *
-   * <li>Get the population fraction for the requested species from the last call to fit the jump
+   * <p>Get the population fraction for the requested species from the last call to fit the jump
    * distances.
    *
    * @param args An array of input and output variables.

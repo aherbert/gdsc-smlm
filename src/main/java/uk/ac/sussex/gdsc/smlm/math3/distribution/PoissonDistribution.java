@@ -143,7 +143,7 @@ public final class PoissonDistribution {
    *
    * <li>{@code inf[x in Z | P(X<=x) >= p]} for {@code 0 < p <= 1},</li>
    *
-   * <li>{@code inf[x in Z | P(X<=x) > 0]}</code> for {@code p = 0}.</li>
+   * <li>{@code inf[x in Z | P(X<=x) > 0]} for {@code p = 0}.</li>
    *
    * </ul>
    *

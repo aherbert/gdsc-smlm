@@ -304,8 +304,8 @@ public final class LocalDensity {
    * @param border the border
    * @return the local density
    * @see #estimate(int[], int[], int, IntDoubleConsumer)
-   * @throw {@link IllegalArgumentException} if x and y lengths do not match; or if
-   *        {@code 2 * border + 1} is greater than the maximum integer size.
+   * @throws IllegalArgumentException if x and y lengths do not match; or if {@code 2 * border + 1}
+   *         is greater than the maximum integer size.
    */
   public static double estimate(int[] x, int[] y, int border) {
     return estimate(x, y, border, null);
@@ -337,8 +337,8 @@ public final class LocalDensity {
    * @param border the border (negative values are set to zero)
    * @param regions the regions (can be {@code null})
    * @return the local density
-   * @throw {@link IllegalArgumentException} if x and y lengths do not match; or if
-   *        {@code 2 * border + 1} is greater than the maximum integer size.
+   * @throws IllegalArgumentException if x and y lengths do not match; or if {@code 2 * border + 1}
+   *         is greater than the maximum integer size.
    */
   public static double estimate(int[] x, int[] y, int border, IntDoubleConsumer regions) {
     final int n = x.length;

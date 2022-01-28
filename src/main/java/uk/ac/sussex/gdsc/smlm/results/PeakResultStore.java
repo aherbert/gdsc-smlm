@@ -185,12 +185,12 @@ public interface PeakResultStore {
   PeakResult[] subset(Predicate<PeakResult> filter);
 
   /**
-   * Returns <tt>true</tt> if this store contains the specified result. More formally, returns
-   * <tt>true</tt> if and only if this store contains at least one element <tt>e</tt> such that
-   * <tt>(result==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;result.equals(e))</tt>.
+   * Returns true if this store contains the specified result. More formally, returns true if and
+   * only if this store contains at least one element {@code e} such that
+   * {@code (result==null ? e==null : result.equals(e))}.
    *
    * @param result the result
-   * @return <tt>true</tt> if this list contains the specified result true, if successful
+   * @return true if this list contains the specified result true, if successful
    */
   boolean contains(PeakResult result);
 }
