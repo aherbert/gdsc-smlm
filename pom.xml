@@ -126,6 +126,11 @@ Software for single molecule localisation microscopy (SMLM)
       <version>${gdsc.core.version}</version>
     </dependency>
     <dependency>
+      <groupId>uk.ac.sussex.gdsc</groupId>
+      <artifactId>gdsc-core-ij</artifactId>
+      <version>${gdsc.core.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>${xstream.version}</version>
