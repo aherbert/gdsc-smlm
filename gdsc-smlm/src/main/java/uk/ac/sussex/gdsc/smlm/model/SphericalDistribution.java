@@ -25,22 +25,18 @@
 package uk.ac.sussex.gdsc.smlm.model;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.ObjectSampler;
+import org.apache.commons.rng.sampling.shape.UnitBallSampler;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 
 /**
  * Samples uniformly from the specified spherical volume.
  */
 public class SphericalDistribution implements SpatialDistribution {
-  private final double radius;
   private final double r2;
-  private final double range;
-  private final UniformRandomProvider randomGenerator;
-  private final NormalizedGaussianSampler gauss;
-  private boolean useRejectionMethod = true;
   private final double[] origin = new double[3];
+  private ObjectSampler<double[]> sampler;
 
   /**
    * Instantiates a new spherical distribution.
@@ -62,52 +58,26 @@ public class SphericalDistribution implements SpatialDistribution {
     if (randomGenerator == null) {
       randomGenerator = UniformRandomProviders.create();
     }
-    this.radius = radius;
-    this.r2 = radius * radius;
-    this.range = 2 * radius;
-    this.randomGenerator = randomGenerator;
-    gauss = SamplerUtils.createNormalizedGaussianSampler(randomGenerator);
+    if (radius > 0) {
+      r2 = radius * radius;
+      final ObjectSampler<double[]> ball = UnitBallSampler.of(randomGenerator, 3);
+      final double r = radius;
+      sampler = () -> {
+        final double[] next = ball.sample();
+        next[0] *= r;
+        next[1] *= r;
+        next[2] *= r;
+        return next;
+      };
+    } else {
+      r2 = 0;
+      sampler = () -> new double[3];
+    }
   }
 
   @Override
   public double[] next() {
-    final double[] xyz = new double[3];
-    if (radius > 0) {
-      if (useRejectionMethod) {
-        // -=-=-=-
-        // Rejection method:
-        // Sample from a cube and then check if within a sphere
-        // -=-=-=-
-        double d2 = 0;
-        do {
-          for (int i = 0; i < 3; i++) {
-            // xyz[i] = randomGenerator.nextDouble() * ((randomGenerator.nextBoolean()) ? -radius :
-            // radius);
-            // Avoid extra call to the random generator
-            xyz[i] = randomGenerator.nextDouble() * range - radius;
-          }
-          d2 = xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2];
-        } while (d2 > r2);
-      } else {
-        // -=-=-=-
-        // Transformation method:
-        // Generate a random point on the surface of the sphere and then sample within.
-        // -=-=-=-
-
-        // Generate a random unit vector: X1, X2, X3 sampled with mean 0 and variance 1
-        for (int i = 0; i < 3; i++) {
-          xyz[i] = gauss.sample();
-        }
-
-        // Calculate the distance: RsU^1/3 / length
-        final double d = (radius * Math.cbrt(randomGenerator.nextDouble()))
-            / Math.sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
-        for (int i = 0; i < 3; i++) {
-          xyz[i] *= d;
-        }
-      }
-    }
-    return xyz;
+    return sampler.sample();
   }
 
   @Override
@@ -120,26 +90,6 @@ public class SphericalDistribution implements SpatialDistribution {
   public boolean isWithinXy(double[] xyz) {
     final double[] delta = {xyz[0] - origin[0], xyz[1] - origin[1]};
     return (delta[0] * delta[0] + delta[1] * delta[1]) < r2;
-  }
-
-  /**
-   * Checks if is using the rejection method. If true then sample from the distribution using the
-   * rejection method. The alternative is a transformation method.
-   *
-   * @return true, if is use rejection method
-   */
-  public boolean isUseRejectionMethod() {
-    return useRejectionMethod;
-  }
-
-  /**
-   * Sets whether to use the rejection method. If true then sample from the distribution using the
-   * rejection method. The alternative is a transformation method.
-   *
-   * @param useRejectionMethod the new use rejection method
-   */
-  public void setUseRejectionMethod(boolean useRejectionMethod) {
-    this.useRejectionMethod = useRejectionMethod;
   }
 
   @Override

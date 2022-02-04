@@ -24,87 +24,47 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
 class SphericalDistributionTest {
-  private static Logger logger;
-
-  @BeforeAll
-  public static void beforeAll() {
-    logger = Logger.getLogger(SphericalDistributionTest.class.getName());
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    logger = null;
-  }
-
   @SeededTest
-  void canSampleUsingTransformationMethod(RandomSeed seed) {
+  void canSample(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
-    dist.setUseRejectionMethod(false);
     for (int i = 100; i-- > 0;) {
-      dist.next();
+      final double[] x = dist.next();
+      Assertions.assertTrue(MathUtils.distance(x[0], x[1], x[2], 0, 0, 0) <= radius,
+          () -> "Bad coords: " + Arrays.toString(x) + " radius=" + radius);
     }
   }
 
   @SeededTest
-  void canSampleUsingRejectionMethod(RandomSeed seed) {
+  void canSampleWithNoRadius(RandomSeed seed) {
     final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
-    final double radius = 10 + rg.nextDouble() * 10;
-    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
-    dist.setUseRejectionMethod(true);
-    for (int i = 100; i-- > 0;) {
-      dist.next();
+    final double[] expected = {0, 0, 0};
+    for (final double radius : new double[] {0.0, -0.0}) {
+      final SphericalDistribution dist = new SphericalDistribution(radius, rg);
+      for (int i = 5; i-- > 0;) {
+        final double[] x = dist.next();
+        Assertions.assertArrayEquals(expected, x);
+      }
     }
   }
 
-  @SeededTest
-  void rejectionMethodIsFasterThanTransformationMethod(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
-    final double radius = 10 + rg.nextDouble() * 10;
-    final SphericalDistribution dist = new SphericalDistribution(radius, rg);
-    dist.setUseRejectionMethod(false);
-    for (int i = 100; i-- > 0;) {
-      dist.next();
-    }
-    dist.setUseRejectionMethod(true);
-    for (int i = 100; i-- > 0;) {
-      dist.next();
-    }
-
-    dist.setUseRejectionMethod(false);
-    final long time1 = getRunTime(dist);
-    dist.setUseRejectionMethod(true);
-    final long time2 = getRunTime(dist);
-    Assertions.assertTrue(time1 > time2,
-        () -> String.format("Rejection = %d, Transformation = %d", time2, time1));
-    logger.log(
-        TestLogUtils.getRecord(Level.INFO, "Rejection = %d, Transformation = %d", time2, time1));
-  }
-
-  private static long getRunTime(SphericalDistribution dist) {
-    final long start = System.nanoTime();
-    for (int i = 1000000; i-- > 0;) {
-      dist.next();
-    }
-    return System.nanoTime() - start;
+  @ParameterizedTest
+  @ValueSource(doubles = {-1, Double.NaN})
+  void testIllegalRadiusThrows(double radius) {
+    Assertions.assertThrows(IllegalArgumentException.class,
+        () -> new SphericalDistribution(radius));
   }
 }
