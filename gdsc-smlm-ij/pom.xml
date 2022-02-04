@@ -120,4 +120,21 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <excludes>Smlm_PlugIn*</excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <configuration>
+          <excludes>Smlm_PlugIn*</excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

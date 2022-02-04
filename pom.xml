@@ -251,7 +251,6 @@ Software for single molecule localisation microscopy (SMLM)
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <excludes>Smlm_PlugIn*</excludes>
           <archive>
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -262,9 +261,6 @@ Software for single molecule localisation microscopy (SMLM)
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
-        <configuration>
-          <excludes>Smlm_PlugIn*</excludes>
-        </configuration>
         <executions>
           <execution>
             <id>attach-sources</id>
