@@ -25,7 +25,7 @@
 /**
  * Provide classes to filter 2D data.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.ij.filters;

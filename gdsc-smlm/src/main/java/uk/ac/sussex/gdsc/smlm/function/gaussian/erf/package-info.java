@@ -39,7 +39,7 @@
  * <p>This work is based on the paper:<br> Smith et al, (2010). Fast, single-molecule localisation
  * that achieves theoretically minimum uncertainty. Nature Methods 7, 373-375 (supplementary note).
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;

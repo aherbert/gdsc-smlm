@@ -29,7 +29,7 @@
  * <p>These classes are implementations of the interfaces defined in
  * {@link uk.ac.sussex.gdsc.smlm.fitting}.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;

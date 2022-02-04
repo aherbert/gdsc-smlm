@@ -32,7 +32,7 @@
  * information (for EM-CCD cameras). <li>Fast log computation using tabulated values. <li>Camera
  * noise models (e.g. CCD, EM-CCD). </ul>
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.function;

@@ -25,7 +25,7 @@
 /**
  * Provides classes for graphical display of data, for example tables.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;

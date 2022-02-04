@@ -25,7 +25,7 @@
 /**
  * Provides classes to model a pixel camera, for example the camera of a microscope.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.model.camera;

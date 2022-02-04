@@ -50,7 +50,6 @@ import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMix
  * @see <a
  *      href="https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm">Expectation–maximization
  *      algorithm (Wikipedia)</a>
- * @since 1.0
  */
 public class MultivariateGaussianMixtureExpectationMaximization {
   /** Default maximum number of iterations allowed per fitting process. */

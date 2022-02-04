@@ -547,7 +547,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    *         of the <code>JTable</code> as determined by the method <code>getRowCount</code>
    * @see javax.swing.table.TableRowSorter
    * @see javax.swing.JTable#getRowCount()
-   * @since 1.6
    */
   public int convertRowIndexToModel(int viewRowIndex) {
     return table.convertRowIndexToModel(viewRowIndex);
@@ -574,7 +573,6 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    * @throws IndexOutOfBoundsException if sorting is enabled and passed an index outside the number
    *         of rows of the <code>TableModel</code>
    * @see javax.swing.table.TableRowSorter
-   * @since 1.6
    */
   public int convertRowIndexToView(int modelRowIndex) {
     return table.convertRowIndexToView(modelRowIndex);

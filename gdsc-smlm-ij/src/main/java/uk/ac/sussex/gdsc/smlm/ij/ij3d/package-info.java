@@ -26,7 +26,7 @@
  * Provides classes to construct objects for display in the <a
  * href="https://imagej.nih.gov/ij/plugins/3d-viewer/">ImageJ 3D Viewer</a>.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;

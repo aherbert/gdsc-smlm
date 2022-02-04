@@ -27,7 +27,7 @@
  * href="https://imagej.nih.gov/ij/">ImageJ</a> plugins.
  *
  * @see <a href="https://imagej.nih.gov/ij/">ImageJ</a>
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm;

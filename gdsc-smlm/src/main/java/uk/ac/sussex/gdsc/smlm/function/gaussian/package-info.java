@@ -35,7 +35,7 @@
  *
  * <p>The functions can support rotated elliptical 2D Gaussians.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;

@@ -35,7 +35,7 @@
  * integral over the 1x1 area surrounding point (X,Y) is approximated using the function value at
  * (X,Y).
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.function.cspline;

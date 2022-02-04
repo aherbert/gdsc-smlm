@@ -29,6 +29,6 @@
  * Single Molecule Localisation Microscopy (SMLM) project. The plugins are experimental and subject
  * to change without notice.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;

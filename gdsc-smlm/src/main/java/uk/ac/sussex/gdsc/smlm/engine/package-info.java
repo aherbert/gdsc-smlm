@@ -33,7 +33,7 @@
  * width. Fitting may not process all candidates due to the use of smart stopping criteria based on
  * the acceptance rate.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.engine;

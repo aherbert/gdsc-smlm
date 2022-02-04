@@ -26,7 +26,7 @@
  * Provides modelling classes for localisation microscopy including Point Spread Functions (PSFs),
  * fluorophores and molecule diffusion.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.model;

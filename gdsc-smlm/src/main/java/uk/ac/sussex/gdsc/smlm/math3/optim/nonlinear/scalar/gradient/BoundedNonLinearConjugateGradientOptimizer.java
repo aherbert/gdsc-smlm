@@ -108,8 +108,6 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * The initial step is a factor with respect to the search direction (which itself is roughly
    * related to the gradient of the function). <br> It is used to find an interval that brackets the
    * optimum in line search.
-   *
-   * @since 3.1
    */
   public static class BracketingStep implements OptimizationData {
     /** Initial step. */

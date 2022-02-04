@@ -25,7 +25,7 @@
 /**
  * Provides classes for the stopping criteria (convergence) of fitting algorithms.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;

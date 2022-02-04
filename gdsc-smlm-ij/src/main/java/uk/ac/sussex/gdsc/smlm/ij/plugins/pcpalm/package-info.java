@@ -25,7 +25,7 @@
 /**
  * Provides PC-PALM plugins to execute within <a href="https://imagej.nih.gov/ij/">ImageJ</a>.
  *
- * @since 1.0.0
+ * @since 1.0
  */
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
