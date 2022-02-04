@@ -30,7 +30,6 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -39,7 +38,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -59,23 +57,18 @@ import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.gui.ScreenDimensionHelper;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SplitMix;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.CalibrationWriter;
 import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableSettings;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SummariseResults;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TiffSeriesViewer.TiffSeriesVirtualStack;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
-import uk.ac.sussex.gdsc.smlm.results.ArrayPeakResultStore;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.smlm.results.PeakResultStoreList;
 import uk.ac.sussex.gdsc.smlm.results.sort.FramePeakResultComparator;
 
 /**
@@ -588,69 +581,5 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
    */
   public void convertRowIndexToView(int[] indices) {
     table.convertRowIndexToView(indices);
-  }
-
-  /**
-   * Launch the application.
-   *
-   * @param args the arguments
-   */
-  public static void main(String[] args) {
-    final SplitMix r = SplitMix.new64(System.currentTimeMillis());
-    final int n = 20;
-
-    final ListSelectionModel selectionModel = new DefaultListSelectionModel();
-
-    EventQueue.invokeLater((Runnable) () -> {
-      try {
-        final PeakResultStoreList store = new ArrayPeakResultStore(10);
-        for (int i = n; i-- > 0;) {
-          store.add(new PeakResult(r.nextInt(), r.nextInt(), r.nextInt(), r.nextFloat(),
-              r.nextDouble(), r.nextFloat(), r.nextFloat(), PeakResult.createParams(r.nextFloat(),
-                  r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat()),
-              null));
-        }
-
-        final CalibrationWriter cw = new CalibrationWriter();
-        cw.setNmPerPixel(100);
-        cw.setCountPerPhoton(10);
-        cw.setDistanceUnit(DistanceUnit.PIXEL);
-        cw.setIntensityUnit(IntensityUnit.COUNT);
-
-        final ResultsTableSettings.Builder tableSettings = ResultsTableSettings.newBuilder();
-        tableSettings.setDistanceUnit(DistanceUnit.NM);
-        tableSettings.setIntensityUnit(IntensityUnit.PHOTON);
-        tableSettings.setShowFittingData(true);
-        tableSettings.setShowNoiseData(true);
-        tableSettings.setShowPrecision(true);
-        tableSettings.setRoundingPrecision(4);
-
-        final PeakResultTableModel model =
-            new PeakResultTableModel(store, cw.getCalibration(), null, tableSettings.build());
-
-        final PeakResultTableModelFrame d =
-            new PeakResultTableModelFrame(model, null, selectionModel);
-        d.setTitle("D");
-        d.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        d.setVisible(true);
-
-        // Selecting in one list activates the other list
-
-        final PeakResultTableModelFrame d2 =
-            new PeakResultTableModelFrame(model, null, selectionModel);
-        d2.setTitle("D2");
-        // Since we have the same selection model we need the same row sorter,
-        // otherwise the selection is scrambled by sorting.
-        // The alternative would be to get the source for the selection event (the table)
-        // and get the row sorter to do the mapping.
-        // However this breaks deletion of data as the row sorter double processes the deletion.
-        // Basically only one table can use the same selection model when sorting is desired.
-        // d2.table.setRowSorter(d.table.getRowSorter())
-        d2.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        d2.setVisible(true);
-      } catch (final Exception ex) {
-        ex.printStackTrace();
-      }
-    });
   }
 }
