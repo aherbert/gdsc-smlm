@@ -59,8 +59,14 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - gdsc-core
      - Contains the GDSC core library.
 
+   * - gdsc-core-ij
+     - Contains the GDSC core ``ImageJ`` library.
+
    * - gdsc-smlm
-     - Contains the GDSC SMLM plugins.
+     - Contains the GDSC SMLM library.
+
+   * - gdsc-smlm-ij_
+     - Contains the GDSC SMLM ``ImageJ`` plugins.
 
    * - ejml
      - Efficient Java Matrix Library for linear algebra. Requires version 0.24. This is the version used by ``Fiji``.
