@@ -9,17 +9,17 @@
     <relativePath>../gdsc-ij-parent</relativePath>
   </parent>
 
-  <artifactId>gdsc-smlm_</artifactId>
+  <artifactId>gdsc-smlm-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
-  <name>GDSC SMLM plugins for ImageJ</name>
+  <name>GDSC SMLM library for single molecule localisation microscopy</name>
   <url>http:///github.com/aherbert/gdsc-smlm</url>
   <organization>
     <name>Genome Damage and Stability Centre</name>
     <url>http://www.sussex.ac.uk/gdsc/</url>
   </organization>
-  <description>Genome Damage and Stability Centre SMLM ImageJ Plugins
+  <description>Genome Damage and Stability Centre SMLM
 
 Software for single molecule localisation microscopy (SMLM)
 </description>
@@ -126,16 +126,11 @@ Software for single molecule localisation microscopy (SMLM)
       <version>${gdsc.core.version}</version>
     </dependency>
     <dependency>
-      <groupId>uk.ac.sussex.gdsc</groupId>
-      <artifactId>gdsc-core-ij</artifactId>
-      <version>${gdsc.core.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>${xstream.version}</version>
       <exclusions>
-        <!-- XStream issue 117: Duplicate classes in xpp3_min and xmlpull (https://github.com/x-stream/xstream/issues/117). 
+        <!-- XStream issue 117: Duplicate classes in xpp3_min and xmlpull (https://github.com/x-stream/xstream/issues/117).
           Current resolution is to ignore xmlpull. -->
         <exclusion>
           <groupId>xmlpull</groupId>
@@ -164,17 +159,8 @@ Software for single molecule localisation microscopy (SMLM)
       <artifactId>protobuf-java-util</artifactId>
       <version>${protobuf.version}</version>
     </dependency>
-    <dependency>
-      <groupId>us.hebi.matlab.mat</groupId>
-      <artifactId>mfl-core</artifactId>
-      <version>${mfl-core.version}</version>
-    </dependency>
 
     <!-- Managed dependencies -->
-    <dependency>
-      <groupId>net.imagej</groupId>
-      <artifactId>ij</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
@@ -190,11 +176,6 @@ Software for single molecule localisation microscopy (SMLM)
     <dependency>
       <groupId>net.sf.trove4j</groupId>
       <artifactId>trove4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>sc.fiji</groupId>
-      <artifactId>3D_Viewer</artifactId>
-      <!-- For testing <version>4.0.3-SNAPSHOT</version> -->
     </dependency>
 
     <!-- TESTING -->
@@ -224,18 +205,6 @@ Software for single molecule localisation microscopy (SMLM)
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt-main</artifactId>
-      <optional>true</optional>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all-main</artifactId>
-      <optional>true</optional>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
@@ -255,8 +224,8 @@ Software for single molecule localisation microscopy (SMLM)
     <pluginManagement>
       <plugins>
 
-        <!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT <plugin> <artifactId>maven-enforcer-plugin</artifactId> 
-          <version>1.4.1</version> <executions> <execution> <id>enforce-rules</id> <goals> <goal>enforce</goal> </goals> <configuration> 
+        <!-- This is added purely for testing against the latest 3D_Viewer SNAPSHOT <plugin> <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.4.1</version> <executions> <execution> <id>enforce-rules</id> <goals> <goal>enforce</goal> </goals> <configuration>
           <skip>true</skip> </configuration> </execution> </executions> </plugin> -->
 
       </plugins>
@@ -274,6 +243,7 @@ Software for single molecule localisation microscopy (SMLM)
           <execution>
             <goals>
               <goal>compile</goal>
+              <goal>test-compile</goal>
             </goals>
           </execution>
         </executions>
@@ -390,6 +360,11 @@ Software for single molecule localisation microscopy (SMLM)
       </testResource>
     </testResources>
   </build>
+
+  <modules>
+    <module>gdsc-smlm</module>
+    <module>gdsc-smlm-ij</module>
+  </modules>
 
   <profiles>
     <profile>

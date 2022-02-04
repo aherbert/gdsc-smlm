@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+// ProtoBuffer description file for configuration settings of the GDSC SMLM Java code.
+// Authors: Alex Herbert, 2017
+// License: GPL V3
+package uk.ac.sussex.gdsc.smlm.data.config;
+
+option java_outer_classname = "CalibrationProtos";
+
+import "uk/ac/sussex/gdsc/smlm/data/config/unit.proto";
+import "uk/ac/sussex/gdsc/smlm/data/config/fit.proto";
+
+// Define the calibration for distance
+message DistanceCalibration {
+  // The distance unit.
+  DistanceUnit distance_unit = 1;
+  // The camera pixel size in nanometers.
+  double nm_per_pixel = 2;
+}
+
+// Define the calibration for time
+message TimeCalibration {
+  // The time unit. This is currently unused as it is assumed the time in the results
+  // is in frames.
+  TimeUnit time_unit = 1;
+  // The exposure time in milliseconds per frame.
+  double exposure_time = 2;
+}
+
+message IntensityCalibration {
+  // The intensity unit.
+  IntensityUnit intensity_unit = 1;
+  // The gain (Count/photon). Can be used to convert the signal in Analogue-to-Digital
+  // count units (Counts) to photons.
+  double count_per_photon = 2;
+}
+
+// Define the calibration for angles
+message AngleCalibration {
+  // The angle units, e.g. for a rotated point spread function.
+  AngleUnit angle_unit = 1;
+}
+
+// The camera type
+enum CameraType {
+  CAMERA_TYPE_NA = 0; // Not available
+  EMCCD = 1; // Electron Multiplying Charge Coupled Device (EM CCD)
+  CCD = 2; // Charge Coupled Device (CCD)
+  SCMOS = 3; // Scientific Complementary Metal-Oxide-Semiconductor (sCMOS)
+}
+
+// Define the camera calibration
+message CameraCalibration {
+  // Amplification (count/electron) has been removed and replaced by quantum efficiency
+  reserved 4;
+  reserved "count_per_electron";
+
+  // The camera type.
+  CameraType camera_type = 1;
+
+  // The camera Gaussian read noise (in Counts).
+  double read_noise = 2;
+
+  // The camera bias (in Counts)
+  double bias = 3;
+
+  // The camera model name. This should contain all the information required to
+  // load the camera model, e.g. in the case of a per-pixel camera model for sCMOS cameras.
+  string camera_model_name = 5;
+
+  // Define the quantum efficiency (QE in electron/photon) of the microscope camera.
+  // Note that the camera noise model assumes that photons are converted to counts by
+  // a process that is not perfect (i.e. it has noise). The underlying process is
+  // photons converted to electrons in the camera chip and then amplification
+  // (count/electron) occurring in the camera hardware. Ideally this should be recorded
+  // by storing the QE and the amplification. However the total gain (Count/photon)
+  // is already stored with the results. Thus the amplification can be inferred by
+  // dividing the total gain by the quantum efficiency which should be in the range 0-1.
+  double quantum_efficiency = 6;
+}
+
+// Define the calibration for the result data
+message ResultDataCalibration {
+  // Results may have an XY localisation precision. This stores the method used to
+  // compute the localisation precision.
+  PrecisionMethod precision_method = 1;
+}
+
+// Define the calibration for the results. The calibration contains details of the
+// results units and how to convert them. Note that data can be loaded without knowledge
+// of the camera used so the distance, time and intensity calibration are separate.
+message Calibration {
+  // The distance calibration.
+  DistanceCalibration distance_calibration = 1;
+
+  // The time calibration.
+  TimeCalibration time_calibration = 2;
+
+  // The intensity calibration
+  IntensityCalibration intensity_calibration = 3;
+
+  // The angle calibration.
+  AngleCalibration angle_calibration = 4;
+
+  // The camera calibration.
+  CameraCalibration camera_calibration = 5;
+
+  // The result data calibration.
+  ResultDataCalibration result_data_calibration = 6;
+}
+
+// Define a camera model resource that can be loaded
+message CameraModelResource {
+  // The x origin of the camera pixel data
+  int32 x = 1;
+  // The y origin of the camera pixel data
+  int32 y = 2;
+  // The width of the camera pixel data
+  int32 width = 3;
+  // The height of the camera pixel data
+  int32 height = 4;
+  // The filename where the model data is stored
+  string filename = 5;
+}
+
+// Define the camera model settings
+message CameraModelSettings {
+  map<string, CameraModelResource> camera_model_resources = 1;
+}
