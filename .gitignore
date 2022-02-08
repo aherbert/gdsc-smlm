@@ -3,7 +3,7 @@ target
 .classpath
 .settings
 /macros
-/plugins
+gdsc-smlm-ij/plugins
 *.lut
 JumpDistanceAnalysisTest.dat
 /gdsc.smlm.settings.xml
