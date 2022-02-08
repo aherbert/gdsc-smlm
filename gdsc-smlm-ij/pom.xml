@@ -36,7 +36,11 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
   <scm>
     <connection>scm:git:git://github.com/aherbert/gdsc-smlm.git</connection>
     <developerConnection>scm:git:ssh://github.com/aherbert/gdsc-smlm.git</developerConnection>
-    <url>https://github.com/aherbert/gdsc-smlm</url>
+    <!-- URL used in org.scijava.search.SourceFinder to look up the source from
+     the ImageJ search bar. Add the sub-module path to the latest version.
+     The base repo URL generates an invalid link as it doesn't include the
+     sub-module in the path to the class source file. -->
+    <url>https://github.com/aherbert/gdsc-smlm/tree/master/gdsc-smlm-ij/src/main/java</url>
   </scm>
   <issueManagement>
     <system>GitHub Issues</system>
