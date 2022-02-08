@@ -106,18 +106,9 @@ public class PoissonCalculator {
       // mll = 0
       if (x[i] > 0.0) {
         final double logx = Math.log(x[i]);
-        if (x[i] <= 1) {
-          // When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
-          // Compute the actual maximum log likelihood
-          mll += x[i] * logx - x[i];
-        } else if (x[i] <= APPROXIMATION_X) {
+        if (x[i] <= APPROXIMATION_X) {
           // At low values of log(n!) we use the gamma function as the relative error of the
           // approximation is high.
-          // Note that the logGamma function uses only 1 Math.log() call when the input is
-          // below 2.5. Above that it uses 2 calls. So the cost for this accuracy is an extra
-          // Math.log() call.
-          // final double logXFactorial = Gamma.logGamma(x[i] + 1)
-          // Note Math.log1p is faster than FastMath.log1p.
           final double logXFactorial = -Math.log1p(Gamma.invGamma1pm1(x[i]));
           sumLogXFactorial += logXFactorial;
           mll += x[i] * logx - x[i] - logXFactorial;
@@ -335,46 +326,54 @@ public class PoissonCalculator {
    * @return x!
    */
   public static double logFactorial(double x) {
-    if (x > 1) {
-      return logGamma(1 + x);
-    }
-    return 0.0;
+    return logGamma1p(x);
   }
 
   /**
-   * Copied from Apache Commons FastMath. Removed support for NaN and x < 0.5.
+   * Compute {@code log(Gamma(1+x))}.
    *
-   * <p>Returns the value of log&nbsp;&Gamma;(x) for x&nbsp;&gt;&nbsp;0. </p>
+   * <p>Adapted from Apache Commons FastMath logGamma. Removed support for NaN and negative x.
+   * Updated the code to use x or (x+1) where appropriate.
    *
-   * <p>For x &le; 8, the implementation is based on the double precision implementation in the
-   * <em>NSWC Library of Mathematics Subroutines</em>, {@code DGAMLN}. For x &gt; 8, the
-   * implementation is based on </p> <ul> <li><a
-   * href="http://mathworld.wolfram.com/GammaFunction.html">Gamma Function</a>, equation (28).</li>
+   * <p>For x &le; 7, the implementation is based on the double precision implementation in the
+   * <em>NSWC Library of Mathematics Subroutines</em>, {@code DGAMLN}. For x &gt; 7, the
+   * implementation is based on </p>
+   *
+   * <ul>
+   *
+   * <li><a href="http://mathworld.wolfram.com/GammaFunction.html">Gamma Function</a>, equation
+   * (28).</li>
+   *
    * <li><a href="http://mathworld.wolfram.com/LanczosApproximation.html"> Lanczos
-   * Approximation</a>, equations (1) through (5).</li> <li><a
-   * href="http://my.fit.edu/~gabdo/gamma.txt">Paul Godfrey, A note on the computation of the
-   * convergent Lanczos complex Gamma approximation</a></li> </ul>
+   * Approximation</a>, equations (1) through (5).</li>
+   *
+   * <li><a href="http://my.fit.edu/~gabdo/gamma.txt">Paul Godfrey, A note on the computation of the
+   * convergent Lanczos complex Gamma approximation</a></li>
+   *
+   * </ul>
    *
    * @param x Argument.
-   * @return the value of {@code log(Gamma(x))}, {@code Double.NaN} if {@code x <= 0.0}.
+   * @return the value of {@code log(Gamma(1+x))}
    */
-  private static double logGamma(double x) {
-    // No support for x < 0.5
-
-    if (x <= 2.5) {
-      return Gamma.logGamma1p((x - 0.5) - 0.5);
-    } else if (x <= 8.0) {
-      final int n = (int) Math.floor(x - 1.5);
+  private static double logGamma1p(double x) {
+    if (x <= APPROXIMATION_X) {
+      if (x == 0) {
+        return 0;
+      }
+      return -Math.log1p(Gamma.invGamma1pm1(x));
+    }
+    if (x <= 7) {
+      final int n = (int) Math.floor(x - 0.5);
       double prod = 1.0;
-      for (int i = 1; i <= n; i++) {
+      for (int i = 0; i < n; i++) {
         prod *= x - i;
       }
-      return Gamma.logGamma1p(x - (n + 1)) + Math.log(prod);
-    } else {
-      final double sum = Gamma.lanczos(x);
-      final double tmp = x + Gamma.LANCZOS_G + .5;
-      return ((x + .5) * Math.log(tmp)) - tmp + HALF_LOG_2_PI + Math.log(sum / x);
+      return Gamma.logGamma1p(x - n) + Math.log(prod);
     }
+    final double x1p = x + 1;
+    final double sum = Gamma.lanczos(x1p);
+    final double tmp = x + Gamma.LANCZOS_G + 1.5;
+    return ((x + 1.5) * Math.log(tmp)) - tmp + HALF_LOG_2_PI + Math.log(sum / x1p);
   }
 
   /**
@@ -399,7 +398,6 @@ public class PoissonCalculator {
    * must be positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -440,7 +438,6 @@ public class PoissonCalculator {
    * must be positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -464,7 +461,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -488,11 +484,7 @@ public class PoissonCalculator {
     // However the log(x) is needed in the O(ln(x)) computation.
 
     // Use the Stirling approximation when appropriate
-    if (x <= 1) {
-      // When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
-      // Compute the actual log likelihood
-      return x * Math.log(mean) - mean;
-    } else if (x <= APPROXIMATION_X) {
+    if (x <= APPROXIMATION_X) {
       // At low values of log(n!) we use the gamma function as the relative error of the
       // approximation is high.
       // Note that the logGamma function uses only 1 Math.log() call when the input is
@@ -500,14 +492,13 @@ public class PoissonCalculator {
       // return x * Math.log(mean) - mean - Gamma.logGamma(x[i] + 1)
       // Note Math.log1p is faster than FastMath.log1p.
       return x * Math.log(mean) - mean + Math.log1p(Gamma.invGamma1pm1(x));
-    } else {
-      // Approximate log(n!) using Stirling's approximation using the first 3 terms.
-      // This will have a maximum relative error of approximately 6.7e-5
-      // ll = x * log(mean) - mean - x * log(x) + x - O(ln(x))
-      // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
-      return x * Math.log(mean) - mean - HALF_LOG_2_PI - (x + 0.5) * Math.log(x) + x
-          - ONE_OVER_12 / x + ONE_OVER_360 / pow3(x);
     }
+    // Approximate log(n!) using Stirling's approximation using the first 3 terms.
+    // This will have a maximum relative error of approximately 6.7e-5
+    // ll = x * log(mean) - mean - x * log(x) + x - O(ln(x))
+    // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
+    return x * Math.log(mean) - mean - HALF_LOG_2_PI - (x + 0.5) * Math.log(x) + x - ONE_OVER_12 / x
+        + ONE_OVER_360 / pow3(x);
   }
 
   /**
@@ -515,7 +506,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -540,11 +530,7 @@ public class PoissonCalculator {
     // However the log(x) is needed in the O(ln(x)) computation.
 
     // Use the Stirling approximation when appropriate
-    if (x <= 1) {
-      // When x is below 1 then the factorial can be omitted, i.e. log(x!) = 0
-      // Compute the actual log likelihood
-      return x * fastLog.log(mean) - mean;
-    } else if (x <= APPROXIMATION_X) {
+    if (x <= APPROXIMATION_X) {
       // At low values of log(n!) we use the gamma function as the relative error of the
       // approximation is high.
       // Note that the logGamma function uses only 1 Math.log() call when the input is
@@ -552,14 +538,13 @@ public class PoissonCalculator {
       // return x * Math.log(mean) - mean - Gamma.logGamma(x[i] + 1)
       // Note Math.log1p is faster than FastMath.log1p.
       return x * fastLog.log(mean) - mean + Math.log1p(Gamma.invGamma1pm1(x));
-    } else {
-      // Approximate log(n!) using Stirling's approximation using the first 3 terms.
-      // This will have a maximum relative error of approximately 6.7e-5
-      // ll = x * log(mean) - mean - x * log(x) + x - O(ln(x))
-      // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
-      return x * fastLog.log(mean) - mean - HALF_LOG_2_PI - (x + 0.5) * fastLog.log(x) + x
-          - ONE_OVER_12 / x + ONE_OVER_360 / pow3(x);
     }
+    // Approximate log(n!) using Stirling's approximation using the first 3 terms.
+    // This will have a maximum relative error of approximately 6.7e-5
+    // ll = x * log(mean) - mean - x * log(x) + x - O(ln(x))
+    // O(ln(x)) = 0.5 * log(2*pi) + 0.5 * log(x) + 1/12x - 1/360x^3
+    return x * fastLog.log(mean) - mean - HALF_LOG_2_PI - (x + 0.5) * fastLog.log(x) + x
+        - ONE_OVER_12 / x + ONE_OVER_360 / pow3(x);
   }
 
   /**
@@ -605,7 +590,6 @@ public class PoissonCalculator {
    * must be positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -633,7 +617,6 @@ public class PoissonCalculator {
    * must be positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param mean the mean
    * @param x the x
@@ -649,7 +632,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -678,7 +660,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -692,7 +673,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @return the maximum log likelihood
@@ -712,7 +692,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @param fastLog the fast log function
@@ -727,7 +706,6 @@ public class PoissonCalculator {
    * positive.
    *
    * <p>Computation is done using an approximation to x! when x is above {@link #APPROXIMATION_X}.
-   * The number of calls to Math.log() is 2 for all x over 1.
    *
    * @param x the x
    * @param fastLog the fast log function
