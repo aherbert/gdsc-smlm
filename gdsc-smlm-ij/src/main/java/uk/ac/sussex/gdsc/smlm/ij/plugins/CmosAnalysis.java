@@ -32,6 +32,7 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
+import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 import java.io.BufferedOutputStream;
@@ -1006,12 +1007,7 @@ public class CmosAnalysis implements PlugIn {
     if (!egd.wasCanceled()) {
       settings.modelName = egd.getNextString();
       settings.modelDirectory = egd.getNextString();
-      final PerPixelCameraModel cameraModel =
-          new PerPixelCameraModel(width, height, bias, gain, variance);
-      if (!CameraModelManager.save(cameraModel,
-          new File(settings.modelDirectory, settings.modelName).getPath())) {
-        IJ.error(TITLE, "Failed to save model to file");
-      }
+      saveCameraModel(width, height, bias, gain, variance);
     }
     IJ.showStatus(""); // Remove the status from the ij.io.ImageWriter class
 
@@ -1120,5 +1116,61 @@ public class CmosAnalysis implements PlugIn {
     }
 
     ImageJUtils.log(result.toString());
+  }
+
+  /**
+   * Save the camera model. The data is validated. If invalid then the raw data files are saved,
+   * otherwise the camera model is saved.
+   *
+   * @param width the width
+   * @param height the height
+   * @param bias the bias
+   * @param gain the gain
+   * @param variance the variance
+   */
+  private void saveCameraModel(int width, int height, float[] bias, float[] gain,
+      float[] variance) {
+    PerPixelCameraModel cameraModel;
+    try {
+      cameraModel = new PerPixelCameraModel(width, height, bias, gain, variance);
+    } catch (IllegalArgumentException ex) {
+      ImageJUtils.log("Invalid per-pixel camera model: %s", ex.getMessage());
+
+      // Save raw data
+      final ImageStack stack = new ImageStack(width, height);
+      stack.addSlice("Bias", bias);
+      stack.addSlice("Gain", gain);
+      stack.addSlice("Variance", variance);
+      final ImagePlus imp = new ImagePlus(settings.modelName, stack);
+      final String filename =
+          Paths.get(settings.modelDirectory, settings.modelName + ".error.tif").toString();
+      ImageJUtils.log("Saving raw data to: %s", filename);
+      new FileSaver(imp).saveAsTiffStack(filename);
+
+      // Check for bad data
+      final int size = bias.length;
+      int errors = 0;
+      for (int i = 0; i < size && errors < 100; i++) {
+        if (!Double.isFinite(bias[i])) {
+          ImageJUtils.log("Pixel [%d,%d] Bias %s", i % width, i / width, bias[i]);
+          errors++;
+        }
+        if (!(gain[i] <= Double.MAX_VALUE && gain[i] > 0)) {
+          ImageJUtils.log("Pixel [%d,%d] Gain %s", i % width, i / width, gain[i]);
+          errors++;
+        }
+        if (!(variance[i] <= Double.MAX_VALUE && variance[i] >= 0)) {
+          ImageJUtils.log("Pixel [%d,%d] Variance %s", i % width, i / width, variance[i]);
+          errors++;
+        }
+      }
+
+      IJ.error(TITLE, "Invalid per-pixel camera model.\n \nCheck the ImageJ log for errors.");
+      return;
+    }
+    if (!CameraModelManager.save(cameraModel,
+        new File(settings.modelDirectory, settings.modelName).getPath())) {
+      IJ.error(TITLE, "Failed to save model to file");
+    }
   }
 }
