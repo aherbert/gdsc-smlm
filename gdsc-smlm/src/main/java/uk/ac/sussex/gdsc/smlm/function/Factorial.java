@@ -171,8 +171,8 @@ public final class Factorial {
       return prod / (1 + Gamma.invGamma1pm1(t));
     }
 
-    final double x1p = x + 1;
+    final double xp1 = x + 1;
     final double y = x + LANCZOS_G_PLUS_1_5;
-    return SQRT_TWO_PI / x1p * Math.pow(y, x + 1.5) * Math.exp(-y) * Gamma.lanczos(x1p);
+    return SQRT_TWO_PI / xp1 * Math.pow(y, x + 1.5) * Math.exp(-y) * Gamma.lanczos(xp1);
   }
 }

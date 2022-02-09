@@ -111,9 +111,9 @@ public final class LogFactorial {
       }
       return Math.log(prod) - Math.log1p(Gamma.invGamma1pm1(x - n));
     }
-    final double x1p = x + 1;
-    final double sum = Gamma.lanczos(x1p);
+    final double xp1 = x + 1;
+    final double sum = Gamma.lanczos(xp1);
     final double tmp = x + LANCZOS_G_PLUS_1_5;
-    return (x + 1.5) * Math.log(tmp) - tmp + LN_SQRT_TWO_PI + Math.log(sum / x1p);
+    return (x + 1.5) * Math.log(tmp) - tmp + LN_SQRT_TWO_PI + Math.log(sum / xp1);
   }
 }
