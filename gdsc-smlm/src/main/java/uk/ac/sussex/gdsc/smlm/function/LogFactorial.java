@@ -100,9 +100,7 @@ public final class LogFactorial {
    */
   private static double logGamma1p(double x) {
     if (x <= 1.5) {
-      if (x == 0) {
-        return 0;
-      }
+      // No check for x == 0 as this is handled as a representable int
       return -Math.log1p(Gamma.invGamma1pm1(x));
     }
     if (x <= 7) {
