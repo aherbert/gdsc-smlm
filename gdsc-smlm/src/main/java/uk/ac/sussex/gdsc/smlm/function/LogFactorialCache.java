@@ -43,7 +43,7 @@ public class LogFactorialCache {
   private final ReadWriteLock objectLock = new ReentrantReadWriteLock();
 
   /**
-   * Instantiates a new log factorial.
+   * Create an instance.
    *
    * <p>The size of the newly constructed object can be obtained using {@link #getMaxN()}.
    */
@@ -62,7 +62,7 @@ public class LogFactorialCache {
   }
 
   /**
-   * Instantiates a new log factorial using the given table size.
+   * Create an instance using the given table size.
    *
    * @param n argument
    */
@@ -99,7 +99,7 @@ public class LogFactorialCache {
   }
 
   /**
-   * Increase the tabulated values up to a max n. Does nothing if already above the given n.
+   * Increase the table size up to a max n. Does nothing if already above the given n.
    *
    * <p>Note: This has synchronisation overhead.
    *
@@ -142,12 +142,11 @@ public class LogFactorialCache {
    * @param minN the min N
    * @param maxN the max N
    * @throws IllegalArgumentException If min is greater than max
+   * @see #getLogFactorialUnsafe(int)
    */
   public void ensureRange(int minN, int maxN) {
     // Validate the range
-    if (minN < 0) {
-      minN = 0;
-    }
+    minN = Math.max(0, minN);
     maxN = getLowerLimitN(maxN);
     if (minN > maxN) {
       throw new IllegalArgumentException("Max must be greater than min");
@@ -243,22 +242,15 @@ public class LogFactorialCache {
    * @return log(n!)
    * @throws ArrayIndexOutOfBoundsException if n is outside the table bounds
    * @see #getMaxN()
+   * @see #ensureRange(int, int)
    */
   public double getLogFactorialUnsafe(int n) {
     return objectTable[n];
   }
 
   /**
-   * Copy the object.
-   *
-   * @return the log factorial cache
-   */
-  public LogFactorialCache copy() {
-    return new LogFactorialCache(objectTable);
-  }
-
-  /**
-   * Copy the object with the given table size.
+   * Create a new instance with the given table size. Tabulated values from this instance
+   * are copied for the new instance.
    *
    * <p>If n is larger then the current size then the table will be expanded.
    *
