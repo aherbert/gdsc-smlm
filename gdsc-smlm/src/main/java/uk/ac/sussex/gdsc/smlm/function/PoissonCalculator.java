@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
@@ -108,8 +107,8 @@ public class PoissonCalculator {
         final double logx = Math.log(x[i]);
         if (x[i] <= APPROXIMATION_X) {
           // At low values of log(n!) we use the gamma function as the relative error of the
-          // approximation is high.
-          final double logXFactorial = -Math.log1p(Gamma.invGamma1pm1(x[i]));
+          // approximation is high. 
+          final double logXFactorial = LogFactorial.value(x[i]);
           sumLogXFactorial += logXFactorial;
           mll += x[i] * logx - x[i] - logXFactorial;
         } else {
@@ -153,10 +152,7 @@ public class PoissonCalculator {
    * @param n the number of terms
    * @return x!
    */
-  public static double logFactorialApproximation(double x, int n) {
-    if (x <= 1) {
-      return 0;
-    }
+  static double logFactorialApproximation(double x, int n) {
     final double logx = Math.log(x);
     double value = x * logx - x;
     if (n <= 0) {
@@ -296,7 +292,7 @@ public class PoissonCalculator {
     if (x == 0.0) {
       return -mean;
     }
-    return x * Math.log(mean) - mean - logFactorial(x);
+    return x * Math.log(mean) - mean - LogFactorial.value(x);
   }
 
   /**
@@ -313,68 +309,12 @@ public class PoissonCalculator {
       if (x[i] == 0.0) {
         ll -= mean[i];
       } else {
-        ll += x[i] * Math.log(mean[i]) - mean[i] - logFactorial(x[i]);
+        ll += x[i] * Math.log(mean[i]) - mean[i] - LogFactorial.value(x[i]);
       }
     }
     return ll;
   }
 
-  /**
-   * Compute log(x!) using logGamma(x+1).
-   *
-   * @param x the value x
-   * @return x!
-   */
-  public static double logFactorial(double x) {
-    return logGamma1p(x);
-  }
-
-  /**
-   * Compute {@code log(Gamma(1+x))}.
-   *
-   * <p>Adapted from Apache Commons FastMath logGamma. Removed support for NaN and negative x.
-   * Updated the code to use x or (x+1) where appropriate.
-   *
-   * <p>For x &le; 7, the implementation is based on the double precision implementation in the
-   * <em>NSWC Library of Mathematics Subroutines</em>, {@code DGAMLN}. For x &gt; 7, the
-   * implementation is based on </p>
-   *
-   * <ul>
-   *
-   * <li><a href="http://mathworld.wolfram.com/GammaFunction.html">Gamma Function</a>, equation
-   * (28).</li>
-   *
-   * <li><a href="http://mathworld.wolfram.com/LanczosApproximation.html"> Lanczos
-   * Approximation</a>, equations (1) through (5).</li>
-   *
-   * <li><a href="http://my.fit.edu/~gabdo/gamma.txt">Paul Godfrey, A note on the computation of the
-   * convergent Lanczos complex Gamma approximation</a></li>
-   *
-   * </ul>
-   *
-   * @param x Argument.
-   * @return the value of {@code log(Gamma(1+x))}
-   */
-  private static double logGamma1p(double x) {
-    if (x <= APPROXIMATION_X) {
-      if (x == 0) {
-        return 0;
-      }
-      return -Math.log1p(Gamma.invGamma1pm1(x));
-    }
-    if (x <= 7) {
-      final int n = (int) Math.floor(x - 0.5);
-      double prod = 1.0;
-      for (int i = 0; i < n; i++) {
-        prod *= x - i;
-      }
-      return Gamma.logGamma1p(x - n) + Math.log(prod);
-    }
-    final double x1p = x + 1;
-    final double sum = Gamma.lanczos(x1p);
-    final double tmp = x + Gamma.LANCZOS_G + 1.5;
-    return ((x + 1.5) * Math.log(tmp)) - tmp + HALF_LOG_2_PI + Math.log(sum / x1p);
-  }
 
   /**
    * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
@@ -487,11 +427,9 @@ public class PoissonCalculator {
     if (x <= APPROXIMATION_X) {
       // At low values of log(n!) we use the gamma function as the relative error of the
       // approximation is high.
-      // Note that the logGamma function uses only 1 Math.log() call when the input is
+      // Note that the LogFactorial function uses only 1 Math.log() call when the input is
       // below 2.5. Above that it uses 2 calls so we switch to the approximation.
-      // return x * Math.log(mean) - mean - Gamma.logGamma(x[i] + 1)
-      // Note Math.log1p is faster than FastMath.log1p.
-      return x * Math.log(mean) - mean + Math.log1p(Gamma.invGamma1pm1(x));
+      return x * Math.log(mean) - mean - LogFactorial.value(x);
     }
     // Approximate log(n!) using Stirling's approximation using the first 3 terms.
     // This will have a maximum relative error of approximately 6.7e-5
@@ -533,11 +471,9 @@ public class PoissonCalculator {
     if (x <= APPROXIMATION_X) {
       // At low values of log(n!) we use the gamma function as the relative error of the
       // approximation is high.
-      // Note that the logGamma function uses only 1 Math.log() call when the input is
+      // Note that the LogFactorial function uses only 1 Math.log() call when the input is
       // below 2.5. Above that it uses 2 calls so we switch to the approximation.
-      // return x * Math.log(mean) - mean - Gamma.logGamma(x[i] + 1)
-      // Note Math.log1p is faster than FastMath.log1p.
-      return x * fastLog.log(mean) - mean + Math.log1p(Gamma.invGamma1pm1(x));
+      return x * fastLog.log(mean) - mean - LogFactorial.value(x);
     }
     // Approximate log(n!) using Stirling's approximation using the first 3 terms.
     // This will have a maximum relative error of approximately 6.7e-5

@@ -34,7 +34,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -82,19 +81,6 @@ class PoissonCalculatorTest {
   private static int maxx = 10;
 
   static double P_LIMIT = 0.999999;
-
-  @SeededTest
-  void canComputeLogFactorial(RandomSeed seed) {
-    Assertions.assertEquals(0, PoissonCalculator.logFactorial(0));
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
-    for (int i = 0; i < 100; i++) {
-      final double x = rng.nextDouble() * 15;
-      final double expected = x <= 1.5 ? Gamma.logGamma1p(x) : Gamma.logGamma(1 + x);
-      final double observed = PoissonCalculator.logFactorial(x);
-      TestAssertions.assertTest(expected, observed, predicate, () -> Double.toString(x));
-    }
-  }
 
   @Test
   void canComputeLikelihoodForIntegerData() {
@@ -502,8 +488,7 @@ class PoissonCalculatorTest {
         new BaseNonLinearFunction("Gaussian") {
           @Override
           public double eval(int x) {
-            return 0.1
-                + 100 * StdMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
+            return 0.1 + 100 * StdMath.exp(-0.5 * MathUtils.pow2(x - n2) / (params[0] * params[0]));
           }
         }, new BaseNonLinearFunction("Gaussian") {
           @Override
@@ -584,22 +569,33 @@ class PoissonCalculatorTest {
     Assumptions.assumeTrue(logger.isLoggable(LOG_LEVEL));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
+    // The approximation is very bad close to 1
     double value = 1.0;
     for (int i = 1; i <= 100; i++) {
       value = Math.nextUp(value);
       showRelativeErrorOfLogFactorialApproximation(value);
     }
+
+    // Error for the first LogFactorial computation switch point at x=1.5.
+    // Below this level the error is very bad.
+    // INFO: 1.5! = 0.2847 : [1.3192219378603063, 0.1925445003447508, 0.002597657209671918,
+    // 2.866725480047198E-4, 8.04441744746754E-5, 4.192375182790675E-5]
     for (int i = 1; i <= 300; i++) {
       showRelativeErrorOfLogFactorialApproximation(1 + i / 100.0);
     }
+    // INFO: 4.0! = 3.178 : [0.5137975858922471, 0.006541950896246824, 1.3423516145952628E-5,
+    // 2.3333406200452226E-7, 1.0541480759747081E-8, 8.90185218881136E-10]
 
+    // Error approaches machine epsilon using 3 terms:
+    // INFO: 100.0! = 363.7 : [0.008858972036867302, 2.2910100241207718E-6, 7.63669686628571E-12,
+    // 0.0, 1.5627513181378083E-16, 1.5627513181378083E-16]
     for (int i = 4; i <= 100; i++) {
       showRelativeErrorOfLogFactorialApproximation(i);
     }
   }
 
   private static void showRelativeErrorOfLogFactorialApproximation(double x) {
-    final double e = PoissonCalculator.logFactorial(x);
+    final double e = LogFactorial.value(x);
     final double[] o = new double[6];
     final double[] error = new double[o.length];
     for (int i = 0; i < o.length; i++) {
@@ -721,8 +717,8 @@ class PoissonCalculatorTest {
       final PoissonCalculator pc = new PoissonCalculator(x);
       expected = PoissonCalculator.maximumLogLikelihood(x);
       observed = pc.getMaximumLogLikelihood();
-      logger.log(TestLogUtils.getRecord(LOG_LEVEL, "[%s] Instance MaxLL = %g vs %g (error = %g)",
-          X, expected, observed, DoubleEquality.relativeError(expected, observed)));
+      logger.log(TestLogUtils.getRecord(LOG_LEVEL, "[%s] Instance MaxLL = %g vs %g (error = %g)", X,
+          expected, observed, DoubleEquality.relativeError(expected, observed)));
       Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(expected, observed),
           () -> "Instance Max LL not equal: x=" + X);
 

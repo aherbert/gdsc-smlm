@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.math3.special.Gamma;
 
 /**
  * Cache values of the natural logarithm of the factorial function {@code ln n!}.
@@ -79,19 +78,6 @@ public class LogFactorialCache {
    */
   private static int getLowerLimitN(int n) {
     return Math.max(n, 1);
-  }
-
-  /**
-   * Compute the log of n!. Uses the gamma function.
-   *
-   * @param n the value n
-   * @return log(n!)
-   */
-  private static double logF(double n) {
-    if (n <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(n + 1);
   }
 
   /**
@@ -220,7 +206,7 @@ public class LogFactorialCache {
   private static void computeRange(int minN, int maxN, double[] table) {
     for (int n = Math.max(2, minN); n <= maxN; n++) {
       if (table[n] == 0) {
-        table[n] = logF(n);
+        table[n] = LogFactorial.value(n);
       }
     }
   }
@@ -239,7 +225,7 @@ public class LogFactorialCache {
     final double[] table = objectTable;
     double value = table[n];
     if (value == 0) {
-      table[n] = value = logF(n);
+      table[n] = value = LogFactorial.value(n);
     }
     return value;
   }
