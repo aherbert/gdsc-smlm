@@ -50,7 +50,7 @@ public final class LogFactorial {
    */
   public static double value(int n) {
     if (n <= MAX_FACTORIAL) {
-      return Math.log(Factorial.value(n));
+      return Math.log(Factorial.uncheckedValue(n));
     }
     return logGamma1p(n);
   }
@@ -67,7 +67,7 @@ public final class LogFactorial {
   public static double value(double n) {
     ValidationUtils.checkPositive(n);
     if (n <= MAX_FACTORIAL && Math.rint(n) == n) {
-      return Math.log(Factorial.value((int) n));
+      return Math.log(Factorial.uncheckedValue((int) n));
     }
     return logGamma1p(n);
   }

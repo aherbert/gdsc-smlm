@@ -98,6 +98,19 @@ public final class Factorial {
   }
 
   /**
+   * Get the factorial of n.
+   *
+   * <p>The maximum value representable as a double is {@code 170!}.
+   *
+   * @param n argument (must be positive)
+   * @return n!
+   * @throws ArrayIndexOutOfBoundsException if n is negative or above 170
+   */
+  static double uncheckedValue(int n) {
+    return FACTORIALS[n];
+  }
+
+  /**
    * Get the factorial of n as a real number.
    *
    * <p>This is computed using {@code gamma(1+n)}.
