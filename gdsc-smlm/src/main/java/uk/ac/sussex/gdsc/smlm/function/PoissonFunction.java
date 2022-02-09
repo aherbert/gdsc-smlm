@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 
 /**
@@ -127,32 +126,6 @@ public class PoissonFunction implements LikelihoodFunction, LogLikelihoodFunctio
   private static int getX(double observed) {
     // XXX: Change to throw an exception if observed is not an integer?
     return (int) Math.round(observed);
-  }
-
-  /**
-   * Return the log of the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the log factorial
-   */
-  public static double logFactorial(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
-  }
-
-  /**
-   * Return the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the factorial
-   */
-  public static double factorial(double value) {
-    if (value <= 1) {
-      return 1;
-    }
-    return Gamma.gamma(value + 1);
   }
 
   @Override

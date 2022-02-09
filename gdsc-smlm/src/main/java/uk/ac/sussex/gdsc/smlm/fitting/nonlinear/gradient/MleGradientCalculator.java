@@ -24,9 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.function.NonLinearFunction;
-import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+import uk.ac.sussex.gdsc.smlm.function.PoissonCalculator;
 
 /**
  * Calculates the Hessian matrix (the square matrix of second-order partial derivatives of a
@@ -647,34 +646,6 @@ public class MleGradientCalculator extends GradientCalculator {
   }
 
   /**
-   * Get the Poisson likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive.
-   *
-   * @param mean the mean
-   * @param x the x
-   * @return the likelihood
-   */
-  public static double likelihood(double mean, double x) {
-    if (x == 0) {
-      return StdMath.exp(-mean);
-    }
-    return Math.pow(mean, x) * StdMath.exp(-mean) / factorial(x);
-  }
-
-  /**
-   * Compute the factorial of the value (value!) using the gamma function.
-   *
-   * @param value the value
-   * @return the factorial
-   */
-  private static double factorial(double value) {
-    if (value <= 1) {
-      return 1;
-    }
-    return Gamma.gamma(value + 1);
-  }
-
-  /**
    * Compute the Poisson log likelihood for the data.
    *
    * @param x the data
@@ -686,36 +657,8 @@ public class MleGradientCalculator extends GradientCalculator {
     double ll = 0;
     func.initialise(a);
     for (int i = 0; i < x.length; i++) {
-      ll += logLikelihood(func.eval(i), x[i]);
+      ll += PoissonCalculator.logLikelihood(func.eval(i), x[i]);
     }
     return ll;
-  }
-
-  /**
-   * Get the Poisson log likelihood of value x given the mean. The mean must be strictly positive. x
-   * must be positive.
-   *
-   * @param mean the mean
-   * @param x the x
-   * @return the log likelihood
-   */
-  public static double logLikelihood(double mean, double x) {
-    if (x == 0) {
-      return -mean;
-    }
-    return x * Math.log(mean) - mean - logFactorial(x);
-  }
-
-  /**
-   * Compute the log factorial of the value (log(value!)) using the gamma function.
-   *
-   * @param value the value
-   * @return the log factorial
-   */
-  private static double logFactorial(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
   }
 }

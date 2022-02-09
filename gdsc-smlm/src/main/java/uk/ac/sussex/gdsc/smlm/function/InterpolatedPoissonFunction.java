@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
@@ -88,10 +87,7 @@ public class InterpolatedPoissonFunction
     // PMF(l,k) = e^-l * l^k / gamma(k+1)
     // log(PMF) = -l + k * log(l) - logGamma(k+1)
     if (nonInteger) {
-      // return (StdMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
-
-      final double ll = -mu + x * Math.log(mu) - logFactorial(x);
-      return StdMath.exp(ll) * alpha;
+      return PoissonCalculator.likelihood(mu, x) * alpha;
     }
 
     pd.setMeanUnsafe(mu);
@@ -125,7 +121,7 @@ public class InterpolatedPoissonFunction
 
     if (nonInteger) {
       final double loge = Math.log(mu);
-      double ll = -mu + x * loge - logFactorial(x);
+      double ll = x * loge - mu - LogFactorial.value(x);
       lk = StdMath.exp(ll);
       if (x == mu) {
         // Special case
@@ -133,23 +129,18 @@ public class InterpolatedPoissonFunction
         return lk * alpha;
       }
 
-      if (x >= 1) {
-        // In contrast to the logFactorial(o-1)
-        // this continues to use the logGamma function even when o-1 < 1.
-        // It creates the correct gradient down to o==1.
-        ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
-        lkm1 = StdMath.exp(ll);
-      } else if (x > 0) {
-        // x is between 0 and 1.
-        // There is no definition for the factorial (x-1)!
-
-        // ll = -e - Gamma.logGamma(x);
-        // ll = -e - Math.abs(x - 1) * loge - Gamma.logGamma(x);
+      if (x > 0) {
+        // When x is between 0 and 1
+        // there is no definition for the factorial (x-1)!
 
         // This continues to be the best match to the numerical gradient
         // even though it is impossible. It works because the gamma function is still
         // defined when x>0.
-        ll = -mu + (x - 1) * loge - Gamma.logGamma(x);
+        // ll = (x - 1) * loge - mu - logFactorial(x - 1);
+        // Re-use existing values:
+        // Given log((x - 1)!) = log(x!) - log(x)
+        // => ll = (x - 1) * loge - mu - LogFactorial.value(x) - log(x)
+        ll -= loge - Math.log(x);
         lkm1 = StdMath.exp(ll);
       } else {
         lkm1 = 0;
@@ -175,32 +166,6 @@ public class InterpolatedPoissonFunction
     return lk * alpha;
   }
 
-  /**
-   * Return the log of the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the log factorial
-   */
-  public static double logFactorial(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
-  }
-
-  /**
-   * Return the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the factorial
-   */
-  public static double factorial(double value) {
-    if (value <= 1) {
-      return 1;
-    }
-    return Gamma.gamma(value + 1);
-  }
-
   @Override
   public double logLikelihood(double x, double mu) {
     if (x < 0 || mu <= 0) {
@@ -215,10 +180,7 @@ public class InterpolatedPoissonFunction
     // PMF(l,k) = e^-l * l^k / gamma(k+1)
     // log(PMF) = -l + k * log(l) - logGamma(k+1)
     if (nonInteger) {
-      // return (StdMath.exp(-e) * Math.pow(e, o) / factorial(o)) * alpha;
-
-      final double ll = -mu + x * Math.log(mu) - logFactorial(x);
-      return ll + logAlpha;
+      return PoissonCalculator.logLikelihood(mu, x) + logAlpha;
     }
 
     pd.setMeanUnsafe(mu);

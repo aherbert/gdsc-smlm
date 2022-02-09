@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
@@ -91,7 +90,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
       x[i] = Math.max(0, (data[i] - offset[i]) / gain[i] + varG2[i]);
       logG[i] = Math.log(gain[i]);
 
-      sum += logGamma1(x[i]) + logG[i];
+      sum += LogFactorial.value(x[i]) + logG[i];
     }
 
     logNormalisation = sum;
@@ -126,7 +125,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     // Pre-compute the sum over the data
     double sum = 0;
     for (int i = 0; i < n; i++) {
-      sum += logGamma1(x[i]) + logG[i];
+      sum += LogFactorial.value(x[i]) + logG[i];
     }
 
     logNormalisation = sum;
@@ -298,7 +297,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
 
     double ll = l + logG[index];
     if (x[index] != 0) {
-      ll += logGamma1(x[index]) - x[index] * Math.log(l);
+      ll += LogFactorial.value(x[index]) - x[index] * Math.log(l);
     }
 
     return ll;
@@ -326,17 +325,10 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
 
     double ll = l + logG[index];
     if (x[index] != 0) {
-      ll += logGamma1(x[index]) - x[index] * Math.log(l);
+      ll += LogFactorial.value(x[index]) - x[index] * Math.log(l);
     }
 
     return ll;
-  }
-
-  private static double logGamma1(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
   }
 
   /**
@@ -435,7 +427,7 @@ public class ScmosLikelihoodWrapper extends LikelihoodWrapper {
     // since the observed values (k) are scaled by the gain
     double ll = l + Math.log(gain);
     if (x != 0) {
-      ll += logGamma1(x) - x * Math.log(l);
+      ll += LogFactorial.value(x) - x * Math.log(l);
     }
 
     return ll;

@@ -561,22 +561,30 @@ class GradientCalculatorSpeedTest {
     final double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
     for (final double u : new double[] {0.79, 2.5, 5.32}) {
       double ll = 0;
+      double oll = 0;
       final PoissonDistribution pd = new PoissonDistribution(u);
+
+      // The likelihood and logLikelihood computation are delegated to the PoissonCalculator.
+      // However these are tested here to check they are correct for the observations.
+      // The logLikelihood function for the entire array of observations is then asserted.
       for (final int x : xx) {
-        double obs = MleGradientCalculator.likelihood(u, x);
+        double obs = PoissonCalculator.likelihood(u, x);
         double exp = pd.probability(x);
         TestAssertions.assertTest(exp, obs, predicate, "likelihood");
 
-        obs = MleGradientCalculator.logLikelihood(u, x);
+        obs = PoissonCalculator.logLikelihood(u, x);
         exp = pd.logProbability(x);
         TestAssertions.assertTest(exp, obs, predicate, "log likelihood");
 
+        oll += obs;
         ll += exp;
       }
 
       final MleGradientCalculator gc = new MleGradientCalculator(1);
       final double o = gc.logLikelihood(xxx, new double[] {u}, func);
 
+      Assertions.assertEquals(oll, o,
+          "sum log likelihood should exactly match the PoissonCalculator");
       TestAssertions.assertTest(ll, o, predicate, "sum log likelihood");
     }
   }

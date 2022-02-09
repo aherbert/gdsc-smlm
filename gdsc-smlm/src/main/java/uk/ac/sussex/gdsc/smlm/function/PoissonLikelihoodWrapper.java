@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 //@formatter:off
@@ -125,7 +124,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
       // Pre-apply gain
       for (int i = 0; i < dataSize; i++) {
         data[i] *= this.alpha;
-        sum += logFactorial(data[i]);
+        sum += LogFactorial.value(data[i]);
       }
 
       // We subtract this as we are computing the negative log likelihood
@@ -223,7 +222,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     final double k = data[index];
     // Function now computes expected poisson mean without gain
     return lx - k * Math.log(lx)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : logFactorial(k)) - logAlpha;
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : LogFactorial.value(k)) - logAlpha;
   }
 
   @Override
@@ -259,14 +258,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     // Log(probability) = log(p) + log(alpha)
 
     return lx - k * Math.log(lx)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : logFactorial(k)) - logAlpha;
-  }
-
-  private static double logFactorial(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : LogFactorial.value(k)) - logAlpha;
   }
 
   /**
@@ -282,7 +274,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
       LOG_FACTORIAL.increaseMaxN((int) count);
     }
     return mean - count * Math.log(mean)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) count) : logFactorial(count));
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) count) : LogFactorial.value(count));
   }
 
   /**

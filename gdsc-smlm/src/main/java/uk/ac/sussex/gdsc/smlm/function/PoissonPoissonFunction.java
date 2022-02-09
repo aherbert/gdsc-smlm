@@ -24,9 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.special.Gamma;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
-import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
  * Implements the probability density function for a combined Poisson distribution used to model a
@@ -133,39 +131,8 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
     // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-    double ll = -mu;
-    if (x > 0) {
-      ll += x * Math.log(mu) - logFactorial(x);
-    }
-
     // Scale the output so the cumulative probability is 1
-    return StdMath.exp(ll) * alpha;
-  }
-
-  /**
-   * Return the log of the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the log factorial
-   */
-  public static double logFactorial(double value) {
-    if (value <= 1) {
-      return 0;
-    }
-    return Gamma.logGamma(value + 1);
-  }
-
-  /**
-   * Return the factorial for the given real number, using the gamma function.
-   *
-   * @param value the number
-   * @return the factorial
-   */
-  public static double factorial(double value) {
-    if (value <= 1) {
-      return 1;
-    }
-    return Gamma.gamma(value + 1);
+    return PoissonCalculator.likelihood(mu, x) * alpha;
   }
 
   @Override
@@ -188,12 +155,7 @@ public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihood
     // LL(P_sCMOS (x=[(Di-oi)/gi + vari/gi^2]|ui,vari,gi,oi)) <br>
     // = -(ui+vari/gi^2) + x * ln(ui+vari/gi^2) - ln(gamma(x+1)) <br>
 
-    double ll = -mu;
-    if (x > 0) {
-      ll += x * Math.log(mu) - logFactorial(x);
-    }
-
     // Scale the output so the cumulative probability is 1
-    return ll + logAlpha;
+    return PoissonCalculator.logLikelihood(mu, x) + logAlpha;
   }
 }
