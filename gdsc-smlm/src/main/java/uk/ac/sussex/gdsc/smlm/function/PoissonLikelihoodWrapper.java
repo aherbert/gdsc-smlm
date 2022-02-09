@@ -68,6 +68,8 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 //@formatter:on
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
+  private static final LogFactorialCache LOG_FACTORIAL = new LogFactorialCache();
+
   private final boolean integerData;
   private final double sumLogFactorialK;
   private final double alpha;
@@ -87,7 +89,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
       }
     }
 
-    LogFactorial.increaseTableMaxN(max);
+    LOG_FACTORIAL.increaseMaxN(max);
     return true;
   }
 
@@ -117,13 +119,13 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     double sum = 0;
     if (integerData) {
       for (final double d : data) {
-        sum += LogFactorial.logF((int) d);
+        sum += LOG_FACTORIAL.getLogFactorial((int) d);
       }
     } else {
       // Pre-apply gain
       for (int i = 0; i < dataSize; i++) {
         data[i] *= this.alpha;
-        sum += LogFactorial.logF(data[i]);
+        sum += logFactorial(data[i]);
       }
 
       // We subtract this as we are computing the negative log likelihood
@@ -220,8 +222,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
 
     final double k = data[index];
     // Function now computes expected poisson mean without gain
-    return lx - k * Math.log(lx) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
-        - logAlpha;
+    return lx - k * Math.log(lx)
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : logFactorial(k)) - logAlpha;
   }
 
   @Override
@@ -256,8 +258,8 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     // The probability = p * alpha
     // Log(probability) = log(p) + log(alpha)
 
-    return lx - k * Math.log(lx) + ((integerData) ? LogFactorial.logF((int) k) : logFactorial(k))
-        - logAlpha;
+    return lx - k * Math.log(lx)
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : logFactorial(k)) - logAlpha;
   }
 
   private static double logFactorial(double value) {
@@ -277,10 +279,10 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   public static double negativeLogLikelihood(double mean, double count) {
     final boolean integerData = (int) count == count;
     if (integerData) {
-      LogFactorial.increaseTableMaxN((int) count);
+      LOG_FACTORIAL.increaseMaxN((int) count);
     }
     return mean - count * Math.log(mean)
-        + ((integerData) ? LogFactorial.logF((int) count) : logFactorial(count));
+        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) count) : logFactorial(count));
   }
 
   /**

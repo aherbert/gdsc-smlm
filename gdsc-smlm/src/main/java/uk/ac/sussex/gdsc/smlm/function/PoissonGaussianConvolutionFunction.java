@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 public class PoissonGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {
-  private static final LogFactorial logFactorial = new LogFactorial();
+  private static final LogFactorialCache LOG_FACTORIAL = new LogFactorialCache();
 
   /**
    * The on-chip gain multiplication factor.
@@ -164,7 +164,7 @@ public class PoissonGaussianConvolutionFunction
     // 65536 + 5 * s => This is an acceptable table size to pre-compute the log
     // factorial if s is reasonable.
 
-    logFactorial.ensureRange(qmin, qmax);
+    LOG_FACTORIAL.ensureRange(qmin, qmax);
 
     final double logu = Math.log(u);
     double pvalue = 0;
@@ -173,7 +173,7 @@ public class PoissonGaussianConvolutionFunction
     // the Poisson PMF and Gaussian PDF
     if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
-        final double poisson = StdMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        final double poisson = StdMath.exp(q * logu - u - LOG_FACTORIAL.getLogFactorialUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
         final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
@@ -181,7 +181,7 @@ public class PoissonGaussianConvolutionFunction
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
-        final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
+        final double logPoisson = q * logu - u - LOG_FACTORIAL.getLogFactorialUnsafe(q);
         final double x = getX(D, q);
         final double logGaussian = -(MathUtils.pow2(x) / twoVar) + logNormalisationGaussian;
         pvalue += StdMath.exp(logPoisson + logGaussian);
@@ -251,12 +251,12 @@ public class PoissonGaussianConvolutionFunction
         qmax++;
       }
     }
-    logFactorial.ensureRange(qmin, qmax);
+    LOG_FACTORIAL.ensureRange(qmin, qmax);
     final double logu = Math.log(u);
     double pvalue = 0;
     if (computePmf) {
       for (int q = qmin; q <= qmax; q++) {
-        final double poisson = StdMath.exp(q * logu - u - logFactorial.getLogFUnsafe(q));
+        final double poisson = StdMath.exp(q * logu - u - LOG_FACTORIAL.getLogFactorialUnsafe(q));
         // Use Gaussian CDF
         final double x = getX(D, q);
         final double gaussian = (gaussianCdf(x + 0.5) - gaussianCdf(x - 0.5)) * 0.5;
@@ -264,7 +264,7 @@ public class PoissonGaussianConvolutionFunction
       }
     } else {
       for (int q = qmin; q <= qmax; q++) {
-        final double logPoisson = q * logu - u - logFactorial.getLogFUnsafe(q);
+        final double logPoisson = q * logu - u - LOG_FACTORIAL.getLogFactorialUnsafe(q);
         final double x = getX(D, q);
         // final double logGaussian = (MathUtils.pow2(x) / var_by_2) + logNormalisationGaussian;
         // p += StdMath.exp(logPoisson - logGaussian);

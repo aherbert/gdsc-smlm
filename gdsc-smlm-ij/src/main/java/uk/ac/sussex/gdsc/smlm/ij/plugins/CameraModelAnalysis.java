@@ -41,7 +41,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
@@ -64,7 +63,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
 import uk.ac.sussex.gdsc.smlm.function.InterpolatedPoissonFunction;
 import uk.ac.sussex.gdsc.smlm.function.LikelihoodFunction;
-import uk.ac.sussex.gdsc.smlm.function.LogFactorial;
+import uk.ac.sussex.gdsc.smlm.function.LogFactorialCache;
 import uk.ac.sussex.gdsc.smlm.function.PoissonFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaFunction;
 import uk.ac.sussex.gdsc.smlm.function.PoissonGammaGaussianConvolutionFunction;
@@ -76,6 +75,7 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonPoissonFunction;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CameraModelAnalysisSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.math3.analysis.integration.CustomSimpsonIntegrator;
+import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
@@ -113,6 +113,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static final int MODE_SCMOS = 2;
 
   private static final String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
+
+  /** Single instance holding log factorial values.
+   * This may create a memory leak as it is never reduced in size. */
+  private static final LogFactorialCache LOG_FACTORIAL = new LogFactorialCache();
 
   private CameraModelAnalysisSettings.Builder settings;
 
@@ -676,8 +680,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static double[][] convolveHistogram(CameraModelAnalysisSettings settings) {
 
     // Find the range of the Poisson
-    final PoissonDistribution poisson = new PoissonDistribution(null, settings.getPhotons(),
-        PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+    final PoissonDistribution poisson = new PoissonDistribution(settings.getPhotons());
     final int maxn = poisson.inverseCumulativeProbability(UPPER);
 
     final double gain = getGain(settings);
@@ -755,12 +758,13 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
           // Note: Both methods work
 
-          LogFactorial.increaseTableMaxN(maxn);
+          LOG_FACTORIAL.ensureRange(minn - 1, maxn);
           final double[] f = new double[maxn + 1];
           final double logm = Math.log(m);
           final double logp = Math.log(p);
           for (int n = minn; n <= maxn; n++) {
-            f[n] = -LogFactorial.logF(n) + n * logp - p - LogFactorial.logF(n - 1) - n * logm;
+            f[n] = -LOG_FACTORIAL.getLogFactorialUnsafe(n) + n * logp - p
+                - LOG_FACTORIAL.getLogFactorialUnsafe(n - 1) - n * logm;
           }
 
           // Use Poisson + Gamma distribution
