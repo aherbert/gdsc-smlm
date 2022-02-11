@@ -35,7 +35,9 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
@@ -114,9 +116,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
   private static final String[] MODEL = SettingsManager.getNames((Object[]) Model.values());
 
-  /** Single instance holding log factorial values.
-   * This may create a memory leak as it is never reduced in size. */
-  private static final LogFactorialCache LOG_FACTORIAL = new LogFactorialCache();
+  /** Single instance holding log factorial values for resue. */
+  private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
+      new AtomicReference<>(new SoftReference<>(null));
 
   private CameraModelAnalysisSettings.Builder settings;
 
@@ -758,13 +760,18 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
           // Note: Both methods work
 
-          LOG_FACTORIAL.ensureRange(minn - 1, maxn);
+          LogFactorialCache lfc = LOG_FACTORIAL_CACHE.get().get();
+          if (lfc == null) {
+            lfc = new LogFactorialCache();
+            LOG_FACTORIAL_CACHE.set(new SoftReference<>(lfc));
+          }
+          lfc.ensureRange(minn - 1, maxn);
           final double[] f = new double[maxn + 1];
           final double logm = Math.log(m);
           final double logp = Math.log(p);
           for (int n = minn; n <= maxn; n++) {
-            f[n] = -LOG_FACTORIAL.getLogFactorialUnsafe(n) + n * logp - p
-                - LOG_FACTORIAL.getLogFactorialUnsafe(n - 1) - n * logm;
+            f[n] = -lfc.getLogFactorialUnsafe(n) + n * logp - p - lfc.getLogFactorialUnsafe(n - 1)
+                - n * logm;
           }
 
           // Use Poisson + Gamma distribution

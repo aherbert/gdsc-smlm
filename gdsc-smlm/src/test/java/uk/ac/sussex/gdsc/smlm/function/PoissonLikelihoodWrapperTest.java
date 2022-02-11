@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -50,6 +52,8 @@ import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
 class PoissonLikelihoodWrapperTest {
+  private static final Level LOG_LEVEL = Level.FINE;
+
   private static Logger logger;
 
   @BeforeAll
@@ -298,7 +302,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(Level.INFO, "Per Datum %s : %s = %d / %d (%.2f)",
+    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "Per Datum %s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > 90,
         () -> NAME[targetParameter] + " fraction too low per datum: " + p);
@@ -494,7 +498,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(Level.INFO, "%s : %s = %d / %d (%.2f)",
+    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "%s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > threshold, () -> NAME[targetParameter] + " fraction too low: " + p);
   }
@@ -519,9 +523,6 @@ class PoissonLikelihoodWrapperTest {
 
   @Test
   void cumulativeProbabilityIsOneWithIntegerData() {
-    // Initialise for large observed count
-    PoissonLikelihoodWrapper.likelihood(1, photons[photons.length - 1] * 2);
-
     for (final double p : photons) {
       cumulativeProbabilityIsOneWithIntegerData(p);
     }
@@ -537,7 +538,7 @@ class PoissonLikelihoodWrapperTest {
     if (mu > 0) {
       final int max = (int) Math.ceil(mu + 3 * Math.sqrt(mu));
       for (; x <= max; x++) {
-        final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
+        final double pp = PoissonLikelihoodWrapperTest.likelihood(mu, x);
         // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
         pvalue += pp;
       }
@@ -550,14 +551,14 @@ class PoissonLikelihoodWrapperTest {
     // Now keep evaluating up until no difference
     final double changeTolerance = 1e-6;
     for (;; x++) {
-      final double pp = PoissonLikelihoodWrapper.likelihood(mu, x);
+      final double pp = PoissonLikelihoodWrapperTest.likelihood(mu, x);
       // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
       pvalue += pp;
       if (pp / pvalue < changeTolerance) {
         break;
       }
     }
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f, max=%d", mu, pvalue, x));
+    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, p=%f, max=%d", mu, pvalue, x));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
@@ -577,11 +578,11 @@ class PoissonLikelihoodWrapperTest {
     final double pvalue = in.integrate(20000, new UnivariateFunction() {
       @Override
       public double value(double x) {
-        return PoissonLikelihoodWrapper.likelihood(mu, x);
+        return PoissonLikelihoodWrapperTest.likelihood(mu, x);
       }
     }, 0, max);
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, p=%f", mu, pvalue));
+    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, p=%f", mu, pvalue));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
@@ -603,50 +604,10 @@ class PoissonLikelihoodWrapperTest {
 
     // Evaluate all values from zero to large n
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
-    final double[] a = new double[0];
-    final double[] g = new double[0];
+    final double[] a = new double[1];
+    final double[] g = new double[1];
 
-    final NonLinearFunction nlf = new NonLinearFunction() {
-      @Override
-      public void initialise(double[] a) {
-        // Do nothing
-      }
-
-      @Override
-      public int[] gradientIndices() {
-        return new int[0];
-      }
-
-      @Override
-      public double evalw(int x, double[] dyda, double[] weights) {
-        return 0;
-      }
-
-      @Override
-      public double evalw(int x, double[] weights) {
-        return 0;
-      }
-
-      @Override
-      public double eval(int x) {
-        return mu;
-      }
-
-      @Override
-      public double eval(int x, double[] dyda) {
-        return mu;
-      }
-
-      @Override
-      public boolean canComputeWeights() {
-        return false;
-      }
-
-      @Override
-      public int getNumberOfGradients() {
-        return 0;
-      }
-    };
+    final NonLinearFunction nlf = new DummyNonLinearFunction(mu);
     PoissonLikelihoodWrapper func =
         new PoissonLikelihoodWrapper(nlf, a, Arrays.copyOf(k, n), n, alpha);
 
@@ -669,7 +630,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "mu=%f, limit=%d, p=%f", mu, limit, pvalue));
+    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, limit=%d, p=%f", mu, limit, pvalue));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
 
     // Check the function can compute the same total
@@ -679,5 +640,94 @@ class PoissonLikelihoodWrapperTest {
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
     TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
+  }
+
+  @ParameterizedTest
+  @ValueSource(doubles = {0.5, 1, 2, 4, 8})
+  void testLikelihood(double mu) {
+    final int max = (int) Math.ceil(mu * 3) + 1;
+    final double[] x = SimpleArrayUtils.newArray(max, 0, 1.0);
+    final PoissonLikelihoodWrapper fun = new PoissonLikelihoodWrapper(
+        new DummyNonLinearFunction(mu), new double[] {mu}, x, x.length, 1);
+    final double[] g = new double[1];
+    double sum = 0;
+    for (int i = 0; i < max; i++) {
+      final double nll = fun.computeLikelihood(i);
+      final double nll2 = fun.computeLikelihood(g, i);
+      sum += nll;
+      Assertions.assertEquals(nll, nll2);
+      Assertions.assertEquals(-PoissonCalculator.logLikelihood(mu, i), nll,
+          "Incorrect negative log-likelihood");
+    }
+    // Function over the entire data
+    final double nll = fun.computeLikelihood();
+    final double nll2 = fun.computeLikelihood(g);
+    Assertions.assertEquals(nll, nll2);
+    Assertions.assertEquals(sum, nll, Math.abs(sum) * 1e-14);
+  }
+
+  /**
+   * Compute the likelihood. The {@link PoissonLikelihoodWrapper} used to have this as a static
+   * function. It now only has instance methods. Test now assert that the instance methods compute
+   * the same values as the {@link PoissonCalculator#logLikelihood(double, double)} method when the
+   * alpha value is 1.
+   *
+   * <p>This method exists to verify the integral of the likelihood is correct. It is assumed the
+   * {@link PoissonCalculator} likelihood is the exponential of the log-likelihood.
+   *
+   * @param mu the mean
+   * @param x the value
+   * @return the likelihood
+   */
+  private static double likelihood(double mu, double x) {
+    return PoissonCalculator.likelihood(mu, x);
+  }
+
+  private static class DummyNonLinearFunction implements NonLinearFunction {
+    private final double mu;
+
+    DummyNonLinearFunction(double mu) {
+      this.mu = mu;
+    }
+
+    @Override
+    public void initialise(double[] a) {
+      // Do nothing
+    }
+
+    @Override
+    public int[] gradientIndices() {
+      return new int[1];
+    }
+
+    @Override
+    public double evalw(int x, double[] dyda, double[] weights) {
+      return 0;
+    }
+
+    @Override
+    public double evalw(int x, double[] weights) {
+      return 0;
+    }
+
+    @Override
+    public double eval(int x) {
+      return mu;
+    }
+
+    @Override
+    public double eval(int x, double[] dyda) {
+      return mu;
+    }
+
+    @Override
+    public boolean canComputeWeights() {
+      return false;
+    }
+
+    @Override
+    public int getNumberOfGradients() {
+      return 0;
+    }
   }
 }

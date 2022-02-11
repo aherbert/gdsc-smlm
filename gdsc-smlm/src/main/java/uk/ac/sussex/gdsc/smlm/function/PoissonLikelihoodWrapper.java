@@ -24,7 +24,9 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+import java.lang.ref.SoftReference;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleUnaryOperator;
 
 //@formatter:off
 /**
@@ -67,29 +69,41 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 //@formatter:on
 public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
-  private static final LogFactorialCache LOG_FACTORIAL = new LogFactorialCache();
+  /** Single instance holding log factorial values for resue. */
+  private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
+      new AtomicReference<>(new SoftReference<>(null));
 
-  private final boolean integerData;
+  /** Cache all the integer factorials if the data contains only integers. */
+  private final DoubleUnaryOperator logFactorial;
   private final double sumLogFactorialK;
   private final double alpha;
   private final double logAlpha;
 
   private boolean allowNegativeExpectedValues = true;
 
-  private static boolean initialiseFactorial(double[] data) {
-    int max = 0;
+  private static DoubleUnaryOperator initialiseFactorial(double[] data) {
+    double maxD = 0;
     for (final double d : data) {
-      final int i = (int) d;
-      if (i != d || d < 0) {
-        return false;
+      final double d2 = Math.rint(d);
+      if (d2 != d || d < 0) {
+        return LogFactorial::value;
       }
-      if (max < i) {
-        max = i;
-      }
+      maxD = maxD < d2 ? d2 : maxD;
     }
-
-    LOG_FACTORIAL.increaseMaxN(max);
-    return true;
+    if (maxD > Integer.MAX_VALUE) {
+      return LogFactorial::value;
+    }
+    final int max = (int) maxD;
+    // Use pre-computed values if available
+    LogFactorialCache lfc = LOG_FACTORIAL_CACHE.get().get();
+    if (lfc == null) {
+      lfc = new LogFactorialCache(max);
+      LOG_FACTORIAL_CACHE.set(new SoftReference<>(lfc));
+    } else {
+      lfc.increaseMaxN(max);
+    }
+    final LogFactorialCache cache = lfc;
+    return d -> cache.getLogFactorial((int) d);
   }
 
   /**
@@ -112,24 +126,24 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     this.alpha = Math.abs(alpha);
     logAlpha = Math.log(alpha);
 
-    // Initialise the factorial table to the correct size
-    integerData = (alpha == 1) && initialiseFactorial(data);
-    // Pre-compute the sum over the data
-    double sum = 0;
-    if (integerData) {
-      for (final double d : data) {
-        sum += LOG_FACTORIAL.getLogFactorial((int) d);
-      }
-    } else {
+    if (alpha != 1) {
       // Pre-apply gain
       for (int i = 0; i < dataSize; i++) {
         data[i] *= this.alpha;
-        sum += LogFactorial.value(data[i]);
       }
-
-      // We subtract this as we are computing the negative log likelihood
-      sum -= dataSize * logAlpha;
     }
+
+    // Initialise the factorial table to the correct size
+    logFactorial = initialiseFactorial(data);
+    // Pre-compute the sum over the data
+    double sum = 0;
+    for (final double d : data) {
+      sum += logFactorial.applyAsDouble(d);
+    }
+
+    // We subtract this as we are computing the negative log likelihood
+    sum -= dataSize * logAlpha;
+
     sumLogFactorialK = sum;
   }
 
@@ -221,8 +235,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
 
     final double k = data[index];
     // Function now computes expected poisson mean without gain
-    return lx - k * Math.log(lx)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : LogFactorial.value(k)) - logAlpha;
+    return lx - k * Math.log(lx) + logFactorial.applyAsDouble(k) - logAlpha;
   }
 
   @Override
@@ -257,36 +270,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
     // The probability = p * alpha
     // Log(probability) = log(p) + log(alpha)
 
-    return lx - k * Math.log(lx)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) k) : LogFactorial.value(k)) - logAlpha;
-  }
-
-  /**
-   * Compute the negative log likelihood.
-   *
-   * @param mean the mean of the Poisson distribution (lambda)
-   * @param count the observed count
-   * @return the negative log likelihood
-   */
-  public static double negativeLogLikelihood(double mean, double count) {
-    final boolean integerData = (int) count == count;
-    if (integerData) {
-      LOG_FACTORIAL.increaseMaxN((int) count);
-    }
-    return mean - count * Math.log(mean)
-        + ((integerData) ? LOG_FACTORIAL.getLogFactorial((int) count) : LogFactorial.value(count));
-  }
-
-  /**
-   * Compute the likelihood.
-   *
-   * @param mean the mean of the Poisson distribution (lambda)
-   * @param count the observed count
-   * @return the likelihood
-   */
-  public static double likelihood(double mean, double count) {
-    final double nll = negativeLogLikelihood(mean, count);
-    return StdMath.exp(-nll);
+    return lx - k * Math.log(lx) + logFactorial.applyAsDouble(k) - logAlpha;
   }
 
   @Override

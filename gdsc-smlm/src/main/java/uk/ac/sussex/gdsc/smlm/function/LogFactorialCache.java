@@ -24,12 +24,19 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Cache values of the natural logarithm of the factorial function {@code ln n!}.
+ *
+ * <p>The cache can be expanded in size but not reduced. Changes in size are thread-safe. Thus the
+ * cache can be shared by threads.
+ *
+ * <p>Note: If the cache will be long-lived then memory leaks should be avoided by using for example
+ * a {@link SoftReference} to the cache and recreating it when it has been garbage collected.
  */
 public class LogFactorialCache {
   /**
@@ -62,7 +69,7 @@ public class LogFactorialCache {
   }
 
   /**
-   * Create an instance using the given table size.
+   * Create an instance using a table size to cache up to the specified maximum N.
    *
    * @param n argument
    */
@@ -249,8 +256,8 @@ public class LogFactorialCache {
   }
 
   /**
-   * Create a new instance with the given table size. Tabulated values from this instance
-   * are copied for the new instance.
+   * Create a new instance with the given table size. Tabulated values from this instance are copied
+   * for the new instance.
    *
    * <p>If n is larger then the current size then the table will be expanded.
    *
