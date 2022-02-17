@@ -446,7 +446,7 @@ public class TraceManager {
 
     final TIntHashSet processedTraces = new TIntHashSet(traces.length);
     for (int i = 0; i < localisations.length; i++) {
-      if (tracker != null && i % 256 == 0) {
+      if (tracker != null && (i & 0xff) == 0) {
         tracker.progress(i, localisations.length);
       }
 
