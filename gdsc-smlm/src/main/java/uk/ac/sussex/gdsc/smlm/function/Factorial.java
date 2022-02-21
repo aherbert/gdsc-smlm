@@ -88,13 +88,10 @@ public final class Factorial {
    *
    * @param n argument (must be positive)
    * @return n!
-   * @throws ArrayIndexOutOfBoundsException if n is negative
+   * @throws ArrayIndexOutOfBoundsException if n is negative or above 170
    */
-  public static double value(int n) {
-    if (n < FACTORIALS.length) {
-      return FACTORIALS[n];
-    }
-    return Double.POSITIVE_INFINITY;
+  static double uncheckedValue(int n) {
+    return FACTORIALS[n];
   }
 
   /**
@@ -104,10 +101,13 @@ public final class Factorial {
    *
    * @param n argument (must be positive)
    * @return n!
-   * @throws ArrayIndexOutOfBoundsException if n is negative or above 170
+   * @throws ArrayIndexOutOfBoundsException if n is negative
    */
-  static double uncheckedValue(int n) {
-    return FACTORIALS[n];
+  public static double value(int n) {
+    if (n < FACTORIALS.length) {
+      return FACTORIALS[n];
+    }
+    return Double.POSITIVE_INFINITY;
   }
 
   /**
