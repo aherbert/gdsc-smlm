@@ -107,7 +107,7 @@ public class PoissonCalculator {
         final double logx = Math.log(x[i]);
         if (x[i] <= APPROXIMATION_X) {
           // At low values of log(n!) we use the gamma function as the relative error of the
-          // approximation is high. 
+          // approximation is high.
           final double logXFactorial = LogFactorial.value(x[i]);
           sumLogXFactorial += logXFactorial;
           mll += x[i] * logx - x[i] - logXFactorial;
