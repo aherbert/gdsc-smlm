@@ -28,9 +28,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 /**
  * Test that an Lvm stepping solver can return the same results with and without bounds.
@@ -92,7 +92,7 @@ class BoundedLvmSteppingFunctionSolverTest extends BaseSteppingFunctionSolverTes
     final String name = getLvmName(applyBounds, clamping, false);
 
     final int loops = 5;
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
 
     for (final double s : signal) {

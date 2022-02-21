@@ -31,15 +31,15 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class TraceManagerTest {
   @SeededTest
   void canTraceSinglePulseWithFixedCoords(RandomSeed seed) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final float[] params = createParams(rand);
     final Trace trace = new Trace();
     for (int i = 0; i < 5; i++) {
@@ -51,7 +51,7 @@ class TraceManagerTest {
 
   @SeededTest
   void canTraceSinglePulseWithMovingCoords(RandomSeed seed) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final float distance = 0.5f;
 
     final float[] params = createParams(rand);
@@ -66,7 +66,7 @@ class TraceManagerTest {
 
   @SeededTest
   void canTraceMultiplePulseWithFixedCoords(RandomSeed seed) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
 
     final float[] params = createParams(rand);
     final Trace trace = new Trace();
@@ -84,7 +84,7 @@ class TraceManagerTest {
 
   @SeededTest
   void canTraceMultiplePulseWithMovingCoords(RandomSeed seed) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final float distance = 0.5f;
 
     final float[] params = createParams(rand);
@@ -136,7 +136,7 @@ class TraceManagerTest {
 
   private static void simulate(RandomSeed seed, int molecules, int maxPulses, int maxOnTime,
       int maxOffTime, float distance) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final Trace[] expected = new Trace[molecules];
     for (int j = 0; j < expected.length; j++) {
       final float[] params = createParams(rand);
@@ -160,7 +160,7 @@ class TraceManagerTest {
 
   private static void simulateMoving(RandomSeed seed, int molecules, int maxPulses, int maxOnTime,
       int maxOffTime) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
 
     // When the molecules are moving their paths may intersect.
     // Thus each molecule is allocated a 2x2 square to move within

@@ -37,10 +37,10 @@ import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -202,7 +202,7 @@ class KernelFilterTest {
 
   private void filter1IsSameAsFilter2(RandomSeed seed, FilterWrapper f1, FilterWrapper f2,
       boolean internal, double tolerance) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final float[] data = createData(rand, size, size);
 
     final int testBorder = (internal) ? f1.kw / 2 : 0;
@@ -280,7 +280,7 @@ class KernelFilterTest {
 
   private void floatFilterIsFasterThanImageJFilter(RandomSeed seed, int kw) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
 
     final float[][] data = new float[10][];
     for (int i = 0; i < data.length; i++) {

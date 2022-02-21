@@ -55,9 +55,9 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
@@ -148,7 +148,7 @@ class ScmosLikelihoodWrapperTest {
     data.gain = new float[n];
     data.offset = new float[n];
     data.sd = new float[n];
-    final UniformRandomProvider rg = RngUtils.create(source.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(source.get());
     final DiscreteSampler pd = GdscSmlmTestUtils.createPoissonSampler(rg, O);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, VAR);
@@ -282,7 +282,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -490,7 +490,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -840,7 +840,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);

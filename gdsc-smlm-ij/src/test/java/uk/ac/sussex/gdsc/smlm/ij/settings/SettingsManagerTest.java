@@ -29,15 +29,15 @@ import java.io.IOException;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class SettingsManagerTest {
   @SeededTest
   void canReadWriteConfiguration(RandomSeed seed) throws IOException {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
 
     final Calibration.Builder builder = Calibration.newBuilder();
     builder.getCameraCalibrationBuilder().setBias(rand.nextDouble());

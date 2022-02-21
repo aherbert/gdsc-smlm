@@ -31,10 +31,10 @@ import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -95,7 +95,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -123,7 +123,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -151,7 +151,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -177,7 +177,7 @@ class SumFilterTest extends AbstractFilterTest {
   public void
       floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
           RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -443,7 +443,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -752,7 +752,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(
       RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1013,7 +1013,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1039,7 +1039,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1454,7 +1454,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1545,7 +1545,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1639,7 +1639,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1946,7 +1946,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1973,7 +1973,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2000,7 +2000,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2024,7 +2024,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
       RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2285,7 +2285,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2592,7 +2592,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2847,7 +2847,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2873,7 +2873,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3284,7 +3284,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3376,7 +3376,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3470,7 +3470,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {

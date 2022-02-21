@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -60,7 +60,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -87,7 +87,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -189,7 +189,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -349,7 +349,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -440,7 +440,7 @@ class MedianFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -694,7 +694,7 @@ class MedianFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -784,7 +784,7 @@ class MedianFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final MedianFilter filter = new MedianFilter();
 
     for (final int width : primes) {

@@ -27,15 +27,15 @@ package uk.ac.sussex.gdsc.smlm.math3.distribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class PoissonDistributionTest {
   @SeededTest
   void canComputeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -53,7 +53,7 @@ class PoissonDistributionTest {
 
   @SeededTest
   void canComputeCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -71,7 +71,7 @@ class PoissonDistributionTest {
 
   @SeededTest
   void canComputeInverseCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {

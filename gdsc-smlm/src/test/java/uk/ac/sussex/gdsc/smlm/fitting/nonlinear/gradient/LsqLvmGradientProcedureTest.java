@@ -45,12 +45,15 @@ import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
+import uk.ac.sussex.gdsc.test.api.TestAssertions;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -186,7 +189,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final int[] x =
-        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -296,7 +299,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final int[] x =
-        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+        createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -361,7 +364,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final String name = GradientCalculator.class.getSimpleName();
@@ -428,7 +431,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
+    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -504,18 +507,19 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final IndexSupplier msg = new IndexSupplier(2).setMessagePrefix("Gradient ");
 
     // Must compute most of the time
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit, nparams);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final int ii = i;
+      msg.set(0, i);
       final double[] y = yList.get(i);
       final double[] a = paramsList.get(i);
       final double[] a2 = a.clone();
@@ -525,6 +529,7 @@ class LsqLvmGradientProcedureTest {
       final double[] beta = p.beta.clone();
       for (int j = 0; j < nparams; j++) {
         final int jj = j;
+        msg.set(1, j);
         final int k = indices[j];
         final double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
         a2[k] = a[k] + d;
@@ -543,10 +548,7 @@ class LsqLvmGradientProcedureTest {
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
         // func.getName(k), a[k], d, beta[j],
         // gradient);
-        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
-          Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii,
-              jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
-        });
+        failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq, msg));
       }
     }
   }
@@ -573,7 +575,7 @@ class LsqLvmGradientProcedureTest {
     final double defaultBackground = background;
     try {
       background = 1e-2;
-      createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+      createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
 
       final EjmlLinearSolver solver = new EjmlLinearSolver(1e-5, 1e-6);
 

@@ -60,8 +60,8 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -232,7 +232,7 @@ public abstract class BaseFunctionSolverTest {
   private static double[][] createData(RandomSeed source) {
     // Per observation read noise.
     // This is generated once so create the randon generator here.
-    final UniformRandomProvider rg = RngUtils.create(source.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(source.get());
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, variance);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
     final double[] w = new double[size * size];
@@ -272,7 +272,7 @@ public abstract class BaseFunctionSolverTest {
       solver.setWeights(getWeights(seed, noiseModel));
     }
 
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
 
     for (final double s : signal) {
       final double[] expected = createParams(1, s, 0, 0, 1);
@@ -358,7 +358,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     final int loops = 5;
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
     final String[] statName = {"Signal", "X", "Y"};
 
@@ -661,7 +661,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.
@@ -771,7 +771,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.

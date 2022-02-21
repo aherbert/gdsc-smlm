@@ -46,9 +46,9 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.IntensityUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.LocationUnits;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.Spot;
 import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.SpotList;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
@@ -123,7 +123,7 @@ class ResultsManagerTest {
     }
 
     // Generate random spots
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     final int size = 100;
     final Spot[] spots = new Spot[size];
     for (int i = 1; i <= size; i++) {

@@ -51,11 +51,11 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -306,7 +306,7 @@ class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
@@ -441,7 +441,7 @@ class PoissonCalculatorTest {
 
     // Simulate Poisson process
     nlf.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double[] x = new double[n];
     final double[] u = new double[n];
     for (int i = 0; i < n; i++) {
@@ -515,7 +515,7 @@ class PoissonCalculatorTest {
     nlf1.initialise(a);
     nlf2.initialise(a);
     nlf3.initialise(a);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     double[] x = SimpleArrayUtils.newArray(n, 0, 1.0);
     final double[] u = new double[x.length];
     final double[] b1 = new double[x.length];
@@ -701,7 +701,7 @@ class PoissonCalculatorTest {
   @SeededTest
   void instanceAndFastMethodIsApproximatelyEqualToStaticMethod(RandomSeed seed) {
     final DoubleEquality eq = new DoubleEquality(3e-4, 0);
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     // Test for different x. The calculator approximation begins
     final int n = 100;
     final double[] u = new double[n];

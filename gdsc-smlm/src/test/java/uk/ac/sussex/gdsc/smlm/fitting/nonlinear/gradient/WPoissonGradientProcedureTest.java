@@ -37,10 +37,10 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.DummyGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -82,7 +82,7 @@ class WPoissonGradientProcedureTest {
   private static double[] createData(RandomSeed source) {
     int count = blockWidth * blockWidth;
     final double[] var = new double[count];
-    final UniformRandomProvider rng = RngUtils.create(source.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(source.get());
     while (count-- > 0) {
       // Range 0.9 to 1.1
       var[count] = 0.9 + 0.2 * rng.nextDouble();
@@ -122,7 +122,7 @@ class WPoissonGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     createFakeParams(rng, nparams, iter, paramsList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -207,7 +207,7 @@ class WPoissonGradientProcedureTest {
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     createFakeParams(rng, nparams, iter, paramsList);
     final Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -257,7 +257,7 @@ class WPoissonGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
@@ -332,7 +332,7 @@ class WPoissonGradientProcedureTest {
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
     final double[] var = dataCache.computeIfAbsent(seed, WPoissonGradientProcedureTest::createData);
-    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);

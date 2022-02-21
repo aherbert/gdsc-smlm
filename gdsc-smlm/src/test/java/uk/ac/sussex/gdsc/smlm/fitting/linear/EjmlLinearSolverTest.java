@@ -42,11 +42,11 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -527,7 +527,7 @@ class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1
@@ -826,7 +826,7 @@ class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1

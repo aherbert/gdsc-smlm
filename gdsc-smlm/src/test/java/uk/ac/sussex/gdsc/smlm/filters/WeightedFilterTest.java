@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -68,7 +68,7 @@ public abstract class WeightedFilterTest {
 
   @SeededTest
   void evenWeightsDoesNotAlterFiltering(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
 
     final DataFilter filter1 = createDataFilter();
     final DataFilter filter2 = createDataFilter();
@@ -128,7 +128,7 @@ public abstract class WeightedFilterTest {
 
   @SeededTest
   void filterDoesNotAlterFilteredImageMean(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     // ExponentialDistribution ed = new ExponentialDistribution(rand, 57,
     // ExponentialDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 

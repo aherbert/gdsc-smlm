@@ -45,9 +45,9 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
@@ -439,7 +439,7 @@ class ImageJImagePeakResultsTest {
   }
 
   private void checkCanAddUsingDifferentMethods(RandomSeed seed, int displayFlags) {
-    final UniformRandomProvider rand = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rand = RngUtils.create(seed.get());
     displayFlags |= ImageJImagePeakResults.DISPLAY_SIGNAL;
 
     final ImageJImagePeakResults[] r = new ImageJImagePeakResults[8];

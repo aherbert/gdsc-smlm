@@ -27,10 +27,8 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 import java.util.ArrayList;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.function.FakeGradientFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
@@ -40,11 +38,12 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussia
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector for use in
@@ -109,7 +108,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
@@ -160,20 +159,26 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeed()), npeaks, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.get()), npeaks, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final IndexSupplier msg1 = new IndexSupplier(2).setMessagePrefix("Gradient1 ");
+    final IndexSupplier msg2 = new IndexSupplier(2).setMessagePrefix("Gradient2 ");
+    final IndexSupplier msg3 = new IndexSupplier(3).setMessagePrefix("GradientJ ");
 
     // Must compute most of the time
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
     // failureLimit = 0;
-    final TestCounter failCounter = new TestCounter(failureLimit, 2 * nparams);
-    final TestCounter failCounter2 = new TestCounter(failureLimit, nparams * nparams);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, 2 * nparams);
+    final AssertionErrorCounter failCounter2 =
+        new AssertionErrorCounter(failureLimit, nparams * nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final int ii = i;
+      msg1.set(0, i);
+      msg2.set(0, i);
+      msg3.set(0, i);
       final double[] y = yList.get(i);
       final double[] a = paramsList.get(i);
       final double[] a2 = a.clone();
@@ -185,6 +190,9 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
       final DenseMatrix64F J = DenseMatrix64F.wrap(nparams, nparams, p.getJacobianLinear());
       for (int j = 0; j < nparams; j++) {
         final int j_ = j;
+        msg1.set(1, j);
+        msg2.set(1, j);
+        msg3.set(1, j);
         final int k = indices[j];
         final double d = Precision.representableDelta(a[k], (a[k] == 0) ? delta : a[k] * delta);
         a2[k] = a[k] + d;
@@ -202,15 +210,8 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f
         // ?= %f", i, k, ll, func.getName(k), a[k], d,
         // gradient1, d1[j], gradient2, d2[j]);
-        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(gradient1, d1[j_]), () -> {
-          Assertions.fail(() -> String.format("Not same gradient1 @ %d,%d: %s != %s (error=%s)", ii,
-              j_, gradient1, d1[j_], DoubleEquality.relativeError(gradient1, d1[j_])));
-        });
-        failCounter.run(nparams + j, () -> eq.almostEqualRelativeOrAbsolute(gradient2, d2[j_]),
-            () -> {
-              Assertions.fail(() -> String.format("Not same gradient2 @ %d,%d: %s != %s (error=%s)",
-                  ii, j_, gradient2, d2[j_], DoubleEquality.relativeError(gradient2, d2[j_])));
-            });
+        failCounter.run(j, () -> TestAssertions.assertTest(gradient1, d1[j_], eq, msg1));
+        failCounter.run(nparams + j, () -> TestAssertions.assertTest(gradient2, d2[j_], eq, msg2));
 
         // Test the Jacobian ...
 
@@ -222,6 +223,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
           }
 
           final int jj_ = jj;
+          msg3.set(2, jj);
           final int kk = indices[jj];
           final double dd =
               Precision.representableDelta(a[kk], (a[kk] == 0) ? delta : a[kk] * delta);
@@ -235,7 +237,6 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
 
           // Use index j even though we adjusted index jj
           final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
-          final boolean ok = eq.almostEqualRelativeOrAbsolute(gradient3, J.get(j, jj));
           // logger.fine(FunctionUtils.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b", i,
           // k, kk, func.getName(k),
           // a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
@@ -243,12 +244,8 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
           // {
           // ExtraAssertions.fail("Not same gradientJ @ [%d,%d]", j, jj);
           // }
-          failCounter2.run(nparams * j_ + jj_, () -> ok, () -> {
-            Assertions
-                .fail(() -> String.format("Not same gradientJ @ %d [%d,%d]: %s != %s (error=%s)",
-                    ii, j_, jj_, gradient3, J.get(j_, jj_),
-                    DoubleEquality.relativeError(gradient3, J.get(j_, jj_))));
-          });
+          failCounter2.run(nparams * j + jj,
+              () -> TestAssertions.assertTest(gradient3, J.get(j_, jj_), eq, msg3));
         }
       }
     }

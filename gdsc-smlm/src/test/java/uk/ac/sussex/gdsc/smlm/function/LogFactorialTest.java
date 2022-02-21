@@ -35,9 +35,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class LogFactorialTest {
@@ -92,7 +92,7 @@ class LogFactorialTest {
    */
   @SeededTest
   void testLogFactorialDouble(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-14);
     for (int i = 0; i < 200; i++) {
       final double n = rng.nextDouble() * 200;

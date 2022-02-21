@@ -32,9 +32,9 @@ import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.model.GaussianPsfModel;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class ErfGaussian2DFunctionVsPsfModelTest {
@@ -43,7 +43,7 @@ class ErfGaussian2DFunctionVsPsfModelTest {
 
   @SeededTest
   void computesSameAsPsfModel(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     for (int i = 0; i < 10; i++) {
       //@formatter:off
       computesSameAsPsfModel(

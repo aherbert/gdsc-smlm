@@ -41,9 +41,9 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class UnivariateLikelihoodFisherInformationCalculatorTest {
@@ -53,7 +53,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePoissonFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON);
     }
@@ -61,7 +61,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputeHalfPoissonFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.HALF_POISSON);
     }
@@ -69,7 +69,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
     }
@@ -151,7 +151,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
     }

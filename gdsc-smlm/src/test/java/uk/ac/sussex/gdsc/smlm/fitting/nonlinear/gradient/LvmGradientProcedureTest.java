@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.opentest4j.AssertionFailedError;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
@@ -59,12 +58,12 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussia
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingResult;
@@ -229,8 +228,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x =
-        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -347,8 +345,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x =
-        createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -459,7 +456,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.getSeed()), nparams, iter, paramsList, yList);
+    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
     if (precomputed) {
@@ -581,7 +578,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList);
+    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
@@ -665,7 +662,7 @@ class LvmGradientProcedureTest {
 
   @SeededTest
   void gradientProcedureFastLogMleCannotComputeGradient(RandomSeed seed) {
-    Assertions.assertThrows(AssertionFailedError.class, () -> {
+    Assertions.assertThrows(AssertionError.class, () -> {
       gradientProcedureComputesGradient(seed,
           new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FAST_LOG_MLE,
           false);
@@ -715,7 +712,7 @@ class LvmGradientProcedureTest {
 
   @SeededTest
   void gradientProcedureFastLogMleCannotComputeGradientWithPrecomputed(RandomSeed seed) {
-    Assertions.assertThrows(AssertionFailedError.class, () -> {
+    Assertions.assertThrows(AssertionError.class, () -> {
       gradientProcedureComputesGradient(seed,
           new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FAST_LOG_MLE,
           true);
@@ -739,22 +736,23 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.getSeed()), 1, iter, paramsList, yList, true);
+    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleEquality eq = new DoubleEquality(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final IndexSupplier msg = new IndexSupplier(2).setMessagePrefix("Gradient ");
 
     final double[] b = (precomputed) ? new double[func.size()] : null;
 
     final FastLog fastLog = type == Type.FAST_LOG_MLE ? getFastLog() : null;
 
     // Must compute most of the time
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit, nparams);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final int ii = i;
+      msg.set(0, i);
       final double[] y = yList.get(i);
       final double[] a = paramsList.get(i);
       final double[] a2 = a.clone();
@@ -775,6 +773,7 @@ class LvmGradientProcedureTest {
       final double[] beta = gp.beta.clone();
       for (int j = 0; j < nparams; j++) {
         final int jj = j;
+        msg.set(1, j);
         final int k = indices[j];
         // double d = Precision.representableDelta(a[k], (a[k] == 0) ? 1e-3 : a[k] * delta);
         final double d = Precision.representableDelta(a[k], delta);
@@ -794,11 +793,7 @@ class LvmGradientProcedureTest {
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
         // Gaussian2DFunction.getName(k),
         // a[k], d, beta[j], gradient);
-
-        failCounter.run(j, () -> eq.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
-          Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)", ii,
-              jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
-        });
+        failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq, msg));
       }
     }
   }
@@ -820,7 +815,7 @@ class LvmGradientProcedureTest {
 
   @SeededTest
   void gradientProcedureFastLogMleCannotSupportPrecomputedWithGradients(RandomSeed seed) {
-    Assertions.assertThrows(AssertionFailedError.class, () -> {
+    Assertions.assertThrows(AssertionError.class, () -> {
       gradientProcedureSupportsPrecomputed(seed, Type.FAST_LOG_MLE);
     });
   }
@@ -837,7 +832,7 @@ class LvmGradientProcedureTest {
   private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type,
       boolean checkGradients) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rng, 0, noise);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -879,17 +874,19 @@ class LvmGradientProcedureTest {
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleEquality eq2 = new DoubleEquality(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq2 = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final IndexSupplier msg = new IndexSupplier(2).setMessagePrefix("Gradient ");
 
     final double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
     final double[] y_b = new double[b.length];
 
     // Count the number of failures for each gradient
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit, nparams * 2);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams * 2);
 
     for (int i = 0; i < paramsList.size(); i++) {
       final int ii = i;
+      msg.set(0, i);
       final double[] y = yList.get(i);
       final double[] a3peaks = paramsList.get(i);
       // logger.fine(FunctionUtils.getSupplier("[%d] a=%s", i, Arrays.toString(a3peaks));
@@ -964,6 +961,7 @@ class LvmGradientProcedureTest {
       if (checkGradients) {
         for (int j = 0; j < nparams; j++) {
           final int jj = j;
+          msg.set(1, j);
           final int k = indices[j];
           // double d = Precision.representableDelta(a2peaks[k], (a2peaks[k] == 0) ? 1e-3 :
           // a2peaks[k] * delta);
@@ -984,10 +982,7 @@ class LvmGradientProcedureTest {
           // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
           // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
           // DoubleEquality.relativeError(gradient, beta[j]));
-          failCounter.run(j, () -> eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient), () -> {
-            Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)",
-                ii, jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
-          });
+          failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq2, msg));
         }
       }
 
@@ -1092,11 +1087,7 @@ class LvmGradientProcedureTest {
         // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
         // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
         // DoubleEquality.relativeError(gradient, beta[j]));
-        failCounter.run(nparams + j, () -> eq2.almostEqualRelativeOrAbsolute(beta[jj], gradient),
-            () -> {
-              Assertions.fail(() -> String.format("Not same gradient @ %d,%d: %s != %s (error=%s)",
-                  ii, jj, beta[jj], gradient, DoubleEquality.relativeError(beta[jj], gradient)));
-            });
+        failCounter.run(nparams + j, () -> TestAssertions.assertTest(gradient, beta[jj], eq2, msg));
       }
     }
   }

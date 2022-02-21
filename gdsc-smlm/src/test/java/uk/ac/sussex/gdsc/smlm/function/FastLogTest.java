@@ -40,11 +40,11 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.function.IcsiFastLog.DataType;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.TimingService;
@@ -351,7 +351,7 @@ class FastLogTest {
   }
 
   private static float[] generateRandomFloats(RandomSeed seed, int n) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final float[] d = new float[n];
     for (int i = 0; i < d.length; i++) {
       d[i] = nextUniformFloat(rng);
@@ -570,7 +570,7 @@ class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[10000000];
@@ -609,7 +609,7 @@ class FastLogTest {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double lower = Double.MIN_VALUE;
     final double upper = Double.MAX_VALUE;
     final double[] d = new double[100000];
@@ -629,7 +629,7 @@ class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
 
     final LocalList<TestFastLog> test = new LocalList<>();
     final int n = 13;
@@ -765,7 +765,7 @@ class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final float[] x = new float[1000000];
     for (int i = 0; i < x.length; i++) {
       x[i] = nextUniformFloat(rng);
@@ -848,7 +848,7 @@ class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double[] values = new double[1000000];
     for (int i = 0; i < values.length; i++) {
       values[i] = nextUniformDouble(rng);
@@ -897,7 +897,7 @@ class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double[] x = new double[1000000];
     for (int i = 0; i < x.length; i++) {
       x[i] = nextUniformDouble(rng);
@@ -927,7 +927,7 @@ class FastLogTest {
     Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double[] x = new double[1000000];
     final float[] xf = new float[x.length];
     for (int i = 0; i < x.length; i++) {

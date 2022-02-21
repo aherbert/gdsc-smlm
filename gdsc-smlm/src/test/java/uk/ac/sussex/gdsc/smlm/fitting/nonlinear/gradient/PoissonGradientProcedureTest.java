@@ -46,10 +46,10 @@ import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -111,7 +111,7 @@ class PoissonGradientProcedureTest {
     final int iter = 10;
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.get()), nparams, iter, paramsList);
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -198,7 +198,7 @@ class PoissonGradientProcedureTest {
     final int iter = 1000;
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.get()), nparams, iter, paramsList);
     final int n = blockWidth * blockWidth;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -268,7 +268,7 @@ class PoissonGradientProcedureTest {
     final int iter = 10;
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.get()), nparams, iter, paramsList);
     Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
     if (precomputed) {
@@ -323,7 +323,7 @@ class PoissonGradientProcedureTest {
     final int iter = 100;
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
 
-    createFakeParams(RngUtils.create(seed.getSeed()), nparams, iter, paramsList);
+    createFakeParams(RngUtils.create(seed.get()), nparams, iter, paramsList);
 
     // Remove the timing of the function call by creating a dummy function
     final FakeGradientFunction f = new FakeGradientFunction(blockWidth, nparams);
@@ -385,7 +385,7 @@ class PoissonGradientProcedureTest {
   @SeededTest
   void crlbIsHigherWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
 
     final ErfGaussian2DFunction func = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1,
         10, 10, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);

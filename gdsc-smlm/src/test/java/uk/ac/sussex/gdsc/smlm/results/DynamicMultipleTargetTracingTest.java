@@ -38,15 +38,15 @@ import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing.DmttConfiguration;
 import uk.ac.sussex.gdsc.smlm.results.DynamicMultipleTargetTracing.Trajectory;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class DynamicMultipleTargetTracingTest {
   @SeededTest
   void checkBuilderDefaults(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final double diffusionCoefficientMaximum = 1 + rng.nextDouble();
     final DmttConfiguration.Builder b = DmttConfiguration.newBuilder(diffusionCoefficientMaximum);
 
@@ -69,7 +69,7 @@ class DynamicMultipleTargetTracingTest {
 
   @SeededTest
   void checkBuilder(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     final int temporalWindow = 2 + rng.nextInt(10);
     final double localDiffusionWeight = rng.nextDouble();
     final double diffusionCoefficientMaximum = 1 + rng.nextDouble();

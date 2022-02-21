@@ -42,10 +42,10 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -85,7 +85,7 @@ class FrcTest {
     // Sample lines through an image to create a structure.
     final int size = 1024;
     final double[][] data = new double[size * 2][];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = size, i = 0; x < size; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};
@@ -268,7 +268,7 @@ class FrcTest {
     // Sample lines through an image to create a structure.
     final int N = 2048;
     final double[][] data = new double[N * 2][];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 5);
     for (int x = 0, y = 0, y2 = N, i = 0; x < N; x++, y++, y2--) {
       data[i++] = new double[] {x + gs.sample(), y + gs.sample()};

@@ -31,10 +31,10 @@ import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -242,7 +242,7 @@ class BlockMeanFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, BlockMeanDataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, 57);
 
     for (final int width : primes) {

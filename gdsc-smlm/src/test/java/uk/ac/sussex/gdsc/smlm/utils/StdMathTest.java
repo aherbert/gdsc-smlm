@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 @SuppressWarnings({"javadoc"})
 class StdMathTest {

@@ -47,9 +47,9 @@ import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -150,7 +150,7 @@ class ConfigurationTemplateTest {
     // Create a dummy image
     final int size = 20;
     final float[] pixels = new float[size * size];
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int i = pixels.length; i-- > 0;) {
       pixels[i] = r.nextFloat();
     }

@@ -25,9 +25,9 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class IntBlockSumFilterTest extends AbstractFilterTest {
@@ -126,7 +126,7 @@ class IntBlockSumFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, BlockSumDataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
 
     for (final int width : primes) {
       for (final int height : primes) {

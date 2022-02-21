@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -89,7 +89,7 @@ class Gaussian2DFunctionSpeedTest {
   }
 
   private static Object createData(RandomSeed source) {
-    return new Gaussian2DFunctionSpeedTestData(RngUtils.create(source.getSeed()));
+    return new Gaussian2DFunctionSpeedTestData(RngUtils.create(source.get()));
   }
 
   // private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();

@@ -34,15 +34,14 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.KernelFilter;
-import uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter;
 import uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter.Operation;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 @SuppressWarnings({"javadoc"})
@@ -68,7 +67,7 @@ class FhtFilterTest {
     final int ey = 7;
     final int ox = 1;
     final int oy = 2;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
     // This is offset from the centre
     final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);
@@ -150,8 +149,8 @@ class FhtFilterTest {
     }
 
     // Use a fail counter for a 'soft' test that detects major problems
-    final int failureLimit = TestCounter.computeFailureLimit(repeats, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(repeats, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit);
 
     final IndexSupplier msg = new IndexSupplier(2);
     for (int y = min; y < max; y++) {

@@ -28,16 +28,16 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class OffsetFunctionTest {
   @SeededTest
   void offsetValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final ValueFunction f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
@@ -77,7 +77,7 @@ class OffsetFunctionTest {
   @SeededTest
   void offsetGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final Gradient1Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);
@@ -126,7 +126,7 @@ class OffsetFunctionTest {
   @SeededTest
   void offsetGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     final Gradient2Function f0 = new FakeGradientFunction(3, n);
     final int size = f0.size();
     final double[] b1 = GdscSmlmTestUtils.generateDoubles(size, r);

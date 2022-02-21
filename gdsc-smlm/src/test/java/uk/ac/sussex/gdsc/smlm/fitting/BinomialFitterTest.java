@@ -33,9 +33,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
@@ -69,7 +69,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitBinomialWithKnownNUsingLeastSquaresEstimator(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = false;
     final boolean maximumLikelihood = false;
     for (final int n : N) {
@@ -81,7 +81,7 @@ class BinomialFitterTest {
 
   @SeededTest
   void canFitBinomialWithKnownNUsingMaximumLikelihood(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = false;
     final boolean maximumLikelihood = true;
     if (TestSettings.allow(optionalTestComplexity)) {
@@ -101,7 +101,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitBinomialWithUnknownNUsingLeastSquaresEstimator(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = false;
     final boolean maximumLikelihood = false;
     for (final int n : N) {
@@ -114,7 +114,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitBinomialWithUnknownNUsingMaximumLikelihood(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(optionalTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = false;
     final boolean maximumLikelihood = true;
 
@@ -132,7 +132,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitZeroTruncatedBinomialWithKnownNUsingLeastSquaresEstimator(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = true;
     final boolean maximumLikelihood = false;
     for (final int n : N) {
@@ -145,7 +145,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitZeroTruncatedBinomialWithKnownNUsingMaximumLikelihood(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = true;
     final boolean maximumLikelihood = true;
     for (final int n : N) {
@@ -158,7 +158,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitZeroTruncatedBinomialWithUnknownNUsingLeastSquaresEstimator(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = true;
     final boolean maximumLikelihood = false;
     for (final int n : N) {
@@ -171,7 +171,7 @@ class BinomialFitterTest {
   @SeededTest
   void canFitZeroTruncatedBinomialWithUnknownNUsingMaximumLikelihood(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = true;
     final boolean maximumLikelihood = false;
     for (final int n : N) {
@@ -184,7 +184,7 @@ class BinomialFitterTest {
   @SeededTest
   void sameFitBinomialWithKnownNUsingLseOrMle(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = false;
     for (final int n : N) {
       for (final double p : P) {
@@ -196,7 +196,7 @@ class BinomialFitterTest {
   @SeededTest
   void sameFitZeroTruncatedBinomialWithKnownNUsingLseOrMle(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(nonEssentialTestComplexity));
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final boolean zeroTruncated = true;
     for (final int n : N) {
       for (final double p : P) {

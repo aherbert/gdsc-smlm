@@ -40,9 +40,9 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class SeriesImageSourceTest {
@@ -136,7 +136,7 @@ class SeriesImageSourceTest {
       }
     }
 
-    final UniformRandomProvider r = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider r = RngUtils.create(seed.get());
     for (int i = 0; i < 3; i++) {
       final int[] random = RandomUtils.sample(pixels.length / 2, pixels.length, r);
       for (final int frame : random) {

@@ -32,10 +32,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -58,7 +58,7 @@ class FilterTest {
 
   @SeededTest
   void canCompareMultiFilter(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
     final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter f1 =
@@ -73,7 +73,7 @@ class FilterTest {
 
   @SeededTest
   void canCompareMultiFilter2(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
     final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter2 f1 =
@@ -90,7 +90,7 @@ class FilterTest {
   void directCompareMultiFilterIsFaster(RandomSeed seed) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
     final MultiFilter f1 = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     final MultiFilter2 f2 = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -212,7 +212,7 @@ class FilterTest {
   @SeededTest
   void canSerialiseMultiFilter(RandomSeed seed) {
     // Check the XStream serialisation supports inheritance
-    final UniformRandomProvider rng = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rng = RngUtils.create(seed.get());
     testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);

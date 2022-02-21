@@ -40,9 +40,9 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculator;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -64,7 +64,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void canComputeCrlb(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       testComputeCrlb(rg, n, 0, true);
     }
@@ -72,7 +72,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void canComputeCrlbWithZeros(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     for (int n = 2; n < 10; n++) {
       testComputeCrlb(rg, n, 1, true);
       testComputeCrlb(rg, n, n / 2, true);
@@ -81,7 +81,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void canComputeCrlbWithReciprocal(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       testComputeCrlb(rg, n, 0, false);
     }
@@ -89,7 +89,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void canComputeCrlbWithReciprocalWithZeros(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     for (int n = 2; n < 10; n++) {
       testComputeCrlb(rg, n, 1, false);
       testComputeCrlb(rg, n, n / 2, false);
@@ -98,7 +98,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void inversionDoesNotMatchReciprocal(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     for (int n = 1; n < 10; n++) {
       final FisherInformationMatrix m = createFisherInformationMatrix(rg, n, 0);
       final double[] crlb = m.crlb();
@@ -201,7 +201,7 @@ class FisherInformationMatrixTest {
     final int k = 5;
     final int n = 10;
 
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
     final FisherInformationMatrix m = createRandomMatrix(UniformRandomProvider, n);
     final DenseMatrix64F e = m.getMatrix();
     if (logger.isLoggable(level)) {
@@ -234,7 +234,7 @@ class FisherInformationMatrixTest {
 
   @SeededTest
   void computeWithSubsetReducesTheCrlb(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.getSeed());
+    final UniformRandomProvider rg = RngUtils.create(seed.get());
     final Gaussian2DFunction f = createFunction(10, 1);
     final int perPeak = f.getGradientParametersPerPeak();
     // Create a matrix with 2 peaks + background

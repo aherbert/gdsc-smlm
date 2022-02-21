@@ -36,8 +36,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -163,7 +163,7 @@ class AbstractFilterTest {
 
   private static Object createSpeedData(RandomSeed source) {
     // Just store the random generator and the empty data
-    return new FloatData(RngUtils.create(source.getSeed()));
+    return new FloatData(RngUtils.create(source.get()));
   }
 
   /**

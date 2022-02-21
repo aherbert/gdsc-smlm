@@ -41,12 +41,12 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunc
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.junit5.RandomSeed;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
+import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestCounter;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
@@ -103,7 +103,7 @@ class SolverSpeedTest {
   }
 
   private static Object createData(RandomSeed source) {
-    return new SolverSpeedTestData(RngUtils.create(source.getSeed()));
+    return new SolverSpeedTestData(RngUtils.create(source.get()));
   }
 
   @SeededTest
@@ -118,8 +118,8 @@ class SolverSpeedTest {
     final GaussJordan solver = new GaussJordan();
     final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit, 2);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, 2);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
 
@@ -161,8 +161,8 @@ class SolverSpeedTest {
     final GaussJordan solver = new GaussJordan();
     final EjmlLinearSolver solver2 = new EjmlLinearSolver();
 
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
 
@@ -199,8 +199,8 @@ class SolverSpeedTest {
 
     final GaussJordan solver = new GaussJordan();
 
-    final int failureLimit = TestCounter.computeFailureLimit(iter, 0.1);
-    final TestCounter failCounter = new TestCounter(failureLimit, 2);
+    final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, 2);
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-2, 0);
 
