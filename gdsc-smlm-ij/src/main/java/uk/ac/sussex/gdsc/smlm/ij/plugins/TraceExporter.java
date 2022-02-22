@@ -49,6 +49,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
+import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
@@ -67,6 +68,7 @@ import us.hebi.matlab.mat.format.Mat5;
 import us.hebi.matlab.mat.types.Cell;
 import us.hebi.matlab.mat.types.MatFile;
 import us.hebi.matlab.mat.types.Matrix;
+import us.hebi.matlab.mat.types.Struct;
 
 /**
  * Plugin to export traced datasets.
@@ -141,7 +143,7 @@ public class TraceExporter implements PlugIn {
   }
 
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT");
+    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS");
 
     private final String name;
 
@@ -307,7 +309,9 @@ public class TraceExporter implements PlugIn {
       });
     }
 
-    if (settings.format == 2) {
+    if (settings.format == 3) {
+      exportNobias(results);
+    } else if (settings.format == 2) {
       exportVbSpt(results);
     } else if (settings.format == 1) {
       exportAnaDda(results);
@@ -532,7 +536,6 @@ public class TraceExporter implements PlugIn {
     }
   }
 
-
   @SuppressWarnings("resource")
   private void exportVbSpt(MemoryPeakResults results) {
     // vbSPT file format:
@@ -573,13 +576,13 @@ public class TraceExporter implements PlugIn {
     final LocalList<double[]> list = new LocalList<>();
     results.forEach(DistanceUnit.UM, (XyzrResultProcedure) (x, y, z, result) -> {
       if (idCounter.advance(result.getId())) {
-        addTrack(out, idCounter.getCount() - 1, list, is3d);
+        addVbSptTrack(out, idCounter.getCount() - 1, list, is3d);
         idCounter.increment();
         list.clear();
       }
       list.add(new double[] {x, y, z, result.getFrame()});
     });
-    addTrack(out, idCounter.getCount() - 1, list, is3d);
+    addVbSptTrack(out, idCounter.getCount() - 1, list, is3d);
 
     try (MatFile matFile = Mat5.newMatFile()) {
       matFile.addArray("tracks", out);
@@ -598,7 +601,7 @@ public class TraceExporter implements PlugIn {
    * @param is3d true if the data is 3D, otherwise write 2D data
    */
   @SuppressWarnings("resource")
-  private static void addTrack(Cell cell, int index, LocalList<double[]> list, boolean is3d) {
+  private static void addVbSptTrack(Cell cell, int index, LocalList<double[]> list, boolean is3d) {
     if (list.isEmpty()) {
       return;
     }
@@ -621,6 +624,107 @@ public class TraceExporter implements PlugIn {
       }
     }
     cell.set(index, m);
+  }
+
+  @SuppressWarnings("resource")
+  private void exportNobias(MemoryPeakResults results) {
+    // NOBIAS file format:
+    // https://github.com/BiteenMatlab/NOBIAS
+    // Matlab matrix file (.mat) input data variable should be a structure variable with
+    // at least two fields: ‘obs’ and ‘TrID’. ‘obs’ is a 2 × T matrix of observations where T is the
+    // total amount of steps and 2 indicates the dimensionality (2D tracks). Each element of ‘obs’
+    // is the step size in that dimension. ‘TrID’ is the trajectory ID number, which denotes the
+    // track that step is from. It should be a 1 × T integer vector. To do the motion blur
+    // correction, the input data must also have a third field, ‘obs_corr’ (edited), that denotes
+    // the correlation steps.
+
+    // Note: From reading NOBIAS_get_simu_data_corrsteps.m
+    // the 'obs_corr' is the product of two consecutive steps. The final step is nan.
+
+    // The NOBIAS ‘Params’ structure includes two parameters, ‘Params.frametime’ and
+    // ‘Params.pixelsize’, that depend on your experimental settings. Please indicate your imaging
+    // frame time in units of seconds and your imaging pixel size in units of μm.
+
+    // Count the IDs. Each new result ID will increment the count.
+    final FrameCounter idCounter = new FrameCounter(results.getFirst().getId() - 1);
+    results.forEach((PeakResultProcedure) result -> {
+      if (idCounter.advance(result.getId())) {
+        idCounter.increment();
+      }
+    });
+
+    // This will reset the counter to zero and ensure the current frame does not match
+    // in the event of a single track
+    idCounter.advanceAndReset(idCounter.currentFrame() + 1);
+
+    // Collect the jumps for the tracks
+    final LocalList<double[]> list = new LocalList<>();
+    final double[] last = new double[3];
+    results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
+      if (idCounter.advance(result.getId())) {
+        last[0] = x;
+        last[1] = y;
+        last[2] = idCounter.incrementAndGet();
+      } else {
+        last[0] = x - last[0];
+        last[1] = y - last[1];
+        list.add(last.clone());
+        last[0] = x;
+        last[1] = y;
+      }
+    });
+
+    // Create the 'data' cell array as 1x1
+    final Struct data = Mat5.newStruct(1, 1);
+
+    final int rows = list.size();
+
+    final Matrix trid = Mat5.newMatrix(rows, 1);
+    for (int i = 0; i < rows; i++) {
+      final double[] xyz = list.unsafeGet(i);
+      trid.setDouble(i, xyz[2]);
+    }
+    data.set("TrID", trid);
+
+    final Matrix obs = Mat5.newMatrix(2, rows);
+    for (int i = 0; i < rows; i++) {
+      final double[] xyz = list.unsafeGet(i);
+      obs.setDouble(2 * i, xyz[0]);
+      obs.setDouble(2 * i + 1, xyz[1]);
+    }
+    data.set("obs", obs);
+
+    final Matrix obsCorr = Mat5.newMatrix(2, rows);
+    if (rows != 0) {
+      double[] xyz2 = list.unsafeGet(0);
+      for (int i = 1; i < rows; i++) {
+        final double[] xyz = list.unsafeGet(i);
+        obsCorr.setDouble(2 * i - 2, xyz[0] * xyz2[0]);
+        obsCorr.setDouble(2 * i - 1, xyz[1] * xyz2[1]);
+        xyz2 = xyz;
+      }
+      obsCorr.setDouble(2 * rows - 2, Double.NaN);
+      obsCorr.setDouble(2 * rows - 1, Double.NaN);
+    }
+    data.set("obs_corr", obsCorr);
+
+    Struct params = null;
+    if (results.hasCalibration()) {
+      params = Mat5.newStruct(1, 1);
+      final CalibrationReader cr = results.getCalibrationReader();
+      params.set("frametime", Mat5.newScalar(cr.getExposureTime() / 1000));
+      params.set("pixelsize", Mat5.newScalar(cr.getNmPerPixel() / 1000));
+    }
+
+    try (MatFile matFile = Mat5.newMatFile()) {
+      matFile.addArray("data", data);
+      if (params != null) {
+        matFile.addArray("Params", params);
+      }
+      Mat5.writeToFile(matFile, Paths.get(settings.directory, results.getName() + ".mat").toFile());
+    } catch (final IOException ex) {
+      handleException(ex);
+    }
   }
 
   private static void handleException(Exception ex) {

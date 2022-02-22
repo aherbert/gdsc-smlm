@@ -857,7 +857,31 @@ The cell contents can be displayed for verification using::
 
     % Example loading and display of track data from the first 2 cells
     input = load(inputfile, 'tracks');
-    celldisp(input.tracks(1,1:2))
+    celldisp(input.tracks(1,1:2));
+
+
+NOBIAS Localisations
+^^^^^^^^^^^^^^^^^^^^
+
+The `NOBIAS <https://github.com/BiteenMatlab/NOBIAS>`_ localisations file format. This is a Matlab matrix file containing the track IDs and jump steps in the X and Y dimensions.
+
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`.
+
+Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal `n`.
+
+If the results are calibrated then a second struct called 'Params' is added to the file containing two named fields: 'frametime' is the frame exposure time in seconds; and 'pixelsize' is the camera pixel size in |micro|\ m.
+
+The cell contents can be displayed for verification using::
+
+    % Example loading and display of the first 3 jump steps
+    input = load('/path/to/file.mat', 'data');
+    display(input.data.obs(1:2,1:3));
+    display(input.data.TrID(1:3,1));
+    display(input.Params);
+
+Execute NOBIAS HDP-HMM Module using::
+
+    out = NOBIAS(input.data,'pixelsize',input.Params.pixelsize,'frametime',Params.frametime)
 
 
 .. index:: Exporting Datasets
