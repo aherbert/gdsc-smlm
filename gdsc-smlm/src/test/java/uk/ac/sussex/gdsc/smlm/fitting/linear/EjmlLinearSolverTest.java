@@ -24,16 +24,18 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
@@ -42,19 +44,18 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
 class EjmlLinearSolverTest {
+  /** Used to control test logging. Actual output messages are written at the INFO level. */
+  private static final Level LOG_LEVEL = Level.FINE;
   private static Logger logger;
 
   @BeforeAll
@@ -95,12 +96,12 @@ class EjmlLinearSolverTest {
     Assertions.assertTrue(result, "Failed to invert");
     Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
     }
     for (int i = 0; i < b.length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -134,12 +135,12 @@ class EjmlLinearSolverTest {
     Assertions.assertTrue(result, "Failed to invert");
     Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
     }
     for (int i = 0; i < b.length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -174,12 +175,12 @@ class EjmlLinearSolverTest {
     Assertions.assertTrue(result, "Failed to invert");
     Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
     }
     for (int i = 0; i < b.length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -220,12 +221,12 @@ class EjmlLinearSolverTest {
     Assertions.assertTrue(result, "Failed to invert");
     Assertions.assertArrayEquals(x, b, 1e-4f, "Bad solution");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("x = %s", Arrays.toString(b)));
     }
     for (int i = 0; i < b.length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -257,7 +258,7 @@ class EjmlLinearSolverTest {
 
     for (int i = 0; i < a[0].length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -295,7 +296,7 @@ class EjmlLinearSolverTest {
 
     for (int i = 0; i < a[0].length; i++)
     {
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isLoggable(LOG_LEVEL)) {
         logger.info(FunctionUtils.getSupplier("a[%d] = %s", i, Arrays.toString(a[i])));
       }
       Assertions.assertArrayEquals(a_inv[i], a[i], 1e-4f, "Bad inversion");
@@ -322,7 +323,7 @@ class EjmlLinearSolverTest {
 
     Assertions.assertNotNull(o, "Failed to invert");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("a diagonal = %s", Arrays.toString(o)));
     }
     Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
@@ -351,7 +352,7 @@ class EjmlLinearSolverTest {
 
     Assertions.assertNotNull(o, "Failed to invert");
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(LOG_LEVEL)) {
       logger.info(FunctionUtils.getSupplier("a diagonal = %s", Arrays.toString(o)));
     }
     Assertions.assertArrayEquals(e, o, 1e-4, "Bad inversion");
@@ -362,159 +363,123 @@ class EjmlLinearSolverTest {
   // CHECKSTYLE.OFF: MemberName
   // CHECKSTYLE.OFF: ParameterName
 
-  private abstract class SolverTimingTask extends BaseTimingTask {
+  private abstract class SolverExecutable implements Executable {
+    String name;
     DenseMatrix64F[] a;
     DenseMatrix64F[] b;
-    final boolean badSolver;
-    // No validation for a pure speed test
-    EjmlLinearSolver solver = new EjmlLinearSolver();
 
-    public SolverTimingTask(String name, DenseMatrix64F[] a, DenseMatrix64F[] b) {
-      super(name + " " + a[0].numCols);
-      // Clone the data
+    SolverExecutable(String name, DenseMatrix64F[] a, DenseMatrix64F[] b) {
+      this.name = name + " " + a[0].numCols;
       this.a = a;
       this.b = b;
-      // Check the solver gets a good answer
+    }
+
+    @Override
+    public void execute() {
+      // Use the solver validation
+      EjmlLinearSolver solver = new EjmlLinearSolver();
       solver.setEqual(new DoubleEquality(5e-3, 1e-6));
       int fail = 0;
-      final Object data = getData(0);
-      a = (DenseMatrix64F[]) ((Object[]) data)[0];
-      b = (DenseMatrix64F[]) ((Object[]) data)[1];
       for (int i = 0; i < a.length; i++) {
-        if (!solve(a[i], b[i])) {
+        DenseMatrix64F aa = a[i].copy();
+        DenseMatrix64F bb = b[i].copy();
+        if (!solve(solver, aa, bb)) {
           fail++;
         }
       }
-      if (fail > 0) {
-        logger
-            .info(FunctionUtils.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
-        badSolver = true;
-      } else {
-        badSolver = false;
-      }
-      solver.setEqual(null);
+      Assertions.assertEquals(0, fail,
+          FunctionUtils.getSupplier("%s failed to invert %d/%d", name, fail, a.length));
     }
 
-    @Override
-    public int getSize() {
-      return 1;
-    }
-
-    @Override
-    public Object getData(int i) {
-      // Clone
-      int n = b.length;
-      final DenseMatrix64F[] a = new DenseMatrix64F[n];
-      final DenseMatrix64F[] b = new DenseMatrix64F[n];
-      while (n-- > 0) {
-        a[n] = this.a[n].copy();
-        b[n] = this.b[n].copy();
-      }
-      return new Object[] {a, b};
-    }
-
-    @Override
-    public Object run(Object data) {
-      final DenseMatrix64F[] a = (DenseMatrix64F[]) ((Object[]) data)[0];
-      final DenseMatrix64F[] b = (DenseMatrix64F[]) ((Object[]) data)[1];
-      for (int i = 0; i < a.length; i++) {
-        solve(a[i], b[i]);
-      }
-      return null;
-    }
-
-    abstract boolean solve(DenseMatrix64F a, DenseMatrix64F b);
+    abstract boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b);
   }
 
-  private class LinearSolverTimingTask extends SolverTimingTask {
-    public LinearSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class LinearSolverExecutable extends SolverExecutable {
+    public LinearSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("Linear Solver", a, b);
     }
 
     @Override
-    boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
       return solver.solveLinear(a, b);
     }
   }
 
-  private class CholeskySolverTimingTask extends SolverTimingTask {
-    public CholeskySolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class CholeskySolverExecutable extends SolverExecutable {
+    public CholeskySolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("Cholesky Solver", a, b);
     }
 
     @Override
-    boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
       return solver.solveCholesky(a, b);
     }
   }
 
-  private class CholeskyLdltSolverTimingTask extends SolverTimingTask {
-    public CholeskyLdltSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class CholeskyLdltSolverExecutable extends SolverExecutable {
+    public CholeskyLdltSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("CholeskyLDLT Solver", a, b);
     }
 
     @Override
-    boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
       return solver.solveCholeskyLdlT(a, b);
     }
   }
 
-  private class PseudoInverseSolverTimingTask extends SolverTimingTask {
-    public PseudoInverseSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class PseudoInverseSolverExecutable extends SolverExecutable {
+    public PseudoInverseSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("PseudoInverse Solver", a, b);
     }
 
     @Override
-    boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
       return solver.solvePseudoInverse(a, b);
     }
   }
 
-  private class DirectInversionSolverTimingTask extends SolverTimingTask {
-    public DirectInversionSolverTimingTask(DenseMatrix64F[] a, DenseMatrix64F[] b) {
+  private class DirectInversionSolverExecutable extends SolverExecutable {
+    public DirectInversionSolverExecutable(DenseMatrix64F[] a, DenseMatrix64F[] b) {
       super("DirectInversion Solver", a, b);
     }
 
     @Override
-    boolean solve(DenseMatrix64F a, DenseMatrix64F b) {
+    boolean solve(EjmlLinearSolver solver, DenseMatrix64F a, DenseMatrix64F b) {
       return solver.solveDirectInversion(a, b);
     }
   }
 
-  // Create a speed test of the different methods
   @SpeedTag
   @SeededTest
-  void runSolverSpeedTest6(RandomSeed seed) {
-    runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+  void runSolverTest6(RandomSeed seed) {
+    runSolverTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  void runSolverSpeedTest5(RandomSeed seed) {
-    runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
+  void runSolverTest5(RandomSeed seed) {
+    runSolverTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  void runSolverSpeedTest4(RandomSeed seed) {
-    runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
+  void runSolverTest4(RandomSeed seed) {
+    runSolverTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  void runSolverSpeedTest3(RandomSeed seed) {
-    runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+  void runSolverTest3(RandomSeed seed) {
+    runSolverTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  void runSolverSpeedTest2(RandomSeed seed) {
-    runSolverSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+  void runSolverTest2(RandomSeed seed) {
+    runSolverTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
   }
 
-  private void runSolverSpeedTest(RandomSeed seed, int flags) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
+  private void runSolverTest(RandomSeed seed, int flags) {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
@@ -564,129 +529,60 @@ class EjmlLinearSolverTest {
 
     final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
     final DenseMatrix64F[] b = bList.toArray(new DenseMatrix64F[0]);
-    final int runs = 100000 / a.length;
-    final TimingService ts = new TimingService(runs);
-    final LocalList<SolverTimingTask> tasks = new LocalList<>();
-    // Added in descending speed order
-    tasks.add(new PseudoInverseSolverTimingTask(a, b));
-    tasks.add(new LinearSolverTimingTask(a, b));
-    tasks.add(new CholeskySolverTimingTask(a, b));
-    tasks.add(new CholeskyLdltSolverTimingTask(a, b));
-    tasks.add(new DirectInversionSolverTimingTask(a, b));
-    for (final SolverTimingTask task : tasks) {
-      if (!task.badSolver) {
-        ts.execute(task);
-      }
+    final List<Executable> list = new ArrayList<>(
+        Arrays.asList(new PseudoInverseSolverExecutable(a, b), new LinearSolverExecutable(a, b),
+            new CholeskySolverExecutable(a, b), new CholeskyLdltSolverExecutable(a, b)));
+    if (np <= 5) {
+      list.add(new DirectInversionSolverExecutable(a, b));
     }
-    final int size = ts.getSize();
-    ts.repeat();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport(size));
-    }
-
-    // Since the speed is very similar at sizes 2-5 there is nothing to reliably assert
-    // about the fastest of Cholesky/CholeskyLDLT/Direct.
-    // Just check the PseudoInverse is slowest
-    for (int i = 1; i < size; i++) {
-      logger.log(TestLogUtils.getTimingRecord(ts.get(-(size)), ts.get(-i)));
-    }
-
-    if (np > 2) {
-      // The Direct solver may not be faster at size=5
-      int i = (np == 5) ? 2 : 1;
-      final int size_1 = size - 1;
-      for (; i < size_1; i++) {
-        logger.log(TestLogUtils.getTimingRecord(ts.get(-(size_1)), ts.get(-i)));
-      }
-    }
+    Assertions.assertAll(list);
   }
 
-  private abstract class InversionTimingTask extends BaseTimingTask {
+  private abstract class InversionExecutable implements Executable {
+    String name;
     DenseMatrix64F[] a;
-    boolean[] ignore;
-    final boolean badSolver;
-    // No validation for a pure speed test
-    EjmlLinearSolver solver = new EjmlLinearSolver();
+    double[][] answer;
 
-    public InversionTimingTask(String name, DenseMatrix64F[] a, boolean[] ignore,
-        double[][] answer) {
-      super(name + " " + a[0].numCols);
-      // Clone the data
+    public InversionExecutable(String name, DenseMatrix64F[] a, double[][] answer) {
+      this.name = name + " " + a[0].numCols;
       this.a = a;
-      this.ignore = ignore;
-      // Check the inversion gets a good answer
+      this.answer = answer;
+    }
+
+    @Override
+    public void execute() {
+      // Use the solver validation
+      EjmlLinearSolver solver = new EjmlLinearSolver();
       solver.setInversionTolerance(1e-2);
+      DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-3, 1e-4);
       int fail = 0;
-      final boolean[] failed = new boolean[a.length];
       for (int i = 0; i < a.length; i++) {
-        final double[] b = invert(a[i].copy());
-        if (b == null) {
-          failed[i] = true;
-          fail++;
-        } else if (answer[i] == null) {
+        DenseMatrix64F aa = a[i].copy();
+        double[] b = invert(solver, aa);
+
+        // Check against the answer
+        if (answer[i] == null) {
+          // Not initialised yet
           answer[i] = b;
+        } else if (b == null) {
+          fail++;
         } else {
           // Check against the existing answer
           for (int j = 0; j < b.length; j++) {
-            if (!DoubleEquality.almostEqualRelativeOrAbsolute(b[j], answer[i][j], 1e-3, 1e-4)) {
-              failed[i] = true;
+            if (!test.test(b[j], answer[i][j])) {
               fail++;
               break;
             }
           }
         }
       }
-      if (fail > 0) {
-        logger
-            .info(FunctionUtils.getSupplier(getName() + " failed to invert %d/%d", fail, a.length));
-      }
-      solver.setInversionTolerance(0);
-      if (fail == a.length) {
-        // This solver cannot do the inversion
-        badSolver = true;
-      } else {
-        badSolver = false;
-        // Flag those we cannot do as bad
-        for (int i = 0; i < a.length; i++) {
-          if (failed[i]) {
-            ignore[i] = true;
-          }
-        }
-      }
+      Assertions.assertEquals(0, fail,
+          FunctionUtils.getSupplier("%s failed to invert %d/%d", name, fail, a.length));
     }
 
-    @Override
-    public int getSize() {
-      return 1;
-    }
+    abstract double[] invert(EjmlLinearSolver solver, DenseMatrix64F a);
 
-    @Override
-    public Object getData(int i) {
-      // Clone
-      int n = a.length;
-      final DenseMatrix64F[] a = new DenseMatrix64F[n];
-      while (n-- > 0) {
-        if (!ignore[n]) {
-          a[n] = this.a[n].copy();
-        }
-      }
-      return a;
-    }
-
-    @Override
-    public Object run(Object data) {
-      final DenseMatrix64F[] a = (DenseMatrix64F[]) data;
-      for (int i = 0; i < a.length; i++) {
-        if (!ignore[i]) {
-          invert(a[i]);
-        }
-      }
-      return null;
-    }
-
-    abstract double[] invert(DenseMatrix64F a);
-
-    double[] extract(DenseMatrix64F a) {
+    final double[] extract(DenseMatrix64F a) {
       final int n = a.numCols;
       final double[] b = new double[n];
       for (int i = 0, j = 0; i < n; i++, j += n + 1) {
@@ -696,13 +592,14 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class LinearInversionTimingTask extends InversionTimingTask {
-    public LinearInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer) {
-      super("Linear Inversion", a, ignore, answer);
+
+  private class LinearInversionExecutable extends InversionExecutable {
+    public LinearInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("Linear Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       if (solver.invertLinear(a)) {
         return extract(a);
       }
@@ -710,13 +607,14 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class CholeskyInversionTimingTask extends InversionTimingTask {
-    public CholeskyInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore, double[][] answer) {
-      super("Cholesky Inversion", a, ignore, answer);
+
+  private class CholeskyInversionExecutable extends InversionExecutable {
+    public CholeskyInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("Cholesky Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       if (solver.invertCholesky(a)) {
         return extract(a);
       }
@@ -724,14 +622,14 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class CholeskyLdltInversionTimingTask extends InversionTimingTask {
-    public CholeskyLdltInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
-        double[][] answer) {
-      super("CholeskyLDLT Inversion", a, ignore, answer);
+
+  private class CholeskyLdltInversionExecutable extends InversionExecutable {
+    public CholeskyLdltInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("CholeskyLDLT Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       if (solver.invertCholeskyLdlT(a)) {
         return extract(a);
       }
@@ -739,14 +637,14 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class PseudoInverseInversionTimingTask extends InversionTimingTask {
-    public PseudoInverseInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
-        double[][] answer) {
-      super("PseudoInverse Inversion", a, ignore, answer);
+
+  private class PseudoInverseInversionExecutable extends InversionExecutable {
+    public PseudoInverseInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("PseudoInverse Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       if (solver.invertPseudoInverse(a)) {
         return extract(a);
       }
@@ -754,14 +652,14 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class DirectInversionInversionTimingTask extends InversionTimingTask {
-    public DirectInversionInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
-        double[][] answer) {
-      super("DirectInversion Inversion", a, ignore, answer);
+
+  private class DirectInversionInversionExecutable extends InversionExecutable {
+    public DirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("DirectInversion Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       if (solver.invertDirectInversion(a)) {
         return extract(a);
       }
@@ -769,52 +667,51 @@ class EjmlLinearSolverTest {
     }
   }
 
-  private class DiagonalDirectInversionInversionTimingTask extends InversionTimingTask {
-    public DiagonalDirectInversionInversionTimingTask(DenseMatrix64F[] a, boolean[] ignore,
-        double[][] answer) {
-      super("DiagonalDirectInversion Inversion", a, ignore, answer);
+
+  private class DiagonalDirectInversionInversionExecutable extends InversionExecutable {
+    public DiagonalDirectInversionInversionExecutable(DenseMatrix64F[] a, double[][] answer) {
+      super("DiagonalDirectInversion Inversion", a, answer);
     }
 
     @Override
-    double[] invert(DenseMatrix64F a) {
+    double[] invert(EjmlLinearSolver solver, DenseMatrix64F a) {
       return EjmlLinearSolver.invertDiagonalDirectInversion(a);
     }
+
   }
 
   // Create a speed test of the different methods
   @SpeedTag
   @SeededTest
-  void runInversionSpeedTest6(RandomSeed seed) {
-    runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
+  void runInversionTest6(RandomSeed seed) {
+    runInversionTest(seed, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  void runInversionSpeedTest5(RandomSeed seed) {
-    runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
+  void runInversionTest5(RandomSeed seed) {
+    runInversionTest(seed, GaussianFunctionFactory.FIT_ERF_CIRCLE);
   }
 
   @SpeedTag
   @SeededTest
-  void runInversionSpeedTest4(RandomSeed seed) {
-    runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
+  void runInversionTest4(RandomSeed seed) {
+    runInversionTest(seed, GaussianFunctionFactory.FIT_ERF_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  void runInversionSpeedTest3(RandomSeed seed) {
-    runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
+  void runInversionTest3(RandomSeed seed) {
+    runInversionTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NB_FIXED);
   }
 
   @SpeedTag
   @SeededTest
-  void runInversionSpeedTest2(RandomSeed seed) {
-    runInversionSpeedTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
+  void runInversionTest2(RandomSeed seed) {
+    runInversionTest(seed, GaussianFunctionFactory.FIT_SIMPLE_NS_NB_FIXED);
   }
 
-  private void runInversionSpeedTest(RandomSeed seed, int flags) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
+  private void runInversionTest(RandomSeed seed, int flags) {
     final Gaussian2DFunction f0 = GaussianFunctionFactory.create2D(1, 10, 10, flags, null);
     final int n = f0.size();
     final double[] y = new double[n];
@@ -861,53 +758,22 @@ class EjmlLinearSolverTest {
     }
 
     final DenseMatrix64F[] a = aList.toArray(new DenseMatrix64F[0]);
-    final boolean[] ignore = new boolean[a.length];
     final double[][] answer = new double[a.length][];
-    final int runs = 100000 / a.length;
-    final TimingService ts = new TimingService(runs);
-    final LocalList<InversionTimingTask> tasks = new LocalList<>();
-    // Added in descending speed order
-    tasks.add(new PseudoInverseInversionTimingTask(a, ignore, answer));
-    tasks.add(new LinearInversionTimingTask(a, ignore, answer));
-    tasks.add(new CholeskyLdltInversionTimingTask(a, ignore, answer));
-    tasks.add(new CholeskyInversionTimingTask(a, ignore, answer));
-    tasks.add(new DirectInversionInversionTimingTask(a, ignore, answer));
-    tasks.add(new DiagonalDirectInversionInversionTimingTask(a, ignore, answer));
-    for (final InversionTimingTask task : tasks) {
-      if (!task.badSolver) {
-        ts.execute(task);
-      }
-    }
-    final int size = ts.getSize();
-    ts.repeat();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport(size));
-    }
 
-    // When it is present the DiagonalDirect is fastest (n<=5)
+    // Get the actual answer
+    new LinearInversionExecutable(a, answer).execute();
+    Assertions.assertTrue(Arrays.stream(answer).noneMatch(x -> x == null),
+        "Cannot solve all inversions");
+
+    final List<Executable> list =
+        new ArrayList<>(Arrays.asList(new PseudoInverseInversionExecutable(a, answer),
+            new LinearInversionExecutable(a, answer),
+            new CholeskyLdltInversionExecutable(a, answer),
+            new CholeskyInversionExecutable(a, answer)));
     if (np <= 5) {
-      for (int i = 2; i <= size; i++) {
-        logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-1)));
-      }
-
-      if (np < 5) {
-        // n < 5 Direct is fastest
-        for (int i = 3; i <= size; i++) {
-          logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-2)));
-        }
-      } else {
-        // Cholesky should be fastest. It is marginal over CholeskyLDLT.
-        // and may not be faster than Direct at n=5 so that comparison is ignored.
-        for (int i = 4; i <= size; i++) {
-          logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-3)));
-        }
-      }
-    } else {
-      // No Direct inversion possible.
-      // Cholesky should be fastest.
-      for (int i = 2; i <= size; i++) {
-        logger.log(TestLogUtils.getTimingRecord(ts.get(-i), ts.get(-1)));
-      }
+      list.add(new DirectInversionInversionExecutable(a, answer));
+      list.add(new DiagonalDirectInversionInversionExecutable(a, answer));
     }
+    Assertions.assertAll(list);
   }
 }

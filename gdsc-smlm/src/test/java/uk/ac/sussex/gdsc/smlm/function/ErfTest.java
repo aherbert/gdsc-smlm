@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -41,12 +40,8 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 // TODO: Update this using the new Erf implementation in Commons Numbers 1.1
@@ -336,63 +331,6 @@ class ErfTest {
         erf.name, max2));
   }
 
-  private static class ErfTimingTask extends BaseTimingTask {
-    BaseErf erf;
-    double[] x;
-
-    public ErfTimingTask(BaseErf erf, double[] x) {
-      super(erf.name);
-      this.erf = erf;
-      this.x = x;
-    }
-
-    @Override
-    public int getSize() {
-      return 1;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return null;
-    }
-
-    @Override
-    public Object run(Object data) {
-      for (int i = 0; i < x.length; i++) {
-        erf.erf(x[i]);
-      }
-      return null;
-    }
-  }
-
-  @Test
-  void erfApproxIsFaster() {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final int range = 5;
-    final int steps = 10000;
-    final double[] x = new double[steps];
-    final double total = 2 * range;
-    final double step = total / steps;
-    for (int i = 0; i < steps; i++) {
-      x[i] = -range + i * step;
-    }
-
-    final TimingService ts = new TimingService(5);
-    ts.execute(new ErfTimingTask(new ApacheErf(), x));
-    ts.execute(new ErfTimingTask(new Erf(), x));
-    ts.execute(new ErfTimingTask(new Erf0(), x));
-    ts.execute(new ErfTimingTask(new Erf2(), x));
-
-    final int size = ts.getSize();
-    ts.repeat(size);
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport(size));
-    }
-
-    Assertions.assertTrue(ts.get(-3).getMean() < ts.get(-4).getMean());
-  }
-
   @Test
   void gaussianIntegralApproximatesErf() {
     final double x = 1.3;
@@ -515,108 +453,6 @@ class ErfTest {
         final double o = uk.ac.sussex.gdsc.smlm.function.Erf.pow16(f);
         TestAssertions.assertTest(e, o, equality, () -> "x=" + f);
       }
-    }
-  }
-
-  // See if power functions are faster
-
-  //@formatter:off
-  private abstract static class BasePow {
-    String name;
-    BasePow(String name) { this.name = name; }
-    abstract double pow(double x);
-  }
-  private static class MathPow4 extends BasePow {
-    MathPow4() {  super("Math pow4"); }
-    @Override
-    double pow(double x) { return Math.pow(x, 4); }
-  }
-  private static class FastMathPow4 extends BasePow {
-    FastMathPow4() {  super("FastMath pow4"); }
-    @Override
-    double pow(double x) { return FastMath.pow(x, 4L); }
-  }
-  private static class Pow4 extends BasePow {
-    Pow4() {  super("pow4"); }
-    @Override
-    double pow(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.pow4(x); }
-  }
-  private static class MathPow16 extends BasePow {
-    MathPow16() {  super("Math pow16"); }
-    @Override
-    double pow(double x) { return Math.pow(x, 16); }
-  }
-  private static class FastMathPow16 extends BasePow {
-    FastMathPow16() {  super("FastMath pow16"); }
-    @Override
-    double pow(double x) { return FastMath.pow(x, 16L); }
-  }
-  private static class Pow16 extends BasePow {
-    Pow16() {  super("pow16"); }
-    @Override
-    double pow(double x) { return uk.ac.sussex.gdsc.smlm.function.Erf.pow16(x); }
-  }
-  //@formatter:on
-
-  private static class PowTimingTask extends BaseTimingTask {
-    BasePow pow;
-    double[] x;
-
-    public PowTimingTask(BasePow pow, double[] x) {
-      super(pow.name);
-      this.pow = pow;
-      this.x = x;
-    }
-
-    @Override
-    public int getSize() {
-      return 1;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return null;
-    }
-
-    @Override
-    public Object run(Object data) {
-      for (int i = 0; i < x.length; i++) {
-        pow.pow(x[i]);
-      }
-      return null;
-    }
-  }
-
-  @Test
-  void powerApproxIsFaster() {
-    //Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final int range = 5000;
-    final int steps = 100000;
-    final double[] x = new double[steps];
-    final double step = range / steps;
-    for (int i = 0; i < steps; i++) {
-      x[i] = i * step;
-    }
-
-    final TimingService ts = new TimingService(5);
-    ts.execute(new PowTimingTask(new MathPow4(), x));
-    ts.execute(new PowTimingTask(new FastMathPow4(), x));
-    ts.execute(new PowTimingTask(new Pow4(), x));
-    ts.execute(new PowTimingTask(new MathPow16(), x));
-    ts.execute(new PowTimingTask(new FastMathPow16(), x));
-    ts.execute(new PowTimingTask(new Pow16(), x));
-
-    final int size = ts.getSize();
-    ts.repeat(size);
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport());
-    }
-
-    for (int i = 0; i < 2; i++) {
-      final int j = -(1 + i * 3);
-      Assertions.assertTrue(ts.get(j).getMean() < ts.get(j - 1).getMean());
-      Assertions.assertTrue(ts.get(j).getMean() < ts.get(j - 2).getMean());
     }
   }
 }

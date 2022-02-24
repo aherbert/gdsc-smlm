@@ -26,47 +26,17 @@ package uk.ac.sussex.gdsc.smlm.ij.filters;
 
 import ij.plugin.filter.EDM;
 import ij.process.ByteProcessor;
-import ij.process.FHT;
 import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.jtransforms.dht.FloatDHT_2D;
 import org.jtransforms.fft.FloatFFT_2D;
-import org.jtransforms.utils.CommonUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.ij.process.Fht;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter.Operation;
-import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
-import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
 class JTransformsTest {
-  private static Logger logger;
-
-  @BeforeAll
-  public static void beforeAll() {
-    logger = Logger.getLogger(JTransformsTest.class.getName());
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    logger = null;
-  }
 
   private static FloatProcessor createProcessor(int size, int x, int y, int width, int height,
       UniformRandomProvider rng) {
@@ -174,170 +144,5 @@ class JTransformsTest {
 
     Assertions.assertArrayEquals(fht1.getData(), input1, 1e-5f);
     Assertions.assertArrayEquals(fht2.getData(), input2, 1e-5f);
-  }
-
-  private abstract class DhtSpeedTask extends BaseTimingTask {
-    int maxN;
-    float[][] data;
-
-    public DhtSpeedTask(String name, int maxN, float[][] data) {
-      super(name);
-      this.maxN = maxN;
-      this.data = data;
-    }
-
-    @Override
-    public int getSize() {
-      return 1;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return SimpleArrayUtils.deepCopy(data);
-    }
-
-    @Override
-    public Object run(Object data) {
-      return run((float[][]) data);
-    }
-
-    abstract Object run(float[][] data);
-  }
-
-  private class NonDuplicatingFloatProcessor extends FloatProcessor {
-    public NonDuplicatingFloatProcessor(int width, int height, float[] pixels) {
-      super(width, height, pixels);
-    }
-
-    @Override
-    public ImageProcessor duplicate() {
-      return this;
-    }
-
-    @Override
-    public ImageProcessor convertToFloat() {
-      return this;
-    }
-  }
-
-  private class ImageJFhtSpeedTask extends DhtSpeedTask {
-    public ImageJFhtSpeedTask(int maxN, float[][] data) {
-      super(FHT.class.getSimpleName(), maxN, data);
-    }
-
-    @Override
-    Object run(float[][] data) {
-      for (int i = 0; i < data.length; i += 2) {
-        // Forward
-        FHT fht = new FHT(new NonDuplicatingFloatProcessor(maxN, maxN, data[i]), false);
-        fht.transform();
-        // Reverse
-        fht = new FHT(new NonDuplicatingFloatProcessor(maxN, maxN, data[i + 1]), true);
-        fht.transform();
-      }
-      return null;
-    }
-  }
-
-  private class ImageJFht2SpeedTask extends DhtSpeedTask {
-    Fht fht2;
-
-    public ImageJFht2SpeedTask(int maxN, float[][] data) {
-      super(Fht.class.getSimpleName(), maxN, data);
-      // Create one so we have the pre-computed tables
-      fht2 = new Fht(data[0].clone(), maxN, false);
-      fht2.transform();
-    }
-
-    @Override
-    Object run(float[][] data) {
-      for (int i = 0; i < data.length; i += 2) {
-        // Forward
-        Fht fht = new Fht(data[i], maxN, false);
-        fht.copyTables(fht2);
-        fht.transform();
-        // Reverse
-        fht = new Fht(data[i + 1], maxN, true);
-        fht.copyTables(fht2);
-        fht.transform();
-      }
-      return null;
-    }
-  }
-
-  private class JTransformsDhtSpeedTask extends DhtSpeedTask {
-    FloatDHT_2D dht;
-
-    public JTransformsDhtSpeedTask(int maxN, float[][] data) {
-      super(FloatDHT_2D.class.getSimpleName(), maxN, data);
-      dht = new FloatDHT_2D(maxN, maxN);
-    }
-
-    @Override
-    Object run(float[][] data) {
-      for (int i = 0; i < data.length; i += 2) {
-        // Forward
-        dht.forward(data[i]);
-        // Reverse
-        dht.inverse(data[i + 1], true);
-      }
-      return null;
-    }
-  }
-
-  @SpeedTag
-  @SeededTest
-  void jtransforms2DDhtIsFasterThanFht2(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    // Test the forward DHT of data. and reverse transform or the pre-computed correlation.
-
-    final int size = 256;
-    final int w = size / 4;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
-
-    // Blob in the centre
-    FloatProcessor fp = createProcessor(size, size / 2 - w / 2, size / 2 - w / 2, w, w, null);
-    final Fht fht2 = new Fht((float[]) fp.getPixels(), size, false);
-    fht2.transform();
-    fht2.initialiseFastMultiply();
-
-    // Random blobs, original and correlated
-    final int N = 40;
-    final float[][] data = new float[N * 2][];
-    final int lower = w;
-    final int upper = size - w;
-    final int range = upper - lower;
-    for (int i = 0, j = 0; i < N; i++) {
-      final int x = lower + r.nextInt(range);
-      final int y = lower + r.nextInt(range);
-      fp = createProcessor(size, x, y, w, w, r);
-      final float[] pixels = (float[]) fp.getPixels();
-      data[j++] = pixels.clone();
-      final Fht fht1 = new Fht(pixels, size, false);
-      fht1.copyTables(fht2);
-      fht2.transform();
-      final float[] pixels2 = new float[pixels.length];
-      fht2.conjugateMultiply(fht2, pixels2);
-      data[j++] = pixels2;
-    }
-
-    // CommonUtils.setThreadsBeginN_1D_FFT_2Threads(Long.MAX_VALUE);
-    // CommonUtils.setThreadsBeginN_1D_FFT_4Threads(Long.MAX_VALUE);
-    CommonUtils.setThreadsBeginN_2D(Long.MAX_VALUE);
-
-    final TimingService ts = new TimingService();
-    ts.execute(new ImageJFhtSpeedTask(size, data));
-    ts.execute(new ImageJFht2SpeedTask(size, data));
-    ts.execute(new JTransformsDhtSpeedTask(size, data));
-    ts.repeat();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport());
-    }
-
-    // Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean());
-    final TimingResult slow = ts.get(-2);
-    final TimingResult fast = ts.get(-1);
-    logger.log(TestLogUtils.getTimingRecord(slow, fast));
   }
 }

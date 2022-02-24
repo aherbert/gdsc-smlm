@@ -33,7 +33,6 @@ import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -59,17 +58,12 @@ import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
-import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 /**
  * Contains speed tests for the methods for calculating the Hessian and gradient vector for use in
@@ -271,133 +265,6 @@ class LvmGradientProcedureTest {
     }
   }
 
-  private abstract class Timer {
-    private int loops;
-    int min;
-
-    Timer() {}
-
-    Timer(int min) {
-      this.min = min;
-    }
-
-    long getTime() {
-      // Run till stable timing
-      long t1 = time();
-      for (int i = 0; i < 10; i++) {
-        final long t2 = t1;
-        t1 = time();
-        if (loops >= min && DoubleEquality.relativeError(t1, t2) < 0.02) {
-          break;
-        }
-      }
-      return t1;
-    }
-
-    long time() {
-      loops++;
-      long time = System.nanoTime();
-      run();
-      time = System.nanoTime() - time;
-      // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
-      return time;
-    }
-
-    abstract void run();
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureLsqIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.LSQ);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.MLE);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureFastLogMleIsNotSlowerThanGradientCalculator(RandomSeed seed) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, Type.FAST_LOG_MLE);
-  }
-
-  private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed, Type type) {
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 4, type);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 5, type);
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 6, type);
-    // 2 peaks
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 11, type);
-    // 4 peaks
-    gradientProcedureIsNotSlowerThanGradientCalculator(seed, 21, type);
-  }
-
-  private void gradientProcedureIsNotSlowerThanGradientCalculator(RandomSeed seed,
-      final int nparams, final Type type) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final int iter = 1000;
-    final double[][] alpha = new double[nparams][nparams];
-    final double[] beta = new double[nparams];
-
-    final ArrayList<double[]> paramsList = new ArrayList<>(iter);
-    final ArrayList<double[]> yList = new ArrayList<>(iter);
-
-    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
-    final int n = x.length;
-    final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
-
-    final boolean mle = type != Type.LSQ;
-    final FastLog fastLog = (type == Type.FAST_LOG_MLE) ? getFastLog() : null;
-    final GradientCalculator calc = GradientCalculatorUtils.newCalculator(nparams, mle);
-
-    for (int i = 0; i < paramsList.size(); i++) {
-      calc.findLinearised(n, yList.get(i), paramsList.get(i), alpha, beta, func);
-    }
-
-    for (int i = 0; i < paramsList.size(); i++) {
-      final LvmGradientProcedure p =
-          LvmGradientProcedureUtils.create(yList.get(i), func, type, fastLog);
-      p.gradient(paramsList.get(i));
-    }
-
-    // Realistic loops for an optimisation
-    final int loops = 15;
-
-    // Run till stable timing
-    final Timer t1 = new Timer() {
-      @Override
-      void run() {
-        for (int i = 0, k = 0; i < iter; i++) {
-          final GradientCalculator calc = GradientCalculatorUtils.newCalculator(nparams, mle);
-          for (int j = loops; j-- > 0;) {
-            calc.findLinearised(n, yList.get(i), paramsList.get(k++ % iter), alpha, beta, func);
-          }
-        }
-      }
-    };
-    final long time1 = t1.getTime();
-
-    final Timer t2 = new Timer(t1.loops) {
-      @Override
-      void run() {
-        for (int i = 0, k = 0; i < iter; i++) {
-          final LvmGradientProcedure p =
-              LvmGradientProcedureUtils.create(yList.get(i), func, type, fastLog);
-          for (int j = loops; j-- > 0;) {
-            p.gradient(paramsList.get(k++ % iter));
-          }
-        }
-      }
-    };
-    final long time2 = t2.getTime();
-
-    logger.log(TestLogUtils.getTimingRecord(new TimingResult("GradientCalculator", time1),
-        new TimingResult(() -> String.format("LVMGradientProcedure %d %s", nparams, type), time2)));
-  }
-
   @SeededTest
   void gradientProcedureLsqUnrolledComputesSameAsGradientProcedure(RandomSeed seed) {
     gradientProcedureUnrolledComputesSameAsGradientProcedure(seed, Type.LSQ, false);
@@ -508,144 +375,6 @@ class LvmGradientProcedureTest {
       default:
         return new LsqLvmGradientProcedure(y, func);
     }
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, false);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, false);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FAST_LOG_MLE, false);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureWLsqIsFasterUnrolledThanGradientProcedure(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, false);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void
-      gradientProcedureLsqIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.LSQ, true);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void
-      gradientProcedureMleIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.MLE, true);
-  }
-
-  @SpeedTag
-  @SeededTest
-  void gradientProcedureFastLogMleIsFasterUnrolledThanGradientProcedureWithPrecomputed(
-      RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.FAST_LOG_MLE, true);
-  }
-
-  @SpeedTag
-  @SeededTest
-  public void
-      gradientProcedureWLsqIsFasterUnrolledThanGradientProcedureWithPrecomputed(RandomSeed seed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, Type.WLSQ, true);
-  }
-
-  private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed, Type type,
-      boolean precomputed) {
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 4, type, precomputed);
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 5, type, precomputed);
-    gradientProcedureIsFasterUnrolledThanGradientProcedure(seed, 6, type, precomputed);
-  }
-
-  private void gradientProcedureIsFasterUnrolledThanGradientProcedure(RandomSeed seed,
-      final int nparams, final Type type, final boolean precomputed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final int iter = 100;
-
-    final ArrayList<double[]> paramsList = new ArrayList<>(iter);
-    final ArrayList<double[]> yList = new ArrayList<>(iter);
-
-    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
-
-    // Remove the timing of the function call by creating a dummy function
-    final FakeGradientFunction fgf = new FakeGradientFunction(blockWidth, nparams);
-    final Gradient1Function func;
-    if (precomputed) {
-      final double[] b = SimpleArrayUtils.newArray(fgf.size(), 0.1, 1.3);
-      func = OffsetGradient1Function.wrapGradient1Function(fgf, b);
-    } else {
-      func = fgf;
-    }
-
-    final FastLog fastLog = type == Type.FAST_LOG_MLE ? getFastLog() : null;
-
-    final IntArrayFormatSupplier msgA = new IntArrayFormatSupplier("A [%d]", 1);
-    final IntArrayFormatSupplier msgB = new IntArrayFormatSupplier("B [%d]", 1);
-
-    for (int i = 0; i < paramsList.size(); i++) {
-      final LvmGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
-      p1.gradient(paramsList.get(i));
-      p1.gradient(paramsList.get(i));
-
-      final LvmGradientProcedure p2 =
-          LvmGradientProcedureUtils.create(yList.get(i), func, type, fastLog);
-      p2.gradient(paramsList.get(i));
-      p2.gradient(paramsList.get(i));
-
-      // Check they are the same
-      Assertions.assertArrayEquals(p1.getAlphaLinear(), p2.getAlphaLinear(), msgA.set(0, i));
-      Assertions.assertArrayEquals(p1.beta, p2.beta, msgB.set(0, i));
-    }
-
-    // Realistic loops for an optimisation
-    final int loops = 15;
-
-    // Run till stable timing
-    final Timer t1 = new Timer() {
-      @Override
-      void run() {
-        for (int i = 0, k = 0; i < paramsList.size(); i++) {
-          final LvmGradientProcedure p1 = createProcedure(type, yList.get(i), func, fastLog);
-          for (int j = loops; j-- > 0;) {
-            p1.gradient(paramsList.get(k++ % iter));
-          }
-        }
-      }
-    };
-    final long time1 = t1.getTime();
-
-    final Timer t2 = new Timer(t1.loops) {
-      @Override
-      void run() {
-        for (int i = 0, k = 0; i < paramsList.size(); i++) {
-          final LvmGradientProcedure p2 =
-              LvmGradientProcedureUtils.create(yList.get(i), func, type, fastLog);
-          for (int j = loops; j-- > 0;) {
-            p2.gradient(paramsList.get(k++ % iter));
-          }
-        }
-      }
-    };
-    final long time2 = t2.getTime();
-
-    logger
-        .log(TestLogUtils.getTimingRecord(
-            new TimingResult(
-                () -> String.format("%s, Precomputed=%b : Standard", type, precomputed), time1),
-            new TimingResult(() -> String.format("Unrolled %d", nparams), time2)));
   }
 
   @SeededTest
@@ -885,7 +614,6 @@ class LvmGradientProcedureTest {
     final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams * 2);
 
     for (int i = 0; i < paramsList.size(); i++) {
-      final int ii = i;
       msg.set(0, i);
       final double[] y = yList.get(i);
       final double[] a3peaks = paramsList.get(i);

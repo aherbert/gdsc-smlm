@@ -27,27 +27,18 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.FloatProcessor;
 import java.awt.Rectangle;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingResult;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -267,101 +258,6 @@ class GaussianFilterTest {
       logger.fine(FunctionUtils.getSupplier("%s vs %s w=%b @ %.1f = %g", f1.getName(), f2.getName(),
           weighted, sigma, max));
       Assertions.assertTrue(max < tolerance);
-    }
-  }
-
-  private class MyTimingTask extends BaseTimingTask {
-    GFilter filter;
-    float[][] data;
-    double sigma;
-
-    public MyTimingTask(GFilter filter, float[][] data, double sigma) {
-      super(filter.getName() + " " + sigma);
-      this.filter = filter;
-      this.data = data;
-      this.sigma = sigma;
-    }
-
-    @Override
-    public int getSize() {
-      return data.length;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return data[index].clone();
-    }
-
-    @Override
-    public Object run(Object data) {
-      final float[] d = (float[]) data;
-      return filter.run(d, sigma);
-    }
-  }
-
-  @SpeedTag
-  @SeededTest
-  void floatFilterIsFasterThanDoubleFilter(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
-
-    final float[][] data = new float[10][];
-    for (int i = 0; i < data.length; i++) {
-      data[i] = createData(rg, size, size);
-    }
-
-    final TimingService ts = new TimingService();
-    for (final double sigma : sigmas) {
-      ts.execute(new MyTimingTask(new FloatFilter(false), data, sigma));
-      ts.execute(new MyTimingTask(new DpFilter(false), data, sigma));
-      ts.execute(new MyTimingTask(new DoubleFilter(false), data, sigma));
-    }
-    final int size = ts.getSize();
-    ts.repeat();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport(size));
-    }
-    final int n = size / sigmas.length;
-    for (int i = 0, j = size; i < sigmas.length; i++, j += n) {
-      for (int k = 1; k < n; k++) {
-        final TimingResult slow = ts.get(j + k);
-        final TimingResult fast = ts.get(j);
-        logger.log(TestLogUtils.getTimingRecord(slow, fast));
-      }
-    }
-  }
-
-  @SpeedTag
-  @SeededTest
-  void floatFilterInternalIsFasterThanDoubleFilterInternal(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
-
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
-
-    final float[][] data = new float[10][];
-    for (int i = 0; i < data.length; i++) {
-      data[i] = createData(rg, size, size);
-    }
-
-    final TimingService ts = new TimingService();
-    for (final double sigma : sigmas) {
-      ts.execute(new MyTimingTask(new FloatFilter(true), data, sigma));
-      ts.execute(new MyTimingTask(new DpFilter(false), data, sigma));
-      ts.execute(new MyTimingTask(new DoubleFilter(true), data, sigma));
-    }
-    final int size = ts.getSize();
-    ts.repeat();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(ts.getReport(size));
-    }
-    final int n = size / sigmas.length;
-    for (int i = 0, j = size; i < sigmas.length; i++, j += n) {
-      for (int k = 1; k < n; k++) {
-        final TimingResult slow = ts.get(j + k);
-        final TimingResult fast = ts.get(j);
-        logger.log(TestLogUtils.getTimingRecord(slow, fast));
-      }
     }
   }
 

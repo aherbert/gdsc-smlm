@@ -52,14 +52,11 @@ import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
 class PoissonCalculatorTest {
@@ -754,159 +751,6 @@ class PoissonCalculatorTest {
       Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(expected, observed),
           () -> "Instance LLR not equal: x=" + X);
     }
-  }
-
-  private abstract static class PcTimingTask extends BaseTimingTask {
-    double[] x;
-    double[] mean;
-    int ll;
-    int llr;
-
-    public PcTimingTask(String name, double[] x, double[] mean, int ll, int llr) {
-      super(String.format("%s ll=%d llr=%d", name, ll, llr));
-      this.x = x;
-      this.mean = mean;
-      this.ll = ll;
-      this.llr = llr;
-    }
-
-    @Override
-    public int getSize() {
-      return 1;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return null;
-    }
-  }
-
-  private static class StaticPcTimingTask extends PcTimingTask {
-    public StaticPcTimingTask(double[] x, double[] mean, int ll, int llr) {
-      super("static", x, mean, ll, llr);
-    }
-
-    @Override
-    public Object run(Object data) {
-      double value = 0;
-      for (int i = 0; i < llr; i++) {
-        value += PoissonCalculator.logLikelihoodRatio(mean, x);
-      }
-      for (int i = 0; i < ll; i++) {
-        value += PoissonCalculator.logLikelihood(mean, x);
-      }
-      return value;
-    }
-  }
-
-  private static class FastPcTimingTask extends PcTimingTask {
-    public FastPcTimingTask(double[] x, double[] mean, int ll, int llr) {
-      super("fast", x, mean, ll, llr);
-    }
-
-    @Override
-    public Object run(Object data) {
-      double value = 0;
-      for (int i = 0; i < llr; i++) {
-        value += PoissonCalculator.logLikelihoodRatio(mean, x);
-      }
-      for (int i = 0; i < ll; i++) {
-        value += PoissonCalculator.fastLogLikelihood(mean, x);
-      }
-      return value;
-    }
-  }
-
-  private static class FastLogPcTimingTask extends PcTimingTask {
-    FastLog fastLog = FastLogFactory.getFastLog();
-
-    public FastLogPcTimingTask(double[] x, double[] mean, int ll, int llr) {
-      super("fastLog", x, mean, ll, llr);
-    }
-
-    @Override
-    public Object run(Object data) {
-      double value = 0;
-      for (int i = 0; i < llr; i++) {
-        value += PoissonCalculator.logLikelihoodRatio(mean, x, fastLog);
-      }
-      for (int i = 0; i < ll; i++) {
-        value += PoissonCalculator.fastLogLikelihood(mean, x, fastLog);
-      }
-      return value;
-    }
-  }
-
-  private static class InstancePcTimingTask extends PcTimingTask {
-    int max;
-
-    public InstancePcTimingTask(double[] x, double[] mean, int ll, int llr) {
-      super("instance", x, mean, ll, llr);
-      max = Math.max(llr, ll);
-    }
-
-    @Override
-    public Object run(Object data) {
-      final PoissonCalculator pc = new PoissonCalculator(x);
-      double value = 0;
-      // Use the fastest execution possible
-      for (int i = 0; i < max; i++) {
-        value += pc.pseudoLogLikelihood(mean);
-      }
-      if (llr > 0) {
-        value += pc.getMaximumLogLikelihood();
-      }
-      return value;
-    }
-  }
-
-  @SpeedTag
-  @Test
-  void instanceMethodIsFaster() {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-
-    final int n = 1000;
-    final int m = 10;
-    final double[] x = new double[n * m];
-    final double[] u = new double[x.length];
-    for (int i = 1, k = 0; i <= n; i++) {
-      final double testx = 0.1 * i;
-      // +/- 3SD of the expected
-      final double sd = 3 * Math.sqrt(testx);
-      final double min = Math.max(0.1, testx - sd);
-      final double max = testx + sd;
-      final double inc = (max - min) / (m - 1);
-      for (int j = 0; j < m; j++, k++) {
-        x[k] = testx;
-        u[k] = min + j * inc;
-      }
-    }
-    final double[] limits = MathUtils.limits(x);
-    logger.log(
-        TestLogUtils.getRecord(LOG_LEVEL, "Speed test x-range: %f - %f", limits[0], limits[1]));
-
-    final TimingService ts = new TimingService(5);
-    final int[] loops = new int[] {0, 1, 10};
-    for (final int ll : loops) {
-      for (final int llr : loops) {
-        if (ll + llr == 0) {
-          continue;
-        }
-        ts.execute(new StaticPcTimingTask(x, u, ll, llr));
-        ts.execute(new FastPcTimingTask(x, u, ll, llr));
-        ts.execute(new FastLogPcTimingTask(x, u, ll, llr));
-        ts.execute(new InstancePcTimingTask(x, u, ll, llr));
-      }
-    }
-
-    final int size = ts.getSize();
-    ts.repeat(size);
-    if (logger.isLoggable(LOG_LEVEL)) {
-      logger.info(ts.getReport(size));
-    }
-
-    final int index = ts.getSize() - 1;
-    Assertions.assertTrue(ts.get(index).getMean() < ts.get(index - 1).getMean());
   }
 
   private static double[] add(double[] v1, double[] v2) {

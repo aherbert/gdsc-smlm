@@ -27,8 +27,6 @@ package uk.ac.sussex.gdsc.smlm.math3.distribution.fitting;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import org.apache.commons.math3.distribution.MixtureMultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
@@ -39,53 +37,29 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
-import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
-import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution.MultivariateGaussianDistribution;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 
 @SuppressWarnings({"javadoc"})
 class MultivariateGaussianMixtureExpectationMaximizationTest {
-  private static Logger logger;
-
   /** Convergence checker to match the Commons Math 3 default on absolute value. */
   // @formatter:off
   private static final MultivariateGaussianMixtureExpectationMaximization.DoubleDoubleBiPredicate
       DEFAULT_CONVERGENCE_CHECKER = TestHelper.doublesAreWithin(1e-5)::test;
   // @formatter:on
-
-  @BeforeAll
-  public static void beforeAll() {
-    logger =
-        Logger.getLogger(MultivariateGaussianMixtureExpectationMaximizationTest.class.getName());
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    logger = null;
-  }
 
   @SeededTest
   void canComputeCovariance(RandomSeed seed) {
@@ -526,164 +500,6 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
   }
 
   /**
-   * Base class for fitting the mixture data.
-   */
-  private abstract class FittingSpeedTask extends BaseTimingTask {
-    double[][][] data;
-
-    public FittingSpeedTask(String name, double[][][] data) {
-      super(name);
-      this.data = data;
-    }
-
-    @Override
-    public int getSize() {
-      return data.length;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return data[index];
-    }
-
-    @Override
-    public Object run(Object data) {
-      return run((double[][]) data);
-    }
-
-    abstract Object run(double[][] data);
-  }
-
-  /**
-   * Test the speed of implementations of the expectation maximization algorithm with a mixture of n
-   * 2D Gaussian distributions.
-   *
-   * @param seed the seed
-   */
-  @SpeedTag
-  @SeededTest
-  void testExpectationMaximizationSpeedWithDifferentNumberOfComponents(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
-
-    // Create data
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    for (int n = 2; n <= 4; n++) {
-      final double[][][] data = new double[10][][];
-      for (int i = 0; i < data.length; i++) {
-        final double[] sampleWeights = createWeights(n, rng);
-        final double[][] sampleMeans = create(n, 2, rng, -5, 5);
-        final double[][] sampleStdDevs = create(n, 2, rng, 1, 10);
-        final double[] sampleCorrelations = create(n, rng, -0.9, 0.9);
-        data[i] =
-            createData2d(1000, rng, sampleWeights, sampleMeans, sampleStdDevs, sampleCorrelations);
-      }
-
-      final int numComponents = n;
-      // Time initial estimation and fitting
-      final TimingService ts = new TimingService();
-      ts.execute(new FittingSpeedTask("Commons n=" + n + " 2D", data) {
-        @Override
-        Object run(double[][] data) {
-          final MultivariateNormalMixtureExpectationMaximization fitter =
-              new MultivariateNormalMixtureExpectationMaximization(data);
-          fitter
-              .fit(MultivariateNormalMixtureExpectationMaximization.estimate(data, numComponents));
-          return fitter.getLogLikelihood();
-        }
-      });
-      ts.execute(new FittingSpeedTask("GDSC n=" + n + " 2D", data) {
-        @Override
-        Object run(double[][] data) {
-          final MultivariateGaussianMixtureExpectationMaximization fitter =
-              new MultivariateGaussianMixtureExpectationMaximization(data);
-          fitter.fit(
-              MultivariateGaussianMixtureExpectationMaximization.estimate(data, numComponents));
-          return fitter.getLogLikelihood();
-        }
-      });
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info(ts.getReport());
-      }
-      // More than twice as fast
-      Assertions.assertTrue(ts.get(-1).getMean() < ts.get(-2).getMean() / 2);
-    }
-  }
-
-  /**
-   * Test the speed of implementations of the expectation maximization algorithm with a mixture of n
-   * ND Gaussian distributions.
-   *
-   * @param seed the seed
-   */
-  @SpeedTag
-  @SeededTest
-  void testExpectationMaximizationSpeed(RandomSeed seed) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
-
-    final MultivariateGaussianMixtureExpectationMaximization.DoubleDoubleBiPredicate relChecker =
-        TestHelper.doublesAreClose(1e-6)::test;
-
-    // Create data
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    for (int n = 2; n <= 3; n++) {
-      for (int dim = 2; dim <= 4; dim++) {
-        final double[][][] data = new double[10][][];
-        final int nCorrelations = dim - 1;
-        for (int i = 0; i < data.length; i++) {
-          final double[] sampleWeights = createWeights(n, rng);
-          final double[][] sampleMeans = create(n, dim, rng, -5, 5);
-          final double[][] sampleStdDevs = create(n, dim, rng, 1, 10);
-          final double[][] sampleCorrelations =
-              IntStream.range(0, n).mapToObj(component -> create(nCorrelations, rng, -0.9, 0.9))
-                  .toArray(double[][]::new);
-          data[i] = createDataNd(1000, rng, sampleWeights, sampleMeans, sampleStdDevs,
-              sampleCorrelations);
-        }
-
-        final int numComponents = n;
-        // Time initial estimation and fitting
-        final TimingService ts = new TimingService();
-        ts.execute(new FittingSpeedTask("Commons n=" + n + " " + dim + "D", data) {
-          @Override
-          Object run(double[][] data) {
-            final MultivariateNormalMixtureExpectationMaximization fitter =
-                new MultivariateNormalMixtureExpectationMaximization(data);
-            fitter.fit(
-                MultivariateNormalMixtureExpectationMaximization.estimate(data, numComponents));
-            return fitter.getLogLikelihood();
-          }
-        });
-        ts.execute(new FittingSpeedTask("GDSC n=" + n + " " + dim + "D", data) {
-          @Override
-          Object run(double[][] data) {
-            final MultivariateGaussianMixtureExpectationMaximization fitter =
-                new MultivariateGaussianMixtureExpectationMaximization(data);
-            fitter.fit(
-                MultivariateGaussianMixtureExpectationMaximization.estimate(data, numComponents));
-            return fitter.getLogLikelihood();
-          }
-        });
-        ts.execute(new FittingSpeedTask("GDSC rel 1e-6 n=" + n + " " + dim + "D", data) {
-          @Override
-          Object run(double[][] data) {
-            final MultivariateGaussianMixtureExpectationMaximization fitter =
-                new MultivariateGaussianMixtureExpectationMaximization(data);
-            fitter.fit(
-                MultivariateGaussianMixtureExpectationMaximization.estimate(data, numComponents),
-                1000, relChecker);
-            return fitter.getLogLikelihood();
-          }
-        });
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info(ts.getReport());
-        }
-        // More than twice as fast
-        Assertions.assertTrue(ts.get(-2).getMean() < ts.get(-3).getMean() / 2);
-      }
-    }
-  }
-
-  /**
    * Gets the column means. This is done using the same method as the means in the Apache Commons
    * Math Covariance class.
    *
@@ -792,74 +608,5 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     final MixtureMultivariateNormalDistribution dist =
         new MixtureMultivariateNormalDistribution(new RandomGeneratorAdapter(rng), components);
     return dist.sample(sampleSize);
-  }
-
-  /**
-   * Creates the data from a mixture of n ND Gaussian distributions. The length of the weights array
-   * (and all other arrays) is the number of mixture components. The lengths of the nested means
-   * (and all std.dev. array) is the number of dimensions for the Gaussian.
-   *
-   * @param sampleSize the sample size
-   * @param rng the random generator
-   * @param weights the weights for each component
-   * @param means the means for the dimensions
-   * @param stdDevs the std devs for the dimensions
-   * @param correlations the correlations between the first dimension and the remaining dimensions
-   * @return the double[][]
-   */
-  private static double[][] createDataNd(int sampleSize, UniformRandomProvider rng,
-      double[] weights, double[][] means, double[][] stdDevs, double[][] correlations) {
-    // Directly sample Gaussian distributions
-    final NormalizedGaussianSampler sampler = SamplerUtils.createNormalizedGaussianSampler(rng);
-    final double[][] data = new double[sampleSize][];
-    int count = 0;
-    final int dimensions = means[0].length;
-    // Ensure we have the correct number of samples
-    final int[] nSamples = new int[weights.length];
-    for (int i = 0; i < weights.length; i++) {
-      // Sample from n ND Gaussian distributions
-      nSamples[i] = (int) Math.round(weights[i] * sampleSize);
-    }
-    // Ensure we have the correct number of samples by leveling the counts
-    while (MathUtils.sum(nSamples) > sampleSize) {
-      nSamples[SimpleArrayUtils.findMaxIndex(nSamples)]--;
-    }
-    while (MathUtils.sum(nSamples) < sampleSize) {
-      nSamples[SimpleArrayUtils.findMinIndex(nSamples)]++;
-    }
-
-    for (int i = 0; i < weights.length; i++) {
-      // Sample from n ND Gaussian distributions
-      final int n = nSamples[i];
-      final double[][] samples = new double[n][dimensions];
-      for (int j = 0; j < n; j++) {
-        for (int k = 0; k < dimensions; k++) {
-          samples[j][k] = sampler.sample();
-        }
-      }
-
-      // Transform using the correlations so the remaining dimensions are correlated with the first
-      // https://www.uvm.edu/~statdhtx/StatPages/More_Stuff/CorrGen.html
-      for (int k = 1; k < dimensions; k++) {
-        final double r = correlations[i][k - 1];
-        final double a = r / Math.sqrt(1 - r * r);
-        for (int j = 0; j < n; j++) {
-          // Z = a*X + Y
-          samples[j][k] += a * samples[j][0];
-        }
-      }
-
-      // Apply mean and std.dev.
-      for (int j = 0; j < n; j++) {
-        for (int k = 0; k < dimensions; k++) {
-          samples[j][k] = samples[j][k] * stdDevs[i][k] + means[i][k];
-        }
-      }
-
-      // Fill the data
-      System.arraycopy(samples, 0, data, count, n);
-      count += n;
-    }
-    return data;
   }
 }

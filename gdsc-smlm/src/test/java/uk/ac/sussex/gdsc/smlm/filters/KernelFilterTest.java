@@ -27,24 +27,17 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import ij.plugin.filter.Convolver;
 import ij.process.FloatProcessor;
 import java.awt.Rectangle;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
-import uk.ac.sussex.gdsc.test.utils.BaseTimingTask;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.TimingService;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -241,65 +234,6 @@ class KernelFilterTest {
     logger.fine(
         FunctionUtils.getSupplier("%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max));
     Assertions.assertTrue(max < tolerance);
-  }
-
-  private class MyTimingTask extends BaseTimingTask {
-    FilterWrapper filter;
-    float[][] data;
-    int border;
-
-    public MyTimingTask(FilterWrapper filter, float[][] data, int border) {
-      super(filter.getName() + " " + border);
-      this.filter = filter;
-      this.data = data;
-      this.border = border;
-    }
-
-    @Override
-    public int getSize() {
-      return data.length;
-    }
-
-    @Override
-    public Object getData(int index) {
-      return data[index].clone();
-    }
-
-    @Override
-    public Object run(Object data) {
-      final float[] d = (float[]) data;
-      return filter.filter(d, border);
-    }
-  }
-
-  @SeededTest
-  void floatFilterIsFasterThanImageJFilter(RandomSeed seed) {
-    floatFilterIsFasterThanImageJFilter(seed, 5);
-    floatFilterIsFasterThanImageJFilter(seed, 11);
-  }
-
-  private void floatFilterIsFasterThanImageJFilter(RandomSeed seed, int kw) {
-    Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
-
-    final float[][] data = new float[10][];
-    for (int i = 0; i < data.length; i++) {
-      data[i] = createData(rg, size, size);
-    }
-
-    final float[] kernel = createKernel(kw, kw);
-    for (final int border : borders) {
-      final TimingService ts = new TimingService();
-      ts.execute(new MyTimingTask(new ConvolverWrapper(kernel, kw, kw), data, border));
-      ts.execute(new MyTimingTask(new KernelFilterWrapper(kernel, kw, kw), data, border));
-      ts.execute(new MyTimingTask(new ZeroKernelFilterWrapper(kernel, kw, kw), data, border));
-      final int size = ts.getSize();
-      ts.repeat();
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info(ts.getReport(size));
-      }
-      logger.log(TestLogUtils.getTimingRecord(ts.get(-3), ts.get(-1)));
-    }
   }
 
   private static float[] createData(UniformRandomProvider rg, int width, int height) {

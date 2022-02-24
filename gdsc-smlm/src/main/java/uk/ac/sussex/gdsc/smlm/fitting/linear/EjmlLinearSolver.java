@@ -649,7 +649,7 @@ public class EjmlLinearSolver {
    */
   private LinearSolver<DenseMatrix64F> getInversionSolver() {
     if (inversionSolver == null) {
-      // This should work on any matrix
+      // Supports any matrix up to size 5
       inversionSolver = new InversionSolver();
     }
     return inversionSolver;
