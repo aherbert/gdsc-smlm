@@ -533,7 +533,7 @@ class FastMleGradient2ProcedureTest {
 
     // Must compute most of the time
     final int failureLimit = AssertionErrorCounter.computeFailureLimit(iter, 0.1);
-    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams);
+    final AssertionErrorCounter failCounter = new AssertionErrorCounter(failureLimit, nparams * 2);
 
     for (int i = 0; i < paramsList.size(); i++) {
       msg1.set(0, i);
