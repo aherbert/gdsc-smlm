@@ -38,6 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -231,7 +232,7 @@ class KernelFilterTest {
       }
     }
 
-    logger.fine(
+    logger.log(TestLevel.TEST_DEBUG,
         FunctionUtils.getSupplier("%s vs %s @ %d = %g", f1.getName(), f2.getName(), border, max));
     Assertions.assertTrue(max < tolerance);
   }

@@ -28,7 +28,6 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -58,6 +57,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.ObjectArrayFormatSupplier;
@@ -660,7 +660,7 @@ class PeakResultsReaderTest {
       boolean showEndFrame, boolean showId, boolean showPrecision, boolean showCategory,
       ResultsFileFormat f1, boolean useScanner1, ResultsFileFormat f2, boolean useScanner2,
       int loops) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final UniformRandomProvider rg = RngUtils.create(seed.get());
@@ -677,10 +677,11 @@ class PeakResultsReaderTest {
     final long time2 = getReadTime(filename, useScanner2, loops);
 
     if (useScanner1 != useScanner2) {
-      logger.info(FunctionUtils.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2,
-          useScanner2, (double) time1 / time2, f1, useScanner1));
+      logger.log(TestLevel.TEST_INFO,
+          FunctionUtils.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2,
+              useScanner2, (double) time1 / time2, f1, useScanner1));
     } else {
-      logger.info(
+      logger.log(TestLevel.TEST_INFO,
           FunctionUtils.getSupplier("%s is %.2fx faster than %s", f2, (double) time1 / time2, f1));
     }
     Assertions.assertTrue(time2 < time1,

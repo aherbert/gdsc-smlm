@@ -63,6 +63,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 /**
@@ -263,7 +264,7 @@ public abstract class BaseFunctionSolverTest {
   void canFitSingleGaussian(RandomSeed seed, FunctionSolver solver, boolean applyBounds,
       NoiseModel noiseModel) {
     // Allow reporting the fit deviations
-    final boolean report = false;
+    final boolean report = logger.isLoggable(TestLevel.TEST_INFO);
     double[] crlb = null;
     SimpleArrayMoment moment = null;
 
@@ -328,9 +329,10 @@ public abstract class BaseFunctionSolverTest {
       }
       // Report
       if (report) {
-        logger.info(FunctionUtils.getSupplier("%s %s %f : CRLB = %s, Deviations = %s",
-            solver.getClass().getSimpleName(), noiseModel, s, Arrays.toString(crlb),
-            Arrays.toString(moment.getStandardDeviation())));
+        logger.log(TestLevel.TEST_INFO,
+            FunctionUtils.getSupplier("%s %s %f : CRLB = %s, Deviations = %s",
+                solver.getClass().getSimpleName(), noiseModel, s, Arrays.toString(crlb),
+                Arrays.toString(moment.getStandardDeviation())));
       }
     }
   }
@@ -441,10 +443,10 @@ public abstract class BaseFunctionSolverTest {
                 if (sd2 < sd1) {
                   betterPrecision[index]++;
                   args[args.length - 1] = "P*";
-                  logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+                  logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
                 } else {
                   args[args.length - 1] = "P";
-                  logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+                  logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
                 }
                 totalPrecision[index]++;
               }
@@ -455,10 +457,10 @@ public abstract class BaseFunctionSolverTest {
               if (u2 < u1) {
                 betterAccuracy[index]++;
                 args[args.length - 1] = "A*";
-                logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+                logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
               } else {
                 args[args.length - 1] = "A";
-                logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+                logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
               }
               totalAccuracy[index]++;
             }
@@ -468,10 +470,10 @@ public abstract class BaseFunctionSolverTest {
             if (sd2 < sd1) {
               betterPrecision[index]++;
               args[args.length - 1] = "P*";
-              logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+              logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
             } else {
               args[args.length - 1] = "P";
-              logger.log(TestLogUtils.getRecord(Level.FINE, msg, args));
+              logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
             }
             totalPrecision[index]++;
           }
@@ -485,11 +487,12 @@ public abstract class BaseFunctionSolverTest {
       better += betterPrecision[index] + betterAccuracy[index];
       total += totalPrecision[index] + totalAccuracy[index];
       test(name2, name, statName[index] + " P", betterPrecision[index], totalPrecision[index],
-          Level.FINE);
+          TestLevel.TEST_INFO);
       test(name2, name, statName[index] + " A", betterAccuracy[index], totalAccuracy[index],
-          Level.FINE);
+          TestLevel.TEST_INFO);
     }
-    test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total, Level.INFO);
+    test(name2, name, String.format("All (eval [%d] [%d]) : ", i1, i2), better, total,
+        TestLevel.TEST_INFO);
   }
 
   private static void test(String name2, String name, String statName, int better, int total,
@@ -544,8 +547,8 @@ public abstract class BaseFunctionSolverTest {
   }
 
   double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected) {
-    // logger.info(FunctionUtils.getSupplier("%s : Expected %s", solver.getClass().getSimpleName(),
-    // Arrays.toString(expected)));
+    // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s : Expected %s",
+    // solver.getClass().getSimpleName(), Arrays.toString(expected)));
     params = params.clone();
     final FitStatus status = solver.fit(data, null, params, null);
     if (status != FitStatus.OK) {

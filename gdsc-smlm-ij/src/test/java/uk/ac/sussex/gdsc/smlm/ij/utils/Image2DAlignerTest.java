@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -137,7 +137,8 @@ class Image2DAlignerTest {
     // result = a.align(target.copy(), i, error);
     // c = a.getCorrelation();
     //
-    // logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
+    // logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+    // java.util.Arrays.toString(e),
     // c.get(index),
     // java.util.Arrays.toString(result));
     // }
@@ -149,9 +150,9 @@ class Image2DAlignerTest {
       result = a.align(target, refinements);
     }
     Image2D correlation = a.getCorrelation();
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
-          correlation.get(index), java.util.Arrays.toString(result)));
+    if (logger.isLoggable(TestLevel.TEST_DEBUG)) {
+      logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+          java.util.Arrays.toString(e), correlation.get(index), java.util.Arrays.toString(result)));
     }
 
     for (int i = 0; i < 2; i++) {

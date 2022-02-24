@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -38,6 +37,7 @@ import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -58,7 +58,7 @@ class AbstractFilterTest {
 
   @BeforeEach
   void checkLogging() {
-    debug = logger.isLoggable(Level.FINE);
+    debug = logger.isLoggable(TestLevel.TEST_INFO);
   }
 
   // TODO - The test data should be representative of the final use case

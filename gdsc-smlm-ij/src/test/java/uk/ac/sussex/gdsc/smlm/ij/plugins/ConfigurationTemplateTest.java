@@ -107,6 +107,7 @@ class ConfigurationTemplateTest {
     final String[] after = ConfigurationTemplate.getTemplateNames(false);
 
     checkLoaded("canLoadResourceTemplates", templates, before, after);
+    ConfigurationTemplate.clearTemplates();
   }
 
   private static void checkLoaded(String test, TemplateResource[] templates, String[] before,
@@ -139,6 +140,7 @@ class ConfigurationTemplateTest {
     }
 
     Assertions.assertArrayEquals(names, ConfigurationTemplate.getTemplateNames());
+    ConfigurationTemplate.clearTemplates();
   }
 
   @SeededTest
@@ -171,6 +173,7 @@ class ConfigurationTemplateTest {
     final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();
 
     Assertions.assertArrayEquals(pixels, data);
+    ConfigurationTemplate.clearTemplates();
   }
 
   @Test
@@ -186,6 +189,7 @@ class ConfigurationTemplateTest {
     }
 
     final ImagePlus imp2 = ConfigurationTemplate.getTemplateImage(names[0]);
+    ConfigurationTemplate.clearTemplates();
 
     Assertions.assertNotNull(imp2);
     final float[] data = (float[]) imp2.getProcessor().toFloat(0, null).getPixels();

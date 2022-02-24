@@ -24,13 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -137,7 +137,8 @@ class PoissonGaussianFisherInformationTest {
       }
 
       mean = Double.longBitsToDouble(upper);
-      logger.info(FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), mean));
+      logger.log(TestLevel.TEST_INFO,
+          FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), mean));
     }
 
     Assertions.assertTrue(1.0 / mean != Double.POSITIVE_INFINITY);
@@ -151,9 +152,9 @@ class PoissonGaussianFisherInformationTest {
       final double lower = func.getPoissonGaussianApproximationI(mean);
       final double upper = PoissonFisherInformation.getPoissonI(mean);
       final double alpha = I / upper;
-      logger.log(
-          TestLogUtils.getRecord(Level.INFO, "s=%g mean=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s",
-              func.sd, mean, I, I2, lower, upper, alpha));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+          "s=%g mean=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", func.sd, mean, I, I2, lower, upper,
+          alpha));
       Assertions.assertTrue(I > lower);
       Assertions.assertTrue(I < upper);
 

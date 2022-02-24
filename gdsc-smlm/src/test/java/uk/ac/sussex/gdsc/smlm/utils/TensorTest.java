@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.utils;
 
 import java.util.Arrays;
 import java.util.Formatter;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -39,6 +38,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class TensorTest {
@@ -76,7 +76,7 @@ class TensorTest {
   }
 
   private static void print(double[] com, double[] values, double[][] vectors) {
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(TestLevel.TEST_INFO)) {
       final StringBuilder sb = new StringBuilder();
       final String newLine = System.lineSeparator();
       try (Formatter formatter = new Formatter(sb)) {
@@ -87,7 +87,7 @@ class TensorTest {
               180.0 * Math.atan2(vectors[i][1], vectors[i][0]) / Math.PI);
         }
       }
-      logger.info(sb.toString());
+      logger.log(TestLevel.TEST_INFO, sb.toString());
     }
   }
 

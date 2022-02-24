@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function.cspline;
 
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
@@ -46,6 +45,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 public abstract class CubicSplineFunctionTest {
@@ -196,7 +196,7 @@ public abstract class CubicSplineFunctionTest {
     }
 
     final int[] gradientIndices = cf.gradientIndices();
-    logger.log(TestLogUtils.getRecord(Level.INFO, "Function%d %s %s", npeaks,
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
         cf.getClass().getName(), Arrays.toString(gradientIndices)));
 
     Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");
@@ -359,7 +359,7 @@ public abstract class CubicSplineFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradient1 %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
@@ -471,7 +471,7 @@ public abstract class CubicSplineFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradient2 %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
@@ -636,7 +636,7 @@ public abstract class CubicSplineFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradient1With2Peaks %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
@@ -769,7 +769,7 @@ public abstract class CubicSplineFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradient2With2Peaks %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), CubicSplineFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));

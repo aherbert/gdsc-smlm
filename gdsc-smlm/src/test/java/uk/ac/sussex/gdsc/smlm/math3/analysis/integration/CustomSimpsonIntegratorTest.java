@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.junit.jupiter.api.AfterAll;
@@ -35,6 +34,7 @@ import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class CustomSimpsonIntegratorTest {
@@ -156,7 +156,7 @@ class CustomSimpsonIntegratorTest {
     final double ee = simpson(func, ax, bx, iter);
     final double o = in.integrate(Integer.MAX_VALUE, func, ax, bx);
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "%s iter=%d  %g-%g  e=%g  ee=%g  o=%g",
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s iter=%d  %g-%g  e=%g  ee=%g  o=%g",
         func.getClass().getSimpleName(), iter, ax, bx, e, ee, o));
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);

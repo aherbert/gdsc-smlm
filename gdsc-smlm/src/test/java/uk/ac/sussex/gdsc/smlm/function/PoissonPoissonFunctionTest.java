@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -39,6 +38,7 @@ import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class PoissonPoissonFunctionTest {
@@ -168,8 +168,8 @@ class PoissonPoissonFunctionTest {
       }
     }, min, max);
 
-    logger.log(
-        TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, sd, pvalue, p2));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+        sd, pvalue, p2));
 
     return p2;
   }

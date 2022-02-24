@@ -35,6 +35,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
@@ -269,8 +270,9 @@ class AverageFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name,
-                width, height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name, width,
+                    height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
           }
         }
       }
@@ -345,9 +347,10 @@ class AverageFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx",
-                slow.name, width, height, boxSize, time, fast.name, fastTime,
-                speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name,
+                    width, height, boxSize, time, fast.name, fastTime,
+                    speedUpFactor(time, fastTime)));
           }
         }
       }

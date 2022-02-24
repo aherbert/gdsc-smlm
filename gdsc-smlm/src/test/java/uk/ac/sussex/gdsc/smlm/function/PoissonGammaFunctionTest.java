@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 import gnu.trove.list.array.TDoubleArrayList;
 import java.util.Arrays;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -43,6 +42,7 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -179,7 +179,8 @@ class PoissonGammaFunctionTest {
     }
 
     // if (p2 < 0.98 || p2 > 1.02)
-    logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, pvalue, p2));
+    logger.log(
+        TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, pvalue, p2));
 
     return p2;
   }
@@ -312,8 +313,8 @@ class PoissonGammaFunctionTest {
     }
 
     final double f = (double) fail / list.size();
-    logger.log(TestLogUtils.getRecord(Level.INFO, "g=%g, mu=%g, failures=%g, mean=%f", gain, mu, f,
-        MathUtils.div0(sum, fail)));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%g, mu=%g, failures=%g, mean=%f",
+        gain, mu, f, MathUtils.div0(sum, fail)));
     if (approx) {
       Assertions.assertTrue(f < 0.2);
     } else {
@@ -336,7 +337,7 @@ class PoissonGammaFunctionTest {
     final double[] p = list.toArray();
 
     final boolean report =
-        logger.isLoggable(Level.INFO) && TestSettings.allow(TestComplexity.MEDIUM);
+        logger.isLoggable(TestLevel.TEST_INFO) && TestSettings.allow(TestComplexity.MEDIUM);
     if (report) {
       Arrays.sort(p);
     }
@@ -355,7 +356,7 @@ class PoissonGammaFunctionTest {
       if (report) {
         final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
 
-        logger.log(TestLogUtils.getRecord(Level.INFO,
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
             "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)", x, dirac, p0,
             dirac / p0,
             // uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),

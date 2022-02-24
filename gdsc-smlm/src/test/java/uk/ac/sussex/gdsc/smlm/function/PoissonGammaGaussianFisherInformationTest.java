@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -52,7 +52,7 @@ class PoissonGammaGaussianFisherInformationTest {
 
   @Test
   void canFindMaximumAndUpperLimit() {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MEDIUM));
 
     final double[] M = {20, 500};
@@ -83,8 +83,9 @@ class PoissonGammaGaussianFisherInformationTest {
       double mean) {
     final double[] max = func.findMaximum(mean, 1e-6);
     final double[] upper = func.findUpperLimit(mean, max, 1e-6);
-    logger.fine(FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", func.gain,
-        mean, max[0], max[1], max[2], upper[0], upper[1], upper[2]));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("m=%g u=%g max=%s %s (%s)  upper=%s %s (%s)", func.gain, mean,
+            max[0], max[1], max[2], upper[0], upper[1], upper[2]));
   }
 
   @Test
@@ -97,7 +98,8 @@ class PoissonGammaGaussianFisherInformationTest {
     // f.setMeanThreshold(Double.POSITIVE_INFINITY);
     // double I = f.getPoissonGammaGaussianI(u);
     // double upper = PoissonFisherInformation.getPoissonI(u);
-    // logger.fine(FunctionUtils.getSupplier("s=%g u=%g I=%s PoissonI=%s alpha=%s", s1, u, I, upper,
+    // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("s=%g u=%g I=%s PoissonI=%s
+    // alpha=%s", s1, u, I, upper,
     // I / upper);
     // if (true)
     // return;
@@ -138,7 +140,8 @@ class PoissonGammaGaussianFisherInformationTest {
       double mean) {
     final double I = func.getPoissonGammaGaussianI(mean);
     final double upper = PoissonFisherInformation.getPoissonI(mean);
-    // logger.fine(FunctionUtils.getSupplier("m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.m, f.s,
+    // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("m=%g s=%g u=%g I=%s PoissonI=%s
+    // alpha=%s", f.m, f.s,
     // u, I, upper, I / upper);
     Assertions.assertTrue(I <= upper, "Not less than Poisson information");
     // This is true at higher mean
@@ -150,7 +153,7 @@ class PoissonGammaGaussianFisherInformationTest {
   @Test
   void canComputeAlpha() {
     // This is a report as nothing is asserted
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.VERY_HIGH));
 
     // Compute the alpha using a range of gain and standard deviation
@@ -182,9 +185,10 @@ class PoissonGammaGaussianFisherInformationTest {
         final double alpha = I / upper;
         final double alpha2 = I2 / upper2;
         final double change = lastAlpha / alpha;
-        logger.fine(FunctionUtils.getSupplier(
-            "p=%g  p2=%s   m=%s  s=%s   I=%s (%s)  alpha=%s (%s)  (delta=%s)", p, p2, m, s, I, I2,
-            alpha, alpha2, change));
+        logger.log(TestLevel.TEST_INFO,
+            FunctionUtils.getSupplier(
+                "p=%g  p2=%s   m=%s  s=%s   I=%s (%s)  alpha=%s (%s)  (delta=%s)", p, p2, m, s, I,
+                I2, alpha, alpha2, change));
         lastAlpha = alpha;
       }
     }
@@ -234,7 +238,8 @@ class PoissonGammaGaussianFisherInformationTest {
       }
 
       mean = Double.longBitsToDouble(upper);
-      logger.info(FunctionUtils.getSupplier("(upper = 0x%s = %s", Long.toHexString(upper), mean));
+      logger.log(TestLevel.TEST_INFO,
+          FunctionUtils.getSupplier("(upper = 0x%s = %s", Long.toHexString(upper), mean));
     }
 
     Assertions.assertTrue(1.0 / mean != Double.POSITIVE_INFINITY);
@@ -254,8 +259,8 @@ class PoissonGammaGaussianFisherInformationTest {
         final double I = f.getPoissonGammaGaussianI(mean);
         final double upper = PoissonFisherInformation.getPoissonI(mean);
         final double alpha = I / upper;
-        logger.log(TestLogUtils.getRecord(Level.FINE, "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s",
-            f.gain, f.sd, mean, I, upper, alpha));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
+            "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.gain, f.sd, mean, I, upper, alpha));
         Assertions.assertTrue(I < upper,
             () -> String.format("Fisher information (%s) is not below upper limit: %s", I, upper));
         Assertions.assertTrue(alpha > 0, "Alpha is not above zero");

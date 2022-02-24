@@ -28,7 +28,6 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -49,6 +48,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 /**
@@ -477,7 +477,8 @@ class ImageJImagePeakResultsTest {
     for (int i = 0; i < r.length; i++) {
       r[i].end();
       image[i] = getImage(r[i]);
-      logger.log(TestLogUtils.getRecord(Level.FINE, "[%d] = %s", i, Arrays.toString(image[i])));
+      logger.log(
+          TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "[%d] = %s", i, Arrays.toString(image[i])));
     }
 
     // Test single value adds

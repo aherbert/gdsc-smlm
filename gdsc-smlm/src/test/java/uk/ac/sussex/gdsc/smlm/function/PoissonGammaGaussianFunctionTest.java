@@ -27,7 +27,6 @@ package uk.ac.sussex.gdsc.smlm.function;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -52,6 +51,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -112,7 +112,7 @@ class PoissonGammaGaussianFunctionTest {
         sb.append(newLine);
         TextUtils.formatTo(sb, "pgSum[%d] = %.3f;", g, bd.round(mc).doubleValue());
       }
-      logger.info(sb.toString());
+      logger.log(TestLevel.TEST_INFO, sb.toString());
     }
 
     pgSum[1] = 1.019;
@@ -665,28 +665,28 @@ class PoissonGammaGaussianFunctionTest {
   @Test
   void discretePdfCloselyMatchesPmfIntegration() {
     final double[] e = closelyMatchesPmfIntegration(0.34, ConvolutionMode.DISCRETE_PDF);
-    logger.log(TestLogUtils.getRecord(Level.FINE,
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
         "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
   }
 
   @Test
   void discretePmfCloselyMatchesPmfIntegration() {
     final double[] e = closelyMatchesPmfIntegration(0.22, ConvolutionMode.DISCRETE_PMF);
-    logger.log(TestLogUtils.getRecord(Level.FINE,
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
         "Discrete integration max error : rel = %g : abs = %g", e[0], e[1]));
   }
 
   @Test
   void approximationCloselyMatchesPmfIntegration() {
     final double[] e = closelyMatchesPmfIntegration(0.22, ConvolutionMode.APPROXIMATION);
-    logger.log(TestLogUtils.getRecord(Level.FINE, "Approximation max error : rel = %g : abs = %g",
-        e[0], e[1]));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
+        "Approximation max error : rel = %g : abs = %g", e[0], e[1]));
   }
 
   @Test
   void legedreGaussPdfMatchesPmfIntegration() {
     final double[] e = closelyMatchesPmfIntegration(0.03, ConvolutionMode.LEGENDRE_GAUSS_PDF);
-    logger.log(TestLogUtils.getRecord(Level.FINE,
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
         "Simpson integration max error : rel = %g : abs = %g", e[0], e[1]));
   }
 
@@ -720,7 +720,7 @@ class PoissonGammaGaussianFunctionTest {
   private static void cumulativeProbabilityIsOne(final double mu, final double sd,
       final double gain, ConvolutionMode convolutionMode, boolean pmfMode) {
     final double p = cumulativeProbability(mu, sd, gain, convolutionMode, pmfMode);
-    logger.log(TestLogUtils.getRecord(Level.INFO, "%s : mu=%f, s=%f, g=%f, p=%f",
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s : mu=%f, s=%f, g=%f, p=%f",
         getName(convolutionMode), mu, sd, gain, p));
 
     // Poisson-Gamma convolution approximation does not sum to 1 at lower gain
@@ -797,9 +797,9 @@ class PoissonGammaGaussianFunctionTest {
           return f.likelihood(x, mu);
         }
       }, min, max);
-      logger.log(
-          TestLogUtils.getRecord(Level.FINE, "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g",
-              getName(convolutionMode), mu, sd, gain, sd, gain, pvalue, pp));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
+          "%s : mu=%f, rn=%f, cg=%f, s=%f, g=%f, p=%g => %g", getName(convolutionMode), mu, sd,
+          gain, sd, gain, pvalue, pp));
       pvalue = pp;
     }
 

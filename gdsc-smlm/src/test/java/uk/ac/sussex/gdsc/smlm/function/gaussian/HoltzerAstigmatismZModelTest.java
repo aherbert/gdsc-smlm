@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class HoltzerAstigmatismZModelTest {
@@ -77,7 +77,7 @@ class HoltzerAstigmatismZModelTest {
     final double[] ds_dz2 = new double[2];
     final double[] ds_duz = new double[1];
     final double[] ds_dlz = new double[1];
-    final boolean record = logger.isLoggable(Level.INFO);
+    final boolean record = logger.isLoggable(TestLevel.TEST_INFO);
     for (double z = -0.5; z < 0.5; z += 0.01) {
       final double s0 = HoltzerAstigmatismZModel.getS(sd, z, one_d2, ax, bx);
       final double s1 = HoltzerAstigmatismZModel.getS1(sd, z, one_d2, ax, bx, ds_dz);
@@ -100,7 +100,7 @@ class HoltzerAstigmatismZModelTest {
       final double o2 = ds_dz2[1];
 
       if (record) {
-        logger.log(TestLogUtils.getRecord(Level.INFO,
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
             "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
             DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2)));
       }

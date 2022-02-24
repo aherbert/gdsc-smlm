@@ -56,12 +56,13 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
 class PoissonCalculatorTest {
   /** The logging level for verbose test messages. */
-  private static final Level LOG_LEVEL = Level.FINE;
+  private static final Level LOG_LEVEL = TestLevel.TEST_DEBUG;
   private static Logger logger;
 
   @BeforeAll
@@ -327,7 +328,7 @@ class PoissonCalculatorTest {
       op[i] = PoissonCalculator.maximumLikelihood(x[i]);
     }
 
-    // TestSettings.setLogLevel(uk.ac.sussex.gdsc.smlm.TestLog.Level.FINE);
+    // TestSettings.setLogLevel(TestLevel.TEST_DEBUG);
 
     final int df = n - 1;
     final ChiSquaredDistributionTable table =

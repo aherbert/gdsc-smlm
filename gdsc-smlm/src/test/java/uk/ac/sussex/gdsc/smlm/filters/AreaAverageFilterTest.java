@@ -34,6 +34,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
@@ -101,10 +102,11 @@ class AreaAverageFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float areaAverageInternal [%dx%d] @ %.1f : "
-                    + "%d => areaAverageUsingSumsInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float areaAverageInternal [%dx%d] @ %.1f : "
+                        + "%d => areaAverageUsingSumsInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
             // blockTime, time), blockTime < time);
@@ -180,10 +182,11 @@ class AreaAverageFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float areaAverageUsingAverages [%dx%d] @ %.1f : "
-                    + "%d => stripedBlockAverage %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float areaAverageUsingAverages [%dx%d] @ %.1f : "
+                        + "%d => stripedBlockAverage %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
             // blockTime, time), blockTime < time);
@@ -260,10 +263,11 @@ class AreaAverageFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : "
-                    + "%d => stripedBlockAverageInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float areaAverageUsingAveragesInternal [%dx%d] @ %.1f : "
+                        + "%d => stripedBlockAverageInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // if (ExtraAssertions.assert_SPEED_TESTS) Assertions.assertTrue(String.format("Not
             // faster: [%dx%d] @ %d : %d > %d", width, height, boxSize,
             // blockTime, time), blockTime < time);

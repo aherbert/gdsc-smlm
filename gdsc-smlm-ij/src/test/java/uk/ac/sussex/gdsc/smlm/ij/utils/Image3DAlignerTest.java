@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -34,6 +33,7 @@ import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -71,7 +71,8 @@ class Image3DAlignerTest {
     for (int zz = 0; zz < z; zz++) {
       final double dz = zz - cz;
       // if (zz == 0 || zz == z - 1)
-      // logger.fine(FunctionUtils.getSupplier("%f %f %f", dz, zModel.getSx(dz), zModel.getSy(dz));
+      // logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("%f %f %f", dz,
+      // zModel.getSx(dz), zModel.getSy(dz));
       a[Gaussian2DFunction.Z_POSITION] = dz;
       p.getValues(f, a, data, zz * length);
     }
@@ -154,7 +155,8 @@ class Image3DAlignerTest {
     // result = a.align(target.copy(), i, error);
     // c = a.getCorrelation();
     //
-    // logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
+    // logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+    // java.util.Arrays.toString(e),
     // c.get(index),
     // java.util.Arrays.toString(result));
     // }
@@ -166,9 +168,9 @@ class Image3DAlignerTest {
       result = a.align(target, refinements, error);
     }
     Image3D correlation = a.getCorrelation();
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine(FunctionUtils.getSupplier("e %s %g, o %s", java.util.Arrays.toString(e),
-          correlation.get(index), java.util.Arrays.toString(result)));
+    if (logger.isLoggable(TestLevel.TEST_DEBUG)) {
+      logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+          java.util.Arrays.toString(e), correlation.get(index), java.util.Arrays.toString(result)));
     }
 
     for (int i = 0; i < 3; i++) {

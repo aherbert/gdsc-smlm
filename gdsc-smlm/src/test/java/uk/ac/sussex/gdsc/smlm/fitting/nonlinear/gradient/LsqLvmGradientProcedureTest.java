@@ -188,8 +188,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x =
-        createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -298,8 +297,7 @@ class LsqLvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x =
-        createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -561,7 +559,7 @@ class LsqLvmGradientProcedureTest {
 
     final int iter = 100;
 
-    final Level logLevel = Level.FINER;
+    final Level logLevel = TestLevel.TEST_DEBUG;
     final boolean debug = logger.isLoggable(logLevel);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -589,7 +587,7 @@ class LsqLvmGradientProcedureTest {
         betaList.add(beta.clone());
         for (int j = 0; j < nparams; j++) {
           if (Math.abs(beta[j]) < 1e-6) {
-            logger.log(TestLogUtils.getRecord(Level.INFO, "[%d] Tiny beta %s %g", i,
+            logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "[%d] Tiny beta %s %g", i,
                 func.getGradientParameterName(j), beta[j]));
           }
         }

@@ -86,7 +86,7 @@ class FactorialTest {
   void testFactorialDouble(RandomSeed seed) {
     final UniformRandomProvider rng = RngUtils.create(seed.get());
     final DoubleDoubleBiPredicate tol =
-        TestHelper.doublesAreClose(5e-15).or(TestHelper.doublesEqual());
+        TestHelper.doublesAreClose(1e-14).or(TestHelper.doublesEqual());
     for (int i = 0; i < 100; i++) {
       final double n = rng.nextDouble() * 180;
       final double expected = n < 1.5 ? 1 / (1 + Gamma.invGamma1pm1(n)) : Gamma.gamma(1 + n);

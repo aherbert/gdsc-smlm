@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -38,6 +37,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 /**
@@ -417,13 +417,13 @@ class PrecisionTest {
     try {
       maxx *= 2;
       while (maxx * maxx < Integer.MAX_VALUE) {
-        logger.log(TestLogUtils.getRecord(Level.INFO, "maxx = %d", maxx));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
         functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx),
             new DoubleCircularGaussian(maxx), 1e-3);
         maxx *= 2;
       }
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, ex.getMessage()));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
       // ex.printStackTrace();
       return;
     }
@@ -482,13 +482,13 @@ class PrecisionTest {
     try {
       maxx *= 2;
       while (maxx * maxx < Integer.MAX_VALUE) {
-        logger.log(TestLogUtils.getRecord(Level.INFO, "maxx = %d", maxx));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
         functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx),
             new DoubleFixedGaussian(maxx), 1e-3);
         maxx *= 2;
       }
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, ex.getMessage()));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
       // ex.printStackTrace();
       return;
     }

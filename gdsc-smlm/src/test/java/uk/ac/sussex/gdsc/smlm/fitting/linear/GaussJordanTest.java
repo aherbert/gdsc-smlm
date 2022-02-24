@@ -25,12 +25,12 @@
 package uk.ac.sussex.gdsc.smlm.fitting.linear;
 
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class GaussJordanTest {
@@ -63,11 +63,12 @@ class GaussJordanTest {
     Assertions.assertTrue(result);
     Assertions.assertArrayEquals(expecteds, b, 1e-4f);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(() -> String.format("x = %s", Arrays.toString(b)));
+    if (logger.isLoggable(TestLevel.TEST_INFO)) {
+      logger.log(TestLevel.TEST_INFO, () -> String.format("x = %s", Arrays.toString(b)));
       for (int i = 0; i < b.length; i++) {
         final int ii = i;
-        logger.info(() -> String.format("a[%d] = %s", ii, Arrays.toString(a[ii])));
+        logger.log(TestLevel.TEST_INFO,
+            () -> String.format("a[%d] = %s", ii, Arrays.toString(a[ii])));
       }
     }
   }

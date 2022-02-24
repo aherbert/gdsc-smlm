@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results.filter;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -35,6 +34,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class FilterTest {
@@ -102,7 +102,7 @@ class FilterTest {
       final MultiFilter f1 =
           (MultiFilter) filter.create(random(filter.getNumberOfParameters(), rng));
       final String xml = f1.toXml();
-      logger.log(TestLogUtils.getRecord(Level.FINE, XmlUtils.prettyPrintXml(xml)));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, XmlUtils.prettyPrintXml(xml)));
       final MultiFilter f2 = (MultiFilter) Filter.fromXml(xml);
       Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
       Assertions.assertEquals(f1, f2);

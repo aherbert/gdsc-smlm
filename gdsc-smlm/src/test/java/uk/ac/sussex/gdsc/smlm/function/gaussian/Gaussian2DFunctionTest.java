@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function.gaussian;
 
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
@@ -37,6 +36,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 public abstract class Gaussian2DFunctionTest {
@@ -161,8 +161,8 @@ public abstract class Gaussian2DFunctionTest {
     }
 
     final int[] gradientIndices = gf.gradientIndices();
-    if (logger.isLoggable(Level.INFO)) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, "Function%d %s %s", npeaks,
+    if (logger.isLoggable(TestLevel.TEST_INFO)) {
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
           gf.getClass().getName(), Arrays.toString(gradientIndices)));
     }
 
@@ -220,7 +220,7 @@ public abstract class Gaussian2DFunctionTest {
     final double[] dyda = new double[f1.gradientIndices().length];
     double[] params;
 
-    boolean record = logger.isLoggable(Level.INFO);
+    boolean record = logger.isLoggable(TestLevel.TEST_INFO);
 
     for (final double background : testbackground) {
       // Peak 1
@@ -242,7 +242,7 @@ public abstract class Gaussian2DFunctionTest {
                   f.initialise(params);
                   if (record) {
                     record = false;
-                    logger.log(TestLogUtils.getRecord(Level.INFO, "%s %d frozen to %s",
+                    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s %d frozen to %s",
                         f1.getClass().getSimpleName(), 1, f.getClass().getSimpleName()));
                   }
 
@@ -384,7 +384,7 @@ public abstract class Gaussian2DFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradient %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
@@ -406,7 +406,7 @@ public abstract class Gaussian2DFunctionTest {
     final double[] dyda = new double[f2.gradientIndices().length];
     double[] params;
 
-    boolean record = logger.isLoggable(Level.INFO);
+    boolean record = logger.isLoggable(TestLevel.TEST_INFO);
 
     for (final double background : testbackground) {
       // Peak 1
@@ -436,8 +436,8 @@ public abstract class Gaussian2DFunctionTest {
                               f.initialise(params);
                               if (record) {
                                 record = false;
-                                logger.log(TestLogUtils.getRecord(Level.INFO, "%s %d frozen to %s",
-                                    f2.getClass().getSimpleName(), 2,
+                                logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+                                    "%s %d frozen to %s", f2.getClass().getSimpleName(), 2,
                                     f.getClass().getSimpleName()));
                               }
 
@@ -625,7 +625,7 @@ public abstract class Gaussian2DFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesTargetGradientWith2Peaks %s [%d] %s (error %s +/- %s)",
           f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
           Gaussian2DFunction.getName(targetParameter), MathUtils.rounded(s.getMean()),

@@ -59,6 +59,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
@@ -69,6 +70,7 @@ import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
  */
 @SuppressWarnings({"javadoc"})
 class GradientCalculatorSpeedTest {
+  private static final Level level = TestLevel.TEST_INFO;
   private static Logger logger;
 
   @BeforeAll
@@ -608,7 +610,7 @@ class GradientCalculatorSpeedTest {
 
     // Manipulate the background
     final double defaultBackground = background;
-    final boolean report = logger.isLoggable(Level.INFO);
+    final boolean report = logger.isLoggable(level);
     try {
       background = 1e-2;
       createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
@@ -625,7 +627,7 @@ class GradientCalculatorSpeedTest {
         betaList.add(beta.clone());
         for (int j = 0; j < nparams; j++) {
           if (Math.abs(beta[j]) < 1e-6) {
-            logger.info(FunctionUtils.getSupplier("[%d] Tiny beta %s %g", i,
+            logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("[%d] Tiny beta %s %g", i,
                 func.getGradientParameterName(j), beta[j]));
           }
         }
@@ -684,9 +686,11 @@ class GradientCalculatorSpeedTest {
 
         if (report) {
           for (int i = 0; i < nparams; i++) {
-            logger.info(FunctionUtils.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g",
-                b, func.getGradientParameterName(i), rel[i].getMean(),
-                rel[i].getStandardDeviation(), abs[i].getMean(), abs[i].getStandardDeviation()));
+            logger.log(level,
+                FunctionUtils.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
+                    func.getGradientParameterName(i), rel[i].getMean(),
+                    rel[i].getStandardDeviation(), abs[i].getMean(),
+                    abs[i].getStandardDeviation()));
           }
         }
       }

@@ -52,6 +52,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -124,7 +125,8 @@ class JumpDistanceAnalysisTest {
         final double e = fc.evaluate(x, params);
         // Integrate
         final double o = si.integrate(10000, func, 0, x);
-        // logger.info(FunctionUtils.getSupplier("Integrate d=%.1f : x=%.1f, e=%f, o=%f, iter=%d,
+        // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Integrate d=%.1f : x=%.1f,
+        // e=%f, o=%f, iter=%d,
         // eval=%d", d, x, e, o, si.getIterations(),
         // si.getEvaluations());
         TestAssertions.assertTest(e, o, equality,
@@ -159,7 +161,8 @@ class JumpDistanceAnalysisTest {
           final double e = fc.evaluate(x, params);
           // Integrate
           final double o = si.integrate(10000, func, 0, x);
-          // logger.info(FunctionUtils.getSupplier("Integrate d=%.1f, f=%.1f : x=%.1f, e=%f, o=%f,
+          // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Integrate d=%.1f, f=%.1f :
+          // x=%.1f, e=%f, o=%f,
           // iter=%d, eval=%d", d, f, x, e, o,
           // si.getIterations(), si.getEvaluations());
           TestAssertions.assertTest(e, o, equality,
@@ -381,7 +384,7 @@ class JumpDistanceAnalysisTest {
     } finally {
       final double[] e1 = getPercentError(dc, fitD);
       final double[] e2 = getPercentError(fraction, fitF);
-      logger.info(
+      logger.log(TestLevel.TEST_INFO,
           FunctionUtils.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
               (error == null) ? "+++ Pass" : "--- Fail", title, dc.length, samples, n, toString(dc),
               toString(fitD), toString(e1), toString(fraction), toString(fitF), toString(e2)));

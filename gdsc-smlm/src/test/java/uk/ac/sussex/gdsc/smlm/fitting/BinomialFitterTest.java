@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -214,20 +215,21 @@ class BinomialFitterTest {
     // BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
     bf.setMaximumLikelihood(maximumLikelihood);
 
-    logger.info(FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
+    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
     int fail = 0;
     for (int i = 0; i < TRIALS; i++) {
       final int[] data = createData(rg, n, p, false);
       final double[] fit = bf.fitBinomial(data, minN, maxN, zeroTruncated);
       final int fittedN = (int) fit[0];
       final double fittedP = fit[1];
-      logger.info(FunctionUtils.getSupplier("  Fitted (n=%d, p=%f)", fittedN, fittedP));
+      logger.log(TestLevel.TEST_INFO,
+          FunctionUtils.getSupplier("  Fitted (n=%d, p=%f)", fittedN, fittedP));
       try {
         Assertions.assertEquals(n, fittedN, "Failed to fit n");
         Assertions.assertEquals(p, fittedP, 0.05, "Failed to fit p");
       } catch (final AssertionError ex) {
         fail++;
-        logger.info("    " + ex.getMessage());
+        logger.log(TestLevel.TEST_INFO, "    " + ex.getMessage());
       }
     }
     Assertions.assertTrue(fail <= FAILURES,
@@ -239,7 +241,7 @@ class BinomialFitterTest {
     final BinomialFitter bf = new BinomialFitter(null);
     // BinomialFitter bf = new BinomialFitter(new ConsoleLogger());
 
-    logger.info(FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
+    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Fitting (n=%d, p=%f)", n, p));
     int fail = 0;
     int c1 = 0;
     for (int i = 0; i < TRIALS; i++) {
@@ -254,21 +256,22 @@ class BinomialFitterTest {
       final int n2 = (int) fitMle[0];
       final double p2 = fitMle[1];
 
-      logger.info(FunctionUtils.getSupplier("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)", n1, p1,
-          n2, p2));
+      logger.log(TestLevel.TEST_INFO, FunctionUtils
+          .getSupplier("  Fitted LSE (n=%d, p=%f) == MLE (n=%d, p=%f)", n1, p1, n2, p2));
 
       try {
         Assertions.assertEquals(n1, n2, "Failed to match n");
         Assertions.assertEquals(p1, p2, 0.05, "Failed to match p");
       } catch (final AssertionError ex) {
         fail++;
-        logger.info("    " + ex.getMessage());
+        logger.log(TestLevel.TEST_INFO, "    " + ex.getMessage());
       }
       if (Math.abs(p1 - p) < Math.abs(p2 - p)) {
         c1++;
       }
     }
-    logger.info(FunctionUtils.getSupplier("  Closest LSE %d, MLE %d", c1, TRIALS - c1));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("  Closest LSE %d, MLE %d", c1, TRIALS - c1));
     if (fail > FAILURES) {
       final String msg = String.format("Too many failures (n=%d, p=%f): %d", n, p, fail);
       Assertions.fail(msg);

@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -42,6 +41,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -186,8 +186,8 @@ class PoissonGaussianFunctionTest {
     }, min, max);
 
     if (p2 < 0.98 || p2 > 1.02) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, sd,
-          pvalue, p2));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+          sd, pvalue, p2));
     }
 
     return p2;
@@ -264,8 +264,8 @@ class PoissonGaussianFunctionTest {
     final long t1 = getTime(noise2, x, true);
     final long t2 = getTime(noise2, x, false);
 
-    logger.log(
-        TestLogUtils.getRecord(Level.INFO, "Picard %d : Pade %d (%fx)", t1, t2, t1 / (double) t2));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Picard %d : Pade %d (%fx)", t1, t2,
+        t1 / (double) t2));
     Assertions.assertTrue(t2 < t1, () -> String.format("Picard %d < Pade %d", t1, t2));
   }
 

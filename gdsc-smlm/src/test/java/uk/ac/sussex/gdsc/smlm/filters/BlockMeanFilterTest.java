@@ -37,6 +37,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -226,7 +227,8 @@ class BlockMeanFilterTest extends AbstractFilterTest {
     //// Check the weights do not alter the image mean
     // double u1 = Maths.sum(data) / data.length;
     // double u2 = Maths.sum(data1) / data.length;
-    // logger.fine(() -> String.format("[%dx%d] @ %.1f : %g => %g (%g)", width, height, boxSize, u1,
+    // logger.log(TestLevel.TEST_DEBUG, () -> String.format("[%dx%d] @ %.1f : %g => %g (%g)", width,
+    //// height, boxSize, u1,
     //// u2,
     // DoubleEquality.relativeError(u1, u2));
 
@@ -404,8 +406,9 @@ class BlockMeanFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name,
-                width, height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format("%s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name, width,
+                    height, boxSize, time, fast.name, fastTime, speedUpFactor(time, fastTime)));
           }
         }
       }
@@ -480,9 +483,10 @@ class BlockMeanFilterTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx",
-                slow.name, width, height, boxSize, time, fast.name, fastTime,
-                speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format("Internal %s [%dx%d] @ %.1f : %d => %s %d = %.2fx", slow.name,
+                    width, height, boxSize, time, fast.name, fastTime,
+                    speedUpFactor(time, fastTime)));
           }
         }
       }

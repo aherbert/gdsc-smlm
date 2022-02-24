@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -163,7 +164,8 @@ class PeakResultDigestTest {
         digest.digest(r1);
       }
       time = System.nanoTime() - time;
-      logger.info(FunctionUtils.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
+      logger.log(TestLevel.TEST_INFO,
+          FunctionUtils.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
     }
   }
 

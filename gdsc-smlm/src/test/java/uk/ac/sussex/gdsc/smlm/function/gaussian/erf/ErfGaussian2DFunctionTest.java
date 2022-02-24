@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function.gaussian.erf;
 
-import java.util.logging.Level;
 import org.apache.commons.math3.util.Precision;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
@@ -48,6 +47,7 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -203,7 +203,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesSecondTargetGradient %s %s (error %s +/- %s)",
           f1.getClass().getSimpleName(), Gaussian2DFunction.getName(targetParameter),
           MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()));
@@ -371,7 +371,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
         }
       }
     }
-    logger.info(() -> {
+    logger.log(TestLevel.TEST_INFO, () -> {
       return String.format("functionComputesSecondTargetGradient %s [%d] %s (error %s +/- %s)",
           f2.getClass().getSimpleName(), Gaussian2DFunction.getPeak(targetParameter),
           Gaussian2DFunction.getName(targetParameter), MathUtils.rounded(s.getMean()),
@@ -547,8 +547,8 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                           final boolean ok =
                               eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
                           if (!ok) {
-                            logger.log(TestLogUtils.getRecord(Level.INFO, "%d [%d,%d] %f ?= %f",
-                                index, j, k, gradient, m.get(j, k)));
+                            logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+                                "%d [%d,%d] %f ?= %f", index, j, k, gradient, m.get(j, k)));
                             Assertions.fail(String.format("%d [%d,%d] %f != %f", index, j, k,
                                 gradient, m.get(j, k)));
                           }
@@ -768,7 +768,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                                       final double gradient = (duDa[k] - duDb[k]) / delta[j];
                                       final boolean ok =
                                           eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
-                                      // logger.log(TestLog.getRecord(Level.FINE,
+                                      // logger.log(TestLog.getRecord(TestLevel.TEST_DEBUG,
                                       // "%d [%d,%d] %f ?= %f", i, j, k,
                                       // gradient, m.get(j, k)));
                                       if (!ok) {
@@ -946,8 +946,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     final long t3 = System.nanoTime();
     t1 = t2 - t1;
     t2 = t3 - t2;
-    logger.log(TestLogUtils.getRecord(Level.INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
-        f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
+    logger.log(
+        TestLogUtils.getRecord(TestLevel.TEST_INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
+            f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
     TestAssertions.assertTest(s1, s2, TestHelper.doublesAreClose(1e-3, 0));
     Assertions.assertTrue(t2 < t1);
   }

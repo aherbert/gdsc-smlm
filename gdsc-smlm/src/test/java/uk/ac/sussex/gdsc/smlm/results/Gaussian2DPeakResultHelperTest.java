@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -51,6 +50,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -98,7 +98,7 @@ class Gaussian2DPeakResultHelperTest {
 
   @Test
   void lowerIntegrationpointsApproximateMaximumLikelihoodVariance() {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final double[] sum = new double[maxpoints + 1];
@@ -124,14 +124,14 @@ class Gaussian2DPeakResultHelperTest {
     }
 
     for (int points = minpoints; points <= maxpoints; points++) {
-      logger.info(
+      logger.log(TestLevel.TEST_INFO,
           FunctionUtils.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
     }
   }
 
   @Test
   void runSpeedTest() {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // Test with realistic parameters
@@ -187,7 +187,7 @@ class Gaussian2DPeakResultHelperTest {
     }
 
     for (int points = minpoints; points <= maxpoints; points++) {
-      logger.info(
+      logger.log(TestLevel.TEST_INFO,
           FunctionUtils.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f",
               points, sum[points] / count, sum2[points] / count2));
     }

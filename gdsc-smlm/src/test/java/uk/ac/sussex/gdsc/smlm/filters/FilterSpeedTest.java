@@ -31,6 +31,7 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -98,10 +99,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float rollingBlockMeanNxNInternal [%dx%d] @ %d : %d => "
-                    + "rollingBlockSumNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float rollingBlockMeanNxNInternal [%dx%d] @ %d : %d => "
+                        + "rollingBlockSumNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -177,10 +179,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float blockMedianNxNInternal [%dx%d] @ %d : %d => "
-                    + "rollingBlockMeanNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float blockMedianNxNInternal [%dx%d] @ %d : %d => "
+                        + "rollingBlockMeanNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -257,10 +260,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float rollingMedianNxNInternal [%dx%d] @ %d : %d => "
-                    + "rollingBlockMeanNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float rollingMedianNxNInternal [%dx%d] @ %d : %d => "
+                        + "rollingBlockMeanNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -336,10 +340,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float convolveInternal [%dx%d] @ %d : %d => "
-                    + "rollingBlockMeanNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float convolveInternal [%dx%d] @ %d : %d => "
+                        + "rollingBlockMeanNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -424,10 +429,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float areaFilterInternal [%dx%d] @ %d : %d => "
-                    + "rollingBlockMeanNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float areaFilterInternal [%dx%d] @ %d : %d => "
+                        + "rollingBlockMeanNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -513,10 +519,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "float areaFilterInternal [%dx%d] @ %d : %d => "
-                    + "stripedBlockMeanNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "float areaFilterInternal [%dx%d] @ %d : %d => "
+                        + "stripedBlockMeanNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);
@@ -594,10 +601,11 @@ class FilterSpeedTest extends AbstractFilterTest {
           boxSlowTotal += time;
           boxFastTotal += fastTime;
           if (debug) {
-            logger.fine(() -> String.format(
-                "int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => "
-                    + "float rollingBlockSumNxNInternal %d = %.2fx",
-                width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
+            logger.log(TestLevel.TEST_DEBUG,
+                () -> String.format(
+                    "int rollingBlockSumNxNInternal [%dx%d] @ %d : %d => "
+                        + "float rollingBlockSumNxNInternal %d = %.2fx",
+                    width, height, boxSize, time, fastTime, speedUpFactor(time, fastTime)));
             // Assertions.assertTrue(String.format("Not faster: [%dx%d] @ %d : %d > %d", width,
             // height, boxSize,
             // blockTime, time), blockTime < time);

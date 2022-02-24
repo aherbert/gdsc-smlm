@@ -38,13 +38,14 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class PsfProtosTest {
   @Test
   void canWriteAndReadString() throws ParseException, InvalidProtocolBufferException {
     final Logger logger = Logger.getLogger(PsfProtosTest.class.getName());
-    final Level logLevel = Level.FINE;
+    final Level logLevel = TestLevel.TEST_INFO;
     final PSFProtos.PSF.Builder psfBuilder = PSFProtos.PSF.newBuilder();
     final PSFParameter.Builder psfParamBuilder = PSFProtos.PSFParameter.newBuilder();
     psfBuilder.setPsfType(PSFType.CUSTOM);

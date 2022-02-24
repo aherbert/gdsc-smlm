@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -44,7 +42,10 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
+import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"unused", "javadoc"})
 class FastLogTest {
@@ -219,8 +220,8 @@ class FastLogTest {
     final float e = (float) Math.log(value);
     final float o = fl.log(value);
     final float error = FloatEquality.relativeError(e, o);
-    logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO,
-        "%s v=%g : %fl vs %s (%g)", fl.name, value, e, o, error));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s v=%g : %fl vs %s (%g)", fl.name,
+        value, e, o, error));
     if (test) {
       if (Double.isNaN(e) && Double.isNaN(o)) {
         return;
@@ -295,7 +296,7 @@ class FastLogTest {
     final double e = Math.log(value);
     final double o = fl.log(value);
     final double error = DoubleEquality.relativeError(e, o);
-    logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(Level.INFO,
+    logger.log(uk.ac.sussex.gdsc.test.utils.TestLogUtils.getRecord(TestLevel.TEST_INFO,
         "%s v=%g : %fl vs %s (%g)", fl.name, value, e, o, error));
     if (test) {
       if (Double.isNaN(e) && Double.isNaN(o)) {
@@ -314,7 +315,7 @@ class FastLogTest {
 
   @SeededTest
   void canTestFloatError(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
@@ -374,7 +375,7 @@ class FastLogTest {
 
   @Test
   void canTestFloatErrorRange() {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final LocalList<TestFastLog> test = new LocalList<>();
@@ -409,7 +410,7 @@ class FastLogTest {
       for (int i = 0; i < data.length; i++) {
         logD[i] = (float) Math.log(data[i]);
       }
-      logger.info(getSupplier("e=%d-%d", e, e + ee));
+      logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("e=%d-%d", e, e + ee));
       for (final TestFastLog fl : test) {
         runCanTestFloatError(fl, data, logD);
       }
@@ -527,8 +528,8 @@ class FastLogTest {
         s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", fl.name, fl.getN(), s1.count,
-        s1.summary(), s2.summary()));
+    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s, n=%d, c=%d : %s : relative %s",
+        fl.name, fl.getN(), s1.count, s1.summary(), s2.summary()));
   }
 
   private static boolean next(BaseTestLog fl, FPair pair, float[] data) {
@@ -563,7 +564,7 @@ class FastLogTest {
 
   @SeededTest
   void canTestDoubleError(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
@@ -602,7 +603,7 @@ class FastLogTest {
 
   @SeededTest
   void canTestDoubleErrorLog1P(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     // All float values is a lot so we do a representative set
@@ -623,7 +624,7 @@ class FastLogTest {
 
   @SeededTest
   void canTestDoubleErrorRange(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     final UniformRandomProvider rng = RngUtils.create(seed.get());
@@ -659,7 +660,7 @@ class FastLogTest {
       for (int i = 0; i < data.length; i++) {
         logD[i] = Math.log(data[i]);
       }
-      logger.info(getSupplier("e=%d-%d", e, e + ee));
+      logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("e=%d-%d", e, e + ee));
       for (final TestFastLog fl : test) {
         runCanTestDoubleError(fl, data, logD);
       }
@@ -711,29 +712,7 @@ class FastLogTest {
         s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.info(getSupplier("%s, n=%d, c=%d : %s : relative %s", fl.name, fl.getN(), s1.count,
-        s1.summary(), s2.summary()));
-  }
-
-  /**
-   * Get a supplier for the string using the format and arguments.
-   *
-   * <p>This can be used where it is not convenient to create a lambda function directly because the
-   * arguments are not effectively final.
-   *
-   * <p>Returns a function of:
-   *
-   * <pre>
-   * {@code
-   * () -> String.format(format, args);
-   * }
-   * </pre>
-   *
-   * @param format the format
-   * @param args the arguments
-   * @return the supplier
-   */
-  static final Supplier<String> getSupplier(final String format, final Object... args) {
-    return () -> String.format(format, args);
+    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s, n=%d, c=%d : %s : relative %s",
+        fl.name, fl.getN(), s1.count, s1.summary(), s2.summary()));
   }
 }

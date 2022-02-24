@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -42,6 +41,7 @@ import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -140,7 +140,7 @@ class ConvolutionTest {
   @SpeedTag
   @SeededTest
   void doSpeedTest(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
     final UniformRandomProvider rg = RngUtils.create(seed.get());
 
@@ -179,14 +179,15 @@ class ConvolutionTest {
     }
     t2 = System.nanoTime() - t2;
 
-    logger.info(FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
-        kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+            kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
   @SpeedTag
   @SeededTest
   void doDoubleSpeedTest(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
     final UniformRandomProvider rg = RngUtils.create(seed.get());
 
@@ -226,14 +227,15 @@ class ConvolutionTest {
     }
     t2 = System.nanoTime() - t2;
 
-    logger.info(FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
-        kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+            kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
   @SpeedTag
   @SeededTest
   void doSingleVsDoubleSpeedTest(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     int size = 10;
@@ -276,14 +278,15 @@ class ConvolutionTest {
     }
     t2 = System.nanoTime() - t2;
 
-    logger.info(FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
-        kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+            kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
   @SpeedTag
   @SeededTest
   void doSingleVsDoubleFftSpeedTest(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     int size = 10;
@@ -326,8 +329,9 @@ class ConvolutionTest {
     }
     t2 = System.nanoTime() - t2;
 
-    logger.info(FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
-        kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+            kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
   private static double[] randomData(UniformRandomProvider random, int size) {
@@ -546,7 +550,7 @@ class ConvolutionTest {
   @SpeedTag
   @SeededTest
   void doScaledSpeedTest(RandomSeed seed) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
     int size = 10;
@@ -586,7 +590,8 @@ class ConvolutionTest {
     }
     t2 = System.nanoTime() - t2;
 
-    logger.info(FunctionUtils.getSupplier("Size=%d, sd=%f, scale=%d (%d) [%d] : %d -> %d (%f)",
-        size, sd, scale, kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("Size=%d, sd=%f, scale=%d (%d) [%d] : %d -> %d (%f)", size, sd,
+            scale, kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 }

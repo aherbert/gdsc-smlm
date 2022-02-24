@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -42,6 +41,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 // TODO: Update this using the new Erf implementation in Commons Numbers 1.1
@@ -130,7 +130,8 @@ class ErfTest {
         Assertions.assertTrue(error < expected);
       }
     }
-    logger.log(TestLogUtils.getRecord(Level.INFO, "erfx %s max error = %g", erf.name, max));
+    logger
+        .log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfx %s max error = %g", erf.name, max));
   }
 
   @Test
@@ -154,7 +155,7 @@ class ErfTest {
   }
 
   private static void checkErfxIndistinguishableFrom1(BaseErf erf) {
-    Assumptions.assumeTrue(logger.isLoggable(Level.INFO));
+    Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
 
     // Find switch using a binary search
     double lower = 1;
@@ -169,8 +170,9 @@ class ErfTest {
       }
     }
 
-    logger.info(FunctionUtils.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s",
-        erf.name, Double.toString(lower), Double.toString(upper)));
+    logger.log(TestLevel.TEST_INFO,
+        FunctionUtils.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s", erf.name,
+            Double.toString(lower), Double.toString(upper)));
   }
 
   @SeededTest
@@ -215,7 +217,8 @@ class ErfTest {
       }
     }
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "erfxx %s max error = %g", erf.name, max));
+    logger
+        .log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfxx %s max error = %g", erf.name, max));
   }
 
   @Test
@@ -251,7 +254,8 @@ class ErfTest {
       Assertions.assertTrue(error < expected);
     }
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "erfxx %s unit max error = %g", erf.name, max));
+    logger.log(
+        TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfxx %s unit max error = %g", erf.name, max));
   }
 
   @Test
@@ -325,10 +329,10 @@ class ErfTest {
     Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
         () -> erf.name + " Gaussian approx integral is incorrect");
 
-    logger.log(TestLogUtils.getRecord(Level.INFO, "%s Erf approx pixel unit max error = %f",
-        erf.name, max));
-    logger.log(TestLogUtils.getRecord(Level.INFO, "%s Gaussian approx pixel unit max error = %f",
-        erf.name, max2));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        "%s Erf approx pixel unit max error = %f", erf.name, max));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        "%s Gaussian approx pixel unit max error = %f", erf.name, max2));
   }
 
   @Test
@@ -400,8 +404,8 @@ class ErfTest {
 
       final int n = steps * steps;
       observed = norm * sum / n;
-      logger.log(TestLogUtils.getRecord(Level.INFO, "n=%d, e=%f, o=%f, error=%f", n, expected,
-          observed, DoubleEquality.relativeError(expected, observed)));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "n=%d, e=%f, o=%f, error=%f", n,
+          expected, observed, DoubleEquality.relativeError(expected, observed)));
     }
 
     TestAssertions.assertTest(expected, observed, TestHelper.doublesAreClose(1e-2, 0));

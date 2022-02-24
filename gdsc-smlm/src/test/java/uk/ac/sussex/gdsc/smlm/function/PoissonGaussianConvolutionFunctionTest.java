@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -46,6 +45,7 @@ import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -192,8 +192,8 @@ class PoissonGaussianConvolutionFunctionTest {
     }
 
     if (p2 < 0.98 || p2 > 1.02) {
-      logger.log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu, sd,
-          pvalue, p2));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+          sd, pvalue, p2));
     }
 
     return p2;

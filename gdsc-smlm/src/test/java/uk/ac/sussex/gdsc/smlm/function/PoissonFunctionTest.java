@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -37,6 +36,7 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.api.function.DoublePredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"unused", "javadoc"})
@@ -61,8 +61,10 @@ class PoissonFunctionTest {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-        logger.log(TestLogUtils.getRecord(Level.FINE, "minRange[%d][%d] = %d;", j, i, result[0]));
-        logger.log(TestLogUtils.getRecord(Level.FINE, "maxRange[%d][%d] = %d;", j, i, result[1]));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "minRange[%d][%d] = %d;", j, i,
+            result[0]));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "maxRange[%d][%d] = %d;", j, i,
+            result[1]));
       }
     }
   }
@@ -153,9 +155,9 @@ class PoissonFunctionTest {
     minx += min;
     maxx += min;
 
-    logger
-        .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d",
-            gain, mu, o, pvalue, minx, maxp, maxc, maxx));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, pvalue, minx, maxp, maxc,
+        maxx));
     return new int[] {minx, maxx};
   }
 

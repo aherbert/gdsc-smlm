@@ -48,11 +48,12 @@ import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
 class PoissonLikelihoodWrapperTest {
-  private static final Level LOG_LEVEL = Level.FINE;
+  private static final Level LOG_LEVEL = TestLevel.TEST_DEBUG;
 
   private static Logger logger;
 

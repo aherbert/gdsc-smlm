@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.function;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class InterpolatedPoissonFunctionTest {
@@ -148,8 +148,10 @@ class InterpolatedPoissonFunctionTest {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         final int[] result = cumulativeProbabilityIsOneWithInteger(gain[j], photons[i]);
-        logger.log(TestLogUtils.getRecord(Level.FINE, "minRange[%d][%d] = %d;", j, i, result[0]));
-        logger.log(TestLogUtils.getRecord(Level.FINE, "maxRange[%d][%d] = %d;", j, i, result[1]));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "minRange[%d][%d] = %d;", j, i,
+            result[0]));
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "maxRange[%d][%d] = %d;", j, i,
+            result[1]));
       }
     }
   }
@@ -240,9 +242,9 @@ class InterpolatedPoissonFunctionTest {
     minx += min;
     maxx += min;
 
-    logger
-        .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d",
-            gain, mu, o, pvalue, minx, maxp, maxc, maxx));
+    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, pvalue, minx, maxp, maxc,
+        maxx));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("g=%f, mu=%f", gain, mu));
     return new int[] {minx, maxx};
   }
@@ -285,8 +287,8 @@ class InterpolatedPoissonFunctionTest {
         }
       }, min, max);
 
-      logger
-          .log(TestLogUtils.getRecord(Level.INFO, "g=%f, mu=%f, o=%f, p=%f", gain, mu, o, pvalue));
+      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, o=%f, p=%f", gain, mu, o,
+          pvalue));
       // Assertions.assertEquals(String.format("g=%f, mu=%f", gain, mu), 1, p, 0.02);
     } catch (final TooManyEvaluationsException ex) {
       // double inc = max / 20000.0;
@@ -352,7 +354,7 @@ class InterpolatedPoissonFunctionTest {
       // Ignore tiny gradients. These occur due to floating point error when the gradient
       // should be zero, e.g. mu*gain=x, i.e. the max of the distribution PMF
       if (Math.abs(eg) < 1e-10) {
-        logger.log(TestLogUtils.getRecord(Level.FINE,
+        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
             "g=%g, mu=%g, x=%g (ox=%g), p=%g  g=%g  %g  error=%g", gain, mu, x, ox, p1, g, eg,
             error));
         continue;

@@ -43,6 +43,7 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngUtils;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
+import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -60,7 +61,7 @@ class FisherInformationMatrixTest {
   }
 
   /** The level for logging output. */
-  private final Level level = Level.FINE;
+  private final Level level = TestLevel.TEST_DEBUG;
 
   @SeededTest
   void canComputeCrlb(RandomSeed seed) {
