@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
@@ -33,6 +31,8 @@ import ij.gui.Line;
 import ij.gui.Plot;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Label;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -202,9 +202,9 @@ public class FilterMolecules implements PlugIn {
     private int lastFrame;
     private int totalJump;
     private double sumSquared;
-    private final TDoubleArrayList msdList = new TDoubleArrayList();
-    private final TIntArrayList lengthList = new TIntArrayList();
-    private final TIntArrayList idList = new TIntArrayList();
+    private final DoubleArrayList msdList = new DoubleArrayList();
+    private final IntArrayList lengthList = new IntArrayList();
+    private final IntArrayList idList = new IntArrayList();
 
     /**
      * Filter the molecules using the diffusion coefficient.
@@ -251,9 +251,9 @@ public class FilterMolecules implements PlugIn {
       // and show in the dialog.
       // When click save extract all the results that match the ID filter.
 
-      msds = msdList.toArray();
-      lengths = lengthList.toArray();
-      ids = idList.toArray();
+      msds = msdList.toDoubleArray();
+      lengths = lengthList.toIntArray();
+      ids = idList.toIntArray();
 
       // Sort by MSD
       final int[] indices = SimpleArrayUtils.natural(msds.length);

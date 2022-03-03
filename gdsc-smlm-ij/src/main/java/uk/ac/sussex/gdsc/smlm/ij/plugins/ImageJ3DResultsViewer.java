@@ -28,7 +28,6 @@ import customnode.CustomLineMesh;
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -2096,9 +2095,17 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   private static float[] createRankById(MemoryPeakResults results) {
     if (results.hasId()) {
-      final TFloatArrayList list = new TFloatArrayList(results.size());
-      results.forEach((PeakResultProcedure) r -> list.add(r.getId()));
-      return list.toArray();
+      final float[] list = new float[results.size()];
+      final PeakResultProcedure p = new PeakResultProcedure() {
+        int i;
+
+        @Override
+        public void execute(PeakResult peakResult) {
+          list[i++] = peakResult.getId();
+        }
+      };
+      results.forEach(p);
+      return list;
     }
     return null;
   }
@@ -3571,11 +3578,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
       appearance.getPointAttributes().setPointSize(sphereSize[0].x);
     }
     if (settings.getSupportDynamicTransparency()) {
-      return new ItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance,
-          sphereSize, colors, alpha);
+      return new ItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance, sphereSize,
+          colors, alpha);
     }
-    return new OrderedItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance,
-        sphereSize, colors, alpha);
+    return new OrderedItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance, sphereSize,
+        colors, alpha);
   }
 
   @SuppressWarnings("unused")
@@ -3671,8 +3678,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     // Support drawing as points ...
     if (settings.getRendering() == 0) {
-      final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga,
-          appearance, null, null, transparency);
+      final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga, appearance,
+          null, null, transparency);
       if (alpha != null) {
         mesh.setItemAlpha(alpha);
       }
@@ -3694,8 +3701,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     IJ.showStatus("Creating 3D mesh ...");
-    final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga,
-        appearance, sphereSize, null, transparency);
+    final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga, appearance,
+        sphereSize, null, transparency);
     if (alpha != null) {
       mesh.setItemAlpha(alpha);
     }
@@ -3791,14 +3798,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final ImageJTrackProgress progress = null; // Used for debugging construction time
     if (alpha != null) {
       final TransparentItemTriangleMesh mesh = new TransparentItemTriangleMesh(
-          point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[0]),
-          sphereSize, null, transparency, creaseAngle, progress);
+          point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[0]), sphereSize,
+          null, transparency, creaseAngle, progress);
       mesh.setItemAlpha(alpha);
       return mesh;
     }
 
     return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-        points.toArray(new Point3f[0]), sphereSize, null, transparency, creaseAngle,
-        progress);
+        points.toArray(new Point3f[0]), sphereSize, null, transparency, creaseAngle, progress);
   }
 }

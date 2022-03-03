@@ -24,11 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -84,9 +84,9 @@ public class TraceLengthAnalysis implements PlugIn {
   private int lastFrame;
   private int totalJump;
   private double sumSquared;
-  private final TDoubleArrayList msdList = new TDoubleArrayList();
-  private final TIntArrayList lengthList = new TIntArrayList();
-  private final TIntArrayList idList = new TIntArrayList();
+  private final DoubleArrayList msdList = new DoubleArrayList();
+  private final IntArrayList lengthList = new IntArrayList();
+  private final IntArrayList idList = new IntArrayList();
 
   /** The plugin settings. */
   private Settings settings;
@@ -187,9 +187,9 @@ public class TraceLengthAnalysis implements PlugIn {
     lastid = results.getFirst().getId() - 1;
     results.forEach(this::processTrackLength);
     store(); // For the final track
-    msds = msdList.toArray();
-    lengths = lengthList.toArray();
-    ids = idList.toArray();
+    msds = msdList.toDoubleArray();
+    lengths = lengthList.toIntArray();
+    ids = idList.toIntArray();
     final int[] limits = MathUtils.limits(lengths);
     h1 = new int[limits[1] + 1];
     h2 = new int[h1.length];

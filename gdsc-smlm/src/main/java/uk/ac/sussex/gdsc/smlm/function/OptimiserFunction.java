@@ -24,17 +24,19 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.Arrays;
 
 /**
  * Allow optimisation using Apache Commons Math 3 Optimiser.
  */
 public abstract class OptimiserFunction {
+  // TODO - Make these private and optimise data access using DoubleArrayList.elements()
+
   /** The x. */
-  protected TDoubleArrayList x;
+  protected DoubleArrayList x;
   /** The y. */
-  protected TDoubleArrayList y;
+  protected DoubleArrayList y;
 
   /**
    * Adds the point.
@@ -44,8 +46,8 @@ public abstract class OptimiserFunction {
    */
   public void addPoint(double x, double y) {
     if (this.x == null) {
-      this.x = new TDoubleArrayList();
-      this.y = new TDoubleArrayList();
+      this.x = new DoubleArrayList();
+      this.y = new DoubleArrayList();
     }
     this.x.add(x);
     this.y.add(y);
@@ -57,28 +59,9 @@ public abstract class OptimiserFunction {
    * @param x the x
    * @param y the y
    */
-  public void addData(float[] x, float[] y) {
-    this.x = new TDoubleArrayList();
-    this.y = new TDoubleArrayList();
-    for (int i = 0; i < x.length; i++) {
-      this.x.add(x[i]);
-      this.y.add(y[i]);
-    }
-  }
-
-  /**
-   * Adds the data.
-   *
-   * @param x the x
-   * @param y the y
-   */
   public void addData(double[] x, double[] y) {
-    this.x = new TDoubleArrayList();
-    this.y = new TDoubleArrayList();
-    for (int i = 0; i < x.length; i++) {
-      this.x.add(x[i]);
-      this.y.add(y[i]);
-    }
+    this.x = DoubleArrayList.wrap(x);
+    this.y = DoubleArrayList.wrap(y);
   }
 
   /**
@@ -87,7 +70,7 @@ public abstract class OptimiserFunction {
    * @return the x
    */
   public double[] getX() {
-    return x.toArray();
+    return x.toDoubleArray();
   }
 
   /**
@@ -96,7 +79,7 @@ public abstract class OptimiserFunction {
    * @return the y
    */
   public double[] getY() {
-    return y.toArray();
+    return y.toDoubleArray();
   }
 
   /**

@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
@@ -99,7 +99,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
 
     // Note: 1+blinks1 is the number of on-states
 
-    final TDoubleArrayList sequence = new TDoubleArrayList();
+    final DoubleArrayList sequence = new DoubleArrayList();
 
     // The exponential distribution is just scaled by the mean
     final ContinuousSampler sampler = SamplerUtils.createExponentialSampler(rand);
@@ -132,7 +132,7 @@ public class StandardFluorophoreSequenceModel extends FluorophoreSequenceModel {
     }
 
     // Convert the sequence to the burst sequence array
-    setBurstSequence(sequence.toArray());
+    setBurstSequence(sequence.toDoubleArray());
   }
 
   /**

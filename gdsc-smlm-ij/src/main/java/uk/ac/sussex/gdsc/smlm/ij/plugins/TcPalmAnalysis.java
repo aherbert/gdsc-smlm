@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -40,6 +39,7 @@ import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
 import ij.process.LUT;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
@@ -471,8 +471,8 @@ public class TcPalmAnalysis implements PlugIn {
 
       if (createPlotData) {
         // Expand the total activations with extra frames to allow large spans to plot as horizontal
-        final TIntArrayList tmpFrames = new TIntArrayList(frames.length);
-        final TIntArrayList tmpCounts = new TIntArrayList(frames.length);
+        final IntArrayList tmpFrames = new IntArrayList(frames.length);
+        final IntArrayList tmpCounts = new IntArrayList(frames.length);
 
         int previousT = Integer.MIN_VALUE;
         int previousC = 0;
@@ -486,8 +486,8 @@ public class TcPalmAnalysis implements PlugIn {
           tmpFrames.add(previousT);
           tmpCounts.add(previousC);
         }
-        plotFrames = tmpFrames.toArray();
-        plotCounts = tmpCounts.toArray();
+        plotFrames = tmpFrames.toIntArray();
+        plotCounts = tmpCounts.toIntArray();
       } else {
         plotFrames = null;
         plotCounts = null;
@@ -1928,8 +1928,8 @@ public class TcPalmAnalysis implements PlugIn {
       final int[] plotCounts = activationsPlotData.data.plotCounts;
 
       // For each cluster add to the plot.
-      final TIntArrayList tmpFrames = new TIntArrayList();
-      final TIntArrayList tmpCounts = new TIntArrayList();
+      final IntArrayList tmpFrames = new IntArrayList();
+      final IntArrayList tmpCounts = new IntArrayList();
       for (int i = 0; i < bursts.size(); i++) {
         // Find the start and end points on the plotted data.
         final int[] range = bursts.unsafeGet(i);
@@ -1937,18 +1937,18 @@ public class TcPalmAnalysis implements PlugIn {
         final int ie = Arrays.binarySearch(plotFrames, range[1]);
 
         // Pad the line with zeros at the end
-        tmpFrames.resetQuick();
-        tmpCounts.resetQuick();
+        tmpFrames.clear();
+        tmpCounts.clear();
         int[] frames = Arrays.copyOfRange(plotFrames, is, ie + 1);
         tmpFrames.add(frames[0]);
-        tmpFrames.add(frames);
+        tmpFrames.addElements(1, frames);
         tmpFrames.add(frames[frames.length - 1]);
         tmpCounts.add(0);
         int[] counts = Arrays.copyOfRange(plotCounts, is, ie + 1);
-        tmpCounts.add(counts);
+        tmpCounts.addElements(0, counts);
         tmpCounts.add(0);
-        frames = tmpFrames.toArray();
-        counts = tmpCounts.toArray();
+        frames = tmpFrames.toIntArray();
+        counts = tmpCounts.toIntArray();
 
         // Add to the plot.
         plot.setColor(colourMap.getColour(i));

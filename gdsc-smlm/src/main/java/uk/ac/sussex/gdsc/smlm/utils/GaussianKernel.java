@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
@@ -44,7 +44,7 @@ public class GaussianKernel {
 
   private int currentScale;
 
-  private final TDoubleArrayList halfKernel;
+  private final DoubleArrayList halfKernel;
 
   /**
    * Instantiates a new gaussian kernel.
@@ -58,7 +58,7 @@ public class GaussianKernel {
     }
     this.sd = sd;
     currentScale = 1;
-    halfKernel = new TDoubleArrayList();
+    halfKernel = new DoubleArrayList();
     // Initialise the first value exp(-0)
     halfKernel.add(1);
     // Precompute exponential scaling factor
@@ -74,7 +74,7 @@ public class GaussianKernel {
     this.sd = source.sd;
     this.var2 = source.var2;
     currentScale = source.currentScale;
-    halfKernel = new TDoubleArrayList(source.halfKernel);
+    halfKernel = new DoubleArrayList(source.halfKernel);
   }
 
   /**
@@ -159,10 +159,13 @@ public class GaussianKernel {
     // Note: The stored values in the halfKernel are always non-zero.
     final double[] kernel = new double[2 * kradius - 1];
     kernel[0] = 1;
+    final double[] e = halfKernel.elements();
     if (currentScale == scale) {
-      for (int i = 1, size = Math.min(kradius, halfKernel.size()); i < size; i++) {
-        kernel[i] = halfKernel.getQuick(i);
-      }
+      final int size = Math.min(kradius, halfKernel.size());
+      System.arraycopy(e, 1, kernel, 1, size - 1);
+      //for (int i = 1; i < size; i++) {
+      //  kernel[i] = e[i];
+      //}
     } else {
       final double step = 1.0 / scale;
       final int sample = currentScale / scale;
@@ -170,7 +173,7 @@ public class GaussianKernel {
         // In case sampling requires a different end point in the kernel
         // check the size
         if (j < halfKernel.size()) {
-          kernel[i] = halfKernel.getQuick(j);
+          kernel[i] = e[j];
         } else {
           kernel[i] = StdMath.exp(MathUtils.pow2(i * step) / var2);
           // Check if zero
@@ -238,11 +241,12 @@ public class GaussianKernel {
     final double[] kernel = new double[2 * kradius - 1];
     kernel[0] = 1;
     final double step = scale;
+    final double[] e = halfKernel.elements();
     for (int i = 1, j = sample; i < kradius; i++, j += sample) {
       // In case sampling requires a different end point in the kernel
       // check the size
       if (j < halfKernel.size()) {
-        kernel[i] = halfKernel.getQuick(j);
+        kernel[i] = e[j];
       } else {
         kernel[i] = StdMath.exp(MathUtils.pow2(i * step) / var2);
         // Check if zero
@@ -275,10 +279,10 @@ public class GaussianKernel {
       final int upsample = scale / currentScale;
       currentScale = scale;
 
-      final double[] g = halfKernel.toArray();
+      final double[] g = halfKernel.toDoubleArray();
       final int kradius = g.length;
       final double step = 1.0 / currentScale;
-      halfKernel.resetQuick();
+      halfKernel.clear();
       halfKernel.add(1);
 
       for (int i = 1, j = 0; i < kradius; i++, j += upsample) {

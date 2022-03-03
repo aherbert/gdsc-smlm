@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Rectangle;
 import java.util.BitSet;
 import org.junit.jupiter.api.Assertions;
@@ -277,8 +277,8 @@ class LocalDensityTest {
    * Simple consumer of the regions.
    */
   private static class RegionConsumer implements IntDoubleConsumer {
-    TIntArrayList list1 = new TIntArrayList();
-    TDoubleArrayList list2 = new TDoubleArrayList();
+    IntArrayList list1 = new IntArrayList();
+    DoubleArrayList list2 = new DoubleArrayList();
 
     @Override
     public void accept(int t, double value) {
@@ -295,12 +295,15 @@ class LocalDensityTest {
         if (ts.length == 0) {
           return true;
         }
+        final int[] ts1 = list1.elements();
+        final double[] values1 = list2.elements();
+        final int len = list1.size();
         final BitSet set = new BitSet(ts.length);
         for (int n = 0; n < ts.length; n++) {
           final int t = ts[n];
           final double value = values[n];
-          for (int i = list1.size() - 1; i >= 0; i--) {
-            if (!set.get(i) && list1.getQuick(i) == t && list2.getQuick(i) == value) {
+          for (int i = len - 1; i >= 0; i--) {
+            if (!set.get(i) && ts1[i] == t && values1[i] == value) {
               // Found, mark as used
               set.set(i);
               break;
@@ -313,8 +316,8 @@ class LocalDensityTest {
     }
 
     void clear() {
-      list1.resetQuick();
-      list2.resetQuick();
+      list1.clear();
+      list2.clear();
     }
   }
 }

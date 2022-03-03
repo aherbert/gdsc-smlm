@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -35,6 +34,7 @@ import ij.gui.Line;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Label;
@@ -1119,8 +1119,8 @@ public class PsfDrift implements PlugIn {
     // Extract valid values (some can be NaN)
     double[] sw0 = new double[w0.length];
     double[] sw1 = new double[w1.length];
-    final TDoubleArrayList s0 = new TDoubleArrayList(w0.length);
-    final TDoubleArrayList s1 = new TDoubleArrayList(w0.length);
+    final DoubleArrayList s0 = new DoubleArrayList(w0.length);
+    final DoubleArrayList s1 = new DoubleArrayList(w0.length);
     int c0 = 0;
     int c1 = 0;
     for (int i = 0; i < w0.length; i++) {
@@ -1137,9 +1137,9 @@ public class PsfDrift implements PlugIn {
       IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
       return;
     }
-    double[] slice0 = s0.toArray();
+    double[] slice0 = s0.toDoubleArray();
     sw0 = Arrays.copyOf(sw0, c0);
-    double[] slice1 = s1.toArray();
+    double[] slice1 = s1.toDoubleArray();
     sw1 = Arrays.copyOf(sw1, c1);
 
     // Smooth
@@ -1149,8 +1149,8 @@ public class PsfDrift implements PlugIn {
       sw1 = loess.smooth(slice1, sw1);
     }
 
-    final TDoubleArrayList minWx = new TDoubleArrayList();
-    final TDoubleArrayList minWy = new TDoubleArrayList();
+    final DoubleArrayList minWx = new DoubleArrayList();
+    final DoubleArrayList minWy = new DoubleArrayList();
     for (int i = 0; i < w0.length; i++) {
       double weight = 0;
       if (Double.isFinite(w0[i])) {
@@ -1170,8 +1170,8 @@ public class PsfDrift implements PlugIn {
     }
 
     // Smooth the combined line
-    final double[] cx = minWx.toArray();
-    double[] cy = minWy.toArray();
+    final double[] cx = minWx.toDoubleArray();
+    double[] cy = minWy.toDoubleArray();
     if (settings.smoothing > 0) {
       final LoessInterpolator loess = new LoessInterpolator(settings.smoothing, 1);
       cy = loess.smooth(cx, cy);

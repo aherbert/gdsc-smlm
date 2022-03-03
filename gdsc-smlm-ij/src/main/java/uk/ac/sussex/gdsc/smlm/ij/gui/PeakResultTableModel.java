@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import gnu.trove.list.array.TIntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -323,9 +323,9 @@ public class PeakResultTableModel extends AbstractTableModel {
 
     int[] outIndices = SimpleArrayUtils.natural(converters.length);
     if (!showZ) {
-      final TIntArrayList list = new TIntArrayList(outIndices);
-      list.remove(PeakResult.Z);
-      outIndices = list.toArray();
+      final IntArrayList list = IntArrayList.wrap(outIndices);
+      list.removeInt(PeakResult.Z);
+      outIndices = list.toIntArray();
     }
 
     for (final int i : outIndices) {

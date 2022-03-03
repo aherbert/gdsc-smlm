@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.pcpalm;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -37,6 +36,7 @@ import ij.plugin.frame.Recorder;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -2127,12 +2127,12 @@ public class PcPalmMolecules implements PlugIn {
       super(parameters);
     }
 
-    protected TDoubleArrayList x;
-    protected TDoubleArrayList y;
+    protected DoubleArrayList x;
+    protected DoubleArrayList y;
 
     public void addData(float[] x, float[] y) {
-      this.x = new TDoubleArrayList();
-      this.y = new TDoubleArrayList();
+      this.x = new DoubleArrayList(x.length);
+      this.y = new DoubleArrayList(x.length);
       for (int i = 0; i < x.length; i++) {
         this.x.add(x[i]);
         this.y.add(y[i]);
@@ -2140,14 +2140,12 @@ public class PcPalmMolecules implements PlugIn {
     }
 
     public double[] calculateTarget() {
-      return y.toArray();
+      return y.toDoubleArray();
     }
 
     public double[] calculateWeights() {
       final double[] w = new double[y.size()];
-      for (int i = 0; i < y.size(); i++) {
-        w[i] = 1;
-      }
+      Arrays.fill(w, 1);
       return w;
     }
   }
@@ -2174,8 +2172,9 @@ public class PcPalmMolecules implements PlugIn {
         // Should the delta be changed for each parameter?
         d[i][i] = delta * Math.abs(variables[i]);
       }
+      final double[] xx = x.elements();
       for (int i = 0; i < jacobian.length; ++i) {
-        final double x = this.x.getQuick(i);
+        final double x = xx[i];
         final double value = evaluate(x, variables);
         for (int j = 0; j < variables.length; j++) {
           final double value2 = evaluate(x, variables[0] + d[0][j], variables[1] + d[1][j],
@@ -2189,8 +2188,9 @@ public class PcPalmMolecules implements PlugIn {
     @Override
     public double[] value(double[] variables) {
       final double[] values = new double[x.size()];
+      final double[] xx = x.elements();
       for (int i = 0; i < values.length; i++) {
-        values[i] = evaluate(x.getQuick(i), variables);
+        values[i] = evaluate(xx[i], variables);
       }
       return values;
     }
@@ -2209,8 +2209,10 @@ public class PcPalmMolecules implements PlugIn {
     public double value(double[] point) {
       // Objective function is to minimise sum-of-squares
       double ss = 0;
+      final double[] xx = x.elements();
+      final double[] yy = y.elements();
       for (int i = x.size(); i-- > 0;) {
-        final double dx = y.get(i) - evaluate(x.getQuick(i), point);
+        final double dx = yy[i] - evaluate(xx[i], point);
         ss += dx * dx;
       }
       return ss;

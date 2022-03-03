@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -41,6 +40,7 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.frame.PlugInFrame;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Choice;
@@ -174,7 +174,7 @@ public class SpotAnalysis extends PlugInFrame
   private Rectangle areaBounds;
 
   private final TreeSet<Spot> onFrames = new TreeSet<>();
-  private final TIntArrayList candidateFrames = new TIntArrayList();
+  private final IntArrayList candidateFrames = new IntArrayList();
 
   private final TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
   private int id;
@@ -693,7 +693,7 @@ public class SpotAnalysis extends PlugInFrame
 
     if (!candidateFrames.isEmpty()) {
       // Set the first candidate frame
-      rawImp.setSlice(candidateFrames.get(0));
+      rawImp.setSlice(candidateFrames.elements()[0]);
     } else {
       updateCurrentSlice(rawImp.getCurrentSlice());
     }
@@ -705,7 +705,7 @@ public class SpotAnalysis extends PlugInFrame
     currentSlice = -1;
     onFrames.clear();
     listModel.clear();
-    candidateFrames.resetQuick();
+    candidateFrames.clear();
     updated = false;
   }
 
@@ -848,8 +848,9 @@ public class SpotAnalysis extends PlugInFrame
       final double[] onx = new double[candidateFrames.size()];
       final double[] ony = new double[onx.length];
       int count = 0;
+      final int[] e = candidateFrames.elements();
       for (int i = 0; i < candidateFrames.size(); i++) {
-        final int frame = candidateFrames.getQuick(i);
+        final int frame = e[i];
         onx[count] = frame;
         ony[count] = yValues[frame - 1];
         count++;

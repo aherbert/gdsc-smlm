@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.utils;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.logging.Logger;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -369,7 +369,7 @@ class ConvolutionTest {
   @SeededTest
   void canComputeScaledConvolution(RandomSeed seed) {
     final UniformRandomProvider random = RngUtils.create(seed.get());
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     int size = 10;
     for (int i = 0; i < sizeLoops; i++) {
       double sd = 0.5;
@@ -404,7 +404,7 @@ class ConvolutionTest {
   @SeededTest
   void canComputeDoubleScaledConvolution(RandomSeed seed) {
     final UniformRandomProvider random = RngUtils.create(seed.get());
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     int size = 10;
     for (int i = 0; i < sizeLoops / 2; i++) {
       double sd = 0.5;
@@ -442,21 +442,22 @@ class ConvolutionTest {
     }
   }
 
-  private static double[] convolve(double[] kernel, double[] data, TDoubleArrayList list,
+  private static double[] convolve(double[] kernel, double[] data, DoubleArrayList list,
       int scale) {
     final double[] data1 = scale(data, list, scale);
     return Convolution.convolve(kernel, data1);
   }
 
-  private static double[] scale(double[] data, TDoubleArrayList list, int scale) {
-    list.resetQuick();
+  private static double[] scale(double[] data, DoubleArrayList list, int scale) {
+    list.clear();
     final double[] fill = new double[scale - 1];
+    list.ensureCapacity(data.length * scale);
     list.add(data[0]);
     for (int i = 1; i < data.length; i++) {
-      list.add(fill);
+      list.addElements(list.size(), fill);
       list.add(data[i]);
     }
-    return list.toArray();
+    return list.toDoubleArray();
   }
 
   @SeededTest
@@ -572,7 +573,7 @@ class ConvolutionTest {
 
     final double[] data1 = randomData(random, size);
     final double[] kernel = createKernel(sd);
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
 
     // Warm up
     convolve(kernel, data1, list, scale);

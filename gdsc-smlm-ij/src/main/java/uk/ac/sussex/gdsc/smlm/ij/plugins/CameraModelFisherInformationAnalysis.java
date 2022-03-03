@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Map;
@@ -433,14 +433,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
     // Dump the samples. Convert to base e.
     final double scale = Math.log(10);
-    final TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
-    final TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
+    final DoubleArrayList meanList = new DoubleArrayList(data.getAlphaSampleCount());
+    final DoubleArrayList alphalist = new DoubleArrayList(data.getAlphaSampleCount());
     for (final AlphaSample sample : data.getAlphaSampleList()) {
       meanList.add(sample.getLog10Mean() * scale);
       alphalist.add(sample.getAlpha());
     }
-    final double[] means = meanList.toArray();
-    final double[] alphas = alphalist.toArray();
+    final double[] means = meanList.toDoubleArray();
+    final double[] alphas = alphalist.toDoubleArray();
     SortUtils.sortData(alphas, means, true, false);
     final BasePoissonFisherInformation upperf =
         (type == CameraType.EM_CCD) ? new HalfPoissonFisherInformation()
@@ -795,7 +795,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         return null;
       }
     }
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     for (int i = 0;; i++) {
       final double e = minExp + i * h;
       list.add(e);
@@ -803,7 +803,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         break;
       }
     }
-    return list.toArray();
+    return list.toDoubleArray();
   }
 
   private double[] getAlpha(final double[] photons, double[] exp,
@@ -817,18 +817,18 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       final PoissonFisherInformationData data = load(key);
       if (data != null) {
         // Dump the samples
-        final TDoubleArrayList meanList = new TDoubleArrayList(data.getAlphaSampleCount());
-        final TDoubleArrayList alphalist = new TDoubleArrayList(data.getAlphaSampleCount());
+        final DoubleArrayList meanList = new DoubleArrayList(data.getAlphaSampleCount());
+        final DoubleArrayList alphalist = new DoubleArrayList(data.getAlphaSampleCount());
         for (final AlphaSample sample : data.getAlphaSampleList()) {
           meanList.add(sample.getLog10Mean());
           alphalist.add(sample.getAlpha());
         }
-        final double[] exp2 = meanList.toArray();
-        final double[] alphas = alphalist.toArray();
+        final double[] exp2 = meanList.toDoubleArray();
+        final double[] alphas = alphalist.toDoubleArray();
         SortUtils.sortData(alphas, exp2, true, false);
 
         // Find any exponent not in the array
-        final TIntArrayList list = new TIntArrayList(exp.length);
+        final IntArrayList list = new IntArrayList(exp.length);
         for (int i = 0; i < exp.length; i++) {
           // Assume exp2 is sorted
           final int j = Arrays.binarySearch(exp2, exp[i]);
@@ -838,7 +838,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
             alpha[i] = alphas[j]; // Get alpha
           }
         }
-        index = list.toArray();
+        index = list.toIntArray();
       } else {
         // Compute all
         index = SimpleArrayUtils.natural(alpha.length);
@@ -1007,8 +1007,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
     // Interpolate with 5 points per sample for smooth curve
     final int n = 5;
-    final TDoubleArrayList iexp = new TDoubleArrayList();
-    final TDoubleArrayList iphotons = new TDoubleArrayList();
+    final DoubleArrayList iexp = new DoubleArrayList();
+    final DoubleArrayList iphotons = new DoubleArrayList();
     for (int i = 1; i < exp.length; i++) {
       final int i_1 = i - 1;
       final double h = (exp[i] - exp[i_1]) / n;
@@ -1020,8 +1020,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
     iexp.add(exp[exp.length - 1]);
     iphotons.add(Math.pow(10, exp[exp.length - 1]));
-    final double[] photons = iphotons.toArray();
-    final double[] ix = (logScaleX) ? photons : iexp.toArray();
+    final double[] photons = iphotons.toDoubleArray();
+    final double[] ix = (logScaleX) ? photons : iexp.toDoubleArray();
     final double[] ialpha1 = getAlpha(if1, photons);
 
     final int pointShape = getPointShape(pointOption);

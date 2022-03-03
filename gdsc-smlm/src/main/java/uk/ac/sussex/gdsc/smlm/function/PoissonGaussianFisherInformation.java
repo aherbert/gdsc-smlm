@@ -27,7 +27,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -127,7 +127,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private final PoissonDistribution pd = new PoissonDistribution(1);
 
   /** Working space to store the Poisson probabilities. */
-  private final TDoubleArrayList list = new TDoubleArrayList();
+  private final DoubleArrayList list = new DoubleArrayList();
 
   /** The mean threshold for the switch to a Gaussian-Gaussian convolution. */
   private double meanThreshold = 100;
@@ -455,7 +455,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
     // Build the Poisson distribution.
     pd.setMeanUnsafe(theta);
-    list.resetQuick();
+    list.clear();
 
     // XXX - check this is needed
     // For small theta the tail of the distribution is important
@@ -480,7 +480,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     // Unscaled Poisson
-    final double[] p = list.toArray();
+    final double[] p = list.toDoubleArray();
 
     // Convolve with the Gaussian kernel.
     // As the mean reduces the Poisson distribution is more skewed

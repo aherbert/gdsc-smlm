@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -262,7 +262,7 @@ class PoissonGammaFunctionTest {
     final boolean approx = (2 * Math.sqrt(max * o / gain) > 709);
     final double tol = approx ? 0.05 : 1e-3;
 
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     if (min != 0) {
       list.add(0);
     }
@@ -271,7 +271,7 @@ class PoissonGammaFunctionTest {
     }
 
     final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
-    for (final double x : list.toArray()) {
+    for (final double x : list.toDoubleArray()) {
       final double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
       final double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
       Assertions.assertEquals(p1, p2);
@@ -324,7 +324,7 @@ class PoissonGammaFunctionTest {
 
   @Test
   void canComputeSeparatelyAtC0() {
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     for (int exp = -12; exp < 6; exp++) {
       list.add(Math.pow(10, exp * 0.5));
     }
@@ -334,7 +334,7 @@ class PoissonGammaFunctionTest {
     for (double x = 11; x <= 20; x++) {
       list.add(x / 10.0);
     }
-    final double[] p = list.toArray();
+    final double[] p = list.toDoubleArray();
 
     final boolean report =
         logger.isLoggable(TestLevel.TEST_INFO) && TestSettings.allow(TestComplexity.MEDIUM);

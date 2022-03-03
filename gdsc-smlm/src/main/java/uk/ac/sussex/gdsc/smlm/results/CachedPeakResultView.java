@@ -24,8 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.function.Predicate;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.results.predicates.FramePeakResultPredicate;
 import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
 
@@ -35,8 +34,8 @@ import uk.ac.sussex.gdsc.smlm.results.predicates.IdPeakResultPredicate;
 public class CachedPeakResultView implements PeakResultView {
   private final PeakResultStore store;
 
-  private TIntObjectHashMap<PeakResult[]> frameMap;
-  private TIntObjectHashMap<PeakResult[]> idMap;
+  private Int2ObjectOpenHashMap<PeakResult[]> frameMap;
+  private Int2ObjectOpenHashMap<PeakResult[]> idMap;
 
   /**
    * Instantiates a new cached peak result view.
@@ -56,14 +55,9 @@ public class CachedPeakResultView implements PeakResultView {
   @Override
   public PeakResult[] getResultsByFrame(int frame) {
     if (frameMap == null) {
-      frameMap = new TIntObjectHashMap<>();
-      return findResults(frameMap, frame, new FramePeakResultPredicate(frame));
+      frameMap = new Int2ObjectOpenHashMap<>();
     }
-    PeakResult[] results = frameMap.get(frame);
-    if (results == null) {
-      results = findResults(frameMap, frame, new FramePeakResultPredicate(frame));
-    }
-    return results;
+    return frameMap.computeIfAbsent(frame, i -> store.subset(new FramePeakResultPredicate(i)));
   }
 
   /**
@@ -75,21 +69,9 @@ public class CachedPeakResultView implements PeakResultView {
   @Override
   public PeakResult[] getResultsById(int id) {
     if (idMap == null) {
-      idMap = new TIntObjectHashMap<>();
-      return findResults(idMap, id, new IdPeakResultPredicate(id));
+      idMap = new Int2ObjectOpenHashMap<>();
     }
-    PeakResult[] results = idMap.get(id);
-    if (results == null) {
-      results = findResults(idMap, id, new IdPeakResultPredicate(id));
-    }
-    return results;
-  }
-
-  private PeakResult[] findResults(TIntObjectHashMap<PeakResult[]> map, int key,
-      Predicate<PeakResult> filter) {
-    final PeakResult[] results = store.subset(filter);
-    map.put(key, results);
-    return results;
+    return idMap.computeIfAbsent(id, i -> store.subset(new IdPeakResultPredicate(i)));
   }
 
   /**

@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.list.array.TIntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -168,13 +168,13 @@ class TraceManagerTest {
     // no overlap at the clustering distance of sqrt(2)
     final int n = (int) Math.sqrt(molecules);
 
-    final TIntArrayList list = new TIntArrayList(molecules);
+    final IntArrayList list = new IntArrayList(molecules);
     for (int y = 0; list.size() < molecules; y += 4) {
       for (int x = 0; x < n && list.size() < molecules; x += 4) {
         list.add(y * n + x);
       }
     }
-    final int[] positions = list.toArray();
+    final int[] positions = list.toIntArray();
     RandomUtils.shuffle(positions, rand);
 
     // Offsets for movement around the 2x2 region

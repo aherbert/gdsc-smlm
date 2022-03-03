@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.list.array.TIntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -465,7 +465,7 @@ public class DynamicMultipleTargetTracing {
     /** The results. */
     final PeakResultStoreList results = new ArrayPeakResultStore(11);
     /** The indices for frames when the trajectory was on. */
-    final TIntArrayList onFrames;
+    final IntArrayList onFrames;
     /**
      * The gap between the last frame in the trajectory and the current frame minus 1. A value of
      * zero indicates the current frame is adjacent.
@@ -506,7 +506,7 @@ public class DynamicMultipleTargetTracing {
      */
     Trajectory(int id, PeakResult result, boolean on) {
       this.id = id;
-      onFrames = new TIntArrayList();
+      onFrames = new IntArrayList();
       add(result, on);
     }
 
@@ -646,8 +646,9 @@ public class DynamicMultipleTargetTracing {
      */
     void forLastOn(int n, Consumer<PeakResult> action) {
       int count = n;
+      final int[] e = onFrames.elements();
       for (int i = onFrames.size() - 1; count > 0; i--, count--) {
-        action.accept(results.get(onFrames.getQuick(i)));
+        action.accept(results.get(e[i]));
       }
     }
 

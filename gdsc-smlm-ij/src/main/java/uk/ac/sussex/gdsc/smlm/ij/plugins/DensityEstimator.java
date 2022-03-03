@@ -24,11 +24,11 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.Prefs;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -208,25 +208,25 @@ public class DensityEstimator implements PlugIn {
         results.getName(), MathUtils.rounded(globalDensity * scale), size, size,
         MathUtils.rounded(minDensity * scale));
 
-    final TIntArrayList x = new TIntArrayList();
-    final TIntArrayList y = new TIntArrayList();
+    final IntArrayList x = new IntArrayList();
+    final IntArrayList y = new IntArrayList();
     final ExecutorService es = Executors.newFixedThreadPool(Prefs.getThreads());
     final LocalList<FrameDensity> densities = new LocalList<>();
     final LocalList<Future<?>> futures = new LocalList<>();
     results.forEach((PeakResultProcedure) (peak) -> {
       if (counter.advance(peak.getFrame())) {
-        final FrameDensity fd =
-            new FrameDensity(peak.getFrame(), x.toArray(), y.toArray(), border, includeSingles);
+        final FrameDensity fd = new FrameDensity(peak.getFrame(), x.toIntArray(), y.toIntArray(),
+            border, includeSingles);
         densities.add(fd);
         futures.add(es.submit(fd));
-        x.resetQuick();
-        y.resetQuick();
+        x.clear();
+        y.clear();
       }
       x.add((int) peak.getXPosition());
       y.add((int) peak.getYPosition());
     });
-    densities.add(
-        new FrameDensity(counter.currentFrame(), x.toArray(), y.toArray(), border, includeSingles));
+    densities.add(new FrameDensity(counter.currentFrame(), x.toIntArray(), y.toIntArray(), border,
+        includeSingles));
     futures.add(es.submit(densities.get(densities.size() - 1)));
     es.shutdown();
 

@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
@@ -830,9 +830,10 @@ public final class Shape3DHelper {
    */
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces
-    final TObjectIntHashMap<Point3f> m = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
+    final Object2IntOpenHashMap<Point3f> m = new Object2IntOpenHashMap<>(list.size());
+    m.defaultReturnValue(-1);
     final LocalList<Point3f> vertices = new LocalList<>(list.size());
-    final TIntArrayList faces = new TIntArrayList(list.size());
+    final IntArrayList faces = new IntArrayList(list.size());
     int index = 0;
     // Process triangles
     for (int i = 0; i < list.size(); i++) {
@@ -846,7 +847,7 @@ public final class Shape3DHelper {
       faces.add(value);
     }
 
-    return Pair.of(vertices.toArray(new Point3f[0]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[0]), faces.toIntArray());
   }
 
   /**

@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -33,6 +31,9 @@ import ij.gui.Plot;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrays;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.lang.ref.SoftReference;
@@ -696,7 +697,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // Note: The Poisson-Gamma is computed without the Dirac delta contribution
     // at c=0. This allows correct convolution with the Gaussian of the dirac delta
     // and the rest of the Poisson-Gamma (so matching the simulation).
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     double step;
     String name;
 
@@ -850,9 +851,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       if (list.size() % 2 == 0) {
         list.add(0);
       }
-      final double[] g = list.toArray();
+      final double[] g = list.elements();
       // Number of sub intervals
-      final int n = g.length - 1;
+      final int n = list.size() - 1;
       final double h = 1; // h = (a-b) / n = sub-interval width
       double sum2 = 0;
       double sum4 = 0;
@@ -865,9 +866,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       final double sum = (h / 3) * (g[0] + 2 * sum2 + 4 * sum4 + g[n]);
       // Check
       // System.out.printf("Sum=%g Expected=%g\n", sum * step, expected);
-      SimpleArrayUtils.multiply(g, expected / sum);
-      list.resetQuick();
-      list.add(g);
+      final double factor = expected / sum;
+      SimpleArrayUtils.apply(g, 0, n + 1, x -> x * factor);
     } else {
       name = "Poisson";
       // Apply fixed gain. Just change the step interval of the PMF.
@@ -886,17 +886,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     if (debug) {
       final String title = name;
       final Plot plot = new Plot(title, "x", "y");
-      plot.addPoints(SimpleArrayUtils.newArray(list.size(), 0, step), list.toArray(), Plot.LINE);
+      plot.addPoints(SimpleArrayUtils.newArray(list.size(), 0, step), list.toDoubleArray(), Plot.LINE);
       ImageJUtils.display(title, plot);
     }
 
     double zero = 0;
-    double[] pg = list.toArray();
+    double[] pg = list.toDoubleArray();
 
     // Sample Gaussian
     if (noise > 0) {
       step /= upsample;
-      pg = list.toArray();
 
       // Convolve with Gaussian kernel
       final double[] kernel = GaussianKernel.makeGaussianKernel(Math.abs(noise) / step, 6, true);
@@ -941,7 +940,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
       zero = downSampleCdfToPmf(settings, list, step, zero, pg, 1.0);
 
-      pg = list.toArray();
+      pg = list.toDoubleArray();
       zero = (int) Math.floor(zero);
       step = 1.0;
 
@@ -951,7 +950,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       if (settings.getMode() == MODE_EM_CCD) {
         // Poisson-Gamma PDF
         zero = downSampleCdfToPmf(settings, list, step, zero, pg, 1 - dirac);
-        pg = list.toArray();
+        pg = list.toDoubleArray();
         zero = (int) Math.floor(zero);
 
         // Add the dirac delta function.
@@ -967,7 +966,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
         // Simple non-interpolated expansion.
         // This should be used when there is no Gaussian convolution.
         final double[] pd = pg;
-        list.resetQuick();
+        list.clear();
 
         // Account for rounding.
         final Round round = getRound(settings);
@@ -980,8 +979,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
         if (pg[0] != 0) {
           list.add(0);
-          list.add(pg);
-          pg = list.toArray();
+          list.addElements(list.size(), pg);
+          pg = list.toDoubleArray();
           zero--;
         }
       }
@@ -989,14 +988,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       step = 1.0;
     } else {
       // Add the dirac delta function.
-      list.setQuick(0, list.getQuick(0) + dirac);
+      list.elements()[0] += dirac;
     }
 
     return new double[][] {SimpleArrayUtils.newArray(pg.length, zero, step), pg};
   }
 
   private static double downSampleCdfToPmf(CameraModelAnalysisSettings settings,
-      TDoubleArrayList list, double step, double zero, double[] pg, double sum) {
+      DoubleArrayList list, double step, double zero, double[] pg, double sum) {
     // Down-sample to 1.0 pixel step interval.
 
     // Build cumulative distribution.
@@ -1020,7 +1019,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // // Pad the CDF to avoid index-out-of bounds during interpolation
     final int padSize = 0;
     // padSize = (int) Math.ceil(1 / step) + 2;
-    // list.resetQuick();
+    // list.clear();
     // list.add(new double[padSize]);
     // list.add(g);
     // for (int i = padSize; i-- > 0;)
@@ -1028,7 +1027,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // double[] pd = list.toArray();
     final double[] pd = pg;
 
-    list.resetQuick();
+    list.clear();
 
     final double[] x = SimpleArrayUtils.newArray(pd.length, zero - padSize * step, step);
 
@@ -1194,9 +1193,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static class CachingUnivariateFunction implements UnivariateFunction {
     final LikelihoodFunction fun;
     final double theta;
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
 
-    public CachingUnivariateFunction(LikelihoodFunction fun, double theta) {
+    CachingUnivariateFunction(LikelihoodFunction fun, double theta) {
       this.fun = fun;
       this.theta = theta;
     }
@@ -1209,8 +1208,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       return v;
     }
 
-    public void reset() {
-      list.resetQuick();
+    void reset() {
+      list.clear();
     }
   }
 
@@ -1234,7 +1233,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     }
     // Add more until the probability change is marginal
     double sum = MathUtils.sum(y);
-    final TDoubleArrayList list = new TDoubleArrayList(y);
+    final DoubleArrayList list = new DoubleArrayList(y);
     for (int o = (int) x[x.length - 1] + 1;; o++) {
       final double p = fun.likelihood(o, e);
       list.add(p);
@@ -1246,7 +1245,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
         break;
       }
     }
-    final TDoubleArrayList list2 = new TDoubleArrayList(10);
+    final DoubleArrayList list2 = new DoubleArrayList(10);
     for (int o = (int) x[0] - 1;; o--) {
       final double p = fun.likelihood(o, e);
       list2.add(p);
@@ -1262,11 +1261,11 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     double start = x[0];
     if (!list2.isEmpty()) {
       start -= list2.size();
-      list2.reverse();
-      list.insert(0, list2.toArray());
+      DoubleArrays.reverse(list2.elements(), 0, list2.size());
+      list.addAll(0, list2);
     }
 
-    y = list.toArray();
+    y = list.toDoubleArray();
     x = SimpleArrayUtils.newArray(y.length, start, 1.0);
 
     if (settings.getSimpsonIntegration()) {
@@ -1330,16 +1329,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       }
 
       // Compute indices for the integral
-      final TIntArrayList tmp = new TIntArrayList(SIMPSON_N);
+      final IntArrayList tmp = new IntArrayList(SIMPSON_N);
       for (int j = 1; j <= SIMPSON_N_2 - 1; j++) {
         tmp.add(2 * j);
       }
-      final int[] i2 = tmp.toArray();
-      tmp.resetQuick();
+      final int[] i2 = tmp.toIntArray();
+      tmp.clear();
       for (int j = 1; j <= SIMPSON_N_2; j++) {
         tmp.add(2 * j - 1);
       }
-      final int[] i4 = tmp.toArray();
+      final int[] i4 = tmp.toIntArray();
 
       // Compute integral
       for (int i = 0; i < y.length; i++) {
@@ -1386,7 +1385,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
                 // Note: The Simpson integrator will have computed the edge values
                 // as the first two values in the cache.
-                final double[] g = uf.list.toArray();
+                final double[] g = uf.list.elements();
                 final double dx = (g[3] - g[1]) / in.getN();
                 final int total = 1 + 2 * ((int) in.getN());
                 sum = 0;

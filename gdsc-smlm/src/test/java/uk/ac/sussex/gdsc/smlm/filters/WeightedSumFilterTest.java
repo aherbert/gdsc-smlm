@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
@@ -49,13 +48,11 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest {
     final float[] offsets = getOffsets(filter);
     final int[] boxSizes = getBoxSizes(filter);
 
-    final TDoubleArrayList l1 = new TDoubleArrayList();
     final FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-6, 0);
 
     for (final int width : primes) {
       for (final int height : primes) {
         final float[] data = createData(width, height, rg);
-        l1.reset();
 
         // Ones used for normalisation
         final float[] ones = new float[width * height];

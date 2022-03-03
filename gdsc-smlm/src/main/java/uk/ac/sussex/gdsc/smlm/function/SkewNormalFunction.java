@@ -170,6 +170,6 @@ public class SkewNormalFunction {
    */
   private static double cumul(double x) {
     // 1/sqrt(2) = 0.707106781
-    return 0.5 * (1 + Erf.erf(x * 0.707106781));
+    return 0.5 * (1 + Erf.erf(x * 0.70710678118654746));
   }
 }

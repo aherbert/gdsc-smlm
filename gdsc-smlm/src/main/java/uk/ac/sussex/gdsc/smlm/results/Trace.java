@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.list.linked.TIntLinkedList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * Define a cluster of localisations from different frames that represent a single molecule trace.
@@ -81,8 +81,8 @@ public class Trace extends Cluster {
 
       // Ensure in the correct time-order
       sort();
-      final TIntLinkedList on = new TIntLinkedList();
-      final TIntLinkedList off = new TIntLinkedList();
+      final IntArrayList on = new IntArrayList();
+      final IntArrayList off = new IntArrayList();
 
       blinks = 1;
       int t1 = results.get(0).getFrame();
@@ -100,8 +100,8 @@ public class Trace extends Cluster {
       }
       on.add(t1 - onStart + 1);
 
-      onTimes = on.toArray();
-      offTimes = off.toArray();
+      onTimes = on.toIntArray();
+      offTimes = off.toIntArray();
     }
   }
 

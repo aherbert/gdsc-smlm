@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.filters;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.SharedStateContinuousSampler;
@@ -117,13 +117,13 @@ public abstract class WeightedFilterTest {
     if (filter1.minBoxSize == 0) {
       return boxSizes;
     }
-    final TIntArrayList list = new TIntArrayList();
+    final IntArrayList list = new IntArrayList();
     for (final int b : boxSizes) {
       if (b >= filter1.minBoxSize) {
         list.add(b);
       }
     }
-    return list.toArray();
+    return list.toIntArray();
   }
 
   @SeededTest
@@ -136,14 +136,14 @@ public abstract class WeightedFilterTest {
     final float[] offsets = getOffsets(filter);
     final int[] boxSizes = getBoxSizes(filter);
 
-    final TDoubleArrayList l1 = new TDoubleArrayList();
+    final DoubleArrayList l1 = new DoubleArrayList();
 
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, 2, 0.2);
 
     for (final int width : primes) {
       for (final int height : primes) {
         final float[] data = createData(width, height, rg);
-        l1.reset();
+        l1.clear();
 
         filter.setWeights(null, width, height);
         for (final int boxSize : boxSizes) {
@@ -154,7 +154,7 @@ public abstract class WeightedFilterTest {
           }
         }
 
-        final double[] e = l1.toArray();
+        final double[] e = l1.elements();
         int ei = 0;
 
         // Uniform weights

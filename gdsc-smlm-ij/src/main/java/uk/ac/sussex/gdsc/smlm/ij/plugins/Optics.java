@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -49,6 +47,8 @@ import ij.process.FloatPolygon;
 import ij.process.LUT;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Choice;
@@ -2692,8 +2692,8 @@ public class Optics implements PlugIn {
 
           // Since collision detection is costly first rank by area (which
           // is faster and can be precomputed)
-          final TIntArrayList ids = new TIntArrayList(candidates.length);
-          final TDoubleArrayList area = new TDoubleArrayList(candidates.length);
+          final IntArrayList ids = new IntArrayList(candidates.length);
+          final DoubleArrayList area = new DoubleArrayList(candidates.length);
           final Hull[] hulls = clusteringResult.getHulls(inputSettings.getHullMode(),
               inputSettings.getDiggingThreshold());
           for (final int index : candidates) {
@@ -2709,9 +2709,9 @@ public class Optics implements PlugIn {
             return null;
           }
 
-          candidates = ids.toArray();
+          candidates = ids.toIntArray();
           // Sort ascending
-          SortUtils.sortData(candidates, area.toArray(), false, false);
+          SortUtils.sortData(candidates, area.elements(), false, false);
           final double[] point = {x, y};
           for (final int clusterId : candidates) {
             if (contains(hulls[clusterId], point)) {
@@ -3291,7 +3291,7 @@ public class Optics implements PlugIn {
             return null;
           }
           final int index2 = textPanel.getSelectionEnd();
-          final TIntArrayList clusters = new TIntArrayList(index2 - index + 1);
+          final IntArrayList clusters = new IntArrayList(index2 - index + 1);
           while (index <= index2) {
             final String line = textPanel.getLine(index);
             index++;
@@ -3302,7 +3302,7 @@ public class Optics implements PlugIn {
               clusters.add(id);
             }
           }
-          return clusters.toArray();
+          return clusters.toIntArray();
         }
       });
     }

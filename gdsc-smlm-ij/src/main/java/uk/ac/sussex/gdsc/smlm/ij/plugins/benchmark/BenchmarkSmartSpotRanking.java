@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
@@ -34,6 +33,7 @@ import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -175,11 +175,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
         "Precision", "Recall", "F0.5", "F1", "F2", "Jaccard", "MCC"};
 
     static {
-      final TDoubleArrayList list = new TDoubleArrayList();
+      final DoubleArrayList list = new DoubleArrayList(20);
       for (int snr = 20; snr <= 70; snr += 5) {
         list.add(snr);
       }
-      snrLevels = list.toArray();
+      snrLevels = list.toDoubleArray();
 
       thresholdMethods = AutoThreshold.Method.values();
       thresholdMethodNames = new String[thresholdMethods.length + snrLevels.length];

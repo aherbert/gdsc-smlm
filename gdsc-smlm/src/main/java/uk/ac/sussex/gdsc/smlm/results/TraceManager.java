@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
@@ -444,7 +444,7 @@ public class TraceManager {
     // e.g. [1,2,2,1,3] => [1,2,5,4,3] when spots in group 1 are reallocated before spots in group
     // 2.
 
-    final TIntHashSet processedTraces = new TIntHashSet(traces.length);
+    final IntOpenHashSet processedTraces = new IntOpenHashSet(traces.length);
     for (int i = 0; i < localisations.length; i++) {
       if (tracker != null && (i & 0xff) == 0) {
         tracker.progress(i, localisations.length);
@@ -1648,25 +1648,20 @@ public class TraceManager {
       return Arrays.copyOf(traces, count);
     }
     // Use a map when the size is potentially large
-    final TIntObjectHashMap<Trace> map = new TIntObjectHashMap<>();
-    Trace next = new Trace();
+    final Int2ObjectOpenHashMap<Trace> map = new Int2ObjectOpenHashMap<>();
     for (final PeakResult result : list) {
       final int id = result.getId();
       if (id > 0) {
-        Trace trace = map.putIfAbsent(id, next);
-        if (trace == null) {
-          // This was a new key
-          trace = next;
-          trace.setId(id);
-          // Prepare for next absent key
-          next = new Trace();
-        }
-        trace.add(result);
+        map.computeIfAbsent(id, i -> {
+          final Trace trace = new Trace();
+          trace.setId(i);
+          return trace;
+        }).add(result);
       }
     }
 
     // Extract the traces
-    final Trace[] traces = map.values(new Trace[map.size()]);
+    final Trace[] traces = map.values().toArray(new Trace[map.size()]);
     Arrays.sort(traces, (t1, t2) -> Integer.compare(t1.getId(), t2.getId()));
     return traces;
   }

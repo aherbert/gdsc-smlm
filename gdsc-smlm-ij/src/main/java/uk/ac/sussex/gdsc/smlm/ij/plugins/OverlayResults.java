@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
@@ -51,6 +50,7 @@ import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.ImageAdapter;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrentMonoStack;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
@@ -126,8 +126,6 @@ public class OverlayResults implements PlugIn {
     private TextWindow tw;
     private Rectangle windowBounds;
 
-    TFloatArrayList ox = new TFloatArrayList(100);
-    TFloatArrayList oy = new TFloatArrayList(100);
     PeakResultView view;
     TypeConverter<DistanceUnit> converter;
 
@@ -310,18 +308,24 @@ public class OverlayResults implements PlugIn {
         closeTextWindow();
       }
 
-      ox.resetQuick();
-      oy.resetQuick();
       if (view == null) {
         view = results.getSnapshotPeakResultView();
         converter = results.getDistanceConverter(DistanceUnit.PIXEL);
       }
       int select = -1;
       final PeakResult[] frameResults = view.getResultsByFrame(currentSlice);
+      int size = 0;
+      float[] ox = new float[11];
+      float[] oy = new float[11];
       for (int i = 0; i < frameResults.length; i++) {
         final PeakResult r = frameResults[i];
-        ox.add(converter.convert(r.getXPosition()));
-        oy.add(converter.convert(r.getYPosition()));
+        if (ox.length == size) {
+          ox = Arrays.copyOf(ox, MemoryUtils.createNewCapacity(size + 1, size));
+          oy = Arrays.copyOf(oy, ox.length);
+        }
+        ox[size] = converter.convert(r.getXPosition());
+        oy[size] = converter.convert(r.getYPosition());
+        size++;
         if (table != null) {
           table.add(r);
           if (selectedId != null && selectedId.contains(r.getId())) {
@@ -333,7 +337,8 @@ public class OverlayResults implements PlugIn {
         }
       }
 
-      final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
+      // Coords are copied in PolygonRoi
+      final PointRoi roi = new OffsetPointRoi(ox, oy, size);
       roi.setPointType(3);
       if (newImage) {
         // New windows to the front

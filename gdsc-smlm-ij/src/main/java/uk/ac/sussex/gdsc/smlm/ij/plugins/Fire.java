@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Macro;
@@ -39,6 +38,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.AWTEvent;
 import java.awt.Checkbox;
 import java.awt.Color;
@@ -1321,8 +1321,8 @@ public class Fire implements PlugIn {
     }
     final int step = maxT / nSteps;
 
-    final TDoubleArrayList x = new TDoubleArrayList();
-    final TDoubleArrayList y = new TDoubleArrayList();
+    final DoubleArrayList x = new DoubleArrayList();
+    final DoubleArrayList y = new DoubleArrayList();
 
     double yMin = fireNumber;
     double yMax = fireNumber;
@@ -1359,8 +1359,8 @@ public class Fire implements PlugIn {
     x.add(maxT);
     y.add(fireNumber);
 
-    final double[] xValues = x.toArray();
-    final double[] yValues = y.toArray();
+    final double[] xValues = x.toDoubleArray();
+    final double[] yValues = y.toDoubleArray();
 
     String units = "px";
     if (results.getCalibration() != null) {

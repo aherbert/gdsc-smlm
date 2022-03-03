@@ -24,13 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -823,8 +823,8 @@ public class DensityImage implements PlugIn {
   }
 
   private double[][] calculateLScores(DensityManager dm) {
-    final TDoubleArrayList x = new TDoubleArrayList();
-    final TDoubleArrayList y = new TDoubleArrayList();
+    final DoubleArrayList x = new DoubleArrayList();
+    final DoubleArrayList y = new DoubleArrayList();
     x.add(0.0);
     y.add(0.0);
 
@@ -836,8 +836,8 @@ public class DensityImage implements PlugIn {
     }
 
     final double[][] values = new double[2][];
-    values[0] = x.toArray();
-    values[1] = y.toArray();
+    values[0] = x.toDoubleArray();
+    values[1] = y.toDoubleArray();
     return values;
   }
 }

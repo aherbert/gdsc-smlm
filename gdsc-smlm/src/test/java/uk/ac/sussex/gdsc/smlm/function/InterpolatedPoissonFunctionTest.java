@@ -24,7 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrays;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
@@ -162,7 +163,7 @@ class InterpolatedPoissonFunctionTest {
     final InterpolatedPoissonFunction f = new InterpolatedPoissonFunction(1.0 / gain, false);
     double pvalue = 0;
 
-    final TDoubleArrayList values = new TDoubleArrayList();
+    final DoubleArrayList values = new DoubleArrayList();
 
     double maxp = 0;
     int maxc = 0;
@@ -192,7 +193,7 @@ class InterpolatedPoissonFunctionTest {
     // Now keep evaluating up and down until no difference
     final double changeTolerance = 1e-6;
     if (min > 0) {
-      values.reverse();
+      DoubleArrays.reverse(values.elements(), 0, values.size());
       for (int x = min - 1; x >= 0; x--) {
         min = x;
         final double pp = f.likelihood(x, o);
@@ -207,7 +208,7 @@ class InterpolatedPoissonFunctionTest {
           break;
         }
       }
-      values.reverse();
+      DoubleArrays.reverse(values.elements(), 0, values.size());
     }
     for (int x = max + 1;; x++) {
       max = x;
@@ -225,13 +226,14 @@ class InterpolatedPoissonFunctionTest {
     }
 
     // Find the range for 99.5% of the sum
-    final double[] h = values.toArray();
+    final double[] h = values.elements();
+    final int len = values.size();
     // Find cumulative
-    for (int i = 1; i < h.length; i++) {
+    for (int i = 1; i < len; i++) {
       h[i] += h[i - 1];
     }
     int minx = 0;
-    int maxx = h.length - 1;
+    int maxx = len - 1;
     while (h[minx + 1] < 0.0025) {
       minx++;
     }

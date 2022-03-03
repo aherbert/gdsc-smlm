@@ -24,10 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import gnu.trove.list.array.TIntArrayList;
 import ij.WindowManager;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.Frame;
 import java.awt.event.MouseListener;
 import java.util.Map;
@@ -198,9 +198,9 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
     ic = converters[PeakResult.INTENSITY];
     outIndices = SimpleArrayUtils.natural(converters.length);
     if (!showZ) {
-      final TIntArrayList list = new TIntArrayList(outIndices);
-      list.remove(PeakResult.Z);
-      outIndices = list.toArray();
+      final IntArrayList list = new IntArrayList(outIndices);
+      list.removeInt(PeakResult.Z);
+      outIndices = list.toIntArray();
     }
     // Update the calibration if converters were created
     if (helper.isCalibrationChanged()) {

@@ -24,13 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -269,7 +269,7 @@ public class ResultsImageSampler {
         no = Arrays.copyOf(list, count);
       } else {
         // Sample throughout the localisation time course
-        final TLongArrayList list = new TLongArrayList(data.length);
+        final LongArrayList list = new LongArrayList(data.length);
         if (empty < data.length) {
           // We can pick all the indices that are missing
           long emptyCandidate = 0;
@@ -299,7 +299,7 @@ public class ResultsImageSampler {
             emptyCandidate = current + 1;
           }
         }
-        no = list.toArray();
+        no = list.toLongArray();
       }
     }
   }

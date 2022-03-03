@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.array.TByteArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -58,6 +57,7 @@ import uk.ac.sussex.gdsc.core.utils.BooleanArray;
 import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -465,6 +465,32 @@ public class FailCountManager implements PlugIn {
       plot.addPoints(x, y, Plot.LINE);
       plot.addLabel(0, 0, "Max = " + maxy);
       ImageJUtils.display(title, plot, 0, wo);
+    }
+  }
+
+  /**
+   * Expandable byte array storage.
+   */
+  private static class ByteArrayList {
+    byte[] data;
+    int size;
+
+    int size() {
+      return size;
+    }
+
+    void fill(int from, int to, byte value) {
+      if (to - data.length > 0) {
+        // Resize required
+        int newCapacity = MemoryUtils.createNewCapacity(to, data.length);
+        data = Arrays.copyOf(data, newCapacity);
+      }
+      Arrays.fill(data, from, to, value);
+      size += from - to;
+    }
+
+    byte[] toArray() {
+      return Arrays.copyOf(data, size);
     }
   }
 
@@ -884,7 +910,7 @@ public class FailCountManager implements PlugIn {
 
     // Create a set of fail counters
     final LocalList<FailCounter> counters = new LocalList<>();
-    final TByteArrayList type = new TByteArrayList();
+    final ByteArrayList type = new ByteArrayList();
     for (int i = 0; i <= maxCons; i++) {
       counters.add(ConsecutiveFailCounter.create(i));
     }
@@ -1085,7 +1111,7 @@ public class FailCountManager implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void fill(TByteArrayList type, LocalList<FailCounter> counters, int value) {
+  private static void fill(ByteArrayList type, LocalList<FailCounter> counters, int value) {
     final int n = counters.size() - type.size();
     ImageJUtils.log("Type %d = %d", value, n);
     type.fill(type.size(), counters.size(), (byte) value);

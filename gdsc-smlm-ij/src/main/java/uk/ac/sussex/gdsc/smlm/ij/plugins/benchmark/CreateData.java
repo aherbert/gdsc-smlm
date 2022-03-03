@@ -25,8 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import com.google.protobuf.TextFormat;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
@@ -42,6 +40,8 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import java.awt.Checkbox;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
@@ -79,6 +79,7 @@ import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.core.source64.SplitMix64;
+import org.apache.commons.rng.core.util.NumberFactory;
 import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
 import org.apache.commons.rng.sampling.distribution.InverseTransformDiscreteSampler;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -2117,7 +2118,7 @@ public class CreateData implements PlugIn {
     if (localisations.isEmpty()) {
       return new int[0];
     }
-    final TIntArrayList ids = new TIntArrayList(settings.getParticles());
+    final IntArrayList ids = new IntArrayList(settings.getParticles());
     // Assume the localisations are sorted by id
     int id = localisations.get(0).getId();
     ids.add(id);
@@ -2127,7 +2128,7 @@ public class CreateData implements PlugIn {
         ids.add(id);
       }
     }
-    return ids.toArray();
+    return ids.toIntArray();
   }
 
   // StoredDataStatistics rawPhotons = new StoredDataStatistics();
@@ -3515,8 +3516,8 @@ public class CreateData implements PlugIn {
             "Calculating density ...");
         final ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
         final List<Future<?>> futures = new LinkedList<>();
-        final TFloatArrayList coordsX = new TFloatArrayList();
-        final TFloatArrayList coordsY = new TFloatArrayList();
+        // Pack 2 floats into a long
+        final LongArrayList coords = new LongArrayList();
         final Statistics densityStats = stats[DENSITY];
         final float radius = (float) (settings.getDensityRadius() * getHwhm());
         final Rectangle bounds = results.getBounds();
@@ -3526,14 +3527,15 @@ public class CreateData implements PlugIn {
         final FrameCounter counter = results.newFrameCounter();
         results.forEach((PeakResultProcedure) result -> {
           if (counter.advance(result.getFrame())) {
-            counter.increment(runDensityCalculation(threadPool, futures, coordsX, coordsY,
-                densityStats, radius, area, allDensity, counter.getCount(), ticker));
+            counter.increment(runDensityCalculation(threadPool, futures, coords, densityStats,
+                radius, area, allDensity, counter.getCount(), ticker));
           }
-          coordsX.add(result.getXPosition());
-          coordsY.add(result.getYPosition());
+          // Pack
+          coords.add(NumberFactory.makeLong(Float.floatToRawIntBits(result.getXPosition()),
+              Float.floatToRawIntBits(result.getYPosition())));
         });
-        runDensityCalculation(threadPool, futures, coordsX, coordsY, densityStats, radius, area,
-            allDensity, counter.getCount(), ticker);
+        runDensityCalculation(threadPool, futures, coords, densityStats, radius, area, allDensity,
+            counter.getCount(), ticker);
         ConcurrencyUtils.waitForCompletionUnchecked(futures);
         threadPool.shutdown();
         ImageJUtils.finished();
@@ -3642,14 +3644,19 @@ public class CreateData implements PlugIn {
   }
 
   private static int runDensityCalculation(ExecutorService threadPool, List<Future<?>> futures,
-      final TFloatArrayList coordsX, final TFloatArrayList coordsY, final Statistics densityStats,
-      final float radius, final double area, final int[] allDensity, final int allIndex,
-      Ticker ticker) {
-    final int size = coordsX.size();
-    final float[] xCoords = coordsX.toArray();
-    final float[] yCoords = coordsY.toArray();
-    coordsX.resetQuick();
-    coordsY.resetQuick();
+      final LongArrayList coords, final Statistics densityStats, final float radius,
+      final double area, final int[] allDensity, final int allIndex, Ticker ticker) {
+    final int size = coords.size();
+    final float[] xCoords = new float[size];
+    final float[] yCoords = new float[size];
+    final long[] e = coords.elements();
+    for (int i = 0; i < size; i++) {
+      final long v = e[i];
+      // Unpack
+      xCoords[i] = Float.intBitsToFloat(NumberFactory.extractHi(v));
+      yCoords[i] = Float.intBitsToFloat(NumberFactory.extractLo(v));
+    }
+    coords.clear();
     futures.add(threadPool.submit(() -> {
       final DensityManager dm = new DensityManager(xCoords, yCoords, area);
       final int[] density = dm.calculateDensity(radius, true);

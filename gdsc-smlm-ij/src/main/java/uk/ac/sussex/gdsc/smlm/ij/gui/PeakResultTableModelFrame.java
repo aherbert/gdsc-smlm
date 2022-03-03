@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.gui;
 
-import gnu.trove.list.array.TFloatArrayList;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -489,26 +488,28 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
         o.add(roi);
       } else {
         Arrays.sort(list, FramePeakResultComparator.INSTANCE);
-        final TFloatArrayList ox = new TFloatArrayList(list.length);
-        final TFloatArrayList oy = new TFloatArrayList(list.length);
+        final float[] ox = new float[list.length];
+        final float[] oy = new float[list.length];
+        int size = 0;
         int frame = list[0].getFrame() - 1;
-        for (int i = 0; i < list.length; i++) {
-          if (frame != list[i].getFrame()) {
-            if (ox.size() > 0) {
-              final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
+        for (final PeakResult r : list) {
+          if (frame != r.getFrame()) {
+            if (size != 0) {
+              // Arrays are copied in PolygonRoi
+              final PointRoi roi = new OffsetPointRoi(ox, oy, size);
               roi.setPointType(3);
               roi.setPosition(frame);
-              ox.resetQuick();
-              oy.resetQuick();
+              size = 0;
               o.add(roi);
             }
-            frame = list[i].getFrame();
+            frame = r.getFrame();
           }
-          ox.add(converter.convert(list[i].getXPosition()));
-          oy.add(converter.convert(list[i].getYPosition()));
+          ox[size] = converter.convert(r.getXPosition());
+          oy[size] = converter.convert(r.getYPosition());
+          size++;
         }
-        if (ox.size() > 0) {
-          final PointRoi roi = new OffsetPointRoi(ox.toArray(), oy.toArray());
+        if (size > 0) {
+          final PointRoi roi = new OffsetPointRoi(ox, oy, size);
           roi.setPointType(3);
           roi.setPosition(frame);
           o.add(roi);

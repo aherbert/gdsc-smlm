@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.scijava.vecmath.Color3f;
@@ -99,9 +99,10 @@ public final class CustomContentHelper {
    */
   public static Pair<Point3f[], int[]> createIndexedObject(List<Point3f> list) {
     // Compact the vertices to a set of vertices and faces
-    final TObjectIntHashMap<Point3f> map = new TObjectIntHashMap<>(list.size(), 0.5f, -1);
+    final Object2IntOpenHashMap<Point3f> map = new Object2IntOpenHashMap<>(list.size());
+    map.defaultReturnValue(-1);
     final LocalList<Point3f> vertices = new LocalList<>(list.size());
-    final TIntArrayList faces = new TIntArrayList(list.size());
+    final IntArrayList faces = new IntArrayList(list.size());
     int index = 0;
     // Process triangles
     for (int i = 0; i < list.size(); i += 3) {
@@ -110,11 +111,11 @@ public final class CustomContentHelper {
       index = addFace(map, vertices, faces, list.get(i + 2), index);
     }
 
-    return Pair.of(vertices.toArray(new Point3f[0]), faces.toArray());
+    return Pair.of(vertices.toArray(new Point3f[0]), faces.toIntArray());
   }
 
-  private static int addFace(TObjectIntHashMap<Point3f> map, LocalList<Point3f> vertices,
-      TIntArrayList faces, Point3f point, int index) {
+  private static int addFace(Object2IntOpenHashMap<Point3f> map, LocalList<Point3f> vertices,
+      IntArrayList faces, Point3f point, int index) {
     // Add the point if it is not in the set of vertices.
     // Get the index associated with the vertex.
     int value = map.putIfAbsent(point, index);

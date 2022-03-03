@@ -24,8 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.function.TDoubleFunction;
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleUnaryOperator;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.AbstractConvergenceChecker;
@@ -38,6 +38,7 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution;
 import uk.ac.sussex.gdsc.smlm.utils.Convolution.DoubleConvolutionValueProcedure;
 import uk.ac.sussex.gdsc.smlm.utils.GaussianKernel;
@@ -55,7 +56,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   /**
    * Class to scale the lists.
    */
-  private static class ScalingFunction implements TDoubleFunction {
+  private static class ScalingFunction implements DoubleUnaryOperator {
     final double scale;
 
     ScalingFunction(double scale) {
@@ -63,7 +64,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
 
     @Override
-    public double execute(double value) {
+    public double apply(double value) {
       return value * scale;
     }
   }
@@ -127,9 +128,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
   private final int defaultScale;
 
   /** Working space to store the probabilities. */
-  private final TDoubleArrayList listP = new TDoubleArrayList();
+  private final DoubleArrayList listP = new DoubleArrayList();
   /** Working space to store the gradient. */
-  private final TDoubleArrayList listA = new TDoubleArrayList();
+  private final DoubleArrayList listA = new DoubleArrayList();
 
   /**
    * The relative probability threshold of the Poisson-Gamma distribution that is used. Any
@@ -324,8 +325,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
    */
   public double getPoissonGammaGaussianI(double theta) {
     // Reset
-    listP.resetQuick();
-    listA.resetQuick();
+    listP.clear();
+    listA.clear();
     lastG = null;
     lastT = theta;
 
@@ -505,9 +506,9 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
       // No interpolated integration necessary as this is discrete
       double sum = 0;
-      final double[] p = listP.toArray();
-      final double[] a = listA.toArray();
-      for (int i = 0; i < p.length; i++) {
+      final double[] p = listP.elements();
+      final double[] a = listA.elements();
+      for (int i = 0, size = listP.size(); i < size; i++) {
         sum += getF(p[i], a[i]);
       }
       if (sum == Double.POSITIVE_INFINITY) {
@@ -553,8 +554,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       return largeApproximation(theta);
     }
 
-    final double[] p = listP.toArray();
-    final double[] a = listA.toArray();
+    final double[] p = listP.toDoubleArray();
+    final double[] a = listA.toDoubleArray();
 
     // Find the minimum value to determine if A^2/P can be unchecked
     // for divide by zero error.
@@ -652,10 +653,10 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // At x=0 integrate from 0 to 0.5 without the Dirac contribution
     // (i.e. make it a a smooth function for integration).
     // Note the Dirac contribution for the unscaled function is 1.
-    final double diracContirbution = 1;
-    value -= diracContirbution;
+    final double diracContribution = 1;
+    value -= diracContribution;
     value = add(theta, value, gradient, 0, 0.25, 0.5);
-    listP.setQuick(0, listP.getQuick(0) + diracContirbution);
+    listP.elements()[0] += diracContribution;
 
     // The next x value after the max
     final int maxx = (int) Math.ceil(max[0]);
@@ -667,12 +668,12 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     for (; x <= endX; x++) {
       value = add(theta, value, gradient, x - 0.5, x, x + 0.5);
       if (value == 0) {
-        listP.removeAt(x);
-        listA.removeAt(x);
+        listP.removeDouble(x);
+        listA.removeDouble(x);
         break;
       } else if (x >= maxx) {
         // Compute f
-        final double f = getF(listP.getQuick(x), listA.getQuick(x));
+        final double f = getF(listP.getDouble(x), listA.getDouble(x));
         // If this is less than half the max then break and switch to a single
         // point evaluation.
         if (f < threshold) {
@@ -706,20 +707,19 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // This may be due to not using enough of the range. It may be due
     // to the Bessel approximation failing.
 
-    final double sumP = listP.sum();
+    final double sumP = listP.doubleStream().sum();
     if (sumP == Double.POSITIVE_INFINITY || sumP / expected < 0.75) {
       return false;
     }
-    final double sumA = listA.sum();
+    final double sumA = listA.doubleStream().sum();
     if (sumA == Double.POSITIVE_INFINITY || sumA / expected < 0.75) {
       return false;
     }
 
     // System.out.printf("theta=%g 0=%d Expected=%s SumP=%s (%s) SumA=%s (%s)\n", theta, endX,
     // expected, sumP, sumP / expected, sumA, sumA / expected);
-
-    listP.transformValues(new ScalingFunction(expected / sumP));
-    listA.transformValues(new ScalingFunction(expected / sumA));
+    SimpleArrayUtils.apply(listP.elements(), 0, listP.size(), new ScalingFunction(expected / sumP));
+    SimpleArrayUtils.apply(listA.elements(), 0, listA.size(), new ScalingFunction(expected / sumA));
 
     return true;
   }
@@ -937,8 +937,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       throw new IllegalStateException("No previous Fisher information computation is available");
     }
 
-    final double[] p = listP.toArray();
-    final double[] a = listA.toArray();
+    final double[] p = listP.toDoubleArray();
+    final double[] a = listA.toDoubleArray();
 
     double[] gradientA;
     double[] valueP;

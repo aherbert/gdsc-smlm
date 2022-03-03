@@ -24,10 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
@@ -45,6 +41,8 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.LUT;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Window;
@@ -125,6 +123,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleData;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
@@ -879,7 +878,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       settings.angleMinJumpDistance = gd.getNextNumber();
 
-      final TIntObjectHashMap<TDoubleArrayList> angleMap =
+      final TIntObjectHashMap<DoubleArrayList> angleMap =
           getAngleMap(data, distanceConverter, settings.angleMinJumpDistance);
       final WindowOrganiser wo = new WindowOrganiser();
       // Histogram each angle bin from 0 to 360 in 15 degree increments (24 bins).
@@ -893,11 +892,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       final int[] comps = angleMap.keys();
       Arrays.sort(comps);
       for (final int comp : comps) {
-        final TDoubleArrayList angles = angleMap.get(comp);
-        angles.transformValues(d -> d * 360);
+        final DoubleArrayList angles = angleMap.get(comp);
+        SimpleArrayUtils.apply(angles.elements(), 0, angles.size(), d -> d * 360);
         // @formatter:off
         final HistogramPlot plot = builder.setTitle(String.format("Component %d", comp))
-            .setData(DoubleData.wrap(angles.toArray()))
+            .setData(DoubleData.wrap(angles.toDoubleArray()))
             .build();
         // @formatter:on
         if (plot.show(wo) == null) {
@@ -932,9 +931,9 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param minJumpDistance the minimum distance for each jump to include the angle (in nm)
      * @return the angle map
      */
-    private static TIntObjectHashMap<TDoubleArrayList> getAngleMap(List<TrackData> data,
+    private static TIntObjectHashMap<DoubleArrayList> getAngleMap(List<TrackData> data,
         TypeConverter<DistanceUnit> distanceConverter, double minJumpDistance) {
-      final TIntObjectHashMap<TDoubleArrayList> angleMap = new TIntObjectHashMap<>();
+      final TIntObjectHashMap<DoubleArrayList> angleMap = new TIntObjectHashMap<>();
       // Set the small jump distance using a squared threshold.
       // Convert min jump distance in nm to the native units.
       // Note: The distance converter is for micrometres.
@@ -961,9 +960,9 @@ public class TrackPopulationAnalysis implements PlugIn {
           final double y2 = p2.getYPosition();
           final double x3 = p3.getXPosition();
           final double y3 = p3.getYPosition();
-          TDoubleArrayList list = angleMap.get(component[i]);
+          DoubleArrayList list = angleMap.get(component[i]);
           if (list == null) {
-            angleMap.put(component[i], list = new TDoubleArrayList());
+            angleMap.put(component[i], list = new DoubleArrayList());
           }
           // Turn angle between vector p1 -> p2 and p2 -> p3.
           // An angle of 0 is the same direction. 0.5 is a reverse.
@@ -982,7 +981,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         ImageJUtils.log("Jump angle analysis: Min distance=%.1fnm", minJumpDistance);
         for (final int c : comp) {
           final int ex = excluded.get(c);
-          final TDoubleList list = angleMap.get(c);
+          final DoubleArrayList list = angleMap.get(c);
           final int total = ex + (list == null ? 0 : list.size());
           ImageJUtils.log("Component %d: Excluded %d / %d angles (%.2f%%)", c, ex, total,
               100.0 * ex / total);
@@ -1209,7 +1208,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         return;
       }
 
-      final TIntObjectHashMap<TIntArrayList> timeMap = getTimeMap(data);
+      final TIntObjectHashMap<IntArrayList> timeMap = getTimeMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
       final int[] comps = timeMap.keys();
       Arrays.sort(comps);
@@ -1217,7 +1216,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           new HistogramPlotBuilder("title").setName("Residence Time").setMinBinWidth(deltaT);
       final UniformRandomProvider rng = UniformRandomProviders.create();
       for (final int comp : comps) {
-        final int[] times = timeMap.get(comp).toArray();
+        final int[] times = timeMap.get(comp).toIntArray();
         final int total = times.length;
         final double[] dtimes = Arrays.stream(times).mapToDouble(t -> t * deltaT).toArray();
         // Build histogram
@@ -1325,8 +1324,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param data the data
      * @return the time map
      */
-    private static TIntObjectHashMap<TIntArrayList> getTimeMap(List<TrackData> data) {
-      final TIntObjectHashMap<TIntArrayList> timeMap = new TIntObjectHashMap<>();
+    private static TIntObjectHashMap<IntArrayList> getTimeMap(List<TrackData> data) {
+      final TIntObjectHashMap<IntArrayList> timeMap = new TIntObjectHashMap<>();
       data.forEach(track -> {
         final int[] component = track.component;
         int current = component[0];
@@ -1355,11 +1354,11 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param start the start (inclusive)
      * @param end the end (exclusive)
      */
-    private static void addTime(TIntObjectHashMap<TIntArrayList> timeMap, int component, int start,
+    private static void addTime(TIntObjectHashMap<IntArrayList> timeMap, int component, int start,
         int end) {
-      TIntArrayList times = timeMap.get(component);
+      IntArrayList times = timeMap.get(component);
       if (times == null) {
-        times = new TIntArrayList();
+        times = new IntArrayList();
         timeMap.put(component, times);
       }
       times.add(end - start);
@@ -1753,6 +1752,42 @@ public class TrackPopulationAnalysis implements PlugIn {
   }
 
   /**
+   * Store float coordinates.
+   */
+  private static final class Coords {
+    float[] x;
+    float[] y;
+    int size;
+
+    Coords(int length) {
+      x = new float[length];
+      y = new float[length];
+    }
+
+    void add(float v, float w) {
+      if (x.length == size) {
+        x = Arrays.copyOf(x, MemoryUtils.createNewCapacity(size + 1, size));
+        y = Arrays.copyOf(y, x.length);
+      }
+      x[size] = v;
+      y[size] = w;
+      size++;
+    }
+
+    void clear() {
+      size = 0;
+    }
+
+    float[] getX() {
+      return Arrays.copyOf(x, size);
+    }
+
+    float[] getY() {
+      return Arrays.copyOf(y, size);
+    }
+  }
+
+  /**
    * Show a plot of the selected track feature.
    */
   private static class TrackFeaturePlot implements Consumer<List<TrackData>> {
@@ -1794,23 +1829,20 @@ public class TrackPopulationAnalysis implements PlugIn {
         plot.addPoints(x, y, Plot.CIRCLE);
         plot.addPoints(x, y, Plot.LINE);
       } else {
-        final TFloatArrayList xx = new TFloatArrayList(x.length);
-        final TFloatArrayList yy = new TFloatArrayList(x.length);
+        final Coords c = new Coords(11);
         bits.stream().forEach(com -> {
           plot.setColor(colourMap.apply(com));
-          xx.resetQuick();
-          yy.resetQuick();
+          c.clear();
           for (int i = 0; i < x.length; i++) {
             if (component[i] == com) {
-              xx.add(x[i]);
-              yy.add(y[i]);
+              c.add(x[i], y[i]);
               // Add lines using the colour of the second component.
               if (i != 0) {
                 plot.drawLine(x[i - 1], y[i - 1], x[i], y[i]);
               }
             }
           }
-          plot.addPoints(xx.toArray(), yy.toArray(), Plot.CIRCLE);
+          plot.addPoints(c.getX(), c.getY(), Plot.CIRCLE);
         });
       }
       ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
@@ -1896,23 +1928,20 @@ public class TrackPopulationAnalysis implements PlugIn {
         plot.drawLine(t[i - 1], d[i - 1], t[i], d[i]);
       }
       // Add points of the same colour
-      final TFloatArrayList xx = new TFloatArrayList(t.length);
-      final TFloatArrayList yy = new TFloatArrayList(t.length);
+      final Coords coords = new Coords(t.length);
       for (final Color c : colours) {
         if (c == null) {
           continue;
         }
-        xx.resetQuick();
-        yy.resetQuick();
+        coords.clear();
         plot.setColor(c);
         for (int i = 0; i < component.length; i++) {
           final int j = i + offset;
           if (colours[j] == c) {
-            xx.add(t[j]);
-            yy.add(d[j]);
+            coords.add(t[j], d[j]);
           }
         }
-        plot.addPoints(xx.toArray(), yy.toArray(), Plot.CIRCLE);
+        plot.addPoints(coords.getX(), coords.getY(), Plot.CIRCLE);
       }
       ImageJUtils.display(plot.getTitle(), plot, ImageJUtils.NO_TO_FRONT, wo).getPlot()
           .setLimitsToFit(true);
@@ -2522,7 +2551,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     // final StoredDataStatistics statsAlpha = new StoredDataStatistics(tracks.size());
 
     // Process each track
-    final TIntArrayList lengths = new TIntArrayList(tracks.size());
+    final IntArrayList lengths = new IntArrayList(tracks.size());
     for (final Trace track : tracks) {
       // Get xy coordinates
       final int size = track.size();
@@ -2670,7 +2699,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
       }
     }
-    return Pair.create(lengths.toArray(), trackData);
+    return Pair.create(lengths.toIntArray(), trackData);
   }
 
   /**

@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import gnu.trove.list.array.TDoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
@@ -344,7 +344,7 @@ class PoissonCalculatorTest {
 
       ));
     }
-    final TDoubleArrayList list = new TDoubleArrayList();
+    final DoubleArrayList list = new DoubleArrayList();
     final int imin = 5;
     final int imax = 15;
     for (int i = imin; i <= imax; i++) {
@@ -384,7 +384,7 @@ class PoissonCalculatorTest {
     }
 
     // Find max using quadratic fit
-    final double[] data = list.toArray();
+    final double[] data = list.toDoubleArray();
     int index = SimpleArrayUtils.findMaxIndex(data);
     final double maxa = (double) (imin + index) / 10;
     double fita = maxa;
