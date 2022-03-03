@@ -24,7 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.utils;
 
-import ij.IJ;
+import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.smlm.function.OptimiserFunction;
 
 /**
@@ -35,7 +35,7 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction {
   private int evalCount;
 
   /** The name. */
-  protected String name = "Optimiser";
+  protected String name;
 
   /**
    * Instantiates a new logging optimiser function.
@@ -64,7 +64,7 @@ public abstract class LoggingOptimiserFunction extends OptimiserFunction {
   public void increment() {
     evalCount++;
     if (logging) {
-      IJ.showStatus(name + " Evaluation " + evalCount);
+      ImageJUtils.showStatus(() -> name + " Evaluation " + evalCount);
     }
   }
 
