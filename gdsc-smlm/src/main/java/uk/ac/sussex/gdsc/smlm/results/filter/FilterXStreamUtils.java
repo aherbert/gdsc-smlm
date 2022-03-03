@@ -44,7 +44,6 @@ public final class FilterXStreamUtils {
     xs = new XStream(new DomDriver());
     if (xs != null) {
       try {
-        XStream.setupDefaultSecurity(xs); // to be removed after 1.5
         xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
 
         xs.autodetectAnnotations(true);

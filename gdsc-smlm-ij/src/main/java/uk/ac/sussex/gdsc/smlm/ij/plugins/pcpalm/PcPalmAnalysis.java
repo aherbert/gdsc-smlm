@@ -262,7 +262,6 @@ public class PcPalmAnalysis implements PlugIn {
       error("No results in memory");
     } else if (getDirectory()) {
       final XStream xs = new XStream(new DomDriver());
-      XStream.setupDefaultSecurity(xs); // to be removed after 1.5
       xs.allowTypes(new Class[] {CorrelationResult.class});
       for (final CorrelationResult result : results) {
         saveResult(xs, result);
@@ -301,7 +300,6 @@ public class PcPalmAnalysis implements PlugIn {
       int count = 0;
       for (int i = 0; i < fileList.length; i++) {
         final XStream xs = new XStream(new DomDriver());
-        XStream.setupDefaultSecurity(xs); // to be removed after 1.5
         xs.allowTypes(new Class[] {CorrelationResult.class});
         if (fileList[i].isFile() && loadResult(newResults, xs, fileList[i].getPath())) {
           count++;

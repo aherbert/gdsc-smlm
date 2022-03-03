@@ -48,7 +48,6 @@ public class XStreamUtils {
 
     static {
       final XStream xstream = new XStream(new DomDriver());
-      XStream.setupDefaultSecurity(xstream); // to be removed after 1.5
       xstream.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
       xs = xstream;
     }
