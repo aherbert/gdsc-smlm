@@ -472,7 +472,8 @@ public class FailCountManager implements PlugIn {
    * Expandable byte array storage.
    */
   private static class ByteArrayList {
-    byte[] data;
+    // Empty
+    byte[] data = {};
     int size;
 
     int size() {
