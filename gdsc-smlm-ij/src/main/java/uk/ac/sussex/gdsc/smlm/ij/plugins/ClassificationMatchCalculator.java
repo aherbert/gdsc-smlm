@@ -342,8 +342,10 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
 
     // Divide the results into time points
-    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates1 = getCoordinates(results1, test);
-    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates2 = getCoordinates(results2, test);
+    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates1 =
+        getCoordinates(results1, test);
+    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates2 =
+        getCoordinates(results2, test);
 
     // Process each time point
     int n1 = 0;
@@ -495,8 +497,8 @@ public class ClassificationMatchCalculator implements PlugIn {
    * @param test the test
    * @return the coordinates
    */
-  public static Int2ObjectOpenHashMap<List<PeakResultPoint>> getCoordinates(MemoryPeakResults results,
-      Predicate<PeakResult> test) {
+  public static Int2ObjectOpenHashMap<List<PeakResultPoint>>
+      getCoordinates(MemoryPeakResults results, Predicate<PeakResult> test) {
     final Int2ObjectOpenHashMap<List<PeakResultPoint>> coords = new Int2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there

@@ -886,7 +886,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     if (debug) {
       final String title = name;
       final Plot plot = new Plot(title, "x", "y");
-      plot.addPoints(SimpleArrayUtils.newArray(list.size(), 0, step), list.toDoubleArray(), Plot.LINE);
+      plot.addPoints(SimpleArrayUtils.newArray(list.size(), 0, step), list.toDoubleArray(),
+          Plot.LINE);
       ImageJUtils.display(title, plot);
     }
 

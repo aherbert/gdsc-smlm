@@ -1222,8 +1222,7 @@ public class PcPalmFitting implements PlugIn {
             BoundedNonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
             new SimpleValueChecker(relativeThreshold, -1));
 
-        optimum = opt.optimize(maxEvaluations, gradient, objective,
-            GoalType.MINIMIZE,
+        optimum = opt.optimize(maxEvaluations, gradient, objective, GoalType.MINIMIZE,
             new InitialGuess((optimum == null) ? initialSolution : optimum.getPointRef()),
             new SimpleBounds(lowerB, upperB));
         if (debug) {
@@ -1803,7 +1802,8 @@ public class PcPalmFitting implements PlugIn {
       increment();
       final double[] values = new double[x.size()];
       for (int i = 0; i < values.length; i++) {
-        values[i] = evaluate(x.getDouble(i), variables[0], variables[1], variables[2], variables[3]);
+        values[i] =
+            evaluate(x.getDouble(i), variables[0], variables[1], variables[2], variables[3]);
       }
       return values;
     }

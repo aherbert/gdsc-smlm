@@ -2098,11 +2098,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
     if (results.hasId()) {
       final float[] list = new float[results.size()];
       final PeakResultProcedure p = new PeakResultProcedure() {
-        int i;
+        int index;
 
         @Override
         public void execute(PeakResult peakResult) {
-          list[i++] = peakResult.getId();
+          list[index++] = peakResult.getId();
         }
       };
       results.forEach(p);
