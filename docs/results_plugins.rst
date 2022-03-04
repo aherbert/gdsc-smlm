@@ -865,7 +865,7 @@ NOBIAS Localisations
 
 The `NOBIAS <https://github.com/BiteenMatlab/NOBIAS>`_ localisations file format. This is a Matlab matrix file containing the track IDs and jump steps in the X and Y dimensions.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`.
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`.
 
 Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal `n`.
 

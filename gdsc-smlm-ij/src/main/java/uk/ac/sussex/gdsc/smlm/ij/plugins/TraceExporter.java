@@ -67,6 +67,7 @@ import uk.ac.sussex.gdsc.smlm.results.sort.IdFramePeakResultComparator;
 import us.hebi.matlab.mat.format.Mat5;
 import us.hebi.matlab.mat.types.Cell;
 import us.hebi.matlab.mat.types.MatFile;
+import us.hebi.matlab.mat.types.MatlabType;
 import us.hebi.matlab.mat.types.Matrix;
 import us.hebi.matlab.mat.types.Struct;
 
@@ -658,13 +659,16 @@ public class TraceExporter implements PlugIn {
     idCounter.advanceAndReset(idCounter.currentFrame() + 1);
 
     // Collect the jumps for the tracks
-    final LocalList<double[]> list = new LocalList<>();
+    final LocalList<double[]> list = new LocalList<>(results.size());
     final double[] last = new double[3];
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
       if (idCounter.advance(result.getId())) {
         last[0] = x;
         last[1] = y;
-        last[2] = idCounter.incrementAndGet();
+        // Use the original track ID.
+        // NOBIAS is robust to this as it checks for a change in ID using: if (TrID(t)~=TrID(t-1))
+        last[2] = result.getId();
+        //last[2] = idCounter.incrementAndGet();
       } else {
         last[0] = x - last[0];
         last[1] = y - last[1];
@@ -679,10 +683,10 @@ public class TraceExporter implements PlugIn {
 
     final int rows = list.size();
 
-    final Matrix trid = Mat5.newMatrix(rows, 1);
+    final Matrix trid = Mat5.newMatrix(rows, 1, MatlabType.Int32);
     for (int i = 0; i < rows; i++) {
       final double[] xyz = list.unsafeGet(i);
-      trid.setDouble(i, xyz[2]);
+      trid.setInt(i, (int) xyz[2]);
     }
     data.set("TrID", trid);
 
