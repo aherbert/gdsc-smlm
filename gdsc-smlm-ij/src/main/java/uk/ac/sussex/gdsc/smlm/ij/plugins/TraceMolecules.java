@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
@@ -36,6 +35,7 @@ import ij.plugin.LutLoader;
 import ij.plugin.PlugIn;
 import ij.process.FloatProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
 import java.awt.TextField;
 import java.io.BufferedWriter;
@@ -1349,14 +1349,14 @@ public class TraceMolecules implements PlugIn {
   }
 
   private static int[] convert(double[] intervals) {
-    final TIntHashSet set = new TIntHashSet(intervals.length);
+    final IntOpenHashSet set = new IntOpenHashSet(intervals.length);
     for (final double d : intervals) {
       set.add((int) Math.round(d));
     }
 
     set.remove(0); // Do not allow zero
 
-    final int[] values = set.toArray();
+    final int[] values = set.toIntArray();
     Arrays.sort(values);
     return values;
   }

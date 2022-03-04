@@ -24,14 +24,13 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
@@ -457,9 +457,9 @@ public class ResultsMatchCalculator implements PlugIn {
     final double maxDistance = settings.distanceThreshold + settings.increments * settings.delta;
 
     // Divide the results into time points
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates =
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates =
         getCoordinates(results1, settings.coordinateMethod1);
-    final TIntObjectHashMap<List<Coordinate>> predictedCoordinates =
+    final Int2ObjectOpenHashMap<List<Coordinate>> predictedCoordinates =
         getCoordinates(results2, settings.coordinateMethod2);
 
     int n1 = 0;
@@ -596,19 +596,19 @@ public class ResultsMatchCalculator implements PlugIn {
         getDistances(settings.distanceThreshold, settings.increments, settings.delta);
     final double[] pairDistances = getPairDistances(allMatches);
     // Re-use storage for the ID analysis
-    TIntHashSet id1 = null;
-    TIntHashSet id2 = null;
-    TIntHashSet matchId1 = null;
-    TIntHashSet matchId2 = null;
+    IntOpenHashSet id1 = null;
+    IntOpenHashSet id2 = null;
+    IntOpenHashSet matchId1 = null;
+    IntOpenHashSet matchId2 = null;
     final boolean doIdAnalysis = doIdAnalysis1 || doIdAnalysis2;
     if (doIdAnalysis) {
       if (doIdAnalysis1) {
         id1 = getIds(results1);
-        matchId1 = new TIntHashSet(id1.size());
+        matchId1 = new IntOpenHashSet(id1.size());
       }
       if (doIdAnalysis2) {
         id2 = getIds(results2);
-        matchId2 = new TIntHashSet(id2.size());
+        matchId2 = new IntOpenHashSet(id2.size());
       }
     }
     final StringBuilder sb = new StringBuilder();
@@ -716,7 +716,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param results the results
    * @return the coordinates
    */
-  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results) {
+  public static Int2ObjectOpenHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results) {
     return getCoordinates(results, CoordinateMethod.ALL, false);
   }
 
@@ -727,7 +727,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param coordinateMethod the coordinate method
    * @return the coordinates
    */
-  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static Int2ObjectOpenHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       CoordinateMethod coordinateMethod) {
     return getCoordinates(results, coordinateMethod, false);
   }
@@ -740,7 +740,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param integerCoordinates True if the values should be rounded down to integers
    * @return the coordinates
    */
-  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static Int2ObjectOpenHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       final boolean integerCoordinates) {
     return getCoordinates(results, CoordinateMethod.ALL, integerCoordinates);
   }
@@ -753,9 +753,9 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param integerCoordinates True if the values should be rounded down to integers
    * @return the coordinates
    */
-  public static TIntObjectHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
+  public static Int2ObjectOpenHashMap<List<Coordinate>> getCoordinates(MemoryPeakResults results,
       CoordinateMethod coordinateMethod, final boolean integerCoordinates) {
-    final TIntObjectHashMap<List<Coordinate>> coords = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<List<Coordinate>> coords = new Int2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -808,7 +808,7 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param time the time
    * @return the coordinates
    */
-  public static Coordinate[] getCoordinates(TIntObjectHashMap<List<Coordinate>> coords,
+  public static Coordinate[] getCoordinates(Int2ObjectOpenHashMap<List<Coordinate>> coords,
       int time) {
     final List<Coordinate> tmp = coords.get(time);
     if (tmp != null) {
@@ -838,19 +838,16 @@ public class ResultsMatchCalculator implements PlugIn {
    * @param predictedCoordinates the predicted coordinates
    * @return a list of time points
    */
-  private static int[] getTimepoints(TIntObjectHashMap<List<Coordinate>> actualCoordinates,
-      TIntObjectHashMap<List<Coordinate>> predictedCoordinates) {
+  private static int[] getTimepoints(Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates,
+      Int2ObjectOpenHashMap<List<Coordinate>> predictedCoordinates) {
 
     // Do inline to avoid materialising the keys arrays
-    final TIntHashSet hashset =
-        new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
-    final TIntProcedure p = value -> {
-      hashset.add(value);
-      return true;
-    };
-    actualCoordinates.forEachKey(p);
-    predictedCoordinates.forEachKey(p);
-    final int[] set = hashset.toArray();
+    final IntOpenHashSet hashset =
+        new IntOpenHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
+    final IntConsumer p = hashset::add;
+    actualCoordinates.keySet().forEach(p);
+    predictedCoordinates.keySet().forEach(p);
+    final int[] set = hashset.toIntArray();
 
     Arrays.sort(set);
     return set;
@@ -1011,8 +1008,8 @@ public class ResultsMatchCalculator implements PlugIn {
     return null;
   }
 
-  private static TIntHashSet getIds(MemoryPeakResults results) {
-    final TIntHashSet ids = new TIntHashSet(results.size());
+  private static IntOpenHashSet getIds(MemoryPeakResults results) {
+    final IntOpenHashSet ids = new IntOpenHashSet(results.size());
     results.forEach((PeakResultProcedure) result -> ids.add(result.getId()));
     return ids;
   }
@@ -1101,8 +1098,8 @@ public class ResultsMatchCalculator implements PlugIn {
   public static MatchResult compareCoordinates(MemoryPeakResults results1,
       MemoryPeakResults results2, double distance) {
     // Divide the results into time points
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates = getCoordinates(results1);
-    final TIntObjectHashMap<List<Coordinate>> predictedCoordinates = getCoordinates(results2);
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates = getCoordinates(results1);
+    final Int2ObjectOpenHashMap<List<Coordinate>> predictedCoordinates = getCoordinates(results2);
 
     return compareCoordinates(actualCoordinates, predictedCoordinates, distance);
   }
@@ -1116,8 +1113,8 @@ public class ResultsMatchCalculator implements PlugIn {
    * @return the match result
    */
   public static MatchResult compareCoordinates(
-      TIntObjectHashMap<List<Coordinate>> actualCoordinates,
-      TIntObjectHashMap<List<Coordinate>> predictedCoordinates, double distance) {
+      Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates,
+      Int2ObjectOpenHashMap<List<Coordinate>> predictedCoordinates, double distance) {
     int tp = 0;
     int fp = 0;
     int fn = 0;

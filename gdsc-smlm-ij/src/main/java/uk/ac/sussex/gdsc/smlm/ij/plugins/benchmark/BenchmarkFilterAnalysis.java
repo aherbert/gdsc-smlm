@@ -24,9 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -41,6 +38,10 @@ import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -224,7 +225,7 @@ public class BenchmarkFilterAnalysis
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, TIntObjectHashMap<UniqueIdPeakResult[]>>> coordinateCache =
+      Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   /** A reference to the last prepared fit results. */
@@ -236,7 +237,7 @@ public class BenchmarkFilterAnalysis
       new AtomicReference<>();
 
   /** The actual coordinates from the simulation. */
-  private TIntObjectHashMap<UniqueIdPeakResult[]> actualCoordinates;
+  private Int2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
 
   /** The prepared fit result data. */
   private FitResultData fitResultData;
@@ -847,12 +848,12 @@ public class BenchmarkFilterAnalysis
     final float ylimit;
     final CoordinateStore coordinateStore;
     final Ticker ticker;
-    final TIntObjectHashMap<UniqueIdPeakResult[]> actualCoordinates;
+    final Int2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
 
     FitResultsWorker(BlockingQueue<Job> jobs, List<MultiPathFitResults> syncResults,
         double matchDistance, RampedScore distanceScore, RampedScore signalScore,
         AtomicInteger uniqueId, CoordinateStore coordinateStore, Ticker ticker,
-        TIntObjectHashMap<UniqueIdPeakResult[]> actualCoordinates) {
+        Int2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates) {
       this.jobs = jobs;
       this.results = syncResults;
       this.matchDistance = matchDistance;
@@ -1112,7 +1113,7 @@ public class BenchmarkFilterAnalysis
       return false;
     }
 
-    private UniqueIdPeakResult[] getCoordinates(TIntObjectHashMap<UniqueIdPeakResult[]> coords,
+    private UniqueIdPeakResult[] getCoordinates(Int2ObjectOpenHashMap<UniqueIdPeakResult[]> coords,
         int time) {
       final UniqueIdPeakResult[] tmp = coords.get(time);
       return (tmp == null) ? EMPTY : tmp;
@@ -1386,7 +1387,7 @@ public class BenchmarkFilterAnalysis
   private class IterationConvergenceChecker {
     InterruptChecker scoreChecker;
     InterruptConvergenceChecker filterChecker;
-    TIntObjectHashMap<List<Coordinate>> previousResults;
+    Int2ObjectOpenHashMap<List<Coordinate>> previousResults;
     boolean canContinue = true;
 
     public IterationConvergenceChecker(FilterScore current) {
@@ -1401,7 +1402,7 @@ public class BenchmarkFilterAnalysis
       }
     }
 
-    private TIntObjectHashMap<List<Coordinate>> getResults(FilterScore current) {
+    private Int2ObjectOpenHashMap<List<Coordinate>> getResults(FilterScore current) {
       return ResultsMatchCalculator
           .getCoordinates(createResults(null, (DirectFilter) current.filter, false));
     }
@@ -1448,7 +1449,7 @@ public class BenchmarkFilterAnalysis
       }
 
       if (settings.iterationCompareResults) {
-        final TIntObjectHashMap<List<Coordinate>> currentResults = getResults(current);
+        final Int2ObjectOpenHashMap<List<Coordinate>> currentResults = getResults(current);
         final MatchResult r = ResultsMatchCalculator.compareCoordinates(currentResults,
             previousResults, settings.iterationCompareDistance);
         if (r.getJaccard() == 1) {
@@ -1778,7 +1779,7 @@ public class BenchmarkFilterAnalysis
    * Abstract class to allow the array storage to be reused.
    */
   private abstract class CustomTIntObjectProcedure
-      implements TIntObjectProcedure<UniqueIdPeakResult[]> {
+      implements Consumer<Int2ObjectMap.Entry<UniqueIdPeakResult[]>> {
     float[] x;
     float[] y;
     float[] x2;
@@ -2587,7 +2588,7 @@ public class BenchmarkFilterAnalysis
   private MultiPathFitResults[] readResults() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean update = false;
-    Pair<Integer, TIntObjectHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
+    Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
       coords = Pair.of(simulationParameters.id, getCoordinates(results));
@@ -2752,10 +2753,8 @@ public class BenchmarkFilterAnalysis
         t.start();
       }
 
-      spotFitResults.fitResults.forEachEntry((frame, candidates) -> {
-        put(jobs, new Job(frame, candidates));
-        return true;
-      });
+      spotFitResults.fitResults.int2ObjectEntrySet()
+          .forEach(e -> put(jobs, new Job(e.getIntKey(), e.getValue())));
       // Finish all the worker threads by passing in a null job
       for (int i = 0; i < threads.size(); i++) {
         put(jobs, new Job(0, null));
@@ -2807,8 +2806,9 @@ public class BenchmarkFilterAnalysis
     return localFitResultData.resultsList;
   }
 
-  private static TIntObjectHashMap<UniqueIdPeakResult[]> getCoordinates(MemoryPeakResults results) {
-    final TIntObjectHashMap<UniqueIdPeakResult[]> coords = new TIntObjectHashMap<>();
+  private static Int2ObjectOpenHashMap<UniqueIdPeakResult[]>
+      getCoordinates(MemoryPeakResults results) {
+    final Int2ObjectOpenHashMap<UniqueIdPeakResult[]> coords = new Int2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -7451,8 +7451,8 @@ public class BenchmarkFilterAnalysis
     final Overlay o = new Overlay();
 
     // Do TP
-    final TIntHashSet actual = new TIntHashSet();
-    final TIntHashSet predicted = new TIntHashSet();
+    final IntOpenHashSet actual = new IntOpenHashSet();
+    final IntOpenHashSet predicted = new IntOpenHashSet();
     for (final FractionalAssignment[] assignments : allAssignments) {
       if (assignments == null || assignments.length == 0) {
         continue;
@@ -7552,43 +7552,45 @@ public class BenchmarkFilterAnalysis
       }
 
       // Add the results to the lists
-      actualCoordinates.forEachEntry(new CustomTIntObjectProcedure(x, y, x2, y2) {
-        @Override
-        public boolean execute(int frame, UniqueIdPeakResult[] results) {
-          int c1 = 0;
-          int c2 = 0;
-          if (x.length <= results.length) {
-            x = new float[results.length];
-            y = new float[results.length];
-          }
-          if (x2.length <= results.length) {
-            x2 = new float[results.length];
-            y2 = new float[results.length];
-          }
+      actualCoordinates.int2ObjectEntrySet()
+          .fastForEach(new CustomTIntObjectProcedure(x, y, x2, y2) {
+            @Override
+            public void accept(Entry<UniqueIdPeakResult[]> e) {
+              final int frame = e.getIntKey();
+              final UniqueIdPeakResult[] results = e.getValue();
+              int c1 = 0;
+              int c2 = 0;
+              if (x.length <= results.length) {
+                x = new float[results.length];
+                y = new float[results.length];
+              }
+              if (x2.length <= results.length) {
+                x2 = new float[results.length];
+                y2 = new float[results.length];
+              }
 
-          for (int i = 0; i < results.length; i++) {
-            // Ignore those that were matched by TP
-            if (actual.contains(results[i].uniqueId)) {
-              continue;
-            }
+              for (int i = 0; i < results.length; i++) {
+                // Ignore those that were matched by TP
+                if (actual.contains(results[i].uniqueId)) {
+                  continue;
+                }
 
-            if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit)) {
-              x2[c2] = results[i].getXPosition();
-              y2[c2++] = results[i].getYPosition();
-            } else {
-              x[c1] = results[i].getXPosition();
-              y[c1++] = results[i].getYPosition();
+                if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit)) {
+                  x2[c2] = results[i].getXPosition();
+                  y2[c2++] = results[i].getYPosition();
+                } else {
+                  x[c1] = results[i].getXPosition();
+                  y[c1++] = results[i].getYPosition();
+                }
+              }
+              if (c1 != 0) {
+                SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.yellow);
+              }
+              if (c2 != 0) {
+                SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
+              }
             }
-          }
-          if (c1 != 0) {
-            SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.yellow);
-          }
-          if (c2 != 0) {
-            SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
-          }
-          return true;
-        }
-      });
+          });
     }
 
     imp.setOverlay(o);

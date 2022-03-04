@@ -26,7 +26,6 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.ImagePlus;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
@@ -40,6 +39,7 @@ import ij3d.pointlist.PointListShape;
 import ij3d.shapes.BoundingBox;
 import ij3d.shapes.CoordinateSystem;
 import isosurface.MeshGroup;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -95,7 +95,7 @@ public class CustomContentInstant extends ContentInstant {
   private boolean available = true;
 
   private int customBefore;
-  private TIntObjectHashMap<Switch> switchMap;
+  private Int2ObjectOpenHashMap<Switch> switchMap;
 
   // Copy the entire contents of the super class
 
@@ -251,7 +251,7 @@ public class CustomContentInstant extends ContentInstant {
    */
   public int addCustomSwitch(Node node, boolean before) {
     if (switchMap == null) {
-      switchMap = new TIntObjectHashMap<>();
+      switchMap = new Int2ObjectOpenHashMap<>();
     }
     final int index = switchMap.size();
     final Switch s = new Switch();

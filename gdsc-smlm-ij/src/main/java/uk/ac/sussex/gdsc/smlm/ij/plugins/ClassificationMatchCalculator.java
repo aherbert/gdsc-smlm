@@ -25,18 +25,18 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.Prefs;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import uk.ac.sussex.gdsc.core.ij.BufferedTextWindow;
@@ -342,8 +342,8 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
 
     // Divide the results into time points
-    final TIntObjectHashMap<List<PeakResultPoint>> coordinates1 = getCoordinates(results1, test);
-    final TIntObjectHashMap<List<PeakResultPoint>> coordinates2 = getCoordinates(results2, test);
+    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates1 = getCoordinates(results1, test);
+    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coordinates2 = getCoordinates(results2, test);
 
     // Process each time point
     int n1 = 0;
@@ -436,7 +436,7 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
 
     // Find the unique values
-    final TIntHashSet set = new TIntHashSet();
+    final IntOpenHashSet set = new IntOpenHashSet();
     for (final PointPair r : allMatches) {
       set.add(fun.applyAsInt(((PeakResultPoint) r.getPoint1()).getPeakResult()));
       set.add(fun.applyAsInt(((PeakResultPoint) r.getPoint2()).getPeakResult()));
@@ -448,7 +448,7 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
 
     // Map to a natural sequence from zero
-    final int[] keys = set.toArray();
+    final int[] keys = set.toIntArray();
     Arrays.sort(keys);
 
     // Check if a discrete sequence already
@@ -457,7 +457,7 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
 
     // Map each key to a value starting from 0
-    final TIntIntHashMap map = new TIntIntHashMap(keys.length);
+    final Int2IntOpenHashMap map = new Int2IntOpenHashMap(keys.length);
     for (final int k : keys) {
       map.put(k, map.size());
     }
@@ -495,9 +495,9 @@ public class ClassificationMatchCalculator implements PlugIn {
    * @param test the test
    * @return the coordinates
    */
-  public static TIntObjectHashMap<List<PeakResultPoint>> getCoordinates(MemoryPeakResults results,
+  public static Int2ObjectOpenHashMap<List<PeakResultPoint>> getCoordinates(MemoryPeakResults results,
       Predicate<PeakResult> test) {
-    final TIntObjectHashMap<List<PeakResultPoint>> coords = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<List<PeakResultPoint>> coords = new Int2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -533,7 +533,7 @@ public class ClassificationMatchCalculator implements PlugIn {
    * @param time the time
    * @return the coordinates
    */
-  public static Coordinate[] getCoordinates(TIntObjectHashMap<List<PeakResultPoint>> coords,
+  public static Coordinate[] getCoordinates(Int2ObjectOpenHashMap<List<PeakResultPoint>> coords,
       int time) {
     final List<PeakResultPoint> tmp = coords.get(time);
     if (tmp != null) {
@@ -549,19 +549,16 @@ public class ClassificationMatchCalculator implements PlugIn {
    * @param predictedCoordinates the predicted coordinates
    * @return a list of time points
    */
-  private static int[] getTimepoints(TIntObjectHashMap<List<PeakResultPoint>> actualCoordinates,
-      TIntObjectHashMap<List<PeakResultPoint>> predictedCoordinates) {
+  private static int[] getTimepoints(Int2ObjectOpenHashMap<List<PeakResultPoint>> actualCoordinates,
+      Int2ObjectOpenHashMap<List<PeakResultPoint>> predictedCoordinates) {
 
     // Do inline to avoid materialising the keys arrays
-    final TIntHashSet hashset =
-        new TIntHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
-    final TIntProcedure p = value -> {
-      hashset.add(value);
-      return true;
-    };
-    actualCoordinates.forEachKey(p);
-    predictedCoordinates.forEachKey(p);
-    final int[] set = hashset.toArray();
+    final IntOpenHashSet hashset =
+        new IntOpenHashSet(Math.max(actualCoordinates.size(), predictedCoordinates.size()));
+    final IntConsumer p = hashset::add;
+    actualCoordinates.keySet().forEach(p);
+    predictedCoordinates.keySet().forEach(p);
+    final int[] set = hashset.toIntArray();
 
     Arrays.sort(set);
     return set;

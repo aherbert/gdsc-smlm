@@ -24,8 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -120,8 +119,8 @@ class BlinkEstimatorTest {
           RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[MEDIUM], ton[MEDIUM],
-        toff[MEDIUM], particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[MEDIUM], ton[MEDIUM], toff[MEDIUM],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -165,8 +164,8 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW],
-        particles, fixedFraction, false, true);
+    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW], particles,
+        fixedFraction, false, true);
   }
 
   @SeededTest
@@ -203,14 +202,10 @@ class BlinkEstimatorTest {
         for (final double n : blinkingRate) {
           for (int i = 0; i < ton.length; i++) {
             tests++;
-            final TIntHashSet ok = estimateBlinking(rg, n, ton[i], toff[i], particles,
+            final IntOpenHashSet ok = estimateBlinking(rg, n, ton[i], toff[i], particles,
                 fixedFraction, timeAtLowerBound, false);
-            ok.forEach(new TIntProcedure() {
-              @Override
-              public boolean execute(int value) {
-                count[value]++;
-                return true;
-              }
+            ok.forEach((int value) -> {
+              count[value]++;
             });
           }
         }
@@ -229,7 +224,7 @@ class BlinkEstimatorTest {
     }
   }
 
-  private TIntHashSet estimateBlinking(UniformRandomProvider rg, double blinkingRate, double ton,
+  private IntOpenHashSet estimateBlinking(UniformRandomProvider rg, double blinkingRate, double ton,
       double toff, int particles, double fixedFraction, boolean timeAtLowerBound,
       boolean doAssert) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
@@ -375,7 +370,7 @@ class BlinkEstimatorTest {
     }
 
     // See if any fitting regime gets a correct answer
-    final TIntHashSet ok = new TIntHashSet();
+    final IntOpenHashSet ok = new IntOpenHashSet();
     for (int numberOfFittedPoints = MIN_FITTED_POINTS; numberOfFittedPoints <= MAX_FITTED_POINTS;
         numberOfFittedPoints++) {
       be.setNumberOfFittedPoints(numberOfFittedPoints);

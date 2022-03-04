@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -35,6 +34,7 @@ import ij.gui.Plot;
 import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -217,7 +217,7 @@ public class CmosAnalysis implements PlugIn {
      * @return the photons
      */
     int[] getPhotons() {
-      final TIntHashSet list = new TIntHashSet();
+      final IntOpenHashSet list = new IntOpenHashSet();
       list.add(0);
       for (final String key : simulationPhotons.split(",")) {
         try {
@@ -230,7 +230,7 @@ public class CmosAnalysis implements PlugIn {
           throw new NumberFormatException("Invalid number of photons: " + key);
         }
       }
-      final int[] result = list.toArray();
+      final int[] result = list.toIntArray();
       Arrays.sort(result);
       return result;
     }

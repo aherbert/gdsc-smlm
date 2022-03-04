@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -39,6 +38,7 @@ import ij.gui.RoiListener;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
 import ij.process.LUT;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.AWTEvent;
 import java.awt.Color;
@@ -1699,10 +1699,10 @@ public class TcPalmAnalysis implements PlugIn {
    */
   private CumulativeCountData createCumulativeCountData(LocalList<ClusterData> clusters,
       boolean createPlotData) {
-    final TIntIntHashMap all = new TIntIntHashMap(maxT - minT + 1);
-    clusters.forEach(c -> c.results.forEach(peak -> all.adjustOrPutValue(peak.getFrame(), 1, 1)));
-    final int[] frames = all.keys();
-    final int[] counts = all.values();
+    final Int2IntOpenHashMap all = new Int2IntOpenHashMap(maxT - minT + 1);
+    clusters.forEach(c -> c.results.forEach(peak -> all.addTo(peak.getFrame(), 1)));
+    final int[] frames = all.keySet().toIntArray();
+    final int[] counts = all.values().toIntArray();
     SortUtils.sortData(counts, frames, true, false);
     return new CumulativeCountData(frames, counts, createPlotData);
   }

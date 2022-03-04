@@ -28,7 +28,6 @@ import customnode.CustomLineMesh;
 import customnode.CustomMesh;
 import customnode.CustomMeshNode;
 import customnode.CustomPointMesh;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -47,6 +46,7 @@ import ij3d.ImageCanvas3D;
 import ij3d.ImageWindow3D;
 import ij3d.UniverseListener;
 import ij3d.UniverseSettings;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.awt.Color;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
@@ -73,6 +73,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntConsumer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -693,11 +694,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
         table.convertRowIndexToModel(indices);
       }
 
-      // Try to to preserve those currently selected
+      // Try to preserve those currently selected
 
       // Find all those currently selected (old selection)
-      final TObjectIntHashMap<PeakResult> oldSelection =
-          new TObjectIntHashMap<>(selected.size(), 0.5f, NO_ENTRY);
+      final Object2IntOpenHashMap<PeakResult> oldSelection =
+          new Object2IntOpenHashMap<>(selected.size());
+      oldSelection.defaultReturnValue(NO_ENTRY);
       for (int i = 0; i < selected.size(); i++) {
         final PeakResult r = selected.unsafeGet(i);
         if (r != null) {
@@ -718,17 +720,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
       for (int i = 0; i < indices.length; i++) {
         final PeakResult r = peakResultTableModel.get(indices[i]);
         // Check if already selected
-        if (oldSelection.remove(r) == NO_ENTRY) {
+        if (oldSelection.removeInt(r) == NO_ENTRY) {
           // Do this later to save space
           toSelect.push(r);
         }
       }
 
       // Remove the old selection no longer required
-      oldSelection.forEachEntry((result, index) -> {
+      oldSelection.values().forEach((IntConsumer) index -> {
         contentInstance.setCustomSwitch(index, false);
         selected.unsafeSet(index, null);
-        return true;
       });
 
       // Select the new additions

@@ -24,10 +24,10 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -265,7 +265,7 @@ public class TraceExporter implements PlugIn {
     int count = 0;
     int tracks = 0;
     int maxLength = 0;
-    final TIntHashSet remove = new TIntHashSet();
+    final IntOpenHashSet remove = new IntOpenHashSet();
     for (int i = 0, size = results.size(); i < size; i++) {
       final PeakResult result = results.get(i);
       if (result.getId() != id) {

@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -35,6 +34,7 @@ import ij.gui.NonBlockingGenericDialog;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.awt.AWTEvent;
 import java.awt.Choice;
 import java.awt.Point;
@@ -94,7 +94,7 @@ public class ConfigurationTemplate implements PlugIn {
   private TextWindow infoWindow;
   private int templateId;
   private String headings;
-  private TIntObjectHashMap<String> text;
+  private Int2ObjectOpenHashMap<String> text;
   private boolean templateImage;
 
   static {
@@ -1162,7 +1162,7 @@ public class ConfigurationTemplate implements PlugIn {
     templateId = templateImp.getID();
     currentSlice = 0;
     headings = "";
-    text = new TIntObjectHashMap<>();
+    text = new Int2ObjectOpenHashMap<>();
     final Object info = templateImp.getProperty("Info");
     if (info != null) {
       // First line is the headings

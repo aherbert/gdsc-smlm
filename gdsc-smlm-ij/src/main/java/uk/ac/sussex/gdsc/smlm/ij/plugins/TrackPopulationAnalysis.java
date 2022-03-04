@@ -24,9 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -42,7 +39,10 @@ import ij.process.ByteProcessor;
 import ij.process.LUT;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Window;
@@ -878,7 +878,7 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       settings.angleMinJumpDistance = gd.getNextNumber();
 
-      final TIntObjectHashMap<DoubleArrayList> angleMap =
+      final Int2ObjectOpenHashMap<DoubleArrayList> angleMap =
           getAngleMap(data, distanceConverter, settings.angleMinJumpDistance);
       final WindowOrganiser wo = new WindowOrganiser();
       // Histogram each angle bin from 0 to 360 in 15 degree increments (24 bins).
@@ -889,7 +889,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           .setLimits(new double[] {0, 360 - binWidth}).setMinBinWidth(binWidth)
           // This is a higher number than 360/binWidth to force use of the bin width
           .setNumberOfBins((int) (2 * 360 / binWidth));
-      final int[] comps = angleMap.keys();
+      final int[] comps = angleMap.keySet().toIntArray();
       Arrays.sort(comps);
       for (final int comp : comps) {
         final DoubleArrayList angles = angleMap.get(comp);
@@ -931,15 +931,15 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param minJumpDistance the minimum distance for each jump to include the angle (in nm)
      * @return the angle map
      */
-    private static TIntObjectHashMap<DoubleArrayList> getAngleMap(List<TrackData> data,
+    private static Int2ObjectOpenHashMap<DoubleArrayList> getAngleMap(List<TrackData> data,
         TypeConverter<DistanceUnit> distanceConverter, double minJumpDistance) {
-      final TIntObjectHashMap<DoubleArrayList> angleMap = new TIntObjectHashMap<>();
+      final Int2ObjectOpenHashMap<DoubleArrayList> angleMap = new Int2ObjectOpenHashMap<>();
       // Set the small jump distance using a squared threshold.
       // Convert min jump distance in nm to the native units.
       // Note: The distance converter is for micrometres.
       final double min2 = minJumpDistance <= 0 ? 0
           : MathUtils.pow2(distanceConverter.convertBack(minJumpDistance / 1000));
-      final TIntIntHashMap excluded = new TIntIntHashMap();
+      final Int2IntOpenHashMap excluded = new Int2IntOpenHashMap();
       data.forEach(track -> {
         final int[] component = track.component;
         final Trace trace = track.trace;
@@ -951,7 +951,7 @@ public class TrackPopulationAnalysis implements PlugIn {
           // Exclude small jump distances
           if (min2 > 0 && (p1.distance2(p2) < min2 || p2.distance2(p3) < min2)) {
             // Count the number of excluded angles
-            excluded.adjustOrPutValue(component[i], 1, 1);
+            excluded.addTo(component[i], 1);
             continue;
           }
           final double x1 = p1.getXPosition();
@@ -972,11 +972,9 @@ public class TrackPopulationAnalysis implements PlugIn {
 
       // Report the number excluded
       if (min2 > 0) {
-        angleMap.forEachKey(key -> {
-          excluded.adjustOrPutValue(key, 0, 0);
-          return true;
-        });
-        final int[] comp = excluded.keys();
+        // Create the entire key set
+        angleMap.keySet().forEach(key -> excluded.putIfAbsent(key, 0));
+        final int[] comp = excluded.keySet().toIntArray();
         Arrays.sort(comp);
         ImageJUtils.log("Jump angle analysis: Min distance=%.1fnm", minJumpDistance);
         for (final int c : comp) {
@@ -1054,11 +1052,11 @@ public class TrackPopulationAnalysis implements PlugIn {
       }
       settings.showMsdOverT = gd.getNextBoolean();
 
-      final TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap = getMsdMap(data);
+      final Int2ObjectOpenHashMap<SumOfSquaredDeviations[]> msdMap = getMsdMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
-      final int[] comps = msdMap.keys();
+      final int[] comps = msdMap.keySet().toIntArray();
       Arrays.sort(comps);
       for (final int comp : comps) {
         final SumOfSquaredDeviations[] msds = msdMap.get(comp);
@@ -1134,8 +1132,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param data the data
      * @return the MSD map
      */
-    private TIntObjectHashMap<SumOfSquaredDeviations[]> getMsdMap(List<TrackData> data) {
-      final TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap = new TIntObjectHashMap<>();
+    private Int2ObjectOpenHashMap<SumOfSquaredDeviations[]> getMsdMap(List<TrackData> data) {
+      final Int2ObjectOpenHashMap<SumOfSquaredDeviations[]> msdMap = new Int2ObjectOpenHashMap<>();
       data.forEach(track -> {
         final int[] component = track.component;
         final Trace trace = track.trace;
@@ -1176,8 +1174,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param x the x coords
      * @param y the y coords
      */
-    private static void addMsd(TIntObjectHashMap<SumOfSquaredDeviations[]> msdMap, int component,
-        int start, int end, int wm1, double[] x, double[] y) {
+    private static void addMsd(Int2ObjectOpenHashMap<SumOfSquaredDeviations[]> msdMap,
+        int component, int start, int end, int wm1, double[] x, double[] y) {
       final int length = end - start;
       if (length < wm1) {
         return;
@@ -1208,9 +1206,9 @@ public class TrackPopulationAnalysis implements PlugIn {
         return;
       }
 
-      final TIntObjectHashMap<IntArrayList> timeMap = getTimeMap(data);
+      final Int2ObjectOpenHashMap<IntArrayList> timeMap = getTimeMap(data);
       final WindowOrganiser wo = new WindowOrganiser();
-      final int[] comps = timeMap.keys();
+      final int[] comps = timeMap.keySet().toIntArray();
       Arrays.sort(comps);
       final HistogramPlotBuilder builder =
           new HistogramPlotBuilder("title").setName("Residence Time").setMinBinWidth(deltaT);
@@ -1324,8 +1322,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param data the data
      * @return the time map
      */
-    private static TIntObjectHashMap<IntArrayList> getTimeMap(List<TrackData> data) {
-      final TIntObjectHashMap<IntArrayList> timeMap = new TIntObjectHashMap<>();
+    private static Int2ObjectOpenHashMap<IntArrayList> getTimeMap(List<TrackData> data) {
+      final Int2ObjectOpenHashMap<IntArrayList> timeMap = new Int2ObjectOpenHashMap<>();
       data.forEach(track -> {
         final int[] component = track.component;
         int current = component[0];
@@ -1354,8 +1352,8 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @param start the start (inclusive)
      * @param end the end (exclusive)
      */
-    private static void addTime(TIntObjectHashMap<IntArrayList> timeMap, int component, int start,
-        int end) {
+    private static void addTime(Int2ObjectOpenHashMap<IntArrayList> timeMap, int component,
+        int start, int end) {
       IntArrayList times = timeMap.get(component);
       if (times == null) {
         times = new IntArrayList();
@@ -2546,7 +2544,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final Ticker ticker = ImageJUtils.createTicker(tracks.size(), 1, "Computing track features...");
 
     // Collect the track categories. Later these are renumbered to a natural sequence from 0.
-    final TIntHashSet catSet = new TIntHashSet();
+    final IntOpenHashSet catSet = new IntOpenHashSet();
 
     // final StoredDataStatistics statsAlpha = new StoredDataStatistics(tracks.size());
 
@@ -2684,7 +2682,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     final double[][] trackData = data.toArray(new double[0][0]);
     if (hasCategory) {
-      final int[] categories = catSet.toArray();
+      final int[] categories = catSet.toIntArray();
       Arrays.sort(categories);
       // Only remap if non-compact (i.e. not 0 to n)
       final int max = categories[categories.length - 1];

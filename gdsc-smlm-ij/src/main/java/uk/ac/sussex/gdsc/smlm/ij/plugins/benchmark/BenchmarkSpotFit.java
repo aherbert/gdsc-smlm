@@ -24,9 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -35,6 +32,8 @@ import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -53,6 +52,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -167,7 +167,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, TIntObjectHashMap<List<Coordinate>>>> coordinateCache =
+      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
@@ -287,7 +287,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * Store the filter candidates data.
    */
   private static class CandidateData {
-    final TIntObjectHashMap<FilterCandidates> filterCandidates;
+    final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates;
     final double fractionPositive;
     final double fractionNegative;
     final int countPositive;
@@ -299,7 +299,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int negativesAfterAllPositives;
     final int width;
 
-    CandidateData(TIntObjectHashMap<FilterCandidates> filterCandidates, int filterId,
+    CandidateData(Int2ObjectOpenHashMap<FilterCandidates> filterCandidates, int filterId,
         double fractionPositive, double fractionNegative, int countPositive, int countNegative,
         Settings settings, int width) {
       this.filterCandidates = filterCandidates;
@@ -474,7 +474,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int id;
 
     /** The fit results. */
-    TIntObjectHashMap<FilterCandidates> fitResults;
+    Int2ObjectOpenHashMap<FilterCandidates> fitResults;
 
     /** The distance in pixels. */
     double distanceInPixels;
@@ -503,7 +503,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param simulationId the simulation id
      * @param fitResults the fit results
      */
-    BenchmarkSpotFitResult(int simulationId, TIntObjectHashMap<FilterCandidates> fitResults) {
+    BenchmarkSpotFitResult(int simulationId, Int2ObjectOpenHashMap<FilterCandidates> fitResults) {
       id = fitResultsId.incrementAndGet();
       this.simulationId = simulationId;
       this.fitResults = fitResults;
@@ -801,9 +801,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
     final FitWorker fitWorker;
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
-    final TIntObjectHashMap<FilterCandidates> filterCandidates;
-    final TIntObjectHashMap<FilterCandidates> results;
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
+    final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates;
+    final Int2ObjectOpenHashMap<FilterCandidates> results;
     final Rectangle bounds;
     final MultiPathFilter multiFilter;
     final Ticker ticker;
@@ -812,8 +812,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     List<PointPair> matches = new ArrayList<>();
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<List<Coordinate>> actualCoordinates,
-        TIntObjectHashMap<FilterCandidates> filterCandidates, PeakResults peakResults,
+        Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates,
+        Int2ObjectOpenHashMap<FilterCandidates> filterCandidates, PeakResults peakResults,
         Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
@@ -824,7 +824,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
       this.actualCoordinates = actualCoordinates;
       this.filterCandidates = filterCandidates;
-      this.results = new TIntObjectHashMap<>();
+      this.results = new Int2ObjectOpenHashMap<>();
       bounds = new Rectangle(0, 0, stack.getWidth(), stack.getHeight());
       // Instance copy
       multiFilter = BenchmarkSpotFit.this.multiFilter.copy();
@@ -1427,7 +1427,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private BenchmarkSpotFitResult runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    Pair<Integer, TIntObjectHashMap<List<Coordinate>>> coords = coordinateCache.get();
+    Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
@@ -1439,7 +1439,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       refresh = true;
     }
 
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates = coords.getValue();
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates = coords.getValue();
 
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
@@ -1521,7 +1521,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       results.convertToPreferredUnits();
     }
 
-    final TIntObjectHashMap<FilterCandidates> fitResults = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<FilterCandidates> fitResults = new Int2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       fitResults.putAll(w.results);
     }
@@ -1530,7 +1530,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     int count = 0;
     // Materialise into an array since we use it twice
     final FilterCandidates[] candidates =
-        fitResults.values(new FilterCandidates[fitResults.size()]);
+        fitResults.values().toArray(new FilterCandidates[fitResults.size()]);
     for (final FilterCandidates result : candidates) {
       for (int i = 0; i < result.fitResult.length; i++) {
         final MultiPathFitResult fitResult = result.fitResult[i];
@@ -1616,7 +1616,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @param fitting the fitting
    * @return The filter candidate data
    */
-  private CandidateData subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults,
+  private CandidateData subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults,
       int fitting) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
@@ -1624,10 +1624,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     final int[] counter = new int[2];
 
-    final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<FilterCandidates> subset = new Int2ObjectOpenHashMap<>();
     final double[] fX = new double[2];
     final int[] nX = new int[2];
-    filterResults.forEachEntry((frame, result) -> {
+    filterResults.int2ObjectEntrySet().fastForEach(e -> {
+      final int frame = e.getIntKey();
+      final FilterResult result = e.getValue();
       // Determine the number of positives to find. This score may be fractional.
       fX[0] += result.result.getTruePositives();
       fX[1] += result.result.getFalsePositives();
@@ -1703,7 +1705,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
       // We can use all the candidates but only fit up to count
       subset.put(frame, new FilterCandidates(pos, neg, np, nn, result.spots, count));
-      return true;
     });
 
     // We now add all the candidates but only fit the first N
@@ -1730,20 +1731,20 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   /**
-   * Create an abstract class to allow a count to be passed to the constructor. The procedure can be
+   * Create an abstract class to allow a count to be passed to the constructor. The consumer can be
    * coded inline using final object references.
    */
-  private abstract static class CustomTIntProcedure implements TIntProcedure {
+  private abstract static class CustomIntConsumer implements IntConsumer {
     int count;
 
-    CustomTIntProcedure(int count) {
+    CustomIntConsumer(int count) {
       this.count = count;
     }
   }
 
   private void summariseResults(BenchmarkSpotFitResult spotFitResults, long runTime,
       final PreprocessedPeakResult[] preprocessedPeakResults, int uniqueIdCount,
-      CandidateData candidateData, TIntObjectHashMap<List<Coordinate>> actualCoordinates) {
+      CandidateData candidateData, Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates) {
 
     // Summarise the fitting results. N fits, N failures.
     // Optimal match statistics if filtering is perfect (since fitting is not perfect).
@@ -1773,15 +1774,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
-    final TIntObjectHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
+    final Int2ObjectOpenHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
     final int[] frames = new int[fitResults.size()];
     final FilterCandidates[] candidates = new FilterCandidates[fitResults.size()];
     final int[] counter = new int[1];
-    fitResults.forEachEntry((frame, candidate) -> {
-      frames[counter[0]] = frame;
-      candidates[counter[0]] = candidate;
+    fitResults.int2ObjectEntrySet().fastForEach(e -> {
+      frames[counter[0]] = e.getIntKey();
+      candidates[counter[0]] = e.getValue();
       counter[0]++;
-      return true;
     });
 
     for (final FilterCandidates result : candidates) {
@@ -1878,7 +1878,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
     // Score the results and count the number returned
     final List<FractionalAssignment[]> assignments = new ArrayList<>();
-    final TIntHashSet set = new TIntHashSet(uniqueIdCount);
+    final IntOpenHashSet set = new IntOpenHashSet(uniqueIdCount);
     final FractionScoreStore scoreStore = set::add;
 
     final MultiPathFitResults[] multiResults = multiPathResults.toArray(new MultiPathFitResults[0]);
@@ -1923,9 +1923,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       }
     }
     // Add the rest
-    set.forEach(new CustomTIntProcedure(count) {
+    set.forEach(new CustomIntConsumer(count) {
       @Override
-      public boolean execute(int uniqueId) {
+      public void accept(int uniqueId) {
         // This should not be null or something has gone wrong
         final PreprocessedPeakResult r = preprocessedPeakResults[uniqueId];
         if (r == null) {
@@ -1950,7 +1950,6 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
         score[FILTER_ESHIFT] = eshift;
         score[FILTER_PRECISION] = precision;
         matchScores[count++] = score;
-        return true;
       }
     });
 

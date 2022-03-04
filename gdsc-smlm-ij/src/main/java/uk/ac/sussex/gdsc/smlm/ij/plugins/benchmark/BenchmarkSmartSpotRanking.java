@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -34,6 +33,7 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
@@ -100,7 +101,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, TIntObjectHashMap<List<Coordinate>>>> coordinateCache =
+      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
@@ -125,7 +126,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * Store the filter candidates data.
    */
   private static class CandidateData {
-    final TIntObjectHashMap<FilterCandidates> filterCandidates;
+    final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates;
     final double fractionPositive;
     final double fractionNegative;
     final int countPositive;
@@ -136,7 +137,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final double fractionNegativesAfterAllPositives;
     final int negativesAfterAllPositives;
 
-    CandidateData(TIntObjectHashMap<FilterCandidates> filterCandidates, int filterId,
+    CandidateData(Int2ObjectOpenHashMap<FilterCandidates> filterCandidates, int filterId,
         double fractionPositive, double fractionNegative, int countPositive, int countNegative,
         Settings settings) {
       this.filterCandidates = filterCandidates;
@@ -325,9 +326,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
-    final TIntObjectHashMap<FilterCandidates> filterCandidates;
-    final TIntObjectHashMap<RankResults> results;
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
+    final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates;
+    final Int2ObjectOpenHashMap<RankResults> results;
     final int fitting;
     final boolean requireSnr;
     final Ticker ticker;
@@ -336,13 +337,13 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     double[] region;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<List<Coordinate>> actualCoordinates,
-        TIntObjectHashMap<FilterCandidates> filterCandidates, Ticker ticker) {
+        Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates,
+        Int2ObjectOpenHashMap<FilterCandidates> filterCandidates, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
       this.actualCoordinates = actualCoordinates;
       this.filterCandidates = filterCandidates;
-      this.results = new TIntObjectHashMap<>();
+      this.results = new Int2ObjectOpenHashMap<>();
       this.ticker = ticker;
       fitting = config.getFittingWidth();
       requireSnr = (levels.length > 0);
@@ -718,9 +719,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
   private void runAnalysis() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    final Pair<Integer, TIntObjectHashMap<List<Coordinate>>> coords = coordinateCache.get();
+    final Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = coordinateCache.get();
 
-    TIntObjectHashMap<List<Coordinate>> actualCoordinates;
+    Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
       // The Coordinate objects will be PeakResultPoint objects that store the original PeakResult
@@ -741,7 +742,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       candidateDataCache.set(candidateData);
     }
 
-    final TIntObjectHashMap<FilterCandidates> filterCandidates = candidateData.filterCandidates;
+    final Int2ObjectOpenHashMap<FilterCandidates> filterCandidates = candidateData.filterCandidates;
     final ImageStack stack = imp.getImageStack();
 
     // Create a pool of workers
@@ -759,10 +760,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
 
     // Process the frames
-    filterCandidates.forEachKey(value -> {
-      put(jobs, value);
-      return true;
-    });
+    filterCandidates.keySet().forEach((IntConsumer) value -> put(jobs, value));
     // Finish all the worker threads by passing in a null job
     for (int i = 0; i < threads.size(); i++) {
       put(jobs, -1);
@@ -788,7 +786,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     IJ.showStatus("Collecting results ...");
 
-    final TIntObjectHashMap<RankResults> rankResults = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<RankResults> rankResults = new Int2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       rankResults.putAll(w.results);
     }
@@ -805,15 +803,17 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * @param filterResults the filter results
    * @return The filter candidate data
    */
-  private CandidateData subsetFilterResults(TIntObjectHashMap<FilterResult> filterResults) {
+  private CandidateData subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
     final double f2 = settings.fractionNegativesAfterAllPositives / 100.0;
 
-    final TIntObjectHashMap<FilterCandidates> subset = new TIntObjectHashMap<>();
+    final Int2ObjectOpenHashMap<FilterCandidates> subset = new Int2ObjectOpenHashMap<>();
     final double[] fX = new double[2];
     final int[] nX = new int[2];
-    filterResults.forEachEntry((frame, result) -> {
+    filterResults.int2ObjectEntrySet().fastForEach(e -> {
+      final int frame = e.getIntKey();
+      final FilterResult result = e.getValue();
       // Determine the number of positives to find. This score may be fractional.
       fX[0] += result.result.getTruePositives();
       fX[1] += result.result.getFalsePositives();
@@ -889,7 +889,6 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
       // included but only the first N are processed. Should this be changed here too.
 
       subset.put(frame, new FilterCandidates(pos, neg, np, nn, Arrays.copyOf(result.spots, count)));
-      return true;
     });
 
     return new CandidateData(subset, filterResult.id, fX[0], fX[1], nX[0], nX[1], settings);
@@ -928,7 +927,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private void summariseResults(TIntObjectHashMap<RankResults> rankResults,
+  private void summariseResults(Int2ObjectOpenHashMap<RankResults> rankResults,
       CandidateData candidateData) {
     // Summarise the ranking results.
     final StringBuilder sb = new StringBuilder(filterResult.resultPrefix);
@@ -942,12 +941,11 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     final double[] counter1 = new double[2];
     final int[] counter2 = new int[2];
-    candidateData.filterCandidates.forEachValue(result -> {
+    candidateData.filterCandidates.values().forEach(result -> {
       counter1[0] += result.np;
       counter1[1] += result.nn;
       counter2[0] += result.pos;
       counter2[1] += result.neg;
-      return true;
     });
     final int countTp = counter2[0];
     final int countFp = counter2[1];
@@ -972,11 +970,10 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final int[] frames = new int[rankResults.size()];
     final RankResults[] rankResultsArray = new RankResults[rankResults.size()];
     final int[] counter = new int[1];
-    rankResults.forEachEntry((frame, result) -> {
-      frames[counter[0]] = frame;
-      rankResultsArray[counter[0]] = result;
+    rankResults.int2ObjectEntrySet().fastForEach(e -> {
+      frames[counter[0]] = e.getIntKey();
+      rankResultsArray[counter[0]] = e.getValue();
       counter[0]++;
-      return true;
     });
 
     // Summarise actual and candidate spots per frame

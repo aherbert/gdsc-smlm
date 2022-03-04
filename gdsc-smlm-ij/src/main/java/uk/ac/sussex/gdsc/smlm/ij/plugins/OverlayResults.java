@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -35,6 +34,7 @@ import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Label;
@@ -259,7 +259,7 @@ public class OverlayResults implements PlugIn {
       clearError();
 
       final ImageJTablePeakResults table;
-      TIntHashSet selectedId = null;
+      IntOpenHashSet selectedId = null;
       if (settings.showTable) {
         final boolean hasId = results.hasId();
 
@@ -270,7 +270,7 @@ public class OverlayResults implements PlugIn {
           final int idColumn = ImageJUtils.getColumn(tp, "Id");
           final int start = tp.getSelectionStart();
           if (start != -1 && idColumn != -1) {
-            selectedId = new TIntHashSet();
+            selectedId = new IntOpenHashSet();
             final int end = tp.getSelectionEnd();
             for (int index = start; index <= end; index++) {
               final String text = tp.getLine(index).split("\t")[idColumn];

@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -40,6 +39,7 @@ import ij.process.Blitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.awt.AWTEvent;
 import java.awt.Choice;
 import java.awt.Color;
@@ -108,7 +108,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
   private ImagePlus imp;
   private boolean preview;
   private Label label;
-  private TIntObjectHashMap<List<Coordinate>> actualCoordinates;
+  private Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
 
   private int currentSlice;
   private MaximaSpotFilter filter;

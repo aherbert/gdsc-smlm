@@ -24,8 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -34,6 +32,7 @@ import ij.gui.Overlay;
 import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntConsumer;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -131,7 +131,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static String tablePrefix;
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
-  private static AtomicReference<Pair<Integer, TIntObjectHashMap<PsfSpot[]>>> coordinateCache =
+  private static AtomicReference<Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>>> coordinateCache =
       new AtomicReference<>(Pair.of(-1, null));
 
   /** The filter result from the most recent benchmark analysis. */
@@ -139,7 +139,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       new AtomicReference<>();
 
   /** The actual coordinates for the simulation. */
-  private TIntObjectHashMap<PsfSpot[]> simulationCoords;
+  private Int2ObjectOpenHashMap<PsfSpot[]> simulationCoords;
   private double matchDistance;
   private double lowerMatchDistance;
   private Rectangle border;
@@ -320,7 +320,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final int id;
 
     /** The filter results. */
-    TIntObjectHashMap<FilterResult> filterResults;
+    Int2ObjectOpenHashMap<FilterResult> filterResults;
 
     /** The configuration for the spot filter. */
     FitEngineConfiguration config;
@@ -395,7 +395,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param config the config
      * @param spotFilter the spot filter
      */
-    BenchmarkSpotFilterResult(int simulationId, TIntObjectHashMap<FilterResult> filterResults,
+    BenchmarkSpotFilterResult(int simulationId, Int2ObjectOpenHashMap<FilterResult> filterResults,
         FitEngineConfiguration config, MaximaSpotFilter spotFilter) {
       id = filterResultsId.getAndIncrement();
       this.simulationId = simulationId;
@@ -669,15 +669,15 @@ public class BenchmarkSpotFilter implements PlugIn {
   private class OverlapWorker implements Runnable {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
-    final TIntObjectHashMap<List<Coordinate>> originalCoordinates;
-    final TIntObjectHashMap<PsfSpot[]> coordinates;
+    final Int2ObjectOpenHashMap<List<Coordinate>> originalCoordinates;
+    final Int2ObjectOpenHashMap<PsfSpot[]> coordinates;
     final Ticker overlapTicker;
 
     public OverlapWorker(BlockingQueue<Integer> jobs,
-        TIntObjectHashMap<List<Coordinate>> originalCoordinates, Ticker overlapTicker) {
+        Int2ObjectOpenHashMap<List<Coordinate>> originalCoordinates, Ticker overlapTicker) {
       this.jobs = jobs;
       this.originalCoordinates = originalCoordinates;
-      this.coordinates = new TIntObjectHashMap<>();
+      this.coordinates = new Int2ObjectOpenHashMap<>();
       this.overlapTicker = overlapTicker;
     }
 
@@ -798,7 +798,7 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @param time the time
      * @return The array list
      */
-    public PsfSpot[] getCoordinates(TIntObjectHashMap<List<Coordinate>> coords, int time) {
+    public PsfSpot[] getCoordinates(Int2ObjectOpenHashMap<List<Coordinate>> coords, int time) {
       final List<Coordinate> list1 = coords.get(time);
       if (list1 != null) {
         final PsfSpot[] list2 = new PsfSpot[list1.size()];
@@ -827,18 +827,18 @@ public class BenchmarkSpotFilter implements PlugIn {
     final ImageStack stack;
     final MaximaSpotFilter spotFilter;
     final float background;
-    final TIntObjectHashMap<PsfSpot[]> coords;
-    final TIntObjectHashMap<FilterResult> results;
+    final Int2ObjectOpenHashMap<PsfSpot[]> coords;
+    final Int2ObjectOpenHashMap<FilterResult> results;
 
     float[] data;
     long time;
 
     public Worker(BlockingQueue<Integer> jobs, ImageStack stack, MaximaSpotFilter spotFilter,
-        float background, TIntObjectHashMap<PsfSpot[]> coords) {
+        float background, Int2ObjectOpenHashMap<PsfSpot[]> coords) {
       this.jobs = jobs;
       this.stack = stack;
       this.spotFilter = (MaximaSpotFilter) spotFilter.copy();
-      this.results = new TIntObjectHashMap<>();
+      this.results = new Int2ObjectOpenHashMap<>();
       this.background = background;
       this.coords = coords;
 
@@ -1983,7 +1983,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       IJ.showStatus("Collecting results ...");
     }
 
-    TIntObjectHashMap<FilterResult> filterResults = null;
+    Int2ObjectOpenHashMap<FilterResult> filterResults = null;
     time = 0;
     for (int i = 0; i < workers.size(); i++) {
       final Worker w = workers.get(i);
@@ -1993,14 +1993,14 @@ public class BenchmarkSpotFilter implements PlugIn {
       } else {
         filterResults.putAll(w.results);
         w.results.clear();
-        w.results.compact();
+        w.results.trim();
       }
     }
     if (filterResults == null) {
       throw new NullPointerException();
     }
 
-    filterResults.compact();
+    filterResults.trim();
 
     if (!batchMode) {
       IJ.showStatus("Summarising results ...");
@@ -2023,12 +2023,12 @@ public class BenchmarkSpotFilter implements PlugIn {
    *
    * @return the coordinates
    */
-  private TIntObjectHashMap<PsfSpot[]> getSimulationCoordinates() {
-    Pair<Integer, TIntObjectHashMap<PsfSpot[]>> coords = coordinateCache.get();
+  private Int2ObjectOpenHashMap<PsfSpot[]> getSimulationCoordinates() {
+    Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>> coords = coordinateCache.get();
     if (coords.getKey() != simulationParameters.id) {
       // Always use float coordinates.
       // The Worker adds a pixel offset for the spot coordinates.
-      final TIntObjectHashMap<List<Coordinate>> coordinates =
+      final Int2ObjectOpenHashMap<List<Coordinate>> coordinates =
           ResultsMatchCalculator.getCoordinates(results, false);
 
       // Spot PSFs may overlap so we must determine the amount of signal overlap and amplitude
@@ -2049,9 +2049,8 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       // Process the frames
-      coordinates.forEachKey(value -> {
+      coordinates.keySet().forEach((IntConsumer) value -> {
         put(jobs, value);
-        return true;
       });
       // Finish all the worker threads by passing in a null job
       for (int i = 0; i < threads.size(); i++) {
@@ -2059,7 +2058,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       // Wait for all to finish
-      final TIntObjectHashMap<PsfSpot[]> actualCoordinates = new TIntObjectHashMap<>();
+      final Int2ObjectOpenHashMap<PsfSpot[]> actualCoordinates = new Int2ObjectOpenHashMap<>();
       for (int i = 0; i < threads.size(); i++) {
         try {
           threads.get(i).join();
@@ -2073,7 +2072,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
       // For testing
       final SimpleRegression regression = new SimpleRegression(false);
-      for (final PsfSpot[] spots : actualCoordinates.valueCollection()) {
+      for (final PsfSpot[] spots : actualCoordinates.values()) {
         for (final PsfSpot spot : spots) {
           regression.addData(spot.getAmplitude(),
               calculator.getAmplitude(spot.getPeakResult().getParameters()));
@@ -2096,10 +2095,12 @@ public class BenchmarkSpotFilter implements PlugIn {
    *
    * @param filterResults the filter results
    */
-  private static void addSpotsToMemory(TIntObjectHashMap<FilterResult> filterResults) {
+  private static void addSpotsToMemory(Int2ObjectOpenHashMap<FilterResult> filterResults) {
     final MemoryPeakResults results = new MemoryPeakResults();
     results.setName(TITLE + " TP " + truePositivesResultsSetId.getAndIncrement());
-    filterResults.forEachEntry((TIntObjectProcedure<FilterResult>) (peak, filterResult) -> {
+    filterResults.int2ObjectEntrySet().fastForEach(e -> {
+      final int peak = e.getIntKey();
+      final FilterResult filterResult = e.getValue();
       for (final ScoredSpot spot : filterResult.spots) {
         if (spot.match) {
           final float[] params =
@@ -2108,7 +2109,6 @@ public class BenchmarkSpotFilter implements PlugIn {
               null);
         }
       }
-      return true;
     });
     MemoryPeakResults.addResults(results);
   }
@@ -2121,15 +2121,13 @@ public class BenchmarkSpotFilter implements PlugIn {
    */
   private static double[][] histogramFailures(BenchmarkSpotFilterResult benchmarkFilterResult) {
     final StoredData data = new StoredData();
-    benchmarkFilterResult.filterResults
-        .forEachEntry((TIntObjectProcedure<FilterResult>) (peak, filterResult) -> {
-          for (final ScoredSpot spot : filterResult.spots) {
-            if (spot.match) {
-              data.add(spot.fails);
-            }
-          }
-          return true;
-        });
+    benchmarkFilterResult.filterResults.values().forEach(filterResult -> {
+      for (final ScoredSpot spot : filterResult.spots) {
+        if (spot.match) {
+          data.add(spot.fails);
+        }
+      }
+    });
 
     final double[][] h = MathUtils.cumulativeHistogram(data.getValues(), true);
 
@@ -2163,8 +2161,9 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
   }
 
-  private BenchmarkSpotFilterResult summariseResults(TIntObjectHashMap<FilterResult> filterResults,
-      FitEngineConfiguration config, MaximaSpotFilter spotFilter, boolean batchSummary) {
+  private BenchmarkSpotFilterResult summariseResults(
+      Int2ObjectOpenHashMap<FilterResult> filterResults, FitEngineConfiguration config,
+      MaximaSpotFilter spotFilter, boolean batchSummary) {
     final BenchmarkSpotFilterResult filterResult =
         new BenchmarkSpotFilterResult(simulationParameters.id, filterResults, config, spotFilter);
 
@@ -2191,12 +2190,11 @@ public class BenchmarkSpotFilter implements PlugIn {
     // Create the overall match score
     final double[] total = new double[3];
     final ArrayList<ScoredSpot> allSpots = new ArrayList<>();
-    filterResults.forEachValue(result -> {
+    filterResults.values().forEach(result -> {
       total[0] += result.result.getTruePositives();
       total[1] += result.result.getFalsePositives();
       total[2] += result.result.getFalseNegatives();
       allSpots.addAll(Arrays.asList(result.spots));
-      return true;
     });
     double tp = total[0];
     double fp = total[1];
@@ -2407,7 +2405,7 @@ public class BenchmarkSpotFilter implements PlugIn {
   @SuppressWarnings("null")
   private void showOverlay(ImagePlus imp, BenchmarkSpotFilterResult filterResult) {
     final Overlay o = new Overlay();
-    filterResult.filterResults.forEachValue(result -> {
+    filterResult.filterResults.values().forEach(result -> {
       final int size = result.spots.length;
 
       float[] tx = null;
@@ -2456,7 +2454,6 @@ public class BenchmarkSpotFilter implements PlugIn {
         }
         SpotFinderPreview.addRoi(result.frame, o, nx, ny, npoints, Color.yellow);
       }
-      return true;
     });
 
     imp.setOverlay(o);

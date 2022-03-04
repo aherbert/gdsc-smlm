@@ -24,15 +24,15 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.gui.Line;
 import ij.gui.Plot;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Label;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -190,7 +190,7 @@ public class FilterMolecules implements PlugIn {
     private int[] lengths; // Length of trace
     private int[] ids; // trace id
 
-    private TIntHashSet filtered;
+    private IntOpenHashSet filtered;
     private Label filteredLabel;
     private double maxDiffusionCoefficientHistogram;
     private double maxLengthHistogram;
@@ -315,7 +315,7 @@ public class FilterMolecules implements PlugIn {
       gd.addSlider("Minimum_length", min, max, settings.minimumLength, 1);
 
       // Compute initial filtered set.
-      filtered = new TIntHashSet();
+      filtered = new IntOpenHashSet();
       // Add label to dialog containing the set size.
       gd.addMessage("");
       filteredLabel = (Label) gd.getMessage();
@@ -503,8 +503,8 @@ public class FilterMolecules implements PlugIn {
 
     if (settings.removeSingles) {
       results.removeIf(p -> p.getId() <= 0);
-      final TIntIntHashMap count = new TIntIntHashMap(results.size());
-      results.forEach((PeakResultProcedure) r -> count.adjustOrPutValue(r.getId(), 1, 1));
+      final Int2IntOpenHashMap count = new Int2IntOpenHashMap(results.size());
+      results.forEach((PeakResultProcedure) r -> count.addTo(r.getId(), 1));
       results.removeIf(p -> count.get(p.getId()) == 1);
       if (results.isEmpty()) {
         IJ.error(TITLE, "No results after filtering singles");

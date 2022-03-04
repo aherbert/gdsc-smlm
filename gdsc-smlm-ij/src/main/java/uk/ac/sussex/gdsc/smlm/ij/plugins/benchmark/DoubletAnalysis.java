@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -35,6 +34,7 @@ import ij.gui.Plot;
 import ij.gui.PointRoi;
 import ij.plugin.PlugIn;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
@@ -542,7 +542,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     volatile boolean finished;
     final BlockingQueue<Integer> jobs;
     final ImageStack stack;
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates;
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates;
     final int fitting;
     final FitConfiguration fitConfig;
     final MaximaSpotFilter spotFilter;
@@ -576,7 +576,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      * @param ticker the ticker
      */
     Worker(BlockingQueue<Integer> jobs, ImageStack stack,
-        TIntObjectHashMap<List<Coordinate>> actualCoordinates, FitEngineConfiguration config,
+        Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates, FitEngineConfiguration config,
         Overlay overlay, Ticker ticker) {
       this.jobs = jobs;
       this.stack = stack;
@@ -1925,14 +1925,11 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     final ImageStack stack = imp.getImageStack();
 
     // Get the coordinates per frame
-    final TIntObjectHashMap<List<Coordinate>> actualCoordinates =
+    final Int2ObjectOpenHashMap<List<Coordinate>> actualCoordinates =
         ResultsMatchCalculator.getCoordinates(results, false);
 
     final long[] sumCount = new long[1];
-    actualCoordinates.forEachValue(list -> {
-      sumCount[0] += list.size();
-      return true;
-    });
+    actualCoordinates.values().forEach(list -> sumCount[0] += list.size());
     final double density = 1e6 * sumCount[0]
         / (simulationParameters.pixelPitch * simulationParameters.pixelPitch
             * results.getBounds().getWidth() * results.getBounds().getHeight()
@@ -1956,10 +1953,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
     // Fit the frames
     final long startTime = System.nanoTime();
-    actualCoordinates.forEachKey(frame -> {
-      put(jobs, frame);
-      return true;
-    });
+    actualCoordinates.keySet().forEach(frame -> put(jobs, frame));
     // Finish all the worker threads by passing in a null job
     for (int i = 0; i < threads.size(); i++) {
       put(jobs, -1);

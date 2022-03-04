@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -40,6 +39,7 @@ import ij.plugin.filter.GaussianBlur;
 import ij.plugin.frame.PlugInFrame;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -176,7 +176,7 @@ public class SpotAnalysis extends PlugInFrame
   private final TreeSet<Spot> onFrames = new TreeSet<>();
   private final IntArrayList candidateFrames = new IntArrayList();
 
-  private final TIntObjectHashMap<Trace> traces = new TIntObjectHashMap<>();
+  private final Int2ObjectOpenHashMap<Trace> traces = new Int2ObjectOpenHashMap<>();
   private int id;
   private boolean updated;
   private int blurCount;

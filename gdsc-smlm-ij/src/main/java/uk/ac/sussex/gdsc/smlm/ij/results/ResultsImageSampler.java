@@ -24,12 +24,12 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.results;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Overlay;
 import ij.gui.PointRoi;
 import ij.process.ImageProcessor;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -308,7 +308,7 @@ public class ResultsImageSampler {
    * Creates the result samples. Do this by storing the coordinates at the region index.
    */
   private void createResultSamples() {
-    final TLongObjectHashMap<ResultsSample> map = new TLongObjectHashMap<>(results.size());
+    final Long2ObjectOpenHashMap<ResultsSample> map = new Long2ObjectOpenHashMap<>(results.size());
     ResultsSample next = ResultsSample.create(-1);
     // For SNR computation
     Object[] pixelArray = stack.getImageArray();
@@ -349,7 +349,7 @@ public class ResultsImageSampler {
 
     // Create an array of all the sample entries.
     // This is used to sample regions by density.
-    data = map.values(new ResultsSample[map.size()]);
+    data = map.values().toArray(new ResultsSample[map.size()]);
   }
 
   /**

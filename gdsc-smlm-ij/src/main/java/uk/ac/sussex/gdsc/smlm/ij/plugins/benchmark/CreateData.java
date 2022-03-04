@@ -25,8 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
 import com.google.protobuf.TextFormat;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -40,7 +38,9 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import ij.text.TextWindow;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import java.awt.Checkbox;
 import java.awt.Rectangle;
@@ -334,8 +334,9 @@ public class CreateData implements PlugIn {
   private double hwhm;
   private PSF psf;
 
-  private TIntHashSet movingMolecules;
-  private TIntIntHashMap idToCompound;
+  private IntOpenHashSet movingMolecules;
+  private int movingMoleculesInitialCapacity;
+  private Int2IntOpenHashMap idToCompound;
   private ArrayList<String> compoundNames;
   private boolean maskListContainsStacks;
 
@@ -986,7 +987,7 @@ public class CreateData implements PlugIn {
 
       // Map the fluorophore ID to the compound for mixtures
       if (compounds.size() > 1) {
-        idToCompound = new TIntIntHashMap(fluorophores.size());
+        idToCompound = new Int2IntOpenHashMap(fluorophores.size());
         for (final FluorophoreSequenceModel l : fluorophores) {
           idToCompound.put(l.getId(), l.getLabel());
         }
@@ -995,8 +996,7 @@ public class CreateData implements PlugIn {
       IJ.showStatus("Creating localisations ...");
 
       // TODO - Output a molecule Id for each fluorophore if using compound molecules. This allows
-      // analysis
-      // of the ratio of trimers, dimers, monomers, etc that could be detected.
+      // analysis of the ratio of trimers, dimers, monomers, etc that could be detected.
 
       totalSteps = checkTotalSteps(totalSteps, fluorophores);
       if (totalSteps == 0) {
@@ -1916,7 +1916,8 @@ public class CreateData implements PlugIn {
     // final double gain = new CreateDataSettingsHelper(settings).getTotalGainSafe();
     sortLocalisationsByIdThenTime(localisations);
     final int[] idList = getIds(localisations);
-    movingMolecules = new TIntHashSet(idList.length);
+    movingMoleculesInitialCapacity = idList.length;
+    movingMolecules = new IntOpenHashSet(movingMoleculesInitialCapacity);
     int index = 0;
     for (final int id : idList) {
       final int fromIndex = findIndexById(localisations, index, id);
@@ -3336,8 +3337,7 @@ public class CreateData implements PlugIn {
       return null;
     }
     // movingMolecules will be created with an initial capacity to hold all the unique IDs
-    final TIntHashSet idSet =
-        new TIntHashSet((movingMolecules != null) ? movingMolecules.capacity() : 0);
+    final IntOpenHashSet idSet = new IntOpenHashSet(movingMoleculesInitialCapacity);
     for (final LocalisationModel l : localisations) {
       idSet.add(l.getId());
     }
