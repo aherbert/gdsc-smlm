@@ -104,6 +104,7 @@ public class TraceExporter implements PlugIn {
     double wobble;
     int format;
     boolean showTraceLengths;
+    boolean save;
 
     Settings() {
       // Set defaults
@@ -120,6 +121,7 @@ public class TraceExporter implements PlugIn {
       wobble = source.wobble;
       format = source.format;
       showTraceLengths = source.showTraceLengths;
+      save = source.save;
     }
 
     Settings copy() {
@@ -144,7 +146,7 @@ public class TraceExporter implements PlugIn {
   }
 
   private enum ExportFormat implements NamedObject {
-    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS");
+    SPOT_ON("Spot-On"), ANA_DNA("anaDDA"), VB_SPT("vbSPT"), NOBIAS("NOBIAS"), NONE("None");
 
     private final String name;
 
@@ -193,13 +195,15 @@ public class TraceExporter implements PlugIn {
     gd.addDirectoryField("Directory", settings.directory, 30);
     gd.addNumericField("Min_length", settings.minLength, 0);
     gd.addNumericField("Max_length", settings.maxLength, 0);
-    gd.addMessage("Specify the maximum jump allowed within a trace.\n"
-        + "Traces with larger jumps will be split.");
+    gd.addMessage("Specify the maximum frame jump allowed within a trace.\n"
+        + "Traces with larger gaps will be split. Set to zero to disable\n"
+        + "(no splitting). Set to 1 to require continuous tracks.");
     gd.addNumericField("Max_jump", settings.maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
     gd.addChoice("Format", Settings.formatNames, settings.format);
     gd.addCheckbox("Histogram_trace_lengths", settings.showTraceLengths);
+    gd.addCheckbox("Save_to_memory", settings.save);
     gd.addHelp(HelpUrls.getUrl("trace-exporter"));
     gd.showDialog();
     if (gd.wasCanceled()) {
@@ -212,6 +216,7 @@ public class TraceExporter implements PlugIn {
     settings.wobble = Math.max(0, gd.getNextNumber());
     settings.format = gd.getNextChoiceIndex();
     settings.showTraceLengths = gd.getNextBoolean();
+    settings.save = gd.getNextBoolean();
     settings.save();
     return true;
   }
@@ -316,11 +321,16 @@ public class TraceExporter implements PlugIn {
       exportVbSpt(results);
     } else if (settings.format == 1) {
       exportAnaDda(results);
-    } else {
+    } else if (settings.format == 0) {
       exportSpotOn(results);
     }
     ImageJUtils.log("Exported %s: %s in %s", results.getName(),
         TextUtils.pleural(results.size(), "localisation"), TextUtils.pleural(tracks, "track"));
+
+    if (settings.save) {
+      results.setName(results.getName() + " (exported)");
+      MemoryPeakResults.addResults(results);
+    }
 
     if (settings.showTraceLengths) {
       // We store and index (count-1)

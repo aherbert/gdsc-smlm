@@ -742,7 +742,7 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
      - The maximum length of each trace. Any trace longer than this will not be split into sub-traces. This option can be used to increase the number of short traces.
 
    * - Max jump
-     - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique Id.
+     - The maximum jump allowed within a trace. If a jump between frames is larger than this then the trace will be split into two sub-traces and exported with a unique Id. Set to zero to disable (no splitting). Set to one to require continuous tracks.
 
    * - Wobble
      - Add a random Gaussian deviation to the coordinates. This can be used to add randomness to simulated data.
@@ -752,6 +752,9 @@ When the ``Trace Exporter`` is run a dialog is presented allowing the export to 
 
    * - Histogram trace lengths
      - Plot a histogram of the length of traces for each exported dataset.
+
+   * - Save to memory
+     - Save each exported dataset to memory. The results will have ``(exported)`` appended to the name.
 
 
 .. index:: Available Formats
@@ -882,6 +885,12 @@ The cell contents can be displayed for verification using::
 Execute NOBIAS HDP-HMM Module using::
 
     out = NOBIAS(input.data,'pixelsize',input.Params.pixelsize,'frametime',Params.frametime)
+
+
+None
+^^^^
+
+Do not export the traces to file. The other output options of the exporter will receive each dataset, e.g. save to memory.
 
 
 .. index:: Exporting Datasets
