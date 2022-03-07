@@ -71,6 +71,9 @@ Place all of the following ``jar`` files into the ``ImageJ`` plugins directory:
    * - ejml
      - Efficient Java Matrix Library for linear algebra. Requires version 0.24. This is the version used by ``Fiji``.
 
+   * - fastutil-core
+     - Library for type-specific Java collections.
+
    * - JTransforms
      - Library for multi-threaded Fourier transforms.
 
