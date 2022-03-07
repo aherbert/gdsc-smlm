@@ -848,7 +848,12 @@ where the rows define the coordinates in two or three dimensions at each timeste
      - The z position (in |micro|\ m). Only included if the results set contains non-zero z coordinates.
 
    * - Frame
-     - The frame. This is not specified by the vbSPT format. It is added to the required XYZ data to allow localisations to be correctly identified and exported following analysis by vbSPT. It is ignored by vbSPT analysis which uses the first 2 or 3 columns only.
+     - The frame. This is not specified by the vbSPT format.
+
+   * - ID
+     - The track ID. This is not specified by the vbSPT format.
+
+Note: The Frame and ID are not specified by the vbSPT format. They are added to the required XYZ data to allow localisations to be identified using the key ``Frame:ID``, facilitating export of the vbSPT results with categories assigned to each result. It is ignored by vbSPT analysis which uses the first 2 or 3 columns only.
 
 The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a single cell array named ``tracks`` of 1 row by `n` columns, where `n` is the number of tracks. It can be specified as the input within the ``vbSPT`` run input file using::
 
@@ -868,7 +873,7 @@ NOBIAS Localisations
 
 The `NOBIAS <https://github.com/BiteenMatlab/NOBIAS>`_ localisations file format. This is a Matlab matrix file containing the track IDs and jump steps in the X and Y dimensions.
 
-The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`.
+The file uses Matlab's Mat5 binary format with the extension ``.mat``. The file has a struct named ``data``. This has an array named ``TrID`` of `n` rows by 1 column, where `n` is the number of jump steps, representing the track IDs. The export uses the original track IDs from the tracks, not a sequence starting from 1. A second array named ``obs`` of 2 by `n` columns represents the track jump sizes in pixels. To allow motion blur correction, a third array named ``obs_corr`` matching the size of ``obs`` is provided. This contains the product of consecutive steps in each dimension, e.g. x[i]*x[i+1] for all i+1 < n. The value at the end of the array for each dimension is `nan`. For convenience an array named ``Frame`` is added to the data corresponding to the start frame of each jump observation. This allows the jump to be identified in the original results using the key ``Frame:ID``, facilitating export of the NOBIAS results with categories assigned to each result.
 
 Note: The apparent transpose of columns and rows for the two named fields matches the example data format provided by NOBIAS. The ``TrID`` matrix is used as a 1D array and columns*rows must equal `n`.
 
@@ -899,6 +904,14 @@ Exporting Datasets
 ~~~~~~~~~~~~~~~~~~
 
 When the export parameters have been chosen the plugin presents a selection dialog of all the results sets that are available. When the results have been selected they are exported to a file in the output directory named using the results set name and the appropriate file extension.
+
+
+.. index:: ! Track Population Importer
+
+Track Population Importer
+--------------
+
+TODO
 
 
 .. index:: ! Filter Results

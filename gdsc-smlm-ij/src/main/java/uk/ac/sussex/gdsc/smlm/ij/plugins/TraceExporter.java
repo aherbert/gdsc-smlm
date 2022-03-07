@@ -563,8 +563,8 @@ public class TraceExporter implements PlugIn {
     // 2. y coordinate (μm)
     // 3. z coordinate (μm)
     //
-    // Note: An extra column is added containing the frame. This allows results to
-    // be uniquely identified using frame,x,y,z
+    // Note: Extra columns are added containing the frame and track ID. This allows results to
+    // be uniquely identified using the key: 'Frame:Id'
 
     // Count the IDs. Each new result ID will increment the count.
     final FrameCounter idCounter = new FrameCounter(results.getFirst().getId() - 1);
@@ -591,7 +591,7 @@ public class TraceExporter implements PlugIn {
         idCounter.increment();
         list.clear();
       }
-      list.add(new double[] {x, y, z, result.getFrame()});
+      list.add(new double[] {x, y, z, result.getFrame(), result.getId()});
     });
     addVbSptTrack(out, idCounter.getCount() - 1, list, is3d);
 
@@ -618,20 +618,27 @@ public class TraceExporter implements PlugIn {
     }
     // Create the matrix
     final int rows = list.size();
-    final Matrix m = Mat5.newMatrix(rows, is3d ? 4 : 3);
+    final Matrix m = Mat5.newMatrix(rows, is3d ? 5 : 4);
     // Set up column offsets
     final int col1 = rows * 1;
     final int col2 = rows * 2;
     final int col3 = rows * 3;
+    final int col4 = rows * 4;
     for (int i = 0; i < rows; i++) {
       final double[] xyz = list.unsafeGet(i);
+      // X,Y
       m.setDouble(i, xyz[0]);
       m.setDouble(i + col1, xyz[1]);
       if (is3d) {
+        // Z
         m.setDouble(i + col2, xyz[2]);
+        // Frame,Track
         m.setDouble(i + col3, xyz[3]);
+        m.setDouble(i + col4, xyz[4]);
       } else {
+        // Frame,Track
         m.setDouble(i + col2, xyz[3]);
+        m.setDouble(i + col3, xyz[4]);
       }
     }
     cell.set(index, m);
@@ -668,9 +675,13 @@ public class TraceExporter implements PlugIn {
     // in the event of a single track
     idCounter.advanceAndReset(idCounter.currentFrame() + 1);
 
-    // Collect the jumps for the tracks
+    // Export the original frame.
+    // Allows mapping the NOBIAS results: key=[T,ID] -> value=Category
+
+    // Collect the jumps for the tracks.
+    // Label the jump with the start frame.
     final LocalList<double[]> list = new LocalList<>(results.size());
-    final double[] last = new double[3];
+    final double[] last = new double[4];
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
       if (idCounter.advance(result.getId())) {
         last[0] = x;
@@ -679,12 +690,14 @@ public class TraceExporter implements PlugIn {
         // NOBIAS is robust to this as it checks for a change in ID using: if (TrID(t)~=TrID(t-1))
         last[2] = result.getId();
         //last[2] = idCounter.incrementAndGet();
+        last[3] = result.getFrame();
       } else {
         last[0] = x - last[0];
         last[1] = y - last[1];
         list.add(last.clone());
         last[0] = x;
         last[1] = y;
+        last[3] = result.getFrame();
       }
     });
 
@@ -694,11 +707,14 @@ public class TraceExporter implements PlugIn {
     final int rows = list.size();
 
     final Matrix trid = Mat5.newMatrix(rows, 1, MatlabType.Int32);
+    final Matrix frame = Mat5.newMatrix(rows, 1, MatlabType.Int32);
     for (int i = 0; i < rows; i++) {
       final double[] xyz = list.unsafeGet(i);
       trid.setInt(i, (int) xyz[2]);
+      frame.setInt(i, (int) xyz[3]);
     }
     data.set("TrID", trid);
+    data.set("Frame", frame);
 
     final Matrix obs = Mat5.newMatrix(2, rows);
     for (int i = 0; i < rows; i++) {
