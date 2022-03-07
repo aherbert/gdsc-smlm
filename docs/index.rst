@@ -176,6 +176,9 @@ Results Plugins
    * - :ref:`results_plugins:Trace Exporter`
      - Export traced datasets to file.
 
+   * - :ref:`results_plugins:Track Population Importer`
+     - Imports track categories from file and assigns them to an existing track dataset.
+
    * - :ref:`results_plugins:Filter Results`
      - Filters a list of localisations using signal strength, coordinate shift and PSF width.
 

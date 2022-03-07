@@ -891,6 +891,12 @@ Execute NOBIAS HDP-HMM Module using::
 
     out = NOBIAS(input.data,'pixelsize',input.Params.pixelsize,'frametime',Params.frametime)
 
+Export the state sequence as categories using::
+
+    csvwrite('tracks.csv', horzcat(input.data.Frame, input.data.TrID, out.reord_stateSeq'));
+
+The categories in the ``tracks.csv`` file can be applied to a results set using the ``Track Population Importer`` (see section :numref:`%s <results_plugins:Track Population Importer>`).
+
 
 None
 ^^^^
@@ -909,9 +915,32 @@ When the export parameters have been chosen the plugin presents a selection dial
 .. index:: ! Track Population Importer
 
 Track Population Importer
---------------
+-------------------------
 
-TODO
+Imports track population categories from file and assigns them to an existing track dataset. The input text datafile consists of records of ``Frame,ID,Category``. The plugin loads the file and sets the category on the corresponding localisations in a selected dataset using the unique key ``Frame:ID``. An error will occur if the file or the selected dataset contain duplicate keys, or if the mapping file contains a key that is not present in the selected dataset. Note: Any track ID or category ID that is not above zero is ignored since the GDSC SMLM software uses identifiers above zero for assigned tracks and categories.
+
+The plugin will record the number of localisations that were assigned categories. Any localisations that do not have an assigned category can be set to zero, or left unchanged.
+
+The following options are available:
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+
+   * - Filename
+     - The name of the input mapping file. Contains records of ``Frame,ID,Category``.
+
+   * - Results
+     - The name of the result set.
+
+   * - Ignore unmapped
+     - Set to ``true`` to leave any unmapped localisations unchanged. The default is to set the category to zero.
+
+   * - New dataset
+     - Set to ``true`` to create a new dataset with the label ``(categorised)`` appended to the name; the original dataset will be unchanged. The default is to update the dataset in place.
 
 
 .. index:: ! Filter Results
