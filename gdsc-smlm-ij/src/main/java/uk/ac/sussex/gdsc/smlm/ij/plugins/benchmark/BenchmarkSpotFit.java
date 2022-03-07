@@ -80,6 +80,7 @@ import uk.ac.sussex.gdsc.core.utils.Correlator;
 import uk.ac.sussex.gdsc.core.utils.FastCorrelator;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SortUtils;
@@ -474,7 +475,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int id;
 
     /** The fit results. */
-    Int2ObjectOpenHashMap<FilterCandidates> fitResults;
+    CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults;
 
     /** The distance in pixels. */
     double distanceInPixels;
@@ -503,7 +504,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @param simulationId the simulation id
      * @param fitResults the fit results
      */
-    BenchmarkSpotFitResult(int simulationId, Int2ObjectOpenHashMap<FilterCandidates> fitResults) {
+    BenchmarkSpotFitResult(int simulationId,
+        CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults) {
       id = fitResultsId.incrementAndGet();
       this.simulationId = simulationId;
       this.fitResults = fitResults;
@@ -1521,7 +1523,8 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       results.convertToPreferredUnits();
     }
 
-    final Int2ObjectOpenHashMap<FilterCandidates> fitResults = new Int2ObjectOpenHashMap<>();
+    final CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults =
+        new CustomInt2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       fitResults.putAll(w.results);
     }
@@ -1616,7 +1619,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @param fitting the fitting
    * @return The filter candidate data
    */
-  private CandidateData subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults,
+  private CandidateData subsetFilterResults(CustomInt2ObjectOpenHashMap<FilterResult> filterResults,
       int fitting) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
@@ -1627,9 +1630,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final Int2ObjectOpenHashMap<FilterCandidates> subset = new Int2ObjectOpenHashMap<>();
     final double[] fX = new double[2];
     final int[] nX = new int[2];
-    filterResults.int2ObjectEntrySet().fastForEach(e -> {
-      final int frame = e.getIntKey();
-      final FilterResult result = e.getValue();
+    filterResults.forEach((int frame, FilterResult result) -> {
       // Determine the number of positives to find. This score may be fractional.
       fX[0] += result.result.getTruePositives();
       fX[1] += result.result.getFalsePositives();
@@ -1774,13 +1775,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final int[] multiDoubletStatus = new int[singleStatus.length];
 
     // Easier to materialise the values since we have a lot of non final variables to manipulate
-    final Int2ObjectOpenHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
+    final CustomInt2ObjectOpenHashMap<FilterCandidates> fitResults = spotFitResults.fitResults;
     final int[] frames = new int[fitResults.size()];
     final FilterCandidates[] candidates = new FilterCandidates[fitResults.size()];
     final int[] counter = new int[1];
-    fitResults.int2ObjectEntrySet().fastForEach(e -> {
-      frames[counter[0]] = e.getIntKey();
-      candidates[counter[0]] = e.getValue();
+    fitResults.forEach((int key, FilterCandidates value) -> {
+      frames[counter[0]] = key;
+      candidates[counter[0]] = value;
       counter[0]++;
     });
 

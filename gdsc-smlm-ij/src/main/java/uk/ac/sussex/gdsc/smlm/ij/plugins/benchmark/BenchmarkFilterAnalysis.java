@@ -38,8 +38,6 @@ import ij.gui.PlotWindow;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Checkbox;
@@ -99,6 +97,7 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.RampedScore;
 import uk.ac.sussex.gdsc.core.utils.SettingsList;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
@@ -106,6 +105,7 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
+import uk.ac.sussex.gdsc.core.utils.function.IntObjConsumer;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.data.config.FitProtos.PrecisionMethod;
 import uk.ac.sussex.gdsc.smlm.data.config.TemplateProtos.TemplateSettings;
@@ -225,7 +225,7 @@ public class BenchmarkFilterAnalysis
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<
-      Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>>> coordinateCache =
+      Pair<Integer, CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>>> coordinateCache =
           new AtomicReference<>(Pair.of(-1, null));
 
   /** A reference to the last prepared fit results. */
@@ -237,7 +237,7 @@ public class BenchmarkFilterAnalysis
       new AtomicReference<>();
 
   /** The actual coordinates from the simulation. */
-  private Int2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
+  private CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]> actualCoordinates;
 
   /** The prepared fit result data. */
   private FitResultData fitResultData;
@@ -1778,14 +1778,13 @@ public class BenchmarkFilterAnalysis
   /**
    * Abstract class to allow the array storage to be reused.
    */
-  private abstract class CustomTIntObjectProcedure
-      implements Consumer<Int2ObjectMap.Entry<UniqueIdPeakResult[]>> {
+  private abstract class CustomIntObjectProcedure implements IntObjConsumer<UniqueIdPeakResult[]> {
     float[] x;
     float[] y;
     float[] x2;
     float[] y2;
 
-    CustomTIntObjectProcedure(float[] x, float[] y, float[] x2, float[] y2) {
+    CustomIntObjectProcedure(float[] x, float[] y, float[] x2, float[] y2) {
       this.x = x;
       this.y = y;
       this.x2 = x2;
@@ -2588,7 +2587,7 @@ public class BenchmarkFilterAnalysis
   private MultiPathFitResults[] readResults() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean update = false;
-    Pair<Integer, Int2ObjectOpenHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
+    Pair<Integer, CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>> coords = coordinateCache.get();
 
     if (coords.getKey() != simulationParameters.id) {
       coords = Pair.of(simulationParameters.id, getCoordinates(results));
@@ -2806,9 +2805,10 @@ public class BenchmarkFilterAnalysis
     return localFitResultData.resultsList;
   }
 
-  private static Int2ObjectOpenHashMap<UniqueIdPeakResult[]>
+  private static CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]>
       getCoordinates(MemoryPeakResults results) {
-    final Int2ObjectOpenHashMap<UniqueIdPeakResult[]> coords = new Int2ObjectOpenHashMap<>();
+    final CustomInt2ObjectOpenHashMap<UniqueIdPeakResult[]> coords =
+        new CustomInt2ObjectOpenHashMap<>();
     if (results.size() > 0) {
       // Do not use HashMap directly to build the coords object since there
       // will be many calls to getEntry(). Instead sort the results and use
@@ -7552,45 +7552,42 @@ public class BenchmarkFilterAnalysis
       }
 
       // Add the results to the lists
-      actualCoordinates.int2ObjectEntrySet()
-          .fastForEach(new CustomTIntObjectProcedure(x, y, x2, y2) {
-            @Override
-            public void accept(Entry<UniqueIdPeakResult[]> e) {
-              final int frame = e.getIntKey();
-              final UniqueIdPeakResult[] results = e.getValue();
-              int c1 = 0;
-              int c2 = 0;
-              if (x.length <= results.length) {
-                x = new float[results.length];
-                y = new float[results.length];
-              }
-              if (x2.length <= results.length) {
-                x2 = new float[results.length];
-                y2 = new float[results.length];
-              }
+      actualCoordinates.forEach(new CustomIntObjectProcedure(x, y, x2, y2) {
+        @Override
+        public void accept(int frame, UniqueIdPeakResult[] results) {
+          int c1 = 0;
+          int c2 = 0;
+          if (x.length <= results.length) {
+            x = new float[results.length];
+            y = new float[results.length];
+          }
+          if (x2.length <= results.length) {
+            x2 = new float[results.length];
+            y2 = new float[results.length];
+          }
 
-              for (int i = 0; i < results.length; i++) {
-                // Ignore those that were matched by TP
-                if (actual.contains(results[i].uniqueId)) {
-                  continue;
-                }
-
-                if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit)) {
-                  x2[c2] = results[i].getXPosition();
-                  y2[c2++] = results[i].getYPosition();
-                } else {
-                  x[c1] = results[i].getXPosition();
-                  y[c1++] = results[i].getYPosition();
-                }
-              }
-              if (c1 != 0) {
-                SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.yellow);
-              }
-              if (c2 != 0) {
-                SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
-              }
+          for (int i = 0; i < results.length; i++) {
+            // Ignore those that were matched by TP
+            if (actual.contains(results[i].uniqueId)) {
+              continue;
             }
-          });
+
+            if (checkBorder && outsideBorder(results[i], border, xlimit, ylimit)) {
+              x2[c2] = results[i].getXPosition();
+              y2[c2++] = results[i].getYPosition();
+            } else {
+              x[c1] = results[i].getXPosition();
+              y[c1++] = results[i].getYPosition();
+            }
+          }
+          if (c1 != 0) {
+            SpotFinderPreview.addRoi(frame, o, x, y, c1, Color.yellow);
+          }
+          if (c2 != 0) {
+            SpotFinderPreview.addRoi(frame, o, x2, y2, c2, Color.orange);
+          }
+        }
+      });
     }
 
     imp.setOverlay(o);

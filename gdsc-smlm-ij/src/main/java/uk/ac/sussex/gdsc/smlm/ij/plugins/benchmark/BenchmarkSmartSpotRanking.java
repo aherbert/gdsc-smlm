@@ -61,6 +61,7 @@ import uk.ac.sussex.gdsc.core.threshold.FloatHistogram;
 import uk.ac.sussex.gdsc.core.threshold.Histogram;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomInt2ObjectOpenHashMap;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
@@ -786,7 +787,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
     IJ.showStatus("Collecting results ...");
 
-    final Int2ObjectOpenHashMap<RankResults> rankResults = new Int2ObjectOpenHashMap<>();
+    final CustomInt2ObjectOpenHashMap<RankResults> rankResults =
+        new CustomInt2ObjectOpenHashMap<>();
     for (final Worker w : workers) {
       rankResults.putAll(w.results);
     }
@@ -803,7 +805,8 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
    * @param filterResults the filter results
    * @return The filter candidate data
    */
-  private CandidateData subsetFilterResults(Int2ObjectOpenHashMap<FilterResult> filterResults) {
+  private CandidateData
+      subsetFilterResults(CustomInt2ObjectOpenHashMap<FilterResult> filterResults) {
     // Convert fractions from percent
     final double f1 = Math.min(1, settings.fractionPositives / 100.0);
     final double f2 = settings.fractionNegativesAfterAllPositives / 100.0;
@@ -811,9 +814,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final Int2ObjectOpenHashMap<FilterCandidates> subset = new Int2ObjectOpenHashMap<>();
     final double[] fX = new double[2];
     final int[] nX = new int[2];
-    filterResults.int2ObjectEntrySet().fastForEach(e -> {
-      final int frame = e.getIntKey();
-      final FilterResult result = e.getValue();
+    filterResults.forEach((int frame, FilterResult result) -> {
       // Determine the number of positives to find. This score may be fractional.
       fX[0] += result.result.getTruePositives();
       fX[1] += result.result.getFalsePositives();
@@ -927,7 +928,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     }
   }
 
-  private void summariseResults(Int2ObjectOpenHashMap<RankResults> rankResults,
+  private void summariseResults(CustomInt2ObjectOpenHashMap<RankResults> rankResults,
       CandidateData candidateData) {
     // Summarise the ranking results.
     final StringBuilder sb = new StringBuilder(filterResult.resultPrefix);
@@ -970,9 +971,9 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
     final int[] frames = new int[rankResults.size()];
     final RankResults[] rankResultsArray = new RankResults[rankResults.size()];
     final int[] counter = new int[1];
-    rankResults.int2ObjectEntrySet().fastForEach(e -> {
-      frames[counter[0]] = e.getIntKey();
-      rankResultsArray[counter[0]] = e.getValue();
+    rankResults.forEach((int key, RankResults value) -> {
+      frames[counter[0]] = key;
+      rankResultsArray[counter[0]] = value;
       counter[0]++;
     });
 

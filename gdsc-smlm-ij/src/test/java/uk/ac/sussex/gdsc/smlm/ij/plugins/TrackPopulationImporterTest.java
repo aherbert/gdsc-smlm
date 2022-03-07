@@ -36,7 +36,7 @@ import java.util.BitSet;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationImporter.CustomLong2IntOpenHashMap;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomLong2IntOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.IdCategoryPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;

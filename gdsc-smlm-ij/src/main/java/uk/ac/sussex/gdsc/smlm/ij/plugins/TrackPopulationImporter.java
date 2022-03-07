@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.apache.commons.rng.core.util.NumberFactory;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.utils.OpenHashMaps.CustomLong2IntOpenHashMap;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.MemoryResultsList;
 import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
@@ -52,66 +53,6 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class TrackPopulationImporter implements PlugIn {
   private static final String TITLE = "Track Population Importer";
   private static final Pattern CSV = Pattern.compile(", *");
-
-  // Customise the Long2IntMap to add a zero-allocation forEach entry method.
-  // This allows changing the map implementation, for example if the map needs
-  // to be larger than the maximum table size allowed for the OpenHashMap (uses
-  // a power of 2 table). Note Koloboke collections offers a forEach(key, value)
-  // method so the implementation could be switched to that. Currently koloboke
-  // is not an imported dependency (mainly due to the very large size of the jar file).
-
-  /**
-   * Customisation of Long2IntMap.
-   */
-  interface CustomLong2IntMap extends Long2IntMap {
-    /**
-     * Specialised consumer for a long-int pair.
-     */
-    interface LongIntConsumer {
-      /**
-       * Accept the pair.
-       *
-       * @param a Value a
-       * @param b Value b
-       */
-      void accept(long a, int b);
-    }
-
-    /**
-     * Perform the action for each entry.
-     *
-     * @param action the action
-     */
-    void forEach(LongIntConsumer action);
-  }
-
-  /**
-   * Customisation of Long2IntOpenHashMap.
-   */
-  static class CustomLong2IntOpenHashMap extends Long2IntOpenHashMap implements CustomLong2IntMap {
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Create an instance.
-     *
-     * @param expected the expected number of entries
-     */
-    CustomLong2IntOpenHashMap(int expected) {
-      super(expected);
-    }
-
-    @Override
-    public void forEach(LongIntConsumer action) {
-      if (containsNullKey) {
-        action.accept(key[n], value[n]);
-      }
-      for (int pos = n; pos-- != 0;) {
-        if (!((key[pos]) == (0))) {
-          action.accept(key[pos], value[pos]);
-        }
-      }
-    }
-  }
 
   /** The plugin settings. */
   private Settings settings;
@@ -203,7 +144,7 @@ public class TrackPopulationImporter implements PlugIn {
       final Long2IntMap resultMap = createResultMap(data);
 
       // Read the mapping 'Frame:ID -> Category'
-      CustomLong2IntMap categoryMap;
+      CustomLong2IntOpenHashMap categoryMap;
       try (BufferedReader br = Files.newBufferedReader(Paths.get(settings.filename))) {
         categoryMap = createCategoryMap(br);
       }
@@ -292,7 +233,7 @@ public class TrackPopulationImporter implements PlugIn {
    * @throws IllegalArgumentException if the category map does not contain 3 integer fields per
    *         line; or the map contains duplicate keys
    */
-  static CustomLong2IntMap createCategoryMap(BufferedReader reader) throws IOException {
+  static CustomLong2IntOpenHashMap createCategoryMap(BufferedReader reader) throws IOException {
     final CustomLong2IntOpenHashMap map = new CustomLong2IntOpenHashMap(16);
     map.defaultReturnValue(-1);
     String line;
@@ -329,7 +270,7 @@ public class TrackPopulationImporter implements PlugIn {
    * @throws IllegalArgumentException if the category map contains a key not in the results
    */
   static BitSet assignCategory(PeakResult[] data, Long2IntMap resultMap,
-      CustomLong2IntMap categoryMap) {
+      CustomLong2IntOpenHashMap categoryMap) {
     final BitSet assigned = new BitSet(data.length);
     categoryMap.forEach((long key, int category) -> {
       final int index = resultMap.get(key);
