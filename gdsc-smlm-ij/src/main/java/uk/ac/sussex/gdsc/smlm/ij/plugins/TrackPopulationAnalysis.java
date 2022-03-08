@@ -3079,7 +3079,7 @@ public class TrackPopulationAnalysis implements PlugIn {
      * for MSD = A t^alpha.
      * </pre>
      *
-     * Slope is anomalous coefficient alpha. exp(intercept) is 4D.
+     * <p>Slope is anomalous coefficient alpha. exp(intercept) is 4D.
      */
     final SimpleRegression reg2;
     boolean useT1Fraction;
