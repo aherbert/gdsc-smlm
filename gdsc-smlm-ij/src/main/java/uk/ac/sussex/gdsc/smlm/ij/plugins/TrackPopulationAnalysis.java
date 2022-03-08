@@ -54,6 +54,7 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -175,6 +176,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
   /** The plugin settings. */
   private Settings settings;
+  private boolean extraOptions;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -194,6 +196,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     boolean debug;
     int maxComponents;
     double minWeight;
+    boolean simpleAlpha;
+    boolean useT1Fraction;
     double minAlpha;
     double maxAlpha;
     double significance;
@@ -247,6 +251,8 @@ public class TrackPopulationAnalysis implements PlugIn {
       this.debug = source.debug;
       this.maxComponents = source.maxComponents;
       this.minWeight = source.minWeight;
+      this.simpleAlpha = source.simpleAlpha;
+      this.useT1Fraction = source.useT1Fraction;
       this.minAlpha = source.minAlpha;
       this.maxAlpha = source.maxAlpha;
       this.significance = source.significance;
@@ -775,6 +781,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         y[i] = distanceConverter.convert(peak.getYPosition());
       }
 
+      final boolean extraOptions = ImageJUtils.isExtraOptions();
       final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
       msdFitter.setData(x, y);
       final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
@@ -785,7 +792,7 @@ public class TrackPopulationAnalysis implements PlugIn {
         // Extract the jump distances
         // Fit with regression, Brownian and FBM models
         try {
-          msdFitter.fit(frame - 1, msds);
+          msdFitter.fit(frame - 1, msds, false);
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
             ImageJUtils.log("Failed to fit anomalous exponent: " + ex.getMessage());
@@ -794,15 +801,24 @@ public class TrackPopulationAnalysis implements PlugIn {
         }
 
         // Plot the raw data and the fit results.
+        final double d = msdFitter.getRegressionD();
+        final double alpha = msdFitter.getRegressionAlpha();
         final RealVector p1 = msdFitter.lvmSolution1.getPoint();
         final RealVector p2 = msdFitter.lvmSolution2.getPoint();
         final String title = TITLE + " MSD vs Time";
         final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
-        plot.addLabel(0, 0,
-            String.format("Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
-                MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
-                MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
-                MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue)));
+        final StringBuilder msg = new StringBuilder(512);
+        try (Formatter formatter = new Formatter(msg)) {
+          formatter.format("Brownian D=%s, s=%s : FBM D=%s, s=%s, alpha=%s (p-value=%s)",
+              MathUtils.rounded(p1.getEntry(0)), MathUtils.rounded(p1.getEntry(1)),
+              MathUtils.rounded(p2.getEntry(0)), MathUtils.rounded(p2.getEntry(1)),
+              MathUtils.rounded(p2.getEntry(2)), MathUtils.rounded(msdFitter.pValue));
+          if (extraOptions) {
+            formatter.format(" : Simple D=%s, alpha=%s", MathUtils.rounded(d),
+                MathUtils.rounded(alpha));
+          }
+        }
+        plot.addLabel(0, 0, msg.toString());
 
         // Add error bars
         final double[] error = Arrays.stream(msds)
@@ -830,6 +846,10 @@ public class TrackPopulationAnalysis implements PlugIn {
         plot.setColor(Color.BLUE);
         plot.addPoints(t, converter.apply(msdFitter.model1.value(p1).getFirst().toArray()),
             Plot.LINE);
+        plot.setColor(Color.RED);
+        plot.addPoints(t,
+            converter.apply(Arrays.stream(t).map(tt -> 4 * d * Math.pow(tt, alpha)).toArray()),
+            Plot.LINE);
         // plot.setColor(Color.RED);
         // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
         // plot.addPoints(t, yy, Plot.CIRCLE);
@@ -843,10 +863,16 @@ public class TrackPopulationAnalysis implements PlugIn {
       gd.addMessage("Track " + trackData.id + " Anomalous Exponent View");
       gd.addSlider("Data window", 1, trackData.data.length, 1);
       gd.addCheckbox("Show MSD over time", settings.showMsdOverT);
+      if (extraOptions) {
+        gd.addCheckbox("Use_t1_fraction", settings.useT1Fraction);
+      }
       gd.addDialogListener((egd, e) -> {
-        settings.showMsdOverT = egd.getNextBoolean();
         // Read the frame
         final int frame = (int) egd.getNextNumber();
+        settings.showMsdOverT = egd.getNextBoolean();
+        if (extraOptions) {
+          msdFitter.useT1Fraction = settings.useT1Fraction = egd.getNextBoolean();
+        }
         // Show the data point
         action.accept(frame);
         return true;
@@ -1950,6 +1976,8 @@ public class TrackPopulationAnalysis implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
+    extraOptions = ImageJUtils.isExtraOptions();
+
     if (MemoryPeakResults.isMemoryEmpty()) {
       IJ.error(TITLE, "No localisations in memory");
       return;
@@ -2343,6 +2371,10 @@ public class TrackPopulationAnalysis implements PlugIn {
     gd.addSlider("Window", 5, 20, settings.window);
     gd.addSlider("Min_track_length", 2, 20, settings.minTrackLength);
     gd.addMessage("Anomalous diffusion coefficient");
+    if (extraOptions) {
+      gd.addCheckbox("Simple_alpha", settings.simpleAlpha);
+      gd.addCheckbox("Use_t1_fraction", settings.useT1Fraction);
+    }
     gd.addNumericField("Fit_significance", settings.significance, -2);
     gd.addNumericField("Min_alpha", settings.minAlpha, -3);
     gd.addNumericField("Max_alpha", settings.maxAlpha, -3);
@@ -2369,6 +2401,10 @@ public class TrackPopulationAnalysis implements PlugIn {
 
     settings.window = (int) gd.getNextNumber();
     settings.minTrackLength = (int) gd.getNextNumber();
+    if (extraOptions) {
+      settings.simpleAlpha = gd.getNextBoolean();
+      settings.useT1Fraction = gd.getNextBoolean();
+    }
     settings.significance = gd.getNextNumber();
     settings.minAlpha = gd.getNextNumber();
     settings.maxAlpha = gd.getNextNumber();
@@ -2533,6 +2569,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     final MsdFitter msdFitter = new MsdFitter(settings, deltaT);
     final double significance = settings.significance;
     final int[] fitResult = new int[4];
+    final boolean regressionOnly = extraOptions && settings.simpleAlpha;
 
     // Factor for the diffusion coefficient: 1/N * 1/(2*dimensions*deltaT) = 1 / 4Nt
     // with N the number of points to average.
@@ -2583,45 +2620,47 @@ public class TrackPopulationAnalysis implements PlugIn {
         // 1. Anomalous exponent.
         msdFitter.setData(x, y);
         try {
-          msdFitter.fit(k, null);
-          // statsAlpha.add(msdFitter.alpha);
-          int fitIndex = msdFitter.positiveSlope ? 0 : 2;
+          msdFitter.fit(k, null, regressionOnly);
+          if (regressionOnly) {
+            values[0] = msdFitter.getRegressionAlpha();
+          } else {
 
-          // If better then this is anomalous diffusion
-          final double alpha = msdFitter.lvmSolution2.getPoint().getEntry(2);
-          values[0] = alpha;
-          if (msdFitter.pValue > significance) {
-            fitIndex++;
+            int fitIndex = msdFitter.positiveSlope ? 0 : 2;
+
+            // If better then this is anomalous diffusion
+            final double alpha = msdFitter.lvmSolution2.getPoint().getEntry(2);
+            values[0] = alpha;
+            if (msdFitter.pValue > significance) {
+              fitIndex++;
+            }
+            fitResult[fitIndex]++;
+
+            // // Debug
+            // if (
+            // // msdFitter.pValue < 0.2
+            // msdFitter.pValue < 0.2 && values[0] < 0
+            // // !msdFitter.positiveSlope
+            // ) {
+            // final RealVector p = msdFitter.lvmSolution2.getPoint();
+            // final String title = "anomalous exponent";
+            // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
+            // final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
+            // plot.addLabel(0, 0, msdFitter.lvmSolution2.getPoint().toString() + " p="
+            // + msdFitter.pValue + ". " + msdFitter.lvmSolution1.getPoint().toString());
+            // plot.addPoints(t, msdFitter.s, Plot.CROSS);
+            // plot.addPoints(t, msdFitter.model2.value(p).getFirst().toArray(), Plot.LINE);
+            // plot.setColor(Color.BLUE);
+            // plot.addPoints(t,
+            // msdFitter.model1.value(msdFitter.lvmSolution1.getPoint()).getFirst().toArray(),
+            // Plot.LINE);
+            // plot.setColor(Color.RED);
+            // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
+            // plot.addPoints(t, yy, Plot.CIRCLE);
+            // System.out.printf("%s : %s", msdFitter.lvmSolution2.getPoint(), values[0]);
+            // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
+            // System.out.println();
+            // }
           }
-          fitResult[fitIndex]++;
-
-          // values[0] = msdFitter.alpha;
-
-          // // Debug
-          // if (
-          // // msdFitter.pValue < 0.2
-          // msdFitter.pValue < 0.2 && values[0] < 0
-          // // !msdFitter.positiveSlope
-          // ) {
-          // final RealVector p = msdFitter.lvmSolution2.getPoint();
-          // final String title = "anomalous exponent";
-          // final Plot plot = new Plot(title, "time (s)", "MSD (um^2)");
-          // final double[] t = SimpleArrayUtils.newArray(msdFitter.s.length, deltaT, deltaT);
-          // plot.addLabel(0, 0, msdFitter.lvmSolution2.getPoint().toString() + " p="
-          // + msdFitter.pValue + ". " + msdFitter.lvmSolution1.getPoint().toString());
-          // plot.addPoints(t, msdFitter.s, Plot.CROSS);
-          // plot.addPoints(t, msdFitter.model2.value(p).getFirst().toArray(), Plot.LINE);
-          // plot.setColor(Color.BLUE);
-          // plot.addPoints(t,
-          // msdFitter.model1.value(msdFitter.lvmSolution1.getPoint()).getFirst().toArray(),
-          // Plot.LINE);
-          // plot.setColor(Color.RED);
-          // final double[] yy = Arrays.stream(t).map(msdFitter.reg::predict).toArray();
-          // plot.addPoints(t, yy, Plot.CIRCLE);
-          // System.out.printf("%s : %s", msdFitter.lvmSolution2.getPoint(), values[0]);
-          // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
-          // System.out.println();
-          // }
         } catch (TooManyIterationsException | ConvergenceException ex) {
           if (settings.debug) {
             ImageJUtils.log("Failed to fit anomalous exponent: " + ex.getMessage());
@@ -2990,6 +3029,15 @@ public class TrackPopulationAnalysis implements PlugIn {
    * Class to encapsulate the fitting of the mean square distance data.
    */
   private static class MsdFitter {
+    /**
+     * Small fraction of MSD for the first jump to set an anchor point close to t0. This fails to
+     * handle data where the localisation precision is a large component of the MSD, i.e. MSD(t=0)
+     * is non-zero. Setting a value very close to (0,0) can anchor the regression curve incorrectly
+     * for non-diffusing data with a flat MSD curve.
+     */
+    private static final double T1_FRACTION = 1.0 / 50;
+    private static final double LOG_T1_FRACTION = -Math.log(50);
+
     // CHECKSTYLE.OFF: MemberName
     final double deltaT;
     final int window;
@@ -3011,7 +3059,20 @@ public class TrackPopulationAnalysis implements PlugIn {
     final RealVector start2;
     final ParameterValidator paramValidator2;
 
+    /** Linear regression of: MSD = A t. Slope is 4D. */
     final SimpleRegression reg;
+    /**
+     * Linear regression of:
+     *
+     * <pre>
+     * log(MSD) = log(A) + alpha * log(t)
+     * for MSD = A t^alpha.
+     * </pre>
+     *
+     * Slope is anomalous coefficient alpha. exp(intercept) is 4D.
+     */
+    final SimpleRegression reg2;
+    boolean useT1Fraction;
     final int denominatorDegreesOfFreedom;
     final FDistribution distribution;
 
@@ -3084,13 +3145,15 @@ public class TrackPopulationAnalysis implements PlugIn {
         return point;
       };
 
-      // For linear fit estimation
+      // For linear fit estimation and simple alpha coefficient fit estimation
       reg = new SimpleRegression(true);
+      reg2 = new SimpleRegression(true);
       // For significance test of the least squares fit.
       // numeratorDegreesOfFreedom = numberOfParameters2 - numberOfParameters1
       // denominatorDegreesOfFreedom = numberOfPoints - numberOfParameters2
       denominatorDegreesOfFreedom = (int) MathUtils.sum(weight) - 3;
       distribution = new FDistribution(null, 1, denominatorDegreesOfFreedom);
+      useT1Fraction = settings.useT1Fraction;
     }
 
     /**
@@ -3118,13 +3181,20 @@ public class TrackPopulationAnalysis implements PlugIn {
       // Initialise the regression used to estimate the slope.
       // This is not a true weighted regression but is only used as a start point so this is OK.
       reg.clear();
+      reg2.clear();
       final double[] weights = new double[msds.length];
       double ssy = 0;
       for (int i = 0; i < msds.length; i++) {
+        final double t = (i + 1) * deltaT;
         s[i] = msds[i].getMean();
-        reg.addData((i + 1) * deltaT, s[i]);
+        reg.addData(t, s[i]);
+        final double logT = Math.log(t);
+        reg2.addData(logT, Math.log(s[i]));
         weights[i] = msds[i].getN();
         ssy += msds[i].getSumOfSquaredDeviations();
+      }
+      if (useT1Fraction) {
+        reg2.addData(Math.log(deltaT) + LOG_T1_FRACTION, Math.log(s[0] * T1_FRACTION));
       }
       // Set the weights and degrees of freedom
       final RealMatrix weightMatrix = new DiagonalMatrix(weights, false);
@@ -3141,8 +3211,9 @@ public class TrackPopulationAnalysis implements PlugIn {
      *
      * @param k the k
      * @param msds the msds (can be null)
+     * @param regressionOnly if true only perform the regression fit
      */
-    void fit(int k, SumOfSquaredDeviations[] msds) {
+    void fit(int k, SumOfSquaredDeviations[] msds, boolean regressionOnly) {
       // First point in window = k
       // Last point in window = k + w - 1 = k + wm1
       final int end = k + wm1;
@@ -3153,35 +3224,42 @@ public class TrackPopulationAnalysis implements PlugIn {
       // For the MSD fit compute the gradient and intercept using a linear regression.
       // (This could exploit pre-computation of the regression x components.)
 
-      // Do a regression of log(MSD/t) vs log(t):
+      // Do a regression of log(MSD) vs log(t):
       // MSD = A t^alpha
-      // log(MSD/t) = log(A) + (alpha - 1) log(t)
-      // The slope is alpha - 1
-      // SimpleRegression reg2 = new SimpleRegression();
+      // log(MSD) = log(A) + alpha * log(t)
 
       reg.clear();
+      reg2.clear();
       double ssy = 0;
       for (int m = 1; m <= wm1; m++) {
         // Use intermediate points to compute an average
         final SumOfSquaredDeviations msd = new SumOfSquaredDeviations();
         final double t = m * deltaT;
-        // double logT = Math.log(t);
         for (int i = end - m; i >= k; i--) {
           final double d = MathUtils.distance2(x[i], y[i], x[i + m], y[i + m]);
           msd.add(d);
           reg.addData(t, d);
-          // reg2.addData(logT, Math.log(d / t));
         }
         s[m - 1] = msd.getMean();
+        final double logT = Math.log(t);
+        reg2.addData(logT, Math.log(msd.getMean()));
         ssy += msd.getSumOfSquaredDeviations();
         if (msds != null) {
           msds[m - 1] = msd;
         }
       }
 
-      // alpha = reg2.getSlope() + 1;
+      if (useT1Fraction) {
+        reg2.addData(Math.log(deltaT) + LOG_T1_FRACTION, Math.log(s[0] * T1_FRACTION));
+      }
 
-      fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
+      // System.out.println(Arrays.toString(s));
+      // System.out.println(reg2.getSlope());
+      // System.out.println(Math.exp(reg2.getIntercept()));
+
+      if (!regressionOnly) {
+        fit(weightMatrix, ssy, denominatorDegreesOfFreedom, distribution);
+      }
     }
 
     /**
@@ -3296,6 +3374,27 @@ public class TrackPopulationAnalysis implements PlugIn {
       // ImageJUtils.display(title, plot, ImageJUtils.NO_TO_FRONT);
       // System.out.println(lvmSolution2.getPoint());
       // }
+    }
+
+    /**
+     * Gets the alpha estimated from a linear regression fit of log(MSD) = log(A) + alpha * log(t).
+     *
+     * @return the alpha
+     */
+    double getRegressionAlpha() {
+      return reg2.getSlope();
+    }
+
+    /**
+     * Gets the diffusion coefficient D estimated from a linear regression fit of log(MSD) = log(A)
+     * + alpha * log(t).
+     *
+     * @return the diffusion coefficient D
+     */
+    double getRegressionD() {
+      // log(MSD) = log(A) + alpha * log(t)
+      // A = 4D
+      return Math.exp(reg2.getIntercept()) * 0.25f;
     }
   }
 

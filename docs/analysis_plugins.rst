@@ -1429,7 +1429,7 @@ The anomalous exponent is obtained from fitting the mean squared distance (MSD) 
 
     \text{MSD}(n) = \left \langle \left( X(t_i + n\Delta t) - X(t_i) \right)^2 \right \rangle
 
-for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD is fit using a weighted linear regression with the weights equal to the number of points used to compute each average. A linear model is fit for standard Brownian motion diffusion [Backlund, et al (2015), eq. 1]:
+for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD is fit using various models. The case of standard diffusion is fit using a linear model for standard Brownian motion diffusion [Backlund, et al (2015), eq. 1]:
 
 .. math::
 
@@ -1437,7 +1437,7 @@ for :math:`n \in [1, \dots, w-1]` and :math:`i \in [0, \dots, w-n-1]`. The MSD i
 
 where :math:`D` is the diffusion coefficient and :math:`s` is the static localisation precision.
 
-A fractional Brownian motion (FBM) diffusion function is fit for the case of anomalous diffusion [Backlund, et al (2015), eq. 8]:
+The case of anomalous diffusion is fit using a fractional Brownian motion (FBM) diffusion function [Backlund, et al (2015), eq. 8]:
 
 .. math::
 
