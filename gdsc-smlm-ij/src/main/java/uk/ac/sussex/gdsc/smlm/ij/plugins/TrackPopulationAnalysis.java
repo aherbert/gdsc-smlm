@@ -2680,7 +2680,7 @@ public class TrackPopulationAnalysis implements PlugIn {
 
         // 2. Effective diffusion coefficient (Hozé, eq 10).
         // This is the average squared jump distance between successive points
-        // divided by 1 / (2 * dimensions * deltaT), i.e. 1 / 4t.
+        // multiplied by 1 / (2 * dimensions * deltaT), i.e. 1 / 4t.
         double sum = 0;
         for (int i = k; i < end; i++) {
           sum += MathUtils.distance2(x[i], y[i], x[i + 1], y[i + 1]);
