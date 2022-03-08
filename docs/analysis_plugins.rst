@@ -1469,7 +1469,7 @@ The length of confinement is computed using the standard deviation of the positi
 Drift vector magnitude
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The drift vector is computed as the expected distance between successive points in each dimension, i.e. the average step size [Hozé, 2017, eq 9]. This analysis uses the Euclidean distance between the first and last point in the window to characterise the magnitude of the displacement. This is normalised by the number of steps in the window.
+The drift vector is computed as the expected distance between successive points in each dimension, i.e. the average step size [Hozé, 2017, eq 9]. This analysis uses the Euclidean norm of the drift vector to characterise the magnitude of the displacement.
 
 Gaussian Mixture Model
 ~~~~~~~~~~~~~~~~~~~~~~

@@ -2574,6 +2574,8 @@ public class TrackPopulationAnalysis implements PlugIn {
     // Factor for the diffusion coefficient: 1/N * 1/(2*dimensions*deltaT) = 1 / 4Nt
     // with N the number of points to average.
     final double diffusionCoefficientFactor = 1.0 / (4 * wm1 * deltaT);
+    // Drift coefficient: 1/N * 1/deltaT
+    final double driftMagnitudeFactor = 1.0 / (wm1 * deltaT);
 
     // Used for the standard deviations
     final Statistics statsX = new Statistics();
@@ -2703,7 +2705,15 @@ public class TrackPopulationAnalysis implements PlugIn {
         // as the distance between the first and last point divided by the number of points.
         // The drift field in each dimension is combined to create a drift norm, i.e. Euclidean
         // distance.
-        values[3] = MathUtils.distance(x[k], y[k], x[end], y[end]) / wm1;
+        // double sumx = 0;
+        // double sumy = 0;
+        // for (int i = k; i < end; i++) {
+        // sumx += x[i + 1] - x[i];
+        // sumy += y[i + 1] - y[i];
+        // }
+        // System.out.println(DoubleEquality.relativeError(sumx, x[end] - x[k]));
+        // System.out.println(DoubleEquality.relativeError(sumy, y[end] - y[k]));
+        values[3] = MathUtils.distance(x[k], y[k], x[end], y[end]) * driftMagnitudeFactor;
       }
       lengths.add(data.size() - previousSize);
       ticker.tick();
