@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.plugin.PlugIn;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -61,6 +62,12 @@ public class TrackPopulationImporter implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
+    private static final String KEY_FILENAME = "gdsc.smlm.trackpopulationimporter.filename";
+    private static final String KEY_INPUT_OPTION = "gdsc.smlm.trackpopulationimporter.inputOption";
+    private static final String KEY_IGNORE_UNMAPPED =
+        "gdsc.smlm.trackpopulationimporter.ignoreUnmapped";
+    private static final String KEY_NEW_DATASET = "gdsc.smlm.trackpopulationimporter.newDataset";
+
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> lastSettings =
         new AtomicReference<>(new Settings());
@@ -72,8 +79,10 @@ public class TrackPopulationImporter implements PlugIn {
 
     Settings() {
       // Set defaults
-      filename = "";
-      inputOption = "";
+      filename = Prefs.get(KEY_FILENAME, "");
+      inputOption = Prefs.get(KEY_INPUT_OPTION, "");
+      ignoreUnmapped = Prefs.get(KEY_IGNORE_UNMAPPED, false);
+      newDataset = Prefs.get(KEY_NEW_DATASET, false);
     }
 
     Settings(Settings source) {
@@ -101,6 +110,10 @@ public class TrackPopulationImporter implements PlugIn {
      */
     void save() {
       lastSettings.set(this);
+      Prefs.set(KEY_FILENAME, filename);
+      Prefs.set(KEY_INPUT_OPTION, inputOption);
+      Prefs.set(KEY_IGNORE_UNMAPPED, ignoreUnmapped);
+      Prefs.set(KEY_NEW_DATASET, newDataset);
     }
   }
 

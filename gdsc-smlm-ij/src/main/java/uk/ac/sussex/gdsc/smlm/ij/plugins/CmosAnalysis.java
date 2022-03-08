@@ -205,10 +205,11 @@ public class CmosAnalysis implements PlugIn {
     }
 
     /**
-     * Save the settings. This can be called only once as it saves via a reference.
+     * Save the settings.
      */
     void save() {
       lastSettings.set(this);
+      Prefs.set(Constants.sCMOSAnalysisDirectory, directory);
     }
 
     /**
