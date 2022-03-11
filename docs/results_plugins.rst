@@ -1516,8 +1516,9 @@ When the ``3D Results Viewer`` is run the user must select the results set and t
      - Set the mode used to assign colour to each localisation.
 
        * ``Depth``: Use the z-depth.
-       * ``Intensity``: Use the localisation intensity.
        * ``ID``: Use the localisation ID. For example identifiers may be assigned by clustering.
+       * ``Intensity``: Use the localisation intensity.
+       * ``Category``: Use the localisation category. For example identifiers may be assigned by track population analysis.
 
        The ``Intensity`` mode allows `Gamma correction <https://en.wikipedia.org/wiki/Gamma_correction>`_. Low gamma will increase the colour range used for low intensity values. High gamma will increase the colour range used for high intensity values. Set the ``Colour gamma`` to one to disable.
 

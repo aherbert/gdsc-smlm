@@ -441,6 +441,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
       public String getName() {
         return "Intensity";
       }
+    },
+    Category {
+      @Override
+      public String getName() {
+        return "Category";
+      }
     },;
 
     static final ColourMode[] values = ColourMode.values();
@@ -2055,6 +2061,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
       case INTENSITY:
         rank = createRankByIntensity(results, settings);
         break;
+      case Category:
+        rank = createRankByCategory(results);
+        break;
       case DEPTH:
       default:
         rank = createRankByDepth(results);
@@ -2102,7 +2111,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
         @Override
         public void execute(PeakResult peakResult) {
-          list[index++] = peakResult.getId();
+          list[index++] = Math.max(0, peakResult.getId());
         }
       };
       results.forEach(p);
@@ -2122,6 +2131,23 @@ public class ImageJ3DResultsViewer implements PlugIn {
       applyGamma(rank, gamma);
     }
     return rank;
+  }
+
+  private static float[] createRankByCategory(MemoryPeakResults results) {
+    if (results.hasCategory()) {
+      final float[] list = new float[results.size()];
+      final PeakResultProcedure p = new PeakResultProcedure() {
+        int index;
+
+        @Override
+        public void execute(PeakResult peakResult) {
+          list[index++] = Math.max(0, peakResult.getCategory());
+        }
+      };
+      results.forEach(p);
+      return list;
+    }
+    return null;
   }
 
   /**
