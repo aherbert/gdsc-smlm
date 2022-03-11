@@ -1956,9 +1956,6 @@ The following options are available:
 
        If not selected the output will draw each point individually.
 
-   * - Sort
-     - Specify how the clusters will be sorted before drawing. The sort order determines the colour taken from the look-up table.
-
    * - Spline fit
      - If selected the line will be drawn as a spline fit. This is only valid when ``Traces`` is selected.
 
@@ -1969,12 +1966,18 @@ The following options are available:
 
        If no output image is selected then the default output image will be created as a stack of the required size.
 
+   * - Colour
+     - Specify how the cluster colour is assigned from the look-up table.
+
    * - LUT
      - Specify the look-up table (i.e. the colour) used to plot the clusters.
 
        Each cluster is a single colour. The colour is varied according to the order the clusters are processed.
 
        Note: Single colour LUTs vary the intensity of the colour from 50% to 100% to provide identification of the order.
+
+   * - Invert LUT
+     - Set to ``true`` to invert the LUT.
 
    * - Line width
      - Specify the line width. Use zero to draw lines with a 1 pixel stroke width regardless of the magnification.

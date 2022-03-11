@@ -41,12 +41,16 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetLineRoi;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
+import uk.ac.sussex.gdsc.core.ij.gui.OffsetPolygonRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
-import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.SortUtils;
+import uk.ac.sussex.gdsc.core.utils.LocalList;
+import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
@@ -60,8 +64,8 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager;
  */
 public class DrawClusters implements PlugIn {
   private static final String TITLE = "Draw Clusters";
-  private static final String[] sorts =
-      new String[] {"None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame"};
+  private static final String[] COLOURS =
+      new String[] {"None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame", "Category"};
 
   /** The plugin settings. */
   private Settings settings;
@@ -81,10 +85,11 @@ public class DrawClusters implements PlugIn {
     int minSize;
     int maxSize;
     boolean drawLines;
-    int sort;
+    int colour;
     boolean splineFit;
     boolean useStackPosition;
     int lut;
+    boolean invertLut;
     float lineWidth;
 
     Settings() {
@@ -104,10 +109,11 @@ public class DrawClusters implements PlugIn {
       minSize = source.minSize;
       maxSize = source.maxSize;
       drawLines = source.drawLines;
-      sort = source.sort;
+      colour = source.colour;
       splineFit = source.splineFit;
       useStackPosition = source.useStackPosition;
       lut = source.lut;
+      invertLut = source.invertLut;
       lineWidth = source.lineWidth;
     }
 
@@ -173,9 +179,8 @@ public class DrawClusters implements PlugIn {
       if (traces[i].size() >= settings.minSize && traces[i].size() <= myMaxSize) {
         traces[count++] = traces[i];
         traces[i].sort();
-        if (maxFrame < traces[i].getTail().getFrame()) {
-          maxFrame = traces[i].getTail().getFrame();
-        }
+        final int end = traces[i].getTail().getFrame();
+        maxFrame = maxFrame < end ? end : maxFrame;
       }
     }
 
@@ -205,14 +210,14 @@ public class DrawClusters implements PlugIn {
         width = bounds.width;
         height = bounds.height;
       } else {
-        width = (int) (settings.imageSize * bounds.width / maxD);
-        height = (int) (settings.imageSize * bounds.height / maxD);
+        width = (int) (settings.imageSize * (bounds.width / maxD));
+        height = (int) (settings.imageSize * (bounds.height / maxD));
       }
       final ByteProcessor bp = new ByteProcessor(width, height);
       if (isUseStackPosition) {
         final ImageStack stack = new ImageStack(width, height, maxFrame);
         for (int i = 1; i <= maxFrame; i++) {
-          stack.setPixels(bp.getPixels(), i); // Do not clone as the image is empty
+          stack.setPixels(bp.getPixels(), i); // Do not duplicate pixel as the image is empty
         }
         imp = ImageJUtils.display(TITLE, stack);
       } else {
@@ -236,106 +241,209 @@ public class DrawClusters implements PlugIn {
     // Create ROIs and store data to sort them
     final Roi[] rois = new Roi[count];
     final int[][] frames = (isUseStackPosition) ? new int[count][] : null;
-    final int[] indices = SimpleArrayUtils.natural(count);
     final double[] values = new double[count];
     for (int i = 0; i < count; i++) {
       final Trace trace = traces[i];
       final int npoints = trace.size();
       final float[] xpoints = new float[npoints];
       final float[] ypoints = new float[npoints];
-      int ii = 0;
       if (frames != null) {
         frames[i] = new int[npoints];
       }
-      for (int k = 0; k < trace.size(); k++) {
+      for (int k = 0; k < npoints; k++) {
         final PeakResult result = trace.get(k);
-        xpoints[ii] = (result.getXPosition() - bounds.x) * xScale;
-        ypoints[ii] = (result.getYPosition() - bounds.y) * yScale;
+        xpoints[k] = (result.getXPosition() - bounds.x) * xScale;
+        ypoints[k] = (result.getYPosition() - bounds.y) * yScale;
         if (frames != null) {
-          frames[i][ii] = result.getFrame();
+          frames[i][k] = result.getFrame();
         }
-        ii++;
       }
       Roi roi;
       if (myDrawLines) {
-        roi = new PolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
+        roi = new OffsetPolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
         if (settings.splineFit) {
           ((PolygonRoi) roi).fitSpline();
         }
       } else {
-        roi = new OffsetPointRoi(xpoints, ypoints, npoints);
-        ((PointRoi) roi).setShowLabels(false);
+        final OffsetPointRoi r = new OffsetPointRoi(xpoints, ypoints, npoints);
+        r.setPointType(2);
+        r.setShowLabels(false);
+        roi = r;
       }
 
       rois[i] = roi;
-      switch (settings.sort) {
-        case 1: // Sort by ID
-          values[i] = traces[i].getId();
+      switch (settings.colour) {
+        case 1: // ID (positive only)
+          values[i] = Math.max(0, trace.getId());
           break;
-        case 2: // Sort by time
-          values[i] = traces[i].getHead().getFrame();
+        case 2: // Time
+          values[i] = trace.getHead().getFrame();
           break;
-        case 3: // Sort by size descending
-          values[i] = -traces[i].size();
+        case 3: // Cluster size
+          values[i] = trace.size();
           break;
-        case 4: // Sort by length descending
-          values[i] = -roi.getLength();
+        case 4: // Track length
+          values[i] = roi.getLength();
           break;
         case 5: // Mean Square Displacement
-          values[i] = -traces[i].getMsd();
+          values[i] = trace.getMsd();
           break;
         case 6: // Mean / Frame
-          values[i] = -traces[i].getMeanDistance();
+          values[i] = trace.getMeanDistance();
+          break;
+        case 7: // Category
+          values[i] = maxCategory(trace);
           break;
         case 0: // No sort
         default:
+          values[i] = i;
           break;
       }
-    }
-
-    if (settings.sort > 0) {
-      SortUtils.sortIndices(indices, values, true);
     }
 
     // Draw the traces as ROIs on an overlay
     final Overlay o = new Overlay();
-    final LUT lut = LutHelper.createLut(settings.lut);
-    final double scale = 256.0 / count;
+    final LUT lut = settings.invertLut ? LutHelper.createLut(settings.lut).createInvertedLut()
+        : LutHelper.createLut(settings.lut);
+    // Colour assumes the values are a linear scale from [0, max]
+    final double max = MathUtils.max(values);
+    final double scale = 255.0 / max;
+    final ToDoubleFunction<PeakResult> perLocalisationColour =
+        getPerLocalisationColour(settings.colour);
+    final Function<PeakResult,
+        Color> localisationColour = perLocalisationColour == null ? null
+            : result -> LutHelper.getColour(lut,
+                (int) Math.round(perLocalisationColour.applyAsDouble(result) * scale));
+
+    final LocalList<Roi> localisations = new LocalList<>(11);
     if (frames != null) {
       // Add the tracks on the frames containing the results
       final boolean isHyperStack = imp.isDisplayedHyperStack();
       for (int i = 0; i < count; i++) {
-        final int index = indices[i];
-        final Color c = LutHelper.getColour(lut, (int) (i * scale));
-        final PolygonRoi roi = (PolygonRoi) rois[index];
-        roi.setFillColor(c);
-        roi.setStrokeColor(c);
-        // roi.setStrokeWidth(settings.lineWidth);
-        roi.updateWideLine(settings.lineWidth);
+        Color c = null;
+        final Trace trace = traces[i];
+        final PolygonRoi roi = (PolygonRoi) rois[i];
+        // Colour per localisation
+        if (localisationColour != null) {
+          toLocalisations(roi, trace, localisationColour, myDrawLines, settings.lineWidth,
+              localisations);
+        } else {
+          c = LutHelper.getColour(lut, (int) Math.round(values[i] * scale));
+          roi.setFillColor(c);
+          roi.setStrokeColor(c);
+          roi.updateWideLine(settings.lineWidth);
+          localisations.push(roi);
+        }
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
-        // For each frame in the track, add the ROI track and a point ROI for the current position
-        for (int j = 0; j < frames[index].length; j++) {
-          addToOverlay(o, (Roi) roi.clone(), isHyperStack, frames[index][j]);
+        // For each frame in the track, add the ROI(s) track and a point ROI for the current
+        // position
+        for (int j = 0; j < frames[i].length; j++) {
+          final int frame = frames[i][j];
+          localisations.forEach(r -> addToOverlay(o, (Roi) r.clone(), isHyperStack, frame));
           final PointRoi pointRoi = new OffsetPointRoi(fp.xpoints[j], fp.ypoints[j]);
           pointRoi.setPointType(3);
+          if (localisationColour != null) {
+            c = localisationColour.apply(trace.get(j));
+          }
           pointRoi.setFillColor(c);
-          pointRoi.setStrokeColor(Color.black);
-          addToOverlay(o, pointRoi, isHyperStack, frames[index][j]);
+          pointRoi.setStrokeColor(c);
+          addToOverlay(o, pointRoi, isHyperStack, frame);
         }
+        localisations.clear();
       }
     } else {
       // Add the tracks as a single overlay
       for (int i = 0; i < count; i++) {
-        final Roi roi = rois[indices[i]];
-        roi.setStrokeColor(new Color(lut.getRGB((int) (i * scale))));
-        // roi.setStrokeWidth(settings.lineWidth);
-        roi.updateWideLine(settings.lineWidth);
-        o.add(roi);
+        final PolygonRoi roi = (PolygonRoi) rois[i];
+        // Colour per localisation
+        if (localisationColour != null) {
+          toLocalisations(roi, traces[i], localisationColour, myDrawLines, settings.lineWidth,
+              localisations);
+          localisations.forEach(o::add);
+        } else {
+          roi.setStrokeColor(new Color(lut.getRGB((int) Math.round(values[i] * scale))));
+          // roi.setStrokeWidth(settings.lineWidth);
+          roi.updateWideLine(settings.lineWidth);
+          o.add(roi);
+        }
+        localisations.clear();
       }
     }
     imp.setOverlay(o);
 
     IJ.showStatus(msg);
+  }
+
+  /**
+   * Get the maximum category in the trace.
+   *
+   * @param trace the trace
+   * @return the maximum catergory
+   */
+  private static int maxCategory(Trace trace) {
+    int max = 0;
+    for (int k = 0; k < trace.size(); k++) {
+      final PeakResult result = trace.get(k);
+      max = Math.max(max, result.getCategory());
+    }
+    return max;
+  }
+
+  /**
+   * Create a function to generate colour is per localisation.
+   *
+   * @param colour the colour
+   * @return the function (or null)
+   */
+  private static ToDoubleFunction<PeakResult> getPerLocalisationColour(int colour) {
+    // Only per category colour is currently supported
+    if (colour == 7) {
+      return PeakResult::getCategory;
+    }
+    return null;
+  }
+
+  /**
+   * Convert the ROI points to a set of per-localisation ROIs. Optionally draw lines; otherwise draw
+   * points. Get colour from the trace results using the colour function.
+   *
+   * @param roi the roi
+   * @param trace the trace
+   * @param localisationColour the localisation colour
+   * @param drawLines the draw lines
+   * @param lut the lut
+   * @param scale the scale
+   * @param lineWidth the line width
+   * @param localisations the per-localisation ROIs(output)
+   */
+  private static void toLocalisations(PolygonRoi roi, Trace trace,
+      Function<PeakResult, Color> localisationColour, boolean drawLines, float lineWidth,
+      LocalList<Roi> localisations) {
+    // Extract all the points from the ROI FloatPolygon
+    final FloatPolygon fp = roi.getNonSplineFloatPolygon();
+    // If draw traces then draw lines; otherwise draw points.
+    // Get colour from the trace results.
+    final int npoints = trace.size();
+    if (drawLines) {
+      for (int k = 1; k < npoints; k++) {
+        final PeakResult result = trace.get(k - 1);
+        final Color c = localisationColour.apply(result);
+        final OffsetLineRoi line =
+            new OffsetLineRoi(fp.xpoints[k - 1], fp.ypoints[k - 1], fp.xpoints[k], fp.ypoints[k]);
+        line.setStrokeColor(c);
+        localisations.add(line);
+      }
+    } else {
+      for (int k = 0; k < npoints; k++) {
+        final PeakResult result = trace.get(k);
+        final Color c = localisationColour.apply(result);
+        final OffsetPointRoi pointRoi = new OffsetPointRoi(fp.xpoints[k], fp.ypoints[k]);
+        pointRoi.setPointType(2);
+        pointRoi.setStrokeColor(c);
+        pointRoi.updateWideLine(lineWidth);
+        localisations.add(pointRoi);
+      }
+    }
   }
 
   private boolean showDialog() {
@@ -362,10 +470,11 @@ public class DrawClusters implements PlugIn {
     gd.addSlider("Min_size", 1, 15, settings.minSize);
     gd.addSlider("Max_size", 0, 20, settings.maxSize);
     gd.addCheckbox("Traces (draw lines)", settings.drawLines);
-    gd.addChoice("Sort", sorts, sorts[settings.sort]);
     gd.addCheckbox("Spline_fit (traces only)", settings.splineFit);
     gd.addCheckbox("Use_stack_position", settings.useStackPosition);
+    gd.addChoice("Colour", COLOURS, COLOURS[settings.colour]);
     gd.addChoice("LUT", LutHelper.getLutNames(), settings.lut);
+    gd.addCheckbox("Invert_LUT", settings.invertLut);
     gd.addSlider("Line_width", 0, 0.5, settings.lineWidth);
 
     gd.addHelp(HelpUrls.getUrl("draw-clusters"));
@@ -382,10 +491,11 @@ public class DrawClusters implements PlugIn {
     settings.minSize = (int) Math.abs(gd.getNextNumber());
     settings.maxSize = (int) Math.abs(gd.getNextNumber());
     settings.drawLines = gd.getNextBoolean();
-    settings.sort = gd.getNextChoiceIndex();
     settings.splineFit = gd.getNextBoolean();
     settings.useStackPosition = gd.getNextBoolean();
+    settings.colour = gd.getNextChoiceIndex();
     settings.lut = gd.getNextChoiceIndex();
+    settings.invertLut = gd.getNextBoolean();
     settings.lineWidth = (float) gd.getNextNumber();
     settings.save();
 
