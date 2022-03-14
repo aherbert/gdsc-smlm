@@ -1954,10 +1954,10 @@ The following options are available:
    * - Traces
      - Select this option to assume the localisations are connected as a time-series trace. The output will draw lines connecting the points.
 
-       If not selected the output will draw each point individually.
+       If not selected the output will draw each point individually. If clusters have more than one localisation per frame then this mode is disabled.
 
    * - Spline fit
-     - If selected the line will be drawn as a spline fit. This is only valid when ``Traces`` is selected.
+     - If selected the line will be drawn as a spline fit. This is only valid when ``Traces`` is selected and the colour is not per localisation (which requires drawing traces as individual lines not a continuous spline).
 
    * - Use stack position
      - If selected the plugin will draw each cluster on the specific frame containing the localisation.

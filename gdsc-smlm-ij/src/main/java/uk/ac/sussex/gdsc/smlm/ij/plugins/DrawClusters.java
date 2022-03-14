@@ -37,6 +37,7 @@ import ij.plugin.PlugIn;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.LUT;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -171,7 +172,6 @@ public class DrawClusters implements PlugIn {
     int count = 0;
     final int myMaxSize =
         (settings.maxSize < settings.minSize) ? Integer.MAX_VALUE : settings.maxSize;
-    final boolean myDrawLines = myMaxSize > 1 && settings.drawLines;
     for (int i = 0; i < traces.length; i++) {
       if (settings.expandToSingles) {
         traces[i].expandToSingles();
@@ -188,6 +188,16 @@ public class DrawClusters implements PlugIn {
       IJ.error(TITLE, "No traces achieved the size limits");
       return;
     }
+
+    // There are only traces if each trace has only 1 localisation per frame. Otherwise
+    // this is some type of clustering result. Only allow drawing lines from traces.
+    final boolean myDrawLines = settings.drawLines && myMaxSize > 1 && isTraced(traces);
+
+    final ToDoubleFunction<PeakResult> perLocalisationColour =
+        getPerLocalisationColour(settings.colour);
+    // Spline-fit is only used the entire trace is added. If split up into per-localisation
+    // lines then the spline is not used.
+    final boolean doSplineFit = settings.splineFit && perLocalisationColour == null;
 
     final String msg =
         String.format(TITLE + ": %d / %s (%s)", count, TextUtils.pleural(traces.length, "trace"),
@@ -261,7 +271,7 @@ public class DrawClusters implements PlugIn {
       Roi roi;
       if (myDrawLines) {
         roi = new OffsetPolygonRoi(xpoints, ypoints, npoints, Roi.POLYLINE);
-        if (settings.splineFit) {
+        if (doSplineFit) {
           ((PolygonRoi) roi).fitSpline();
         }
       } else {
@@ -308,8 +318,6 @@ public class DrawClusters implements PlugIn {
     // Colour assumes the values are a linear scale from [0, max]
     final double max = MathUtils.max(values);
     final double scale = 255.0 / max;
-    final ToDoubleFunction<PeakResult> perLocalisationColour =
-        getPerLocalisationColour(settings.colour);
     final Function<PeakResult,
         Color> localisationColour = perLocalisationColour == null ? null
             : result -> LutHelper.getColour(lut,
@@ -335,13 +343,20 @@ public class DrawClusters implements PlugIn {
           localisations.push(roi);
         }
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
-        // For each frame in the track, add the ROI(s) track and a point ROI for the current
-        // position
+        // For each frame in the track, add a point ROI for the current position.
+        // If this is a trace then add the entire the ROI(s) track to the frame
+        // for convenience. The current position will be highlighted with a circle.
         for (int j = 0; j < frames[i].length; j++) {
           final int frame = frames[i][j];
-          localisations.forEach(r -> addToOverlay(o, (Roi) r.clone(), isHyperStack, frame));
+          // It only makes sense to add all localisations to a single frame if this is
+          // a trace. Otherwise add only the relevant point per frame.
           final PointRoi pointRoi = new OffsetPointRoi(fp.xpoints[j], fp.ypoints[j]);
-          pointRoi.setPointType(3);
+          if (myDrawLines) {
+            localisations.forEach(r -> addToOverlay(o, (Roi) r.clone(), isHyperStack, frame));
+            pointRoi.setPointType(3);
+          } else {
+            pointRoi.setPointType(2);
+          }
           if (localisationColour != null) {
             c = localisationColour.apply(trace.get(j));
           }
@@ -372,6 +387,27 @@ public class DrawClusters implements PlugIn {
     imp.setOverlay(o);
 
     IJ.showStatus(msg);
+  }
+
+  /**
+   * Checks if is the entire dataset is traced. This requires each trace to have only 1 localisation
+   * per frame.
+   *
+   * @param traces the traces
+   * @return true if traced
+   */
+  private static boolean isTraced(Trace[] traces) {
+    final IntOpenHashSet set = new IntOpenHashSet();
+    for (final Trace trace : traces) {
+      set.clear();
+      for (int k = 0; k < trace.size(); k++) {
+        if (!set.add(trace.get(k).getFrame())) {
+          // Already seen
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -470,6 +506,7 @@ public class DrawClusters implements PlugIn {
     gd.addSlider("Min_size", 1, 15, settings.minSize);
     gd.addSlider("Max_size", 0, 20, settings.maxSize);
     gd.addCheckbox("Traces (draw lines)", settings.drawLines);
+    gd.addMessage("Spline fit cannot be used when colouring per localisation (e.g. catagory)");
     gd.addCheckbox("Spline_fit (traces only)", settings.splineFit);
     gd.addCheckbox("Use_stack_position", settings.useStackPosition);
     gd.addChoice("Colour", COLOURS, COLOURS[settings.colour]);
