@@ -37,8 +37,8 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.utils.JsonUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class PsfProtosTest {
@@ -74,7 +74,7 @@ class PsfProtosTest {
     final String e = psfBuilder.toString();
     final PSFProtos.PSF psf = psfBuilder.build();
     final String o = psf.toString();
-    logger.log(TestLogUtils.getRecord(logLevel, o));
+    logger.log(TestLogging.getRecord(logLevel, o));
     Assertions.assertEquals(e, o);
 
     psfBuilder.clear();
@@ -83,7 +83,7 @@ class PsfProtosTest {
 
     // Short string
     final String o2 = TextFormat.shortDebugString(psf);
-    logger.log(TestLogUtils.getRecord(logLevel, o2));
+    logger.log(TestLogging.getRecord(logLevel, o2));
 
     psfBuilder.clear();
     TextFormat.merge(o2, psfBuilder);
@@ -92,9 +92,9 @@ class PsfProtosTest {
     // JSON
     final Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
     String json = printer.print(psf);
-    logger.log(TestLogUtils.getRecord(logLevel, json));
+    logger.log(TestLogging.getRecord(logLevel, json));
     json = JsonUtils.simplify(json);
-    logger.log(TestLogUtils.getRecord(logLevel, json));
+    logger.log(TestLogging.getRecord(logLevel, json));
 
     psfBuilder.clear();
     JsonFormat.parser().merge(json, psfBuilder);

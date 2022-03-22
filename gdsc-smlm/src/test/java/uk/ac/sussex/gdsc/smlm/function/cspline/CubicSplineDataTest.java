@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunction;
 import uk.ac.sussex.gdsc.core.math.interpolation.CustomTricubicFunctionUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -49,7 +49,7 @@ class CubicSplineDataTest {
 
   private static void canExternaliseFunction(RandomSeed seed, boolean singlePrecision)
       throws IOException {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final int x = 6;
     final int y = 5;
     final int z = 4;

@@ -43,12 +43,12 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -303,7 +303,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "Per Datum %s : %s = %d / %d (%.2f)",
+    logger.log(TestLogging.getRecord(LOG_LEVEL, "Per Datum %s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > 90,
         () -> NAME[targetParameter] + " fraction too low per datum: " + p);
@@ -499,7 +499,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "%s : %s = %d / %d (%.2f)",
+    logger.log(TestLogging.getRecord(LOG_LEVEL, "%s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > threshold, () -> NAME[targetParameter] + " fraction too low: " + p);
   }
@@ -559,7 +559,7 @@ class PoissonLikelihoodWrapperTest {
         break;
       }
     }
-    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, p=%f, max=%d", mu, pvalue, x));
+    logger.log(TestLogging.getRecord(LOG_LEVEL, "mu=%f, p=%f, max=%d", mu, pvalue, x));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
@@ -583,7 +583,7 @@ class PoissonLikelihoodWrapperTest {
       }
     }, 0, max);
 
-    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, p=%f", mu, pvalue));
+    logger.log(TestLogging.getRecord(LOG_LEVEL, "mu=%f, p=%f", mu, pvalue));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
   }
 
@@ -631,14 +631,14 @@ class PoissonLikelihoodWrapperTest {
       }
     }
 
-    logger.log(TestLogUtils.getRecord(LOG_LEVEL, "mu=%f, limit=%d, p=%f", mu, limit, pvalue));
+    logger.log(TestLogging.getRecord(LOG_LEVEL, "mu=%f, limit=%d, p=%f", mu, limit, pvalue));
     Assertions.assertEquals(1, pvalue, 0.02, () -> String.format("mu=%f", mu));
 
     // Check the function can compute the same total
     func = new PoissonLikelihoodWrapper(nlf, a, k, index, alpha);
     final double sum = func.computeLikelihood();
     final double sum2 = func.computeLikelihood(g);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     TestAssertions.assertTest(total, sum, predicate, "computeLikelihood");
     TestAssertions.assertTest(total, sum2, predicate, "computeLikelihood with gradient");
   }

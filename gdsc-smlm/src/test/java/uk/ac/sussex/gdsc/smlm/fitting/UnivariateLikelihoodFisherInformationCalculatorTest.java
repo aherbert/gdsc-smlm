@@ -38,11 +38,11 @@ import uk.ac.sussex.gdsc.smlm.function.PoissonGaussianApproximationFisherInforma
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -53,7 +53,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePoissonFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON);
     }
@@ -61,7 +61,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputeHalfPoissonFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.HALF_POISSON);
     }
@@ -69,7 +69,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePoissonGaussianApproximationFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n < 10; n++) {
       computePoissonFisherInformation(r, Model.POISSON_GAUSSIAN);
     }
@@ -127,7 +127,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
     }
 
     Assertions.assertArrayEquals(e, o, 1e-6);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(5e-2, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(5e-2, 0);
 
     if (model == Model.POISSON || model == Model.HALF_POISSON) {
       // Get the Mortensen approximation for fitting Poisson data with a Gaussian.
@@ -151,7 +151,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
 
   @SeededTest
   void canComputePerPixelPoissonGaussianApproximationFisherInformation(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n < 10; n++) {
       canComputePerPixelPoissonGaussianApproximationFisherInformation(r);
     }
@@ -195,7 +195,7 @@ class UnivariateLikelihoodFisherInformationCalculatorTest {
     final FisherInformationMatrix I = calc.compute(params);
     final double[] o = I.getMatrix().data;
 
-    TestAssertions.assertArrayTest(e, o, TestHelper.doublesAreClose(1e-6, 0));
+    TestAssertions.assertArrayTest(e, o, Predicates.doublesAreClose(1e-6, 0));
   }
 
   private static double nextUniform(UniformRandomProvider rng, double min, double max) {

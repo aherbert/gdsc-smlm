@@ -46,11 +46,11 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.fitting.MultivariateGaussianMixtureExpectationMaximization.MixtureMultivariateGaussianDistribution.MultivariateGaussianDistribution;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -58,12 +58,12 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
   /** Convergence checker to match the Commons Math 3 default on absolute value. */
   // @formatter:off
   private static final MultivariateGaussianMixtureExpectationMaximization.DoubleDoubleBiPredicate
-      DEFAULT_CONVERGENCE_CHECKER = TestHelper.doublesAreWithin(1e-5)::test;
+      DEFAULT_CONVERGENCE_CHECKER = Predicates.doublesAreAbsolutelyClose(1e-5)::test;
   // @formatter:on
 
   @SeededTest
   void canComputeCovariance(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
 
     final int rows = 20;
     final int cols = 3;
@@ -160,7 +160,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
         MultivariateGaussianDistribution.create(means, covariances);
     final MultivariateGaussianDistribution obs =
         MultivariateGaussianMixtureExpectationMaximization.createUnmixed(data);
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-6);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-6);
     TestAssertions.assertArrayTest(exp.getMeans(), obs.getMeans(), test);
     TestAssertions.assertArrayTest(exp.getCovariances(), obs.getCovariances(), test);
   }
@@ -223,8 +223,8 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
     for (int n = 0; n < 3; n++) {
       final long start = n + seed.getAsLong();
       // This relies on the shuffle being the same
-      RandomUtils.shuffle(data, RngUtils.create(start));
-      RandomUtils.shuffle(components, RngUtils.create(start));
+      RandomUtils.shuffle(data, RngFactory.create(start));
+      RandomUtils.shuffle(components, RngFactory.create(start));
 
       final MixtureMultivariateGaussianDistribution dist =
           MultivariateGaussianMixtureExpectationMaximization.createMixed(data, components);
@@ -232,7 +232,7 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
       Assertions.assertArrayEquals(new double[] {0.5, 0.5}, dist.getWeights());
       final MultivariateGaussianDistribution[] distributions = dist.getDistributions();
       Assertions.assertEquals(weights.length, distributions.length);
-      final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-8);
+      final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-8);
       for (int i = 0; i < means.length; i++) {
         TestAssertions.assertArrayTest(means[i], distributions[i].getMeans(), test);
         TestAssertions.assertArrayTest(covariances[i], distributions[i].getCovariances(), test);
@@ -355,8 +355,8 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
   @SeededTest
   void canEstimateInitialMixture(RandomSeed seed) {
     // Test verses the Commons Math estimation
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5, 1e-16);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-5, 1e-16);
     // Number of components
     for (int n = 2; n <= 3; n++) {
       final double[] sampleWeights = createWeights(n, rng);
@@ -444,8 +444,8 @@ class MultivariateGaussianMixtureExpectationMaximizationTest {
   @SeededTest
   void canFit(RandomSeed seed) {
     // Test verses the Commons Math estimation
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5, 1e-16);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-5, 1e-16);
     final int sampleSize = 1000;
     // Number of components
     for (int n = 2; n <= 3; n++) {

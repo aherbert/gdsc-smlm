@@ -32,13 +32,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class TensorTest {
@@ -116,11 +116,11 @@ class TensorTest {
 
   @SeededTest
   void canComputeSameTensor(RandomSeed seed) {
-    final UniformRandomProvider random = RngUtils.create(seed.get());
+    final UniformRandomProvider random = RngFactory.create(seed.get());
     final int w = 3;
     final int h = 4;
     final float[] data = new float[w * h];
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-6, 0);
     for (int i = 0; i < 10; i++) {
       for (int j = data.length; j-- > 0;) {
         data[j] = random.nextFloat();

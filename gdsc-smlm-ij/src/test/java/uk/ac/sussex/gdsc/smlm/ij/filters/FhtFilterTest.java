@@ -35,11 +35,11 @@ import uk.ac.sussex.gdsc.core.utils.ImageWindow;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.filters.KernelFilter;
 import uk.ac.sussex.gdsc.smlm.ij.filters.FhtFilter.Operation;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
@@ -67,7 +67,7 @@ class FhtFilterTest {
     final int ey = 7;
     final int ox = 1;
     final int oy = 2;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final FloatProcessor fp1 = createProcessor(size, ex, ey, 4, 4, r);
     // This is offset from the centre
     final FloatProcessor fp2 = createProcessor(size, size / 2 + ox, size / 2 + oy, 4, 4, r);
@@ -132,11 +132,11 @@ class FhtFilterTest {
 
     // There may be differences due to the use of the JTransforms library
     final double error = (operation == Operation.DECONVOLUTION) ? 5e-2 : 1e-4;
-    final FloatFloatBiPredicate predicate = TestHelper.floatsAreClose(error, 0);
+    final FloatFloatBiPredicate predicate = Predicates.floatsAreClose(error, 0);
 
     // This tests everything and can fail easily depending on the random generator
     // due to edge artifacts.
-    // TestAssertions.assertArrayTest(e, input1, TestHelper.almostEqualFloats(error, 0));
+    // TestAssertions.assertArrayTest(e, input1, Predicates.almostEqualFloats(error, 0));
 
     // This tests the centre to ignore edge differences
     final int min = size / 4;

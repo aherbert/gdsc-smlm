@@ -31,13 +31,13 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 /**
@@ -417,13 +417,13 @@ class PrecisionTest {
     try {
       maxx *= 2;
       while (maxx * maxx < Integer.MAX_VALUE) {
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
+        logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
         functionsComputeSameValue(maxx, new SingleCircularGaussian(maxx),
             new DoubleCircularGaussian(maxx), 1e-3);
         maxx *= 2;
       }
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
       // ex.printStackTrace();
       return;
     }
@@ -482,13 +482,13 @@ class PrecisionTest {
     try {
       maxx *= 2;
       while (maxx * maxx < Integer.MAX_VALUE) {
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
+        logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "maxx = %d", maxx));
         functionsComputeSameValue(maxx, new SingleFixedGaussian(maxx),
             new DoubleFixedGaussian(maxx), 1e-3);
         maxx *= 2;
       }
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, ex.getMessage()));
       // ex.printStackTrace();
       return;
     }
@@ -540,7 +540,7 @@ class PrecisionTest {
     final double[] tg1 = new double[n];
     final double[] tg2 = new double[n];
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(precision, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(precision, 0);
 
     for (int i = 0, limit = maxx * maxx; i < limit; i++) {
       final float v1 = f1.eval(i);
@@ -606,7 +606,7 @@ class PrecisionTest {
     }
 
     logger.log(
-        TestLogUtils.getTimingRecord(((noSum) ? "No sum " : "") + "Gradient " + c1.getSimpleName(),
+        TestLogging.getTimingRecord(((noSum) ? "No sum " : "") + "Gradient " + c1.getSimpleName(),
             time1, c2.getSimpleName(), time2));
   }
 
@@ -758,7 +758,7 @@ class PrecisionTest {
       c2 = f2.getClass();
     }
 
-    logger.log(TestLogUtils.getTimingRecord(((noSum) ? "No sum " : "") + c1.getSimpleName(), time1,
+    logger.log(TestLogging.getTimingRecord(((noSum) ? "No sum " : "") + c1.getSimpleName(), time1,
         c2.getSimpleName(), time2));
   }
 

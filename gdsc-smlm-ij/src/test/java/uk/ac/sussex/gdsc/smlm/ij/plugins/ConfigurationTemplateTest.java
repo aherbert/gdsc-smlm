@@ -48,9 +48,9 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ConfigurationTemplate.TemplateResource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiFilter2;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 
 @SuppressWarnings({"javadoc"})
 class ConfigurationTemplateTest {
@@ -121,7 +121,7 @@ class ConfigurationTemplateTest {
     // Check all have been loaded
     for (final TemplateResource template : templates) {
       if (set.contains(template.name)) {
-        logger.log(TestLogUtils.getRecord(Level.INFO, test + " loaded: " + template));
+        logger.log(TestLogging.getRecord(Level.INFO, test + " loaded: " + template));
         continue;
       }
       Assertions.fail(test + " could not load: " + template);
@@ -152,7 +152,7 @@ class ConfigurationTemplateTest {
     // Create a dummy image
     final int size = 20;
     final float[] pixels = new float[size * size];
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int i = pixels.length; i-- > 0;) {
       pixels[i] = r.nextFloat();
     }

@@ -27,16 +27,16 @@ package uk.ac.sussex.gdsc.smlm.filters;
 import java.util.ArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assumptions;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc", "unused"})
@@ -45,12 +45,12 @@ class MedianFilterTest extends AbstractFilterTest {
   private static int INTERNAL_ITER = 20;
   private static int ITER3 = 100;
   private static int ITER = 10;
-  private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-3, 0);
+  private static FloatFloatBiPredicate equality = Predicates.floatsAreClose(1e-3, 0);
 
   private static void floatArrayEquals(float[] data1, float[] data2, int boxSize, String format,
       Object... args) {
     try {
-      // TestAssertions.assertArrayTest(data1, data2, TestHelper.almostEqualFloats(boxSize, 0) *
+      // TestAssertions.assertArrayTest(data1, data2, Predicates.almostEqualFloats(boxSize, 0) *
       // boxSize * 1e-3);
       TestAssertions.assertArrayTest(data1, data2, equality);
     } catch (final AssertionError ex) {
@@ -61,7 +61,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockMedianNxNInternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -88,7 +88,7 @@ class MedianFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -181,17 +181,17 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize,
           boxSlowTotal, "blockMedianNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
         "blockMedianNxNInternal", fastTotal));
   }
 
   @SeededTest
   public void
       floatBlockMedian3x3InternalAndBlockMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -278,7 +278,7 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockMedianNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockMedianNxNInternal", slowTotal,
         "blockMedian3x3Internal", fastTotal));
   }
 
@@ -347,14 +347,14 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedian3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingMedian3x3Internal", slowTotal,
         "blockMedian3x3Internal", fastTotal));
   }
 
   @SeededTest
   public void
       floatRollingMedian3x3InternalAndRollingMedianNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -439,13 +439,13 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
         "rollingMedian3x3Internal", fastTotal));
   }
 
   @SeededTest
   void floatBlockMedianNxNAndRollingMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -538,10 +538,10 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockMedianNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("float blockMedianNxN " + boxSize, boxSlowTotal,
           "blockMedianNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockMedianNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockMedianNxN", slowTotal,
         "blockMedianNxNInternal", fastTotal));
   }
 
@@ -615,10 +615,10 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingMedianNxN " + boxSize,
           boxSlowTotal, "blockMedianNxN", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal, "blockMedianNxN",
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxN", slowTotal, "blockMedianNxN",
         fastTotal));
   }
 
@@ -692,16 +692,16 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingMedianNxN " + boxSize,
           boxSlowTotal, "rollingMedianNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxN", slowTotal,
         "rollingMedianNxNInternal", fastTotal));
   }
 
   @SeededTest
   void floatBlockMedian3x3AndBlockMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
     for (final int width : primes) {
       for (final int height : primes) {
@@ -785,13 +785,13 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedian3x3",
+    logger.log(TestLogging.getTimingRecord("float blockMedianNxN", slowTotal, "blockMedian3x3",
         fastTotal));
   }
 
   @SeededTest
   void floatRollingMedian3x3AndRollingMedianNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MedianFilter filter = new MedianFilter();
 
     for (final int width : primes) {
@@ -877,7 +877,7 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedian3x3",
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxN", slowTotal, "rollingMedian3x3",
         fastTotal));
   }
 
@@ -945,7 +945,7 @@ class MedianFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockMedian3x3", slowTotal, "rollingMedian3x3",
+    logger.log(TestLogging.getTimingRecord("float blockMedian3x3", slowTotal, "rollingMedian3x3",
         fastTotal));
   }
 }

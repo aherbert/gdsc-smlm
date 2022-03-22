@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.smlm.results.sort.FrameIdPeakResultComparator;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -59,7 +59,7 @@ class PeakResultStoreTest {
     final boolean isList = store instanceof PeakResultStoreList;
     final PeakResultStoreList storeList = (isList) ? (PeakResultStoreList) store : null;
     PeakResult result;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
 
     PeakResult[] list = new PeakResult[20];
     int size = 0;

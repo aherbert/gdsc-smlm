@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -117,7 +117,7 @@ class ChiSquaredDistributionTableTest {
 
   @SeededTest
   void canPerformChiSquaredTest(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     final ChiSquareTest test = new ChiSquareTest();
     for (final int n : new int[] {10, 50, 100}) {
       final double[] x = SimpleArrayUtils.newArray(n, 0.5, 1.0);

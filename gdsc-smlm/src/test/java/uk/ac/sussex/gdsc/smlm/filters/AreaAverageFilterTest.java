@@ -30,11 +30,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
@@ -114,10 +114,10 @@ class AreaAverageFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float areaAverageInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float areaAverageInternal " + boxSize,
           boxSlowTotal, "areaAverageUsingSumsInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float areaAverageInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float areaAverageInternal", slowTotal,
         "areaAverageUsingSumsInternal", fastTotal));
   }
 
@@ -194,10 +194,10 @@ class AreaAverageFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float areaAverageUsingAverages " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float areaAverageUsingAverages " + boxSize,
           boxSlowTotal, "stripedBlockAverage", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float areaAverageUsingAverages", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float areaAverageUsingAverages", slowTotal,
         "stripedBlockAverage", fastTotal));
   }
 
@@ -276,16 +276,16 @@ class AreaAverageFilterTest extends AbstractFilterTest {
       }
       // if (debug)
       logger.log(
-          TestLogUtils.getStageTimingRecord("float areaAverageUsingAveragesInternal " + boxSize,
+          TestLogging.getStageTimingRecord("float areaAverageUsingAveragesInternal " + boxSize,
               boxSlowTotal, "stripedBlockAverageInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float areaAverageUsingAveragesInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float areaAverageUsingAveragesInternal", slowTotal,
         "stripedBlockAverageInternal", fastTotal));
   }
 
   @SeededTest
   void areaAverageCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final int max = 50;
     final float[] data = createData(rg, max, max);
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -338,7 +338,7 @@ class AreaAverageFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void areaAverageInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final int max = 50;
     final float[] data = createData(rg, max, max);
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -358,7 +358,7 @@ class AreaAverageFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void areaAverageUsingSumsCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final int max = 50;
     final float[] data = createData(rg, max, max);
     final AreaAverageFilter filter = new AreaAverageFilter();
@@ -379,7 +379,7 @@ class AreaAverageFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void areaAverageUsingSumsInternalCorrectlyInterpolatesBetweenBlocks(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final int max = 50;
     final float[] data = createData(rg, max, max);
     final AreaAverageFilter filter = new AreaAverageFilter();

@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 /**
@@ -163,7 +163,7 @@ class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
     try {
       fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.EMCCD);
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getFailRecord(ex));
+      logger.log(TestLogging.getFailRecord(ex));
     }
   }
 
@@ -291,7 +291,7 @@ class SteppingFunctionSolverTest extends BaseSteppingFunctionSolverTest {
     try {
       fitSingleGaussian(seed, NO_BOUND, NO_CLAMP, FastMLE, NoiseModel.SCMOS);
     } catch (final AssertionError ex) {
-      logger.log(TestLogUtils.getFailRecord(ex));
+      logger.log(TestLogging.getFailRecord(ex));
     }
   }
 

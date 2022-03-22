@@ -43,14 +43,14 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -267,7 +267,7 @@ class Gaussian2DPeakResultHelperTest {
     Assertions.assertEquals(0, Gaussian2DPeakResultHelper.inverseCumulative2D(0));
     Assertions
         .assertTrue(Double.POSITIVE_INFINITY == Gaussian2DPeakResultHelper.inverseCumulative2D(1));
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     for (int i = 1; i <= 10; i++) {
       final double r = i / 10.0;
       final double p = Gaussian2DPeakResultHelper.cumulative2D(r);
@@ -278,9 +278,9 @@ class Gaussian2DPeakResultHelperTest {
 
   @SeededTest
   void canComputeMeanSignalUsingR(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 10; i++) {
       final double intensity = rg.nextDouble() * 100;
       final double sx = rg.nextDouble() * 2;
@@ -305,9 +305,9 @@ class Gaussian2DPeakResultHelperTest {
 
   @SeededTest
   void canComputeMeanSignalUsingP(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 10; i++) {
       final double intensity = rg.nextDouble() * 100;
       final double sx = rg.nextDouble() * 2;

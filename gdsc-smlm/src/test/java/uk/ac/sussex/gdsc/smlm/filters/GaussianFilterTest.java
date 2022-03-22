@@ -37,9 +37,9 @@ import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -226,7 +226,7 @@ class GaussianFilterTest {
 
   private void filter1IsSameAsFilter2(RandomSeed seed, GFilter f1, GFilter f2, boolean weighted,
       double tolerance) {
-    final UniformRandomProvider rand = RngUtils.create(seed.get());
+    final UniformRandomProvider rand = RngFactory.create(seed.get());
     final float[] data = createData(rand, size, size);
     float[] weights = null;
     if (weighted) {

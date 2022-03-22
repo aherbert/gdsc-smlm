@@ -32,8 +32,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction.ErfFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
@@ -65,7 +65,7 @@ class PsfModelGradient1FunctionTest {
     final ErfGaussian2DFunction f = new SingleAstigmatismErfGaussian2DFunction(maxx, maxy, zModel);
     f.setErfFunction(ErfFunction.COMMONS_MATH);
     final double[] a2 = new double[Gaussian2DFunction.PARAMETERS_PER_PEAK + 1];
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-8, 0);
 
     final double c = maxx * 0.5;
     for (int i = -1; i <= 1; i++) {

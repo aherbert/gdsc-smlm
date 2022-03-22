@@ -47,16 +47,16 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.HoltzerAstigmatismZModel;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
@@ -148,7 +148,7 @@ class FastMleGradient2ProcedureTest {
 
   @SeededTest
   void gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(RandomSeed seed) {
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-5, 0);
     gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(seed, 4, equality);
     gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(seed, 5, equality);
     gradientProcedureComputesSameLogLikelihoodAsMleGradientCalculator(seed, 6, equality);
@@ -163,7 +163,7 @@ class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final MleGradientCalculator calc =
@@ -183,7 +183,7 @@ class FastMleGradient2ProcedureTest {
   @SeededTest
   void gradientProcedureComputesSameWithPrecomputed(RandomSeed seed) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
 
     final ErfGaussian2DFunction f1 = (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, 10,
         10, GaussianFunctionFactory.FIT_ERF_FREE_CIRCLE, null);
@@ -303,7 +303,7 @@ class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     final MleGradientCalculator calc =
@@ -351,7 +351,7 @@ class FastMleGradient2ProcedureTest {
     };
     final long time2 = t2.getTime();
 
-    logger.log(TestLogUtils.getTimingRecord("GradientCalculator " + nparams, time1,
+    logger.log(TestLogging.getTimingRecord("GradientCalculator " + nparams, time1,
         "FastMLEGradient2Procedure", time2));
   }
 
@@ -369,7 +369,7 @@ class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     // Create messages
@@ -435,7 +435,7 @@ class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
+    createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList);
 
     // Remove the timing of the function call by creating a dummy function
     final Gradient2Function func = new FakeGradientFunction(blockWidth, nparams);
@@ -487,7 +487,7 @@ class FastMleGradient2ProcedureTest {
     };
     final long time2 = t2.getTime();
 
-    logger.log(TestLogUtils.getTimingRecord("Standard", time1, "Unrolled " + nparams, time2));
+    logger.log(TestLogging.getTimingRecord("Standard", time1, "Unrolled " + nparams, time2));
     Assertions.assertTrue(time2 < time1 * 1.5);
   }
 
@@ -521,11 +521,11 @@ class FastMleGradient2ProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
+    createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = Predicates.doublesAreClose(5e-2, 1e-16);
     final IndexSupplier msg1 = new IndexSupplier(2).setMessagePrefix("Gradient1 ");
     final IndexSupplier msg2 = new IndexSupplier(2).setMessagePrefix("Gradient2 ");
 

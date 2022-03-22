@@ -50,16 +50,16 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleEllipticalGaussian2DFuncti
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFixedGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleFreeCircularGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.SingleNbFixedGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
@@ -273,7 +273,7 @@ class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
         (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
@@ -397,7 +397,7 @@ class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc =
         (mle) ? new MleGradientCalculator(beta.length) : new GradientCalculator(beta.length);
@@ -423,7 +423,7 @@ class GradientCalculatorSpeedTest {
     }
     start2 = System.nanoTime() - start2;
 
-    logger.log(TestLogUtils.getTimingRecord(
+    logger.log(TestLogging.getTimingRecord(
         ((mle) ? "MLE " : "") + "Linearised GradientCalculator " + nparams, start1,
         "GradientCalculator", start2));
   }
@@ -437,7 +437,7 @@ class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList);
+    final int[] x = createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList);
 
     final GradientCalculator calc = new GradientCalculator6();
     final GradientCalculator calc2 = new GradientCalculator6();
@@ -468,7 +468,7 @@ class GradientCalculatorSpeedTest {
     }
     start2 = System.nanoTime() - start2;
 
-    logger.log(TestLogUtils.getTimingRecord("GradientCalculator", start1,
+    logger.log(TestLogging.getTimingRecord("GradientCalculator", start1,
         "GradientCalculatorAssumed", start2));
   }
 
@@ -497,7 +497,7 @@ class GradientCalculatorSpeedTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
+    final int[] x = createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList, true);
 
     final double delta = 1e-3;
     final DoubleEquality eq = new DoubleEquality(1e-3, 1e-3);
@@ -557,7 +557,7 @@ class GradientCalculatorSpeedTest {
     };
     //@formatter:on
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
 
     final int[] xx = SimpleArrayUtils.natural(100);
     final double[] xxx = SimpleArrayUtils.newArray(100, 0, 1.0);
@@ -613,7 +613,7 @@ class GradientCalculatorSpeedTest {
     final boolean report = logger.isLoggable(level);
     try {
       background = 1e-2;
-      createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
+      createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList, true);
 
       final EjmlLinearSolver solver = new EjmlLinearSolver(1e-5, 1e-6);
 
@@ -648,7 +648,7 @@ class GradientCalculatorSpeedTest {
         abs[i] = new Statistics();
       }
 
-      final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+      final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
 
       // for (int b = 1; b < 1000; b *= 2)
       // for (double b : new double[] { -500, -100, -10, -1, -0.1, 0.1, 1, 10, 100, 500 })
@@ -713,8 +713,8 @@ class GradientCalculatorSpeedTest {
         new EllipticalGaussian2DFunction(1, blockWidth, blockWidth);
     final int n = blockWidth * blockWidth;
     final double[] a = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int run = 5; run-- > 0;) {
       a[Gaussian2DFunction.BACKGROUND] = random(rng, background);
       a[Gaussian2DFunction.SIGNAL] = random(rng, amplitude);

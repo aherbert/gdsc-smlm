@@ -31,11 +31,11 @@ import org.junit.jupiter.api.Assumptions;
 import uk.ac.sussex.gdsc.core.utils.FloatEquality;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc"})
@@ -143,7 +143,7 @@ class AverageFilterTest extends AbstractFilterTest {
   }
 
   private static void checkIsCorrect(RandomSeed seed, DataFilter filter) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     for (final int width : primes) {
       for (final int height : primes) {
         for (final float boxSize : boxSizes) {
@@ -277,10 +277,10 @@ class AverageFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord(slow.name + " " + boxSize, boxSlowTotal,
           fast.name, boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
+    logger.log(TestLogging.getTimingRecord(slow.name, slowTotal, fast.name, fastTotal));
   }
 
   private void speedTestInternal(RandomSeed seed, DataFilter fast, DataFilter slow) {
@@ -355,11 +355,11 @@ class AverageFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("Internal " + slow.name + " " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("Internal " + slow.name + " " + boxSize,
           boxSlowTotal, fast.name, boxFastTotal));
     }
     logger.log(
-        TestLogUtils.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
+        TestLogging.getTimingRecord("Internal " + slow.name, slowTotal, fast.name, fastTotal));
   }
 
   @SpeedTag

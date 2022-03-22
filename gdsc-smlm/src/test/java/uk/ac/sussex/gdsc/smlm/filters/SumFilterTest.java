@@ -28,16 +28,16 @@ import java.util.ArrayList;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"deprecation", "javadoc", "unused"})
@@ -46,7 +46,7 @@ class SumFilterTest extends AbstractFilterTest {
   private static final int INTERNAL_ITER = 50;
   private static final int ITER3 = 200;
   private static final int ITER = 20;
-  private static FloatFloatBiPredicate equality = TestHelper.floatsAreClose(1e-4, 0);
+  private static FloatFloatBiPredicate equality = Predicates.floatsAreClose(1e-4, 0);
 
   /**
    * Check the float arrays are equal, else fail with a formatted message.
@@ -96,7 +96,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -124,7 +124,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -152,7 +152,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   public void
       floatBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -178,7 +178,7 @@ class SumFilterTest extends AbstractFilterTest {
   public void
       floatRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
           RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -276,10 +276,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float blockSumNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockSumNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
@@ -356,10 +356,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float blockSumNxNInternal " + boxSize,
           boxSlowTotal, "stripedBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockSumNxNInternal", slowTotal,
         "stripedBlockSumNxNInternal", fastTotal));
   }
 
@@ -438,16 +438,16 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float stripedBlockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float stripedBlockSumNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void floatBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -535,7 +535,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockSumNxNInternal", slowTotal,
         "blockSum3x3Internal", fastTotal));
   }
 
@@ -607,7 +607,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockSum3x3Internal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
@@ -679,7 +679,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockSum3x3Internal", slowTotal,
         "stripedBlockSum3x3Internal", fastTotal));
   }
 
@@ -753,14 +753,14 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSum3x3Internal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
   @SeededTest
   void floatRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(
       RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -853,7 +853,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
@@ -927,7 +927,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSumNxNInternal", slowTotal,
         "stripedBlockSum3x3Internal", fastTotal));
   }
 
@@ -1020,13 +1020,13 @@ class SumFilterTest extends AbstractFilterTest {
       // boxSize, boxFastTotal, boxSlowTotal),
       // boxFastTotal < boxSlowTotal);
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxNInternalTransposed", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockSumNxNInternalTransposed", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void floatBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1052,7 +1052,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void floatBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1147,10 +1147,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
           "blockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "blockSumNxNInternal",
+    logger.log(TestLogging.getTimingRecord("float blockSumNxN", slowTotal, "blockSumNxNInternal",
         fastTotal));
   }
 
@@ -1225,10 +1225,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
           "stripedBlockSumNxN", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "stripedBlockSumNxN",
+    logger.log(TestLogging.getTimingRecord("float blockSumNxN", slowTotal, "stripedBlockSumNxN",
         fastTotal));
   }
 
@@ -1305,10 +1305,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float stripedBlockSumNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float stripedBlockSumNxN " + boxSize,
           boxSlowTotal, "stripedBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSumNxN", slowTotal,
         "stripedBlockSumNxNInternal", fastTotal));
   }
 
@@ -1383,10 +1383,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("float blockSumNxN " + boxSize, boxSlowTotal,
           "rollingBlockSumNxN", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "rollingBlockSumNxN",
+    logger.log(TestLogging.getTimingRecord("float blockSumNxN", slowTotal, "rollingBlockSumNxN",
         fastTotal));
   }
 
@@ -1463,16 +1463,16 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingBlockSumNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingBlockSumNxN " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockSumNxN", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void floatBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1559,12 +1559,12 @@ class SumFilterTest extends AbstractFilterTest {
       }
     }
     logger.log(
-        TestLogUtils.getTimingRecord("float blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
+        TestLogging.getTimingRecord("float blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
   }
 
   @SeededTest
   void floatStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1653,13 +1653,13 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSumNxN", slowTotal,
         "stripedBlockSum3x3", fastTotal));
   }
 
   @SeededTest
   void floatRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1748,7 +1748,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockSumNxN", slowTotal,
         "rollingBlockSum3x3", fastTotal));
   }
 
@@ -1819,7 +1819,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSum3x3", slowTotal, "rollingBlockSum3x3",
+    logger.log(TestLogging.getTimingRecord("float blockSum3x3", slowTotal, "rollingBlockSum3x3",
         fastTotal));
   }
 
@@ -1890,7 +1890,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockSum3x3", slowTotal, "stripedBlockSum3x3",
+    logger.log(TestLogging.getTimingRecord("float blockSum3x3", slowTotal, "stripedBlockSum3x3",
         fastTotal));
   }
 
@@ -1962,13 +1962,13 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("float stripedBlockSum3x3", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float stripedBlockSum3x3", slowTotal,
         "rollingBlockSum3x3", fastTotal));
   }
 
   @SeededTest
   void intBlockSumNxNInternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -1995,7 +1995,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNInternalAndStripedBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2022,7 +2022,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2046,7 +2046,7 @@ class SumFilterTest extends AbstractFilterTest {
   @SeededTest
   void intRollingBlockSumNxNInternalAndRollingBlockSumNxNInternalTransposedReturnSameResult(
       RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2143,10 +2143,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("int blockSumNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int blockSumNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
@@ -2222,10 +2222,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("int blockSumNxNInternal " + boxSize,
           boxSlowTotal, "stripedBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int blockSumNxNInternal", slowTotal,
         "stripedBlockSumNxNInternal", fastTotal));
   }
 
@@ -2301,16 +2301,16 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int stripedBlockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("int stripedBlockSumNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void intBlockSum3x3InternalAndBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2398,7 +2398,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int blockSumNxNInternal", slowTotal,
         "blockSum3x3Internal", fastTotal));
   }
 
@@ -2470,7 +2470,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int blockSum3x3Internal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
@@ -2542,7 +2542,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int blockSum3x3Internal", slowTotal,
         "stripedBlockSum3x3Internal", fastTotal));
   }
 
@@ -2613,14 +2613,14 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSum3x3Internal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSum3x3Internal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
   @SeededTest
   public void
       intRollingBlockSum3x3InternalAndRollingBlockSumNxNInternalReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2709,7 +2709,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int rollingBlockSumNxNInternal", slowTotal,
         "rollingBlockSum3x3Internal", fastTotal));
   }
 
@@ -2780,7 +2780,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSumNxNInternal", slowTotal,
         "stripedBlockSum3x3Internal", fastTotal));
   }
 
@@ -2872,13 +2872,13 @@ class SumFilterTest extends AbstractFilterTest {
       // boxSize, boxFastTotal, boxSlowTotal),
       // boxFastTotal < boxSlowTotal);
     }
-    logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxNInternalTransposed", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int rollingBlockSumNxNInternalTransposed", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void intBlockSumNxNAndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2904,7 +2904,7 @@ class SumFilterTest extends AbstractFilterTest {
 
   @SeededTest
   void intBlockSumNxNAndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -2999,10 +2999,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
           "blockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "blockSumNxNInternal",
+    logger.log(TestLogging.getTimingRecord("int blockSumNxN", slowTotal, "blockSumNxNInternal",
         fastTotal));
   }
 
@@ -3077,10 +3077,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
           "stripedBlockSumNxN", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "stripedBlockSumNxN",
+    logger.log(TestLogging.getTimingRecord("int blockSumNxN", slowTotal, "stripedBlockSumNxN",
         fastTotal));
   }
 
@@ -3154,10 +3154,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int stripedBlockSumNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("int stripedBlockSumNxN " + boxSize,
           boxSlowTotal, "stripedBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSumNxN", slowTotal,
         "stripedBlockSumNxNInternal", fastTotal));
   }
 
@@ -3232,10 +3232,10 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
+      logger.log(TestLogging.getStageTimingRecord("int blockSumNxN " + boxSize, boxSlowTotal,
           "rollingBlockSumNxN", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "rollingBlockSumNxN",
+    logger.log(TestLogging.getTimingRecord("int blockSumNxN", slowTotal, "rollingBlockSumNxN",
         fastTotal));
   }
 
@@ -3309,16 +3309,16 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("int rollingBlockSumNxN " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("int rollingBlockSumNxN " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int rollingBlockSumNxN", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
   @SeededTest
   void intBlockSum3x3AndBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3406,12 +3406,12 @@ class SumFilterTest extends AbstractFilterTest {
       }
     }
     logger
-        .log(TestLogUtils.getTimingRecord("int blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
+        .log(TestLogging.getTimingRecord("int blockSumNxN", slowTotal, "blockSum3x3", fastTotal));
   }
 
   @SeededTest
   void intStripedBlockSum3x3AndStripedBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3500,13 +3500,13 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSumNxN", slowTotal,
         "stripedBlockSum3x3", fastTotal));
   }
 
   @SeededTest
   void intRollingBlockSum3x3AndRollingBlockSumNxNReturnSameResult(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final SumFilter filter = new SumFilter();
 
     for (final int width : primes) {
@@ -3595,7 +3595,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int rollingBlockSumNxN", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int rollingBlockSumNxN", slowTotal,
         "rollingBlockSum3x3", fastTotal));
   }
 
@@ -3666,7 +3666,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSum3x3", slowTotal, "rollingBlockSum3x3",
+    logger.log(TestLogging.getTimingRecord("int blockSum3x3", slowTotal, "rollingBlockSum3x3",
         fastTotal));
   }
 
@@ -3737,7 +3737,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int blockSum3x3", slowTotal, "stripedBlockSum3x3",
+    logger.log(TestLogging.getTimingRecord("int blockSum3x3", slowTotal, "stripedBlockSum3x3",
         fastTotal));
   }
 
@@ -3809,7 +3809,7 @@ class SumFilterTest extends AbstractFilterTest {
         }
       }
     }
-    logger.log(TestLogUtils.getTimingRecord("int stripedBlockSum3x3", slowTotal,
+    logger.log(TestLogging.getTimingRecord("int stripedBlockSum3x3", slowTotal,
         "rollingBlockSum3x3", fastTotal));
   }
 }

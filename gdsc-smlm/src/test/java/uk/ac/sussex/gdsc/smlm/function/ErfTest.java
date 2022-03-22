@@ -34,14 +34,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 // TODO: Update this using the new Erf implementation in Commons Numbers 1.1
@@ -113,7 +113,7 @@ class ErfTest {
   }
 
   private static void checkErfxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final int range = 8;
     double max = 0;
 
@@ -131,7 +131,7 @@ class ErfTest {
       }
     }
     logger
-        .log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfx %s max error = %g", erf.name, max));
+        .log(TestLogging.getRecord(TestLevel.TEST_INFO, "erfx %s max error = %g", erf.name, max));
   }
 
   @Test
@@ -191,7 +191,7 @@ class ErfTest {
   }
 
   private static void checkErfxxHasLowError(RandomSeed seed, BaseErf erf, double expected) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     final int range = 3;
     double max = 0;
@@ -218,7 +218,7 @@ class ErfTest {
     }
 
     logger
-        .log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfxx %s max error = %g", erf.name, max));
+        .log(TestLogging.getRecord(TestLevel.TEST_INFO, "erfxx %s max error = %g", erf.name, max));
   }
 
   @Test
@@ -255,7 +255,7 @@ class ErfTest {
     }
 
     logger.log(
-        TestLogUtils.getRecord(TestLevel.TEST_INFO, "erfxx %s unit max error = %g", erf.name, max));
+        TestLogging.getRecord(TestLevel.TEST_INFO, "erfxx %s unit max error = %g", erf.name, max));
   }
 
   @Test
@@ -329,9 +329,9 @@ class ErfTest {
     Assertions.assertTrue(DoubleEquality.relativeError(sum1, sum3) < 1e-3,
         () -> erf.name + " Gaussian approx integral is incorrect");
 
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
         "%s Erf approx pixel unit max error = %f", erf.name, max));
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
         "%s Gaussian approx pixel unit max error = %f", erf.name, max2));
   }
 
@@ -404,11 +404,11 @@ class ErfTest {
 
       final int n = steps * steps;
       observed = norm * sum / n;
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "n=%d, e=%f, o=%f, error=%f", n,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "n=%d, e=%f, o=%f, error=%f", n,
           expected, observed, DoubleEquality.relativeError(expected, observed)));
     }
 
-    TestAssertions.assertTest(expected, observed, TestHelper.doublesAreClose(1e-2, 0));
+    TestAssertions.assertTest(expected, observed, Predicates.doublesAreClose(1e-2, 0));
   }
 
   @Test
@@ -436,7 +436,7 @@ class ErfTest {
 
   @Test
   void canComputePower4() {
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-10, 0);
     for (int i = -10; i <= 10; i++) {
       for (final double d : new double[] {0, 0.1, 0.01, 0.001}) {
         final double f = i + d;
@@ -449,7 +449,7 @@ class ErfTest {
 
   @Test
   void canComputePower16() {
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-10, 0);
     for (int i = -10; i <= 10; i++) {
       for (final double d : new double[] {0, 0.1, 0.01, 0.001}) {
         final double f = i + d;

@@ -37,12 +37,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -180,7 +180,7 @@ class PoissonGammaFunctionTest {
 
     // if (p2 < 0.98 || p2 > 1.02)
     logger.log(
-        TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, pvalue, p2));
+        TestLogging.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, p=%f  %f", gain, mu, pvalue, p2));
 
     return p2;
   }
@@ -208,7 +208,7 @@ class PoissonGammaFunctionTest {
     // Note: The input mu parameter is pre-gain.
     final double e = mu;
     final Supplier<String> msg = () -> String.format("g=%f, mu=%f", gain, mu);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-6, 0);
     for (int x = min; x <= max; x++) {
       final double p = f.likelihood(x, e);
       if (p == 0) {
@@ -270,7 +270,7 @@ class PoissonGammaFunctionTest {
       list.add(x);
     }
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     for (final double x : list.toDoubleArray()) {
       final double p1 = PoissonGammaFunction.poissonGamma(x, o, gain);
       final double p2 = PoissonGammaFunction.poissonGamma(x, o, gain, dp_dt);
@@ -313,7 +313,7 @@ class PoissonGammaFunctionTest {
     }
 
     final double f = (double) fail / list.size();
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%g, mu=%g, failures=%g, mean=%f",
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "g=%g, mu=%g, failures=%g, mean=%f",
         gain, mu, f, MathUtils.div0(sum, fail)));
     if (approx) {
       Assertions.assertTrue(f < 0.2);
@@ -344,7 +344,7 @@ class PoissonGammaFunctionTest {
 
     final double m = 5;
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     for (final double x : p) {
       final double e = PoissonGammaFunction.poissonGamma(0, x, m);
       // Test the function can be separated into the dirac and the rest
@@ -356,7 +356,7 @@ class PoissonGammaFunctionTest {
       if (report) {
         final double p01 = PoissonGammaFunction.poissonGammaN(1e-10, x, m);
 
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
             "p=%g  Dirac=%s   p0=%s (dirac:p0=%s)   p01=%s  (p0:p01 = %s)", x, dirac, p0,
             dirac / p0,
             // uk.ac.sussex.gdsc.core.utils.DoubleEquality.relativeError(p0, dirac),

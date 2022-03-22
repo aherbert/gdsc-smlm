@@ -29,8 +29,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -152,7 +152,7 @@ class PoissonGaussianFisherInformationTest {
       final double lower = func.getPoissonGaussianApproximationI(mean);
       final double upper = PoissonFisherInformation.getPoissonI(mean);
       final double alpha = I / upper;
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
           "s=%g mean=%g I=%s I(1e-100)=%s (%s - %s) alpha=%s", func.sd, mean, I, I2, lower, upper,
           alpha));
       Assertions.assertTrue(I > lower);

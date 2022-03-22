@@ -45,14 +45,14 @@ import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceCumulFunc
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.JumpDistanceFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceCumulFunction;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis.MixedJumpDistanceFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -88,8 +88,8 @@ class JumpDistanceAnalysisTest {
   // Test MLE fitting and histogram fitting separately.
   // Is MLE fitting worth doing. Can it be made better?
 
-  final DoubleDoubleBiPredicate deltaD = TestHelper.doublesAreClose(0.1, 0);
-  final DoubleDoubleBiPredicate deltaF = TestHelper.doublesAreClose(0.2, 0);
+  final DoubleDoubleBiPredicate deltaD = Predicates.doublesAreClose(0.1, 0);
+  final DoubleDoubleBiPredicate deltaF = Predicates.doublesAreClose(0.2, 0);
 
   // Used for testing single populations
   // Used for testing dual populations:
@@ -109,7 +109,7 @@ class JumpDistanceAnalysisTest {
     jd.setMinFraction(0);
     final SimpsonIntegrator si =
         new SimpsonIntegrator(1e-3, 1e-8, 2, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-2, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-2, 0);
     for (final double d : D) {
       final double[] params = new double[] {d};
       final JumpDistanceFunction fp = new JumpDistanceFunction(null, d);
@@ -143,7 +143,7 @@ class JumpDistanceAnalysisTest {
     jd.setMinFraction(0);
     final SimpsonIntegrator si =
         new SimpsonIntegrator(1e-3, 1e-8, 2, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-2, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-2, 0);
     for (final double d : D) {
       for (final double f : new double[] {0, 0.1, 0.2, 0.4, 0.7, 0.9, 1}) {
         final double[] params = new double[] {f, d, 1 - f, d * 0.1};
@@ -180,7 +180,7 @@ class JumpDistanceAnalysisTest {
   // @formatter:on
 
   private void fitSinglePopulation(RandomSeed seed, boolean mle) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final String title = String.format("%s Single  ", (mle) ? "MLE" : "LSQ");
     AssertionError error = null;
     NEXT_D: for (final double d : D) {
@@ -240,7 +240,7 @@ class JumpDistanceAnalysisTest {
 
   private void fitDualPopulation(RandomSeed seed, boolean mle, double fraction) {
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.MAXIMUM));
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     final String title = String.format("%s Dual=%.1f", (mle) ? "MLE" : "LSQ", fraction);
     AssertionError error = null;
@@ -273,7 +273,7 @@ class JumpDistanceAnalysisTest {
   void canDoBenchmark(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     out = null;
     try {

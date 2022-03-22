@@ -57,13 +57,13 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 /**
@@ -233,7 +233,7 @@ public abstract class BaseFunctionSolverTest {
   private static double[][] createData(RandomSeed source) {
     // Per observation read noise.
     // This is generated once so create the randon generator here.
-    final UniformRandomProvider rg = RngUtils.create(source.get());
+    final UniformRandomProvider rg = RngFactory.create(source.get());
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, variance);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, gain, gainSD);
     final double[] w = new double[size * size];
@@ -273,7 +273,7 @@ public abstract class BaseFunctionSolverTest {
       solver.setWeights(getWeights(seed, noiseModel));
     }
 
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     for (final double s : signal) {
       final double[] expected = createParams(1, s, 0, 0, 1);
@@ -360,7 +360,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     final int loops = 5;
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final StoredDataStatistics[] stats = new StoredDataStatistics[6];
     final String[] statName = {"Signal", "X", "Y"};
 
@@ -443,10 +443,10 @@ public abstract class BaseFunctionSolverTest {
                 if (sd2 < sd1) {
                   betterPrecision[index]++;
                   args[args.length - 1] = "P*";
-                  logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+                  logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
                 } else {
                   args[args.length - 1] = "P";
-                  logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+                  logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
                 }
                 totalPrecision[index]++;
               }
@@ -457,10 +457,10 @@ public abstract class BaseFunctionSolverTest {
               if (u2 < u1) {
                 betterAccuracy[index]++;
                 args[args.length - 1] = "A*";
-                logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+                logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
               } else {
                 args[args.length - 1] = "A";
-                logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+                logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
               }
               totalAccuracy[index]++;
             }
@@ -470,10 +470,10 @@ public abstract class BaseFunctionSolverTest {
             if (sd2 < sd1) {
               betterPrecision[index]++;
               args[args.length - 1] = "P*";
-              logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+              logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
             } else {
               args[args.length - 1] = "P";
-              logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, msg, args));
+              logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, msg, args));
             }
             totalPrecision[index]++;
           }
@@ -664,7 +664,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.
@@ -774,7 +774,7 @@ public abstract class BaseFunctionSolverTest {
     }
 
     // Draw target data
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double[] data = drawGaussian(p12, noise, noiseModel, rg);
 
     // fit with 2 peaks using the known params.
@@ -785,7 +785,7 @@ public abstract class BaseFunctionSolverTest {
     solver1.fit(data, null, params, null);
     solver2.computeValue(data, null, params);
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
 
     double v1 = solver1.getValue();
     double v2 = solver2.getValue();

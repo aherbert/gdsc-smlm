@@ -56,7 +56,7 @@ import uk.ac.sussex.gdsc.smlm.model.UniformIllumination;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
@@ -109,7 +109,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[LOW], ton[MEDIUM], toff[MEDIUM],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[LOW], ton[MEDIUM], toff[MEDIUM],
         particles, fixedFraction, false, true);
   }
 
@@ -119,7 +119,7 @@ class BlinkEstimatorTest {
           RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[MEDIUM], ton[MEDIUM], toff[MEDIUM],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[MEDIUM], ton[MEDIUM], toff[MEDIUM],
         particles, fixedFraction, false, true);
   }
 
@@ -128,7 +128,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[HIGH], ton[MEDIUM], toff[MEDIUM],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[HIGH], ton[MEDIUM], toff[MEDIUM],
         particles, fixedFraction, false, true);
   }
 
@@ -137,7 +137,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[LOW], ton[HIGH], toff[HIGH],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[LOW], ton[HIGH], toff[HIGH],
         particles, fixedFraction, false, true);
   }
 
@@ -146,7 +146,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[MEDIUM], ton[HIGH], toff[HIGH],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[MEDIUM], ton[HIGH], toff[HIGH],
         particles, fixedFraction, false, true);
   }
 
@@ -155,7 +155,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[HIGH], ton[HIGH], toff[HIGH],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[HIGH], ton[HIGH], toff[HIGH],
         particles, fixedFraction, false, true);
   }
 
@@ -164,7 +164,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW], particles,
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW], particles,
         fixedFraction, false, true);
   }
 
@@ -173,7 +173,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[MEDIUM], ton[LOW], toff[LOW],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[MEDIUM], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -182,7 +182,7 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngUtils.create(seed.get()), blinkingRate[HIGH], ton[LOW], toff[LOW],
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[HIGH], ton[LOW], toff[LOW],
         particles, fixedFraction, false, true);
   }
 
@@ -190,7 +190,7 @@ class BlinkEstimatorTest {
   void findOptimalFittedPoints(RandomSeed seed) {
     // Skip this as it is slow
     Assumptions.assumeTrue(false);
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     final int particles = 1000;
     final double fixedFraction = 1;

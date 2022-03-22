@@ -28,14 +28,14 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class PrecomputedFunctionTest {
   @SeededTest
   void precomputedValueFunctionWrapsPrecomputedValues(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final ValueFunction func = new PrecomputedValueFunction(v);
@@ -60,7 +60,7 @@ class PrecomputedFunctionTest {
   @SeededTest
   void precomputedGradient1FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final double[][] g1 = new double[size][];
@@ -93,7 +93,7 @@ class PrecomputedFunctionTest {
   @SeededTest
   void precomputedGradient2FunctionWrapsPrecomputedValues(RandomSeed seed) {
     final int n = 3;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final int size = 100;
     final double[] v = GdscSmlmTestUtils.generateDoubles(size, r);
     final double[][] g1 = new double[size][];

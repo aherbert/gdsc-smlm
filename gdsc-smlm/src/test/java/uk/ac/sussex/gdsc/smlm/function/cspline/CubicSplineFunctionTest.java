@@ -44,8 +44,8 @@ import uk.ac.sussex.gdsc.smlm.function.StandardValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.QuadraticAstigmatismZModel;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 public abstract class CubicSplineFunctionTest {
@@ -196,7 +196,7 @@ public abstract class CubicSplineFunctionTest {
     }
 
     final int[] gradientIndices = cf.gradientIndices();
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
         cf.getClass().getName(), Arrays.toString(gradientIndices)));
 
     Assertions.assertEquals(cf.getN(), npeaks, "Incorrect number of peaks");

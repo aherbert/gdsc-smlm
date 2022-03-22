@@ -41,7 +41,7 @@ import uk.ac.sussex.gdsc.smlm.results.AttributePeakResult;
 import uk.ac.sussex.gdsc.smlm.results.IdCategoryPeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -50,7 +50,7 @@ class TrackPopulationImporterTest {
 
   @SeededTest
   void canEncodeAndDecodeKey(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     for (int i = 0; i < 10; i++) {
       final int frame = rng.nextInt();
       final int id = rng.nextInt();

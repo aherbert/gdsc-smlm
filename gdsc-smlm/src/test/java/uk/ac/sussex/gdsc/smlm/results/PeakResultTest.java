@@ -27,14 +27,14 @@ package uk.ac.sussex.gdsc.smlm.results;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class PeakResultTest {
   @SeededTest
   void sameResultIsEqual(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false, false);
     final PeakResult p = r1[0];
     Assertions.assertTrue(PeakResult.equals(p, p), "Same object");
@@ -52,10 +52,10 @@ class PeakResultTest {
         for (final boolean withCategory : both) {
           for (final boolean withEndFrame : both) {
             for (final boolean withPrecision : both) {
-              rng = RngUtils.create(seed.get());
+              rng = RngFactory.create(seed.get());
               final PeakResult[] r1 = createResults(rng, size, n, withDeviations, withId,
                   withCategory, withEndFrame, withPrecision);
-              rng = RngUtils.create(seed.get());
+              rng = RngFactory.create(seed.get());
               final PeakResult[] r2 = createResults(rng, size, n, withDeviations, withId,
                   withCategory, withEndFrame, withPrecision);
               for (int i = 0; i < r1.length; i++) {
@@ -79,7 +79,7 @@ class PeakResultTest {
         for (final boolean withCategory : both) {
           for (final boolean withEndFrame : both) {
             for (final boolean withPrecision : both) {
-              rng = RngUtils.create(seed.get());
+              rng = RngFactory.create(seed.get());
               final PeakResult[] r1 = createResults(rng, size, n, withDeviations, withId,
                   withCategory, withEndFrame, withPrecision);
               final PeakResult[] r2 = createResults(rng, size, n, withDeviations, withId,

@@ -27,19 +27,19 @@ package uk.ac.sussex.gdsc.smlm.math3.distribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class PoissonDistributionTest {
   @SeededTest
   void canComputeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-12);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-12);
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -57,8 +57,8 @@ class PoissonDistributionTest {
 
   @SeededTest
   void canComputeCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-15);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {
@@ -76,8 +76,8 @@ class PoissonDistributionTest {
 
   @SeededTest
   void canComputeInverseCumulativeProbability(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-15);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
 
     final PoissonDistribution fpd = new PoissonDistribution(1);
     for (int i = 1; i <= 100; i++) {

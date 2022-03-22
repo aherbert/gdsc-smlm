@@ -32,11 +32,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -75,7 +75,7 @@ class LogFactorialTest {
 
     // Compute some more by log summation
     double base = Math.log(value.doubleValue());
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-15);
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
     for (int n = MAX_N + 1; n < MAX_N * 3; n++) {
       base += Math.log(n);
       final double v1 = LogFactorial.value(n);
@@ -92,8 +92,8 @@ class LogFactorialTest {
    */
   @SeededTest
   void testLogFactorialDouble(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-14);
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-14);
     for (int i = 0; i < 200; i++) {
       final double n = rng.nextDouble() * 200;
       final double expected = n <= 1.5 ? Gamma.logGamma1p(n) : Gamma.logGamma(1 + n);
@@ -138,7 +138,7 @@ class LogFactorialTest {
       // @formatter:on
   })
   void testLogFactorial(double n, double expected) {
-    final DoubleDoubleBiPredicate tol = TestHelper.doublesAreClose(1e-15);
+    final DoubleDoubleBiPredicate tol = Predicates.doublesAreRelativelyClose(1e-15);
     TestAssertions.assertTest(expected, LogFactorial.value(n), tol, () -> Double.toString(n));
   }
 }

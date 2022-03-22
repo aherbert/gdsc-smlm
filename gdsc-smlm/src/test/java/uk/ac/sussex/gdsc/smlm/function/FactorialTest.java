@@ -31,11 +31,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -84,9 +84,9 @@ class FactorialTest {
    */
   @SeededTest
   void testFactorialDouble(RandomSeed seed) {
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     final DoubleDoubleBiPredicate tol =
-        TestHelper.doublesAreClose(1e-14).or(TestHelper.doublesEqual());
+        Predicates.doublesAreRelativelyClose(1e-14).or(Predicates.doublesAreEqual());
     for (int i = 0; i < 100; i++) {
       final double n = rng.nextDouble() * 180;
       final double expected = n < 1.5 ? 1 / (1 + Gamma.invGamma1pm1(n)) : Gamma.gamma(1 + n);
@@ -129,7 +129,7 @@ class FactorialTest {
   })
   void testFactorial(double n, double expected) {
     final DoubleDoubleBiPredicate tol =
-        TestHelper.doublesAreClose(1e-15).or(TestHelper.doublesEqual());
+        Predicates.doublesAreRelativelyClose(1e-15).or(Predicates.doublesAreEqual());
     TestAssertions.assertTest(expected, Factorial.value(n), tol, () -> Double.toString(n));
   }
 }

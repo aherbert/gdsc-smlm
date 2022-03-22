@@ -30,11 +30,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class CustomSimpsonIntegratorTest {
@@ -156,15 +156,15 @@ class CustomSimpsonIntegratorTest {
     final double ee = simpson(func, ax, bx, iter);
     final double o = in.integrate(Integer.MAX_VALUE, func, ax, bx);
 
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s iter=%d  %g-%g  e=%g  ee=%g  o=%g",
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "%s iter=%d  %g-%g  e=%g  ee=%g  o=%g",
         func.getClass().getSimpleName(), iter, ax, bx, e, ee, o));
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-6, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-6, 0);
     TestAssertions.assertTest(e, ee, predicate);
     TestAssertions.assertTest(e, o, predicate);
 
     // These should be the same within numeric tolerance
-    TestAssertions.assertTest(ee, o, TestHelper.doublesAreClose(1e-12, 0));
+    TestAssertions.assertTest(ee, o, Predicates.doublesAreClose(1e-12, 0));
   }
 
   private static double simpson(UnivariateFunction func, double ax, double bx, int iter) {

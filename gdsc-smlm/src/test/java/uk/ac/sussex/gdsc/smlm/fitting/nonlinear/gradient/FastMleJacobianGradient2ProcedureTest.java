@@ -35,12 +35,12 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.MultiFreeCircularErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
@@ -93,7 +93,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
   @SeededTest
   void gradientProcedureComputesSameAsBaseGradientProcedure(RandomSeed seed) {
     // Test the base functionality of computing the partial derivatives is the same
-    final DoubleDoubleBiPredicate equality = TestHelper.doublesAreClose(1e-5, 0);
+    final DoubleDoubleBiPredicate equality = Predicates.doublesAreClose(1e-5, 0);
     gradientProcedureComputesSameAsBaseGradientProcedure(seed, 4, equality);
     gradientProcedureComputesSameAsBaseGradientProcedure(seed, 5, equality);
     gradientProcedureComputesSameAsBaseGradientProcedure(seed, 6, equality);
@@ -108,7 +108,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
     for (int i = 0; i < paramsList.size(); i++) {
@@ -159,11 +159,11 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.get()), npeaks, iter, paramsList, yList, true);
+    createData(RngFactory.create(seed.get()), npeaks, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = Predicates.doublesAreClose(5e-2, 1e-16);
     final IndexSupplier msg1 = new IndexSupplier(2).setMessagePrefix("Gradient1 ");
     final IndexSupplier msg2 = new IndexSupplier(2).setMessagePrefix("Gradient2 ");
     final IndexSupplier msg3 = new IndexSupplier(3).setMessagePrefix("GradientJ ");

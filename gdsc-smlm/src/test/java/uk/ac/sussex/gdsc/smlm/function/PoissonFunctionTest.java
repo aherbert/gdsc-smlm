@@ -32,12 +32,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.smlm.math3.distribution.PoissonDistribution;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.api.function.DoublePredicate;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"unused", "javadoc"})
@@ -62,10 +62,10 @@ class PoissonFunctionTest {
     for (int j = 0; j < gain.length; j++) {
       for (int i = 0; i < photons.length; i++) {
         final int[] result = cumulativeProbabilityIsOne(gain[j], photons[i]);
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "minRange[%d][%d] = %d;", j, i,
-            result[0]));
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, "maxRange[%d][%d] = %d;", j, i,
-            result[1]));
+        logger.log(
+            TestLogging.getRecord(TestLevel.TEST_DEBUG, "minRange[%d][%d] = %d;", j, i, result[0]));
+        logger.log(
+            TestLogging.getRecord(TestLevel.TEST_DEBUG, "maxRange[%d][%d] = %d;", j, i, result[1]));
       }
     }
   }
@@ -157,7 +157,7 @@ class PoissonFunctionTest {
     minx += min;
     maxx += min;
 
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
         "g=%f, mu=%f, o=%f, p=%f, min=%d, %f @ %d, max=%d", gain, mu, o, pvalue, minx, maxp, maxc,
         maxx));
     return new int[] {minx, maxx};
@@ -192,9 +192,9 @@ class PoissonFunctionTest {
     final int min = range[0];
     final int max = range[1];
     // Allow a relative difference or an exact match (for the case of -Infinity)
-    final DoublePredicate isNegativeInfinity = TestHelper.doubleEquals(Double.NEGATIVE_INFINITY);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0)
-        .or(TestHelper.and(isNegativeInfinity, isNegativeInfinity));
+    final DoublePredicate isNegativeInfinity = Predicates.doubleIsEqualTo(Double.NEGATIVE_INFINITY);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0)
+        .or(Predicates.and(isNegativeInfinity, isNegativeInfinity));
     for (int x = min; x <= max; x++) {
       final double v1 = Math.log(f.likelihood(x, o));
       final double v2 = f.logLikelihood(x, o);
@@ -223,7 +223,7 @@ class PoissonFunctionTest {
     final int[] range = getRange(1, mu);
     final int min = range[0];
     final int max = range[1];
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     for (int x = min; x <= max; x++) {
       final double v1 = f.likelihood(x, o);
       final double v2 = pd.probability(x);

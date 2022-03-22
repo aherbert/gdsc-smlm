@@ -44,13 +44,13 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient.GradientCalculatorUtils
 import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
 @SuppressWarnings({"javadoc"})
@@ -493,7 +493,7 @@ class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1
@@ -555,7 +555,7 @@ class EjmlLinearSolverTest {
       // Use the solver validation
       EjmlLinearSolver solver = new EjmlLinearSolver();
       solver.setInversionTolerance(1e-2);
-      DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-3, 1e-4);
+      DoubleDoubleBiPredicate test = Predicates.doublesAreClose(1e-3, 1e-4);
       int fail = 0;
       for (int i = 0; i < a.length; i++) {
         DenseMatrix64F aa = a[i].copy();
@@ -724,7 +724,7 @@ class EjmlLinearSolverTest {
     final double[] testw1 = new double[] {1.1, 1.2, 1.5};
     final int np = f0.getNumberOfGradients();
     final GradientCalculator calc = GradientCalculatorUtils.newCalculator(np);
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     // double lambda = 10;
     for (final double background : testbackground) {
       // Peak 1

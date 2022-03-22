@@ -35,10 +35,10 @@ import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 /**
@@ -89,7 +89,7 @@ class Gaussian2DFunctionSpeedTest {
   }
 
   private static Object createData(RandomSeed source) {
-    return new Gaussian2DFunctionSpeedTestData(RngUtils.create(source.get()));
+    return new Gaussian2DFunctionSpeedTestData(RngFactory.create(source.get()));
   }
 
   // private static ArrayList<double[]> paramsListSinglePeak = new ArrayList<>();
@@ -393,7 +393,7 @@ class Gaussian2DFunctionSpeedTest {
     }
     start2 = System.nanoTime() - start2;
 
-    logger.log(TestLogUtils.getTimingRecord(f1.getClass().getName(), start1,
+    logger.log(TestLogging.getTimingRecord(f1.getClass().getName(), start1,
         f2.getClass().getName(), start2));
   }
 

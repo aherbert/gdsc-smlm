@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 
@@ -259,7 +259,7 @@ class PoissonGammaGaussianFisherInformationTest {
         final double I = f.getPoissonGammaGaussianI(mean);
         final double upper = PoissonFisherInformation.getPoissonI(mean);
         final double alpha = I / upper;
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG,
+        logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG,
             "m=%g s=%g u=%g I=%s PoissonI=%s alpha=%s", f.gain, f.sd, mean, I, upper, alpha));
         Assertions.assertTrue(I < upper,
             () -> String.format("Fisher information (%s) is not below upper limit: %s", I, upper));

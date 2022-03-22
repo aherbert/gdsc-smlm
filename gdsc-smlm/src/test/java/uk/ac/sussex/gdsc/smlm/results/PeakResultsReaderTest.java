@@ -49,15 +49,15 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.ObjectArrayFormatSupplier;
@@ -477,7 +477,7 @@ class PeakResultsReaderTest {
 
   @SeededTest
   void canConvertMalkToNmAndPhotons(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false, false);
 
     // Output in pixel and count
@@ -503,7 +503,7 @@ class PeakResultsReaderTest {
   @SeededTest
   void writeTextWithComputedPrecisionMatchesRead(RandomSeed seed) {
     // Create without precision
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults results = createResults(rg, 200, false, false, false, false, false);
     // Ensure units are OK for computing precision
     final CalibrationWriter cw = results.getCalibrationWriter();
@@ -542,7 +542,7 @@ class PeakResultsReaderTest {
   }
 
   private static void canReadIntoPreferredUnits(RandomSeed seed, ResultsFileFormat fileFormat) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out = createResults(rg, 200, false, false, false, false, false);
 
     // Output in nm and count
@@ -585,7 +585,7 @@ class PeakResultsReaderTest {
 
   private static void canReadAndSimplifyGaussian2DPsf(RandomSeed seed,
       ResultsFileFormat fileFormat) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out = createResults(rg, 1, false, false, false, false, false);
 
     final CalibrationWriter cal = new CalibrationWriter(out.getCalibration());
@@ -663,7 +663,7 @@ class PeakResultsReaderTest {
     Assumptions.assumeTrue(logger.isLoggable(TestLevel.TEST_INFO));
     Assumptions.assumeTrue(TestSettings.allow(TestComplexity.HIGH));
 
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out =
         createResults(rg, 20000, showDeviations, showEndFrame, showId, showPrecision, showCategory);
     final String filename = createFile();
@@ -693,7 +693,7 @@ class PeakResultsReaderTest {
   private static void writeMatchesRead(RandomSeed seed, boolean sequential,
       ResultsFileFormat fileFormat, boolean showDeviations, boolean showEndFrame, boolean showId,
       boolean showPrecision, boolean showCategory, boolean sort) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out =
         createResults(rg, 200, showDeviations, showEndFrame, showId, showPrecision, showCategory);
     if (fileFormat == ResultsFileFormat.MALK) {
@@ -791,7 +791,7 @@ class PeakResultsReaderTest {
   private static void checkScannerMatchesNonScanner(RandomSeed seed, boolean showDeviations,
       boolean showEndFrame, boolean showId, boolean showPrecision, boolean showCategory,
       boolean sort) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final MemoryPeakResults out =
         createResults(rg, 1000, showDeviations, showEndFrame, showId, showPrecision, showCategory);
     final String filename = createFile();
@@ -841,8 +841,8 @@ class PeakResultsReaderTest {
     // TSF requires the bias be subtracted
     // double bias = expectedResults.getCalibration().getBias();
 
-    final DoubleDoubleBiPredicate deltaD = TestHelper.doublesIsCloseTo(1e-5, 0);
-    final FloatFloatBiPredicate deltaF = TestHelper.floatsIsCloseTo(1e-5, 0);
+    final DoubleDoubleBiPredicate deltaD = Predicates.doublesBIsRelativelyCloseToA(1e-5);
+    final FloatFloatBiPredicate deltaF = Predicates.floatsBIsRelativelyCloseToA(1e-5);
 
     for (int i = 0; i < actualResults.size(); i++) {
       final PeakResult p1 = expected[i];

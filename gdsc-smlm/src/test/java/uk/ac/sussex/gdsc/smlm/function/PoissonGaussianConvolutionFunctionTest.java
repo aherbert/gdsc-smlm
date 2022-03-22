@@ -36,16 +36,16 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -192,7 +192,7 @@ class PoissonGaussianConvolutionFunctionTest {
     }
 
     if (p2 < 0.98 || p2 > 1.02) {
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
           sd, pvalue, p2));
     }
 
@@ -217,7 +217,7 @@ class PoissonGaussianConvolutionFunctionTest {
     final double e = mu;
     final Supplier<String> msg =
         () -> String.format("g=%f, mu=%f, s=%f, erf=%b", gain, mu, sd, computePmf);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-3, 0);
     for (int x = min; x <= max; x++) {
       final double p = f.likelihood(x, e);
       if (p == 0) {
@@ -245,7 +245,7 @@ class PoissonGaussianConvolutionFunctionTest {
         PoissonGaussianConvolutionFunction.createWithStandardDeviation(1 / g, s);
     f2.setComputePmf(false);
 
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
 
     // Generate realistic data from the probability mass function
     final double[][] samples = new double[photons.length][];
@@ -299,7 +299,7 @@ class PoissonGaussianConvolutionFunctionTest {
       t2 += run(f2, samples, photons);
     }
 
-    logger.log(TestLogUtils.getTimingRecord("cdf", t1, "pdf", t2));
+    logger.log(TestLogging.getTimingRecord("cdf", t1, "pdf", t2));
   }
 
   private static long run(PoissonGaussianConvolutionFunction func, double[][] samples,

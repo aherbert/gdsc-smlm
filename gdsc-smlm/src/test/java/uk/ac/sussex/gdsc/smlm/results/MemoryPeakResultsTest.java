@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MemoryUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 
 @SuppressWarnings({"javadoc"})
 class MemoryPeakResultsTest {
@@ -66,7 +66,7 @@ class MemoryPeakResultsTest {
     final double error = DoubleEquality.relativeError(actual, expected);
     // This is flaky so do not assert the test
     // Assertions.assertEquals(size, expected, Math.abs(size) * SIZE_TOLERANCE);
-    logger.log(TestLogUtils.getResultRecord(error < SIZE_TOLERANCE,
+    logger.log(TestLogging.getResultRecord(error < SIZE_TOLERANCE,
         "Memory expected=%d : measured=%d : error=%f", expected, actual, error));
   }
 

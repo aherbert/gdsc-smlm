@@ -30,8 +30,8 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -111,10 +111,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingBlockMeanNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingBlockMeanNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockMeanNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockMeanNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 
@@ -191,10 +191,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float blockMedianNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float blockMedianNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockMeanNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float blockMedianNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float blockMedianNxNInternal", slowTotal,
         "rollingBlockMeanNxNInternal", fastTotal));
   }
 
@@ -272,10 +272,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingMedianNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockMeanNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingMedianNxNInternal", slowTotal,
         "rollingBlockMeanNxNInternal", fastTotal));
   }
 
@@ -352,10 +352,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float convolveInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float convolveInternal " + boxSize,
           boxSlowTotal, "rollingBlockMeanNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float convolveInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float convolveInternal", slowTotal,
         "rollingBlockMeanNxNInternal", fastTotal));
   }
 
@@ -441,10 +441,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float areaFilterInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float areaFilterInternal " + boxSize,
           boxSlowTotal, "rollingBlockMeanNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float areaFilterInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float areaFilterInternal", slowTotal,
         "rollingBlockMeanNxNInternal", fastTotal));
   }
 
@@ -531,10 +531,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float areaFilterInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float areaFilterInternal " + boxSize,
           boxSlowTotal, "stripedBlockMeanNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float areaFilterInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float areaFilterInternal", slowTotal,
         "stripedBlockMeanNxNInternal", fastTotal));
   }
 
@@ -613,10 +613,10 @@ class FilterSpeedTest extends AbstractFilterTest {
         }
       }
       // if (debug)
-      logger.log(TestLogUtils.getStageTimingRecord("float rollingBlockSumNxNInternal " + boxSize,
+      logger.log(TestLogging.getStageTimingRecord("float rollingBlockSumNxNInternal " + boxSize,
           boxSlowTotal, "rollingBlockSumNxNInternal", boxFastTotal));
     }
-    logger.log(TestLogUtils.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal,
+    logger.log(TestLogging.getTimingRecord("float rollingBlockSumNxNInternal", slowTotal,
         "rollingBlockSumNxNInternal", fastTotal));
   }
 

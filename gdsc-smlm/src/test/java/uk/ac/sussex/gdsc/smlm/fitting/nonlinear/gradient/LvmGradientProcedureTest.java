@@ -54,14 +54,14 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.ErfGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleFreeCircularErfGaussian2DFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
@@ -222,7 +222,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    final int[] x = createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    final int[] x = createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     final int n = x.length;
     final FakeGradientFunction func = new FakeGradientFunction(blockWidth, nparams);
 
@@ -240,7 +240,7 @@ class LvmGradientProcedureTest {
         new IndexSupplier(1, name + "Observations: Not same alpha matrix ", null);
 
     final DoubleDoubleBiPredicate predicate =
-        (error == 0) ? TestHelper.doublesEqual() : TestHelper.doublesAreClose(error, 0);
+        (error == 0) ? Predicates.doublesAreEqual() : Predicates.doublesAreClose(error, 0);
 
     for (int i = 0; i < paramsList.size(); i++) {
       // Reference implementation
@@ -323,7 +323,7 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createFakeData(RngUtils.create(seed.get()), nparams, iter, paramsList, yList);
+    createFakeData(RngFactory.create(seed.get()), nparams, iter, paramsList, yList);
     Gradient1Function func = new FakeGradientFunction(blockWidth, nparams);
 
     if (precomputed) {
@@ -465,11 +465,11 @@ class LvmGradientProcedureTest {
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
     final ArrayList<double[]> yList = new ArrayList<>(iter);
 
-    createData(RngUtils.create(seed.get()), 1, iter, paramsList, yList, true);
+    createData(RngFactory.create(seed.get()), 1, iter, paramsList, yList, true);
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleDoubleBiPredicate eq = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq = Predicates.doublesAreClose(5e-2, 1e-16);
     final IndexSupplier msg = new IndexSupplier(2).setMessagePrefix("Gradient ");
 
     final double[] b = (precomputed) ? new double[func.size()] : null;
@@ -561,7 +561,7 @@ class LvmGradientProcedureTest {
   private void gradientProcedureSupportsPrecomputed(RandomSeed seed, final Type type,
       boolean checkGradients) {
     final int iter = 10;
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rng, 0, noise);
 
     final ArrayList<double[]> paramsList = new ArrayList<>(iter);
@@ -603,7 +603,7 @@ class LvmGradientProcedureTest {
 
     // for the gradients
     final double delta = 1e-4;
-    final DoubleDoubleBiPredicate eq2 = TestHelper.doublesAreClose(5e-2, 1e-16);
+    final DoubleDoubleBiPredicate eq2 = Predicates.doublesAreClose(5e-2, 1e-16);
     final IndexSupplier msg = new IndexSupplier(2).setMessagePrefix("Gradient ");
 
     final double[] a1peaks = new double[1 + Gaussian2DFunction.PARAMETERS_PER_PEAK];
@@ -734,11 +734,11 @@ class LvmGradientProcedureTest {
 
       if (type != Type.LSQ) {
         if (eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
-          logger.log(TestLogUtils.getFailRecord("p12b3 Same value @ %d (error=%s) : %s == %s", i,
+          logger.log(TestLogging.getFailRecord("p12b3 Same value @ %d (error=%s) : %s == %s", i,
               DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
         if (almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
-          logger.log(TestLogUtils.getFailRecord("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
+          logger.log(TestLogging.getFailRecord("p12b3 Same gradient @ %d (error=%s) : %s vs %s", i,
               relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
         }
 
@@ -763,16 +763,16 @@ class LvmGradientProcedureTest {
               dj = j;
             }
           }
-          logger.log(TestLogUtils.getFailRecord("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i,
+          logger.log(TestLogging.getFailRecord("p12b3 Same alpha @ %d,%d (error=%s) : %s vs %s", i,
               dj, error, Arrays.toString(alpha[dj]), Arrays.toString(m123[dj])));
         }
       } else {
         if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
-          logger.log(TestLogUtils.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s",
+          logger.log(TestLogging.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s",
               i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
         if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
-          logger.log(TestLogUtils.getFailRecord(
+          logger.log(TestLogging.getFailRecord(
               "p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
               relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
         }
@@ -781,7 +781,7 @@ class LvmGradientProcedureTest {
           // Arrays.toString(m123[j]));
           if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
             logger.log(
-                TestLogUtils.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i,
+                TestLogging.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i,
                     j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
                     Arrays.toString(m123[j])));
           }

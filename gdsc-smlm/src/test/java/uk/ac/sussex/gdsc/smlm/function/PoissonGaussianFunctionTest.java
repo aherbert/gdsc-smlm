@@ -35,13 +35,13 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SpeedTag;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -186,7 +186,7 @@ class PoissonGaussianFunctionTest {
     }, min, max);
 
     if (p2 < 0.98 || p2 > 1.02) {
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
           sd, pvalue, p2));
     }
 
@@ -231,7 +231,7 @@ class PoissonGaussianFunctionTest {
     final int min = range[0];
     final int max = range[1];
     final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-3, 0);
     for (int x = min; x <= max; x++) {
       final double p = f.probability(x);
       if (p == 0) {
@@ -264,7 +264,7 @@ class PoissonGaussianFunctionTest {
     final long t1 = getTime(noise2, x, true);
     final long t2 = getTime(noise2, x, false);
 
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Picard %d : Pade %d (%fx)", t1, t2,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "Picard %d : Pade %d (%fx)", t1, t2,
         t1 / (double) t2));
     Assertions.assertTrue(t2 < t1, () -> String.format("Picard %d < Pade %d", t1, t2));
   }

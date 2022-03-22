@@ -30,9 +30,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 import org.opentest4j.AssertionFailedError;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
+import uk.ac.sussex.gdsc.test.utils.AssertionErrors;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestUtils;
 
 /**
  * Test the PulseActivationAnalysis unmixing functions.
@@ -43,7 +43,7 @@ class PulseActivationAnalysisTest {
 
   @SeededTest
   void canLinearlyUnmix2Channels(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n <= 2; n++) {
       for (int m = 1; m <= 2; m++) {
         canLinearlyUnmix2Channels(r, n, m);
@@ -92,7 +92,7 @@ class PulseActivationAnalysisTest {
         }
       }
     } catch (final AssertionFailedError ex) {
-      TestUtils.wrapAssertionFailedError(ex,
+      AssertionErrors.prependMessage(ex,
           () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }
@@ -122,7 +122,7 @@ class PulseActivationAnalysisTest {
 
   @SeededTest
   void canLinearlyUnmix3Channels(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int n = 1; n <= 3; n++) {
       for (int m = 1; m <= 6; m++) {
         canLinearlyUnmix3Channels(r, n, m);
@@ -172,7 +172,7 @@ class PulseActivationAnalysisTest {
         }
       }
     } catch (final AssertionFailedError ex) {
-      TestUtils.wrapAssertionFailedError(ex,
+      AssertionErrors.prependMessage(ex,
           () -> String.format("channels=%d, crosstalk=%d", n, m));
     }
   }

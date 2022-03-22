@@ -34,11 +34,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class PoissonPoissonFunctionTest {
@@ -168,7 +168,7 @@ class PoissonPoissonFunctionTest {
       }
     }, min, max);
 
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "g=%f, mu=%f, s=%f p=%f  %f", gain, mu,
         sd, pvalue, p2));
 
     return p2;
@@ -201,7 +201,7 @@ class PoissonPoissonFunctionTest {
     // Note: The input mu parameter is pre-gain.
     final double e = mu;
     final Supplier<String> msg = () -> String.format("g=%f, mu=%f, s=%f", gain, mu, sd);
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-3, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-3, 0);
     for (int x = min; x <= max; x++) {
       final double p = f.likelihood(x, e);
       if (p == 0) {

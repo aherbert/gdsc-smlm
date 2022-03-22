@@ -27,15 +27,15 @@ package uk.ac.sussex.gdsc.smlm.utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
 class GaussianKernelTest {
   @Test
   void canGetConversionFactor() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -134,7 +134,7 @@ class GaussianKernelTest {
 
   @Test
   void canComputeDownscaleGaussianKernelIncScaleIncRange() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -159,7 +159,7 @@ class GaussianKernelTest {
 
   @Test
   void canComputeDownscaleGaussianKernelDecScaleIncRange() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -184,7 +184,7 @@ class GaussianKernelTest {
 
   @Test
   void canComputeDownscaleGaussianKernelIncRangeIncScale() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 
@@ -209,7 +209,7 @@ class GaussianKernelTest {
 
   @Test
   void canComputeDownscaleGaussianKernelIncRangeDecScale() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < 5; i++) {
       final double s = 0.33 * (1 << i);
 

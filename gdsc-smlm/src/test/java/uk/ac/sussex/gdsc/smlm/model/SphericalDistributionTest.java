@@ -31,14 +31,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
 class SphericalDistributionTest {
   @SeededTest
   void canSample(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double radius = 10 + rg.nextDouble() * 10;
     final SphericalDistribution dist = new SphericalDistribution(radius, rg);
     for (int i = 100; i-- > 0;) {
@@ -50,7 +50,7 @@ class SphericalDistributionTest {
 
   @SeededTest
   void canSampleWithNoRadius(RandomSeed seed) {
-    final UniformRandomProvider rg = RngUtils.create(seed.get());
+    final UniformRandomProvider rg = RngFactory.create(seed.get());
     final double[] expected = {0, 0, 0};
     for (final double radius : new double[] {0.0, -0.0}) {
       final SphericalDistribution dist = new SphericalDistribution(radius, rg);

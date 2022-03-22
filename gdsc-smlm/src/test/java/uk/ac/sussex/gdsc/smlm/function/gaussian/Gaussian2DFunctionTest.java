@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 public abstract class Gaussian2DFunctionTest {
@@ -162,7 +162,7 @@ public abstract class Gaussian2DFunctionTest {
 
     final int[] gradientIndices = gf.gradientIndices();
     if (logger.isLoggable(TestLevel.TEST_INFO)) {
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "Function%d %s %s", npeaks,
           gf.getClass().getName(), Arrays.toString(gradientIndices)));
     }
 
@@ -242,7 +242,7 @@ public abstract class Gaussian2DFunctionTest {
                   f.initialise(params);
                   if (record) {
                     record = false;
-                    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s %d frozen to %s",
+                    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "%s %d frozen to %s",
                         f1.getClass().getSimpleName(), 1, f.getClass().getSimpleName()));
                   }
 
@@ -436,7 +436,7 @@ public abstract class Gaussian2DFunctionTest {
                               f.initialise(params);
                               if (record) {
                                 record = false;
-                                logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+                                logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
                                     "%s %d frozen to %s", f2.getClass().getSimpleName(), 2,
                                     f.getClass().getSimpleName()));
                               }

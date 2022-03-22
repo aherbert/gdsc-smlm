@@ -42,12 +42,12 @@ import uk.ac.sussex.gdsc.smlm.function.ValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunctionTest;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
 
 @SuppressWarnings({"javadoc"})
@@ -547,7 +547,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
                           final boolean ok =
                               eq.almostEqualRelativeOrAbsolute(gradient, m.get(j, k));
                           if (!ok) {
-                            logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+                            logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
                                 "%d [%d,%d] %f ?= %f", index, j, k, gradient, m.get(j, k)));
                             Assertions.fail(String.format("%d [%d,%d] %f != %f", index, j, k,
                                 gradient, m.get(j, k)));
@@ -883,7 +883,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
 
   @Test
   void functionCanComputeIntegral() {
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     double[] params;
     for (final double background : testbackground) {
       // Peak 1
@@ -947,9 +947,9 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
     t1 = t2 - t1;
     t2 = t3 - t2;
     logger.log(
-        TestLogUtils.getRecord(TestLevel.TEST_INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
+        TestLogging.getRecord(TestLevel.TEST_INFO, "computeIntegralIsFaster %s %d vs %d (%gx)",
             f1.getClass().getSimpleName(), t1, t2, (double) t1 / t2));
-    TestAssertions.assertTest(s1, s2, TestHelper.doublesAreClose(1e-3, 0));
+    TestAssertions.assertTest(s1, s2, Predicates.doublesAreClose(1e-3, 0));
     Assertions.assertTrue(t2 < t1);
   }
 
@@ -957,7 +957,7 @@ public abstract class ErfGaussian2DFunctionTest extends Gaussian2DFunctionTest {
   void functionCanComputeIntegralWith2Peaks() {
     Assumptions.assumeTrue(null != f2);
 
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-8, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-8, 0);
     double[] params;
     for (final double background : testbackground) {
       // Peak 1

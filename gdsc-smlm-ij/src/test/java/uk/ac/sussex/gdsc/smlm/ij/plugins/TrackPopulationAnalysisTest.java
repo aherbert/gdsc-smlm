@@ -38,10 +38,10 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.BrownianDiffusionFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.ExponentialDataFunction;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.TrackPopulationAnalysis.FbmDiffusionFunction;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 
 @SuppressWarnings({"javadoc"})
 class TrackPopulationAnalysisTest {
@@ -49,7 +49,7 @@ class TrackPopulationAnalysisTest {
   void canComputeBrownianDiffusionFunction1() {
     final int size = 10;
     final double delta = 1e-6;
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-5);
     for (final double t : new double[] {0.8, 1, 1.2}) {
       final MultivariateJacobianFunction f = new BrownianDiffusionFunction(size, t);
       for (final double d : new double[] {0.8, 0.9, 1, 1.1, 1.2}) {
@@ -90,7 +90,7 @@ class TrackPopulationAnalysisTest {
   void canComputeFbmDiffusionFunction() {
     final int size = 10;
     final double delta = 1e-6;
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-5);
     for (final double t : new double[] {0.8, 1, 1.2}) {
       final MultivariateJacobianFunction f = new FbmDiffusionFunction(size, t);
       for (final double d : new double[] {0.8, 0.9, 1, 1.1, 1.2}) {
@@ -147,7 +147,7 @@ class TrackPopulationAnalysisTest {
   @Test
   void canComputeBrownianModelUsingFbmFunction() {
     final int size = 10;
-    final DoubleDoubleBiPredicate test = TestHelper.doublesAreClose(1e-5);
+    final DoubleDoubleBiPredicate test = Predicates.doublesAreRelativelyClose(1e-5);
     final double alpha = 1.0;
     for (final double t : new double[] {0.8, 1, 1.2}) {
       final BrownianDiffusionFunction f1 = new BrownianDiffusionFunction(size, t);
@@ -175,7 +175,7 @@ class TrackPopulationAnalysisTest {
 
   @Test
   void canComputeExponentialLogLikelihood() {
-    final RandomGenerator rng = new RandomGeneratorAdapter(RngUtils.createWithFixedSeed());
+    final RandomGenerator rng = new RandomGeneratorAdapter(RngFactory.createWithFixedSeed());
     final double delta = 1e-6;
     for (final double mean : new double[] {2, 10}) {
       // Create exponential data

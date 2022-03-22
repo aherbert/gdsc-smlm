@@ -35,7 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.ImageExtractor;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 
 @SuppressWarnings({"javadoc"})
@@ -63,7 +63,7 @@ class ImageConverterTest {
   }
 
   private static Object createData(RandomSeed seed) {
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final ByteProcessor bp = new ByteProcessor(w, h);
     final ImageConverterTestData data = new ImageConverterTestData();
     data.bdata = (byte[]) bp.getPixels();
@@ -122,7 +122,7 @@ class ImageConverterTest {
     final byte[] bdata = data.bdata;
     final short[] sdata = data.sdata;
     final float[] fdata = data.fdata;
-    final UniformRandomProvider rand = RngUtils.create(seed.get());
+    final UniformRandomProvider rand = RngFactory.create(seed.get());
     final ImageExtractor ie = ImageExtractor.wrap(fdata, w, h);
     for (int i = 0; i < 10; i++) {
       final Rectangle bounds = ie.getBoxRegionBounds(10 + rand.nextInt(w - 20),

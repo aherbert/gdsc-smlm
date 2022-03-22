@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class QuadraticAstigmatismZModelTest {
@@ -91,7 +91,7 @@ class QuadraticAstigmatismZModelTest {
       final double o2 = ds_dz2[1];
 
       if (record) {
-        logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+        logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
             "z=%f s=%f : ds_dz=%g  %g  (%g): d2s_dz2=%g   %g  (%g)", z, s0, e1, o1,
             DoubleEquality.relativeError(o1, e1), e2, o2, DoubleEquality.relativeError(o2, e2)));
       }

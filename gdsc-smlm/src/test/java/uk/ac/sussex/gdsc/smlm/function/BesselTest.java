@@ -28,17 +28,19 @@ import java.util.function.DoubleUnaryOperator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 
 @SuppressWarnings({"javadoc"})
 class BesselTest {
-  // Require doublesEqual to compare infinity == infinity
+  // Require doublesAreEqual to compare infinity == infinity
   private static final DoubleDoubleBiPredicate tolerance5e16 =
-      TestHelper.doublesEqual().or(TestHelper.doublesAreClose(5e-16));
-  private static final DoubleDoubleBiPredicate tolerance1e15 = TestHelper.doublesAreClose(1e-15);
-  private static final DoubleDoubleBiPredicate tolerance5e15 = TestHelper.doublesAreClose(5e-15);
+      Predicates.doublesAreEqual().or(Predicates.doublesAreRelativelyClose(5e-16));
+  private static final DoubleDoubleBiPredicate tolerance1e15 =
+      Predicates.doublesAreRelativelyClose(1e-15);
+  private static final DoubleDoubleBiPredicate tolerance5e15 =
+      Predicates.doublesAreRelativelyClose(5e-15);
 
   @ParameterizedTest
   @CsvFileSource(resources = {"bessel_i0.csv"})

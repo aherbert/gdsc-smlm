@@ -31,10 +31,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import uk.ac.sussex.gdsc.core.utils.XmlUtils;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 
 @SuppressWarnings({"javadoc"})
 class FilterTest {
@@ -52,7 +52,7 @@ class FilterTest {
 
   @SeededTest
   void canCompareMultiFilter(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
+    final UniformRandomProvider UniformRandomProvider = RngFactory.create(seed.get());
     final MultiFilter f = new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter f1 =
@@ -67,7 +67,7 @@ class FilterTest {
 
   @SeededTest
   void canCompareMultiFilter2(RandomSeed seed) {
-    final UniformRandomProvider UniformRandomProvider = RngUtils.create(seed.get());
+    final UniformRandomProvider UniformRandomProvider = RngFactory.create(seed.get());
     final MultiFilter2 f = new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0);
     for (int i = 1000; i-- > 0;) {
       final MultiFilter2 f1 =
@@ -91,7 +91,7 @@ class FilterTest {
   @SeededTest
   void canSerialiseMultiFilter(RandomSeed seed) {
     // Check the XStream serialisation supports inheritance
-    final UniformRandomProvider rng = RngUtils.create(seed.get());
+    final UniformRandomProvider rng = RngFactory.create(seed.get());
     testSerialisation(new MultiFilter(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilter2(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
     testSerialisation(new MultiFilterCrlb(0, 0, 0, 0, 0, 0, 0, 0, 0), rng);
@@ -102,7 +102,7 @@ class FilterTest {
       final MultiFilter f1 =
           (MultiFilter) filter.create(random(filter.getNumberOfParameters(), rng));
       final String xml = f1.toXml();
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_DEBUG, XmlUtils.prettyPrintXml(xml)));
+      logger.log(TestLogging.getRecord(TestLevel.TEST_DEBUG, XmlUtils.prettyPrintXml(xml)));
       final MultiFilter f2 = (MultiFilter) Filter.fromXml(xml);
       Assertions.assertTrue(f1.getClass().equals(f2.getClass()));
       Assertions.assertEquals(f1, f2);

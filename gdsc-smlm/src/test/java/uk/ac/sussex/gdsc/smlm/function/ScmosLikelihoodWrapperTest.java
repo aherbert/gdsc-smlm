@@ -51,14 +51,14 @@ import uk.ac.sussex.gdsc.smlm.GdscSmlmTestUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
+import uk.ac.sussex.gdsc.test.api.Predicates;
 import uk.ac.sussex.gdsc.test.api.TestAssertions;
-import uk.ac.sussex.gdsc.test.api.TestHelper;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
-import uk.ac.sussex.gdsc.test.rng.RngUtils;
+import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils;
-import uk.ac.sussex.gdsc.test.utils.TestLogUtils.TestLevel;
+import uk.ac.sussex.gdsc.test.utils.TestLogging;
+import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
@@ -148,7 +148,7 @@ class ScmosLikelihoodWrapperTest {
     data.gain = new float[n];
     data.offset = new float[n];
     data.sd = new float[n];
-    final UniformRandomProvider rg = RngUtils.create(source.get());
+    final UniformRandomProvider rg = RngFactory.create(source.get());
     final DiscreteSampler pd = GdscSmlmTestUtils.createPoissonSampler(rg, O);
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(rg, G, G_SD);
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, VAR);
@@ -282,7 +282,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -354,7 +354,7 @@ class ScmosLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "Per Datum %s : %s = %d / %d (%.2f)",
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "Per Datum %s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > 90,
         () -> NAME[targetParameter] + " fraction too low per datum: " + p);
@@ -490,7 +490,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     for (final double background : testbackground) {
@@ -557,7 +557,7 @@ class ScmosLikelihoodWrapperTest {
       }
     }
     final double p = (100.0 * count) / total;
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "%s : %s = %d / %d (%.2f)",
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "%s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > threshold,
         FunctionUtils.getSupplier("%s fraction too low: %s", NAME[targetParameter], p));
@@ -693,7 +693,7 @@ class ScmosLikelihoodWrapperTest {
     double pvalue = 0;
     double maxp = 0;
     int maxi = 0;
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     for (int i = 0; i < n; i++) {
       final double nll = func.computeLikelihood(i);
       final double nll2 = func.computeLikelihood(gradient, i);
@@ -724,7 +724,7 @@ class ScmosLikelihoodWrapperTest {
     final double kmax = ((mode1 + mode2) * 0.5) * G + O; // Scale to observed values
     // TestLog.fine(logger,"mu=%f, p=%f, maxp=%f @ %f (expected=%f %f)", mu, p, maxp, k[maxi], kmax,
     // kmax - k[maxi]);
-    TestAssertions.assertTest(kmax, k[maxi], TestHelper.doublesAreClose(1e-3, 0), "k-max");
+    TestAssertions.assertTest(kmax, k[maxi], Predicates.doublesAreClose(1e-3, 0), "k-max");
 
     if (test) {
       Assertions.assertEquals(P_LIMIT, pvalue, 0.02, () -> "mu=" + mu);
@@ -825,7 +825,7 @@ class ScmosLikelihoodWrapperTest {
   }
 
   private static void canComputePValue(RandomSeed seed, BaseNonLinearFunction nlf) {
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, nlf.name));
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, nlf.name));
 
     final int n = maxx * maxx;
 
@@ -840,7 +840,7 @@ class ScmosLikelihoodWrapperTest {
     final float[] g = testData.gain;
     final float[] o = testData.offset;
     final float[] sd = testData.sd;
-    final UniformRandomProvider r = RngUtils.create(seed.get());
+    final UniformRandomProvider r = RngFactory.create(seed.get());
     final SharedStateContinuousSampler gs = SamplerUtils.createGaussianSampler(r, 0, 1);
 
     final double[] k = SimpleArrayUtils.newArray(n, 0, 1.0);
@@ -861,8 +861,8 @@ class ScmosLikelihoodWrapperTest {
       op[j] = ScmosLikelihoodWrapper.likelihood((k[j] - o[j]) / g[j], var[j], g[j], o[j], k[j]);
       oll2 -= Math.log(op[j]);
     }
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "oll=%f, oll2=%f", oll, oll2));
-    final DoubleDoubleBiPredicate predicate = TestHelper.doublesAreClose(1e-10, 0);
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "oll=%f, oll2=%f", oll, oll2));
+    final DoubleDoubleBiPredicate predicate = Predicates.doublesAreClose(1e-10, 0);
     TestAssertions.assertTest(oll2, oll, predicate, "Observed Log-likelihood");
 
     final DoubleArrayList list = new DoubleArrayList();
@@ -883,7 +883,7 @@ class ScmosLikelihoodWrapperTest {
       }
       final double llr2 = -2 * Math.log(product.doubleValue());
       final double q = f.computeQValue(ll);
-      logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO,
+      logger.log(TestLogging.getRecord(TestLevel.TEST_INFO,
           "a=%f, ll=%f, ll2=%f, llr=%f, llr2=%f, product=%s, p=%f", a[0], ll, ll2, llr, llr2,
           product.round(new MathContext(4)).toString(), q));
 
@@ -918,7 +918,7 @@ class ScmosLikelihoodWrapperTest {
 
     // Allow a tolerance as the random data may alter the p-value computation.
     // Should allow it to be less than 2 increment either side of the answer.
-    logger.log(TestLogUtils.getRecord(TestLevel.TEST_INFO, "min fit = %g => %g", mina, fita));
+    logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "min fit = %g => %g", mina, fita));
     Assertions.assertEquals(1, fita, 0.199, "min");
   }
 }
