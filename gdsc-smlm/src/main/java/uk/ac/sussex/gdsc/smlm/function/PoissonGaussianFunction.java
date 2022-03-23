@@ -52,9 +52,9 @@ public class PoissonGaussianFunction implements LikelihoodFunction, LogLikelihoo
 
   private static final double EPSILON = 1e-4; // 1e-6
 
-  /** The Gaussian normalisation: <code>1 / Math.sqrt(2 * Math.PI)</code>. */
+  /** The Gaussian normalisation: {@code 1 / Math.sqrt(2 * Math.PI)}. */
   static final double NORMALISATION = 1 / Math.sqrt(2 * Math.PI);
-  /** The log Gaussian normalisation: <code>Math.log(1 / Math.sqrt(2 * Math.PI))</code>. */
+  /** The log Gaussian normalisation: {@code Math.log(1 / Math.sqrt(2 * Math.PI))}. */
   static final double LOG_NORMALISATION = Math.log(NORMALISATION);
 
   /**

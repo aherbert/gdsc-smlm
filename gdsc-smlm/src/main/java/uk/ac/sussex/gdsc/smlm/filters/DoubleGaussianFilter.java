@@ -342,9 +342,9 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Scale a line (row or column or part thereof) down by a factor <code>reduceBy</code> and write
-   * the result into <code>cache</code>. Input line pixel # <code>unscaled0</code> will correspond
-   * to output line pixel # 0. <code>unscaled0</code> may be negative. Out-of-line pixels of the
+   * Scale a line (row or column or part thereof) down by a factor {@code reduceBy} and write
+   * the result into {@code cache}. Input line pixel # {@code unscaled0} will correspond
+   * to output line pixel # 0. {@code unscaled0} may be negative. Out-of-line pixels of the
    * input are replaced by the edge pixels.
    *
    * @param pixels input array
@@ -409,7 +409,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
   }
 
   /**
-   * Scale a line up by factor <code>reduceBy</code> and write as a row or column (or part thereof)
+   * Scale a line up by factor {@code reduceBy} and write as a row or column (or part thereof)
    * to the pixels array of a FloatProcessor.
    */
   private static final void upscaleLine(final double[] cache, final double[] pixels,
@@ -463,14 +463,14 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    *        from the kernel periphery (last element) to 0 and back. Normalization should include all
    *        kernel points, also these not calculated because they are not needed.
    * @param readFrom First array element of the line that must be read.
-   *        <code>writeFrom-kernel.length</code> or 0.
+   *        {@code writeFrom-kernel.length} or 0.
    * @param readTo Last array element+1 of the line that must be read.
-   *        <code>writeTo+kernel.length</code> or <code>input.length</code>
+   *        {@code writeTo+kernel.length} or {@code input.length}
    * @param writeFrom Index of the first point in the line that should be written
    * @param writeTo Index+1 of the last point in the line that should be written
    * @param point0 Array index of first element of the 'line' in pixels (i.e., lineNumber * lineInc)
    * @param pointInc Increment of the pixels array index to the next point (for an ImageProcessor,
-   *        it should be <code>1</code> for a row, <code>width</code> for a column)
+   *        it should be {@code 1} for a row, {@code width} for a column)
    */
   private static final void convolveLine(final double[] input, final double[] pixels,
       final double[][] kernel, final int writeFrom, final int writeTo, final int point0,
@@ -552,7 +552,7 @@ public class DoubleGaussianFilter extends BaseWeightedFilter {
    * @return A 2*n array. Array[0][n] is the kernel, decaying towards zero, which would be reached
    *         at kernel.length (unless kernel size is limited by maxRadius). Array[1][n] holds the
    *         sum over all kernel values > n, including non-calculated values in case the kernel size
-   *         is limited by <code>maxRadius</code>.
+   *         is limited by {@code maxRadius}.
    */
   private double[][] makeGaussianKernel(final double sigma, int maxRadius) {
     if (maxRadius < 50) {

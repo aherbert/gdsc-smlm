@@ -632,7 +632,7 @@ public class PeakResultTableModel extends AbstractTableModel {
    * specifying a range of (1,5) removes the component at index 1 and the component at index 5, as
    * well as all components in between.
    *
-   * <p>Throws an <code>ArrayIndexOutOfBoundsException</code> if the index was invalid.
+   * <p>Throws an {@code ArrayIndexOutOfBoundsException} if the index was invalid.
    *
    * @param source the source
    * @param fromIndex the index of the lower end of the range

@@ -177,7 +177,7 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
   }
 
   /**
-   * Returns unbiased exponent of a <code>double</code>.
+   * Returns unbiased exponent of a {@code double}.
    *
    * @param value the double
    * @return the exponent

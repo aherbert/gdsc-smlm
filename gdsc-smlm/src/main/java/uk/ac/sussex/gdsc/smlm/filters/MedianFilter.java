@@ -248,9 +248,9 @@ public class MedianFilter {
    *
    * <p>Copied from ij.plugins.filters.RankFilters.
    *
-   * @param buf The input array. Only values 0 ... bufLength are read. <code>buf</code> will be
+   * @param buf The input array. Only values 0 ... bufLength are read. {@code buf} will be
    *        modified.
-   * @param bufLength Number of values in <code>buf</code> that should be read
+   * @param bufLength Number of values in {@code buf} that should be read
    * @param n which value should be found; n=0 for the lowest, n=bufLength-1 for the highest
    * @return the value
    */

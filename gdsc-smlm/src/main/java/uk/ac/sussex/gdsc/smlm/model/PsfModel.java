@@ -707,7 +707,7 @@ public abstract class PsfModel {
    * Get the value and partial gradient of the PSF function.
    *
    * <p>If gradient[i].length is not 3 then the correct array size will be created. Allows the
-   * function to be called using <code>double[][] gradient = new double[width*height][]</code>.
+   * function to be called using {@code double[][] gradient = new double[width*height][]}.
    *
    * @param width The data width
    * @param height The data height

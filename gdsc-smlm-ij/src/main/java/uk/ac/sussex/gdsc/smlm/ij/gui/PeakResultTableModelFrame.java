@@ -532,13 +532,13 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Maps the index of the row in terms of the view to the underlying <code>TableModel</code>. If
+   * Maps the index of the row in terms of the view to the underlying {@code TableModel}. If
    * the contents of the model are not sorted the model and view indices are the same.
    *
    * @param viewRowIndex the index of the row in the view
    * @return the index of the corresponding row in the model
    * @throws IndexOutOfBoundsException if sorting is enabled and passed an index outside the range
-   *         of the <code>JTable</code> as determined by the method <code>getRowCount</code>
+   *         of the {@code JTable} as determined by the method {@code getRowCount}
    * @see javax.swing.table.TableRowSorter
    * @see javax.swing.JTable#getRowCount()
    */
@@ -547,25 +547,25 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Returns the location of <code>index</code> in terms of the underlying model. That is, for the
-   * row <code>index</code> in the coordinates of the view this returns the row index in terms of
+   * Returns the location of {@code index} in terms of the underlying model. That is, for the
+   * row {@code index} in the coordinates of the view this returns the row index in terms of
    * the underlying model.
    *
    * @param indices the indices (updated in-place)
-   * @throws IndexOutOfBoundsException if <code>index</code> is outside the range of the view
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of the view
    */
   public void convertRowIndexToModel(int[] indices) {
     table.convertRowIndexToModel(indices);
   }
 
   /**
-   * Maps the index of the row in terms of the <code>TableModel</code> to the view. If the contents
+   * Maps the index of the row in terms of the {@code TableModel} to the view. If the contents
    * of the model are not sorted the model and view indices are the same.
    *
    * @param modelRowIndex the index of the row in terms of the model
    * @return the index of the corresponding row in the view, or -1 if the row isn't visible
    * @throws IndexOutOfBoundsException if sorting is enabled and passed an index outside the number
-   *         of rows of the <code>TableModel</code>
+   *         of rows of the {@code TableModel}
    * @see javax.swing.table.TableRowSorter
    */
   public int convertRowIndexToView(int modelRowIndex) {
@@ -573,12 +573,12 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Returns the location of <code>index</code> in terms of the view. That is, for the row
-   * <code>index</code> in the coordinates of the underlying model this returns the row index in
+   * Returns the location of {@code index} in terms of the view. That is, for the row
+   * {@code index} in the coordinates of the underlying model this returns the row index in
    * terms of the view.
    *
    * @param indices the indices (updated in-place)
-   * @throws IndexOutOfBoundsException if <code>index</code> is outside the range of the model
+   * @throws IndexOutOfBoundsException if {@code index} is outside the range of the model
    */
   public void convertRowIndexToView(int[] indices) {
     table.convertRowIndexToView(indices);
