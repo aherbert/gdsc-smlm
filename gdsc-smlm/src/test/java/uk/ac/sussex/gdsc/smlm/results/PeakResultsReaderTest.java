@@ -841,8 +841,8 @@ class PeakResultsReaderTest {
     // TSF requires the bias be subtracted
     // double bias = expectedResults.getCalibration().getBias();
 
-    final DoubleDoubleBiPredicate deltaD = Predicates.doublesBIsRelativelyCloseToA(1e-5);
-    final FloatFloatBiPredicate deltaF = Predicates.floatsBIsRelativelyCloseToA(1e-5);
+    final DoubleDoubleBiPredicate deltaD = Predicates.doublesIsRelativelyCloseTo(1e-5);
+    final FloatFloatBiPredicate deltaF = Predicates.floatsIsRelativelyCloseTo(1e-5);
 
     for (int i = 0; i < actualResults.size(); i++) {
       final PeakResult p1 = expected[i];
