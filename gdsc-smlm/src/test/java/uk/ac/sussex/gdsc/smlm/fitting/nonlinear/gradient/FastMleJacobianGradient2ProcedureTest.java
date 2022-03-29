@@ -237,7 +237,8 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
 
           // Use index j even though we adjusted index jj
           final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
-          // logger.fine(FormatSupplier.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b", i,
+          // logger.fine(FormatSupplier.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b",
+          // i,
           // k, kk, func.getName(k),
           // a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
           // if (!ok)

@@ -544,7 +544,8 @@ class PoissonCalculatorTest {
     final double ll1a = PoissonCalculator.logLikelihood(b12, x);
     final double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
     final double llra = -2 * (ll1a - ll2a);
-    // logger.fine(FormatSupplier.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a, llra);
+    // logger.fine(FormatSupplier.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a,
+    // llra);
 
     // Compute the LLR of adding b3 to b2 given we already have x minus b1
     final double ll1b = PoissonCalculator.logLikelihood(b2, xb);

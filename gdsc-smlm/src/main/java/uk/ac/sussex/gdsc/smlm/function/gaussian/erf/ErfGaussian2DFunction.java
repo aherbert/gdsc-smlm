@@ -42,10 +42,10 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
  */
 public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     implements Gradient2Function, ExtendedGradient2Function {
-  /** The constant {@code 1.0 / Math.sqrt(2)}. */
-  protected static final double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
-  /** The constant {@code 1.0 / Math.sqrt(2 * Math.PI)}. */
-  protected static final double ONE_OVER_ROOT2PI = 1.0 / Math.sqrt(2 * Math.PI);
+  /** The constant 1 / sqrt(2). */
+  protected static final double ONE_OVER_ROOT2 = 0.7071067811865475244;
+  /** The constant 1 / sqrt(2 * pi). */
+  protected static final double ONE_OVER_ROOT2PI = 0.3989422804014326779;
 
   // Required for the PSF
 

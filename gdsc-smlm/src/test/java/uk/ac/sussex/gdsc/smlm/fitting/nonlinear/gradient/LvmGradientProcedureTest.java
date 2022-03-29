@@ -666,12 +666,13 @@ class LvmGradientProcedureTest {
       // p123.value, s);
 
       if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
-        Assertions.fail(FormatSupplier.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s",
-            i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
+        Assertions
+            .fail(FormatSupplier.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+                DoubleEquality.relativeError(p123.value, value), p123.value, value));
       }
       if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
-        Assertions
-            .fail(FormatSupplier.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+        Assertions.fail(
+            FormatSupplier.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
                 relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
       }
       for (int j = 0; j < alpha.length; j++) {
@@ -707,7 +708,8 @@ class LvmGradientProcedureTest {
           beta[j] *= -2;
 
           final double gradient = (s1 - s2) / (2 * d);
-          // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
+          // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k,
+          // s,
           // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
           // DoubleEquality.relativeError(gradient, beta[j]));
           failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq2, msg));
@@ -768,21 +770,21 @@ class LvmGradientProcedureTest {
         }
       } else {
         if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
-          logger.log(TestLogging.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s",
-              i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
+          logger.log(TestLogging.getFailRecord("p12b3 Not same value @ %d (error=%s) : %s == %s", i,
+              DoubleEquality.relativeError(p123.value, value), p123.value, value));
         }
         if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
-          logger.log(TestLogging.getFailRecord(
-              "p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
-              relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
+          logger.log(TestLogging.getFailRecord("p12b3 Not same gradient @ %d (error=%s) : %s vs %s",
+              i, relativeError(beta, p123.beta), Arrays.toString(beta),
+              Arrays.toString(p123.beta)));
         }
         for (int j = 0; j < alpha.length; j++) {
           // logger.fine(FormatSupplier.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
           // Arrays.toString(m123[j]));
           if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
-            logger.log(
-                TestLogging.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s", i,
-                    j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
+            logger
+                .log(TestLogging.getFailRecord("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s",
+                    i, j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
                     Arrays.toString(m123[j])));
           }
         }

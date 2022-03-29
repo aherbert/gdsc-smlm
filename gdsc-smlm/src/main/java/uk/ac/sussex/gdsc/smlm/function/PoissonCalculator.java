@@ -24,7 +24,6 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
-import org.apache.commons.math3.util.FastMath;
 import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 
 /**
@@ -32,20 +31,20 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 public class PoissonCalculator {
   /** Avoid repeated computation of log of 2 PI. */
-  private static final double HALF_LOG_2_PI = 0.5 * Math.log(2.0 * FastMath.PI);
+  private static final double HALF_LOG_2_PI = 0.9189385332046727417;
 
   /** The value of x where the instance method computes x! using an approximation. */
   public static final double APPROXIMATION_X = 1.5;
 
   // For computation of Stirling series
 
-  /** The constant {@code 1./12}. */
+  /** The constant 1/12. */
   protected static final double ONE_OVER_12 = 1.0 / 12.0;
-  /** The constant {@code 1./360}. */
+  /** The constant 1/360. */
   protected static final double ONE_OVER_360 = 1.0 / 360;
-  /** The constant {@code 1./1260}. */
+  /** The constant 1/1260. */
   protected static final double ONE_OVER_1260 = 1.0 / 1260;
-  /** The constant {@code 1./1680}. */
+  /** The constant 1/1680. */
   protected static final double ONE_OVER_1680 = 1.0 / 1680;
 
   private boolean uninitialsed = true;

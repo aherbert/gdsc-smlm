@@ -164,8 +164,8 @@ class BlinkEstimatorTest {
       RandomSeed seed) {
     final int particles = 1000;
     final double fixedFraction = 1;
-    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW], particles,
-        fixedFraction, false, true);
+    estimateBlinking(RngFactory.create(seed.get()), blinkingRate[LOW], ton[LOW], toff[LOW],
+        particles, fixedFraction, false, true);
   }
 
   @SeededTest
@@ -387,8 +387,8 @@ class BlinkEstimatorTest {
           && offError < relativeError) {
         ok.add(numberOfFittedPoints);
         logger.info("-=-=--=-");
-        logger.info(
-            FormatSupplier.getSupplier("*** Correct at %d fitted points ***", numberOfFittedPoints));
+        logger.info(FormatSupplier.getSupplier("*** Correct at %d fitted points ***",
+            numberOfFittedPoints));
         if (doAssert) {
           break;
         }
