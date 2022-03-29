@@ -78,7 +78,7 @@ class InterpolatedPoissonFisherInformationTest {
     final double u = StdMath.exp(logU);
     final double e = fi.getAlpha(u);
     final double o = intFi.getAlpha(u);
-    // logger.fine(FunctionUtils.getSupplier("logU=%g u=%g e=%g o=%g error=%g", logU, u, e, o,
+    // logger.fine(FormatSupplier.getSupplier("logU=%g u=%g e=%g o=%g error=%g", logU, u, e, o,
     // DoubleEquality.relativeError(o, e));
 
     // Small numbers may have a large relative error but the absolute error is small

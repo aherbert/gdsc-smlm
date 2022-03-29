@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class Gaussian2DPeakResultHelperTest {
@@ -125,7 +125,7 @@ class Gaussian2DPeakResultHelperTest {
 
     for (int points = minpoints; points <= maxpoints; points++) {
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
+          FormatSupplier.getSupplier("Points = %d, Av error = %f", points, sum[points] / count));
     }
   }
 
@@ -188,7 +188,7 @@ class Gaussian2DPeakResultHelperTest {
 
     for (int points = minpoints; points <= maxpoints; points++) {
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f",
+          FormatSupplier.getSupplier("Points = %d, Av relative time = %f, Slow down factor = %f",
               points, sum[points] / count, sum2[points] / count2));
     }
   }
@@ -236,7 +236,7 @@ class Gaussian2DPeakResultHelperTest {
             final double o1 = calc.getAmplitude(paramsf);
             final double o2 = calc.getPixelAmplitude(paramsf);
 
-            // logger.fine(FunctionUtils.getSupplier("e=%f, o1=%f, o2=%f", e, o1, o2));
+            // logger.fine(FormatSupplier.getSupplier("e=%f, o1=%f, o2=%f", e, o1, o2));
             Assertions.assertEquals(e, o2, 1e-3);
             r.addData(e, o1);
           }
@@ -244,7 +244,7 @@ class Gaussian2DPeakResultHelperTest {
       }
     }
 
-    // logger.fine(FunctionUtils.getSupplier("Regression: pixel amplitude vs amplitude = %f,
+    // logger.fine(FormatSupplier.getSupplier("Regression: pixel amplitude vs amplitude = %f,
     // slope=%f, n=%d", r.getR(), r.getSlope(),
     // r.getN()));
     // The simple amplitude over estimates the actual pixel amplitude

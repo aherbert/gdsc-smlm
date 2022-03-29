@@ -91,7 +91,7 @@ class AstigmatismModelManagerTest {
     for (double z = -0.5; z <= 0.5; z += 0.1) {
       final double e = sc.convert(m1.getSx(z));
       final double o = m2.getSx(zc.convert(z));
-      // logger.fine(FunctionUtils.getSupplier("%f vs %f", e, o);
+      // logger.fine(FormatSupplier.getSupplier("%f vs %f", e, o);
       TestAssertions.assertTest(e, o, predicate);
     }
   }

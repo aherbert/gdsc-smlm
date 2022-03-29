@@ -93,7 +93,7 @@ class GaussianPsfModelTest {
               // Only check where there is a reasonable amount of signal
             } else if (e[ii] > 1e-8) {
               final double error = DoubleEquality.relativeError(e[ii], o[ii]);
-              // logger.fine(FunctionUtils.getSupplier("[%d,%d] %g == %g %g", ii/maxx, ii%maxx,
+              // logger.fine(FormatSupplier.getSupplier("[%d,%d] %g == %g %g", ii/maxx, ii%maxx,
               // e[ii], o[ii], error);
               // We expect a small error since the ErfGaussian2DFunction uses a
               // fast approximation of the Erf(..) (the error function). The PSFModel
@@ -155,7 +155,7 @@ class GaussianPsfModelTest {
             if (o[ii] > 1e-4) {
               for (int l = 0; l < 3; l++) {
                 final double error = DoubleEquality.relativeError(g[ii][l], g2[ii][l]);
-                // logger.fine(FunctionUtils.getSupplier("[%d,%d] %g == %g %g", ii, l, g[ii][l],
+                // logger.fine(FormatSupplier.getSupplier("[%d,%d] %g == %g %g", ii, l, g[ii][l],
                 // g2[ii][l], error);
                 if (error > 5e-3) {
                   Assertions.fail(String.format("[%d] %s != %s  error = %f", ii,
@@ -216,7 +216,7 @@ class GaussianPsfModelTest {
           }
           Assertions.assertFalse(0 == extra, "No extra");
           final double f = (double) extra / zero;
-          // logger.fine(FunctionUtils.getSupplier("Extra %d/%d (%g)", extra, zero, f);
+          // logger.fine(FormatSupplier.getSupplier("Extra %d/%d (%g)", extra, zero, f);
           Assertions.assertTrue(f > 0.4, "Not much extra");
         }
       }

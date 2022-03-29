@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class GaussianFilterTest {
@@ -256,7 +256,7 @@ class GaussianFilterTest {
         }
       }
 
-      logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("%s vs %s w=%b @ %.1f = %g",
+      logger.log(TestLevel.TEST_DEBUG, FormatSupplier.getSupplier("%s vs %s w=%b @ %.1f = %g",
           f1.getName(), f2.getName(), weighted, sigma, max));
       Assertions.assertTrue(max < tolerance);
     }

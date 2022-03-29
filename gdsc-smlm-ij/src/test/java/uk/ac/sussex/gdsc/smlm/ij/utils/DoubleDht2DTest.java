@@ -187,7 +187,7 @@ class DoubleDht2DTest {
         // To align dht2 with dht would be the opposite sign.
         final int ox = xy[0] - icentre;
         final int oy = xy[1] - icentre;
-        // logger.fine(FunctionUtils.getSupplier("Shift [%d,%d], centre [%d,%d]", x, y, xy[0],
+        // logger.fine(FormatSupplier.getSupplier("Shift [%d,%d], centre [%d,%d]", x, y, xy[0],
         // xy[1]);
         Assertions.assertEquals(x, ox);
         Assertions.assertEquals(y, oy);

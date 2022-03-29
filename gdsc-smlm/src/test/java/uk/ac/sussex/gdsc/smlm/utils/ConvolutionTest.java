@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class ConvolutionTest {
@@ -180,7 +180,7 @@ class ConvolutionTest {
     t2 = System.nanoTime() - t2;
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+        FormatSupplier.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
             kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
@@ -228,7 +228,7 @@ class ConvolutionTest {
     t2 = System.nanoTime() - t2;
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+        FormatSupplier.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
             kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
@@ -279,7 +279,7 @@ class ConvolutionTest {
     t2 = System.nanoTime() - t2;
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+        FormatSupplier.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
             kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
@@ -330,7 +330,7 @@ class ConvolutionTest {
     t2 = System.nanoTime() - t2;
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
+        FormatSupplier.getSupplier("Size=%d, sd=%f (%d) [%d] : %d -> %d (%f)", size, sd,
             kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 
@@ -592,7 +592,7 @@ class ConvolutionTest {
     t2 = System.nanoTime() - t2;
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("Size=%d, sd=%f, scale=%d (%d) [%d] : %d -> %d (%f)", size, sd,
+        FormatSupplier.getSupplier("Size=%d, sd=%f, scale=%d (%d) [%d] : %d -> %d (%f)", size, sd,
             scale, kernel.length, size * kernel.length, t1, t2, t1 / (double) t2));
   }
 }

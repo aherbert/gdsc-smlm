@@ -139,7 +139,7 @@ class ToleranceCheckerTest {
       value *= 0.5;
       param *= 0.5;
       v2 = v1 + dir * value;
-      // logger.fine(FunctionUtils.getSupplier("v2 = %f", v2);
+      // logger.fine(FormatSupplier.getSupplier("v2 = %f", v2);
       p2 = new double[] {p1[0] + dir * param};
       final int observed = tc.converged(v1, p1, v2, p2);
       if (observed != 0) {

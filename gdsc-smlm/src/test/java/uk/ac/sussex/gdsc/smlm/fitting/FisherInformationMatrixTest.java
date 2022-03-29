@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class FisherInformationMatrixTest {
@@ -107,7 +107,7 @@ class FisherInformationMatrixTest {
       // These increasingly do not match with increasing number of parameters.
       if (logger.isLoggable(level)) {
         logger.log(level,
-            FunctionUtils.getSupplier("%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2)));
+            FormatSupplier.getSupplier("%s =? %s", Arrays.toString(crlb), Arrays.toString(crlb2)));
       }
       if (n > 1) {
         // Just do a sum so we have a test
@@ -125,7 +125,7 @@ class FisherInformationMatrixTest {
     // Invert for Crlb
     final double[] crlb = (invert) ? m.crlb() : m.crlbReciprocal();
     if (logger.isLoggable(level)) {
-      logger.log(level, FunctionUtils.getSupplier("columns=%d, zeroColumns=%d : %s", columns,
+      logger.log(level, FormatSupplier.getSupplier("columns=%d, zeroColumns=%d : %s", columns,
           zeroColumns, Arrays.toString(crlb)));
     }
     Assertions.assertNotNull(crlb,
@@ -214,7 +214,7 @@ class FisherInformationMatrixTest {
       Arrays.sort(indices);
       final DenseMatrix64F o = m.subset(indices).getMatrix();
       if (logger.isLoggable(level)) {
-        logger.log(level, FunctionUtils.getSupplier(Arrays.toString(indices)));
+        logger.log(level, FormatSupplier.getSupplier(Arrays.toString(indices)));
         logger.log(level, String.valueOf(o));
       }
       for (int i = 0; i < indices.length; i++) {

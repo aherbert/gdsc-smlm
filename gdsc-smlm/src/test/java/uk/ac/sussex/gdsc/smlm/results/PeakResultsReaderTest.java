@@ -59,7 +59,7 @@ import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.ObjectArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
@@ -678,11 +678,11 @@ class PeakResultsReaderTest {
 
     if (useScanner1 != useScanner2) {
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2,
+          FormatSupplier.getSupplier("%s (scan=%b) is %.2fx faster than %s (scan=%b)", f2,
               useScanner2, (double) time1 / time2, f1, useScanner1));
     } else {
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("%s is %.2fx faster than %s", f2, (double) time1 / time2, f1));
+          FormatSupplier.getSupplier("%s is %.2fx faster than %s", f2, (double) time1 / time2, f1));
     }
     Assertions.assertTrue(time2 < time1,
         () -> String.format("%s (%d) is not faster than %s (%d)", f2, time2, f1, time1));

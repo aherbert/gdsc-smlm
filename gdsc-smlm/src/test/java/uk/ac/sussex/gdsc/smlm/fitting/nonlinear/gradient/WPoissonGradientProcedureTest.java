@@ -178,7 +178,7 @@ class WPoissonGradientProcedureTest {
       long time = System.nanoTime();
       run();
       time = System.nanoTime() - time;
-      // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
+      // logger.fine(FormatSupplier.getSupplier("[%d] Time = %d", loops, t);
       return time;
     }
 

@@ -60,7 +60,7 @@ import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class BlinkEstimatorTest {
@@ -210,7 +210,7 @@ class BlinkEstimatorTest {
           }
         }
       }
-      logger.info(FunctionUtils.getSupplier("Time@LowerBound = %b", timeAtLowerBound));
+      logger.info(FormatSupplier.getSupplier("Time@LowerBound = %b", timeAtLowerBound));
       for (int n = MIN_FITTED_POINTS; n <= MAX_FITTED_POINTS; n++) {
         if (logger.isLoggable(Level.INFO)) {
           final StringBuilder sb = new StringBuilder();
@@ -338,9 +338,9 @@ class BlinkEstimatorTest {
     }
 
     logger.info(
-        FunctionUtils.getSupplier("N = %d (%d), N-blinks = %f, tOn = %f, tOff = %f, Fixed = %f",
+        FormatSupplier.getSupplier("N = %d (%d), N-blinks = %f, tOn = %f, tOff = %f, Fixed = %f",
             fluorophores.size(), localisations.size(), blinkingRate, ton, toff, fixedFraction));
-    logger.info(FunctionUtils.getSupplier(
+    logger.info(FormatSupplier.getSupplier(
         "Actual N-blinks = %f (%f), tOn = %f (%f), tOff = %f (%f), 95%% = %f, max = %f",
         statsNBlinks.getMean(), statsSampledNBlinks.getMean(), statsTOn.getMean(),
         statsSampledTOn.getMean(), statsTOff.getMean(), statsSampledTOff.getMean(),
@@ -379,7 +379,7 @@ class BlinkEstimatorTest {
       final double moleculesError = DoubleEquality.relativeError(nMolecules, be.getNMolecules());
       final double blinksError = DoubleEquality.relativeError(blinkingRate, be.getNBlinks());
       final double offError = DoubleEquality.relativeError(toff * msPerFrame, be.getTOff());
-      logger.info(FunctionUtils.getSupplier("Error %d: N = %f, blinks = %f, tOff = %f : %f",
+      logger.info(FormatSupplier.getSupplier("Error %d: N = %f, blinks = %f, tOff = %f : %f",
           numberOfFittedPoints, moleculesError, blinksError, offError,
           (moleculesError + blinksError + offError) / 3));
 
@@ -388,7 +388,7 @@ class BlinkEstimatorTest {
         ok.add(numberOfFittedPoints);
         logger.info("-=-=--=-");
         logger.info(
-            FunctionUtils.getSupplier("*** Correct at %d fitted points ***", numberOfFittedPoints));
+            FormatSupplier.getSupplier("*** Correct at %d fitted points ***", numberOfFittedPoints));
         if (doAssert) {
           break;
         }

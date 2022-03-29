@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class PeakResultDigestTest {
@@ -165,7 +165,7 @@ class PeakResultDigestTest {
       }
       time = System.nanoTime() - time;
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
+          FormatSupplier.getSupplier("size = %d, time = %g ms", size, (1e-6 * time) / N));
     }
   }
 

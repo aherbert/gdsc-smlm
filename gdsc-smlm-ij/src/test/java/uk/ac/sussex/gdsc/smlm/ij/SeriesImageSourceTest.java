@@ -140,7 +140,7 @@ class SeriesImageSourceTest {
     for (int i = 0; i < 3; i++) {
       final int[] random = RandomUtils.sample(pixels.length / 2, pixels.length, r);
       for (final int frame : random) {
-        // logger.fine(FunctionUtils.getSupplier("[%d] frame = %d", i, frame);
+        // logger.fine(FormatSupplier.getSupplier("[%d] frame = %d", i, frame);
         final float[] e = pixels[frame];
         final float[] o = source.get(frame + 1); // 1-base index on the frame
         Assertions.assertArrayEquals(e, o);

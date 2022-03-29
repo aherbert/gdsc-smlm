@@ -146,7 +146,7 @@ class PoissonCalculatorTest {
     public double value(double x) {
       double value = likelihood(mu, x);
       // v = pgf.probability(x, mu);
-      // logger.fine(FunctionUtils.getSupplier("x=%f, v=%f", x, v);
+      // logger.fine(FormatSupplier.getSupplier("x=%f, v=%f", x, v);
       return value;
     }
 
@@ -544,16 +544,16 @@ class PoissonCalculatorTest {
     final double ll1a = PoissonCalculator.logLikelihood(b12, x);
     final double ll2a = PoissonCalculator.logLikelihood(add(b12, b3), x);
     final double llra = -2 * (ll1a - ll2a);
-    // logger.fine(FunctionUtils.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a, llra);
+    // logger.fine(FormatSupplier.getSupplier("x|(a+b+c) ll1=%f, ll2=%f, llra=%f", ll1a, ll2a, llra);
 
     // Compute the LLR of adding b3 to b2 given we already have x minus b1
     final double ll1b = PoissonCalculator.logLikelihood(b2, xb);
     final double ll2b = PoissonCalculator.logLikelihood(add(b2, b3), xb);
     final double llrb = -2 * (ll1b - ll2b);
-    // logger.fine(FunctionUtils.getSupplier("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f", ll1b, ll2b,
+    // logger.fine(FormatSupplier.getSupplier("x-a|(b+c) : ll1=%f, ll2=%f, llrb=%f", ll1b, ll2b,
     // llrb);
 
-    // logger.fine(FunctionUtils.getSupplier("llr=%f (%g), llr2=%f (%g)", llra,
+    // logger.fine(FormatSupplier.getSupplier("llr=%f (%g), llr2=%f (%g)", llra,
     // PoissonCalculator.computePValue(llra, 1), llrb,
     // PoissonCalculator.computePValue(llrb, 1));
     Assertions.assertThrows(AssertionError.class, () -> {

@@ -207,7 +207,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
 
         final double gradient1 = (llh - lll) / (2 * d);
         final double gradient2 = (d1h[j] - d1l[j]) / (2 * d);
-        // logger.fine(FunctionUtils.getSupplier("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f
+        // logger.fine(FormatSupplier.getSupplier("[%d,%d] ll - %f (%s %f+/-%f) d1 %f ?= %f : d2 %f
         // ?= %f", i, k, ll, func.getName(k), a[k], d,
         // gradient1, d1[j], gradient2, d2[j]);
         failCounter.run(j, () -> TestAssertions.assertTest(gradient1, d1[j_], eq, msg1));
@@ -237,7 +237,7 @@ class FastMleJacobianGradient2ProcedureTest extends FastMleGradient2ProcedureTes
 
           // Use index j even though we adjusted index jj
           final double gradient3 = (d1h[j] - d1l[j]) / (2 * dd);
-          // logger.fine(FunctionUtils.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b", i,
+          // logger.fine(FormatSupplier.getSupplier("[%d,%d,%d] (%s %f %s %f+/-%f) J %f ?= %f %b", i,
           // k, kk, func.getName(k),
           // a[k], func.getName(kk), a[kk], dd, gradient3, J.get(j, jj), ok);
           // if (!ok)

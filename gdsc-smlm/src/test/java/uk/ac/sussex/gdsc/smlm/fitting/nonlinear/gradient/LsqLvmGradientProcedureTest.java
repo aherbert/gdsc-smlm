@@ -248,7 +248,7 @@ class LsqLvmGradientProcedureTest {
       long nanos = System.nanoTime();
       run();
       nanos = System.nanoTime() - nanos;
-      // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
+      // logger.fine(FormatSupplier.getSupplier("[%d] Time = %d", loops, t);
       return nanos;
     }
 
@@ -543,7 +543,7 @@ class LsqLvmGradientProcedureTest {
         beta[j] *= -2;
 
         final double gradient = (s1 - s2) / (2 * d);
-        // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
+        // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
         // func.getName(k), a[k], d, beta[j],
         // gradient);
         failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq, msg));

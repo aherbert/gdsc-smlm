@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 // TODO: Update this using the new Erf implementation in Commons Numbers 1.1
 
@@ -126,7 +126,7 @@ class ErfTest {
         if (max < error) {
           max = error;
         }
-        // logger.fine(FunctionUtils.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
+        // logger.fine(FormatSupplier.getSupplier("x=%f, e=%f, o=%f, error=%f", x, e, o, error);
         Assertions.assertTrue(error < expected);
       }
     }
@@ -171,7 +171,7 @@ class ErfTest {
     }
 
     logger.log(TestLevel.TEST_INFO,
-        FunctionUtils.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s", erf.name,
+        FormatSupplier.getSupplier("erfx %s indistinguishable from 1: x > %s, x >= %s", erf.name,
             Double.toString(lower), Double.toString(upper)));
   }
 
@@ -209,7 +209,7 @@ class ErfTest {
             if (max < error) {
               max = error;
             }
-            // logger.fine(FunctionUtils.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e,
+            // logger.fine(FormatSupplier.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e,
             // o, error);
             Assertions.assertTrue(error < expected);
           }
@@ -249,7 +249,7 @@ class ErfTest {
       if (max < error) {
         max = error;
       }
-      // logger.fine(FunctionUtils.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o,
+      // logger.fine(FormatSupplier.getSupplier("x=%f, x2=%f, e=%f, o=%f, error=%f", x, x2, e, o,
       // error);
       Assertions.assertTrue(error < expected);
     }
@@ -317,7 +317,7 @@ class ErfTest {
         if (max2 < error2) {
           max2 = error2;
         }
-        // logger.fine(FunctionUtils.getSupplier("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f,
+        // logger.fine(FormatSupplier.getSupplier("x=%d, y=%d, e=%g, o=%g, o2=%g, error=%f,
         // error2=%f", x, y, e, o, oo, error, error2);
         Assertions.assertTrue(error < error2);
       }
@@ -400,7 +400,7 @@ class ErfTest {
       // sum2 += StdMath.exp(-(xx * xx + yy * yy) / twos2);
       // }
       // }
-      // logger.fine(FunctionUtils.getSupplier("sum=%f, sum2=%f", sum, sum2);
+      // logger.fine(FormatSupplier.getSupplier("sum=%f, sum2=%f", sum, sum2);
 
       final int n = steps * steps;
       observed = norm * sum / n;

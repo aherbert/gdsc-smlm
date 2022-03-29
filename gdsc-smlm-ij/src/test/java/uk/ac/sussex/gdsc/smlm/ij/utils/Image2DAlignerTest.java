@@ -33,7 +33,7 @@ import uk.ac.sussex.gdsc.smlm.function.StandardFloatValueProcedure;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.GaussianFunctionFactory;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class Image2DAlignerTest {
@@ -137,7 +137,7 @@ class Image2DAlignerTest {
     // result = a.align(target.copy(), i, error);
     // c = a.getCorrelation();
     //
-    // logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+    // logger.log(TestLevel.TEST_DEBUG, FormatSupplier.getSupplier("e %s %g, o %s",
     // java.util.Arrays.toString(e),
     // c.get(index),
     // java.util.Arrays.toString(result));
@@ -151,7 +151,7 @@ class Image2DAlignerTest {
     }
     Image2D correlation = a.getCorrelation();
     if (logger.isLoggable(TestLevel.TEST_DEBUG)) {
-      logger.log(TestLevel.TEST_DEBUG, FunctionUtils.getSupplier("e %s %g, o %s",
+      logger.log(TestLevel.TEST_DEBUG, FormatSupplier.getSupplier("e %s %g, o %s",
           java.util.Arrays.toString(e), correlation.get(index), java.util.Arrays.toString(result)));
     }
 

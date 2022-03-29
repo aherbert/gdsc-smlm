@@ -61,7 +61,7 @@ import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 /**
@@ -523,7 +523,7 @@ class GradientCalculatorSpeedTest {
         a2[j] = a[j];
 
         final double gradient = (s1 - s2) / (2 * d);
-        // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, j, s,
+        // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, j, s,
         // func.getName(j), a[j], d, beta[k],
         // gradient));
         Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(beta[k], gradient), msg.set(1, j));
@@ -627,7 +627,7 @@ class GradientCalculatorSpeedTest {
         betaList.add(beta.clone());
         for (int j = 0; j < nparams; j++) {
           if (Math.abs(beta[j]) < 1e-6) {
-            logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("[%d] Tiny beta %s %g", i,
+            logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("[%d] Tiny beta %s %g", i,
                 func.getGradientParameterName(j), beta[j]));
           }
         }
@@ -687,7 +687,7 @@ class GradientCalculatorSpeedTest {
         if (report) {
           for (int i = 0; i < nparams; i++) {
             logger.log(level,
-                FunctionUtils.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
+                FormatSupplier.getSupplier("Bias = %.2f : %s : Rel %g +/- %g: Abs %g +/- %g", b,
                     func.getGradientParameterName(i), rel[i].getMean(),
                     rel[i].getStandardDeviation(), abs[i].getMean(),
                     abs[i].getStandardDeviation()));
@@ -745,7 +745,7 @@ class GradientCalculatorSpeedTest {
 
       final double llr = PoissonCalculator.logLikelihoodRatio(u, x);
       final double llr2 = calc.findLinearised(n, x, a, alpha, beta, func);
-      // logger.fine(FunctionUtils.getSupplier("llr=%f, llr2=%f", llr, llr2));
+      // logger.fine(FormatSupplier.getSupplier("llr=%f, llr2=%f", llr, llr2));
       TestAssertions.assertTest(llr, llr2, predicate, "Log-likelihood ratio");
     }
   }

@@ -62,7 +62,7 @@ import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.AssertionErrorCounter;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IndexSupplier;
 
 /**
@@ -405,7 +405,7 @@ class LvmGradientProcedureTest {
     // Try different precision
     for (int n = FastLog.N; n < 23; n++) {
       try {
-        // logger.fine(FunctionUtils.getSupplier("Precision n=%d", n);
+        // logger.fine(FormatSupplier.getSupplier("Precision n=%d", n);
         fastLog = new TurboLog2(n);
         gradientProcedureComputesGradient(seed,
             new SingleFreeCircularErfGaussian2DFunction(blockWidth, blockWidth), Type.FAST_LOG_MLE,
@@ -519,7 +519,7 @@ class LvmGradientProcedureTest {
         beta[j] *= -2;
 
         final double gradient = (s1 - s2) / (2 * d);
-        // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
+        // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f", i, k, s,
         // Gaussian2DFunction.getName(k),
         // a[k], d, beta[j], gradient);
         failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq, msg));
@@ -617,7 +617,7 @@ class LvmGradientProcedureTest {
       msg.set(0, i);
       final double[] y = yList.get(i);
       final double[] a3peaks = paramsList.get(i);
-      // logger.fine(FunctionUtils.getSupplier("[%d] a=%s", i, Arrays.toString(a3peaks));
+      // logger.fine(FormatSupplier.getSupplier("[%d] a=%s", i, Arrays.toString(a3peaks));
 
       final double[] a2peaks =
           Arrays.copyOf(a3peaks, 1 + 2 * Gaussian2DFunction.PARAMETERS_PER_PEAK);
@@ -662,24 +662,24 @@ class LvmGradientProcedureTest {
       final double[] beta = p12b3.beta.clone();
       double[][] alpha = p12b3.getAlphaMatrix();
 
-      // logger.fine(FunctionUtils.getSupplier("MLE=%b [%d] p12b3 %f %f", type.isMLE(), i,
+      // logger.fine(FormatSupplier.getSupplier("MLE=%b [%d] p12b3 %f %f", type.isMLE(), i,
       // p123.value, s);
 
       if (!eq.almostEqualRelativeOrAbsolute(p123.value, value)) {
-        Assertions.fail(FunctionUtils.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s",
+        Assertions.fail(FormatSupplier.getSupplier("p12b3 Not same value @ %d (error=%s) : %s == %s",
             i, DoubleEquality.relativeError(p123.value, value), p123.value, value));
       }
       if (!almostEqualRelativeOrAbsolute(eq, beta, p123.beta)) {
         Assertions
-            .fail(FunctionUtils.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
+            .fail(FormatSupplier.getSupplier("p12b3 Not same gradient @ %d (error=%s) : %s vs %s", i,
                 relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
       }
       for (int j = 0; j < alpha.length; j++) {
-        // logger.fine(FunctionUtils.getSupplier("%s !=\n%s", Arrays.toString(alpha[j]),
+        // logger.fine(FormatSupplier.getSupplier("%s !=\n%s", Arrays.toString(alpha[j]),
         // Arrays.toString(m123[j]));
         if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
           Assertions
-              .fail(FunctionUtils.getSupplier("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s",
+              .fail(FormatSupplier.getSupplier("p12b3 Not same alpha @ %d,%d (error=%s) : %s vs %s",
                   i, j, relativeError(alpha[j], m123[j]), Arrays.toString(alpha[j]),
                   Arrays.toString(m123[j])));
         }
@@ -707,7 +707,7 @@ class LvmGradientProcedureTest {
           beta[j] *= -2;
 
           final double gradient = (s1 - s2) / (2 * d);
-          // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
+          // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
           // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
           // DoubleEquality.relativeError(gradient, beta[j]));
           failCounter.run(j, () -> TestAssertions.assertTest(gradient, beta[jj], eq2, msg));
@@ -727,7 +727,7 @@ class LvmGradientProcedureTest {
       System.arraycopy(p12m3.beta, 0, beta, 0, p12m3.beta.length);
       alpha = p12m3.getAlphaMatrix();
 
-      // logger.fine(FunctionUtils.getSupplier("%s [%d] p12m3 %f %f", type, i, p123.value, s);
+      // logger.fine(FormatSupplier.getSupplier("%s [%d] p12m3 %f %f", type, i, p123.value, s);
 
       // The test for different or equal is not robust to different random seeds.
       // ExtraAssertions.fail has been changed for TestLog.logFailure
@@ -745,7 +745,7 @@ class LvmGradientProcedureTest {
         // Note: Test the matrix is different by finding 1 different column
         int dj = -1;
         for (int j = 0; j < alpha.length; j++) {
-          // logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
+          // logger.fine(FormatSupplier.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
           // Arrays.toString(m123[j]));
           if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
             dj = j; // Different column
@@ -777,7 +777,7 @@ class LvmGradientProcedureTest {
               relativeError(beta, p123.beta), Arrays.toString(beta), Arrays.toString(p123.beta)));
         }
         for (int j = 0; j < alpha.length; j++) {
-          // logger.fine(FunctionUtils.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
+          // logger.fine(FormatSupplier.getSupplier("%s !=\n%s\n", Arrays.toString(alpha[j]),
           // Arrays.toString(m123[j]));
           if (!almostEqualRelativeOrAbsolute(eq, alpha[j], m123[j])) {
             logger.log(
@@ -812,7 +812,7 @@ class LvmGradientProcedureTest {
         beta[j] *= -2;
 
         final double gradient = (s1 - s2) / (2 * d);
-        // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
+        // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f (%s %f+/-%f) %f ?= %f (%f)", i, k, s,
         // Gaussian2DFunction.getName(k), a2peaks[k], d, beta[j], gradient,
         // DoubleEquality.relativeError(gradient, beta[j]));
         failCounter.run(nparams + j, () -> TestAssertions.assertTest(gradient, beta[jj], eq2, msg));

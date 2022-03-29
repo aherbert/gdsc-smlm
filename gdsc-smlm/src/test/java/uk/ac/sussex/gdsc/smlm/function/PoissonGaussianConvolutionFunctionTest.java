@@ -146,8 +146,8 @@ class PoissonGaussianConvolutionFunctionTest {
       max = range[1];
       for (int x = min; x <= max; x++) {
         final double pp = f.likelihood(x, e);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f %f", x, pp, f2.probability(x));
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f %f", x, pp, f2.probability(x));
         pvalue += pp;
       }
       // if (p > 1.01)
@@ -160,7 +160,7 @@ class PoissonGaussianConvolutionFunctionTest {
     for (int x = min - 1;; x--) {
       min = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
@@ -169,7 +169,7 @@ class PoissonGaussianConvolutionFunctionTest {
     for (int x = max + 1;; x++) {
       max = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
@@ -180,7 +180,7 @@ class PoissonGaussianConvolutionFunctionTest {
     if (!computePmf) {
       // Do a formal integration if the PDF
       // if (p < 0.98 || p > 1.02)
-      // logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, s=%f p=%f", gain, mu, s, p);
+      // logger.fine(FormatSupplier.getSupplier("g=%f, mu=%f, s=%f p=%f", gain, mu, s, p);
       final UnivariateIntegrator in =
           new SimpsonIntegrator(1e-4, 1e-6, 4, SimpsonIntegrator.SIMPSON_MAX_ITERATIONS_COUNT);
       p2 = in.integrate(Integer.MAX_VALUE, new UnivariateFunction() {

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class PoissonGaussianFisherInformationTest {
@@ -61,7 +61,7 @@ class PoissonGaussianFisherInformationTest {
     // double I = func.getPoissonGaussianI(mean);
     // double lower = func.getPoissonGaussianApproximationI(mean);
     // double upper = PoissonFisherInformation.getPoissonI(mean);
-    // logger.fine(FunctionUtils.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
+    // logger.fine(FormatSupplier.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
     // I, lower,
     // upper, I / upper);
     // if (true)
@@ -91,7 +91,7 @@ class PoissonGaussianFisherInformationTest {
     final double I = func.getPoissonGaussianI(mean);
     double lower = func.getPoissonGaussianApproximationI(mean);
     double upper = PoissonFisherInformation.getPoissonI(mean);
-    // logger.fine(FunctionUtils.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
+    // logger.fine(FormatSupplier.getSupplier("s=%g mean=%g I=%s (%s - %s) alpha=%s", func.s, mean,
     // I, lower,
     // upper, I / upper);
     // Allow a tolerance on the approximation at high mean.
@@ -138,7 +138,7 @@ class PoissonGaussianFisherInformationTest {
 
       mean = Double.longBitsToDouble(upper);
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), mean));
+          FormatSupplier.getSupplier("upper = 0x%s = %s", Long.toHexString(upper), mean));
     }
 
     Assertions.assertTrue(1.0 / mean != Double.POSITIVE_INFINITY);

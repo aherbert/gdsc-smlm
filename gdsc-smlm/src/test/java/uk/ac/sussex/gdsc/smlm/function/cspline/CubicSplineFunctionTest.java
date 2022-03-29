@@ -347,7 +347,7 @@ public abstract class CubicSplineFunctionTest {
                   if ((gradient * dyda) < 0) {
                     Assertions.fail(String.format("%s sign != %s", gradient, dyda));
                   }
-                  // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
+                  // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
                   // gradient, gradientIndex, dyda, error);
                   if (!eq.almostEqualRelativeOrAbsolute(gradient, dyda)) {
                     Assertions.fail(String.format("%s != %s", gradient, dyda));
@@ -453,13 +453,13 @@ public abstract class CubicSplineFunctionTest {
                   final double gradient = (high - low) / (2 * h);
                   final double d2yda2 = p2.gradients2[i][gradientIndex];
                   final double error = DoubleEquality.relativeError(gradient, d2yda2);
-                  // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
+                  // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
                   // gradient, gradientIndex, d2yda2, error);
                   if (test) {
                     s.add(error);
                     Assertions.assertTrue((gradient * d2yda2) >= 0,
                         () -> String.format("%s sign != %s", gradient, d2yda2));
-                    // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
+                    // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x, y,
                     // gradient, gradientIndex, d2yda2, error);
                     Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(gradient, d2yda2),
                         () -> String.format("%s != %s", gradient, d2yda2));
@@ -621,7 +621,7 @@ public abstract class CubicSplineFunctionTest {
 
                           Assertions.assertTrue((gradient * dyda) >= 0,
                               () -> String.format("%s sign != %s", gradient, dyda));
-                          // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
+                          // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
                           // y, gradient, gradientIndex, dyda, error);
                           Assertions.assertTrue(eq.almostEqualRelativeOrAbsolute(gradient, dyda),
                               () -> String.format("%s != %s", gradient, dyda));
@@ -745,14 +745,14 @@ public abstract class CubicSplineFunctionTest {
                           final double gradient = (high - low) / (2 * h);
                           final double d2yda2 = p2.gradients2[i][gradientIndex];
                           final double error = DoubleEquality.relativeError(gradient, d2yda2);
-                          // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
+                          // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
                           // y, gradient, gradientIndex, d2yda2, error);
                           if (test) {
                             s.add(error);
                             if ((gradient * d2yda2) < 0) {
                               Assertions.fail(String.format("%s sign != %s", gradient, d2yda2));
                             }
-                            // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)",
+                            // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)",
                             // x, y, gradient, gradientIndex, d2yda2, error);
                             if (!eq.almostEqualRelativeOrAbsolute(gradient, d2yda2)) {
                               Assertions.fail(String.format("%s != %s", gradient, d2yda2));

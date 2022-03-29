@@ -64,7 +64,7 @@ import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 /**
  * Base class for testing the function solvers.
@@ -307,12 +307,12 @@ public abstract class BaseFunctionSolverTest {
               for (int i = 0; i < expected.length; i++) {
                 if (fp[i] < lower[i]) {
                   Assertions
-                      .fail(FunctionUtils.getSupplier("Fit Failed: [%d] %.2f < %.2f: %s != %s", i,
+                      .fail(FormatSupplier.getSupplier("Fit Failed: [%d] %.2f < %.2f: %s != %s", i,
                           fp[i], lower[i], Arrays.toString(fp), Arrays.toString(expected)));
                 }
                 if (fp[i] > upper[i]) {
                   Assertions
-                      .fail(FunctionUtils.getSupplier("Fit Failed: [%d] %.2f > %.2f: %s != %s", i,
+                      .fail(FormatSupplier.getSupplier("Fit Failed: [%d] %.2f > %.2f: %s != %s", i,
                           fp[i], upper[i], Arrays.toString(fp), Arrays.toString(expected)));
                 }
                 if (report) {
@@ -330,7 +330,7 @@ public abstract class BaseFunctionSolverTest {
       // Report
       if (report) {
         logger.log(TestLevel.TEST_INFO,
-            FunctionUtils.getSupplier("%s %s %f : CRLB = %s, Deviations = %s",
+            FormatSupplier.getSupplier("%s %s %f : CRLB = %s, Deviations = %s",
                 solver.getClass().getSimpleName(), noiseModel, s, Arrays.toString(crlb),
                 Arrays.toString(moment.getStandardDeviation())));
       }
@@ -498,7 +498,7 @@ public abstract class BaseFunctionSolverTest {
   private static void test(String name2, String name, String statName, int better, int total,
       Level logLevel) {
     final double p = (total == 0) ? 0 : 100.0 * better / total;
-    logger.log(logLevel, FunctionUtils.getSupplier("%s vs %s : %s %d / %d  (%.1f)", name2, name,
+    logger.log(logLevel, FormatSupplier.getSupplier("%s vs %s : %s %d / %d  (%.1f)", name2, name,
         statName, better, total, p));
     // Do not test if we don't have many examples
     if (total <= 10) {
@@ -547,12 +547,12 @@ public abstract class BaseFunctionSolverTest {
   }
 
   double[] fitGaussian(FunctionSolver solver, double[] data, double[] params, double[] expected) {
-    // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s : Expected %s",
+    // logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("%s : Expected %s",
     // solver.getClass().getSimpleName(), Arrays.toString(expected)));
     params = params.clone();
     final FitStatus status = solver.fit(data, null, params, null);
     if (status != FitStatus.OK) {
-      Assertions.fail(FunctionUtils.getSupplier("Fit Failed: %s i=%d: %s != %s", status.toString(),
+      Assertions.fail(FormatSupplier.getSupplier("Fit Failed: %s i=%d: %s != %s", status.toString(),
           solver.getIterations(), Arrays.toString(params), Arrays.toString(expected)));
     }
     return params;

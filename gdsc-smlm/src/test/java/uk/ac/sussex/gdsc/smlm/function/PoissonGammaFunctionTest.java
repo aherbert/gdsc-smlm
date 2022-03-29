@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class PoissonGammaFunctionTest {
@@ -119,9 +119,9 @@ class PoissonGammaFunctionTest {
       max = range[1];
       for (int x = min; x <= max; x++) {
         final double pp = f.likelihood(x, e);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
         if (debug) {
-          logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
+          logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp));
         }
         pvalue += pp;
       }
@@ -135,9 +135,9 @@ class PoissonGammaFunctionTest {
     for (int x = min - 1;; x--) {
       min = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       if (debug) {
-        logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
+        logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp));
       }
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
@@ -147,9 +147,9 @@ class PoissonGammaFunctionTest {
     for (int x = max + 1;; x++) {
       max = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       if (debug) {
-        logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp));
+        logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp));
       }
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
@@ -162,7 +162,7 @@ class PoissonGammaFunctionTest {
       // Do a formal integration
       if (debug) {
         if (pvalue < 0.98 || pvalue > 1.02) {
-          logger.fine(FunctionUtils.getSupplier("g=%f, mu=%f, p=%f", gain, mu, pvalue));
+          logger.fine(FormatSupplier.getSupplier("g=%f, mu=%f, p=%f", gain, mu, pvalue));
         }
       }
       final UnivariateIntegrator in =
@@ -302,7 +302,7 @@ class PoissonGammaFunctionTest {
       final double g = (up - lp) / diff;
       final double error = DoubleEquality.relativeError(g, eg);
       final double ox = x / gain;
-      // logger.fine(FunctionUtils.getSupplier("g=%g, mu=%g, x=%g (ox=%g), p=%g g=%g %g error=%g",
+      // logger.fine(FormatSupplier.getSupplier("g=%g, mu=%g, x=%g (ox=%g), p=%g g=%g %g error=%g",
       // gain, mu, x, ox, p1, g, eg,
       // error);
 

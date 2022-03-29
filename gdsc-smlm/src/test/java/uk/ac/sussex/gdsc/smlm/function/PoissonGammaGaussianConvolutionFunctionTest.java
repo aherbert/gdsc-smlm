@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.test.api.TestAssertions;
 import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class PoissonGammaGaussianConvolutionFunctionTest {
@@ -106,9 +106,9 @@ class PoissonGammaGaussianConvolutionFunctionTest {
       max = range[1];
       for (int x = min; x <= max; x++) {
         final double pp = f.likelihood(x, e);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
         if (debug) {
-          logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+          logger.fine(FormatSupplier.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
         }
         pvalue += pp;
       }
@@ -122,9 +122,9 @@ class PoissonGammaGaussianConvolutionFunctionTest {
     for (int x = min - 1;; x--) {
       min = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       if (debug) {
-        logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+        logger.fine(FormatSupplier.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
       }
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
@@ -134,9 +134,9 @@ class PoissonGammaGaussianConvolutionFunctionTest {
     for (int x = max + 1;; x++) {
       max = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%g", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%g", x, pp);
       if (debug) {
-        logger.fine(FunctionUtils.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
+        logger.fine(FormatSupplier.getSupplier("x=%d, p=%f   %f", x, pp, f2.likelihood(x, e)));
       }
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {

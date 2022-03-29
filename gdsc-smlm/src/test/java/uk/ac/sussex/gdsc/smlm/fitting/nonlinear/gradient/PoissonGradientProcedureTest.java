@@ -172,7 +172,7 @@ class PoissonGradientProcedureTest {
       long time = System.nanoTime();
       run();
       time = System.nanoTime() - time;
-      // logger.fine(FunctionUtils.getSupplier("[%d] Time = %d", loops, t);
+      // logger.fine(FormatSupplier.getSupplier("[%d] Time = %d", loops, t);
       return time;
     }
 
@@ -420,7 +420,7 @@ class PoissonGradientProcedureTest {
       final double[] crlb2 = m2.crlb();
       Assertions.assertNotNull(crlb1);
       Assertions.assertNotNull(crlb2);
-      // logger.fine(FunctionUtils.getSupplier("%s : %s", Arrays.toString(crlb1),
+      // logger.fine(FormatSupplier.getSupplier("%s : %s", Arrays.toString(crlb1),
       // Arrays.toString(crlb2));
       for (int j = 0; j < n; j++) {
         Assertions.assertTrue(crlb1[j] < crlb2[j]);
@@ -466,7 +466,7 @@ class PoissonGradientProcedureTest {
               final double o1 = Math.sqrt(crlb[ix]) * a;
               final double o2 = Math.sqrt(crlb[iy]) * a;
               final double e = Gaussian2DPeakResultHelper.getMLPrecisionX(a, ss, n, b2, false);
-              // logger.fine(FunctionUtils.getSupplier("e = %f : o = %f %f", e, o1, o2);
+              // logger.fine(FormatSupplier.getSupplier("e = %f : o = %f %f", e, o1, o2);
               Assertions.assertEquals(e, o1, e * 5e-2);
               Assertions.assertEquals(e, o2, e * 5e-2);
             }

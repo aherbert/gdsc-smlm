@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 public abstract class WeightedFilterTest {
@@ -216,7 +216,7 @@ public abstract class WeightedFilterTest {
     // filter.name, title,
     // width, height, boxSize, internal, u1, u2, error);
     Assertions.assertEquals(0, error, tol,
-        FunctionUtils.getSupplier("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)",
+        FormatSupplier.getSupplier("%s : %s [%dx%d] @ %.1f [internal=%b] : %g => %g  (%g)",
             filter.name, title, width, height, boxSize, internal, u1, u2, error));
     return u2;
   }

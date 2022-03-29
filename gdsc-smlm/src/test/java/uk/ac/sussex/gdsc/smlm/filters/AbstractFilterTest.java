@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class AbstractFilterTest {
@@ -227,7 +227,7 @@ class AbstractFilterTest {
       for (int x = border; x < maxx - border - 1; x++, index++) {
         if (!eq.almostEqualRelativeOrAbsolute(data1[index], data2[index])) {
           final String message = String.format(format, args);
-          Assertions.fail(FunctionUtils.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y,
+          Assertions.fail(FormatSupplier.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y,
               data1[index], data2[index], FloatEquality.relativeError(data1[index], data2[index])));
         }
       }
@@ -243,7 +243,7 @@ class AbstractFilterTest {
       for (int x = border; x < maxx - border - 1; x++, index++) {
         if (data1[index] != data2[index]) {
           final String message = String.format(format, args);
-          Assertions.fail(FunctionUtils.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y,
+          Assertions.fail(FormatSupplier.getSupplier("%s [%d,%d] %f != %f  (%g)", message, x, y,
               data1[index], data2[index], FloatEquality.relativeError(data1[index], data2[index])));
         }
       }

@@ -97,7 +97,7 @@ class ChiSquaredDistributionTableTest {
       for (int df = 1; df <= max; df++) {
         final double o = upperTable.getCrititalValue(df);
         final double e = et[j++];
-        // logger.fine(FunctionUtils.getSupplier("p=%.3f,df=%d = %f", p[i], df, o);
+        // logger.fine(FormatSupplier.getSupplier("p=%.3f,df=%d = %f", p[i], df, o);
         Assertions.assertEquals(e, o, 1e-2);
 
         // The test only stores 2 decimal places so use the computed value to set upper/lower

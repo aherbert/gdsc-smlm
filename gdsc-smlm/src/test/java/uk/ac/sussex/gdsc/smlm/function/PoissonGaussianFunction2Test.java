@@ -137,8 +137,8 @@ class PoissonGaussianFunction2Test {
       max = range[1];
       for (int x = min; x <= max; x++) {
         final double pp = f.likelihood(x, e);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f %f", x, pp);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f %f", x, pp, f2.probability(x));
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f %f", x, pp);
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f %f", x, pp, f2.probability(x));
         pvalue += pp;
       }
       // if (p > 1.01)
@@ -151,7 +151,7 @@ class PoissonGaussianFunction2Test {
     for (int x = min - 1;; x--) {
       min = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp);
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
         break;
@@ -160,7 +160,7 @@ class PoissonGaussianFunction2Test {
     for (int x = max + 1;; x++) {
       max = x;
       final double pp = f.likelihood(x, e);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp);
       pvalue += pp;
       if (pp == 0 || pp / pvalue < changeTolerance) {
         break;

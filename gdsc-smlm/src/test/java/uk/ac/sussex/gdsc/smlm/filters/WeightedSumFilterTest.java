@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.test.api.function.FloatFloatBiPredicate;
 import uk.ac.sussex.gdsc.test.junit5.SeededTest;
 import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 public abstract class WeightedSumFilterTest extends WeightedFilterTest {
@@ -115,7 +115,7 @@ public abstract class WeightedSumFilterTest extends WeightedFilterTest {
     final float[] o = filter(data, width, height, boxSize - offset, internal, filter);
 
     TestAssertions.assertArrayTest(e, o, equality,
-        FunctionUtils.getSupplier("%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width, height,
+        FormatSupplier.getSupplier("%s : [%dx%d] @ %.1f [internal=%b]", filter.name, width, height,
             boxSize - offset, internal));
   }
 }

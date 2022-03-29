@@ -367,10 +367,10 @@ public abstract class Gaussian2DFunctionTest {
                         Assertions
                             .fail(String.format("%s sign != %s", gradient, dyda2[gradientIndex]));
                       }
-                      // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
+                      // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f? (%g)", x,
                       // y, gradient,
                       // gradientIndex, dyda2[gradientIndex], error);
-                      // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f == [%d] %f?", x, y,
+                      // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f == [%d] %f?", x, y,
                       // gradient, gradientIndex, dyda[gradientIndex]);
                       if (!eq.almostEqualRelativeOrAbsolute(gradient, dyda[gradientIndex])) {
                         Assertions.fail(String.format("%s != %s", gradient, dyda[gradientIndex]));
@@ -599,10 +599,10 @@ public abstract class Gaussian2DFunctionTest {
                                     Assertions.fail(String.format("%s sign != %s", gradient,
                                         dyda2[gradientIndex]));
                                   }
-                                  // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f
+                                  // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f
                                   // == [%d] %f? (%g)", x, y, gradient,
                                   // gradientIndex, dyda2[gradientIndex], error);
-                                  // logger.fine(FunctionUtils.getSupplier("[%d,%d] %f
+                                  // logger.fine(FormatSupplier.getSupplier("[%d,%d] %f
                                   // == [%d] %f?", x, y, gradient, gradientIndex,
                                   // dyda[gradientIndex]);
                                   if (!eq.almostEqualRelativeOrAbsolute(gradient,
@@ -671,7 +671,7 @@ public abstract class Gaussian2DFunctionTest {
                 for (int index = maxx * maxx; index-- > 0;) {
                   final double r1 = f.eval(index);
                   final double r2 = f2.eval(index);
-                  // logger.fine(FunctionUtils.getSupplier("%d,%d r1=%f", index%maxx, index/maxx,
+                  // logger.fine(FormatSupplier.getSupplier("%d,%d r1=%f", index%maxx, index/maxx,
                   // r1);
                   sum += r1;
                   if (!eq2.almostEqualRelativeOrAbsolute(r1, r2)) {

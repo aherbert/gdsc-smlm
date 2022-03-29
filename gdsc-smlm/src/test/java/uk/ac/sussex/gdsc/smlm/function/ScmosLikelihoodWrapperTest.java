@@ -59,7 +59,7 @@ import uk.ac.sussex.gdsc.test.rng.RngFactory;
 import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 import uk.ac.sussex.gdsc.test.utils.functions.IntArrayFormatSupplier;
 
 @SuppressWarnings({"javadoc"})
@@ -332,7 +332,7 @@ class ScmosLikelihoodWrapperTest {
                       final double gradient = (value2 - value3) / (2 * h);
                       boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
                           || Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                      // logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" +
+                      // logger.fine(FormatSupplier.getSupplier("[%s-%s]/2*%g : %g == %g", "" +
                       // value2, "" + value3, h, gradient,
                       // dyda[gradientIndex]);
                       if (!ok) {
@@ -536,7 +536,7 @@ class ScmosLikelihoodWrapperTest {
                   final double gradient = (value2 - value3) / (2 * h);
                   boolean ok = Math.signum(gradient) == Math.signum(dyda[gradientIndex])
                       || Math.abs(gradient - dyda[gradientIndex]) < 0.1;
-                  // logger.fine(FunctionUtils.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2,
+                  // logger.fine(FormatSupplier.getSupplier("[%s-%s]/2*%g : %g == %g", "" + value2,
                   // "" + value3, h, gradient,
                   // dyda[gradientIndex]));
                   if (!ok) {
@@ -560,7 +560,7 @@ class ScmosLikelihoodWrapperTest {
     logger.log(TestLogging.getRecord(TestLevel.TEST_INFO, "%s : %s = %d / %d (%.2f)",
         f1.getClass().getSimpleName(), NAME[targetParameter], count, total, p));
     Assertions.assertTrue(p > threshold,
-        FunctionUtils.getSupplier("%s fraction too low: %s", NAME[targetParameter], p));
+        FormatSupplier.getSupplier("%s fraction too low: %s", NAME[targetParameter], p));
   }
 
   private static double[] getVariables(int[] indices, double[] a) {

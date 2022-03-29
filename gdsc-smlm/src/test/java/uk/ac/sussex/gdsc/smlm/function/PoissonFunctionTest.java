@@ -38,7 +38,7 @@ import uk.ac.sussex.gdsc.test.api.function.DoubleDoubleBiPredicate;
 import uk.ac.sussex.gdsc.test.api.function.DoublePredicate;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"unused", "javadoc"})
 class PoissonFunctionTest {
@@ -90,7 +90,7 @@ class PoissonFunctionTest {
     int max = range[1];
     for (int x = min; x <= max; x++) {
       final double pp = f.likelihood(x, o);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp);
       pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
@@ -110,7 +110,7 @@ class PoissonFunctionTest {
       for (int x = min - 1; x >= 0; x--) {
         min = x;
         final double pp = f.likelihood(x, o);
-        // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
+        // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp);
         pvalue += pp;
         values.add(pp);
         if (maxp < pp) {
@@ -126,7 +126,7 @@ class PoissonFunctionTest {
     for (int x = max + 1;; x++) {
       max = x;
       final double pp = f.likelihood(x, o);
-      // logger.fine(FunctionUtils.getSupplier("x=%d, p=%f", x, pp);
+      // logger.fine(FormatSupplier.getSupplier("x=%d, p=%f", x, pp);
       pvalue += pp;
       values.add(pp);
       if (maxp < pp) {
@@ -201,7 +201,7 @@ class PoissonFunctionTest {
       // System.out.printf("x=%d, v1=%s, v2=%s%n", x, v1, v2);
 
       TestAssertions.assertTest(v1, v2, predicate,
-          FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
+          FormatSupplier.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
     }
   }
 
@@ -229,7 +229,7 @@ class PoissonFunctionTest {
       final double v2 = pd.probability(x);
 
       TestAssertions.assertTest(v1, v2, predicate,
-          FunctionUtils.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
+          FormatSupplier.getSupplier("g=%f, mu=%f, x=%d", gain, mu, x));
     }
   }
 }

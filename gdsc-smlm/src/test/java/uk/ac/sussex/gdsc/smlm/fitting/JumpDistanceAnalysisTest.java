@@ -54,7 +54,7 @@ import uk.ac.sussex.gdsc.test.utils.RandomSeed;
 import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"javadoc"})
 class JumpDistanceAnalysisTest {
@@ -125,12 +125,12 @@ class JumpDistanceAnalysisTest {
         final double e = fc.evaluate(x, params);
         // Integrate
         final double o = si.integrate(10000, func, 0, x);
-        // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Integrate d=%.1f : x=%.1f,
+        // logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("Integrate d=%.1f : x=%.1f,
         // e=%f, o=%f, iter=%d,
         // eval=%d", d, x, e, o, si.getIterations(),
         // si.getEvaluations());
         TestAssertions.assertTest(e, o, equality,
-            FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
+            FormatSupplier.getSupplier("Failed to integrate: x=%g", x));
       }
     }
   }
@@ -161,12 +161,12 @@ class JumpDistanceAnalysisTest {
           final double e = fc.evaluate(x, params);
           // Integrate
           final double o = si.integrate(10000, func, 0, x);
-          // logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("Integrate d=%.1f, f=%.1f :
+          // logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("Integrate d=%.1f, f=%.1f :
           // x=%.1f, e=%f, o=%f,
           // iter=%d, eval=%d", d, f, x, e, o,
           // si.getIterations(), si.getEvaluations());
           TestAssertions.assertTest(e, o, equality,
-              FunctionUtils.getSupplier("Failed to integrate: x=%g", x));
+              FormatSupplier.getSupplier("Failed to integrate: x=%g", x));
         }
       }
     }
@@ -385,7 +385,7 @@ class JumpDistanceAnalysisTest {
       final double[] e1 = getPercentError(dc, fitD);
       final double[] e2 = getPercentError(fraction, fitF);
       logger.log(TestLevel.TEST_INFO,
-          FunctionUtils.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
+          FormatSupplier.getSupplier("%s %s N=%d sample=%d, n=%d : %s = %s [%s] : %s = %s [%s]",
               (error == null) ? "+++ Pass" : "--- Fail", title, dc.length, samples, n, toString(dc),
               toString(fitD), toString(e1), toString(fraction), toString(fitF), toString(e2)));
       if (error != null) {

@@ -45,7 +45,7 @@ import uk.ac.sussex.gdsc.test.utils.TestComplexity;
 import uk.ac.sussex.gdsc.test.utils.TestLogging;
 import uk.ac.sussex.gdsc.test.utils.TestLogging.TestLevel;
 import uk.ac.sussex.gdsc.test.utils.TestSettings;
-import uk.ac.sussex.gdsc.test.utils.functions.FunctionUtils;
+import uk.ac.sussex.gdsc.test.utils.functions.FormatSupplier;
 
 @SuppressWarnings({"unused", "javadoc"})
 class FastLogTest {
@@ -410,7 +410,7 @@ class FastLogTest {
       for (int i = 0; i < data.length; i++) {
         logD[i] = (float) Math.log(data[i]);
       }
-      logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("e=%d-%d", e, e + ee));
+      logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("e=%d-%d", e, e + ee));
       for (final TestFastLog fl : test) {
         runCanTestFloatError(fl, data, logD);
       }
@@ -435,7 +435,7 @@ class FastLogTest {
       for (int e = mine; e <= maxe; e++) {
         final int bits = m | (e << 23);
         final float v = Float.intBitsToFloat(bits);
-        // logger.fine(FunctionUtils.getSupplier("%g = %s", v, Integer.toBinaryString(bits));
+        // logger.fine(FormatSupplier.getSupplier("%g = %s", v, Integer.toBinaryString(bits));
         data[index++] = v;
       }
     }
@@ -509,7 +509,7 @@ class FastLogTest {
     delta = Math.abs(delta);
     // if (delta > 1)
     // {
-    // //logger.fine(FunctionUtils.getSupplier("Big error: %fl %fl", v, d[pair.i-1]);
+    // //logger.fine(FormatSupplier.getSupplier("Big error: %fl %fl", v, d[pair.i-1]);
     // }
     final Stats s1 = new Stats(delta, data[pair.index - 1]);
     final Stats s2 = (value != 0) ? new Stats(Math.abs(delta / value), data[pair.index - 1])
@@ -520,7 +520,7 @@ class FastLogTest {
       delta = Math.abs(delta);
       // if (delta > 5)
       // {
-      // //logger.fine(FunctionUtils.getSupplier("Big error: [%g] %fl %fl %fl", d[pair.i - 1], v,
+      // //logger.fine(FormatSupplier.getSupplier("Big error: [%g] %fl %fl %fl", d[pair.i - 1], v,
       // pair.fl, v));
       // }
       s1.add(delta, data[pair.index - 1]);
@@ -528,7 +528,7 @@ class FastLogTest {
         s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s, n=%d, c=%d : %s : relative %s",
+    logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("%s, n=%d, c=%d : %s : relative %s",
         fl.name, fl.getN(), s1.count, s1.summary(), s2.summary()));
   }
 
@@ -541,7 +541,7 @@ class FastLogTest {
       pair.value = fl.log(x);
       if (pair.value != Float.NEGATIVE_INFINITY) {
         return true;
-        // logger.fine(FunctionUtils.getSupplier("%g", x);
+        // logger.fine(FormatSupplier.getSupplier("%g", x);
       }
     }
     return false;
@@ -556,7 +556,7 @@ class FastLogTest {
       pair.value = fl.log(x);
       if (pair.value != Double.NEGATIVE_INFINITY) {
         return true;
-        // logger.fine(FunctionUtils.getSupplier("%g", x);
+        // logger.fine(FormatSupplier.getSupplier("%g", x);
       }
     }
     return false;
@@ -660,7 +660,7 @@ class FastLogTest {
       for (int i = 0; i < data.length; i++) {
         logD[i] = Math.log(data[i]);
       }
-      logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("e=%d-%d", e, e + ee));
+      logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("e=%d-%d", e, e + ee));
       for (final TestFastLog fl : test) {
         runCanTestDoubleError(fl, data, logD);
       }
@@ -683,7 +683,7 @@ class FastLogTest {
       for (long e = mine; e <= maxe && index < data.length; e++) {
         final long bits = m | (e << 52);
         final double v = Double.longBitsToDouble(bits);
-        // logger.fine(FunctionUtils.getSupplier("%g = %s", v, Long.toBinaryString(bits));
+        // logger.fine(FormatSupplier.getSupplier("%g = %s", v, Long.toBinaryString(bits));
         data[index++] = v;
       }
     }
@@ -704,7 +704,7 @@ class FastLogTest {
         : new Stats(0, data[pair.index - 1]);
     while (next(fl, pair, data)) {
       value = logD[pair.index - 1];
-      // logger.fine(FunctionUtils.getSupplier("%g vs %g", v, pair.fl);
+      // logger.fine(FormatSupplier.getSupplier("%g vs %g", v, pair.fl);
       delta = value - pair.value;
       delta = Math.abs(delta);
       s1.add(delta, data[pair.index - 1]);
@@ -712,7 +712,7 @@ class FastLogTest {
         s2.add(Math.abs(delta / value), data[pair.index - 1]);
       }
     }
-    logger.log(TestLevel.TEST_INFO, FunctionUtils.getSupplier("%s, n=%d, c=%d : %s : relative %s",
+    logger.log(TestLevel.TEST_INFO, FormatSupplier.getSupplier("%s, n=%d, c=%d : %s : relative %s",
         fl.name, fl.getN(), s1.count, s1.summary(), s2.summary()));
   }
 }
