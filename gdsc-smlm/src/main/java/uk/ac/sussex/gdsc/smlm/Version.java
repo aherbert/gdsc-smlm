@@ -46,7 +46,7 @@ public class Version {
     final Manifest manifest = loadManifest(Version.class);
     if (manifest != null) {
       final Attributes attributes = manifest.getMainAttributes();
-      version = attributes.getValue("Specification-Version");
+      version = attributes.getValue("Implementation-Version");
       buildDate = attributes.getValue("Implementation-Date");
       buildNumber = attributes.getValue("Implementation-Build");
     }
@@ -79,7 +79,12 @@ public class Version {
   /**
    * Get the GDSC SMLM version.
    *
+   * <p>This uses the 'Implementation-Version' entry in the manifest. It will have the full project
+   * version including any suffix, for example SNAPSHOT, RC1, etc.
+   *
    * @return The uk.ac.sussex.gdsc.smlm package version
+   * @see <a href="https://maven.apache.org/shared/maven-archiver/index.html">Maven archiver:
+   *      addDefaultImplementationEntries</a>
    */
   public static String getVersion() {
     return version;
