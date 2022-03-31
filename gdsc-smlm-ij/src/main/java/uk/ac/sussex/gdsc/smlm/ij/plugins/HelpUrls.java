@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
+import uk.ac.sussex.gdsc.smlm.Version;
 
 /**
  * Contains help URLs for the GDSC ImageJ plugins.
@@ -39,21 +40,36 @@ import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 public final class HelpUrls {
   /** The system property to define the base help url. */
   private static final String HELP_URL_BASE_PROPERTY = "gdsc.smlm.help.url.base";
+  /** The system property to define the verion of the help url. */
+  private static final String HELP_URL_VERSION_PROPERTY = "gdsc.smlm.help.url.version";
   /** The system property to define the help url properties configuration file. */
   private static final String HELP_URL_CONF_PROPERTY = "gdsc.smlm.help.url.conf";
   /** The help url for the SMLM plugins. */
-  private static final String DEFAULT_HELP_URL = "https://gdsc-smlm.readthedocs.io/en/latest/";
+  private static final String DEFAULT_HELP_URL = "https://gdsc-smlm.readthedocs.io/en/";
+  /** The version for the SMLM plugins. */
+  private static final String DEFAULT_HELP_VERSION = "latest";
   /** The url configuration for the SMLM plugins. */
   private static final String DEFAULT_HELP_CONF = "/uk/ac/sussex/gdsc/smlm/ij/help.config";
 
   /** The url base. */
-  private static String urlBase;
+  private static final String urlBase;
 
   /** The map storing sub-URLs to append to the base URL. */
-  private static Properties map;
+  private static final Properties map;
 
   static {
-    urlBase = System.getProperty(HELP_URL_BASE_PROPERTY, DEFAULT_HELP_URL);
+    // url = base + version
+
+    // Runtime specified.
+    // No checks are made that the input URL is valid
+    final String base = System.getProperty(HELP_URL_BASE_PROPERTY, DEFAULT_HELP_URL);
+    String version = System.getProperty(HELP_URL_VERSION_PROPERTY);
+
+    if (version == null) {
+      version = getTagVersionOrDefault(Version.getVersion());
+    }
+
+    urlBase = createUrl(base, version);
     map = loadUrls(System.getProperty(HELP_URL_CONF_PROPERTY, DEFAULT_HELP_CONF));
   }
 
@@ -124,5 +140,80 @@ public final class HelpUrls {
   @VisibleForTesting
   static void forEach(BiConsumer<String, String> action) {
     map.forEach((k, v) -> action.accept((String) k, urlBase + v));
+  }
+
+  /**
+   * Gets the help url version for a release based on knowledge of the release tag pattern, or else
+   * the default help version ("latest").
+   *
+   * <p>The method assumes semver format using numbers for major.minor[.patch]. The tag for a
+   * release will have a 'v' prefix.
+   *
+   * <pre>
+   * 1.0-SNAPSHOT    latest
+   * 1.0             v1.0
+   * 1.0.0           v1.0.0
+   * 1.0.1           v1.0.1
+   * 1.1-SNAPSHOT    latest
+   * 1.1             v1.1
+   * </pre>
+   * 
+   * <p>Note: The patch number is optional if zero. No logic is used to detect a zero patch number.
+   * This respects the choice chosen for the semver.
+   *
+   * @param version the version
+   * @return the tag version or default
+   */
+  @VisibleForTesting
+  static String getTagVersionOrDefault(String version) {
+    // Tags have a 'v' prefixed to the semver format of the version:
+    // vX.Y[.Z]
+    // Z is added if non-zero.
+    // The following just assumes a tag for a release version will be the same with
+    // a v prefix. The regex looks for 'X.Y' and optionally '.Z'.
+    // No logic for a patch version of zero is made.
+    // If 1.0.0 is the release version then the tag should be 'v1.0.0' not 'v1.0'
+    if (version.matches("^(\\d+\\.\\d+)(\\.\\d+)?$")) {
+      // Add the 'v' prefix
+      return "v" + version;
+    }
+    ImageJPluginLoggerHelper.getLogger(HelpUrls.class)
+        .fine(() -> String.format("GDSC SMLM help url version is not a release: <%s>, using: <%s>",
+            version, DEFAULT_HELP_VERSION));
+    // Fall back to the default
+    return DEFAULT_HELP_VERSION;
+  }
+
+  /**
+   * Create the URL by joining the base to the remaining path, adding the separator '/' if required.
+   * A '/' is added at the end of the url.
+   *
+   * @param base the base
+   * @param extra the extra
+   * @return the url string
+   */
+  @VisibleForTesting
+  static String createUrl(String base, String... extra) {
+    final StringBuilder sb = new StringBuilder(base.length());
+    append(sb, base);
+    for (final String s : extra) {
+      append(sb, s);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Append the string if non-empty. Appends the separator '/' if missing from the string.
+   *
+   * @param sb the StringBuilder
+   * @param s the string
+   */
+  private static void append(StringBuilder sb, String s) {
+    if (!s.isEmpty()) {
+      sb.append(s);
+      if (sb.charAt(sb.length() - 1) != '/') {
+        sb.append('/');
+      }
+    }
   }
 }

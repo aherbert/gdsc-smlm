@@ -37,6 +37,8 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.opentest4j.TestAbortedException;
 
 @SuppressWarnings({"javadoc"})
@@ -47,6 +49,34 @@ class HelpUrlsTest {
     Assertions.assertTrue(HelpUrls.loadUrls("").isEmpty());
     Assertions.assertTrue(HelpUrls.loadUrls("  ").isEmpty());
     Assertions.assertTrue(HelpUrls.loadUrls("path/does/not/exist").isEmpty());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "a, latest",
+    "1, latest",
+    "1.0, v1.0",
+    "1.0.a, latest",
+    "1.0.a, latest",
+    "1.0.0.0, latest",
+    // No logic to convert 1.0.0 to v1.0
+    // semver usage must be consistent between help URL versions and the code version. 
+    "1.0.0, v1.0.0",
+    "1.0.1, v1.0.1",
+    "1.1-SNAPSHOT, latest",
+    "1.1, v1.1",
+  })
+  void canGetTagVersionOrDefault(String version, String expected) {
+    Assertions.assertEquals(expected, HelpUrls.getTagVersionOrDefault(version));
+  }
+
+  @Test
+  void canCreateUrl() {
+    Assertions.assertEquals("a/b/", HelpUrls.createUrl("a", "b"));
+    Assertions.assertEquals("a/b/", HelpUrls.createUrl("a/", "b"));
+    Assertions.assertEquals("a/b/", HelpUrls.createUrl("a/", "b/"));
+    Assertions.assertEquals("a/b/", HelpUrls.createUrl("a/", "b/", ""));
+    Assertions.assertEquals("a/b/", HelpUrls.createUrl("a/", "", "b"));
   }
 
   @Test
