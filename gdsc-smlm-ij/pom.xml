@@ -19,7 +19,7 @@ Software for single molecule localisation microscopy (SMLM) in ImageJ
 </description>
 
   <!-- Required for scijava enforcer rules -->
-  <url>http:///github.com/aherbert/gdsc-smlm</url>
+  <url>https://github.com/aherbert/gdsc-smlm</url>
   <organization>
     <name>Genome Damage and Stability Centre</name>
   </organization>

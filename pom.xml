@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <name>GDSC SMLM library for single molecule localisation microscopy</name>
-  <url>http:///github.com/aherbert/gdsc-smlm</url>
+  <url>https://github.com/aherbert/gdsc-smlm</url>
   <organization>
     <name>Genome Damage and Stability Centre</name>
     <url>http://www.sussex.ac.uk/gdsc/</url>
