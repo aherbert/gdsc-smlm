@@ -657,7 +657,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     float getPointSize() {
       if (rendering == Rendering.POINT) {
-        ((ItemPointMesh) outline).getPointSize();
+        return ((ItemPointMesh) outline).getPointSize();
       }
       return 0;
     }
