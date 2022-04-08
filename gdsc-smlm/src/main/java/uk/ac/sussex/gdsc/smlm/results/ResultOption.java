@@ -105,4 +105,13 @@ public class ResultOption {
       throw new IllegalArgumentException("Not a valid value: " + value);
     }
   }
+
+  /**
+   * Checks for valid values.
+   *
+   * @return true, if the list of valid values is not empty
+   */
+  public boolean hasValues() {
+    return values != null && values.length > 0;
+  }
 }
