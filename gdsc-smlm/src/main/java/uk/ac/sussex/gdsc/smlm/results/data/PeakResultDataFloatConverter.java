@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.data.utils.Converter;
 /**
  * Gets a float data value from a result.
  */
-public abstract class PeakResultDataFloatConverter extends PeakResultDataFloat {
+public abstract class PeakResultDataFloatConverter implements PeakResultDataFloat {
   /** The converter. */
   final Converter converter;
 

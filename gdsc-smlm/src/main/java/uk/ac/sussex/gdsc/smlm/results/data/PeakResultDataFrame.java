@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the frame from a result.
  */
-public class PeakResultDataFrame extends PeakResultDataInteger {
+public class PeakResultDataFrame implements PeakResultDataInteger {
   @Override
   public Integer getValue(PeakResult result) {
     return result.getFrame();

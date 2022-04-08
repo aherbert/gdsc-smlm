@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the Signal-toNoise Ratio (SNR) from a result.
  */
-public class PeakResultDataSnr extends PeakResultDataFloat {
+public class PeakResultDataSnr implements PeakResultDataFloat {
   @Override
   public Float getValue(PeakResult result) {
     return result.getSnr();

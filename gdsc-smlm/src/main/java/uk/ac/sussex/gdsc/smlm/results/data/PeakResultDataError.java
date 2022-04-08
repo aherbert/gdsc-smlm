@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the error from a result.
  */
-public class PeakResultDataError extends PeakResultDataDouble {
+public class PeakResultDataError implements PeakResultDataDouble {
   @Override
   public Double getValue(PeakResult result) {
     return result.getError();

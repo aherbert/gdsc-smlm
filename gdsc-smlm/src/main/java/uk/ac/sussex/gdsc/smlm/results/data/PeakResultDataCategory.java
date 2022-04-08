@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the category from a result.
  */
-public class PeakResultDataCategory extends PeakResultDataInteger {
+public class PeakResultDataCategory implements PeakResultDataInteger {
   @Override
   public Integer getValue(PeakResult result) {
     return result.getCategory();

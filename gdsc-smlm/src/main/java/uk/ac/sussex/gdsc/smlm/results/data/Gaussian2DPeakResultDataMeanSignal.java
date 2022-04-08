@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * <p>Assumes that the mean signal is the total signal within 1 standard deviation of the centre
  * divided by the elliptical area of the Gaussian.
  */
-public class Gaussian2DPeakResultDataMeanSignal extends PeakResultDataFloat {
+public class Gaussian2DPeakResultDataMeanSignal implements PeakResultDataFloat {
   /** The index of the x width. */
   static final int i = PeakResult.STANDARD_PARAMETERS;
   /** The index of the y width. */

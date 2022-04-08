@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets a parameter deviation data value from a result.
  */
-public class PeakResultDataParameterDeviation extends PeakResultDataFloat {
+public class PeakResultDataParameterDeviation implements PeakResultDataFloat {
   /** The parameter index. */
   public final int index;
 

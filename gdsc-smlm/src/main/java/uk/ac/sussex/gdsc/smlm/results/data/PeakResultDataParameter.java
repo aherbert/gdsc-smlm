@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets a parameter data value from a result.
  */
-public class PeakResultDataParameter extends PeakResultDataFloat {
+public class PeakResultDataParameter implements PeakResultDataFloat {
   /** The parameter index. */
   public final int index;
 

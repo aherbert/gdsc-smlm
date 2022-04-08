@@ -35,7 +35,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * <p>Assumes that the mean signal is half the total signal divided by the ellipsoid area of the
  * Gaussian that contains half the signal.
  */
-public class Gaussian2DPeakResultDataSnr extends PeakResultDataFloat {
+public class Gaussian2DPeakResultDataSnr implements PeakResultDataFloat {
   /** The index of the x width. */
   static final int SX = PeakResult.STANDARD_PARAMETERS;
   /** The index of the y width. */

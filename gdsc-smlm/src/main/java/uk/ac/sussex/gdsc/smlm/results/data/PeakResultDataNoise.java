@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 /**
  * Gets the noise from a result.
  */
-public class PeakResultDataNoise extends PeakResultDataFloat {
+public class PeakResultDataNoise implements PeakResultDataFloat {
   @Override
   public Float getValue(PeakResult result) {
     return result.getNoise();
