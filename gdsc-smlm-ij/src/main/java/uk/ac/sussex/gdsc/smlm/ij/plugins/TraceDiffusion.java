@@ -929,7 +929,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
           .append(MathUtils.rounded(clusteringSettings.getDiffusionCoefficentMaximum(), 3))
           .append("um^2/s");
       if (!clusteringSettings.getDisableLocalDiffusionModel()
-          | !clusteringSettings.getDisableIntensityModel()) {
+          || !clusteringSettings.getDisableIntensityModel()) {
         sb.append(", window=").append(clusteringSettings.getTemporalWindow());
       }
       if (!clusteringSettings.getDisableLocalDiffusionModel()) {
