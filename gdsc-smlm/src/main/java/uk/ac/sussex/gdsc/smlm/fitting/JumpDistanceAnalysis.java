@@ -69,7 +69,6 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * Analysis Tools Using Monte Carlo Simulations. PLoS One 8, Issue 5, e64287
  */
 public class JumpDistanceAnalysis {
-  private static final boolean DEBUG_OPTIMISER = false;
   private static final double THIRD = 1.0 / 3.0;
 
   private double s2;
@@ -1367,9 +1366,7 @@ public class JumpDistanceAnalysis {
       }
       ll += Math.log(one_fourD) * x.length;
       // Debug the call from the optimiser
-      if (DEBUG_OPTIMISER) {
-        System.out.printf("[1] : [%f] = %f\n", variables[0], ll);
-      }
+      // System.out.printf("[1] : [%f] = %f\n", variables[0], ll);
       return ll;
     }
 
@@ -1561,15 +1558,13 @@ public class JumpDistanceAnalysis {
         ll += Math.log(p);
       }
       // Debug the call from the optimiser
-      if (DEBUG_OPTIMISER) {
-        final double[] f = new double[numberOfFractions];
-        final double[] d = new double[numberOfFractions];
-        for (int i = 0; i < numberOfFractions; i++) {
-          f[i] = params[i * 2];
-          d[i] = params[i * 2 + 1];
-        }
-        System.out.printf("%s : %s = %f\n", Arrays.toString(f), Arrays.toString(d), ll);
-      }
+      // final double[] f = new double[numberOfFractions];
+      // final double[] d = new double[numberOfFractions];
+      // for (int i = 0; i < numberOfFractions; i++) {
+      // f[i] = params[i * 2];
+      // d[i] = params[i * 2 + 1];
+      // }
+      // System.out.printf("%s : %s = %f\n", Arrays.toString(f), Arrays.toString(d), ll);
       return ll;
     }
   }
@@ -1787,15 +1782,13 @@ public class JumpDistanceAnalysis {
         ss += dx * dx;
       }
       // Debug the call from the optimiser
-      if (DEBUG_OPTIMISER) {
-        final double[] F = new double[numberOfFractions];
-        final double[] D = new double[numberOfFractions];
-        for (int i = 0; i < numberOfFractions; i++) {
-          F[i] = parameters[i * 2];
-          D[i] = parameters[i * 2 + 1];
-        }
-        System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), ss);
-      }
+      // final double[] F = new double[numberOfFractions];
+      // final double[] D = new double[numberOfFractions];
+      // for (int i = 0; i < numberOfFractions; i++) {
+      // F[i] = parameters[i * 2];
+      // D[i] = parameters[i * 2 + 1];
+      // }
+      // System.out.printf("%s : %s = %f\n", Arrays.toString(F), Arrays.toString(D), ss);
       return ss;
     }
   }
