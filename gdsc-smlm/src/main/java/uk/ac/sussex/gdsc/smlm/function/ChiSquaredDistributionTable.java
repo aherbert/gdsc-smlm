@@ -39,7 +39,7 @@ import org.apache.commons.math3.special.Gamma;
  *      href="https://en.wikipedia.org/wiki/Likelihood-ratio_test#Distribution:_Wilks%E2%80%99_theorem">Wilks
  *      Theorum</a>
  */
-public class ChiSquaredDistributionTable {
+public final class ChiSquaredDistributionTable {
   /**
    * The p-value for computing the value using the cumulative probability.
    */

@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
  * amplified by a gain and then read with Gaussian noise.
  */
-public class PoissonGammaGaussianConvolutionFunction
+public final class PoissonGammaGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {
   /**
    * The on-chip gain multiplication factor.

@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  * Stop evaluating when a number of cumulative failures occurs. The counting is weighted so that
  * fails increment and passes decrement different amounts.
  */
-public class WeightedFailCounter extends BaseFailCounter {
+public final class WeightedFailCounter extends BaseFailCounter {
   /** The fail count. Use a long to avoid overflow errors. */
   private long failCount;
 

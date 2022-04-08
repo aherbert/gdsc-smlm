@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 /**
  * A fail counter that always returns OK. Failures are ignored.
  */
-public class NullFailCounter implements FailCounter {
+public final class NullFailCounter implements FailCounter {
   /** An instance. */
   public static final NullFailCounter INSTANCE = new NullFailCounter();
 

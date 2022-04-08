@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  * Stop evaluating when the pass rate falls below a set fraction. A minimum number of pass/fail
  * counts can be specified.
  */
-public class PassRateFailCounter extends BaseFailCounter {
+public final class PassRateFailCounter extends BaseFailCounter {
   /** The pass count. */
   private int passCount;
 

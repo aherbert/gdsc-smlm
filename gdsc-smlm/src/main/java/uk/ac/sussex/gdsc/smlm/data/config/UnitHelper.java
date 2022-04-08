@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 /**
  * Contains helper functions for the units. Adds functionality to the protocol buffer unit enums.
  */
-public class UnitHelper {
+public final class UnitHelper {
 
   private static final String UNKNOWN = "unknown";
   private static final String COUNT = "count";

@@ -29,7 +29,7 @@ import uk.ac.sussex.gdsc.core.utils.BooleanRollingArray;
 /**
  * Stop evaluating when a number of failures occurs within a window.
  */
-public class RollingWindowFailCounter extends BaseFailCounter {
+public final class RollingWindowFailCounter extends BaseFailCounter {
   /** The rolling array stores true for a failure. */
   private final BooleanRollingArray rollingArray;
 

@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Null implementation of the CoordinateStore interface.
  */
-public class NullCoordinateStore implements CoordinateStore {
+public final class NullCoordinateStore implements CoordinateStore {
   /** An instance to ignore calls to the CoordinateStore interface. */
   public static final NullCoordinateStore INSTANCE = new NullCoordinateStore();
 

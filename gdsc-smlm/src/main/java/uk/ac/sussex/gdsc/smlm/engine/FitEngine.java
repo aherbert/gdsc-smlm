@@ -47,7 +47,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResults;
  * processed sequentially by worker threads. The queue behaviour when the size is much greater than
  * the number of worker threads can be configured.
  */
-public class FitEngine {
+public final class FitEngine {
   /** The empty job used as a shutdown signal. */
   private static final FitJob EMPTY_JOB = new FitJob();
 

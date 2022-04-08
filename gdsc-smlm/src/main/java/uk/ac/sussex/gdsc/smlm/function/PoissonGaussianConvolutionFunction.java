@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * which captures a Poisson process of emitted light, converted to electrons on the camera chip,
  * amplified by a gain and then read with Gaussian noise.
  */
-public class PoissonGaussianConvolutionFunction
+public final class PoissonGaussianConvolutionFunction
     implements LikelihoodFunction, LogLikelihoodFunction {
   /** Single instance holding log factorial values for resue. */
   private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =

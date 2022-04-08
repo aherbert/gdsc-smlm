@@ -27,7 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
 /**
  * Stop evaluating when a number of consecutive failures is exceeded.
  */
-public class ConsecutiveFailCounter extends BaseFailCounter {
+public final class ConsecutiveFailCounter extends BaseFailCounter {
   /** The fail count. */
   private int failCount;
 

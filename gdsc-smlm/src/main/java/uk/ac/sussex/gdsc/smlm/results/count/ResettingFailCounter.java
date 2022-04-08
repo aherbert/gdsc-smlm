@@ -28,7 +28,7 @@ package uk.ac.sussex.gdsc.smlm.results.count;
  * Stop evaluating when a number of cumulative failures occurs. The failures count is reset to a
  * fraction of the current value for each pass.
  */
-public class ResettingFailCounter extends BaseFailCounter {
+public final class ResettingFailCounter extends BaseFailCounter {
   /** The fail count. */
   private int failCount;
 

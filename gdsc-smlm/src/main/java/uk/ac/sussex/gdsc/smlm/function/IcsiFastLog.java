@@ -35,7 +35,7 @@ package uk.ac.sussex.gdsc.smlm.function;
  * @see <a href=
  *      "http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf">http://www.icsi.berkeley.edu/pubs/techreports/TR-07-002.pdf</a>
  */
-public class IcsiFastLog extends FastLog {
+public final class IcsiFastLog extends FastLog {
   /**
    * Specify the data type that will be used in the call to the log functions.
    */

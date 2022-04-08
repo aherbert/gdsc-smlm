@@ -57,7 +57,7 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
  * <p>See Huang, et al (2013) Video-rate nanoscopy using sCMOS camera–specific single-molecule
  * localization algorithms. Nature Methods 10, 653–658.
  */
-public class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
+public final class PoissonPoissonFunction implements LikelihoodFunction, LogLikelihoodFunction {
   /**
    * The inverse of the on-chip gain multiplication factor.
    */
