@@ -157,7 +157,7 @@ public final class HelpUrls {
    * 1.1-SNAPSHOT    latest
    * 1.1             v1.1
    * </pre>
-   * 
+   *
    * <p>Note: The patch number is optional if zero. No logic is used to detect a zero patch number.
    * This respects the choice chosen for the semver.
    *
