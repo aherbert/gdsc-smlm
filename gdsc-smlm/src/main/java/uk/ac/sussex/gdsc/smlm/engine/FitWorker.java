@@ -4391,7 +4391,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     final double[] dev = fitResult.getParameterDeviations();
 
     if (queueSize != 0) {
-      throw new RuntimeException("There are results queued already!");
+      throw new IllegalStateException("There are results queued already!");
     }
 
     for (int i = 0; i < results.length; i++) {
