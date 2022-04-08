@@ -674,7 +674,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           // are stored as the current slice results.
           // Note the current fit configuration for benchmarking may have minimal filtering settings
           // so we do not use that object.
-          final FitConfiguration tmp = new FitConfiguration();
+          final FitConfiguration tmp = FitConfiguration.create();
           final double residualsThreshold = 0.4;
           filter = new MultiPathFilter(tmp, createMinimalFilter(PrecisionMethod.POISSON_CRLB),
               residualsThreshold);

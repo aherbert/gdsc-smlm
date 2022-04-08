@@ -98,7 +98,7 @@ public class BenchmarkSmartSpotRanking implements PlugIn {
 
   /** The reference to the latest fit engine configuration. */
   private static AtomicReference<FitEngineConfiguration> configRef =
-      new AtomicReference<>(new FitEngineConfiguration());
+      new AtomicReference<>(FitEngineConfiguration.create());
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
   private static AtomicReference<

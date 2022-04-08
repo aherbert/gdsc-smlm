@@ -135,7 +135,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   private static AtomicInteger lastId = new AtomicInteger();
 
   static {
-    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitEngineConfiguration config = FitEngineConfiguration.create();
     final FitConfiguration fitConfig = config.getFitConfiguration();
 
     // Set some default fit settings here ...
@@ -157,7 +157,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     fitConfig.setComputeDeviations(false);
     fitConfig.setComputeResiduals(true);
 
-    final FitConfiguration filterFitConfig = new FitConfiguration();
+    final FitConfiguration filterFitConfig = FitConfiguration.create();
     filterFitConfig.setSmartFilter(false);
     filterFitConfig.setDisableSimpleFilter(false);
     filterFitConfig.setMinPhotons(0);
@@ -2835,7 +2835,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     }
 
     // Start with a clone of the filter settings
-    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitEngineConfiguration config = FitEngineConfiguration.create();
     final FitConfiguration fitConfig = config.getFitConfiguration();
     fitConfig.setFitSettings(filterFitConfig.getFitSettings());
 
@@ -2850,7 +2850,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
     // This was done fitting all the results
     config.setFailuresLimit(-1);
     if (settings.useBenchmarkSettings) {
-      final FitEngineConfiguration pConfig = new FitEngineConfiguration();
+      final FitEngineConfiguration pConfig = FitEngineConfiguration.create();
       // TODO - add option to use latest or the best
       if (BenchmarkFilterAnalysis.updateConfiguration(pConfig, false)) {
         config.setFailuresLimit(pConfig.getFailuresLimit());
@@ -3166,7 +3166,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
   }
 
   private static boolean updateFilterConfiguration(FitConfiguration filterFitConfig) {
-    final FitEngineConfiguration c = new FitEngineConfiguration();
+    final FitEngineConfiguration c = FitEngineConfiguration.create();
     // TODO - add option to use latest or the best
     if (!BenchmarkFilterAnalysis.updateConfiguration(c, false)) {
       IJ.error(TITLE, "Unable to use the benchmark filter analysis configuration");
@@ -3208,7 +3208,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
 
       if (textCoordinateShiftFactor != null) {
         // Start with a default. This will cause a reset.
-        final FitConfiguration fitConfig = new FitConfiguration();
+        final FitConfiguration fitConfig = FitConfiguration.create();
         if (template != null) {
           fitConfig.setFitSettings(template.getFitEngineSettings().getFitSettings());
         }
@@ -3224,7 +3224,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
       } else if (template != null) {
         if (template.hasFitEngineSettings()) {
           final boolean custom = ConfigurationTemplate.isCustomTemplate(templateName);
-          final FitEngineConfiguration config2 = new FitEngineConfiguration(
+          final FitEngineConfiguration config2 = FitEngineConfiguration.create(
               template.getFitEngineSettings(), template.getCalibration(), template.getPsf());
           final FitConfiguration fitConfig2 = config2.getFitConfiguration();
           if (custom && template.hasPsf()) {

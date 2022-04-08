@@ -182,7 +182,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     settings = SettingsManager.readPsfEstimatorSettings(0).toBuilder();
     // Reset
     if (IJ.controlKeyDown()) {
-      config = new FitEngineConfiguration();
+      config = FitEngineConfiguration.create();
       final Calibration calibration = SettingsManager.readCalibration(0);
       config.getFitConfiguration().setCalibration(calibration);
       config.getFitConfiguration().setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);

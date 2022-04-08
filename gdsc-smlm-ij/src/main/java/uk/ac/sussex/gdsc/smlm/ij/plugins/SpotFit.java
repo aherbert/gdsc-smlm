@@ -459,7 +459,7 @@ public class SpotFit implements PlugIn {
     }
 
     private static FitConfiguration createFitConfiguration() {
-      final FitConfiguration config = new FitConfiguration();
+      final FitConfiguration config = FitConfiguration.create();
       config.setFitSolver(FitSolver.LVM_LSE);
       config.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.ONE_AXIS_GAUSSIAN_2D));
       config.setInitialPeakStdDev(0);

@@ -121,7 +121,8 @@ public final class FitEngine {
     // Create the workers
 
     // Note - Copy the configuration for each worker.
-    // Set up for a direct copy of the settings.
+    // Set up for a direct copy of the settings. This avoids a call to build
+    // in getFitEngineSettings() for each copy that would be made using config.createCopy()
     final FitEngineSettings fitEngineSettings = config.getFitEngineSettings();
     final FitConfiguration fitConfiguration = config.getFitConfiguration();
     final Calibration calibration = fitConfiguration.getCalibration();
@@ -129,7 +130,7 @@ public final class FitEngine {
 
     for (int i = 0; i < threads; i++) {
       final FitEngineConfiguration copy =
-          new FitEngineConfiguration(fitEngineSettings, calibration, psf);
+          FitEngineConfiguration.create(fitEngineSettings, calibration, psf);
       // Copy anything else not in a proto object
       copy.getFitConfiguration().copySettings(fitConfiguration);
 

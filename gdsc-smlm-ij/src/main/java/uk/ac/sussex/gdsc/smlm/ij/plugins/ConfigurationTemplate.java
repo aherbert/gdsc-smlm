@@ -277,7 +277,7 @@ public class ConfigurationTemplate implements PlugIn {
 
     // Add the default.
     // This will be a simple least squares estimator applicable to non-calibrated data.
-    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitEngineConfiguration config = FitEngineConfiguration.create();
     addInlineTemplate(inlineTemplates, "Default", config);
 
     // Other templates are no longer hard coded.

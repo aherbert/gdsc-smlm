@@ -665,7 +665,7 @@ public class PeakFit implements PlugInFilter {
   }
 
   private void init(FitEngineConfiguration config, ResultsSettings resultsSettings) {
-    this.config = (config != null) ? config : new FitEngineConfiguration();
+    this.config = (config != null) ? config : FitEngineConfiguration.create();
     fitConfig = this.config.getFitConfiguration();
     this.resultsSettings = (resultsSettings != null) ? ResultsSettings.newBuilder(resultsSettings)
         : ResultsSettings.newBuilder();
@@ -2137,7 +2137,7 @@ public class PeakFit implements PlugInFilter {
 
     // Restore fitting to default settings but maintain the calibrated width
     final double sd = fitConfig.getInitialXSd();
-    config = new FitEngineConfiguration();
+    config = FitEngineConfiguration.create();
     fitConfig = config.getFitConfiguration();
     fitConfig.setInitialPeakStdDev(sd);
     // Allow to move 1 SD

@@ -580,7 +580,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
         estimatedHeights[i] = smoothData[maxIndices[i]];
       }
 
-      final FitConfiguration config = new FitConfiguration();
+      final FitConfiguration config = FitConfiguration.create();
       setupPeakFiltering(config);
 
       final long time = System.nanoTime();
@@ -991,7 +991,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
   }
 
   private Gaussian2DFitter createGaussianFitter(boolean simpleFiltering) {
-    final FitConfiguration config = new FitConfiguration();
+    final FitConfiguration config = FitConfiguration.create();
     config.setFitSolver(FitSolver.LVM_LSE);
     config.setPsf(PsfProtosHelper.getDefaultPsf(getPsfType()));
     config.setMaxIterations(getMaxIterations());

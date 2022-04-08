@@ -283,7 +283,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
   /////////////////////////////////////////////////////////////////
 
   /**
-   * Instantiates a new memory peak results.
+   * Creates a new memory peak results.
    *
    * @param store the backing storage implementation
    * @throws IllegalArgumentException If the store is null
@@ -296,14 +296,14 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Instantiates a new memory peak results.
+   * Creates a new memory peak results.
    */
   public MemoryPeakResults() {
     this(1000);
   }
 
   /**
-   * Instantiates a new memory peak results.
+   * Creates a new memory peak results.
    *
    * @param capacity the capacity
    */
@@ -313,23 +313,27 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Instantiates a new memory peak results.
+   * Creates a new memory peak results.
    *
    * @param results the results
+   * @return the memory peak results
    */
-  public MemoryPeakResults(Collection<PeakResult> results) {
-    this();
-    addAll(results);
+  public static MemoryPeakResults create(Collection<PeakResult> results) {
+    final MemoryPeakResults r = new MemoryPeakResults();
+    r.addAll(results);
+    return r;
   }
 
   /**
-   * Instantiates a new memory peak results.
+   * Create a new memory peak results.
    *
    * @param psf the psf
+   * @return the memory peak results
    */
-  public MemoryPeakResults(PSF psf) {
-    this();
-    setPsf(psf);
+  public static MemoryPeakResults create(PSF psf) {
+    final MemoryPeakResults r = new MemoryPeakResults();
+    r.setPsf(psf);
+    return r;
   }
 
   /**

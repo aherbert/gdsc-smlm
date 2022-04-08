@@ -161,7 +161,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
 
     Settings() {
       // Set defaults
-      final FitEngineConfiguration c = new FitEngineConfiguration();
+      final FitEngineConfiguration c = FitEngineConfiguration.create();
       defaultDataFilterMethod = c.getDataFilterMethod(0);
       defaultSmooth = c.getDataFilterParameterValue(0);
       distance = 1.5;

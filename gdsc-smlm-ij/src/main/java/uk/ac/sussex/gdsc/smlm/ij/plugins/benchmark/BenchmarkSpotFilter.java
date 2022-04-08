@@ -228,7 +228,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     Settings() {
       // Set defaults
-      config = new FitEngineConfiguration();
+      config = FitEngineConfiguration.create();
       search = 1;
       differenceSmooth = 3;
       minSearch = 1;

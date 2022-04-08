@@ -73,7 +73,7 @@ class ConfigurationTemplateTest {
     final File tmpFile = File.createTempFile("template", ".json.txt");
     tmpFile.deleteOnExit();
 
-    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitEngineConfiguration config = FitEngineConfiguration.create();
     final FitConfiguration fitConfig = config.getFitConfiguration();
     fitConfig.setMaxIterations(150);
     fitConfig.setMinWidthFactor(0.2);

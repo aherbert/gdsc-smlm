@@ -1251,7 +1251,7 @@ public class SpotAnalysis extends PlugInFrame
       drawProfiles();
 
       // Fit the PSF using a Gaussian
-      final FitConfiguration fitConfiguration = new FitConfiguration();
+      final FitConfiguration fitConfiguration = FitConfiguration.create();
       fitConfiguration.setPsf(PsfProtosHelper.defaultOneAxisGaussian2DPSF);
       fitConfiguration.setFixedPsf(true);
       fitConfiguration.setBackgroundFitting(true);

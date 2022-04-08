@@ -991,7 +991,7 @@ class PeakResultsReaderTest {
     final boolean extended = showEndFrame || showId || showPrecision || showCategory;
 
     final MemoryPeakResults results =
-        new MemoryPeakResults(PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
+        MemoryPeakResults.create(PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D));
     while (size-- > 0) {
       final int startFrame = rg.nextInt(size + 1);
       final int origX = rg.nextInt(256);

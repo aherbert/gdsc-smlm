@@ -1603,7 +1603,7 @@ public class PsfCreator implements PlugInFilter {
     if (!PsfHelper.isGaussian2D(settings.getPsf())) {
       settings.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
     }
-    config = new FitEngineConfiguration(settings.getFitEngineSettings(), settings.getCalibration(),
+    config = FitEngineConfiguration.create(settings.getFitEngineSettings(), settings.getCalibration(),
         settings.getPsf());
     final boolean save = false;
     if (!configPlugin.showDialog(config, save)) {

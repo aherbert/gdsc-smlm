@@ -1094,7 +1094,7 @@ public final class SettingsManager {
     final FitEngineSettings fitEngineSettings = readFitEngineSettings(flags);
     final Calibration calibration = readCalibration(flags);
     final PSF psf = readPsf(flags);
-    return new FitEngineConfiguration(fitEngineSettings, calibration, psf);
+    return FitEngineConfiguration.create(fitEngineSettings, calibration, psf);
   }
 
   /**

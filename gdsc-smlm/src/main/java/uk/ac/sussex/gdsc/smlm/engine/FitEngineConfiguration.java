@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
@@ -63,65 +64,62 @@ import uk.ac.sussex.gdsc.smlm.results.count.PassRateFailCounter;
 /**
  * Specifies the configuration for the fit engine.
  */
-public class FitEngineConfiguration {
+public final class FitEngineConfiguration {
   private FitEngineSettings.Builder fitEngineSettings;
   private FitConfiguration fitConfiguration;
 
   /**
-   * Instantiates a new fit engine configuration.
+   * Creates a new fit engine configuration.
+   *
+   * @return the fit engine configuration
    */
-  public FitEngineConfiguration() {
-    this(FitProtosHelper.defaultFitEngineSettings, CalibrationProtosHelper.defaultCalibration,
-        PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+  public static FitEngineConfiguration create() {
+    return create(FitProtosHelper.defaultFitEngineSettings,
+        CalibrationProtosHelper.defaultCalibration, PsfProtosHelper.defaultOneAxisGaussian2DPSF);
   }
 
   /**
-   * Instantiates a new fit engine configuration.
+   * Creates a new fit engine configuration.
    *
    * @param fitEngineSettings the fit engine settings
    * @param calibration the calibration
    * @param psf the psf
+   * @return the fit engine configuration
    */
-  public FitEngineConfiguration(FitEngineSettings fitEngineSettings, Calibration calibration,
-      PSF psf) {
-    if (fitEngineSettings == null) {
-      throw new IllegalArgumentException("FitEngineSettings is null");
-    }
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    if (psf == null) {
-      throw new IllegalArgumentException("PSF is null");
-    }
-    init(fitEngineSettings.toBuilder(), calibration.toBuilder(), psf.toBuilder());
+  public static FitEngineConfiguration create(FitEngineSettings fitEngineSettings,
+      Calibration calibration, PSF psf) {
+    Objects.requireNonNull(fitEngineSettings, "fitEngineSettings");
+    final FitConfiguration fitConfiguration =
+        FitConfiguration.create(fitEngineSettings.getFitSettings(), calibration, psf);
+    return new FitEngineConfiguration(fitEngineSettings.toBuilder(), fitConfiguration);
   }
 
   /**
-   * Instantiates a new fit engine configuration.
+   * Creates a new fit engine configuration.
    *
    * @param fitEngineSettings the fit engine settings
    * @param calibration the calibration
    * @param psf the psf
+   * @return the fit engine configuration
    */
-  public FitEngineConfiguration(FitEngineSettings.Builder fitEngineSettings,
+  public static FitEngineConfiguration create(FitEngineSettings.Builder fitEngineSettings,
       Calibration.Builder calibration, PSF.Builder psf) {
-    if (fitEngineSettings == null) {
-      throw new IllegalArgumentException("FitEngineSettings is null");
-    }
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    if (psf == null) {
-      throw new IllegalArgumentException("PSF is null");
-    }
-    init(fitEngineSettings, calibration, psf);
+    Objects.requireNonNull(fitEngineSettings, "fitEngineSettings");
+    final FitConfiguration fitConfiguration =
+        FitConfiguration.create(fitEngineSettings.getFitSettingsBuilder(), calibration, psf);
+    return new FitEngineConfiguration(fitEngineSettings, fitConfiguration);
   }
 
-  private void init(FitEngineSettings.Builder fitEngineSettings, Calibration.Builder calibration,
-      PSF.Builder psf) {
+  /**
+   * Creates a new fit engine configuration.
+   *
+   * @param fitEngineSettings the fit engine settings
+   * @param fitConfiguration the fit configuration
+   */
+  private FitEngineConfiguration(FitEngineSettings.Builder fitEngineSettings,
+      FitConfiguration fitConfiguration) {
     this.fitEngineSettings = fitEngineSettings;
-    fitConfiguration =
-        new FitConfiguration(fitEngineSettings.getFitSettingsBuilder(), calibration, psf, false);
+    this.fitConfiguration = fitConfiguration;
   }
 
   /**
@@ -563,7 +561,7 @@ public class FitEngineConfiguration {
    */
   public FitEngineConfiguration createCopy() {
     // Manual copy using the current proto objects
-    final FitEngineConfiguration clone = new FitEngineConfiguration(getFitEngineSettings(),
+    final FitEngineConfiguration clone = create(getFitEngineSettings(),
         getFitConfiguration().getCalibration(), getFitConfiguration().getPsf());
     // Copy anything else not in a proto object
     clone.getFitConfiguration().copySettings(getFitConfiguration());

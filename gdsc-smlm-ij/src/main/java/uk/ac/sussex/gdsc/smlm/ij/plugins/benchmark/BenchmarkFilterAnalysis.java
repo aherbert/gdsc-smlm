@@ -2159,7 +2159,7 @@ public class BenchmarkFilterAnalysis
         settings.scoreResidualsThreshold = r.residualsThreshold;
       } else {
         // Default to the fit config settings
-        final FitConfiguration tmp = new FitConfiguration();
+        final FitConfiguration tmp = FitConfiguration.create();
         // So we get a MultiFilter2
         tmp.setPrecisionMethod(PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND);
         scoreFilter = tmp.getDefaultSmartFilter();
@@ -2859,7 +2859,7 @@ public class BenchmarkFilterAnalysis
         gd.addNumericField("Max_residuals_threshold", settings.maxResidualsThreshold, 2);
       }
     }
-    final FitEngineConfiguration tmp = new FitEngineConfiguration();
+    final FitEngineConfiguration tmp = FitEngineConfiguration.create();
     tmp.setDuplicateDistance(settings.duplicateDistance);
     tmp.setDuplicateDistanceAbsolute(settings.duplicateDistanceAbsolute);
     PeakFit.addDuplicateDistanceOptions(gd, new PeakFit.SimpleFitEngineConfigurationProvider(tmp));
@@ -5900,7 +5900,7 @@ public class BenchmarkFilterAnalysis
    * @param topFilterSummary the top filter summary
    */
   private void saveTemplate(String topFilterSummary) {
-    final FitEngineConfiguration config = new FitEngineConfiguration();
+    final FitEngineConfiguration config = FitEngineConfiguration.create();
     if (!updateAllConfiguration(config, true)) {
       IJ.log("Unable to create the template configuration");
       return;
@@ -7660,7 +7660,7 @@ public class BenchmarkFilterAnalysis
     if (withBorder) {
       // To produce the same results as the PeakFit plugin we must implement the border
       // functionality used in the FitWorker. This respects the border of the spot filter.
-      final FitEngineConfiguration config = new FitEngineConfiguration();
+      final FitEngineConfiguration config = FitEngineConfiguration.create();
       updateAllConfiguration(config);
       final MaximaSpotFilter spotFilter = config.createSpotFilter();
       final int border = spotFilter.getBorder();

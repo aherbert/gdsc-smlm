@@ -301,7 +301,7 @@ class ResultsManagerTest {
   private static MemoryPeakResults extract(Spot[] spots, int channel, int slice, int position,
       int type) {
     final MemoryPeakResults results =
-        new MemoryPeakResults(PsfHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
+        MemoryPeakResults.create(PsfHelper.create(PSFType.ONE_AXIS_GAUSSIAN_2D));
     for (final Spot spot : spots) {
       if (spot.getChannel() == channel && spot.getSlice() == slice && spot.getPos() == position
           && spot.getFluorophoreType() == type) {

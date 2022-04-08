@@ -1193,7 +1193,7 @@ public class PcPalmMolecules implements PlugIn {
 
     settings.molecules = new ArrayList<>(settings.numberOfMolecules);
     // Create some dummy results since the calibration is required for later analysis
-    settings.results = new MemoryPeakResults(PsfHelper.create(PSFType.CUSTOM));
+    settings.results = MemoryPeakResults.create(PsfHelper.create(PSFType.CUSTOM));
     settings.results.setCalibration(CalibrationHelper.create(nmPerPixel, 1, 100));
     settings.results.setSource(new NullSource("Molecule Simulation"));
     settings.results.begin();

@@ -417,7 +417,7 @@ public class SpotInspector implements PlugIn {
     if (!PsfHelper.isGaussian2D(psf)) {
       return -1;
     }
-    final FitConfiguration fitConfig = new FitConfiguration();
+    final FitConfiguration fitConfig = FitConfiguration.create();
     fitConfig.setPsf(psf);
     return (float) MathUtils.max(1, fitConfig.getInitialXSd(), fitConfig.getInitialYSd());
   }

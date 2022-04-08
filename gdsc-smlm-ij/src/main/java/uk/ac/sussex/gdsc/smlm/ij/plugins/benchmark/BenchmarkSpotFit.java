@@ -344,7 +344,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Add a filter to use for storing the slice results:
       // Use the standard configuration to ensure sensible fits are stored as the current slice
       // results.
-      final FitConfiguration tmp = new FitConfiguration();
+      final FitConfiguration tmp = FitConfiguration.create();
       final PrecisionMethod precisionMethod = PrecisionMethod.MORTENSEN_LOCAL_BACKGROUND;
       tmp.setPrecisionMethod(precisionMethod);
 
@@ -430,7 +430,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     }
 
     private static FitEngineConfiguration createDefaultConfig() {
-      final FitEngineConfiguration config = new FitEngineConfiguration();
+      final FitEngineConfiguration config = FitEngineConfiguration.create();
       final FitConfiguration fitConfig = config.getFitConfiguration();
       // Set some default fit settings here ...
       fitConfig.setDisableSimpleFilter(false);
@@ -1323,7 +1323,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     MultiPathFilter myMultiFilter = null;
     if (myUseBenchmarkSettings && !ImageJUtils.isShowGenericDialog()) {
       // Only copy the benchmark settings if not interactive
-      final FitEngineConfiguration tmp = new FitEngineConfiguration();
+      final FitEngineConfiguration tmp = FitEngineConfiguration.create();
       final FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
       tmpFitConfig.setComputeResiduals(true); // Collect the residuals threshold
       if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false)) {
@@ -2947,7 +2947,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       MultiPathFilter myMultiFilter;
 
       if (checkbox.getState()) {
-        final FitEngineConfiguration tmp = new FitEngineConfiguration();
+        final FitEngineConfiguration tmp = FitEngineConfiguration.create();
         final FitConfiguration tmpFitConfig = tmp.getFitConfiguration();
         tmpFitConfig.setComputeResiduals(true); // Collect residuals threshold
         if (BenchmarkFilterAnalysis.updateConfiguration(tmp, false)) {

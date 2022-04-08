@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
@@ -100,7 +101,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
 /**
  * Specifies the fitting configuration.
  */
-public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfiguration {
+public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfiguration {
   private FitSettings.Builder fitSettings;
 
   // Extract the settings for convenience
@@ -163,75 +164,57 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
   private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
 
   /**
-   * Instantiates a new fit configuration.
+   * Creates a new fit configuration.
+   *
+   * @return the fit configuration
    */
-  public FitConfiguration() {
-    this(FitProtosHelper.defaultFitSettings, CalibrationProtosHelper.defaultCalibration,
+  public static FitConfiguration create() {
+    return create(FitProtosHelper.defaultFitSettings, CalibrationProtosHelper.defaultCalibration,
         PsfProtosHelper.defaultOneAxisGaussian2DPSF);
   }
 
   /**
-   * Instantiates a new fit configuration.
+   * Creates a new fit configuration.
    *
    * @param fitSettings the fit settings
    * @param calibration the calibration
    * @param psf the psf
+   * @return the fit configuration
    */
-  public FitConfiguration(FitSettings fitSettings, Calibration calibration, PSF psf) {
-    if (fitSettings == null) {
-      throw new IllegalArgumentException("FitSettings is null");
-    }
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    if (psf == null) {
-      throw new IllegalArgumentException("PSF is null");
-    }
-    init(fitSettings.toBuilder(), calibration.toBuilder(), psf.toBuilder());
+  public static FitConfiguration create(FitSettings fitSettings, Calibration calibration, PSF psf) {
+    Objects.requireNonNull(fitSettings, "fitSettings");
+    Objects.requireNonNull(calibration, "calibration");
+    Objects.requireNonNull(psf, "psf");
+    final FitConfiguration c =
+        new FitConfiguration(fitSettings.toBuilder(), calibration.toBuilder(), psf.toBuilder());
+    c.initialiseState();
+    return c;
   }
 
   /**
-   * Instantiates a new fit configuration.
+   * Creates a new fit configuration.
    *
    * @param fitSettings the fit settings
    * @param calibration the calibration
    * @param psf the psf
+   * @return the fit configuration
    */
-  public FitConfiguration(FitSettings.Builder fitSettings, Calibration.Builder calibration,
-      PSF.Builder psf) {
-    if (fitSettings == null) {
-      throw new IllegalArgumentException("FitSettings is null");
-    }
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    if (psf == null) {
-      throw new IllegalArgumentException("PSF is null");
-    }
-    init(fitSettings, calibration, psf);
+  public static FitConfiguration create(FitSettings.Builder fitSettings,
+      Calibration.Builder calibration, PSF.Builder psf) {
+    final FitConfiguration c = new FitConfiguration(Objects.requireNonNull(fitSettings, "fitSettings"),
+        Objects.requireNonNull(calibration, "calibration"), Objects.requireNonNull(psf, "psf"));
+    c.initialiseState();
+    return c;
   }
 
   /**
-   * Instantiates a new fit configuration. Does not check for null objects.
-   *
-   * @param fitSettings the fit settings
-   * @param calibration the calibration
-   * @param psf the psf
-   * @param dummy the dummy parameter
-   */
-  FitConfiguration(FitSettings.Builder fitSettings, Calibration.Builder calibration,
-      PSF.Builder psf, boolean dummy) {
-    init(fitSettings, calibration, psf);
-  }
-
-  /**
-   * Initialise the instance.
+   * Creates a new fit configuration. Does not check for null objects.
    *
    * @param fitSettings the fit settings
    * @param calibration the calibration
    * @param psf the psf
    */
-  private void init(FitSettings.Builder fitSettings, Calibration.Builder calibration,
+  private FitConfiguration(FitSettings.Builder fitSettings, Calibration.Builder calibration,
       PSF.Builder psf) {
     this.fitSettings = fitSettings;
 
@@ -240,8 +223,6 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
     this.psf = psf;
     fitSolverSettings = fitSettings.getFitSolverSettingsBuilder();
     filterSettings = fitSettings.getFilterSettingsBuilder();
-
-    initialiseState();
   }
 
   /**
@@ -609,7 +590,7 @@ public class FitConfiguration implements IDirectFilter, Gaussian2DFitConfigurati
    */
   public FitConfiguration createCopy() {
     // This is not named copy() to avoid a name clash with IDirectFilter::copy
-    return new FitConfiguration(getFitSettings(), getCalibration(), getPsf()).copySettings(this);
+    return create(getFitSettings(), getCalibration(), getPsf()).copySettings(this);
   }
 
   /**

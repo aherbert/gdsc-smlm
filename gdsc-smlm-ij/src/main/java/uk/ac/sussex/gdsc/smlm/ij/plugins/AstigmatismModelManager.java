@@ -517,7 +517,7 @@ public class AstigmatismModelManager implements PlugIn {
   private boolean loadConfiguration() {
     // We have a different fit configuration just for the PSF Creator.
     // This allows it to be saved and not effect PeakFit settings.
-    config = new FitEngineConfiguration(pluginSettings.getFitEngineSettings(),
+    config = FitEngineConfiguration.create(pluginSettings.getFitEngineSettings(),
         pluginSettings.getCalibration(), pluginSettings.getPsf());
     if (!showConfigurationDialog()) {
       IJ.error(TITLE, "No fit configuration loaded");

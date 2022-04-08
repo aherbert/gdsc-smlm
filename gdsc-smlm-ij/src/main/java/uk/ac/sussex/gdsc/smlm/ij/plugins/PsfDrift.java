@@ -97,8 +97,8 @@ public class PsfDrift implements PlugIn {
   private ImagePlus imp;
   private ImagePSF psfSettings;
   private static AtomicReference<FitConfiguration> fitConfigRef =
-      new AtomicReference<>(new FitConfiguration());
-  private FitConfiguration fitConfig = new FitConfiguration();
+      new AtomicReference<>(FitConfiguration.create());
+  private FitConfiguration fitConfig = FitConfiguration.create();
 
   private int centrePixel;
   private int total;
@@ -536,7 +536,7 @@ public class PsfDrift implements PlugIn {
     // Configure the fit solver. We must wrap the settings with a
     // FitEngineConfiguration to pass to the PeakFit method
     final FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
-    final FitEngineConfiguration config = new FitEngineConfiguration(fitEngineSettings,
+    final FitEngineConfiguration config = FitEngineConfiguration.create(fitEngineSettings,
         SettingsManager.readCalibration(0), PsfProtosHelper.defaultOneAxisGaussian2DPSF);
     config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
     if (!PeakFit.configurePsfModel(config)) {
