@@ -233,7 +233,7 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
    *        identified by {@link #gradientIndices()}
    * @return The predicted value y
    */
-  public abstract double eval2(final int x, final double[] dyda, final double[] d2yda2);
+  public abstract double eval2(int x, double[] dyda, double[] d2yda2);
 
   /**
    * Gets the erf function.

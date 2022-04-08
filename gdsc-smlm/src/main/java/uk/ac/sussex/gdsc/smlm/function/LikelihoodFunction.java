@@ -38,5 +38,5 @@ public interface LikelihoodFunction {
    * @param theta The parameter value (θ)
    * @return The likelihood
    */
-  double likelihood(final double x, final double theta);
+  double likelihood(double x, double theta);
 }

@@ -42,7 +42,7 @@ public interface MultiFilterComponentSet {
    * @param peak the peak
    * @return the result
    */
-  int validate(final PreprocessedPeakResult peak);
+  int validate(PreprocessedPeakResult peak);
 
   /**
    * Replace the first component.

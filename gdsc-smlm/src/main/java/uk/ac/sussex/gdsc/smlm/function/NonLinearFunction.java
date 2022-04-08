@@ -37,7 +37,7 @@ public interface NonLinearFunction extends GradientFunction {
    *        {@link #gradientIndices()} . Note: dyda.length must be &gt;= to gradientIndices().length
    * @return The predicted value y
    */
-  double eval(final int x, final double[] dyda);
+  double eval(int x, double[] dyda);
 
   /**
    * The non-linear fitting function. Produce an output predicted value for a given input predictor
@@ -46,7 +46,7 @@ public interface NonLinearFunction extends GradientFunction {
    * @param x Predictor
    * @return The predicted value y
    */
-  double eval(final int x);
+  double eval(int x);
 
   /**
    * The non-linear fitting function. Produce an output predicted value for a given input predictor
@@ -61,7 +61,7 @@ public interface NonLinearFunction extends GradientFunction {
    * @throws NullPointerException If the output weight argument is null
    * @throws ArrayIndexOutOfBoundsException If the output weight argument is length 0
    */
-  double evalw(final int x, final double[] dyda, final double[] weight);
+  double evalw(int x, double[] dyda, double[] weight);
 
   /**
    * The non-linear fitting function. Produce an output predicted value for a given input predictor
@@ -72,7 +72,7 @@ public interface NonLinearFunction extends GradientFunction {
    *        This should not be zero to avoid divide by zero error.
    * @return The predicted value y
    */
-  double evalw(final int x, final double[] weight);
+  double evalw(int x, double[] weight);
 
   /**
    * Check if the function can compute weights.

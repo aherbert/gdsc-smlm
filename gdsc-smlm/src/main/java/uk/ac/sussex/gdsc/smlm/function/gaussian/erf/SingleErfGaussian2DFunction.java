@@ -84,7 +84,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
    * @return The predicted value
    */
   @Override
-  public abstract double eval(final int x, final double[] duda);
+  public abstract double eval(int x, double[] duda);
 
   /**
    * Evaluates a 2-dimensional Gaussian function for a single peak.
@@ -95,7 +95,7 @@ public abstract class SingleErfGaussian2DFunction extends ErfGaussian2DFunction 
    * @return The predicted value
    */
   @Override
-  public abstract double eval2(final int x, final double[] duda, final double[] d2uda2);
+  public abstract double eval2(int x, double[] duda, double[] d2uda2);
 
   @Override
   public void forEach(ValueProcedure procedure) {

@@ -34,7 +34,7 @@ public interface Gradient1Function extends ValueFunction, GradientFunction {
    *
    * @param a An array of coefficients
    */
-  void initialise1(final double[] a);
+  void initialise1(double[] a);
 
   /**
    * Applies the procedure for the valid range of the function.

@@ -34,7 +34,7 @@ interface MultiFilterComponent {
    * @param peak the peak
    * @return true, if it fails the filter
    */
-  boolean fail(final PreprocessedPeakResult peak);
+  boolean fail(PreprocessedPeakResult peak);
 
   /**
    * Gets the type of the component. The return value will match the constants defined in

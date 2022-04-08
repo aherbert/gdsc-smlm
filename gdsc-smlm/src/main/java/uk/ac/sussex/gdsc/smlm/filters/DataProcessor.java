@@ -69,7 +69,7 @@ public abstract class DataProcessor {
    * @param width The width of the data
    * @param height The height of the data
    */
-  public abstract void setWeights(final float[] weights, final int width, final int height);
+  public abstract void setWeights(float[] weights, int width, int height);
 
   /**
    * Checks for weights. Weights are set using {@link #setWeights(float[], int, int)}.
@@ -86,7 +86,7 @@ public abstract class DataProcessor {
    * @param height The height of the data
    * @return The new data
    */
-  public abstract float[] process(final float[] data, final int width, final int height);
+  public abstract float[] process(float[] data, int width, int height);
 
   /**
    * Gets the border.

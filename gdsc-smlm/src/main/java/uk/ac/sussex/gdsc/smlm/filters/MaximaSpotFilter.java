@@ -101,7 +101,7 @@ public abstract class MaximaSpotFilter extends SpotFilter {
    * @param height the height
    * @return The pre-processed data
    */
-  public abstract float[] preprocessData(final float[] data, final int width, final int height);
+  public abstract float[] preprocessData(float[] data, int width, int height);
 
   /**
    * Find the indices of the maxima using the currently configured parameters.

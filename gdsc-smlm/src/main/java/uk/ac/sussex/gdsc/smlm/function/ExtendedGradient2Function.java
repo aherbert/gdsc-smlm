@@ -34,7 +34,7 @@ public interface ExtendedGradient2Function extends Gradient2Function {
    *
    * @param a An array of coefficients
    */
-  void initialiseExtended2(final double[] a);
+  void initialiseExtended2(double[] a);
 
   /**
    * Applies the procedure for the valid range of the function.

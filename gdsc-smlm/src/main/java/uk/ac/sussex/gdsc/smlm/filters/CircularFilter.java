@@ -87,7 +87,7 @@ public abstract class CircularFilter extends BaseWeightedFilter {
    * @param radius the radius
    * @return the weighted normaliser
    */
-  protected abstract Normaliser computeWeightedNormaliser(final double radius);
+  protected abstract Normaliser computeWeightedNormaliser(double radius);
 
   /**
    * Computes the normaliser within a radius around each point.

@@ -34,5 +34,5 @@ public interface NoiseModel {
    * @param value The model value
    * @return The expected variance of the value
    */
-  double variance(final double value);
+  double variance(double value);
 }

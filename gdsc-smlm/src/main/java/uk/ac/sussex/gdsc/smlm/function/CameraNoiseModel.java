@@ -91,7 +91,7 @@ public abstract class CameraNoiseModel implements NoiseModel {
    */
   // Note: This method is here for documentation. It is defined in the NoiseModel interface.
   @Override
-  public abstract double variance(final double value);
+  public abstract double variance(double value);
 
   /**
    * Gets the bias.

@@ -38,5 +38,5 @@ public interface LogLikelihoodFunction {
    * @param theta The parameter value (θ)
    * @return The log-likelihood
    */
-  double logLikelihood(final double x, final double theta);
+  double logLikelihood(double x, double theta);
 }

@@ -58,7 +58,7 @@ public interface IDirectFilter {
    * @param flags Flags used to control the filter
    * @see #validate(PreprocessedPeakResult)
    */
-  void setup(final int flags);
+  void setup(int flags);
 
   /**
    * Called before the accept method is called for PreprocessedPeakResult. The filter data can
@@ -70,7 +70,7 @@ public interface IDirectFilter {
    * @param filterSetupData Data used to control the filter
    * @see #validate(PreprocessedPeakResult)
    */
-  void setup(final int flags, final FilterSetupData... filterSetupData);
+  void setup(int flags, FilterSetupData... filterSetupData);
 
   /**
    * Gets the flags required to reinitialise the current filter state using {@link #setup(int)} or
@@ -99,7 +99,7 @@ public interface IDirectFilter {
    * @param peak The peak result
    * @return true if the peak should be accepted
    */
-  boolean accept(final PreprocessedPeakResult peak);
+  boolean accept(PreprocessedPeakResult peak);
 
   /**
    * Filter the peak result.
@@ -108,7 +108,7 @@ public interface IDirectFilter {
    * @return zero if the peak should be accepted, otherwise set to flags indicating the field that
    *         failed validation.
    */
-  int validate(final PreprocessedPeakResult peak);
+  int validate(PreprocessedPeakResult peak);
 
   /**
    * Return the type of filter. This should be a DirectFilter.

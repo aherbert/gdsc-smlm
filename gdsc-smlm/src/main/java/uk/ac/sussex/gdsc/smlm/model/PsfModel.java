@@ -66,7 +66,7 @@ public abstract class PsfModel {
    * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
-  public abstract double create3D(float[] data, final int width, final int height, final double sum,
+  public abstract double create3D(float[] data, int width, int height, double sum,
       double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
@@ -85,8 +85,8 @@ public abstract class PsfModel {
    * @param rng The random generator. If provided Poisson noise will be added to the PSF.
    * @return The total sum added to the image (useful when poissonNoise is added)
    */
-  public abstract double create3D(double[] data, final int width, final int height,
-      final double sum, double x0, double x1, double x2, UniformRandomProvider rng);
+  public abstract double create3D(double[] data, int width, int height,
+      double sum, double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
    * Construct a PSF function on the provided data.
@@ -413,7 +413,7 @@ public abstract class PsfModel {
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
-  public abstract int sample3D(float[] data, final int width, final int height, final int n,
+  public abstract int sample3D(float[] data, int width, int height, int n,
       double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
@@ -433,7 +433,7 @@ public abstract class PsfModel {
    * @return The number of samples drawn on the image (useful to detect samples outside the image
    *         bounds)
    */
-  public abstract int sample3D(double[] data, final int width, final int height, final int n,
+  public abstract int sample3D(double[] data, int width, int height, int n,
       double x0, double x1, double x2, UniformRandomProvider rng);
 
   /**
@@ -754,7 +754,7 @@ public abstract class PsfModel {
    * @param jacobian the jacobian (partial gradient at each point for each dimension)
    * @return true, if successful; false, if no value was computed
    */
-  protected abstract boolean computeValueAndGradient(final int width, final int height, double x0,
+  protected abstract boolean computeValueAndGradient(int width, int height, double x0,
       double x1, double x2, double[] value, double[][] jacobian);
 
   /**

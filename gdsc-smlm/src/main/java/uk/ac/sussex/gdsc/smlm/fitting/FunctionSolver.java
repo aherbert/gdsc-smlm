@@ -47,8 +47,7 @@ public interface FunctionSolver {
    * @param parameterVariances Variance of the fitted parameters (output)
    * @return The fit status
    */
-  FitStatus fit(final double[] data, final double[] fx, final double[] parameters,
-      final double[] parameterVariances);
+  FitStatus fit(double[] data, double[] fx, double[] parameters, double[] parameterVariances);
 
   /**
    * Gets the number of fitted parameters.
@@ -166,7 +165,7 @@ public interface FunctionSolver {
    * @param parameters The function parameters (input)
    * @return True if evaluation was performed
    */
-  boolean evaluate(final double[] data, final double[] fx, final double[] parameters);
+  boolean evaluate(double[] data, double[] fx, double[] parameters);
 
   /**
    * Compute the deviations for a parameterised function using a set of data points,
@@ -184,8 +183,7 @@ public interface FunctionSolver {
    * @param parameterVariances Variance of the fitted parameters (output)
    * @return True if computation was performed
    */
-  boolean computeDeviations(final double[] data, final double[] parameters,
-      final double[] parameterVariances);
+  boolean computeDeviations(double[] data, double[] parameters, double[] parameterVariances);
 
   /**
    * Gets the name of the parameter for the specified index.

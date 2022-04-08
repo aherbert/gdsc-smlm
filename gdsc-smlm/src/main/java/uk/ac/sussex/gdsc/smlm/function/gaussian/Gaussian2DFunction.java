@@ -272,7 +272,7 @@ public abstract class Gaussian2DFunction
    */
   // Note: This is here for documentation
   @Override
-  public abstract double eval(final int x);
+  public abstract double eval(int x);
 
   /**
    * Produce an output predicted value for a given set of input predictors (x) and coefficients (a).
@@ -288,7 +288,7 @@ public abstract class Gaussian2DFunction
    */
   // Note: This is here for documentation
   @Override
-  public abstract double eval(final int x, final double[] dyda);
+  public abstract double eval(int x, double[] dyda);
 
   /**
    * Execute the {@link #eval(int, double[])} method and set the expected variance using the noise

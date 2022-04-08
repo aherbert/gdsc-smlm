@@ -42,7 +42,7 @@ public interface ValueFunction {
    *
    * @param a An array of coefficients
    */
-  void initialise0(final double[] a);
+  void initialise0(double[] a);
 
   /**
    * Applies the procedure for the valid range of the function.

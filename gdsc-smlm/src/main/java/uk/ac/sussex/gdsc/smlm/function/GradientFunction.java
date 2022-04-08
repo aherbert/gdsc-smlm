@@ -34,7 +34,7 @@ public interface GradientFunction {
    *
    * @param a An array of coefficients
    */
-  void initialise(final double[] a);
+  void initialise(double[] a);
 
   /**
    * The function will evaluate the gradient for up to {@code n} parameters where

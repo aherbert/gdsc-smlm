@@ -92,7 +92,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * @param n The block size
    * @return the weighted normaliser
    */
-  protected abstract Normaliser computeWeightedNormaliser(final float n);
+  protected abstract Normaliser computeWeightedNormaliser(float n);
 
   /**
    * Computes the normaliser within a 2n+1 size block around each point.
@@ -100,7 +100,7 @@ public abstract class BlockFilter extends BaseWeightedFilter {
    * @param n The block size
    * @return the normaliser
    */
-  protected abstract Normaliser computeNormaliser(final float n);
+  protected abstract Normaliser computeNormaliser(float n);
 
   /**
    * Compute the filter within a 2n+1 size block around each point. Only pixels with a full block

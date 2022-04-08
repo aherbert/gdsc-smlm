@@ -77,7 +77,7 @@ public interface PeakResultStoreList extends PeakResultStore {
    *
    * @param randomSource the random source
    */
-  void shuffle(final UniformRandomProvider randomSource);
+  void shuffle(UniformRandomProvider randomSource);
 
   /**
    * Returns the index of the first occurrence of the specified result in this store, or -1 if this
