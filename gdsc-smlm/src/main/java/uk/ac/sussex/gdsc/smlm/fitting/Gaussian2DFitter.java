@@ -118,7 +118,7 @@ public class Gaussian2DFitter {
    * @param background the background
    * @return the FWHM
    */
-  public static double half_max_linewidth(double[] data, int index, int[] point, int[] dim,
+  private static double halfMaxLineWidth(double[] data, int index, int[] point, int[] dim,
       int dimension, int[] cumulRegion, double background) {
     return halfMaxPosition(data, index, point, dim, dimension, cumulRegion, 1, background)
         - halfMaxPosition(data, index, point, dim, dimension, cumulRegion, -1, background);
@@ -625,7 +625,7 @@ public class Gaussian2DFitter {
               return false;
             }
 
-            sx = fwhm2sd(half_max_linewidth(y, index, position, dim, 0, cumulRegion, background));
+            sx = fwhm2sd(halfMaxLineWidth(y, index, position, dim, 0, cumulRegion, background));
           }
         }
 
@@ -639,7 +639,7 @@ public class Gaussian2DFitter {
                 return false;
               }
 
-              sy = fwhm2sd(half_max_linewidth(y, index, position, dim, 1, cumulRegion, background));
+              sy = fwhm2sd(halfMaxLineWidth(y, index, position, dim, 1, cumulRegion, background));
             }
           } else {
             sy = sx;
