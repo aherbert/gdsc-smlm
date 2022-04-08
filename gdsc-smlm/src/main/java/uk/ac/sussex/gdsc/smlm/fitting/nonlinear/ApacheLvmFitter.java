@@ -206,10 +206,10 @@ public class ApacheLvmFitter extends LseBaseFunctionSolver {
     final GradientCalculator c =
         GradientCalculatorUtils.newCalculator(function.getNumberOfGradients(), false);
     // Since we know the function is a Gaussian2DFunction from the constructor
-    final double[][] I = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) function);
+    final double[][] i = c.fisherInformationMatrix(y.length, a, (NonLinearFunction) function);
     if (c.isNaNGradients()) {
       throw new FunctionSolverException(FitStatus.INVALID_GRADIENTS);
     }
-    return new FisherInformationMatrix(I);
+    return new FisherInformationMatrix(i);
   }
 }

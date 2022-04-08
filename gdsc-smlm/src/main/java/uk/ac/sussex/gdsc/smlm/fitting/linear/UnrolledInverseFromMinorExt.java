@@ -59,9 +59,9 @@ public class UnrolledInverseFromMinorExt {
    */
   public static double[] inv(DenseMatrix64F mat) {
     double max = Math.abs(mat.data[0]);
-    final int N = mat.getNumElements();
+    final int n = mat.getNumElements();
 
-    for (int i = 1; i < N; i++) {
+    for (int i = 1; i < n; i++) {
       final double a = Math.abs(mat.data[i]);
       if (a > max) {
         max = a;
@@ -101,14 +101,14 @@ public class UnrolledInverseFromMinorExt {
     final double m11 = a22;
     final double m12 = -(a21);
 
-    final double det_recip = scale / (a11 * m11 + a12 * m12);
-    if (!Double.isFinite(det_recip)) {
+    final double oneDivDet = scale / (a11 * m11 + a12 * m12);
+    if (!Double.isFinite(oneDivDet)) {
       return null;
     }
 
     final double m22 = a11;
 
-    return new double[] {m11 * det_recip, m22 * det_recip};
+    return new double[] {m11 * oneDivDet, m22 * oneDivDet};
   }
 
   /**
@@ -135,15 +135,15 @@ public class UnrolledInverseFromMinorExt {
     final double m12 = -(a21 * a33 - a23 * a31);
     final double m13 = a21 * a32 - a22 * a31;
 
-    final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13);
-    if (!Double.isFinite(det_recip)) {
+    final double oneDivDet = scale / (a11 * m11 + a12 * m12 + a13 * m13);
+    if (!Double.isFinite(oneDivDet)) {
       return null;
     }
 
     final double m22 = a11 * a33 - a13 * a31;
     final double m33 = a11 * a22 - a12 * a21;
 
-    return new double[] {m11 * det_recip, m22 * det_recip, m33 * det_recip};
+    return new double[] {m11 * oneDivDet, m22 * oneDivDet, m33 * oneDivDet};
   }
 
   /**
@@ -182,8 +182,8 @@ public class UnrolledInverseFromMinorExt {
     final double m14 = -(+a21 * (a32 * a43 - a33 * a42) - a22 * (a31 * a43 - a33 * a41)
         + a23 * (a31 * a42 - a32 * a41));
 
-    final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14);
-    if (!Double.isFinite(det_recip)) {
+    final double oneDivDet = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14);
+    if (!Double.isFinite(oneDivDet)) {
       return null;
     }
 
@@ -194,7 +194,7 @@ public class UnrolledInverseFromMinorExt {
     final double m44 = +a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31)
         + a13 * (a21 * a32 - a22 * a31);
 
-    return new double[] {m11 * det_recip, m22 * det_recip, m33 * det_recip, m44 * det_recip};
+    return new double[] {m11 * oneDivDet, m22 * oneDivDet, m33 * oneDivDet, m44 * oneDivDet};
   }
 
   /**
@@ -279,8 +279,8 @@ public class UnrolledInverseFromMinorExt {
         - a24 * (+a31 * (a42 * a53 - a43 * a52) - a32 * (a41 * a53 - a43 * a51)
             + a33 * (a41 * a52 - a42 * a51));
 
-    final double det_recip = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14 + a15 * m15);
-    if (!Double.isFinite(det_recip)) {
+    final double oneDivDet = scale / (a11 * m11 + a12 * m12 + a13 * m13 + a14 * m14 + a15 * m15);
+    if (!Double.isFinite(oneDivDet)) {
       return null;
     }
 
@@ -321,7 +321,7 @@ public class UnrolledInverseFromMinorExt {
         - a14 * (+a21 * (a32 * a43 - a33 * a42) - a22 * (a31 * a43 - a33 * a41)
             + a23 * (a31 * a42 - a32 * a41));
 
-    return new double[] {m11 * det_recip, m22 * det_recip, m33 * det_recip, m44 * det_recip,
-        m55 * det_recip};
+    return new double[] {m11 * oneDivDet, m22 * oneDivDet, m33 * oneDivDet, m44 * oneDivDet,
+        m55 * oneDivDet};
   }
 }
