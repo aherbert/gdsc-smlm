@@ -51,6 +51,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
@@ -499,6 +500,9 @@ public class TrackPopulationAnalysis implements PlugIn {
 
   /**
    * Class to display TrackDataTableModel in a window frame.
+   *
+   * <p>Although this class extends {@link java.awt.Component} it is not intended
+   * to be {@link Serializable}.
    */
   private static class TrackDataTableModelFrame extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
@@ -518,7 +522,7 @@ public class TrackPopulationAnalysis implements PlugIn {
     private JMenuItem analysisFitJumpDistances;
     private JMenuItem analysisResidenceTime;
     private JMenuItem optionsTrackData;
-    private Consumer<List<TrackData>> selectedAction;
+    private transient Consumer<List<TrackData>> selectedAction;
 
     /**
      * Create a new instance.
