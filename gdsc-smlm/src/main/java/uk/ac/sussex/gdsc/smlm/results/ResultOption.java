@@ -49,7 +49,7 @@ public class ResultOption {
   private Object value;
 
   /**
-   * Instantiates a new result option.
+   * Creates a new result option.
    *
    * @param id the id
    * @param name the name
@@ -60,7 +60,8 @@ public class ResultOption {
     this.id = id;
     this.name = name;
     this.values = values;
-    this.setValue(value);
+    checkValue(value, values);
+    this.value = value;
   }
 
   /**
@@ -80,12 +81,22 @@ public class ResultOption {
    * @throws IllegalArgumentException If the value is not in the list of valid values
    */
   public void setValue(Object value) {
-    checkValue(value);
+    checkValue(value, values);
     this.value = value;
   }
 
-  private void checkValue(Object value) {
-    if (hasValues()) {
+  /**
+   * Check the value is equal to a valid value.
+   *
+   * <p>If the set of valid values is null or empty then no exception is raised (any value is
+   * valid).
+   *
+   * @param value the value
+   * @param values the values
+   * @throws IllegalArgumentException If the value is not in the list of valid values
+   */
+  static void checkValue(Object value, Object[] values) {
+    if (values != null && values.length > 0) {
       for (int i = 0; i < values.length; i++) {
         if (values[i].equals(value)) {
           return;
@@ -93,14 +104,5 @@ public class ResultOption {
       }
       throw new IllegalArgumentException("Not a valid value: " + value);
     }
-  }
-
-  /**
-   * Checks for valid values.
-   *
-   * @return true, if the list of valid values is not empty
-   */
-  public boolean hasValues() {
-    return values != null && values.length > 0;
   }
 }

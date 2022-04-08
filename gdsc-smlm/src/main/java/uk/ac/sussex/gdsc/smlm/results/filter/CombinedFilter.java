@@ -71,17 +71,21 @@ public abstract class CombinedFilter extends DirectFilter {
   public CombinedFilter(Filter filter1, Filter filter2) {
     this.filter1 = filter1;
     this.filter2 = filter2;
-    initialiseState();
+    init();
   }
 
-  @Override
-  protected void initialiseState() {
+  private void init() {
     if (filter1 instanceof DirectFilter) {
       dfilter1 = (DirectFilter) filter1;
     }
     if (filter2 instanceof DirectFilter) {
       dfilter2 = (DirectFilter) filter2;
     }
+  }
+
+  @Override
+  protected void initialiseState() {
+    init();
   }
 
   @Override

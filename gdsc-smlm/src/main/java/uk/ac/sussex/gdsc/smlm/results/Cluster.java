@@ -61,7 +61,7 @@ public class Cluster {
    */
   public Cluster(PeakResult result) {
     results = new ArrayPeakResultStore(2);
-    add(result);
+    results.add(result);
   }
 
   /**

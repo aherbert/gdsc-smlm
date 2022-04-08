@@ -107,7 +107,7 @@ public abstract class ImageSource {
    * @param name The name of the image source
    */
   public ImageSource(String name) {
-    setName(name);
+    this.name = getNameOrEmpty(name);
   }
 
   /**
@@ -437,11 +437,11 @@ public abstract class ImageSource {
    * @param name the new name
    */
   public void setName(String name) {
-    if (name != null && name.length() > 0) {
-      this.name = name;
-    } else {
-      this.name = "";
-    }
+    this.name = getNameOrEmpty(name);
+  }
+
+  private static String getNameOrEmpty(String name) {
+    return name != null && name.length() > 0 ? name : "";
   }
 
   /**

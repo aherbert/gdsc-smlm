@@ -91,7 +91,7 @@ public abstract class BaseSteppingFunctionSolverTest extends BaseFunctionSolverT
       SteppingFunctionSolverType type, ToleranceChecker tc) {
     final ErfGaussian2DFunction f =
         (ErfGaussian2DFunction) GaussianFunctionFactory.create2D(1, size, size, flags, null);
-    final ParameterBounds bounds = new ParameterBounds(f);
+    final ParameterBounds bounds = ParameterBounds.create(f);
     switch (clamp) {
       case DYNAMIC_CLAMP:
         bounds.setDynamicClamp(true);

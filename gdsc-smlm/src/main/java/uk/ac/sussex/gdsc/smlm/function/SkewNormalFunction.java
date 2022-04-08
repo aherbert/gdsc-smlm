@@ -52,7 +52,10 @@ public class SkewNormalFunction {
    * @param parameters [amplitude, location, scale, alpha]
    */
   public SkewNormalFunction(double[] parameters) {
-    setParameters(parameters);
+    amplitude = parameters[0];
+    location = parameters[1];
+    scale = parameters[2];
+    alpha = parameters[3];
   }
 
   /**

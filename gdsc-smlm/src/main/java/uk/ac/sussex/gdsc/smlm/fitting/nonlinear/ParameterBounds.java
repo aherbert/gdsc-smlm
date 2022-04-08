@@ -36,7 +36,7 @@ import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
  * <p>Support parameter clamping to prevent large parameter shifts. Optionally update the clamping
  * when the search direction changes.
  */
-public class ParameterBounds {
+public final class ParameterBounds {
   private GradientFunction function;
   private int[] gradientIndices;
   private boolean isLower;
@@ -49,13 +49,19 @@ public class ParameterBounds {
   private int[] dir;
   private boolean dynamicClamp;
 
+  /** Creates a new parameter bounds. */
+  private ParameterBounds() {}
+
   /**
-   * Instantiates a new parameter bounds.
+   * Creates a new parameter bounds.
    *
    * @param function the function
+   * @return the parameter bounds
    */
-  public ParameterBounds(GradientFunction function) {
-    setGradientFunction(function);
+  public static ParameterBounds create(GradientFunction function) {
+    final ParameterBounds b = new ParameterBounds();
+    b.setGradientFunction(function);
+    return b;
   }
 
   /**

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
@@ -48,8 +49,8 @@ public abstract class UnitResultProcedure extends AbstractResultProcedure {
   public UnitResultProcedure(MemoryPeakResults results, DistanceUnit distanceUnit,
       IntensityUnit intensityUnit) {
     super(results);
-    this.setDistanceUnit(distanceUnit);
-    this.setIntensityUnit(intensityUnit);
+    this.distanceUnit = Objects.requireNonNull(distanceUnit, "distanceUnit");
+    this.intensityUnit = Objects.requireNonNull(intensityUnit, "intensityUnit");
   }
 
   /**
@@ -96,10 +97,7 @@ public abstract class UnitResultProcedure extends AbstractResultProcedure {
    * @param distanceUnit the new distance unit
    */
   public void setDistanceUnit(DistanceUnit distanceUnit) {
-    if (distanceUnit == null) {
-      throw new IllegalArgumentException("unit must not be null");
-    }
-    this.distanceUnit = distanceUnit;
+    this.distanceUnit = Objects.requireNonNull(distanceUnit, "distanceUnit");
   }
 
   /**
@@ -117,9 +115,6 @@ public abstract class UnitResultProcedure extends AbstractResultProcedure {
    * @param intensityUnit the new intensity unit
    */
   public void setIntensityUnit(IntensityUnit intensityUnit) {
-    if (intensityUnit == null) {
-      throw new IllegalArgumentException("unit must not be null");
-    }
-    this.intensityUnit = intensityUnit;
+    this.intensityUnit = Objects.requireNonNull(intensityUnit, "intensityUnit");
   }
 }

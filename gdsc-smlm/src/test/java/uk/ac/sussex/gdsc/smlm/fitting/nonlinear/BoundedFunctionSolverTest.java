@@ -312,7 +312,7 @@ class BoundedFunctionSolverTest extends BaseFunctionSolverTest {
             : new NonLinearFit(f, sc);
     if (clamping != 0) {
       final BoundedNonLinearFit bsolver = (BoundedNonLinearFit) solver;
-      final ParameterBounds bounds = new ParameterBounds(f);
+      final ParameterBounds bounds = ParameterBounds.create(f);
       bounds.setClampValues(defaultClampValues);
       bounds.setDynamicClamp(clamping == 2);
       bsolver.setBounds(bounds);

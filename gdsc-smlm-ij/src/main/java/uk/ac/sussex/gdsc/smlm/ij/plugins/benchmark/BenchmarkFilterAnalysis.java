@@ -1347,11 +1347,6 @@ public class BenchmarkFilterAnalysis
     }
 
     @Override
-    protected void noConvergenceCriteria() {
-      // Ignore this as we can stop using interrupt
-    }
-
-    @Override
     public boolean converged(SearchResult<FilterScore> previous,
         SearchResult<FilterScore> current) {
       if (super.converged(previous, current)) {

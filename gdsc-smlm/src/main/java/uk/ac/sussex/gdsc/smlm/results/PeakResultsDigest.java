@@ -57,19 +57,22 @@ public class PeakResultsDigest {
   private String value;
 
   /**
-   * Instantiates a new peak results digest.
+   * Creates a new peak results digest.
    */
   public PeakResultsDigest() {
     reset();
   }
 
   /**
-   * Instantiates a new peak results digest with a digest of the results.
+   * Creates a new peak results digest with a digest of the results.
    *
    * @param peakResults the peak results
+   * @return the peak results digest
    */
-  public PeakResultsDigest(PeakResult... peakResults) {
-    digest(peakResults);
+  public static PeakResultsDigest create(PeakResult... peakResults) {
+    PeakResultsDigest d = new PeakResultsDigest();
+    d.digest(peakResults);
+    return d;
   }
 
   /**
@@ -216,8 +219,7 @@ public class PeakResultsDigest {
    */
   public static Future<PeakResultsDigest> digestLater(final ExecutorService executorService,
       final PeakResult... peakResults) {
-    return executorService
-        .submit((Callable<PeakResultsDigest>) () -> new PeakResultsDigest(peakResults));
+    return executorService.submit((Callable<PeakResultsDigest>) PeakResultsDigest::create);
   }
 
   /**

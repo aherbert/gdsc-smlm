@@ -3115,7 +3115,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
     // All the remaining solvers are based on the stepping function solver
     final ToleranceChecker tc = getToleranceChecker();
-    final ParameterBounds bounds = new ParameterBounds(gaussianFunction);
+    final ParameterBounds bounds = ParameterBounds.create(gaussianFunction);
     if (isUseClamping()) {
       setClampValues(bounds);
     }

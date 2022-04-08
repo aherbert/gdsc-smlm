@@ -40,7 +40,7 @@ class PeakResultDigestTest {
   void sameResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -49,7 +49,7 @@ class PeakResultDigestTest {
   void sameSize1ResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 1, 5, false, false, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -58,7 +58,7 @@ class PeakResultDigestTest {
   void sameEmptyResultsAreEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 0, 5, false, false, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -67,7 +67,7 @@ class PeakResultDigestTest {
   void sameResultsAreEqualWithDeviation(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, true, false, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -76,7 +76,7 @@ class PeakResultDigestTest {
   void sameResultsAreEqualWithId(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, false, true, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -85,7 +85,7 @@ class PeakResultDigestTest {
   void sameResultsAreEqualWithEndFrame(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, true, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -94,7 +94,7 @@ class PeakResultDigestTest {
   void sameResultsAreEqualWithPrecision(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, true);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertTrue(digest.matches(digest));
   }
@@ -103,11 +103,11 @@ class PeakResultDigestTest {
   void differentResultsAreNotEqual(RandomSeed seed) {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     final PeakResult[] r1 = createResults(r, 10, 5, false, false, false, false);
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     for (final int size : new int[] {10, 1, 0}) {
       final PeakResult[] r2 = createResults(r, size, 5, false, false, false, false);
       Assertions.assertFalse(digest.matches(r2));
-      Assertions.assertFalse(digest.matches(new PeakResultsDigest(r2)));
+      Assertions.assertFalse(digest.matches(PeakResultsDigest.create(r2)));
     }
   }
 
@@ -116,7 +116,7 @@ class PeakResultDigestTest {
     final UniformRandomProvider r = RngFactory.create(seed.get());
     for (int size = 1; size < 5; size++) {
       final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);
-      final PeakResultsDigest digest = new PeakResultsDigest(r1);
+      final PeakResultsDigest digest = PeakResultsDigest.create(r1);
 
       final PeakResultDigest d = new PeakResultDigest();
       for (final PeakResult rr : r1) {
@@ -128,14 +128,14 @@ class PeakResultDigestTest {
 
   @SeededTest
   void digestIsEmptyStringWhenSizeIsZero() {
-    Assertions.assertEquals("", new PeakResultsDigest(new PeakResult[0]).getDigest());
+    Assertions.assertEquals("", PeakResultsDigest.create(new PeakResult[0]).getDigest());
   }
 
   @SeededTest
   void digestHandlesNull() {
     final PeakResult[] r1 = null;
     final PeakResult[] r0 = new PeakResult[0];
-    final PeakResultsDigest digest = new PeakResultsDigest(r1);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r1);
     Assertions.assertTrue(digest.matches(r1));
     Assertions.assertFalse(digest.matches(r0));
   }
@@ -144,7 +144,7 @@ class PeakResultDigestTest {
   void digestHandlesEmptyArray() {
     final PeakResult[] r1 = null;
     final PeakResult[] r0 = new PeakResult[0];
-    final PeakResultsDigest digest = new PeakResultsDigest(r0);
+    final PeakResultsDigest digest = PeakResultsDigest.create(r0);
     Assertions.assertTrue(digest.matches(r0));
     Assertions.assertFalse(digest.matches(r1));
   }
@@ -155,7 +155,7 @@ class PeakResultDigestTest {
     final Logger logger = Logger.getLogger(PeakResultDigestTest.class.getName());
 
     final UniformRandomProvider r = RngFactory.create(seed.get());
-    final PeakResultsDigest digest = new PeakResultsDigest();
+    final PeakResultsDigest digest = PeakResultsDigest.create();
     final int N = 5;
     for (int size = 1000; size < 2000000; size *= 2) {
       final PeakResult[] r1 = createResults(r, size, 5, false, false, false, false);

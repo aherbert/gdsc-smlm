@@ -519,7 +519,7 @@ public class DynamicMultipleTargetTracing {
     Trajectory(int id, PeakResult result) {
       this.id = id;
       onFrames = null;
-      add(result);
+      results.add(result);
     }
 
     /**

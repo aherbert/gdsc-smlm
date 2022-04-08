@@ -46,7 +46,7 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
    */
   public PrecomputedGradient1Function(double[] values, double[][] g1) {
     super(values);
-    final int numberOfGradients = checkGradient(g1);
+    final int numberOfGradients = checkGradient(values, g1);
     gradientIndices = SimpleArrayUtils.natural(numberOfGradients);
     this.g1 = g1;
   }
@@ -54,10 +54,11 @@ public class PrecomputedGradient1Function extends PrecomputedValueFunction
   /**
    * Check the gradient has the correct length for the function values.
    *
+   * @param values the values
    * @param gradient the gradient
    * @return the number of gradients
    */
-  protected int checkGradient(double[][] gradient) {
+  protected static int checkGradient(double[] values, double[][] gradient) {
     if (gradient == null) {
       throw new IllegalArgumentException("Gradient is null");
     }

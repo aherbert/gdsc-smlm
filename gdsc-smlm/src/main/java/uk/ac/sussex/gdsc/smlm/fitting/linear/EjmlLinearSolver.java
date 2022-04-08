@@ -160,7 +160,7 @@ public class EjmlLinearSolver {
    * @param equal the object for equality
    */
   public EjmlLinearSolver(DoubleEquality equal) {
-    setEqual(equal);
+    this(equal, 0);
   }
 
   /**
@@ -170,8 +170,9 @@ public class EjmlLinearSolver {
    * @param inversionTolerance the inversion tolerance
    */
   public EjmlLinearSolver(DoubleEquality equal, double inversionTolerance) {
-    setEqual(equal);
-    setInversionTolerance(inversionTolerance);
+    this.equal = equal;
+    errorChecking = (equal != null);
+    this.inversionTolerance = inversionTolerance;
   }
 
   /**

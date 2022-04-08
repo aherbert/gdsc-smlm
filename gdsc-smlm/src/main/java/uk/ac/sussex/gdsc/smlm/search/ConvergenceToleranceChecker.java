@@ -51,9 +51,10 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
    * value. In order to perform only absolute checks, the relative tolerance must be set to a
    * negative value.
    *
+   * <p>Warning: No checks are made to validate that convergence is possible.
+   *
    * @param relative relative tolerance threshold
    * @param absolute absolute tolerance threshold
-   * @throws IllegalArgumentException if none of the convergence criteria are valid
    */
   public ConvergenceToleranceChecker(double relative, double absolute) {
     this(relative, absolute, true, false, 0);
@@ -66,27 +67,19 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
    * value. In order to perform only absolute checks, the relative tolerance must be set to a
    * negative value.
    *
+   * <p>Warning: No checks are made to validate that convergence is possible.
+   *
    * @param relative relative tolerance threshold
    * @param absolute absolute tolerance threshold
    * @param checkScore Set to true to check the score
    * @param checkSequence Set to true to check the position
    * @param maxIterations Set above zero to check the iterations (number of times
    *        {@link #converged(SearchResult, SearchResult)} is called)
-   * @throws IllegalArgumentException if none of the convergence criteria are valid
    */
   public ConvergenceToleranceChecker(double relative, double absolute, boolean checkScore,
       boolean checkSequence, int maxIterations) {
     if (maxIterations < 0) {
       maxIterations = 0;
-    }
-    boolean canConverge = maxIterations != 0;
-
-    if (checkScore || checkSequence) {
-      canConverge |= (relative > 0 || absolute > 0);
-    }
-
-    if (!canConverge) {
-      noConvergenceCriteria();
     }
 
     this.relative = relative;
@@ -94,16 +87,6 @@ public class ConvergenceToleranceChecker<T extends Comparable<T>> implements Con
     this.checkScore = checkScore;
     this.checkSequence = checkSequence;
     this.maxIterations = maxIterations;
-  }
-
-  /**
-   * Called by the constructor if there are no convergence criteria. Sub-classes that provide
-   * additional convergence checks must override this to avoid error.
-   *
-   * @throws IllegalArgumentException if there are no convergence criteria in the constructor
-   */
-  protected void noConvergenceCriteria() {
-    throw new IllegalArgumentException("No valid convergence criteria");
   }
 
   /**

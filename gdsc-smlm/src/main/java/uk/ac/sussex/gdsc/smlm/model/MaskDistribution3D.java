@@ -118,8 +118,8 @@ public class MaskDistribution3D implements SpatialDistribution {
     }
     this.randomGenerator =
         ValidationUtils.checkNotNull(randomGenerator, "Random generator must not be null");
-
-    setUniformDistribution(uniformDistribution);
+    this.uniformDistribution =
+        getUniformDistributionOrDefault(uniformDistribution, randomGenerator);
     maxx = width;
     maxy = height;
     maxz = masks.size();
@@ -505,10 +505,15 @@ public class MaskDistribution3D implements SpatialDistribution {
    * @param uniformDistribution the uniformDistribution to set
    */
   public void setUniformDistribution(UniformDistribution uniformDistribution) {
-    if (uniformDistribution == null) {
-      uniformDistribution =
-          new UniformDistribution(null, new double[] {1, 1, 1}, randomGenerator.nextInt());
+    this.uniformDistribution =
+        getUniformDistributionOrDefault(uniformDistribution, randomGenerator);
+  }
+
+  private static UniformDistribution getUniformDistributionOrDefault(UniformDistribution d,
+      UniformRandomProvider rng) {
+    if (d == null) {
+      return new UniformDistribution(null, new double[] {1, 1, 1}, rng.nextInt());
     }
-    this.uniformDistribution = uniformDistribution;
+    return d;
   }
 }

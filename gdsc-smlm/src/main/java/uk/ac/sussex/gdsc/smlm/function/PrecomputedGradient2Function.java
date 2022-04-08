@@ -42,7 +42,7 @@ public class PrecomputedGradient2Function extends PrecomputedGradient1Function
    */
   public PrecomputedGradient2Function(double[] values, double[][] g1, double[][] g2) {
     super(values, g1);
-    checkGradient(g2);
+    checkGradient(values, g2);
     this.g2 = g2;
   }
 

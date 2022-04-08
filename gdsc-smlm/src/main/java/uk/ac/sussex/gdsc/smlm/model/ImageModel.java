@@ -91,6 +91,7 @@ public abstract class ImageModel {
    */
   public ImageModel(double onTime, double offTime1, double offTime2, double blinks1, double blinks2,
       UniformRandomProvider rng) {
+    this.random = Objects.requireNonNull(rng, "Random generator must not be null");
     checkParameter("onTime", onTime);
     checkParameter("offTime1", offTime1);
     checkParameter("offTime2", offTime2);
@@ -101,7 +102,6 @@ public abstract class ImageModel {
     this.offTime2 = offTime2;
     this.blinks1 = blinks1;
     this.blinks2 = blinks2;
-    setUniformRandomProvider(rng);
   }
 
   /**

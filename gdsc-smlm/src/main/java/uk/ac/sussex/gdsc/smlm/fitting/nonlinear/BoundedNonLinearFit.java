@@ -59,7 +59,11 @@ public class BoundedNonLinearFit extends NonLinearFit {
    */
   public BoundedNonLinearFit(NonLinearFunction func, StoppingCriteria sc, ParameterBounds bounds) {
     super(func, sc);
-    setBounds(bounds);
+    if (bounds == null) {
+      this.bounds = ParameterBounds.create(function);
+    } else {
+      this.bounds = bounds;
+    }
   }
 
   /**
@@ -76,7 +80,11 @@ public class BoundedNonLinearFit extends NonLinearFit {
   public BoundedNonLinearFit(NonLinearFunction func, StoppingCriteria sc, int significantDigits,
       double maxAbsoluteError, ParameterBounds bounds) {
     super(func, sc, significantDigits, maxAbsoluteError);
-    setBounds(bounds);
+    if (bounds == null) {
+      this.bounds = ParameterBounds.create(function);
+    } else {
+      this.bounds = bounds;
+    }
   }
 
   @Override
@@ -146,9 +154,10 @@ public class BoundedNonLinearFit extends NonLinearFit {
    */
   public void setBounds(ParameterBounds bounds) {
     if (bounds == null) {
-      bounds = new ParameterBounds(function);
+      this.bounds = ParameterBounds.create(function);
+    } else {
+      this.bounds = bounds;
     }
-    this.bounds = bounds;
   }
 
   /**

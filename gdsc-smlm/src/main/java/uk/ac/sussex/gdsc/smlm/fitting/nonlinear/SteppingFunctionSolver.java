@@ -98,7 +98,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
     super(type, function);
     this.tc = Objects.requireNonNull(tc, "tolerance checker");
     if (bounds == null) {
-      bounds = new ParameterBounds(function);
+      bounds = ParameterBounds.create(function);
     } else if (bounds.getGradientFunction() != function) {
       throw new IllegalArgumentException(
           "Bounds must be constructed with the same gradient function");

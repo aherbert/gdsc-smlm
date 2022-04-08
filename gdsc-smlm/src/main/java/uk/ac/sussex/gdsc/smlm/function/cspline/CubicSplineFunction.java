@@ -650,7 +650,9 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     cx = (maxSx / 2.0);
     cy = (maxSy / 2.0);
     cz = (maxSz / 2.0);
-    setScale(1);
+    // setScale(1);
+    scale2 = scale = 1;
+    updateFunctionBounds();
   }
 
   /**
@@ -677,7 +679,9 @@ public abstract class CubicSplineFunction implements Gradient2Function {
     this.cx = cx;
     this.cy = cy;
     this.cz = cz;
-    setScale(scale);
+    // setScale(1);
+    scale2 = scale = 1;
+    updateFunctionBounds();
   }
 
   /**
