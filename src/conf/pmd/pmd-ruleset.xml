@@ -24,8 +24,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
   <description>
-    This ruleset checks the code for discouraged programming
-    constructs.
+    This ruleset checks the code for discouraged programming constructs.
   </description>
 
   <!-- This needs some updating to a set of rules that is OK for each build -->
@@ -34,6 +33,45 @@
     <exclude name="UseVarargs" />
     <!--  Allow builders to construct classes using private constructors -->
     <exclude name="AccessorClassGeneration" />
+    <!-- Disabled to avoid having to suppress many cases where code is improved by allowing
+         reassignment, i.e. small functions where compiled byte size must be minimised to
+         allow inlining. -->
+    <exclude name="AvoidReassigningParameters" />
+    <exclude name="ArrayIsStoredDirectly" />
+    <exclude name="MethodReturnsInternalArray" />
+    <!-- Allow advanced for loop control -->
+    <exclude name="ForLoopVariableCount" />
+    <exclude name="AvoidReassigningLoopVariables" />
+  </rule>
+  <rule ref="category/java/codestyle.xml/FieldNamingConventions">
+    <properties>
+      <property name="exclusions" value="serialVersionUID|logger" />
+    </properties>
+  </rule>
+  <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
+    <properties>
+      <!-- Allow underscores using letters for add, subtract, multiply, divide.  -->
+      <property name="finalVarPattern" value="[a-z][a-zA-Z0-9]*(_[asmd]_[a-zA-Z0-9]*)*" />
+    </properties>
+  </rule>
+  <!-- This allows the commonly used construct for decrementing in a for loop. -->
+  <rule ref="category/java/errorprone.xml/AssignmentInOperand">
+    <properties>
+      <property name="allowIncrementDecrement" value="true" />
+    </properties>
+  </rule>
+  <!-- Allow 1 to be used in conditions as a magic number. -->
+  <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+    <properties>
+      <property name="ignoreMagicNumbers" value="-1,0,1" />
+    </properties>
+  </rule>
+  <!-- This is to allow private fields to be undocumented. There are specific visibility checks done using Checkstyle. 'private'
+    is OK but otherwise fields should be commented. -->
+  <rule ref="category/java/documentation.xml/CommentRequired">
+    <properties>
+      <property name="fieldCommentRequirement" value="Ignored" />
+    </properties>
   </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="MethodArgumentCouldBeFinal" />
@@ -49,6 +87,7 @@
     <exclude name="OnlyOneReturn" />
     <!--  Allow builders to have setters that return something -->
     <exclude name="LinguisticNaming" />
+    <exclude name="UseUnderscoresInNumericLiterals" />
   </rule>
   <rule ref="category/java/design.xml">
     <exclude name="TooManyMethods" />
@@ -64,13 +103,44 @@
   </rule>
   <rule ref="category/java/errorprone.xml">
     <exclude name="BeanMembersShouldSerialize" />
+    <!-- This results in overflow during analysis and so is disabled. This rule is known to be poor with Java 5 and later:
+      https://github.com/pmd/pmd/issues/873 -->
+    <exclude name="DataflowAnomalyAnalysis" />
+    <!-- Assigning objects to null to reset the state is allowed. -->
+    <exclude name="NullAssignment" />
+    <exclude name="ReturnEmptyCollectionRatherThanNull" />
+    <exclude name="AvoidFieldNameMatchingMethodName" />
   </rule>
   <rule ref="category/java/multithreading.xml">
     <exclude name="DoNotUseThreads" />
     <exclude name="AvoidUsingVolatile" />
   </rule>
   <rule ref="category/java/performance.xml">
-    <!-- <exclude name="..." /> -->
+    <!-- This is used for 16-bit images so allow it.  -->
+    <exclude name="AvoidUsingShortType" />
+    <exclude name="AvoidInstantiatingObjectsInLoops" />
+  </rule>
+
+  <rule ref="category/java/bestpractices.xml/SystemPrintln">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="./ancestor::ClassOrInterfaceDeclaration[@SimpleName = 'Version']"/>
+    </properties>
+  </rule>
+  <rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="./ancestor::ClassOrInterfaceDeclaration[@SimpleName ='BaseFunctionSolver'
+        or @SimpleName = 'BaseLsqLvmGradientProcedure' or @SimpleName = 'FixedPixelCameraModel'
+        or @SimpleName = 'DirectFilter' or @SimpleName = 'Filter'
+        ]"/>
+    </properties>
+  </rule>
+  <rule ref="category/java/codestyle.xml/ShortMethodName">
+    <properties>
+      <!-- Allow samplers to have factory constructor method 'of' -->
+      <property name="violationSuppressXPath" value="./ancestor-or-self::MethodDeclaration[@Name = 'of']"/>
+    </properties>
   </rule>
 
 </ruleset>
