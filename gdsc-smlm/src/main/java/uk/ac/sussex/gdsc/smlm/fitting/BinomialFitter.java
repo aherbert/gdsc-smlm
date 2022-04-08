@@ -132,8 +132,8 @@ public class BinomialFitter {
     // Pad to include all values
     final double[] nValues = histogram[0];
     final double[] pValues = histogram[1];
-    final int N = (int) nValues[nValues.length - 1];
-    final double[] p = new double[N + 1];
+    final int n = (int) nValues[nValues.length - 1];
+    final double[] p = new double[n + 1];
 
     // Pad the histogram out for any missing values between 0 and N
     for (int i = 1; i < nValues.length; i++) {
@@ -143,7 +143,7 @@ public class BinomialFitter {
         p[ii] = pValues[i - 1];
       }
     }
-    p[N] = pValues[pValues.length - 1];
+    p[n] = pValues[pValues.length - 1];
 
     // We need the original histogram, not the cumulative histogram
     if (!cumulative) {

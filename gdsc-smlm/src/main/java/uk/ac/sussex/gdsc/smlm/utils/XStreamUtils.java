@@ -44,12 +44,12 @@ public class XStreamUtils {
   }
 
   private static class XStreamLoader {
-    static final XStream xs;
+    static final XStream XS;
 
     static {
       final XStream xstream = new XStream(new DomDriver());
       xstream.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
-      xs = xstream;
+      XS = xstream;
     }
   }
 
@@ -60,9 +60,9 @@ public class XStreamUtils {
    * @return XML string representation
    */
   public static String toXml(Object obj) {
-    if (XStreamLoader.xs != null) {
+    if (XStreamLoader.XS != null) {
       try {
-        return XStreamLoader.xs.toXML(obj);
+        return XStreamLoader.XS.toXML(obj);
       } catch (final XStreamException ex) {
         logger.log(Level.FINE, "Failed to convert to XML", ex);
       }
@@ -77,9 +77,9 @@ public class XStreamUtils {
    * @return the object
    */
   public static Object fromXml(String xml) {
-    if (XStreamLoader.xs != null) {
+    if (XStreamLoader.XS != null) {
       try {
-        return XStreamLoader.xs.fromXML(xml);
+        return XStreamLoader.XS.fromXML(xml);
       } catch (final XStreamException ex) {
         logger.log(Level.FINE, "Failed to load from XML", ex);
       }

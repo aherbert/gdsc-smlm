@@ -33,15 +33,15 @@ import java.util.function.DoubleUnaryOperator;
  */
 public final class StdMath {
   /** Exponential function. */
-  private static final DoubleUnaryOperator exp;
+  private static final DoubleUnaryOperator EXP;
 
   static {
     // The Math.exp function in Java 8 is slower than FastMath.
     // From Java 9 onwards the Math.exp function is faster.
     if (System.getProperty("java.specification.version").startsWith("1.8")) {
-      exp = org.apache.commons.math3.util.FastMath::exp;
+      EXP = org.apache.commons.math3.util.FastMath::exp;
     } else {
-      exp = Math::exp;
+      EXP = Math::exp;
     }
   }
 
@@ -57,6 +57,6 @@ public final class StdMath {
    * @see Math#exp(double)
    */
   public static double exp(double x) {
-    return exp.applyAsDouble(x);
+    return EXP.applyAsDouble(x);
   }
 }
