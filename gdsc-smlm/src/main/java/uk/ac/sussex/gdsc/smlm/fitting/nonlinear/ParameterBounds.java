@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.function.GradientFunction;
 
 /**
@@ -357,9 +358,7 @@ public class ParameterBounds {
    * @param function the new gradient function
    */
   public void setGradientFunction(GradientFunction function) {
-    if (function == null) {
-      throw new NullPointerException();
-    }
+    Objects.requireNonNull(function, "function");
 
     // Do not do this to allow caching
     // setClampValues(null);

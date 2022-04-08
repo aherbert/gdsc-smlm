@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
 import java.util.Arrays;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.FisherInformationMatrix;
 import uk.ac.sussex.gdsc.smlm.fitting.FitStatus;
@@ -391,10 +392,7 @@ public abstract class BaseFunctionSolver implements FunctionSolver {
    * @throws NullPointerException if the function is null
    */
   public void setGradientFunction(GradientFunction function) {
-    if (function == null) {
-      throw new NullPointerException("Function must not be null");
-    }
-    this.function = function;
+    this.function = Objects.requireNonNull(function, "function");
   }
 
   /**

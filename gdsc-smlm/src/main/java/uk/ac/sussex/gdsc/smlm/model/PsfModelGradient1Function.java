@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -50,19 +51,16 @@ public class PsfModelGradient1Function implements Gradient1Function, NamedFuncti
    * @param height the height
    */
   public PsfModelGradient1Function(PsfModel psf, int width, int height) {
-    if (psf == null) {
-      throw new NullPointerException("PSF is null");
-    }
     if (width < 1) {
       throw new IllegalArgumentException("Width cannot be less than 1");
     }
     if (height < 1) {
       throw new IllegalArgumentException("Height cannot be less than 1");
     }
-    if ((double) width * height > Integer.MAX_VALUE) {
+    if ((long) width * height > Integer.MAX_VALUE) {
       throw new IllegalArgumentException("width*height is too large");
     }
-    this.psf = psf;
+    this.psf = Objects.requireNonNull(psf, "PSF is null");
     this.width = width;
     this.height = height;
   }

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
@@ -95,10 +96,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   public SteppingFunctionSolver(FunctionSolverType type, Gradient1Function function,
       ToleranceChecker tc, ParameterBounds bounds) {
     super(type, function);
-    if (tc == null) {
-      throw new NullPointerException("Null tolerance checker");
-    }
-    this.tc = tc;
+    this.tc = Objects.requireNonNull(tc, "tolerance checker");
     if (bounds == null) {
       bounds = new ParameterBounds(function);
     } else if (bounds.getGradientFunction() != function) {

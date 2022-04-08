@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -62,10 +63,7 @@ public class Gaussian2DFitter {
    * @param fitConfiguration the fit configuration
    */
   public Gaussian2DFitter(Gaussian2DFitConfiguration fitConfiguration) {
-    if (fitConfiguration == null) {
-      throw new NullPointerException("No fit configuration");
-    }
-    this.fitConfiguration = fitConfiguration;
+    this.fitConfiguration = Objects.requireNonNull(fitConfiguration, "No fit configuration");
     computeResiduals = fitConfiguration.isComputeResiduals();
   }
 

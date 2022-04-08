@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting;
 
 import java.util.Arrays;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.smlm.function.FisherInformation;
 import uk.ac.sussex.gdsc.smlm.function.Gradient1Function;
@@ -76,10 +77,8 @@ public class UnivariateLikelihoodFisherInformationCalculator
    */
   public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf,
       FisherInformation fi) {
-    if (gf == null || fi == null) {
-      throw new NullPointerException();
-    }
-    this.gf = gf;
+    Objects.requireNonNull(fi, "fi");
+    this.gf = Objects.requireNonNull(gf, "gf");
     this.fi = new FisherInformation[gf.size()];
     Arrays.fill(this.fi, fi);
   }
@@ -92,15 +91,12 @@ public class UnivariateLikelihoodFisherInformationCalculator
    */
   public UnivariateLikelihoodFisherInformationCalculator(Gradient1Function gf,
       FisherInformation[] fi) {
-    if (gf == null || fi == null) {
-      throw new NullPointerException();
-    }
+    this.gf = Objects.requireNonNull(gf, "gf");
+    this.fi = Objects.requireNonNull(fi, "fi");
     if (fi.length != gf.size()) {
       throw new IllegalArgumentException(
           "Fisher information must be provided for each function value");
     }
-    this.gf = gf;
-    this.fi = fi;
   }
 
   /**

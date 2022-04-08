@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
@@ -805,10 +806,7 @@ public abstract class ImageModel {
    * @param random the new random generator
    */
   public void setUniformRandomProvider(UniformRandomProvider random) {
-    if (random == null) {
-      throw new NullPointerException("Random generator must not be null");
-    }
-    this.random = random;
+    this.random = Objects.requireNonNull(random, "Random generator must not be null");
   }
 
   /**

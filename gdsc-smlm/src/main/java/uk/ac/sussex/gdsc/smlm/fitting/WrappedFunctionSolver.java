@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.fitting;
 
+import java.util.Objects;
+
 /**
  * Wrap a function solver. The default implementation passes all calls to the FunctioSolver
  * interface to the inner function solver.
@@ -38,10 +40,7 @@ public class WrappedFunctionSolver implements FunctionSolver {
    * @param solver the solver
    */
   public WrappedFunctionSolver(FunctionSolver solver) {
-    if (solver == null) {
-      throw new NullPointerException("FunctionSolver is null");
-    }
-    this.solver = solver;
+    this.solver = Objects.requireNonNull(solver, "FunctionSolver is null");
   }
 
   // Pass through all interface calls to the inner function solver.

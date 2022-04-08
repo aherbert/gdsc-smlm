@@ -389,9 +389,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @param results the results
    */
   public static void addResults(MemoryPeakResults results) {
-    if (results == null) {
-      throw new NullPointerException("Results must not be null");
-    }
+    Objects.requireNonNull(results, "Results must not be null");
     results.trimToSize();
     resultsMap.put(results.getName(), results);
   }
@@ -2055,9 +2053,8 @@ public class MemoryPeakResults extends AbstractPeakResults {
   }
 
   /**
-   * Find the index of the given result. More formally, returns the lowest index {@code i} such
-   * that {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1
-   * if there is no such index.
+   * Find the index of the given result. More formally, returns the lowest index {@code i} such that
+   * {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1 if there is no such index.
    *
    * @param result the result
    * @return the index (or -1)

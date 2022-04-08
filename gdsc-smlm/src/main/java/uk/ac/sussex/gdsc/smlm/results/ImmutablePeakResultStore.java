@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -42,10 +43,7 @@ public class ImmutablePeakResultStore implements PeakResultStore {
    * @param store the store
    */
   public ImmutablePeakResultStore(PeakResultStore store) {
-    if (store == null) {
-      throw new NullPointerException("Store must not be null");
-    }
-    this.store = store;
+    this.store = Objects.requireNonNull(store, "store");
   }
 
   @Override

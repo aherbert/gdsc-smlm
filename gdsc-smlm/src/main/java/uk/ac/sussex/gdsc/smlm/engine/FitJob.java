@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.engine;
 
 import java.awt.Rectangle;
 import java.util.List;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.fitting.FitResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult;
@@ -93,12 +94,8 @@ public class FitJob {
    * @param bounds the bounds
    */
   public FitJob(int id, int slice, float[] data, Rectangle bounds) {
-    if (data == null) {
-      throw new NullPointerException("Data must not be null");
-    }
-    if (bounds == null) {
-      throw new NullPointerException("Bounds must not be null");
-    }
+    Objects.requireNonNull(data, "Data must not be null");
+    Objects.requireNonNull(bounds, "Bounds must not be null");
     if (bounds.width < 1 || bounds.height < 1) {
       throw new IllegalArgumentException("Bounds width and height must be positive");
     }

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
@@ -53,12 +54,8 @@ public class UniformDistribution implements SpatialDistribution {
 
     private static UniformRandomProvider
         create(Supplier<UniformRandomProvider> randomGeneratorFactory) {
-      final UniformRandomProvider rng = randomGeneratorFactory.get();
-      if (rng == null) {
-        throw new NullPointerException(
-            "UniformRandomProviderFactory created null UniformRandomProvider");
-      }
-      return rng;
+      return Objects.requireNonNull(randomGeneratorFactory.get(),
+          "UniformRandomProviderFactory created null UniformRandomProvider");
     }
 
     @Override
