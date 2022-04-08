@@ -24,14 +24,17 @@
 
 package uk.ac.sussex.gdsc.smlm.results;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -370,7 +373,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     final LocalList<Result> results = new LocalList<>(size);
     String header;
 
-    try (DataInputStream input = new DataInputStream(new FileInputStream(filename))) {
+    try (InputStream input = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
       header = readHeader(input);
 
       int flags = 0;
@@ -397,8 +400,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     Collections.sort(results, (r1, r2) -> Integer.compare(r1.slice, r2.slice));
 
     // Must write using the same method as the main code so use a FileOutputStream again
-    try (FileOutputStream fos = new FileOutputStream(filename);
-        BufferedOutputStream output = new BufferedOutputStream(fos)) {
+    try (OutputStream output = new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)))) {
       output.write(header.getBytes(StandardCharsets.UTF_8));
       for (final Result result : results) {
         output.write(result.line);
@@ -417,7 +419,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
    * @return The header
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public static String readHeader(DataInputStream input) throws IOException {
+  public static String readHeader(InputStream input) throws IOException {
     final StringBuilder header = new StringBuilder(1024);
     final StringBuilder line = new StringBuilder(256);
     do {
@@ -431,13 +433,16 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     return header.toString();
   }
 
-  private static void readLine(StringBuilder sb, DataInputStream input) throws IOException {
+  private static void readLine(StringBuilder sb, InputStream input) throws IOException {
     sb.setLength(0);
-    byte bi;
+    int ch;
     do {
-      bi = input.readByte();
-      sb.append((char) bi);
-    } while (bi != '\n');
+      ch = input.read();
+      if (ch < 0) {
+        throw new EOFException();
+      }
+      sb.append((char) ch);
+    } while (ch != '\n');
   }
 
   /**

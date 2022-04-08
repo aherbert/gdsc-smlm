@@ -27,11 +27,13 @@ package uk.ac.sussex.gdsc.smlm.results;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Parser;
+import it.unimi.dsi.fastutil.io.FastBufferedInputStream;
 import java.awt.Rectangle;
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.logging.Level;
@@ -123,7 +125,8 @@ public class TsfPeakResultsReader {
     }
     readHeader = true;
 
-    try (FileInputStream fi = new FileInputStream(filename);
+    // Use FastBufferedInputStream to have a correct skip implementation
+    try (InputStream fi = new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         DataInputStream di = new DataInputStream(fi)) {
       // The file has an initial 0, then the offset (as long)
       // to the position of spotList.
@@ -189,7 +192,8 @@ public class TsfPeakResultsReader {
    * @return true, if is a TSF file
    */
   public static boolean isTsf(String filename) {
-    try (FileInputStream fi = new FileInputStream(filename);
+    // Use FastBufferedInputStream to have a correct skip implementation
+    try (InputStream fi = new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         DataInputStream di = new DataInputStream(fi)) {
       // the file has an initial 0, then the offset (as long)
       // to the position of spotList
@@ -235,7 +239,8 @@ public class TsfPeakResultsReader {
     long expectedSpots = -1;
 
     // Read the messages that contain the spot data
-    try (BufferedInputStream fi = new BufferedInputStream(new FileInputStream(filename))) {
+    // Use FastBufferedInputStream to have a correct skip implementation
+    try (InputStream fi = new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
       // size of int + size of long
       FileUtils.skip(fi, 12);
 

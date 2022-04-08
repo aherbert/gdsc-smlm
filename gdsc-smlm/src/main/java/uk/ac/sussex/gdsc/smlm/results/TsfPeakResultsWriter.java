@@ -31,10 +31,11 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -163,7 +164,7 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
 
     id = new AtomicInteger();
     try {
-      out = new BufferedOutputStream(new FileOutputStream(filename));
+      out = new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)));
     } catch (final Exception ex) {
       logger.log(Level.SEVERE, ex, () -> "Failed to write open TSF file: " + filename);
       closeOutput();

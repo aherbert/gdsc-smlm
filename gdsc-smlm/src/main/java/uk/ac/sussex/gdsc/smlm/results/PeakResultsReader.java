@@ -26,13 +26,13 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import it.unimi.dsi.fastutil.io.FastBufferedInputStream;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -145,12 +145,14 @@ public class PeakResultsReader {
    * Interface to report progress on reading a file.
    */
   private interface ProgressReporter {
+
     /**
      * Show the progress.
      *
+     * @param read the number of bytes read
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void showProgress() throws IOException;
+    void showProgress(long read) throws IOException;
   }
 
   private static class NullProgressReporter implements ProgressReporter {
@@ -159,35 +161,37 @@ public class PeakResultsReader {
     private NullProgressReporter() {}
 
     @Override
-    public void showProgress() {
+    public void showProgress(long read) {
       // Do nothing
     }
   }
 
   /**
-   * Report progress reading an input stream using the associated {@link FileChannel}.
+   * Report progress reading an input stream of known size.
    */
-  private static class FileProgressReporter implements ProgressReporter {
-    final FileChannel channel;
+  private static class SizeProgressReporter implements ProgressReporter {
     final long size;
+    final long step;
     final TrackProgress tracker;
-    int counter;
+    long next;
 
-    FileProgressReporter(FileInputStream input, TrackProgress tracker) throws IOException {
-      channel = input.getChannel();
-      size = channel.size();
+    SizeProgressReporter(long size, TrackProgress tracker) {
+      this.size = size;
       this.tracker = tracker;
+      // Divide into ~128 steps.
+      next = step = size >>> 7;
     }
 
     @Override
-    public void showProgress() throws IOException {
+    public void showProgress(long read) throws IOException {
       // Only report periodically
-      if (++counter % 512 == 0) {
+      if (read > next) {
+        next = read + step;
         if (tracker.isEnded()) {
           // Throw an IOException and it will be caught and ignored by all the file reading methods
           throw new IOException("File read was cancelled");
         }
-        tracker.progress(channel.position(), size);
+        tracker.progress(read, size);
       }
     }
   }
@@ -209,7 +213,7 @@ public class PeakResultsReader {
   public String getHeader() {
     if (header == null) {
       try (BufferedReader input =
-          new BufferedReader(new UnicodeReader(new FileInputStream(filename), null))) {
+          new BufferedReader(new UnicodeReader(Files.newInputStream(Paths.get(filename)), null))) {
         final StringBuilder sb = new StringBuilder();
         String line;
         int count = 0;
@@ -824,80 +828,79 @@ public class PeakResultsReader {
       fieldCount = new PeakResultConversionHelper(null, psf).getNames().length;
     }
 
-    try (FileInputStream fis = new FileInputStream(filename)) {
-      try (DataInputStream input = new DataInputStream(fis)) {
-        // Seek to the start of the binary data by just reading the header again
-        BinaryFilePeakResults.readHeader(input);
+    try (FastBufferedInputStream input =
+        new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
+      // Seek to the start of the binary data by just reading the header again
+      BinaryFilePeakResults.readHeader(input);
 
-        final ProgressReporter reporter = createProgressReporter(fis);
+      final ProgressReporter reporter = createProgressReporter(filename);
 
-        // Format: [i]i[i]iifdf + n*f [+ n*f]
-        // where [] are optional and n is the number of fields
-        int flags = 0;
-        if (readEndFrame) {
-          flags += SmlmFilePeakResults.FLAG_END_FRAME;
+      // Format: [i]i[i]iifdf + n*f [+ n*f]
+      // where [] are optional and n is the number of fields
+      int flags = 0;
+      if (readEndFrame) {
+        flags += SmlmFilePeakResults.FLAG_END_FRAME;
+      }
+      if (readId) {
+        flags += SmlmFilePeakResults.FLAG_ID;
+      }
+      if (readCategory) {
+        flags += SmlmFilePeakResults.FLAG_CATEGORY;
+      }
+      if (readPrecision) {
+        flags += SmlmFilePeakResults.FLAG_PRECISION;
+      }
+      int length = BinaryFilePeakResults.getDataSize(deviations, flags, fieldCount);
+      if (!readMeanIntensity) {
+        length -= 4; // No float field for mean signal
+      }
+      final byte[] buffer = new byte[length];
+
+      final boolean convert = smlmVersion == 1;
+      // Halted by the EOFException
+      for (;;) {
+        // Note: Reading single strips seems fast enough at the moment.
+        // This could be modified to read larger blocks of data if necessary.
+
+        final int bytesRead = input.read(buffer);
+        if (bytesRead != length) {
+          break;
         }
-        if (readId) {
-          flags += SmlmFilePeakResults.FLAG_ID;
+
+        position = 0;
+        final int id = (readId) ? readInt(buffer) : 0;
+        final int category = (readCategory) ? readInt(buffer) : 0;
+        final int peak = readInt(buffer);
+        final int endPeak = (readEndFrame) ? readInt(buffer) : peak;
+        final int origX = readInt(buffer);
+        final int origY = readInt(buffer);
+        final float origValue = readFloat(buffer);
+        final double error = readDouble(buffer);
+        final float noise = readFloat(buffer);
+        final float meanSignal = (readMeanIntensity) ? readFloat(buffer) : 0;
+        float[] params = readData(buffer, new float[fieldCount]);
+        float[] paramsStdDev = (deviations) ? readData(buffer, new float[fieldCount]) : null;
+
+        // Convert format which had the full Gaussian2D parameters array
+        if (gaussian2Dformat) {
+          // Convert old binary format with the amplitude to signal
+          if (convert) {
+            params[LEGACY_FORMAT_SIGNAL] *=
+                2 * Math.PI * params[LEGACY_FORMAT_X_SD] * params[LEGACY_FORMAT_Y_SD];
+          }
+          params = mapGaussian2DFormatParams(params);
+          paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
         }
-        if (readCategory) {
-          flags += SmlmFilePeakResults.FLAG_CATEGORY;
-        }
+
         if (readPrecision) {
-          flags += SmlmFilePeakResults.FLAG_PRECISION;
+          results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
+              paramsStdDev, endPeak, id, category, readFloat(buffer)));
+        } else {
+          results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal, params,
+              paramsStdDev, endPeak, id, category));
         }
-        int length = BinaryFilePeakResults.getDataSize(deviations, flags, fieldCount);
-        if (!readMeanIntensity) {
-          length -= 4; // No float field for mean signal
-        }
-        final byte[] buffer = new byte[length];
 
-        final boolean convert = smlmVersion == 1;
-        // Halted by the EOFException
-        for (;;) {
-          // Note: Reading single strips seems fast enough at the moment.
-          // This could be modified to read larger blocks of data if necessary.
-
-          final int bytesRead = input.read(buffer);
-          if (bytesRead != length) {
-            break;
-          }
-
-          position = 0;
-          final int id = (readId) ? readInt(buffer) : 0;
-          final int category = (readCategory) ? readInt(buffer) : 0;
-          final int peak = readInt(buffer);
-          final int endPeak = (readEndFrame) ? readInt(buffer) : peak;
-          final int origX = readInt(buffer);
-          final int origY = readInt(buffer);
-          final float origValue = readFloat(buffer);
-          final double error = readDouble(buffer);
-          final float noise = readFloat(buffer);
-          final float meanSignal = (readMeanIntensity) ? readFloat(buffer) : 0;
-          float[] params = readData(buffer, new float[fieldCount]);
-          float[] paramsStdDev = (deviations) ? readData(buffer, new float[fieldCount]) : null;
-
-          // Convert format which had the full Gaussian2D parameters array
-          if (gaussian2Dformat) {
-            // Convert old binary format with the amplitude to signal
-            if (convert) {
-              params[LEGACY_FORMAT_SIGNAL] *=
-                  2 * Math.PI * params[LEGACY_FORMAT_X_SD] * params[LEGACY_FORMAT_Y_SD];
-            }
-            params = mapGaussian2DFormatParams(params);
-            paramsStdDev = mapGaussian2DFormatDeviations(paramsStdDev);
-          }
-
-          if (readPrecision) {
-            results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal,
-                params, paramsStdDev, endPeak, id, category, readFloat(buffer)));
-          } else {
-            results.add(createResult(peak, origX, origY, origValue, error, noise, meanSignal,
-                params, paramsStdDev, endPeak, id, category));
-          }
-
-          reporter.showProgress();
-        }
+        reporter.showProgress(input.position());
       }
     } catch (final EOFException ex) {
       // Ignore. Binary data does not have a size so it is read until the EOF.
@@ -1025,10 +1028,10 @@ public class PeakResultsReader {
     return Double.longBitsToDouble(readLong(buffer));
   }
 
-  private ProgressReporter createProgressReporter(FileInputStream fis) throws IOException {
+  private ProgressReporter createProgressReporter(String filename) throws IOException {
     final TrackProgress trackProgress = tracker;
     if (trackProgress != null) {
-      return new FileProgressReporter(fis, trackProgress);
+      return new SizeProgressReporter(Files.size(Paths.get(filename)), trackProgress);
     }
     return NullProgressReporter.INSTANCE;
   }
@@ -1059,41 +1062,42 @@ public class PeakResultsReader {
       fieldCount = new PeakResultConversionHelper(null, psf).getNames().length;
     }
 
-    try (FileInputStream fis = new FileInputStream(filename)) {
-      try (BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-        final ProgressReporter reporter = createProgressReporter(fis);
+    try (
+        FastBufferedInputStream fis =
+            new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
+        BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
+      final ProgressReporter reporter = createProgressReporter(filename);
 
-        String line;
-        int errors = 0;
+      String line;
+      int errors = 0;
 
-        final LineReader reader = createLineReader(results, smlmVersion, fieldCount);
+      final LineReader reader = createLineReader(results, smlmVersion, fieldCount);
 
-        // Skip the header
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty()) {
-            continue;
-          }
-
-          if (line.charAt(0) != '#') {
-            // This is the first record
-            if (!reader.addPeakResult(line)) {
-              errors = 1;
-            }
-            break;
-          }
+      // Skip the header
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty()) {
+          continue;
         }
 
-        while ((line = input.readLine()) != null) {
-          if (line.isEmpty() || line.charAt(0) == '#') {
-            continue;
+        if (line.charAt(0) != '#') {
+          // This is the first record
+          if (!reader.addPeakResult(line)) {
+            errors = 1;
           }
-
-          if (!reader.addPeakResult(line) && ++errors >= 10) {
-            break;
-          }
-
-          reporter.showProgress();
+          break;
         }
+      }
+
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty() || line.charAt(0) == '#') {
+          continue;
+        }
+
+        if (!reader.addPeakResult(line) && ++errors >= 10) {
+          break;
+        }
+
+        reporter.showProgress(fis.position());
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -1806,7 +1810,9 @@ public class PeakResultsReader {
   }
 
   private MemoryPeakResults readTable() {
-    try (FileInputStream fis = new FileInputStream(filename);
+    try (
+        FastBufferedInputStream fis =
+            new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
 
       // Skip over the single line header
@@ -1833,7 +1839,7 @@ public class PeakResultsReader {
         return null;
       }
 
-      final ProgressReporter reporter = createProgressReporter(fis);
+      final ProgressReporter reporter = createProgressReporter(filename);
 
       final MemoryPeakResults results = createResults();
       results.setName(FileUtils.getName(filename));
@@ -1849,7 +1855,7 @@ public class PeakResultsReader {
           break;
         }
 
-        reporter.showProgress();
+        reporter.showProgress(fis.position());
       }
 
       return results;
@@ -2090,9 +2096,11 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
     results.setName(FileUtils.getName(filename));
 
-    try (FileInputStream fis = new FileInputStream(filename);
+    try (
+        FastBufferedInputStream fis =
+            new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      final ProgressReporter reporter = createProgressReporter(fis);
+      final ProgressReporter reporter = createProgressReporter(filename);
 
       String line;
       int errors = 0;
@@ -2120,7 +2128,7 @@ public class PeakResultsReader {
           break;
         }
 
-        reporter.showProgress();
+        reporter.showProgress(fis.position());
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -2184,9 +2192,11 @@ public class PeakResultsReader {
     final MemoryPeakResults results = createResults();
     results.setName(FileUtils.getName(filename));
 
-    try (FileInputStream fis = new FileInputStream(filename);
+    try (
+        FastBufferedInputStream fis =
+            new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      final ProgressReporter reporter = createProgressReporter(fis);
+      final ProgressReporter reporter = createProgressReporter(filename);
 
       String line;
       int errors = 0;
@@ -2218,7 +2228,7 @@ public class PeakResultsReader {
           break;
         }
 
-        reporter.showProgress();
+        reporter.showProgress(fis.position());
       }
     } catch (final IOException ex) {
       logError(ex);
@@ -2417,9 +2427,11 @@ public class PeakResultsReader {
       results.setName(FileUtils.getName(filename));
     }
 
-    try (FileInputStream fis = new FileInputStream(filename);
+    try (
+        FastBufferedInputStream fis =
+            new FastBufferedInputStream(Files.newInputStream(Paths.get(filename)));
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
-      final ProgressReporter reporter = createProgressReporter(fis);
+      final ProgressReporter reporter = createProgressReporter(filename);
 
       String line;
       int errors = 0;
@@ -2448,7 +2460,7 @@ public class PeakResultsReader {
           break;
         }
 
-        reporter.showProgress();
+        reporter.showProgress(fis.position());
       }
     } catch (final IOException ex) {
       logError(ex);

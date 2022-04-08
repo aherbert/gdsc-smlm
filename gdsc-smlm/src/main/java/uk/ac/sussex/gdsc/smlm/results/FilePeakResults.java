@@ -28,8 +28,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +44,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
  */
 public abstract class FilePeakResults extends AbstractPeakResults implements ThreadSafePeakResults {
   /** Only write to a single results file. */
-  protected FileOutputStream fos;
+  protected OutputStream fos;
 
   /** The filename. */
   protected String filename;
@@ -65,7 +67,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
     fos = null;
     size = 0;
     try {
-      fos = new FileOutputStream(filename);
+      fos = Files.newOutputStream(Paths.get(filename));
       openOutput();
       write(createResultsHeader());
     } catch (final Exception ex) {
