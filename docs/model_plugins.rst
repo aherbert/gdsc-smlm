@@ -3,29 +3,72 @@
 Model Plugins
 =============
 
-The following plugins allow single-molecule images to be simulated. This can be used for benchmarking fitting parameters by comparing the results of fitting the simulation to the actual known positions. Note that comparison of two sets of localisations can be done using the
-``Results Match Calculator``
-plugin (see section :numref:`{number}<results_plugins:Results Match Calculator>`).
-
-
-.. index:: ! Benchmarking
-
-Benchmarking
-------------
-
-The benchmarking system provides the means to optimise the SMLM tools to produce the best results on data that is typical of a microscope setup.
+The model plugins allow single-molecule images to be simulated. An optimisation pipeline is provided to select suitable parameters for each stage of the ``Peak Fit`` algorithm given the simulated image.
 
 *   Create an ideal PSF of the microscope (``PSF Creator`` and ``PSF Drift``)
 *   Draw spots on an image using a defined camera noise model at configured XY positions and z-depths (``Create Spot Data``)
 *   Identify candidates for fitting (``Filter Spot Data``)
 *   Fit candidate spots (``Fit Spot Data``)
-*   Filter the fitting results, i.e. accept or reject fitting results (``Benchmark Filter Analysis``)
+*   Filter the fitting results, i.e. accept or reject fitting results (``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters``)
 *   Save templates of the best fit configurations
 
-The benchmarking workflow will provide statistics on the recall and precision that can be achieved when fitting localisations of a given photon signal strength throughout the depth-of-field of the point spread function.
+The plugins are described in sections using the order presented on the ``Plugins > GDSC SMLM > Model`` menu.
 
-The plugins are described in the following sections using the order presented on the ``Plugins > GDSC SMLM > Model`` menu.
+.. index:: ! Optimisation Overview
 
+Optimisation Overview
+---------------------
+
+Localisation of single molecules from image data has many parameters controlling each stage of the processing. Parameter selection is dependent on the input image properties such as localisation density and background noise and the desired output quality such as the localisation precision and false positive rate.
+
+The GDSC SMLM software contains a benchmarking pipeline that allows optimisation of parameters using a simulated example input image with known ground-truth localisations. :numref:`Figure %s <fig_optimisation_overview>` shows an overview of the parameter optimisation pipeline. The pipeline exploits the image processing stages of the ``Peak Fit`` engine by separately optimising parameters for candidate identification and spot fitting and filtering. The initial stage is identification of the best spot filter to find and rank spot candidates that correspond to true localisations. The candidates are then fit to generate results that can be used to score different results filters and fit engine control parameters.
+
+Separation of the optimisation into stages allows exploration of a large parameter space while remaining computationally tractable. Note that some stages are not independent due to shared parameters. These stages can be iterated until convergence.
+
+.. _fig_optimisation_overview:
+.. figure:: images/optimisation_overview.svg
+    :align: center
+    :figwidth: 100%
+
+    ``Peak Fit`` parameter optimisation pipeline.
+
+    A simulated image with corresponding ground-truth localisations is input and the output is a fit configuration optimised for the reference image. Stage 1 identifies the best candidate spot filter and outputs spot candidates. Stage 2 iteratively fits the candidates and optimises first the result filter and then the fit engine parameters.
+
+
+.. index:: Optimisation Details
+
+Optimisation Details
+~~~~~~~~~~~~~~~~~~~~
+
+The optimisation uses the ground-truth localisations to score candidates or fit results as true positives (TP) if they are within a distance threshold of a ground-truth localisation, otherwise they are false positives (FP). Any ground-truth localisations not matched are false negatives (FN). The binary scoring metrics precision, recall and Jaccard index are used to assess respectively the fraction of predicted results that are valid, fraction of total results that were predicted and the similarity of the ground-truth and predicted results.
+
+.. math::
+
+    \text{Precision} & = \frac{\text{TP}}{\text{TP}+\text{FP}} \\
+    \text{Recall} & = \frac{\text{TP}}{\text{TP}+\text{FN}} \\
+    \text{Jaccard index} & = \frac{\text{TP}}{\text{TP}+\text{FP}+\text{FN}}
+
+The scoring metrics are dependent on the distance threshold. Using multiple distance thresholds allows computation of combined TP and FP totals where some results may be TP at one threshold and FP at a lower distance threshold. This allows results that are closer to the ground truth to have better scores. If matching is performed using a nearest-neighbour matching algorithm then the matches at lower distances will be a subset of matches at a higher distance threshold. The use of multiple thresholds can then be performed using a single nearest-neighbour matching at the highest threshold and scores allocated using a weight based on a configurable lower distance threshold and the distance between the matched results. The distance threshold limits should be appropriate to the simulated experiment such as using the Abbe diffraction limit for the upper distance (:math:`d = \lambda / 2\text{NA}`) and the expected localisation precision of the data for the lower limit.
+
+A candidate filter creates a ranked list of candidates for an input frame which are scored using the ground-truth localisations. The scored candidates for all the frames are then sorted by their ranking score, for example the peak intensity of the candidate location. The scoring metrics are computed using the top N candidates for all N from 1 to the total number of candidates creating plots of precision, recall and Jaccard against the candidate order. The precision is plotted against the recall to create a precision-recall plot. The area under the precision-recall curve (AUC) has a value between 0 and 1 where higher is better. The candidate filter is then allocated a score using the maximum Jaccard score and/or the AUC. When combining the scores they are normalised using the population mean and standard deviation to a z-score and summed. Parameters for each filter are varied over a range, for example the width of a Gaussian smoothing filter, and the filter with the best score is selected.
+
+The candidates from the best scoring filter are used for fitting. The ``Peak Fit`` fitting stage is a single pass algorithm that visits each candidate only once, fitting the candidate using a decision tree between fitting as a spot with neighbours, fitting as an isolated spot and optionally refitting the single spot as a dual spot. Spots are chosen dynamically using a filter and fitting stops based on stopping criteria. The algorithm uses the current results when processing later candidates and so the fitting stage used by the parameter optimisation runs the same decision algorithm to generate and use results when processing the frame. However in addition the optimisation runs all fitting pathways and saves all the results including any that would be discarded by the decision path. The stopping criteria are adjusted to allow a configured fraction of the candidates to be processed. This creates a large set of potential results for optimisation of parameters that control filtering and stopping criteria.
+
+The fit results are pre-processed for filter scoring. Each result is compared to the ground-truth localisations and any matches below the upper distance threshold are saved. Note there is a many-to-many relationship between results and ground-truth localisations; each match assignment is saved with the TP score corresponding to how close it matches the ground-truth. The results have filter criteria pre-computed such as the localisation precision, deviation from the initial peak width and the signal to noise ratio (SNR). The results can then be filtered with a results filter. The results filter uses the same decision tree as the ``Peak Fit`` fitting stage, the only difference is the fit results are pre-computed. The filter selects results from the pre-processed fit results for each frame. All the result assignments for the selected results are sorted by distance. A match score is then computed by selecting the first assignment for each ground-truth localisation and totalling the TP scores. Any unmatched ground-truth localisations are totalled as FN and any unmatched fit results as FP. The binary scoring metrics for the filter are computed using the totals from all frames. The best filter is selected from all configured results filters using the Jaccard index. Optionally the filter must pass a minimum precision value to be included allowing for example only filters with 95\% precision. Filters are grouped into sets if they all filter results using the same filter criteria. The weakest filter from the set can be used to exclude pre-processed fit results that would fail all filters in the set to increase scoring efficiency.
+
+Result filter parameter optimisation is split into two stages. The first stage optimises the result filter used to select fit results and uses the same configuration for the fitting decision tree (fit engine configuration). The second stage optimises the fit engine configuration and uses the same result filter. In the first stage a filter set is typically constructed by using an enumeration of each filter parameter over a range. The range for each filter parameter can be auto-computed using the observed range from the pre-computed fit results. Alternatively the filters can be loaded from file. The best scoring filter from the input filter sets is selected. An optional step is to explore the parameter space of a filter set by iteratively generating a new set of filters around the current optimum and repeating the scoring. New filter sets can be generated using enumeration of a reduced range or a genetic algorithm to mix parameters in a population of the best filters. The second stage of filter optimisation enumerates the parameters of the fit engine configuration while using the current best filter. Stage 1 and 2 can be repeated until convergence on the best results filter.
+
+Note that fitting and result filtering are not independent. During fitting results selected by the filter may be used in the fit of later candidates. The optimisation allows a repeat of the fitting process using the best filter. The new set of fit results are then assessed again using the same process. This can be iterated until the parameters of the best filter do not change or the results generated by the fit and filter process do not change. The output of the optimisation are the parameters of the spot filter, fit result filter and fit engine configuration which can be saved to file as a configuration template.
+
+The plugins that compose the ``Peak Fit`` optimisation pipeline are:
+
+* ``Filter Spot Data (Batch)`` (see :numref:`%s <model_plugins:Filter Spot Data (Batch)>`)
+* ``Fit Spot Data`` (see :numref:`%s <model_plugins:Fit Spot Data>`)
+* ``Benchmark Filter Analysis`` (see :numref:`%s <model_plugins:Benchmark Filter Analysis>`)
+* ``Benchmark Filter Parameters`` (see :numref:`%s <model_plugins:Benchmark Filter Parameters>`)
+* ``Iterate Filter Analysis`` (see :numref:`%s <model_plugins:Iterate Filter Analysis>`)
+
+The pipeline requires an input simulated image with ground truth localisation data. The ``Load Benchmark Data`` plugin (see :numref:`%s <model_plugins:Load Benchmark Data>`) can be used to load an externally generated ground truth dataset. Alternatively a dataset can be simulated by using the ``Create Data`` plugin (see :numref:`%s <model_plugins:Create Data>`).
 
 .. index:: ! PSF Creator
 
@@ -3157,7 +3200,7 @@ For some algorithms the input filter set is used to define the lower and upper b
       </FilterSet>
     </list>
 
-The ultimate limits for each filter parameter are set using the minimum and maximum value of that filter data in all the results generated by ``Benchmark Spot Fit`` plugin. This prevents evaluation of filters that will not discriminate the fit results.
+The ultimate limits for each filter parameter are set using the minimum and maximum value of that filter data in all the results generated by ``Fit Spot Data`` plugin. This prevents evaluation of filters that will not discriminate the fit results.
 
 
 .. index:: Evolution using a Genetic Algorithm
@@ -3752,7 +3795,7 @@ Run different filter parameters on a set of benchmark fitting results produced b
 
 The ``Iterate Filter Analysis`` plugin is designed to test the results filtering available in the ``Peak Fit`` plugin. The principle is that simulated localisations are identified as candidates for fitting and then fitted using the same routines available in ``Peak Fit``. This is done using the ``Filter Spot Data`` and ``Fit Spot Data`` plugins. The results can then be subjected to different filters to determine the best filter.
 
-Searching all parameters that control fitting and filtering of fitting results is computationally intractable. This plugin alternates the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
+Searching all parameters that control fitting and filtering of fitting results is computationally intractable. This plugin alternates the ``Fit Spot Data``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins until convergence. This can be performed within a reasonable time on a standard desktop machine making optimisation of fitting parameters available to computationally resource limited audiences.
 
 Iteration
 ~~~~~~~~~
@@ -3772,7 +3815,7 @@ The plugin uses the following routine:
 #. If converged then stop.
 #. Else go to 4.
 
-Steps 1-3 correspond to the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. The plugins are run interactively to collect settings on the first invocation. Step 1 is only run if the benchmark fitting results are not available for the current simulation, otherwise the current fit results are used. Step 4 is an optional step to ensure the filter is optimal for the current fit results before refitting the spot data. Without this option only a single optimisation of the filter is performed per refit of the spot data.
+Steps 1-3 correspond to the ``Fit Spot Data``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. The plugins are run interactively to collect settings on the first invocation. Step 1 is only run if the benchmark fitting results are not available for the current simulation, otherwise the current fit results are used. Step 4 is an optional step to ensure the filter is optimal for the current fit results before refitting the spot data. Without this option only a single optimisation of the filter is performed per refit of the spot data.
 
 The convergence is measured using:
 
@@ -3820,7 +3863,7 @@ The plugin requires the following parameters to control the iteration:
    * - Converge before refit
      - Set to **true** to require the filter parameters to converge before performing a refit of the spot data with the new best filter.
 
-The plugin requires that ``Benchmark Spot Fit`` has been run to initialise the fit settings. If this has not been done then it will be run once by the plugin. Note that the initial spot fit must be run with the default filter settings and not a previously optimised filter. If the filter settings are not the defaults then the plugin will always be run. This ensures a consistent start point for optimisation.
+The plugin requires that ``Fit Spot Data`` has been run to initialise the fit settings. If this has not been done then it will be run once by the plugin. Note that the initial spot fit must be run with the default filter settings and not a previously optimised filter. If the filter settings are not the defaults then the plugin will always be run. This ensures a consistent start point for optimisation.
 
 The plugin then shows a dialog to obtain options for ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters``. These plugins are very similar and a single dialog can collect the parameters for both plugins.
 
@@ -3829,7 +3872,7 @@ The plugin then iterates the optimisation of the result filter given the same fi
 Results
 ~~~~~~~
 
-The results are shown in the same result tables as the ``Benchmark Spot Fit``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. Progress is logged to the ``ImageJ`` log window.
+The results are shown in the same result tables as the ``Fit Spot Data``, ``Benchmark Filter Analysis`` and ``Benchmark Filter Parameters`` plugins. Progress is logged to the ``ImageJ`` log window.
 
 
 .. index:: ! Score Filter
