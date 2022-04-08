@@ -42,6 +42,8 @@
     <!-- Allow advanced for loop control -->
     <exclude name="ForLoopVariableCount" />
     <exclude name="AvoidReassigningLoopVariables" />
+    <!-- The LoggerUtils class is used to perform logging and guard the log statement -->
+    <exclude name="GuardLogStatement" />
   </rule>
   <rule ref="category/java/codestyle.xml/FieldNamingConventions">
     <properties>
