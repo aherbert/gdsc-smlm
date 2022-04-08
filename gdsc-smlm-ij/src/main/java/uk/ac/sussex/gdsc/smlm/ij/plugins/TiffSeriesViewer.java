@@ -52,7 +52,7 @@ import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
-import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
@@ -283,7 +283,7 @@ public class TiffSeriesViewer implements PlugIn {
       return;
     }
     ImageJUtils.showStatus("Opening TIFF ...");
-    final TrackProgressAdaptor progress = new TrackProgressAdaptor() {
+    final TrackProgressAdapter progress = new TrackProgressAdapter() {
       @Override
       public void progress(double fraction) {
         IJ.showProgress(fraction);

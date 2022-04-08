@@ -92,7 +92,7 @@ import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
 import uk.ac.sussex.gdsc.core.logging.TrackProgress;
-import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.DoubleMedianWindow;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -482,7 +482,7 @@ public class Fire implements PlugIn {
    * Dumb implementation of the track progress interface for parallel threads. Uses simple
    * synchronisation to increment total progress.
    */
-  private static class ParallelTrackProgress extends TrackProgressAdaptor {
+  private static class ParallelTrackProgress extends TrackProgressAdapter {
     final AtomicDouble done = new AtomicDouble();
     final int total;
 

@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import org.apache.commons.rng.UniformRandomProvider;
-import uk.ac.sussex.gdsc.core.utils.rng.JdkRandomAdaptor;
+import uk.ac.sussex.gdsc.core.utils.rng.JdkRandomAdapter;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
 /**
@@ -210,7 +210,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
   @Override
   public void shuffle(UniformRandomProvider randomSource) {
-    Collections.shuffle(results, new JdkRandomAdaptor(randomSource));
+    Collections.shuffle(results, new JdkRandomAdapter(randomSource));
   }
 
   @Override

@@ -86,7 +86,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.Pcg32;
-import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
@@ -282,7 +282,7 @@ public class CmosAnalysis implements PlugIn {
       final int size = (int) Math.sqrt(pixelVariance.length);
 
       // Pre-compute a set of Poisson numbers since this is slow
-      final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, photons);
+      final DiscreteSampler pd = PoissonSamplers.createPoissonSampler(rg, photons);
       // // For speed we can precompute a set of random numbers to reuse
       // final int[] poisson = new int[pixelVariance.length];
       // for (int i = poisson.length; i-- > 0;) {
@@ -555,7 +555,7 @@ public class CmosAnalysis implements PlugIn {
 
     final UniformRandomProvider rg = UniformRandomProviders.create();
 
-    final DiscreteSampler pd = PoissonSamplerUtils.createPoissonSampler(rg, settings.offset);
+    final DiscreteSampler pd = PoissonSamplers.createPoissonSampler(rg, settings.offset);
     final ContinuousSampler ed = SamplerUtils.createExponentialSampler(rg, settings.variance);
     final SharedStateContinuousSampler gauss =
         SamplerUtils.createGaussianSampler(rg, settings.gain, settings.gainStdDev);

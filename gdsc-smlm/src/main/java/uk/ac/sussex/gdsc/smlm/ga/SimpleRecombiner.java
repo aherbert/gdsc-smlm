@@ -28,7 +28,7 @@ import java.util.Arrays;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
-import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
 
 /**
  * Recombine sequence by selecting random positions for crossover.
@@ -52,7 +52,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
   public SimpleRecombiner(UniformRandomProvider random, double fraction, double meanChildren) {
     super(random);
     this.fraction = fraction;
-    additionalChildrenSampler = PoissonSamplerUtils.createPoissonSampler(random, meanChildren);
+    additionalChildrenSampler = PoissonSamplers.createPoissonSampler(random, meanChildren);
   }
 
   /**
@@ -93,7 +93,7 @@ public class SimpleRecombiner<T extends Comparable<T>> extends Randomiser implem
     int crossoverCount = 1;
     if (fraction > 0) {
       crossoverCount = Math.max(1,
-          PoissonSamplerUtils.nextPoissonSample(random, fraction * chromosome1.length()));
+          PoissonSamplers.nextPoissonSample(random, fraction * chromosome1.length()));
     }
 
     // Randomly select positions using a partial Fischer-Yates shuffle

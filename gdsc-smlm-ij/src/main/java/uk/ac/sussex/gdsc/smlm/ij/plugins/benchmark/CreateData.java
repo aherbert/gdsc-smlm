@@ -108,7 +108,7 @@ import uk.ac.sussex.gdsc.core.utils.UnicodeReader;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.BinomialDiscreteInverseCumulativeProbabilityFunction;
 import uk.ac.sussex.gdsc.core.utils.rng.MarsagliaTsangGammaSampler;
-import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplerUtils;
+import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomGeneratorAdapter;
 import uk.ac.sussex.gdsc.core.utils.rng.RandomUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
@@ -3190,7 +3190,7 @@ public class CreateData implements PlugIn {
         }
       } else {
         for (int i = 0; i < pixels2.length; i++) {
-          pixels2[i] = PoissonSamplerUtils.nextPoissonSample(rng, backgroundPixels[i]);
+          pixels2[i] = PoissonSamplers.nextPoissonSample(rng, backgroundPixels[i]);
         }
       }
     } else {

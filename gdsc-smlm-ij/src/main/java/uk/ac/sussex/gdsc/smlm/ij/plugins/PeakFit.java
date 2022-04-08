@@ -77,7 +77,7 @@ import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog.OptionListener;
 import uk.ac.sussex.gdsc.core.ij.gui.OffsetPointRoi;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper;
 import uk.ac.sussex.gdsc.core.ij.process.LutHelper.LutColour;
-import uk.ac.sussex.gdsc.core.logging.TrackProgressAdaptor;
+import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
@@ -736,7 +736,7 @@ public class PeakFit implements PlugInFilter {
       // TrackProgress logging is very verbose if the series has many images
       // Status is used only when reading TIFF info.
       // seriesImageSource.setTrackProgress(SimpleImageJTrackProgress.getInstance());
-      seriesImageSource.setTrackProgress(new TrackProgressAdaptor() {
+      seriesImageSource.setTrackProgress(new TrackProgressAdapter() {
         @Override
         public void status(String format, Object... args) {
           ImageJUtils.showStatus(() -> String.format(format, args));
