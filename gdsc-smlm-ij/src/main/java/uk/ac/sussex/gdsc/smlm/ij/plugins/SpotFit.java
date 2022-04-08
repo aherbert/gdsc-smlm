@@ -93,11 +93,12 @@ public class SpotFit implements PlugIn {
 
     boolean draw;
 
+    @SuppressWarnings("unused")
     CustomTextWindow(String title, String headings, int width, int height) {
       super(title, headings, "", width, height);
 
-      @SuppressWarnings("unused")
-      final TextPanelMouseListener ml = new TextPanelMouseListener(getTextPanel()) {
+      // Operates on the provided text panel
+      new TextPanelMouseListener(getTextPanel()) {
         @Override
         public void selected(int selectionStart, int selectionEnd) {
           // Only if drawing fit region is enabled
