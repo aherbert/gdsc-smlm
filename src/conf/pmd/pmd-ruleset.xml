@@ -135,6 +135,7 @@
         value="./ancestor::ClassOrInterfaceDeclaration[@SimpleName ='BaseFunctionSolver'
         or @SimpleName = 'BaseLsqLvmGradientProcedure' or @SimpleName = 'FixedPixelCameraModel'
         or @SimpleName = 'DirectFilter' or @SimpleName = 'Filter'
+        or @SimpleName = 'FilePeakResults' or @SimpleName = 'ImageSource'
         ]"/>
     </properties>
   </rule>
