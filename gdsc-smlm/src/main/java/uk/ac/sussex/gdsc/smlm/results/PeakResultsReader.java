@@ -559,8 +559,9 @@ public class PeakResultsReader {
             JsonFormat.parser().merge(json, psfBuilder);
             psf = psfBuilder.build();
           } catch (final InvalidProtocolBufferException ex) {
-            // This should be OK
-            System.err.println("Unable to deserialise the PSF settings");
+            // This will have to revert to a guess based on type
+            Logger.getLogger(PeakResultsReader.class.getName()).log(Level.INFO,
+                "Unable to deserialise the PSF settings", ex);
           }
         }
 
