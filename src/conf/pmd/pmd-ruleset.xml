@@ -142,5 +142,11 @@
       <property name="violationSuppressXPath" value="./ancestor-or-self::MethodDeclaration[@Name = 'of']"/>
     </properties>
   </rule>
+  <rule ref="category/java/errorprone.xml/MoreThanOneLogger">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="./ancestor-or-self::ClassOrInterfaceDeclaration[@SimpleName = 'FitWorker']"/>
+    </properties>
+  </rule>
 
 </ruleset>
