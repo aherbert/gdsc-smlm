@@ -342,7 +342,7 @@ Software for single molecule localisation microscopy (SMLM)
         <artifactId>maven-pmd-plugin</artifactId>
         <configuration>
           <!-- Ignore lower levels for now -->
-          <minimumPriority>3</minimumPriority>
+          <minimumPriority>2</minimumPriority>
         </configuration>
       </plugin>
     </plugins>

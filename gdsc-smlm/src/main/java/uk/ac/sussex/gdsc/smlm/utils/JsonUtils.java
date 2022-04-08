@@ -125,13 +125,9 @@ public final class JsonUtils {
   private static boolean canSimplify(CharSequence chars, int start, int end) {
     for (int j = start; j < end; j++) {
       final char ch = chars.charAt(j);
-      if (Character.isWhitespace(ch)) {
+      if (Character.isWhitespace(ch) || !(Character.isLetterOrDigit(ch) || isAllowed(ch))) {
         return false;
       }
-      if (Character.isLetterOrDigit(ch) || isAllowed(ch)) {
-        continue;
-      }
-      return false;
     }
     return true;
   }
