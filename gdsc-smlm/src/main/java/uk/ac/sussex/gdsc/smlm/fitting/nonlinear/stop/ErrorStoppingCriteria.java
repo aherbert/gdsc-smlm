@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import uk.ac.sussex.gdsc.core.logging.LoggerUtils;
 import uk.ac.sussex.gdsc.core.math.NumberUtils;
 import uk.ac.sussex.gdsc.core.utils.DoubleEquality;
@@ -158,8 +159,9 @@ public class ErrorStoppingCriteria extends StoppingCriteria {
       increment(a, true);
     }
 
-    if (log != null) {
-      LoggerUtils.log(log, Level.INFO,
+    final Logger l = log;
+    if (l != null && l.isLoggable(Level.INFO)) {
+      LoggerUtils.log(l, Level.INFO,
           "iter = %d, error = %function -> %function : %s : Continue = %b", getIteration(),
           oldError, newError, getErrorDescription(oldError, newError, result), notSatisfied);
     }

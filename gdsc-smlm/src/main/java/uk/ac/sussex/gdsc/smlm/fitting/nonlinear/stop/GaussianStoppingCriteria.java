@@ -25,6 +25,8 @@
 package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.stop;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.StoppingCriteria;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
@@ -66,7 +68,13 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
 
   @Override
   public void evaluate(double oldError, double newError, double[] a) {
-    final StringBuilder sb = logParameters(oldError, newError, a);
+    final Logger l = log;
+    final StringBuilder sb;
+    if (l != null && l.isLoggable(Level.INFO)) {
+      sb = logParameters(oldError, newError, a);
+    } else {
+      sb = null;
+    }
 
     if (newError > oldError) {
       // Fit is worse
@@ -91,7 +99,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
       // Check the parameters are still valid
       if (invalidCoordinates(a)) {
         notSatisfied = false;
-        if (log != null) {
+        if (sb != null) {
           sb.append(" Bad Coords: ").append(Arrays.toString(a));
         }
       }
@@ -99,42 +107,39 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
       increment(a, true);
     }
 
-    if (log != null) {
+    if (l != null && l.isLoggable(Level.INFO)) {
       sb.append(" Continue=").append(notSatisfied).append("\n");
-      log.info(sb.toString());
+      l.info(sb.toString());
     }
   }
 
   /**
-   * Creates a string representation of the peak parameters if logging.
+   * Creates a string representation of the peak parameters for logging.
    *
    * @param oldError the old error
    * @param newError the new error
    * @param a The parameters
-   * @return The string
+   * @return The string builder
    */
   protected StringBuilder logParameters(double oldError, double newError, double[] a) {
-    if (log != null) {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError)
-          .append(" -> ").append(newError);
-      if (newError <= oldError) {
+    final StringBuilder sb = new StringBuilder();
+    sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError)
+        .append(" -> ").append(newError);
+    if (newError <= oldError) {
 
-        for (int i = 0; i < peaks; i++) {
-          sb.append(", Peak").append(i + 1).append("=[");
-          int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
-          for (int j = 0; j < 2; j++, param++) {
-            if (j > 0) {
-              sb.append(",");
-            }
-            sb.append(a[param] - bestA[param]);
+      for (int i = 0; i < peaks; i++) {
+        sb.append(", Peak").append(i + 1).append("=[");
+        int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
+        for (int j = 0; j < 2; j++, param++) {
+          if (j > 0) {
+            sb.append(",");
           }
-          sb.append("]");
+          sb.append(a[param] - bestA[param]);
         }
+        sb.append("]");
       }
-      return sb;
     }
-    return null;
+    return sb;
   }
 
   /**
