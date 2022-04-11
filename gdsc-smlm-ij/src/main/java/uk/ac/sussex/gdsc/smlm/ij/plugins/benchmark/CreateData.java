@@ -155,8 +155,8 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCalculator;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.PsfCombiner;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.SmlmUsageTracker;
-import uk.ac.sussex.gdsc.smlm.ij.settings.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CreateDataSettings;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CreateDataSettingsOrBuilder;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.LoadLocalisationsSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
@@ -738,6 +738,142 @@ public class CreateData implements PlugIn {
      */
     public double getBackground() {
       return background;
+    }
+  }
+
+  /**
+   * Contain the helper functionality for the CreateDataSettings.
+   */
+  private static final class CreateDataSettingsHelper {
+    /** The create data settings. */
+    private final CreateDataSettingsOrBuilder createDataSettings;
+    /** Set to true if the camera type is {@link CameraType#EMCCD}. */
+    private final boolean isEmCcd;
+    /** The total gain. */
+    private double totalGain;
+
+    /**
+     * Instantiates a new CreateDataSettings helper.
+     *
+     * @param createDataSettings the create data settings
+     */
+    CreateDataSettingsHelper(CreateDataSettingsOrBuilder createDataSettings) {
+      if (createDataSettings == null) {
+        throw new IllegalArgumentException("CreateDataSettings must not be null");
+      }
+      if (!CalibrationProtosHelper.isCcdCameraType(createDataSettings.getCameraType())) {
+        throw new IllegalArgumentException("Helper instance must be used for a CCD-type camera");
+      }
+      this.createDataSettings = createDataSettings;
+      isEmCcd = createDataSettings.getCameraTypeValue() == CameraType.EMCCD_VALUE;
+
+      double tmp = 0;
+      final double emGain = getEmGain();
+      final double cameraGain = getCameraGain();
+      if (cameraGain > 0) {
+        tmp = (emGain > 0) ? emGain * cameraGain : cameraGain;
+      } else if (emGain > 0) {
+        tmp = emGain;
+      }
+      this.totalGain = tmp * getQuantumEfficiency();
+    }
+
+    /**
+     * Get the amplification (Count/electron). This is equal to the EM-gain multiplied by the camera
+     * gain. If either gain or QE are disabled then they will be ignored. An amplification of zero
+     * means no amplification is applied.
+     *
+     * @return the amplification
+     */
+    double getAmplification() {
+      return totalGain / getQuantumEfficiency();
+    }
+
+    /**
+     * EM-gain cannot be below 1. If so it is set to zero and disabled.
+     *
+     * <p>This is also zero for a non EM-CCD camera.
+     *
+     * @return the emGain
+     */
+    double getEmGain() {
+      if (isEmCcd) {
+        double emGain = createDataSettings.getEmGain();
+        if (emGain < 1) {
+          emGain = 0;
+        }
+        return emGain;
+      }
+      return 0;
+    }
+
+    /**
+     * Camera gain cannot be below 0. If so it is set to zero and disabled.
+     *
+     * @return the cameraGain (Count/electron)
+     */
+    double getCameraGain() {
+      double cameraGain = createDataSettings.getCameraGain();
+      if (cameraGain < 0) {
+        cameraGain = 0;
+      }
+      return cameraGain;
+    }
+
+    /**
+     * QE cannot be below 0 or above 1. If so it is set to one and disabled.
+     *
+     * @return the quantumEfficiency
+     */
+    double getQuantumEfficiency() {
+      double quantumEfficiency = createDataSettings.getQuantumEfficiency();
+      if (quantumEfficiency < 0 || quantumEfficiency > 1) {
+        quantumEfficiency = 1;
+      }
+      return quantumEfficiency;
+    }
+
+    /**
+     * Get the total gain (Count/Photon). This is equal to the EM-gain multiplied by the camera gain
+     * multiplied by the quantum efficiency. If either gain is disabled then they will be ignored.
+     * If the total gain is not above zero (due to invalid configuration) then 1 will be returned.
+     *
+     * @return the total gain safe
+     */
+    double getTotalGainSafe() {
+      return (totalGain > 0) ? totalGain : 1;
+    }
+
+    /**
+     * Gets the diffusion type.
+     *
+     * @param diffusionType the diffusion type
+     * @return the diffusion type
+     */
+    static DiffusionType getDiffusionType(int diffusionType) {
+      if (diffusionType >= 0 && diffusionType < DiffusionType.values().length) {
+        return DiffusionType.values()[diffusionType];
+      }
+      // Set a default
+      return DiffusionType.RANDOM_WALK;
+    }
+
+    /**
+     * Gets the read noise in Counts. This is the read noise in electrons multiplied by the camera
+     * gain.
+     *
+     * @return the read noise in Counts
+     */
+    double getReadNoiseInCounts() {
+      double readNoise = 0;
+      if (createDataSettings.getReadNoise() > 0) {
+        readNoise = createDataSettings.getReadNoise();
+        // Read noise is in electrons. Apply camera gain to get the noise in ADUs.
+        if (createDataSettings.getCameraGain() != 0) {
+          readNoise *= createDataSettings.getCameraGain();
+        }
+      }
+      return readNoise;
     }
   }
 

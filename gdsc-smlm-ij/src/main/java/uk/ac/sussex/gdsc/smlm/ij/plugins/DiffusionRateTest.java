@@ -67,7 +67,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
-import uk.ac.sussex.gdsc.smlm.ij.settings.CreateDataSettingsHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.CreateDataSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
@@ -318,8 +317,7 @@ class DiffusionRateTest implements PlugIn {
     }
 
     // Convert diffusion co-efficient into the standard deviation for the random walk
-    final DiffusionType diffusionType =
-        CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+    final DiffusionType diffusionType = getDiffusionType(settings.getDiffusionType());
     final double diffusionSigma = ImageModel.getRandomMoveDistance(diffusionRateInPixelsPerStep);
     ImageJUtils.log("Simulation step-size = %s nm",
         MathUtils.rounded(settings.getPixelPitch() * diffusionSigma, 4));
@@ -628,8 +626,7 @@ class DiffusionRateTest implements PlugIn {
     }
     String title2 = title + " Cumulative Jump Distance " + dimensions + "D";
     final double[][] jdHistogram = JumpDistanceAnalysis.cumulativeHistogram(values);
-    final DiffusionType diffusionType =
-        CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+    final DiffusionType diffusionType = getDiffusionType(settings.getDiffusionType());
     if (diffusionType == DiffusionType.GRID_WALK) {
       // In this case with a large simulation size the jumps are all
       // the same distance so the histogram is a single step. Check the plot
@@ -967,8 +964,7 @@ class DiffusionRateTest implements PlugIn {
     final float[] xValues = new float[totalSteps];
     final float[] x = new float[totalSteps];
     final float[] y = new float[totalSteps];
-    final DiffusionType diffusionType =
-        CreateDataSettingsHelper.getDiffusionType(settings.getDiffusionType());
+    final DiffusionType diffusionType = getDiffusionType(settings.getDiffusionType());
     double[] axis;
     if (diffusionType == DiffusionType.LINEAR_WALK) {
       axis = nextVector(SamplerUtils.createNormalizedGaussianSampler(rng));
@@ -1410,5 +1406,19 @@ class DiffusionRateTest implements PlugIn {
   static double getLastSimulationPrecision() {
     final SimulationData data = lastSimulation.get();
     return (data != null) ? data.precision : 0;
+  }
+
+  /**
+   * Gets the diffusion type.
+   *
+   * @param diffusionType the diffusion type
+   * @return the diffusion type
+   */
+  static DiffusionType getDiffusionType(int diffusionType) {
+    if (diffusionType >= 0 && diffusionType < DiffusionType.values().length) {
+      return DiffusionType.values()[diffusionType];
+    }
+    // Set a default
+    return DiffusionType.RANDOM_WALK;
   }
 }
