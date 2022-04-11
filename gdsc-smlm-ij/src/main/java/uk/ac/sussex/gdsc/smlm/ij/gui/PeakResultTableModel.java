@@ -126,13 +126,13 @@ public class PeakResultTableModel extends AbstractTableModel {
     this.calibration = resultsSource.getCalibration();
     this.psf = resultsSource.getPsf();
 
-    setShowDeviations(resultsSource.hasDeviations());
-    setShowZ(resultsSource.is3D());
-    setShowId(resultsSource.hasId());
-    setShowCategory(resultsSource.hasCategory());
-    setShowEndFrame(resultsSource.hasEndFrame());
-    setSource(resultsSource.getSource());
-    setConfiguration(resultsSource.getConfiguration());
+    this.showDeviations =resultsSource.hasDeviations();
+    this.showZ = resultsSource.is3D();
+    this.showId = resultsSource.hasId();
+    this.showCategory = resultsSource.hasCategory();
+    this.showEndFrame = resultsSource.hasEndFrame();
+    this.source = resultsSource.getSource();
+    this.configuration = resultsSource.getConfiguration();
   }
 
   /**

@@ -99,10 +99,8 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
   public TableColumnAdjuster(JTable table, int spacing, boolean installActions) {
     this.table = table;
     this.spacing = spacing;
-    setColumnHeaderIncluded(true);
-    setColumnDataIncluded(true);
-    setOnlyAdjustLarger(false);
-    setDynamicAdjustment(false);
+    this.isColumnHeaderIncluded = true;
+    this.isColumnDataIncluded = true;
     if (installActions) {
       installActions();
     }
