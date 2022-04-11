@@ -310,7 +310,7 @@ public class TcPalmAnalysis implements PlugIn {
       results.add(result);
     }
 
-    void updateBounds(PeakResult result) {
+    private void updateBounds(PeakResult result) {
       float value = result.getXPosition();
       if (value < x) {
         x = value;
@@ -328,7 +328,7 @@ public class TcPalmAnalysis implements PlugIn {
     /**
      * Called when no more results will be added to the cluster data.
      */
-    void finish() {
+    private void finish() {
       results.trimToSize();
       // Set dimensions non-zero so the rectangle contains/intersects methods do not ignore
       // the zero sized cluster.

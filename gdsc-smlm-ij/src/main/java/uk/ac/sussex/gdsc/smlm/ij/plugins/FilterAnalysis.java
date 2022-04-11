@@ -252,7 +252,7 @@ public class FilterAnalysis implements PlugIn {
       updateValues(xAxisName, xValues, yValues);
     }
 
-    void updateValues(String xAxisName, double[] xValues, double[] yValues) {
+    final void updateValues(String xAxisName, double[] xValues, double[] yValues) {
       this.xAxisName = xAxisName;
       this.xValues = xValues;
       this.yValues = yValues;

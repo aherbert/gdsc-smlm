@@ -1232,12 +1232,12 @@ public class BenchmarkFilterAnalysis
     double[] yValues;
     double score;
 
-    public NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
+    NamedPlot(String name, String xAxisName, double[] xValues, double[] yValues) {
       this.name = name;
       updateValues(xAxisName, xValues, yValues);
     }
 
-    public void updateValues(String xAxisName, double[] xValues, double[] yValues) {
+    final void updateValues(String xAxisName, double[] xValues, double[] yValues) {
       this.xAxisName = xAxisName;
       this.xValues = xValues;
       this.yValues = yValues;

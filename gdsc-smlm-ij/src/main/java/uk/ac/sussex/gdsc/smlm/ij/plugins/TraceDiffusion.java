@@ -1732,7 +1732,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       return jacobian;
     }
 
-    double[][] calculateJacobian() {
+    private double[][] calculateJacobian() {
       // Compute the gradients using calculus differentiation:
       // y = ax + c
       // dyDa = x

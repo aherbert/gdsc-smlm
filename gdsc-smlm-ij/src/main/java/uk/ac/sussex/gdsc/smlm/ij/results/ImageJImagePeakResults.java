@@ -242,8 +242,6 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
     ox = bounds.x;
     oy = bounds.y;
 
-    setBounds(bounds);
-
     // Set the limits used to check if a coordinate has 4 neighbour cells
     xlimit = imageWidth - 1;
     ylimit = imageHeight - 1;

@@ -1290,7 +1290,7 @@ public class PsfDrift implements PlugIn {
       imp.updateAndDraw();
     }
 
-    double getFwhm() {
+    final double getFwhm() {
       return 2 * cy[centre - offset];
     }
 

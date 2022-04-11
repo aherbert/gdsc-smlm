@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.model.DiffusionType;
 /**
  * Contain the helper functionality for the CreateDataSettings.
  */
-public class CreateDataSettingsHelper {
+public final class CreateDataSettingsHelper {
   /** The create data settings. */
   CreateDataSettingsOrBuilder createDataSettings;
 
@@ -43,9 +43,9 @@ public class CreateDataSettingsHelper {
   private double totalGain;
 
   /**
-   * Instantiates a new creates the data createDataSettings helper.
+   * Instantiates a new CreateDataSettings helper.
    *
-   * @param createDataSettings the create data createDataSettings
+   * @param createDataSettings the create data settings
    */
   public CreateDataSettingsHelper(CreateDataSettingsOrBuilder createDataSettings) {
     if (createDataSettings == null) {

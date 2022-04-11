@@ -365,7 +365,7 @@ public class PulseActivationAnalysis implements PlugIn {
 
     Point(float x, float y) {
       super(x, y);
-      xy = super.getPosition();
+      xy = new float[] {x, y};
     }
 
     @Override

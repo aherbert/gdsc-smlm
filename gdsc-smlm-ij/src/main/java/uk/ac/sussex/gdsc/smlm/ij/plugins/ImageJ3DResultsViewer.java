@@ -459,7 +459,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ResultsMetaData implements ListSelectionListener {
+  private static final class ResultsMetaData implements ListSelectionListener {
     PeakResultTableModel peakResultTableModel;
     ListSelectionModel listSelectionModel;
 
