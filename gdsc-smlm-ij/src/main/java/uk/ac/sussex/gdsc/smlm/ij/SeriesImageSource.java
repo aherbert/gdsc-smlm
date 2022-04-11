@@ -30,10 +30,11 @@ import ij.io.FileInfo;
 import ij.io.Opener;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
@@ -131,7 +132,7 @@ public class SeriesImageSource extends ImageSource {
   /**
    * Store details for an image.
    */
-  private abstract class Image {
+  private static abstract class Image {
     int width;
     int height;
     int size;
@@ -190,7 +191,7 @@ public class SeriesImageSource extends ImageSource {
    * Support all images ImageJ can read using a fixed image array.
    */
   @SuppressWarnings("unused")
-  private class ArrayImage extends Image {
+  private static class ArrayImage extends Image {
     final Object[] imageArray;
 
     ArrayImage() {
@@ -221,7 +222,7 @@ public class SeriesImageSource extends ImageSource {
    * <p>The methods that manipulate the internal state are synchronized to prevent multiple threads
    * causing read errors.
    */
-  private class TiffImage extends Image {
+  private static class TiffImage extends Image {
     /** The index map for OME-TIFF images, otherwise null. */
     final IndexMap indexMap;
     /** Cache of the file info for each image in the TIFF. */
@@ -406,7 +407,7 @@ public class SeriesImageSource extends ImageSource {
      * @param info the info
      * @return True if all the same size and type
      */
-    boolean allSameSizeAndType(ExtendedFileInfo[] info) {
+    final boolean allSameSizeAndType(ExtendedFileInfo[] info) {
       boolean ok = info[0].nImages == 1;
       contiguous = ok;
       final long startingOffset = info[0].getOffset();
@@ -731,6 +732,13 @@ public class SeriesImageSource extends ImageSource {
 
   private abstract static class BaseWorker implements Runnable {
     volatile boolean run = true;
+
+    /**
+     * Set the run flag to false.
+     */
+    void shutdown() {
+      run = false;
+    }
   }
 
   /**
@@ -842,7 +850,7 @@ public class SeriesImageSource extends ImageSource {
       // Close and clear if an error occurred
       rawFramesQueue.close((error != null));
 
-      run = false;
+      shutdown();
     }
   }
 
@@ -925,7 +933,7 @@ public class SeriesImageSource extends ImageSource {
         decodeQueue.close(false);
       }
 
-      run = false;
+      shutdown();
     }
   }
 
@@ -1019,7 +1027,7 @@ public class SeriesImageSource extends ImageSource {
         readQueue.close(false);
       }
 
-      run = false;
+      shutdown();
     }
   }
 
@@ -1074,7 +1082,7 @@ public class SeriesImageSource extends ImageSource {
         rawFramesQueue.close(false);
       }
 
-      run = false;
+      shutdown();
     }
   }
 
@@ -1242,10 +1250,9 @@ public class SeriesImageSource extends ImageSource {
    * <p>Copied from ij.io.Opener and removed all but the TIFF identification.
    */
   private static int getFileType(String filename) {
-    final File file = new File(filename);
     final byte[] buf = new byte[132];
     int read;
-    try (InputStream is = new FileInputStream(file)) {
+    try (InputStream is = Files.newInputStream(Paths.get(filename))) {
       read = is.read(buf, 0, 132);
       if (read < 4) {
         return Opener.UNKNOWN;
@@ -1278,13 +1285,12 @@ public class SeriesImageSource extends ImageSource {
       return Opener.TIFF_AND_DICOM;
     }
 
-    final String name = file.getName();
-    if (name.endsWith(".lsm")) {
+    if (filename.endsWith(".lsm")) {
       return Opener.UNKNOWN; // The LSM Reader plugin opens these files
     }
 
     // This is only for little endian
-    if (littleEndian && name.endsWith(".flex")) {
+    if (littleEndian && filename.endsWith(".flex")) {
       return Opener.UNKNOWN;
     }
 
@@ -1492,7 +1498,7 @@ public class SeriesImageSource extends ImageSource {
     if (threads != null) {
       // Signal the workers to stop
       for (final BaseWorker worker : workers) {
-        worker.run = false;
+        worker.shutdown();
       }
 
       // Close the queues. This will wake any thread waiting for them to have capacity.
