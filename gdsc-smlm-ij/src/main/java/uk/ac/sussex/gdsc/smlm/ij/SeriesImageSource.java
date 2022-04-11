@@ -183,9 +183,7 @@ public class SeriesImageSource extends ImageSource {
      *
      * @param freeMemory Set to true to free any cached memory
      */
-    void close(boolean freeMemory) {
-      // Do nothing
-    }
+    abstract void close(boolean freeMemory);
   }
 
   /**
@@ -208,6 +206,11 @@ public class SeriesImageSource extends ImageSource {
     @Override
     Object getFrame(int index) throws Exception {
       return imageArray[index];
+    }
+
+    @Override
+    void close(boolean freeMemory) {
+      // Do nothing
     }
   }
 
