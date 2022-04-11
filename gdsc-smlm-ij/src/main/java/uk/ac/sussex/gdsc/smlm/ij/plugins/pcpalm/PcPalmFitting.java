@@ -1499,7 +1499,7 @@ public class PcPalmFitting implements PlugIn {
      * @param parameters The parameters
      * @return the value
      */
-    abstract double evaluate(double radius, final double[] parameters);
+    abstract double evaluate(double radius, double[] parameters);
 
     /**
      * Evaluate the jacobian of the correlation function for all data points (see

@@ -51,7 +51,7 @@ public interface ItemShape {
    *
    * @param color the new color
    */
-  void setItemColor(final Color3f color);
+  void setItemColor(Color3f color);
 
   /**
    * Sets the color for each item.
@@ -59,5 +59,5 @@ public interface ItemShape {
    * @param color the new color
    * @throws IllegalArgumentException if the number of colours is incorrect
    */
-  void setItemColor(final Color3f[] color);
+  void setItemColor(Color3f[] color);
 }
