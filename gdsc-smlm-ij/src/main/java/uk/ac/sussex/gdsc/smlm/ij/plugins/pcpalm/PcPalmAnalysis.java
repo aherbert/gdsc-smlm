@@ -40,11 +40,13 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Rectangle;
+import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -270,13 +272,13 @@ public class PcPalmAnalysis implements PlugIn {
   }
 
   private void saveResult(XStream xs, CorrelationResult result) {
-    final String outputFilename = String.format("%s/%s.%d.xml", settings.resultsDirectory,
-        (result.spatialDomain) ? "Spatial" : "Frequency", result.id);
-    try (FileOutputStream fs = new FileOutputStream(outputFilename)) {
-      xs.toXML(result, fs);
+    final Path path = Paths.get(settings.resultsDirectory,
+        String.format("%s.%d.xml", (result.spatialDomain) ? "Spatial" : "Frequency", result.id));
+    try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(path))) {
+      // Use the instance (not .toXML() method) to allow the exception to be caught
+      xs.toXML(result, out);
     } catch (IOException | XStreamException ex) {
-      IJ.log(
-          "Failed to save correlation result to file: " + outputFilename + ". " + ex.getMessage());
+      IJ.log("Failed to save correlation result to file: " + path + ". " + ex.getMessage());
     }
   }
 
@@ -761,8 +763,8 @@ public class PcPalmAnalysis implements PlugIn {
    * @param showErrorBars the show error bars
    * @return the plot
    */
-  public static Plot plotCorrelation(double[][] gr, int offset, String plotTitle,
-      String yAxisTitle, boolean barChart, boolean showErrorBars) {
+  public static Plot plotCorrelation(double[][] gr, int offset, String plotTitle, String yAxisTitle,
+      boolean barChart, boolean showErrorBars) {
     final double[] x = new double[gr[1].length - offset];
     final double[] y = new double[x.length];
     System.arraycopy(gr[0], offset, x, 0, x.length);

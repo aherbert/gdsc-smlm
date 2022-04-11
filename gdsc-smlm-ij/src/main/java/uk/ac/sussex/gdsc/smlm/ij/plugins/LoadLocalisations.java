@@ -32,8 +32,9 @@ import ij.plugin.PlugIn;
 import java.awt.Font;
 import java.awt.TextArea;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -331,8 +332,8 @@ public class LoadLocalisations implements PlugIn {
     int count = 0;
     int headerCount = Math.max(0, settings.getHeaderLines());
 
-    try (BufferedReader input = new BufferedReader(
-        new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null))) {
+    try (BufferedReader input = new BufferedReader(new UnicodeReader(
+        Files.newInputStream(Paths.get(settings.getLocalisationsFilename())), null))) {
       final Pattern p = Pattern.compile(settings.getDelimiter());
 
       final int it = settings.getFieldT();
@@ -421,8 +422,8 @@ public class LoadLocalisations implements PlugIn {
    */
   private static List<String> loadLines(LoadLocalisationsSettings.Builder settings, int count) {
     final List<String> lines = new LocalList<>(count);
-    try (BufferedReader input = new BufferedReader(
-        new UnicodeReader(new FileInputStream(settings.getLocalisationsFilename()), null))) {
+    try (BufferedReader input = new BufferedReader(new UnicodeReader(
+        Files.newInputStream(Paths.get(settings.getLocalisationsFilename())), null))) {
       String line;
       while ((line = input.readLine()) != null && lines.size() < count) {
         lines.add(line);

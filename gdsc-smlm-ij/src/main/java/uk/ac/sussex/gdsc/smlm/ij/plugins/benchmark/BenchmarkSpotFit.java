@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import com.thoughtworks.xstream.XStreamException;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -41,7 +42,11 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2338,11 +2343,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     final ArrayList<FilterSet> filterList = new ArrayList<>(1);
     // Add Range keyword to identify as a range filter set
     filterList.add(new FilterSet("Range", filters));
-    try (FileOutputStream fos = new FileOutputStream(filename)) {
+    try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)))) {
       // Use the instance (not .toXML() method) to allow the exception to be caught
-      FilterXStreamUtils.getXStreamInstance().toXML(filterList, fos);
+      FilterXStreamUtils.getXStreamInstance().toXML(filterList, out);
       return true;
-    } catch (final Exception ex) {
+    } catch (final IOException | XStreamException ex) {
       IJ.log("Unable to save the filter set to file: " + ex.getMessage());
     }
     return false;

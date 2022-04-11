@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark;
 
+import com.thoughtworks.xstream.XStreamException;
 import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
@@ -45,11 +46,14 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.TextArea;
 import java.awt.TextField;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2255,9 +2259,9 @@ public class BenchmarkFilterAnalysis
         }
       }
 
-      final File file = new File(filename);
+      final Path path = Paths.get(filename);
       try (BufferedReader input =
-          new BufferedReader(new UnicodeReader(new FileInputStream(file), null))) {
+          new BufferedReader(new UnicodeReader(Files.newInputStream(path), null))) {
         // Use the instance so we can catch the exception
         final Object o = FilterXStreamUtils.getXStreamInstance().fromXML(input);
 
@@ -2296,7 +2300,7 @@ public class BenchmarkFilterAnalysis
         filterSets = expandFilters(filterSets);
 
         // Save for re-use
-        lastFilterList.set(Triple.of(filename, getLastModified(file), filterSets));
+        lastFilterList.set(Triple.of(filename, getLastModified(path), filterSets));
 
         return filterSets;
       } catch (final Exception ex) {
@@ -2558,8 +2562,7 @@ public class BenchmarkFilterAnalysis
       return false;
     }
     if (filename.equals(filterCache.getLeft())) {
-      final File file = new File(filename);
-      final long timeStamp = getLastModified(file);
+      final long timeStamp = getLastModified(Paths.get(filename));
       return timeStamp == filterCache.getMiddle();
     }
     return false;
@@ -2568,12 +2571,12 @@ public class BenchmarkFilterAnalysis
   /**
    * Gets the last modified time.
    *
-   * @param file the file
+   * @param path the path
    * @return the last modified time
    */
-  private static long getLastModified(File file) {
+  private static long getLastModified(Path path) {
     try {
-      return file.lastModified();
+      return Files.getLastModifiedTime(path).toMillis();
     } catch (final Exception ex) {
       return 0;
     }
@@ -5851,12 +5854,12 @@ public class BenchmarkFilterAnalysis
   }
 
   private static void saveFilterSet(FilterSet filterSet, String filename) {
-    try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")) {
+    try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)))) {
       final List<FilterSet> list = new ArrayList<>(1);
       list.add(filterSet);
-      // Use the instance so we can catch the exception
-      out.write(FilterXStreamUtils.getXStreamInstance().toXML(list));
-    } catch (final Exception ex) {
+      // Use the instance (not .toXML() method) to allow the exception to be caught
+      FilterXStreamUtils.getXStreamInstance().toXML(list, out);
+    } catch (final IOException | XStreamException ex) {
       IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
     }
   }

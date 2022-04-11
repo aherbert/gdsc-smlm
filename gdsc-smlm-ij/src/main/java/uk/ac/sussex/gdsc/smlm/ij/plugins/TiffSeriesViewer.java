@@ -41,9 +41,10 @@ import java.awt.Font;
 import java.awt.Label;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -365,7 +366,7 @@ public class TiffSeriesViewer implements PlugIn {
   private static void saveAsTiff(ImagePlus imp, String path) throws IOException {
     final FileInfo fi = imp.getFileInfo();
     fi.nImages = imp.getStackSize();
-    try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path))) {
+    try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(Paths.get(path)))) {
       new TiffEncoder(fi).write(out);
     }
   }

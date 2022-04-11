@@ -47,8 +47,6 @@ import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -1849,7 +1847,7 @@ public class CreateData implements PlugIn {
       if (filename != null) {
         settings.setPhotonDistributionFile(filename);
         try (BufferedReader in = new BufferedReader(new UnicodeReader(
-            new FileInputStream(new File(settings.getPhotonDistributionFile())), null))) {
+            Files.newInputStream(Paths.get(settings.getPhotonDistributionFile())), null))) {
           final StoredDataStatistics stats = new StoredDataStatistics();
           String str = in.readLine();
           double val = 0.0d;

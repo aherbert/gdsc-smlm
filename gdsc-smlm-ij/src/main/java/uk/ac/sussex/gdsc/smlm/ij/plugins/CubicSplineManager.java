@@ -37,9 +37,10 @@ import java.awt.Label;
 import java.awt.TextField;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -328,7 +329,7 @@ public class CubicSplineManager implements PlugIn {
     }
 
     // Try to save to file
-    try (FileOutputStream os = new FileOutputStream(filename)) {
+    try (OutputStream os = Files.newOutputStream(Paths.get(filename))) {
       psfModel.imagePsf.writeDelimitedTo(os);
       psfModel.splineData.write(os, SimpleImageJTrackProgress.getInstance());
 
@@ -386,7 +387,7 @@ public class CubicSplineManager implements PlugIn {
 
   private static CubicSplinePsf loadFromFile(String name, String filename) {
     // Try to load from file
-    try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
+    try (InputStream is = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
       IJ.showStatus("Loading cubic spline: " + name);
       final ImagePSF imagePsf = ImagePSF.parseDelimitedFrom(is);
       final CubicSplineData function =

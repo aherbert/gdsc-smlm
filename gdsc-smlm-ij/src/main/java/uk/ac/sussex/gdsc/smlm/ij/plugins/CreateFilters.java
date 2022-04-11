@@ -30,11 +30,12 @@ import ij.plugin.PlugIn;
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -235,8 +236,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         filterSettings.setFilterSetFilename(filterSettings.getFilterSetFilename() + ".xml");
       }
 
-      try (OutputStreamWriter out = new OutputStreamWriter(
-          new FileOutputStream(filterSettings.getFilterSetFilename()), "UTF-8")) {
+      try (Writer out = Files.newBufferedWriter(Paths.get(filterSettings.getFilterSetFilename()))) {
         out.write(uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(sw.toString()));
         SettingsManager.writeSettings(filterSettings.build());
         IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());

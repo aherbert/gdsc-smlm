@@ -42,11 +42,11 @@ import java.awt.Panel;
 import java.awt.Point;
 import java.awt.ScrollPane;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -266,11 +266,11 @@ public class SmlmTools extends PlugInFrame {
   private static InputStream getToolsPluginsConfig() {
     // Look for smlm.config in the plugin directory
     final String pluginsDir = IJ.getDirectory("plugins");
-    final String filename = pluginsDir + File.separator + "smlm.config";
-    if (new File(filename).exists()) {
+    final Path path = Paths.get(pluginsDir, "smlm.config");
+    if (Files.exists(path)) {
       try {
-        return new FileInputStream(filename);
-      } catch (final FileNotFoundException ex) {
+        return Files.newInputStream(path);
+      } catch (IOException e) {
         // Ignore and resort to default
       }
     }

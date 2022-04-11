@@ -35,9 +35,10 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import java.awt.Color;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1390,12 +1391,11 @@ class DiffusionRateTest implements PlugIn {
     if (pluginSettings.simpleDir == null) {
       return;
     }
-    final String newLine = System.lineSeparator();
-    final File file = new File(pluginSettings.simpleDir, prefix + dimensions + "d.txt");
-    try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
+    try (BufferedWriter out = Files
+        .newBufferedWriter(Paths.get(pluginSettings.simpleDir, prefix + dimensions + "d.txt"))) {
       for (final double d : storedDataStatistics.getValues()) {
         out.write(Double.toString(d));
-        out.write(newLine);
+        out.newLine();
       }
     } catch (final Exception ex) {
       ex.printStackTrace(); // Show the error
