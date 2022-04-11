@@ -438,13 +438,11 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
 
   @Override
   public void run(ImageProcessor ip) {
-    int result;
-    for (;;) {
-      result = estimatePsf();
-      if (settings.getIterate() && result == TRY_AGAIN) {
-        continue;
+    int result = estimatePsf();
+    if (settings.getIterate()) {
+      while (result == TRY_AGAIN) {
+        result = estimatePsf();
       }
-      break;
     }
     if (result < INSUFFICIENT_PEAKS) {
       log("Finished. Check the table for final parameters");

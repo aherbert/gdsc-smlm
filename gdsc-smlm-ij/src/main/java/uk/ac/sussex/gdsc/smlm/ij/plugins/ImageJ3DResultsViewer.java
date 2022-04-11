@@ -2509,10 +2509,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
             content = (Content) path.getNode(j);
           }
         }
-        if (content == null) {
-          continue;
+        if (content != null) {
+          return Pair.of(content, result[i].getIntersectionInfos()[0]);
         }
-        return Pair.of(content, result[i].getIntersectionInfos()[0]);
       }
       return null;
     } catch (final Exception ex) {
