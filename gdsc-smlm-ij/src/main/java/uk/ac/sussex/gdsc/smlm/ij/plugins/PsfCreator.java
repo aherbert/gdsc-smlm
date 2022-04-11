@@ -131,7 +131,7 @@ import uk.ac.sussex.gdsc.smlm.ij.IJImageSource;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.CubicSplineManager.CubicSplinePsf;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.benchmark.CreateData;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCreatorSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.GuiProtosHelper;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GuiSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.ImagePsfHelper;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.Image2DAligner;
@@ -4207,7 +4207,7 @@ public class PsfCreator implements PlugInFilter {
     if (ImageJUtils.isShowGenericDialog()) {
       gd.addAndGetButton("Reset", event -> {
         final boolean interactive = PsfCreator.this.settings.getInteractiveMode();
-        final PSFCreatorSettings defaults = GuiProtosHelper.defaultPSFCreatorSettings;
+        final PSFCreatorSettings defaults = GuiSettings.DefaultPSFCreatorSettings.INSTANCE;
         int ti = 0;
         int cbi = 0;
         tf.get(ti++).setText(Double.toString(defaults.getAnalysisWindow()));

@@ -126,7 +126,7 @@ import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.PSFCalculatorSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.GuiProtosHelper;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GuiSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.model.camera.CameraModel;
@@ -193,7 +193,7 @@ public class PeakFit implements PlugInFilter {
 
   /** The calculator setting used for the Simple Fit wizard. This is immutable. */
   private static PSFCalculatorSettings calculatorSettings =
-      GuiProtosHelper.defaultPSFCalculatorSettings;
+      GuiSettings.DefaultPSFCalculatorSettings.INSTANCE;
 
   /** The plugin settings. Loaded when a dialog is shown. */
   private Settings settings;

@@ -999,7 +999,7 @@ public final class SettingsManager {
    * @return the GUIFilterSettings
    */
   public static GUIFilterSettings readGuiFilterSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultGUIFilterSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultGUIFilterSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1009,7 +1009,8 @@ public final class SettingsManager {
    * @return the PSFCalculatorSettings
    */
   public static PSFCalculatorSettings readPsfCalculatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFCalculatorSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFCalculatorSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1019,7 +1020,8 @@ public final class SettingsManager {
    * @return the PSFEstimatorSettings
    */
   public static PSFEstimatorSettings readPsfEstimatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFEstimatorSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFEstimatorSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1029,7 +1031,8 @@ public final class SettingsManager {
    * @return the CreateDataSettings
    */
   public static CreateDataSettings readCreateDataSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultCreateDataSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultCreateDataSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1039,7 +1042,8 @@ public final class SettingsManager {
    * @return the LoadLocalisationsSettings
    */
   public static LoadLocalisationsSettings readLoadLocalisationsSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultLoadLocalisationsSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultLoadLocalisationsSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1049,7 +1053,8 @@ public final class SettingsManager {
    * @return the ClusteringSettings
    */
   public static ClusteringSettings readClusteringSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultClusteringSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultClusteringSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1059,7 +1064,7 @@ public final class SettingsManager {
    * @return the OpticsSettings
    */
   public static OpticsSettings readOpticsSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultOpticsSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultOpticsSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1069,7 +1074,7 @@ public final class SettingsManager {
    * @return the ConfigurationTemplateSettings
    */
   public static ConfigurationTemplateSettings readConfigurationTemplateSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultConfigurationTemplateSettings)
+    return new ConfigurationReader<>(GuiSettings.DefaultConfigurationTemplateSettings.INSTANCE)
         .read(flags);
   }
 
@@ -1124,7 +1129,8 @@ public final class SettingsManager {
    * @return the NucleusMaskSettings
    */
   public static NucleusMaskSettings readNucleusMaskSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultNucleusMaskSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultNucleusMaskSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1134,7 +1140,8 @@ public final class SettingsManager {
    * @return the PSFCreatorSettings
    */
   public static PSFCreatorSettings readPsfCreatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultPSFCreatorSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFCreatorSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1144,7 +1151,8 @@ public final class SettingsManager {
    * @return the CameraModelManagerSettings
    */
   public static CameraModelManagerSettings readCameraModelManagerSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultCameraModelManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultCameraModelManagerSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1154,7 +1162,7 @@ public final class SettingsManager {
    * @return the CameraModelAnalysisSettings
    */
   public static CameraModelAnalysisSettings readCameraModelAnalysisSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultCameraModelAnalysisSettings)
+    return new ConfigurationReader<>(GuiSettings.DefaultCameraModelAnalysisSettings.INSTANCE)
         .read(flags);
   }
 
@@ -1168,7 +1176,7 @@ public final class SettingsManager {
   public static CameraModelFisherInformationAnalysisSettings
       readCameraModelFisherInformationAnalysisSettings(int flags) {
     return new ConfigurationReader<>(
-        GuiProtosHelper.defaultCameraModelFisherInformationAnalysisSettings).read(flags);
+        GuiSettings.DefaultCameraModelFisherInformationAnalysisSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1178,7 +1186,8 @@ public final class SettingsManager {
    * @return the CubicSplineManagerSettings
    */
   public static CubicSplineManagerSettings readCubicSplineManagerSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultCubicSplineManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultCubicSplineManagerSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1188,7 +1197,8 @@ public final class SettingsManager {
    * @return the FailCountManagerSettings
    */
   public static FailCountManagerSettings readFailCountManagerSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultFailCountManagerSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultFailCountManagerSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -1208,8 +1218,8 @@ public final class SettingsManager {
    * @return the AstigmatismModelManagerSettings
    */
   public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultAstigmatismModelManagerSettings)
-        .read(flags);
+    return new ConfigurationReader<>(
+        GuiSettings.DefaultAstigmatismModelManagerSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1239,7 +1249,7 @@ public final class SettingsManager {
    * @return the ImageJ3DResultsViewerSettings
    */
   public static ImageJ3DResultsViewerSettings readImageJ3DResultsViewerSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultImageJ3DResultsViewerSettings)
+    return new ConfigurationReader<>(GuiSettings.DefaultImageJ3DResultsViewerSettings.INSTANCE)
         .read(flags);
   }
 
@@ -1250,7 +1260,7 @@ public final class SettingsManager {
    * @return the SpotFitSettings
    */
   public static SpotFitSettings readSpotFitSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultSpotFitSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultSpotFitSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1270,7 +1280,8 @@ public final class SettingsManager {
    * @return the TcPalmAnalysisSettings
    */
   public static TcPalmAnalysisSettings readTcPalmAnalysisSettings(int flags) {
-    return new ConfigurationReader<>(GuiProtosHelper.defaultTcPalmAnalysisSettings).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultTcPalmAnalysisSettings.INSTANCE)
+        .read(flags);
   }
 
   /**

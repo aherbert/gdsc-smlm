@@ -42,7 +42,7 @@ import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.ij.plugins.ResultsManager.InputSource;
 import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.GUIFilterSettings;
-import uk.ac.sussex.gdsc.smlm.ij.settings.GuiProtosHelper;
+import uk.ac.sussex.gdsc.smlm.ij.settings.GuiSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
@@ -60,7 +60,7 @@ public class FilterResults implements PlugIn {
   private MemoryPeakResults results;
 
   private GUIFilterSettings.Builder filterSettings =
-      GuiProtosHelper.defaultGUIFilterSettings.toBuilder();
+      GuiSettings.DefaultGUIFilterSettings.INSTANCE.toBuilder();
 
   // Used to pass data from analyseResults() to checkLimits()
   private float minDrift = Float.MAX_VALUE;
