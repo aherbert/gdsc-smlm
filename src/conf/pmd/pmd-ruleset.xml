@@ -45,7 +45,6 @@
     <!-- The LoggerUtils class is used to perform logging and guard the log statement -->
     <exclude name="GuardLogStatement" />
   </rule>
-  <!-- 
   <rule ref="category/java/codestyle.xml/FieldNamingConventions">
     <properties>
       <property name="exclusions" value="serialVersionUID|logger" />
@@ -53,11 +52,10 @@
   </rule>
   <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
     <properties>
-      Allow underscores using letters for add, subtract, multiply, divide.  
+      <!-- Allow underscores using letters for add, subtract, multiply, divide. -->
       <property name="finalVarPattern" value="[a-z][a-zA-Z0-9]*(_[asmd]_[a-zA-Z0-9]*)*" />
     </properties>
   </rule>
-  -->
   <!-- This allows the commonly used construct for decrementing in a for loop. -->
   <rule ref="category/java/errorprone.xml/AssignmentInOperand">
     <properties>
@@ -92,11 +90,6 @@
     <!--  Allow builders to have setters that return something -->
     <exclude name="LinguisticNaming" />
     <exclude name="UseUnderscoresInNumericLiterals" />
-
-    <!-- TODO: Reinstate after correcting -->
-    <exclude name="FieldNamingConventions" />
-    <exclude name="LocalVariableNamingConventions" />
-    <exclude name="FormalParameterNamingConventions" />
   </rule>
   <rule ref="category/java/design.xml">
     <exclude name="TooManyMethods" />
