@@ -2641,17 +2641,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
      */
     public int run(Content content);
 
-    public void finish();
-  }
-
-  private abstract static class BaseContentAction implements ContentAction {
-    @Override
-    public void finish() {
-      // Ignore
+    default public void finish() {
+      // Do nothing
     }
   }
 
-  private static class ChangeColourContentAction extends BaseContentAction {
+  private static class ChangeColourContentAction implements ContentAction {
     ImageJ3DResultsViewerSettings.Builder settings;
 
     @Override
@@ -2702,7 +2697,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ChangePointSizeContentAction extends BaseContentAction {
+  private static class ChangePointSizeContentAction implements ContentAction {
     float pointSize = -1;
 
     @Override
@@ -2763,7 +2758,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class UpdatePointSizeContentAction extends BaseContentAction {
+  private static class UpdatePointSizeContentAction implements ContentAction {
     static final UpdatePointSizeContentAction INCREASE = new UpdatePointSizeContentAction(true);
     static final UpdatePointSizeContentAction DECREASE = new UpdatePointSizeContentAction(false);
 
@@ -2808,7 +2803,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ResetViewContentAction extends BaseContentAction {
+  private static class ResetViewContentAction implements ContentAction {
     final boolean error;
 
     public ResetViewContentAction(boolean error) {
@@ -2830,7 +2825,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ToggleTransparentAction extends BaseContentAction {
+  private static class ToggleTransparentAction implements ContentAction {
     private static class TransparencyData {
       float transparency;
       float[] alpha;
@@ -2973,7 +2968,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ToggleShadedAction extends BaseContentAction {
+  private static class ToggleShadedAction implements ContentAction {
     @Override
     public int run(Content content) {
       if (!(content.getUserData() instanceof ResultsMetaData)) {
@@ -2994,7 +2989,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private class FindEyePointContentAction extends BaseContentAction {
+  private class FindEyePointContentAction implements ContentAction {
     ImageJ3DResultsViewerSettings.Builder settings;
     final Point3d eyePtInVWorld = new Point3d();
     final Point3d dir0InVWorld = new Point3d();
@@ -3138,7 +3133,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class ColourSurfaceContentAction extends BaseContentAction {
+  private static class ColourSurfaceContentAction implements ContentAction {
     private static final AtomicReference<Options> optionsRef = new AtomicReference<>(new Options());
 
     private static class Options {
@@ -3200,7 +3195,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private class CropResultsAction extends BaseContentAction {
+  private class CropResultsAction implements ContentAction {
     CoordinatePredicate shape;
     private final Point2d p2d = new Point2d();
     ImageJ3DResultsViewerSettings.Builder settings;
@@ -3316,7 +3311,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static class UpdateHighlightColourAction extends BaseContentAction {
+  private static class UpdateHighlightColourAction implements ContentAction {
     @Override
     public int run(Content content) {
       if (content.getUserData() instanceof ResultsMetaData) {
