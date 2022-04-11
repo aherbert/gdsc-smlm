@@ -31,10 +31,10 @@ import com.google.protobuf.Parser;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 import ij.Prefs;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -133,7 +133,7 @@ public final class SettingsManager {
   public static final int FLAG_SHOW_FILE_NOT_FOUND_ON_READ = 0x00000010;
 
   /** The settings directory. */
-  private static File settingsDirectory;
+  private static String settingsDirectory;
 
   static {
     setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
@@ -739,7 +739,7 @@ public final class SettingsManager {
    *         directory)
    */
   public static String getSettingsDirectory() {
-    return settingsDirectory.getPath();
+    return settingsDirectory;
   }
 
   /**
@@ -749,9 +749,9 @@ public final class SettingsManager {
    */
   public static void setSettingsDirectory(String directory) {
     Prefs.set(Constants.settingsDirectory, directory);
-    settingsDirectory = new File(directory);
+    settingsDirectory = directory;
     try {
-      Files.createDirectories(settingsDirectory.toPath());
+      Files.createDirectories(Paths.get(settingsDirectory));
     } catch (final IOException ex) {
       logger.log(Level.SEVERE, "Unable create settings directory", ex);
     }
@@ -821,14 +821,14 @@ public final class SettingsManager {
   }
 
   /**
-   * Creates the settings file using the class name to create the filename in the settings
+   * Creates the settings file path using the class name to create the filename in the settings
    * directory.
    *
    * @param clazz the clazz
-   * @return the file
+   * @return the path
    */
-  private static File createSettingsFile(Class<?> clazz) {
-    return new File(settingsDirectory, clazz.getSimpleName().toLowerCase(Locale.US) + ".settings");
+  private static Path createSettingsPath(Class<?> clazz) {
+    return Paths.get(settingsDirectory, clazz.getSimpleName().toLowerCase(Locale.US) + ".settings");
   }
 
   /**
@@ -849,7 +849,7 @@ public final class SettingsManager {
    * @return true, if successful
    */
   public static boolean writeSettings(Message message, int flags) {
-    return writeMessage(message, createSettingsFile(message.getClass()), flags);
+    return writeMessage(message, createSettingsPath(message.getClass()), flags);
   }
 
   /**
@@ -896,14 +896,14 @@ public final class SettingsManager {
    * @return true, if the settings are cleared
    */
   public static boolean clearSettings(Class<?> clazz) {
-    final File file = createSettingsFile(clazz);
+    final Path path = createSettingsPath(clazz);
     try {
-      if (file.exists()) {
-        Files.delete(file.toPath());
+      if (Files.exists(path)) {
+        Files.delete(path);
       }
-      return true; // Already clear
-    } catch (final Exception ex) {
-      logger.log(Level.WARNING, ex, () -> "Unable to clear the settings file: " + file);
+      return true;
+    } catch (final IOException ex) {
+      logger.log(Level.WARNING, ex, () -> "Unable to clear the settings file: " + path);
     }
     return false;
   }
@@ -943,7 +943,7 @@ public final class SettingsManager {
      */
     @SuppressWarnings("unchecked")
     public T read(int flags) {
-      T msg = (T) readMessage(mt.getParserForType(), createSettingsFile(mt.getClass()), flags);
+      T msg = (T) readMessage(mt.getParserForType(), createSettingsPath(mt.getClass()), flags);
       // If null use the default unless explicitly not requested
       if (msg == null && BitFlagUtils.anyNotSet(flags, FLAG_NO_DEFAULT)) {
         msg = mt;
@@ -1284,21 +1284,21 @@ public final class SettingsManager {
    * @return True if written
    */
   public static boolean writeMessage(Message message, String filename, int flags) {
-    return writeMessage(message, new File(filename), flags);
+    return writeMessage(message, Paths.get(filename), flags);
   }
 
   /**
    * Write the message to file.
-   *
+   * 
    * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param message the message
-   * @param file the file
+   * @param path the path
    * @param flags the flags
    * @return True if written
    */
-  public static boolean writeMessage(Message message, File file, int flags) {
-    try (FileOutputStream fs = new FileOutputStream(file)) {
+  public static boolean writeMessage(Message message, Path path, int flags) {
+    try (OutputStream fs = new BufferedOutputStream(Files.newOutputStream(path))) {
       return writeMessage(message, fs, flags);
     } catch (final IOException ex) {
       logWriteError(flags, ex);
@@ -1337,26 +1337,26 @@ public final class SettingsManager {
    * @return the message
    */
   public static Message readMessage(Parser<? extends Message> parser, String filename, int flags) {
-    return readMessage(parser, new File(filename), flags);
+    return readMessage(parser, Paths.get(filename), flags);
   }
 
   /**
    * Read the message from file.
-   *
+   * 
    * <p>If this fails then an error message is written to the ImageJ log
    *
    * @param parser the parser
-   * @param file the file
+   * @param path the path
    * @param flags the flags
    * @return the message
    */
-  public static Message readMessage(Parser<? extends Message> parser, File file, int flags) {
-    try (FileInputStream fs = new FileInputStream(file)) {
-      return readMessage(parser, fs, flags);
+  public static Message readMessage(Parser<? extends Message> parser, Path path, int flags) {
+    try (InputStream is = new BufferedInputStream(Files.newInputStream(path))) {
+      return readMessage(parser, is, flags);
     } catch (final IOException ex) {
       // Only print this if the file-not-found flag is present
       // and not silent. This prevents warnings when settings files
-      // have yet to be created, i.ex. for new users of a settings file.
+      // have yet to be created, i.e. for new users of a settings file.
       if (BitFlagUtils.areSet(flags, FLAG_SHOW_FILE_NOT_FOUND_ON_READ)) {
         logReadError(flags, ex);
       }
