@@ -33,10 +33,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -68,6 +70,8 @@ import uk.ac.sussex.gdsc.smlm.results.ImageSource;
  * return an incorrect value.
  */
 public class SeriesImageSource extends ImageSource {
+  private static final String UNEXPECTED_INTERRUPTION = "Unexpected interruption";
+
   /** The buffer limit for reading TIFF images into memory. Default = 30MB */
   private int bufferLimit = 31457280;
 
@@ -75,7 +79,7 @@ public class SeriesImageSource extends ImageSource {
   private long sequentialReadBufferLimit = 52428800L;
 
   /** The list of image filenames. */
-  private ArrayList<String> images;
+  List<String> images;
   /**
    * Flag indicating if the image series contains only TIFF images. No other formats are currently
    * supported.
@@ -87,13 +91,13 @@ public class SeriesImageSource extends ImageSource {
    * image for the frame.
    */
   @XStreamOmitField
-  private int[] imageSize;
+  int[] imageSize;
 
   /**
    * Used to cache data about the TIFF images.
    */
   @XStreamOmitField
-  private ImageData[] imageData;
+  ImageData[] imageData;
 
   // Used for frame-based read
   @XStreamOmitField
@@ -104,32 +108,33 @@ public class SeriesImageSource extends ImageSource {
   private int numberOfThreads = 1;
   private int numberOfImages = 1;
 
+  /** The track progress. */
   @XStreamOmitField
-  private TrackProgress trackProgress = NullTrackProgress.getInstance();
+  TrackProgress trackProgress = NullTrackProgress.getInstance();
 
   // Used to process the files into images
   @XStreamOmitField
-  private ArrayList<BaseWorker> workers;
+  private List<BaseWorker> workers;
   @XStreamOmitField
-  private ArrayList<Thread> threads;
+  private List<Thread> threads;
 
   /** The queue for in-memory buffered images awaiting TIFF decoding. */
   @XStreamOmitField
-  private CloseableBlockingQueue<NextSource> decodeQueue;
+  CloseableBlockingQueue<NextSource> decodeQueue;
   /** The queue for in-memory buffered images awaiting TIFF reading. */
   @XStreamOmitField
-  private CloseableBlockingQueue<NextSource> readQueue;
+  CloseableBlockingQueue<NextSource> readQueue;
 
   /** Used for sequential reading to queue the raw frames. */
   @XStreamOmitField
-  private CloseableBlockingQueue<Object> rawFramesQueue;
+  CloseableBlockingQueue<Object> rawFramesQueue;
 
   /**
    * The first error that occurred during sequential reading. This is stored, the queue is shutdown
    * and then this can be thrown in the next() method.
    */
   @XStreamOmitField
-  private DataException error;
+  RuntimeException error;
 
   /**
    * Store details for an image.
@@ -177,9 +182,9 @@ public class SeriesImageSource extends ImageSource {
      *
      * @param index the frame number
      * @return the frame
-     * @throws Exception the exception
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    abstract Object getFrame(int index) throws Exception;
+    abstract Object getFrame(int index) throws IOException;
 
     /**
      * Close the image.
@@ -207,7 +212,7 @@ public class SeriesImageSource extends ImageSource {
     }
 
     @Override
-    Object getFrame(int index) throws Exception {
+    Object getFrame(int index) {
       return imageArray[index];
     }
 
@@ -294,12 +299,12 @@ public class SeriesImageSource extends ImageSource {
           size = fi.nImages;
           contiguous = true;
         }
-        if (size != 0) {
-          bytesPerFrame = getBytesPerFrame(fi.fileType);
-          reader = new FastImageReader(fi);
-        } else {
+        if (size == 0) {
           canRead = false;
           bytesPerFrame = 0;
+        } else {
+          bytesPerFrame = getBytesPerFrame(fi.fileType);
+          reader = new FastImageReader(fi);
         }
       } else {
         canRead = false;
@@ -350,7 +355,7 @@ public class SeriesImageSource extends ImageSource {
           size = indexMap.getSize();
           contiguous = true;
         }
-        if (size != 0) {
+        if (size == 0) {
           bytesPerFrame = getBytesPerFrame(fi.fileType);
           reader = new FastImageReader(fi);
         } else {
@@ -363,7 +368,7 @@ public class SeriesImageSource extends ImageSource {
       }
     }
 
-    private boolean isSupported(int fileType) {
+    private static boolean isSupported(int fileType) {
       switch (fileType) {
         // Greyscale images as we just want the raw pixels with no color model
         case FileInfo.GRAY8:
@@ -456,12 +461,9 @@ public class SeriesImageSource extends ImageSource {
         return false;
       }
 
-      // Only 1 of the following can be above 1
-      if (!indexMap.isSingleFrame() && !indexMap.isSingleSlice()) {
-        return false;
-      }
-
-      return true;
+      // Only 1 of the following can be above 1.
+      // If either is single then this is OK
+      return indexMap.isSingleFrame() || indexMap.isSingleSlice();
     }
 
     /**
@@ -518,7 +520,7 @@ public class SeriesImageSource extends ImageSource {
     }
 
     @Override
-    synchronized Object getFrame(int index) throws Exception {
+    synchronized Object getFrame(int index) throws IOException {
       if (!openInputStream()) {
         throw new IllegalStateException("Cannot read the TIFF image");
       }
@@ -549,19 +551,15 @@ public class SeriesImageSource extends ImageSource {
       // Store the number of frames that have been read
       frameCount = index + 1;
 
-      try {
-        // long t = System.nanoTime();
-        ss.seek(offset);
-        final Object pixels = readPixels();
-        // System.out.printf("IO Time = %f ms\n", (System.nanoTime()-t)/1e6);
-        return pixels;
-      } catch (final IOException ex) {
-        // The reader now throws exceptions. We could set the canRead flag to prevent further IO.
-        // However do not do this so that an image can be scrolled up to the point at which
-        // it cannot be read (e.g. in the case of TIFF file truncation during sequential writing).
-        // canRead = false;
-        throw ex;
-      }
+      ss.seek(offset);
+
+      // Note:
+      // The reader now throws exceptions.
+      // If this occurs we could set the canRead flag to prevent further IO.
+      // However do not do this so that an image can be scrolled up to the point at which
+      // it cannot be read (e.g. in the case of TIFF file truncation during sequential writing).
+
+      return readPixels();
     }
 
     /**
@@ -596,7 +594,7 @@ public class SeriesImageSource extends ImageSource {
       return info[index];
     }
 
-    public void readTiffInfo(ByteArraySeekableStream ss) throws IOException {
+    void readTiffInfo(ByteArraySeekableStream ss) throws IOException {
       if (isCompleteTiffInfo()) {
         return;
       }
@@ -614,10 +612,10 @@ public class SeriesImageSource extends ImageSource {
       }
     }
 
-    public boolean isCompleteTiffInfo() {
+    boolean isCompleteTiffInfo() {
       if (!complete) {
-        for (int i = 0; i < info.length; i++) {
-          if (info[i] == null) {
+        for (final ExtendedFileInfo fi : info) {
+          if (fi == null) {
             return false;
           }
         }
@@ -626,7 +624,7 @@ public class SeriesImageSource extends ImageSource {
       return true;
     }
 
-    public boolean openInputStream() throws IOException {
+    boolean openInputStream() throws IOException {
       if (canRead && ss == null) {
         if (inMemory) {
           throw new IllegalStateException("No input file required for in-memory image");
@@ -646,7 +644,7 @@ public class SeriesImageSource extends ImageSource {
       return canRead;
     }
 
-    public File getFile() {
+    File getFile() {
       if (fi.directory.length() > 0) {
         return new File(fi.directory, fi.fileName);
       }
@@ -661,10 +659,10 @@ public class SeriesImageSource extends ImageSource {
      * @return true, if successful
      */
     boolean validateFileInfo(File file, ExtendedFileInfo fi) {
-      final long offset = fi.getOffset();
       if (fi.width <= 0 || fi.height <= 0) {
         return false;
       }
+      final long offset = fi.getOffset();
       if (offset >= 0 && offset < 1000L) {
         return true;
       }
@@ -687,12 +685,12 @@ public class SeriesImageSource extends ImageSource {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void reset() throws IOException {
+    void reset() throws IOException {
       frameCount = 0;
-      if (ss != null) {
-        ss.seek(0);
-      } else {
+      if (ss == null) {
         openInputStream();
+      } else {
+        ss.seek(0);
       }
     }
 
@@ -722,16 +720,19 @@ public class SeriesImageSource extends ImageSource {
    *
    * @param ss the stream
    */
-  private static void closeQuietly(SeekableStream ss) {
+  static void closeQuietly(SeekableStream ss) {
     if (ss != null) {
       try {
         ss.close();
-      } catch (final IOException ignore) {
+      } catch (final IOException ignored) {
         // Ignore
       }
     }
   }
 
+  /**
+   * Base class for workers.
+   */
   private abstract static class BaseWorker implements Runnable {
     volatile boolean run = true;
 
@@ -856,27 +857,30 @@ public class SeriesImageSource extends ImageSource {
     }
   }
 
+  /**
+   * An in-memory source of image bytes.
+   */
   private static class NextSource {
     final byte[] buffer;
     final int imageId;
     // ExtendedFileInfo[] info;
     Image image;
 
-    public NextSource(byte[] buffer, int imageId) {
+    NextSource(byte[] buffer, int imageId) {
       this.buffer = buffer;
       this.imageId = imageId;
     }
 
-    // public void setFileInfo(ExtendedFileInfo[] info)
+    // void setFileInfo(ExtendedFileInfo[] info)
     // {
     // this.info = info;
     // }
 
-    public void setImage(Image image) {
+    void setImage(Image image) {
       this.image = image;
     }
 
-    // public NextSource()
+    // NextSource()
     // {
     // this(null, -1);
     // }
@@ -927,15 +931,15 @@ public class SeriesImageSource extends ImageSource {
         setError(new DataException(ex));
       } finally {
         closeInputStream(fs);
-      }
 
-      if (error != null) {
-        closeWorkflowQueues();
-      } else {
-        decodeQueue.close(false);
-      }
+        if (error == null) {
+          decodeQueue.close(false);
+        } else {
+          closeWorkflowQueues();
+        }
 
-      shutdown();
+        shutdown();
+      }
     }
   }
 
@@ -1016,20 +1020,25 @@ public class SeriesImageSource extends ImageSource {
             break;
           }
         }
+        // Suppress all exceptions. These are stored to be thrown by the nextRawFrame() method.
       } catch (final DataException ex) {
         setError(ex);
+      } catch (final IOException ex) {
+        setError(new UncheckedIOException(ex));
+      } catch (final InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        setError(new ConcurrentRuntimeException(UNEXPECTED_INTERRUPTION, ex));
       } catch (final Exception ex) {
         setError(new DataException(ex));
-      }
-      // no finally as there is nothing to close
+      } finally {
+        if (error == null) {
+          readQueue.close(false);
+        } else {
+          closeWorkflowQueues();
+        }
 
-      if (error != null) {
-        closeWorkflowQueues();
-      } else {
-        readQueue.close(false);
+        shutdown();
       }
-
-      shutdown();
     }
   }
 
@@ -1073,18 +1082,22 @@ public class SeriesImageSource extends ImageSource {
         }
       } catch (final DataException ex) {
         setError(ex);
+      } catch (final IOException ex) {
+        setError(new UncheckedIOException(ex));
+      } catch (final InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        setError(new ConcurrentRuntimeException(UNEXPECTED_INTERRUPTION, ex));
       } catch (final Exception ex) {
         setError(new DataException(ex));
-      }
-      // no finally as there is nothing to close
+      } finally {
+        if (error == null) {
+          rawFramesQueue.close(false);
+        } else {
+          closeWorkflowQueues();
+        }
 
-      if (error != null) {
-        closeWorkflowQueues();
-      } else {
-        rawFramesQueue.close(false);
+        shutdown();
       }
-
-      shutdown();
     }
   }
 
@@ -1095,7 +1108,7 @@ public class SeriesImageSource extends ImageSource {
     long fileSize;
     TiffImage tiffImage;
 
-    public ImageData(long size) {
+    ImageData(long size) {
       fileSize = size;
     }
   }
@@ -1126,8 +1139,9 @@ public class SeriesImageSource extends ImageSource {
    *
    * @param path the path
    * @return the seekable stream
+   * @throws FileNotFoundException the file not found exception
    */
-  private static FileSeekableStream createSeekableStream(String path) throws FileNotFoundException {
+  static FileSeekableStream createSeekableStream(String path) throws FileNotFoundException {
     return new FileSeekableStream(path);
   }
 
@@ -1136,11 +1150,11 @@ public class SeriesImageSource extends ImageSource {
    *
    * @param is the input stream
    */
-  private static void closeInputStream(InputStream is) {
+  static void closeInputStream(InputStream is) {
     if (is != null) {
       try {
         is.close();
-      } catch (final IOException ex) {
+      } catch (final IOException ignored) {
         // Ignore
       }
     }
@@ -1151,8 +1165,8 @@ public class SeriesImageSource extends ImageSource {
   }
 
   private boolean belowBufferLimit() {
-    for (int i = 0; i < imageData.length; i++) {
-      if (!belowBufferLimit(imageData[i].fileSize)) {
+    for (final ImageData d : imageData) {
+      if (!belowBufferLimit(d.fileSize)) {
         return false;
       }
     }
@@ -1162,7 +1176,7 @@ public class SeriesImageSource extends ImageSource {
   private static long getSize(File file) {
     try {
       return file.length();
-    } catch (final SecurityException ex) {
+    } catch (final SecurityException ignored) {
       // No file size...
     }
     return 0;
@@ -1178,7 +1192,8 @@ public class SeriesImageSource extends ImageSource {
       // This exception is not bubbled up.
       // At the moment if we ignore this then the ImageWorker will open the file
       // rather than process from the memory stream.
-      ex.printStackTrace();
+      ImageJPluginLoggerHelper.getLogger(SeriesImageSource.class.getName()).log(Level.WARNING,
+          "Failed to read file into memory", ex);
     }
     return null;
   }
@@ -1191,14 +1206,14 @@ public class SeriesImageSource extends ImageSource {
    */
   public SeriesImageSource(String name, SeriesOpener series) {
     super(name);
-    if (series != null) {
+    if (series == null) {
+      isTiffSeries = false;
+    } else {
       final String[] names = series.getImageList();
       for (int i = 0; i < names.length; i++) {
         names[i] = new File(series.getPath(), names[i]).getPath();
       }
       isTiffSeries = isTiffSeries(names);
-    } else {
-      isTiffSeries = false;
     }
   }
 
@@ -1229,18 +1244,15 @@ public class SeriesImageSource extends ImageSource {
     // Create this as it is needed for XStream serialisation
     images = new ArrayList<>();
 
-    for (int i = 0; i < filenames.length; i++) {
-      final int fileType = getFileType(filenames[i]);
-      if (fileType != Opener.TIFF) {
+    for (final String filename : filenames) {
+      if (getFileType(filename) != Opener.TIFF) {
         // Only support TIFF images
         return false;
       }
     }
 
     // All images are TIFF so store the filenames
-    for (int i = 0; i < filenames.length; i++) {
-      images.add(filenames[i]);
-    }
+    images.addAll(Arrays.asList(filenames));
 
     return true;
   }
@@ -1358,10 +1370,11 @@ public class SeriesImageSource extends ImageSource {
           imageData[ok] = new ImageData(size);
           names[ok] = path;
           ok++;
-        } catch (final Throwable ex) {
+        } catch (final IOException ex) {
           if (estimate) {
             // This is an untested method so log the error
-            ex.printStackTrace();
+            ImageJPluginLoggerHelper.getLogger(SeriesImageSource.class.getName()).log(Level.WARNING,
+                "Failed to initialise size estimate", ex);
           }
         }
         ticker.tick();
@@ -1384,7 +1397,13 @@ public class SeriesImageSource extends ImageSource {
     }
   }
 
-  private int getImageSize(int index) {
+  /**
+   * Gets the image size.
+   *
+   * @param index the index
+   * @return the image size
+   */
+  int getImageSize(int index) {
     return (index == 0) ? imageSize[index] : imageSize[index] - imageSize[index - 1];
   }
 
@@ -1421,7 +1440,7 @@ public class SeriesImageSource extends ImageSource {
         }
 
         return true;
-      } catch (final Exception ex) {
+      } catch (final IOException ex) {
         // Q. Should the problem be reported. Currently if the exception is
         // not bubbled up then the source is not opened.
         if (trackProgress.isLog()) {
@@ -1518,7 +1537,7 @@ public class SeriesImageSource extends ImageSource {
           thread.join();
         } catch (final InterruptedException ex) {
           Thread.currentThread().interrupt();
-          throw new ConcurrentRuntimeException("Unexpected interruption", ex);
+          throw new ConcurrentRuntimeException(UNEXPECTED_INTERRUPTION, ex);
         }
       }
 
@@ -1536,13 +1555,19 @@ public class SeriesImageSource extends ImageSource {
    * Close the queues for the in-memory workflow. This should be called on error as it shuts all the
    * queues.
    */
-  private void closeWorkflowQueues() {
+  void closeWorkflowQueues() {
     decodeQueue.close(true);
     readQueue.close(true);
     rawFramesQueue.close(true);
   }
 
-  private void storeTiffImage(int imageId, TiffImage image) {
+  /**
+   * Store the tiff image.
+   *
+   * @param imageId the image id
+   * @param image the image
+   */
+  void storeTiffImage(int imageId, TiffImage image) {
     // This could be made optional to save memory
     imageData[imageId].tiffImage = image;
   }
@@ -1572,7 +1597,12 @@ public class SeriesImageSource extends ImageSource {
     return true;
   }
 
-  private void setError(DataException ex) {
+  /**
+   * Sets the error.
+   *
+   * @param ex the new error
+   */
+  void setError(RuntimeException ex) {
     if (error != null) {
       ImageJPluginLoggerHelper.getDefaultLogger().log(Level.WARNING,
           "Encountered a second error during sequential read!");
@@ -1598,7 +1628,7 @@ public class SeriesImageSource extends ImageSource {
       }
     } catch (final InterruptedException ex) {
       Thread.currentThread().interrupt();
-      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
+      throw new ConcurrentRuntimeException(UNEXPECTED_INTERRUPTION, ex);
     }
 
     // We are here because the pixels were null so shut down sequential reading
@@ -1646,7 +1676,7 @@ public class SeriesImageSource extends ImageSource {
     if (lastImage != null && slice < lastImage.size) {
       try {
         return lastImage.getFrame(slice);
-      } catch (final Exception ex) {
+      } catch (final IOException ex) {
         // Q. Should the problem be reported. Currently if the exception is
         // not bubbled up then the frame will be null.
         if (trackProgress.isLog()) {
@@ -1692,7 +1722,7 @@ public class SeriesImageSource extends ImageSource {
           tiffImage = new TiffImage(info, (ss instanceof ByteArraySeekableStream) ? ss : null);
         }
       }
-    } catch (final IOException ioe) {
+    } catch (final IOException ignored) {
       // Ignore
     } finally {
       closeInputStream(ss);

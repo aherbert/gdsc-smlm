@@ -224,10 +224,11 @@ public class IJImageSource extends ImageSource {
       if ((imp == null) && (path != null && path.length() > 0)) {
         // Try and open the original image from file
         imp = IJ.openImage(path);
-        if (imp == null) {
-          // Some readers return null and display the image, e.g. BioFormats.
-          // Add code to handle this.
-        } else if (getName() != null) {
+
+        // TODO: Some readers return null and display the image, e.g. BioFormats.
+        // Add code to handle this.
+
+        if (imp != null && getName() != null) {
           // Ensure the image has the correct name
           imp.setTitle(getName());
         }
@@ -284,7 +285,10 @@ public class IJImageSource extends ImageSource {
       if (frame > 0 && frame <= imageArray.length) {
         return imageArray[frame - 1];
       }
-    } else if (imageStack != null
+      return null;
+    }
+
+    if (imageStack != null
         // This is a virtual stack so access the image processor through the virtual stack object
         && frame > 0 && frame <= imageStack.getSize()) {
       return imageStack.getPixels(frame);

@@ -29,6 +29,11 @@ import ij.process.ImageProcessor;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.NoDataException;
+import org.apache.commons.math3.exception.NonMonotonicSequenceException;
+import org.apache.commons.math3.exception.NotFiniteNumberException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.jtransforms.fft.FloatFFT_2D;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.VisibleForTesting;
@@ -104,6 +109,9 @@ public class Frc {
    * {@link #calculateFrcCurve(ImageProcessor, ImageProcessor, double)}.
    */
   private TrackProgress progress;
+
+  /** The tapered image mean. */
+  private double taperedImageMean;
 
   /**
    * Lazy load the availability of the JTransforms library.
@@ -337,7 +345,7 @@ public class Frc {
      *
      * @param correlation the new correlation
      */
-    private void setCorrelation(double correlation) {
+    void setCorrelation(double correlation) {
       this.correlation = MathUtils.clip(-1, 1, correlation);
     }
 
@@ -385,7 +393,7 @@ public class Frc {
    * Contains the result of computing all the rings of the Fourier Ring Correlation (FRC) between
    * two images.
    */
-  public static class FrcCurve {
+  public static final class FrcCurve {
     /** The nm per pixel for the super-resolution images. */
     public final double nmPerPixel;
 
@@ -495,7 +503,7 @@ public class Frc {
    * Contains the Fourier Image Resolution (FIRE) result computed from the intersection of the FRC
    * curve and a threshold curve.
    */
-  public static class FrcFireResult {
+  public static final class FrcFireResult {
     /** The fire number (in nm). */
     public final double fireNumber;
 
@@ -637,7 +645,7 @@ public class Frc {
     double mean2;
 
     // Real and imaginary components
-    float[] re1 = null;
+    float[] re1;
     float[] im1;
     float[] re2;
     float[] im2;
@@ -758,7 +766,7 @@ public class Frc {
       final int cx = size * centre + centre;
       results[0] = new FrcCurveResult(0, 1, conjMult[cx], absFft1[cx], absFft2[cx]);
 
-      final float[][] images = new float[][] {conjMult, absFft1, absFft2};
+      final float[][] images = {conjMult, absFft1, absFft2};
       for (int radius = 1; radius < max; radius++) {
         // Inline the calculation for speed
         double sum0 = 0;
@@ -1002,9 +1010,6 @@ public class Frc {
     return fht.getComplexTransformProcessors();
   }
 
-  /** The tapered image mean. */
-  private double taperedImageMean;
-
   /**
    * Applies a Tukey window function to the image and then pads it to the next square size power of
    * two.
@@ -1012,7 +1017,7 @@ public class Frc {
    * @param dataImage the data image
    * @return The square tapered image
    */
-  public FloatProcessor getSquareTaperedImage(ImageProcessor dataImage) {
+  private FloatProcessor getSquareTaperedImage(ImageProcessor dataImage) {
     taperedImageMean = 0;
 
     final int size = Math.max(dataImage.getWidth(), dataImage.getHeight());
@@ -1149,11 +1154,11 @@ public class Frc {
     final int ybase = (int) y;
     double xfraction = x - xbase;
     double yfraction = y - ybase;
-    if (xfraction < 0.0) {
-      xfraction = 0.0;
+    if (xfraction < 0) {
+      xfraction = 0;
     }
-    if (yfraction < 0.0) {
-      yfraction = 0.0;
+    if (yfraction < 0) {
+      yfraction = 0;
     }
 
     final int lowerLeftIndex = ybase * maxx + xbase;
@@ -1200,12 +1205,13 @@ public class Frc {
       yVals[i] = frcCurve.get(i).getCorrelation();
     }
 
-    double[] smoothed = new double[frcCurve.getSize()];
+    double[] smoothed;
 
     try {
       final LoessInterpolator loess = new LoessInterpolator(bandwidth, robustness);
       smoothed = loess.smooth(xVals, yVals);
-    } catch (final Exception ex) {
+    } catch (final NonMonotonicSequenceException | DimensionMismatchException | NoDataException
+        | NotFiniteNumberException | NumberIsTooSmallException ex) {
       // Smoothing failed, return original curve
       return frcCurve;
     }
@@ -1305,6 +1311,7 @@ public class Frc {
 
       default:
         Arrays.fill(threshold, 1.0 / 7.0);
+        break;
     }
 
     return threshold;
@@ -1668,7 +1675,7 @@ public class Frc {
     final double[] q = new double[frcCurve.getSize()];
     final double conversion = 1.0 / (l * nmPerPixel);
     for (int i = 0; i < q.length; i++) {
-      q[i] = frcCurve.get(i).radius * conversion;
+      q[i] = frcCurve.get(i).getRadius() * conversion;
     }
     return q;
   }

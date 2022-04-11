@@ -158,13 +158,13 @@ public class FhtFilter {
    */
   public static double getScale(float[] kernel) {
     double sum = 0.0;
-    for (int i = 0; i < kernel.length; i++) {
-      sum += kernel[i];
+    for (final float f : kernel) {
+      sum += f;
     }
-    if (sum != 0.0) {
-      return 1.0 / sum;
+    if (sum != 0) {
+      return 1 / sum;
     }
-    return 1.0;
+    return 1;
   }
 
   /**
