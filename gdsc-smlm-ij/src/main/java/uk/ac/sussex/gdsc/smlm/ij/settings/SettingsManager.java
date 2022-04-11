@@ -110,10 +110,6 @@ public final class SettingsManager {
   /** The logger. */
   private static Logger logger = Logger.getLogger(SettingsManager.class.getName());
 
-  /** The Constant DEFAULT_FILENAME. */
-  private static final String DEFAULT_FILENAME = System.getProperty("user.home")
-      + System.getProperty("file.separator") + "gdsc.smlm.settings.xml";
-
   /** The Constant DEFAULT_DIRECTORY. */
   private static final String DEFAULT_DIRECTORY =
       System.getProperty("user.home") + File.separatorChar + ".gdsc.smlm";
@@ -132,11 +128,14 @@ public final class SettingsManager {
    */
   public static final int FLAG_SHOW_FILE_NOT_FOUND_ON_READ = 0x00000010;
 
+  /** gdsc.smlm.settingsDirectory */
+  private static final String KEY_SETTINGS_DIRECTORY = "gdsc.smlm.settingsDirectory";
+
   /** The settings directory. */
   private static String settingsDirectory;
 
   static {
-    setSettingsDirectory(Prefs.get(Constants.settingsDirectory, DEFAULT_DIRECTORY));
+    setSettingsDirectory(Prefs.get(KEY_SETTINGS_DIRECTORY, DEFAULT_DIRECTORY));
   }
 
   /**
@@ -738,7 +737,7 @@ public final class SettingsManager {
    * @return The settings directory (from the ImageJ preferences or the default under the home
    *         directory)
    */
-  public static String getSettingsDirectory() {
+  static String getSettingsDirectory() {
     return settingsDirectory;
   }
 
@@ -747,8 +746,8 @@ public final class SettingsManager {
    *
    * @param directory the directory
    */
-  public static void setSettingsDirectory(String directory) {
-    Prefs.set(Constants.settingsDirectory, directory);
+  static void setSettingsDirectory(String directory) {
+    Prefs.set(KEY_SETTINGS_DIRECTORY, directory);
     settingsDirectory = directory;
     try {
       Files.createDirectories(Paths.get(settingsDirectory));
@@ -800,24 +799,6 @@ public final class SettingsManager {
       name += " (" + shortName + ")";
     }
     return name;
-  }
-
-  /**
-   * Gets the settings filename (from the ImageJ preferences or the default in the home directory).
-   *
-   * @return The settings filename
-   */
-  public static String getSettingsFilename() {
-    return Prefs.get(Constants.settingsFilename, DEFAULT_FILENAME);
-  }
-
-  /**
-   * Save settings filename.
-   *
-   * @param filename the filename
-   */
-  public static void saveSettingsFilename(String filename) {
-    Prefs.set(Constants.settingsFilename, filename);
   }
 
   /**
