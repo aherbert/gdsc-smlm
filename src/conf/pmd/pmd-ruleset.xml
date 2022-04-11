@@ -165,5 +165,14 @@
         value="./ancestor-or-self::ClassOrInterfaceDeclaration[@SimpleName = 'FitWorker']"/>
     </properties>
   </rule>
+  <rule ref="category/java/errorprone.xml/ConstructorCallsOverridableMethod">
+    <properties>
+      <!-- The ImageJ 3D View design pattern for mesh objects is to createGeometry() in the
+           constructor. The library does not provide a constructor accepting a Geometry argument
+           which prevents using factory construction logic outside the constructor. -->
+      <property name="violationSuppressXPath"
+        value="./ancestor-or-self::ClassOrInterfaceDeclaration[matches(@SimpleName, '^Item.*Mesh$')]"/>
+    </properties>
+  </rule>
 
 </ruleset>
