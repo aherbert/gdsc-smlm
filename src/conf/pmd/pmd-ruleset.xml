@@ -141,6 +141,12 @@
         ]"/>
     </properties>
   </rule>
+  <rule ref="category/java/codestyle.xml/NoPackage">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="./descendant-or-self::ClassOrInterfaceDeclaration[@SimpleName = 'Smlm_PlugIn']"/>
+    </properties>
+  </rule>
   <rule ref="category/java/codestyle.xml/ShortMethodName">
     <properties>
       <!-- Allow samplers to have factory constructor method 'of' -->
