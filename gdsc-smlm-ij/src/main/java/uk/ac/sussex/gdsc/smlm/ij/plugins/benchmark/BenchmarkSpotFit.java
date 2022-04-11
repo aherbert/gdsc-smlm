@@ -2522,7 +2522,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // Jaccard score verses the range of the metric
       for (final double[] d : matchScores) {
         if (!Double.isFinite(d[index])) {
-          System.out.printf("Error in fit data [%d]: %s%n", index, d[index]);
+          ImageJUtils.log("Error in fit data [%d]: %s", index, d[index]);
         }
       }
 

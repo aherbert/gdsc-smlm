@@ -942,16 +942,16 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
                     if (Math.signum(result.aic1 - result.aic2) != Math
                         .signum(result.maic1 - result.maic2)) {
                       daic++;
-                      System.out.printf(
-                          "AIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)%n", frame,
+                      ImageJUtils.log(
+                          "AIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)", frame,
                           spot.x, spot.y, matchCount, Math.signum(result.aic1 - result.aic2),
                           Math.signum(result.maic1 - result.maic2), result.getMaxScore());
                     }
                     if (Math.signum(result.bic1 - result.bic2) != Math
                         .signum(result.mbic1 - result.mbic2)) {
                       dbic++;
-                      System.out.printf(
-                          "BIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)%n", frame,
+                      ImageJUtils.log(
+                          "BIC difference with residuals [%d] %d,%d : %d  %f vs %f (%.2f)", frame,
                           spot.x, spot.y, matchCount, Math.signum(result.bic1 - result.bic2),
                           Math.signum(result.mbic1 - result.mbic2), result.getMaxScore());
                     }

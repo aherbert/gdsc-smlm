@@ -3742,7 +3742,7 @@ public class Optics implements PlugIn {
       // }
 
       if (debug) {
-        System.out.println("dialogItemChanged: " + event);
+        IJ.log("dialogItemChanged: " + event);
       }
 
       // A previous run may have been cancelled so we have to handle this.
@@ -3794,7 +3794,7 @@ public class Optics implements PlugIn {
       if (preview) {
         // Run the settings
         if (debug) {
-          System.out.println("Adding work");
+          IJ.log("Adding work");
         }
         if (!delay) {
           workflow.stopPreview();

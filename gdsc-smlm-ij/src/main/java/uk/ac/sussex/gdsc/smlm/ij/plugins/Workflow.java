@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
 
 /**
@@ -202,7 +203,7 @@ public class Workflow<S, R> {
 
     private void debug(String msg) {
       if (isDebug()) {
-        System.out.println(worker.getClass().getSimpleName() + msg);
+        ImageJPluginLoggerHelper.getLogger(worker.getClass().getName()).info(msg);
       }
     }
 

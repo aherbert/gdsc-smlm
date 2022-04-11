@@ -1226,7 +1226,7 @@ public class PcPalmFitting implements PlugIn {
             new InitialGuess((optimum == null) ? initialSolution : optimum.getPointRef()),
             new SimpleBounds(lowerB, upperB));
         if (debug) {
-          System.out.printf("Bounded Iter %d = %g (%d)\n", iteration, optimum.getValue(),
+          ImageJUtils.log("Bounded Iter %d = %g (%d)", iteration, optimum.getValue(),
               opt.getEvaluations());
         }
       } catch (final RuntimeException ex) {
@@ -1270,7 +1270,7 @@ public class PcPalmFitting implements PlugIn {
         final PointValuePair constrainedSolution = opt.optimize(new InitialGuess(initialSolution),
             objective, GoalType.MINIMIZE, bounds, sigma, popSize, maxEvaluations);
         if (debug) {
-          System.out.printf("CMAES Iter %d initial = %g (%d)\n", iteration,
+          ImageJUtils.log("CMAES Iter %d initial = %g (%d)", iteration,
               constrainedSolution.getValue(), opt.getEvaluations());
         }
         boundedEvaluations += opt.getEvaluations();
@@ -1291,7 +1291,7 @@ public class PcPalmFitting implements PlugIn {
             opt.optimize(new InitialGuess(optimum.getPointRef()), objective, GoalType.MINIMIZE,
                 bounds, sigma, popSize, maxEvaluations);
         if (debug) {
-          System.out.printf("CMAES Iter %d restart = %g (%d)\n", iteration,
+          ImageJUtils.log("CMAES Iter %d restart = %g (%d)", iteration,
               constrainedSolution.getValue(), opt.getEvaluations());
         }
         if (constrainedSolution.getValue() < optimum.getValue()) {

@@ -37,10 +37,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
 import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.SeriesOpener;
 import uk.ac.sussex.gdsc.core.ij.io.ByteArraySeekableStream;
 import uk.ac.sussex.gdsc.core.ij.io.ExtendedFileInfo;
@@ -1572,7 +1574,8 @@ public class SeriesImageSource extends ImageSource {
 
   private void setError(DataException ex) {
     if (error != null) {
-      System.err.println("Encountered a second error during sequential read!");
+      ImageJPluginLoggerHelper.getDefaultLogger().log(Level.WARNING,
+          "Encountered a second error during sequential read!");
     }
     error = ex;
   }

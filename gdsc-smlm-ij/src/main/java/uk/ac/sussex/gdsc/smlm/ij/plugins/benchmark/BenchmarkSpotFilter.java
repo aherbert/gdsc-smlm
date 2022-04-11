@@ -49,6 +49,7 @@ import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
@@ -1173,9 +1174,11 @@ public class BenchmarkSpotFilter implements PlugIn {
       }
 
       if (settings.debug) {
-        System.out.printf("Frame %d : N = %.2f, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f%n", frame,
-            actualLength, result.getTruePositives(), result.getFalsePositives(), result.getRecall(),
-            result.getPrecision());
+        ImageJPluginLoggerHelper.getLogger(BenchmarkSpotFit.class.getName())
+            .info(() -> String.format(
+                "Frame %d : N = %.2f, TP = %.2f, FP = %.2f, R = %.2f, P = %.2f", frame,
+                result.getFalseNegatives() + result.getTruePositives(), result.getTruePositives(),
+                result.getFalsePositives(), result.getRecall(), result.getPrecision()));
       }
 
       results.put(frame, new FilterResult(frame, result, scoredSpots, actual, actualAssignment));
