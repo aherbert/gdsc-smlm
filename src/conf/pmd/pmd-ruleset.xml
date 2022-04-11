@@ -48,6 +48,8 @@
   <rule ref="category/java/codestyle.xml/FieldNamingConventions">
     <properties>
       <property name="exclusions" value="serialVersionUID|logger" />
+      <property name="violationSuppressXPath"
+        value="./ancestor::ClassOrInterfaceDeclaration[@SimpleName ='PrefsKey']"/>
     </properties>
   </rule>
   <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
