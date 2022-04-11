@@ -145,8 +145,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
     static final int T_ON = 2;
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     String header;
@@ -224,14 +223,14 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -418,9 +417,9 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         // - sum the actual MSD
 
         double sumD = 0;
-        final double sumD_adjacent = Math.max(0, sumDistance[1] - error) * factors[1];
+        final double sumDadjacent = Math.max(0, sumDistance[1] - error) * factors[1];
         double sumT = 0;
-        final double sumT_adjacent = sumTime[1];
+        final double sumTadjacent = sumTime[1];
         for (int t = 1; t < traceLength; t++) {
           sumD += Math.max(0, sumDistance[t] - error) * factors[t];
           sumT += sumTime[t];
@@ -430,7 +429,7 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
         // time separation since this will miss moving molecules that end up at the origin)
 
         msdPerMoleculeAllVsAll.add(px2ToUm2PerSecond * sumD / sumT);
-        msdPerMoleculeAdjacent.add(px2ToUm2PerSecond * sumD_adjacent / sumT_adjacent);
+        msdPerMoleculeAdjacent.add(px2ToUm2PerSecond * sumDadjacent / sumTadjacent);
       }
 
       StoredDataStatistics dperMoleculeAllVsAll = null;
@@ -1811,11 +1810,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // dyDa = x
       // dy_dc = 8c
       final double[][] jacobian = new double[x.length][2];
-      final double dy_dc = 8 * variables[1];
+      final double dydc = 8 * variables[1];
 
       for (int i = 0; i < jacobian.length; ++i) {
         jacobian[i][0] = x[i];
-        jacobian[i][1] = dy_dc;
+        jacobian[i][1] = dydc;
       }
 
       return jacobian;
@@ -1901,11 +1900,11 @@ public class TraceDiffusion implements PlugIn, CurveLogger {
       // dyDa = x - 1/3
       // dy_dc = 8c
       final double[][] jacobian = new double[x.length][2];
-      final double dy_dc = 8 * variables[1];
+      final double dydc = 8 * variables[1];
 
       for (int i = 0; i < jacobian.length; ++i) {
         jacobian[i][0] = x[i] - THIRD;
-        jacobian[i][1] = dy_dc;
+        jacobian[i][1] = dydc;
       }
 
       return jacobian;

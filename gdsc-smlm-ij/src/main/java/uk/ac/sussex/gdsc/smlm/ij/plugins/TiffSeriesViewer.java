@@ -81,8 +81,7 @@ public class TiffSeriesViewer implements PlugIn {
     private static final String[] OUTPUT_MODE = {"Image", "Files"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     private int inputMode;
     private String inputDirectory;
@@ -123,14 +122,14 @@ public class TiffSeriesViewer implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(Constants.tiffSeriesMode, inputMode);
       Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
       Prefs.set(Constants.tiffSeriesFile, inputFile);

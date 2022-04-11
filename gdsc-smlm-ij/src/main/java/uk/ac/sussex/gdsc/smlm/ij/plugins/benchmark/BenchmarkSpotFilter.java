@@ -109,8 +109,8 @@ public class BenchmarkSpotFilter implements PlugIn {
   /** The title. */
   static final String TITLE = "Filter Spot Data";
 
-  private static AtomicReference<TextWindow> summaryTable = new AtomicReference<>();
-  private static AtomicReference<TextWindow> batchSummaryTable = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> BACTH_SUMMARY_TABLE = new AtomicReference<>();
 
   /**
    * The settings corresponding to the cached batch results. This is atomically updated in a
@@ -124,7 +124,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * The true positives results set id. This is incremented for each new results set added to
    * memory.
    */
-  private static AtomicInteger truePositivesResultsSetId = new AtomicInteger(1);
+  private static final AtomicInteger TRUE_POSITIVES_RESULTS_SET_ID = new AtomicInteger(1);
 
   /**
    * The prefix for the results table header. Contains all the standard header data about the input
@@ -133,11 +133,12 @@ public class BenchmarkSpotFilter implements PlugIn {
   private static String tablePrefix;
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
-  private static AtomicReference<Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>>> coordinateCache =
-      new AtomicReference<>(Pair.of(-1, null));
+  private static final AtomicReference<
+      Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>>> COORDINATE_CACHE =
+          new AtomicReference<>(Pair.of(-1, null));
 
   /** The filter result from the most recent benchmark analysis. */
-  private static final AtomicReference<BenchmarkSpotFilterResult> filterResult =
+  private static final AtomicReference<BenchmarkSpotFilterResult> FILTER_RESULT =
       new AtomicReference<>();
 
   /** The actual coordinates for the simulation. */
@@ -174,22 +175,21 @@ public class BenchmarkSpotFilter implements PlugIn {
     private static final String[] MATCHING_METHOD = {"Single", "Multi", "Greedy"};
     private static final int MATCHING_METHOD_MULTI = 1;
     private static final int MATCHING_METHOD_GREEDY = 2;
-    private static final String[] batchPlotNames;
+    private static final String[] BATCH_PLOT_NAMES;
 
     static {
       SELECTION_METHOD = new String[3];
       SELECTION_METHOD[0] = BatchResult.getScoreName(0);
       SELECTION_METHOD[1] = BatchResult.getScoreName(1);
       SELECTION_METHOD[2] = BatchResult.getScoreName(0) + "+" + BatchResult.getScoreName(1);
-      batchPlotNames = new String[BatchResult.NUMBER_OF_SCORES];
-      for (int i = 0; i < batchPlotNames.length; i++) {
-        batchPlotNames[i] = BatchResult.getScoreName(i);
+      BATCH_PLOT_NAMES = new String[BatchResult.NUMBER_OF_SCORES];
+      for (int i = 0; i < BATCH_PLOT_NAMES.length; i++) {
+        BATCH_PLOT_NAMES[i] = BatchResult.getScoreName(i);
       }
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     FitEngineConfiguration config;
 
@@ -297,14 +297,14 @@ public class BenchmarkSpotFilter implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -1295,7 +1295,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
     // Clear old results to free memory
     BenchmarkSpotFilterResult localFilterResult;
-    filterResult.set(null);
+    FILTER_RESULT.set(null);
 
     // For graphs
     windowOrganiser = new WindowOrganiser();
@@ -1390,7 +1390,7 @@ public class BenchmarkSpotFilter implements PlugIn {
 
       gd.addMessage("Choose performance plots:");
       for (int i = 0; i < settings.batchPlot.length; i++) {
-        gd.addCheckbox(Settings.batchPlotNames[i], settings.batchPlot[i]);
+        gd.addCheckbox(Settings.BATCH_PLOT_NAMES[i], settings.batchPlot[i]);
       }
 
       gd.addChoice("Selection", Settings.SELECTION_METHOD, settings.selectionMethod);
@@ -1446,7 +1446,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     }
 
     // Store the latest result
-    filterResult.set(localFilterResult);
+    FILTER_RESULT.set(localFilterResult);
 
     // Debugging the matches
     if (settings.debug) {
@@ -1492,7 +1492,7 @@ public class BenchmarkSpotFilter implements PlugIn {
     final Color[] colors =
         new Color[] {Color.red, Color.gray, Color.green, Color.blue, Color.magenta};
 
-    final String name = Settings.batchPlotNames[index];
+    final String name = Settings.BATCH_PLOT_NAMES[index];
     final String title = TITLE + " Performance " + name;
     final Plot plot = new Plot(title, "Relative width", name);
     final double scale = 1.0 / config.getHwhmMin();
@@ -2026,7 +2026,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * @return the coordinates
    */
   private Int2ObjectOpenHashMap<PsfSpot[]> getSimulationCoordinates() {
-    Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>> coords = coordinateCache.get();
+    Pair<Integer, Int2ObjectOpenHashMap<PsfSpot[]>> coords = COORDINATE_CACHE.get();
     if (coords.getKey() != simulationParameters.id) {
       // Always use float coordinates.
       // The Worker adds a pixel offset for the spot coordinates.
@@ -2086,7 +2086,7 @@ public class BenchmarkSpotFilter implements PlugIn {
       ImageJUtils.finished();
 
       coords = Pair.of(simulationParameters.id, actualCoordinates);
-      coordinateCache.set(coords);
+      COORDINATE_CACHE.set(coords);
     }
 
     return coords.getRight();
@@ -2099,7 +2099,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    */
   private static void addSpotsToMemory(CustomInt2ObjectOpenHashMap<FilterResult> filterResults) {
     final MemoryPeakResults results = new MemoryPeakResults();
-    results.setName(TITLE + " TP " + truePositivesResultsSetId.getAndIncrement());
+    results.setName(TITLE + " TP " + TRUE_POSITIVES_RESULTS_SET_ID.getAndIncrement());
     filterResults.forEach((int peak, FilterResult filterResult) -> {
       for (final ScoredSpot spot : filterResult.spots) {
         if (spot.match) {
@@ -2573,10 +2573,10 @@ public class BenchmarkSpotFilter implements PlugIn {
     AtomicReference<TextWindow> tableRef;
     String title;
     if (batchSummary) {
-      tableRef = batchSummaryTable;
+      tableRef = BACTH_SUMMARY_TABLE;
       title = TITLE + " Batch";
     } else {
-      tableRef = summaryTable;
+      tableRef = SUMMARY_TABLE;
       title = TITLE;
     }
     return ImageJUtils.refresh(tableRef,
@@ -2609,7 +2609,7 @@ public class BenchmarkSpotFilter implements PlugIn {
    * @return true, if successful
    */
   public static boolean updateConfiguration(FitEngineConfiguration config) {
-    final BenchmarkSpotFilterResult result = filterResult.get();
+    final BenchmarkSpotFilterResult result = FILTER_RESULT.get();
     if (result == null) {
       return false;
     }
@@ -2644,6 +2644,6 @@ public class BenchmarkSpotFilter implements PlugIn {
    * @return the benchmark filter result
    */
   static BenchmarkSpotFilterResult getBenchmarkFilterResult() {
-    return filterResult.get();
+    return FILTER_RESULT.get();
   }
 }

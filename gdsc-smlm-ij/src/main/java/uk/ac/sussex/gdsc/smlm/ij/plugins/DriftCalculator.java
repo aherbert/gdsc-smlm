@@ -130,8 +130,7 @@ public class DriftCalculator implements PlugIn {
     static final String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String driftFilename;
     String method;
@@ -215,14 +214,14 @@ public class DriftCalculator implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 

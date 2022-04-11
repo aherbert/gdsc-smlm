@@ -567,8 +567,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final Color3f[] colors = new Color3f[N];
+    final int n = objectSize * size;
+    final Color3f[] colors = new Color3f[n];
     int index = 0;
     for (final Color3f c : color) {
       for (int j = objectSize; j-- > 0;) {

@@ -52,10 +52,10 @@ public final class HelpUrls {
   private static final String DEFAULT_HELP_CONF = "/uk/ac/sussex/gdsc/smlm/ij/help.config";
 
   /** The url base. */
-  private static final String urlBase;
+  private static final String URL_BASE;
 
   /** The map storing sub-URLs to append to the base URL. */
-  private static final Properties map;
+  private static final Properties URL_PAGE_MAP;
 
   static {
     // url = base + version
@@ -69,8 +69,8 @@ public final class HelpUrls {
       version = getTagVersionOrDefault(Version.getVersion());
     }
 
-    urlBase = createUrl(base, version);
-    map = loadUrls(System.getProperty(HELP_URL_CONF_PROPERTY, DEFAULT_HELP_CONF));
+    URL_BASE = createUrl(base, version);
+    URL_PAGE_MAP = loadUrls(System.getProperty(HELP_URL_CONF_PROPERTY, DEFAULT_HELP_CONF));
   }
 
   /** No construction. */
@@ -105,7 +105,7 @@ public final class HelpUrls {
    * @return the URL
    */
   public static String getUrl() {
-    return urlBase;
+    return URL_BASE;
   }
 
   /**
@@ -115,7 +115,7 @@ public final class HelpUrls {
    * @return the URL
    */
   public static String getUrl(String key) {
-    return getUrl(key, map);
+    return getUrl(key, URL_PAGE_MAP);
   }
 
   /**
@@ -129,7 +129,7 @@ public final class HelpUrls {
   @VisibleForTesting
   static String getUrl(String key, Properties map) {
     final String path = map.getProperty(key);
-    return path == null ? urlBase : urlBase + path;
+    return path == null ? URL_BASE : URL_BASE + path;
   }
 
   /**
@@ -139,7 +139,7 @@ public final class HelpUrls {
    */
   @VisibleForTesting
   static void forEach(BiConsumer<String, String> action) {
-    map.forEach((k, v) -> action.accept((String) k, urlBase + v));
+    URL_PAGE_MAP.forEach((k, v) -> action.accept((String) k, URL_BASE + v));
   }
 
   /**

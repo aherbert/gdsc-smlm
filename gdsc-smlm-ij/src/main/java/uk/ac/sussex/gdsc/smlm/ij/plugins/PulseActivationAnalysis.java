@@ -153,7 +153,7 @@ public class PulseActivationAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The colours for each channel. */
-    static final Color[] colors = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
+    static final Color[] COLORS = new Color[] {Color.RED, Color.GREEN, Color.BLUE};
 
     static final int C21 = 0;
     static final int C31 = 1;
@@ -164,27 +164,26 @@ public class PulseActivationAnalysis implements PlugIn {
     static final int MAX_CHANNELS = 3;
 
     /** The cross talk names for each pair of 3-channels. */
-    static final String[] ctNames = {"21", "31", "12", "32", "13", "23"};
+    static final String[] CT_NAMES = {"21", "31", "12", "32", "13", "23"};
 
-    static final String[] magnifications;
+    static final String[] MAGNIFICATIONS;
 
-    static final Correction[] specificCorrection;
-    static final Correction[] nonSpecificCorrection;
+    static final Correction[] SPECIFIC_CORRECTION;
+    static final Correction[] NON_SPECIFIC_CORRECTION;
 
     static {
       final EnumSet<Correction> correction = EnumSet.allOf(Correction.class);
-      specificCorrection = correction.toArray(new Correction[0]);
+      SPECIFIC_CORRECTION = correction.toArray(new Correction[0]);
       correction.remove(Correction.SUBTRACTION);
-      nonSpecificCorrection = correction.toArray(new Correction[0]);
+      NON_SPECIFIC_CORRECTION = correction.toArray(new Correction[0]);
 
       // Produce 2^k for k in [0, 8]
-      magnifications =
+      MAGNIFICATIONS =
           IntStream.range(0, 9).map(i -> 1 << i).mapToObj(Integer::toString).toArray(String[]::new);
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     int channels;
@@ -215,7 +214,7 @@ public class PulseActivationAnalysis implements PlugIn {
     double nonSpecificFrequency;
 
 
-    String magnification = magnifications[1];
+    String magnification = MAGNIFICATIONS[1];
 
     Settings() {
       // Note: Set defaults to work with the 3-channel simulation
@@ -281,14 +280,14 @@ public class PulseActivationAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -808,10 +807,10 @@ public class PulseActivationAnalysis implements PlugIn {
     plot.setLimits(0, settings.channels + 1.0, 0, 1);
     plot.setXMinorTicks(false);
     plot.addPoints(x, y, Plot.BAR);
-    String label = String.format("Crosstalk %s = %s", Settings.ctNames[index1],
+    String label = String.format("Crosstalk %s = %s", Settings.CT_NAMES[index1],
         MathUtils.round(settings.ct[index1]));
     if (index2 > -1) {
-      label += String.format(", %s = %s", Settings.ctNames[index2],
+      label += String.format(", %s = %s", Settings.CT_NAMES[index2],
           MathUtils.round(settings.ct[index2]));
     }
     plot.addLabel(0, 0, label);
@@ -932,35 +931,35 @@ public class PulseActivationAnalysis implements PlugIn {
     double i = 1;
     // CHECKSTYLE.ON: LocalVariableName
 
-    final double A = (e * i - f * h);
-    final double B = -(d * i - f * g);
-    final double C = (d * h - e * g);
+    final double aa = (e * i - f * h);
+    final double bb = -(d * i - f * g);
+    final double cc = (d * h - e * g);
 
-    final double det = a * A + b * B + c * C;
+    final double det = a * aa + b * bb + c * cc;
 
-    final double det_recip = 1.0 / det;
+    final double oneDivDet = 1.0 / det;
 
-    if (!Double.isFinite(det_recip)) {
+    if (!Double.isFinite(oneDivDet)) {
       // Failed so reset to the observed densities
       return new double[] {od1, od2, od3};
     }
 
-    final double D = -(b * i - c * h);
-    final double E = (a * i - c * g);
-    final double F = -(a * h - b * g);
-    final double G = (b * f - c * e);
-    final double H = -(a * f - c * d);
-    final double I = (a * e - b * d);
+    final double dd = -(b * i - c * h);
+    final double ee = (a * i - c * g);
+    final double ff = -(a * h - b * g);
+    final double gg = (b * f - c * e);
+    final double hh = -(a * f - c * d);
+    final double ii = (a * e - b * d);
 
-    a = det_recip * A;
-    b = det_recip * D;
-    c = det_recip * G;
-    d = det_recip * B;
-    e = det_recip * E;
-    f = det_recip * H;
-    g = det_recip * C;
-    h = det_recip * F;
-    i = det_recip * I;
+    a = oneDivDet * aa;
+    b = oneDivDet * dd;
+    c = oneDivDet * gg;
+    d = oneDivDet * bb;
+    e = oneDivDet * ee;
+    f = oneDivDet * hh;
+    g = oneDivDet * cc;
+    h = oneDivDet * ff;
+    i = oneDivDet * ii;
 
     final double[] x = new double[3];
     x[0] = a * od1 + b * od2 + c * od3;
@@ -992,7 +991,7 @@ public class PulseActivationAnalysis implements PlugIn {
             PulseActivationAnalysis.this.settings.densityRadius / results.getNmPerPixel();
         this.minNeighbours = PulseActivationAnalysis.this.settings.minNeighbours;
 
-        specificCorrection = getCorrection(Settings.specificCorrection,
+        specificCorrection = getCorrection(Settings.SPECIFIC_CORRECTION,
             PulseActivationAnalysis.this.settings.specificCorrectionIndex);
         this.specificCorrectionCutoff = new double[settings.channels];
         for (int i = settings.channels; i-- > 0;) {
@@ -1001,7 +1000,7 @@ public class PulseActivationAnalysis implements PlugIn {
               PulseActivationAnalysis.this.settings.specificCorrectionCutoff[i] / 100.0;
         }
 
-        nonSpecificCorrection = getCorrection(Settings.nonSpecificCorrection,
+        nonSpecificCorrection = getCorrection(Settings.NON_SPECIFIC_CORRECTION,
             PulseActivationAnalysis.this.settings.nonSpecificCorrectionIndex);
         this.nonSpecificCorrectionCutoff =
             PulseActivationAnalysis.this.settings.nonSpecificCorrectionCutoff / 100.0;
@@ -1112,21 +1111,21 @@ public class PulseActivationAnalysis implements PlugIn {
         gd.addNumericField("Crosstalk_21", settings.ct[Settings.C21], 3);
         gd.addNumericField("Crosstalk_12", settings.ct[Settings.C12], 3);
       } else {
-        for (int i = 0; i < Settings.ctNames.length; i++) {
-          gd.addNumericField("Crosstalk_" + Settings.ctNames[i], settings.ct[i], 3);
+        for (int i = 0; i < Settings.CT_NAMES.length; i++) {
+          gd.addNumericField("Crosstalk_" + Settings.CT_NAMES[i], settings.ct[i], 3);
         }
       }
 
       gd.addNumericField("Local_density_radius", settings.densityRadius, 0, 6, "nm");
       gd.addSlider("Min_neighbours", 0, 15, settings.minNeighbours);
-      correctionNames = SettingsManager.getNames((Object[]) Settings.specificCorrection);
+      correctionNames = SettingsManager.getNames((Object[]) Settings.SPECIFIC_CORRECTION);
       gd.addChoice("Crosstalk_correction", correctionNames,
           correctionNames[settings.specificCorrectionIndex]);
       for (int c = 1; c <= settings.channels; c++) {
         gd.addSlider("Crosstalk_correction_cutoff_C" + c + " (%)", 0, 100,
             settings.specificCorrectionCutoff[c - 1]);
       }
-      assignmentNames = SettingsManager.getNames((Object[]) Settings.nonSpecificCorrection);
+      assignmentNames = SettingsManager.getNames((Object[]) Settings.NON_SPECIFIC_CORRECTION);
       gd.addChoice("Nonspecific_assigment", assignmentNames,
           assignmentNames[settings.nonSpecificCorrectionIndex]);
       gd.addSlider("Nonspecific_assignment_cutoff (%)", 0, 100,
@@ -1143,7 +1142,7 @@ public class PulseActivationAnalysis implements PlugIn {
     gd.addMessage("Click '" + buttonLabel + "' to draw the current ROIs in a loop view");
     gd.addAndGetButton(buttonLabel, this::actionPerformed);
     magnificationChoice =
-        gd.addAndGetChoice("Magnification", Settings.magnifications, settings.magnification);
+        gd.addAndGetChoice("Magnification", Settings.MAGNIFICATIONS, settings.magnification);
 
     gd.addDialogListener(this::dialogItemChanged);
     gd.addOptionCollectedListener(event -> addWork(previewCheckBox.getState()));
@@ -1172,8 +1171,8 @@ public class PulseActivationAnalysis implements PlugIn {
           Recorder.recordOption("Crosstalk_21", Double.toString(settings.ct[Settings.C21]));
           Recorder.recordOption("Crosstalk_12", Double.toString(settings.ct[Settings.C12]));
         } else {
-          for (int i = 0; i < Settings.ctNames.length; i++) {
-            Recorder.recordOption("Crosstalk_" + Settings.ctNames[i],
+          for (int i = 0; i < Settings.CT_NAMES.length; i++) {
+            Recorder.recordOption("Crosstalk_" + Settings.CT_NAMES[i],
                 Double.toString(settings.ct[i]));
           }
         }
@@ -1291,7 +1290,7 @@ public class PulseActivationAnalysis implements PlugIn {
   }
 
   private void validateCrosstalk(int index) {
-    final String name = "Crosstalk " + Settings.ctNames[index];
+    final String name = "Crosstalk " + Settings.CT_NAMES[index];
     ParameterUtils.isPositive(name, settings.ct[index]);
     // Previously this was required to be less than 0.5.
     // I now believe any value less than 1 is OK. Above 1 shows that the
@@ -2106,9 +2105,9 @@ public class PulseActivationAnalysis implements PlugIn {
 
     // Report simulated cross talk
     final double[] crosstalk = computeCrosstalk(count, channel);
-    ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", Settings.ctNames[index1],
+    ImageJUtils.log("Simulated crosstalk C%s  %s=>%s, C%s  %s=>%s", Settings.CT_NAMES[index1],
         MathUtils.rounded(settings.ct[index1]), MathUtils.rounded(crosstalk[c1]),
-        Settings.ctNames[index2], MathUtils.rounded(settings.ct[index2]),
+        Settings.CT_NAMES[index2], MathUtils.rounded(settings.ct[index2]),
         MathUtils.rounded(crosstalk[c2]));
   }
 
@@ -2177,8 +2176,8 @@ public class PulseActivationAnalysis implements PlugIn {
       gd.addChoice("Distribution" + ch, distribution,
           distribution[settings.distribution[c].ordinal()]);
       gd.addNumericField("Precision_" + ch, settings.precision[c], 3);
-      gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c], settings.ct[2 * c], 3);
-      gd.addNumericField("Crosstalk_" + Settings.ctNames[2 * c + 1], settings.ct[2 * c + 1], 3);
+      gd.addNumericField("Crosstalk_" + Settings.CT_NAMES[2 * c], settings.ct[2 * c], 3);
+      gd.addNumericField("Crosstalk_" + Settings.CT_NAMES[2 * c + 1], settings.ct[2 * c + 1], 3);
     }
     gd.addHelp(HelpUrls.getUrl(helpKey));
     gd.showDialog();
@@ -2272,7 +2271,7 @@ public class PulseActivationAnalysis implements PlugIn {
     // For each result set crop out the localisation and construct an overlay
     final Overlay o = new Overlay();
     for (int i = 0; i < output.length; i++) {
-      final Color color = Settings.colors[i];
+      final Color color = Settings.COLORS[i];
 
       // The first result is the memory results
       final MemoryPeakResults localResults = (MemoryPeakResults) output[i].getOutput(0);

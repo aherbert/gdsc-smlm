@@ -51,12 +51,12 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
  */
 public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
   private static final String TITLE = "Smooth Image";
-  private static final DataFilterMethod[] filters;
-  private static final String[] filterNames;
+  private static final DataFilterMethod[] FILTERS;
+  private static final String[] FILTER_NAMES;
 
   static {
-    filters = SettingsManager.getDataFilterMethodValues();
-    filterNames = SettingsManager.getDataFilterMethodNames();
+    FILTERS = SettingsManager.getDataFilterMethodValues();
+    FILTER_NAMES = SettingsManager.getDataFilterMethodNames();
   }
 
   private static final int FLAGS =
@@ -81,8 +81,7 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     int filter1;
     double smooth1;
@@ -118,14 +117,14 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -185,10 +184,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
 
     settings = Settings.load();
     gd.addMessage("Smooth image:");
-    gd.addChoice("Spot_filter", filterNames, filterNames[settings.filter1]);
+    gd.addChoice("Spot_filter", FILTER_NAMES, FILTER_NAMES[settings.filter1]);
     gd.addSlider("Smoothing", 0, 4.5, settings.smooth1);
     gd.addCheckbox("Difference_filter", settings.differenceFilter);
-    gd.addChoice("Spot_filter2", filterNames, filterNames[settings.filter2]);
+    gd.addChoice("Spot_filter2", FILTER_NAMES, FILTER_NAMES[settings.filter2]);
     gd.addSlider("Smoothing2", 1.5, 6, settings.smooth2);
     gd.addCheckbox("Auto_adjust_contrast", settings.autoAdjustConstrast);
     gd.addCheckbox("Allow_inversion", settings.allowInversion);
@@ -248,10 +247,10 @@ public class SmoothImage implements ExtendedPlugInFilter, DialogListener {
     final int search = 1;
     final int border = 0;
     final DataProcessor processor0 = FitEngineConfiguration.createDataProcessor(border,
-        filters[settings.filter1], settings.smooth1);
+        FILTERS[settings.filter1], settings.smooth1);
     if (settings.differenceFilter) {
       final DataProcessor processor1 = FitEngineConfiguration.createDataProcessor(border,
-          filters[settings.filter2], settings.smooth2);
+          FILTERS[settings.filter2], settings.smooth2);
       return new DifferenceSpotFilter(search, border, processor0, processor1,
           settings.allowInversion);
     }

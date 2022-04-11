@@ -252,7 +252,7 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
         {"Score n=1", "Score n=2", "Score n=N", "Iter n=1", "Eval n=1", "Iter n>1", "Eval n>1"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
+    private static final AtomicReference<Settings> INSTANCE =
         new AtomicReference<>(new Settings());
 
     boolean useBenchmarkSettings;
@@ -338,14 +338,14 @@ public class DoubletAnalysis implements PlugIn, ItemListener {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 

@@ -149,8 +149,7 @@ public class ResultsManager implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     String inputFilename;
@@ -185,14 +184,14 @@ public class ResultsManager implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(Constants.inputFilename, inputFilename);
       Prefs.set(Constants.inputNmPerPixel, inputNmPerPixel);
       Prefs.set(Constants.inputExposureTime, inputExposureTime);

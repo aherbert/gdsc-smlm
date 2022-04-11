@@ -402,29 +402,29 @@ public final class Shape3DHelper {
     return (float) Math.sqrt(value);
   }
 
-  private static final float[][] triVertices =
+  private static final float[][] TRI_VERTICES =
       {{sqrt(8d / 9), 0, 0}, {-sqrt(2d / 9), sqrt(2d / 3), 0}, {-sqrt(2d / 9), -sqrt(2d / 3), 0}};
-  private static final int[][] triFaces = {{0, 1, 2}};
+  private static final int[][] TRI_FACES = {{0, 1, 2}};
 
-  private static final float[][] squareVertices = {{1, 1, 0}, {-1, 1, 0}, {-1, -1, 0}, {1, -1, 0}};
-  private static final int[][] squareFaces = {{0, 1, 3}, {3, 1, 2}};
+  private static final float[][] SQUARE_VERTICES = {{1, 1, 0}, {-1, 1, 0}, {-1, -1, 0}, {1, -1, 0}};
+  private static final int[][] SQUARE_FACES = {{0, 1, 3}, {3, 1, 2}};
 
   // https://en.m.wikipedia.org/wiki/Tetrahedron
   // based on alternated cube
-  private static final float[][] tetraVertices = {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
-  private static final int[][] tetraFaces = {{0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
+  private static final float[][] TETRA_VERTICES = {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
+  private static final int[][] TETRA_FACES = {{0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
 
   // https://en.m.wikipedia.org/wiki/Octahedron
-  private static final float[][] octaVertices =
+  private static final float[][] OCTA_VERTICES =
       {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},};
-  private static final int[][] octaFaces =
+  private static final int[][] OCTA_FACES =
       {{0, 3, 4}, {3, 1, 4}, {1, 2, 4}, {2, 0, 4}, {3, 0, 5}, {1, 3, 5}, {2, 1, 5}, {0, 2, 5},};
 
-  private static final float[][] cubeVertices = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1},
+  private static final float[][] CUBE_VERTICES = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1},
       {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},};
-  private static final int[][] cubeFaces = {{0, 1, 3}, {3, 1, 2}, {0, 4, 7}, {0, 7, 3}, {1, 5, 6},
+  private static final int[][] CUBE_FACES = {{0, 1, 3}, {3, 1, 2}, {0, 4, 7}, {0, 7, 3}, {1, 5, 6},
       {1, 6, 2}, {3, 7, 6}, {3, 6, 2}, {0, 4, 5}, {0, 5, 1}, {4, 5, 7}, {4, 6, 7},};
-  private static final int[][] cubeFaces4 =
+  private static final int[][] CUBE_FACES4 =
       {{0, 1, 5, 4}, {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7}, {7, 4, 5, 6}, {2, 1, 0, 3},};
 
   /**
@@ -434,7 +434,7 @@ public final class Shape3DHelper {
    */
   @SuppressWarnings("unused")
   private static List<Point3f> createTriangle() {
-    return createSolid(triVertices, triFaces, true);
+    return createSolid(TRI_VERTICES, TRI_FACES, true);
   }
 
   /**
@@ -443,7 +443,7 @@ public final class Shape3DHelper {
    * @return the list of vertices for the triangles
    */
   private static List<Point3f> createSquare() {
-    return createSolid(squareVertices, squareFaces, true);
+    return createSolid(SQUARE_VERTICES, SQUARE_FACES, true);
   }
 
   /**
@@ -453,7 +453,7 @@ public final class Shape3DHelper {
    */
   @SuppressWarnings("unused")
   private static List<Point3f> createTetrahedron() {
-    return createSolid(tetraVertices, tetraFaces, true);
+    return createSolid(TETRA_VERTICES, TETRA_FACES, true);
   }
 
   /**
@@ -464,7 +464,7 @@ public final class Shape3DHelper {
   @SuppressWarnings("unused")
   private static List<Point3f> createOctahedron() {
     // This is already normalised
-    return createSolid(octaVertices, octaFaces, false);
+    return createSolid(OCTA_VERTICES, OCTA_FACES, false);
   }
 
   /**
@@ -473,7 +473,7 @@ public final class Shape3DHelper {
    * @return the list of vertices for the triangles
    */
   private static List<Point3f> createCube() {
-    return createSolid(cubeVertices, cubeFaces, true);
+    return createSolid(CUBE_VERTICES, CUBE_FACES, true);
   }
 
   /**
@@ -535,7 +535,7 @@ public final class Shape3DHelper {
    */
   @SuppressWarnings("unused")
   private static List<Point3f> createTriangleOutline() {
-    return createSolidOutline(triVertices, true);
+    return createSolidOutline(TRI_VERTICES, true);
   }
 
   /**
@@ -544,7 +544,7 @@ public final class Shape3DHelper {
    * @return the list of vertices for the triangles
    */
   private static List<Point3f> createSquareOutline() {
-    return createSolidOutline(squareVertices, true);
+    return createSolidOutline(SQUARE_VERTICES, true);
   }
 
   /**
@@ -714,7 +714,7 @@ public final class Shape3DHelper {
         primitive = GeometryInfo.QUAD_ARRAY;
         coords = new LocalList<>();
         for (int i = 0; i < 4; i++) {
-          coords.add(new Point3f(cubeVertices[i][0], cubeVertices[i][1], 0));
+          coords.add(new Point3f(CUBE_VERTICES[i][0], CUBE_VERTICES[i][1], 0));
         }
         normalise = true;
         normal.set(0, 0, 1);
@@ -735,9 +735,9 @@ public final class Shape3DHelper {
         coords = new LocalList<>();
         final Point3f[] vertices = new Point3f[8];
         for (int i = 0; i < 8; i++) {
-          vertices[i] = new Point3f(cubeVertices[i][0], cubeVertices[i][1], cubeVertices[i][2]);
+          vertices[i] = new Point3f(CUBE_VERTICES[i][0], CUBE_VERTICES[i][1], CUBE_VERTICES[i][2]);
         }
-        for (final int[] face : cubeFaces4) {
+        for (final int[] face : CUBE_FACES4) {
           for (int i = 0; i < 4; i++) {
             coords.add(vertices[face[i]]);
           }

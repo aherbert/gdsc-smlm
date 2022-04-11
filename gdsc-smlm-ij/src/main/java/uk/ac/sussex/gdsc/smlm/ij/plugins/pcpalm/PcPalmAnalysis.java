@@ -120,7 +120,7 @@ public class PcPalmAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
+    private static final AtomicReference<Settings> INSTANCE =
         new AtomicReference<>(new Settings());
 
     String resultsDirectory;
@@ -175,14 +175,14 @@ public class PcPalmAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -559,7 +559,7 @@ public class PcPalmAnalysis implements PlugIn {
       // Create histogram of distances at different radii.
       final int nBins = (int) (settings.correlationDistance / settings.correlationInterval) + 1;
       final double maxDistance2 = settings.correlationDistance * settings.correlationDistance;
-      final int[] H = new int[nBins];
+      final int[] h = new int[nBins];
 
       // TODO - Update this using a grid with a resolution of maxDistance to increase speed
       // by only comparing to neighbours within range.
@@ -611,7 +611,7 @@ public class PcPalmAnalysis implements PlugIn {
 
           final double d = m.distance2(molecules.get(j));
           if (d < maxDistance2) {
-            H[(int) (Math.sqrt(d) / settings.correlationInterval)]++;
+            h[(int) (Math.sqrt(d) / settings.correlationInterval)]++;
           }
         }
       }
@@ -628,7 +628,7 @@ public class PcPalmAnalysis implements PlugIn {
           // Pair-correlation is the count at the given distance divided by N and the area at
           // distance ri:
           // H(r_i) / (N x (pi x (r_i+1)^2 - pi x r_i^2))
-          pcf[i] = H[i] / (npi * (radius[i + 1] * radius[i + 1] - radius[i] * radius[i]));
+          pcf[i] = h[i] / (npi * (radius[i + 1] * radius[i + 1] - radius[i] * radius[i]));
         }
       }
 

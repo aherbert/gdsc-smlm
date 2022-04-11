@@ -145,8 +145,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     DataFilterMethod defaultDataFilterMethod;
     double defaultSmooth;
@@ -196,14 +195,14 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -751,13 +750,13 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
       final double[] intensity = new double[size];
       final double[] rank = SimpleArrayUtils.newArray(size, 1, 1.0);
       final int top = (settings.topN > 0) ? settings.topN : size;
-      final int size_1 = size - 1;
+      final int sizem1 = size - 1;
       for (int i = 0; i < size; i++) {
         intensity[i] = spots[i].intensity;
         if (i < top) {
           x[0] = spots[i].x + bounds.x + 0.5f;
           y[0] = spots[i].y + bounds.y + 0.5f;
-          final Color c = LutHelper.getColour(lut, size_1 - i, size);
+          final Color c = LutHelper.getColour(lut, sizem1 - i, size);
           addRoi(0, o, x, y, 1, c, 2, 1);
         }
       }
@@ -777,7 +776,7 @@ public class SpotFinderPreview implements ExtendedPlugInFilter {
         plot.drawLine(settings.select, 0, settings.select, in);
         x[0] = spots[index].x + bounds.x + 0.5f;
         y[0] = spots[index].y + bounds.y + 0.5f;
-        final Color c = LutHelper.getColour(lut, size_1 - settings.select, size);
+        final Color c = LutHelper.getColour(lut, sizem1 - settings.select, size);
         addRoi(0, o, x, y, 1, c, 3, 3);
         plot.setColor(Color.black);
         plot.addLabel(0, 0, "Selected spot intensity = " + MathUtils.rounded(in));

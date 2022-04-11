@@ -57,7 +57,7 @@ public class DarkTimeAnalysis implements PlugIn {
   private static final String TITLE = "Dark-time Analysis";
 
   private static final String[] METHOD;
-  private static final ClusteringAlgorithm[] algorithms =
+  private static final ClusteringAlgorithm[] ALGORITHMS =
       new ClusteringAlgorithm[] {ClusteringAlgorithm.CENTROID_LINKAGE_TIME_PRIORITY,
           ClusteringAlgorithm.CENTROID_LINKAGE_DISTANCE_PRIORITY,
           ClusteringAlgorithm.PARTICLE_CENTROID_LINKAGE_TIME_PRIORITY,
@@ -66,7 +66,7 @@ public class DarkTimeAnalysis implements PlugIn {
   static {
     final ArrayList<String> methods = new ArrayList<>();
     methods.add("Tracing");
-    for (final ClusteringAlgorithm c : algorithms) {
+    for (final ClusteringAlgorithm c : ALGORITHMS) {
       methods.add("Clustering (" + c.toString() + ")");
     }
     METHOD = methods.toArray(new String[0]);
@@ -82,8 +82,7 @@ public class DarkTimeAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     int method;
@@ -118,14 +117,14 @@ public class DarkTimeAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -233,7 +232,7 @@ public class DarkTimeAnalysis implements PlugIn {
       traces = tm.getTraces();
     } else {
       final ClusteringEngine engine =
-          new ClusteringEngine(Prefs.getThreads(), algorithms[settings.method - 1], tracker);
+          new ClusteringEngine(Prefs.getThreads(), ALGORITHMS[settings.method - 1], tracker);
       final List<Cluster> clusters =
           engine.findClusters(TraceMolecules.convertToClusterPoints(results), d, range);
       traces = TraceMolecules.convertToTraces(results, clusters);

@@ -87,7 +87,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
 
   // Store the ROI painters that have been attached to TextPanels so they can be updated
   // with a new image source
-  private static final Map<TextPanel, ImageRoiPainter> map = new ConcurrentHashMap<>();
+  private static final Map<TextPanel, ImageRoiPainter> PAINTER_MAP = new ConcurrentHashMap<>();
 
   private boolean showDeviations;
   private boolean showEndFrame;
@@ -248,7 +248,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
           continue;
         }
 
-        roiPainter = map.get(resultsWindow.getTextPanel());
+        roiPainter = PAINTER_MAP.get(resultsWindow.getTextPanel());
         break;
       }
     }
@@ -262,7 +262,7 @@ public class ImageJTablePeakResults extends ImageJAbstractPeakResults
       // The ROI painter adds itself to the TextPanel as a mouse listener. However
       // the TextPanel addMouseListener() adds to the private TextCanvas object so it
       // cannot be retrieved. Store the painter in a global lookup table.
-      map.put(resultsWindow.getTextPanel(), roiPainter);
+      PAINTER_MAP.put(resultsWindow.getTextPanel(), roiPainter);
     }
 
     tp = resultsWindow.getTextPanel();

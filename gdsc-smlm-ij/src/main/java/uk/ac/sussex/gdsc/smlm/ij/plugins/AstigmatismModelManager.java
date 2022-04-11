@@ -919,12 +919,6 @@ public class AstigmatismModelManager implements PlugIn {
         (estimateD(focalPlaneXindex, fitZ, smoothSx) + estimateD(focalPlaneYindex, fitZ, smoothSy))
             / 2;
 
-    // Start with Ax, Bx, Ay, By as zero.
-    final double Ax = 0;
-    final double Bx = 0;
-    final double Ay = 0;
-    final double By = 0;
-
     // Equations assume that x direction is focused above (positive).
     // If this is not the case we can invert the gamma parameter.
     if (focalPlaneXindex < focalPlaneYindex) {
@@ -947,16 +941,13 @@ public class AstigmatismModelManager implements PlugIn {
         new LevenbergMarquardtOptimizer(initialStepBoundFactor, costRelativeTolerance,
             parRelativeTolerance, orthoTolerance, threshold);
 
+    // Start with Ax, Bx, Ay, By as zero.
     parameters = new double[9];
     parameters[P_GAMMA] = gamma;
     parameters[P_Z0] = z0;
     parameters[P_D] = d;
     parameters[P_S0X] = s0x;
-    parameters[P_AX] = Ax;
-    parameters[P_BX] = Bx;
     parameters[P_S0Y] = s0y;
-    parameters[P_AY] = Ay;
-    parameters[P_BY] = By;
 
     record("Initial", parameters);
     if (pluginSettings.getShowEstimatedCurve()) {
@@ -1057,7 +1048,7 @@ public class AstigmatismModelManager implements PlugIn {
   private class AstigmatismVectorFunction implements MultivariateVectorFunction {
     @Override
     public double[] value(double[] point) {
-      final double one_d2 = 1.0 / MathUtils.pow2(point[P_D]);
+      final double oneDivD2 = 1.0 / MathUtils.pow2(point[P_D]);
 
       final double[] value = new double[fitZ.length * 2];
       double z;
@@ -1072,14 +1063,14 @@ public class AstigmatismModelManager implements PlugIn {
         z3 = z2 * z;
         z4 = z2 * z2;
         value[i] =
-            point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+            point[P_S0X] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
         // Y : z -> z+gamma
         z = fitZ[i] - point[P_Z0] + point[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
         value[j] =
-            point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+            point[P_S0Y] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
       }
 
       return value;
@@ -1101,7 +1092,7 @@ public class AstigmatismModelManager implements PlugIn {
         pl[i] -= delta;
       }
 
-      final double one_d2 = 1.0 / MathUtils.pow2(point[P_D]);
+      final double oneDivD2 = 1.0 / MathUtils.pow2(point[P_D]);
       pu[P_D] = 1.0 / MathUtils.pow2(pu[P_D]);
       pl[P_D] = 1.0 / MathUtils.pow2(pl[P_D]);
 
@@ -1120,12 +1111,12 @@ public class AstigmatismModelManager implements PlugIn {
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v1 = point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+        v1 = point[P_S0X] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
         z = fitZ[i] - point[P_Z0] - pl[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v2 = point[P_S0X] * Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+        v2 = point[P_S0X] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
 
         value[i][P_GAMMA] = (v1 - v2) / twoDelta;
 
@@ -1143,13 +1134,13 @@ public class AstigmatismModelManager implements PlugIn {
             Math.sqrt(1 + pu[P_D] * (z2 + point[P_AX] * z3 + point[P_BX] * z4))-
             Math.sqrt(1 + pl[P_D] * (z2 + point[P_AX] * z3 + point[P_BX] * z4))) / twoDelta;
         // Analytical gradient
-        value[i][P_S0X] = Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
+        value[i][P_S0X] = Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + point[P_BX] * z4));
         value[i][P_AX] = point[P_S0X] * (
-            Math.sqrt(1 + one_d2 * (z2 + pu[P_AX] * z3 + point[P_BX] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + pl[P_AX] * z3 + point[P_BX] * z4))) / twoDelta;
+            Math.sqrt(1 + oneDivD2 * (z2 + pu[P_AX] * z3 + point[P_BX] * z4))-
+            Math.sqrt(1 + oneDivD2 * (z2 + pl[P_AX] * z3 + point[P_BX] * z4))) / twoDelta;
         value[i][P_BX] = point[P_S0X] * (
-            Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + pu[P_BX] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + point[P_AX] * z3 + pl[P_BX] * z4))) / twoDelta;
+            Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + pu[P_BX] * z4))-
+            Math.sqrt(1 + oneDivD2 * (z2 + point[P_AX] * z3 + pl[P_BX] * z4))) / twoDelta;
         //@formatter:on
       }
 
@@ -1160,12 +1151,12 @@ public class AstigmatismModelManager implements PlugIn {
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v1 = point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+        v1 = point[P_S0Y] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
         z = fitZ[i] - point[P_Z0] + pl[P_GAMMA];
         z2 = z * z;
         z3 = z2 * z;
         z4 = z2 * z2;
-        v2 = point[P_S0Y] * Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+        v2 = point[P_S0Y] * Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
 
         value[j][P_GAMMA] = (v1 - v2) / twoDelta;
 
@@ -1183,13 +1174,13 @@ public class AstigmatismModelManager implements PlugIn {
             Math.sqrt(1 + pu[P_D] * (z2 + point[P_AY] * z3 + point[P_BY] * z4))-
             Math.sqrt(1 + pl[P_D] * (z2 + point[P_AY] * z3 + point[P_BY] * z4))) / twoDelta;
         // Analytical gradient
-        value[j][P_S0Y] = Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
+        value[j][P_S0Y] = Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + point[P_BY] * z4));
         value[j][P_AY] = point[P_S0Y] * (
-            Math.sqrt(1 + one_d2 * (z2 + pu[P_AY] * z3 + point[P_BY] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + pl[P_AY] * z3 + point[P_BY] * z4))) / twoDelta;
+            Math.sqrt(1 + oneDivD2 * (z2 + pu[P_AY] * z3 + point[P_BY] * z4))-
+            Math.sqrt(1 + oneDivD2 * (z2 + pl[P_AY] * z3 + point[P_BY] * z4))) / twoDelta;
         value[j][P_BY] = point[P_S0Y] * (
-            Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + pu[P_BY] * z4))-
-            Math.sqrt(1 + one_d2 * (z2 + point[P_AY] * z3 + pl[P_BY] * z4))) / twoDelta;
+            Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + pu[P_BY] * z4))-
+            Math.sqrt(1 + oneDivD2 * (z2 + point[P_AY] * z3 + pl[P_BY] * z4))) / twoDelta;
         //@formatter:on
       }
 
@@ -1216,22 +1207,22 @@ public class AstigmatismModelManager implements PlugIn {
     final double gamma = parameters[P_GAMMA];
     final double d = parameters[P_D];
     final double s0x = parameters[P_S0X];
-    final double Ax = parameters[P_AX];
-    final double Bx = parameters[P_BX];
+    final double ax = parameters[P_AX];
+    final double bx = parameters[P_BX];
     final double s0y = parameters[P_S0Y];
-    final double Ay = parameters[P_AY];
-    final double By = parameters[P_BY];
+    final double ay = parameters[P_AY];
+    final double by = parameters[P_BY];
     final double z0 = parameters[P_Z0];
 
     // Draw across the entire data range
-    final double one_d2 = 1.0 / MathUtils.pow2(d);
+    final double oneDivD2 = 1.0 / MathUtils.pow2(d);
 
     // Update plot
     final double[] sx1 = new double[z.length];
     final double[] sy1 = new double[z.length];
     for (int i = 0; i < z.length; i++) {
-      sx1[i] = getS(s0x, z[i] - z0 - gamma, one_d2, Ax, Bx);
-      sy1[i] = getS(s0y, z[i] - z0 + gamma, one_d2, Ay, By);
+      sx1[i] = getS(s0x, z[i] - z0 - gamma, oneDivD2, ax, bx);
+      sy1[i] = getS(s0y, z[i] - z0 + gamma, oneDivD2, ay, by);
     }
 
     // Just redraw the plot
@@ -1453,11 +1444,11 @@ public class AstigmatismModelManager implements PlugIn {
     final double gamma = model.getGamma();
     final double d = model.getD();
     final double s0x = model.getS0X();
-    final double Ax = model.getAx();
-    final double Bx = model.getBx();
+    final double ax = model.getAx();
+    final double bx = model.getBx();
     final double s0y = model.getS0Y();
-    final double Ay = model.getAy();
-    final double By = model.getBy();
+    final double ay = model.getAy();
+    final double by = model.getBy();
 
     final double range = Math.abs(gamma) + 1.5 * d;
     final int n = 200;
@@ -1467,7 +1458,7 @@ public class AstigmatismModelManager implements PlugIn {
     final double[] sy = new double[z.length];
     // Use the same class that is used during fitting
     final HoltzerAstigmatismZModel m =
-        HoltzerAstigmatismZModel.create(s0x, s0y, gamma, d, Ax, Bx, Ay, By);
+        HoltzerAstigmatismZModel.create(s0x, s0y, gamma, d, ax, bx, ay, by);
     for (int i = 0; i < z.length; i++) {
       final double zz = -range + i * step;
       z[i] = zz;

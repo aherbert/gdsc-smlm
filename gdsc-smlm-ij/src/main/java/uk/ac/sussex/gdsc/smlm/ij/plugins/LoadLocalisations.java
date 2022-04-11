@@ -75,19 +75,19 @@ public class LoadLocalisations implements PlugIn {
 
   private static class TimeUnitLoader {
     // Time units for the exposure time cannot be in frames as this makes no sense
-    private static final String[] tUnits;
-    private static final TimeUnit[] tUnitValues;
+    private static final String[] TIME_UNITS;
+    private static final TimeUnit[] TIME_UNIT_VALUES;
 
     static {
       final EnumSet<TimeUnit> set = EnumSet.allOf(TimeUnit.class);
       set.remove(TimeUnit.FRAME);
       set.remove(TimeUnit.UNRECOGNIZED);
-      tUnits = new String[set.size()];
-      tUnitValues = new TimeUnit[set.size()];
+      TIME_UNITS = new String[set.size()];
+      TIME_UNIT_VALUES = new TimeUnit[set.size()];
       int index = 0;
       for (final TimeUnit t : set) {
-        tUnits[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
-        tUnitValues[index] = t;
+        TIME_UNITS[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
+        TIME_UNIT_VALUES[index] = t;
         index++;
       }
     }
@@ -98,7 +98,7 @@ public class LoadLocalisations implements PlugIn {
      * @return the time units
      */
     static String[] getTimeUnits() {
-      return tUnits;
+      return TIME_UNITS;
     }
 
     /**
@@ -107,7 +107,7 @@ public class LoadLocalisations implements PlugIn {
      * @return the time unit values
      */
     static TimeUnit[] getTimeUnitValues() {
-      return tUnitValues;
+      return TIME_UNIT_VALUES;
     }
   }
 

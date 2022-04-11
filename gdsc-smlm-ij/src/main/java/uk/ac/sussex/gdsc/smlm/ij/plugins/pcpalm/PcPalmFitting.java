@@ -158,7 +158,7 @@ public class PcPalmFitting implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
+    private static final AtomicReference<Settings> INSTANCE =
         new AtomicReference<>(new Settings());
 
     String inputOption;
@@ -221,14 +221,14 @@ public class PcPalmFitting implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings. This can be called only once as it saves via a reference.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -999,12 +999,12 @@ public class PcPalmFitting implements PlugIn {
         }
 
         // Note the RandomModelFunction evaluates g(r)stoch + 1
-        final double gr_protein_i = grPeaks[i] - (grStoch[i] - 1);
+        final double grProtein = grPeaks[i] - (grStoch[i] - 1);
 
-        if (gr_protein_i > settings.grProteinThreshold) {
+        if (grProtein > settings.grProteinThreshold) {
           // Failed fit
           ImageJUtils.log("  Failed to fit %s: g(r)protein %s > %s @ r=%s", randomModel.getName(),
-              MathUtils.rounded(gr_protein_i, 4), MathUtils.rounded(settings.grProteinThreshold, 4),
+              MathUtils.rounded(grProtein, 4), MathUtils.rounded(settings.grProteinThreshold, 4),
               MathUtils.rounded(radius[i], 4));
           valid1 = false;
         }
@@ -1770,10 +1770,10 @@ public class PcPalmFitting implements PlugIn {
      */
     public double evaluate(double radius, final double sigma, final double density,
         final double range, final double amplitude) {
-      final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
+      final double grStoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
           * StdMath.exp(-radius * radius / (4 * sigma * sigma));
-      final double gr_protein = amplitude * StdMath.exp(-radius / range) + 1;
-      return gr_stoch + gr_protein;
+      final double grProtein = amplitude * StdMath.exp(-radius / range) + 1;
+      return grStoch + grProtein;
     }
 
     /**
@@ -2052,11 +2052,11 @@ public class PcPalmFitting implements PlugIn {
      */
     public double evaluate(double radius, final double sigma, final double density,
         final double range, final double amplitude, final double alpha) {
-      final double gr_stoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
+      final double grStoch = (1.0 / (4 * Math.PI * density * sigma * sigma))
           * StdMath.exp(-radius * radius / (4 * sigma * sigma));
-      final double gr_protein =
+      final double grProtein =
           amplitude * StdMath.exp(-radius / alpha) * Math.cos(0.5 * Math.PI * radius / range) + 1;
-      return gr_stoch + gr_protein;
+      return grStoch + grProtein;
     }
 
     /**

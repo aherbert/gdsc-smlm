@@ -368,7 +368,7 @@ public class CreateData implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
+    private static final AtomicReference<Settings> INSTANCE =
         new AtomicReference<>(new Settings());
 
     boolean[] displayHistograms = new boolean[NAMES.length];
@@ -392,14 +392,14 @@ public class CreateData implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings. This can be called only once as it saves via a reference.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -1468,7 +1468,7 @@ public class CreateData implements PlugIn {
   public static double getPrecisionN(double pixelPitch, double sd, double photons, double b2,
       boolean emCcd) {
     // EM-CCD noise factor
-    final double F = (emCcd) ? 2 : 1;
+    final double f = (emCcd) ? 2 : 1;
     final double a2 = pixelPitch * pixelPitch;
     // 4 * pi = 12.56637061
 
@@ -1484,7 +1484,7 @@ public class CreateData implements PlugIn {
 
     // The MLE fitter can approach this limit when background is 0 photon and EM-gain = 25.
 
-    return Math.sqrt(F * (photons + (12.56637061 * sd * sd * b2) / a2));
+    return Math.sqrt(f * (photons + (12.56637061 * sd * sd * b2) / a2));
     // return Math.sqrt(F * (N + (12.56637061 * sa2 * b2) / a2));
   }
 

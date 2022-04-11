@@ -691,13 +691,13 @@ public class Image2DAligner {
     // j = jmax when j>jmax
 
     // Note: The correlation is for the movement of the reference over the target
-    final int nc_2 = nc / 2;
-    final int nr_2 = nr / 2;
-    final int[] centre = new int[] {nc_2, nr_2};
+    final int halfnc = nc / 2;
+    final int halfnr = nr / 2;
+    final int[] centre = new int[] {halfnc, halfnr};
 
     // Compute the shift from the centre
-    final int dx = nc_2 - ix;
-    final int dy = nr_2 - iy;
+    final int dx = halfnc - ix;
+    final int dy = halfnr - iy;
 
     // For the reference (moved -dx,-dy over the target)
     int rx = -dx;
@@ -738,20 +738,20 @@ public class Image2DAligner {
 
     for (int r = iy; r < iyh; r++) {
       // Compute the y-1,y+height-1
-      final int ry_1 = Math.max(-1, ry - 1);
-      final int ry_h_1 = Math.min(nr, ry + nr) - 1;
+      final int rym1 = Math.max(-1, ry - 1);
+      final int ryphm1 = Math.min(nr, ry + nr) - 1;
       ry++;
-      final int ty_1 = Math.max(-1, ty - 1);
-      final int ty_h_1 = Math.min(nr, ty + nr) - 1;
+      final int tym1 = Math.max(-1, ty - 1);
+      final int typhm1 = Math.min(nr, ty + nr) - 1;
       ty--;
-      final int height = ry_h_1 - ry_1;
+      final int height = ryphm1 - rym1;
 
       final int base = r * nc;
       for (int c = ix, i = 0; c < ixw; c++, i++) {
         final double sumXy = buffer[base + c];
 
-        compute(rx1[i], ry_1, rxw1[i], ry_h_1, width[i], height, rs, rss, rsum);
-        compute(tx1[i], ty_1, txw1[i], ty_h_1, width[i], height, ts, tss, tsum);
+        compute(rx1[i], rym1, rxw1[i], ryphm1, width[i], height, rs, rss, rsum);
+        compute(tx1[i], tym1, txw1[i], typhm1, width[i], height, ts, tss, tsum);
 
         // Compute the correlation
         // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
@@ -817,8 +817,8 @@ public class Image2DAligner {
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
     final double[] result = new double[] {
-      nc_2 - xy[0],
-      nr_2 - xy[1],
+      halfnc - xy[0],
+      halfnr - xy[1],
       buffer[maxi]
     };
     // @formatter:on
@@ -871,21 +871,21 @@ public class Image2DAligner {
     final int[] xy = correlation.getXy(maxi);
 
     // Find the range for the target and reference
-    final int nc_2 = nc / 2;
-    final int nr_2 = nr / 2;
-    final int tx = Math.max(0, xy[0] - nc_2);
-    final int ty = Math.max(0, xy[1] - nr_2);
-    final int width = Math.min(nc, xy[0] + nc_2) - tx;
-    final int height = Math.min(nr, xy[1] + nr_2) - ty;
+    final int halfnc = nc / 2;
+    final int halfnr = nr / 2;
+    final int tx = Math.max(0, xy[0] - halfnc);
+    final int ty = Math.max(0, xy[1] - halfnr);
+    final int width = Math.min(nc, xy[0] + halfnc) - tx;
+    final int height = Math.min(nr, xy[1] + halfnr) - ty;
 
     // For the reference we express as a shift relative to the centre
     // and subtract the half-width.
     // Formally:
-    // (nc_2 - xy[0]) // shift
-    // + nc_2 // centre
-    // - nc_2 // Half width
-    final int rx = Math.max(0, -xy[0] + nc_2);
-    final int ry = Math.max(0, -xy[1] + nr_2);
+    // (halfnc - xy[0]) // shift
+    // + halfnc // centre
+    // - halfnc // Half width
+    final int rx = Math.max(0, -xy[0] + halfnc);
+    final int ry = Math.max(0, -xy[1] + halfnr);
 
     final double[] tar = target.input;
     final double[] ref = reference.input;
@@ -938,23 +938,23 @@ public class Image2DAligner {
 
     // This has been adapted from Image2D to compute the twos sums together
 
-    final int xw_yh = yh1 * nc + xw1;
+    final int xwyh = yh1 * nc + xw1;
     result[0] = 0;
     result[1] = 0;
     if (y1 >= 0) {
-      final int h_ = height * nc;
+      final int h = height * nc;
       if (x1 >= 0) {
-        result[0] = sum[xw_yh - width - h_] - sum[xw_yh - width];
-        result[1] = sumSq[xw_yh - width - h_] - sumSq[xw_yh - width];
+        result[0] = sum[xwyh - width - h] - sum[xwyh - width];
+        result[1] = sumSq[xwyh - width - h] - sumSq[xwyh - width];
       }
-      result[0] -= sum[xw_yh - h_];
-      result[1] -= sumSq[xw_yh - h_];
+      result[0] -= sum[xwyh - h];
+      result[1] -= sumSq[xwyh - h];
     } else if (x1 >= 0) {
-      result[0] = -sum[xw_yh - width];
-      result[1] = -sumSq[xw_yh - width];
+      result[0] = -sum[xwyh - width];
+      result[1] = -sumSq[xwyh - width];
     }
-    result[0] = result[0] + sum[xw_yh];
-    result[1] = result[1] + sumSq[xw_yh];
+    result[0] = result[0] + sum[xwyh];
+    result[1] = result[1] + sumSq[xwyh];
   }
 
   /**

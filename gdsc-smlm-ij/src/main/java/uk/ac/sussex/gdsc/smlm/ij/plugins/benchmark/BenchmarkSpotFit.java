@@ -172,11 +172,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private static final int FILTER_EVALUATIONS = 8;
 
   /** The coordinate cache. This stores the coordinates for a simulation Id. */
-  private static AtomicReference<
-      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> coordinateCache =
+  private static final AtomicReference<
+      Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>>> COORDINATE_CACHE =
           new AtomicReference<>(Pair.of(-1, null));
 
-  private static AtomicReference<TextWindow> summaryTableRef = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE_REF = new AtomicReference<>();
 
   /**
    * The prefix for the results table header. Contains all the standard header data about the input
@@ -184,10 +184,12 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    */
   private static String tablePrefix;
 
-  private static AtomicReference<CandidateData> candidateDataCache = new AtomicReference<>();
+  private static final AtomicReference<CandidateData> CANDIDATE_DATA_CACHE =
+      new AtomicReference<>();
 
   /** A reference to the most recent results. */
-  private static AtomicReference<BenchmarkSpotFitResult> spotFitResults = new AtomicReference<>();
+  private static final AtomicReference<BenchmarkSpotFitResult> SPOT_FIT_RESULTS =
+      new AtomicReference<>();
 
   private final FitEngineConfiguration config;
   private MultiPathFilter multiFilter;
@@ -341,9 +343,9 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    */
   private static class Settings {
     /** The default MultiPathFilter. */
-    static final MultiPathFilter defaultMultiFilter;
+    static final MultiPathFilter DEFAULT_MULTI_FILTER;
     /** The default parameters. */
-    static final double[] defaultParameters;
+    static final double[] DEFAULT_PARAMETERS;
 
     static {
       // Add a filter to use for storing the slice results:
@@ -357,14 +359,13 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
       // We might as well use the doublet fits given we will compute them.
       final double residualsThreshold = 0.4;
-      defaultMultiFilter = new MultiPathFilter(primaryFilter,
+      DEFAULT_MULTI_FILTER = new MultiPathFilter(primaryFilter,
           FitWorker.createMinimalFilter(precisionMethod), residualsThreshold);
-      defaultParameters = createParameters(createDefaultConfig());
+      DEFAULT_PARAMETERS = createParameters(createDefaultConfig());
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     FitEngineConfiguration config;
     MultiPathFilter multiFilter;
@@ -385,7 +386,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     Settings() {
       // Set defaults
       config = createDefaultConfig();
-      multiFilter = defaultMultiFilter.copy();
+      multiFilter = DEFAULT_MULTI_FILTER.copy();
       fractionPositives = 100;
       fractionNegativesAfterAllPositives = 50;
       negativesAfterAllPositives = 10;
@@ -424,14 +425,14 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
 
     private static FitEngineConfiguration createDefaultConfig() {
@@ -1434,7 +1435,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   private BenchmarkSpotFitResult runFitting() {
     // Extract all the results in memory into a list per frame. This can be cached
     boolean refresh = false;
-    Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = coordinateCache.get();
+    Pair<Integer, Int2ObjectOpenHashMap<List<Coordinate>>> coords = COORDINATE_CACHE.get();
 
     if (coords.getKey() != simulationParameters.id) {
       // Do not get integer coordinates
@@ -1442,7 +1443,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
       // from the MemoryPeakResults
       coords =
           Pair.of(simulationParameters.id, ResultsMatchCalculator.getCoordinates(results, false));
-      coordinateCache.set(coords);
+      COORDINATE_CACHE.set(coords);
       refresh = true;
     }
 
@@ -1451,11 +1452,11 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // Extract all the candidates into a list per frame. This can be cached if the settings have not
     // changed
     final int width = (config.isIncludeNeighbours()) ? config.getFittingWidth() : 0;
-    CandidateData candidateData = candidateDataCache.get();
+    CandidateData candidateData = CANDIDATE_DATA_CACHE.get();
     if (refresh || candidateData == null
         || candidateData.differentSettings(filterResult.id, settings, width)) {
       candidateData = subsetFilterResults(filterResult.filterResults, width);
-      candidateDataCache.set(candidateData);
+      CANDIDATE_DATA_CACHE.set(candidateData);
     }
 
     final StopWatch stopWatch = StopWatch.createStarted();
@@ -1572,7 +1573,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
 
     IJ.showStatus("");
 
-    spotFitResults.set(newSpotFitResults);
+    SPOT_FIT_RESULTS.set(newSpotFitResults);
 
     return newSpotFitResults;
   }
@@ -1581,7 +1582,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * Clear old results to free memory.
    */
   private static void clearFitResults() {
-    spotFitResults.set(null);
+    SPOT_FIT_RESULTS.set(null);
   }
 
   private static int
@@ -2834,7 +2835,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
   }
 
   private static TextWindow createTable() {
-    return ImageJUtils.refresh(summaryTableRef,
+    return ImageJUtils.refresh(SUMMARY_TABLE_REF,
         () -> new TextWindow(TITLE, createHeader(), "", 1000, 300));
   }
 
@@ -2912,7 +2913,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
     // targetFitConfiguration.setFitSolverSettings(targetFitConfiguration.getFitSolverSettings());
     // targetFitConfiguration.setFilterSettings(targetFitConfiguration.getFilterSettings());
 
-    final FitEngineConfiguration sourceConfig = Settings.lastSettings.get().config;
+    final FitEngineConfiguration sourceConfig = Settings.INSTANCE.get().config;
     final FitConfiguration sourceFitConfiguration = sourceConfig.getFitConfiguration();
     // Set the fit engine settings manually to avoid merging all child settings
     // i.e. do not do a global update using:
@@ -2995,16 +2996,16 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return true, if a reset was required
    */
   boolean resetMultiPathFilter() {
-    if (Settings.defaultMultiFilter.equals(multiFilter)
-        && equals(createParameters(config), Settings.defaultParameters)) {
+    if (Settings.DEFAULT_MULTI_FILTER.equals(multiFilter)
+        && equals(createParameters(config), Settings.DEFAULT_PARAMETERS)) {
       return false;
     }
-    multiFilter = Settings.defaultMultiFilter;
-    config.setFailuresLimit((int) Settings.defaultParameters[0]);
+    multiFilter = Settings.DEFAULT_MULTI_FILTER;
+    config.setFailuresLimit((int) Settings.DEFAULT_PARAMETERS[0]);
     // Note we are not resetting the residuals threshold in the config.
     // Only the threshold in the multi-filter matters.
-    config.setDuplicateDistance(Settings.defaultParameters[1]);
-    config.setDuplicateDistanceAbsolute(Settings.defaultParameters[2] != 0);
+    config.setDuplicateDistance(Settings.DEFAULT_PARAMETERS[1]);
+    config.setDuplicateDistanceAbsolute(Settings.DEFAULT_PARAMETERS[2] != 0);
     return true;
   }
 
@@ -3028,7 +3029,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the fit engine configuration
    */
   static FitEngineConfiguration getFitEngineConfiguration() {
-    return Settings.lastSettings.get().config.createCopy();
+    return Settings.INSTANCE.get().config.createCopy();
   }
 
   /**
@@ -3037,7 +3038,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the multi filter
    */
   static MultiPathFilter getMultiFilter() {
-    return Settings.lastSettings.get().multiFilter.copy();
+    return Settings.INSTANCE.get().multiFilter.copy();
   }
 
   /**
@@ -3046,7 +3047,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the signal factor
    */
   static double getSignalFactor() {
-    return Settings.lastSettings.get().signalFactor;
+    return Settings.INSTANCE.get().signalFactor;
   }
 
   /**
@@ -3055,7 +3056,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the lower signal factor
    */
   static double getLowerSignalFactor() {
-    return Settings.lastSettings.get().lowerSignalFactor;
+    return Settings.INSTANCE.get().lowerSignalFactor;
   }
 
   /**
@@ -3064,7 +3065,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the compute doublets
    */
   static boolean getComputeDoublets() {
-    return Settings.lastSettings.get().computeDoublets;
+    return Settings.INSTANCE.get().computeDoublets;
   }
 
   /**
@@ -3074,7 +3075,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the min
    */
   static double getMin(ParameterType type) {
-    final BenchmarkSpotFitResult results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = SPOT_FIT_RESULTS.get();
     return results == null ? 0 : getValue(type, results.min, 0);
   }
 
@@ -3085,7 +3086,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the max
    */
   static double getMax(ParameterType type) {
-    final BenchmarkSpotFitResult results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = SPOT_FIT_RESULTS.get();
     return results == null ? Double.MAX_VALUE : getValue(type, results.max, Double.MAX_VALUE);
   }
 
@@ -3135,7 +3136,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the benchmark spot fit results
    */
   static BenchmarkSpotFitResult getBenchmarkSpotFitResults() {
-    return spotFitResults.get();
+    return SPOT_FIT_RESULTS.get();
   }
 
   /**
@@ -3144,7 +3145,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the distance in pixels
    */
   static double getDistanceInPixels() {
-    final BenchmarkSpotFitResult results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = SPOT_FIT_RESULTS.get();
     return results == null ? 0 : results.distanceInPixels;
   }
 
@@ -3154,7 +3155,7 @@ public class BenchmarkSpotFit implements PlugIn, ItemListener {
    * @return the lower distance in pixels
    */
   static double getLowerDistanceInPixels() {
-    final BenchmarkSpotFitResult results = spotFitResults.get();
+    final BenchmarkSpotFitResult results = SPOT_FIT_RESULTS.get();
     return results == null ? 0 : results.lowerDistanceInPixels;
   }
 

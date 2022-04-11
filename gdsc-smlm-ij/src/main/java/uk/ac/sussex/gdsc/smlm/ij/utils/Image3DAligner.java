@@ -87,10 +87,10 @@ public class Image3DAligner {
   // For optimisation
 
   /** Do not have a maximum evaluations as we will converge using the refinements parameter. */
-  private static final MaxEval maxEvaluations = new MaxEval(Integer.MAX_VALUE);
+  private static final MaxEval MAX_EVALUATIONS = new MaxEval(Integer.MAX_VALUE);
 
   /** The bounds of the spline are always 0-1. */
-  private static final SimpleBounds bounds =
+  private static final SimpleBounds BOUNDS =
       new SimpleBounds(new double[3], SimpleArrayUtils.newDoubleArray(3, 1));
 
   /**
@@ -877,15 +877,15 @@ public class Image3DAligner {
     // k = kmax when k>kmax
 
     // Note: The correlation is for the movement of the reference over the target
-    final int nc_2 = nc / 2;
-    final int nr_2 = nr / 2;
-    final int ns_2 = ns / 2;
-    final int[] centre = new int[] {nc_2, nr_2, ns_2};
+    final int halfnc = nc / 2;
+    final int halfnr = nr / 2;
+    final int halfns = ns / 2;
+    final int[] centre = new int[] {halfnc, halfnr, halfns};
 
     // Compute the shift from the centre
-    final int dx = nc_2 - ix;
-    final int dy = nr_2 - iy;
-    final int dz = ns_2 - iz;
+    final int dx = halfnc - ix;
+    final int dy = halfnr - iy;
+    final int dz = halfns - iz;
 
     // For the reference (moved -dx,-dy,-dz over the target)
     int rx = -dx;
@@ -943,13 +943,13 @@ public class Image3DAligner {
 
     for (int s = iz; s < izd; s++) {
       // Compute the z-1,z+d-1
-      final int rz_1 = Math.max(-1, rz - 1);
-      final int rz_d_1 = Math.min(ns, rz + ns) - 1;
+      final int rzm1 = Math.max(-1, rz - 1);
+      final int rzpdm1 = Math.min(ns, rz + ns) - 1;
       rz++;
-      final int tz_1 = Math.max(-1, tz - 1);
-      final int tz_d_1 = Math.min(ns, tz + ns) - 1;
+      final int tzm1 = Math.max(-1, tz - 1);
+      final int tzpdm1 = Math.min(ns, tz + ns) - 1;
       tz--;
-      final int d = rz_d_1 - rz_1;
+      final int d = rzpdm1 - rzm1;
 
       for (int r = iy, j = 0; r < iyh; r++, j++) {
         final int base = s * nrByNc + r * nc;
@@ -957,8 +957,8 @@ public class Image3DAligner {
         for (int c = ix, i = 0; c < ixw; c++, i++) {
           final double sumXy = buffer[base + c];
 
-          compute(rx1[i], ry1[j], rz_1, rxw1[i], ryh1[j], rz_d_1, width[i], h[j], d, rs, rss, rsum);
-          compute(tx1[i], ty1[j], tz_1, txw1[i], tyh1[j], tz_d_1, width[i], h[j], d, ts, tss, tsum);
+          compute(rx1[i], ry1[j], rzm1, rxw1[i], ryh1[j], rzpdm1, width[i], h[j], d, rs, rss, rsum);
+          compute(tx1[i], ty1[j], tzm1, txw1[i], tyh1[j], tzpdm1, width[i], h[j], d, ts, tss, tsum);
 
           // Compute the correlation
           // (sumXy - sumX*sumY/n) / sqrt( (sumXx - sumX^2 / n) * (sumYy - sumY^2 / n) )
@@ -1025,9 +1025,9 @@ public class Image3DAligner {
     // Report the shift required to move from the centre of the target image to the reference
     // @formatter:off
     final double[] result = new double[] {
-      nc_2 - xyz[0],
-      nr_2 - xyz[1],
-      ns_2 - xyz[2],
+      halfnc - xyz[0],
+      halfnr - xyz[1],
+      halfns - xyz[2],
       buffer[maxi]
     };
     // @formatter:on
@@ -1082,7 +1082,7 @@ public class Image3DAligner {
                   // set the number of refinements
                   new SimpleValueChecker(relativeThreshold, -1, refinements));
 
-          final PointValuePair opt = optimiser.optimize(maxEvaluations, bounds, GoalType.MINIMIZE,
+          final PointValuePair opt = optimiser.optimize(MAX_EVALUATIONS, BOUNDS, GoalType.MINIMIZE,
               new InitialGuess(origin),
               // Scale the error for the position check
               new PositionChecker(-1, error / 3.0), new ObjectiveFunction(sf::value),
@@ -1131,24 +1131,24 @@ public class Image3DAligner {
     final int[] xyz = correlation.getXyz(maxi);
 
     // Find the range for the target and reference
-    final int nc_2 = nc / 2;
-    final int nr_2 = nr / 2;
-    final int ns_2 = ns / 2;
-    final int tx = Math.max(0, xyz[0] - nc_2);
-    final int ty = Math.max(0, xyz[1] - nr_2);
-    final int tz = Math.max(0, xyz[2] - ns_2);
-    final int width = Math.min(nc, xyz[0] + nc_2) - tx;
-    final int height = Math.min(nr, xyz[1] + nr_2) - ty;
-    final int depth = Math.min(ns, xyz[2] + ns_2) - tz;
+    final int halfnc = nc / 2;
+    final int halfnr = nr / 2;
+    final int halfns = ns / 2;
+    final int tx = Math.max(0, xyz[0] - halfnc);
+    final int ty = Math.max(0, xyz[1] - halfnr);
+    final int tz = Math.max(0, xyz[2] - halfns);
+    final int width = Math.min(nc, xyz[0] + halfnc) - tx;
+    final int height = Math.min(nr, xyz[1] + halfnr) - ty;
+    final int depth = Math.min(ns, xyz[2] + halfns) - tz;
 
     // For the reference we express as a shift relative to the centre
     // and subtract the half-width.
-    // Formally: (nc_2 - xyz[0]) // shift
-    // + nc_2 // centre
-    // - nc_2 // Half width
-    final int rx = Math.max(0, -xyz[0] + nc_2);
-    final int ry = Math.max(0, -xyz[1] + nr_2);
-    final int rz = Math.max(0, -xyz[2] + ns_2);
+    // Formally: (halfnc - xyz[0]) // shift
+    // + halfnc // centre
+    // - halfnc // Half width
+    final int rx = Math.max(0, -xyz[0] + halfnc);
+    final int ry = Math.max(0, -xyz[1] + halfnr);
+    final int rz = Math.max(0, -xyz[2] + halfns);
 
     final double[] tar = target.input;
     final double[] ref = reference.input;
@@ -1212,43 +1212,43 @@ public class Image3DAligner {
 
     // This has been adapted from Image3D to compute the twos sums together
 
-    // int xw_yh_zd = reference.dht.getIndex(xw1, yh1, zd1);
-    final int xw_yh_zd = zd1 * nrByNc + yh1 * nc + xw1;
+    // int xwyhzd = reference.dht.getIndex(xw1, yh1, zd1);
+    final int xwyhzd = zd1 * nrByNc + yh1 * nc + xw1;
     result[0] = 0;
     result[1] = 0;
     if (z1 >= 0) {
-      final int xw_yh_z = xw_yh_zd - depth * nrByNc;
+      final int xwyhz = xwyhzd - depth * nrByNc;
       if (y1 >= 0) {
-        final int h_ = height * nc;
+        final int h = height * nc;
         if (x1 >= 0) {
-          result[0] = sum[xw_yh_zd - width - h_] - sum[xw_yh_z - width - h_] - sum[xw_yh_zd - width]
-              + sum[xw_yh_z - width];
-          result[1] = sumSq[xw_yh_zd - width - h_] - sumSq[xw_yh_z - width - h_]
-              - sumSq[xw_yh_zd - width] + sumSq[xw_yh_z - width];
+          result[0] = sum[xwyhzd - width - h] - sum[xwyhz - width - h] - sum[xwyhzd - width]
+              + sum[xwyhz - width];
+          result[1] = sumSq[xwyhzd - width - h] - sumSq[xwyhz - width - h]
+              - sumSq[xwyhzd - width] + sumSq[xwyhz - width];
         }
-        result[0] = result[0] + sum[xw_yh_z - h_] - sum[xw_yh_zd - h_];
-        result[1] = result[1] + sumSq[xw_yh_z - h_] - sumSq[xw_yh_zd - h_];
+        result[0] = result[0] + sum[xwyhz - h] - sum[xwyhzd - h];
+        result[1] = result[1] + sumSq[xwyhz - h] - sumSq[xwyhzd - h];
       } else if (x1 >= 0) {
-        result[0] = sum[xw_yh_z - width] - sum[xw_yh_zd - width];
-        result[1] = sumSq[xw_yh_z - width] - sumSq[xw_yh_zd - width];
+        result[0] = sum[xwyhz - width] - sum[xwyhzd - width];
+        result[1] = sumSq[xwyhz - width] - sumSq[xwyhzd - width];
       }
-      result[0] = result[0] + sum[xw_yh_zd] - sum[xw_yh_z];
-      result[1] = result[1] + sumSq[xw_yh_zd] - sumSq[xw_yh_z];
+      result[0] = result[0] + sum[xwyhzd] - sum[xwyhz];
+      result[1] = result[1] + sumSq[xwyhzd] - sumSq[xwyhz];
     } else {
       if (y1 >= 0) {
-        final int h_ = height * nc;
+        final int h = height * nc;
         if (x1 >= 0) {
-          result[0] = sum[xw_yh_zd - width - h_] - sum[xw_yh_zd - width];
-          result[1] = sumSq[xw_yh_zd - width - h_] - sumSq[xw_yh_zd - width];
+          result[0] = sum[xwyhzd - width - h] - sum[xwyhzd - width];
+          result[1] = sumSq[xwyhzd - width - h] - sumSq[xwyhzd - width];
         }
-        result[0] -= sum[xw_yh_zd - h_];
-        result[1] -= sumSq[xw_yh_zd - h_];
+        result[0] -= sum[xwyhzd - h];
+        result[1] -= sumSq[xwyhzd - h];
       } else if (x1 >= 0) {
-        result[0] = -sum[xw_yh_zd - width];
-        result[1] = -sumSq[xw_yh_zd - width];
+        result[0] = -sum[xwyhzd - width];
+        result[1] = -sumSq[xwyhzd - width];
       }
-      result[0] = result[0] + sum[xw_yh_zd];
-      result[1] = result[1] + sumSq[xw_yh_zd];
+      result[0] = result[0] + sum[xwyhzd];
+      result[1] = result[1] + sumSq[xwyhzd];
     }
   }
 

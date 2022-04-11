@@ -95,8 +95,8 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 public class TraceMolecules implements PlugIn {
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
 
-  private static final AtomicReference<TextWindow> summaryTable = new AtomicReference<>();
-  private static final AtomicBoolean logHeader = new AtomicBoolean(true);
+  private static final AtomicReference<TextWindow> SUMMARY_TABLE = new AtomicReference<>();
+  private static final AtomicBoolean LOG_HEADER = new AtomicBoolean(true);
 
   private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "Blinks",
       "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)", "Dwell time (s)"};
@@ -112,18 +112,18 @@ public class TraceMolecules implements PlugIn {
   private static final int TOTAL_T_OFF = 6;
   private static final int DWELL_TIME = 7;
 
-  private static boolean[] integerDisplay;
+  private static final boolean[] INTEGER_DISPLAY;
 
   static {
-    integerDisplay = new boolean[NAMES.length];
-    integerDisplay[BLINKS] = true;
+    INTEGER_DISPLAY = new boolean[NAMES.length];
+    INTEGER_DISPLAY[BLINKS] = true;
   }
 
-  private static boolean[] alwaysRemoveOutliers;
+  private static final boolean[] ALWAYS_REMOVE_OUTLIERS;
 
   static {
-    alwaysRemoveOutliers = new boolean[NAMES.length];
-    alwaysRemoveOutliers[TOTAL_SIGNAL] = false;
+    ALWAYS_REMOVE_OUTLIERS = new boolean[NAMES.length];
+    ALWAYS_REMOVE_OUTLIERS[TOTAL_SIGNAL] = false;
   }
 
   private String pluginTitle = "Trace or Cluster Molecules";
@@ -156,8 +156,7 @@ public class TraceMolecules implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     private static final String KEY_INPUT_OPTION = "gdsc.smlm.tracemolecules.inputOption";
     private static final String KEY_INPUT_DEBUG_MODE = "gdsc.smlm.tracemolecules.inputDebugMode";
@@ -206,14 +205,14 @@ public class TraceMolecules implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(KEY_INPUT_OPTION, inputOption);
       Prefs.set(KEY_INPUT_DEBUG_MODE, inputDebugMode);
       Prefs.set(KEY_INPUT_OPTIMISE, inputOptimiseBlinkingRate);
@@ -667,9 +666,9 @@ public class TraceMolecules implements PlugIn {
       for (int i = 0; i < NAMES.length; i++) {
         if (pluginSettings.displayHistograms[i]) {
           builder.setData((StoredDataStatistics) stats[i]).setName(NAMES[i])
-              .setIntegerBins(integerDisplay[i])
+              .setIntegerBins(INTEGER_DISPLAY[i])
               .setRemoveOutliersOption(
-                  (settings.getRemoveOutliers() || alwaysRemoveOutliers[i]) ? 2 : 0)
+                  (settings.getRemoveOutliers() || ALWAYS_REMOVE_OUTLIERS[i]) ? 2 : 0)
               .show(windowOrganiser);
         }
       }
@@ -686,16 +685,16 @@ public class TraceMolecules implements PlugIn {
 
   private Consumer<String> createSummaryTable() {
     if (java.awt.GraphicsEnvironment.isHeadless()) {
-      if (logHeader.compareAndSet(true, false)) {
+      if (LOG_HEADER.compareAndSet(true, false)) {
         IJ.log(createHeader());
       }
       return IJ::log;
     }
-    TextWindow window = summaryTable.get();
+    TextWindow window = SUMMARY_TABLE.get();
     if (window == null || !window.isVisible()) {
       window = new TextWindow(pluginTitle + " Data Summary", createHeader(), "", 800, 300);
       window.setVisible(true);
-      summaryTable.set(window);
+      SUMMARY_TABLE.set(window);
     }
     return window::append;
   }

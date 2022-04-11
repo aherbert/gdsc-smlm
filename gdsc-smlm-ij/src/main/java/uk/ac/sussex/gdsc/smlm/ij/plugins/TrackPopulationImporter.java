@@ -69,8 +69,7 @@ public class TrackPopulationImporter implements PlugIn {
     private static final String KEY_NEW_DATASET = "gdsc.smlm.trackpopulationimporter.newDataset";
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String filename;
     String inputOption;
@@ -102,14 +101,14 @@ public class TrackPopulationImporter implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(KEY_FILENAME, filename);
       Prefs.set(KEY_INPUT_OPTION, inputOption);
       Prefs.set(KEY_IGNORE_UNMAPPED, ignoreUnmapped);

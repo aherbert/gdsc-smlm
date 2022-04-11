@@ -87,15 +87,14 @@ public class TraceExporter implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
-    static final String[] formatNames;
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
+    static final String[] FORMAT_NAMES;
 
     static {
-      formatNames = SettingsManager.getNames((Object[]) ExportFormat.values());
+      FORMAT_NAMES = SettingsManager.getNames((Object[]) ExportFormat.values());
       // We do not want capitalisation of 'ana' or 'vb'
-      formatNames[ExportFormat.ANA_DNA.ordinal()] = ExportFormat.ANA_DNA.getName();
-      formatNames[ExportFormat.VB_SPT.ordinal()] = ExportFormat.VB_SPT.getName();
+      FORMAT_NAMES[ExportFormat.ANA_DNA.ordinal()] = ExportFormat.ANA_DNA.getName();
+      FORMAT_NAMES[ExportFormat.VB_SPT.ordinal()] = ExportFormat.VB_SPT.getName();
     }
 
     String directory;
@@ -135,14 +134,14 @@ public class TraceExporter implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -202,7 +201,7 @@ public class TraceExporter implements PlugIn {
     gd.addNumericField("Max_jump", settings.maxJump, 0);
     gd.addMessage("Specify localistion precision (wobble) to add");
     gd.addNumericField("Wobble", settings.wobble, 0, 6, "nm");
-    gd.addChoice("Format", Settings.formatNames, settings.format);
+    gd.addChoice("Format", Settings.FORMAT_NAMES, settings.format);
     gd.addCheckbox("Histogram_trace_lengths", settings.showTraceLengths);
     gd.addCheckbox("Save_to_memory", settings.save);
     gd.addHelp(HelpUrls.getUrl("trace-exporter"));
@@ -690,7 +689,7 @@ public class TraceExporter implements PlugIn {
         // Use the original track ID.
         // NOBIAS is robust to this as it checks for a change in ID using: if (TrID(t)~=TrID(t-1))
         last[2] = result.getId();
-        //last[2] = idCounter.incrementAndGet();
+        // last[2] = idCounter.incrementAndGet();
         last[3] = result.getFrame();
       } else {
         last[0] = x - last[0];

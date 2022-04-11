@@ -88,7 +88,7 @@ class DiffusionRateTest implements PlugIn {
 
   // Used to allow other plugins to detect if a dataset is simulated
 
-  private static final AtomicReference<SimulationData> lastSimulation = new AtomicReference<>();
+  private static final AtomicReference<SimulationData> LAST_SIMULATION = new AtomicReference<>();
   private SimulationData simulation;
 
   private CreateDataSettings.Builder settings;
@@ -130,8 +130,7 @@ class DiffusionRateTest implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     boolean useConfinement;
     int confinementAttempts;
@@ -185,14 +184,14 @@ class DiffusionRateTest implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings. This can be called only once as it saves via a reference.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -264,7 +263,7 @@ class DiffusionRateTest implements PlugIn {
    * @return true, if is simulated
    */
   static boolean isSimulated(String name) {
-    SimulationData data = lastSimulation.get();
+    SimulationData data = LAST_SIMULATION.get();
     if (data != null) {
       for (final String name2 : data.dataset) {
         if (name.equals(name2)) {
@@ -293,7 +292,7 @@ class DiffusionRateTest implements PlugIn {
       return;
     }
 
-    lastSimulation.set(null);
+    LAST_SIMULATION.set(null);
 
     final int totalSteps = (int) Math.ceil(settings.getSeconds() * settings.getStepsPerSecond());
 
@@ -1404,7 +1403,7 @@ class DiffusionRateTest implements PlugIn {
    * @return the last simulation precision
    */
   static double getLastSimulationPrecision() {
-    final SimulationData data = lastSimulation.get();
+    final SimulationData data = LAST_SIMULATION.get();
     return (data != null) ? data.precision : 0;
   }
 

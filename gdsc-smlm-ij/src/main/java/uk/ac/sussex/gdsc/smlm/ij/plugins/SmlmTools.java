@@ -61,13 +61,13 @@ public class SmlmTools extends PlugInFrame {
   private static final String TITLE = "GDSC SMLM ImageJ Plugins";
   private static final String OPT_LOCATION = "SMLM_Plugins.location";
 
-  private static final AtomicReference<PlugInFrame> instance = new AtomicReference<>();
+  private static final AtomicReference<PlugInFrame> INSTANCE = new AtomicReference<>();
 
   // Store the screen dimension
-  private static Dimension screenDimension;
+  private static final Dimension SCREEN_DIMENSION;
 
   static {
-    screenDimension = IJ.getScreenSize();
+    SCREEN_DIMENSION = IJ.getScreenSize();
   }
 
   private final HashMap<String, String[]> plugins = new HashMap<>();
@@ -83,7 +83,7 @@ public class SmlmTools extends PlugInFrame {
     super(TITLE);
 
     // Only allow one instance to run
-    final Frame frame = instance.get();
+    final Frame frame = INSTANCE.get();
 
     if (frame != null) {
       frame.toFront();
@@ -94,7 +94,7 @@ public class SmlmTools extends PlugInFrame {
       return;
     }
 
-    instance.set(this);
+    INSTANCE.set(this);
     WindowManager.addWindow(this);
 
     pack();
@@ -113,7 +113,7 @@ public class SmlmTools extends PlugInFrame {
   @Override
   public void close() {
     Prefs.saveLocation(OPT_LOCATION, getLocation());
-    instance.compareAndSet(this, null);
+    INSTANCE.compareAndSet(this, null);
     super.close();
   }
 
@@ -123,7 +123,7 @@ public class SmlmTools extends PlugInFrame {
    * @return True if the instance of the SMLM Tools Frame is visible.
    */
   public static boolean isFrameVisible() {
-    final Frame frame = instance.get();
+    final Frame frame = INSTANCE.get();
     return (frame != null && frame.isVisible());
   }
 
@@ -131,7 +131,7 @@ public class SmlmTools extends PlugInFrame {
    * Close the instance of the SMLM Tools Frame.
    */
   public static void closeFrame() {
-    final PlugInFrame frame = instance.getAndUpdate(fr -> null);
+    final PlugInFrame frame = INSTANCE.getAndUpdate(fr -> null);
     if (frame != null) {
       frame.close();
     }
@@ -226,8 +226,8 @@ public class SmlmTools extends PlugInFrame {
     add(scroll, BorderLayout.CENTER);
 
     // Scale to the screen size
-    d.width = Math.min(d.width, screenDimension.width - 100);
-    d.height = Math.min(d.height, screenDimension.height - 150);
+    d.width = Math.min(d.width, SCREEN_DIMENSION.width - 100);
+    d.height = Math.min(d.height, SCREEN_DIMENSION.height - 150);
 
     final Insets insets = scroll.getInsets();
     d.width += insets.left + insets.right;

@@ -184,8 +184,7 @@ public class TrackPopulationAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     List<String> input;
     int window;
@@ -282,14 +281,14 @@ public class TrackPopulationAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -501,8 +500,8 @@ public class TrackPopulationAnalysis implements PlugIn {
   /**
    * Class to display TrackDataTableModel in a window frame.
    *
-   * <p>Although this class extends {@link java.awt.Component} it is not intended
-   * to be {@link Serializable}.
+   * <p>Although this class extends {@link java.awt.Component} it is not intended to be
+   * {@link Serializable}.
    */
   private static class TrackDataTableModelFrame extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;

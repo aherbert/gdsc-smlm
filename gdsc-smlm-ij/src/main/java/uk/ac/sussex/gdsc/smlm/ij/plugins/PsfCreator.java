@@ -73,7 +73,6 @@ import uk.ac.sussex.gdsc.core.data.FloatStackTrivalueProvider;
 import uk.ac.sussex.gdsc.core.data.procedures.FloatStackTrivalueProcedure;
 import uk.ac.sussex.gdsc.core.data.utils.Rounder;
 import uk.ac.sussex.gdsc.core.data.utils.RounderUtils;
-import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft;
 import uk.ac.sussex.gdsc.core.ij.AlignImagesFft.SubPixelMethod;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -117,8 +116,6 @@ import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameterUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfHelper;
 import uk.ac.sussex.gdsc.smlm.data.config.PsfProtosHelper;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitConverterUtils;
-import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
@@ -1603,8 +1600,8 @@ public class PsfCreator implements PlugInFilter {
     if (!PsfHelper.isGaussian2D(settings.getPsf())) {
       settings.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
     }
-    config = FitEngineConfiguration.create(settings.getFitEngineSettings(), settings.getCalibration(),
-        settings.getPsf());
+    config = FitEngineConfiguration.create(settings.getFitEngineSettings(),
+        settings.getCalibration(), settings.getPsf());
     final boolean save = false;
     if (!configPlugin.showDialog(config, save)) {
       IJ.error(TITLE, "No fit configuration loaded");
@@ -1616,8 +1613,7 @@ public class PsfCreator implements PlugInFilter {
     config.setResidualsThreshold(1);
     fitConfig = config.getFitConfiguration();
     nmPerPixel = fitConfig.getCalibrationReader().getNmPerPixel();
-    if (settings.getRadius() < 5
-        * Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())) {
+    if (settings.getRadius() < 5 * Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())) {
       settings.setRadius(5 * Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd()));
       ImageJUtils.log("Radius is less than 5 * PSF standard deviation, increasing to %s",
           MathUtils.rounded(settings.getRadius()));
@@ -1889,9 +1885,8 @@ public class PsfCreator implements PlugInFilter {
     final double[] a = new double[z.length];
 
     // Set limits for the fit
-    final float maxWidth =
-        (float) (Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())
-            * settings.getMagnification() * 4);
+    final float maxWidth = (float) (Math.max(fitConfig.getInitialXSd(), fitConfig.getInitialYSd())
+        * settings.getMagnification() * 4);
     final float maxSignal = 2; // PSF is normalised to 1
 
     final WidthResultProcedure wp = new WidthResultProcedure(results, DistanceUnit.PIXEL);
@@ -3109,8 +3104,6 @@ public class PsfCreator implements PlugInFilter {
     return centres;
   }
 
-  private static final TypeConverter<AngleUnit> angleConverter =
-      UnitConverterUtils.createConverter(AngleUnit.RADIAN, AngleUnit.DEGREE);
   private static final double NO_ANGLE = -360.0;
 
   private class PsfCentreSelector implements DialogListener {
@@ -3229,7 +3222,7 @@ public class PsfCreator implements PlugInFilter {
             // Q. Which vector to use, small or big Eigen value?
             // Since they are orthogonal it does not matter.
             // Use arc tan to get the result in the domain -pi to pi
-            double angle = angleConverter.convert(Math.atan2(v[1][1], v[1][0]));
+            double angle = Math.toDegrees(Math.atan2(v[1][1], v[1][0]));
             double difference = angle - lastA;
             if (difference > 180) {
               difference -= 360;
@@ -3304,8 +3297,8 @@ public class PsfCreator implements PlugInFilter {
             final float[] data = psf.psf[z];
             // Ensure the sum is positive
             final float min = MathUtils.min(data);
-            final double min_by_x = min * maxx;
-            final double min_by_y = min * maxy;
+            final double min_m_maxx = min * maxx;
+            final double min_m_maxy = min * maxy;
             // rolling sums for each column/row
             double sr = 0;
             double sc = 0;
@@ -3313,14 +3306,14 @@ public class PsfCreator implements PlugInFilter {
               for (int y = 0, i = x; y < maxy; y++, i += maxx) {
                 sc += data[i];
               }
-              sc -= min_by_y;
+              sc -= min_m_maxy;
               xp[x] = sc;
             }
             for (int y = 0, i = 0; y < maxy; y++) {
               for (int x = 0; x < maxx; x++, i++) {
                 sr += data[i];
               }
-              sr -= min_by_x;
+              sr -= min_m_maxx;
               yp[y] = sr;
             }
             // Find centre

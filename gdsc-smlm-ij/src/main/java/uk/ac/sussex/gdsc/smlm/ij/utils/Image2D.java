@@ -729,41 +729,39 @@ public abstract class Image2D {
     // i = imax when i>imax
     // j = jmax when j>jmax
 
-    final int x_1 = intersect[0] - 1;
-    final int y_1 = intersect[1] - 1;
+    final int xm1 = intersect[0] - 1;
+    final int ym1 = intersect[1] - 1;
     // The intersect has already checked the bounds
-    // int x_w_1 = Math.min(x_1 + width, nc);
-    // int y_h_1 = Math.min(y_1 + height, nr);
-    final int x_w_1 = x_1 + width;
-    final int y_h_1 = y_1 + height;
+    final int xpwm1 = xm1 + width;
+    final int yphm1 = ym1 + height;
 
-    // double sum = table[index(x_w_1, y_h_1)];
-    // if (y_1 >= 0)
+    // double sum = table[index(xpwm1, yphm1)];
+    // if (ym1 >= 0)
     // {
-    // sum -= table[index(x_w_1, y_1)];
-    // if (x_1 >= 0)
-    // sum = sum + table[index(x_1, y_1)] - table[index(x_1, y_h_1)];
+    // sum -= table[index(xpwm1, ym1)];
+    // if (xm1 >= 0)
+    // sum = sum + table[index(xm1, ym1)] - table[index(xm1, yphm1)];
     // }
-    // else if (x_1 >= 0)
+    // else if (xm1 >= 0)
     // {
-    // sum -= table[index(x_1, y_h_1)];
+    // sum -= table[index(xm1, yphm1)];
     // }
     // return sum;
 
     // This has been ordered to use the smallest sums first (i.e. closer to x,y than
     // x+width,y+height)
-    final int xw_yh = index(x_w_1, y_h_1);
+    final int xwyh = index(xpwm1, yphm1);
     double sum = 0;
-    if (y_1 >= 0) {
-      final int h_ = height * nc;
-      if (x_1 >= 0) {
-        sum = table[xw_yh - width - h_] - table[xw_yh - width];
+    if (ym1 >= 0) {
+      final int h = height * nc;
+      if (xm1 >= 0) {
+        sum = table[xwyh - width - h] - table[xwyh - width];
       }
-      sum -= table[xw_yh - h_];
-    } else if (x_1 >= 0) {
-      sum = -table[xw_yh - width];
+      sum -= table[xwyh - h];
+    } else if (xm1 >= 0) {
+      sum = -table[xwyh - width];
     }
-    return sum + table[xw_yh];
+    return sum + table[xwyh];
   }
 
   /**
@@ -829,18 +827,18 @@ public abstract class Image2D {
 
     // This has been ordered to use the smallest sums first (i.e. closer to x,y than
     // x+width,y+height)
-    final int xw1yh1 = index(xw1, yh1);
+    final int xwyh = index(xw1, yh1);
     double sum = 0;
     if (y1 >= 0) {
       final int heightOffset = height * nc;
       if (x1 >= 0) {
-        sum = table[xw1yh1 - width - heightOffset] - table[xw1yh1 - width];
+        sum = table[xwyh - width - heightOffset] - table[xwyh - width];
       }
-      sum -= table[xw1yh1 - heightOffset];
+      sum -= table[xwyh - heightOffset];
     } else if (x1 >= 0) {
-      sum = -table[xw1yh1 - width];
+      sum = -table[xwyh - width];
     }
-    return sum + table[xw1yh1];
+    return sum + table[xwyh];
   }
 
   /**
@@ -908,19 +906,19 @@ public abstract class Image2D {
     x = intersect[0];
     y = intersect[1];
 
-    final int y_p_h = y + height;
+    final int yph = y + height;
     final int fillYBefore = y * nc;
-    final int fillYAfter = (nr - y_p_h) * nc;
+    final int fillYAfter = (nr - yph) * nc;
 
-    final int x_p_w = x + width;
+    final int xpw = x + width;
     final int fillXBefore = x;
-    final int fillXAfter = (nc - x_p_w);
+    final int fillXAfter = (nc - xpw);
 
     if (fillYBefore != 0) {
       fill(0, fillYBefore, value);
     }
     if (fillYAfter != 0) {
-      fill(y_p_h * nc, fillYAfter, value);
+      fill(yph * nc, fillYAfter, value);
     }
 
     int base = fillYBefore;
@@ -930,7 +928,7 @@ public abstract class Image2D {
         fill(base, fillXBefore, value);
       }
       if (fillXAfter != 0) {
-        fill(base + x_p_w, fillXAfter, value);
+        fill(base + xpw, fillXAfter, value);
       }
       base += nc;
     }

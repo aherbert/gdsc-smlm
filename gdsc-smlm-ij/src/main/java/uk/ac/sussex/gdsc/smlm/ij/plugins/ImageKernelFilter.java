@@ -81,8 +81,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String imageTitle;
     int method;
@@ -115,14 +114,14 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings. This can be called only once as it saves via a reference.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 

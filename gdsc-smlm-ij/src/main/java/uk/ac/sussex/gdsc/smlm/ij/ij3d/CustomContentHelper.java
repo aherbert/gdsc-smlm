@@ -77,11 +77,11 @@ public final class CustomContentHelper {
 
     final InterpolatedImage ii = new InterpolatedImage(imp);
 
-    final int N = itemShape.size();
-    final Color3f[] colors = new Color3f[N];
+    final int n = itemShape.size();
+    final Color3f[] colors = new Color3f[n];
     final double pw = cal.pixelWidth;
     final double ph = cal.pixelHeight;
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < n; i++) {
       final Point3f coord = itemShape.getCoordinate(i);
       // Ignore the z-coordinate
       final int v = (int) Math.round(ii.interpol.get(coord.x / pw, coord.y / ph, 0));

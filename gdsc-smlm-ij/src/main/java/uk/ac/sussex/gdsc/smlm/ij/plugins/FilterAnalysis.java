@@ -80,7 +80,7 @@ public class FilterAnalysis implements PlugIn {
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
   private static AtomicReference<TextWindow> sensitivityWindowRef = new AtomicReference<>();
 
-  private static final AtomicReference<LastResults> lastResults = new AtomicReference<>();
+  private static final AtomicReference<LastResults> LAST_RESULTS = new AtomicReference<>();
 
   private ArrayList<NamedPlot> plots;
   private HashMap<String, FilterScore> bestFilter;
@@ -120,8 +120,7 @@ public class FilterAnalysis implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     boolean saveFilterSets;
     boolean showResultsTable;
@@ -229,14 +228,14 @@ public class FilterAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings. This can be called only once as it saves via a reference.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -382,7 +381,7 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private static List<MemoryPeakResults> readResults(String inputDirectory) {
-    final LastResults last = lastResults.get();
+    final LastResults last = LAST_RESULTS.get();
     if (last != null && last.inputDirectory.equals(inputDirectory)) {
       final GenericDialog gd = new GenericDialog(TITLE);
       gd.addMessage("Re-use results from the same directory (no to refresh)?");
@@ -412,7 +411,7 @@ public class FilterAnalysis implements PlugIn {
       }
     }
     ImageJUtils.finished();
-    lastResults.set(new LastResults(list, inputDirectory));
+    LAST_RESULTS.set(new LastResults(list, inputDirectory));
 
     return list;
   }

@@ -76,12 +76,12 @@ public class DensityImage implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    static final String[] scoreMethods = new String[] {"Density", "Ripley's K", "Ripley's K / Area",
-        "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
+    static final String[] SCORE_METHODS =
+        new String[] {"Density", "Ripley's K", "Ripley's K / Area", "Ripley's L", "Ripley's L - r",
+            "Ripley's L / r", "Ripley's (L - r) / r"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     float radius;
@@ -148,14 +148,14 @@ public class DensityImage implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -643,7 +643,7 @@ public class DensityImage implements PlugIn {
 
     gd.addCheckbox("Use_square_approx", settings.useSquareApproximation);
     gd.addNumericField("Square_resolution", settings.resolution, 0);
-    gd.addChoice("Score", Settings.scoreMethods, settings.scoreMethodIndex);
+    gd.addChoice("Score", Settings.SCORE_METHODS, settings.scoreMethodIndex);
 
     gd.addMessage("Filter localisations using the L-score / Relative density.\n"
         + "Filtered results will be added to memory:");

@@ -121,8 +121,7 @@ public class CmosAnalysis implements PlugIn {
   private static class Settings {
     private static final String DEFAULT_PHOTONS = "50, 100, 200, 400, 800";
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String directory;
     String modelDirectory;
@@ -201,14 +200,14 @@ public class CmosAnalysis implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(Constants.sCMOSAnalysisDirectory, directory);
     }
 

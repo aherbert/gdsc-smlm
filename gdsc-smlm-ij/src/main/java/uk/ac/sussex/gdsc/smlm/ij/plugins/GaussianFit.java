@@ -96,8 +96,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     double smooth;
     int boxSize;
@@ -183,14 +182,14 @@ public class GaussianFit implements ExtendedPlugInFilter {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(Constants.smooth, smooth);
       Prefs.set(Constants.boxSize, boxSize);
       Prefs.set(Constants.background, background);
@@ -217,8 +216,8 @@ public class GaussianFit implements ExtendedPlugInFilter {
   }
 
   private static class PsfTypeLoader {
-    private static final PSFType[] psfTypeValues;
-    private static final String[] psfTypeNames;
+    private static final PSFType[] PSF_TYPE_VALUES;
+    private static final String[] PSF_TYPE_NAMES;
 
     static {
       //@formatter:off
@@ -227,10 +226,10 @@ public class GaussianFit implements ExtendedPlugInFilter {
           PSFType.TWO_AXIS_GAUSSIAN_2D,
           PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
       //@formatter:on
-      psfTypeValues = set.toArray(new PSFType[0]);
-      psfTypeNames = new String[psfTypeValues.length];
-      for (int i = 0; i < psfTypeValues.length; i++) {
-        psfTypeNames[i] = PsfProtosHelper.getName(psfTypeValues[i]);
+      PSF_TYPE_VALUES = set.toArray(new PSFType[0]);
+      PSF_TYPE_NAMES = new String[PSF_TYPE_VALUES.length];
+      for (int i = 0; i < PSF_TYPE_VALUES.length; i++) {
+        PSF_TYPE_NAMES[i] = PsfProtosHelper.getName(PSF_TYPE_VALUES[i]);
       }
     }
   }
@@ -265,7 +264,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    * @return the PSF type values
    */
   public static PSFType[] getPsfTypeValues() {
-    return PsfTypeLoader.psfTypeValues;
+    return PsfTypeLoader.PSF_TYPE_VALUES;
   }
 
 
@@ -275,7 +274,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    * @return the PSF type names
    */
   public static String[] getPsfTypeNames() {
-    return PsfTypeLoader.psfTypeNames;
+    return PsfTypeLoader.PSF_TYPE_NAMES;
   }
 
   @Override

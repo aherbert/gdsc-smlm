@@ -109,8 +109,7 @@ public class ClassificationMatchCalculator implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     private static final String KEY_INPUT_OPTION1 =
         "gdsc.smlm.classificationmatchcalculator.inputOption1";
@@ -155,14 +154,14 @@ public class ClassificationMatchCalculator implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(KEY_INPUT_OPTION1, inputOption1);
       Prefs.set(KEY_INPUT_OPTION2, inputOption2);
       Prefs.set(KEY_MATCH_DISTANCE, matchDistance);

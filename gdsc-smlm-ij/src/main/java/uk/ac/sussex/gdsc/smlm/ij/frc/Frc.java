@@ -1330,9 +1330,9 @@ public class Frc {
     // data sets"
     // Eq. (15) = log2(SNR+1) = n-bits
     final double snr = (Math.pow(2, bits) - 1) / 2;
-    final double snr_p_1 = snr + 1;
+    final double snrP1 = snr + 1;
     final double twoRootSnr = 2 * Math.sqrt(snr);
-    final double twoRootSnr_p_1 = twoRootSnr + 1;
+    final double twoRootSnrP1 = twoRootSnr + 1;
 
     // Sense check:
     // 1/2-bit is equation (17) from Heel:
@@ -1343,7 +1343,7 @@ public class Frc {
     for (int i = 1; i < threshold.length; i++) {
       // nr = number of samples in Fourier circle = 2*pi*r
       final double sqrtNr = Math.sqrt(TWO_PI * i);
-      threshold[i] = ((snr + twoRootSnr_p_1 / sqrtNr) / (snr_p_1 + twoRootSnr / sqrtNr));
+      threshold[i] = ((snr + twoRootSnrP1 / sqrtNr) / (snrP1 + twoRootSnr / sqrtNr));
     }
   }
 
@@ -1416,21 +1416,21 @@ public class Frc {
       final double x3 = x1;
       final double x4 = x2;
 
-      final double x1_x2 = x1 - x2;
-      final double x3_x4 = x3 - x4;
-      final double y1_y2 = y1 - y2;
-      final double y3_y4 = y3 - y4;
+      final double x1_s_x2 = x1 - x2;
+      final double x3_s_x4 = x3 - x4;
+      final double y1_s_y2 = y1 - y2;
+      final double y3_s_y4 = y3 - y4;
 
       // Check if lines are parallel
-      if (x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0) {
+      if (x1_s_x2 * y3_s_y4 - y1_s_y2 * x3_s_x4 == 0) {
         if (y1 == y3) {
           // The lines are the same
           intersections[count++] = new double[] {x1, y1};
         }
       } else {
         // Find intersection
-        final double px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4))
-            / (x1_x2 * y3_y4 - y1_y2 * x3_x4);
+        final double px = ((x1 * y2 - y1 * x2) * x3_s_x4 - x1_s_x2 * (x3 * y4 - y3 * x4))
+            / (x1_s_x2 * y3_s_y4 - y1_s_y2 * x3_s_x4);
 
         // Check if the intersection is within the two points
         // Q. Is this necessary given the intersection check above?
@@ -1663,10 +1663,10 @@ public class Frc {
    * @return the q array (in nm^-1)
    */
   private static double[] computeQ(FrcCurve frcCurve, double nmPerPixel) {
-    final double L = frcCurve.fieldOfView;
+    final double l = frcCurve.fieldOfView;
 
     final double[] q = new double[frcCurve.getSize()];
-    final double conversion = 1.0 / (L * nmPerPixel);
+    final double conversion = 1.0 / (l * nmPerPixel);
     for (int i = 0; i < q.length; i++) {
       q[i] = frcCurve.get(i).radius * conversion;
     }
@@ -1701,11 +1701,11 @@ public class Frc {
     // uncertainties that depends on the mean and width of the
     // distribution of localization uncertainties
     final double[] hq = new double[qvalues.length];
-    final double eight_pi2_s2 = 2 * FOUR_PI_2 * sigma * sigma;
+    final double eightPi2s2 = 2 * FOUR_PI_2 * sigma * sigma;
     hq[0] = 1;
     for (int i = 1; i < qvalues.length; i++) {
       final double q2 = qvalues[i] * qvalues[i];
-      final double d = 1 + eight_pi2_s2 * q2;
+      final double d = 1 + eightPi2s2 * q2;
       hq[i] = StdMath.exp((-FOUR_PI_2 * mean * mean * q2) / d) / Math.sqrt(d);
     }
     return hq;

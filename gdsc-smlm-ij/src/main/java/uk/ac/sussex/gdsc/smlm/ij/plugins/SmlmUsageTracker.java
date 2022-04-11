@@ -39,7 +39,7 @@ public class SmlmUsageTracker implements PlugIn {
   private static final String TITLE = "SMLM Usage Tracker";
 
   /** A flag used when the dialog is shown. */
-  private static final AtomicBoolean dialogShown = new AtomicBoolean();
+  private static final AtomicBoolean DIALOG_SHOWN = new AtomicBoolean();
 
   static {
     // This ensures all GDSC loggers redirect from the console to the ImageJ log window.
@@ -87,13 +87,13 @@ public class SmlmUsageTracker implements PlugIn {
   // The plugins config input stream is closed in the buildPluginMap method
   @SuppressWarnings("resource")
   private static class LazyMapHolder {
-    private static final HashMap<String, String[]> map;
+    private static final HashMap<String, String[]> MAP;
 
     static {
       final HashMap<String, String[]> localMap = new HashMap<>();
       ImageJAnalyticsUtils.buildPluginMap(localMap, SmlmTools.getPluginsConfig(),
           StandardCharsets.UTF_8);
-      map = localMap;
+      MAP = localMap;
     }
   }
 
@@ -110,7 +110,7 @@ public class SmlmUsageTracker implements PlugIn {
     }
 
     final String[] pair =
-        LazyMapHolder.map.get(ImageJAnalyticsUtils.getKey(clazz.getName(), argument));
+        LazyMapHolder.MAP.get(ImageJAnalyticsUtils.getKey(clazz.getName(), argument));
     if (pair == null) {
       recordPlugin(clazz.getName().replace('.', '/'), argument);
     } else {
@@ -141,9 +141,9 @@ public class SmlmUsageTracker implements PlugIn {
   @Override
   public void run(String arg) {
     // If this is the first plugin to call recordPlugin(...) then the dialog may be shown.
-    dialogShown.set(false);
+    DIALOG_SHOWN.set(false);
     recordPlugin(this.getClass(), arg);
-    if (!dialogShown.get()) {
+    if (!DIALOG_SHOWN.get()) {
       showDialog(false);
     }
   }
@@ -155,7 +155,7 @@ public class SmlmUsageTracker implements PlugIn {
    *        status is unknown
    */
   static void showDialog(boolean autoMessage) {
-    dialogShown.set(true);
+    DIALOG_SHOWN.set(true);
     ImageJAnalyticsUtils.showDialog(TITLE, autoMessage, HelpUrls.getUrl("smlm-usage-tracker"));
   }
 }

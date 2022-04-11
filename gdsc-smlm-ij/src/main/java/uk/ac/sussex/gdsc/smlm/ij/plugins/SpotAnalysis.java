@@ -128,11 +128,11 @@ public class SpotAnalysis extends PlugInFrame
   private static final String RAW_SPLOT_TITLE = PLUGIN_TITLE + " Raw spot";
   private static final String BLUR_SPOT_TITLE = PLUGIN_TITLE + " Blur spot";
   private static final String AVG_SPOT_TITLE = PLUGIN_TITLE + " Average spot";
-  private static final String[] resultsTitles =
+  private static final String[] RESULTS_TITLES =
       new String[] {RAW_MEAN_TITLE, RAW_SD_TITLE, RAW_SPLOT_TITLE, BLUR_SPOT_TITLE, AVG_SPOT_TITLE};
 
-  private static final AtomicReference<Frame> instance = new AtomicReference<>();
-  private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
+  private static final AtomicReference<Frame> INSTANCE = new AtomicReference<>();
+  private static final AtomicReference<TextWindow> RESULTS_WINDOW = new AtomicReference<>();
 
   private TextWindow resultsWindow;
 
@@ -286,7 +286,7 @@ public class SpotAnalysis extends PlugInFrame
       return;
     }
 
-    final Frame frame = instance.get();
+    final Frame frame = INSTANCE.get();
 
     if ("add".equals(arg)) {
       if (frame != null) {
@@ -300,7 +300,7 @@ public class SpotAnalysis extends PlugInFrame
       return;
     }
 
-    instance.set(this);
+    INSTANCE.set(this);
     IJ.register(SpotAnalysis.class);
     WindowManager.addWindow(this);
     ImagePlus.addImageListener(new ImageAdapter() {
@@ -401,7 +401,7 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private static boolean previousResult(String title) {
-    for (final String resultTitle : resultsTitles) {
+    for (final String resultTitle : RESULTS_TITLES) {
       if (title.startsWith(resultTitle)) {
         return true;
       }
@@ -491,7 +491,7 @@ public class SpotAnalysis extends PlugInFrame
 
   @Override
   public void close() {
-    instance.set(null);
+    INSTANCE.set(null);
     super.close();
   }
 
@@ -962,7 +962,7 @@ public class SpotAnalysis extends PlugInFrame
   }
 
   private void createResultsWindow() {
-    resultsWindow = ImageJUtils.refresh(resultsWindowRef,
+    resultsWindow = ImageJUtils.refresh(RESULTS_WINDOW,
         () -> new TextWindow(PLUGIN_TITLE + " Results",
             "Id\tcx\tcy\tSignal\tt-On (ms)\tt-Off (ms)\tBlinks\tAv.t-On\tAv.t-Off\tSource", "", 600,
             200));

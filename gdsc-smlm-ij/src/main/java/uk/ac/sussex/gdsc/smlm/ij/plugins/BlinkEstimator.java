@@ -92,8 +92,7 @@ public class BlinkEstimator implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     int maxDarkTime;
@@ -141,14 +140,14 @@ public class BlinkEstimator implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -683,7 +682,7 @@ public class BlinkEstimator implements PlugIn {
 
     private double[][] jacobian(double[] variables) {
       // Compute the gradients using calculus differentiation
-      final double N = variables[0];
+      final double n = variables[0];
       final double nBlink = variables[1];
       final double tOff = variables[2];
       final double[][] jacobian = new double[x.size()][variables.length];
@@ -694,24 +693,24 @@ public class BlinkEstimator implements PlugIn {
         final double a = (1 - td) / tOff;
         final double b = StdMath.exp(a);
 
-        // value = N * (1 + nBlink * b)
-        // = N + N * nBlink * exp(a)
+        // value = n * (1 + nBlink * b)
+        // = n + n * nBlink * exp(a)
 
-        // Differentiate with respect to N:
+        // Differentiate with respect to n:
         jacobian[i][0] = 1 + nBlink * b;
 
         // Differentiate with respect to nBlink:
-        jacobian[i][1] = N * b;
+        jacobian[i][1] = n * b;
 
         // Differentiate with respect to tOff:
-        jacobian[i][2] = N * nBlink * b * -a / tOff;
+        jacobian[i][2] = n * nBlink * b * -a / tOff;
       }
 
       //// Check numerically ...
       // double[][] jacobian2 = jacobian2(variables);
       // for (int i = 0; i < jacobian.length; i++)
       // {
-      // System.out.printf("N = %g : %g = %g. nBlink = %g : %g = %g. tOff = %g : %g = %g\n",
+      // System.out.printf("n = %g : %g = %g. nBlink = %g : %g = %g. tOff = %g : %g = %g\n",
       //// jacobian[i][0],
       // jacobian2[i][0], DoubleEquality.relativeError(jacobian[i][0], jacobian2[i][0]),
       //// jacobian[i][1],
@@ -726,7 +725,7 @@ public class BlinkEstimator implements PlugIn {
     @SuppressWarnings("unused")
     private double[][] jacobian2(double[] variables) {
       // Compute the gradients using numerical differentiation
-      final double N = variables[0];
+      final double n = variables[0];
       final double nBlink = variables[1];
       final double tOff = variables[2];
       final double[][] jacobian = new double[x.size()][variables.length];
@@ -739,9 +738,9 @@ public class BlinkEstimator implements PlugIn {
       }
       for (int i = 0; i < jacobian.length; ++i) {
         final double r = this.x.getDouble(i);
-        final double value = evaluate(r, N, nBlink, tOff);
+        final double value = evaluate(r, n, nBlink, tOff);
         for (int j = 0; j < variables.length; j++) {
-          final double value2 = evaluate(r, N + d[0][j], nBlink + d[1][j], tOff + d[2][j]);
+          final double value2 = evaluate(r, n + d[0][j], nBlink + d[1][j], tOff + d[2][j]);
           jacobian[i][j] = (value2 - value) / d[j][j];
         }
       }

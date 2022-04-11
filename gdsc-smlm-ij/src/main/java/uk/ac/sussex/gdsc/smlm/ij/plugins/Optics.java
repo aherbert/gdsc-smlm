@@ -145,30 +145,30 @@ public class Optics implements PlugIn {
   private static final int LOG_OPTICS = 0x02;
   private static final int LOG_LOOP = 0x04;
 
-  private static final AtomicInteger workerId = new AtomicInteger();
+  private static final AtomicInteger WORKED_ID = new AtomicInteger();
 
   private static AtomicInteger logged = new AtomicInteger();
 
-  private static final LUT clusterLut;
-  private static final LUT valueLut;
-  private static final LUT clusterDepthLut;
-  private static final LUT clusterOrderLut;
-  private static final LUT loopLut;
+  private static final LUT CLUSTER_LUT;
+  private static final LUT VALUE_LUT;
+  private static final LUT CLUSTER_DEPTH_LUT;
+  private static final LUT CLUSTER_ORDER_LUT;
+  private static final LUT LOOP_LUT;
 
   static {
-    valueLut = LutHelper.createLut(LutColour.FIRE);
+    VALUE_LUT = LutHelper.createLut(LutColour.FIRE);
 
     // Need to be able to see all colours against white (plot) or black (image) background
     final LUT fireGlow = LutHelper.createLut(LutColour.FIRE_GLOW, true);
     // Clusters are scrambled so use a LUT with colours that are visible easily visible on
     // black/white.
     // Note: The colours returned by LUTHelper.getColorModel() can be close to black.
-    clusterLut = LutHelper.createLut(LutColour.PIMP_LIGHT, true);
-    clusterDepthLut = fireGlow;
-    clusterOrderLut = fireGlow;
+    CLUSTER_LUT = LutHelper.createLut(LutColour.PIMP_LIGHT, true);
+    CLUSTER_DEPTH_LUT = fireGlow;
+    CLUSTER_ORDER_LUT = fireGlow;
 
     // This is only used on the image so can include white
-    loopLut = LutHelper.createLut(LutColour.FIRE_LIGHT, true);
+    LOOP_LUT = LutHelper.createLut(LutColour.FIRE_LIGHT, true);
   }
 
   private Object[] imageModeArray;
@@ -947,7 +947,7 @@ public class Optics implements PlugIn {
     final int id;
 
     BaseWorker() {
-      id = workerId.getAndIncrement();
+      id = WORKED_ID.getAndIncrement();
       // When constructing the workflow automatically add any workers
       // that can handle cluster selections
       if (this instanceof ClusterSelectedHandler) {
@@ -1003,7 +1003,7 @@ public class Optics implements PlugIn {
    */
   private static class CachedClusteringResult {
     // Id field allows detection of stale cached data
-    private static final AtomicInteger latestId = new AtomicInteger();
+    private static final AtomicInteger LATEST_ID = new AtomicInteger();
 
     final int id;
 
@@ -1051,7 +1051,7 @@ public class Optics implements PlugIn {
      * @param settings the settings used when the result was created
      */
     CachedClusteringResult(ClusteringResult clusteringResult, OpticsSettings settings) {
-      id = latestId.incrementAndGet();
+      id = LATEST_ID.incrementAndGet();
       this.clusteringResult = clusteringResult;
       this.hullMode = settings.getHullMode();
       this.diggingThreshold = settings.getDiggingThreshold();
@@ -1070,7 +1070,7 @@ public class Optics implements PlugIn {
      * @return true, if is current
      */
     boolean isCurrent() {
-      return id == latestId.get();
+      return id == LATEST_ID.get();
     }
 
     /**
@@ -1726,7 +1726,7 @@ public class Optics implements PlugIn {
         limits[0] = 0;
 
         List<OpticsCluster> clusters = null;
-        LUT lut = clusterLut;
+        LUT lut = CLUSTER_LUT;
         int maxClusterId = 0;
         int maxLevel = 0;
 
@@ -1804,7 +1804,7 @@ public class Optics implements PlugIn {
         // Colour the reachability plot line if it is in a cluster. Use a default colour
         if (mode.isColourProfile()) {
           if (mode.isColourProfileByOrder()) {
-            lut = clusterOrderLut;
+            lut = CLUSTER_ORDER_LUT;
             mapper = new LutHelper.NonZeroLutMapper(1, profileColourTo.length - 1);
             for (int i = 1; i < profileColourTo.length; i++) {
               profileColourFrom[i - 1] = profileColourTo[i] = mapper.map(i);
@@ -1819,7 +1819,7 @@ public class Optics implements PlugIn {
 
             final boolean useLevel = mode.isColourProfileByDepth();
             if (useLevel) {
-              lut = clusterDepthLut;
+              lut = CLUSTER_DEPTH_LUT;
             }
 
             for (final OpticsCluster cluster : clusters) {
@@ -2335,22 +2335,22 @@ public class Optics implements PlugIn {
             createLoopData(settings, opticsManager);
 
             // Draw each cluster in a new colour
-            LUT lut = valueLut;
+            LUT lut = VALUE_LUT;
             LutMapper mapper = new LutHelper.NullLutMapper();
             if (mode.isMapped()) {
               switch (mode) {
                 case CLUSTER_ORDER:
-                  lut = clusterOrderLut;
+                  lut = CLUSTER_ORDER_LUT;
                   break;
                 case CLUSTER_ID:
-                  lut = clusterLut;
+                  lut = CLUSTER_LUT;
                   break;
                 case CLUSTER_DEPTH:
-                  lut = clusterDepthLut;
+                  lut = CLUSTER_DEPTH_LUT;
                   mapper = new ValueLutMapper(map);
                   break;
                 case LOOP:
-                  lut = loopLut;
+                  lut = LOOP_LUT;
                   mapper = new ValueLutMapper(loop);
                   break;
                 default:
@@ -2402,11 +2402,11 @@ public class Optics implements PlugIn {
               int max2 = max;
               final int[] map = SimpleArrayUtils.natural(max + 1);
 
-              LUT lut = clusterLut;
+              LUT lut = CLUSTER_LUT;
 
               if (clusteringResult.isOptics) {
                 if (outlineMode.isColourByDepth()) {
-                  lut = clusterDepthLut;
+                  lut = CLUSTER_DEPTH_LUT;
                   final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
                   Arrays.fill(map, 0);
                   for (final OpticsCluster c : allClusters) {
@@ -2465,12 +2465,12 @@ public class Optics implements PlugIn {
               int max2 = max;
               final int[] map = SimpleArrayUtils.natural(max + 1);
 
-              LUT lut = clusterLut;
+              LUT lut = CLUSTER_LUT;
 
               if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_ORDER.ordinal()) {
-                lut = clusterOrderLut;
+                lut = CLUSTER_ORDER_LUT;
               } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_DEPTH.ordinal()) {
-                lut = clusterDepthLut;
+                lut = CLUSTER_DEPTH_LUT;
                 final List<OpticsCluster> allClusters = clusteringResult.getAllClusters();
                 Arrays.fill(map, 0);
                 for (final OpticsCluster c : allClusters) {
@@ -2478,7 +2478,7 @@ public class Optics implements PlugIn {
                 }
                 max2 = MathUtils.max(map);
               } else if (lastSpanningTreeMode == SpanningTreeMode.COLOURED_BY_LOOP.ordinal()) {
-                lut = loopLut;
+                lut = LOOP_LUT;
               }
 
               // Get the coordinates

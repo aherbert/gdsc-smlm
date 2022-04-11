@@ -142,9 +142,9 @@ public class SpotFit implements PlugIn {
   private static class SpotFitPluginTool extends PlugInTool {
     private static SpotFitPluginTool toolInstance = new SpotFitPluginTool();
 
-    private static final AtomicReference<CustomTextWindow> resultsWindow = new AtomicReference<>();
-    private static final Pattern pattern = Pattern.compile("\t");
-    private static final AtomicReference<Pair<Integer, Roi>> analysisOutline =
+    private static final AtomicReference<CustomTextWindow> RESULTS_WINDOW = new AtomicReference<>();
+    private static final Pattern PATTERN = Pattern.compile("\t");
+    private static final AtomicReference<Pair<Integer, Roi>> ANALYSIS_OUTLINE =
         new AtomicReference<>(Pair.of(0, null));
 
     /**
@@ -223,7 +223,7 @@ public class SpotFit implements PlugIn {
      */
     private synchronized void setSpotFitSettings(SpotFitSettings settings) {
       settingsInstance = settings;
-      final CustomTextWindow tw = resultsWindow.get();
+      final CustomTextWindow tw = RESULTS_WINDOW.get();
       if (tw != null) {
         tw.draw = settings.getShowFitRoi();
       }
@@ -270,8 +270,7 @@ public class SpotFit implements PlugIn {
       gd.addCheckbox("Attach_to_slice", settings.getAttachToSlice());
       gd.addCheckbox("Log_progress", settings.getLogProgress());
       gd.addMessage(TextUtils.wrap(
-          "Optionally perform comparison analysis in a second channel. Channel 0 is ignored.",
-          80));
+          "Optionally perform comparison analysis in a second channel. Channel 0 is ignored.", 80));
       gd.addNumericField("Comparison_channel", settings.getComparisonChannel(), 0);
       gd.addSlider("Analysis_radius", 3, 10, settings.getAnalysisRadius());
 
@@ -492,7 +491,7 @@ public class SpotFit implements PlugIn {
      * @return the text window
      */
     private static CustomTextWindow createResultsWindow(boolean drawSelected) {
-      return ImageJUtils.refresh(resultsWindow, () -> {
+      return ImageJUtils.refresh(RESULTS_WINDOW, () -> {
         final CustomTextWindow tw =
             new CustomTextWindow(TITLE + " Results", createHeader(), 700, 300);
         tw.draw = drawSelected;
@@ -608,7 +607,7 @@ public class SpotFit implements PlugIn {
     }
 
     private static Roi createAnalysisRoi(int analysisRadius) {
-      final Pair<Integer, Roi> outline = analysisOutline.get();
+      final Pair<Integer, Roi> outline = ANALYSIS_OUTLINE.get();
       Roi roi;
       if (outline.getKey() != analysisRadius) {
         final int size = 2 * analysisRadius + 1;
@@ -627,7 +626,7 @@ public class SpotFit implements PlugIn {
         }
         final ObjectOutliner oo = new ObjectOutliner(bp);
         roi = oo.outline(analysisRadius, analysisRadius);
-        analysisOutline.set(Pair.of(analysisRadius, roi));
+        ANALYSIS_OUTLINE.set(Pair.of(analysisRadius, roi));
       } else {
         roi = outline.getValue();
       }
@@ -682,7 +681,7 @@ public class SpotFit implements PlugIn {
         }
       }
 
-      final TextWindow window = resultsWindow.get();
+      final TextWindow window = RESULTS_WINDOW.get();
       if (window != null && window.isShowing()) {
         final TextPanel tp = window.getTextPanel();
         final String title = imp.getTitle();
@@ -694,7 +693,7 @@ public class SpotFit implements PlugIn {
             continue;
           }
 
-          final String[] fields = pattern.split(line, 0);
+          final String[] fields = PATTERN.split(line, 0);
 
           try {
             if (isCorrectSlice(channel, slice, frame, isDisplayedHyperStack, fields)) {

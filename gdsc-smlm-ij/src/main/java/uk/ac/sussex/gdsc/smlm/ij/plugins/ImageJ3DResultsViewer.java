@@ -199,7 +199,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       SettingsManager.getNames((Object[]) ColourMode.values());
 
   /** The executor service for message digests. */
-  private static final ExecutorService executorService = Executors.newCachedThreadPool();
+  private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
   /** The identity transform. */
   private static final Transform3D IDENTITY = new Transform3D();
@@ -209,14 +209,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   // @formatter:off
   private static final Map<PeakResultsDigest,
-      Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> resultsTables =
+      Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame>> RESULTS_TABLES =
       new ConcurrentHashMap<>();
   // @formatter:on
 
-  private static final AtomicReference<ResultsTableSettings> resultsTableSettings =
+  private static final AtomicReference<ResultsTableSettings> RESULTS_TABLE_SETTINGS =
       new AtomicReference<>();
-  private static final AtomicBoolean addToSelection = new AtomicBoolean();
-  private static final AtomicReference<Color3f> highlightColor = new AtomicReference<>();
+  private static final AtomicBoolean ADD_TO_SELECTION = new AtomicBoolean();
+  private static final AtomicReference<Color3f> HIGHLIGHT_COLOR = new AtomicReference<>();
 
   private Image3DUniverse univ;
   private JMenuItem resetRotation;
@@ -277,13 +277,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     },;
 
-    static final SizeMode[] values = SizeMode.values();
+    static final SizeMode[] VALUES = SizeMode.values();
 
     public static SizeMode forNumber(int number) {
-      if (number < 0 || number >= values.length) {
+      if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
-      return values[number];
+      return VALUES[number];
     }
   }
 
@@ -307,13 +307,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     },;
 
-    static final DepthMode[] values = DepthMode.values();
+    static final DepthMode[] VALUES = DepthMode.values();
 
     public static DepthMode forNumber(int number) {
-      if (number < 0 || number >= values.length) {
+      if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
-      return values[number];
+      return VALUES[number];
     }
   }
 
@@ -349,13 +349,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     },;
 
-    static final TransparencyMode[] values = TransparencyMode.values();
+    static final TransparencyMode[] VALUES = TransparencyMode.values();
 
     public static TransparencyMode forNumber(int number) {
-      if (number < 0 || number >= values.length) {
+      if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
-      return values[number];
+      return VALUES[number];
     }
   }
 
@@ -407,13 +407,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     },;
 
-    static final SortMode[] values = SortMode.values();
+    static final SortMode[] VALUES = SortMode.values();
 
     public static SortMode forNumber(int number) {
-      if (number < 0 || number >= values.length) {
+      if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
-      return values[number];
+      return VALUES[number];
     }
 
     public abstract String getDescription();
@@ -442,20 +442,20 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return "Intensity";
       }
     },
-    Category {
+    CATEGORY {
       @Override
       public String getName() {
         return "Category";
       }
     },;
 
-    static final ColourMode[] values = ColourMode.values();
+    static final ColourMode[] VALUES = ColourMode.values();
 
     public static ColourMode forNumber(int number) {
-      if (number < 0 || number >= values.length) {
+      if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
-      return values[number];
+      return VALUES[number];
     }
   }
 
@@ -663,7 +663,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     void highlightColourUpdated() {
-      this.highlightColor = ImageJ3DResultsViewer.highlightColor.get();
+      this.highlightColor = ImageJ3DResultsViewer.HIGHLIGHT_COLOR.get();
       if (outline != null) {
         outline.setColor(highlightColor);
       }
@@ -784,7 +784,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // If the selection is output to a table then it may have been sorted
       // and we map the index from the data to the table
       PeakResultTableModelFrame table;
-      if (resultsTableSettings.get().getShowTable()) {
+      if (RESULTS_TABLE_SETTINGS.get().getShowTable()) {
         table = createTable(results, this);
       } else {
         table = findTable(this);
@@ -796,7 +796,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Highlight the localisation using an outline.
       // Add to or replace previous selection.
-      if (addToSelection.get()) {
+      if (ADD_TO_SELECTION.get()) {
         listSelectionModel.addSelectionInterval(index, index);
       } else {
         listSelectionModel.setSelectionInterval(index, index);
@@ -807,7 +807,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // There is a single TableModel and SelectionModel for each unique results set.
       // This may be displayed in a window.
       final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> t =
-          resultsTables.get(data.digest);
+          RESULTS_TABLES.get(data.digest);
       final PeakResultTableModelFrame table = t.getRight();
       if (table != null && table.isVisible()) {
         return table;
@@ -824,7 +824,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       // Clicks just select from the selection model, and add results to the table model.
 
       final Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
-          resultsTables.get(data.digest);
+          RESULTS_TABLES.get(data.digest);
 
       PeakResultTableModelFrame table = triplet.getRight();
       if (table != null) {
@@ -855,7 +855,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       });
       table.setVisible(true);
-      resultsTables.put(data.digest, Triple.of(triplet.getLeft(), triplet.getMiddle(), table));
+      RESULTS_TABLES.put(data.digest, Triple.of(triplet.getLeft(), triplet.getMiddle(), table));
 
       return table;
     }
@@ -1060,7 +1060,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final ImageJ3DResultsViewerSettings.Builder settings =
         SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
 
-    addToSelection.set(settings.getAddToSelection());
+    ADD_TO_SELECTION.set(settings.getAddToSelection());
 
     // Get a list of the window titles available. Allow the user to select
     // an existing window or a new one.
@@ -1329,7 +1329,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // Cache the table settings
-    resultsTableSettings.set(settings.getResultsTableSettings());
+    RESULTS_TABLE_SETTINGS.set(settings.getResultsTableSettings());
 
     // Create a 3D viewer.
     if (windowChoice == 0) {
@@ -1344,7 +1344,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     // Commence a digest
     final Future<PeakResultsDigest> futureDigest =
-        PeakResultsDigest.digestLater(executorService, results.toArray());
+        PeakResultsDigest.digestLater(EXECUTOR_SERVICE, results.toArray());
 
     final LocalList<Point3f> points = getPoints(results, settings);
 
@@ -1420,13 +1420,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       return;
     }
     Triple<PeakResultTableModel, ListSelectionModel, PeakResultTableModelFrame> triplet =
-        resultsTables.get(data.digest);
+        RESULTS_TABLES.get(data.digest);
     if (triplet == null) {
       triplet = Triple.of(new PeakResultTableModel(results, false,
           // Note the settings do not matter until the table is set live
-          resultsTableSettings.get()), new DefaultListSelectionModel(), null);
+          RESULTS_TABLE_SETTINGS.get()), new DefaultListSelectionModel(), null);
       triplet.getLeft().setCheckDuplicates(true);
-      resultsTables.put(data.digest, triplet);
+      RESULTS_TABLES.put(data.digest, triplet);
     }
 
     // Preserve orientation on the content
@@ -2028,7 +2028,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static void createHighlightColour(String highlightColour) {
-    highlightColor.set(null);
+    HIGHLIGHT_COLOR.set(null);
     for (int i = 0; i < highlightColour.length(); i++) {
       if (Character.isDigit(highlightColour.charAt(i))) {
         // Try and extract RGB
@@ -2039,7 +2039,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             final int red = Integer.parseInt(split[0]);
             final int green = Integer.parseInt(split[1]);
             final int blue = Integer.parseInt(split[2]);
-            highlightColor.set(new Color3f(new Color(red, green, blue)));
+            HIGHLIGHT_COLOR.set(new Color3f(new Color(red, green, blue)));
             return;
           } catch (final NumberFormatException ex) {
             // Ignore
@@ -2047,7 +2047,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
     }
-    highlightColor.set(colours.get(highlightColour.toLowerCase(Locale.US)));
+    HIGHLIGHT_COLOR.set(colours.get(highlightColour.toLowerCase(Locale.US)));
   }
 
   private static Color3f[] createColour(MemoryPeakResults results,
@@ -2061,7 +2061,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       case INTENSITY:
         rank = createRankByIntensity(results, settings);
         break;
-      case Category:
+      case CATEGORY:
         rank = createRankByCategory(results);
         break;
       case DEPTH:
@@ -3133,7 +3133,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static class ColourSurfaceContentAction implements ContentAction {
-    private static final AtomicReference<Options> optionsRef = new AtomicReference<>(new Options());
+    private static final AtomicReference<Options> OPTIONS_REF =
+        new AtomicReference<>(new Options());
 
     private static class Options {
       String title = "";
@@ -3146,7 +3147,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return 0;
       }
 
-      final Options options = optionsRef.get();
+      final Options options = OPTIONS_REF.get();
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       final String[] list = ImageJUtils.getImageList(ImageJUtils.SINGLE);
@@ -3162,7 +3163,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       options.title = gd.getNextChoice();
       options.resetTransparency = gd.getNextBoolean();
       ImagePlus imp = WindowManager.getImage(options.title);
-      optionsRef.set(options);
+      OPTIONS_REF.set(options);
       if (imp == null) {
         return -1;
       }
@@ -3380,7 +3381,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       final ResultsSettings.Builder s = ResultsSettings.newBuilder();
-      ResultsTableSettings localResultsTableSettings = resultsTableSettings.get();
+      ResultsTableSettings localResultsTableSettings = RESULTS_TABLE_SETTINGS.get();
       s.setResultsTableSettings(localResultsTableSettings);
       gd.addMessage("Click on the image to view localisation data.\nCtrl/Alt key must be pressed.");
       final TextField[] tf = new TextField[1];
@@ -3392,7 +3393,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
               int red;
               int green;
               int blue;
-              final Color3f color = highlightColor.get();
+              final Color3f color = HIGHLIGHT_COLOR.get();
               if (color == null) {
                 red = blue = 0;
                 green = 255;
@@ -3479,7 +3480,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
       settings.setHighlightColour(gd.getNextString());
       boolean add = gd.getNextBoolean();
-      addToSelection.set(add);
+      ADD_TO_SELECTION.set(add);
       settings.setAddToSelection(add);
       final ResultsTableSettings.Builder resultsTableSettingsBuilder =
           s.getResultsTableSettingsBuilder();
@@ -3497,7 +3498,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Update the table settings for all the selection models
       if (resultsTableSettingsBuilder.getUpdateExistingTables()) {
-        for (final Triple<PeakResultTableModel, ?, ?> t : resultsTables.values()) {
+        for (final Triple<PeakResultTableModel, ?, ?> t : RESULTS_TABLES.values()) {
           t.getLeft().setTableSettings(localResultsTableSettings);
         }
       }

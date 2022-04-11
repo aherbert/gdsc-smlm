@@ -211,8 +211,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final float[] colors = new float[N * 4];
+    final int n = objectSize * size;
+    final float[] colors = new float[n * 4];
     ga.getColors(0, colors);
     int index = 0;
     while (index < colors.length) {
@@ -235,8 +235,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final float[] colors = new float[N * 4];
+    final int n = objectSize * size;
+    final float[] colors = new float[n * 4];
     ga.getColors(0, colors);
     int index = 0;
     for (final Color3f c : color) {
@@ -261,8 +261,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final Color4f[] colors = new Color4f[N];
+    final int n = objectSize * size;
+    final Color4f[] colors = new Color4f[n];
     int index = 0;
     for (final Color4f c : color) {
       for (int j = objectSize; j-- > 0;) {
@@ -282,8 +282,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final float[] colors = new float[N * 4];
+    final int n = objectSize * size;
+    final float[] colors = new float[n * 4];
     ga.getColors(0, colors);
     int index = 3;
     for (final float f : alpha) {
@@ -304,8 +304,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final float[] colors = new float[N * 4];
+    final int n = objectSize * size;
+    final float[] colors = new float[n * 4];
     ga.getColors(0, colors);
     int index = 3;
     while (size-- > 0) {
@@ -327,8 +327,8 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       return;
     }
     final int objectSize = objectVertices.length;
-    final int N = objectSize * size;
-    final float[] colors = new float[N * 4];
+    final int n = objectSize * size;
+    final float[] colors = new float[n * 4];
     ga.getColors(0, colors);
     for (int i = 0; i < size; i++) {
       // Get only alpha

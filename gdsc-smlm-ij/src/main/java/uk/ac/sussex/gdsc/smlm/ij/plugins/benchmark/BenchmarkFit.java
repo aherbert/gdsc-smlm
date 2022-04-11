@@ -134,11 +134,11 @@ public class BenchmarkFit implements PlugIn {
   private static final int ACTUAL_SIGNAL = 9;
   private static final int ADJUSTED_X_SD = 10;
   private static final int ADJUSTED_Y_SD = 11;
-  private static boolean[] displayHistograms = new boolean[NAMES.length];
+  private static final boolean[] DISPLAY_HISTOGRAMS = new boolean[NAMES.length];
 
   static {
-    for (int i = 0; i < displayHistograms.length; i++) {
-      displayHistograms[i] = true;
+    for (int i = 0; i < DISPLAY_HISTOGRAMS.length; i++) {
+      DISPLAY_HISTOGRAMS[i] = true;
     }
   }
 
@@ -206,7 +206,7 @@ public class BenchmarkFit implements PlugIn {
   /**
    * Store all the results from fitting on the same benchmark dataset.
    */
-  static final LinkedList<BenchmarkResult> benchmarkResults = new LinkedList<>();
+  static final LinkedList<BenchmarkResult> BENCHMARK_RESULTS = new LinkedList<>();
 
   /**
    * Used to allow multi-threading of the fitting method.
@@ -557,7 +557,7 @@ public class BenchmarkFit implements PlugIn {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
     if ("analysis".equals(arg)) {
-      if (benchmarkResults.isEmpty()) {
+      if (BENCHMARK_RESULTS.isEmpty()) {
         IJ.error(TITLE, "No benchmark results in memory.\n \n" + TextUtils.wrap(
             "Run the Fit Benchmark Data plugin and results will be stored for comparison analysis.",
             60));
@@ -833,9 +833,9 @@ public class BenchmarkFit implements PlugIn {
 
       final double[] convert = getConversionFactors();
 
-      for (int i = 0; i < displayHistograms.length; i++) {
+      for (int i = 0; i < DISPLAY_HISTOGRAMS.length; i++) {
         if (convert[i] != 0) {
-          gd2.addCheckbox(NAMES[i].replace(' ', '_'), displayHistograms[i]);
+          gd2.addCheckbox(NAMES[i].replace(' ', '_'), DISPLAY_HISTOGRAMS[i]);
         }
       }
       gd2.showDialog();
@@ -843,9 +843,9 @@ public class BenchmarkFit implements PlugIn {
         return false;
       }
       histogramBins = (int) Math.abs(gd2.getNextNumber());
-      for (int i = 0; i < displayHistograms.length; i++) {
+      for (int i = 0; i < DISPLAY_HISTOGRAMS.length; i++) {
         if (convert[i] != 0) {
-          displayHistograms[i] = gd2.getNextBoolean();
+          DISPLAY_HISTOGRAMS[i] = gd2.getNextBoolean();
         }
       }
     }
@@ -981,7 +981,7 @@ public class BenchmarkFit implements PlugIn {
       final HistogramPlotBuilder builder =
           new HistogramPlotBuilder(TITLE).setNumberOfBins(histogramBins);
       for (int i = 0; i < NAMES.length; i++) {
-        if (displayHistograms[i] && convert[i] != 0) {
+        if (DISPLAY_HISTOGRAMS[i] && convert[i] != 0) {
           // We will have to convert the values...
           final double[] tmp = ((StoredDataStatistics) stats[i]).getValues();
           for (int j = 0; j < tmp.length; j++) {
@@ -1224,13 +1224,13 @@ public class BenchmarkFit implements PlugIn {
     // Store the results for fitting on this benchmark dataset
     final BenchmarkResult benchmarkResult = new BenchmarkResult(benchmarkParameters, answer,
         sb.toString(), convert, this.results, this.resultsTime);
-    if (!benchmarkResults.isEmpty()) {
+    if (!BENCHMARK_RESULTS.isEmpty()) {
       // Clear the results if the benchmark has changed
-      if (benchmarkResults.getFirst().benchmarkParameters.id != benchmarkParameters.id) {
-        benchmarkResults.clear();
+      if (BENCHMARK_RESULTS.getFirst().benchmarkParameters.id != benchmarkParameters.id) {
+        BENCHMARK_RESULTS.clear();
       }
     }
-    benchmarkResults.add(benchmarkResult);
+    BENCHMARK_RESULTS.add(benchmarkResult);
 
     // Now output the actual results ...
     sb.append('\t');
@@ -1317,13 +1317,13 @@ public class BenchmarkFit implements PlugIn {
   }
 
   private void runAnalysis() {
-    benchmarkParameters = benchmarkResults.getFirst().benchmarkParameters;
+    benchmarkParameters = BENCHMARK_RESULTS.getFirst().benchmarkParameters;
     final double sa = getSa();
 
     // The fitting could have used centre-of-mass or not making the number of points different.
     // Find the shortest array (this will be the one where the centre-of-mass was not used)
     int length = Integer.MAX_VALUE;
-    for (final BenchmarkResult benchmarkResult : benchmarkResults) {
+    for (final BenchmarkResult benchmarkResult : BENCHMARK_RESULTS) {
       if (length > benchmarkResult.results.length) {
         length = benchmarkResult.results.length;
       }
@@ -1332,8 +1332,8 @@ public class BenchmarkFit implements PlugIn {
     // Build a list of all the frames which have results
     final int[] valid = new int[length];
     int index = 0;
-    final int[] counts = new int[benchmarkResults.size()];
-    for (final BenchmarkResult benchmarkResult : benchmarkResults) {
+    final int[] counts = new int[BENCHMARK_RESULTS.size()];
+    for (final BenchmarkResult benchmarkResult : BENCHMARK_RESULTS) {
       int count = 0;
       for (int i = 0; i < valid.length; i++) {
         if (benchmarkResult.results[i] != null) {
@@ -1344,7 +1344,7 @@ public class BenchmarkFit implements PlugIn {
       counts[index++] = count;
     }
 
-    final int target = benchmarkResults.size();
+    final int target = BENCHMARK_RESULTS.size();
 
     // Check that we have data
     if (!validData(valid, target)) {
@@ -1360,7 +1360,7 @@ public class BenchmarkFit implements PlugIn {
 
     // Create the results using only frames where all the fitting methods were successful
     index = 0;
-    for (final BenchmarkResult benchmarkResult : benchmarkResults) {
+    for (final BenchmarkResult benchmarkResult : BENCHMARK_RESULTS) {
       final double[] answer = benchmarkResult.answer;
 
       final Statistics[] stats = new Statistics[NAMES.length];

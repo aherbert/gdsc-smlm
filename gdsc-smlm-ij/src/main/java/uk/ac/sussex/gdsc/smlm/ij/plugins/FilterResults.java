@@ -217,8 +217,7 @@ public class FilterResults implements PlugIn {
   }
 
   private static float getDrift(PeakResult result, float x, float y) {
-    return Math.max(Math.abs(result.getOrigX() + 0.5f - x),
-        Math.abs(result.getOrigY() + 0.5f - y));
+    return Math.max(Math.abs(result.getOrigX() + 0.5f - x), Math.abs(result.getOrigY() + 0.5f - y));
   }
 
   private static float getSnr(PeakResult result) {

@@ -78,8 +78,7 @@ public class TraceMatchCalculator implements PlugIn {
     private static final String[] SORT_OPTIONS = new String[] {"Score", "Time"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption1 = "";
     String inputOption2 = "";
@@ -119,14 +118,14 @@ public class TraceMatchCalculator implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 

@@ -82,14 +82,15 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   /** The maximum number of fisher information curves to save to file. */
   private static final int MAX_DATA_TO_FILE = 10;
 
-  private static final CameraType[] cameraTypeValues = CameraType.values();
+  private static final CameraType[] CAMERA_TYPE_VALUES = CameraType.values();
 
-  private static final String[] cameraTypes = SettingsManager.getNames((Object[]) cameraTypeValues);
+  private static final String[] CAMERA_TYPES =
+      SettingsManager.getNames((Object[]) CAMERA_TYPE_VALUES);
 
   private static Map<FiKey, PoissonFisherInformationData> cache = new ConcurrentHashMap<>();
 
   /** The debug flag set on start-up by system properties. */
-  private static final boolean debug = System.getProperty("gdsc.smlm.debug") != null;
+  private static final boolean DEBUG = System.getProperty("gdsc.smlm.debug") != null;
 
   static {
     final PoissonFisherInformationCache cacheData = new SettingsManager.ConfigurationReader<>(
@@ -221,7 +222,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     }
 
     CameraType getType() {
-      return cameraTypeValues[type];
+      return CAMERA_TYPE_VALUES[type];
     }
 
     @Override
@@ -479,10 +480,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     gd.addSlider("Min_exponent", -50, 4, settings.getMinExponent());
     gd.addSlider("Max_exponent", -10, 4, settings.getMaxExponent());
     gd.addSlider("Sub_divisions", 0, 10, settings.getSubDivisions());
-    gd.addChoice("Camera_1_type", cameraTypes, settings.getCamera1Type());
+    gd.addChoice("Camera_1_type", CAMERA_TYPES, settings.getCamera1Type());
     gd.addNumericField("Camera_1_gain", settings.getCamera1Gain(), 2);
     gd.addNumericField("Camera_1_noise", settings.getCamera1Noise(), 2);
-    gd.addChoice("Camera_2_type", cameraTypes, settings.getCamera2Type());
+    gd.addChoice("Camera_2_type", CAMERA_TYPES, settings.getCamera2Type());
     gd.addNumericField("Camera_2_gain", settings.getCamera2Gain(), 2);
     gd.addNumericField("Camera_2_noise", settings.getCamera2Noise(), 2);
     gd.addChoice("Plot_point", POINT_OPTION, settings.getPointOption());
@@ -560,7 +561,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     // ==============
     // Debug PGG
     // ==============
-    if (debug && f2 instanceof PoissonGammaGaussianFisherInformation) {
+    if (DEBUG && f2 instanceof PoissonGammaGaussianFisherInformation) {
       final PoissonGammaGaussianFisherInformation pgg = (PoissonGammaGaussianFisherInformation) f2;
       final double t = 200;
 
@@ -1010,10 +1011,10 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     final DoubleArrayList iexp = new DoubleArrayList();
     final DoubleArrayList iphotons = new DoubleArrayList();
     for (int i = 1; i < exp.length; i++) {
-      final int i_1 = i - 1;
-      final double h = (exp[i] - exp[i_1]) / n;
+      final double base = exp[i - 1];
+      final double h = (exp[i] - base) / n;
       for (int j = 0; j < n; j++) {
-        final double e = exp[i_1] + j * h;
+        final double e = base + j * h;
         iexp.add(e);
         iphotons.add(Math.pow(10, e));
       }

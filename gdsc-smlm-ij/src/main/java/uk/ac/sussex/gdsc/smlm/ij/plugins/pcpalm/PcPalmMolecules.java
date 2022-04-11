@@ -139,7 +139,7 @@ public class PcPalmMolecules implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
+    private static final AtomicReference<Settings> INSTANCE =
         new AtomicReference<>(new Settings());
 
     static final String[] RUN_MODE =
@@ -291,14 +291,14 @@ public class PcPalmMolecules implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 

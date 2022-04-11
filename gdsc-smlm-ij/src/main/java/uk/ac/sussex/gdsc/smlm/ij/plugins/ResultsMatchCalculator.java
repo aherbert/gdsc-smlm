@@ -76,10 +76,10 @@ public class ResultsMatchCalculator implements PlugIn {
   private static AtomicReference<PairsTextWindow> pairsWindowRef = new AtomicReference<>();
 
   /** The write header flag used in headless mode to ensure the header is only written once. */
-  private static AtomicBoolean writeHeader = new AtomicBoolean(true);
+  private static final AtomicBoolean WRITE_HEADER = new AtomicBoolean(true);
 
   /** The rounder for the text output. */
-  private static final Rounder rounder = RounderUtils.create(4);
+  private static final Rounder ROUNDER = RounderUtils.create(4);
 
   /** an empty coordinate array. */
   private static final Coordinate[] EMPTY_COORD_ARRAY = new Coordinate[0];
@@ -104,7 +104,7 @@ public class ResultsMatchCalculator implements PlugIn {
      */
     LAST_FRAME("Last frame");
 
-    private static final CoordinateMethod[] values = CoordinateMethod.values();
+    private static final CoordinateMethod[] VALUES = CoordinateMethod.values();
 
     /** The description. */
     private final String description;
@@ -141,7 +141,7 @@ public class ResultsMatchCalculator implements PlugIn {
      */
     public static CoordinateMethod fromDescription(String description,
         CoordinateMethod defaultValue) {
-      for (final CoordinateMethod value : values) {
+      for (final CoordinateMethod value : VALUES) {
         if (value.description.equals(description)) {
           return value;
         }
@@ -155,10 +155,10 @@ public class ResultsMatchCalculator implements PlugIn {
    */
   private static class CoordinateMethodDescriptions {
     /** The descriptions. */
-    static final String[] descriptions;
+    static final String[] DESCRIPTIONS;
 
     static {
-      descriptions =
+      DESCRIPTIONS =
           Stream.of(CoordinateMethod.values()).map(m -> m.getDescription()).toArray(String[]::new);
     }
   }
@@ -168,8 +168,7 @@ public class ResultsMatchCalculator implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     private static final String KEY_INPUT_OPTION1 = "gdsc.smlm.resultsmatchcalculator.inputOption1";
     private static final String KEY_INPUT_OPTION2 = "gdsc.smlm.resultsmatchcalculator.inputOption2";
@@ -195,7 +194,7 @@ public class ResultsMatchCalculator implements PlugIn {
         "gdsc.smlm.resultsmatchcalculator.outputEndFrame";
 
     /** The options to save the classifications. */
-    private static final String[] saveClassificationsOptions =
+    private static final String[] SAVE_CLASSIFICATIONS_OPTIONS =
         {"None", "Matched", "Unmatched", "All"};
     private static final int SAVE_MATCHED = 0x01;
     private static final int SAVE_UNMATCHED = 0x02;
@@ -267,14 +266,14 @@ public class ResultsMatchCalculator implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
       Prefs.set(KEY_INPUT_OPTION1, inputOption1);
       Prefs.set(KEY_INPUT_OPTION2, inputOption2);
       Prefs.set(KEY_COORD_METHOD1, coordinateMethod1.getDescription());
@@ -382,9 +381,9 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addMessage("Compare the points in two results sets\nand compute the match statistics");
     ResultsManager.addInput(gd, "Results1", settings.inputOption1, InputSource.MEMORY);
     ResultsManager.addInput(gd, "Results2", settings.inputOption2, InputSource.MEMORY);
-    gd.addChoice("Coordinate_method1", CoordinateMethodDescriptions.descriptions,
+    gd.addChoice("Coordinate_method1", CoordinateMethodDescriptions.DESCRIPTIONS,
         settings.coordinateMethod1.getDescription());
-    gd.addChoice("Coordinate_method2", CoordinateMethodDescriptions.descriptions,
+    gd.addChoice("Coordinate_method2", CoordinateMethodDescriptions.DESCRIPTIONS,
         settings.coordinateMethod2.getDescription());
     gd.addNumericField("Distance", settings.distanceThreshold, 2);
 
@@ -393,7 +392,7 @@ public class ResultsMatchCalculator implements PlugIn {
     gd.addNumericField("Beta", settings.beta, 2);
     gd.addCheckbox("Show_table", settings.showTable);
     gd.addCheckbox("Show_pairs", settings.showPairs);
-    gd.addChoice("Save_classifications", Settings.saveClassificationsOptions,
+    gd.addChoice("Save_classifications", Settings.SAVE_CLASSIFICATIONS_OPTIONS,
         settings.saveClassificationsOption);
     gd.addCheckbox("Id_analysis", settings.idAnalysis);
     gd.addCheckbox("Save_pairs", settings.savePairs);
@@ -584,8 +583,8 @@ public class ResultsMatchCalculator implements PlugIn {
     } else {
       // Headless mode
       output = IJ::log;
-      if (writeHeader.get()) {
-        writeHeader.set(false);
+      if (WRITE_HEADER.get()) {
+        WRITE_HEADER.set(false);
         IJ.log(createResultsHeader(settings.idAnalysis));
       }
     }
@@ -693,7 +692,7 @@ public class ResultsMatchCalculator implements PlugIn {
   private TextFilePeakResults createFilePeakResults(String directory, int set,
       MemoryPeakResults results, double distanceLow, double distanceHigh) {
     final String filename = directory + String.format("Match%d_%s_%s_%s.txt", set,
-        results.getName(), rounder.toString(distanceLow), rounder.toString(distanceHigh));
+        results.getName(), ROUNDER.toString(distanceLow), ROUNDER.toString(distanceHigh));
     final TextFilePeakResults r = new TextFilePeakResults(filename, false, outputEndFrame(results));
     r.copySettings(results);
     r.begin();
@@ -920,30 +919,30 @@ public class ResultsMatchCalculator implements PlugIn {
     sb.setLength(0);
     sb.append(i1).append('\t');
     sb.append(i2).append('\t');
-    sb.append(rounder.round(distanceThrehsold)).append('\t');
+    sb.append(ROUNDER.round(distanceThrehsold)).append('\t');
     sb.append(result.getNumberPredicted()).append('\t');
     sb.append(result.getTruePositives()).append('\t');
     sb.append(result.getFalsePositives()).append('\t');
     sb.append(result.getFalseNegatives()).append('\t');
-    sb.append(rounder.round(result.getJaccard())).append('\t');
-    sb.append(rounder.round(result.getRmsd())).append('\t');
-    sb.append(rounder.round(result.getPrecision())).append('\t');
-    sb.append(rounder.round(result.getRecall())).append('\t');
-    sb.append(rounder.round(result.getFScore(0.5))).append('\t');
-    sb.append(rounder.round(result.getFScore(1.0))).append('\t');
-    sb.append(rounder.round(result.getFScore(2.0))).append('\t');
-    sb.append(rounder.round(result.getFScore(settings.beta)));
+    sb.append(ROUNDER.round(result.getJaccard())).append('\t');
+    sb.append(ROUNDER.round(result.getRmsd())).append('\t');
+    sb.append(ROUNDER.round(result.getPrecision())).append('\t');
+    sb.append(ROUNDER.round(result.getRecall())).append('\t');
+    sb.append(ROUNDER.round(result.getFScore(0.5))).append('\t');
+    sb.append(ROUNDER.round(result.getFScore(1.0))).append('\t');
+    sb.append(ROUNDER.round(result.getFScore(2.0))).append('\t');
+    sb.append(ROUNDER.round(result.getFScore(settings.beta)));
     if (idResult1 != null) {
       sb.append('\t').append(idResult1.getNumberPredicted());
       sb.append('\t').append(idResult1.getTruePositives());
-      sb.append('\t').append(rounder.round(idResult1.getRecall()));
+      sb.append('\t').append(ROUNDER.round(idResult1.getRecall()));
     } else if (idResult2 != null) {
       sb.append("\t-\t-\t-");
     }
     if (idResult2 != null) {
       sb.append('\t').append(idResult2.getNumberPredicted());
       sb.append('\t').append(idResult2.getTruePositives());
-      sb.append('\t').append(rounder.round(idResult2.getRecall()));
+      sb.append('\t').append(ROUNDER.round(idResult2.getRecall()));
     } else if (idResult1 != null) {
       sb.append("\t-\t-\t-");
     }
@@ -972,7 +971,7 @@ public class ResultsMatchCalculator implements PlugIn {
     addPoint(sb, p2);
     final double d = pair.getXyDistance();
     if (d >= 0) {
-      sb.append(rounder.round(d)).append('\t');
+      sb.append(ROUNDER.round(d)).append('\t');
     } else {
       sb.append("-\t");
     }
@@ -983,9 +982,9 @@ public class ResultsMatchCalculator implements PlugIn {
     if (result == null) {
       sb.append("-\t-\t-\t");
     } else {
-      sb.append(rounder.round(result.getX())).append('\t');
-      sb.append(rounder.round(result.getY())).append('\t');
-      sb.append(rounder.round(result.getZ())).append('\t');
+      sb.append(ROUNDER.round(result.getX())).append('\t');
+      sb.append(ROUNDER.round(result.getY())).append('\t');
+      sb.append(ROUNDER.round(result.getZ())).append('\t');
     }
   }
 

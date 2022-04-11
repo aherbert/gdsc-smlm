@@ -91,7 +91,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   // Compute distance to simulation. Compute distance to another distribution.
 
   private static final String TITLE = "Camera Model Analysis";
-  private static final KolmogorovSmirnovTest kolmogorovSmirnovTest = new KolmogorovSmirnovTest();
+  private static final KolmogorovSmirnovTest KS_TEST = new KolmogorovSmirnovTest();
 
   /** The relative change in cumulative probability to stop computation. */
   private static final double PROBABILITY_DELTA = 1e-6;
@@ -434,7 +434,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     // distribution.
     double pvalue = Double.NaN;
     try {
-      pvalue = 1d - kolmogorovSmirnovTest.cdf(distance, n);
+      pvalue = 1d - KS_TEST.cdf(distance, n);
     } catch (final MathArithmeticException ex) {
       // Cannot be computed to leave at NaN
     }
@@ -788,10 +788,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
           // double total2 = total;
           for (int c = 1; c <= maxc; c++) {
             double sum = 0;
-            final double c_m = c / m;
+            final double cDivM = c / m;
             final double logc = Math.log(c);
             for (int n = minn; n <= maxn; n++) {
-              sum += StdMath.exp(f[n] + (n - 1) * logc - c_m);
+              sum += StdMath.exp(f[n] + (n - 1) * logc - cDivM);
             }
             // sum2 += pd[n] * gd[n].density(c);
             list.add(sum);
@@ -820,15 +820,15 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
         // Compute the integral of [-step/2:step/2] for each point.
         // Use trapezoid integration.
-        final double step_2 = step / 2;
+        final double halfStep = step / 2;
         double prev = PoissonGammaFunction.poissonGammaN(0, p, m);
-        double next = PoissonGammaFunction.poissonGammaN(step_2, p, m);
+        double next = PoissonGammaFunction.poissonGammaN(halfStep, p, m);
         list.add((prev + next) * 0.25);
         double max = 0;
         for (int i = 1;; i++) {
           // Each remaining point is modelling a PMF for the range [-step/2:step/2]
           prev = next;
-          next = PoissonGammaFunction.poissonGammaN(i * step + step_2, p, m);
+          next = PoissonGammaFunction.poissonGammaN(i * step + halfStep, p, m);
           final double pp = (prev + next) * 0.5;
           if (max < pp) {
             max = pp;
@@ -1462,7 +1462,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     return new double[] {distance, value, area / x1.length};
   }
 
-  private static final double[] areaX = {0, 1, 1, 0};
+  private static final double[] AREA_X = {0, 1, 1, 0};
 
   @SuppressWarnings("unused")
   private static double area(double y1, double y2, double y3, double y4) {
@@ -1476,6 +1476,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
       }
     }
 
-    return Math.abs(GeometryUtils.getArea(areaX, new double[] {y1, y2, y3, y4}));
+    return Math.abs(GeometryUtils.getArea(AREA_X, new double[] {y1, y2, y3, y4}));
   }
 }

@@ -196,21 +196,21 @@ public class Fire implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    private static final String[] scaleItems;
-    private static final int[] scaleValues = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
-    private static String[] imageSizeItems;
-    private static int[] imageSizeValues;
+    private static final String[] SCALE_ITEMS;
+    private static final int[] SCALE_VALUES = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
+    private static final String[] IMAGE_SIZE_ITEMS;
+    private static final int[] IMAGE_SIZE_VALUES;
 
     static {
-      scaleItems = new String[scaleValues.length];
-      scaleItems[0] = "Auto";
-      for (int i = 1; i < scaleValues.length; i++) {
-        scaleItems[i] = Integer.toString(scaleValues[i]);
+      SCALE_ITEMS = new String[SCALE_VALUES.length];
+      SCALE_ITEMS[0] = "Auto";
+      for (int i = 1; i < SCALE_VALUES.length; i++) {
+        SCALE_ITEMS[i] = Integer.toString(SCALE_VALUES[i]);
       }
 
       // Create size for Fourier transforms. Must be power of 2.
-      imageSizeValues = new int[32];
-      imageSizeItems = new String[imageSizeValues.length];
+      final int[] imageSizeValues = new int[32];
+      final String[] imageSizeItems = new String[imageSizeValues.length];
       int size = 512; // Start at a reasonable size. Too small does not work.
       int count = 0;
       while (size <= 16384) {
@@ -221,13 +221,12 @@ public class Fire implements PlugIn {
         size *= 2;
         count++;
       }
-      imageSizeValues = Arrays.copyOf(imageSizeValues, count);
-      imageSizeItems = Arrays.copyOf(imageSizeItems, count);
+      IMAGE_SIZE_VALUES = Arrays.copyOf(imageSizeValues, count);
+      IMAGE_SIZE_ITEMS = Arrays.copyOf(imageSizeItems, count);
     }
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> lastSettings =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     String inputOption;
     String inputOption2;
@@ -270,7 +269,7 @@ public class Fire implements PlugIn {
       repeats = 1;
       randomSplit = true;
       blockSize = 50;
-      imageSizeIndex = Arrays.binarySearch(imageSizeValues, 2047);
+      imageSizeIndex = Arrays.binarySearch(IMAGE_SIZE_VALUES, 2047);
       perimeterSamplingFactor = 1;
       fourierMethodIndex = FourierMethod.JTRANSFORMS.ordinal();
       samplingMethodIndex = SamplingMethod.RADIAL_SUM.ordinal();
@@ -323,14 +322,14 @@ public class Fire implements PlugIn {
      * @return the settings
      */
     static Settings load() {
-      return lastSettings.get().copy();
+      return INSTANCE.get().copy();
     }
 
     /**
      * Save the settings.
      */
     void save() {
-      lastSettings.set(this);
+      INSTANCE.set(this);
     }
   }
 
@@ -560,8 +559,8 @@ public class Fire implements PlugIn {
     // Compute FIRE
 
     String name = inputResults1.getName();
-    final double fourierImageScale = Settings.scaleValues[settings.imageScaleIndex];
-    final int imageSize = Settings.imageSizeValues[settings.imageSizeIndex];
+    final double fourierImageScale = Settings.SCALE_VALUES[settings.imageScaleIndex];
+    final int imageSize = Settings.IMAGE_SIZE_VALUES[settings.imageSizeIndex];
 
     if (this.results2 != null) {
       name += " vs " + this.results2.getName();
@@ -799,8 +798,8 @@ public class Fire implements PlugIn {
     final boolean single = results2 == null;
 
     gd.addMessage("Image construction options:");
-    gd.addChoice("Image_scale", Settings.scaleItems, settings.imageScaleIndex);
-    gd.addChoice("Auto_image_size", Settings.imageSizeItems, settings.imageSizeIndex);
+    gd.addChoice("Image_scale", Settings.SCALE_ITEMS, settings.imageScaleIndex);
+    gd.addChoice("Auto_image_size", Settings.IMAGE_SIZE_ITEMS, settings.imageSizeIndex);
     if (extraOptions) {
       gd.addCheckbox("Use_signal (if present)", settings.useSignal);
     }
@@ -1214,8 +1213,8 @@ public class Fire implements PlugIn {
         plot = new Plot(title, String.format("Spatial Frequency (%s^-1)", units), "FRC");
 
         xValues = new double[frcCurve.getSize()];
-        final double L = frcCurve.fieldOfView;
-        final double conversion = 1.0 / (L * result.getNmPerPixel());
+        final double l = frcCurve.fieldOfView;
+        final double conversion = 1.0 / (l * result.getNmPerPixel());
         for (int i = 0; i < xValues.length; i++) {
           xValues[i] = frcCurve.get(i).getRadius() * conversion;
         }
@@ -1489,8 +1488,8 @@ public class Fire implements PlugIn {
     }
     final StoredDataStatistics precision = histogram.precision;
 
-    final double fourierImageScale = Settings.scaleValues[settings.imageScaleIndex];
-    final int imageSize = Settings.imageSizeValues[settings.imageSizeIndex];
+    final double fourierImageScale = Settings.SCALE_VALUES[settings.imageScaleIndex];
+    final int imageSize = Settings.IMAGE_SIZE_VALUES[settings.imageSizeIndex];
 
     // Create the image and compute the numerator of FRC.
     // Do not use the signal so results.size() is the number of localisations.
@@ -1572,10 +1571,10 @@ public class Fire implements PlugIn {
       final int[] sample =
           RandomUtils.sample(10000, precision.getN(), UniformRandomProviders.create());
 
-      final double four_pi2 = 4 * Math.PI * Math.PI;
+      final double fourPi2 = 4 * Math.PI * Math.PI;
       final double[] pre = new double[q.length];
       for (int i = 1; i < q.length; i++) {
-        pre[i] = -four_pi2 * q[i] * q[i];
+        pre[i] = -fourPi2 * q[i] * q[i];
       }
 
       // Sample
@@ -1596,8 +1595,8 @@ public class Fire implements PlugIn {
       expDecay = new double[q.length];
       expDecay[0] = 1;
       for (int i = 1; i < q.length; i++) {
-        final double sinc_q = sinc(Math.PI * q[i]);
-        expDecay[i] = sinc_q * sinc_q * hq[i];
+        final double sincPiQ = sinc(Math.PI * q[i]);
+        expDecay[i] = sincPiQ * sincPiQ * hq[i];
       }
     } else {
       // Note: The sigma mean and std should be in the units of super-resolution
@@ -1782,8 +1781,8 @@ public class Fire implements PlugIn {
     final double[] expDecay = new double[qvalues.length];
     expDecay[0] = 1;
     for (int i = 1; i < qvalues.length; i++) {
-      final double sinc_q = sinc(Math.PI * qvalues[i]);
-      expDecay[i] = sinc_q * sinc_q * hq[i];
+      final double sincPiQ = sinc(Math.PI * qvalues[i]);
+      expDecay[i] = sincPiQ * sincPiQ * hq[i];
     }
     return expDecay;
   }
@@ -1944,8 +1943,8 @@ public class Fire implements PlugIn {
       pre = new double[high - low];
       for (int i = 0; i < pre.length; i++) {
         final int index = i + low;
-        final double sinc_q = (index == 0) ? 1 : sinc(Math.PI * qvalues[index]);
-        pre[i] = frcnum[index] / (sinc_q * sinc_q);
+        final double sincPiQ = (index == 0) ? 1 : sinc(Math.PI * qvalues[index]);
+        pre[i] = frcnum[index] / (sincPiQ * sincPiQ);
         q2[i] = qvalues[index] * qvalues[index];
       }
       n2 = FRCNUM_NOISE_VAR * FRCNUM_NOISE_VAR;
@@ -1962,12 +1961,12 @@ public class Fire implements PlugIn {
       }
 
       // Fast computation of a subset of hq
-      final double eight_pi2_s2 = 2 * FOUR_PI2 * sigma * sigma;
+      final double eightPi2S2 = 2 * FOUR_PI2 * sigma * sigma;
       final double factor = -FOUR_PI2 * mean * mean;
 
       double value = 0;
       for (int i = 0; i < pre.length; i++) {
-        final double d = 1 + eight_pi2_s2 * q2[i];
+        final double d = 1 + eightPi2S2 * q2[i];
         final double hq = StdMath.exp((factor * q2[i]) / d) / Math.sqrt(d);
 
         // Original cost function. Note that each observation has a
@@ -2000,8 +1999,8 @@ public class Fire implements PlugIn {
     }
 
     gd.addMessage("Image construction options:");
-    gd.addChoice("Image_scale", Settings.scaleItems, settings.imageScaleIndex);
-    gd.addChoice("Auto_image_size", Settings.imageSizeItems, settings.imageSizeIndex);
+    gd.addChoice("Image_scale", Settings.SCALE_ITEMS, settings.imageScaleIndex);
+    gd.addChoice("Auto_image_size", Settings.IMAGE_SIZE_ITEMS, settings.imageSizeIndex);
     gd.addNumericField("Block_size", settings.blockSize, 0);
     gd.addCheckbox("Random_split", settings.randomSplit);
     gd.addNumericField("Max_per_bin", settings.maxPerBin, 0);

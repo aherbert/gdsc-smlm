@@ -486,62 +486,62 @@ public class ImageJImagePeakResults extends ImageJAbstractPeakResults {
       }
 
       // Compress into 16-bit image if necessary
-      final int K = 65535;
-      final double norm = K / max;
+      final int k = 65535;
+      final double norm = k / max;
 
       final short[] pixels = (short[]) this.pixels;
 
       for (int i = 0; i < pixels.length; i++) {
         int index = (int) (norm * data[i]);
-        if (index > K) {
-          index = K;
+        if (index > k) {
+          index = k;
         }
         pixels[i] = (short) index;
       }
 
       // Get the histogram
-      final int[] H = new int[K + 1];
+      final int[] h = new int[k + 1];
       for (int i = 0; i < pixels.length; i++) {
-        H[pixels[i] & 0xffff]++;
+        h[pixels[i] & 0xffff]++;
       }
 
       // Skip empty data
       int start = 1;
-      while (H[start] == 0 && start < K) {
+      while (h[start] == 0 && start < k) {
         start++;
         // System.out.printf("Start = %d\n", start);
       }
 
       // Perform weighted histogram equalisation
       // See: ij.plugin.ContrastEnhancer
-      final double[] sqrt = new double[H.length];
-      sqrt[start] = Math.sqrt(H[start]);
+      final double[] sqrt = new double[h.length];
+      sqrt[start] = Math.sqrt(h[start]);
       double sum = sqrt[start];
-      for (int i = start + 1; i < K; i++) {
-        sqrt[i] = Math.sqrt(H[i]);
+      for (int i = start + 1; i < k; i++) {
+        sqrt[i] = Math.sqrt(h[i]);
         sum += 2 * sqrt[i];
       }
-      sum += Math.sqrt(H[K]);
+      sum += Math.sqrt(h[k]);
 
-      final double scale = K / sum;
+      final double scale = k / sum;
 
-      final int[] lut = new int[K + 1];
+      final int[] lut = new int[k + 1];
 
       lut[0] = 0;
       sum = sqrt[start];
-      for (int i = start + 1; i < K; i++) {
+      for (int i = start + 1; i < k; i++) {
         final double delta = sqrt[i];
         sum += delta;
         lut[i] = (int) (sum * scale + 0.5);
         sum += delta;
       }
-      lut[K] = K;
+      lut[k] = k;
 
       for (int i = 0; i < pixels.length; i++) {
         pixels[i] = (short) lut[pixels[i] & 0xffff];
       }
 
-      imp.setDisplayRange(0, K);
+      imp.setDisplayRange(0, k);
     } else {
       // 32-bit image. Just copy the data but find the maximum
       final float[] pixels = (float[]) this.pixels;

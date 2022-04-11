@@ -920,73 +920,70 @@ public abstract class Image3D {
     // j = jmax when j>jmax
     // k = kmax when k>kmax
 
-    final int x_1 = intersect[0] - 1;
-    final int y_1 = intersect[1] - 1;
-    final int z_1 = intersect[2] - 1;
+    final int xm1 = intersect[0] - 1;
+    final int ym1 = intersect[1] - 1;
+    final int zm1 = intersect[2] - 1;
     // The intersect has already checked the bounds
-    // int x_w_1 = Math.min(x_1 + width, nc);
-    // int y_h_1 = Math.min(y_1 + height, nr);
-    // int z_d_1 = Math.min(z_1 + depth, ns);
-    final int x_w_1 = x_1 + width;
-    final int y_h_1 = y_1 + height;
-    final int z_d_1 = z_1 + depth;
+    final int xpwm1 = xm1 + width;
+    final int yphm1 = ym1 + height;
+    final int zpdm1 = zm1 + depth;
 
-    // double sum = table[index(x_w_1, y_h_1, z_d_1)];
-    // if (y_1 >= 0)
+    // double sum = table[index(xpwm1, yphm1, zpdm1)];
+    // if (ym1 >= 0)
     // {
-    // sum -= table[index(x_w_1, y_1, z_d_1)];
-    // if (x_1 >= 0)
-    // sum = sum + table[index(x_1, y_1, z_d_1)] - table[index(x_1, y_h_1, z_d_1)];
+    // sum -= table[index(xpwm1, ym1, zpdm1)];
+    // if (xm1 >= 0)
+    // sum = sum + table[index(xm1, ym1, zpdm1)] - table[index(xm1, yphm1, zpdm1)];
     // }
-    // else if (x_1 >= 0)
+    // else if (xm1 >= 0)
     // {
-    // sum -= table[index(x_1, y_h_1, z_d_1)];
+    // sum -= table[index(xm1, yphm1, zpdm1)];
     // }
-    // if (z_1 >= 0)
+    // if (zm1 >= 0)
     // {
-    // sum -= table[index(x_w_1, y_h_1, z_1)];
-    // if (y_1 >= 0)
+    // sum -= table[index(xpwm1, yphm1, zm1)];
+    // if (ym1 >= 0)
     // {
-    // sum += table[index(x_w_1, y_1, z_1)];
-    // if (x_1 >= 0)
-    // sum = sum - table[index(x_1, y_1, z_1)] + table[index(x_1, y_h_1, z_1)];
+    // sum += table[index(xpwm1, ym1, zm1)];
+    // if (xm1 >= 0)
+    // sum = sum - table[index(xm1, ym1, zm1)] + table[index(xm1, yphm1, zm1)];
     // }
-    // else if (x_1 >= 0)
+    // else if (xm1 >= 0)
     // {
-    // sum += table[index(x_1, y_h_1, z_1)];
+    // sum += table[index(xm1, yphm1, zm1)];
     // }
     // }
     // return sum;
 
     // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than
     // x+width,y+height,z+depth)
-    final int xw_yh_zd = index(x_w_1, y_h_1, z_d_1);
-    if (z_1 >= 0) {
-      final int xw_yh_z = xw_yh_zd - depth * nrByNc;
+    final int xwyhzd = index(xpwm1, yphm1, zpdm1);
+    if (zm1 >= 0) {
+      final int xwyhz = xwyhzd - depth * nrByNc;
       double sum = 0;
-      if (y_1 >= 0) {
-        final int h_ = height * nc;
-        if (x_1 >= 0) {
-          sum = table[xw_yh_zd - width - h_] - table[xw_yh_z - width - h_] - table[xw_yh_zd - width]
-              + table[xw_yh_z - width];
+      if (ym1 >= 0) {
+        final int h = height * nc;
+        if (xm1 >= 0) {
+          sum = table[xwyhzd - width - h] - table[xwyhz - width - h] - table[xwyhzd - width]
+              + table[xwyhz - width];
         }
-        sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
-      } else if (x_1 >= 0) {
-        sum = table[xw_yh_z - width] - table[xw_yh_zd - width];
+        sum = sum + table[xwyhz - h] - table[xwyhzd - h];
+      } else if (xm1 >= 0) {
+        sum = table[xwyhz - width] - table[xwyhzd - width];
       }
-      return sum + table[xw_yh_zd] - table[xw_yh_z];
+      return sum + table[xwyhzd] - table[xwyhz];
     }
     double sum = 0;
-    if (y_1 >= 0) {
-      final int h_ = height * nc;
-      if (x_1 >= 0) {
-        sum = table[xw_yh_zd - width - h_] - table[xw_yh_zd - width];
+    if (ym1 >= 0) {
+      final int h = height * nc;
+      if (xm1 >= 0) {
+        sum = table[xwyhzd - width - h] - table[xwyhzd - width];
       }
-      sum -= table[xw_yh_zd - h_];
-    } else if (x_1 >= 0) {
-      sum = -table[xw_yh_zd - width];
+      sum -= table[xwyhzd - h];
+    } else if (xm1 >= 0) {
+      sum = -table[xwyhzd - width];
     }
-    return sum + table[xw_yh_zd];
+    return sum + table[xwyhzd];
   }
 
   /**
@@ -1076,33 +1073,33 @@ public abstract class Image3D {
 
     // This has been ordered to use the smallest sums first (i.e. closer to x,y,z than
     // x+width,y+height,z+depth)
-    final int xw_yh_zd = index(xw1, yh1, zd1);
+    final int xwyhzd = index(xw1, yh1, zd1);
     if (z1 >= 0) {
-      final int xw_yh_z = xw_yh_zd - depth * nrByNc;
+      final int xwyhz = xwyhzd - depth * nrByNc;
       double sum = 0;
       if (y1 >= 0) {
-        final int h_ = height * nc;
+        final int h = height * nc;
         if (x1 >= 0) {
-          sum = table[xw_yh_zd - width - h_] - table[xw_yh_z - width - h_] - table[xw_yh_zd - width]
-              + table[xw_yh_z - width];
+          sum = table[xwyhzd - width - h] - table[xwyhz - width - h] - table[xwyhzd - width]
+              + table[xwyhz - width];
         }
-        sum = sum + table[xw_yh_z - h_] - table[xw_yh_zd - h_];
+        sum = sum + table[xwyhz - h] - table[xwyhzd - h];
       } else if (x1 >= 0) {
-        sum = table[xw_yh_z - width] - table[xw_yh_zd - width];
+        sum = table[xwyhz - width] - table[xwyhzd - width];
       }
-      return sum + table[xw_yh_zd] - table[xw_yh_z];
+      return sum + table[xwyhzd] - table[xwyhz];
     }
     double sum = 0;
     if (y1 >= 0) {
-      final int h_ = height * nc;
+      final int h = height * nc;
       if (x1 >= 0) {
-        sum = table[xw_yh_zd - width - h_] - table[xw_yh_zd - width];
+        sum = table[xwyhzd - width - h] - table[xwyhzd - width];
       }
-      sum -= table[xw_yh_zd - h_];
+      sum -= table[xwyhzd - h];
     } else if (x1 >= 0) {
-      sum = -table[xw_yh_zd - width];
+      sum = -table[xwyhzd - width];
     }
-    return sum + table[xw_yh_zd];
+    return sum + table[xwyhzd];
   }
 
   /**
@@ -1189,14 +1186,14 @@ public abstract class Image3D {
       fill((z + depth) * nrByNc, (ns - z - depth) * nrByNc, value);
     }
 
-    final int y_p_h = y + height;
+    final int yph = y + height;
     final int fillYBefore = y * nc;
-    final int yAfter = y_p_h * nc;
-    final int fillYAfter = (nr - y_p_h) * nc;
+    final int yAfter = yph * nc;
+    final int fillYAfter = (nr - yph) * nc;
 
-    final int x_p_w = x + width;
+    final int xpw = x + width;
     final int fillXBefore = x;
-    final int fillXAfter = (nc - x_p_w);
+    final int fillXAfter = (nc - xpw);
 
     for (int s = 0; s < depth; s++, z++) {
       int base = z * nrByNc;
@@ -1215,7 +1212,7 @@ public abstract class Image3D {
           fill(base, fillXBefore, value);
         }
         if (fillXAfter != 0) {
-          fill(base + x_p_w, fillXAfter, value);
+          fill(base + xpw, fillXAfter, value);
         }
         base += nc;
       }
