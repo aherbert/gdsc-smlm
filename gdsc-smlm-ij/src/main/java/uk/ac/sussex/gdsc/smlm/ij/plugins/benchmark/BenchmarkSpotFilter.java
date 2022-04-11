@@ -1998,9 +1998,6 @@ public class BenchmarkSpotFilter implements PlugIn {
         w.results.trim();
       }
     }
-    if (filterResults == null) {
-      throw new NullPointerException();
-    }
 
     filterResults.trim();
 

@@ -55,6 +55,7 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -945,7 +946,7 @@ public class TcPalmAnalysis implements PlugIn {
         }
       } catch (final IOException e) {
         // Let ImageJ display the exception
-        throw new RuntimeException(e);
+        throw new UncheckedIOException(e);
       }
     }
 

@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import org.apache.commons.lang3.concurrent.ConcurrentRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.sussex.gdsc.core.utils.concurrent.ConcurrencyUtils;
@@ -48,9 +49,7 @@ public class Workflow<S, R> {
     final Pair<S, R> work;
 
     Work(long time, Pair<S, R> work) {
-      if (work.getKey() == null) {
-        throw new NullPointerException("Settings cannot be null");
-      }
+      Objects.requireNonNull(work.getKey(), "Settings cannot be null");
       this.timeout = time;
       this.work = work;
     }

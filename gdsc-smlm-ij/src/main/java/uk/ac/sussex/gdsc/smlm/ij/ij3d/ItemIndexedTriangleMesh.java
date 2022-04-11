@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import customnode.CustomIndexedTriangleMesh;
+import java.util.Objects;
 import org.scijava.java3d.Geometry;
 import org.scijava.java3d.GeometryArray;
 import org.scijava.java3d.IndexedTriangleArray;
@@ -93,9 +94,7 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     if (sizes == null || (sameSize = ItemTriangleMesh.sameSize(sizes))) {
       if (sameSize) {
         // Scale the input object
-        if (sizes == null) {
-          throw new NullPointerException("sizes should not be null here");
-        }
+        Objects.requireNonNull(sizes, "sizes should not be null here");
         final Point3f s = sizes[0];
         final float sx = s.x;
         final float sy = s.y;

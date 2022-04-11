@@ -125,10 +125,10 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       final int format = ga.getVertexFormat();
       if (isPointArray) {
         if ((format & GeometryArray.COLOR_4) != GeometryArray.COLOR_4) {
-          throw new NullPointerException("PointArray must have COLOR_4 vertex type");
+          throw new IllegalArgumentException("PointArray must have COLOR_4 vertex type");
         }
       } else if ((format & GeometryArray.COLOR_3) != 0) {
-        throw new NullPointerException("GeometryArray must not have COLOR vertex type");
+        throw new IllegalArgumentException("GeometryArray must not have COLOR vertex type");
       }
     }
 

@@ -57,6 +57,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -3256,9 +3257,7 @@ public class PeakFit implements PlugInFilter {
    * @return the rectangle
    */
   public static Rectangle combineBounds(Rectangle sourceBounds, Rectangle cropBounds) {
-    if (sourceBounds == null) {
-      throw new NullPointerException("No source bounds");
-    }
+    Objects.requireNonNull(sourceBounds, "No source bounds");
     if (cropBounds == null) {
       return sourceBounds;
     }

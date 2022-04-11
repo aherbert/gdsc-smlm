@@ -30,6 +30,7 @@ import ij.plugin.PlugIn;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -478,7 +479,7 @@ public class TraceExporter implements PlugIn {
             writer.newLine();
           }
         } catch (final IOException ex) {
-          throw new RuntimeException(ex);
+          throw new UncheckedIOException(ex);
         }
       });
     } catch (final IOException | RuntimeException ex) {

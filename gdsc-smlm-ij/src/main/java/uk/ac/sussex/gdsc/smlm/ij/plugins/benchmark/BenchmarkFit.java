@@ -1037,7 +1037,7 @@ public class BenchmarkFit implements PlugIn {
     try {
       jobs.put(index);
     } catch (final InterruptedException ex) {
-      throw new RuntimeException("Unexpected interruption", ex);
+      throw new ConcurrentRuntimeException("Unexpected interruption", ex);
     }
   }
 

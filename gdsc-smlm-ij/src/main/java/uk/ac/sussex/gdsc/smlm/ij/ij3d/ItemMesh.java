@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import customnode.CustomMesh;
 import java.util.Arrays;
+import java.util.Objects;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.Geometry;
@@ -190,9 +191,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     if (sizes == null || (sameSize = sameSize(sizes))) {
       if (sameSize) {
         // Scale the input object
-        if (sizes == null) {
-          throw new NullPointerException("sizes should not be null here");
-        }
+        Objects.requireNonNull(sizes, "sizes should not be null here");
         final Point3f s = sizes[0];
         final float sx = s.x;
         final float sy = s.y;

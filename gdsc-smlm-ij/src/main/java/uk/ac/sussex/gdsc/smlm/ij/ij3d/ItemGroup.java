@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import java.util.Arrays;
+import java.util.Objects;
 import org.scijava.java3d.Group;
 import org.scijava.java3d.PointAttributes;
 import org.scijava.java3d.PolygonAttributes;
@@ -49,10 +50,7 @@ public abstract class ItemGroup extends Group implements ItemShape {
    * @param points the points
    */
   public ItemGroup(final Point3f[] points) {
-    if (points == null) {
-      throw new NullPointerException("Points must  not be null");
-    }
-    this.points = points;
+    this.points = Objects.requireNonNull(points, "points");
   }
 
   /**
