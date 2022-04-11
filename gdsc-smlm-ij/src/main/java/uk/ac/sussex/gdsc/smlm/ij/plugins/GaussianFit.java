@@ -70,7 +70,6 @@ import uk.ac.sussex.gdsc.smlm.fitting.Gaussian2DFitter;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.EllipticalGaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.function.gaussian.Gaussian2DFunction;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.ij.utils.ImageJImageConverter;
 import uk.ac.sussex.gdsc.smlm.results.Gaussian2DPeakResultHelper;
 
@@ -123,28 +122,28 @@ public class GaussianFit implements ExtendedPlugInFilter {
 
     Settings() {
       // Set defaults
-      smooth = Prefs.get(Constants.smooth, 0);
-      boxSize = (int) Prefs.get(Constants.boxSize, 1);
-      background = (float) Prefs.get(Constants.background, 0);
-      peakHeight = (float) Prefs.get(Constants.peakHeight, 0);
-      fractionAboveBackground = (float) Prefs.get(Constants.fractionAboveBackground, 0);
-      peakWidth = (float) Prefs.get(Constants.peakWidth, 0);
-      topN = (int) Prefs.get(Constants.topN, 0);
-      blockFindAlgorithm = Prefs.get(Constants.blockFindAlgorithm, true);
-      neighbourCheck = Prefs.get(Constants.neighbourCheck, false);
-      border = (int) Prefs.get(Constants.border, 0);
-      fitFunction = (int) Prefs.get(Constants.fitFunction, 0);
-      fitBackground = Prefs.get(Constants.fitBackground, true);
-      logProgress = Prefs.get(Constants.logProgress, false);
-      maxIterations = (int) Prefs.get(Constants.maxIterations, 20);
-      relativeThreshold = Prefs.get(Constants.relativeThreshold, 1e-5);
-      absoluteThreshold = Prefs.get(Constants.absoluteThreshold, 1e-10);
-      singleFit = Prefs.get(Constants.singleFit, false);
-      singleRegionSize = (int) Prefs.get(Constants.singleRegionSize, 10);
-      initialPeakStdDev = Prefs.get(Constants.initialPeakStdDev0, 0);
-      showDeviations = Prefs.get(Constants.showDeviations, false);
-      filterResults = Prefs.get(Constants.filterResults, false);
-      showFit = Prefs.get(Constants.showFit, false);
+      smooth = Prefs.get(PrefsKey.smooth, 0);
+      boxSize = (int) Prefs.get(PrefsKey.boxSize, 1);
+      background = (float) Prefs.get(PrefsKey.background, 0);
+      peakHeight = (float) Prefs.get(PrefsKey.peakHeight, 0);
+      fractionAboveBackground = (float) Prefs.get(PrefsKey.fractionAboveBackground, 0);
+      peakWidth = (float) Prefs.get(PrefsKey.peakWidth, 0);
+      topN = (int) Prefs.get(PrefsKey.topN, 0);
+      blockFindAlgorithm = Prefs.get(PrefsKey.blockFindAlgorithm, true);
+      neighbourCheck = Prefs.get(PrefsKey.neighbourCheck, false);
+      border = (int) Prefs.get(PrefsKey.border, 0);
+      fitFunction = (int) Prefs.get(PrefsKey.fitFunction, 0);
+      fitBackground = Prefs.get(PrefsKey.fitBackground, true);
+      logProgress = Prefs.get(PrefsKey.logProgress, false);
+      maxIterations = (int) Prefs.get(PrefsKey.maxIterations, 20);
+      relativeThreshold = Prefs.get(PrefsKey.relativeThreshold, 1e-5);
+      absoluteThreshold = Prefs.get(PrefsKey.absoluteThreshold, 1e-10);
+      singleFit = Prefs.get(PrefsKey.singleFit, false);
+      singleRegionSize = (int) Prefs.get(PrefsKey.singleRegionSize, 10);
+      initialPeakStdDev = Prefs.get(PrefsKey.initialPeakStdDev0, 0);
+      showDeviations = Prefs.get(PrefsKey.showDeviations, false);
+      filterResults = Prefs.get(PrefsKey.filterResults, false);
+      showFit = Prefs.get(PrefsKey.showFit, false);
     }
 
     Settings(Settings source) {
@@ -190,28 +189,28 @@ public class GaussianFit implements ExtendedPlugInFilter {
      */
     void save() {
       INSTANCE.set(this);
-      Prefs.set(Constants.smooth, smooth);
-      Prefs.set(Constants.boxSize, boxSize);
-      Prefs.set(Constants.background, background);
-      Prefs.set(Constants.peakHeight, peakHeight);
-      Prefs.set(Constants.fractionAboveBackground, fractionAboveBackground);
-      Prefs.set(Constants.peakWidth, peakWidth);
-      Prefs.set(Constants.topN, topN);
-      Prefs.set(Constants.blockFindAlgorithm, blockFindAlgorithm);
-      Prefs.set(Constants.neighbourCheck, neighbourCheck);
-      Prefs.set(Constants.border, border);
-      Prefs.set(Constants.fitFunction, fitFunction);
-      Prefs.set(Constants.fitBackground, fitBackground);
-      Prefs.set(Constants.logProgress, logProgress);
-      Prefs.set(Constants.showDeviations, showDeviations);
-      Prefs.set(Constants.filterResults, filterResults);
-      Prefs.set(Constants.showFit, showFit);
-      Prefs.set(Constants.maxIterations, maxIterations);
-      Prefs.set(Constants.relativeThreshold, relativeThreshold);
-      Prefs.set(Constants.absoluteThreshold, absoluteThreshold);
-      Prefs.set(Constants.singleFit, singleFit);
-      Prefs.set(Constants.singleRegionSize, singleRegionSize);
-      Prefs.set(Constants.initialPeakStdDev0, initialPeakStdDev);
+      Prefs.set(PrefsKey.smooth, smooth);
+      Prefs.set(PrefsKey.boxSize, boxSize);
+      Prefs.set(PrefsKey.background, background);
+      Prefs.set(PrefsKey.peakHeight, peakHeight);
+      Prefs.set(PrefsKey.fractionAboveBackground, fractionAboveBackground);
+      Prefs.set(PrefsKey.peakWidth, peakWidth);
+      Prefs.set(PrefsKey.topN, topN);
+      Prefs.set(PrefsKey.blockFindAlgorithm, blockFindAlgorithm);
+      Prefs.set(PrefsKey.neighbourCheck, neighbourCheck);
+      Prefs.set(PrefsKey.border, border);
+      Prefs.set(PrefsKey.fitFunction, fitFunction);
+      Prefs.set(PrefsKey.fitBackground, fitBackground);
+      Prefs.set(PrefsKey.logProgress, logProgress);
+      Prefs.set(PrefsKey.showDeviations, showDeviations);
+      Prefs.set(PrefsKey.filterResults, filterResults);
+      Prefs.set(PrefsKey.showFit, showFit);
+      Prefs.set(PrefsKey.maxIterations, maxIterations);
+      Prefs.set(PrefsKey.relativeThreshold, relativeThreshold);
+      Prefs.set(PrefsKey.absoluteThreshold, absoluteThreshold);
+      Prefs.set(PrefsKey.singleFit, singleFit);
+      Prefs.set(PrefsKey.singleRegionSize, singleRegionSize);
+      Prefs.set(PrefsKey.initialPeakStdDev0, initialPeakStdDev);
     }
   }
 

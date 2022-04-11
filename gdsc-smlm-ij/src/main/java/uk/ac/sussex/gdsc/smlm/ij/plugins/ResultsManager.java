@@ -91,7 +91,6 @@ import uk.ac.sussex.gdsc.smlm.ij.gui.PeakResultTableModelFrame;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJImagePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImageJTablePeakResults;
 import uk.ac.sussex.gdsc.smlm.ij.results.ImagePeakResultsFactory;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 import uk.ac.sussex.gdsc.smlm.results.BinaryFilePeakResults;
 import uk.ac.sussex.gdsc.smlm.results.ExtendedPeakResult;
@@ -160,10 +159,10 @@ public class ResultsManager implements PlugIn {
     Settings() {
       // Set defaults
       inputOption = "";
-      inputFilename = Prefs.get(Constants.inputFilename, "");
-      inputNmPerPixel = Prefs.get(Constants.inputNmPerPixel, 0);
-      inputGain = Prefs.get(Constants.inputGain, 1);
-      inputExposureTime = Prefs.get(Constants.inputExposureTime, 0);
+      inputFilename = Prefs.get(PrefsKey.inputFilename, "");
+      inputNmPerPixel = Prefs.get(PrefsKey.inputNmPerPixel, 0);
+      inputGain = Prefs.get(PrefsKey.inputGain, 1);
+      inputExposureTime = Prefs.get(PrefsKey.inputExposureTime, 0);
     }
 
     Settings(Settings source) {
@@ -192,10 +191,10 @@ public class ResultsManager implements PlugIn {
      */
     void save() {
       INSTANCE.set(this);
-      Prefs.set(Constants.inputFilename, inputFilename);
-      Prefs.set(Constants.inputNmPerPixel, inputNmPerPixel);
-      Prefs.set(Constants.inputExposureTime, inputExposureTime);
-      Prefs.set(Constants.inputGain, inputGain);
+      Prefs.set(PrefsKey.inputFilename, inputFilename);
+      Prefs.set(PrefsKey.inputNmPerPixel, inputNmPerPixel);
+      Prefs.set(PrefsKey.inputExposureTime, inputExposureTime);
+      Prefs.set(PrefsKey.inputGain, inputGain);
     }
   }
 

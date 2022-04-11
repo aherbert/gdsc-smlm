@@ -90,7 +90,6 @@ import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 import uk.ac.sussex.gdsc.core.utils.rng.UniformRandomProviders;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.model.camera.PerPixelCameraModel;
 
 /**
@@ -140,7 +139,7 @@ public class CmosAnalysis implements PlugIn {
 
     Settings() {
       // Set defaults
-      directory = Prefs.get(Constants.sCMOSAnalysisDirectory, "");
+      directory = Prefs.get(PrefsKey.sCMOSAnalysisDirectory, "");
       reuseProcessedData = true;
 
       // The simulation can default roughly to the values displayed
@@ -208,7 +207,7 @@ public class CmosAnalysis implements PlugIn {
      */
     void save() {
       INSTANCE.set(this);
-      Prefs.set(Constants.sCMOSAnalysisDirectory, directory);
+      Prefs.set(PrefsKey.sCMOSAnalysisDirectory, directory);
     }
 
     /**
@@ -506,7 +505,7 @@ public class CmosAnalysis implements PlugIn {
     }
     settings.directory = dir;
     settings.save();
-    Prefs.set(Constants.sCMOSAnalysisDirectory, dir);
+    Prefs.set(PrefsKey.sCMOSAnalysisDirectory, dir);
 
     final boolean simulate = "simulate".equals(arg);
     if (simulate || extraOptions) {

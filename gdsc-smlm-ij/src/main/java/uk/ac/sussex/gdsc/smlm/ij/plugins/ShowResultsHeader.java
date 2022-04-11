@@ -31,7 +31,6 @@ import ij.plugin.PlugIn;
 import java.util.concurrent.atomic.AtomicReference;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.gui.ExtendedGenericDialog;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultsReader;
 import uk.ac.sussex.gdsc.smlm.utils.XStreamUtils;
 
@@ -53,7 +52,7 @@ public class ShowResultsHeader implements PlugIn {
 
     Settings() {
       // Set defaults
-      inputFilename = Prefs.get(Constants.inputFilename, "");
+      inputFilename = Prefs.get(PrefsKey.inputFilename, "");
     }
 
     Settings(Settings source) {
@@ -79,7 +78,7 @@ public class ShowResultsHeader implements PlugIn {
      */
     void save() {
       INSTANCE.set(this);
-      Prefs.set(Constants.inputFilename, inputFilename);
+      Prefs.set(PrefsKey.inputFilename, inputFilename);
     }
   }
 

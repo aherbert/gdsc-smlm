@@ -57,7 +57,6 @@ import uk.ac.sussex.gdsc.core.logging.TrackProgressAdapter;
 import uk.ac.sussex.gdsc.core.utils.FileUtils;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.ij.SeriesImageSource;
-import uk.ac.sussex.gdsc.smlm.ij.settings.Constants;
 import uk.ac.sussex.gdsc.smlm.results.ImageSource.ReadHint;
 
 /**
@@ -93,13 +92,13 @@ public class TiffSeriesViewer implements PlugIn {
 
     Settings() {
       // Set defaults
-      inputMode = (int) Prefs.get(Constants.tiffSeriesMode, 0);
-      inputDirectory = Prefs.get(Constants.tiffSeriesDirectory, "");
-      inputFile = Prefs.get(Constants.tiffSeriesFile, "");
-      logProgress = Prefs.getBoolean(Constants.tiffSeriesLogProgress, false);
-      outputMode = (int) Prefs.get(Constants.tiffSeriesOutputMode, 0);
-      imageCount = (int) Prefs.get(Constants.tiffSeriesOutputNImages, 1);
-      outputDirectory = Prefs.get(Constants.tiffSeriesOutputDirectory, "");
+      inputMode = (int) Prefs.get(PrefsKey.tiffSeriesMode, 0);
+      inputDirectory = Prefs.get(PrefsKey.tiffSeriesDirectory, "");
+      inputFile = Prefs.get(PrefsKey.tiffSeriesFile, "");
+      logProgress = Prefs.getBoolean(PrefsKey.tiffSeriesLogProgress, false);
+      outputMode = (int) Prefs.get(PrefsKey.tiffSeriesOutputMode, 0);
+      imageCount = (int) Prefs.get(PrefsKey.tiffSeriesOutputNImages, 1);
+      outputDirectory = Prefs.get(PrefsKey.tiffSeriesOutputDirectory, "");
     }
 
     Settings(Settings source) {
@@ -130,13 +129,13 @@ public class TiffSeriesViewer implements PlugIn {
      */
     void save() {
       INSTANCE.set(this);
-      Prefs.set(Constants.tiffSeriesMode, inputMode);
-      Prefs.set(Constants.tiffSeriesDirectory, inputDirectory);
-      Prefs.set(Constants.tiffSeriesFile, inputFile);
-      Prefs.set(Constants.tiffSeriesLogProgress, logProgress);
-      Prefs.set(Constants.tiffSeriesOutputMode, outputMode);
-      Prefs.set(Constants.tiffSeriesOutputNImages, imageCount);
-      Prefs.set(Constants.tiffSeriesOutputDirectory, outputDirectory);
+      Prefs.set(PrefsKey.tiffSeriesMode, inputMode);
+      Prefs.set(PrefsKey.tiffSeriesDirectory, inputDirectory);
+      Prefs.set(PrefsKey.tiffSeriesFile, inputFile);
+      Prefs.set(PrefsKey.tiffSeriesLogProgress, logProgress);
+      Prefs.set(PrefsKey.tiffSeriesOutputMode, outputMode);
+      Prefs.set(PrefsKey.tiffSeriesOutputNImages, imageCount);
+      Prefs.set(PrefsKey.tiffSeriesOutputDirectory, outputDirectory);
     }
   }
 
