@@ -365,7 +365,7 @@ Software for single molecule localisation microscopy (SMLM)
         <artifactId>maven-pmd-plugin</artifactId>
         <configuration>
           <!-- Ignore lower levels for now -->
-          <minimumPriority>2</minimumPriority>
+          <minimumPriority>3</minimumPriority>
           <excludeFromFailureFile>${gdsc.parent.dir}/src/conf/pmd/exclude.properties</excludeFromFailureFile>
         </configuration>
       </plugin>  
