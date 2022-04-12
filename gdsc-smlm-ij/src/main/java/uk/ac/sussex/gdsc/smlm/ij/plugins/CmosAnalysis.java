@@ -226,7 +226,10 @@ public class CmosAnalysis implements PlugIn {
           }
           list.add(value);
         } catch (final NumberFormatException ex) {
-          throw new NumberFormatException("Invalid number of photons: " + key);
+          final NumberFormatException ex2 =
+              new NumberFormatException("Invalid number of photons: " + key);
+          ex2.initCause(ex);
+          throw ex;
         }
       }
       final int[] result = list.toIntArray();
@@ -235,6 +238,9 @@ public class CmosAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Class to compute a sCMOS simulated image.
+   */
   private static class SimulationWorker implements Runnable {
     /** The maximum value for a short integer. */
     static final short MAX_SHORT = (short) 0xffff;
@@ -337,10 +343,10 @@ public class CmosAnalysis implements PlugIn {
      * @return the clipped value
      */
     private static short clip16bit(double value) {
-      final int i = (int) Math.round(value);
       if (value < 0) {
         return 0;
       }
+      final int i = (int) Math.round(value);
       if (i > 0xffff) {
         return MAX_SHORT;
       }
@@ -361,6 +367,9 @@ public class CmosAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * Sub-directory containing images with a specified exposure time.
+   */
   private static class SubDir {
     int exposureTime;
     File path;
@@ -694,7 +703,7 @@ public class CmosAnalysis implements PlugIn {
       }
     }
 
-    if (subDirs.size() < 2) {
+    if (subDirs.size() <= 1) {
       IJ.error(TITLE, "Not enough sub-directories with exposure time suffix");
       return false;
     }
@@ -911,17 +920,7 @@ public class CmosAnalysis implements PlugIn {
 
       final Statistics s = Statistics.create(data[2 * n]);
 
-      if (pixelOffset != null) {
-        // Compute mean ADU
-        final Statistics signal = new Statistics();
-        final double[] mean = data[2 * n];
-        for (int i = 0; i < pixelOffset.length; i++) {
-          signal.add(mean[i] - pixelOffset[i]);
-        }
-        ImageJUtils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name,
-            MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()),
-            MathUtils.rounded(signal.getMean()), MathUtils.rounded(signal.getStandardDeviation()));
-      } else {
+      if (pixelOffset == null) {
         // Set the offset assuming the first sub-directory is the bias image
         pixelOffset = data[0];
         pixelVariance = data[1];
@@ -931,6 +930,16 @@ public class CmosAnalysis implements PlugIn {
             MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()),
             MathUtils.rounded(statsVariance.getMean()),
             MathUtils.rounded(statsVariance.getStandardDeviation()));
+      } else {
+        // Compute mean ADU
+        final Statistics signal = new Statistics();
+        final double[] mean = data[2 * n];
+        for (int i = 0; i < pixelOffset.length; i++) {
+          signal.add(mean[i] - pixelOffset[i]);
+        }
+        ImageJUtils.log("%s Mean = %s +/- %s. Signal = %s +/- %s ADU", sd.name,
+            MathUtils.rounded(s.getMean()), MathUtils.rounded(s.getStandardDeviation()),
+            MathUtils.rounded(signal.getMean()), MathUtils.rounded(signal.getStandardDeviation()));
       }
 
       IJ.showProgress(1);
@@ -1049,7 +1058,7 @@ public class CmosAnalysis implements PlugIn {
     // Assume the simulation stack and measured stack are not null.
     ImageJUtils.log("Comparison to simulation: %s (%dx%dpx)", simulationImp.getInfoProperty(),
         simulationImp.getWidth(), simulationImp.getHeight());
-    WindowOrganiser wo = new WindowOrganiser();
+    final WindowOrganiser wo = new WindowOrganiser();
     final ImageStack simulationStack = simulationImp.getImageStack();
     for (int slice = 1; slice <= 3; slice++) {
       computeError(slice, simulationStack, wo);
@@ -1070,9 +1079,9 @@ public class CmosAnalysis implements PlugIn {
 
     final Statistics s = new Statistics();
     s.add(error);
-    final StringBuilder result = new StringBuilder("Error ").append(label);
-    result.append(" = ").append(MathUtils.rounded(s.getMean()));
-    result.append(" +/- ").append(MathUtils.rounded(s.getStandardDeviation()));
+    final StringBuilder result = new StringBuilder(128);
+    result.append("Error ").append(label).append(" = ").append(MathUtils.rounded(s.getMean()))
+        .append(" +/- ").append(MathUtils.rounded(s.getStandardDeviation()));
 
     // Do statistical tests
     final double[] x = SimpleArrayUtils.toDouble(e);
@@ -1082,7 +1091,7 @@ public class CmosAnalysis implements PlugIn {
     result.append(" : R=").append(MathUtils.rounded(c.correlation(x, y)));
 
     // Plot these
-    String title = TITLE + " " + label + " Simulation vs Measured";
+    final String title = TITLE + " " + label + " Simulation vs Measured";
     final Plot plot = new Plot(title, "simulated", "measured");
     plot.addPoints(e, o, Plot.DOT);
     plot.addLabel(0, 0, result.toString());
