@@ -142,25 +142,26 @@ public class About implements PlugIn, MacroExtension {
     // Locate the README.txt file and load that into the dialog. Include revision
     final Class<About> resourceClass = About.class;
 
-    StringBuilder msg = new StringBuilder();
+    StringBuilder msg = new StringBuilder(256);
 
     try (BufferedReader input = new BufferedReader(new UnicodeReader(
         resourceClass.getResourceAsStream("/uk/ac/sussex/gdsc/smlm/ij/README.txt"), null))) {
       // Read the contents of the README file
-      String line;
-      while ((line = input.readLine()) != null) {
-        if (line.equals("")) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
+        if (line.isEmpty()) {
           line = " "; // Required to insert a line in the GenericDialog
         }
         msg.append(line).append('\n');
       }
     } catch (final IOException ex) {
       // Default message
-      msg.append("GDSC SMLM Plugins for ImageJ\n");
-      msg.append(" \n");
-      msg.append("Copyright (C) ").append(YEAR).append(" Alex Herbert\n");
-      msg.append("MRC Genome Damage and Stability Centre\n");
-      msg.append("University of Sussex, UK\n");
+      // @formatter:off
+      msg.append("GDSC SMLM Plugins for ImageJ\n")
+        .append(" \n")
+        .append("Copyright (C) ").append(YEAR).append(" Alex Herbert\n")
+        .append("MRC Genome Damage and Stability Centre\n")
+        .append("University of Sussex, UK\n");
+      // @formatter:on
     }
 
     // Build final message
@@ -184,16 +185,16 @@ public class About implements PlugIn, MacroExtension {
     final boolean hasBuildDate = !TextUtils.isNullOrEmpty(buildDate);
     final boolean hasBuildNumber = !TextUtils.isNullOrEmpty(buildNumber);
     if (hasVersion || hasBuildDate || hasBuildNumber) {
-      msg.append("\n \n").append(name).append("\n");
+      msg.append("\n \n").append(name).append('\n');
     }
     if (hasVersion) {
-      msg.append("Version : ").append(version).append("\n");
+      msg.append("Version : ").append(version).append('\n');
     }
     if (hasBuildDate) {
-      msg.append("Build Date : ").append(buildDate).append("\n");
+      msg.append("Build Date : ").append(buildDate).append('\n');
     }
     if (hasBuildNumber) {
-      msg.append("Build Number : ").append(buildNumber).append("\n");
+      msg.append("Build Number : ").append(buildNumber).append('\n');
     }
   }
 
@@ -211,8 +212,6 @@ public class About implements PlugIn, MacroExtension {
    */
   private static int installResource(String resource, String ijDirectory, String destinationName,
       String resourceTitle, String helpKey, String notes, ConfigureOption... options) {
-    final Class<About> resourceClass = About.class;
-
     final String dir = IJ.getDirectory(ijDirectory);
     if (dir == null) {
       IJ.error("Unable to locate " + ijDirectory + " directory");
@@ -286,9 +285,8 @@ public class About implements PlugIn, MacroExtension {
     // Read the file
     final LinkedList<String> contents = new LinkedList<>();
     try (BufferedReader input =
-        new BufferedReader(new UnicodeReader(resourceClass.getResourceAsStream(resource), null))) {
-      String line;
-      while ((line = input.readLine()) != null) {
+        new BufferedReader(new UnicodeReader(About.class.getResourceAsStream(resource), null))) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         contents.add(line);
       }
     } catch (final IOException ex) {
@@ -333,19 +331,16 @@ public class About implements PlugIn, MacroExtension {
 
   @Override
   public String handleExtension(String name, Object[] args) {
-    if (name == null) {
-      return "";
-    }
-    if (name.equals("getNumberOfSpecies")) {
+    if ("getNumberOfSpecies".equals(name)) {
       return TraceDiffusion.getNumberOfSpecies(args);
     }
-    if (name.equals("getD")) {
+    if ("getD".equals(name)) {
       return TraceDiffusion.getD(args);
     }
-    if (name.equals("getF")) {
+    if ("getF".equals(name)) {
       return TraceDiffusion.getF(args);
     }
-    if (name.equals("getSpecies")) {
+    if ("getSpecies".equals(name)) {
       return TraceDiffusion.getSpecies(args);
     }
     return "";
