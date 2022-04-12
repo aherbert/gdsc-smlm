@@ -88,7 +88,8 @@ public class ConfigurationTemplate implements PlugIn {
   private static Map<String, Template> templates;
 
   private String title;
-  private ImagePlus imp;
+  /** The image. */
+  ImagePlus imp;
   private int currentSlice;
   private TextWindow resultsWindow;
   private TextWindow infoWindow;
@@ -186,7 +187,7 @@ public class ConfigurationTemplate implements PlugIn {
       this.settings = settings;
       this.templateType = templateType;
       this.file = file;
-      timestamp = (file != null) ? file.lastModified() : 0;
+      timestamp = file == null ? 0 : file.lastModified();
 
       // Resource templates may have a tif image as a resource
       if (!TextUtils.isNullOrEmpty(tifPath)) {
@@ -264,7 +265,7 @@ public class ConfigurationTemplate implements PlugIn {
         if (inputStream != null) {
           imp = opener.openTiff(inputStream, FileUtils.removeExtension(tifFile.getName()));
         }
-      } catch (final IOException ex) {
+      } catch (final IOException ignored) {
         // Ignore
       }
 
@@ -319,7 +320,7 @@ public class ConfigurationTemplate implements PlugIn {
    */
   private static Map<String, Template>
       restoreLoadedTemplates(Map<String, Template> inlineTemplates) {
-    Map<String, Template> map = new LinkedHashMap<>();
+    final Map<String, Template> map = new LinkedHashMap<>();
 
     // Allow this to fail silently
     final DefaultTemplateSettings settings =
@@ -399,7 +400,7 @@ public class ConfigurationTemplate implements PlugIn {
         addTemplate(map, template.name, builder.build(), TemplateType.RESOURCE, null,
             template.tifPath);
       }
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Ignore
     }
   }
@@ -453,11 +454,10 @@ public class ConfigurationTemplate implements PlugIn {
       if (templateListStream == null) {
         return new TemplateResource[0];
       }
-      try (final BufferedReader input =
+      try (BufferedReader input =
           new BufferedReader(new InputStreamReader(templateListStream, StandardCharsets.UTF_8))) {
-        String line;
         final ArrayList<TemplateResource> list = new ArrayList<>();
-        while ((line = input.readLine()) != null) {
+        for (String line = input.readLine(); line != null; line = input.readLine()) {
           // Skip comment character
           if (line.length() == 0 || line.charAt(0) == '#') {
             continue;
@@ -486,7 +486,7 @@ public class ConfigurationTemplate implements PlugIn {
         }
         return list.toArray(new TemplateResource[0]);
       }
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Ignore
     }
     return new TemplateResource[0];
@@ -526,7 +526,7 @@ public class ConfigurationTemplate implements PlugIn {
           addTemplate(templates, template.name, builder.build(), TemplateType.RESOURCE, null,
               template.tifPath);
         }
-      } catch (final IOException ex) {
+      } catch (final IOException ignored) {
         // Ignore
       }
     }
@@ -829,14 +829,13 @@ public class ConfigurationTemplate implements PlugIn {
 
     // Keep a hash of those not loaded from inline resources
     final HashSet<String> remaining = new HashSet<>(selected.size());
-    for (int i = 0; i < selected.size(); i++) {
-      final String name = selected.get(i);
+    for (final String name : selected) {
       // Try and get the template from inline resources
       final Template t = inlineTemplates.get(name);
-      if (t != null) {
-        templates.put(name, t);
-      } else {
+      if (t == null) {
         remaining.add(name);
+      } else {
+        templates.put(name, t);
       }
     }
 
@@ -1048,18 +1047,18 @@ public class ConfigurationTemplate implements PlugIn {
 
     // Follow when the image slice is changed
     ImageListener listener;
-    if (imp != null) {
+    if (imp == null) {
+      listener = null;
+    } else {
       listener = new ImageAdapter() {
         @Override
         public void imageUpdated(ImagePlus imp) {
-          if (imp == ConfigurationTemplate.this.imp) {
+          if (imp.getID() == ConfigurationTemplate.this.imp.getID()) {
             updateResults(imp.getCurrentSlice());
           }
         }
       };
       ImagePlus.addImageListener(listener);
-    } else {
-      listener = null;
     }
 
     final NonBlockingGenericDialog gd = new NonBlockingGenericDialog(title);
