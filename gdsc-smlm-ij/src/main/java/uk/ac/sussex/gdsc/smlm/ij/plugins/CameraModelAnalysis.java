@@ -121,12 +121,16 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
   private static final AtomicReference<SoftReference<LogFactorialCache>> LOG_FACTORIAL_CACHE =
       new AtomicReference<>(new SoftReference<>(null));
 
-  private CameraModelAnalysisSettings.Builder settings;
+  private static final double[] AREA_X = {0, 1, 1, 0};
+
+  /** The settings. */
+  CameraModelAnalysisSettings.Builder settings;
 
   private boolean extraOptions;
   private boolean dirty = true;
   private CameraModelAnalysisSettings lastSettings;
-  private ExtendedGenericDialog gd;
+  /** The dialog. */
+  ExtendedGenericDialog gd;
   private IntHistogram lastHistogram;
   private double[][] floatHistogram;
   private CameraModelAnalysisSettings lastSimulationSettings;
@@ -198,7 +202,7 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     ;
     //@formatter:on
 
-    public static Model forNumber(int number) {
+    static Model forNumber(int number) {
       final Model[] values = Model.values();
       if (number < 0 || number >= values.length) {
         number = 0;
@@ -207,10 +211,19 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     }
   }
 
-  private static interface Round {
+  private interface Round {
+    /**
+     * Round the value.
+     *
+     * @param value the value
+     * @return the rounded value
+     */
     int round(double value);
   }
 
+  /**
+   * Class to round down.
+   */
   private static class RoundDown implements Round {
     private static final Round INSTANCE = new RoundDown();
 
@@ -220,6 +233,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     }
   }
 
+  /**
+   * Class to round to nearest.
+   */
   private static class RoundUpDown implements Round {
     private static final Round INSTANCE = new RoundUpDown();
 
@@ -435,8 +451,8 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     double pvalue = Double.NaN;
     try {
       pvalue = 1d - KS_TEST.cdf(distance, n);
-    } catch (final MathArithmeticException ex) {
-      // Cannot be computed to leave at NaN
+    } catch (final MathArithmeticException ignored) {
+      // Cannot be computed so leave at NaN
     }
 
     // Plot
@@ -548,11 +564,14 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
    */
   private static IntHistogram simulatePoissonGammaGaussian(CameraModelAnalysisSettings settings,
       UniformRandomProvider random) {
+    final double gain = getGain(settings);
+    if (gain < 1) {
+      throw new IllegalStateException("EM-gain must be >= 1: " + gain);
+    }
+
     final int[] poissonSample = simulatePoisson(settings, random);
 
     final NormalizedGaussianSampler gauss = SamplerUtils.createNormalizedGaussianSampler(random);
-
-    final double gain = getGain(settings);
 
     // Note that applying a separate EM-gain and then the camera gain later
     // is the same as applying the total gain in the gamma distribution and no camera gain
@@ -567,9 +586,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     final int[] sample = new int[samples * emSamples * noiseSamples];
     int count = 0;
     final Round round = getRound(settings);
-    if (gain < 1) {
-      throw new IllegalStateException("EM-gain must be >= 1: " + gain);
-    }
     final MarsagliaTsangGammaSampler gamma = new MarsagliaTsangGammaSampler(random, 1, gain);
     for (int n = poissonSample.length; n-- > 0;) {
       if (poissonSample[n] != 0) {
@@ -1191,6 +1207,9 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     return new double[][] {x, y};
   }
 
+  /**
+   * Cache all input x and the computed values for calls to the UnivariateFunction.
+   */
   private static class CachingUnivariateFunction implements UnivariateFunction {
     final LikelihoodFunction fun;
     final double theta;
@@ -1359,7 +1378,10 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
 
       // Fix Poisson-Gamma ...
       if (c0 != -1) {
-        if (uf != null) {
+        if (uf == null) {
+          // Pure Poisson-Gamma. Just add back the delta.
+          y[c0] += dirac;
+        } else {
           // Convolved Poisson-Gamma. Fix in the range of the Gaussian around c=0
           final CustomSimpsonIntegrator in = new CustomSimpsonIntegrator(SIMPSON_RELATIVE_ACCURACY,
               SIMPSON_ABSOLUTE_ACCURACY, SIMPSON_MIN_ITERATION_COUNT,
@@ -1397,9 +1419,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
               }
             }
           }
-        } else {
-          // Pure Poisson-Gamma. Just add back the delta.
-          y[c0] += dirac;
         }
       }
     }
@@ -1461,8 +1480,6 @@ public class CameraModelAnalysis implements ExtendedPlugInFilter {
     }
     return new double[] {distance, value, area / x1.length};
   }
-
-  private static final double[] AREA_X = {0, 1, 1, 0};
 
   @SuppressWarnings("unused")
   private static double area(double y1, double y2, double y3, double y4) {
