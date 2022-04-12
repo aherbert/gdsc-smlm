@@ -100,8 +100,8 @@ public class Configuration implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    String templateFilename = "";
-    String notes = "";
+    String templateFilename;
+    String notes;
 
     Settings() {
       // Set defaults
@@ -424,7 +424,7 @@ public class Configuration implements PlugIn {
         for (final String note : template.getNotesList()) {
           sb.append(note);
           if (!note.endsWith("\n")) {
-            sb.append("\n");
+            sb.append('\n');
           }
           IJ.log(note);
         }
@@ -487,10 +487,10 @@ public class Configuration implements PlugIn {
 
     textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
     if (calibration.hasNmPerPixel()) {
-      textNmPerPixel.setText("" + calibration.getNmPerPixel());
+      textNmPerPixel.setText(String.valueOf(calibration.getNmPerPixel()));
     }
     if (calibration.hasExposureTime()) {
-      textExposure.setText("" + calibration.getExposureTime());
+      textExposure.setText(String.valueOf(calibration.getExposureTime()));
     }
   }
 
@@ -523,30 +523,30 @@ public class Configuration implements PlugIn {
         .select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
     textDataFilterMethod.select(
         SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-    textSmooth.setText("" + config.getDataFilterParameterValue(0));
-    textSearch.setText("" + config.getSearch());
-    textBorder.setText("" + config.getBorder());
-    textFitting.setText("" + config.getFitting());
+    textSmooth.setText(String.valueOf(config.getDataFilterParameterValue(0)));
+    textSearch.setText(String.valueOf(config.getSearch()));
+    textBorder.setText(String.valueOf(config.getBorder()));
+    textFitting.setText(String.valueOf(config.getFitting()));
     textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
-    textFailuresLimit.setText("" + config.getFailuresLimit());
-    textPassRate.setText("" + config.getPassRate());
+    textFailuresLimit.setText(String.valueOf(config.getFailuresLimit()));
+    textPassRate.setText(String.valueOf(config.getPassRate()));
     textIncludeNeighbours.setState(config.isIncludeNeighbours());
-    textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
-    textResidualsThreshold.setText("" + config.getResidualsThreshold());
-    textDuplicateDistance.setText("" + config.getDuplicateDistance());
+    textNeighbourHeightThreshold.setText(String.valueOf(config.getNeighbourHeightThreshold()));
+    textResidualsThreshold.setText(String.valueOf(config.getResidualsThreshold()));
+    textDuplicateDistance.setText(String.valueOf(config.getDuplicateDistance()));
 
     // Filtering
     textSmartFilter.setState(fitConfig.isSmartFilter());
     textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
     if (!fitConfig.isDisableSimpleFilter()) {
-      textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-      textSignalStrength.setText("" + fitConfig.getSignalStrength());
-      textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
-      textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+      textCoordinateShiftFactor.setText(String.valueOf(fitConfig.getCoordinateShiftFactor()));
+      textSignalStrength.setText(String.valueOf(fitConfig.getSignalStrength()));
+      textWidthFactor.setText(String.valueOf(fitConfig.getMaxWidthFactor()));
+      textPrecisionThreshold.setText(String.valueOf(fitConfig.getPrecisionThreshold()));
     }
     // These are used for settings the bounds so they are included
-    textMinPhotons.setText("" + fitConfig.getMinPhotons());
-    textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+    textMinPhotons.setText(String.valueOf(fitConfig.getMinPhotons()));
+    textMinWidthFactor.setText(String.valueOf(fitConfig.getMinWidthFactor()));
     updateFilterInput();
   }
 }
