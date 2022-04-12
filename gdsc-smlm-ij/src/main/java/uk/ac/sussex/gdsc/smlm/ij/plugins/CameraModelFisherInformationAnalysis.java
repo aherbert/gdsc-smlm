@@ -82,7 +82,8 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   /** The maximum number of fisher information curves to save to file. */
   private static final int MAX_DATA_TO_FILE = 10;
 
-  private static final CameraType[] CAMERA_TYPE_VALUES = CameraType.values();
+  /** The camera type values. */
+  static final CameraType[] CAMERA_TYPE_VALUES = CameraType.values();
 
   private static final String[] CAMERA_TYPES =
       SettingsManager.getNames((Object[]) CAMERA_TYPE_VALUES);
@@ -101,6 +102,9 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
       }
     }
   }
+
+  private static String cachePlot = "";
+  private static int pointOption;
 
   private CameraModelFisherInformationAnalysisSettings.Builder settings;
 
@@ -517,15 +521,14 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
 
   private void analyse() {
     final CameraType type1 = CameraType.forNumber(settings.getCamera1Type());
-    final CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
-
     final FiKey key1 = new FiKey(type1, settings.getCamera1Gain(), settings.getCamera1Noise());
-    final FiKey key2 = new FiKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
-
     final BasePoissonFisherInformation f1 = createPoissonFisherInformation(key1);
     if (f1 == null) {
       return;
     }
+
+    final CameraType type2 = CameraType.forNumber(settings.getCamera2Type());
+    final FiKey key2 = new FiKey(type2, settings.getCamera2Gain(), settings.getCamera2Noise());
     final BasePoissonFisherInformation f2 = createPoissonFisherInformation(key2);
     if (f2 == null) {
       return;
@@ -656,7 +659,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     ImageJUtils.display(title, plot, 0, wo);
 
     // The approximation should not produce an infinite computation
-    double[] limits = new double[] {fi2[fi2.length - 1], fi2[fi2.length - 1]};
+    double[] limits = {fi2[fi2.length - 1], fi2[fi2.length - 1]};
     limits = limits(limits, fi1);
     limits = limits(limits, fi2);
 
@@ -784,7 +787,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   @Nullable
   private double[] createExponents() {
     final int n = 1 + Math.max(0, settings.getSubDivisions());
-    final double h = 1.0 / n;
     final double minExp = settings.getMinExponent();
     final double maxExp = settings.getMaxExponent();
     final double size = (maxExp - minExp) * n + 1;
@@ -796,6 +798,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
         return null;
       }
     }
+    final double h = 1.0 / n;
     final DoubleArrayList list = new DoubleArrayList();
     for (int i = 0;; i++) {
       final double e = minExp + i * h;
@@ -928,8 +931,7 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
   private static double[] limits(double[] limits, double[] fisherI) {
     double min = limits[0];
     double max = limits[1];
-    for (int i = 0; i < fisherI.length; i++) {
-      final double d = fisherI[i];
+    for (final double d : fisherI) {
       // Find limits of numbers that can be logged
       if (d <= 0 || d == Double.POSITIVE_INFINITY) {
         continue;
@@ -944,9 +946,6 @@ public class CameraModelFisherInformationAnalysis implements PlugIn {
     limits[1] = max;
     return limits;
   }
-
-  private static String cachePlot = "";
-  private static int pointOption;
 
   private static void plotFromCache() {
     // Build a list of curve stored in the cache
