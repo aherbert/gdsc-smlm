@@ -38,10 +38,9 @@ import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -71,8 +70,7 @@ public class CameraModelManager implements PlugIn {
   private static AtomicReference<String> filename = new AtomicReference<>("");
 
   /** Cache camera models for speed. */
-  private static Map<String, PerPixelCameraModel> cameraModels =
-      Collections.synchronizedMap(new LinkedHashMap<>());
+  private static Map<String, PerPixelCameraModel> cameraModels = new ConcurrentHashMap<>();
 
   //@formatter:off
   private static final String[] OPTIONS = {
@@ -312,6 +310,7 @@ public class CameraModelManager implements PlugIn {
       case 0:
       default:
         runLoadFromFile();
+        break;
     }
 
     writeCameraModelManagerSettings(pluginSettings);
@@ -544,10 +543,10 @@ public class CameraModelManager implements PlugIn {
     cimp.setSliceWithoutUpdate(1);
 
     imp = WindowManager.getImage(name);
-    if (imp != null) {
-      imp.setImage(cimp);
-    } else {
+    if (imp == null) {
       cimp.show();
+    } else {
+      imp.setImage(cimp);
     }
   }
 
