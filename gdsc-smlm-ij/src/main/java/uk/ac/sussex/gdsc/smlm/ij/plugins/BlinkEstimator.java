@@ -262,13 +262,14 @@ public class BlinkEstimator implements PlugIn {
     }
 
     // Plot
-    plot("Fitted points", "N", npoints, parameters[0]);
-    plot("Fitted points", "nBlinks", npoints, parameters[1]);
-    plot("Fitted points", "tOff", npoints, parameters[2]);
+    final String xAxisTitle = "Fitted points";
+    plot(xAxisTitle, "N", npoints, parameters[0]);
+    plot(xAxisTitle, "nBlinks", npoints, parameters[1]);
+    plot(xAxisTitle, "tOff", npoints, parameters[2]);
     if (IJ.debugMode) {
-      plot("Fitted points", "R^2", npoints, r2);
+      plot(xAxisTitle, "R^2", npoints, r2);
     }
-    plot("Fitted points", "Adjusted R^2", npoints, adjustedR2);
+    plot(xAxisTitle, "Adjusted R^2", npoints, adjustedR2);
   }
 
   /**
@@ -461,7 +462,7 @@ public class BlinkEstimator implements PlugIn {
 
       fittedAverage =
           fitter.calculateAveragePrecision(molecules, title, settings.histogramBins, true, true);
-    } catch (final DataException ex) {
+    } catch (final DataException ignored) {
       // This is thrown when the data cannot be converted for precision computation
     }
 
@@ -530,13 +531,12 @@ public class BlinkEstimator implements PlugIn {
         mean += d;
       }
       mean /= obs.length;
-      double ssResiduals = 0;
       double ssTotal = 0;
-      for (int i = 0; i < obs.length; i++) {
-        ssTotal += (obs[i] - mean) * (obs[i] - mean);
+      for (final double o : obs) {
+        ssTotal += (o - mean) * (o - mean);
       }
       // This is true if the weights are 1
-      ssResiduals = optimum.getResiduals().dotProduct(optimum.getResiduals());
+      final double ssResiduals = optimum.getResiduals().dotProduct(optimum.getResiduals());
 
       r2 = 1 - ssResiduals / ssTotal;
       adjustedR2 = getAdjustedCoefficientOfDetermination(ssResiduals, ssTotal, obs.length,
