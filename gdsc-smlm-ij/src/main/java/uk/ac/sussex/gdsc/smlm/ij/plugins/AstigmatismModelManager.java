@@ -124,27 +124,57 @@ public class AstigmatismModelManager implements PlugIn {
 
   private static AtomicReference<TextWindow> resultsWindowRef = new AtomicReference<>();
 
-  private AstigmatismModelManagerSettings.Builder pluginSettings;
+  /** The plugin settings. */
+  AstigmatismModelManagerSettings.Builder pluginSettings;
   private ImagePlus imp;
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
-  private int cx;
-  private int cy;
+  /** PSF X center. */
+  int cx;
+  /** PSF Y center. */
+  int cy;
   private MemoryPeakResults results;
-  private double[] z;
-  private double[] x;
-  private double[] y;
-  private double[] intensity;
+
+  /** PSF z depth data. */
+  double[] z;
+  /** PSF x offset data. */
+  double[] x;
+  /** PSF y offset data. */
+  double[] y;
+  /** PSF intensity data. */
+  double[] intensity;
   private double[] sx;
   private double[] sy;
-  private PlotWindow xyPlot;
-  private PlotWindow widthPlot;
-  private int minz;
-  private int maxz;
-  private double[] fitZ;
+  /** The xy plot. */
+  PlotWindow xyPlot;
+  /** The width plot. */
+  PlotWindow widthPlot;
+  /** Minimum z. */
+  int minz;
+  /** Maximum z. */
+  int maxz;
+  /** The fitted z depth data. */
+  double[] fitZ;
   private double[] fitSx;
   private double[] fitSy;
   private double[] parameters;
+
+  //@formatter:off
+  private static final String[] OPTIONS = {
+      "Create model",
+      "Import model",
+      // All option below require models
+      "View model",
+      "Delete model",
+      "Invert model",
+      "Export model",
+      };
+  //@formatter:on
+  private static final String[] OPTIONS2;
+
+  static {
+    OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
+  }
 
   /**
    * Provide a lazy initialisation holder for the AstigmatismModelSettings.
@@ -292,23 +322,6 @@ public class AstigmatismModelManager implements PlugIn {
         model.getD(), model.getAx(), model.getBx(), model.getAy(), model.getBy());
   }
 
-  //@formatter:off
-  private static final String[] OPTIONS = {
-      "Create model",
-      "Import model",
-      // All option below require models
-      "View model",
-      "Delete model",
-      "Invert model",
-      "Export model",
-      };
-  //@formatter:on
-  private static final String[] OPTIONS2;
-
-  static {
-    OPTIONS2 = Arrays.copyOf(OPTIONS, 1);
-  }
-
   @Override
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
@@ -348,17 +361,28 @@ public class AstigmatismModelManager implements PlugIn {
         break;
       default:
         createModel();
+        break;
     }
 
     writeAstigmatismModelManagerSettings(pluginSettings);
   }
 
+  /**
+   * Read settings.
+   *
+   * @return the plugin settings
+   */
   private static synchronized AstigmatismModelManagerSettings.Builder
       readAstigmatismModelManagerSettings() {
     return SettingsManager.readAstigmatismModelManagerSettings(0).toBuilder();
   }
 
-  private static synchronized void
+  /**
+   * Write settings.
+   *
+   * @param pluginSettings the plugin settings
+   */
+  static synchronized void
       writeAstigmatismModelManagerSettings(AstigmatismModelManagerSettings.Builder pluginSettings) {
     SettingsManager.writeSettings(pluginSettings);
   }
@@ -405,12 +429,12 @@ public class AstigmatismModelManager implements PlugIn {
 
   private boolean getImage() {
     // Select an image
-    final GenericDialog gd = new GenericDialog(TITLE);
     final String[] list = getImageList();
     if (list.length == 0) {
       IJ.error("No suitable images");
       return false;
     }
+    final GenericDialog gd = new GenericDialog(TITLE);
     gd.addChoice("Image", list, pluginSettings.getImage());
     gd.addHelp(HelpUrls.getUrl("astigmatism-model-manager-create"));
     gd.showDialog();
@@ -504,10 +528,10 @@ public class AstigmatismModelManager implements PlugIn {
 
   private static double guessScale(String unit, double units) {
     unit = unit.toLowerCase(Locale.US);
-    if (unit.equals("nm") || unit.startsWith("nanomet")) {
+    if ("nm".equals(unit) || unit.startsWith("nanomet")) {
       return units;
     }
-    if (unit.equals("\u00B5m") || // Sanitised version of um
+    if ("\u00B5m".equals(unit) || // Sanitised version of um
         unit.startsWith("micron")) {
       return units * 1000;
     }
@@ -693,7 +717,7 @@ public class AstigmatismModelManager implements PlugIn {
     // Fit only a spot in the centre
     final int x = cx - regionBounds.x;
     final int y = cy - regionBounds.y;
-    final int[] maxIndices = new int[] {y * regionBounds.width + x};
+    final int[] maxIndices = {y * regionBounds.width + x};
 
     final Ticker ticker = ImageJUtils.createTicker(source.getFrames(), threadCount);
     IJ.showStatus("Fitting ...");
@@ -802,11 +826,7 @@ public class AstigmatismModelManager implements PlugIn {
       return false;
     }
 
-    if (!doCurveFit()) {
-      return false;
-    }
-
-    return true;
+    return doCurveFit();
   }
 
   private boolean getRange() {
@@ -848,10 +868,13 @@ public class AstigmatismModelManager implements PlugIn {
     return true;
   }
 
+  /**
+   * ZDialogListener.
+   */
   private class ZDialogListener implements DialogListener {
     boolean showRoi = ImageJUtils.isShowGenericDialog();
 
-    public ZDialogListener() {
+    ZDialogListener() {
       widthPlot.getImagePlus().killRoi();
       xyPlot.getImagePlus().killRoi();
     }
@@ -1015,8 +1038,8 @@ public class AstigmatismModelManager implements PlugIn {
 
   private static double[] getWeights(double[]... y) {
     int size = 0;
-    for (int i = 0; i < y.length; i++) {
-      size += y[i].length;
+    for (final double[] yi : y) {
+      size += yi.length;
     }
     final double[] w = new double[size];
     for (int i = 0, k = 0; i < y.length; i++) {
@@ -1045,6 +1068,9 @@ public class AstigmatismModelManager implements PlugIn {
     return s0 * Math.sqrt(1 + oneOverD2 * (z2 + ca * z3 + cb * z4));
   }
 
+  /**
+   * AstigmatismVectorFunction.
+   */
   private class AstigmatismVectorFunction implements MultivariateVectorFunction {
     @Override
     public double[] value(double[] point) {
@@ -1077,6 +1103,9 @@ public class AstigmatismModelManager implements PlugIn {
     }
   }
 
+  /**
+   * AstigmatismMatrixFunction.
+   */
   private class AstigmatismMatrixFunction implements MultivariateMatrixFunction {
     @Override
     public double[][] value(double[] point) {
@@ -1191,15 +1220,17 @@ public class AstigmatismModelManager implements PlugIn {
   private static void record(String name, double[] parameters) {
     final StringBuilder sb = new StringBuilder(name);
     final Rounder rounder = RounderUtils.create(4);
-    sb.append(": ").append("gamma=").append(rounder.round(parameters[P_GAMMA]));
-    sb.append("; ").append("d=").append(rounder.round(parameters[P_D]));
-    sb.append("; ").append("s0x=").append(rounder.round(parameters[P_S0X]));
-    sb.append("; ").append("Ax=").append(rounder.round(parameters[P_AX]));
-    sb.append("; ").append("Bx=").append(rounder.round(parameters[P_BX]));
-    sb.append("; ").append("s0y=").append(rounder.round(parameters[P_S0Y]));
-    sb.append("; ").append("Ay=").append(rounder.round(parameters[P_AY]));
-    sb.append("; ").append("By=").append(rounder.round(parameters[P_BY]));
-    sb.append("; ").append("z0=").append(rounder.round(parameters[P_Z0]));
+    // @formatter:off
+    sb.append(": gamma=").append(rounder.round(parameters[P_GAMMA]))
+      .append("; d=").append(rounder.round(parameters[P_D]))
+      .append("; s0x=").append(rounder.round(parameters[P_S0X]))
+      .append("; Ax=").append(rounder.round(parameters[P_AX]))
+      .append("; Bx=").append(rounder.round(parameters[P_BX]))
+      .append("; s0y=").append(rounder.round(parameters[P_S0Y]))
+      .append("; Ay=").append(rounder.round(parameters[P_AY]))
+      .append("; By=").append(rounder.round(parameters[P_BY]))
+      .append("; z0=").append(rounder.round(parameters[P_Z0]));
+    // @formatter:on
     IJ.log(sb.toString());
   }
 
@@ -1239,20 +1270,22 @@ public class AstigmatismModelManager implements PlugIn {
   private void saveResult(Optimum optimum) {
     final StringBuilder sb = new StringBuilder();
     final Rounder rounder = RounderUtils.create(4);
-    sb.append(fitZ.length * 2);
-    sb.append('\t').append(pluginSettings.getWeightedFit());
-    sb.append('\t').append(MathUtils.rounded(optimum.getRMS(), 6));
-    sb.append('\t').append(optimum.getIterations());
-    sb.append('\t').append(optimum.getEvaluations());
-    sb.append('\t').append(rounder.round(parameters[P_GAMMA]));
-    sb.append('\t').append(rounder.round(parameters[P_D]));
-    sb.append('\t').append(rounder.round(parameters[P_S0X]));
-    sb.append('\t').append(rounder.round(parameters[P_AX]));
-    sb.append('\t').append(rounder.round(parameters[P_BX]));
-    sb.append('\t').append(rounder.round(parameters[P_S0Y]));
-    sb.append('\t').append(rounder.round(parameters[P_AY]));
-    sb.append('\t').append(rounder.round(parameters[P_BY]));
-    sb.append('\t').append(rounder.round(parameters[P_Z0]));
+    // @formatter:off
+    sb.append(fitZ.length * 2)
+      .append('\t').append(pluginSettings.getWeightedFit())
+      .append('\t').append(MathUtils.rounded(optimum.getRMS(), 6))
+      .append('\t').append(optimum.getIterations())
+      .append('\t').append(optimum.getEvaluations())
+      .append('\t').append(rounder.round(parameters[P_GAMMA]))
+      .append('\t').append(rounder.round(parameters[P_D]))
+      .append('\t').append(rounder.round(parameters[P_S0X]))
+      .append('\t').append(rounder.round(parameters[P_AX]))
+      .append('\t').append(rounder.round(parameters[P_BX]))
+      .append('\t').append(rounder.round(parameters[P_S0Y]))
+      .append('\t').append(rounder.round(parameters[P_AY]))
+      .append('\t').append(rounder.round(parameters[P_BY]))
+      .append('\t').append(rounder.round(parameters[P_Z0]));
+    // @formatter:on
     createResultWindow().append(sb.toString());
   }
 
@@ -1519,6 +1552,9 @@ public class AstigmatismModelManager implements PlugIn {
     new ModelRenderer(name, model, m, range, width, plot).run();
   }
 
+  /**
+   * ModelRenderer.
+   */
   private class ModelRenderer implements DialogListener {
     String name;
     AstigmatismModel model;
@@ -1532,7 +1568,9 @@ public class AstigmatismModelManager implements PlugIn {
     private double lastZ = -1;
     private int lastCalibratedImage = -1;
 
-    public ModelRenderer(String name, AstigmatismModel model, HoltzerAstigmatismZModel zmodel,
+    private final SoftLock lock = new SoftLock();
+
+    ModelRenderer(String name, AstigmatismModel model, HoltzerAstigmatismZModel zmodel,
         double range, int width, Plot plot) {
       this.name = name;
       this.model = model;
@@ -1543,7 +1581,7 @@ public class AstigmatismModelManager implements PlugIn {
       this.plot = plot;
     }
 
-    public void run() {
+    void run() {
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addMessage("Model = " + name);
       gd.addSlider("Z (" + UnitHelper.getShortName(model.getZDistanceUnit()) + ")", -range, range,
@@ -1605,8 +1643,6 @@ public class AstigmatismModelManager implements PlugIn {
       plot.getImagePlus().setRoi(new Line(x, y1, x, y2));
     }
 
-    SoftLock lock = new SoftLock();
-
     private void update() {
       if (lock.acquire()) {
         // Run in a new thread to allow the GUI to continue updating
@@ -1627,7 +1663,6 @@ public class AstigmatismModelManager implements PlugIn {
     private int getCalibratedImage() {
       return pluginSettings.getCalibratedImage() ? 1 : 0;
     }
-
   }
 
   /**
@@ -1640,7 +1675,7 @@ public class AstigmatismModelManager implements PlugIn {
    * @throws ConversionException if the units cannot be converted
    */
   public static AstigmatismModel convert(AstigmatismModel model, DistanceUnit zDistanceUnit,
-      DistanceUnit widthDistanceUnit) throws ConversionException {
+      DistanceUnit widthDistanceUnit) {
     return PsfProtosHelper.convert(model, zDistanceUnit, widthDistanceUnit);
   }
 
