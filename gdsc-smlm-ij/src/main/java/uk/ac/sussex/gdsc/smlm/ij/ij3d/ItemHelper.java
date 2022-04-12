@@ -28,6 +28,9 @@ package uk.ac.sussex.gdsc.smlm.ij.ij3d;
  * Contains helper methods.
  */
 final class ItemHelper {
+  /** Threshold below which the transparency is zero. */
+  static final float ZERO_TRANSPARENCY = 0.01f;
+
   /** No public construction. */
   private ItemHelper() {}
 

@@ -50,12 +50,37 @@ import uk.ac.sussex.gdsc.smlm.data.NamedObject;
  * Create Shape3D objects.
  */
 public final class Shape3DHelper {
+
+  private static final float[][] TRI_VERTICES =
+      {{sqrt(8d / 9), 0, 0}, {-sqrt(2d / 9), sqrt(2d / 3), 0}, {-sqrt(2d / 9), -sqrt(2d / 3), 0}};
+  private static final int[][] TRI_FACES = {{0, 1, 2}};
+
+  private static final float[][] SQUARE_VERTICES = {{1, 1, 0}, {-1, 1, 0}, {-1, -1, 0}, {1, -1, 0}};
+  private static final int[][] SQUARE_FACES = {{0, 1, 3}, {3, 1, 2}};
+
+  // https://en.m.wikipedia.org/wiki/Tetrahedron
+  // based on alternated cube
+  private static final float[][] TETRA_VERTICES = {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
+  private static final int[][] TETRA_FACES = {{0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
+
+  // https://en.m.wikipedia.org/wiki/Octahedron
+  private static final float[][] OCTA_VERTICES =
+      {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},};
+  private static final int[][] OCTA_FACES =
+      {{0, 3, 4}, {3, 1, 4}, {1, 2, 4}, {2, 0, 4}, {3, 0, 5}, {1, 3, 5}, {2, 1, 5}, {0, 2, 5},};
+
+  private static final float[][] CUBE_VERTICES = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1},
+      {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},};
+  private static final int[][] CUBE_FACES = {{0, 1, 3}, {3, 1, 2}, {0, 4, 7}, {0, 7, 3}, {1, 5, 6},
+      {1, 6, 2}, {3, 7, 6}, {3, 6, 2}, {0, 4, 5}, {0, 5, 1}, {4, 5, 7}, {4, 6, 7},};
+  private static final int[][] CUBE_FACES4 =
+      {{0, 1, 5, 4}, {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7}, {7, 4, 5, 6}, {2, 1, 0, 3},};
+
   //@formatter:off
   /**
    * The rendering.
    */
-  public enum Rendering implements NamedObject
-  {
+  public enum Rendering implements NamedObject {
     /** Point. */
     POINT {
       @Override public String getName() { return "Point"; }
@@ -402,31 +427,6 @@ public final class Shape3DHelper {
     return (float) Math.sqrt(value);
   }
 
-  private static final float[][] TRI_VERTICES =
-      {{sqrt(8d / 9), 0, 0}, {-sqrt(2d / 9), sqrt(2d / 3), 0}, {-sqrt(2d / 9), -sqrt(2d / 3), 0}};
-  private static final int[][] TRI_FACES = {{0, 1, 2}};
-
-  private static final float[][] SQUARE_VERTICES = {{1, 1, 0}, {-1, 1, 0}, {-1, -1, 0}, {1, -1, 0}};
-  private static final int[][] SQUARE_FACES = {{0, 1, 3}, {3, 1, 2}};
-
-  // https://en.m.wikipedia.org/wiki/Tetrahedron
-  // based on alternated cube
-  private static final float[][] TETRA_VERTICES = {{1, 1, 1}, {1, -1, -1}, {-1, 1, -1}, {-1, -1, 1}};
-  private static final int[][] TETRA_FACES = {{0, 1, 2}, {0, 1, 3}, {1, 2, 3}, {0, 2, 3}};
-
-  // https://en.m.wikipedia.org/wiki/Octahedron
-  private static final float[][] OCTA_VERTICES =
-      {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},};
-  private static final int[][] OCTA_FACES =
-      {{0, 3, 4}, {3, 1, 4}, {1, 2, 4}, {2, 0, 4}, {3, 0, 5}, {1, 3, 5}, {2, 1, 5}, {0, 2, 5},};
-
-  private static final float[][] CUBE_VERTICES = {{1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1},
-      {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},};
-  private static final int[][] CUBE_FACES = {{0, 1, 3}, {3, 1, 2}, {0, 4, 7}, {0, 7, 3}, {1, 5, 6},
-      {1, 6, 2}, {3, 7, 6}, {3, 6, 2}, {0, 4, 5}, {0, 5, 1}, {4, 5, 7}, {4, 6, 7},};
-  private static final int[][] CUBE_FACES4 =
-      {{0, 1, 5, 4}, {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7}, {7, 4, 5, 6}, {2, 1, 0, 3},};
-
   /**
    * Creates the triangle with vertices on a unit sphere.
    *
@@ -486,9 +486,9 @@ public final class Shape3DHelper {
    */
   private static List<Point3f> createSolid(float[][] vertices, int[][] faces, boolean normalise) {
     final List<Point3f> ps = new LocalList<>();
-    for (int i = 0; i < faces.length; i++) {
+    for (final int[] face : faces) {
       for (int k = 0; k < 3; k++) {
-        ps.add(new Point3f(vertices[faces[i][k]]));
+        ps.add(new Point3f(vertices[face[k]]));
       }
     }
     // Project all vertices to the surface of a sphere of radius 1
@@ -556,8 +556,8 @@ public final class Shape3DHelper {
    */
   private static List<Point3f> createSolidOutline(float[][] vertices, boolean normalise) {
     final List<Point3f> ps = new LocalList<>();
-    for (int i = 0; i < vertices.length; i++) {
-      ps.add(new Point3f(vertices[i]));
+    for (final float[] vertex : vertices) {
+      ps.add(new Point3f(vertex));
     }
     // Make continuous
     ps.add(new Point3f(vertices[0]));
@@ -682,16 +682,8 @@ public final class Shape3DHelper {
   public static GeometryArray createGeometryArray(Rendering rendering, int colorDepth) {
     final GeometryInfo gi = createGeometryInfo(rendering, colorDepth);
     final boolean useCoordIndexOnly = gi.getUseCoordIndexOnly();
-    final GeometryArray ga = (rendering.is2D()) ? gi.getGeometryArray()
+    return rendering.is2D() ? gi.getGeometryArray()
         : gi.getIndexedGeometryArray(false, false, false, useCoordIndexOnly, false);
-
-    // int v = ga.getValidVertexCount();
-    // float[] p = new float[v * 3];
-    // ga.getCoordinates(0, p);
-    // for (int i = 0; i < p.length; i += 3)
-    // System.out.printf("%f %f %f\n", p[i], p[i + 1], p[i + 2]);
-
-    return ga;
   }
 
   /**
@@ -702,7 +694,6 @@ public final class Shape3DHelper {
    * @return the geometry info
    */
   public static GeometryInfo createGeometryInfo(Rendering rendering, int colorDepth) {
-    GeometryInfo gi;
     List<Point3f> coords;
     int primitive = GeometryInfo.TRIANGLE_ARRAY;
     int[] stripsCounts = null;
@@ -758,8 +749,7 @@ public final class Shape3DHelper {
         throw new IllegalStateException("Unknown rendering " + rendering);
     }
 
-    gi = new GeometryInfo(primitive);
-
+    final GeometryInfo gi = new GeometryInfo(primitive);
     gi.setUseCoordIndexOnly(true);
 
     if (normalise) {
@@ -836,8 +826,7 @@ public final class Shape3DHelper {
     final IntArrayList faces = new IntArrayList(list.size());
     int index = 0;
     // Process triangles
-    for (int i = 0; i < list.size(); i++) {
-      final Point3f p = list.get(i);
+    for (final Point3f p : list) {
       int value = m.putIfAbsent(p, index);
       if (value == -1) {
         // Store the points in order

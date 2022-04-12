@@ -205,11 +205,11 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
       color = DEFAULT_COLOR;
     }
     this.color = color;
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final int objectSize = objectVertices.length;
     final int n = objectSize * size;
     final float[] colors = new float[n * 4];
@@ -298,11 +298,11 @@ public class TransparentItemTriangleMesh extends ItemTriangleMesh implements Tra
 
   @Override
   public void setItemAlpha(float alpha) {
-    int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    int size = size();
     final int objectSize = objectVertices.length;
     final int n = objectSize * size;
     final float[] colors = new float[n * 4];

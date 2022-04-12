@@ -140,7 +140,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
 
     final int m = objectFaces.length;
     for (int i = 0, k = 0; i < points.length; i++) {
-      for (int j = 0, offset = i * n; j < m; j++) {
+      final int offset = i * n;
+      for (int j = 0; j < m; j++) {
         // Offset the face index by the count of vertices beforehand
         faces[k++] = objectFaces[j] + offset;
       }
@@ -209,8 +210,8 @@ public class ItemIndexedTriangleMesh extends CustomIndexedTriangleMesh {
     final Vector3f[] normals = new Vector3f[nVertices];
 
     for (int i = 0, k = 0; i < points.length; i++) {
-      for (int j = 0; j < objectNormals.length; j++) {
-        normals[k++] = objectNormals[j];
+      for (final Vector3f v : objectNormals) {
+        normals[k++] = v;
       }
     }
 

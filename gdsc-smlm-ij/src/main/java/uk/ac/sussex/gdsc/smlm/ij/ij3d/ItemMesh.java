@@ -25,8 +25,10 @@
 package uk.ac.sussex.gdsc.smlm.ij.ij3d;
 
 import customnode.CustomMesh;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.logging.Level;
 import org.scijava.java3d.Appearance;
 import org.scijava.java3d.ColoringAttributes;
 import org.scijava.java3d.Geometry;
@@ -45,6 +47,7 @@ import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Color4f;
 import org.scijava.vecmath.Point3f;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
+import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
 import uk.ac.sussex.gdsc.core.utils.BitFlagUtils;
 import uk.ac.sussex.gdsc.core.utils.LocalList;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -57,6 +60,8 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
  * geometry has per vertex colours with alpha.
  */
 public class ItemMesh extends CustomMesh implements UpdateableItemShape, TransparentItemShape {
+  private static int transparencyMode = TransparencyAttributes.FASTEST;
+
   /** The vertex count of the original geometry array. */
   protected final int vertexCount;
 
@@ -436,15 +441,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       iga.setCoordinateIndices(0, allIndices);
 
       // Check if we need the color and normal indices
-      if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) != 0) {
-        if (hasNormals()) {
-          // Done later
-        }
-
-        if (hasColor()) {
-          // Update the colour for each vertex as normal
-        }
-      } else {
+      if ((vertexFormat & GeometryArray.USE_COORD_INDEX_ONLY) == 0) {
         if (hasNormals()) {
           // Use the same index for all vertices for normals
           sourceIga.getNormalIndices(0, objectIndices);
@@ -513,7 +510,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       // Handle strips
       int numStrips = 0;
       int[] objectStripCounts = null;
-      int[] allStripCounts = null;
+      int[] allStripCounts;
       if (sourceGa instanceof IndexedGeometryStripArray) {
         final IndexedGeometryStripArray igsa = (IndexedGeometryStripArray) sourceGa;
         numStrips = igsa.getNumStrips();
@@ -536,8 +533,10 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       final Class<?>[] paramTypes2 = paramTypes.toArray(new Class<?>[0]);
       final Object[] paramValues2 = paramValues.toArray();
       ga = (GeometryArray) clazz.getConstructor(paramTypes2).newInstance(paramValues2);
-    } catch (final Exception ex) {
-      ex.printStackTrace();
+    } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException
+        | IllegalArgumentException | InvocationTargetException | SecurityException ex) {
+      ImageJPluginLoggerHelper.getDefaultLogger().log(Level.WARNING, "Failed to create geometry",
+          ex);
       return null;
     }
 
@@ -582,13 +581,11 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     final int nIndices = MathUtils.max(objectIndices) + 1;
     for (int i = 0, k = 0; i < points.length; i++) {
       final int offset = i * nIndices;
-      for (int j = 0; j < objectIndices.length; j++) {
-        allIndices[k++] = objectIndices[j] + offset;
+      for (final int objectIndex : objectIndices) {
+        allIndices[k++] = objectIndex + offset;
       }
     }
   }
-
-  private static int transparencyMode = TransparencyAttributes.FASTEST;
 
   /**
    * Sets the transparency mode.
@@ -620,8 +617,8 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     // so override this method.
     final Appearance appearance = getAppearance();
     final TransparencyAttributes ta = appearance.getTransparencyAttributes();
-    if (transparency <= .01f) {
-      this.transparency = 0.0f;
+    if (transparency <= ItemHelper.ZERO_TRANSPARENCY) {
+      this.transparency = 0;
 
       // For a strange reason if this is set to NONE before the mesh is added to
       // a scene then the transparency cannot be adjusted. So set to FASTEST.
@@ -886,11 +883,11 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
       }
       return;
     }
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final int n = colorUpdater.size();
     final float[] colors = new float[size * n];
     if (hasColor3()) {
@@ -919,9 +916,7 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
     }
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -958,15 +953,11 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   @Override
   public void setItemColor4(Color4f[] color) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     this.color = null;
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -982,14 +973,10 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   @Override
   public void setItemAlpha(float[] alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -1010,15 +997,13 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   @Override
   public void setItemAlpha(float alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final int n = colorUpdater.size();
     final float[] colors = new float[size * n];
     // Preserve color
@@ -1035,14 +1020,10 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
 
   @Override
   public void getItemAlpha(float[] alpha) {
-    if (!hasColor4()) {
-      throw new IllegalArgumentException("Per-item alpha not supported");
-    }
+    checkPerItemAlpha();
 
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
@@ -1060,6 +1041,12 @@ public class ItemMesh extends CustomMesh implements UpdateableItemShape, Transpa
   public void setShaded(boolean shaded) {
     if (!isPointArray) {
       super.setShaded(shaded);
+    }
+  }
+
+  private void checkPerItemAlpha() {
+    if (!hasColor4()) {
+      throw new IllegalArgumentException("Per-item alpha not supported");
     }
   }
 }

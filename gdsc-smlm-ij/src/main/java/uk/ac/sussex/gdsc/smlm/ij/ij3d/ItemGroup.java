@@ -97,7 +97,7 @@ public abstract class ItemGroup extends Group implements ItemShape {
     if (ta == null) {
       return;
     }
-    if (transparency == 0f) {
+    if (transparency == 0) {
       ta.setTransparencyMode(TransparencyAttributes.NONE);
       ta.setTransparency(transparency);
     } else {

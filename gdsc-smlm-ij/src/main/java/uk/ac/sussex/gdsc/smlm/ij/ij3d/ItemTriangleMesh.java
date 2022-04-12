@@ -47,6 +47,8 @@ import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
  * translated for each point.
  */
 public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableItemShape {
+  private static int transparencyMode = TransparencyAttributes.FASTEST;
+
   /** The object vertices. */
   protected Point3f[] objectVertices;
 
@@ -328,8 +330,6 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     return result;
   }
 
-  private static int transparencyMode = TransparencyAttributes.FASTEST;
-
   /**
    * Sets the transparency mode.
    *
@@ -360,8 +360,8 @@ public class ItemTriangleMesh extends CustomTriangleMesh implements UpdateableIt
     // so override this method.
     final Appearance appearance = getAppearance();
     final TransparencyAttributes ta = appearance.getTransparencyAttributes();
-    if (transparency <= .01f) {
-      this.transparency = 0.0f;
+    if (transparency <= ItemHelper.ZERO_TRANSPARENCY) {
+      this.transparency = 0;
       ta.setTransparencyMode(TransparencyAttributes.NONE);
     } else {
       this.transparency = transparency;

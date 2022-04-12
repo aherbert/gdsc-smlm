@@ -124,7 +124,7 @@ public class ItemPointMesh extends CustomPointMesh implements UpdateableItemShap
     final GeometryArray ga = (GeometryArray) getGeometry();
 
     // Reorder all things in the geometry: coordinates and colour
-    final Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
+    final Point3f[] oldCoords = mesh.toArray(new Point3f[0]);
     final float[] oldColors = new float[oldSize * 3];
     ga.getColors(0, oldColors);
     final Point3f[] coords = new Point3f[size];

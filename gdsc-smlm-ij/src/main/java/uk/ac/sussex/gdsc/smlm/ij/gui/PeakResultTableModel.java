@@ -100,7 +100,8 @@ public class PeakResultTableModel extends AbstractTableModel {
   private boolean showZ;
 
   // Used for the columns
-  private Rounder rounder;
+  /** The rounder for the numeric cell entries. */
+  Rounder rounder;
   private PeakResultData<?>[] values;
   private String[] names;
   private boolean rowCounter;
@@ -126,7 +127,7 @@ public class PeakResultTableModel extends AbstractTableModel {
     this.calibration = resultsSource.getCalibration();
     this.psf = resultsSource.getPsf();
 
-    this.showDeviations =resultsSource.hasDeviations();
+    this.showDeviations = resultsSource.hasDeviations();
     this.showZ = resultsSource.is3D();
     this.showId = resultsSource.hasId();
     this.showCategory = resultsSource.hasCategory();
@@ -196,16 +197,16 @@ public class PeakResultTableModel extends AbstractTableModel {
   }
 
   /**
-   * Add an action to perform if the table settings have changed.
-   * This is combined with any previous actions.
+   * Add an action to perform if the table settings have changed. This is combined with any previous
+   * actions.
    *
    * @param action the action
    */
   public void addSettingsUpdatedAction(Consumer<ResultsTableSettings> action) {
-    if (settingsUpdatedAction != null) {
-      settingsUpdatedAction = settingsUpdatedAction.andThen(action);
-    } else {
+    if (settingsUpdatedAction == null) {
       this.settingsUpdatedAction = action;
+    } else {
+      settingsUpdatedAction = settingsUpdatedAction.andThen(action);
     }
   }
 
@@ -356,7 +357,7 @@ public class PeakResultTableModel extends AbstractTableModel {
             return 0.0;
           }
         };
-      } catch (final ConfigurationException | ConversionException ex) {
+      } catch (final ConfigurationException | ConversionException ignored) {
         // Ignore
       }
       if (precision == null) {
@@ -458,9 +459,8 @@ public class PeakResultTableModel extends AbstractTableModel {
 
   /**
    * Returns the index of the first occurrence of the specified result in this store, or -1 if this
-   * list does not contain the element. More formally, returns the lowest index {@code i} such
-   * that {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1
-   * if there is no such index.
+   * list does not contain the element. More formally, returns the lowest index {@code i} such that
+   * {@code (result==null ? get(i)==null : result.equals(get(i)))}, or -1 if there is no such index.
    *
    * @param result the result
    * @return the index (or -1)
@@ -480,12 +480,11 @@ public class PeakResultTableModel extends AbstractTableModel {
     if (peakResults.length == 0) {
       return;
     }
-    final int index0 = data.size();
     if (checkForDuplicates) {
       int size = 0;
-      for (int i = 0; i < peakResults.length; i++) {
-        if (!data.contains(peakResults[i])) {
-          peakResults[size++] = peakResults[i];
+      for (final PeakResult r : peakResults) {
+        if (!data.contains(r)) {
+          peakResults[size++] = r;
         }
       }
       if (size == 0) {
@@ -495,6 +494,7 @@ public class PeakResultTableModel extends AbstractTableModel {
         peakResults = Arrays.copyOf(peakResults, size);
       }
     }
+    final int index0 = data.size();
     data.addArray(peakResults);
     final int index1 = data.size() - 1;
 
@@ -542,8 +542,7 @@ public class PeakResultTableModel extends AbstractTableModel {
     }
 
     int size = 0;
-    for (int i = 0; i < indices.length; i++) {
-      final int index = indices[i];
+    for (final int index : indices) {
       if (index < 0 || index >= data.size()) {
         continue;
       }
@@ -587,8 +586,8 @@ public class PeakResultTableModel extends AbstractTableModel {
     }
     int[] indices = new int[peakResults.length];
     int size = 0;
-    for (int i = 0; i < peakResults.length; i++) {
-      final int j = data.indexOf(peakResults[i]);
+    for (final PeakResult r : peakResults) {
+      final int j = data.indexOf(r);
       if (j >= 0) {
         indices[size++] = j;
       }

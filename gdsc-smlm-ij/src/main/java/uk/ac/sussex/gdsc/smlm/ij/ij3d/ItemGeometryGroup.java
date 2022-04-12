@@ -357,14 +357,14 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
         }
 
         // All items the same transparency
-      } else if (transparency == 0f) {
-        for (int i = 0; i < transparencyAttributes.length; i++) {
-          transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.NONE);
+      } else if (transparency == 0) {
+        for (final TransparencyAttributes ta : transparencyAttributes) {
+          ta.setTransparencyMode(TransparencyAttributes.NONE);
         }
       } else {
-        for (int i = 0; i < transparencyAttributes.length; i++) {
-          transparencyAttributes[i].setTransparencyMode(TransparencyAttributes.FASTEST);
-          transparencyAttributes[i].setTransparency(transparency);
+        for (final TransparencyAttributes ta : transparencyAttributes) {
+          ta.setTransparencyMode(TransparencyAttributes.FASTEST);
+          ta.setTransparency(transparency);
         }
       }
     }
@@ -381,8 +381,8 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       return true;
     }
     if (alphas != null && alphas.length == points.length) {
-      for (int i = 0; i < alphas.length; i++) {
-        if (alphas[i] != 1) {
+      for (final float alpha : alphas) {
+        if (alpha != 1) {
           return true;
         }
       }
@@ -494,18 +494,18 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     }
     if (isPointArray) {
       pointArrayColorUpdater.getColors(color, 1f);
-      if (alphas != null) {
-        for (int i = 0; i < geometryArray.length; i++) {
-          geometryArray[i].setColors(0, pointArrayColorUpdater.getColors(alphas[i]));
+      if (alphas == null) {
+        for (final GeometryArray ga : geometryArray) {
+          ga.setColors(0, pointArrayColorUpdater.pointColor);
         }
       } else {
         for (int i = 0; i < geometryArray.length; i++) {
-          geometryArray[i].setColors(0, pointArrayColorUpdater.pointColor);
+          geometryArray[i].setColors(0, pointArrayColorUpdater.getColors(alphas[i]));
         }
       }
     } else {
-      for (int i = 0; i < material.length; i++) {
-        material[i].setDiffuseColor(color);
+      for (final Material m : material) {
+        m.setDiffuseColor(color);
       }
     }
   }
@@ -518,18 +518,16 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       return;
     }
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     if (isPointArray) {
-      if (alphas != null) {
-        for (int i = 0; i < geometryArray.length; i++) {
-          geometryArray[i].setColors(0, pointArrayColorUpdater.getColors(color[i], alphas[i]));
-        }
-      } else {
+      if (alphas == null) {
         pointArrayColorUpdater.getColors(1f);
         for (int i = 0; i < geometryArray.length; i++) {
           geometryArray[i].setColors(0, pointArrayColorUpdater.getColors(color[i]));
+        }
+      } else {
+        for (int i = 0; i < geometryArray.length; i++) {
+          geometryArray[i].setColors(0, pointArrayColorUpdater.getColors(color[i], alphas[i]));
         }
       }
     } else {
@@ -550,9 +548,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
       return;
     }
     final int size = size();
-    if (color.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(color.length, size);
     if (alphas == null) {
       alphas = new float[size];
     }
@@ -572,29 +568,26 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
 
   @Override
   public void setItemAlpha(float[] alpha) {
-    if (alpha != null) {
-      final int size = size();
-      if (alpha.length != size) {
-        throw new IllegalArgumentException("list of size " + size + " expected");
-      }
-      this.alphas = alpha.clone();
-    } else {
+    if (alpha == null) {
       this.alphas = null;
+    } else {
+      final int size = size();
+      ItemHelper.checkSize(alpha.length, size);
+      this.alphas = alpha.clone();
     }
     if (isPointArray) {
       // PointArray alpha must be updated
-      if (alpha != null) {
-        for (int i = 0; i < geometryArray.length; i++) {
-          final GeometryArray ga = geometryArray[i];
+      if (alpha == null) {
+        for (final GeometryArray ga : geometryArray) {
           ga.getColors(0, pointArrayColorUpdater.pointColor);
-          pointArrayColorUpdater.getColors(alpha[i]);
+          pointArrayColorUpdater.getColors(1f);
           ga.setColors(0, pointArrayColorUpdater.pointColor);
         }
       } else {
         for (int i = 0; i < geometryArray.length; i++) {
           final GeometryArray ga = geometryArray[i];
           ga.getColors(0, pointArrayColorUpdater.pointColor);
-          pointArrayColorUpdater.getColors(1f);
+          pointArrayColorUpdater.getColors(alpha[i]);
           ga.setColors(0, pointArrayColorUpdater.pointColor);
         }
       }
@@ -613,29 +606,26 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
    * @see #setItemAlpha(float[])
    */
   public void setItemAlpha(float[] alpha, float transparency) {
-    if (alpha != null) {
-      final int size = size();
-      if (alpha.length != size) {
-        throw new IllegalArgumentException("list of size " + size + " expected");
-      }
-      this.alphas = alpha.clone();
-    } else {
+    if (alpha == null) {
       this.alphas = null;
+    } else {
+      final int size = size();
+      ItemHelper.checkSize(alpha.length, size);
+      this.alphas = alpha.clone();
     }
     if (isPointArray) {
       // PointArray alpha must be updated
-      if (alpha != null) {
-        for (int i = 0; i < geometryArray.length; i++) {
-          final GeometryArray ga = geometryArray[i];
+      if (alpha == null) {
+        for (final GeometryArray ga : geometryArray) {
           ga.getColors(0, pointArrayColorUpdater.pointColor);
-          pointArrayColorUpdater.getColors(alpha[i]);
+          pointArrayColorUpdater.getColors(1f);
           ga.setColors(0, pointArrayColorUpdater.pointColor);
         }
       } else {
         for (int i = 0; i < geometryArray.length; i++) {
           final GeometryArray ga = geometryArray[i];
           ga.getColors(0, pointArrayColorUpdater.pointColor);
-          pointArrayColorUpdater.getColors(1f);
+          pointArrayColorUpdater.getColors(alpha[i]);
           ga.setColors(0, pointArrayColorUpdater.pointColor);
         }
       }
@@ -651,8 +641,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     Arrays.fill(alphas, alpha);
     if (isPointArray) {
       // PointArray alpha must be updated
-      for (int i = 0; i < geometryArray.length; i++) {
-        final GeometryArray ga = geometryArray[i];
+      for (final GeometryArray ga : geometryArray) {
         ga.getColors(0, pointArrayColorUpdater.pointColor);
         pointArrayColorUpdater.getColors(alpha);
         ga.setColors(0, pointArrayColorUpdater.pointColor);
@@ -679,8 +668,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
     Arrays.fill(alphas, alpha);
     if (isPointArray) {
       // PointArray alpha must be updated
-      for (int i = 0; i < geometryArray.length; i++) {
-        final GeometryArray ga = geometryArray[i];
+      for (final GeometryArray ga : geometryArray) {
         ga.getColors(0, pointArrayColorUpdater.pointColor);
         pointArrayColorUpdater.getColors(alpha);
         ga.setColors(0, pointArrayColorUpdater.pointColor);
@@ -692,9 +680,7 @@ public class ItemGeometryGroup extends ItemGroup implements TransparentItemShape
   @Override
   public void getItemAlpha(float[] alpha) {
     final int size = size();
-    if (alpha.length != size) {
-      throw new IllegalArgumentException("list of size " + size + " expected");
-    }
+    ItemHelper.checkSize(alpha.length, size);
     if (this.alphas == null) {
       // No alpha
       Arrays.fill(alpha, 1f);

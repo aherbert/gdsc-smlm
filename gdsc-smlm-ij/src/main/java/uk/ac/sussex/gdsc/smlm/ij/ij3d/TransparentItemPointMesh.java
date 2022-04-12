@@ -110,7 +110,7 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
     final GeometryArray ga = (GeometryArray) getGeometry();
 
     // Reorder all things in the geometry: coordinates and colour
-    final Point3f[] oldCoords = mesh.toArray(new Point3f[oldSize]);
+    final Point3f[] oldCoords = mesh.toArray(new Point3f[0]);
     final float[] oldColors = new float[oldSize * 4];
     ga.getColors(0, oldColors);
     final Point3f[] coords = new Point3f[size];
@@ -137,11 +137,11 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
       color = DEFAULT_COLOR;
     }
     this.color = color;
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final float[] colors = new float[4 * size];
     ga.getColors(0, colors);
     int index = 0;
@@ -210,11 +210,11 @@ public class TransparentItemPointMesh extends ItemPointMesh implements Transpare
 
   @Override
   public void setItemAlpha(float alpha) {
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final float[] colors = new float[4 * size];
     ga.getColors(0, colors);
     for (int i = 0; i < size; i++) {

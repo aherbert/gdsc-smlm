@@ -39,7 +39,8 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 public class PeakResultTableModelJTable extends JTable {
   private static final long serialVersionUID = 7144289957208169053L;
 
-  private final TableColumnAdjuster tca;
+  /** The table column adjuster. */
+  final TableColumnAdjuster tca;
 
   /**
    * Instantiates a new peak result table model J table.
@@ -98,7 +99,7 @@ public class PeakResultTableModelJTable extends JTable {
       setDefaultRenderer(Float.class, model.getFloatRenderer());
       setDefaultRenderer(Double.class, model.getDoubleRenderer());
       setDefaultRenderer(Integer.class, model.getIntegerRenderer());
-    } else {
+      // else
       // Reset to null?
     }
   }
@@ -112,7 +113,6 @@ public class PeakResultTableModelJTable extends JTable {
    */
   public PeakResult[] getSelectedData() {
     if (dataModel instanceof PeakResultTableModel) {
-      final PeakResultTableModel model = (PeakResultTableModel) dataModel;
       final int iMin = selectionModel.getMinSelectionIndex();
       final int iMax = selectionModel.getMaxSelectionIndex();
 
@@ -121,20 +121,21 @@ public class PeakResultTableModelJTable extends JTable {
         return new PeakResult[0];
       }
 
+      final PeakResultTableModel model = (PeakResultTableModel) dataModel;
       final PeakResult[] rvTmp = new PeakResult[1 + (iMax - iMin)];
       int count = 0;
 
       final RowSorter<?> sorter = getRowSorter();
-      if (sorter != null) {
+      if (sorter == null) {
         for (int i = iMin; i <= iMax; i++) {
           if (selectionModel.isSelectedIndex(i)) {
-            rvTmp[count++] = model.get(sorter.convertRowIndexToModel(i));
+            rvTmp[count++] = model.get(i);
           }
         }
       } else {
         for (int i = iMin; i <= iMax; i++) {
           if (selectionModel.isSelectedIndex(i)) {
-            rvTmp[count++] = model.get(i);
+            rvTmp[count++] = model.get(sorter.convertRowIndexToModel(i));
           }
         }
       }
@@ -149,9 +150,9 @@ public class PeakResultTableModelJTable extends JTable {
   }
 
   /**
-   * Returns the location of {@code index} in terms of the underlying model. That is, for the
-   * row {@code index} in the coordinates of the view this returns the row index in terms of
-   * the underlying model.
+   * Returns the location of {@code index} in terms of the underlying model. That is, for the row
+   * {@code index} in the coordinates of the view this returns the row index in terms of the
+   * underlying model.
    *
    * @param indices the indices (updated in-place)
    * @throws IndexOutOfBoundsException if {@code index} is outside the range of the view
@@ -166,9 +167,8 @@ public class PeakResultTableModelJTable extends JTable {
   }
 
   /**
-   * Returns the location of {@code index} in terms of the view. That is, for the row
-   * {@code index} in the coordinates of the underlying model this returns the row index in
-   * terms of the view.
+   * Returns the location of {@code index} in terms of the view. That is, for the row {@code index}
+   * in the coordinates of the underlying model this returns the row index in terms of the view.
    *
    * @param indices the indices (updated in-place)
    * @throws IndexOutOfBoundsException if {@code index} is outside the range of the model

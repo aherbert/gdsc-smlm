@@ -125,8 +125,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
     model.setLive(true);
 
     final int[] indices =
-        (selectionModel != null) ? ListSelectionModelHelper.getSelectedIndices(selectionModel)
-            : null;
+        selectionModel == null ? null : ListSelectionModelHelper.getSelectedIndices(selectionModel);
 
     table = new PeakResultTableModelJTable(model, columnModel, selectionModel);
 
@@ -395,18 +394,18 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       return;
     }
     final ImageSource source = model.getSource();
-    String text = getTitle() + " source";
+    final StringBuilder sb = new StringBuilder(getTitle()).append(" source");
     if (source == null) {
-      text += " = NA";
+      sb.append(" = NA");
     } else {
-      text += "\n" + XmlUtils.prettyPrintXml(source.toXml());
+      sb.append('\n').append(XmlUtils.prettyPrintXml(source.toXml()));
     }
     // Note:
     // If a raw path is printed to the ImageJ log double-clicking it will open the image.
     // We could separate these onto multiple lines:
     // <path>/path/to/image.tif</path>
     // <string>/path/to/image.tif</string>
-    IJ.log(text);
+    IJ.log(sb.toString());
   }
 
   private void doSourceShowImage() {
@@ -521,7 +520,7 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
       ImageJUtils.adjustSourceRect(imp, 0, (int) converter.convert(p.getXPosition()),
           (int) converter.convert(p.getYPosition()));
       imp.getWindow().toFront();
-    } catch (final ConversionException ex) {
+    } catch (final ConversionException ignored) {
       // Ignore
     }
   }
@@ -532,8 +531,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Maps the index of the row in terms of the view to the underlying {@code TableModel}. If
-   * the contents of the model are not sorted the model and view indices are the same.
+   * Maps the index of the row in terms of the view to the underlying {@code TableModel}. If the
+   * contents of the model are not sorted the model and view indices are the same.
    *
    * @param viewRowIndex the index of the row in the view
    * @return the index of the corresponding row in the model
@@ -547,9 +546,9 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Returns the location of {@code index} in terms of the underlying model. That is, for the
-   * row {@code index} in the coordinates of the view this returns the row index in terms of
-   * the underlying model.
+   * Returns the location of {@code index} in terms of the underlying model. That is, for the row
+   * {@code index} in the coordinates of the view this returns the row index in terms of the
+   * underlying model.
    *
    * @param indices the indices (updated in-place)
    * @throws IndexOutOfBoundsException if {@code index} is outside the range of the view
@@ -559,8 +558,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Maps the index of the row in terms of the {@code TableModel} to the view. If the contents
-   * of the model are not sorted the model and view indices are the same.
+   * Maps the index of the row in terms of the {@code TableModel} to the view. If the contents of
+   * the model are not sorted the model and view indices are the same.
    *
    * @param modelRowIndex the index of the row in terms of the model
    * @return the index of the corresponding row in the view, or -1 if the row isn't visible
@@ -573,9 +572,8 @@ public class PeakResultTableModelFrame extends JFrame implements ActionListener 
   }
 
   /**
-   * Returns the location of {@code index} in terms of the view. That is, for the row
-   * {@code index} in the coordinates of the underlying model this returns the row index in
-   * terms of the view.
+   * Returns the location of {@code index} in terms of the view. That is, for the row {@code index}
+   * in the coordinates of the underlying model this returns the row index in terms of the view.
    *
    * @param indices the indices (updated in-place)
    * @throws IndexOutOfBoundsException if {@code index} is outside the range of the model

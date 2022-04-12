@@ -351,11 +351,11 @@ public class ReferenceItemMesh extends ItemMesh {
   public void setItemAlpha(float alpha) {
     checkPerItemAlpha();
 
-    final int size = size();
     final GeometryArray ga = (GeometryArray) getGeometry();
     if (ga == null) {
       return;
     }
+    final int size = size();
     final int n = colorUpdater.size();
     // Preserve color
     final float[] colors = ga.getColorRefFloat().clone();

@@ -70,6 +70,9 @@ import voltex.VoltexGroup;
  * Extend the ContentInstant class to avoid using an OrderedPath.
  */
 public class CustomContentInstant extends ContentInstant {
+  /** The absolute change to trigger a transparency update. */
+  private static final float TRANSPARENCY_DELTA = 0.001f;
+
   // Duplicate anything private in the super class
 
   // visibility flags
@@ -96,6 +99,8 @@ public class CustomContentInstant extends ContentInstant {
 
   private int customBefore;
   private Int2ObjectOpenHashMap<Switch> switchMap;
+
+  private String displayedDataSwapfile;
 
   // Copy the entire contents of the super class
 
@@ -333,14 +338,12 @@ public class CustomContentInstant extends ContentInstant {
     return available;
   }
 
-  private String displayedDataSwapfile;
-
   private String getDisplayedDataSwapFile() {
     if (displayedDataSwapfile != null) {
       return displayedDataSwapfile;
     }
     try {
-      Path path = Files.createTempFile("3D_Viewer", "displayed");
+      final Path path = Files.createTempFile("3D_Viewer", "displayed");
       displayedDataSwapfile = path.toString();
     } catch (IOException ex) {
       // This is not a critical failure so allow null to be returned
@@ -682,7 +685,7 @@ public class CustomContentInstant extends ContentInstant {
   @Override
   public synchronized void setTransparency(float transparency) {
     final float newTransparency = MathUtils.clip(0, 1, transparency);
-    if (Math.abs(newTransparency - this.transparency) < 0.01) {
+    if (Math.abs(newTransparency - this.transparency) < TRANSPARENCY_DELTA) {
       return;
     }
     this.transparency = newTransparency;
