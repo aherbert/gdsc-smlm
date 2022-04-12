@@ -121,16 +121,16 @@ public class ConvertResults implements PlugIn {
     final DistanceUnit distanceUnit =
         SettingsManager.getDistanceUnitValues()[gd.getNextChoiceIndex()];
     cw.setNmPerPixel(Math.abs(gd.getNextNumber()));
-    final IntensityUnit intensityUnit =
-        SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
-    cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
-    final AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
 
     // Don't set the calibration with bad values
     if (distanceUnit.getNumber() > 0 && !(cw.getNmPerPixel() > 0)) {
       IJ.error(TITLE, "Require positive nm/pixel for conversion");
       return false;
     }
+
+    final IntensityUnit intensityUnit =
+        SettingsManager.getIntensityUnitValues()[gd.getNextChoiceIndex()];
+    cw.setCountPerPhoton(Math.abs(gd.getNextNumber()));
     if (intensityUnit.getNumber() > 0 && !(cw.getCountPerPhoton() > 0)) {
       IJ.error(TITLE, "Require positive Count/photon for conversion");
       return false;
@@ -139,6 +139,7 @@ public class ConvertResults implements PlugIn {
     final Calibration newCalibration = cw.getCalibration();
     results.setCalibration(newCalibration);
 
+    final AngleUnit angleUnit = SettingsManager.getAngleUnitValues()[gd.getNextChoiceIndex()];
     if (!results.convertToUnits(distanceUnit, intensityUnit, angleUnit)) {
       IJ.error(TITLE, "Conversion failed");
       return false;
