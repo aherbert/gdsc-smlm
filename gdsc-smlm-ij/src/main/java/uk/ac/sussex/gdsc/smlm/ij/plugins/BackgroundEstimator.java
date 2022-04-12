@@ -38,6 +38,7 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
@@ -69,6 +70,8 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   /** The plugin settings. */
   private Settings settings;
+
+  private String prefix;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -123,7 +126,7 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    if (arg.equalsIgnoreCase("final")) {
+    if ("final".equals(arg)) {
       showResults();
       return DONE;
     }
@@ -264,26 +267,26 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
     plot.addPoints(xvalues, data1, Plot.LINE);
     plot.draw();
     Statistics stats = Statistics.create(data1);
-    @SuppressWarnings("resource")
-    final Formatter label = new Formatter().format("%s (Blue) = %s +/- %s", title1,
-        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation()));
+    try (Formatter label = new Formatter().format("%s (Blue) = %s +/- %s", title1,
+        MathUtils.rounded(stats.getMean()), MathUtils.rounded(stats.getStandardDeviation()))) {
 
-    plot.setColor(Color.red);
-    plot.addPoints(xvalues, data2, Plot.LINE);
-    stats = Statistics.create(data2);
-    label.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
-        MathUtils.rounded(stats.getStandardDeviation()));
-
-    if (data3 != null) {
-      plot.setColor(Color.green);
-      plot.addPoints(xvalues, data3, Plot.LINE);
-      stats = Statistics.create(data3);
-      label.format(", %s (Green) = %s +/- %s", title3, MathUtils.rounded(stats.getMean()),
+      plot.setColor(Color.red);
+      plot.addPoints(xvalues, data2, Plot.LINE);
+      stats = Statistics.create(data2);
+      label.format(", %s (Red) = %s +/- %s", title2, MathUtils.rounded(stats.getMean()),
           MathUtils.rounded(stats.getStandardDeviation()));
-    }
 
-    plot.setColor(Color.black);
-    plot.addLabel(0, 0, label.toString());
+      if (data3 != null) {
+        plot.setColor(Color.green);
+        plot.addPoints(xvalues, data3, Plot.LINE);
+        stats = Statistics.create(data3);
+        label.format(", %s (Green) = %s +/- %s", title3, MathUtils.rounded(stats.getMean()),
+            MathUtils.rounded(stats.getStandardDeviation()));
+      }
+
+      plot.setColor(Color.black);
+      plot.addLabel(0, 0, label.toString());
+    }
 
     ImageJUtils.display(title, plot, wo);
   }
@@ -329,32 +332,23 @@ public class BackgroundEstimator implements ExtendedPlugInFilter, DialogListener
   }
 
   private String createHeader() {
-    StringBuilder sb = new StringBuilder(imp.getTitle());
-    sb.append('\t').append(MathUtils.rounded(settings.percentile));
-    sb.append('\t').append(settings.noiseMethod.toString());
-    sb.append('\t').append(settings.thresholdMethod.toString());
-    sb.append('\t').append(MathUtils.rounded(settings.fraction));
-    sb.append('\t').append(settings.histogramSize).append('\t');
+    // @formatter:off
+    final StringBuilder sb = new StringBuilder(imp.getTitle())
+      .append('\t').append(MathUtils.rounded(settings.percentile))
+      .append('\t').append(settings.noiseMethod.toString())
+      .append('\t').append(settings.thresholdMethod.toString())
+      .append('\t').append(MathUtils.rounded(settings.fraction))
+      .append('\t').append(settings.histogramSize).append('\t');
+    // @formatter:on
     prefix = sb.toString();
 
-    sb = new StringBuilder("Image");
-    sb.append("\tPercentile");
-    sb.append("\tNoiseMethod");
-    sb.append("\tThresholdMethod");
-    sb.append("\tFraction");
-    sb.append("\tHistogramSize");
-    sb.append("\tSlice");
-    sb.append("\tIsBackground");
-    sb.append("\tNoise");
-    sb.append("\tGlobalNoise");
-    sb.append("\tBackground");
-    sb.append("\tThreshold");
-    sb.append("\tBackgroundSize");
-    sb.append("\tPercentile");
+    sb.setLength(0);
+    Arrays.stream(new String[] {"Image", "Percentile", "NoiseMethod", "ThresholdMethod", "Fraction",
+        "HistogramSize", "Slice", "IsBackground", "Noise", "GlobalNoise", "Background", "Threshold",
+        "BackgroundSize", "Percentile"}).forEach(s -> sb.append(s).append('\t'));
+    sb.setLength(sb.length() - 1);
     return sb.toString();
   }
-
-  private String prefix;
 
   private String createResult(double[] result) {
     final StringBuilder sb = new StringBuilder(prefix);
