@@ -82,16 +82,6 @@ public class ClassificationMatchCalculator implements PlugIn {
   private enum ClassAnalysis implements NamedObject {
     IGNORE("Ignore"), IGNORE_ZERO("Ignore zero"), ALL("All");
 
-    static ClassAnalysis fromNumber(int number) {
-      if (number == ClassAnalysis.ALL.ordinal()) {
-        return ClassAnalysis.ALL;
-      }
-      if (number == ClassAnalysis.IGNORE_ZERO.ordinal()) {
-        return ClassAnalysis.IGNORE_ZERO;
-      }
-      return ClassAnalysis.IGNORE;
-    }
-
     final String name;
 
     ClassAnalysis(String name) {
@@ -101,6 +91,16 @@ public class ClassificationMatchCalculator implements PlugIn {
     @Override
     public String getName() {
       return name;
+    }
+
+    static ClassAnalysis fromNumber(int number) {
+      if (number == ClassAnalysis.ALL.ordinal()) {
+        return ClassAnalysis.ALL;
+      }
+      if (number == ClassAnalysis.IGNORE_ZERO.ordinal()) {
+        return ClassAnalysis.IGNORE_ZERO;
+      }
+      return ClassAnalysis.IGNORE;
     }
   }
 
@@ -170,6 +170,9 @@ public class ClassificationMatchCalculator implements PlugIn {
     }
   }
 
+  /**
+   * Map keys to values.
+   */
   private interface Mapper {
     /**
      * The number of unique mappings.
@@ -257,13 +260,13 @@ public class ClassificationMatchCalculator implements PlugIn {
     // Load the results
     final MemoryPeakResults results1 =
         ResultsManager.loadInputResults(settings.inputOption1, false, null, null);
-    final MemoryPeakResults results2 =
-        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     IJ.showStatus("");
     if (results1 == null || results1.size() == 0) {
       IJ.error(TITLE, "No results 1 could be loaded");
       return;
     }
+    final MemoryPeakResults results2 =
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     if (results2 == null || results2.size() == 0) {
       IJ.error(TITLE, "No results 2 could be loaded");
       return;
@@ -406,17 +409,19 @@ public class ClassificationMatchCalculator implements PlugIn {
             "", 900, 300));
     try (BufferedTextWindow bw = new BufferedTextWindow(resultsWindow)) {
       final StringBuilder sb = new StringBuilder(2048);
-      sb.append(results1.getName()).append('\t');
-      sb.append(results2.getName()).append('\t');
-      sb.append(ANALYSIS_OPTION[settings.useId.ordinal()]).append('\t');
-      sb.append(ANALYSIS_OPTION[settings.useCategory.ordinal()]).append('\t');
-      sb.append(n1).append('\t');
-      sb.append(MathUtils.max(set1) + 1).append('\t');
-      sb.append(n2).append('\t');
-      sb.append(MathUtils.max(set2) + 1).append('\t');
-      sb.append(set1.length).append('\t');
-      sb.append(MathUtils.rounded(r.getRandIndex())).append('\t');
-      sb.append(MathUtils.rounded(r.getAdjustedRandIndex())).append('\t');
+      // @formatter:off
+      sb.append(results1.getName()).append('\t')
+        .append(results2.getName()).append('\t')
+        .append(ANALYSIS_OPTION[settings.useId.ordinal()]).append('\t')
+        .append(ANALYSIS_OPTION[settings.useCategory.ordinal()]).append('\t')
+        .append(n1).append('\t')
+        .append(MathUtils.max(set1) + 1).append('\t')
+        .append(n2).append('\t')
+        .append(MathUtils.max(set2) + 1).append('\t')
+        .append(set1.length).append('\t')
+        .append(MathUtils.rounded(r.getRandIndex())).append('\t')
+        .append(MathUtils.rounded(r.getAdjustedRandIndex())).append('\t');
+      // @formatter:on
       bw.append(sb.toString());
     }
   }
