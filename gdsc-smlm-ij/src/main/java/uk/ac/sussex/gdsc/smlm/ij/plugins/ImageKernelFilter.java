@@ -65,7 +65,7 @@ public class ImageKernelFilter implements ExtendedPlugInFilter, DialogListener {
   private ImagePlus kernelImp;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
