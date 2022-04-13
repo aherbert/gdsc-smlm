@@ -56,11 +56,11 @@ public class NeighbourAnalysis implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    String inputOption = "";
-    double distanceThreshold = 0.6;
-    int timeThreshold = 1;
+    String inputOption;
+    double distanceThreshold;
+    int timeThreshold;
 
-    String filename = "";
+    String filename;
 
     Settings() {
       // Set defaults
