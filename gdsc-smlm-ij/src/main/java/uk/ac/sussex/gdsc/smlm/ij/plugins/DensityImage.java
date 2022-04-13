@@ -70,15 +70,14 @@ public class DensityImage implements PlugIn {
   private int roiImageHeight;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    static final String[] SCORE_METHODS =
-        new String[] {"Density", "Ripley's K", "Ripley's K / Area", "Ripley's L", "Ripley's L - r",
-            "Ripley's L / r", "Ripley's (L - r) / r"};
+    static final String[] SCORE_METHODS = {"Density", "Ripley's K", "Ripley's K / Area",
+        "Ripley's L", "Ripley's L - r", "Ripley's L / r", "Ripley's (L - r) / r"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -196,7 +195,7 @@ public class DensityImage implements PlugIn {
     final boolean useAdjustment = settings.adjustForBorder && !isWithin[0];
 
     final DensityManager dm = createDensityManager(results);
-    int[] density = null;
+    int[] density;
     if (settings.useSquareApproximation) {
       density = dm.calculateSquareDensity(settings.radius, settings.resolution, useAdjustment);
     } else {
@@ -265,6 +264,9 @@ public class DensityImage implements PlugIn {
     }
   }
 
+  /**
+   * Calculate a score for the density.
+   */
   private interface ScoreCalculator {
     /**
      * Get the density score for the input density counts.
@@ -282,10 +284,13 @@ public class DensityImage implements PlugIn {
     float getThreshold();
   }
 
+  /**
+   * DensityScoreCalculator.
+   */
   private class DensityScoreCalculator implements ScoreCalculator {
     MemoryPeakResults results;
 
-    public DensityScoreCalculator(MemoryPeakResults results) {
+    DensityScoreCalculator(MemoryPeakResults results) {
       this.results = results;
     }
 
@@ -298,12 +303,22 @@ public class DensityImage implements PlugIn {
       return score;
     }
 
+    /**
+     * Gets the average density.
+     *
+     * @return the average density
+     */
     protected float getAverageDensity() {
       final Rectangle bounds = results.getBounds();
       final float area = (float) bounds.width * bounds.height;
       return results.size() / area;
     }
 
+    /**
+     * Gets the region area.
+     *
+     * @return the region area
+     */
     protected float getRegionArea() {
       return settings.radius * settings.radius
           * ((settings.useSquareApproximation) ? 4 : (float) Math.PI);
@@ -316,10 +331,13 @@ public class DensityImage implements PlugIn {
     }
   }
 
+  /**
+   * Ripley's K ScoreCalculator.
+   */
   private class KScoreCalculator extends DensityScoreCalculator {
     int mode;
 
-    public KScoreCalculator(MemoryPeakResults results, int mode) {
+    KScoreCalculator(MemoryPeakResults results, int mode) {
       super(results);
       this.mode = mode;
     }
@@ -353,8 +371,11 @@ public class DensityImage implements PlugIn {
     }
   }
 
+  /**
+   * Ripley's L ScoreCalculator.
+   */
   private class LScoreCalculator extends KScoreCalculator {
-    public LScoreCalculator(MemoryPeakResults results, int mode) {
+    LScoreCalculator(MemoryPeakResults results, int mode) {
       super(results, mode);
     }
 
