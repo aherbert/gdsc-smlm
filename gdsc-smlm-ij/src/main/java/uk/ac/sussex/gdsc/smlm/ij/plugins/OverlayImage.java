@@ -42,8 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * transparent background.
  */
 public class OverlayImage implements PlugIn {
-  /** The plugin settings. */
-  private Settings settings;
+  private static final String TITLE = "Overlay image";
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -105,23 +104,23 @@ public class OverlayImage implements PlugIn {
    * setting the zero pixels to transparent.
    */
   void addImage() {
-    final ImagePlus imp = IJ.getImage();
     final int[] wList = WindowManager.getIDList();
     if (wList == null || wList.length < 2) {
-      IJ.error("Add Image...", "The command requires at least two open images.");
+      IJ.error(TITLE, "The command requires at least two open images.");
       return;
     }
+    final ImagePlus imp = IJ.getImage();
     String[] titles = new String[wList.length];
     int count = 0;
-    for (int i = 0; i < wList.length; i++) {
-      final ImagePlus imp2 = WindowManager.getImage(wList[i]);
-      if (imp2 != null && imp2 != imp && imp.getWidth() >= imp2.getWidth()
+    for (final int id : wList) {
+      final ImagePlus imp2 = WindowManager.getImage(id);
+      if (imp2 != null && imp2.getID() != imp.getID() && imp.getWidth() >= imp2.getWidth()
           && imp.getHeight() >= imp2.getHeight()) {
         titles[count++] = imp2.getTitle();
       }
     }
     if (count < 1) {
-      IJ.error("Add Image...", "The command requires at least one valid overlay image.");
+      IJ.error(TITLE, "The command requires at least one valid overlay image.");
       return;
     }
     titles = Arrays.copyOf(titles, count);
@@ -135,8 +134,8 @@ public class OverlayImage implements PlugIn {
       y = r.y;
     }
 
-    settings = Settings.load();
-    final GenericDialog gd = new GenericDialog("Add Image...");
+    final Settings settings = Settings.load();
+    final GenericDialog gd = new GenericDialog(TITLE);
     gd.addChoice("Image to add:", titles, settings.title);
     gd.addNumericField("X location:", x, 0);
     gd.addNumericField("Y location:", y, 0);
@@ -159,14 +158,12 @@ public class OverlayImage implements PlugIn {
     settings.save();
 
     final ImagePlus overlay = WindowManager.getImage(settings.title);
-    if (overlay == imp) {
-      IJ.error("Add Image...",
-          "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
+    if (overlay.getID() == imp.getID()) {
+      IJ.error(TITLE, "Image to be added cannot be the same as\n\"" + imp.getTitle() + "\".");
       return;
     }
     if (overlay.getWidth() > imp.getWidth() && overlay.getHeight() > imp.getHeight()) {
-      IJ.error("Add Image...",
-          "Image to be added cannnot be larger than\n\"" + imp.getTitle() + "\".");
+      IJ.error(TITLE, "Image to be added cannnot be larger than\n\"" + imp.getTitle() + "\".");
       return;
     }
 
