@@ -122,7 +122,7 @@ public class MedianFilter implements PlugInFilter {
     final int slice;
     final Ticker ticker;
 
-    public ImageNormaliser(ImageStack inputStack, float[][] imageStack, float[] mean, int slice,
+    ImageNormaliser(ImageStack inputStack, float[][] imageStack, float[] mean, int slice,
         Ticker ticker) {
       this.inputStack = inputStack;
       this.imageStack = imageStack;
@@ -163,7 +163,7 @@ public class MedianFilter implements PlugInFilter {
     final Ticker ticker;
     final Settings settings;
 
-    public ImageGenerator(float[][] imageStack, float[] mean, int start, int end, Ticker ticker,
+    ImageGenerator(float[][] imageStack, float[] mean, int start, int end, Ticker ticker,
         Settings settings) {
       this.imageStack = imageStack;
       this.mean = mean;
@@ -359,7 +359,7 @@ public class MedianFilter implements PlugInFilter {
     final Ticker ticker;
     final float bias;
 
-    public ImageFilter(ImageStack inputStack, float[][] imageStack, int slice, Ticker ticker,
+    ImageFilter(ImageStack inputStack, float[][] imageStack, int slice, Ticker ticker,
         float bias) {
       this.inputStack = inputStack;
       this.imageStack = imageStack;
