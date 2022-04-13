@@ -47,17 +47,27 @@ import uk.ac.sussex.gdsc.smlm.ij.settings.GUIProtos.NucleusMaskSettings;
 import uk.ac.sussex.gdsc.smlm.ij.settings.SettingsManager;
 
 /**
- * This plugin creates a mask image stack using an XY and XZ mask image.
+ * This plugin creates a mask image stack using ellipsoid nuclei.
  */
 public class NucleusMask implements PlugIn {
   private static final String TITLE = "Nucleus Mask";
 
   private static final String[] MODE = {"Random", "User Input"};
 
-  private NucleusMaskSettings.Builder settings;
+  /** The settings. */
+  NucleusMaskSettings.Builder settings;
 
-  private ImagePlus imp;
-  private ImageStack sphere;
+  /** The image. */
+  ImagePlus imp;
+  /** The current mask of the ellipsoid nucleus. */
+  ImageStack sphere;
+
+  /** The diameter. */
+  double diameter;
+  /** The nm per pixel. */
+  double nmPerPixel;
+  /** The nm per slice. */
+  double nmPerSlice;
 
   @Override
   public void run(String arg) {
@@ -69,10 +79,6 @@ public class NucleusMask implements PlugIn {
 
     createMask();
   }
-
-  private double diameter;
-  private double nmPerPixel;
-  private double nmPerSlice;
 
   private boolean showDialog() {
     ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);

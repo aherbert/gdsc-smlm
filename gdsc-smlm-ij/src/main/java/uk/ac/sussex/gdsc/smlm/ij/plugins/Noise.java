@@ -126,7 +126,7 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
 
   @Override
   public int setup(String arg, ImagePlus imp) {
-    if (arg.equalsIgnoreCase("final")) {
+    if ("final".equalsIgnoreCase(arg)) {
       showResults();
       return DONE;
     }
@@ -380,7 +380,8 @@ public class Noise implements ExtendedPlugInFilter, DialogListener {
   }
 
   private static String createResult(double[] result) {
-    final StringBuilder sb = new StringBuilder("" + (int) result[0]);
+    final StringBuilder sb = new StringBuilder(256);
+    sb.append((int) result[0]);
     for (int i = 1; i < result.length; i++) {
       sb.append('\t').append(result[i]);
     }
