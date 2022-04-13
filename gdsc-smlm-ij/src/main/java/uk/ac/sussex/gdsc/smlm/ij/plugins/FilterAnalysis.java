@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ij.plugins;
 
+import com.thoughtworks.xstream.XStreamException;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
@@ -35,15 +36,19 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.ij.plugin.WindowOrganiser;
 import uk.ac.sussex.gdsc.core.match.ClassificationResult;
@@ -82,12 +87,18 @@ public class FilterAnalysis implements PlugIn {
 
   private static final AtomicReference<LastResults> LAST_RESULTS = new AtomicReference<>();
 
-  private ArrayList<NamedPlot> plots;
-  private HashMap<String, FilterScore> bestFilter;
-  private LinkedList<String> bestFilterOrder;
+  private List<NamedPlot> plots;
+  private Map<String, FilterScore> bestFilter;
+  private List<String> bestFilterOrder;
 
   private final boolean isHeadless;
 
+  /** The plugin settings. */
+  private Settings settings;
+
+  /**
+   * Hold the last results.
+   */
   private static class LastResults {
     List<MemoryPeakResults> resultsList;
     String inputDirectory;
@@ -98,6 +109,9 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * The score for a filter.
+   */
   private static class FilterScore {
     Filter filter;
     double score;
@@ -111,9 +125,6 @@ public class FilterAnalysis implements PlugIn {
       this.score = score;
     }
   }
-
-  /** The plugin settings. */
-  private Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -239,6 +250,9 @@ public class FilterAnalysis implements PlugIn {
     }
   }
 
+  /**
+   * A named plot.
+   */
   private static class NamedPlot {
     String name;
     String xAxisName;
@@ -286,13 +300,13 @@ public class FilterAnalysis implements PlugIn {
     }
 
     // Load filters from file or generate from dialog input
-    List<FilterSet> filterSets = null;
     final boolean fileInput = (arg != null && arg.contains("file"));
 
     if (!showDialog(resultsList, fileInput)) {
       return;
     }
 
+    List<FilterSet> filterSets;
     if (fileInput) {
       filterSets = readFilterSets();
       if (filterSets.isEmpty()) {
@@ -352,7 +366,7 @@ public class FilterAnalysis implements PlugIn {
         }
         IJ.log("No filter sets defined in the specified file: "
             + filterSettings.getFilterSetFilename());
-      } catch (final Exception ex) {
+      } catch (final IOException | XStreamException ex) {
         IJ.log("Unable to load the filter sets from file: " + ex.getMessage());
       } finally {
         IJ.showStatus("");
@@ -374,7 +388,7 @@ public class FilterAnalysis implements PlugIn {
         // Use the instance so we can catch the exception
         FilterXStreamUtils.getXStreamInstance().toXML(filterSets, out);
         SettingsManager.writeSettings(filterSettings.build());
-      } catch (final Exception ex) {
+      } catch (final IOException | XStreamException ex) {
         IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
       }
     }
@@ -737,8 +751,8 @@ public class FilterAnalysis implements PlugIn {
           final ClassificationResult sLower = lower.score(resultsList);
 
           final StringBuilder sb = new StringBuilder();
-          sb.append('\t').append(filter.getParameterName(index)).append('\t');
-          sb.append(MathUtils.rounded(filter.getParameterValue(index), 4)).append('\t');
+          sb.append('\t').append(filter.getParameterName(index)).append('\t')
+              .append(MathUtils.rounded(filter.getParameterValue(index), 4)).append('\t');
 
           final double dx1 = higher.getParameterValue(index) - filter.getParameterValue(index);
           final double dx2 = filter.getParameterValue(index) - lower.getParameterValue(index);
@@ -769,8 +783,8 @@ public class FilterAnalysis implements PlugIn {
     final double relativeSensitivity = (abs1 + abs2) * 0.5;
     final double sensitivity = (dydx1 + dydx2) * 0.5;
 
-    sb.append(MathUtils.rounded(relativeSensitivity, 4)).append('\t');
-    sb.append(MathUtils.rounded(sensitivity, 4)).append('\t');
+    sb.append(MathUtils.rounded(relativeSensitivity, 4)).append('\t')
+        .append(MathUtils.rounded(sensitivity, 4)).append('\t');
   }
 
   private Consumer<String> createResultsWindow() {
@@ -790,18 +804,20 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private static String createResultsHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Name\t");
-    sb.append("N\t");
-    sb.append("TP\t");
-    sb.append("FP\t");
-    sb.append("TN\t");
-    sb.append("FN\t");
-    sb.append("Jaccard\t");
-    sb.append("Precision\t");
-    sb.append("Recall\t");
-    sb.append("F1");
-    return sb.toString();
+    return Arrays.stream(new String[] {
+        // @formatter:off
+        "Name",
+        "N",
+        "TP",
+        "FP",
+        "TN",
+        "FN",
+        "Jaccard",
+        "Precision",
+        "Recall",
+        "F1"
+        // @formatter:on
+    }).collect(Collectors.joining("\t"));
   }
 
   private Consumer<String> createSensitivityWindow() {
@@ -816,17 +832,19 @@ public class FilterAnalysis implements PlugIn {
   }
 
   private static String createSensitivityHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Filter\t");
-    sb.append("Param\t");
-    sb.append("Value\t");
-    sb.append("J Sensitivity (delta)\t");
-    sb.append("J Sensitivity (unit)\t");
-    sb.append("P Sensitivity (delta)\t");
-    sb.append("P Sensitivity (unit)\t");
-    sb.append("R Sensitivity (delta)\t");
-    sb.append("R Sensitivity (unit)\t");
-    return sb.toString();
+    return Arrays.stream(new String[] {
+        // @formatter:off
+        "Filter",
+        "Param",
+        "Value",
+        "J Sensitivity (delta)",
+        "J Sensitivity (unit)",
+        "P Sensitivity (delta)",
+        "P Sensitivity (unit)",
+        "R Sensitivity (delta)",
+        "R Sensitivity (unit)"
+        // @formatter:on
+    }).collect(Collectors.joining("\t"));
   }
 
   private int runAnalysis(Consumer<String> output, FilterSet filterSet,
@@ -871,13 +889,13 @@ public class FilterAnalysis implements PlugIn {
 
     if (allSameType && settings.calculateSensitivity) {
       final FilterScore filterScore = bestFilter.get(type);
-      if (filterScore != null) {
+      if (filterScore == null) {
+        bestFilter.put(type, new FilterScore(maxFilter, maxScore));
+        bestFilterOrder.add(type);
+      } else {
         if (filterScore.score < maxScore) {
           filterScore.update(maxFilter, maxScore);
         }
-      } else {
-        bestFilter.put(type, new FilterScore(maxFilter, maxScore));
-        bestFilterOrder.add(type);
       }
     }
 
@@ -945,17 +963,19 @@ public class FilterAnalysis implements PlugIn {
     final ClassificationResult s = filter.score(resultsList);
 
     if (settings.showResultsTable) {
-      final StringBuilder sb = new StringBuilder();
-      sb.append(filter.getName()).append('\t');
-      sb.append(s.getTruePositives() + s.getFalsePositives()).append('\t');
-      sb.append(s.getTruePositives()).append('\t');
-      sb.append(s.getFalsePositives()).append('\t');
-      sb.append(s.getTrueNegatives()).append('\t');
-      sb.append(s.getFalseNegatives()).append('\t');
-      sb.append(s.getJaccard()).append('\t');
-      sb.append(s.getPrecision()).append('\t');
-      sb.append(s.getRecall()).append('\t');
-      sb.append(s.getF1Score());
+      final StringBuilder sb = new StringBuilder(256);
+      // @formatter:off
+      sb.append(filter.getName()).append('\t')
+        .append(s.getTruePositives() + s.getFalsePositives()).append('\t')
+        .append(s.getTruePositives()).append('\t')
+        .append(s.getFalsePositives()).append('\t')
+        .append(s.getTrueNegatives()).append('\t')
+        .append(s.getFalseNegatives()).append('\t')
+        .append(s.getJaccard()).append('\t')
+        .append(s.getPrecision()).append('\t')
+        .append(s.getRecall()).append('\t')
+        .append(s.getF1Score());
+      // @formatter:on
       output.accept(sb.toString());
     }
     return s;
