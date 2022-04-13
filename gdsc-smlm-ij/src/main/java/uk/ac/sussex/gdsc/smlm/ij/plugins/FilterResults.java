@@ -108,11 +108,7 @@ public class FilterResults implements PlugIn {
       return;
     }
 
-    if (!analyseResults()) {
-      return;
-    }
-
-    if (!showDialog()) {
+    if (!analyseResults() || !showDialog()) {
       return;
     }
 
@@ -291,7 +287,9 @@ public class FilterResults implements PlugIn {
     // Initialise the mask
     CoordFilter maskFilter;
     final ImagePlus maskImp = WindowManager.getImage(filterSettings.getMaskTitle());
-    if (maskImp != null) {
+    if (maskImp == null) {
+      maskFilter = (t, x, y) -> true;
+    } else {
       final int maxx = maskImp.getWidth();
       final int maxy = maskImp.getHeight();
       final Rectangle bounds = results.getBounds();
@@ -308,8 +306,8 @@ public class FilterResults implements PlugIn {
         maskFilter = (t, x, y) -> {
           // Check stack index
           if (t >= 1 && t <= stack.size()) {
-            int ix = (int) ((x - ox) / scaleX);
-            int iy = (int) ((y - oy) / scaleY);
+            final int ix = (int) ((x - ox) / scaleX);
+            final int iy = (int) ((y - oy) / scaleY);
             if (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy) {
               ip.setPixels(stack.getPixels(t));
               return ip.get(iy * maxx + ix) != 0;
@@ -321,13 +319,11 @@ public class FilterResults implements PlugIn {
         // 2D filter.
         final ImageProcessor ip = maskImp.getProcessor();
         maskFilter = (t, x, y) -> {
-          int ix = (int) ((x - ox) / scaleX);
-          int iy = (int) ((y - oy) / scaleY);
+          final int ix = (int) ((x - ox) / scaleX);
+          final int iy = (int) ((y - oy) / scaleY);
           return (ix >= 0 && ix < maxx && iy >= 0 && iy < maxy && ip.get(iy * maxx + ix) != 0);
         };
       }
-    } else {
-      maskFilter = (t, x, y) -> true;
     }
 
     // Create the ticker with size+1 as we tick at the start of the loop
@@ -338,15 +334,7 @@ public class FilterResults implements PlugIn {
       // sp will not be null
 
       // We stored the drift=z, intensity=signal, background=snr
-      if (sp.z[i] > filterSettings.getMaxDrift()) {
-        continue;
-      }
-
-      if (sp.intensity[i] < filterSettings.getMinSignal()) {
-        continue;
-      }
-
-      if (sp.background[i] < filterSettings.getMinSnr()) {
+      if ((sp.z[i] > filterSettings.getMaxDrift()) || (sp.intensity[i] < filterSettings.getMinSignal()) || (sp.background[i] < filterSettings.getMinSnr())) {
         continue;
       }
 
