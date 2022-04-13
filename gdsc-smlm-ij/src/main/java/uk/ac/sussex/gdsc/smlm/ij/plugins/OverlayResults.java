@@ -61,21 +61,27 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultView;
 
 /**
- * Produces a summary table of the results that are stored in memory.
+ * Overlay localisation results on the source image.
  */
 public class OverlayResults implements PlugIn {
   private static final String TITLE = "Overlay Results";
 
-  private String[] names;
-  private int[] ids;
-  private Choice choice;
-  private Checkbox checkbox;
-  private Label label;
+  /** The names of the results in memory. */
+  String[] names;
+  /** The image ids for each results set. */
+  int[] ids;
+  /** The dialog results selection choice. */
+  Choice choice;
+  /** The dialog "show table" checkbox. */
+  Checkbox checkbox;
+  /** The dialog label. */
+  Label label;
 
-  private final ConcurrentMonoStack<Integer> inbox = new ConcurrentMonoStack<>();
+  /** The inbox for the next chosen index to process. */
+  final ConcurrentMonoStack<Integer> inbox = new ConcurrentMonoStack<>();
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -118,6 +124,9 @@ public class OverlayResults implements PlugIn {
     }
   }
 
+  /**
+   * Worker to provide an interactive overlay.
+   */
   private class Worker extends ImageAdapter implements ItemListener, Runnable {
     private boolean running = true;
     private final boolean[] error = new boolean[ids.length];
@@ -181,6 +190,13 @@ public class OverlayResults implements PlugIn {
       }
       clearOldOverlay();
       closeTextWindow();
+    }
+
+    /**
+     * Stop running.
+     */
+    void stop() {
+      running = false;
     }
 
     private void clearOldOverlay() {
@@ -293,14 +309,14 @@ public class OverlayResults implements PlugIn {
         table.begin();
 
         tw = table.getResultsWindow();
-        if (windowBounds != null) {
-          tw.setBounds(windowBounds);
-        } else {
+        if (windowBounds == null) {
           // Position under the window
           final ImageWindow win = imp.getWindow();
           final Point p = win.getLocation();
           p.y += win.getHeight();
           tw.setLocation(p);
+        } else {
+          tw.setBounds(windowBounds);
         }
       } else {
         table = null;
@@ -443,7 +459,7 @@ public class OverlayResults implements PlugIn {
       settings.showTable = gd.getNextBoolean();
     }
     if (thread != null && worker != null) {
-      worker.running = false;
+      worker.stop();
       inbox.close(true);
       try {
         thread.join(0);
