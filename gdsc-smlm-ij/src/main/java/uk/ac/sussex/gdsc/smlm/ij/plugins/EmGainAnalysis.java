@@ -390,7 +390,7 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Avoid super-saturated pixels by using 98% of histogram
     long sum = 0;
-    for (int i = 0; i < data.length; i++) {
+    for (final int i : data) {
       sum += data[i];
     }
 
@@ -462,15 +462,14 @@ public class EmGainAnalysis implements PlugInFilter {
 
     // Perform a fit
     final CustomPowellOptimizer o = new CustomPowellOptimizer(1e-6, 1e-16, 1e-6, 1e-16);
-    final double[] startPoint =
-        new double[] {photons, settings.gain, settings.noise, settings.bias};
+    final double[] startPoint = {photons, settings.gain, settings.noise, settings.bias};
     int maxEval = 3000;
 
     final String[] paramNames = {"Photons", "Gain", "Noise", "Bias"};
     // Set bounds
-    final double[] lower = new double[] {0, 0.5 * settings.gain, 0, settings.bias - settings.noise};
-    final double[] upper = new double[] {2 * photons, 2 * settings.gain, settings.gain,
-        settings.bias + settings.noise};
+    final double[] lower = {0, 0.5 * settings.gain, 0, settings.bias - settings.noise};
+    final double[] upper =
+        {2 * photons, 2 * settings.gain, settings.gain, settings.bias + settings.noise};
 
     // Restart until converged.
     // TODO - Maybe fix this with a better optimiser. This needs to be tested on real data.
@@ -709,8 +708,8 @@ public class EmGainAnalysis implements PlugInFilter {
       }
       // Normalise
       double sum = 0;
-      for (int j = 0; j < kernel.length; j++) {
-        sum += kernel[j];
+      for (final double d : kernel) {
+        sum += d;
       }
       for (int j = 0; j < kernel.length; j++) {
         kernel[j] /= sum;
@@ -758,7 +757,7 @@ public class EmGainAnalysis implements PlugInFilter {
    * @param c0 The constant offset (bias)
    * @return The PDF
    */
-  private static double[] pdf(final int max, final double photons, final double gain,
+  static double[] pdf(final int max, final double photons, final double gain,
       final double sd, int c0) {
     final double[] g = pdfEmGain(max, photons, gain);
     double[] gg;
@@ -773,8 +772,8 @@ public class EmGainAnalysis implements PlugInFilter {
       }
       // Normalise
       double sum = 0;
-      for (int j = 0; j < kernel.length; j++) {
-        sum += kernel[j];
+      for (final double d : kernel) {
+        sum += d;
       }
       for (int j = 0; j < kernel.length; j++) {
         kernel[j] /= sum;
@@ -836,8 +835,8 @@ public class EmGainAnalysis implements PlugInFilter {
 
   private static int getSize(int[] histogram) {
     int size = 0;
-    for (int i = 0; i < histogram.length; i++) {
-      size += histogram[i];
+    for (final int i : histogram) {
+      size += i;
     }
     return size;
   }
