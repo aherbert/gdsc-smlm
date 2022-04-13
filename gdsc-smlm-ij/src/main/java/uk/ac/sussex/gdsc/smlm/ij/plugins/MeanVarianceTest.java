@@ -68,11 +68,9 @@ import uk.ac.sussex.gdsc.core.utils.StoredDataStatistics;
 public class MeanVarianceTest implements PlugIn {
   private static final String TITLE = "Mean Variance Test";
 
-  private int exposureCounter;
+  /** The exposure counter. */
+  int exposureCounter;
   private boolean singleImage;
-
-  /** The plugin settings. */
-  private Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -121,6 +119,9 @@ public class MeanVarianceTest implements PlugIn {
     }
   }
 
+  /**
+   * The sample from a pair of image frames.
+   */
   private static class PairSample {
     int slice1;
     int slice2;
@@ -128,7 +129,7 @@ public class MeanVarianceTest implements PlugIn {
     double mean2;
     double variance;
 
-    public PairSample(int slice1, int slice2, double mean1, double mean2, double variance) {
+    PairSample(int slice1, int slice2, double mean1, double mean2, double variance) {
       this.slice1 = slice1;
       this.slice2 = slice2;
       this.mean1 = mean1;
@@ -136,11 +137,14 @@ public class MeanVarianceTest implements PlugIn {
       this.variance = variance;
     }
 
-    public double getMean() {
+    double getMean() {
       return (mean1 + mean2) * 0.5;
     }
   }
 
+  /**
+   * The sample from all pairs of frames in an image.
+   */
   private class ImageSample {
     String title;
     float[][] slices;
@@ -148,9 +152,9 @@ public class MeanVarianceTest implements PlugIn {
     double[] means;
     List<PairSample> samples;
 
-    public ImageSample(ImagePlus imp, double start, double end) {
+    ImageSample(ImagePlus imp, double start, double end) {
       // Check stack has two slices
-      if (imp.getStackSize() < 2) {
+      if (imp.getStackSize() <= 1) {
         throw new IllegalArgumentException("Image must have at least 2-slices: " + imp.getTitle());
       }
 
@@ -166,7 +170,7 @@ public class MeanVarianceTest implements PlugIn {
           if (exposure >= 0) {
             break;
           }
-        } catch (final NumberFormatException ex) {
+        } catch (final NumberFormatException ignored) {
           // Ignore
         }
       }
@@ -225,7 +229,7 @@ public class MeanVarianceTest implements PlugIn {
       }
     }
 
-    public void compute(boolean consecutive, double start, double end) {
+    void compute(boolean consecutive, double start, double end) {
       final int size = slices.length;
       final int nSamples = (consecutive) ? size - 1 : ((size - 1) * size) / 2;
       samples = new ArrayList<>(nSamples);
@@ -267,7 +271,7 @@ public class MeanVarianceTest implements PlugIn {
   public void run(String arg) {
     SmlmUsageTracker.recordPlugin(this.getClass(), arg);
 
-    settings = Settings.load();
+    final Settings settings = Settings.load();
     settings.save();
 
     String helpKey = "mean-variance-test";
@@ -295,7 +299,7 @@ public class MeanVarianceTest implements PlugIn {
     if (singleImage) {
       IJ.showStatus("Loading images...");
       images = getImages();
-      if (images.size() == 0) {
+      if (images.isEmpty()) {
         IJ.error(TITLE, "Not enough images for analysis");
         return;
       }
@@ -439,7 +443,7 @@ public class MeanVarianceTest implements PlugIn {
           sb.append(IJ.d2s(pair.mean2, 2)).append('\t');
           sb.append(IJ.d2s(mean[j], 2)).append('\t');
           sb.append(IJ.d2s(variance[j], 2)).append('\t');
-          sb.append(MathUtils.rounded(gain, 4)).append("\n");
+          sb.append(MathUtils.rounded(gain, 4)).append('\n');
         }
         j++;
       }
