@@ -77,9 +77,11 @@ public class CropResults implements PlugIn {
   static final int NAME_OPTION_SEQUENCE = 2;
 
   private LocalList<String> titles;
-  private CropResultsSettings.Builder settings;
+  /** The settings. */
+  CropResultsSettings.Builder settings;
   private boolean myUseRoi;
-  private MemoryPeakResults results;
+  /** The results. */
+  MemoryPeakResults results;
   private String outputName;
   private MinMaxResultProcedure minMax;
   private TypeConverter<DistanceUnit> converter;
@@ -215,7 +217,7 @@ public class CropResults implements PlugIn {
           converter =
               CalibrationHelper.getDistanceConverter(results.getCalibration(), DistanceUnit.NM);
           unit = UnitHelper.getShortName(DistanceUnit.NM);
-        } catch (final ConversionException ex) {
+        } catch (final ConversionException ignored) {
           // No native units
         }
       }
@@ -458,11 +460,6 @@ public class CropResults implements PlugIn {
   }
 
   private void roiCropResults() {
-    final MemoryPeakResults newResults = createNewResults();
-
-    // These bounds are integer. But this is because the results are meant to come from an image.
-    final Rectangle integerBounds = results.getBounds(true);
-
     final ImagePlus imp = WindowManager.getImage(settings.getRoiImage());
     if (imp == null) {
       IJ.error(TITLE, "No ROI image: " + settings.getRoiImage());
@@ -475,6 +472,9 @@ public class CropResults implements PlugIn {
       return;
     }
 
+    // These bounds are integer. But this is because the results are meant to come from an image.
+    final Rectangle integerBounds = results.getBounds(true);
+
     // Scale the results to the size of the image with the ROI
     final int roiImageWidth = imp.getWidth();
     final int roiImageHeight = imp.getHeight();
@@ -484,6 +484,7 @@ public class CropResults implements PlugIn {
     final double yscale = roiImageHeight / integerBounds.getHeight();
 
     final Predicate<PeakResult> testZ = getZFilter();
+    final MemoryPeakResults newResults = createNewResults();
 
     results.forEach(DistanceUnit.PIXEL, (XyrResultProcedure) (x, y, result) -> {
       if (roiTest.test((x - ox) * xscale, (y - oy) * yscale) && testZ.test(result)) {
