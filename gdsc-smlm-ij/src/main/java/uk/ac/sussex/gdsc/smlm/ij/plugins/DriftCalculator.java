@@ -126,8 +126,8 @@ public class DriftCalculator implements PlugIn {
     static final String STACK_ALIGNMENT = "Reference Stack Alignment";
     static final String MARKED_ROIS = "Marked ROIs";
     static final String[] UPDATE_METHODS =
-        new String[] {"None", "Update", "New dataset", "New truncated dataset"};
-    static final String[] SIZES = new String[] {"128", "256", "512", "1024", "2048"};
+        {"None", "Update", "New dataset", "New truncated dataset"};
+    static final String[] SIZES = {"128", "256", "512", "1024", "2048"};
 
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
@@ -355,7 +355,7 @@ public class DriftCalculator implements PlugIn {
     final int to;
     final Ticker ticker;
 
-    public ImageFhtInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
+    ImageFhtInitialiser(ImageStack stack, ImageProcessor[] images, AlignImagesFft aligner,
         Fht[] fhtImages, int from, int to, final Ticker ticker) {
       this.stack = stack;
       this.images = images;
@@ -439,22 +439,22 @@ public class DriftCalculator implements PlugIn {
 
     final MemoryPeakResults results =
         ResultsManager.loadInputResults(settings.inputOption, false, DistanceUnit.PIXEL, null);
-    if (results == null || results.size() < 2) {
+    if (results == null || results.size() <= 1) {
       IJ.error(TITLE, "There are not enough fitting results for drift correction");
       return;
     }
-    double[][] drift = null;
+    double[][] drift;
     final int[] limits = findTimeLimits(results);
     try {
-      if (settings.method.equals(Settings.MARKED_ROIS)) {
+      if (Settings.MARKED_ROIS.equals(settings.method)) {
         drift = calculateUsingMarkers(results, limits, rois);
-      } else if (settings.method.equals(Settings.STACK_ALIGNMENT)) {
+      } else if (Settings.STACK_ALIGNMENT.equals(settings.method)) {
         final ImageStack stack = showStackDialog(stackTitles);
         if (stack == null) {
           return;
         }
         drift = calculateUsingImageStack(stack, limits);
-      } else if (settings.method.equals(Settings.DRIFT_FILE)) {
+      } else if (Settings.DRIFT_FILE.equals(settings.method)) {
         drift = calculateUsingDriftFile(limits);
       } else {
         if (!showSubImageDialog()) {
@@ -937,8 +937,8 @@ public class DriftCalculator implements PlugIn {
    */
   private static Spot[][] findSpots(MemoryPeakResults results, Roi[] rois, int[] limits) {
     final ArrayList<Spot[]> roiSpots = new ArrayList<>(rois.length);
-    for (int i = 0; i < rois.length; i++) {
-      final Spot[] spots = findSpots(results, rois[i].getBounds(), limits);
+    for (final Roi roi : rois) {
+      final Spot[] spots = findSpots(results, roi.getBounds(), limits);
       if (spots.length > 0) {
         roiSpots.add(spots);
       }
@@ -1203,7 +1203,7 @@ public class DriftCalculator implements PlugIn {
       }
       ImageJUtils.log("Saved calculated drift to file: " + settings.driftFilename);
     } catch (final IOException ex) {
-      // Do nothing
+      IJ.log("Failed to save drift to file: " + ex.getMessage());
     }
   }
 
@@ -1224,7 +1224,7 @@ public class DriftCalculator implements PlugIn {
       return null;
     }
 
-    if (readDriftFile(limits) < 2) {
+    if (readDriftFile(limits) <= 1) {
       ImageJUtils.log("ERROR : Not enough drift points within the time limits %d - %d", limits[0],
           limits[1]);
       return null;
@@ -1272,9 +1272,8 @@ public class DriftCalculator implements PlugIn {
   private int readDriftFile(int[] limits) {
     int ok = 0;
     try (BufferedReader input = Files.newBufferedReader(Paths.get(settings.driftFilename))) {
-      String line;
       final Pattern pattern = Pattern.compile("[\t, ]+");
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.length() == 0) {
           continue;
         }
@@ -1291,20 +1290,23 @@ public class DriftCalculator implements PlugIn {
             calculatedTimepoints[t] = ++ok;
             lastdx[t] = x;
             lastdy[t] = y;
-          } catch (final NoSuchElementException ex) {
+          } catch (final NoSuchElementException ignored) {
             // Do nothing
           }
         }
       }
     } catch (final IOException ex) {
-      // ignore
+      IJ.log("Failed to read drift to file: " + ex.getMessage());
     }
     return ok;
   }
 
+  /**
+   * Divide the peaks results into blocks.
+   */
   private static class BlockPeakResultProcedure implements PeakResultProcedure {
-    final ArrayList<ArrayList<Localisation>> blocks = new ArrayList<>();
-    ArrayList<Localisation> nextBlock;
+    final List<List<Localisation>> blocks = new ArrayList<>();
+    List<Localisation> nextBlock;
     final Counter counter = new Counter();
     final int frames;
     final int minimimLocalisations;
@@ -1347,30 +1349,30 @@ public class DriftCalculator implements PlugIn {
     results.sort();
     results.forEach(p);
 
-    final ArrayList<ArrayList<Localisation>> blocks = p.blocks;
-    final ArrayList<Localisation> nextBlock = p.nextBlock;
+    final List<List<Localisation>> blocks = p.blocks;
 
-    if (blocks.size() < 2) {
+    if (blocks.size() <= 1) {
       tracker.log("ERROR : Require at least 2 images for drift calculation");
       return null;
     }
 
     // Check the final block has enough localisations
+    final List<Localisation> nextBlock = p.nextBlock;
     if (nextBlock.size() < settings.minimimLocalisations) {
       blocks.remove(blocks.size() - 1);
-      if (blocks.size() < 2) {
+      if (blocks.size() <= 1) {
         tracker.log("ERROR : Require at least 2 images for drift calculation");
         return null;
       }
 
-      final ArrayList<Localisation> combinedBlock = blocks.get(blocks.size() - 1);
+      final List<Localisation> combinedBlock = blocks.get(blocks.size() - 1);
       combinedBlock.addAll(nextBlock);
     }
 
     // Find the average time point for each block
     final int[] blockT = new int[blocks.size()];
     int time = 0;
-    for (final ArrayList<Localisation> block : blocks) {
+    for (final List<Localisation> block : blocks) {
       long sum = 0;
       for (final Localisation r : block) {
         sum += r.time;
@@ -1435,8 +1437,8 @@ public class DriftCalculator implements PlugIn {
    */
   private static double[] getOriginalDriftTimePoints(double[] dx, int[] timepoints) {
     final double[] originalDriftTimePoints = new double[dx.length];
-    for (int i = 0; i < timepoints.length; i++) {
-      originalDriftTimePoints[timepoints[i]] = 1;
+    for (final int t : timepoints) {
+      originalDriftTimePoints[t] = 1;
     }
     return originalDriftTimePoints;
   }
@@ -1456,7 +1458,7 @@ public class DriftCalculator implements PlugIn {
    * @param iterations the iterations
    * @return the double
    */
-  private double calculateDriftUsingFrames(ArrayList<ArrayList<Localisation>> blocks, int[] blockT,
+  private double calculateDriftUsingFrames(List<List<Localisation>> blocks, int[] blockT,
       Rectangle bounds, float scale, double[] dx, double[] dy, double[] originalDriftTimePoints,
       double smoothing, int iterations) {
     // Construct images using the current drift
@@ -1549,7 +1551,7 @@ public class DriftCalculator implements PlugIn {
       }
     }
 
-    if (ok < 2) {
+    if (ok <= 1) {
       tracker.log("ERROR : Unable to align more than 1 image to the overall projection");
       return Double.NaN;
     }
@@ -1602,7 +1604,14 @@ public class DriftCalculator implements PlugIn {
     return Math.max(1, (int) Math.round((double) images.length / Prefs.getThreads()));
   }
 
-  private static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
+  /**
+   * Create a new peak results image.
+   *
+   * @param bounds the bounds
+   * @param imageScale the image scale
+   * @return the peak results image
+   */
+  static ImageJImagePeakResults newImage(Rectangle bounds, float imageScale) {
     final ResultsImageSettings.Builder builder = ResultsImageSettings.newBuilder()
         .setImageType(ResultsImageType.DRAW_INTENSITY).setImageMode(ResultsImageMode.IMAGE_ADD)
         .setWeighted(true).setImageSizeMode(ResultsImageSizeMode.SCALED).setScale(imageScale);
@@ -1614,7 +1623,13 @@ public class DriftCalculator implements PlugIn {
     return image;
   }
 
-  private static ImageProcessor getImage(ImageJImagePeakResults imageResults) {
+  /**
+   * Gets the image.
+   *
+   * @param imageResults the image results
+   * @return the image
+   */
+  static ImageProcessor getImage(ImageJImagePeakResults imageResults) {
     imageResults.end();
     return imageResults.getImagePlus().getProcessor();
   }
