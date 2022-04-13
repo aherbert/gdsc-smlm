@@ -101,15 +101,15 @@ public class FreeFilterResults implements PlugIn {
 
     // Filter results
     final Filter filter = Filter.fromXml(filterSettings.getFreeFilter());
-    if (filter != null) {
+    if (filter == null) {
+      IJ.showStatus("ERROR: Unable to create filter");
+    } else {
       final MemoryPeakResults newResults = filter.filter(results);
       if (newResults.size() > 0) {
         newResults.setName(results.getName() + " Free Filtered");
         MemoryPeakResults.addResults(newResults);
       }
       IJ.showStatus(String.format("Filtered %d results to %d", results.size(), newResults.size()));
-    } else {
-      IJ.showStatus("ERROR: Unable to create filter");
     }
   }
 
