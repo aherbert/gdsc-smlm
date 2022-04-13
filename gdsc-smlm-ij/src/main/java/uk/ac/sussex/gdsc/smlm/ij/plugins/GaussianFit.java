@@ -214,9 +214,12 @@ public class GaussianFit implements ExtendedPlugInFilter {
     }
   }
 
+  /**
+   * Lazy loader for the PSFType.
+   */
   private static class PsfTypeLoader {
-    private static final PSFType[] PSF_TYPE_VALUES;
-    private static final String[] PSF_TYPE_NAMES;
+    static final PSFType[] PSF_TYPE_VALUES;
+    static final String[] PSF_TYPE_NAMES;
 
     static {
       //@formatter:off
@@ -345,7 +348,7 @@ public class GaussianFit implements ExtendedPlugInFilter {
    */
   private static double[] getLimits(ImageProcessor ip) {
     final ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.MIN_MAX, null);
-    final double[] limits = new double[] {stats.min, stats.max};
+    final double[] limits = {stats.min, stats.max};
 
     // Use histogram to cover x% of the data
     final int[] data = ip.getHistogram();
@@ -567,7 +570,94 @@ public class GaussianFit implements ExtendedPlugInFilter {
     final FloatProcessor renderedImage =
         settings.showFit ? new FloatProcessor(ip.getWidth(), ip.getHeight()) : null;
 
-    if (!settings.singleFit) {
+    if (settings.singleFit) {
+      if (isLogProgress()) {
+        IJ.log("Individual fit");
+      }
+
+      int npoints = 0;
+      final float[] xpoints = new float[maxIndices.length];
+      final float[] ypoints = new float[maxIndices.length];
+
+      // Extract each peak and fit individually
+      final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
+      float[] region = null;
+      final Gaussian2DFitter gf = createGaussianFitter(settings.filterResults);
+      double[] validParams = null;
+
+      final ShortProcessor renderedImageCount =
+          settings.showFit ? new ShortProcessor(ip.getWidth(), ip.getHeight()) : null;
+
+      for (int n = 0; n < maxIndices.length; n++) {
+        final int y = maxIndices[n] / width;
+        final int x = maxIndices[n] % width;
+
+        final long time = System.nanoTime();
+        final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, settings.singleRegionSize);
+        region = ie.crop(regionBounds, region);
+
+        final int newIndex = (y - regionBounds.y) * regionBounds.width + x - regionBounds.x;
+
+        if (isLogProgress()) {
+          IJ.log("Fitting peak " + (n + 1));
+        }
+
+        final double[] peakParams = fitSingle(gf, region, regionBounds.width, regionBounds.height,
+            newIndex, smoothData[maxIndices[n]]);
+        ellapsed += System.nanoTime() - time;
+
+        // Output fit result
+        if (peakParams == null) {
+          if (isLogProgress()) {
+            IJ.log("Failed to fit peak " + (n + 1) + ": " + getReason(fitResult));
+          }
+        } else {
+          if (settings.showFit) {
+            // Copy the valid parameters before there are adjusted to global bounds
+            validParams = peakParams.clone();
+          }
+
+          double[] peakParamsDev = null;
+          if (settings.showDeviations) {
+            peakParamsDev = convertParameters(fitResult.getParameterDeviations());
+          }
+
+          addResult(bounds, regionBounds, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
+
+          // Add fit result to the overlay - Coords are updated with the region offsets in addResult
+          final double xf = peakParams[Gaussian2DFunction.X_POSITION];
+          final double yf = peakParams[Gaussian2DFunction.Y_POSITION];
+          xpoints[npoints] = (float) xf;
+          ypoints[npoints] = (float) yf;
+          npoints++;
+
+          // Draw the fit
+          if (settings.showDeviations) {
+            final int ox = bounds.x + regionBounds.x;
+            final int oy = bounds.y + regionBounds.y;
+            addToImage(ox, oy, renderedImage, validParams, 1, regionBounds.width,
+                regionBounds.height);
+            addCount(ox, oy, renderedImageCount, regionBounds.width, regionBounds.height);
+          }
+        }
+      }
+
+      // Update the overlay
+      if (npoints > 0) {
+        setOverlay(npoints, xpoints, ypoints);
+      } else {
+        imp.setOverlay(null);
+      }
+      // Create the mean
+      if (settings.showFit) {
+        for (int i = renderedImageCount.getPixelCount(); i-- > 0;) {
+          final int count = renderedImageCount.get(i);
+          if (count > 1) {
+            renderedImage.setf(i, renderedImage.getf(i) / count);
+          }
+        }
+      }
+    } else {
       if (isLogProgress()) {
         IJ.log("Combined fit");
       }
@@ -585,7 +675,13 @@ public class GaussianFit implements ExtendedPlugInFilter {
       final double[] params = fitMultiple(data, width, height, maxIndices, estimatedHeights);
       ellapsed = System.nanoTime() - time;
 
-      if (params != null) {
+      if (params == null) {
+        if (isLogProgress()) {
+          IJ.log("Failed to fit " + TextUtils.pleural(maxIndices.length, "peak") + ": "
+              + getReason(fitResult));
+        }
+        imp.setOverlay(null);
+      } else {
         // Copy all the valid parameters into a new array
         final double[] validParams = new double[params.length];
         int count = 0;
@@ -638,97 +734,6 @@ public class GaussianFit implements ExtendedPlugInFilter {
         // Draw the fit
         if (validPeaks != 0) {
           addToImage(bounds.x, bounds.y, renderedImage, validParams, validPeaks, width, height);
-        }
-      } else {
-        if (isLogProgress()) {
-          IJ.log("Failed to fit " + TextUtils.pleural(maxIndices.length, "peak") + ": "
-              + getReason(fitResult));
-        }
-        imp.setOverlay(null);
-      }
-    } else {
-      if (isLogProgress()) {
-        IJ.log("Individual fit");
-      }
-
-      int npoints = 0;
-      final float[] xpoints = new float[maxIndices.length];
-      final float[] ypoints = new float[maxIndices.length];
-
-      // Extract each peak and fit individually
-      final ImageExtractor ie = ImageExtractor.wrap(data, width, height);
-      float[] region = null;
-      final Gaussian2DFitter gf = createGaussianFitter(settings.filterResults);
-      double[] validParams = null;
-
-      final ShortProcessor renderedImageCount =
-          settings.showFit ? new ShortProcessor(ip.getWidth(), ip.getHeight()) : null;
-
-      for (int n = 0; n < maxIndices.length; n++) {
-        final int y = maxIndices[n] / width;
-        final int x = maxIndices[n] % width;
-
-        final long time = System.nanoTime();
-        final Rectangle regionBounds = ie.getBoxRegionBounds(x, y, settings.singleRegionSize);
-        region = ie.crop(regionBounds, region);
-
-        final int newIndex = (y - regionBounds.y) * regionBounds.width + x - regionBounds.x;
-
-        if (isLogProgress()) {
-          IJ.log("Fitting peak " + (n + 1));
-        }
-
-        final double[] peakParams = fitSingle(gf, region, regionBounds.width, regionBounds.height,
-            newIndex, smoothData[maxIndices[n]]);
-        ellapsed += System.nanoTime() - time;
-
-        // Output fit result
-        if (peakParams != null) {
-          if (settings.showFit) {
-            // Copy the valid parameters before there are adjusted to global bounds
-            validParams = peakParams.clone();
-          }
-
-          double[] peakParamsDev = null;
-          if (settings.showDeviations) {
-            peakParamsDev = convertParameters(fitResult.getParameterDeviations());
-          }
-
-          addResult(bounds, regionBounds, peakParams, peakParamsDev, n, x, y, data[maxIndices[n]]);
-
-          // Add fit result to the overlay - Coords are updated with the region offsets in addResult
-          final double xf = peakParams[Gaussian2DFunction.X_POSITION];
-          final double yf = peakParams[Gaussian2DFunction.Y_POSITION];
-          xpoints[npoints] = (float) xf;
-          ypoints[npoints] = (float) yf;
-          npoints++;
-
-          // Draw the fit
-          if (settings.showDeviations) {
-            final int ox = bounds.x + regionBounds.x;
-            final int oy = bounds.y + regionBounds.y;
-            addToImage(ox, oy, renderedImage, validParams, 1, regionBounds.width,
-                regionBounds.height);
-            addCount(ox, oy, renderedImageCount, regionBounds.width, regionBounds.height);
-          }
-        } else if (isLogProgress()) {
-          IJ.log("Failed to fit peak " + (n + 1) + ": " + getReason(fitResult));
-        }
-      }
-
-      // Update the overlay
-      if (npoints > 0) {
-        setOverlay(npoints, xpoints, ypoints);
-      } else {
-        imp.setOverlay(null);
-      }
-      // Create the mean
-      if (settings.showFit) {
-        for (int i = renderedImageCount.getPixelCount(); i-- > 0;) {
-          final int count = renderedImageCount.get(i);
-          if (count > 1) {
-            renderedImage.setf(i, renderedImage.getf(i) / count);
-          }
         }
       }
     }
