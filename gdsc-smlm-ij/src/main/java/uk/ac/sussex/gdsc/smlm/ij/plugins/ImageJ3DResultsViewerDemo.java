@@ -237,7 +237,7 @@ public class ImageJ3DResultsViewerDemo implements PlugIn {
 
     IJ.showStatus("Creating points ...");
     final Point3f[] points = pointList.toArray(new Point3f[0]);
-    final Point3f[] sizes = new Point3f[] {new Point3f(scale, scale, scale)};
+    final Point3f[] sizes = {new Point3f(scale, scale, scale)};
     final Appearance appearance = new Appearance();
     final TransparencyAttributes ta = new TransparencyAttributes();
     ta.setTransparency(0.5f);
