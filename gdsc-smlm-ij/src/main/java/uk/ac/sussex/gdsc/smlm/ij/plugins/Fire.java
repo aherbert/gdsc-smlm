@@ -167,10 +167,13 @@ public class Fire implements PlugIn {
   private int roiImageHeight;
 
   // Stored in initialisation
-  private MemoryPeakResults results;
+
+  /** The results. */
+  MemoryPeakResults results;
   private MemoryPeakResults results2;
   private Rectangle2D dataBounds;
-  private String units;
+  /** The spatial units. */
+  String units;
   private double nmPerUnit = 1;
 
   // Stored in setCorrectionParameters
@@ -183,11 +186,12 @@ public class Fire implements PlugIn {
   private int numberOfThreads;
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   private FourierMethod fourierMethod;
   private SamplingMethod samplingMethod;
-  private ThresholdMethod thresholdMethod;
+  /** The threshold method. */
+  ThresholdMethod thresholdMethod;
   private PrecisionMethod precisionMethod;
 
   private PrecisionResultProcedure pp;
@@ -196,10 +200,10 @@ public class Fire implements PlugIn {
    * Contains the settings that are the re-usable state of the plugin.
    */
   private static class Settings {
-    private static final String[] SCALE_ITEMS;
-    private static final int[] SCALE_VALUES = new int[] {0, 1, 2, 4, 8, 16, 32, 64, 128};
-    private static final String[] IMAGE_SIZE_ITEMS;
-    private static final int[] IMAGE_SIZE_VALUES;
+    static final String[] SCALE_ITEMS;
+    static final int[] SCALE_VALUES = {0, 1, 2, 4, 8, 16, 32, 64, 128};
+    static final String[] IMAGE_SIZE_ITEMS;
+    static final int[] IMAGE_SIZE_VALUES;
 
     static {
       SCALE_ITEMS = new String[SCALE_VALUES.length];
@@ -440,6 +444,9 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Worker to compute the FIRE result.
+   */
   private class FireWorker implements Runnable {
     final double fourierImageScale;
     final int imageSize;
@@ -453,7 +460,7 @@ public class Fire implements PlugIn {
      */
     boolean oom;
 
-    public FireWorker(int id, double fourierImageScale, int imageSize) {
+    FireWorker(int id, double fourierImageScale, int imageSize) {
       this.fourierImageScale = fourierImageScale;
       this.imageSize = imageSize;
       name = results.getName() + " [" + id + "]";
@@ -532,17 +539,17 @@ public class Fire implements PlugIn {
       IJ.error(pluginTitle, "No results could be loaded");
       return;
     }
-    MemoryPeakResults inputResults2 =
-        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
-
     inputResults1 = cropToRoi(inputResults1);
-    if (inputResults1.size() < 2) {
+    if (inputResults1.size() <= 1) {
       IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
+
+    MemoryPeakResults inputResults2 =
+        ResultsManager.loadInputResults(settings.inputOption2, false, null, null);
     if (inputResults2 != null) {
       inputResults2 = cropToRoi(inputResults2);
-      if (inputResults2.size() < 2) {
+      if (inputResults2.size() <= 1) {
         IJ.error(pluginTitle, "No results2 within the crop region");
         return;
       }
@@ -562,20 +569,7 @@ public class Fire implements PlugIn {
     final double fourierImageScale = Settings.SCALE_VALUES[settings.imageScaleIndex];
     final int imageSize = Settings.IMAGE_SIZE_VALUES[settings.imageSizeIndex];
 
-    if (this.results2 != null) {
-      name += " vs " + this.results2.getName();
-
-      final FireResult result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod,
-          fourierImageScale, imageSize);
-
-      if (result != null) {
-        logResult(name, result);
-
-        if (settings.showFrcCurve) {
-          showFrcCurve(name, result, thresholdMethod);
-        }
-      }
-    } else {
+    if (this.results2 == null) {
       FireResult result = null;
 
       final int repeats = (settings.randomSplit) ? Math.max(1, settings.repeats) : 1;
@@ -672,6 +666,19 @@ public class Fire implements PlugIn {
       if (settings.showFrcTimeEvolution && result != null && !Double.isNaN(result.fireNumber)) {
         showFrcTimeEvolution(name, result.fireNumber, thresholdMethod,
             nmPerUnit / result.getNmPerPixel(), imageSize);
+      }
+    } else {
+      name += " vs " + this.results2.getName();
+
+      final FireResult result = calculateFireNumber(fourierMethod, samplingMethod, thresholdMethod,
+          fourierImageScale, imageSize);
+
+      if (result != null) {
+        logResult(name, result);
+
+        if (settings.showFrcCurve) {
+          showFrcCurve(name, result, thresholdMethod);
+        }
       }
     }
 
@@ -915,7 +922,9 @@ public class Fire implements PlugIn {
     units = "unknown";
 
     final CalibrationReader cal = results.getCalibrationReader();
-    if (cal != null) {
+    if (cal == null) {
+      IJ.log(pluginTitle + " Warning: No calibration exists for primary results");
+    } else {
       try {
         nmPerUnit = cal.getDistanceConverter(DistanceUnit.NM).convert(1);
         units = UnitHelper.getShortName(DistanceUnit.NM);
@@ -923,8 +932,6 @@ public class Fire implements PlugIn {
       } catch (final ConversionException ex) {
         IJ.log(pluginTitle + " Warning: Ignoring invalid distance calibration for primary results");
       }
-    } else {
-      IJ.log(pluginTitle + " Warning: No calibration exists for primary results");
     }
 
     // Calibration must match between datasets
@@ -1012,7 +1019,7 @@ public class Fire implements PlugIn {
    * @return the memory peak results
    */
   private MemoryPeakResults verify(MemoryPeakResults results) {
-    if (results == null || results.size() < 2) {
+    if (results == null || results.size() <= 1) {
       return null;
     }
     if (settings.blockSize > 1) {
@@ -1034,22 +1041,17 @@ public class Fire implements PlugIn {
     return createImages(fourierImageScale, imageSize, myUseSignal);
   }
 
+  /**
+   * Get the signal from the result.
+   */
   private interface SignalProvider {
+    /**
+     * Gets the signal.
+     *
+     * @param result the result
+     * @return the signal
+     */
     float getSignal(PeakResult result);
-  }
-
-  private static class FixedSignalProvider implements SignalProvider {
-    @Override
-    public float getSignal(PeakResult result) {
-      return 1f;
-    }
-  }
-
-  private static class PeakSignalProvider implements SignalProvider {
-    @Override
-    public float getSignal(PeakResult result) {
-      return result.getIntensity();
-    }
   }
 
   /**
@@ -1067,9 +1069,8 @@ public class Fire implements PlugIn {
       return null;
     }
 
-    final SignalProvider signalProvider =
-        (useSignal && (results.hasIntensity())) ? new PeakSignalProvider()
-            : new FixedSignalProvider();
+    final boolean fixedSignal = useSignal && results.hasIntensity();
+    final SignalProvider signalProvider = fixedSignal ? x -> x.getIntensity() : x -> 1f;
 
     // Draw images using the existing IJ routines.
     final Rectangle bounds = new Rectangle((int) Math.ceil(dataBounds.getWidth()),
@@ -1092,21 +1093,7 @@ public class Fire implements PlugIn {
     final float minx = (float) dataBounds.getX();
     final float miny = (float) dataBounds.getY();
 
-    if (this.results2 != null) {
-      // Two image comparison
-      final ImageJImagePeakResults i1 = image1;
-      results.forEach((PeakResultProcedure) result -> {
-        final float x = result.getXPosition() - minx;
-        final float y = result.getYPosition() - miny;
-        i1.add(x, y, signalProvider.getSignal(result));
-      });
-      final ImageJImagePeakResults i2 = image2;
-      results2.forEach((PeakResultProcedure) result -> {
-        final float x = result.getXPosition() - minx;
-        final float y = result.getYPosition() - miny;
-        i2.add(x, y, signalProvider.getSignal(result));
-      });
-    } else {
+    if (this.results2 == null) {
       // Block sampling.
       // Ensure we have at least 2 even sized blocks.
       int blockSize = Math.min(results.size() / 2, Math.max(1, settings.blockSize));
@@ -1153,6 +1140,20 @@ public class Fire implements PlugIn {
           image.add(x, y, signalProvider.getSignal(p));
         }
       }
+    } else {
+      // Two image comparison
+      final ImageJImagePeakResults i1 = image1;
+      results.forEach((PeakResultProcedure) result -> {
+        final float x = result.getXPosition() - minx;
+        final float y = result.getYPosition() - miny;
+        i1.add(x, y, signalProvider.getSignal(result));
+      });
+      final ImageJImagePeakResults i2 = image2;
+      results2.forEach((PeakResultProcedure) result -> {
+        final float x = result.getXPosition() - minx;
+        final float y = result.getYPosition() - miny;
+        i2.add(x, y, signalProvider.getSignal(result));
+      });
     }
 
     image1.end();
@@ -1161,7 +1162,7 @@ public class Fire implements PlugIn {
     image2.end();
     final ImageProcessor ip2 = image2.getImagePlus().getProcessor();
 
-    if (settings.maxPerBin > 0 && signalProvider instanceof FixedSignalProvider) {
+    if (settings.maxPerBin > 0 && fixedSignal) {
       // We can eliminate over-sampled pixels
       for (int i = ip1.getPixelCount(); i-- > 0;) {
         if (ip1.getf(i) > settings.maxPerBin) {
@@ -1232,7 +1233,7 @@ public class Fire implements PlugIn {
       addLine(colorNoSmooth, result.originalCorrelationCurve);
     }
 
-    public void addResolution(double resolution) {
+    void addResolution(double resolution) {
       // Convert back to nm^-1
       final double x = 1 / resolution;
 
@@ -1251,11 +1252,11 @@ public class Fire implements PlugIn {
       }
     }
 
-    public void addResolution(double resolution, double correlation) {
+    void addResolution(double resolution, double correlation) {
       addResolution(resolution, Double.NaN, correlation);
     }
 
-    public void addResolution(double resolution, double originalResolution, double correlation) {
+    void addResolution(double resolution, double originalResolution, double correlation) {
       // Convert back to nm^-1
       final double x = 1 / resolution;
       plot.setColor(Color.MAGENTA);
@@ -1270,7 +1271,7 @@ public class Fire implements PlugIn {
       }
     }
 
-    private void addLine(Color color, double[] y) {
+    void addLine(Color color, double[] y) {
       if (color == null) {
         return;
       }
@@ -1289,7 +1290,15 @@ public class Fire implements PlugIn {
     }
   }
 
-  private Plot createFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod) {
+  /**
+   * Creates the frc curve.
+   *
+   * @param name the name
+   * @param result the result
+   * @param thresholdMethod the threshold method
+   * @return the plot
+   */
+  Plot createFrcCurve(String name, FireResult result, ThresholdMethod thresholdMethod) {
     final FrcCurvePlot curve = new FrcCurvePlot();
     curve.add(name, result, thresholdMethod, Color.red, Color.blue, Color.black);
     curve.addResolution(result.fireNumber, result.correlation);
@@ -1470,7 +1479,7 @@ public class Fire implements PlugIn {
     }
 
     inputResults = cropToRoi(inputResults);
-    if (inputResults.size() < 2) {
+    if (inputResults.size() <= 1) {
       IJ.error(pluginTitle, "No results within the crop region");
       return;
     }
@@ -1486,7 +1495,6 @@ public class Fire implements PlugIn {
           + PrecisionMethod.FIXED + " and enter a precision mean and SD.");
       return;
     }
-    final StoredDataStatistics precision = histogram.precision;
 
     final double fourierImageScale = Settings.SCALE_VALUES[settings.imageScaleIndex];
     final int imageSize = Settings.IMAGE_SIZE_VALUES[settings.imageSizeIndex];
@@ -1562,6 +1570,7 @@ public class Fire implements PlugIn {
     // become parameters for fitting.
 
     // Check if we can sample precision values
+    final StoredDataStatistics precision = histogram.precision;
     final boolean sampleDecay = precision != null && settings.sampleDecay;
 
     double[] expDecay;
@@ -1696,8 +1705,8 @@ public class Fire implements PlugIn {
       final SimplexOptimizer opt = new SimplexOptimizer(1e-6, 1e-10);
       PointValuePair pair = null;
       final MultiPlateauness f = new MultiPlateauness(frcnum, q, low, high);
-      final double[] initial = new double[] {histogram.mean / images.nmPerPixel,
-          histogram.sigma / images.nmPerPixel, qvalue};
+      final double[] initial =
+          {histogram.mean / images.nmPerPixel, histogram.sigma / images.nmPerPixel, qvalue};
       pair = findMin(pair, opt, f, scale(initial, 0.1));
       pair = findMin(pair, opt, f, scale(initial, 0.5));
       pair = findMin(pair, opt, f, initial);
@@ -1776,7 +1785,15 @@ public class Fire implements PlugIn {
     return a;
   }
 
-  private static double[] computeExpDecay(double mean, double sigma, double[] qvalues) {
+  /**
+   * Compute the exponential decay.
+   *
+   * @param mean the mean
+   * @param sigma the sigma
+   * @param qvalues the qvalues
+   * @return the decay
+   */
+  static double[] computeExpDecay(double mean, double sigma, double[] qvalues) {
     final double[] hq = Frc.computeHq(qvalues, mean, sigma);
     final double[] expDecay = new double[qvalues.length];
     expDecay[0] = 1;
@@ -1793,10 +1810,13 @@ public class Fire implements PlugIn {
    * @param value the value
    * @return the sinc value
    */
-  private static double sinc(double value) {
+  static double sinc(double value) {
     return Math.sin(value) / value;
   }
 
+  /**
+   * Quadratic function.
+   */
   private static class Quadratic implements ParametricUnivariateFunction {
     @Override
     public double value(double x, double... parameters) {
@@ -1870,13 +1890,17 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Univariate plateauness function.
+   */
   private static class Plateauness implements UnivariateFunction, MultivariateFunction {
+    private static final double EPSILON = Math.ulp(1.0);
     static final double FRCNUM_NOISE_VAR = 0.1;
     final double[] pre;
     final double n2;
 
     /**
-     * Instantiates a new plateauness.
+     * Create an instance.
      *
      * @param frcnum the scaled FRC numerator
      * @param expDecay the precomputed exponential decay (hq)
@@ -1895,14 +1919,14 @@ public class Fire implements PlugIn {
 
     @Override
     public double value(double qvalue) {
-      if (qvalue < 1e-16) {
-        qvalue = 1e-16;
+      if (qvalue < EPSILON) {
+        qvalue = EPSILON;
       }
       double value = 0;
-      for (int i = 0; i < pre.length; i++) {
+      for (final double p : pre) {
         // Original cost function. Note that each observation has a
         // contribution of 0 to 1.
-        final double diff = (pre[i] / qvalue) - 1;
+        final double diff = (p / qvalue) - 1;
         value += 1 - StdMath.exp(-diff * diff / n2);
 
         // Modified cost function so that the magnitude of difference over or
@@ -1921,7 +1945,11 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Multivariate plateauness function.
+   */
   private static class MultiPlateauness implements MultivariateFunction {
+    private static final double EPSILON = Math.ulp(1.0);
     static final double FRCNUM_NOISE_VAR = 0.1;
     static final double FOUR_PI2 = 4 * Math.PI * Math.PI;
     final double[] pre;
@@ -1929,7 +1957,7 @@ public class Fire implements PlugIn {
     final double n2;
 
     /**
-     * Instantiates a new plateauness.
+     * Create an instance.
      *
      * @param frcnum the scaled FRC numerator
      * @param qvalues the precomputed exponential decay (hq)
@@ -1956,8 +1984,8 @@ public class Fire implements PlugIn {
       final double sigma = point[1];
       double qvalue = point[2];
 
-      if (qvalue < 1e-16) {
-        qvalue = 1e-16;
+      if (qvalue < EPSILON) {
+        qvalue = EPSILON;
       }
 
       // Fast computation of a subset of hq
@@ -2283,7 +2311,7 @@ public class Fire implements PlugIn {
       windowOrganiser.tile();
     }
 
-    private double computePlateauness(double qvalue, double mu, double sd) {
+    double computePlateauness(double qvalue, double mu, double sd) {
       final double[] expDecay = computeExpDecay(mu, sd, qvalues);
       final Plateauness p = new Plateauness(vq, expDecay, low, high);
       return p.value(qvalue);
@@ -2293,9 +2321,9 @@ public class Fire implements PlugIn {
       data = data.clone();
       if (min == Double.POSITIVE_INFINITY) {
         // Find min positive value
-        for (int i = 0; i < data.length; i++) {
-          if (data[i] > 0 && data[i] < min) {
-            min = data[i];
+        for (final double d : data) {
+          if (d > 0 && d < min) {
+            min = d;
           }
         }
       }
@@ -2377,7 +2405,27 @@ public class Fire implements PlugIn {
 
     void plot(MyWindowOrganiser windowOrganiser) {
       final Plot plot = new Plot(title, "Precision (nm)", "Frequency");
-      if (x != null) {
+      if (x == null) {
+        // There is no base histogram.
+        // Just plot a Gaussian +/- 4 SD.
+        plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
+        final double min = Math.max(0, mean - 4 * sigma);
+        final double max = mean + 4 * sigma;
+        final int n = 100;
+        final double dx = (max - min) / n;
+        final float[] xdata = new float[n + 1];
+        final Gaussian g = new Gaussian(1, mean, sigma);
+        final float[] ydata = new float[xdata.length];
+        for (int i = 0; i <= n; i++) {
+          xdata[i] = (float) (min + i * dx);
+          ydata[i] = (float) g.value(xdata[i]);
+        }
+        plot.setColor(Color.red);
+        plot.addPoints(xdata, ydata, Plot.LINE);
+
+        // Always put min = 0 otherwise the plot does not change.
+        plot.setLimits(0, max, 0, 1.05);
+      } else {
         plot.setColor(Color.black);
         plot.addPoints(x, y, Plot.BAR);
         plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
@@ -2399,26 +2447,6 @@ public class Fire implements PlugIn {
         max = MathUtils.maxDefault(max, y);
         final double rangex = 0;
         plot.setLimits(x2[0] - rangex, x2[x2.length - 1] + rangex, 0, max * 1.05);
-      } else {
-        // There is no base histogram.
-        // Just plot a Gaussian +/- 4 SD.
-        plot.addLabel(0, 0, String.format("Precision = %.3f +/- %.3f", mean, sigma));
-        final double min = Math.max(0, mean - 4 * sigma);
-        final double max = mean + 4 * sigma;
-        final int n = 100;
-        final double dx = (max - min) / n;
-        final float[] xdata = new float[n + 1];
-        final Gaussian g = new Gaussian(1, mean, sigma);
-        final float[] ydata = new float[xdata.length];
-        for (int i = 0; i <= n; i++) {
-          xdata[i] = (float) (min + i * dx);
-          ydata[i] = (float) g.value(xdata[i]);
-        }
-        plot.setColor(Color.red);
-        plot.addPoints(xdata, ydata, Plot.LINE);
-
-        // Always put min = 0 otherwise the plot does not change.
-        plot.setLimits(0, max, 0, 1.05);
       }
       windowOrganiser.display(title, plot, ImageJUtils.NO_TO_FRONT);
       windowOrganiser.tile();
@@ -2433,7 +2461,6 @@ public class Fire implements PlugIn {
    * @return The precision histogram
    */
   private PrecisionHistogram calculatePrecisionHistogram() {
-    final boolean logFitParameters = false;
     final String title = results.getName() + " Precision Histogram";
 
     // Check if the results has the precision already or if it can be computed.
@@ -2492,6 +2519,7 @@ public class Fire implements PlugIn {
     final DescriptiveStatistics stats = precision.getStatistics();
     final double lower = stats.getPercentile(25);
     final double upper = stats.getPercentile(75);
+    final boolean logFitParameters = IJ.debugMode;
     if (Double.isNaN(lower) || Double.isNaN(upper)) {
       if (logFitParameters) {
         ImageJUtils.log("Error computing IQR: %f - %f", lower, upper);
@@ -2645,7 +2673,7 @@ public class Fire implements PlugIn {
     try {
       initialGuess = guess.guess();
       return fitter.withStartPoint(initialGuess).fit(observations);
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // We are expecting TooManyEvaluationsException.
       // Just in case there is another exception type, or the initial estimate failed
       // we catch all exceptions.
@@ -2664,7 +2692,7 @@ public class Fire implements PlugIn {
       this.size = new AtomicInteger(size);
     }
 
-    public void display(String title, Plot plot, int flags) {
+    void display(String title, Plot plot, int flags) {
       if (isTiled()) {
         ImageJUtils.display(title, plot, flags);
       } else {
@@ -2679,11 +2707,11 @@ public class Fire implements PlugIn {
       }
     }
 
-    public boolean isTiled() {
+    boolean isTiled() {
       return size.get() == 0;
     }
 
-    public void tile() {
+    void tile() {
       // Get the value and count down to zero
       if (size.getAndUpdate(MyWindowOrganiser::decrementToZero) == 1) {
         // When the value is 1 the next value is 0 so tile
@@ -2698,6 +2726,9 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Hold the work settings.
+   */
   private static class WorkSettings {
     double mean;
     double sigma;
@@ -2710,6 +2741,9 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Base worker for interactive analysis.
+   */
   private class BaseWorker implements WorkflowWorker<WorkSettings, Object> {
     final MyWindowOrganiser wo;
 
@@ -2734,6 +2768,9 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Worker for the histogram.
+   */
   private class HistogramWorker extends BaseWorker {
     final PrecisionHistogram histogram;
 
@@ -2750,6 +2787,9 @@ public class Fire implements PlugIn {
     }
   }
 
+  /**
+   * Worker for the Q plot.
+   */
   private class QPlotWorker extends BaseWorker {
     final QPlot qplot;
 
@@ -2791,17 +2831,7 @@ public class Fire implements PlugIn {
     workflow.start();
 
     final String macroOptions = Macro.getOptions();
-    if (macroOptions != null) {
-      // If inside a macro then just get the options and run the work
-      final double mean = Double
-          .parseDouble(Macro.getValue(macroOptions, KEY_MEAN, Double.toString(histogram.mean)));
-      final double sigma = Double
-          .parseDouble(Macro.getValue(macroOptions, KEY_SIGMA, Double.toString(histogram.sigma)));
-      final double qvalue =
-          Double.parseDouble(Macro.getValue(macroOptions, KEY_Q, Double.toString(qplot.qvalue)));
-      workflow.run(new WorkSettings(mean, sigma, qvalue));
-      workflow.shutdown(false);
-    } else {
+    if (macroOptions == null) {
       // Draw the plots with the first set of work
       workflow.run(new WorkSettings(histogram.mean, histogram.sigma, qplot.qvalue));
 
@@ -2853,6 +2883,16 @@ public class Fire implements PlugIn {
       if (cancelled) {
         return false;
       }
+    } else {
+      // If inside a macro then just get the options and run the work
+      final double mean = Double
+          .parseDouble(Macro.getValue(macroOptions, KEY_MEAN, Double.toString(histogram.mean)));
+      final double sigma = Double
+          .parseDouble(Macro.getValue(macroOptions, KEY_SIGMA, Double.toString(histogram.sigma)));
+      final double qvalue =
+          Double.parseDouble(Macro.getValue(macroOptions, KEY_Q, Double.toString(qplot.qvalue)));
+      workflow.run(new WorkSettings(mean, sigma, qvalue));
+      workflow.shutdown(false);
     }
 
     // Store the Q value and the mean and sigma
@@ -2870,6 +2910,9 @@ public class Fire implements PlugIn {
     return true;
   }
 
+  /**
+   * Listen to dialog changes to queue work for interactive analysis.
+   */
   private static class FireDialogListener extends MouseAdapter implements DialogListener {
     /**
      * Delay (in milliseconds) used when entering new values in the dialog before the preview is
@@ -2978,7 +3021,7 @@ public class Fire implements PlugIn {
     @Override
     public void mouseClicked(MouseEvent event) {
       // Reset the slider on double-click
-      if ((event.getClickCount() < 2) || !(event.getSource() instanceof Scrollbar)) {
+      if ((event.getClickCount() <= 1) || !(event.getSource() instanceof Scrollbar)) {
         return;
       }
       final Scrollbar sl = (Scrollbar) event.getSource();
