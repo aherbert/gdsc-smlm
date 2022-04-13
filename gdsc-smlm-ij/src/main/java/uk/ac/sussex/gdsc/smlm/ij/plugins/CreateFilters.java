@@ -30,6 +30,7 @@ import ij.plugin.PlugIn;
 import java.awt.Checkbox;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -44,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -52,6 +54,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import uk.ac.sussex.gdsc.core.data.DataException;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
@@ -129,7 +132,7 @@ public class CreateFilters implements PlugIn, ItemListener {
       } else {
         IJ.error(TITLE, "No filters created");
       }
-    } catch (final Exception ex) {
+    } catch (final IOException | ParserConfigurationException | SAXException ex) {
       IJ.error(TITLE, "Unable to load the input XML:\n" + ex.getMessage());
       IJ.showStatus("");
     }
@@ -148,7 +151,6 @@ public class CreateFilters implements PlugIn, ItemListener {
       // Any attributes with enumerations should be expanded.
       final Matcher match = pattern.matcher(token);
       if (match.find()) {
-        final String prefix = " " + match.group(1) + "=\"";
         // Use Big Decimal for the enumeration to preserve the precision of the input text
         // (i.e. using doubles for an enumeration can lose precision and fail to correctly
         // enumerate)
@@ -166,6 +168,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         } catch (final NumberFormatException ex) {
           throw new DataException("Invalid 'min:max:increment' attribute: " + token, ex);
         }
+        final String prefix = " " + match.group(1) + "=\"";
         final String suffix = "\"" + match.group(5);
 
         // Enumerate the attribute
@@ -199,7 +202,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         out.add(new StringBuilder(token));
       } else {
         for (final StringBuilder sb : out) {
-          sb.append(" ").append(token);
+          sb.append(' ').append(token);
         }
       }
     }
@@ -240,7 +243,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         out.write(uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(sw.toString()));
         SettingsManager.writeSettings(filterSettings.build());
         IJ.showStatus(total + " filters: " + filterSettings.getFilterSetFilename());
-      } catch (final Exception ex) {
+      } catch (final IOException ex) {
         IJ.log("Unable to save the filter sets to file: " + ex.getMessage());
       }
     }
@@ -330,7 +333,7 @@ public class CreateFilters implements PlugIn, ItemListener {
         final SAXParser saxParser = factory.newSAXParser();
         saxParser.parse(new InputSource(new StringReader(xml)),
             new AttributeSubstitutionHandler(sb, attributeSubstitutions));
-      } catch (final Exception ex) {
+      } catch (final IOException | ParserConfigurationException | SAXException ex) {
         Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to log filter", ex);
         return;
       }
@@ -339,7 +342,7 @@ public class CreateFilters implements PlugIn, ItemListener {
     IJ.log(uk.ac.sussex.gdsc.core.utils.XmlUtils.prettyPrintXml(xml));
   }
 
-  /*
+  /**
    * Inner class for the Callback Handlers. This class replaces the attributes in the XML with the
    * given substitutions. Attributes are processed in order. Substitutions are ignored (skipped) if
    * they are null.
@@ -349,7 +352,7 @@ public class CreateFilters implements PlugIn, ItemListener {
     String[] attributeSubstitutions;
     int substitutionCount;
 
-    public AttributeSubstitutionHandler(StringBuilder sb, String[] attributeSubstitutions) {
+    AttributeSubstitutionHandler(StringBuilder sb, String[] attributeSubstitutions) {
       this.sb = sb;
       this.attributeSubstitutions = attributeSubstitutions;
     }
@@ -357,26 +360,26 @@ public class CreateFilters implements PlugIn, ItemListener {
     @Override
     public void startElement(String uri, String localName, String qualifiedName,
         Attributes attributes) {
-      sb.append("<").append(qualifiedName);
+      sb.append('<').append(qualifiedName);
       for (int attribute = 0; attribute < attributes.getLength(); attribute++) {
-        sb.append(" ");
+        sb.append(' ');
         final String name = attributes.getQName(attribute);
-        if (substitutionCount < attributeSubstitutions.length && !name.equals("class")) {
+        if (substitutionCount < attributeSubstitutions.length && !"class".equals(name)) {
           final String nextSubstitution = attributeSubstitutions[substitutionCount++];
           if (nextSubstitution != null) {
-            sb.append(name).append("=\"").append(nextSubstitution).append("\"");
+            sb.append(name).append("=\"").append(nextSubstitution).append('\"');
             continue;
           }
         }
 
-        sb.append(name).append("=\"").append(attributes.getValue(attribute)).append("\"");
+        sb.append(name).append("=\"").append(attributes.getValue(attribute)).append('\"');
       }
-      sb.append(">");
+      sb.append('>');
     }
 
     @Override
     public void endElement(String uri, String localName, String qualifiedName) {
-      sb.append("</").append(qualifiedName).append(">");
+      sb.append("</").append(qualifiedName).append('>');
     }
   }
 
