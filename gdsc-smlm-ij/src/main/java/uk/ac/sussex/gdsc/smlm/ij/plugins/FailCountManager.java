@@ -100,9 +100,11 @@ public class FailCountManager implements PlugIn {
 
   private FailCountManagerSettings.Builder settings;
 
+  /**
+   * The plugin option.
+   */
   //@formatter:off
-  private enum FailCountOption implements NamedObject
-  {
+  private enum FailCountOption implements NamedObject {
     CREATE_DATA { @Override
     public String getName() { return "Create Data"; } },
     LOAD_DATA { @Override
@@ -121,7 +123,7 @@ public class FailCountManager implements PlugIn {
       return getName();
     }
 
-    public static FailCountOption forOrdinal(int ordinal) {
+    static FailCountOption forOrdinal(int ordinal) {
       final FailCountOption[] values = FailCountOption.values();
       if (ordinal < 0 || ordinal >= values.length) {
         ordinal = 0;
@@ -138,15 +140,15 @@ public class FailCountManager implements PlugIn {
     final int id;
 
     /** The results (pass./fail). */
-    private final boolean[] results;
+    final boolean[] results;
 
     private int maxConsFailCount = -1;
 
     // These are for plotting so we use float not int
-    private float[] candidate;
-    private float[] consFailCount;
-    private float[] passCount;
-    private float[] passRate;
+    float[] candidate;
+    float[] consFailCount;
+    float[] passCount;
+    float[] passRate;
 
     /**
      * The number of results to process before a fail counter is not OK. Used to score a fail
@@ -165,8 +167,8 @@ public class FailCountManager implements PlugIn {
       if (maxConsFailCount == -1) {
         int consFail = 0;
         int max = 0;
-        for (int i = 0; i < results.length; i++) {
-          if (results[i]) {
+        for (final boolean b : results) {
+          if (b) {
             consFail = 0;
           } else {
             consFail++;
@@ -328,10 +330,16 @@ public class FailCountManager implements PlugIn {
     }
   }
 
+  /**
+   * The fail counter status.
+   */
   private enum CounterStatus {
     CONTINUE, ANALYSE, RETURN;
   }
 
+  /**
+   * Hold the plot data.
+   */
   private static class PlotData {
     final int item;
     final boolean fixedXAxis;
@@ -356,7 +364,7 @@ public class FailCountManager implements PlugIn {
      * @param that the other object
      * @return true, if successful
      */
-    public boolean equalsPlot(PlotData that) {
+    boolean equalsPlot(PlotData that) {
       //@formatter:off
       return that != null &&
           this.item == that.item &&
@@ -375,7 +383,7 @@ public class FailCountManager implements PlugIn {
      * @param that the other object
      * @return true, if is new item
      */
-    public boolean isNewItem(PlotData that) {
+    boolean isNewItem(PlotData that) {
       if (that == null) {
         return true;
       }
@@ -383,6 +391,9 @@ public class FailCountManager implements PlugIn {
     }
   }
 
+  /**
+   * Worker to draw a plot.
+   */
   private static class PlotWorker implements Runnable {
     final ConcurrentMonoStack<PlotData> stack;
     final LocalList<FailCountData> failCountData;
@@ -418,13 +429,13 @@ public class FailCountManager implements PlugIn {
     }
 
     private void run(PlotData plotData) {
-      final boolean isNew =
-          plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
       final int item = plotData.item - 1; // 0-based index
       if (item < 0 || item >= failCountData.size()) {
         return;
       }
       final FailCountData data = failCountData.get(item);
+      final boolean isNew =
+          plotData.isNewItem(lastPlotData) || plotData.fixedXAxis != lastPlotData.fixedXAxis;
 
       // Ensure consistent synchronisation
       data.createData();
@@ -483,7 +494,7 @@ public class FailCountManager implements PlugIn {
     void fill(int from, int to, byte value) {
       if (to - data.length > 0) {
         // Resize required
-        int newCapacity = MemoryUtils.createNewCapacity(to, data.length);
+        final int newCapacity = MemoryUtils.createNewCapacity(to, data.length);
         data = Arrays.copyOf(data, newCapacity);
       }
       Arrays.fill(data, from, to, value);
@@ -687,11 +698,11 @@ public class FailCountManager implements PlugIn {
     try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
       final Pattern pattern = Pattern.compile("[\t, ]+");
       // Ignore the first line
-      String line = br.readLine();
+      br.readLine();
       final BooleanArray array = new BooleanArray(100);
       int lastId = 0;
       int lastCandidate = 0;
-      while ((line = br.readLine()) != null) {
+      for (String line = br.readLine(); line != null; line = br.readLine()) {
         final String[] data = pattern.split(line);
         if (data.length != 3) {
           throw new IOException("Require 3 fields in the data");
@@ -705,7 +716,6 @@ public class FailCountManager implements PlugIn {
         if (candidate < 1) {
           throw new IOException("Candidate must be strictly positive");
         }
-        final boolean ok = guessStatus(data[2]);
 
         if (lastId != id) {
           if (array.size() > 0) {
@@ -718,6 +728,8 @@ public class FailCountManager implements PlugIn {
           lastId = id;
           lastCandidate = candidate - 1; // Ensure continuous
         }
+
+        final boolean ok = guessStatus(data[2]);
         // Require continuous sequence
         if (candidate - lastCandidate == 1) {
           array.add(ok);
@@ -762,13 +774,13 @@ public class FailCountManager implements PlugIn {
       }
     } else {
       string = string.toLowerCase(Locale.US);
-      if (string.equals("pass")) {
+      if ("pass".equals(string)) {
         return true;
       }
-      if (string.equals("fail")) {
+      if ("fail".equals(string)) {
         return false;
       }
-      if (string.equals("ok")) {
+      if ("ok".equals(string)) {
         return true;
       }
     }
@@ -1094,7 +1106,7 @@ public class FailCountManager implements PlugIn {
         SortUtils.sortIndices(indices, score, false);
 
         final StringBuilder sb = new StringBuilder();
-        try (final BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
+        try (BufferedTextWindow tw = new BufferedTextWindow(resultsWindow)) {
           for (int i = 0; i < topN; i++) {
             sb.setLength(0);
             final int j = indices[i];
