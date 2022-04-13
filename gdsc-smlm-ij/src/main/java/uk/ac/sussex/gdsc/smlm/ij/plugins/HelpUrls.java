@@ -50,6 +50,8 @@ public final class HelpUrls {
   private static final String DEFAULT_HELP_VERSION = "latest";
   /** The url configuration for the SMLM plugins. */
   private static final String DEFAULT_HELP_CONF = "/uk/ac/sussex/gdsc/smlm/ij/help.config";
+  /** The url path separator. */
+  private static final char SEPARATOR = '/';
 
   /** The url base. */
   private static final String URL_BASE;
@@ -211,8 +213,8 @@ public final class HelpUrls {
   private static void append(StringBuilder sb, String s) {
     if (!s.isEmpty()) {
       sb.append(s);
-      if (sb.charAt(sb.length() - 1) != '/') {
-        sb.append('/');
+      if (sb.charAt(sb.length() - 1) != SEPARATOR) {
+        sb.append(SEPARATOR);
       }
     }
   }
