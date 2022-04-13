@@ -218,7 +218,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
   private static final AtomicBoolean ADD_TO_SELECTION = new AtomicBoolean();
   private static final AtomicReference<Color3f> HIGHLIGHT_COLOR = new AtomicReference<>();
 
-  private Image3DUniverse univ;
+  /** The universe. */
+  Image3DUniverse univ;
   private JMenuItem resetRotation;
   private JMenuItem resetTranslation;
   private JMenuItem resetZoom;
@@ -250,13 +251,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
         try {
           final Color c = (Color) field.get(null);
           colours.put(field.getName().toLowerCase(Locale.US), new Color3f(c));
-        } catch (final IllegalArgumentException | IllegalAccessException ex) {
+        } catch (final IllegalArgumentException | IllegalAccessException ignored) {
           // Ignore
         }
       }
     }
   }
 
+  /**
+   * The size mode.
+   */
   private enum SizeMode implements NamedObject {
     FIXED_SIZE {
       @Override
@@ -279,7 +283,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final SizeMode[] VALUES = SizeMode.values();
 
-    public static SizeMode forNumber(int number) {
+    static SizeMode forNumber(int number) {
       if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
@@ -287,6 +291,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * The depth mode.
+   */
   private enum DepthMode implements NamedObject {
     NONE {
       @Override
@@ -309,7 +316,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final DepthMode[] VALUES = DepthMode.values();
 
-    public static DepthMode forNumber(int number) {
+    static DepthMode forNumber(int number) {
       if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
@@ -317,6 +324,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * The transparency mode.
+   */
   private enum TransparencyMode implements NamedObject {
     NONE {
       @Override
@@ -351,7 +361,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final TransparencyMode[] VALUES = TransparencyMode.values();
 
-    public static TransparencyMode forNumber(int number) {
+    static TransparencyMode forNumber(int number) {
       if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
@@ -359,6 +369,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * The sort mode.
+   */
   private enum SortMode implements NamedObject {
     NONE {
       @Override
@@ -409,20 +422,23 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final SortMode[] VALUES = SortMode.values();
 
-    public static SortMode forNumber(int number) {
+    static SortMode forNumber(int number) {
       if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
       return VALUES[number];
     }
 
-    public abstract String getDescription();
+    abstract String getDescription();
 
-    public String getDetails() {
+    String getDetails() {
       return getName() + ": " + getDescription();
     }
   }
 
+  /**
+   * The colour mode.
+   */
   private enum ColourMode implements NamedObject {
     DEPTH {
       @Override
@@ -451,7 +467,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     static final ColourMode[] VALUES = ColourMode.values();
 
-    public static ColourMode forNumber(int number) {
+    static ColourMode forNumber(int number) {
       if (number < 0 || number >= VALUES.length) {
         throw new IllegalArgumentException();
       }
@@ -459,6 +475,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Store metadata on the results.
+   */
   private static final class ResultsMetaData implements ListSelectionListener {
     PeakResultTableModel peakResultTableModel;
     ListSelectionModel listSelectionModel;
@@ -606,7 +625,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     private int findSelected(PeakResult result) {
       for (int i = 0; i < selected.size(); i++) {
         final PeakResult r2 = selected.unsafeGet(i);
-        if (r2 != null && result.equals(r2)) {
+        if (r2 != null && r2.equals(result)) {
           return i;
         }
       }
@@ -642,7 +661,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       return -1;
     }
 
-    public void clearSelected() {
+    void clearSelected() {
       for (int i = 0; i < selected.size(); i++) {
         contentInstance.setCustomSwitch(i, false);
         selected.unsafeSet(i, null);
@@ -715,16 +734,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       if (oldSelection.isEmpty()) {
         // Just select the new indices
-        for (int i = 0; i < indices.length; i++) {
-          select(peakResultTableModel.get(indices[i]));
+        for (final int index : indices) {
+          select(peakResultTableModel.get(index));
         }
         return;
       }
 
       // Process the new selection, checking if already selected.
       final LocalList<PeakResult> toSelect = new LocalList<>(indices.length);
-      for (int i = 0; i < indices.length; i++) {
-        final PeakResult r = peakResultTableModel.get(indices[i]);
+      for (final int index : indices) {
+        final PeakResult r = peakResultTableModel.get(index);
         // Check if already selected
         if (oldSelection.removeInt(r) == NO_ENTRY) {
           // Do this later to save space
@@ -861,6 +880,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Object used for sorting.
+   */
   private static class CustomSortObject {
     final float f1;
     final float f2;
@@ -897,6 +919,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Wrap a MouseListener to only run for certain commands.
+   */
   private static class MouseListenerWrapper implements MouseListener {
     static final int MOUSE_CLICKED = 0x01;
     static final int MOUSE_PRESSED = 0x02;
@@ -952,6 +977,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Wrap a MouseMotionListener to only run for certain commands.
+   */
   @SuppressWarnings("unused")
   private static class MouseMotionListenerWrapper implements MouseMotionListener {
     static final int MOUSE_DRAGGED = 0x01;
@@ -984,6 +1012,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Adapter for a UniverseListener.
+   */
   private static class LocalUniverseListener implements UniverseListener {
     @Override
     public void transformationStarted(View view) {
@@ -1119,11 +1150,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       private boolean collectOptions(boolean silent) {
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
         final int rendering = settings.getRendering();
         if (rendering != 0) {
           return false;
         }
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Drawing mode options", null);
         egd.addNumericField("Pixel_size", settings.getPixelSize(), 2, 6, "px");
         egd.setSilent(silent);
         egd.showDialog(true, gd);
@@ -1178,11 +1209,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       private boolean collectOptions(boolean silent) {
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Sort mode options", null);
         final SortMode mode = SortMode.forNumber(settings.getSortMode());
         if (mode == SortMode.NONE) {
           return false;
         }
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Sort mode options", null);
         egd.addMessage(
             TextUtils.wrap("Note: The sort mode is used to correctly render transparent objects. "
                 + "For non-transparent objects faster rendering is achieved with a reverse "
@@ -1228,13 +1259,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
           }
 
           private boolean collectOptions(boolean silent) {
-            final ExtendedGenericDialog egd =
-                new ExtendedGenericDialog("Transparency mode options", null);
             final TransparencyMode mode =
                 TransparencyMode.forNumber(settings.getTransparencyMode());
             if (mode == TransparencyMode.NONE) {
               return false;
             }
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog("Transparency mode options", null);
             egd.addSlider("Min_transparancy", 0, 0.95, settings.getMinTransparency());
             egd.addSlider("Max_transparancy", 0, 0.95, settings.getMaxTransparency());
             egd.setSilent(silent);
@@ -1262,11 +1293,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       private boolean collectOptions(boolean silent) {
-        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Depth mode options", null);
         final DepthMode mode = DepthMode.forNumber(settings.getDepthMode());
         if (mode == DepthMode.NONE) {
           return false;
         }
+        final ExtendedGenericDialog egd = new ExtendedGenericDialog("Depth mode options", null);
         egd.addNumericField("Depth_range", settings.getDepthRange(), 2, 6, "nm");
         if (mode == DepthMode.DITHER) {
           egd.addNumericField("Dither_seed", settings.getDitherSeed(), 0);
@@ -1487,7 +1518,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     IJ.showStatus("");
   }
 
-  private static void addColourMode(final ImageJ3DResultsViewerSettings.Builder settings,
+  /**
+   * Adds the colour mode to the dialog.
+   *
+   * @param settings the settings
+   * @param gd the dialog
+   */
+  static void addColourMode(final ImageJ3DResultsViewerSettings.Builder settings,
       final ExtendedGenericDialog gd) {
     gd.addChoice("Colour_mode", COLOUR_MODE, settings.getColourMode(),
         new OptionListener<Integer>() {
@@ -1503,8 +1540,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
           }
 
           private boolean collectOptions(boolean silent) {
-            final ExtendedGenericDialog egd =
-                new ExtendedGenericDialog("Colour mode options", null);
             final ColourMode mode = ColourMode.forNumber(settings.getColourMode());
             if (mode != ColourMode.INTENSITY) {
               return false;
@@ -1514,6 +1549,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
             if (gamma < 0.05 || gamma > 5.0) {
               gamma = 1.0;
             }
+            final ExtendedGenericDialog egd =
+                new ExtendedGenericDialog("Colour mode options", null);
             egd.addSlider("Colour_gamma", 0.05, 5.0, gamma);
             egd.setSilent(silent);
             egd.showDialog(true, gd);
@@ -1532,7 +1569,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   @SuppressWarnings("unused")
   private static void showHelp() {
-    String macro = "run('URL...', 'url=" + HelpUrls.getUrl(HELP_KEY) + "');";
+    final String macro = "run('URL...', 'url=" + HelpUrls.getUrl(HELP_KEY) + "');";
     new MacroRunner(macro);
   }
 
@@ -1581,12 +1618,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
       public boolean execute(PeakResult peakResult) {
         final float x = peakResult.getParameterDeviation(PeakResult.X);
         final float y = peakResult.getParameterDeviation(PeakResult.Y);
-        float z = peakResult.getParameterDeviation(PeakResult.Z);
         // Check x & y are not zero.
         // This should be OK as 2D fitting should provide these.
         if (x == 0 || y == 0) {
           return true;
         }
+        float z = peakResult.getParameterDeviation(PeakResult.Z);
         if (z == 0) {
           z = (float) Math.sqrt((x * x + y * y) / 2); // Mean variance
         }
@@ -1826,11 +1863,11 @@ public class ImageJ3DResultsViewer implements PlugIn {
   }
 
   private static void sortPerspective(ResultsMetaData data) {
-    final ImageJ3DResultsViewerSettingsOrBuilder settings = data.settings;
     final Vector3d direction = getViewDirection(data.settings);
     if (direction == null) {
       throw new IllegalStateException("The view direction is not valid");
     }
+    final ImageJ3DResultsViewerSettingsOrBuilder settings = data.settings;
     final Point3d eye =
         new Point3d(settings.getSortEyeX(), settings.getSortEyeY(), settings.getSortEyeZ());
 
@@ -1842,7 +1879,15 @@ public class ImageJ3DResultsViewer implements PlugIn {
     reorder(indices, data);
   }
 
-  private static double[] getDistance(LocalList<Point3f> points, Vector3d direction, Point3d eye) {
+  /**
+   * Gets the distance of points from the eye.
+   *
+   * @param points the points
+   * @param direction the direction
+   * @param eye the eye
+   * @return the distance
+   */
+  static double[] getDistance(LocalList<Point3f> points, Vector3d direction, Point3d eye) {
     final double[] d = new double[points.size()];
     for (int i = 0; i < d.length; i++) {
       final Point3f p = points.unsafeGet(i);
@@ -1874,7 +1919,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return dir;
   }
 
-  private static void reorder(int[] indices, ResultsMetaData data) {
+  /**
+   * Reorder the results and the points using the order in the provided indices.
+   *
+   * @param indices the indices
+   * @param data the data
+   */
+  static void reorder(int[] indices, ResultsMetaData data) {
     final MemoryPeakResults results = data.results;
     final LocalList<Point3f> points = data.points;
 
@@ -1946,9 +1997,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
     // Use the vector lengths in each dimension to set the order
     int[] indices = SimpleArrayUtils.natural(3);
-    final double[] values = new double[] {direction.x, direction.y, direction.z};
+    final double[] values = {direction.x, direction.y, direction.z};
     final double[] absValues =
-        new double[] {Math.abs(direction.x), Math.abs(direction.y), Math.abs(direction.z)};
+        {Math.abs(direction.x), Math.abs(direction.y), Math.abs(direction.z)};
     SortUtils.sortIndices(indices, absValues, true);
 
     final int ix = search(indices, 0);
@@ -2027,7 +2078,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static void createHighlightColour(String highlightColour) {
+  /**
+   * Creates the highlight colour.
+   *
+   * @param highlightColour the highlight colour
+   */
+  static void createHighlightColour(String highlightColour) {
     HIGHLIGHT_COLOR.set(null);
     for (int i = 0; i < highlightColour.length(); i++) {
       if (Character.isDigit(highlightColour.charAt(i))) {
@@ -2041,7 +2097,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             final int blue = Integer.parseInt(split[2]);
             HIGHLIGHT_COLOR.set(new Color3f(new Color(red, green, blue)));
             return;
-          } catch (final NumberFormatException ex) {
+          } catch (final NumberFormatException ignored) {
             // Ignore
           }
         }
@@ -2090,7 +2146,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     for (int i = 0, size = results.size(); i < size; i++) {
       float value = rank[i];
       value = value - minimum;
-      if (value < 0f) {
+      if (value < 0) {
         allColors[i] = colors[0];
       } else {
         int ivalue = (int) ((value * scale) + 0.5f);
@@ -2161,10 +2217,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
    * @param gamma the gamma
    */
   private static void applyGamma(float[] rank, double gamma) {
-    if (gamma == 1.0) {
+    if (gamma == 1) {
       return;
     }
-    float[] limits = MathUtils.limits(rank);
+    final float[] limits = MathUtils.limits(rank);
     final float min = limits[0];
     final float max = limits[1];
     if (min == max) {
@@ -2206,7 +2262,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
     return null;
   }
 
-  private static void changeColour(ItemShape itemShape, MemoryPeakResults results,
+  /**
+   * Change colour.
+   *
+   * @param itemShape the item shape
+   * @param results the results
+   * @param settings the settings
+   */
+  static void changeColour(ItemShape itemShape, MemoryPeakResults results,
       ImageJ3DResultsViewerSettingsOrBuilder settings) {
     setColour(itemShape, createColour(results, settings));
   }
@@ -2359,16 +2422,15 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // 0 = ImageCanvas3D
     // 1 = DefaultUniverse
     // 2 = Image3DUniverse
-    final MouseListener[] l = canvas.getMouseListeners();
-    for (int i = 0; i < l.length; i++) {
-      if (l[i].getClass().getName().contains("Image3DUniverse")) {
+    for (final MouseListener l : canvas.getMouseListeners()) {
+      if (l.getClass().getName().contains("Image3DUniverse")) {
         // We want to be before the Image3DUniverse to allow consuming the click event.
         // Only allow the click event.
         // This disables the right-click pop-up menu.
         // It doesn't have anything of use for localisations anyway.
-        canvas.removeMouseListener(l[i]);
+        canvas.removeMouseListener(l);
         canvas.addMouseListener(mouseListener);
-        canvas.addMouseListener(new MouseListenerWrapper(l[i], MouseListenerWrapper.MOUSE_CLICKED
+        canvas.addMouseListener(new MouseListenerWrapper(l, MouseListenerWrapper.MOUSE_CLICKED
         // |MouseListenerWrapper.MOUSE_PRESSED|MouseListenerWrapper.MOUSE_RELEASED
         ));
       }
@@ -2378,11 +2440,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // 1 = DefaultUniverse
     // 2 = Image3DUniverse
     // 3 = EventCatcher (from scijava)
-    final MouseMotionListener[] ml = canvas.getMouseMotionListeners();
-    for (int i = 0; i < ml.length; i++) {
-      if (ml[i].getClass().getName().contains("Image3DUniverse")) {
+    for (final MouseMotionListener ml : canvas.getMouseMotionListeners()) {
+      if (ml.getClass().getName().contains("Image3DUniverse")) {
         // Ignore this as it just shows the name in the IJ status bar
-        canvas.removeMouseMotionListener(ml[i]);
+        canvas.removeMouseMotionListener(ml);
       }
     }
 
@@ -2470,7 +2531,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (item == null) {
         continue;
       }
-      if (item.getText().equals("Toggle dynamic transparency")) {
+      if ("Toggle dynamic transparency".equals(item.getText())) {
         ((JCheckBoxMenuItem) item).setSelected(enable);
       }
     }
@@ -2487,8 +2548,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
    * @param y the y
    * @return the Content and closest intersection point
    */
-  private static Pair<Content, IntersectionInfo> getPickedContent(Canvas3D canvas,
-      BranchGroup scene, final int x, final int y) {
+  static Pair<Content, IntersectionInfo> getPickedContent(Canvas3D canvas, BranchGroup scene,
+      final int x, final int y) {
     final PickCanvas pickCanvas = new PickCanvas(canvas, scene);
     pickCanvas.setMode(PickInfo.PICK_GEOMETRY);
     pickCanvas.setFlags(PickInfo.SCENEGRAPHPATH | PickInfo.CLOSEST_GEOM_INFO
@@ -2501,8 +2562,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (result == null) {
         return null;
       }
-      for (int i = 0; i < result.length; i++) {
-        final SceneGraphPath path = result[i].getSceneGraphPath();
+      for (final PickInfo info : result) {
+        final SceneGraphPath path = info.getSceneGraphPath();
         Content content = null;
         for (int j = path.nodeCount(); j-- > 0;) {
           if (path.getNode(j) instanceof Content) {
@@ -2510,7 +2571,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
           }
         }
         if (content != null) {
-          return Pair.of(content, result[i].getIntersectionInfos()[0]);
+          return Pair.of(content, info.getIntersectionInfos()[0]);
         }
       }
       return null;
@@ -2631,6 +2692,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     // univ.refreshShortcuts();
   }
 
+  /**
+   * Define an action on a Content.
+   */
   private interface ContentAction {
     /**
      * Run the action.
@@ -2638,13 +2702,19 @@ public class ImageJ3DResultsViewer implements PlugIn {
      * @param content The content
      * @return negative for error. No further content can be processed.
      */
-    public int run(Content content);
+    int run(Content content);
 
-    default public void finish() {
+    /**
+     * Finish the action.
+     */
+    default void finish() {
       // Do nothing
     }
   }
 
+  /**
+   * Action to change the colour.
+   */
   private static class ChangeColourContentAction implements ContentAction {
     ImageJ3DResultsViewerSettings.Builder settings;
 
@@ -2653,10 +2723,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
       if (!(content.getUserData() instanceof ResultsMetaData)) {
         return 0;
       }
-
-      final ResultsMetaData data = (ResultsMetaData) content.getUserData();
-
-      final MemoryPeakResults results = data.results;
 
       // Change the colour
       if (settings == null) {
@@ -2690,12 +2756,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
         itemShape = node.getItemGroup();
       }
       if (itemShape != null) {
-        changeColour(itemShape, results, settings);
+        final ResultsMetaData data = (ResultsMetaData) content.getUserData();
+        changeColour(itemShape, data.results, settings);
       }
       return 0;
     }
   }
 
+  /**
+   * Action to change the point size.
+   */
   private static class ChangePointSizeContentAction implements ContentAction {
     float pointSize = -1;
 
@@ -2757,6 +2827,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to update the point size.
+   */
   private static class UpdatePointSizeContentAction implements ContentAction {
     static final UpdatePointSizeContentAction INCREASE = new UpdatePointSizeContentAction(true);
     static final UpdatePointSizeContentAction DECREASE = new UpdatePointSizeContentAction(false);
@@ -2780,7 +2853,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
             pa.setPointSize(updatePointSize(pa.getPointSize()));
           }
         } else if (mesh instanceof CustomPointMesh) {
-          CustomPointMesh cmesh = ((CustomPointMesh) mesh);
+          final CustomPointMesh cmesh = ((CustomPointMesh) mesh);
           cmesh.setPointSize(updatePointSize(cmesh.getPointSize()));
         }
       } else if (contentInstant.getContent() instanceof ItemGroupNode) {
@@ -2802,10 +2875,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to reset the view.
+   */
   private static class ResetViewContentAction implements ContentAction {
     final boolean error;
 
-    public ResetViewContentAction(boolean error) {
+    ResetViewContentAction(boolean error) {
       this.error = error;
     }
 
@@ -2824,12 +2900,18 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to toggle the transparent flag.
+   */
   private static class ToggleTransparentAction implements ContentAction {
+    /**
+     * Hold the transparency data.
+     */
     private static class TransparencyData {
       float transparency;
       float[] alpha;
 
-      public void save(CustomMesh mesh) {
+      void save(CustomMesh mesh) {
         transparency = mesh.getTransparency();
         mesh.setTransparency(0);
         if (mesh instanceof ItemMesh) {
@@ -2851,7 +2933,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         shape.setItemAlpha(1);
       }
 
-      public void save(ItemGroup group) {
+      void save(ItemGroup group) {
         if (group instanceof ItemGeometryGroup) {
           save((ItemGeometryGroup) group);
         } else {
@@ -2860,7 +2942,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
 
-      public void save(ItemGeometryGroup group) {
+      void save(ItemGeometryGroup group) {
         final int size = group.size();
         if (alpha == null || alpha.length != size) {
           alpha = new float[size];
@@ -2870,7 +2952,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         group.setItemAlpha(1f, 0f);
       }
 
-      public void restore(CustomMesh mesh) {
+      void restore(CustomMesh mesh) {
         mesh.setTransparency(transparency);
         if (mesh instanceof ItemMesh) {
           final ItemMesh t = (ItemMesh) mesh;
@@ -2888,7 +2970,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
 
-      public void restore(ItemGroup group) {
+      void restore(ItemGroup group) {
         if (group instanceof ItemGeometryGroup) {
           restore((ItemGeometryGroup) group);
         } else {
@@ -2896,7 +2978,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         }
       }
 
-      public void restore(ItemGeometryGroup group) {
+      void restore(ItemGeometryGroup group) {
         final int size = group.size();
         if (alpha != null && alpha.length == size) {
           group.setItemAlpha(alpha, transparency);
@@ -2967,6 +3049,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to toggle the shaded rendering.
+   */
   private static class ToggleShadedAction implements ContentAction {
     @Override
     public int run(Content content) {
@@ -2988,6 +3073,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to find the eye point.
+   */
   private class FindEyePointContentAction implements ContentAction {
     ImageJ3DResultsViewerSettings.Builder settings;
     final Point3d eyePtInVWorld = new Point3d();
@@ -3066,6 +3154,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to sort the content.
+   */
   private class SortContentAction extends FindEyePointContentAction {
     final boolean reverse;
 
@@ -3080,10 +3171,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return result;
       }
 
-      final ContentInstant contentInstant = content.getCurrent();
       if (content.getUserData() == null) {
         return 0;
       }
+      final ContentInstant contentInstant = content.getCurrent();
       UpdateableItemShape updateable = null;
       boolean reorderData = false;
       if (contentInstant.getContent() instanceof CustomMeshNode) {
@@ -3132,10 +3223,16 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to colour the surface.
+   */
   private static class ColourSurfaceContentAction implements ContentAction {
     private static final AtomicReference<Options> OPTIONS_REF =
         new AtomicReference<>(new Options());
 
+    /**
+     * Hold the options.
+     */
     private static class Options {
       String title = "";
       boolean resetTransparency = true;
@@ -3147,13 +3244,12 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return 0;
       }
 
-      final Options options = OPTIONS_REF.get();
-
-      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       final String[] list = ImageJUtils.getImageList(ImageJUtils.SINGLE);
       if (list.length == 0) {
         return -1;
       }
+      final Options options = OPTIONS_REF.get();
+      final ExtendedGenericDialog gd = new ExtendedGenericDialog(TITLE);
       gd.addChoice("Image", list, options.title);
       gd.addCheckbox("Reset_transparency", options.resetTransparency);
       gd.showDialog();
@@ -3162,7 +3258,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
       options.title = gd.getNextChoice();
       options.resetTransparency = gd.getNextBoolean();
-      ImagePlus imp = WindowManager.getImage(options.title);
+      final ImagePlus imp = WindowManager.getImage(options.title);
       OPTIONS_REF.set(options);
       if (imp == null) {
         return -1;
@@ -3195,6 +3291,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to crop the results.
+   */
   private class CropResultsAction implements ContentAction {
     CoordinatePredicate shape;
     private final Point2d p2d = new Point2d();
@@ -3237,7 +3336,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
       // Transform all points to the image plate and test if they are in the ROI
       final MemoryPeakResults results = data.results;
-      final LocalList<Point3f> points = data.points;
       final MemoryPeakResults newResults = new MemoryPeakResults();
       newResults.copySettings(results);
       // Get the output name
@@ -3278,6 +3376,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         IJ.error(TITLE, "No output name");
         return -1;
       }
+      final LocalList<Point3f> points = data.points;
       newResults.setName(outputName);
       newResults.begin();
       ImageJUtils.showStatus("Cropping " + results.getName());
@@ -3311,6 +3410,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
+  /**
+   * Action to update the highlight colour.
+   */
   private static class UpdateHighlightColourAction implements ContentAction {
     @Override
     public int run(Content content) {
@@ -3322,7 +3424,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
   }
 
-  private static Transform3D getVworldToLocal(ContentInstant content) {
+  /**
+   * Gets the world to local transform.
+   *
+   * @param content the content
+   * @return the world to local transform
+   */
+  static Transform3D getVworldToLocal(ContentInstant content) {
     final Transform3D vWorldToLocal = new Transform3D();
     final Transform3D translate = new Transform3D();
     final Transform3D rotate = new Transform3D();
@@ -3334,8 +3442,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
 
   private void menuActionPerformed(ActionEvent event) {
     final Object src = event.getSource();
-
-    ContentAction action = null;
 
     // Universe actions
     // Adapted from univ.resetView()
@@ -3375,6 +3481,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
       univ.fireTransformationFinished();
       return;
     }
+
+    ContentAction action = null;
     if (src == updateSettings) {
       final ImageJ3DResultsViewerSettings.Builder settings =
           SettingsManager.readImageJ3DResultsViewerSettings(0).toBuilder();
@@ -3479,7 +3587,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
         return;
       }
       settings.setHighlightColour(gd.getNextString());
-      boolean add = gd.getNextBoolean();
+      final boolean add = gd.getNextBoolean();
       ADD_TO_SELECTION.set(add);
       settings.setAddToSelection(add);
       final ResultsTableSettings.Builder resultsTableSettingsBuilder =
@@ -3550,14 +3658,14 @@ public class ImageJ3DResultsViewer implements PlugIn {
       return;
     }
 
-    if (univ.getSelected() != null) {
-      action.run(univ.getSelected());
-    } else {
+    if (univ.getSelected() == null) {
       for (final Iterator<Content> it = univ.contents(); it.hasNext();) {
         if (action.run(it.next()) < 0) {
           break;
         }
       }
+    } else {
+      action.run(univ.getSelected());
     }
 
     action.finish();
@@ -3567,15 +3675,9 @@ public class ImageJ3DResultsViewer implements PlugIn {
       final ImageJ3DResultsViewerSettings.Builder settings, final Point3f[] sphereSize,
       final LocalList<Point3f> points, float[] alpha, float transparency, Color3f[] colors) {
     final Rendering rendering = Rendering.forNumber(settings.getRendering());
-    // All objects have colour using the appearance not per vertex colours.
-    // The exception is points which do not support colour from appearance.
-    final int colorDepth = (rendering == Rendering.POINT) ? 4 : 0;
-    final Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
 
     // Use max so that points get a value of 1
     final int triangles = Math.max(Shape3DHelper.getNumberOfTriangles(rendering), 1);
-
-    final GeometryArray ga = (GeometryArray) shape.getGeometry();
 
     final long size = (long) points.size() * triangles;
     if (size > 10000000L) {
@@ -3590,6 +3692,10 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
     }
 
+    // All objects have colour using the appearance not per vertex colours.
+    // The exception is points which do not support colour from appearance.
+    final int colorDepth = (rendering == Rendering.POINT) ? 4 : 0;
+    final Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
     final Appearance appearance = shape.getAppearance();
     final TransparencyAttributes ta = new TransparencyAttributes();
     ta.setTransparency(transparency);
@@ -3599,6 +3705,8 @@ public class ImageJ3DResultsViewer implements PlugIn {
     if (rendering == Rendering.POINT) {
       appearance.getPointAttributes().setPointSize(sphereSize[0].x);
     }
+
+    final GeometryArray ga = (GeometryArray) shape.getGeometry();
     if (settings.getSupportDynamicTransparency()) {
       return new ItemGeometryGroup(points.toArray(new Point3f[0]), ga, appearance, sphereSize,
           colors, alpha);
@@ -3632,13 +3740,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       final Rendering r = Rendering.forNumber(settings.getRendering());
 
       final List<Point3f> point = Shape3DHelper.createLocalisationObject(r);
-      final Point3f[] vertices = point.toArray(new Point3f[1]);
+      final Point3f[] vertices = point.toArray(new Point3f[0]);
 
       // Correct the direction
       ItemTriangleMesh.checkFacets(vertices);
 
       final double creaseAngle = (r.isHighResolution()) ? 44 : 0;
-      mesh = new ItemTriangleMesh(vertices, points.toArray(new Point3f[1]), null, null,
+      mesh = new ItemTriangleMesh(vertices, points.toArray(new Point3f[0]), null, null,
           transparency, creaseAngle, null);
 
       updateAppearance(mesh, settings);
@@ -3667,7 +3775,6 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final Shape3D shape = Shape3DHelper.createShape(rendering, colorDepth);
 
     final GeometryArray ga = (GeometryArray) shape.getGeometry();
-    final Appearance appearance = shape.getAppearance();
 
     // Estimate the largest array required for the data.
     // The mesh is created by reference using an array for coords, normals and colors.
@@ -3699,6 +3806,7 @@ public class ImageJ3DResultsViewer implements PlugIn {
     }
 
     // Support drawing as points ...
+    final Appearance appearance = shape.getAppearance();
     if (settings.getRendering() == 0) {
       final ItemMesh mesh = new ReferenceItemMesh(points.toArray(new Point3f[0]), ga, appearance,
           null, null, transparency);
@@ -3756,13 +3864,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
       }
 
       CustomPointMesh mesh;
-      if (alpha != null) {
+      if (alpha == null) {
+        mesh = new ItemPointMesh(points, null, transparency);
+      } else {
         final TransparentItemPointMesh mesh2 =
             new TransparentItemPointMesh(points, null, transparency);
         mesh = mesh2;
         mesh2.setItemAlpha(alpha);
-      } else {
-        mesh = new ItemPointMesh(points, null, transparency);
       }
       mesh.setPointSize(sphereSize[0].x);
       return mesh;
@@ -3820,13 +3928,13 @@ public class ImageJ3DResultsViewer implements PlugIn {
     final ImageJTrackProgress progress = null; // Used for debugging construction time
     if (alpha != null) {
       final TransparentItemTriangleMesh mesh = new TransparentItemTriangleMesh(
-          point.toArray(new Point3f[singlePointSize]), points.toArray(new Point3f[0]), sphereSize,
-          null, transparency, creaseAngle, progress);
+          point.toArray(new Point3f[0]), points.toArray(new Point3f[0]), sphereSize, null,
+          transparency, creaseAngle, progress);
       mesh.setItemAlpha(alpha);
       return mesh;
     }
 
-    return new ItemTriangleMesh(point.toArray(new Point3f[singlePointSize]),
-        points.toArray(new Point3f[0]), sphereSize, null, transparency, creaseAngle, progress);
+    return new ItemTriangleMesh(point.toArray(new Point3f[0]), points.toArray(new Point3f[0]),
+        sphereSize, null, transparency, creaseAngle, progress);
   }
 }
