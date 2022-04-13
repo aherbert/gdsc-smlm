@@ -151,6 +151,13 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.XyResultProcedure;
  * to meet the fit criteria.
  */
 public class PeakFit implements PlugInFilter {
+  /** Flag to indicate that read noise should not be configured. */
+  public static final int FLAG_NO_READ_NOISE = 0x00000001;
+  /** Flag to indicate that quantum efficiency should be configured. */
+  public static final int FLAG_QUANTUM_EFFICIENCY = 0x00000002;
+  /** Flag to indicate that gain should not be configured. */
+  public static final int FLAG_NO_GAIN = 0x00000004;
+
   private static final String TITLE = "PeakFit";
   private static final String LOG_SPACER = "-=-=-=-";
 
@@ -177,31 +184,33 @@ public class PeakFit implements PlugInFilter {
   private PeakResultsList results;
   private long time;
   private long runTime;
-  private FitEngineConfiguration config;
-  private FitConfiguration fitConfig;
-  private ResultsSettings.Builder resultsSettings;
+  /** The fit engine configuration. */
+  FitEngineConfiguration config;
+  /** The fit configuration. */
+  FitConfiguration fitConfig;
+  /** The results settings. */
+  ResultsSettings.Builder resultsSettings;
   private boolean silent;
 
   /** Flag for extra options in the dialog (shift-key down). */
-  private boolean extraOptions;
+  boolean extraOptions;
   /** True if running in maxima identification mode. */
-  private boolean maximaIdentification;
+  boolean maximaIdentification;
   /** True if running in fit maxima mode. */
-  private boolean fitMaxima;
+  boolean fitMaxima;
   /** True if running in simple fit mode. */
-  private boolean simpleFit;
+  boolean simpleFit;
 
-  /** The calculator setting used for the Simple Fit wizard. This is immutable. */
-  private static PSFCalculatorSettings calculatorSettings =
-      GuiSettings.DefaultPSFCalculatorSettings.INSTANCE;
+  /** The calculator setting used for the Simple Fit wizard. */
+  private static PSFCalculatorSettings calculatorSettings;
 
   /** The plugin settings. Loaded when a dialog is shown. */
-  private Settings settings;
+  Settings settings;
   /**
    * The extra settings for uncommon processing options. This is always loaded as the class can be
    * used via API method calls.
    */
-  private ExtraSettings extraSettings = new ExtraSettings();
+  ExtraSettings extraSettings = new ExtraSettings();
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -526,10 +535,10 @@ public class PeakFit implements PlugInFilter {
 
       textCameraType.select(CalibrationProtosHelper.getName(calibration.getCameraType()));
       if (calibration.hasNmPerPixel()) {
-        textNmPerPixel.setText("" + calibration.getNmPerPixel());
+        textNmPerPixel.setText(String.valueOf(calibration.getNmPerPixel()));
       }
       if (calibration.hasExposureTime()) {
-        textExposure.setText("" + calibration.getExposureTime());
+        textExposure.setText(String.valueOf(calibration.getExposureTime()));
       }
     }
 
@@ -563,38 +572,38 @@ public class PeakFit implements PlugInFilter {
           .select(SettingsManager.getDataFilterTypeNames()[config.getDataFilterType().ordinal()]);
       textDataFilterMethod.select(
           SettingsManager.getDataFilterMethodNames()[config.getDataFilterMethod(0).ordinal()]);
-      textSmooth.setText("" + config.getDataFilterParameterValue(0));
-      textSearch.setText("" + config.getSearch());
-      textBorder.setText("" + config.getBorder());
-      textFitting.setText("" + config.getFitting());
+      textSmooth.setText(String.valueOf(config.getDataFilterParameterValue(0)));
+      textSearch.setText(String.valueOf(config.getSearch()));
+      textBorder.setText(String.valueOf(config.getBorder()));
+      textFitting.setText(String.valueOf(config.getFitting()));
       if (!maximaIdentification) {
         textFitSolver.select(FitProtosHelper.getName(fitConfig.getFitSolver()));
         if (extraOptions) {
           textFitBackground.setState(fitConfig.isBackgroundFitting());
         }
-        textFailuresLimit.setText("" + config.getFailuresLimit());
-        textPassRate.setText("" + config.getPassRate());
+        textFailuresLimit.setText(String.valueOf(config.getFailuresLimit()));
+        textPassRate.setText(String.valueOf(config.getPassRate()));
         textIncludeNeighbours.setState(config.isIncludeNeighbours());
-        textNeighbourHeightThreshold.setText("" + config.getNeighbourHeightThreshold());
-        textResidualsThreshold.setText("" + config.getResidualsThreshold());
-        textDuplicateDistance.setText("" + config.getDuplicateDistance());
+        textNeighbourHeightThreshold.setText(String.valueOf(config.getNeighbourHeightThreshold()));
+        textResidualsThreshold.setText(String.valueOf(config.getResidualsThreshold()));
+        textDuplicateDistance.setText(String.valueOf(config.getDuplicateDistance()));
 
         // Filtering
         textSmartFilter.setState(fitConfig.isSmartFilter());
         textDisableSimpleFilter.setState(fitConfig.isDisableSimpleFilter());
         if (!fitConfig.isDisableSimpleFilter()) {
-          textCoordinateShiftFactor.setText("" + fitConfig.getCoordinateShiftFactor());
-          textSignalStrength.setText("" + fitConfig.getSignalStrength());
-          textWidthFactor.setText("" + fitConfig.getMaxWidthFactor());
-          textPrecisionThreshold.setText("" + fitConfig.getPrecisionThreshold());
+          textCoordinateShiftFactor.setText(String.valueOf(fitConfig.getCoordinateShiftFactor()));
+          textSignalStrength.setText(String.valueOf(fitConfig.getSignalStrength()));
+          textWidthFactor.setText(String.valueOf(fitConfig.getMaxWidthFactor()));
+          textPrecisionThreshold.setText(String.valueOf(fitConfig.getPrecisionThreshold()));
         }
         // These are used for settings the bounds so they are included
-        textMinPhotons.setText("" + fitConfig.getMinPhotons());
-        textMinWidthFactor.setText("" + fitConfig.getMinWidthFactor());
+        textMinPhotons.setText(String.valueOf(fitConfig.getMinPhotons()));
+        textMinWidthFactor.setText(String.valueOf(fitConfig.getMinWidthFactor()));
         updateFilterInput();
 
         if (extraOptions) {
-          textNoise.setText("" + fitConfig.getNoise());
+          textNoise.setText(String.valueOf(fitConfig.getNoise()));
           textNoiseMethod.select(config.getNoiseMethod().ordinal());
         }
       }
@@ -609,7 +618,7 @@ public class PeakFit implements PlugInFilter {
       textResultsTable.setState(resultsSettings.getResultsTableSettings().getShowTable());
       textResultsImage.select(resultsSettings.getResultsImageSettings().getImageTypeValue());
       textResultsDirectory
-          .setText("" + resultsSettings.getResultsFileSettings().getResultsDirectory());
+          .setText(String.valueOf(resultsSettings.getResultsFileSettings().getResultsDirectory()));
       textFileFormat.select(resultsSettings.getResultsFileSettings().getFileFormatValue());
       textResultsInMemory.setState(resultsSettings.getResultsInMemorySettings().getInMemory());
     }
@@ -619,8 +628,8 @@ public class PeakFit implements PlugInFilter {
    * Lazy load the {@link PSFType} values and names.
    */
   private static class PsfTypeLoader {
-    private static final PSFType[] PSF_TYPE_VALUES;
-    private static final String[] PSF_TYPE_NAMES;
+    static final PSFType[] PSF_TYPE_VALUES;
+    static final String[] PSF_TYPE_NAMES;
 
     static {
       //@formatter:off
@@ -1458,13 +1467,6 @@ public class PeakFit implements PlugInFilter {
       }
     });
   }
-
-  /** Flag to indicate that read noise should not be configured. */
-  public static final int FLAG_NO_READ_NOISE = 0x00000001;
-  /** Flag to indicate that quantum efficiency should be configured. */
-  public static final int FLAG_QUANTUM_EFFICIENCY = 0x00000002;
-  /** Flag to indicate that gain should not be configured. */
-  public static final int FLAG_NO_GAIN = 0x00000004;
 
   /**
    * Adds the camera options.
@@ -2364,6 +2366,9 @@ public class PeakFit implements PlugInFilter {
     gd.addNumericField("Gaussian_SD", fitConfig.getInitialXSd(), 3);
     // Add ability to run the PSF Calculator to get the width
     if (ImageJUtils.isShowGenericDialog()) {
+      if (calculatorSettings == null) {
+        calculatorSettings = GuiSettings.DefaultPSFCalculatorSettings.INSTANCE;
+      }
       final TextField textInitialPeakStdDev0 = (TextField) gd.getNumericFields().get(0);
       gd.addAndGetButton("Run PSF calculator", event -> {
         // Run the PSF Calculator
@@ -2575,21 +2580,18 @@ public class PeakFit implements PlugInFilter {
 
       gd.showDialog();
       if (gd.wasCanceled()) {
+        extraSettings.interlacedData = false;
         return false;
       }
 
-      if (!gd.wasCanceled()) {
-        extraSettings.dataStart = (int) gd.getNextNumber();
-        extraSettings.dataBlock = (int) gd.getNextNumber();
-        extraSettings.dataSkip = (int) gd.getNextNumber();
+      extraSettings.dataStart = (int) gd.getNextNumber();
+      extraSettings.dataBlock = (int) gd.getNextNumber();
+      extraSettings.dataSkip = (int) gd.getNextNumber();
 
-        if (extraSettings.dataStart > 0 && extraSettings.dataBlock > 0
-            && extraSettings.dataSkip > 0) {
-          // Store options for next time
-          extraSettings.save();
-        }
-      } else {
-        extraSettings.interlacedData = false;
+      if (extraSettings.dataStart > 0 && extraSettings.dataBlock > 0
+          && extraSettings.dataSkip > 0) {
+        // Store options for next time
+        extraSettings.save();
       }
     }
 
@@ -2742,10 +2744,8 @@ public class PeakFit implements PlugInFilter {
       return true;
     }
     final boolean result = configureSmartFilter(fitConfig);
-    if (result) {
-      if (BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
-        SettingsManager.writeSettings(config, 0);
-      }
+    if (result && BitFlagUtils.anyNotSet(flags, FLAG_NO_SAVE)) {
+      SettingsManager.writeSettings(config, 0);
     }
     return result;
   }
@@ -2815,7 +2815,12 @@ public class PeakFit implements PlugInFilter {
    * @return True if the configuration succeeded
    */
   public static boolean configureDataFilter(final FitEngineConfiguration config, int flags) {
-    int numberOfFilters = 1;
+    // We use the previous value in the event the configuration does not have any current values.
+    // Check we have at least the first filter.
+    if (config.getDataFiltersCount() == 0) {
+      throw new IllegalStateException("No primary filter is configured");
+    }
+
     int filterCount;
     switch (config.getDataFilterType()) {
       case JURY:
@@ -2829,16 +2834,12 @@ public class PeakFit implements PlugInFilter {
       case SINGLE:
       default:
         filterCount = 1;
+        break;
     }
 
+    int numberOfFilters = 1;
     final String[] filterNames = SettingsManager.getDataFilterMethodNames();
     final DataFilterMethod[] filterValues = SettingsManager.getDataFilterMethodValues();
-
-    // We use the previous value in the event the configuration does not have any current values.
-    // Check we have at least the first filter.
-    if (config.getDataFiltersCount() == 0) {
-      throw new IllegalStateException("No primary filter is configured");
-    }
 
     final FitEngineConfigurationProvider fitEngineConfigurationProvider = () -> config;
 
@@ -3493,6 +3494,12 @@ public class PeakFit implements PlugInFilter {
 
     final int totalFrames = source.getFrames();
 
+    // Use the FitEngine to allow multi-threading.
+    final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
+    if (engine == null) {
+      return;
+    }
+
     final ImageStack stack =
         (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
 
@@ -3500,13 +3507,6 @@ public class PeakFit implements PlugInFilter {
     final Rectangle cropBounds =
         (bounds.x == 0 && bounds.y == 0 && bounds.width == source.getWidth()
             && bounds.height == source.getHeight()) ? null : bounds;
-
-    // Use the FitEngine to allow multi-threading.
-    final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
-    if (engine == null) {
-      return;
-    }
-
     final int step = ImageJUtils.getProgressInterval(totalFrames);
 
     // To pre-process data for noise estimation
@@ -3753,16 +3753,16 @@ public class PeakFit implements PlugInFilter {
    * @return The fiting engine
    */
   public FitEngine createFitEngine(int numberOfThreads, FitQueue queue, int queueSize) {
+    // Update the configuration
+    if (!updateFitConfiguration(config)) {
+      return null;
+    }
+
     // Ensure thread safety
     final PeakResultsList list = (numberOfThreads > 1) ? results.getThreadSafeList() : results;
 
     // Reduce to single object for speed
     final PeakResults r = (results.numberOfOutputs() == 1) ? list.toArray()[0] : list;
-
-    // Update the configuration
-    if (!updateFitConfiguration(config)) {
-      return null;
-    }
 
     final FitEngine engine = FitEngine.create(config, r, numberOfThreads, queue, queueSize);
 
@@ -3884,15 +3884,14 @@ public class PeakFit implements PlugInFilter {
       frames = () -> map.keySet().stream().mapToInt(Integer::intValue).sorted();
     }
 
-    final ImageStack stack =
-        (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
-
     // Use the FitEngine to allow multi-threading.
     final FitEngine engine = createFitEngine(getNumberOfThreads(totalFrames));
     if (engine == null) {
       return;
     }
 
+    final ImageStack stack =
+        (extraSettings.showProcessedFrames) ? new ImageStack(bounds.width, bounds.height) : null;
     final int step = ImageJUtils.getProgressInterval(totalFrames);
 
     // No crop bounds are supported.
