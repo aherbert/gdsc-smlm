@@ -116,8 +116,7 @@ public class PcPalmClusters implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     private static final String[] UNITS = {"pixels^2", "um^2"};
 
@@ -481,7 +480,7 @@ public class PcPalmClusters implements PlugIn {
       final ArrayList<float[]> data = new ArrayList<>();
 
       // Read the header and store the calibration if present
-      while ((line = input.readLine()) != null) {
+      for (line = input.readLine(); line != null; line = input.readLine()) {
         count++;
         if (line.length() == 0) {
           continue;
@@ -503,11 +502,8 @@ public class PcPalmClusters implements PlugIn {
       }
 
       final Pattern pattern = Pattern.compile("[\t, ]+");
-      while (line != null) {
-        if (line.length() == 0) {
-          continue;
-        }
-        if (!Character.isDigit(line.charAt(0))) {
+      for (; line != null; line = input.readLine(), count++) {
+        if (line.length() == 0 || !Character.isDigit(line.charAt(0))) {
           continue;
         }
 
@@ -528,10 +524,6 @@ public class PcPalmClusters implements PlugIn {
 
           data.add(new float[] {molecules, frequency});
         }
-
-        // Get the next line
-        line = input.readLine();
-        count++;
       }
 
       if (data.isEmpty()) {
@@ -835,7 +827,7 @@ public class PcPalmClusters implements PlugIn {
       plot = new Plot(title, "N", "Cumulative Probability");
       plot.addPoints(values, cumulativeHistogram, Plot.LINE);
       plot.addPoints(values, cumulativeHistogram, Plot.CIRCLE);
-      //plot.addPoints(values, cumulativeHistogram, Plot.BAR);
+      // plot.addPoints(values, cumulativeHistogram, Plot.BAR);
       plot.setLimits(0, histogram.length - 1, 0, 1.05);
       ImageJUtils.display(title, plot);
     }

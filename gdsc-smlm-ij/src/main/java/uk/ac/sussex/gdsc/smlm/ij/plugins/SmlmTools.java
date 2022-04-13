@@ -152,8 +152,7 @@ public class SmlmTools extends PlugInFrame {
       // Read into memory
       int gaps = 0;
       try (BufferedReader input = new BufferedReader(new UnicodeReader(readmeStream, null))) {
-        String line;
-        while ((line = input.readLine()) != null) {
+        for (String line = input.readLine(); line != null; line = input.readLine()) {
           if (line.startsWith("#")) {
             continue;
           }

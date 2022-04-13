@@ -86,7 +86,8 @@ public class LoadLocalisations implements PlugIn {
       TIME_UNIT_VALUES = new TimeUnit[set.size()];
       int index = 0;
       for (final TimeUnit t : set) {
-        TIME_UNITS[index] = SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
+        TIME_UNITS[index] =
+            SettingsManager.getName(UnitHelper.getName(t), UnitHelper.getShortName(t));
         TIME_UNIT_VALUES[index] = t;
         index++;
       }
@@ -347,18 +348,13 @@ public class LoadLocalisations implements PlugIn {
       final int isy = settings.getFieldSy();
       final int ip = settings.getFieldPrecision();
 
-      String line;
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         // Skip header
-        if (headerCount-- > 0) {
-          continue;
-        }
-        // Skip empty lines
-        if (line.length() == 0) {
-          continue;
-        }
-        // Skip comments
-        if (hasComment && line.startsWith(comment)) {
+        if (headerCount-- > 0
+            // Skip empty lines
+            || line.length() == 0
+            // Skip comments
+            || (hasComment && line.startsWith(comment))) {
           continue;
         }
 

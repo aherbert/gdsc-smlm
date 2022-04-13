@@ -780,7 +780,7 @@ public class PcPalmFitting implements PlugIn {
       final Pattern pattern = Pattern.compile("#([^=]+) = ([^ ]+)");
 
       // Read the header
-      while ((line = input.readLine()) != null) {
+      for (line = input.readLine(); line != null; line = input.readLine()) {
         count++;
 
         if (line.length() == 0) {
@@ -830,11 +830,8 @@ public class PcPalmFitting implements PlugIn {
 
       // Read the data: gr[0][i], gr[1][i], gr[2][i]
       final ArrayList<double[]> data = new ArrayList<>();
-      while (line != null) {
-        if (line.length() == 0) {
-          continue;
-        }
-        if (line.charAt(0) == '#') {
+      for (; line != null; line = input.readLine(), count++) {
+        if (line.length() == 0 || line.charAt(0) == '#') {
           continue;
         }
 
@@ -860,10 +857,6 @@ public class PcPalmFitting implements PlugIn {
           }
           data.add(new double[] {radius, gr, error});
         }
-
-        // Read the next line
-        line = input.readLine();
-        count++;
       }
 
       if (data.isEmpty()) {
