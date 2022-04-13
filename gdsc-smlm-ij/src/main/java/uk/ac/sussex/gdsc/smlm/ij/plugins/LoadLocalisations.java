@@ -73,6 +73,9 @@ public class LoadLocalisations implements PlugIn {
   // TODO - Add support for noise and mean signal.
   // Q. Is this required?
 
+  /**
+   * Lazy load the TimeUnit names and values.
+   */
   private static class TimeUnitLoader {
     // Time units for the exposure time cannot be in frames as this makes no sense
     private static final String[] TIME_UNITS;
@@ -420,8 +423,8 @@ public class LoadLocalisations implements PlugIn {
     final List<String> lines = new LocalList<>(count);
     try (BufferedReader input = new BufferedReader(new UnicodeReader(
         Files.newInputStream(Paths.get(settings.getLocalisationsFilename())), null))) {
-      String line;
-      while ((line = input.readLine()) != null && lines.size() < count) {
+      for (String line = input.readLine(); line != null && lines.size() < count;
+          line = input.readLine()) {
         lines.add(line);
       }
     } catch (final IOException ex) {
@@ -563,13 +566,12 @@ public class LoadLocalisations implements PlugIn {
       IJ.error(TITLE, "Require positive pixel pitch");
       return false;
     }
+    // Q.Validate other camera types?
     if (cw.isCcdCamera()) {
       if (!cw.hasCountPerPhoton()) {
         IJ.error(TITLE, "Require positive count/photon for CCD camera type");
         return false;
       }
-    } else {
-      // Q.Validate other camera types?
     }
     if (settings.getFieldX() < 0 || settings.getFieldY() < 0) {
       IJ.error(TITLE, "Require valid X and Y indices");
