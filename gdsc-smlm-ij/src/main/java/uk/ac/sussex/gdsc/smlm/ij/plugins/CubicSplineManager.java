@@ -37,6 +37,7 @@ import java.awt.Label;
 import java.awt.TextField;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -90,7 +91,6 @@ public class CubicSplineManager implements PlugIn {
   /** The cache of the last named cubic spline PSF that was either saved or loaded. */
   private static AtomicReference<Pair<String, CubicSplinePsf>> cache = new AtomicReference<>();
 
-
   //@formatter:off
   private static final String[] OPTIONS = {
       "Print all model details",
@@ -102,7 +102,8 @@ public class CubicSplineManager implements PlugIn {
   };
   //@formatter:on
 
-  private CubicSplineManagerSettings.Builder pluginSettings;
+  /** The plugin settings. */
+  CubicSplineManagerSettings.Builder pluginSettings;
 
   /**
    * Provide a lazy initialisation holder for the CubicSplineSettings.
@@ -336,7 +337,7 @@ public class CubicSplineManager implements PlugIn {
       saveResource(psfModel, filename, getName(filename));
 
       return true;
-    } catch (final Exception ex) {
+    } catch (final IOException ex) {
       ImageJUtils.log("Failed to save spline model to file: %s. %s", filename, ex.getMessage());
     }
 
@@ -394,7 +395,7 @@ public class CubicSplineManager implements PlugIn {
           CubicSplineData.read(is, SimpleImageJTrackProgress.getInstance());
 
       return new CubicSplinePsf(imagePsf, function);
-    } catch (final Exception ex) {
+    } catch (final IOException ex) {
       ImageJUtils.log("Failed to load spline model %s from file: %s. %s", name, filename,
           ex.getMessage());
     } finally {
@@ -447,7 +448,14 @@ public class CubicSplineManager implements PlugIn {
     return list;
   }
 
-  private static int getScale(double splineSize, double nmPerPixel) {
+  /**
+   * Gets the scale.
+   *
+   * @param splineSize the spline size
+   * @param nmPerPixel the nm per pixel
+   * @return the scale
+   */
+  static int getScale(double splineSize, double nmPerPixel) {
     if (splineSize > 0) {
       final double factor = nmPerPixel / splineSize;
       final int i = (int) Math.round(factor);
@@ -497,6 +505,7 @@ public class CubicSplineManager implements PlugIn {
         break;
       default:
         runPrintCubicSplines(settings);
+        break;
     }
 
     writeCubicSplineManagerSettings(pluginSettings);
@@ -534,6 +543,9 @@ public class CubicSplineManager implements PlugIn {
     new CSplineRenderer(psfModel).run();
   }
 
+  /**
+   * The cubic splice renderer.
+   */
   private class CSplineRenderer implements DialogListener {
     CubicSplinePsf psfModel;
     ImagePSF imagePsf;
@@ -541,8 +553,15 @@ public class CubicSplineManager implements PlugIn {
     double padx;
     double pady;
     Label label;
+    private int scale = -1;
+    private double xshift;
+    private double yshift;
+    private double zshift;
+    CubicSplineFunction cspline;
+    double[] params = {0, 1, 0, 0, 0}; // Set Intensity == 1
+    SoftLock lock = new SoftLock();
 
-    public CSplineRenderer(CubicSplinePsf psfModel) {
+    CSplineRenderer(CubicSplinePsf psfModel) {
       this.psfModel = psfModel;
       imagePsf = psfModel.imagePsf;
       function = psfModel.splineData;
@@ -552,7 +571,7 @@ public class CubicSplineManager implements PlugIn {
       pady = Math.max(imagePsf.getYCentre(), function.getMaxY() - imagePsf.getYCentre());
     }
 
-    public void run() {
+    void run() {
       final NonBlockingExtendedGenericDialog gd = new NonBlockingExtendedGenericDialog(TITLE);
       gd.addSlider("Scale", 1, 5, pluginSettings.getScale());
 
@@ -598,13 +617,6 @@ public class CubicSplineManager implements PlugIn {
       update();
       return true;
     }
-
-    private int scale = -1;
-    private double xshift;
-    private double yshift;
-    private double zshift;
-    CubicSplineFunction cspline;
-    double[] params = {0, 1, 0, 0, 0}; // Set Intensity == 1
 
     private void draw() {
       scale = pluginSettings.getScale();
@@ -661,8 +673,6 @@ public class CubicSplineManager implements PlugIn {
         label.setText("Intensity = " + MathUtils.rounded(MathUtils.sum(values)));
       }
     }
-
-    SoftLock lock = new SoftLock();
 
     private void update() {
       if (lock.acquire()) {
