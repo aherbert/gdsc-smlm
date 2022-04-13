@@ -128,16 +128,16 @@ public class DepthMask implements PlugIn {
 
   private void createMask() {
     final ImagePlus impXy = WindowManager.getImage(settings.titleXy);
-    final ImagePlus impXz = WindowManager.getImage(settings.titleXz);
-    final ImagePlus impYz = WindowManager.getImage(settings.titleYz);
     if (impXy == null) {
       IJ.error(TITLE, "No XY mask");
       return;
     }
+    final ImagePlus impXz = WindowManager.getImage(settings.titleXz);
     if (impXz == null) {
       IJ.error(TITLE, "No XZ mask");
       return;
     }
+    final ImagePlus impYz = WindowManager.getImage(settings.titleYz);
     if (impYz == null) {
       IJ.error(TITLE, "No YZ mask");
       return;
