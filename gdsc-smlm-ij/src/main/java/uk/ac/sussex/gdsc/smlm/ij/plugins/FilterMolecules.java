@@ -38,7 +38,10 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import uk.ac.sussex.gdsc.core.data.DataException;
+import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot;
 import uk.ac.sussex.gdsc.core.ij.HistogramPlot.HistogramPlotBuilder;
@@ -54,6 +57,7 @@ import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.core.utils.StoredData;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.NamedObject;
+import uk.ac.sussex.gdsc.smlm.data.config.ConfigurationException;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
 import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.TimeUnit;
 import uk.ac.sussex.gdsc.smlm.fitting.JumpDistanceAnalysis;
@@ -72,7 +76,7 @@ public class FilterMolecules implements PlugIn {
   private static final String TITLE = "Filter Molecules";
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -210,11 +214,11 @@ public class FilterMolecules implements PlugIn {
      *
      * @param results the results
      */
-    private void run(MemoryPeakResults results) {
+    void run(MemoryPeakResults results) {
       try {
         distanceConverter = results.getDistanceConverter(DistanceUnit.UM);
         timeConverter = results.getTimeConverter(TimeUnit.SECOND);
-      } catch (final Exception ex) {
+      } catch (final ConversionException | ConfigurationException ex) {
         IJ.error(TITLE, "Cannot convert units to um or seconds: " + ex.getMessage());
         return;
       }
@@ -231,7 +235,7 @@ public class FilterMolecules implements PlugIn {
         final double rawPrecision = distanceConverter.convertBack(precision / 1e3);
         // Get the localisation error (4s^2) in units^2
         error = 4 * rawPrecision * rawPrecision;
-      } catch (final Exception ex) {
+      } catch (final MathIllegalArgumentException | DataException ex) {
         ImageJUtils.log(TITLE + " - Unable to compute precision: " + ex.getMessage());
       }
 
@@ -360,13 +364,7 @@ public class FilterMolecules implements PlugIn {
       final int frame = peakResult.getFrame();
       final float x = peakResult.getXPosition();
       final float y = peakResult.getYPosition();
-      if (lastid != id) {
-        store();
-        lastid = id;
-        startFrame = frame;
-        sumSquared = 0;
-        totalJump = 0;
-      } else {
+      if (lastid == id) {
         // Compute the jump
         final int jump = frame - lastFrame;
         // Get the raw distance but subtract the expected localisation error
@@ -376,6 +374,13 @@ public class FilterMolecules implements PlugIn {
         // However we apply a correction factor for diffusion with frames.
         sumSquared += JumpDistanceAnalysis.convertObservedToActual(d2, jump);
         totalJump += jump;
+      } else {
+        // New Id
+        store();
+        lastid = id;
+        startFrame = frame;
+        sumSquared = 0;
+        totalJump = 0;
       }
       lastFrame = frame;
       lastx = x;
@@ -446,7 +451,7 @@ public class FilterMolecules implements PlugIn {
       lengthPlot.getImagePlus().setRoi(new Line(lx, uy, lx, ly));
     }
 
-    private void update(ExecutorService es, Plot diffusionCoefficientPlot, Plot lengthPlot) {
+    void update(ExecutorService es, Plot diffusionCoefficientPlot, Plot lengthPlot) {
       if (lock.acquire()) {
         // Run in a new thread to allow the GUI to continue updating
         es.submit(() -> {
@@ -511,12 +516,10 @@ public class FilterMolecules implements PlugIn {
       }
     }
 
-    switch (settings.filterMode) {
-      case D:
-        new FilterDiffusionCoefficient().run(results);
-        break;
-      default:
-        IJ.error(TITLE, "Unknown filter mode: " + settings.filterMode);
+    if (settings.filterMode == FilterMode.D) {
+      new FilterDiffusionCoefficient().run(results);
+    } else {
+      IJ.error(TITLE, "Unknown filter mode: " + settings.filterMode);
     }
   }
 
