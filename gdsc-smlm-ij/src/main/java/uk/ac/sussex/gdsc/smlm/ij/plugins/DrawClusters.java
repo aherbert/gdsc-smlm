@@ -66,7 +66,7 @@ import uk.ac.sussex.gdsc.smlm.results.TraceManager;
 public class DrawClusters implements PlugIn {
   private static final String TITLE = "Draw Clusters";
   private static final String[] COLOURS =
-      new String[] {"None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame", "Category"};
+      {"None", "ID", "Time", "Size", "Length", "MSD", "Mean/Frame", "Category"};
 
   /** The plugin settings. */
   private Settings settings;
@@ -171,14 +171,14 @@ public class DrawClusters implements PlugIn {
     int count = 0;
     final int myMaxSize =
         (settings.maxSize < settings.minSize) ? Integer.MAX_VALUE : settings.maxSize;
-    for (int i = 0; i < traces.length; i++) {
+    for (final Trace trace : traces) {
       if (settings.expandToSingles) {
-        traces[i].expandToSingles();
+        trace.expandToSingles();
       }
-      if (traces[i].size() >= settings.minSize && traces[i].size() <= myMaxSize) {
-        traces[count++] = traces[i];
-        traces[i].sort();
-        final int end = traces[i].getTail().getFrame();
+      if (trace.size() >= settings.minSize && trace.size() <= myMaxSize) {
+        traces[count++] = trace;
+        trace.sort();
+        final int end = trace.getTail().getFrame();
         maxFrame = maxFrame < end ? end : maxFrame;
       }
     }
@@ -323,7 +323,24 @@ public class DrawClusters implements PlugIn {
                 (int) Math.round(perLocalisationColour.applyAsDouble(result) * scale));
 
     final LocalList<Roi> localisations = new LocalList<>(11);
-    if (frames != null) {
+    if (frames == null) {
+      // Add the tracks as a single overlay
+      for (int i = 0; i < count; i++) {
+        final PolygonRoi roi = (PolygonRoi) rois[i];
+        // Colour per localisation
+        if (localisationColour == null) {
+          roi.setStrokeColor(new Color(lut.getRGB((int) Math.round(values[i] * scale))));
+          // roi.setStrokeWidth(settings.lineWidth);
+          roi.updateWideLine(settings.lineWidth);
+          o.add(roi);
+        } else {
+          toLocalisations(roi, traces[i], localisationColour, myDrawLines, settings.lineWidth,
+              localisations);
+          localisations.forEach(o::add);
+        }
+        localisations.clear();
+      }
+    } else {
       // Add the tracks on the frames containing the results
       final boolean isHyperStack = imp.isDisplayedHyperStack();
       for (int i = 0; i < count; i++) {
@@ -331,15 +348,15 @@ public class DrawClusters implements PlugIn {
         final Trace trace = traces[i];
         final PolygonRoi roi = (PolygonRoi) rois[i];
         // Colour per localisation
-        if (localisationColour != null) {
-          toLocalisations(roi, trace, localisationColour, myDrawLines, settings.lineWidth,
-              localisations);
-        } else {
+        if (localisationColour == null) {
           c = LutHelper.getColour(lut, (int) Math.round(values[i] * scale));
           roi.setFillColor(c);
           roi.setStrokeColor(c);
           roi.updateWideLine(settings.lineWidth);
           localisations.push(roi);
+        } else {
+          toLocalisations(roi, trace, localisationColour, myDrawLines, settings.lineWidth,
+              localisations);
         }
         final FloatPolygon fp = roi.getNonSplineFloatPolygon();
         // For each frame in the track, add a point ROI for the current position.
@@ -362,23 +379,6 @@ public class DrawClusters implements PlugIn {
           pointRoi.setFillColor(c);
           pointRoi.setStrokeColor(c);
           addToOverlay(o, pointRoi, isHyperStack, frame);
-        }
-        localisations.clear();
-      }
-    } else {
-      // Add the tracks as a single overlay
-      for (int i = 0; i < count; i++) {
-        final PolygonRoi roi = (PolygonRoi) rois[i];
-        // Colour per localisation
-        if (localisationColour != null) {
-          toLocalisations(roi, traces[i], localisationColour, myDrawLines, settings.lineWidth,
-              localisations);
-          localisations.forEach(o::add);
-        } else {
-          roi.setStrokeColor(new Color(lut.getRGB((int) Math.round(values[i] * scale))));
-          // roi.setStrokeWidth(settings.lineWidth);
-          roi.updateWideLine(settings.lineWidth);
-          o.add(roi);
         }
         localisations.clear();
       }

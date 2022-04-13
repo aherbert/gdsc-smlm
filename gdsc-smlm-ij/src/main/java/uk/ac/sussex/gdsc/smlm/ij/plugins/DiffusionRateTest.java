@@ -37,10 +37,12 @@ import ij.text.TextWindow;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -263,7 +265,7 @@ class DiffusionRateTest implements PlugIn {
    * @return true, if is simulated
    */
   static boolean isSimulated(String name) {
-    SimulationData data = LAST_SIMULATION.get();
+    final SimulationData data = LAST_SIMULATION.get();
     if (data != null) {
       for (final String name2 : data.dataset) {
         if (name.equals(name2)) {
@@ -391,14 +393,11 @@ class DiffusionRateTest implements PlugIn {
             }
 
             if (!dist.isWithin(m.getCoordinates())) {
-              // Reset position
-              for (int k = 0; k < 3; k++) {
-                xyz[k] = originalXyz[k];
-              }
-            } else {
               // The move was allowed
               break;
             }
+            // Reset position
+            System.arraycopy(originalXyz, 0, xyz, 0, 3);
           }
 
           points.add(new Point(id, xyz));
@@ -450,10 +449,10 @@ class DiffusionRateTest implements PlugIn {
       // Debug: record all the particles so they can be analysed
       // System.out.printf("%f %f %f\n", m.getX(), m.getY(), m.getZ());
       final double[] xyz = m.getCoordinates();
-      double d2 = 0;
-      totalJumpDistances1D.add(d2 = xyz[0] * xyz[0]);
+      double d2 = xyz[0] * xyz[0];
+      totalJumpDistances1D.add(d2);
       totalJumpDistances2D.add(d2 += xyz[1] * xyz[1]);
-      totalJumpDistances3D.add(d2 += xyz[2] * xyz[2]);
+      totalJumpDistances3D.add(d2 + xyz[2] * xyz[2]);
     }
     final long nanoseconds = System.nanoTime() - start;
     IJ.showProgress(1);
@@ -530,10 +529,10 @@ class DiffusionRateTest implements PlugIn {
     if (r2D.getN() > 0) {
       // Do linear regression to get diffusion rate
 
-      final double[] best2D = new double[] {r2D.getIntercept(), r2D.getSlope()};
+      final double[] best2D = {r2D.getIntercept(), r2D.getSlope()};
       fitted2D = new PolynomialFunction(best2D);
 
-      final double[] best3D = new double[] {r3D.getIntercept(), r3D.getSlope()};
+      final double[] best3D = {r3D.getIntercept(), r3D.getSlope()};
       fitted3D = new PolynomialFunction(best3D);
 
       // For 2D diffusion: d^2 = 4D
@@ -813,9 +812,7 @@ class DiffusionRateTest implements PlugIn {
     final double jump2D = dx * dx + dy * dy;
     jumpDistances2D.add(jump2D);
     jumpDistances3D.add(jump2D + dz * dz);
-    for (int i = 0; i < 3; i++) {
-      origin[i] = xyz[i];
-    }
+    System.arraycopy(xyz, 0, origin, 0, 3);
 
     final double d2 = squared2D(xyz);
     stats2D.add(d2);
@@ -1067,7 +1064,7 @@ class DiffusionRateTest implements PlugIn {
     return limits;
   }
 
-  private void aggregateIntoFrames(ArrayList<Point> points, boolean addError,
+  private void aggregateIntoFrames(List<Point> points, boolean addError,
       double precisionInPixels, NormalizedGaussianSampler gauss) {
     if (myAggregateSteps < 1) {
       return;
@@ -1093,7 +1090,7 @@ class DiffusionRateTest implements PlugIn {
       final boolean newId = result.id != id;
       if (number >= myAggregateSteps || newId) {
         if (number != 0) {
-          double[] xyz = new double[] {cx / number, cy / number};
+          double[] xyz = {cx / number, cy / number};
           if (addError) {
             xyz = addError(xyz, precisionInPixels, gauss);
           }
@@ -1125,7 +1122,7 @@ class DiffusionRateTest implements PlugIn {
 
     // Final peak
     if (number != 0) {
-      double[] xyz = new double[] {cx / number, cy / number};
+      double[] xyz = {cx / number, cy / number};
       if (addError) {
         xyz = addError(xyz, precisionInPixels, gauss);
       }
@@ -1159,7 +1156,7 @@ class DiffusionRateTest implements PlugIn {
    *
    * @param points the points
    */
-  private void msdAnalysis(ArrayList<Point> points) {
+  private void msdAnalysis(List<Point> points) {
     if (myMsdAnalysisSteps == 0) {
       return;
     }
@@ -1262,12 +1259,14 @@ class DiffusionRateTest implements PlugIn {
 
   private String createHeader(double baseMsd) {
     final double apparentD = baseMsd / 4;
-    final StringBuilder sb = new StringBuilder();
-    sb.append(settings.getDiffusionRate()).append('\t');
-    sb.append(myPrecision).append('\t');
-    sb.append(MathUtils.rounded(apparentD)).append('\t');
-    sb.append(MathUtils.rounded(1.0 / settings.getStepsPerSecond())).append('\t');
-    sb.append(myAggregateSteps).append('\t');
+    final StringBuilder sb = new StringBuilder(256);
+    //@formatter:off
+    sb.append(settings.getDiffusionRate()).append('\t')
+      .append(myPrecision).append('\t')
+      .append(MathUtils.rounded(apparentD)).append('\t')
+      .append(MathUtils.rounded(1.0 / settings.getStepsPerSecond())).append('\t')
+      .append(myAggregateSteps).append('\t');
+    //@formatter:on
     // Exposure time is the aggregated frame time
     exposureTime = myAggregateSteps / settings.getStepsPerSecond();
     sb.append(MathUtils.rounded(exposureTime)).append('\t');
@@ -1282,13 +1281,15 @@ class DiffusionRateTest implements PlugIn {
     final double msd = (sum / count) / conversionFactor;
     // Jump distance separation is the number of steps
     final double t = step / settings.getStepsPerSecond();
-    sb.append(prefix);
-    sb.append(MathUtils.rounded(t)).append('\t');
-    sb.append(MathUtils.rounded(t / exposureTime)).append('\t');
-    sb.append(count).append('\t');
-    // Not rounded to preserve precision
-    sb.append(msd).append('\t');
-    sb.append(msd / (4 * t));
+    //@formatter:off
+    sb.append(prefix)
+      .append(MathUtils.rounded(t)).append('\t')
+      .append(MathUtils.rounded(t / exposureTime)).append('\t')
+      .append(count).append('\t')
+      // Not rounded to preserve precision
+      .append(msd).append('\t')
+      .append(msd / (4 * t));
+    //@formatter:on
     return sb.toString();
   }
 
@@ -1392,8 +1393,8 @@ class DiffusionRateTest implements PlugIn {
         out.write(Double.toString(d));
         out.newLine();
       }
-    } catch (final Exception ex) {
-      ex.printStackTrace(); // Show the error
+    } catch (final IOException ex) {
+      IJ.log("Failed to save statistics: " + ex.getMessage());
     }
   }
 
@@ -1404,7 +1405,7 @@ class DiffusionRateTest implements PlugIn {
    */
   static double getLastSimulationPrecision() {
     final SimulationData data = LAST_SIMULATION.get();
-    return (data != null) ? data.precision : 0;
+    return data == null ? 0 : data.precision;
   }
 
   /**
