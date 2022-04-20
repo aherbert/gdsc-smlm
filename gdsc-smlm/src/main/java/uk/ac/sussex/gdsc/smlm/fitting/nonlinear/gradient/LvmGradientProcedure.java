@@ -89,7 +89,8 @@ public abstract class LvmGradientProcedure implements Gradient1Procedure, ValueP
     if (baseline != null && baseline.length == y.length) {
       // For sum-of-squares we can just remove the baseline from the y-values
       this.y = new double[y.length];
-      for (int i = 0, n = baseline.length; i < n; i++) {
+      final int n = baseline.length;
+      for (int i = 0; i < n; i++) {
         this.y[i] = y[i] - baseline[i];
       }
     } else {
