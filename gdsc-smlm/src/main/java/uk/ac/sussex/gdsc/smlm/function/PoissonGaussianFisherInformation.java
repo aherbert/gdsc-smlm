@@ -120,7 +120,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   /** The maximum range of the Gaussian kernel (in SD units). */
   private int maxRange = DEFAULT_MAX_RANGE;
 
-  /** The scale of the kernel. */
+  /** The scale of the kernel. This is a power of 2. */
   private final int defaultScale;
 
   /** The poisson distribution used to generate the Poisson probabilities. */
@@ -194,7 +194,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
       this.defaultScale = getPow2Scale(sampling / sd);
 
-      // Don'theta support excess scaling caused by small kernels
+      // Don't support excess scaling caused by small kernels
       if (defaultScale * sd * MAX_RANGE > 1000000000) {
         throw new IllegalArgumentException(
             "Maximum Gaussian kernel size too large: " + defaultScale * sd * MAX_RANGE);
@@ -521,8 +521,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       // System.out.printf("s=%g theta=%g Iteration=%d sum=%s oldSum=%s change=%s\n", s, theta,
       // iteration, sum, oldSum,
       // delta / (Math.abs(oldSum) + Math.abs(sum)) * 0.5);
-      final double rLimit =
-          getRelativeAccuracy() * (Math.abs(oldSum) + Math.abs(sum)) * 0.5;
+      final double rLimit = getRelativeAccuracy() * (Math.abs(oldSum) + Math.abs(sum)) * 0.5;
       if (delta <= rLimit) {
         break;
       }
@@ -531,13 +530,25 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     return sum;
   }
 
+  /**
+   * Define an integration procedure for a convolution result.
+   */
   private abstract static class IntegrationProcedure implements ConvolutionValueProcedure {
-    final int scale;
+    /**
+     * The scale mask to compute a modulus using the counter where the scale is assumed to be a
+     * power of 2.
+     */
+    private final int scaleMask;
     final double[] pz1;
     int counter;
 
+    /**
+     * Create an instance.
+     *
+     * @param scale the scale (assumed to be a power of 2)
+     */
     IntegrationProcedure(int scale) {
-      this.scale = scale;
+      scaleMask = scale - 1;
 
       // E = integral [A^2/P] - 1
       // P(z) = 1/sqrt(2pi)s sum_j=0:Inf e^-v . v^j / j! . e^-1/2((z-j)/s)^2
@@ -551,7 +562,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
 
     @Override
     public boolean execute(double pz) {
-      final int index = counter % scale;
+      final int index = counter & scaleMask;
       counter++;
       final double az = pz1[index];
       pz1[index] = pz;
@@ -565,11 +576,26 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
       return true;
     }
 
-    protected abstract void sum(double value);
+    /**
+     * Sum the value.
+     *
+     * @param value the value
+     */
+    abstract void sum(double value);
 
-    public abstract double getSum();
+    /**
+     * Gets the sum.
+     *
+     * @return the sum
+     */
+    abstract double getSum();
   }
 
+  /**
+   * Perform Simpson 1/3 integration.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
     double sum2;
     double sum4;
@@ -579,11 +605,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    protected void sum(double value) {
+    void sum(double value) {
       // Simpson's rule.
       // This computes the sum as:
       // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-      if (counter % 2 == 0) {
+      if ((counter & 0x1) == 0) {
         sum2 += value;
       } else {
         sum4 += value;
@@ -591,7 +617,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    public double getSum() {
+    double getSum() {
       // Assume the end function values are zero
       // return (sum4 * 4 + sum2 * 2) / 3;
       // Stabilise for high sums by dividing first
@@ -601,6 +627,11 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
   }
 
+  /**
+   * Perform Simpson 3/8 integration.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
     double sum2;
     double sum3;
@@ -610,7 +641,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    protected void sum(double value) {
+    void sum(double value) {
       // Simpson's 3/8 rule based on cubic interpolation has a lower error.
       // This computes the sum as:
       // 3h/8 * [ f(x0) + 3f(x1) + 3f(x2) + 2f(x3) + 3f(x4) + 3f(x5) + 2f(x6) + ... + f(xn) ]
@@ -622,7 +653,7 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
 
     @Override
-    public double getSum() {
+    double getSum() {
       // Assume the end function values are zero
       // return (3.0 / 8) * (sum3 * 3 + sum2 * 2);
       // Stabilise for high sums by dividing first
