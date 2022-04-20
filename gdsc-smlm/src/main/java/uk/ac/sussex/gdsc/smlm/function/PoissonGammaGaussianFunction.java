@@ -141,14 +141,19 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     LEGENDRE_GAUSS_PDF
   }
 
+  /**
+   * Provide the Poisson-Gamma-Gaussian function as a {@link UnivariateFunction}.
+   */
   private class PggFunction implements UnivariateFunction {
     int counter;
     final double obs;
     final double exp;
+    final double gain;
 
-    public PggFunction(double obs, double exp) {
+    PggFunction(double obs, double exp, double gain) {
       this.obs = obs;
       this.exp = exp;
+      this.gain = gain;
     }
 
     @Override
@@ -224,8 +229,6 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
       return mortensenApproximation(obs, exp);
     }
 
-    ConvolutionMode mode = convolutionMode;
-
     // Integrate to infinity is not necessary. The convolution of the function with the
     // Gaussian should be adequately sampled using a nxSD around the function value.
     // Find a bracket around the value.
@@ -234,6 +237,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     if (upperu < 0) {
       return 0;
     }
+    ConvolutionMode mode = convolutionMode;
     double loweru = obs - range;
     if (loweru < 0) {
       loweru = 0;
@@ -336,7 +340,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
       // is large as it uses fewer points.
 
       // Specify the function to integrate.
-      final PggFunction f = new PggFunction(obs, exp);
+      final PggFunction f = new PggFunction(obs, exp, gain);
 
       try {
         pvalue += createIntegrator().integrate(2000, f, loweru, upperu);
