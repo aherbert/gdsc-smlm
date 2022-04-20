@@ -91,14 +91,14 @@ public final class UnitHelper {
    */
   public static DistanceUnit guessDistanceUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase("px")) {
+      if ("px".equalsIgnoreCase(name)) {
         return DistanceUnit.PIXEL;
       }
       // There is no uppercase μm
-      if (name.equals("μm") || name.equalsIgnoreCase("um")) {
+      if ("μm".equals(name) || "um".equalsIgnoreCase(name)) {
         return DistanceUnit.UM;
       }
-      if (name.equalsIgnoreCase("nm")) {
+      if ("nm".equalsIgnoreCase(name)) {
         return DistanceUnit.NM;
       }
     }
@@ -147,10 +147,10 @@ public final class UnitHelper {
    */
   public static IntensityUnit guessIntensityUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase(PHOTON)) {
+      if (PHOTON.equalsIgnoreCase(name)) {
         return IntensityUnit.PHOTON;
       }
-      if (name.equalsIgnoreCase(COUNT)) {
+      if (COUNT.equalsIgnoreCase(name)) {
         return IntensityUnit.COUNT;
       }
     }
@@ -199,10 +199,10 @@ public final class UnitHelper {
    */
   public static AngleUnit guessAngleUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase("°")) {
+      if ("°".equalsIgnoreCase(name)) {
         return AngleUnit.DEGREE;
       }
-      if (name.equalsIgnoreCase("rad")) {
+      if ("rad".equalsIgnoreCase(name)) {
         return AngleUnit.RADIAN;
       }
     }
@@ -255,13 +255,13 @@ public final class UnitHelper {
    */
   public static TimeUnit guessTimeUnitFromShortName(String name) {
     if (name != null) {
-      if (name.equalsIgnoreCase(FRAME)) {
+      if (FRAME.equalsIgnoreCase(name)) {
         return TimeUnit.FRAME;
       }
-      if (name.equalsIgnoreCase("s")) {
+      if ("s".equalsIgnoreCase(name)) {
         return TimeUnit.SECOND;
       }
-      if (name.equalsIgnoreCase("ms")) {
+      if ("ms".equalsIgnoreCase(name)) {
         return TimeUnit.MILLISECOND;
       }
     }
