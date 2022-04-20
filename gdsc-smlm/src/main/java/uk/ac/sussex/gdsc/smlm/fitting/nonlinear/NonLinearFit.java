@@ -173,9 +173,6 @@ public class NonLinearFit extends LseBaseFunctionSolver
     // for m <= a.length parameters. The parameters can be accessed using the gradientIndices()
     // method.
 
-    final int[] gradientIndices = function.gradientIndices();
-    final int m = gradientIndices.length;
-
     if (initialStage) {
       lambda = initialLambda;
       System.arraycopy(ap, 0, a, 0, a.length);
@@ -186,6 +183,9 @@ public class NonLinearFit extends LseBaseFunctionSolver
         return false;
       }
     }
+
+    final int[] gradientIndices = function.gradientIndices();
+    final int m = gradientIndices.length;
 
     // Set previous using the current best fit result we have
     sumOfSquaresWorking[SUM_OF_SQUARES_OLD] = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
