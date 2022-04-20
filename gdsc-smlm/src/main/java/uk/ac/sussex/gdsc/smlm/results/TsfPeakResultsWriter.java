@@ -70,41 +70,42 @@ import uk.ac.sussex.gdsc.smlm.tsf.TSFProtos.ThetaUnits;
 public class TsfPeakResultsWriter extends AbstractPeakResults {
   private static Logger logger = Logger.getLogger(TsfPeakResultsWriter.class.getName());
 
-  private static final CameraType[] cameraTypeMap;
-  private static final ThetaUnits[] thetaUnitsMap;
-  private static final LocationUnits[] locationUnitsMap;
-  private static final IntensityUnits[] intensityUnitsMap;
+  private static final CameraType[] CAMERA_TYPE_MAP;
+  private static final ThetaUnits[] THETA_UNITS_MAP;
+  private static final LocationUnits[] LOCATION_UNITS_MAP;
+  private static final IntensityUnits[] INTENSITY_UNITS_MAP;
 
   static {
     // These should have 1:1 mapping. We can extends the TSF proto if necessary.
-    cameraTypeMap = new CameraType[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType
+    CAMERA_TYPE_MAP = new CameraType[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType
         .values().length];
-    cameraTypeMap[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD.ordinal()] =
+    CAMERA_TYPE_MAP[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.CCD.ordinal()] =
         CameraType.CCD;
-    cameraTypeMap[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD.ordinal()] =
-        CameraType.EMCCD;
-    cameraTypeMap[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS.ordinal()] =
-        CameraType.SCMOS;
-    thetaUnitsMap =
+    CAMERA_TYPE_MAP[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.EMCCD
+        .ordinal()] = CameraType.EMCCD;
+    CAMERA_TYPE_MAP[uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType.SCMOS
+        .ordinal()] = CameraType.SCMOS;
+    THETA_UNITS_MAP =
         new ThetaUnits[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.values().length];
-    thetaUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN.ordinal()] =
+    THETA_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.RADIAN.ordinal()] =
         ThetaUnits.RADIANS;
-    thetaUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE.ordinal()] =
+    THETA_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.AngleUnit.DEGREE.ordinal()] =
         ThetaUnits.DEGREES;
-    locationUnitsMap = new LocationUnits[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit
-        .values().length];
-    locationUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM.ordinal()] =
+    LOCATION_UNITS_MAP =
+        new LocationUnits[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit
+            .values().length];
+    LOCATION_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.NM.ordinal()] =
         LocationUnits.NM;
-    locationUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM.ordinal()] =
+    LOCATION_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.UM.ordinal()] =
         LocationUnits.UM;
-    locationUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL.ordinal()] =
+    LOCATION_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit.PIXEL.ordinal()] =
         LocationUnits.PIXELS;
-    intensityUnitsMap =
+    INTENSITY_UNITS_MAP =
         new IntensityUnits[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit
             .values().length];
-    intensityUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT.ordinal()] =
-        IntensityUnits.COUNTS;
-    intensityUnitsMap[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON
+    INTENSITY_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.COUNT
+        .ordinal()] = IntensityUnits.COUNTS;
+    INTENSITY_UNITS_MAP[uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit.PHOTON
         .ordinal()] = IntensityUnits.PHOTONS;
   }
 
@@ -244,8 +245,8 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
 
   /**
    * Adds the standard fields from the result. This adds all the fields except the parameter
-   * deviations. A new Spot.Builder can add the deviations directly. An existing Spot.Builder
-   * can recycle the array space for the deviations or clear it.
+   * deviations. A new Spot.Builder can add the deviations directly. An existing Spot.Builder can
+   * recycle the array space for the deviations or clear it.
    *
    * @param builder the builder
    * @param result the result
@@ -493,17 +494,17 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
         builder.setBias(cr.getBias());
       }
       if (cr.hasCameraType()) {
-        builder.setCameraType(cameraTypeMap[cr.getCameraType().ordinal()]);
+        builder.setCameraType(CAMERA_TYPE_MAP[cr.getCameraType().ordinal()]);
       }
 
       if (cr.hasDistanceUnit()) {
-        builder.setLocationUnits(locationUnitsMap[cr.getDistanceUnit().ordinal()]);
+        builder.setLocationUnits(LOCATION_UNITS_MAP[cr.getDistanceUnit().ordinal()]);
       }
       if (cr.hasIntensityUnit()) {
-        builder.setIntensityUnits(intensityUnitsMap[cr.getIntensityUnit().ordinal()]);
+        builder.setIntensityUnits(INTENSITY_UNITS_MAP[cr.getIntensityUnit().ordinal()]);
       }
       if (cr.hasAngleUnit()) {
-        builder.setThetaUnits(thetaUnitsMap[cr.getAngleUnit().ordinal()]);
+        builder.setThetaUnits(THETA_UNITS_MAP[cr.getAngleUnit().ordinal()]);
       }
 
       // We can use some logic here to get the QE

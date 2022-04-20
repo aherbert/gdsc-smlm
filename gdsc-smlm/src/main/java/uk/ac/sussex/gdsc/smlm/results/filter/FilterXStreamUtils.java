@@ -38,15 +38,15 @@ public final class FilterXStreamUtils {
   private static final Logger logger = Logger.getLogger(FilterXStreamUtils.class.getName());
 
   @XStreamOmitField
-  private static final XStream xs;
+  private static final XStream XS;
 
   static {
-    xs = new XStream(new DomDriver());
-    if (xs != null) {
+    XS = new XStream(new DomDriver());
+    if (XS != null) {
       try {
-        xs.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
+        XS.allowTypesByWildcard(new String[] {"uk.ac.sussex.gdsc.smlm.**"});
 
-        xs.autodetectAnnotations(true);
+        XS.autodetectAnnotations(true);
 
         addAlias(FilterSet.class);
 
@@ -102,8 +102,8 @@ public final class FilterXStreamUtils {
    * @param type The class
    */
   public static void addAlias(Class<?> type) {
-    if (xs != null) {
-      xs.alias(type.getSimpleName(), type);
+    if (XS != null) {
+      XS.alias(type.getSimpleName(), type);
     }
   }
 
@@ -116,9 +116,9 @@ public final class FilterXStreamUtils {
    * @return An XML representation of this object
    */
   public static String toXml(Object object) {
-    if (xs != null) {
+    if (XS != null) {
       try {
-        return xs.toXML(object);
+        return XS.toXML(object);
       } catch (final Exception ex) {
         logger.log(Level.WARNING, "Failed to serialise to XML", ex);
       }
@@ -133,9 +133,9 @@ public final class FilterXStreamUtils {
    * @return the object
    */
   public static @Nullable Object fromXml(String xml) {
-    if (xs != null) {
+    if (XS != null) {
       try {
-        return xs.fromXML(xml);
+        return XS.fromXML(xml);
       } catch (final Exception ex) {
         logger.log(Level.WARNING, "Failed to deserialise from XML", ex);
       }
@@ -152,6 +152,6 @@ public final class FilterXStreamUtils {
    * @return An XStream object for reading/writing Filter objects
    */
   public static XStream getXStreamInstance() {
-    return xs;
+    return XS;
   }
 }

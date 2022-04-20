@@ -37,14 +37,14 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class Gaussian2DPeakResultDataMeanSignal implements PeakResultDataFloat {
   /** The index of the x width. */
-  static final int i = PeakResult.STANDARD_PARAMETERS;
+  private static final int I = PeakResult.STANDARD_PARAMETERS;
   /** The index of the y width. */
-  static final int j = i + 1;
+  private static final int J = I + 1;
 
   @Override
   public Float getValue(PeakResult result) {
     return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingR1(result.getIntensity(),
-        result.getParameter(i), result.getParameter(j)));
+        result.getParameter(I), result.getParameter(J)));
   }
 
   @Override

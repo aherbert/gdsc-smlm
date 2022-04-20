@@ -44,7 +44,7 @@ import uk.ac.sussex.gdsc.smlm.results.filter.MultiPathFitResult.FitResult;
  */
 public class MultiPathFilter {
 
-  private static final FailCounter defaultFailCounter = ConsecutiveFailCounter.create(0);
+  private static final FailCounter DEFAULT_FAIL_COUNTER = ConsecutiveFailCounter.create(0);
 
   /** The direct filter to apply to the results. */
   final IDirectFilter filter;
@@ -1210,7 +1210,7 @@ public class MultiPathFilter {
    * @return the fail counter
    */
   public static FailCounter replaceIfNull(FailCounter failCounter) {
-    return (failCounter == null) ? defaultFailCounter.newCounter() : failCounter;
+    return (failCounter == null) ? DEFAULT_FAIL_COUNTER.newCounter() : failCounter;
   }
 
   /**

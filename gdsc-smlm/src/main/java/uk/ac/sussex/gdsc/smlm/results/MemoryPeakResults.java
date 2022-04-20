@@ -82,7 +82,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.ZResultProcedure;
  * SynchronizedPeakResults object if using on multiple threads.
  */
 public class MemoryPeakResults extends AbstractPeakResults {
-  private static final LinkedHashMap<String, MemoryPeakResults> resultsMap = new LinkedHashMap<>();
+  private static final LinkedHashMap<String, MemoryPeakResults> RESULTS_MAP = new LinkedHashMap<>();
 
   /**
    * The memory size of a PeakResult object without deviations. Only the standard parameters are
@@ -374,7 +374,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return Get the named results (or null if they do not exist)
    */
   public static MemoryPeakResults getResults(String name) {
-    return resultsMap.get(name);
+    return RESULTS_MAP.get(name);
   }
 
   /**
@@ -384,7 +384,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return The removed results (or null if they do not exist)
    */
   public static MemoryPeakResults removeResults(String name) {
-    return resultsMap.remove(name);
+    return RESULTS_MAP.remove(name);
   }
 
   /**
@@ -395,7 +395,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
   public static void addResults(MemoryPeakResults results) {
     Objects.requireNonNull(results, "Results must not be null");
     results.trimToSize();
-    resultsMap.put(results.getName(), results);
+    RESULTS_MAP.put(results.getName(), results);
   }
 
   /**
@@ -404,7 +404,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return A set of the available named results held in memory
    */
   public static Set<String> getResultNames() {
-    return resultsMap.keySet();
+    return RESULTS_MAP.keySet();
   }
 
   /**
@@ -413,7 +413,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return A collection of the results held in memory
    */
   public static Collection<MemoryPeakResults> getAllResults() {
-    return resultsMap.values();
+    return RESULTS_MAP.values();
   }
 
   /**
@@ -422,7 +422,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return the results memory size
    */
   public static int getResultsMemorySize() {
-    return resultsMap.size();
+    return RESULTS_MAP.size();
   }
 
   /**
@@ -431,10 +431,10 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return true, if is memory empty
    */
   public static boolean isMemoryEmpty() {
-    if (resultsMap.isEmpty()) {
+    if (RESULTS_MAP.isEmpty()) {
       return true;
     }
-    for (final MemoryPeakResults r : resultsMap.values()) {
+    for (final MemoryPeakResults r : RESULTS_MAP.values()) {
       if (!r.isEmpty()) {
         return false;
       }
@@ -450,7 +450,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return true, if the test passes on any result
    */
   public static boolean isAnyInMemory(Predicate<MemoryPeakResults> test) {
-    for (final MemoryPeakResults r : resultsMap.values()) {
+    for (final MemoryPeakResults r : RESULTS_MAP.values()) {
       if (test.test(r)) {
         return true;
       }
@@ -466,10 +466,10 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @return true, if the test passes on all results
    */
   public static boolean isAllInMemory(Predicate<MemoryPeakResults> test) {
-    if (resultsMap.isEmpty()) {
+    if (RESULTS_MAP.isEmpty()) {
       return false;
     }
-    for (final MemoryPeakResults r : resultsMap.values()) {
+    for (final MemoryPeakResults r : RESULTS_MAP.values()) {
       if (!test.test(r)) {
         return false;
       }
@@ -484,7 +484,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    */
   public static int countMemorySize() {
     int size = 0;
-    for (final MemoryPeakResults r : resultsMap.values()) {
+    for (final MemoryPeakResults r : RESULTS_MAP.values()) {
       size += r.size();
     }
     return size;
@@ -494,7 +494,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * Clear the results from memory.
    */
   public static void clearMemory() {
-    resultsMap.clear();
+    RESULTS_MAP.clear();
   }
 
   /**
@@ -504,7 +504,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    */
   public static long estimateMemorySize() {
     long memorySize = 0;
-    for (final MemoryPeakResults r : resultsMap.values()) {
+    for (final MemoryPeakResults r : RESULTS_MAP.values()) {
       memorySize += estimateMemorySize(r);
     }
     return memorySize;
