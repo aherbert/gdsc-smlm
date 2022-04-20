@@ -133,8 +133,8 @@ public class PoissonGradientProcedure implements Gradient1Procedure {
    * @return true, if NaN
    */
   protected boolean checkGradients() {
-    for (int i = 0, len = data.length; i < len; i++) {
-      if (Double.isNaN(data[i])) {
+    for (final double d : data) {
+      if (Double.isNaN(d)) {
         return true;
       }
     }
