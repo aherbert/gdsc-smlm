@@ -76,7 +76,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   /** Cache all the integer factorials if the data contains only integers. */
   private final DoubleUnaryOperator logFactorial;
   private final double sumLogFactorialK;
-  private final double alpha;
   private final double logAlpha;
 
   private boolean allowNegativeExpectedValues = true;
@@ -123,13 +122,12 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
   public PoissonLikelihoodWrapper(NonLinearFunction function, double[] parameters, double[] data,
       int dataSize, double alpha) {
     super(function, parameters, data, dataSize);
-    this.alpha = Math.abs(alpha);
     logAlpha = Math.log(alpha);
 
     if (alpha != 1) {
       // Pre-apply gain
       for (int i = 0; i < dataSize; i++) {
-        data[i] *= this.alpha;
+        data[i] *= alpha;
       }
     }
 
@@ -192,8 +190,6 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
       // Function now computes expected poisson mean without gain
       double lx = function.eval(i, dlda); // * alpha;
 
-      final double k = data[i];
-
       // Check for zero and return the worst likelihood score
       if (lx <= 0) {
         if (allowNegativeExpectedValues) {
@@ -203,6 +199,7 @@ public class PoissonLikelihoodWrapper extends LikelihoodWrapper {
           return Double.POSITIVE_INFINITY;
         }
       }
+      final double k = data[i];
       ll += lx - k * Math.log(lx);
 
       // Continue to work out the gradient since this does not involve logs.
