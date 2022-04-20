@@ -63,7 +63,9 @@ public class FitType {
   /**
    * Instantiates a new fit type.
    */
-  public FitType() {}
+  public FitType() {
+    // Intentionally empty
+  }
 
   /**
    * Instantiates a new fit type.
