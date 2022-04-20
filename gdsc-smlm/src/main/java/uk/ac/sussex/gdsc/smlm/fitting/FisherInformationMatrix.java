@@ -234,7 +234,8 @@ public class FisherInformationMatrix {
    */
   public @Nullable double[] crlbReciprocal() {
     final double[] result = new double[matrix.numCols];
-    for (int i = 0, j = 0, n = matrix.numCols; i < n; i++, j += n + 1) {
+    final int n = matrix.numCols;
+    for (int i = 0, j = 0; i < n; i++, j += n + 1) {
       result[i] = reciprocal(matrix.data[j]);
     }
     return result;
@@ -311,7 +312,8 @@ public class FisherInformationMatrix {
    */
   public @NotNull double[] crlbReciprocalSqrt() {
     final double[] result = new double[matrix.numCols];
-    for (int i = 0, j = 0, n = matrix.numCols; i < n; i++, j += n + 1) {
+    final int n = matrix.numCols;
+    for (int i = 0, j = 0; i < n; i++, j += n + 1) {
       result[i] = reciprocalSqrt(matrix.data[j]);
     }
     return result;
