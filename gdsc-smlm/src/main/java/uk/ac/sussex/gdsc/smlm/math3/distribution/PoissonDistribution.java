@@ -157,10 +157,10 @@ public final class PoissonDistribution {
   public int inverseCumulativeProbability(final double probability) {
     ValidationUtils.checkArgument(probability >= 0 && probability <= 1, "Invalid probability: %f",
         probability);
-    if (probability == 0.0) {
+    if (probability == 0) {
       return 0;
     }
-    if (probability == 1.0) {
+    if (probability == 1) {
       return Integer.MAX_VALUE;
     }
 
