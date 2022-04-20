@@ -54,11 +54,6 @@
           ./ancestor::ClassOrInterfaceDeclaration[@SimpleName ='PrefsKey']"/>
     </properties>
   </rule>
-  <rule ref="category/java/codestyle.xml/ConfusingTernary">
-    <properties>
-      <property name="ignoreElseIf" value="true" />
-    </properties>
-  </rule>
   <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
     <properties>
       <!-- Allow underscores using letters for add, subtract, multiply, divide. -->
@@ -96,9 +91,12 @@
     <exclude name="AtLeastOneConstructor" />
     <!-- <exclude name="GenericsNaming" /> -->
     <exclude name="OnlyOneReturn" />
-    <!--  Allow builders to have setters that return something -->
+    <!-- Allow builders to have setters that return something -->
     <exclude name="LinguisticNaming" />
     <exclude name="UseUnderscoresInNumericLiterals" />
+    <!-- Typically used with 'if object != null: use object'.
+         This is the main code path and should be first rather than 'if object == null: handle null'  -->
+    <exclude name="ConfusingTernary" />
   </rule>
   <rule ref="category/java/design.xml">
     <exclude name="TooManyMethods" />
