@@ -227,7 +227,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
     final double dx = x0 - params[apos + X_POSITION];
     final double dy = x1 - params[apos + Y_POSITION];
     final double dx2 = dx * dx;
-    final double dxy = dx * dy;
     final double dy2 = dy * dy;
 
     // Calculate gradients
@@ -249,6 +248,7 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
       return y;
     }
 
+    final double dxy = dx * dy;
     final double bb = factors[BB];
 
     final double exp = StdMath.exp(aa * dx2 + bb * dxy + cc * dy2);
