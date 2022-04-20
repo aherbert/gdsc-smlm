@@ -27,7 +27,10 @@ package uk.ac.sussex.gdsc.smlm.function.cspline;
 /**
  * Create a cubic spline function.
  */
-public class CubicSplineFunctionFactory {
+public final class CubicSplineFunctionFactory {
+  /** No instances. */
+  private CubicSplineFunctionFactory() {}
+
   /**
    * Instantiates a new cubic spline function to model n points.
    *
