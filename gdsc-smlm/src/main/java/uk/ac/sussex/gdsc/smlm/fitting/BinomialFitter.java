@@ -67,7 +67,9 @@ public class BinomialFitter {
   /**
    * Instantiates a new binomial fitter.
    */
-  public BinomialFitter() {}
+  public BinomialFitter() {
+    // Intentionally empty
+  }
 
   /**
    * Instantiates a new binomial fitter.
@@ -283,13 +285,13 @@ public class BinomialFitter {
 
     // The model is only fitting the probability p
     // For a binomial n*p = mean => p = mean/n
-    final double[] initialSolution = new double[] {Math.min(mean / n, 1)};
+    final double[] initialSolution = {Math.min(mean / n, 1)};
 
     // Create the function
     final BinomialModelFunction function = new BinomialModelFunction(histogram, n, zeroTruncated);
 
     final double[] lB = new double[1];
-    final double[] uB = new double[] {1};
+    final double[] uB = {1};
     final SimpleBounds bounds = new SimpleBounds(lB, uB);
 
     // Fit
@@ -336,7 +338,7 @@ public class BinomialFitter {
             if (solution == null || result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
+          } catch (final TooManyEvaluationsException | TooManyIterationsException ignored) {
             // No solution
           }
           if (solution == null) {
@@ -352,7 +354,7 @@ public class BinomialFitter {
             if (result.getValue() < solution.getValue()) {
               solution = result;
             }
-          } catch (final TooManyEvaluationsException | TooManyIterationsException ex) {
+          } catch (final TooManyEvaluationsException | TooManyIterationsException ignored) {
             // No solution
           }
         }
@@ -417,7 +419,7 @@ public class BinomialFitter {
           log("Failed to re-fit: Too many iterations: %s", ex.getMessage());
         } catch (final ConvergenceException ex) {
           log("Failed to re-fit: %s", ex.getMessage());
-        } catch (final Exception ex) {
+        } catch (final Exception ignored) {
           // Ignore this ...
         }
       }
@@ -520,7 +522,7 @@ public class BinomialFitter {
     @Override
     public double value(double[] parameters) {
       final double[] p2 = getP(parameters[0]);
-      if (maximumLikelihood) {
+      if (isMaximumLikelihood()) {
         // Calculate the log-likelihood
         double ll = 0;
         // We cannot produce a likelihood for any n>N
@@ -573,7 +575,7 @@ public class BinomialFitter {
       }
     }
 
-    private double[] getWeights() {
+    double[] getWeights() {
       final double[] w = new double[pvalues.length];
       Arrays.fill(w, 1);
       return w;
