@@ -802,7 +802,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         // Simpson's rule.
         // This computes the sum as:
         // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-        if (index % 2 == 0) {
+        if ((index & 0x1) == 0) {
           sum2 += super.getF(pz, az);
         } else {
           sum4 += super.getF(pz, az);
@@ -869,7 +869,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       // Simpson's rule.
       // This computes the sum as:
       // h/3 * [ f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + 2f(x4) ... + 4f(xn-1) + f(xn) ]
-      if (++index % 2 == 0) {
+      if ((++index & 0x1) == 0) {
         sum2 += super.getF(pz, az);
       } else {
         sum4 += super.getF(pz, az);
