@@ -51,7 +51,7 @@ public class Gaussian2DFitter {
   /** The last successful fit. Used to compute the residuals. */
   protected double[] residuals;
   /** Allow calculation of residuals to be turned off (overwrite constructor fit configuration). */
-  protected boolean computeResiduals = true;
+  protected boolean computeResiduals;
   /** The lower bounds for function solvers. */
   protected double[] lower;
   /** The upper bounds for function solvers. */
@@ -89,14 +89,12 @@ public class Gaussian2DFitter {
 
     for (int i = istart; i != iend; i += istep) {
       index += jump;
-      double previous = value;
+      final double previous = value;
       value = data[index];
 
       if (value < half) {
         return i - istep * (half - value) / (previous - value);
       }
-
-      previous = value;
     }
 
     // Not reached the half-max point. Return the dimension limit.
@@ -156,7 +154,7 @@ public class Gaussian2DFitter {
     // multiple peaks.
     // -----
 
-    double background = 0;
+    double background;
 
     // Utils.display("Spot", data, maxx, maxy);
 
@@ -580,9 +578,9 @@ public class Gaussian2DFitter {
   protected boolean checkParameters(final int maxx, final int maxy, final int npeaks,
       double[] params, final boolean[] amplitudeEstimate, final int ySize, final double[] y,
       final int paramsPerPeak, double background, double[] initialParams) {
-    final int[] dim = new int[] {maxx, maxy};
+    final int[] dim = {maxx, maxy};
     final int[] position = new int[2];
-    final int[] cumulRegion = new int[] {1, maxx, ySize};
+    final int[] cumulRegion = {1, maxx, ySize};
     for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
       // ----
       // Check all input parameters and estimate them if necessary
