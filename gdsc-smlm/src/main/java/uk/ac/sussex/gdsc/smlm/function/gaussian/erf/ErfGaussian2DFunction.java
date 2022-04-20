@@ -108,9 +108,18 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
 
   @FunctionalInterface
   private interface ErrorFunction {
-    public double erf(double x);
+    /**
+     * Compute the error function (erf).
+     *
+     * @param x the x
+     * @return the value
+     */
+    double erf(double x);
   }
 
+  /**
+   * Compute the error function using a fast approximation.
+   */
   private static class FastErrorFunction implements ErrorFunction {
     static final FastErrorFunction INSTANCE = new FastErrorFunction();
 
@@ -120,6 +129,9 @@ public abstract class ErfGaussian2DFunction extends Gaussian2DFunction
     }
   }
 
+  /**
+   * Compute the error function using the Commons Math implementation.
+   */
   private static class CommontsMathErrorFunction implements ErrorFunction {
     static final CommontsMathErrorFunction INSTANCE = new CommontsMathErrorFunction();
 

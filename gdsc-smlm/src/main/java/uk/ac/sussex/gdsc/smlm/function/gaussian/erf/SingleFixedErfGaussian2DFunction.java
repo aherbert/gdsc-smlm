@@ -146,7 +146,8 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     double x_u_p12 = -u;
     double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
     double exp_x_minus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
-    for (int i = 0, n = deltaE.length; i < n; i++) {
+    final int n = deltaE.length;
+    for (int i = 0; i < n; i++) {
       x_u_p12 += 1.0;
       final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
       deltaE[i] = erf_x_plus - erf_x_minus;
@@ -179,7 +180,8 @@ public class SingleFixedErfGaussian2DFunction extends SingleCircularErfGaussian2
     double x_u_p12 = -u;
     double erf_x_minus = 0.5 * erf(x_u_p12 * one_sSqrt2);
     double exp_x_minus = StdMath.exp(-(x_u_p12 * x_u_p12 * one_2ss));
-    for (int i = 0, n = deltaE.length; i < n; i++) {
+    final int n = deltaE.length;
+    for (int i = 0; i < n; i++) {
       final double x_u_m12 = x_u_p12;
       x_u_p12 += 1.0;
       final double erf_x_plus = 0.5 * erf(x_u_p12 * one_sSqrt2);
