@@ -102,13 +102,13 @@ public class LsqLvmGradientProcedure extends BaseLsqLvmGradientProcedure {
 
   @Override
   protected boolean checkGradients() {
-    for (int i = 0, len = beta.length; i < len; i++) {
-      if (Double.isNaN(beta[i])) {
+    for (final double d : beta) {
+      if (Double.isNaN(d)) {
         return true;
       }
     }
-    for (int i = 0, len = alpha.length; i < len; i++) {
-      if (Double.isNaN(alpha[i])) {
+    for (final double d : alpha) {
+      if (Double.isNaN(d)) {
         return true;
       }
     }
