@@ -140,7 +140,6 @@ public final class PoissonGaussianConvolutionFunction
     }
     // Use same nomenclature as Huang et al
 
-    final double u = mu; // expected photoelectrons
     final double D = observed; // Camera counts
     // g == gain
     // var = readout variance
@@ -162,6 +161,8 @@ public final class PoissonGaussianConvolutionFunction
         qmax++;
       }
     }
+
+    final double u = mu; // expected photoelectrons
 
     // Note: If D is camera counts then it will likely be limited to a 16-bit range
     // Assuming the gain is at least 1 then the max q is:
@@ -241,7 +242,6 @@ public final class PoissonGaussianConvolutionFunction
       }
       return (-0.5 * observed * observed / var) + logNormalisationGaussian;
     }
-    final double u = mu; // expected photoelectrons
     final double D = observed; // Camera counts
     int qmax = (int) Math.ceil((D + 5 * sd) / gain);
     if (qmax < 0) {
@@ -255,6 +255,7 @@ public final class PoissonGaussianConvolutionFunction
         qmax++;
       }
     }
+    final double u = mu; // expected photoelectrons
     final LogFactorialCache lfc = getLogFactorialCache(qmin, qmax);
     final double logu = Math.log(u);
     double pvalue = 0;
