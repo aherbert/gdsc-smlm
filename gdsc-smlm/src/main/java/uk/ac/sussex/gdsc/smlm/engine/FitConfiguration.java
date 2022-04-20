@@ -1402,7 +1402,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    * Get the location variance with
    * {@link BaseVarianceSelector#getLocationVariance(PreprocessedPeakResult)}.
    */
-  private class VarianceSelector extends BaseVarianceSelector {
+  private static class VarianceSelector extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
       return peak.getLocationVariance();
@@ -1413,7 +1413,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    * Get the location variance using the local background estimate for the local noise with
    * {@link BaseVarianceSelector#getLocationVariance2(PreprocessedPeakResult)}.
    */
-  private class VarianceSelector2 extends BaseVarianceSelector {
+  private static class VarianceSelector2 extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
       return peak.getLocationVariance2();
@@ -1424,7 +1424,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    * Get the Cramér-Rao lower bound on the location variance with
    * {@link BaseVarianceSelector#getLocationVarianceCrlb(PreprocessedPeakResult)}.
    */
-  private class VarianceSelectorCrlb extends BaseVarianceSelector {
+  private static class VarianceSelectorCrlb extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
       return peak.getLocationVarianceCrlb();
