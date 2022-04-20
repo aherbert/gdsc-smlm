@@ -101,7 +101,7 @@ public class FastGaussian2DFitter extends Gaussian2DFitter {
   protected boolean checkParameters(final int maxx, final int maxy, final int npeaks,
       double[] params, final boolean[] amplitudeEstimate, final int ySize, final double[] y,
       final int paramsPerPeak, double background, double[] initialParams) {
-    final int[] dim = new int[] {maxx, maxy};
+    final int[] dim = {maxx, maxy};
     final int[] position = new int[2];
     for (int i = 0, j = 0; i < npeaks; i++, j += paramsPerPeak) {
       // ----
