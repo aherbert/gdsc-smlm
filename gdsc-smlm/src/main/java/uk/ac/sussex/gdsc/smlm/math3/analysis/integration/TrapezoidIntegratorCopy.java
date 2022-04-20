@@ -61,8 +61,7 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
     public TrapezoidIntegratorCopy(final double relativeAccuracy,
                                final double absoluteAccuracy,
                                final int minimalIterationCount,
-                               final int maximalIterationCount)
-        throws NotStrictlyPositiveException, NumberIsTooSmallException, NumberIsTooLargeException {
+                               final int maximalIterationCount) {
         super(relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
         if (maximalIterationCount > TRAPEZOID_MAX_ITERATIONS_COUNT) {
             throw new NumberIsTooLargeException(maximalIterationCount,
