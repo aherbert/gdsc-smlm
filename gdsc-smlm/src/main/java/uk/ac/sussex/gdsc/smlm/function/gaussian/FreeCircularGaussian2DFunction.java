@@ -38,6 +38,32 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The number of gradient parameters for each Gaussian. */
   protected static final int GRADIENT_PARAMETERS_PER_PEAK = 5;
+  /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
+  protected static final int N = 0;
+  /** The index for the The amplitude./height. */
+  protected static final int HEIGHT = 1;
+  /** The index for the x0 position pre-factor. */
+  protected static final int AA = 2;
+  /** The index for the x0*x1 position pre-factor (for rotation). */
+  protected static final int BB = 3;
+  /** The index for the x1 position pre-factor. */
+  protected static final int CC = 4;
+  /** The index for the x width gradient pre-factor. */
+  protected static final int NX = 5;
+  /** The index for the x width gradient pre-factor. */
+  protected static final int AX = 6;
+  /** The index for the x width gradient pre-factor. */
+  protected static final int BX = 7;
+  /** The index for the x width gradient pre-factor. */
+  protected static final int CX = 8;
+  /** The index for the y width gradient pre-factor. */
+  protected static final int NY = 9;
+  /** The index for the y width gradient pre-factor. */
+  protected static final int AY = 10;
+  /** The index for the y width gradient pre-factor. */
+  protected static final int BY = 11;
+  /** The index for the y width gradient pre-factor. */
+  protected static final int CY = 12;
 
   /** Flag set to true if the Gaussian has no rotation angle. */
   protected boolean[] zeroAngle;
@@ -65,33 +91,6 @@ public class FreeCircularGaussian2DFunction extends MultiPeakGaussian2DFunction 
   public Gaussian2DFunction copy() {
     return new FreeCircularGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
-
-  /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
-  protected static final int N = 0;
-  /** The index for the The amplitude./height. */
-  protected static final int HEIGHT = 1;
-  /** The index for the x0 position pre-factor. */
-  protected static final int AA = 2;
-  /** The index for the x0*x1 position pre-factor (for rotation). */
-  protected static final int BB = 3;
-  /** The index for the x1 position pre-factor. */
-  protected static final int CC = 4;
-  /** The index for the x width gradient pre-factor. */
-  protected static final int NX = 5;
-  /** The index for the x width gradient pre-factor. */
-  protected static final int AX = 6;
-  /** The index for the x width gradient pre-factor. */
-  protected static final int BX = 7;
-  /** The index for the x width gradient pre-factor. */
-  protected static final int CX = 8;
-  /** The index for the y width gradient pre-factor. */
-  protected static final int NY = 9;
-  /** The index for the y width gradient pre-factor. */
-  protected static final int AY = 10;
-  /** The index for the y width gradient pre-factor. */
-  protected static final int BY = 11;
-  /** The index for the y width gradient pre-factor. */
-  protected static final int CY = 12;
 
   @Override
   public void initialise(double[] a) {

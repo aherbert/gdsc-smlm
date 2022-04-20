@@ -38,6 +38,14 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 public class NsFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The number of gradient parameters for each Gaussian. */
   protected static final int GRADIENT_PARAMETERS_PER_PEAK = 2;
+  /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
+  protected static final int N = 0;
+  /** The index for the The amplitude./height. */
+  protected static final int HEIGHT = 1;
+  /** The index for the x0 position pre-factor. */
+  protected static final int AA = 2;
+  /** The index for the x0 position gradient pre-factor. */
+  protected static final int AA2 = 3;
 
   /** The pre-computed function factors for each Gaussian. */
   protected final double[][] peakFactors;
@@ -62,15 +70,6 @@ public class NsFixedGaussian2DFunction extends MultiPeakGaussian2DFunction {
   public Gaussian2DFunction copy() {
     return new NsFixedGaussian2DFunction(numberOfPeaks, maxx, maxy);
   }
-
-  /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
-  protected static final int N = 0;
-  /** The index for the The amplitude./height. */
-  protected static final int HEIGHT = 1;
-  /** The index for the x0 position pre-factor. */
-  protected static final int AA = 2;
-  /** The index for the x0 position gradient pre-factor. */
-  protected static final int AA2 = 3;
 
   @Override
   public void initialise(double[] a) {

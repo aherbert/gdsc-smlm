@@ -38,34 +38,6 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   /** The number of gradient parameters for each Gaussian. */
   protected static final int GRADIENT_PARAMETERS_PER_PEAK = 6;
-
-  /** set to true if the Gaussian has no rotation angle. */
-  protected boolean[] zeroAngle;
-  /** The pre-computed function factors for each Gaussian. */
-  protected final double[][] peakFactors;
-  /** The Gaussian parameters (a). */
-  protected double[] params;
-
-  /**
-   * Constructor.
-   *
-   * @param numberOfPeaks The number of peaks
-   * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
-   *        coordinates)
-   * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
-   *        coordinates)
-   */
-  public EllipticalGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
-    super(numberOfPeaks, maxx, maxy);
-    zeroAngle = new boolean[numberOfPeaks];
-    peakFactors = new double[numberOfPeaks][16];
-  }
-
-  @Override
-  public Gaussian2DFunction copy() {
-    return new EllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
-  }
-
   /** The index for the The amplitude./height normalisation: 1/(2*pi*sx*sy). */
   protected static final int N = 0;
   /** The index for the The amplitude./height. */
@@ -98,6 +70,33 @@ public class EllipticalGaussian2DFunction extends MultiPeakGaussian2DFunction {
   protected static final int BY = 14;
   /** The index for the y width gradient pre-factor. */
   protected static final int CY = 15;
+
+  /** set to true if the Gaussian has no rotation angle. */
+  protected boolean[] zeroAngle;
+  /** The pre-computed function factors for each Gaussian. */
+  protected final double[][] peakFactors;
+  /** The Gaussian parameters (a). */
+  protected double[] params;
+
+  /**
+   * Constructor.
+   *
+   * @param numberOfPeaks The number of peaks
+   * @param maxx The maximum x value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   * @param maxy The maximum y value of the 2-dimensional data (used to unpack a linear index into
+   *        coordinates)
+   */
+  public EllipticalGaussian2DFunction(int numberOfPeaks, int maxx, int maxy) {
+    super(numberOfPeaks, maxx, maxy);
+    zeroAngle = new boolean[numberOfPeaks];
+    peakFactors = new double[numberOfPeaks][16];
+  }
+
+  @Override
+  public Gaussian2DFunction copy() {
+    return new EllipticalGaussian2DFunction(numberOfPeaks, maxx, maxy);
+  }
 
   @Override
   public void initialise(double[] a) {
