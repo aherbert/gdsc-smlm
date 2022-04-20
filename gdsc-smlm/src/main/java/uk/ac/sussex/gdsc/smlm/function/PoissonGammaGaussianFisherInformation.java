@@ -53,22 +53,6 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  * <p>Performs a convolution with a finite Gaussian kernel.
  */
 public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInformation {
-  /**
-   * Class to scale the lists.
-   */
-  private static class ScalingFunction implements DoubleUnaryOperator {
-    final double scale;
-
-    ScalingFunction(double scale) {
-      this.scale = scale;
-    }
-
-    @Override
-    public double apply(double value) {
-      return value * scale;
-    }
-  }
-
   private static final int UPPER_LIMIT = Integer.MAX_VALUE - 1;
 
   /** The default minimum range for the Gaussian kernel (in units of SD). */
@@ -165,6 +149,22 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
 
   /** The mean of the last Fisher information. */
   private double lastT;
+
+  /**
+   * Class to scale the lists.
+   */
+  private static class ScalingFunction implements DoubleUnaryOperator {
+    final double scale;
+
+    ScalingFunction(double scale) {
+      this.scale = scale;
+    }
+
+    @Override
+    public double apply(double value) {
+      return value * scale;
+    }
+  }
 
   /**
    * Instantiates a new poisson gamma gaussian fisher information.
@@ -508,7 +508,8 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       double sum = 0;
       final double[] p = listP.elements();
       final double[] a = listA.elements();
-      for (int i = 0, size = listP.size(); i < size; i++) {
+      final int size = listP.size();
+      for (int i = 0; i < size; i++) {
         sum += getF(p[i], a[i]);
       }
       if (sum == Double.POSITIVE_INFINITY) {
@@ -585,10 +586,6 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     // Iterate
     for (int iteration = 1; iteration <= maxIterations && scale < MAX_SCALE; iteration++) {
       scale *= 2;
-      if (iteration == maxIterations || scale == MAX_SCALE) {
-        // System.out.printf("s=%g theta=%g final iteration=%d scale=%d\n", s, theta, iteration,
-        // scale);
-      }
       final double oldSum = sum;
       try {
         sum = compute(scale, range1, p, a, minP);
@@ -609,8 +606,7 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       // 0.5;
       // Avoid problems with very large sums by scaling each individually
       final double rLimit =
-          (getRelativeAccuracy() * Math.abs(oldSum) + getRelativeAccuracy() * Math.abs(sum))
-              * 0.5;
+          (getRelativeAccuracy() * Math.abs(oldSum) + getRelativeAccuracy() * Math.abs(sum)) * 0.5;
       if (delta <= rLimit) {
         break;
       }
@@ -753,10 +749,20 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     return value;
   }
 
+  /**
+   * Define an integration procedure.
+   */
   private abstract static class IntegrationProcedure implements DoubleConvolutionValueProcedure {
     int index;
 
-    protected double getF(double pz, double az) {
+    /**
+     * Compute {@code F = A^2 / P}.
+     *
+     * @param pz the value P
+     * @param az the gradient A
+     * @return the value
+     */
+    double getF(double pz, double az) {
       // Compute with respect to the ultimate limit
 
       // p is always below 1.
@@ -772,9 +778,19 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
       return f;
     }
 
-    public abstract double getSum();
+    /**
+     * Gets the sum.
+     *
+     * @return the sum
+     */
+    abstract double getSum();
   }
 
+  /**
+   * Perform Simpson 1/3 integration.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class SimpsonIntegrationProcedure extends IntegrationProcedure {
     double sum2;
     double sum4;
@@ -806,6 +822,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
   }
 
+  /**
+   * Perform Simpson 3/8 integration.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class Simpson38IntegrationProcedure extends IntegrationProcedure {
     double sum2;
     double sum3;
@@ -837,6 +858,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
   }
 
+  /**
+   * Perform Simpson 1/3 integration without checking p is non-zero.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class UncheckedSimpsonIntegrationProcedure extends SimpsonIntegrationProcedure {
     @Override
     public boolean execute(double pz, double az) {
@@ -852,6 +878,11 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     }
   }
 
+  /**
+   * Perform Simpson 3/8 integration without checking p is non-zero.
+   *
+   * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">Simpsons rule</a>
+   */
   private static class UncheckedSimpson38IntegrationProcedure
       extends Simpson38IntegrationProcedure {
     @Override
@@ -911,7 +942,14 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
         : new SimpsonIntegrationProcedure();
   }
 
-  private static double getF(double valueP, double gradientA) {
+  /**
+   * Compute {@code F = A^2 / P}.
+   *
+   * @param valueP the value P
+   * @param gradientA the gradient A
+   * @return the value
+   */
+  static double getF(double valueP, double gradientA) {
     if (valueP == 0) {
       return 0;
     }
@@ -1137,13 +1175,16 @@ public class PoissonGammaGaussianFisherInformation extends BasePoissonFisherInfo
     this.maxIterations = maxIterations;
   }
 
+  /**
+   * Provide a convergence checkers for optimisation convergence.
+   */
   private static class QuickConvergenceChecker
       extends AbstractConvergenceChecker<UnivariatePointValuePair> {
     int fixedIterations;
     UnivariatePointValuePair previous;
     UnivariatePointValuePair current;
 
-    public QuickConvergenceChecker(int fixedIterations) {
+    QuickConvergenceChecker(int fixedIterations) {
       super(0, 0);
       this.fixedIterations = fixedIterations;
     }
