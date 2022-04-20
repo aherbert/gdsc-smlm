@@ -229,11 +229,11 @@ public final class IcsiFastLog extends FastLog {
         return Float.NaN;
       }
       // +/- Infinity
-      return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
 
     // Check for negatives
-    if ((bits >> 31) != 0) {
+    if (bits < 0) {
       // Only -0 is allowed
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
@@ -274,11 +274,11 @@ public final class IcsiFastLog extends FastLog {
         return Float.NaN;
       }
       // +/- Infinity
-      return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
 
     // Check for negatives
-    if ((bits >> 63) != 0L) {
+    if (bits < 0) {
       // Only -0 is allowed
       return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
@@ -344,10 +344,10 @@ public final class IcsiFastLog extends FastLog {
       if (m != 0) {
         return Float.NaN;
       }
-      return ((bits >> 31) != 0) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
 
-    if ((bits >> 31) != 0) {
+    if (bits < 0) {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
 
@@ -368,10 +368,10 @@ public final class IcsiFastLog extends FastLog {
       if (m != 0L) {
         return Float.NaN;
       }
-      return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
 
-    if ((bits >> 63) != 0L) {
+    if (bits < 0) {
       return (e == 0 && m == 0L) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
 

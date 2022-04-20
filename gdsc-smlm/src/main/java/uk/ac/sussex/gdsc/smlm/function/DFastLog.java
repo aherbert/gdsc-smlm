@@ -155,10 +155,10 @@ public class DFastLog extends FastLog {
         return Float.NaN;
       }
       // +/- Infinity
-      return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
 
-    if ((bits >> 63) != 0L) {
+    if (bits < 0) {
       // Only -0 is allowed
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
@@ -216,9 +216,9 @@ public class DFastLog extends FastLog {
       if (m != 0) {
         return Float.NaN;
       }
-      return ((bits >> 63) != 0L) ? Float.NaN : Float.POSITIVE_INFINITY;
+      return (bits < 0) ? Float.NaN : Float.POSITIVE_INFINITY;
     }
-    if ((bits >> 63) != 0L) {
+    if (bits < 0) {
       return (e == 0 && m == 0) ? Float.NEGATIVE_INFINITY : Float.NaN;
     }
     return (e == 0 ? data[(int) (m >>> qm1)] : e + data[(int) ((m | 0x10000000000000L) >>> q)])
