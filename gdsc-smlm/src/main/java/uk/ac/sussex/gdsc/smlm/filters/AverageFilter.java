@@ -804,11 +804,10 @@ public class AverageFilter {
     }
 
     // Copy back
+    final int length = maxx - n - n;
     for (int y = n; y < maxy - n; y++) {
-      int index = y * maxx + n;
-      for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + n;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -880,8 +879,8 @@ public class AverageFilter {
     }
 
     // Corners
-    final int[] xoffset2 = new int[] {-xwidth, -xwidth, xwidth, xwidth};
-    final int[] yoffset2 = new int[] {-ywidth, ywidth, -ywidth, ywidth};
+    final int[] xoffset2 = {-xwidth, -xwidth, xwidth, xwidth};
+    final int[] yoffset2 = {-ywidth, ywidth, -ywidth, ywidth};
     final int[] offset2 = new int[xoffset2.length];
     for (int d = xoffset2.length; d-- > 0;) {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
@@ -915,11 +914,10 @@ public class AverageFilter {
     }
 
     // Copy back
+    final int length = xlimit - n1;
     for (int y = n1; y < ylimit; y++) {
-      int index = y * maxx + n1;
-      for (int x = n1; x < xlimit; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + n1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -953,11 +951,10 @@ public class AverageFilter {
     }
 
     // Copy back
+    final int length = maxx - 2;
     for (int y = 1; y < maxy - 1; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < maxx - 1; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -1000,11 +997,10 @@ public class AverageFilter {
     }
 
     // Copy back
+    final int length = maxx - 2;
     for (int y = 1; y < maxy - 1; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < maxx - 1; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -1041,11 +1037,10 @@ public class AverageFilter {
     }
 
     // Copy back
+    final int length = maxx - 2;
     for (int y = 1; y < maxy - 1; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < maxx - 1; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -2050,8 +2045,8 @@ public class AverageFilter {
     }
 
     // Corners
-    final int[] xoffset2 = new int[] {-xwidth, -xwidth, xwidth, xwidth};
-    final int[] yoffset2 = new int[] {-ywidth, ywidth, -ywidth, ywidth};
+    final int[] xoffset2 = {-xwidth, -xwidth, xwidth, xwidth};
+    final int[] yoffset2 = {-ywidth, ywidth, -ywidth, ywidth};
     final int[] offset2 = new int[xoffset2.length];
     for (int d = xoffset2.length; d-- > 0;) {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
@@ -2241,11 +2236,11 @@ public class AverageFilter {
     final int ylimit = maxy - 1;
 
     // Edges
-    final int[] xoffset = new int[] {-1, 0, 0, 1};
-    final int[] yoffset = new int[] {0, -1, 1, 0};
+    final int[] xoffset = {-1, 0, 0, 1};
+    final int[] yoffset = {0, -1, 1, 0};
     // Corners
-    final int[] xoffset2 = new int[] {-1, -1, 1, 1};
-    final int[] yoffset2 = new int[] {-1, 1, -1, 1};
+    final int[] xoffset2 = {-1, -1, 1, 1};
+    final int[] yoffset2 = {-1, 1, -1, 1};
 
     final float w2 = weight * weight;
     final float divisor = (float) (1.0 / (1 + 4 * weight + 4 * w2));
@@ -2348,7 +2343,7 @@ public class AverageFilter {
       }
     }
 
-    final float[] kernel = new float[] {1f / 16, 2f / 16, 1f / 16, 2f / 16, /* 4f / 16, */2f / 16,
+    final float[] kernel = {1f / 16, 2f / 16, 1f / 16, 2f / 16, /* 4f / 16, */2f / 16,
         1f / 16, 2f / 16, 1f / 16};
     final float divisor = (float) (1.0 / 16.0);
 
