@@ -64,8 +64,8 @@ public class CubicSplineData {
       throw new IllegalArgumentException("No splines");
     }
     final int size = maxx * maxy;
-    for (int z = 0; z < splines.length; z++) {
-      if (splines[z].length != size) {
+    for (final CustomTricubicFunction[] spline : splines) {
+      if (spline.length != size) {
         throw new IllegalArgumentException("Incorrect XY splines size");
       }
     }
@@ -104,7 +104,8 @@ public class CubicSplineData {
     splines = new CustomTricubicFunction[maxz][size];
 
     for (int z = 0; z < splines.length; z++) {
-      for (int y = 0, i = 0; y < maxy; y++) {
+      int i = 0;
+      for (int y = 0; y < maxy; y++) {
         for (int x = 0; x < maxx; x++, i++) {
           splines[z][i] = function.getSplineNode(x, y, z);
         }
@@ -121,38 +122,67 @@ public class CubicSplineData {
     return splines[0][0] instanceof FloatCustomTricubicFunction;
   }
 
-  private static interface SplineWriter {
+  /**
+   * Writer for spline data.
+   */
+  private interface SplineWriter {
+    /**
+     * Write the function data.
+     *
+     * @param out the output
+     * @param function the function
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     void write(DataOutput out, CustomTricubicFunction function) throws IOException;
   }
 
+  /**
+   * Writer for float-valued spline data.
+   */
   private static class FloatSplineWriter implements SplineWriter {
     final float[] data = new float[64];
 
     @Override
     public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
       function.getCoefficients(data);
-      for (int i = 0; i < data.length; i++) {
-        out.writeFloat(data[i]);
+      for (final float f : data) {
+        out.writeFloat(f);
       }
     }
   }
 
+  /**
+   * Writer for double-valued spline data.
+   */
   private static class DoubleSplineWriter implements SplineWriter {
     final double[] data = new double[64];
 
     @Override
     public void write(DataOutput out, CustomTricubicFunction function) throws IOException {
       function.getCoefficients(data);
-      for (int i = 0; i < data.length; i++) {
-        out.writeDouble(data[i]);
+      for (final double d : data) {
+        out.writeDouble(d);
       }
     }
   }
 
-  private static interface SplineReader {
+  /**
+   * Reader for spline data.
+   */
+  private interface SplineReader {
+    /**
+     * Read function data.
+     *
+     * @param in the input
+     * @return the custom tricubic function
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     CustomTricubicFunction read(DataInput in) throws IOException;
   }
 
+  /**
+   * Reader for float-valued spline data.
+   */
   private static class FloatSplineReader implements SplineReader {
     final float[] splines = new float[64];
 
@@ -165,6 +195,9 @@ public class CubicSplineData {
     }
   }
 
+  /**
+   * Reader for double-valued spline data.
+   */
   private static class DoubleSplineReader implements SplineReader {
     final double[] splines = new double[64];
 
