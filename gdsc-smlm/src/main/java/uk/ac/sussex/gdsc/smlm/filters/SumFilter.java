@@ -33,6 +33,8 @@ package uk.ac.sussex.gdsc.smlm.filters;
 public class SumFilter {
   private float[] floatDataBuffer;
   private float[] floatRowBuffer;
+  private int[] intDataBuffer;
+  private int[] intRowBuffer;
 
   /**
    * Create a copy.
@@ -464,11 +466,10 @@ public class SumFilter {
     }
 
     // Copy back
+    final int length = maxx - n - n;
     for (int y = n; y < maxy - n; y++) {
-      int index = y * maxx + n;
-      for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + n;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -500,11 +501,10 @@ public class SumFilter {
     }
 
     // Copy back
+    final int length = maxx - 2;
     for (int y = 1; y < maxy - 1; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < maxx - 1; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -1184,8 +1184,6 @@ public class SumFilter {
   // All 'float' have been replaced with 'int'.
   // ----------------------------------------------------
   // CHECKSTYLE.OFF: OverloadMethodsDeclarationOrder
-  private int[] intDataBuffer;
-  private int[] intRowBuffer;
 
   /**
    * Compute the block sum within a 2n+1 size block around each point. Only pixels with a full block
@@ -1606,11 +1604,10 @@ public class SumFilter {
     }
 
     // Copy back
+    final int length = maxx - n - n;
     for (int y = n; y < maxy - n; y++) {
-      int index = y * maxx + n;
-      for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + n;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -1642,11 +1639,10 @@ public class SumFilter {
     }
 
     // Copy back
+    final int length = maxx - 2;
     for (int y = 1; y < maxy - 1; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < maxx - 1; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
