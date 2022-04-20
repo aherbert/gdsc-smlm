@@ -65,8 +65,9 @@ import uk.ac.sussex.gdsc.smlm.results.count.PassRateFailCounter;
  * Specifies the configuration for the fit engine.
  */
 public final class FitEngineConfiguration {
-  private FitEngineSettings.Builder fitEngineSettings;
-  private FitConfiguration fitConfiguration;
+  private final FitEngineSettings.Builder fitEngineSettings;
+  private final FitConfiguration fitConfiguration;
+  private FailCounter failCounter;
 
   /**
    * Creates a new fit engine configuration.
@@ -394,8 +395,6 @@ public final class FitEngineConfiguration {
     fitEngineSettings.setPassRate(0);
   }
 
-  private FailCounter failCounter;
-
   /**
    * Gets the fail counter.
    *
@@ -611,6 +610,7 @@ public final class FitEngineConfiguration {
       case SINGLE:
       default:
         truncateFilters(b, 1);
+        break;
     }
   }
 
@@ -824,11 +824,8 @@ public final class FitEngineConfiguration {
    */
   public int getFittingWidth() {
     // Region for peak fitting
-    int fitting = (int) Math.ceil(convertUsingSdMax(getFittingParameter()));
-    if (fitting < 2) {
-      fitting = 2;
-    }
-    return fitting;
+    final int fitting = (int) Math.ceil(convertUsingSdMax(getFittingParameter()));
+    return Math.max(2, fitting);
   }
 
   /**
