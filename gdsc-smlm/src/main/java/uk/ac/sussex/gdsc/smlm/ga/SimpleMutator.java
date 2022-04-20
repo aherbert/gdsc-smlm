@@ -117,7 +117,6 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
 
     final double mean = fraction * chromosome.length();
     if (mean > 0) {
-      int count = PoissonSamplers.nextPoissonSample(random, mean);
       final double[] step;
       final double[] min;
       final double[] max;
@@ -137,6 +136,7 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
         return chromosome.newChromosome(sequence);
       }
 
+      int count = PoissonSamplers.nextPoissonSample(random, mean);
       while (count-- > 0) {
         final int i = positions[random.nextInt(positionsCount)];
 
