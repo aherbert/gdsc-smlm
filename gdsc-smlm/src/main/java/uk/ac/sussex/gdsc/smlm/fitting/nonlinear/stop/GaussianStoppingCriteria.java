@@ -108,7 +108,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
     }
 
     if (l != null && l.isLoggable(Level.INFO)) {
-      sb.append(" Continue=").append(notSatisfied).append("\n");
+      sb.append(" Continue=").append(notSatisfied).append('\n');
       l.info(sb.toString());
     }
   }
@@ -122,7 +122,7 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
    * @return The string builder
    */
   protected StringBuilder logParameters(double oldError, double newError, double[] a) {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(128);
     sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError)
         .append(" -> ").append(newError);
     if (newError <= oldError) {
@@ -132,11 +132,11 @@ public class GaussianStoppingCriteria extends StoppingCriteria {
         int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
         for (int j = 0; j < 2; j++, param++) {
           if (j > 0) {
-            sb.append(",");
+            sb.append(',');
           }
           sb.append(a[param] - bestA[param]);
         }
-        sb.append("]");
+        sb.append(']');
       }
     }
     return sb;

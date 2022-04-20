@@ -55,14 +55,14 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
 
   @Override
   protected StringBuilder logParameters(double oldError, double newError, double[] a) {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(158);
     sb.append("iter = ").append(getIteration() + 1).append(", error = ").append(oldError)
         .append(" -> ").append(newError);
     if (newError <= oldError) {
       if (func.evaluatesBackground()) {
         sb.append(", Back=[");
         sb.append(DoubleEquality.relativeError(bestA[0], a[0]));
-        sb.append("]");
+        sb.append(']');
       }
 
       for (int i = 0; i < peaks; i++) {
@@ -70,7 +70,7 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
         sb.append(DoubleEquality.relativeError(
             bestA[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL],
             a[i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.SIGNAL]));
-        sb.append(",");
+        sb.append(',');
 
         if (func.evaluatesAngle()) {
           final double x =
@@ -83,10 +83,10 @@ public class ParameterStoppingCriteria extends GaussianStoppingCriteria {
 
         int param = i * Gaussian2DFunction.PARAMETERS_PER_PEAK + Gaussian2DFunction.X_POSITION;
         for (int j = 0; j < 2 * 2; j++, param++) {
-          sb.append(",");
+          sb.append(',');
           sb.append(DoubleEquality.relativeError(bestA[param], a[param]));
         }
-        sb.append("]");
+        sb.append(']');
       }
     }
     return sb;
