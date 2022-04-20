@@ -57,11 +57,11 @@ public class FastLogMleLvmGradientProcedure6 extends FastLogMleLvmGradientProced
   @Override
   public void execute(double fi, double[] dfiDa) {
     ++yi;
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         value += (fi - xi - xi * fastLog.fastLog(fi / xi));
         // value += (fi - xi * (1 + fastLog.log(fi / xi)));
 

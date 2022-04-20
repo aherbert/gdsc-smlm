@@ -61,11 +61,11 @@ public class MleLvmGradientProcedure extends LsqLvmGradientProcedure {
     // function to produce 0 for all evaluations.
     // Optimally the function should be bounded to always produce a positive number.
     // ---
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         value += (fi - xi - xi * Math.log(fi / xi));
         final double xi_fi2 = xi / fi / fi;
         final double e = 1 - (xi / fi);
@@ -89,11 +89,11 @@ public class MleLvmGradientProcedure extends LsqLvmGradientProcedure {
   public void execute(double fi) {
     ++yi;
     // Function must produce a strictly positive output.
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         value += (fi - xi - xi * Math.log(fi / xi));
       } else {
         value += fi;

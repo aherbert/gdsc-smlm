@@ -63,7 +63,7 @@ public class FastLogMleLvmGradientProcedureX extends FastLogMleLvmGradientProced
     // function to produce 0 for all evaluations.
     // Optimally the function should be bounded to always produce a positive number.
     // ---
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is strictly positive
@@ -84,7 +84,7 @@ public class FastLogMleLvmGradientProcedureX extends FastLogMleLvmGradientProced
   public void execute(double fi) {
     ++yi;
     // Function must produce a strictly positive output.
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is strictly positive

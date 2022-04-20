@@ -54,7 +54,7 @@ public class MleLvmGradientProcedureX4 extends MleLvmGradientProcedure {
   @Override
   public void execute(double fi, double[] dfiDa) {
     ++yi;
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is strictly positive

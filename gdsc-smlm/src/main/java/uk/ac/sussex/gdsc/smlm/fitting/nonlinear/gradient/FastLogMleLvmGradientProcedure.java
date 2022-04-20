@@ -69,11 +69,11 @@ public class FastLogMleLvmGradientProcedure extends MleLvmGradientProcedure {
     // function to produce 0 for all evaluations.
     // Optimally the function should be bounded to always produce a positive number.
     // ---
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         // We know fi & xi are positive so we can use fast log
         // (i.e. no check for NaN or negatives)
         // The edge case is that positive infinity will return the
@@ -102,11 +102,11 @@ public class FastLogMleLvmGradientProcedure extends MleLvmGradientProcedure {
   public void execute(double fi) {
     ++yi;
     // Function must produce a strictly positive output.
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         value += (fi - xi - xi * fastLog.log(fi / xi));
         // value += (fi - xi * (1 + fastLog.log(fi / xi)));
       } else {

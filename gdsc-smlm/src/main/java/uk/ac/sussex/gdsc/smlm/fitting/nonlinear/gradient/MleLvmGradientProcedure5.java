@@ -54,11 +54,11 @@ public class MleLvmGradientProcedure5 extends MleLvmGradientProcedure {
   @Override
   public void execute(double fi, double[] dfiDa) {
     ++yi;
-    if (fi > 0.0) {
+    if (fi > 0) {
       final double xi = y[yi];
 
       // We assume y[i] is positive but must handle zero
-      if (xi > 0.0) {
+      if (xi > 0) {
         value += (fi - xi - xi * Math.log(fi / xi));
 
         final double xi_fi2 = xi / fi / fi;
