@@ -107,7 +107,7 @@ public class MedianFilter {
       }
     }
 
-    init(offsets.length + 1, data[n * maxx + n]);
+    init(offsets.length + 1);
 
     for (int y = n; y < maxy - n; y++) {
       int index = y * maxx + n;
@@ -126,11 +126,10 @@ public class MedianFilter {
     }
 
     // Copy back
+    final int length = maxx - n - n;
     for (int y = n; y < maxy - n; y++) {
-      int index = y * maxx + n;
-      for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = floatDataBuffer[index];
-      }
+      final int index = y * maxx + n;
+      System.arraycopy(floatDataBuffer, index, data, index, length);
     }
   }
 
@@ -146,7 +145,7 @@ public class MedianFilter {
    */
   public void blockMedian3x3Internal(float[] data, final int maxx, final int maxy) {
     final float[] newData = floatBuffer(floatDataBuffer, data.length);
-    init(9, data[maxx + 1]);
+    init(9);
     // Boundary control
     final int xlimit = maxx - 1;
     final int ylimit = maxy - 1;
@@ -173,11 +172,10 @@ public class MedianFilter {
     }
 
     // Copy back
+    final int length = xlimit - 1;
     for (int y = 1; y < ylimit; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < xlimit; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, length);
     }
   }
 
@@ -185,9 +183,8 @@ public class MedianFilter {
    * Initialise the median buffers.
    *
    * @param size The total number of values to add (should be odd)
-   * @param guess The guess for the median
    */
-  private void init(int size, float guess) {
+  private void init(int size) {
     if (aboveBuf == null || aboveBuf.length < size) {
       aboveBuf = new float[size];
       belowBuf = new float[size];
@@ -248,13 +245,12 @@ public class MedianFilter {
    *
    * <p>Copied from ij.plugins.filters.RankFilters.
    *
-   * @param buf The input array. Only values 0 ... bufLength are read. {@code buf} will be
-   *        modified.
+   * @param buf The input array. Only values 0 ... bufLength are read. {@code buf} will be modified.
    * @param bufLength Number of values in {@code buf} that should be read
    * @param n which value should be found; n=0 for the lowest, n=bufLength-1 for the highest
    * @return the value
    */
-  private static final float findNthLowestNumber(float[] buf, int bufLength, int n) {
+  private static float findNthLowestNumber(float[] buf, int bufLength, int n) {
     // Hoare's find, algorithm, based on http://www.geocities.com/zabrodskyvlada/3alg.html
     // Contributed by Heinz Klar.
     // CHECKSTYLE.OFF: LocalVariableName
@@ -351,7 +347,7 @@ public class MedianFilter {
       }
     }
 
-    init(offsets.length + 1, data[0]);
+    init(offsets.length + 1);
 
     int index = 0;
     for (int y = 0; y < maxy; y++) {
@@ -406,7 +402,7 @@ public class MedianFilter {
   public void blockMedian3x3(float[] data, final int maxx, final int maxy) {
     final int length = maxx * maxy;
     final float[] newData = floatBuffer(floatDataBuffer, length);
-    init(9, data[maxx + 1]);
+    init(9);
 
     // Boundary control
     final int xlimit = maxx - 1;
@@ -538,11 +534,10 @@ public class MedianFilter {
     }
 
     // Copy back
+    final int size = maxx - n - n;
     for (int y = n; y < maxy - n; y++) {
-      int index = y * maxx + n;
-      for (int x = n; x < maxx - n; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + n;
+      System.arraycopy(newData, index, data, index, size);
     }
   }
 
@@ -597,11 +592,10 @@ public class MedianFilter {
     }
 
     // Copy back
+    final int size = xlimit - 1;
     for (int y = 1; y < ylimit; y++) {
-      int index = y * maxx + 1;
-      for (int x = 1; x < xlimit; x++, index++) {
-        data[index] = newData[index];
-      }
+      final int index = y * maxx + 1;
+      System.arraycopy(newData, index, data, index, size);
     }
   }
 
