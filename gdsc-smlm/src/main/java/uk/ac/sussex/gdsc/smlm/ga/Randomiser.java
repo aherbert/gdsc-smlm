@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 /**
  * Base class for data generation using randomness.
  */
-public abstract class Randomiser {
+abstract class Randomiser {
   /** The source of randomness. */
   final UniformRandomProvider random;
 
@@ -40,7 +40,7 @@ public abstract class Randomiser {
    * @param random the random data generator
    * @throws NullPointerException if the random generator is null
    */
-  public Randomiser(UniformRandomProvider random) {
+  Randomiser(UniformRandomProvider random) {
     this.random = ValidationUtils.checkNotNull(random, "Random generator cannot be null");
   }
 }
