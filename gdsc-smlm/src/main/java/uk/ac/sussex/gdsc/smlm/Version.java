@@ -35,9 +35,10 @@ import java.util.regex.Pattern;
 /**
  * Show the version information contained in the source jar manifest.
  */
-public class Version {
+public final class Version {
   /** Constant for the string "unknown". */
-  public static final String UNKNOWN = "";
+  private static final String UNKNOWN = "";
+
   private static String version;
   private static String buildDate;
   private static String buildNumber;
@@ -62,18 +63,23 @@ public class Version {
     }
   }
 
+  /** No instances. */
+  private Version() {}
+
   /**
    * The main method. Output the version and build date.
    *
    * @param args the arguments
    */
   public static void main(String[] args) {
-    final StringBuilder msg = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(128);
     final String newLine = System.lineSeparator();
-    msg.append("Version : ").append(version).append(newLine);
-    msg.append("Build Date : ").append(buildDate).append(newLine);
-    msg.append("Build Number : ").append(buildNumber).append(newLine);
-    System.out.print(msg);
+    // @formatter:off
+    sb.append("Version : ").append(version).append(newLine)
+      .append("Build Date : ").append(buildDate).append(newLine)
+      .append("Build Number : ").append(buildNumber).append(newLine);
+    // @formatter:on
+    System.out.print(sb);
   }
 
   /**
@@ -185,7 +191,7 @@ public class Version {
       try (InputStream in = new URL(manifestPath).openStream()) {
         return new Manifest(in);
       }
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Ignore this
     }
     return null;
