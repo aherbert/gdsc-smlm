@@ -54,6 +54,11 @@
           ./ancestor::ClassOrInterfaceDeclaration[@SimpleName ='PrefsKey']"/>
     </properties>
   </rule>
+  <rule ref="category/java/codestyle.xml/ConfusingTernary">
+    <properties>
+      <property name="ignoreElseIf" value="true" />
+    </properties>
+  </rule>
   <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
     <properties>
       <!-- Allow underscores using letters for add, subtract, multiply, divide. -->
