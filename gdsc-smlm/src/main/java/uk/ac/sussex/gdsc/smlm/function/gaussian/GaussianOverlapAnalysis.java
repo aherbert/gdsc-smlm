@@ -97,7 +97,7 @@ public class GaussianOverlapAnalysis {
    */
   public static int getRange(double sd, double range) {
     final long l = (long) Math.ceil(2 * sd * range);
-    if (l < 1L) {
+    if (l < 1) {
       return 1;
     }
     if (l >= MAX_VALUE) {
@@ -118,7 +118,7 @@ public class GaussianOverlapAnalysis {
    */
   public static int getRange(double sd, double range, int max) {
     final long l = (long) Math.ceil(2 * sd * range);
-    if (l < 1L) {
+    if (l < 1) {
       return 1;
     }
     if (l >= max) {
