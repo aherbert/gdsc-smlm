@@ -431,7 +431,7 @@ public class PoissonGammaGaussianFunction implements LikelihoodFunction, LogLike
     // // Q. How to normalise so that at low cij there is a mixture and at high cij there is no
     // mixture and the result is the Poisson-Gamma. Perhaps this is what the above code is doing.
 
-    if (cij > 0.0) {
+    if (cij > 0) {
       temp += PoissonGammaFunction.poissonGammaN(cij, eta, gain) - f0 - fp0 * cij;
     }
 

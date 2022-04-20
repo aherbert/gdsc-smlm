@@ -88,7 +88,7 @@ public class PoissonGammaFunction
    */
   public static double poissonGamma(double c, double p, double m) {
     // Any observed count above zero
-    if (c > 0.0) {
+    if (c > 0) {
       // The observed count converted to photons
       final double c_m = c / m;
 
@@ -103,7 +103,7 @@ public class PoissonGammaFunction
       }
       // return Math.sqrt(p / (c * m)) * StdMath.exp(_c_m_p) * Bessel.i1(x)
       return (x / (2 * c)) * StdMath.exp(_c_m_p) * Bessel.i1(x);
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       return StdMath.exp(-p) * (1 + p / m);
     } else {
       return 0;
@@ -126,7 +126,7 @@ public class PoissonGammaFunction
    */
   public static double poissonGamma(double c, double p, double m, double[] gradient) {
     // Any observed count above zero
-    if (c > 0.0) {
+    if (c > 0) {
       // The observed count converted to photons
       final double c_m = c / m;
       final double cp_m = p * c_m;
@@ -162,7 +162,7 @@ public class PoissonGammaFunction
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       // f(p) = exp(-p) * (1 + p / m)
       // df/dp = (-exp(-p) * (1 + p / m)) + (exp(-p) / m)
       final double exp_p = StdMath.exp(-p);
@@ -195,7 +195,7 @@ public class PoissonGammaFunction
   public static double poissonGammaN(double c, double p, double m) {
     // As above with no Dirac delta function at c=0
 
-    if (c > 0.0) {
+    if (c > 0) {
       final double c_m = c / m;
       final double x = 2 * Math.sqrt(p * c_m);
       final double _c_m_p = -c_m - p;
@@ -205,7 +205,7 @@ public class PoissonGammaFunction
       }
       // return Math.sqrt(p / (c * m)) * StdMath.exp(_c_m_p) * Bessel.i1(x)
       return (x / (2 * c)) * StdMath.exp(_c_m_p) * Bessel.i1(x);
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       // No Dirac delta function
       return StdMath.exp(-p) * p / m;
     } else {
@@ -234,7 +234,7 @@ public class PoissonGammaFunction
   public static double poissonGammaN(double c, double p, double m, double[] gradient) {
     // As above with no Dirac delta function at c=0
 
-    if (c > 0.0) {
+    if (c > 0) {
       final double c_m = c / m;
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
@@ -249,7 +249,7 @@ public class PoissonGammaFunction
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m - G;
       return G;
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       // No Dirac delta function
       final double exp_p_m = StdMath.exp(-p) / m;
       final double G = exp_p_m * p;
@@ -308,7 +308,7 @@ public class PoissonGammaFunction
    */
   static double poissonGammaPartial(double c, double p, double m, double[] gradient) {
     // As above but do not subtract the function value G from the gradient.
-    if (c > 0.0) {
+    if (c > 0) {
       final double c_m = c / m;
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
@@ -324,7 +324,7 @@ public class PoissonGammaFunction
       final double G = (x / (2 * c)) * exp_c_m_p * Bessel.i1(x);
       gradient[0] = exp_c_m_p * Bessel.i0(x) / m;
       return G;
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       final double exp_p = StdMath.exp(-p);
       final double G = exp_p * (1 + p / m);
       gradient[0] = exp_p / m;
@@ -357,7 +357,7 @@ public class PoissonGammaFunction
     // As above but:
     // - do not multiply by exp^-p
     // - do not subtract the function value G from the gradient.
-    if (c > 0.0) {
+    if (c > 0) {
       final double c_m = c / m;
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
@@ -371,7 +371,7 @@ public class PoissonGammaFunction
       final double G = (x / (2 * c)) * exp_c_m * Bessel.i1(x);
       gradient[0] = exp_c_m * Bessel.i0(x) / m;
       return G;
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       final double G = 1 + p / m;
       gradient[0] = 1 / m;
       return G;
@@ -394,7 +394,7 @@ public class PoissonGammaFunction
    */
   public static double logPoissonGamma(double c, double p, double m) {
     // As above without final exp
-    if (c > 0.0) {
+    if (c > 0) {
       final double c_m = c / m;
       final double cp_m = p * c_m;
       final double x = 2 * Math.sqrt(cp_m);
@@ -402,7 +402,7 @@ public class PoissonGammaFunction
         return 0.5 * Math.log(p / (c * m)) - c_m - p + x - 0.5 * Math.log(TWO_PI * x);
       }
       return 0.5 * Math.log(p / (c * m)) - c_m - p + Math.log(Bessel.i1(x));
-    } else if (c == 0.0) {
+    } else if (c == 0) {
       // log (StdMath.exp(-p) * (1 + p / m))
       return -p + Math.log(1 + p / m);
     } else {
