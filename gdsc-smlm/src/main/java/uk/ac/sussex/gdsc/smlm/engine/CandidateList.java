@@ -31,6 +31,10 @@ import java.util.Comparator;
  * Stores a list of candidates.
  */
 class CandidateList {
+
+  private int size;
+  private Candidate[] list;
+
   /**
    * Simple interface for testing candidates.
    */
@@ -44,7 +48,8 @@ class CandidateList {
     boolean test(Candidate candidate);
   }
 
-  private static enum CandidateComparator implements Comparator<Candidate> {
+  /** Candidate Comparator. */
+  private enum CandidateComparator implements Comparator<Candidate> {
     /** An instance of the comparator. */
     INSTANCE;
 
@@ -54,13 +59,12 @@ class CandidateList {
     }
   }
 
-  private int size;
-  private Candidate[] list;
-
   /**
    * Instantiates a new candidate list.
    */
-  CandidateList() {}
+  CandidateList() {
+    // Intentionally empty
+  }
 
   /**
    * Instantiates a new candidate list.
@@ -135,7 +139,7 @@ class CandidateList {
    * @return the length of the list
    */
   int getLength() {
-    return (list != null) ? list.length : 0;
+    return list == null ? 0 : list.length;
   }
 
   /**
