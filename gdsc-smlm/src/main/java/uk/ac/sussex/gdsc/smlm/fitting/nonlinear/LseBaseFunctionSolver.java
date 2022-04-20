@@ -156,8 +156,6 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
    * @return the covariance matrix (or null)
    */
   public static double[][] covariance(double[][] I, double[][] E) {
-    final int n = I.length;
-
     // Invert the matrix
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
     if (!solver.invert(I)) {
@@ -166,6 +164,7 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
 
     // Note that I now refers to I^-1 in the Mortensen notation
 
+    final int n = I.length;
     final double[][] covar = new double[n][n];
     for (int a = 0; a < n; a++) {
       for (int b = 0; b < n; b++) {
@@ -205,8 +204,6 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
    * @return the variance (or null)
    */
   public static double[] variance(double[][] I, double[][] E) {
-    final int n = I.length;
-
     // Invert the matrix
     final EjmlLinearSolver solver = EjmlLinearSolver.createForInversion(1e-2);
     if (!solver.invert(I)) {
@@ -215,6 +212,7 @@ public abstract class LseBaseFunctionSolver extends BaseFunctionSolver
 
     // Note that I now refers to I^-1 in the Mortensen notation
 
+    final int n = I.length;
     final double[] covar = new double[n];
     for (int a = 0; a < n; a++) {
       // Note: b==a as we only do the diagonal
