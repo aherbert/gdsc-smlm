@@ -35,6 +35,15 @@ public class OffsetGradient1Function extends OffsetValueFunction
   /** The procedure. */
   protected Gradient1Procedure procedure1;
 
+  /** Used to store all the values and gradients for the NonLinearFunction interface. */
+  protected FunctionStore store;
+
+  /** All the values for the NonLinearFunction interface. */
+  protected double[] allValues;
+
+  /** All the gradients for the NonLinearFunction interface. */
+  protected double[][] allDyda;
+
   /**
    * Class for evaluating a function and storing the values and gradients.
    */
@@ -81,15 +90,6 @@ public class OffsetGradient1Function extends OffsetValueFunction
       index++;
     }
   }
-
-  /** Used to store all the values and gradients for the NonLinearFunction interface. */
-  protected FunctionStore store;
-
-  /** All the values for the NonLinearFunction interface. */
-  protected double[] allValues;
-
-  /** All the gradients for the NonLinearFunction interface. */
-  protected double[][] allDyda;
 
   /**
    * Instantiates a new offset gradient1 function.
