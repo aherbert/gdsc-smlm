@@ -53,10 +53,10 @@ public abstract class CubicSplineFunction implements Gradient2Function {
   /**
    * The scale to reduce the size of the spline before mapping to the target range (maxx * maxy).
    */
-  protected int scale = 1;
+  protected int scale;
 
   /** The scale squared (stored for convenience). */
-  private int scale2;
+  int scale2;
 
   /** The x centre of the spline (unscaled). */
   protected double cx;
