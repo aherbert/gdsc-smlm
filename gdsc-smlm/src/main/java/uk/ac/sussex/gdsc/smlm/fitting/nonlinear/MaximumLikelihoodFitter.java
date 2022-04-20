@@ -77,19 +77,46 @@ import uk.ac.sussex.gdsc.smlm.math3.optim.nonlinear.scalar.noderiv.CustomPowellO
  * distribution in order to model the counts from a CCD/EMCCD camera.
  */
 public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
+
+  /** The search method. */
+  SearchMethod searchMethod = SearchMethod.POWELL;
+  private LikelihoodFunction likelihoodFunction = LikelihoodFunction.POISSON;
+  private double alpha;
+  private double sigma;
+
+  private boolean gradientLineMinimisation = true;
+  private double relativeThreshold = 1e-4;
+  private double absoluteThreshold = 1e-10;
+  private double[] lower;
+  private double[] upper;
+  private double[] lowerConstraint;
+  private double[] upperConstraint;
+
+  /**
+   * The function to use for the Powell optimiser (which may have parameters mapped using the sqrt
+   * function.
+   */
+  private MultivariateLikelihood powellFunction;
+
+  /** Maximum iterations for the Powell optimiser. */
+  private int maxIterations;
+
   /**
    * Wrap the LikelihoodFunction with classes that implement the required interfaces.
    */
-  private class Likelihood {
+  private static class Likelihood {
     LikelihoodWrapper fun;
 
-    public Likelihood(LikelihoodWrapper fun) {
+    Likelihood(LikelihoodWrapper fun) {
       this.fun = fun;
     }
   }
 
-  private class MultivariateLikelihood extends Likelihood implements MultivariateFunction {
-    public MultivariateLikelihood(LikelihoodWrapper fun) {
+  /**
+   * Wrap the likelihood function as a MultivariateFunction.
+   */
+  private static class MultivariateLikelihood extends Likelihood implements MultivariateFunction {
+    MultivariateLikelihood(LikelihoodWrapper fun) {
       super(fun);
     }
 
@@ -98,7 +125,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
       return fun.likelihood(point);
     }
 
-    public boolean isMapped() {
+    boolean isMapped() {
       return false;
     }
   }
@@ -106,10 +133,10 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
   /**
    * Map the specified indices using the sqrt function for use with the Powell optimiser.
    */
-  private class MappedMultivariateLikelihood extends MultivariateLikelihood {
+  private static class MappedMultivariateLikelihood extends MultivariateLikelihood {
     final int[] map;
 
-    public MappedMultivariateLikelihood(LikelihoodWrapper fun, int[] map) {
+    MappedMultivariateLikelihood(LikelihoodWrapper fun, int[] map) {
       super(fun);
       this.map = map;
     }
@@ -128,7 +155,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
      * @param point the point
      * @return The mapped point
      */
-    public double[] map(double[] point) {
+    double[] map(double[] point) {
       point = point.clone();
       for (final int i : map) {
         point[i] = Math.sqrt(Math.abs(point[i])) * Math.signum(point[i]);
@@ -145,7 +172,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
      * @param point the point
      * @return The unmapped point
      */
-    public double[] unmap(double[] point) {
+    double[] unmap(double[] point) {
       point = point.clone();
       for (final int i : map) {
         if (point[i] > 0) {
@@ -163,9 +190,12 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
     }
   }
 
-  private class MultivariateVectorLikelihood extends Likelihood
+  /**
+   * Wrap the likelihood function as a MultivariateVectorFunction.
+   */
+  private static class MultivariateVectorLikelihood extends Likelihood
       implements MultivariateVectorFunction {
-    public MultivariateVectorLikelihood(LikelihoodWrapper fun) {
+    MultivariateVectorLikelihood(LikelihoodWrapper fun) {
       super(fun);
     }
 
@@ -176,9 +206,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
       return gradient;
     }
   }
-
-  // Maximum iterations for the Powell optimiser
-  private int maxIterations;
 
   /**
    * The search method.
@@ -233,7 +260,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
     private final String name;
     private final boolean usesGradient;
 
-    private SearchMethod(String name, boolean usesGradient) {
+    SearchMethod(String name, boolean usesGradient) {
       this.name = name;
       this.usesGradient = usesGradient;
     }
@@ -272,7 +299,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
 
     private final String name;
 
-    private LikelihoodFunction(String name) {
+    LikelihoodFunction(String name) {
       this.name = name;
     }
 
@@ -281,23 +308,6 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
       return name;
     }
   }
-
-  private SearchMethod searchMethod = SearchMethod.POWELL;
-  private LikelihoodFunction likelihoodFunction = LikelihoodFunction.POISSON;
-  private double alpha;
-  private double sigma;
-
-  private boolean gradientLineMinimisation = true;
-  private double relativeThreshold = 1e-4;
-  private double absoluteThreshold = 1e-10;
-  private double[] lower;
-  private double[] upper;
-  private double[] lowerConstraint;
-  private double[] upperConstraint;
-
-  // The function to use for the Powell optimiser (which may have parameters mapped using the sqrt
-  // function)
-  private MultivariateLikelihood powellFunction;
 
   /**
    * Default constructor.
@@ -431,11 +441,11 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
         // function evaluations
         final int n30 = Math.min(sigma.length * sigma.length * 30, getMaxEvaluations() / 2);
         evaluations = 0;
-        final OptimizationData[] data = new OptimizationData[] {new InitialGuess(startPoint),
-            new CMAESOptimizer.PopulationSize(popSize), new MaxEval(getMaxEvaluations()),
-            new CMAESOptimizer.Sigma(sigma),
-            new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),
-            GoalType.MINIMIZE, new SimpleBounds(lower, upper)};
+        final OptimizationData[] data =
+            {new InitialGuess(startPoint), new CMAESOptimizer.PopulationSize(popSize),
+                new MaxEval(getMaxEvaluations()), new CMAESOptimizer.Sigma(sigma),
+                new ObjectiveFunction(new MultivariateLikelihood(maximumLikelihoodFunction)),
+                GoalType.MINIMIZE, new SimpleBounds(lower, upper)};
         // Iterate to prevent early convergence
         int repeat = 0;
         while (evaluations < n30) {
@@ -628,7 +638,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
 
     // Check if the method requires the gradient but it cannot be computed
     if (maximumLikelihoodFunction == null
-        || (searchMethod.usesGradient && !maximumLikelihoodFunction.canComputeGradient())) {
+        || (searchMethod.usesGradients() && !maximumLikelihoodFunction.canComputeGradient())) {
       // Ensure no negative data for the Poisson likelihood method.
       // Just truncate the counts for now. These are from noise in the count estimates that we do
       // not model.
@@ -644,7 +654,7 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
           new PoissonLikelihoodWrapper(function, a, y2, n, myAlpha);
       // This will allow Powell searches. The effect on the gradient search algorithms may be weird
       // so leave alone.
-      if (!searchMethod.usesGradient) {
+      if (!searchMethod.usesGradients()) {
         mlFunction.setAllowNegativeExpectedValues(true);
       }
       maximumLikelihoodFunction = mlFunction;
@@ -901,13 +911,13 @@ public class MaximumLikelihoodFitter extends MleBaseFunctionSolver {
       final int n = y.length;
       // The function value must be scaled to the expected value of a Poisson process.
       double[] scaledy;
-      if (alpha != 0) {
+      if (alpha == 0) {
+        scaledy = y;
+      } else {
         scaledy = new double[n];
         for (int i = n; i-- > 0;) {
           scaledy[i] = y[i] * alpha;
         }
-      } else {
-        scaledy = y;
       }
       final LikelihoodWrapper maximumLikelihoodFunction =
           createLikelihoodWrapper(new FixedNonLinearFunction(scaledy), n, lastY, a);
