@@ -304,10 +304,7 @@ public class FastMleGradient2Procedure
    */
   public boolean isNaNGradients() {
     for (int i = numberOfGradients; i-- > 0;) {
-      if (Double.isNaN(d1[i])) {
-        return true;
-      }
-      if (Double.isNaN(d2[i])) {
+      if (Double.isNaN(d1[i]) || Double.isNaN(d2[i])) {
         return true;
       }
     }
