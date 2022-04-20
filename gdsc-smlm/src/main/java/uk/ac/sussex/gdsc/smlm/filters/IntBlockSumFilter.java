@@ -86,7 +86,7 @@ public class IntBlockSumFilter {
       return;
     }
 
-    final int[] wdata = initialise(data, maxx, maxy, n, true);
+    final int[] wdata = initialise(data);
 
     // X-direction
     for (int y = 0; y < maxy; y++) {
@@ -169,7 +169,7 @@ public class IntBlockSumFilter {
       return;
     }
 
-    final int[] wdata = initialise(data, maxx, maxy, 1, true);
+    final int[] wdata = initialise(data);
 
     // X-direction
     for (int y = 0; y < maxy; y++) {
@@ -214,16 +214,10 @@ public class IntBlockSumFilter {
    * Initialise for filtering.
    *
    * @param data the data
-   * @param maxx The width of the data
-   * @param maxy The height of the data
-   * @param n The block size
-   * @param internal the internal flag
    * @return the working data (which may be weighted)
    */
-  private int[] initialise(int[] data, final int maxx, final int maxy, final int n,
-      boolean internal) {
-    final int size = data.length;
-    createIntBuffer(size);
+  private int[] initialise(int[] data) {
+    createIntBuffer(data.length);
     return data;
   }
 
@@ -269,7 +263,7 @@ public class IntBlockSumFilter {
    * @param n The block size
    */
   void rollingBlockFilterNxN(int[] data, final int maxx, final int maxy, final int n) {
-    final int[] wdata = initialise(data, maxx, maxy, n, false);
+    final int[] wdata = initialise(data);
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
@@ -343,7 +337,7 @@ public class IntBlockSumFilter {
    * @param maxy The height of the data
    */
   void rollingBlockFilter3x3(int[] data, final int maxx, final int maxy) {
-    final int[] wdata = initialise(data, maxx, maxy, 1, false);
+    final int[] wdata = initialise(data);
 
     // NOTE:
     // To increase speed when sweeping the arrays and allow for reusing code:
