@@ -31,7 +31,10 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
 /**
  * Utility class for functions.
  */
-public class FunctionHelper {
+public final class FunctionHelper {
+  /** No instances. */
+  private FunctionHelper() {}
+
   /**
    * Gets the mean value using a fraction of the cumulative value, when values are sorted in
    * descending order. All values must be positive. The input values are modified by sorting.
