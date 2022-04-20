@@ -178,9 +178,7 @@ public class NonLinearFit extends LseBaseFunctionSolver
 
     if (initialStage) {
       lambda = initialLambda;
-      for (int j = a.length; j-- > 0;) {
-        ap[j] = a[j];
-      }
+      System.arraycopy(ap, 0, a, 0, a.length);
       sumOfSquaresWorking[SUM_OF_SQUARES_BEST] =
           calculator.findLinearised(n, y, a, alpha, beta, func);
       initialResidualSumOfSquares = sumOfSquaresWorking[SUM_OF_SQUARES_BEST];
@@ -233,12 +231,8 @@ public class NonLinearFit extends LseBaseFunctionSolver
       }
     }
 
-    for (int j = np; j-- > 0;) {
-      beta[j] = da[j];
-    }
-    for (int j = a.length; j-- > 0;) {
-      a[j] = ap[j];
-    }
+    System.arraycopy(da, 0, beta, 0, np);
+    System.arraycopy(ap, 0, a, 0, a.length);
     sumOfSquaresWorking[SUM_OF_SQUARES_BEST] = sumOfSquaresWorking[SUM_OF_SQUARES_NEW];
   }
 
