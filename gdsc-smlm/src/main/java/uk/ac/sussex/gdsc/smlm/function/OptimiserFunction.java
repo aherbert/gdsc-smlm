@@ -39,6 +39,13 @@ public abstract class OptimiserFunction {
   protected DoubleArrayList y;
 
   /**
+   * Create an instance.
+   */
+  protected OptimiserFunction() {
+    // Intentionally empty
+  }
+
+  /**
    * Adds the point.
    *
    * @param x the x
