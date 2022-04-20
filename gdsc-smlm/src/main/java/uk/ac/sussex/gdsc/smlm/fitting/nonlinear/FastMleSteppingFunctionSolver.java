@@ -80,7 +80,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
 
     private final String name;
 
-    private LineSearchMethod(String name) {
+    LineSearchMethod(String name) {
       this.name = name;
     }
 
@@ -233,7 +233,7 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
           slope += gradient[i] * searchDirection[gradientIndices[i]];
         }
 
-        if (slope <= 0.0) {
+        if (slope <= 0) {
           switch (lineSearchMethod) {
             case IGNORE:
               // Ignore any search direction that is in the opposite direction to the
@@ -377,7 +377,8 @@ public class FastMleSteppingFunctionSolver extends SteppingFunctionSolver
     if (obsVariances != null) {
       // The function was wrapped to add the per-observation variances
       // to the computed value, these must be subtracted to get the actual value
-      for (int i = 0, n = u.length; i < n; i++) {
+      final int n = u.length;
+      for (int i = 0; i < n; i++) {
         fx[i] = u[i] - obsVariances[i];
       }
     } else {
