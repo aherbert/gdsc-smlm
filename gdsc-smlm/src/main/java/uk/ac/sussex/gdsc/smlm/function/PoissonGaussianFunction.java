@@ -386,7 +386,7 @@ public final class PoissonGaussianFunction implements LikelihoodFunction, LogLik
    */
   static double newtonIteration(final double x, final double mu, final double sigmaSquared,
       final double initialSaddlepoint) {
-    double change = 0;
+    double change;
     double saddlepoint = initialSaddlepoint;
 
     // Original code can infinite loop
