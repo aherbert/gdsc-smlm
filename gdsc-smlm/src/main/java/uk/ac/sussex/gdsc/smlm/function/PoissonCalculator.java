@@ -98,27 +98,27 @@ public class PoissonCalculator {
     // The error in truncating the series is always of the opposite sign and at most
     // the same magnitude as the first omitted term.
 
-    for (int i = 0, n = x.length; i < n; i++) {
+    for (final double xi : x) {
       // Note: When x==0:
       // log(n!) = 0
       // mll = 0
-      if (x[i] > 0.0) {
-        final double logx = Math.log(x[i]);
-        if (x[i] <= APPROXIMATION_X) {
+      if (xi > 0) {
+        final double logx = Math.log(xi);
+        if (xi <= APPROXIMATION_X) {
           // At low values of log(n!) we use the gamma function as the relative error of the
           // approximation is high.
-          final double logXFactorial = LogFactorial.value(x[i]);
+          final double logXFactorial = LogFactorial.value(xi);
           sumLogXFactorial += logXFactorial;
-          mll += x[i] * logx - x[i] - logXFactorial;
+          mll += xi * logx - xi - logXFactorial;
         } else {
           // Approximate log(n!) using Stirling's approximation using the first 3 terms.
           // This will have a maximum relative error of approximately 2.87e-4
           final double ologx =
-              HALF_LOG_2_PI + 0.5 * logx + ONE_OVER_12 / x[i] - ONE_OVER_360 / pow3(x[i]);
-          sumLogXFactorial += x[i] * logx - x[i] + ologx;
+              HALF_LOG_2_PI + 0.5 * logx + ONE_OVER_12 / xi - ONE_OVER_360 / pow3(xi);
+          sumLogXFactorial += xi * logx - xi + ologx;
           mll -= ologx;
         }
-      } else if (x[i] != 0) {
+      } else if (xi != 0) {
         throw new IllegalArgumentException("Input values x must be positive");
       }
     }
@@ -205,9 +205,9 @@ public class PoissonCalculator {
    * @return the pseudo log likelihood
    */
   public double pseudoLogLikelihood(double[] mean) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] == 0.0) {
+      if (x[i] == 0) {
         ll -= mean[i];
       } else {
         ll += x[i] * Math.log(mean[i]) - mean[i];
@@ -266,7 +266,7 @@ public class PoissonCalculator {
   public double getLogLikelihoodRatio(double logLikelihood) {
     initialise();
     // The log likelihood should be below the maximum log likelihood
-    return (logLikelihood > mll) ? 0 : -2.0 * (logLikelihood - mll);
+    return (logLikelihood > mll) ? 0 : -2 * (logLikelihood - mll);
   }
 
   /**
@@ -288,7 +288,7 @@ public class PoissonCalculator {
    * @return the log likelihood
    */
   public static double logLikelihood(double mean, double x) {
-    if (x == 0.0) {
+    if (x == 0) {
       return -mean;
     }
     return x * Math.log(mean) - mean - LogFactorial.value(x);
@@ -303,9 +303,9 @@ public class PoissonCalculator {
    * @return the log likelihood
    */
   public static double logLikelihood(double[] mean, double[] x) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] == 0.0) {
+      if (x[i] == 0) {
         ll -= mean[i];
       } else {
         ll += x[i] * Math.log(mean[i]) - mean[i] - LogFactorial.value(x[i]);
@@ -343,9 +343,9 @@ public class PoissonCalculator {
    * @return the log likelihood
    */
   public static double fastLogLikelihood(double[] mean, double[] x) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] == 0.0) {
+      if (x[i] == 0) {
         ll -= mean[i];
       } else {
         ll += fastLogLikelihoodX(mean[i], x[i]);
@@ -384,9 +384,9 @@ public class PoissonCalculator {
    * @return the log likelihood
    */
   public static double fastLogLikelihood(double[] mean, double[] x, FastLog fastLog) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] == 0.0) {
+      if (x[i] == 0) {
         ll -= mean[i];
       } else {
         ll += fastLogLikelihoodX(mean[i], x[i], fastLog);
@@ -583,7 +583,7 @@ public class PoissonCalculator {
    * @return the maximum log likelihood
    */
   public static double maximumLogLikelihood(double[] x) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = x.length; i-- > 0;) {
       ll += maximumLogLikelihood(x[i]);
     }
@@ -613,9 +613,9 @@ public class PoissonCalculator {
    * @return the maximum log likelihood
    */
   public static double fastMaximumLogLikelihood(double[] x) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = x.length; i-- > 0;) {
-      if (x[i] > 0.0) {
+      if (x[i] > 0) {
         ll += fastLogLikelihoodX(x[i], x[i]);
       }
     }
@@ -647,9 +647,9 @@ public class PoissonCalculator {
    * @return the maximum log likelihood
    */
   public static double fastMaximumLogLikelihood(double[] x, FastLog fastLog) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = x.length; i-- > 0;) {
-      if (x[i] > 0.0) {
+      if (x[i] > 0) {
         ll += fastLogLikelihoodX(x[i], x[i], fastLog);
       }
     }
@@ -733,9 +733,9 @@ public class PoissonCalculator {
     // i.e., have the same or greater log-likelihood—than the model with fewer parameters
     // (here null)
 
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] > 0.0) {
+      if (x[i] > 0) {
         // ll += (x[i] * Math.log(mean[i]) - mean[i]) - (x[i] * Math.log(x[i]) - x[i])
         // ll += x[i] * Math.log(mean[i]) - mean[i] - x[i] * Math.log(x[i]) + x[i]
         // ll += x[i] * (Math.log(mean[i]) - Math.log(x[i])) - mean[i] + x[i]
@@ -744,7 +744,7 @@ public class PoissonCalculator {
         ll -= mean[i];
       }
     }
-    return -2.0 * ll;
+    return -2 * ll;
   }
 
   /**
@@ -757,15 +757,15 @@ public class PoissonCalculator {
    * @return the log likelihood ratio
    */
   public static double logLikelihoodRatio(double[] mean, double[] x, FastLog fastLog) {
-    double ll = 0.0;
+    double ll = 0;
     for (int i = mean.length; i-- > 0;) {
-      if (x[i] > 0.0) {
+      if (x[i] > 0) {
         ll += x[i] * fastLog.log(mean[i] / x[i]) - mean[i] + x[i];
       } else {
         ll -= mean[i];
       }
     }
-    return -2.0 * ll;
+    return -2 * ll;
   }
 
   /**
@@ -777,10 +777,10 @@ public class PoissonCalculator {
    * @return the log likelihood ratio
    */
   public static double logLikelihoodRatio(double mean, double x) {
-    if (x > 0.0) {
-      return -2.0 * x * Math.log(mean / x) - mean + x;
+    if (x > 0) {
+      return -2 * x * Math.log(mean / x) - mean + x;
     }
-    return -2.0 * mean;
+    return -2 * mean;
   }
 
   /**
@@ -793,9 +793,9 @@ public class PoissonCalculator {
    * @return the log likelihood ratio
    */
   public static double logLikelihoodRatio(double mean, double x, FastLog fastLog) {
-    if (x > 0.0) {
-      return -2.0 * x * fastLog.log(mean / x) - mean + x;
+    if (x > 0) {
+      return -2 * x * fastLog.log(mean / x) - mean + x;
     }
-    return -2.0 * mean;
+    return -2 * mean;
   }
 }
