@@ -34,7 +34,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class SingleCubicSplineFunction extends CubicSplineFunction {
   /** The gradient indices for a single point [Background, Intensity, X, Y, Z]. */
-  private static final int[] gradientIndices = new int[] {0, 1, 2, 3, 4};
+  private static final int[] gradientIndices = {0, 1, 2, 3, 4};
 
   /** The single target spline. */
   private final TargetSpline targetSpline;
