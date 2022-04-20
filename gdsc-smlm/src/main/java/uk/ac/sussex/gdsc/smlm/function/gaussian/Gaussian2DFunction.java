@@ -82,6 +82,11 @@ public abstract class Gaussian2DFunction
   /** The noise model. */
   private NoiseModel noiseModel;
 
+  /** The maxx. */
+  protected final int maxx;
+  /** The maxy. */
+  protected final int maxy;
+
   /**
    * Gets the name of the parameter assuming a 2D Gaussian function.
    *
@@ -138,11 +143,6 @@ public abstract class Gaussian2DFunction
     }
     return peak * PARAMETERS_PER_PEAK + parameterIndex;
   }
-
-  /** The maxx. */
-  protected final int maxx;
-  /** The maxy. */
-  protected final int maxy;
 
   /**
    * Instantiates a new gaussian 2 D function.
@@ -485,7 +485,8 @@ public abstract class Gaussian2DFunction
 
   @Override
   public void forEach(ValueProcedure procedure) {
-    for (int i = 0, n = size(); i < n; i++) {
+    final int n = size();
+    for (int i = 0; i < n; i++) {
       procedure.execute(eval(i));
     }
   }
@@ -493,7 +494,8 @@ public abstract class Gaussian2DFunction
   @Override
   public void forEach(Gradient1Procedure procedure) {
     final double[] duda = new double[getNumberOfGradients()];
-    for (int i = 0, n = size(); i < n; i++) {
+    final int n = size();
+    for (int i = 0; i < n; i++) {
       final double value = eval(i, duda);
       procedure.execute(value, duda);
     }
@@ -518,8 +520,8 @@ public abstract class Gaussian2DFunction
    * @return true, if successful
    */
   protected static boolean invalidGradients(double[] a) {
-    for (int i = 0; i < a.length; i++) {
-      if (Double.isNaN(a[i])) {
+    for (final double d : a) {
+      if (Double.isNaN(d)) {
         return true;
       }
     }
