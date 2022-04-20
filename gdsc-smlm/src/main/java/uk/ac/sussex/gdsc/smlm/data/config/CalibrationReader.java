@@ -49,7 +49,9 @@ public class CalibrationReader {
   /**
    * Instantiates a new calibration reader with no calibration.
    */
-  protected CalibrationReader() {}
+  protected CalibrationReader() {
+    // This constructor is intentionally empty. Nothing special is needed here.
+  }
 
   /**
    * Instantiates a new calibration reader.
