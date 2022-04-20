@@ -29,6 +29,9 @@ package uk.ac.sussex.gdsc.smlm.function;
  */
 public final class FastLogFactory {
 
+  /**
+   * Lazy load the FastLog instance.
+   */
   private static class FastLogLoader {
     static final FastLog INSTANCE = new TurboLog();
   }
