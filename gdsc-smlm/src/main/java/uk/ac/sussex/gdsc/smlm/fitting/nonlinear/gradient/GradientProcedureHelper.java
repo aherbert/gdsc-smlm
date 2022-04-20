@@ -27,7 +27,10 @@ package uk.ac.sussex.gdsc.smlm.fitting.nonlinear.gradient;
 /**
  * Helper functions for the gradient procedures.
  */
-class GradientProcedureHelper {
+final class GradientProcedureHelper {
+  /** No instances. */
+  private GradientProcedureHelper() {}
+
   /**
    * Initialise a working 4x4 matrix.
    *
