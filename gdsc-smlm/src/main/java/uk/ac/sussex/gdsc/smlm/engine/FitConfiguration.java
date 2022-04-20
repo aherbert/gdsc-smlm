@@ -102,11 +102,11 @@ import uk.ac.sussex.gdsc.smlm.results.filter.ShiftFilterSetupData;
  * Specifies the fitting configuration.
  */
 public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfiguration {
-  private FitSettings.Builder fitSettings;
+  private final FitSettings.Builder fitSettings;
 
   // Extract the settings for convenience
-  private CalibrationWriter calibration;
-  private PSF.Builder psf;
+  private final CalibrationWriter calibration;
+  private final PSF.Builder psf;
   private FilterSettings.Builder filterSettings;
   private FitSolverSettings.Builder fitSolverSettings;
 
@@ -114,20 +114,24 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
   private boolean computeDeviations;
   private int flags;
-  private AstigmatismZModel astigmatismZModel;
+  /** The astigmatism Z model. */
+  AstigmatismZModel astigmatismZModel;
   private double coordinateShift = 1;
   private int fitRegionWidth;
   private int fitRegionHeight;
   private double coordinateOffset = 0.5;
   private double minSignal;
   private double precisionThreshold;
-  private boolean isTwoAxisGaussian2D;
+  /** Flag indicating a two axis gaussian. */
+  boolean isTwoAxisGaussian2D;
   private double nmPerPixel;
   private double gain;
-  private double signalToPhotons;
+  /** Conversion factor for signal to photons. */
+  double signalToPhotons;
   private boolean emCcd;
   private boolean isMle;
-  private double noise;
+  /** The global noise for the frame. */
+  double noise;
   private double minWidthFactor = 0.5;
   /**
    * The width factor. This is the squared width if a 2 axis PSF
@@ -161,7 +165,12 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   private double[] observationWeights;
   private CameraModel cameraModel;
 
-  private BaseVarianceSelector varianceSelector = new BaseVarianceSelector();
+  private BaseVarianceSelector varianceSelector = BaseVarianceSelector.INSTANCE;
+
+  private FitStatus result;
+  private Object statusData;
+  /** The peak result validation data. */
+  PeakResultValidationData peakResultValidationData;
 
   /**
    * Creates a new fit configuration.
@@ -573,7 +582,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       return;
     }
     final Filter f = Filter.fromXml(xml);
-    if (f == null || !(f instanceof DirectFilter)) {
+    if (!(f instanceof DirectFilter)) {
       // Throw to ensure the filter is OK
       throw new IllegalStateException("Unrecognised smart filter: " + xml);
       // or
@@ -638,11 +647,9 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    */
   @Override
   public void initialise(int npeaks, int maxx, int maxy) {
-    {
-      // XXX: For debugging thread safety require new objects for each fit
-      // invalidateGaussianFunction();
-      // invalidateToleranceChecker();
-    }
+    // XXX: For debugging thread safety require new objects for each fit
+    // invalidateGaussianFunction();
+    // invalidateToleranceChecker();
 
     // Check if the Gaussian function is invalid
     if (gaussianFunction != null && (gaussianFunction.getNPeaks() != npeaks
@@ -1373,8 +1380,13 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     updatePrecisionThreshold();
   }
 
-  // Enable caching the location variance selection
-  private class BaseVarianceSelector {
+  /**
+   * Base class to obtain the location variance. May be extended to allow caching the variance or
+   * computing a different variance.
+   */
+  private static class BaseVarianceSelector {
+    static final BaseVarianceSelector INSTANCE = new BaseVarianceSelector();
+
     /**
      * Gets the location variance.
      *
@@ -1386,6 +1398,10 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     }
   }
 
+  /**
+   * Get the location variance with
+   * {@link BaseVarianceSelector#getLocationVariance(PreprocessedPeakResult)}.
+   */
   private class VarianceSelector extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
@@ -1393,6 +1409,10 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     }
   }
 
+  /**
+   * Get the location variance using the local background estimate for the local noise with
+   * {@link BaseVarianceSelector#getLocationVariance2(PreprocessedPeakResult)}.
+   */
   private class VarianceSelector2 extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
@@ -1400,6 +1420,10 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     }
   }
 
+  /**
+   * Get the Cramér-Rao lower bound on the location variance with
+   * {@link BaseVarianceSelector#getLocationVarianceCrlb(PreprocessedPeakResult)}.
+   */
   private class VarianceSelectorCrlb extends BaseVarianceSelector {
     @Override
     double getLocationVariance(PreprocessedPeakResult peak) {
@@ -1431,7 +1455,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
         break;
       default:
         method = PrecisionMethod.PRECISION_METHOD_NA;
-        varianceSelector = new BaseVarianceSelector();
+        varianceSelector = BaseVarianceSelector.INSTANCE;
         break;
     }
     calibration.setPrecisionMethod(method);
@@ -2074,10 +2098,6 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     double getNoise();
   }
 
-  private FitStatus result;
-  private Object statusData;
-  private PeakResultValidationData peakResultValidationData;
-
   /**
    * Gets the validation result.
    *
@@ -2289,9 +2309,9 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
 
     // Check widths
     if (isXSdFitting()) {
-      boolean badWidth = false;
-      double xfactor = 0;
-      double yfactor = 0;
+      boolean badWidth;
+      double xfactor;
+      double yfactor;
 
       xfactor = xsd / initialParams[Gaussian2DFunction.X_SD + offset];
       if (isTwoAxisGaussian2D) {
@@ -2367,7 +2387,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    */
   public double getVariance(double localBackground, final double signal, final double sd,
       boolean precisionUsingBackground) {
-    double variance = 0;
+    double variance;
     if (precisionUsingBackground) {
       // Check using the formula which uses the estimated background.
       // This allows for better filtering when the background is variable, e.g. when imaging cells.
