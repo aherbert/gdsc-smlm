@@ -125,8 +125,8 @@ public class SpotFilterHelper {
     }
 
     // Add the spots
-    for (int i = 0; i < spots.length; i++) {
-      data[(spots[i].x - minx) + (spots[i].y - miny) * width] = 1;
+    for (final Spot spot : spots) {
+      data[(spot.x - minx) + (spot.y - miny) * width] = 1;
     }
 
     sumFilter.rollingBlockFilter(data, width, height, n);
