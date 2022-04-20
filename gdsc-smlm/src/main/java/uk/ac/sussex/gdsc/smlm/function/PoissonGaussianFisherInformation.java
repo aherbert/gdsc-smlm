@@ -85,25 +85,25 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
    * Store the limit of the Poisson distribution for small mean for the default cumulative
    * probability.
    */
-  private static final int[] defaultLimits;
+  private static final int[] DEFAULT_LIMITS;
   /**
    * Store the limit of the Poisson distribution for tiny mean for the default cumulative
    * probability.
    */
-  private static final int[] defaultTinyLimits;
+  private static final int[] DEFAULT_TINY_LIMITS;
 
   static {
     final PoissonDistribution pd = new PoissonDistribution(1);
-    defaultLimits = new int[101];
-    for (int i = 1; i < defaultLimits.length; i++) {
-      defaultLimits[i] = computeLimit(pd, i, DEFAULT_CUMULATIVE_PROBABILITY);
+    DEFAULT_LIMITS = new int[101];
+    for (int i = 1; i < DEFAULT_LIMITS.length; i++) {
+      DEFAULT_LIMITS[i] = computeLimit(pd, i, DEFAULT_CUMULATIVE_PROBABILITY);
       // System.out.printf("[%d] = %d scale=%d\n", i, defaultLimits[i], getScale(Math.sqrt(i)));
     }
 
     // Use exponent of the mean down to -20
-    defaultTinyLimits = new int[21];
-    for (int i = 1; i < defaultTinyLimits.length; i++) {
-      defaultTinyLimits[i] = computeTinyLimit(pd, -i, DEFAULT_CUMULATIVE_PROBABILITY);
+    DEFAULT_TINY_LIMITS = new int[21];
+    for (int i = 1; i < DEFAULT_TINY_LIMITS.length; i++) {
+      DEFAULT_TINY_LIMITS[i] = computeTinyLimit(pd, -i, DEFAULT_CUMULATIVE_PROBABILITY);
       // System.out.printf("[%d] = %d : p(0) = %g : cumul = %s : next = %g\n", i,
       // defaultTinyLimits[i],
       // pd.probability(0), pd.cumulativeProbability(defaultTinyLimits[i]),
@@ -139,10 +139,10 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
   private boolean use38 = true;
 
   /** Store the limit of the Poisson distribution for small mean for the cumulative probability. */
-  private int[] limits = defaultLimits;
+  private int[] limits = DEFAULT_LIMITS;
 
   /** Store the limit of the Poisson distribution for tiny mean for the cumulative probability. */
-  private int[] tinyLimits = defaultTinyLimits;
+  private int[] tinyLimits = DEFAULT_TINY_LIMITS;
 
   /** Flag to indicate no possible convolution with the gaussian. */
   private final boolean noGaussian;
@@ -833,9 +833,9 @@ public class PoissonGaussianFisherInformation extends BasePoissonFisherInformati
     }
     if (this.cumulativeProbability != cumulativeProbability) {
       this.cumulativeProbability = cumulativeProbability;
-      if (limits == defaultLimits) {
-        limits = new int[defaultLimits.length];
-        tinyLimits = new int[defaultTinyLimits.length];
+      if (limits == DEFAULT_LIMITS) {
+        limits = new int[DEFAULT_LIMITS.length];
+        tinyLimits = new int[DEFAULT_TINY_LIMITS.length];
       } else {
         // Reset
         Arrays.fill(limits, 0);
