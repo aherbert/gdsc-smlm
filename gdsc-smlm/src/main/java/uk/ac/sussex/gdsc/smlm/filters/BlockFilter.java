@@ -902,8 +902,8 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     }
 
     // Corners
-    final int[] xoffset2 = new int[] {-xwidth, -xwidth, xwidth, xwidth};
-    final int[] yoffset2 = new int[] {-ywidth, ywidth, -ywidth, ywidth};
+    final int[] xoffset2 = {-xwidth, -xwidth, xwidth, xwidth};
+    final int[] yoffset2 = {-ywidth, ywidth, -ywidth, ywidth};
     final int[] offset2 = new int[xoffset2.length];
     for (int d = xoffset2.length; d-- > 0;) {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
@@ -2029,8 +2029,8 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     }
 
     // Corners
-    final int[] xoffset2 = new int[] {-xwidth, -xwidth, xwidth, xwidth};
-    final int[] yoffset2 = new int[] {-ywidth, ywidth, -ywidth, ywidth};
+    final int[] xoffset2 = {-xwidth, -xwidth, xwidth, xwidth};
+    final int[] yoffset2 = {-ywidth, ywidth, -ywidth, ywidth};
     final int[] offset2 = new int[xoffset2.length];
     for (int d = xoffset2.length; d-- > 0;) {
       offset2[d] = maxx * yoffset2[d] + xoffset2[d];
@@ -2217,11 +2217,11 @@ public abstract class BlockFilter extends BaseWeightedFilter {
     final int ylimit = maxy - 1;
 
     // Edges
-    final int[] xoffset = new int[] {-1, 0, 0, 1};
-    final int[] yoffset = new int[] {0, -1, 1, 0};
+    final int[] xoffset = {-1, 0, 0, 1};
+    final int[] yoffset = {0, -1, 1, 0};
     // Corners
-    final int[] xoffset2 = new int[] {-1, -1, 1, 1};
-    final int[] yoffset2 = new int[] {-1, 1, -1, 1};
+    final int[] xoffset2 = {-1, -1, 1, 1};
+    final int[] yoffset2 = {-1, 1, -1, 1};
 
     final float w2 = weight * weight;
 
