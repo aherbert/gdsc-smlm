@@ -54,7 +54,7 @@ public abstract class OptimiserFunction {
   }
 
   /**
-   * Adds the data.
+   * Adds the data. All previous data is replaced.
    *
    * @param x the x
    * @param y the y
