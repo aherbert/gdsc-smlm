@@ -145,8 +145,8 @@ public class FitTypeCounter {
    */
   public int getTotal() {
     int total = 0;
-    for (int i = 0; i < count.length; i++) {
-      total += count[i].get();
+    for (final AtomicInteger i : count) {
+      total += i.get();
     }
     return total;
   }
