@@ -111,6 +111,25 @@ public final class IcsiFastLog extends FastLog {
    * @param dataType the data type
    */
   private IcsiFastLog(int n, DataType dataType) {
+    // Allow computation of float/double datatypes
+    final int size = 1 << n;
+    switch (dataType) {
+      case BOTH:
+        data = new float[size];
+        ddata = new float[size];
+        break;
+      case DOUBLE:
+        data = null;
+        ddata = new float[size];
+        break;
+      case FLOAT:
+        data = new float[size];
+        ddata = null;
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown datatype: " + dataType);
+    }
+
     // Store log2 value of a range of floating point numbers using a limited
     // precision mantissa (m). The purpose of this code is to enumerate all
     // possible mantissas of a float with limited precision (23-q). Note the
@@ -144,25 +163,6 @@ public final class IcsiFastLog extends FastLog {
     int x = 0x3F800000; // Set the exponent to 0 so the float value=1.0
     // assert Float.intBitsToFloat(x) == 1.0f : "value is not 1.0f";
     final int inc = 1 << q; // Amount to increase the mantissa
-
-    // Allow computation of float/double datatypes
-    final int size = 1 << n;
-    switch (dataType) {
-      case BOTH:
-        data = new float[size];
-        ddata = new float[size];
-        break;
-      case DOUBLE:
-        data = null;
-        ddata = new float[size];
-        break;
-      case FLOAT:
-        data = new float[size];
-        ddata = null;
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown datatype: " + dataType);
-    }
 
     for (int i = 0; i < size; i++) {
       // if (i<50 || i>size-50)
