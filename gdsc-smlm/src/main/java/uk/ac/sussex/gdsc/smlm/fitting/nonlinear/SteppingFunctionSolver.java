@@ -205,7 +205,7 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       // Debugging
       final String msg = ex.getMessage();
       logger.log(Level.FINE, () -> String.format("%s failed: %s%s", getClass().getSimpleName(),
-          ex.fitStatus.getName(), (msg != null) ? " - " + msg : ""));
+          ex.fitStatus.getName(), (msg == null) ? "" : " - " + msg));
       return ex.fitStatus;
     } finally {
       iterations = tc.getIterations();
