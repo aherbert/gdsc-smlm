@@ -341,7 +341,7 @@ public final class GuiSettings {
       builder.setComShiftThreshold(0.01);
       // Copy default fit settings but modify for fitting standalone PSFs
       final FitEngineSettings.Builder febuilder =
-          FitProtosHelper.defaultFitEngineSettings.toBuilder();
+          FitProtosHelper.DefaultFitEngineSettings.INSTANCE.toBuilder();
       febuilder.setIncludeNeighbours(false);
       builder.setFitEngineSettings(febuilder);
       builder.setPsf(PsfProtosHelper.getDefaultPsf(PSFType.TWO_AXIS_GAUSSIAN_2D));
@@ -475,7 +475,8 @@ public final class GuiSettings {
       builder.setWeightedFit(true);
       builder.setSaveFitWidth(true);
       builder.setSaveModel(true);
-      final FitEngineSettings.Builder b = FitProtosHelper.defaultFitEngineSettings.toBuilder();
+      final FitEngineSettings.Builder b =
+          FitProtosHelper.DefaultFitEngineSettings.INSTANCE.toBuilder();
 
       // Adjust for a wider fit range
       b.getFittingBuilder().setValue(10).setAbsolute(true);
@@ -493,7 +494,7 @@ public final class GuiSettings {
       fb.setPrecisionMethodValue(PrecisionMethod.POISSON_CRLB_VALUE);
 
       builder.setFitEngineSettings(b);
-      builder.setPsf(PsfProtosHelper.defaultTwoAxisGaussian2DPSF);
+      builder.setPsf(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE);
 
       INSTANCE = builder.build();
     }

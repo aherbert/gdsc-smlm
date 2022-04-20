@@ -32,13 +32,16 @@ import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CameraType;
  */
 public final class CalibrationProtosHelper {
   /** The default Calibration. */
-  public static final Calibration defaultCalibration;
+  public static class DefaultCalibration {
+    /** Default settings instance. */
+    public static final Calibration INSTANCE;
 
-  static {
-    final Calibration.Builder builder = Calibration.newBuilder();
-    // Note: Ideally we would set QE to be 1 but this will involve creating a
-    // camera calibration and it is more useful to have the default as null.
-    defaultCalibration = builder.build();
+    static {
+      final Calibration.Builder builder = Calibration.newBuilder();
+      // Note: Ideally we would set QE to be 1 but this will involve creating a
+      // camera calibration and it is more useful to have the default as null.
+      INSTANCE = builder.build();
+    }
   }
 
   /**

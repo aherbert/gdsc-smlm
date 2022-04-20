@@ -39,37 +39,63 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
  */
 public final class PsfProtosHelper {
   /** The default one-axis Gaussian 2D PSF. */
-  public static final PSF defaultOneAxisGaussian2DPSF;
+  public static class DefaultOneAxisGaussian2DPSF {
+    /** Default settings instance. */
+    public static final PSF INSTANCE;
+
+    static {
+      final PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
+      final PSF.Builder builder = PSF.newBuilder();
+
+      builder.setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
+      paramBuilder.setName("S");
+      paramBuilder.setValue(1);
+      paramBuilder.setUnit(PSFParameterUnit.DISTANCE);
+      builder.addParameters(paramBuilder.build());
+      INSTANCE = builder.build();
+    }
+  }
+
   /** The default two-axis Gaussian 2D PSF. */
-  public static final PSF defaultTwoAxisGaussian2DPSF;
+  public static class DefaultTwoAxisGaussian2DPSF {
+    /** Default settings instance. */
+    public static final PSF INSTANCE;
+
+    static {
+      final PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
+      final PSF.Builder builder = PSF.newBuilder();
+
+      builder.setPsfType(PSFType.TWO_AXIS_GAUSSIAN_2D);
+      paramBuilder.setName("Sx");
+      paramBuilder.setValue(1);
+      builder.addParameters(paramBuilder.build());
+      paramBuilder.setName("Sy");
+      builder.addParameters(paramBuilder.build());
+      INSTANCE = builder.build();
+    }
+  }
+
   /** The default two-axis and theta Gaussian 2D PSF. */
-  public static final PSF defaultTwoAxisAndThetaGaussian2DPSF;
+  public static class DefaultTwoAxisAndThetaGaussian2DPSF {
+    /** Default settings instance. */
+    public static final PSF INSTANCE;
 
-  static {
-    final PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
-    final PSF.Builder builder = PSF.newBuilder();
+    static {
+      final PSFParameter.Builder paramBuilder = PSFParameter.newBuilder();
+      final PSF.Builder builder = PSF.newBuilder();
 
-    builder.setPsfType(PSFType.ONE_AXIS_GAUSSIAN_2D);
-    paramBuilder.setName("S");
-    paramBuilder.setValue(1);
-    paramBuilder.setUnit(PSFParameterUnit.DISTANCE);
-    builder.addParameters(paramBuilder.build());
-    defaultOneAxisGaussian2DPSF = builder.build();
-
-    builder.clear();
-    builder.setPsfType(PSFType.TWO_AXIS_GAUSSIAN_2D);
-    paramBuilder.setName("Sx");
-    builder.addParameters(paramBuilder.build());
-    paramBuilder.setName("Sy");
-    builder.addParameters(paramBuilder.build());
-    defaultTwoAxisGaussian2DPSF = builder.build();
-
-    builder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
-    paramBuilder.setName("Angle");
-    paramBuilder.setUnit(PSFParameterUnit.ANGLE);
-    paramBuilder.setValue(0);
-    builder.addParameters(paramBuilder.build());
-    defaultTwoAxisAndThetaGaussian2DPSF = builder.build();
+      builder.setPsfType(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+      paramBuilder.setName("Sx");
+      paramBuilder.setValue(1);
+      builder.addParameters(paramBuilder.build());
+      paramBuilder.setName("Sy");
+      builder.addParameters(paramBuilder.build());
+      paramBuilder.setName("Angle");
+      paramBuilder.setUnit(PSFParameterUnit.ANGLE);
+      paramBuilder.setValue(0);
+      builder.addParameters(paramBuilder.build());
+      INSTANCE = builder.build();
+    }
   }
 
   /** No public constructor. */
@@ -111,12 +137,12 @@ public final class PsfProtosHelper {
   public static PSF getDefaultPsf(PSFType value) {
     switch (value) {
       case ONE_AXIS_GAUSSIAN_2D:
-        return defaultOneAxisGaussian2DPSF;
+        return DefaultOneAxisGaussian2DPSF.INSTANCE;
       case TWO_AXIS_GAUSSIAN_2D:
       case ASTIGMATIC_GAUSSIAN_2D:
-        return defaultTwoAxisGaussian2DPSF;
+        return DefaultTwoAxisGaussian2DPSF.INSTANCE;
       case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
-        return defaultTwoAxisAndThetaGaussian2DPSF;
+        return DefaultTwoAxisAndThetaGaussian2DPSF.INSTANCE;
 
       case CUSTOM:
         return PSF.getDefaultInstance();

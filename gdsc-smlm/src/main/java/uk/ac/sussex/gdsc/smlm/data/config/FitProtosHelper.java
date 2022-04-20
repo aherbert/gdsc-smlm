@@ -46,136 +46,143 @@ import uk.ac.sussex.gdsc.smlm.fitting.nonlinear.MaximumLikelihoodFitter;
  * Contains helper functions for the FitProtos class.
  */
 public final class FitProtosHelper {
-
   /** The default FitSolverSettings. */
-  public static final FitSolverSettings defaultFitSolverSettings;
+  public static class DefaultFitSolverSettings {
+    /** Default settings instance. */
+    public static final FitSolverSettings INSTANCE;
 
-  static {
-    final FitSolverSettings.Builder builder = FitSolverSettings.newBuilder();
-    builder.setFixedPsf(false);
-    builder.setDisableBackgroundFitting(false);
-    builder.setDisableSignalFitting(false);
+    static {
+      final FitSolverSettings.Builder builder = FitSolverSettings.newBuilder();
+      builder.setFixedPsf(false);
+      builder.setDisableBackgroundFitting(false);
+      builder.setDisableSignalFitting(false);
 
-    builder.setFitSolver(FitSolver.LVM_LSE);
-    builder.setFixedIterations(false);
-    builder.setMaxIterations(20);
-    builder.setRelativeThreshold(1e-6);
-    builder.setAbsoluteThreshold(1e-16);
-    // Disabled. These are rarely used
-    //builder.setParameterRelativeThreshold(1e-3);
-    //builder.setParameterAbsoluteThreshold(1e-6);
+      builder.setFitSolver(FitSolver.LVM_LSE);
+      builder.setFixedIterations(false);
+      builder.setMaxIterations(20);
+      builder.setRelativeThreshold(1e-6);
+      builder.setAbsoluteThreshold(1e-16);
+      // Disabled. These are rarely used
+      // builder.setParameterRelativeThreshold(1e-3);
+      // builder.setParameterAbsoluteThreshold(1e-6);
 
-    builder.setLambda(10);
+      builder.setLambda(10);
 
-    builder.setSearchMethod(SearchMethod.POWELL_BOUNDED);
-    builder.setGradientLineMinimisation(false);
-    builder.setModelCamera(false);
-    builder.setMaxFunctionEvaluations(2000);
+      builder.setSearchMethod(SearchMethod.POWELL_BOUNDED);
+      builder.setGradientLineMinimisation(false);
+      builder.setModelCamera(false);
+      builder.setMaxFunctionEvaluations(2000);
 
-    builder.setUseClamping(false);
-    builder.setUseDynamicClamping(false);
-    // Add defaults for a two-axis and theta Gaussian 2D function.
-    // The units are photons and pixels.
-    // B (3D DAOSTORM uses 100 which is high compared to the expected
-    // background of a 'clean' image)
-    builder.addClampValues(10);
-    builder.addClampValues(1000); // I
-    builder.addClampValues(1); // X
-    builder.addClampValues(1); // Y
-    // TODO: determine what this should be
-    builder.addClampValues(10); // Z
-    builder.addClampValues(3); // Sx
-    builder.addClampValues(3); // Sy
-    builder.addClampValues(Math.PI); // A
+      builder.setUseClamping(false);
+      builder.setUseDynamicClamping(false);
+      // Add defaults for a two-axis and theta Gaussian 2D function.
+      // The units are photons and pixels.
+      // B (3D DAOSTORM uses 100 which is high compared to the expected
+      // background of a 'clean' image)
+      builder.addClampValues(10);
+      builder.addClampValues(1000); // I
+      builder.addClampValues(1); // X
+      builder.addClampValues(1); // Y
+      // TODO: determine what this should be
+      builder.addClampValues(10); // Z
+      builder.addClampValues(3); // Sx
+      builder.addClampValues(3); // Sy
+      builder.addClampValues(Math.PI); // A
 
-    builder.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
+      builder.setLineSearchMethod(LineSearchMethod.PARTIAL_IGNORE);
 
-    defaultFitSolverSettings = builder.build();
+      INSTANCE = builder.build();
+    }
   }
 
   /** The default FilterSettings. */
-  public static final FilterSettings defaultFilterSettings;
+  public static class DefaultFilterSettings {
+    /** Default settings instance. */
+    public static final FilterSettings INSTANCE;
 
-  static {
-    final FilterSettings.Builder builder = FilterSettings.newBuilder();
-    builder.setShiftFactor(1);
-    builder.setSignalStrength(5);
-    builder.setMinPhotons(30);
-    builder.setPrecisionThreshold(40);
-    builder.setPrecisionMethod(PrecisionMethod.MORTENSEN);
-    builder.setMinWidthFactor(0.5);
-    builder.setMaxWidthFactor(2);
-    builder.setDisableSimpleFilter(false);
-    builder.setSmartFilter(false);
-    builder.setSmartFilterString("");
-    defaultFilterSettings = builder.build();
+    static {
+      final FilterSettings.Builder builder = FilterSettings.newBuilder();
+      builder.setShiftFactor(1);
+      builder.setSignalStrength(5);
+      builder.setMinPhotons(30);
+      builder.setPrecisionThreshold(40);
+      builder.setPrecisionMethod(PrecisionMethod.MORTENSEN);
+      builder.setMinWidthFactor(0.5);
+      builder.setMaxWidthFactor(2);
+      builder.setDisableSimpleFilter(false);
+      builder.setSmartFilter(false);
+      builder.setSmartFilterString("");
+      INSTANCE = builder.build();
+    }
   }
 
   /** The default FitSettings. */
-  public static final FitSettings defaultFitSettings;
+  public static class DefaultFitSettings {
+    /** Default settings instance. */
+    public static final FitSettings INSTANCE;
 
-  static {
-    final FitSettings.Builder builder = FitSettings.newBuilder();
-    builder.setFitSolverSettings(defaultFitSolverSettings);
-    builder.setFilterSettings(defaultFilterSettings);
-    defaultFitSettings = builder.build();
+    static {
+      final FitSettings.Builder builder = FitSettings.newBuilder();
+      builder.setFitSolverSettings(DefaultFitSolverSettings.INSTANCE);
+      builder.setFilterSettings(DefaultFilterSettings.INSTANCE);
+      INSTANCE = builder.build();
+    }
   }
 
   /** The default FitEngineSettings. */
-  public static final FitEngineSettings defaultFitEngineSettings;
+  public static class DefaultFitEngineSettings {
+    /** Default settings instance. */
+    public static final FitEngineSettings INSTANCE;
 
-  static {
-    // Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
-    // a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width
-    // mismatch but
-    // the mean filter will be faster as it uses a smaller block size. The Gaussian filter has
-    // higher
-    // recall but lower precision as it identifies more spots due to the shape of the smoothing
-    // filter.
-    // The overall AUC is very similar.
-    //
-    // Note: Setting the parameter at a higher level allows the filter to work on out-of-focus spots
-    // which
-    // will have a wider PSF.
-    //
-    // *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at a
-    // depth of up to 1380nm (the PSF limit).
+    static {
+      // Analysis* shows the best area-under-precision-recall curve (AUC) using a mean filter or
+      // a Gaussian filter with ~1.2 SD smoothing. The Gaussian filter is more robust to width
+      // mismatch but the mean filter will be faster as it uses a smaller block size. The Gaussian
+      // filter has higher recall but lower precision as it identifies more spots due to the shape
+      // of the smoothing filter. The overall AUC is very similar.
+      //
+      // Note: Setting the parameter at a higher level allows the filter to work on out-of-focus
+      // spots which will have a wider PSF.
+      //
+      // *Analysis was performed on simulated data using a Image PSF with spots of 20-100 photons at
+      // a depth of up to 1380nm (the PSF limit).
 
-    final FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
-    builder.setFitSettings(defaultFitSettings);
+      final FitEngineSettings.Builder builder = FitEngineSettings.newBuilder();
+      builder.setFitSettings(DefaultFitSettings.INSTANCE);
 
-    builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
+      builder.setNoiseMethod(NoiseEstimatorMethod.QUICK_RESIDUALS_LEAST_TRIMMED_OF_SQUARES);
 
-    final RelativeParameter.Builder rp = RelativeParameter.newBuilder();
+      final RelativeParameter.Builder rp = RelativeParameter.newBuilder();
 
-    final DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
-    dfs.setDataFilterType(DataFilterType.SINGLE);
-    final DataFilter.Builder dfb = dfs.addDataFiltersBuilder();
-    dfb.setDataFilterMethod(DataFilterMethod.MEAN);
-    rp.setAbsolute(false);
-    rp.setValue(1.2);
-    dfb.addParameters(rp.build());
+      final DataFilterSettings.Builder dfs = builder.getDataFilterSettingsBuilder();
+      dfs.setDataFilterType(DataFilterType.SINGLE);
+      final DataFilter.Builder dfb = dfs.addDataFiltersBuilder();
+      dfb.setDataFilterMethod(DataFilterMethod.MEAN);
+      rp.setAbsolute(false);
+      rp.setValue(1.2);
+      dfb.addParameters(rp.build());
 
-    rp.setAbsolute(false);
-    rp.setValue(1);
-    builder.setSearch(rp.build());
-    builder.setBorder(rp.build());
-    rp.setValue(3);
-    builder.setFitting(rp.build());
+      rp.setAbsolute(false);
+      rp.setValue(1);
+      builder.setSearch(rp.build());
+      builder.setBorder(rp.build());
+      rp.setValue(3);
+      builder.setFitting(rp.build());
 
-    builder.setIncludeNeighbours(true);
-    builder.setNeighbourHeightThreshold(0.3);
-    builder.setResidualsThreshold(1);
-    rp.setValue(0.5);
-    rp.setAbsolute(true);
-    builder.setDuplicateDistance(rp.build());
+      builder.setIncludeNeighbours(true);
+      builder.setNeighbourHeightThreshold(0.3);
+      builder.setResidualsThreshold(1);
+      rp.setValue(0.5);
+      rp.setAbsolute(true);
+      builder.setDuplicateDistance(rp.build());
 
-    // The new pass rate parameter should be more adaptable to different image sizes.
-    // XXX Revisit this when more is known about how to set the pass rate.
-    builder.setFailuresLimit(3);
-    builder.setPassRate(0.5);
+      // The new pass rate parameter should be more adaptable to different image sizes.
+      // XXX Revisit this when more is known about how to set the pass rate.
+      builder.setFailuresLimit(3);
+      builder.setPassRate(0.5);
 
-    defaultFitEngineSettings = builder.build();
+      INSTANCE = builder.build();
+    }
   }
 
   /** No public constructor. */

@@ -232,17 +232,17 @@ public class PsfHelper {
     final List<PSFParameter> list = psf.getParametersList();
     switch (psf.getPsfType()) {
       case ONE_AXIS_GAUSSIAN_2D:
-        return checkParameters(PsfProtosHelper.defaultOneAxisGaussian2DPSF.getParametersList(),
-            list);
+        return checkParameters(
+            PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE.getParametersList(), list);
 
       case ASTIGMATIC_GAUSSIAN_2D:
       case TWO_AXIS_GAUSSIAN_2D:
-        return checkParameters(PsfProtosHelper.defaultTwoAxisGaussian2DPSF.getParametersList(),
-            list);
+        return checkParameters(
+            PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE.getParametersList(), list);
 
       case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
         return checkParameters(
-            PsfProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF.getParametersList(), list);
+            PsfProtosHelper.DefaultTwoAxisAndThetaGaussian2DPSF.INSTANCE.getParametersList(), list);
 
       case UNRECOGNIZED:
         throw new ConfigurationException("PSF is not recognised");

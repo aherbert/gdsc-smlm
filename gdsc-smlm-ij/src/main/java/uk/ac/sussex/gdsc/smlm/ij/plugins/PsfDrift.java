@@ -534,9 +534,9 @@ public class PsfDrift implements PlugIn {
 
     // Configure the fit solver. We must wrap the settings with a
     // FitEngineConfiguration to pass to the PeakFit method
-    final FitEngineSettings fitEngineSettings = FitProtosHelper.defaultFitEngineSettings;
+    final FitEngineSettings fitEngineSettings = FitProtosHelper.DefaultFitEngineSettings.INSTANCE;
     final FitEngineConfiguration config = FitEngineConfiguration.create(fitEngineSettings,
-        SettingsManager.readCalibration(0), PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+        SettingsManager.readCalibration(0), PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
     config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
     if (!PeakFit.configurePsfModel(config)) {
       return;

@@ -169,8 +169,9 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    * @return the fit configuration
    */
   public static FitConfiguration create() {
-    return create(FitProtosHelper.defaultFitSettings, CalibrationProtosHelper.defaultCalibration,
-        PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+    return create(FitProtosHelper.DefaultFitSettings.INSTANCE,
+        CalibrationProtosHelper.DefaultCalibration.INSTANCE,
+        PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
   }
 
   /**
@@ -201,8 +202,9 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
    */
   public static FitConfiguration create(FitSettings.Builder fitSettings,
       Calibration.Builder calibration, PSF.Builder psf) {
-    final FitConfiguration c = new FitConfiguration(Objects.requireNonNull(fitSettings, "fitSettings"),
-        Objects.requireNonNull(calibration, "calibration"), Objects.requireNonNull(psf, "psf"));
+    final FitConfiguration c =
+        new FitConfiguration(Objects.requireNonNull(fitSettings, "fitSettings"),
+            Objects.requireNonNull(calibration, "calibration"), Objects.requireNonNull(psf, "psf"));
     c.initialiseState();
     return c;
   }
@@ -442,8 +444,8 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       // Updated names when changing from two-axis to one axis
       if (psf.getParametersCount() == 1) {
         psf.getParametersBuilder(PsfHelper.INDEX_SX)
-            .setName(PsfProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX)
-                .getName());
+            .setName(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE
+                .getParameters(PsfHelper.INDEX_SX).getName());
       }
     }
 
@@ -451,27 +453,28 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     if (psf.getParametersCount() == 0 && paramCount > 0) {
       // Create a dummy Sx
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(
-          PsfProtosHelper.defaultOneAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX).getName());
+      p.setName(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE
+          .getParameters(PsfHelper.INDEX_SX).getName());
       p.setValue(1);
       p.setUnit(PSFParameterUnit.DISTANCE);
     }
     if (psf.getParametersCount() == 1 && paramCount > 1) {
       // Rename S to Sx
-      psf.getParametersBuilder(PsfHelper.INDEX_SX).setName(
-          PsfProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SX).getName());
+      psf.getParametersBuilder(PsfHelper.INDEX_SX)
+          .setName(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE
+              .getParameters(PsfHelper.INDEX_SX).getName());
 
       // Duplicate the Sx to Sy
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(
-          PsfProtosHelper.defaultTwoAxisGaussian2DPSF.getParameters(PsfHelper.INDEX_SY).getName());
+      p.setName(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE
+          .getParameters(PsfHelper.INDEX_SY).getName());
       p.setValue(psf.getParameters(PsfHelper.INDEX_SX).getValue());
       p.setUnit(PSFParameterUnit.DISTANCE);
     }
     if (psf.getParametersCount() == 2 && paramCount > 2) {
       // Create a dummy angle
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(PsfProtosHelper.defaultTwoAxisAndThetaGaussian2DPSF
+      p.setName(PsfProtosHelper.DefaultTwoAxisAndThetaGaussian2DPSF.INSTANCE
           .getParameters(PsfHelper.INDEX_THETA).getName());
       p.setUnit(PSFParameterUnit.ANGLE);
     }

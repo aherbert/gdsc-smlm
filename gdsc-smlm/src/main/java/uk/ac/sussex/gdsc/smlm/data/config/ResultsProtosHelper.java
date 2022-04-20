@@ -35,24 +35,27 @@ import uk.ac.sussex.gdsc.smlm.data.config.ResultsProtos.ResultsTableFormat;
  */
 public final class ResultsProtosHelper {
   /** The default ResultsSettings. */
-  public static final ResultsSettings defaultResultsSettings;
+  public static class DefaultResultsSettings {
+    /** Default settings instance. */
+    public static final ResultsSettings INSTANCE;
 
-  static {
-    final ResultsSettings.Builder builder = ResultsSettings.newBuilder();
-    // @formatter:off
-    builder.getResultsImageSettingsBuilder()
-      .setWeighted(true)
-      .setEqualised(true)
-      .setAveragePrecision(30)
-      .setImageSizeMode(ResultsImageSizeMode.SCALED)
-      .setScale(1)
-      .setImageSize(2048)
-      .setPixelSize(10)
-      .setLutName("Fire");
-    // @formatter:on
-    builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
-    builder.getResultsInMemorySettingsBuilder().setInMemory(true);
-    defaultResultsSettings = builder.build();
+    static {
+      final ResultsSettings.Builder builder = ResultsSettings.newBuilder();
+      // @formatter:off
+      builder.getResultsImageSettingsBuilder()
+        .setWeighted(true)
+        .setEqualised(true)
+        .setAveragePrecision(30)
+        .setImageSizeMode(ResultsImageSizeMode.SCALED)
+        .setScale(1)
+        .setImageSize(2048)
+        .setPixelSize(10)
+        .setLutName("Fire");
+      // @formatter:on
+      builder.getResultsTableSettingsBuilder().setRoundingPrecision(4);
+      builder.getResultsInMemorySettingsBuilder().setInMemory(true);
+      INSTANCE = builder.build();
+    }
   }
 
   /** No public constructor. */

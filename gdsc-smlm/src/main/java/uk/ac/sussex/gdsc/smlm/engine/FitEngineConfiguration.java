@@ -74,8 +74,9 @@ public final class FitEngineConfiguration {
    * @return the fit engine configuration
    */
   public static FitEngineConfiguration create() {
-    return create(FitProtosHelper.defaultFitEngineSettings,
-        CalibrationProtosHelper.defaultCalibration, PsfProtosHelper.defaultOneAxisGaussian2DPSF);
+    return create(FitProtosHelper.DefaultFitEngineSettings.INSTANCE,
+        CalibrationProtosHelper.DefaultCalibration.INSTANCE,
+        PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
   }
 
   /**

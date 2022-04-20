@@ -118,7 +118,7 @@ public class PeakResultTableModel extends AbstractTableModel {
   public PeakResultTableModel(MemoryPeakResults resultsSource, boolean copyData,
       ResultsTableSettings tableSettings) {
     if (tableSettings == null) {
-      tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
+      tableSettings = ResultsProtosHelper.DefaultResultsSettings.INSTANCE.getResultsTableSettings();
     }
     this.tableSettings = tableSettings;
 
@@ -156,7 +156,7 @@ public class PeakResultTableModel extends AbstractTableModel {
       psf = PSF.getDefaultInstance();
     }
     if (tableSettings == null) {
-      tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
+      tableSettings = ResultsProtosHelper.DefaultResultsSettings.INSTANCE.getResultsTableSettings();
     }
     this.data = results;
     this.calibration = calibration;
@@ -184,7 +184,7 @@ public class PeakResultTableModel extends AbstractTableModel {
    */
   public void setTableSettings(ResultsTableSettings tableSettings) {
     if (tableSettings == null) {
-      tableSettings = ResultsProtosHelper.defaultResultsSettings.getResultsTableSettings();
+      tableSettings = ResultsProtosHelper.DefaultResultsSettings.INSTANCE.getResultsTableSettings();
     }
     if (equals(this.tableSettings, tableSettings)) {
       return;

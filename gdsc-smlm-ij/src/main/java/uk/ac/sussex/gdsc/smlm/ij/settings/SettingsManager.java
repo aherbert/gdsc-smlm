@@ -940,7 +940,8 @@ public final class SettingsManager {
    * @return the Calibration
    */
   public static Calibration readCalibration(int flags) {
-    return new ConfigurationReader<>(CalibrationProtosHelper.defaultCalibration).read(flags);
+    return new ConfigurationReader<>(CalibrationProtosHelper.DefaultCalibration.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -950,7 +951,8 @@ public final class SettingsManager {
    * @return the PSF
    */
   public static PSF readPsf(int flags) {
-    return new ConfigurationReader<>(PsfProtosHelper.defaultOneAxisGaussian2DPSF).read(flags);
+    return new ConfigurationReader<>(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -960,7 +962,8 @@ public final class SettingsManager {
    * @return the ResultsSettings
    */
   public static ResultsSettings readResultsSettings(int flags) {
-    return new ConfigurationReader<>(ResultsProtosHelper.defaultResultsSettings).read(flags);
+    return new ConfigurationReader<>(ResultsProtosHelper.DefaultResultsSettings.INSTANCE)
+        .read(flags);
   }
 
   /**
@@ -970,7 +973,7 @@ public final class SettingsManager {
    * @return the FitEngineSettings
    */
   private static FitEngineSettings readFitEngineSettings(int flags) {
-    return new ConfigurationReader<>(FitProtosHelper.defaultFitEngineSettings).read(flags);
+    return new ConfigurationReader<>(FitProtosHelper.DefaultFitEngineSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -990,8 +993,7 @@ public final class SettingsManager {
    * @return the PSFCalculatorSettings
    */
   public static PSFCalculatorSettings readPsfCalculatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFCalculatorSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFCalculatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1001,8 +1003,7 @@ public final class SettingsManager {
    * @return the PSFEstimatorSettings
    */
   public static PSFEstimatorSettings readPsfEstimatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFEstimatorSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFEstimatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1012,8 +1013,7 @@ public final class SettingsManager {
    * @return the CreateDataSettings
    */
   public static CreateDataSettings readCreateDataSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultCreateDataSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultCreateDataSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1034,8 +1034,7 @@ public final class SettingsManager {
    * @return the ClusteringSettings
    */
   public static ClusteringSettings readClusteringSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultClusteringSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultClusteringSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1110,8 +1109,7 @@ public final class SettingsManager {
    * @return the NucleusMaskSettings
    */
   public static NucleusMaskSettings readNucleusMaskSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultNucleusMaskSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultNucleusMaskSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1121,8 +1119,7 @@ public final class SettingsManager {
    * @return the PSFCreatorSettings
    */
   public static PSFCreatorSettings readPsfCreatorSettings(int flags) {
-    return new ConfigurationReader<>(GuiSettings.DefaultPSFCreatorSettings.INSTANCE)
-        .read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultPSFCreatorSettings.INSTANCE).read(flags);
   }
 
   /**
@@ -1199,8 +1196,8 @@ public final class SettingsManager {
    * @return the AstigmatismModelManagerSettings
    */
   public static AstigmatismModelManagerSettings readAstigmatismModelManagerSettings(int flags) {
-    return new ConfigurationReader<>(
-        GuiSettings.DefaultAstigmatismModelManagerSettings.INSTANCE).read(flags);
+    return new ConfigurationReader<>(GuiSettings.DefaultAstigmatismModelManagerSettings.INSTANCE)
+        .read(flags);
   }
 
   /**

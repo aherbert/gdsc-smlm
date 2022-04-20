@@ -368,8 +368,7 @@ public class CreateData implements PlugIn {
    */
   private static class Settings {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
-    private static final AtomicReference<Settings> INSTANCE =
-        new AtomicReference<>(new Settings());
+    private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
     boolean[] displayHistograms = new boolean[NAMES.length];
 
@@ -1774,7 +1773,7 @@ public class CreateData implements PlugIn {
         PSF.Builder psfBuilder;
         // Set the PSF as a Gaussian using the width at z=0.
         // In future this could be improved for other PSFs.
-        psfBuilder = PsfProtosHelper.defaultOneAxisGaussian2DPSF.toBuilder();
+        psfBuilder = PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE.toBuilder();
         psfBuilder.getParametersBuilder(PsfHelper.INDEX_SX).setValue(psfSd);
         psf = psfBuilder.build();
       }
