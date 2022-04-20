@@ -46,6 +46,14 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
   /** The trace level for debugging the fit computation. */
   private static Level traceLevel = Level.FINEST;
 
+  /** The gradient indices. */
+  protected int[] gradientIndices;
+  /** The tolerance checker. */
+  protected final ToleranceChecker tc;
+  /** The bounds. */
+  protected final ParameterBounds bounds;
+  private double[] weights;
+
   /**
    * Simple class to allow the values to be computed.
    */
@@ -62,14 +70,6 @@ public abstract class SteppingFunctionSolver extends BaseFunctionSolver {
       fx[index++] = value;
     }
   }
-
-  /** The gradient indices. */
-  protected int[] gradientIndices;
-  /** The tolerance checker. */
-  protected final ToleranceChecker tc;
-  /** The bounds. */
-  protected final ParameterBounds bounds;
-  private double[] weights;
 
   /**
    * Create a new stepping function solver.
