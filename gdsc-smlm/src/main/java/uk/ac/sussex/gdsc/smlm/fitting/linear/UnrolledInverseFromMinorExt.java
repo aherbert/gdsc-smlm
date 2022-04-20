@@ -47,9 +47,12 @@ import org.ejml.data.DenseMatrix64F;
  * Alex Herbert created this extension of {@link org.ejml.alg.dense.misc.UnrolledInverseFromMinor}
  * to compute only the diagonal of the inverse.
  */
-public class UnrolledInverseFromMinorExt {
+public final class UnrolledInverseFromMinorExt {
   /** The maximum supported matrix size. */
   public static final int MAX = 5;
+
+  /** No instances. */
+  private UnrolledInverseFromMinorExt() {}
 
   /**
    * Invert the matrix and return the diagonal.
