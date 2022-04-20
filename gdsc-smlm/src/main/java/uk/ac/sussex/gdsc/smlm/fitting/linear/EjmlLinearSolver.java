@@ -52,6 +52,42 @@ public class EjmlLinearSolver {
   // CHECKSTYLE.OFF: MemberName
   // CHECKSTYLE.OFF: ParameterName
 
+  /** The linear solver. */
+  private LinearSolver<DenseMatrix64F> linearSolver;
+
+  /** The pseudo inverse solver. */
+  private LinearSolver<DenseMatrix64F> pseudoInverseSolver;
+
+  /** The cholesky solver. */
+  private LinearSolver<DenseMatrix64F> choleskySolver;
+
+  /** The cholesky LDLT solver. */
+  private LinearSolver<DenseMatrix64F> choleskyLdlTSolver;
+
+  /** The inversion solver. */
+  private LinearSolver<DenseMatrix64F> inversionSolver;
+
+  /** The last successful solver. */
+  private LinearSolver<DenseMatrix64F> lastSuccessfulSolver;
+
+  /** The vector x. */
+  private DenseMatrix64F x;
+
+  /** The inverse of matrix A. */
+  private DenseMatrix64F invA;
+
+  /** The solver size. */
+  private int solverSize;
+
+  /** The error checking flag. Set to true to check the solution x to linear equations A x = b. */
+  private boolean errorChecking;
+
+  /** The class used to check equality (with zero). */
+  private DoubleEquality equal;
+
+  /** The inversion tolerance. */
+  private double inversionTolerance;
+
   /**
    * Solve the matrix using direct inversion.
    */
@@ -62,7 +98,9 @@ public class EjmlLinearSolver {
     /**
      * Instantiates a new inversion solver.
      */
-    InversionSolver() {}
+    InversionSolver() {
+      // Intentionally empty
+    }
 
     @Override
     public boolean setA(DenseMatrix64F a) {
@@ -113,46 +151,12 @@ public class EjmlLinearSolver {
     }
   }
 
-  /** The linear solver. */
-  private LinearSolver<DenseMatrix64F> linearSolver;
-
-  /** The pseudo inverse solver. */
-  private LinearSolver<DenseMatrix64F> pseudoInverseSolver;
-
-  /** The cholesky solver. */
-  private LinearSolver<DenseMatrix64F> choleskySolver;
-
-  /** The cholesky LDLT solver. */
-  private LinearSolver<DenseMatrix64F> choleskyLdlTSolver;
-
-  /** The inversion solver. */
-  private LinearSolver<DenseMatrix64F> inversionSolver;
-
-  /** The last successful solver. */
-  private LinearSolver<DenseMatrix64F> lastSuccessfulSolver;
-
-  /** The vector x. */
-  private DenseMatrix64F x;
-
-  /** The inverse of matrix A. */
-  private DenseMatrix64F invA;
-
-  /** The solver size. */
-  private int solverSize;
-
-  /** The error checking flag. Set to true to check the solution x to linear equations A x = b. */
-  private boolean errorChecking;
-
-  /** The class used to check equality (with zero). */
-  private DoubleEquality equal;
-
-  /** The inversion tolerance. */
-  private double inversionTolerance;
-
   /**
    * Instantiates a new EJML linear solver.
    */
-  public EjmlLinearSolver() {}
+  public EjmlLinearSolver() {
+    // Intentionally empty
+  }
 
   /**
    * Instantiates a new EJML linear solver with tolerance for the linear solution.
