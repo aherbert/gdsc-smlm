@@ -158,7 +158,7 @@ public class RampedSelectionStrategy<T extends Comparable<T>> extends SimpleSele
 
     // This method may be called when fitness is unknown.
     // Only sort those with a fitness score.
-    List<Chromosome<T>> list = null;
+    List<Chromosome<T>> list;
     int count = 0;
     for (final Chromosome<T> c : individuals) {
       if (c.getFitness() == null) {
