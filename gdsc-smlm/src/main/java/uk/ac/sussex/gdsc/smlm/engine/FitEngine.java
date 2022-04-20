@@ -249,7 +249,7 @@ public final class FitEngine {
       // Workers may be waiting for a job.
       // Add null jobs if the queue is not at capacity so they can be collected by alive workers.
       // If there are already jobs then the worker will stop due to the finish() signal.
-      for (int i = 0; i < threads.size(); i++) {
+      for (int i = threads.size(); i-- != 0;) {
         // non-blocking add to queue
         if (!jobs.offer(EMPTY_JOB)) {
           // At capacity so stop adding more
@@ -258,7 +258,7 @@ public final class FitEngine {
       }
     } else {
       // Finish all the worker threads by passing in a null job
-      for (int i = 0; i < threads.size(); i++) {
+      for (int i = threads.size(); i-- != 0;) {
         put(EMPTY_JOB); // blocking add to queue
       }
     }
