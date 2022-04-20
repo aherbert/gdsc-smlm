@@ -18,8 +18,6 @@
 package uk.ac.sussex.gdsc.smlm.math3.analysis.integration;
 
 import org.apache.commons.math3.analysis.integration.BaseAbstractUnivariateIntegrator;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
@@ -85,8 +83,7 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
      * is greater than {@link #TRAPEZOID_MAX_ITERATIONS_COUNT}
      */
     public TrapezoidIntegratorCopy(final int minimalIterationCount,
-                               final int maximalIterationCount)
-        throws NotStrictlyPositiveException, NumberIsTooSmallException, NumberIsTooLargeException {
+                               final int maximalIterationCount) {
         super(minimalIterationCount, maximalIterationCount);
         if (maximalIterationCount > TRAPEZOID_MAX_ITERATIONS_COUNT) {
             throw new NumberIsTooLargeException(maximalIterationCount,
@@ -117,8 +114,7 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
      * @throws TooManyEvaluationsException if the maximal number of evaluations
      * is exceeded.
      */
-    double stage(final CustomSimpsonIntegrator integrator, final int n)
-        throws TooManyEvaluationsException {
+    double stage(final CustomSimpsonIntegrator integrator, final int n) {
 
         if (n == 0) {
             final double max = integrator.getMax();
@@ -160,8 +156,7 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
      * @throws TooManyEvaluationsException if the maximal number of evaluations
      * is exceeded.
      */
-    double stage(final TrapezoidIntegratorCopy integrator, final int n)
-        throws TooManyEvaluationsException {
+    double stage(final TrapezoidIntegratorCopy integrator, final int n) {
 
         if (n == 0) {
             final double max = integrator.getMax();
@@ -190,9 +185,7 @@ class TrapezoidIntegratorCopy extends BaseAbstractUnivariateIntegrator {
 
     /** {@inheritDoc} */
     @Override
-    protected double doIntegrate()
-        throws MathIllegalArgumentException, TooManyEvaluationsException,
-               MaxCountExceededException {
+    protected double doIntegrate() {
 
         double oldt = stage(this, 0);
         incrementCount();
