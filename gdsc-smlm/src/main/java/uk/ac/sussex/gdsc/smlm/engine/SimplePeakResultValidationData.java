@@ -177,7 +177,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
    */
   private static int getRange(double range, int max) {
     final double l = Math.ceil(range);
-    if (l < 1L) {
+    if (l < 1) {
       return 1;
     }
     if (l >= max) {

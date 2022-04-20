@@ -388,9 +388,9 @@ public class QuadrantAnalysis {
       final double sum = v1[0] * v2[0] + v1[1] * v2[1];
       final double cosang = sum / (d1 * d2);
 
-      if (cosang >= 1.0) {
+      if (cosang >= 1) {
         return 0;
-      } else if (cosang <= -1.0) {
+      } else if (cosang <= -1) {
         return Math.PI;
       }
 
