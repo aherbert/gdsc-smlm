@@ -351,7 +351,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * @param pointInc spacing of values in input array (1 for lines, image width for columns)
    * @param newLength length of downscaled data
    */
-  private static final void downscaleLine(final float[] pixels, final float[] cache,
+  private static void downscaleLine(final float[] pixels, final float[] cache,
       final float[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int length, final int pointInc, final int newLength) {
     int pi = pixel0 + pointInc * (unscaled0 - reduceBy * 3 / 2); // pointer in pixels array
@@ -384,7 +384,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * length of the kernel runs from -1.5 to +1.5, and the standard deviation is 1/2. Array index
    * corresponding to the kernel center is unitLength*3/2
    */
-  private static final float[] makeDownscaleKernel(final int unitLength) {
+  private static float[] makeDownscaleKernel(final int unitLength) {
     final int mid = unitLength * 3 / 2;
     final float[] kernel = new float[3 * unitLength];
     for (int i = 0; i <= unitLength / 2; i++) {
@@ -406,7 +406,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * Scale a line up by factor {@code reduceBy} and write as a row or column (or part thereof)
    * to the pixels array of a FloatProcessor.
    */
-  private static final void upscaleLine(final float[] cache, final float[] pixels,
+  private static void upscaleLine(final float[] cache, final float[] pixels,
       final float[] kernel, final int reduceBy, final int pixel0, final int unscaled0,
       final int writeFrom, final int writeTo, final int pointInc) {
     int pi = pixel0 + pointInc * writeFrom;
@@ -426,7 +426,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * downscaled coordinates. The kernel runs from [-2 to +2[, corresponding to array index 0 ...
    * 4*unitLength (whereby the last point is not in the array any more).
    */
-  private static final float[] makeUpscaleKernel(final int unitLength) {
+  private static float[] makeUpscaleKernel(final int unitLength) {
     final float[] kernel = new float[4 * unitLength];
     final int mid = 2 * unitLength;
     kernel[0] = 0;
@@ -462,7 +462,7 @@ public class GaussianFilter extends BaseWeightedFilter {
    * @param pointInc Increment of the pixels array index to the next point (for an ImageProcessor,
    *        it should be {@code 1} for a row, {@code width} for a column)
    */
-  private static final void convolveLine(final float[] input, final float[] pixels,
+  private static void convolveLine(final float[] input, final float[] pixels,
       final float[][] kernel, final int writeFrom, final int writeTo, final int point0,
       final int pointInc) {
     final int length = input.length;
