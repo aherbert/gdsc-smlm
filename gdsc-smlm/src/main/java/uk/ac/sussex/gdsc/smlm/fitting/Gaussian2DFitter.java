@@ -587,7 +587,6 @@ public class Gaussian2DFitter {
       // ----
 
       // Get the parameters
-      double signal = params[j + Gaussian2DFunction.SIGNAL];
       double xpos = params[j + Gaussian2DFunction.X_POSITION];
       double ypos = params[j + Gaussian2DFunction.Y_POSITION];
 
@@ -669,6 +668,7 @@ public class Gaussian2DFitter {
       }
 
       // Convert amplitudes to signal
+      double signal = params[j + Gaussian2DFunction.SIGNAL];
       if (amplitudeEstimate[i]) {
         signal *= TWO_PI * sx * sy;
       }
@@ -774,11 +774,10 @@ public class Gaussian2DFitter {
             params[Gaussian2DFunction.BACKGROUND] - (ymin - params[Gaussian2DFunction.BACKGROUND]);
       }
 
-      if (lower[Gaussian2DFunction.BACKGROUND] < 0) {
-        // This is a problem for MLE fitting
-        if (solver.isStrictlyPositiveFunction()) {
-          lower[Gaussian2DFunction.BACKGROUND] = 0;
-        }
+      if (lower[Gaussian2DFunction.BACKGROUND] < 0
+          // This is a problem for MLE fitting
+          && solver.isStrictlyPositiveFunction()) {
+        lower[Gaussian2DFunction.BACKGROUND] = 0;
       }
     }
 
@@ -831,13 +830,12 @@ public class Gaussian2DFitter {
         lower[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL]
             - (lower[j + Gaussian2DFunction.SIGNAL] - params[j + Gaussian2DFunction.SIGNAL]);
       }
-      if (lower[j + Gaussian2DFunction.SIGNAL] <= 0) {
-        // This is a problem for MLE fitting
-        if (solver.isStrictlyPositiveFunction()) {
-          // If this is zero it causes problems when computing gradients since the
-          // Gaussian function may not exist. So use a small value instead.
-          lower[j + Gaussian2DFunction.SIGNAL] = 0; // .1;
-        }
+      if (lower[j + Gaussian2DFunction.SIGNAL] <= 0
+          // This is a problem for MLE fitting
+          && solver.isStrictlyPositiveFunction()) {
+        // If this is zero it causes problems when computing gradients since the
+        // Gaussian function may not exist. So use a small value instead.
+        lower[j + Gaussian2DFunction.SIGNAL] = 0; // .1;
       }
       if (params[j + Gaussian2DFunction.SIGNAL] > upper[j + Gaussian2DFunction.SIGNAL]) {
         upper[j + Gaussian2DFunction.SIGNAL] = params[j + Gaussian2DFunction.SIGNAL]
@@ -1165,7 +1163,7 @@ public class Gaussian2DFitter {
    * @return the optimised function value for the last fit.
    */
   public double getValue() {
-    return (solver != null) ? solver.getValue() : 0;
+    return solver == null ? 0 : solver.getValue();
   }
 
   /**
@@ -1210,11 +1208,9 @@ public class Gaussian2DFitter {
 
     final boolean result = solver.evaluate(y, residuals, params);
 
-    if (result) {
-      if (residuals != null) {
-        for (int i = 0; i < residuals.length; i++) {
-          residuals[i] = y[i] - residuals[i];
-        }
+    if (result && residuals != null) {
+      for (int i = 0; i < residuals.length; i++) {
+        residuals[i] = y[i] - residuals[i];
       }
     }
 
@@ -1250,13 +1246,12 @@ public class Gaussian2DFitter {
 
     final boolean result = solver.computeDeviations(y, params, paramsDev);
 
-    if (result) {
-      // Ensure the deviations are copied for a symmetric Gaussian
-      if (!fitConfiguration.isYSdFitting() && fitConfiguration.isXSdFitting()) {
-        // Ensure Y deviation is updated with the X deviation
-        for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
-          paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
-        }
+    if (result
+        // Ensure the deviations are copied for a symmetric Gaussian
+        && !fitConfiguration.isYSdFitting() && fitConfiguration.isXSdFitting()) {
+      // Ensure Y deviation is updated with the X deviation
+      for (int i = 0, j = 0; i < npeaks; i++, j += Gaussian2DFunction.PARAMETERS_PER_PEAK) {
+        paramsDev[j + Gaussian2DFunction.Y_SD] = paramsDev[j + Gaussian2DFunction.X_SD];
       }
     }
 
