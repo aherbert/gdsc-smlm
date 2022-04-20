@@ -111,8 +111,8 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     // Run all the processors and store the total maxima intensity at each index
     final float[] intensity = new float[width * height];
     final float[] sum = new float[intensity.length];
-    for (int i = 0; i < processors.length; i++) {
-      final float[] data2 = processors[i].process(data, width, height);
+    for (final DataProcessor dp : processors) {
+      final float[] data2 = dp.process(data, width, height);
       for (int j = 0; j < sum.length; j++) {
         sum[j] += data2[j];
       }
@@ -139,11 +139,11 @@ public final class JurySpotFilter extends MaximaSpotFilter {
 
     int count = 0;
     final Spot[] spots = new Spot[maxIndices.length];
-    for (int n = 0; n < maxIndices.length; n++) {
-      if (intensity[maxIndices[n]] > 0) {
-        final int y = maxIndices[n] / width;
-        final int x = maxIndices[n] % width;
-        spots[count++] = new Spot(x, y, sum[maxIndices[n]] * divisor);
+    for (final int maxIndex : maxIndices) {
+      if (intensity[maxIndex] > 0) {
+        final int y = maxIndex / width;
+        final int x = maxIndex % width;
+        spots[count++] = new Spot(x, y, sum[maxIndex] * divisor);
       }
     }
     return Arrays.copyOf(spots, count);
@@ -154,8 +154,8 @@ public final class JurySpotFilter extends MaximaSpotFilter {
     // Run all the processors and store the total maxima intensity at each index
     final float[] intensity = new float[width * height];
     final float[] sum = new float[intensity.length];
-    for (int i = 0; i < processors.length; i++) {
-      final float[] data2 = processors[i].process(data, width, height);
+    for (final DataProcessor dp : processors) {
+      final float[] data2 = dp.process(data, width, height);
       for (int j = 0; j < sum.length; j++) {
         sum[j] += data2[j];
       }
@@ -175,8 +175,8 @@ public final class JurySpotFilter extends MaximaSpotFilter {
   @Override
   public List<String> getParameters() {
     final List<String> list = super.getParameters();
-    for (int i = 0; i < processors.length; i++) {
-      list.add("Filter = " + processors[i].getDescription());
+    for (final DataProcessor dp : processors) {
+      list.add("Filter = " + dp.getDescription());
     }
     return list;
   }
