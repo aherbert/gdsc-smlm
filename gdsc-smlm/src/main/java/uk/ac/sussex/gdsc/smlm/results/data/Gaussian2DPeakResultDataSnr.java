@@ -43,8 +43,9 @@ public class Gaussian2DPeakResultDataSnr implements PeakResultDataFloat {
 
   @Override
   public Float getValue(PeakResult result) {
-    return new Float(Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getIntensity(),
-        result.getParameter(SX), result.getParameter(SY)) / result.getNoise());
+    return Float
+        .valueOf((float) Gaussian2DPeakResultHelper.getMeanSignalUsingP05(result.getIntensity(),
+            result.getParameter(SX), result.getParameter(SY)) / result.getNoise());
   }
 
   @Override
