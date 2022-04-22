@@ -185,8 +185,8 @@ public class GridDistribution implements SpatialDistribution {
 
   @Override
   public boolean isWithin(double[] xyz) {
-    for (int i = 0; i < xyz.length; i++) {
-      if (xyz[i] < 0 || xyz[i] > size) {
+    for (final double d : xyz) {
+      if (d < 0 || d > size) {
         return false;
       }
     }
