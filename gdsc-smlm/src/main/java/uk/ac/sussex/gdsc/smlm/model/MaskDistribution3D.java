@@ -62,7 +62,6 @@ public class MaskDistribution3D implements SpatialDistribution {
   private final double halfWidth;
   private final double halfHeight;
   private final double minDepth;
-  private final double depth;
   private int particle;
   private final double scaleX;
   private final double scaleY;
@@ -128,8 +127,7 @@ public class MaskDistribution3D implements SpatialDistribution {
     halfWidth = width * 0.5;
     halfHeight = height * 0.5;
     this.sliceDepth = sliceDepth;
-    depth = sliceDepth * maxz;
-    minDepth = depth * -0.5;
+    minDepth = sliceDepth * maxz * -0.5;
 
     maxxMaxy = maxx * maxy;
     mask = new int[maxz * maxxMaxy];
