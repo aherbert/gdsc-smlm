@@ -347,8 +347,8 @@ public class TsfPeakResultsWriter extends AbstractPeakResults {
    */
   private static void addNewParamStdDevs(Builder builder, float[] paramStdDev) {
     // Note: paramsStdDev for X/Y could be set into the X/Y Precision field.
-    for (int i = 0; i < paramStdDev.length; i++) {
-      builder.addParamStdDevs(paramStdDev[i]);
+    for (final float f : paramStdDev) {
+      builder.addParamStdDevs(f);
     }
   }
 
