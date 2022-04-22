@@ -288,6 +288,9 @@ public class MultiPathFilter {
     }
   }
 
+  /**
+   * Data used to setup the state of a filter.
+   */
   private class FilterSetupState {
     /** Store the initial state of the filter flags. */
     int setupFlags;
@@ -301,6 +304,9 @@ public class MultiPathFilter {
     }
   }
 
+  /**
+   * Data used to setup the state of a filter with setup data.
+   */
   private class FilterSetupDataState extends FilterSetupState {
     /** Store the initial state of the filter setup data. */
     FilterSetupData[] setupData;
@@ -555,7 +561,7 @@ public class MultiPathFilter {
    * @param precomputed True if this is a subset with pre-computed validation results
    * @return The new peak results that are accepted (and any valid candidates if found); or null
    */
-  private final PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult,
+  private PreprocessedPeakResult[] accept(final MultiPathFitResult multiPathResult,
       boolean validateCandidates, SelectedResultStore store, boolean precomputed) {
     final int candidateId = multiPathResult.getCandidateId();
 
@@ -1919,12 +1925,11 @@ public class MultiPathFilter {
 
     setup();
     failCounter = replaceIfNull(failCounter);
-    for (int i = 0; i < results.length; i++) {
-      final MultiPathFitResult[] newMultiPathResults =
-          filter(results[i], failCounter, false, subset);
+    for (final MultiPathFitResults result : results) {
+      final MultiPathFitResult[] newMultiPathResults = filter(result, failCounter, false, subset);
       if (newMultiPathResults != null) {
-        newResults[size++] = new MultiPathFitResults(results[i].getFrame(), newMultiPathResults,
-            results[i].getTotalCandidates(), results[i].getNumberOfActualResults());
+        newResults[size++] = new MultiPathFitResults(result.getFrame(), newMultiPathResults,
+            result.getTotalCandidates(), result.getNumberOfActualResults());
       }
     }
 
@@ -1935,16 +1940,14 @@ public class MultiPathFilter {
     if (fitResult == null || fitResult.getResults() == null) {
       return;
     }
-    final PreprocessedPeakResult[] results = fitResult.getResults();
-
-    for (int i = 0; i < results.length; i++) {
+    for (final PreprocessedPeakResult result : fitResult.getResults()) {
       // Validate everything
-      final int r = filter.validate(results[i]);
-      results[i].setValidationResult(r);
+      final int r = filter.validate(result);
+      result.setValidationResult(r);
 
       // Mark as valid in the store
       if (r == 0) {
-        store.isValid[results[i].getCandidateId()] = true;
+        store.isValid[result.getCandidateId()] = true;
       }
     }
   }
@@ -2114,9 +2117,7 @@ public class MultiPathFilter {
     final boolean save = allAssignments != null;
 
     setup();
-    for (int k = 0; k < results.length; k++) {
-      final MultiPathFitResults multiPathResults = results[k];
-
+    for (final MultiPathFitResults multiPathResults : results) {
       // Reset fail count for new frames
       failCounter.reset();
       int lastId = -1;
@@ -2141,24 +2142,24 @@ public class MultiPathFilter {
           if (result != null) {
             // For all the results that were returned, check if any are classified results
             // and store the classifications
-            for (int i = 0; i < result.length; i++) {
-              if (result[i].isNewResult()) {
+            for (final PreprocessedPeakResult r : result) {
+              if (r.isNewResult()) {
                 newResult = true;
 
-                if (result[i].ignore()) {
+                if (r.ignore()) {
                   // Q. should this be passed to the scoreStore?
-                } else if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(),
-                    result[i].getY(), result[i].getZ())) {
-                  coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
-                  scoreStore.add(result[i].getUniqueId());
-                  final FractionalAssignment[] a = result[i].getAssignments(predicted++);
+                } else if (r.isNotDuplicate()
+                    || !coordinateStore.contains(r.getX(), r.getY(), r.getZ())) {
+                  coordinateStore.addToQueue(r.getX(), r.getY(), r.getZ());
+                  scoreStore.add(r.getUniqueId());
+                  final FractionalAssignment[] a = r.getAssignments(predicted++);
                   if (a != null && a.length > 0) {
                     // assignments.addAll(Arrays.asList(a));
                     assignments.addAll(new DummyCollection(a));
                   }
 
                   // This is a new fitted result
-                  store.isFit[result[i].getCandidateId()] = true;
+                  store.isFit[r.getCandidateId()] = true;
                 }
               }
             }
@@ -2247,13 +2248,12 @@ public class MultiPathFilter {
    * @return the fractional assignments
    */
   private static @Nullable FractionalAssignment[] score(
-      final ArrayList<FractionalAssignment> assignments, final double[] score, final int predicted,
+      final List<FractionalAssignment> assignments, final double[] score, final int predicted,
       boolean save, int actual) {
     if (assignments.isEmpty()) {
       return null;
     }
-    final FractionalAssignment[] tmp =
-        assignments.toArray(new FractionalAssignment[0]);
+    final FractionalAssignment[] tmp = assignments.toArray(new FractionalAssignment[0]);
     final RankedScoreCalculator calc = RankedScoreCalculator.create(tmp, actual, predicted);
     final double[] result = calc.score(predicted, false, save);
     score[0] += result[0];
@@ -2273,8 +2273,8 @@ public class MultiPathFilter {
     if (results == null) {
       return;
     }
-    for (int i = 0; i < results.length; i++) {
-      resetValidationFlag(results[i]);
+    for (final MultiPathFitResults result : results) {
+      resetValidationFlag(result);
     }
   }
 
@@ -2317,9 +2317,8 @@ public class MultiPathFilter {
     if (fitResult == null || fitResult.getResults() == null) {
       return;
     }
-    final PreprocessedPeakResult[] results = fitResult.getResults();
-    for (int i = 0; i < results.length; i++) {
-      results[i].setValidationResult(0);
+    for (final PreprocessedPeakResult result : fitResult.getResults()) {
+      result.setValidationResult(0);
     }
   }
 
@@ -2376,7 +2375,7 @@ public class MultiPathFilter {
   public static @Nullable MultiPathFilter fromXml(String xml) {
     try {
       return (MultiPathFilter) FilterXStreamUtils.fromXml(xml);
-    } catch (final ClassCastException ex) {
+    } catch (final ClassCastException ignored) {
       // Ignore
     }
     return null;
