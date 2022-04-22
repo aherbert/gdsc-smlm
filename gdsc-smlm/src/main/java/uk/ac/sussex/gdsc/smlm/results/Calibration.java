@@ -43,7 +43,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.IntensityUnit;
  *             is left to support deserialisation of legacy files.
  */
 @Deprecated
-class Calibration implements Cloneable {
+final class Calibration implements Cloneable {
   /** The field missing exception. */
   // State flags
   private static final int FIELD_MISSING_EXCEPTION = 0x1;
@@ -80,6 +80,102 @@ class Calibration implements Cloneable {
 
   /** The fields. */
   private int fields;
+
+  /** The image pixel size in nanometers. */
+  private double nmPerPixel;
+  /**
+   * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units (ADUs)
+   * to photons.
+   */
+  private double gain;
+
+  /** The exposure time in milliseconds per frame. */
+  private double exposureTime;
+
+  /** The camera Gaussian read noise (in ADUs). */
+  private double readNoise = -1;
+
+  /** The camera bias (in ADUs). */
+  private double bias = -1;
+
+  /** The camera type. */
+  private CameraType cameraType;
+
+  /**
+   * True if the camera was run in Electron Multiplying (EM) mode.
+   *
+   * @deprecated This has been replaced by camaraType. It is left to enable XStream deserialisation
+   *             of old configuration.
+   */
+  @Deprecated
+  // CHECKSTYLE.OFF: AbbreviationAsWordInName
+  boolean emCCD;
+  // CHECKSTYLE.ON: AbbreviationAsWordInName
+  /**
+   * The camera amplification (ADUs/e-) used when modelling a microscope camera.
+   *
+   * <p>Note that the camera noise model assumes that electrons are converted to ADUs by
+   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
+   * (ADUs/photon) divided by the quantum efficiency (e-/photon).
+   */
+  private double amplification;
+
+  /** The distance unit. */
+  private DistanceUnit distanceUnit;
+
+  /** The intensity unit. */
+  private IntensityUnit intensityUnit;
+
+  /** The angle unit. */
+  private AngleUnit angleUnit;
+
+  /**
+   * Default constructor. All properties are set to be invalid but field missing exceptions are
+   * disabled.
+   */
+  public Calibration() {
+    // Intentionally empty
+  }
+
+  /**
+   * All properties are set to be invalid but missing exceptions can be enabled.
+   *
+   * @param fieldMissingExceptionEnabled Set to true to enable the field missing exceptions in the
+   *        get methods
+   */
+  public Calibration(boolean fieldMissingExceptionEnabled) {
+    setFieldMissingException(fieldMissingExceptionEnabled);
+  }
+
+  /**
+   * Parameterised constructor for essential settings.
+   *
+   * @param nmPerPixel the nm per pixel
+   * @param gain the gain
+   * @param exposureTime the exposure time
+   */
+  public Calibration(double nmPerPixel, double gain, double exposureTime) {
+    setNmPerPixel(nmPerPixel);
+    setGain(gain);
+    setExposureTime(exposureTime);
+  }
+
+  @Override
+  public Calibration clone() {
+    try {
+      return (Calibration) super.clone();
+    } catch (final CloneNotSupportedException ex) {
+      return null;
+    }
+  }
+
+  /**
+   * Clear the calibration (set all valid flags to false).
+   */
+  public void clear() {
+    // Clear all but the field missing flag
+    fields = fields & FIELD_MISSING_EXCEPTION;
+  }
 
   /**
    * Checks if an exception will be thrown when accessing a field that is missing.
@@ -350,100 +446,6 @@ class Calibration implements Cloneable {
   public void clearHasAngleUnit() {
     fields = fields & ~FIELD_ANGLE_UNIT;
     angleUnit = null;
-  }
-
-  /** The image pixel size in nanometers. */
-  private double nmPerPixel;
-  /**
-   * The gain (ADUs/photon). Can be used to convert the signal in Analogue-to-Digital units (ADUs)
-   * to photons.
-   */
-  private double gain;
-
-  /** The exposure time in milliseconds per frame. */
-  private double exposureTime;
-
-  /** The camera Gaussian read noise (in ADUs). */
-  private double readNoise = -1;
-
-  /** The camera bias (in ADUs). */
-  private double bias = -1;
-
-  /** The camera type. */
-  private CameraType cameraType;
-
-  /**
-   * True if the camera was run in Electron Multiplying (EM) mode.
-   *
-   * @deprecated This has been replaced by camaraType. It is left to enable XStream deserialisation
-   *             of old configuration.
-   */
-  @Deprecated
-  // CHECKSTYLE.OFF: AbbreviationAsWordInName
-  boolean emCCD;
-  // CHECKSTYLE.ON: AbbreviationAsWordInName
-  /**
-   * The camera amplification (ADUs/e-) used when modelling a microscope camera.
-   *
-   * <p>Note that the camera noise model assumes that electrons are converted to ADUs by
-   * amplification that is not perfect (i.e. it has noise). The amplification is equal to the gain
-   * (ADUs/photon) divided by the quantum efficiency (e-/photon).
-   */
-  private double amplification;
-
-  /** The distance unit. */
-  private DistanceUnit distanceUnit;
-
-  /** The intensity unit. */
-  private IntensityUnit intensityUnit;
-
-  /** The angle unit. */
-  private AngleUnit angleUnit;
-
-  /**
-   * Default constructor. All properties are set to be invalid but field missing exceptions are
-   * disabled.
-   */
-  public Calibration() {}
-
-  /**
-   * All properties are set to be invalid but missing exceptions can be enabled.
-   *
-   * @param fieldMissingExceptionEnabled Set to true to enable the field missing exceptions in the
-   *        get methods
-   */
-  public Calibration(boolean fieldMissingExceptionEnabled) {
-    setFieldMissingException(fieldMissingExceptionEnabled);
-  }
-
-  /**
-   * Parameterised constructor for essential settings.
-   *
-   * @param nmPerPixel the nm per pixel
-   * @param gain the gain
-   * @param exposureTime the exposure time
-   */
-  public Calibration(double nmPerPixel, double gain, double exposureTime) {
-    setNmPerPixel(nmPerPixel);
-    setGain(gain);
-    setExposureTime(exposureTime);
-  }
-
-  @Override
-  public Calibration clone() {
-    try {
-      return (Calibration) super.clone();
-    } catch (final CloneNotSupportedException ex) {
-      return null;
-    }
-  }
-
-  /**
-   * Clear the calibration (set all valid flags to false).
-   */
-  public void clear() {
-    // Clear all but the field missing flag
-    fields = fields & FIELD_MISSING_EXCEPTION;
   }
 
   /**
