@@ -38,6 +38,10 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * a valid result.
  */
 public class PrecisionHysteresisFilter extends HysteresisFilter {
+  /** The default range. */
+  static double[] DEFAULT_RANGE =
+      {0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
+
   @XStreamAsAttribute
   private final double strictPrecision;
   @XStreamAsAttribute
@@ -143,10 +147,6 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     return (index == 0) ? ParameterType.PRECISION : ParameterType.PRECISION_RANGE;
   }
 
-  /** The default range. */
-  static double[] defaultRange =
-      new double[] {0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
-
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -154,14 +154,14 @@ public class PrecisionHysteresisFilter extends HysteresisFilter {
     if (index == 1 || index == 3) {
       return this;
     }
-    final double[] parameters = new double[] {searchDistance, searchDistanceMode, timeThreshold,
+    final double[] parameters = {searchDistance, searchDistanceMode, timeThreshold,
         timeThresholdMode, strictPrecision, range};
     if (index == 0) {
       parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
     } else if (index == 2) {
       parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
     } else {
-      parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
+      parameters[index] = updateParameter(parameters[index], delta, DEFAULT_RANGE[index]);
     }
     return create(parameters);
   }

@@ -165,7 +165,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
     if (index == 1 || index == 3) {
       return this;
     }
-    final double[] parameters = new double[] {searchDistance, searchDistanceMode, timeThreshold,
+    final double[] parameters = {searchDistance, searchDistanceMode, timeThreshold,
         timeThresholdMode, strictPrecision, range};
     if (index == 0) {
       parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
@@ -173,7 +173,7 @@ public class PrecisionHysteresisFilter2 extends HysteresisFilter {
       parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
     } else {
       parameters[index] =
-          updateParameter(parameters[index], delta, PrecisionHysteresisFilter.defaultRange[index]);
+          updateParameter(parameters[index], delta, PrecisionHysteresisFilter.DEFAULT_RANGE[index]);
     }
     return create(parameters);
   }
