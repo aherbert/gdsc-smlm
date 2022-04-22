@@ -38,6 +38,11 @@ import org.apache.commons.rng.UniformRandomProvider;
  * equi-distributed numbers in the domain [0,1]).
  */
 public class UniformDistribution implements SpatialDistribution {
+  private double[] min;
+  private double[] max;
+  private double[] range;
+  private RandomVectorGenerator vectorGenerator;
+
   /**
    * Wrap a standard random generator to create a vector generator for 3 dimensions.
    */
@@ -63,11 +68,6 @@ public class UniformDistribution implements SpatialDistribution {
       return new double[] {rng1.nextDouble(), rng2.nextDouble(), rng3.nextDouble()};
     }
   }
-
-  private double[] min;
-  private double[] max;
-  private double[] range;
-  private RandomVectorGenerator vectorGenerator;
 
   /**
    * Create a new uniform distribution using a Halton sequence. The minimum bounds are set to zero.
