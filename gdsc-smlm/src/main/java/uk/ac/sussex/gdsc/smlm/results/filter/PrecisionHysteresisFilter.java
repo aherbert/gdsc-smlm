@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  */
 public class PrecisionHysteresisFilter extends HysteresisFilter {
   /** The default range. */
-  static double[] DEFAULT_RANGE =
+  static final double[] DEFAULT_RANGE =
       {0, 0, 0, 0, PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
 
   @XStreamAsAttribute
