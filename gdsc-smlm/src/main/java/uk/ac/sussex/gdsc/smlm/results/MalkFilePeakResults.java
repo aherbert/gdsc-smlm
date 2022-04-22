@@ -109,7 +109,7 @@ public class MalkFilePeakResults extends FilePeakResults {
     try {
       // Make sure we close the writer since it may be buffered
       out.close();
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // Ignore exception
     } finally {
       fos = null;
@@ -127,13 +127,13 @@ public class MalkFilePeakResults extends FilePeakResults {
       try {
         toNmConverter = cw.getDistanceConverter(DistanceUnit.NM);
         cw.setDistanceUnit(DistanceUnit.NM);
-      } catch (final ConversionException ex) {
+      } catch (final ConversionException ignored) {
         // Gracefully fail so ignore this
       }
       try {
         toPhotonConverter = cw.getIntensityConverter(IntensityUnit.PHOTON);
         cw.setIntensityUnit(IntensityUnit.PHOTON);
-      } catch (final ConversionException ex) {
+      } catch (final ConversionException ignored) {
         // Gracefully fail so ignore this
       }
 
@@ -179,7 +179,7 @@ public class MalkFilePeakResults extends FilePeakResults {
 
   @Override
   protected String[] getFieldNames() {
-    final String[] names = new String[] {"X", "Y", "Frame", "Signal"};
+    final String[] names = {"X", "Y", "Frame", "Signal"};
     if (toNmConverter != null) {
       names[0] += " (nm)";
       names[1] += " (nm)";
@@ -221,14 +221,12 @@ public class MalkFilePeakResults extends FilePeakResults {
 
   private void addStandardData(StringBuilder sb, final float x, final float y, final int frame,
       final float signal) {
-    sb.append(toNmConverter.convert(x));
-    sb.append('\t');
-    sb.append(toNmConverter.convert(y));
-    sb.append('\t');
-    sb.append(frame);
-    sb.append('\t');
-    sb.append(toPhotonConverter.convert(signal));
-    sb.append('\n');
+    // @formatter:off
+    sb.append(toNmConverter.convert(x)).append('\t')
+      .append(toNmConverter.convert(y)).append('\t')
+      .append(frame).append('\t')
+      .append(toPhotonConverter.convert(signal)).append('\n');
+    // @formatter:on
   }
 
   @Override
@@ -277,7 +275,7 @@ public class MalkFilePeakResults extends FilePeakResults {
 
       String line;
       // Skip the header
-      while ((line = input.readLine()) != null) {
+      for (line = input.readLine(); line != null; line = input.readLine()) {
         if (line.charAt(0) != '#') {
           // This is the first record
           results.add(new Result(line));
@@ -286,7 +284,7 @@ public class MalkFilePeakResults extends FilePeakResults {
         header.append(line).append(System.lineSeparator());
       }
 
-      while ((line = input.readLine()) != null) {
+      for (line = input.readLine(); line != null; line = input.readLine()) {
         results.add(new Result(line));
       }
     }
@@ -302,11 +300,15 @@ public class MalkFilePeakResults extends FilePeakResults {
     }
   }
 
+  /**
+   * Store the String representation of the result with the frame (slice) number to be used for
+   * sorting.
+   */
   private static class Result {
     String line;
     int slice;
 
-    public Result(String line) {
+    Result(String line) {
       this.line = line;
       extractSlice();
     }
@@ -317,7 +319,7 @@ public class MalkFilePeakResults extends FilePeakResults {
         scanner.nextFloat(); // X
         scanner.nextFloat(); // Y
         slice = scanner.nextInt();
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore
       }
     }
