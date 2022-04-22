@@ -27,8 +27,10 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -82,7 +84,9 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.ZResultProcedure;
  * SynchronizedPeakResults object if using on multiple threads.
  */
 public class MemoryPeakResults extends AbstractPeakResults {
-  private static final LinkedHashMap<String, MemoryPeakResults> RESULTS_MAP = new LinkedHashMap<>();
+  /** The map of in-memory results sets. */
+  private static final Map<String, MemoryPeakResults> RESULTS_MAP =
+      Collections.synchronizedMap(new LinkedHashMap<>());
 
   /**
    * The memory size of a PeakResult object without deviations. Only the standard parameters are
@@ -2077,7 +2081,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    */
   public MemoryPeakResults copyAndAssignZeroIds() {
     final int size = size();
-    MemoryPeakResults copy = new MemoryPeakResults(size);
+    final MemoryPeakResults copy = new MemoryPeakResults(size);
     copy.copyState(this);
     // Copy the result. Assign any zero Id result a negative Id.
     int nextId = 0;
