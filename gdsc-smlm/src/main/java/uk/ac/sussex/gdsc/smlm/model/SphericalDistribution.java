@@ -95,9 +95,7 @@ public class SphericalDistribution implements SpatialDistribution {
   @Override
   public void initialise(double[] xyz) {
     if (xyz != null && xyz.length > 2) {
-      for (int i = 0; i < 3; i++) {
-        origin[i] = xyz[i];
-      }
+      System.arraycopy(xyz, 0, origin, 0, 3);
     }
   }
 }
