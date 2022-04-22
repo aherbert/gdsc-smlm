@@ -38,6 +38,11 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * z-depth.
  */
 public class MultiFilter extends DirectFilter implements IMultiFilter {
+  /** The default range. */
+  static final double[] DEFAULT_RANGE = {SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
+      WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
+      EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
+      ZCoordinateFilter.DEFAULT_RANGE};
 
   /** The signal. */
   @XStreamAsAttribute
@@ -550,12 +555,6 @@ public class MultiFilter extends DirectFilter implements IMultiFilter {
   protected ParameterType getPrecisionParamaterType() {
     return ParameterType.PRECISION;
   }
-
-  /** The default range. */
-  static final double[] DEFAULT_RANGE = {SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
-      WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
-      EShiftFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE, ZCoordinateFilter.DEFAULT_RANGE,
-      ZCoordinateFilter.DEFAULT_RANGE};
 
   @Override
   public Filter adjustParameter(int index, double delta) {
