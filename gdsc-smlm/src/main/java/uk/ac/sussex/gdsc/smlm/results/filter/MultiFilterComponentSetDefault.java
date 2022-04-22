@@ -42,17 +42,17 @@ public class MultiFilterComponentSetDefault implements MultiFilterComponentSet {
   @Override
   public int getValidationFlags() {
     int flags = 0;
-    for (int i = 0; i < components.length; i++) {
-      flags |= components[i].getType();
+    for (final MultiFilterComponent c : components) {
+      flags |= c.getType();
     }
     return flags;
   }
 
   @Override
   public int validate(final PreprocessedPeakResult peak) {
-    for (int i = 0; i < components.length; i++) {
-      if (components[i].fail(peak)) {
-        return components[i].getType();
+    for (final MultiFilterComponent c : components) {
+      if (c.fail(peak)) {
+        return c.getType();
       }
     }
     return 0;

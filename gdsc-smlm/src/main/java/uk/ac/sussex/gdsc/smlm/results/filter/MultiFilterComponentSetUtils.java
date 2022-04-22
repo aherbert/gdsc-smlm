@@ -45,7 +45,7 @@ public final class MultiFilterComponentSetUtils {
   public static MultiFilterComponentSet create(MultiFilterComponent[] components, int size) {
     switch (size) {
       //@formatter:off
-      case 0: return new MultiFilterComponentSet0(components);
+      case 0: return MultiFilterComponentSet0.INSTANCE;
       case 1: return new MultiFilterComponentSet1(components);
       case 2: return new MultiFilterComponentSet2(components);
       case 3: return new MultiFilterComponentSet3(components);

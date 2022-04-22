@@ -28,14 +28,8 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
  * Contains a set of components of the multi filter.
  */
 public class MultiFilterComponentSet0 implements MultiFilterComponentSet {
-  /**
-   * Instantiates a new multi filter component set for 0 components.
-   *
-   * @param components the components
-   */
-  MultiFilterComponentSet0(MultiFilterComponent[] components) {
-    // Ignore the array
-  }
+  /** The instance. */
+  static final MultiFilterComponentSet0 INSTANCE = new MultiFilterComponentSet0();
 
   @Override
   public int getValidationFlags() {
@@ -54,6 +48,6 @@ public class MultiFilterComponentSet0 implements MultiFilterComponentSet {
 
   @Override
   public MultiFilterComponentSet copy() {
-    return new MultiFilterComponentSet0(null);
+    return INSTANCE;
   }
 }
