@@ -44,13 +44,6 @@ public abstract class PsfModel {
   private int[] samplePositions;
 
   /**
-   * Instantiates a new PSF model.
-   */
-  public PsfModel() {
-    super();
-  }
-
-  /**
    * Construct a PSF function on the provided data.
    *
    * <p>The PSF data is saved locally and can be queried through class methods, for example the
@@ -324,12 +317,11 @@ public abstract class PsfModel {
     }
 
     final int x0range = x0max - x0min;
-    final int x1range = x1max - x1min;
-
     // min should always be less than max
     if (x0range < 1) {
       throw new IllegalArgumentException("Dimension 0 range not within data bounds");
     }
+    final int x1range = x1max - x1min;
     if (x1range < 1) {
       throw new IllegalArgumentException("Dimension 1 range not within data bounds");
     }
@@ -365,12 +357,11 @@ public abstract class PsfModel {
     }
 
     final int x0range = x0max - x0min;
-    final int x1range = x1max - x1min;
-
     // min should always be less than max
     if (x0range < 1) {
       throw new IllegalArgumentException("Dimension 0 range not within data bounds");
     }
+    final int x1range = x1max - x1min;
     if (x1range < 1) {
       throw new IllegalArgumentException("Dimension 1 range not within data bounds");
     }
@@ -676,7 +667,7 @@ public abstract class PsfModel {
     ValidationUtils.checkStrictlyPositive(width, "Width");
     ValidationUtils.checkStrictlyPositive(height, "Height");
     final long size = (long) width * height;
-    if ((long) width * height > Integer.MAX_VALUE) {
+    if (size > Integer.MAX_VALUE) {
       throw new IllegalArgumentException("width*height is too large");
     }
     return (int) size;
@@ -716,7 +707,7 @@ public abstract class PsfModel {
    * @param x2 The centre in dimension 2
    * @param value the value
    * @param gradient the partial gradient at each point for each dimension
-   * @return the value and gradient true, if successful; false, if no value was computed
+   * @return true, if successful; false, if no value was computed
    * @throws IllegalArgumentException If value or gradient are not length [width*height]
    */
   public boolean getValueAndGradient(final int width, final int height, double x0, double x1,
@@ -774,14 +765,14 @@ public abstract class PsfModel {
    */
   protected boolean computeValueAndGradient(final int width, final int height, double x0, double x1,
       double x2, double[] value, double[][] jacobian, double[] dx) {
-    final int size = width * height;
-    final double[] v1 = new double[size];
-    final double[] v2 = new double[size];
     // Compute the value
     Arrays.fill(value, 0);
     if (!computeValue(width, height, x0, x1, x2, value)) {
       return false;
     }
+    final int size = width * height;
+    final double[] v1 = new double[size];
+    final double[] v2 = new double[size];
     final double[] x = {x0, x1, x2};
     for (int i = 0; i < 3; i++) {
       // Numerical gradient
