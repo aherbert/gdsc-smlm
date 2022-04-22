@@ -43,8 +43,7 @@ public class MinMaxResultProcedure implements PeakResultProcedure {
    * @param value the value
    * @throws IllegalStateException If the results are empty
    */
-  public MinMaxResultProcedure(MemoryPeakResults results, PeakResultValue value)
-      throws IllegalStateException {
+  public MinMaxResultProcedure(MemoryPeakResults results, PeakResultValue value) {
     this.value = value;
     min = max = value.getValue(results.getFirst());
     results.forEach(this);
