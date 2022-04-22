@@ -293,7 +293,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
         temp = fX - fX2;
         t -= delta * temp * temp;
 
-        if (t < 0.0) {
+        if (t < 0) {
           final UnivariatePointValuePair optimum = line.search(x, d);
           functionValue = optimum.getValue();
           if (reset) {
@@ -375,19 +375,16 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   }
 
   /**
-   * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the
-   * convergence check, so that the custom checker will always decide when to stop the line search.
-   */
-  private static final double REL_TOL_UNUSED;
-
-  static {
-    REL_TOL_UNUSED = 2 * FastMath.ulp(1d);
-  }
-
-  /**
    * Class for finding the minimum of the objective function along a given direction.
    */
   private class LineSearch extends BrentOptimizer {
+    /**
+     * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the
+     * convergence check, so that the custom checker will always decide when to stop the line search.
+     *
+     * <p>Equal to 2 * epsilon: 2 * Math.ulp(1.0).
+     */
+    private static final double REL_TOL_UNUSED = 0x1.0p-51;
     /**
      * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the
      * convergence check, so that the custom checker will always decide when to stop the line
@@ -509,8 +506,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
     if (array == null) {
       return false;
     }
-    for (int i = 0; i < array.length; i++) {
-      if (value != array[i]) {
+    for (final double d : array) {
+      if (value != d) {
         return true;
       }
     }
@@ -522,7 +519,7 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
    *
    * @param point the point
    */
-  private void applyBounds(double[] point) {
+  void applyBounds(double[] point) {
     if (isUpper) {
       for (int i = 0; i < point.length; i++) {
         if (point[i] > upper[i]) {
