@@ -41,6 +41,9 @@ public class PeakResultGridManager {
   private int peakCacheX = -1;
   private int peakCacheY = -1;
 
+  /**
+   * Container to manage an expandable array of PeakResult data.
+   */
   private static class PeakList {
     int size;
     PeakResult[] list;
