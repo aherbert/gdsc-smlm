@@ -204,7 +204,6 @@ public class MultiPathFitResult {
    * @param copyResults the copy results
    */
   protected MultiPathFitResult(MultiPathFitResult source, boolean copyResults) {
-    candidateId = source.candidateId;
     frame = source.frame;
     width = source.width;
     height = source.height;
