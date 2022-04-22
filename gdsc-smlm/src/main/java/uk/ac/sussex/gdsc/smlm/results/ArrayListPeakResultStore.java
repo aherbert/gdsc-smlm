@@ -177,9 +177,7 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
       final ArrayListPeakResultStore copy = new ArrayListPeakResultStore(size());
-      for (int i = 0, size = size(); i < size; i++) {
-        copy.add(results.get(i).copy());
-      }
+      results.forEach(x -> copy.add(x.copy()));
       return copy;
     }
     return copy();
@@ -192,19 +190,17 @@ public class ArrayListPeakResultStore implements PeakResultStoreList, PeakResult
 
   @Override
   public void forEach(PeakResultProcedure procedure) {
-    for (int i = 0, size = size(); i < size; i++) {
-      procedure.execute(results.get(i));
-    }
+    results.forEach(procedure::execute);
   }
 
   @Override
   public PeakResult[] subset(Predicate<PeakResult> filter) {
     final ArrayPeakResultStore list = new ArrayPeakResultStore(10);
-    for (int i = 0, size = size(); i < size; i++) {
-      if (filter.test(results.get(i))) {
-        list.add(results.get(i));
+    results.forEach(x -> {
+      if (filter.test(x)) {
+        list.add(x);
       }
-    }
+    });
     return list.toArray();
   }
 
