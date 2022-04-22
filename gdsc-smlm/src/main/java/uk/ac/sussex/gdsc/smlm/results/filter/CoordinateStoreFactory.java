@@ -27,7 +27,10 @@ package uk.ac.sussex.gdsc.smlm.results.filter;
 /**
  * Creates a coordinate store.
  */
-public class CoordinateStoreFactory {
+public final class CoordinateStoreFactory {
+  /** No instances. */
+  private CoordinateStoreFactory() {}
+
   /**
    * Creates the coordinate store.
    *
