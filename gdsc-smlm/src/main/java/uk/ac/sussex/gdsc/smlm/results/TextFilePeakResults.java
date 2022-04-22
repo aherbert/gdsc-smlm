@@ -162,7 +162,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     try {
       // Make sure we close the writer since it may be buffered
       out.close();
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // Ignore exception
     } finally {
       fos = null;
@@ -180,7 +180,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
         calculator = Gaussian2DPeakResultHelper.create(getPsf(), getCalibrationReader(),
             Gaussian2DPeakResultHelper.LSE_PRECISION);
         canComputePrecision = true;
-      } catch (final ConfigurationException | ConversionException ex) {
+      } catch (final ConfigurationException | ConversionException ignored) {
         // Ignore
       }
     }
@@ -248,13 +248,16 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     final String[] fields = helper.getNames();
 
     cf += fields.length * (isShowDeviations() ? 2 : 1);
+    final StringBuilder sb = new StringBuilder(128);
     for (int i = 0; i < fields.length; i++) {
-      String field = fields[i];
       // Add units
       if (!TextUtils.isNullOrEmpty(unitNames[i])) {
-        field += " (" + unitNames[i] + ")";
+        sb.setLength(0);
+        sb.append(fields[i]).append(" (").append(unitNames[i]).append(')');
+        names.add(sb.toString());
+      } else {
+        names.add(fields[i]);
       }
-      names.add(field);
       if (isShowDeviations()) {
         names.add("+/-");
       }
@@ -560,9 +563,8 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
       // Skip optional columns before the slice
       final int skipCount = (isShowId() ? 1 : 0) + (isShowCategory() ? 1 : 0);
 
-      String line;
       // Skip the header
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (!line.isEmpty() && line.charAt(0) != '#') {
           // This is the first record
           results.add(new Result(line, skipCount));
@@ -571,7 +573,7 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
         header.append(line).append(System.lineSeparator());
       }
 
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         results.add(new Result(line, skipCount));
       }
     }
@@ -611,9 +613,10 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
             // FALL-THROUGH
           default:
             slice = scanner.nextInt();
+            break;
         }
         // CHECKSTYLE.ON: FallThroughCheck
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore
       }
     }
