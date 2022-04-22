@@ -155,7 +155,7 @@ public class ImmutablePeakResultStore implements PeakResultStore {
   private static class ImmutablePeakResultProcedure implements PeakResultProcedure {
     PeakResultProcedure procedure;
 
-    public ImmutablePeakResultProcedure(PeakResultProcedure procedure) {
+    ImmutablePeakResultProcedure(PeakResultProcedure procedure) {
       this.procedure = procedure;
     }
 
