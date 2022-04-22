@@ -85,7 +85,7 @@ public enum PrecisionType implements NamedObject {
    *
    * @param name the name
    */
-  private PrecisionType(String name) {
+  PrecisionType(String name) {
     this(name, name);
   }
 
@@ -95,7 +95,7 @@ public enum PrecisionType implements NamedObject {
    * @param name the name
    * @param sname the sname
    */
-  private PrecisionType(String name, String sname) {
+  PrecisionType(String name, String sname) {
     this.name = name;
     this.shortName = sname;
   }
