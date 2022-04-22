@@ -179,7 +179,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
       }
     }
     if (isShowPrecision()) {
-      sb.append("f");
+      sb.append('f');
       flags += FLAG_PRECISION;
     }
     recordSize = getDataSize(isShowDeviations(), flags, fieldCount);
@@ -229,7 +229,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     try {
       // Make sure we close the writer since it may be buffered
       out.close();
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // Ignore exception
     } finally {
       fos = null;
@@ -250,7 +250,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
           params, paramsStdDev, 0.0);
       buffer.flush();
       writeResult(1, bytes);
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Do nothing - This result will not be added to the file
     }
   }
@@ -272,7 +272,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
           result.getParameterDeviations(), result.getPrecision());
       buffer.flush();
       writeResult(1, bytes);
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Do nothing - This result will not be added to the file
     }
   }
@@ -350,7 +350,7 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
 
       buffer.flush();
       writeResult(count, bytes);
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Do nothing - This result will not be added to the file
     }
   }
@@ -400,7 +400,8 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     Collections.sort(results, (r1, r2) -> Integer.compare(r1.slice, r2.slice));
 
     // Must write using the same method as the main code so use a FileOutputStream again
-    try (OutputStream output = new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)))) {
+    try (OutputStream output =
+        new BufferedOutputStream(Files.newOutputStream(Paths.get(filename)))) {
       output.write(header.getBytes(StandardCharsets.UTF_8));
       for (final Result result : results) {
         output.write(result.line);
@@ -500,10 +501,21 @@ public class BinaryFilePeakResults extends SmlmFilePeakResults {
     return size;
   }
 
+  /**
+   * Store the byte[] representation of the result with the frame (slice) number to be used for
+   * sorting.
+   */
   private static class Result {
     byte[] line;
     int slice;
 
+    /**
+     * Create an instance.
+     *
+     * @param line the line
+     * @param offset the offset in the byte[] where the 4 bytes of the 32-bit integer frame (slice)
+     *        is located
+     */
     Result(byte[] line, int offset) {
       this.line = Arrays.copyOf(line, line.length);
       slice = makeInt(line[offset + 0], line[offset + 1], line[offset + 2], line[offset + 3]);
