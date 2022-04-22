@@ -36,6 +36,9 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * result.
  */
 public class SnrHysteresisFilter extends HysteresisFilter {
+  private static double[] DEFAULT_RANGE =
+      {0, 0, 0, 0, SnrFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE};
+
   @XStreamAsAttribute
   private final float strictSnr;
   @XStreamAsAttribute
@@ -123,9 +126,6 @@ public class SnrHysteresisFilter extends HysteresisFilter {
     return (index == 0) ? ParameterType.SNR : ParameterType.SNR_RANGE;
   }
 
-  private static double[] defaultRange =
-      new double[] {0, 0, 0, 0, SnrFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE};
-
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -133,14 +133,14 @@ public class SnrHysteresisFilter extends HysteresisFilter {
     if (index == 1 || index == 3) {
       return this;
     }
-    final double[] parameters = new double[] {searchDistance, searchDistanceMode, timeThreshold,
-        timeThresholdMode, strictSnr, range};
+    final double[] parameters =
+        {searchDistance, searchDistanceMode, timeThreshold, timeThresholdMode, strictSnr, range};
     if (index == 0) {
       parameters[0] = updateParameter(parameters[0], delta, getDefaultSearchRange());
     } else if (index == 2) {
       parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
     } else {
-      parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
+      parameters[index] = updateParameter(parameters[index], delta, DEFAULT_RANGE[index]);
     }
     return create(parameters);
   }
