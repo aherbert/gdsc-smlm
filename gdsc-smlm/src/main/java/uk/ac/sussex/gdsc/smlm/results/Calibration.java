@@ -108,9 +108,7 @@ final class Calibration implements Cloneable {
    *             of old configuration.
    */
   @Deprecated
-  // CHECKSTYLE.OFF: AbbreviationAsWordInName
   boolean emCCD;
-  // CHECKSTYLE.ON: AbbreviationAsWordInName
   /**
    * The camera amplification (ADUs/e-) used when modelling a microscope camera.
    *
