@@ -36,6 +36,16 @@ import java.util.List;
  */
 public abstract class FluorophoreSequenceModel extends MoleculeModel {
   /**
+   * The number of times the molecule went into the dark state.
+   */
+  private int blinks;
+  /**
+   * A sequence of fluorescent bursts in pairs of {on,off} times. The burst sequence will be length
+   * = 2 * (blinks+1)
+   */
+  private double[] burstSequence = {0, 0};
+
+  /**
    * Instantiates a new fluorophore sequence model.
    *
    * @param id the id
@@ -56,16 +66,6 @@ public abstract class FluorophoreSequenceModel extends MoleculeModel {
   public FluorophoreSequenceModel(int id, double[] xyz) {
     super(id, xyz);
   }
-
-  /**
-   * The number of times the molecule went into the dark state.
-   */
-  private int blinks;
-  /**
-   * A sequence of fluorescent bursts in pairs of {on,off} times. The burst sequence will be length
-   * = 2 * (blinks+1)
-   */
-  private double[] burstSequence = new double[] {0, 0};
 
   /**
    * Sets the burst sequence.
