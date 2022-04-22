@@ -287,6 +287,7 @@ public abstract class HysteresisFilter extends Filter {
       case 0:
       default:
         distanceThreshold = getSearchDistanceUsingCandidates(peakResults, candidates);
+        break;
     }
 
     if (distanceThreshold <= 0) {
