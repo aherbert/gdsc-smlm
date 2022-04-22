@@ -69,7 +69,7 @@
   <!-- Allow 1 to be used in conditions as a magic number. -->
   <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
     <properties>
-      <property name="ignoreMagicNumbers" value="-1,0,1" />
+      <property name="ignoreMagicNumbers" value="-1,0,1,2" />
     </properties>
   </rule>
   <!-- This is to allow private fields to be undocumented. There are specific visibility checks done using Checkstyle. 'private'
