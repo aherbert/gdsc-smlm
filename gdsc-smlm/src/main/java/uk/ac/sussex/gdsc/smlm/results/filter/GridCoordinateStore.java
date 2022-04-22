@@ -38,6 +38,43 @@ public class GridCoordinateStore implements CoordinateStore {
    */
   public static final double MINIMUM_BLOCK_SIZE = 0.5;
 
+  /** The timestamp. */
+  int timestamp;
+
+  private CoordinateList[][] grid;
+  private final CoordinateList queue = new CoordinateList();
+  private double blockResolution;
+  private double xyResolution;
+  /**
+   * The squared XY resolution. If the XY resolution is negative then this should never be used as
+   * the store is not active.
+   */
+  private double xy2;
+  /**
+   * The z resolution. If this is negative then this is ignored and the store behaves as if
+   * processing 2D coordinates.
+   */
+  private double zResolution;
+  private final int minx;
+  private final int miny;
+  private final int width;
+  private final int height;
+  private int xBlocks;
+  private int yBlocks;
+  /**
+   * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the
+   * XY resolution is negative.
+   */
+  private boolean isActive;
+  /**
+   * Flag to indicate that the store is ignoring the z coordinate. This is true if the z resolution
+   * is negative.
+   */
+  private boolean is2D;
+
+  /**
+   * Manages an expandable list of coordinates, with a timestamp to allow expiry.
+   */
   private class CoordinateList {
     int timestamp;
     int size;
@@ -70,39 +107,6 @@ public class GridCoordinateStore implements CoordinateStore {
       this.timestamp = GridCoordinateStore.this.timestamp;
     }
   }
-
-  private int timestamp;
-
-  private CoordinateList[][] grid;
-  private final CoordinateList queue = new CoordinateList();
-  private double blockResolution;
-  private double xyResolution;
-  /**
-   * The squared XY resolution. If the XY resolution is negative then this should never be used as
-   * the store is not active.
-   */
-  private double xy2;
-  /**
-   * The z resolution. If this is negative then this is ignored and the store behaves as if
-   * processing 2D coordinates.
-   */
-  private double zResolution;
-  private final int minx;
-  private final int miny;
-  private final int width;
-  private final int height;
-  private int xBlocks;
-  private int yBlocks;
-  /**
-   * Flag to indicate that the store is active (i.e. storing coordinates). It is not active if the
-   * XY resolution is negative.
-   */
-  private boolean isActive;
-  /**
-   * Flag to indicate that the store is ignoring the z coordinate. This is true if the z resolution
-   * is negative.
-   */
-  private boolean is2D;
 
   // Note: This is a public constructor so this can be used without the factory
 
