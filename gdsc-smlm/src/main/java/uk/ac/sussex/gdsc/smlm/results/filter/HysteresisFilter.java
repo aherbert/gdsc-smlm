@@ -28,6 +28,7 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import uk.ac.sussex.gdsc.core.data.NotImplementedException;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationReader;
@@ -351,7 +352,7 @@ public abstract class HysteresisFilter extends Filter {
    * @return the search distance using candidates
    */
   private double getSearchDistanceUsingCandidates(MemoryPeakResults peakResults,
-      LinkedList<PeakResult> candidates) {
+      List<PeakResult> candidates) {
     final Gaussian2DPeakResultCalculator calculator =
         Gaussian2DPeakResultHelper.create(peakResults.getPsf(), peakResults.getCalibration(),
             Gaussian2DPeakResultHelper.LSE_PRECISION);
