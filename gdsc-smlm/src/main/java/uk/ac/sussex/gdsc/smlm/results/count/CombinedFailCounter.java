@@ -50,16 +50,16 @@ public abstract class CombinedFailCounter extends BaseFailCounter {
   protected String generateDescription() {
     final StringBuilder sb = new StringBuilder();
     addDescription(sb, c1);
-    sb.append(" ").append(getOperator()).append(" ");
+    sb.append(' ').append(getOperator()).append(' ');
     addDescription(sb, c2);
     return sb.toString();
   }
 
   private static void addDescription(StringBuilder sb, FailCounter counter) {
     if (counter instanceof CombinedFailCounter) {
-      sb.append("(");
+      sb.append('(');
       sb.append(counter.getDescription());
-      sb.append(")");
+      sb.append(')');
     } else {
       sb.append(counter.getDescription());
     }
