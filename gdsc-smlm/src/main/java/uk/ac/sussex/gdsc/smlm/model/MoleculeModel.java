@@ -220,7 +220,7 @@ public class MoleculeModel {
     final double[] coords = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
-        if (random.nextDouble() < 0.5) {
+        if (random.nextBoolean()) {
           coords[i] += stepSize;
         } else {
           coords[i] -= stepSize;
@@ -243,7 +243,7 @@ public class MoleculeModel {
     final double[] coords = getCoordinates();
     if (stepSize > 0) {
       for (int i = 0; i < 3; i++) {
-        if (random[i].nextDouble() < 0.5) {
+        if (random[i].nextBoolean()) {
           coords[i] += stepSize;
         } else {
           coords[i] -= stepSize;
