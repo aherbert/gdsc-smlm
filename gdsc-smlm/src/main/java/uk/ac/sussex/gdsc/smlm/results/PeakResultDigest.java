@@ -37,7 +37,7 @@ public class PeakResultDigest {
 
   private final MessageDigest digest;
   // Allocate assuming 8 parameters and deviations
-  private ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + 4 * 2 * 8);
+  private ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_DATA_BYTES + 8 * Float.BYTES * 2);
 
   /**
    * Instantiates a new IJ digest.
@@ -70,7 +70,7 @@ public class PeakResultDigest {
   public void update(PeakResult peakResult) {
     // Check buffer size
     final int n = peakResult.getNumberOfParameters();
-    int required = n * 4;
+    int required = n * Float.BYTES;
     if (peakResult.hasParameterDeviations()) {
       required *= 2;
     }
