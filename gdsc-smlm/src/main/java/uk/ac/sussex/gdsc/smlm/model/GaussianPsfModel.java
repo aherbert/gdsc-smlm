@@ -41,6 +41,8 @@ import uk.ac.sussex.gdsc.smlm.function.gaussian.erf.SingleAstigmatismErfGaussian
  * Contains methods for generating models of a Point Spread Function using a Gaussian approximation.
  */
 public class GaussianPsfModel extends PsfModel {
+  private static final double ONE_OVER_ROOT2 = 0.7071067811865475244008443621048490392;
+
   private double s0;
   private double s1;
   private final AstigmatismZModel zModel;
@@ -251,8 +253,6 @@ public class GaussianPsfModel extends PsfModel {
 
     return insert(data, x0min, x1min, x0max, x1max, width, gauss, rng);
   }
-
-  private static final double ONE_OVER_ROOT2 = 1.0 / Math.sqrt(2);
 
   /**
    * Construct a Gaussian 2D function based at the origin using the specified range in each
