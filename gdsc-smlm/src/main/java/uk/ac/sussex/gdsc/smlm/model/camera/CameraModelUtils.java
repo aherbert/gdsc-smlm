@@ -30,9 +30,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
- * Base class for the camera model.
+ * Utility class for the camera model.
  */
-public final class CameraModelUtils {
+final class CameraModelUtils {
 
   /** No public constructor. */
   private CameraModelUtils() {}
@@ -42,7 +42,7 @@ public final class CameraModelUtils {
    *
    * @param bias the bias
    */
-  public static void checkBias(float bias) {
+  static void checkBias(float bias) {
     if (!Double.isFinite(bias)) {
       throw new IllegalArgumentException("Bias must be a finite number");
     }
@@ -53,7 +53,7 @@ public final class CameraModelUtils {
    *
    * @param gain the gain
    */
-  public static void checkGain(float gain) {
+  static void checkGain(float gain) {
     if (!(gain <= Double.MAX_VALUE && gain > 0)) {
       throw new IllegalArgumentException("Gain must be strictly positive");
     }
@@ -64,7 +64,7 @@ public final class CameraModelUtils {
    *
    * @param variance the variance
    */
-  public static void checkVariance(float variance) {
+  static void checkVariance(float variance) {
     if (!(variance <= Double.MAX_VALUE && variance >= 0)) {
       throw new IllegalArgumentException("Variance must be positive");
     }
@@ -77,7 +77,7 @@ public final class CameraModelUtils {
    * @param value the value
    * @return the new array
    */
-  protected static float[] newArray(Rectangle bounds, float value) {
+  static float[] newArray(Rectangle bounds, float value) {
     if (bounds == null || bounds.width <= 0 || bounds.height <= 0) {
       return ArrayUtils.EMPTY_FLOAT_ARRAY;
     }
@@ -93,7 +93,7 @@ public final class CameraModelUtils {
    * @param variance the variance
    * @return the weights
    */
-  public static float[] toWeights(float[] variance) {
+  static float[] toWeights(float[] variance) {
     final float[] w = SimpleArrayUtils.ensureStrictlyPositive(variance);
     // If all the weights are zero then the first item will be zero
     // and there are no weights
