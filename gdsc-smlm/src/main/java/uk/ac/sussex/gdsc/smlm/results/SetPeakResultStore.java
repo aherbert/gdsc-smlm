@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 
@@ -38,7 +39,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
  */
 public class SetPeakResultStore implements PeakResultStore, PeakResultStoreCollection {
   /** The results. */
-  private final HashSet<PeakResult> results;
+  private final Set<PeakResult> results;
 
   /**
    * Instantiates a new set peak results store.
@@ -195,9 +196,8 @@ public class SetPeakResultStore implements PeakResultStore, PeakResultStoreColle
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Collection<PeakResult> getCollection() {
-    return (Collection<PeakResult>) results.clone();
+    return new HashSet<>(results);
   }
 
   @Override
