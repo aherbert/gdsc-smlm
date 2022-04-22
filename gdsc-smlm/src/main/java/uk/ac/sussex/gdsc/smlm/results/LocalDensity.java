@@ -25,7 +25,6 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.Arrays;
@@ -228,7 +227,7 @@ public final class LocalDensity {
       final double[] y = new double[x.length];
       int n = 0;
       final double[] coords = new double[6];
-      final PathIterator pIter = area.getPathIterator(new AffineTransform());
+      final PathIterator pIter = area.getPathIterator(null);
       while (!pIter.isDone()) {
         final int segType = pIter.currentSegment(coords);
         // We are only interested in move-to and line-to operations
@@ -349,10 +348,10 @@ public final class LocalDensity {
     } else {
       ValidationUtils.checkArgument(border <= BORDER_LIMIT, "border too large: %d", border);
     }
-    final int size = 2 * border + 1;
     if (n == 0) {
       return 0;
     }
+    final int size = 2 * border + 1;
     if (n == 1) {
       final double area = (double) size * size;
       if (regions != null) {
