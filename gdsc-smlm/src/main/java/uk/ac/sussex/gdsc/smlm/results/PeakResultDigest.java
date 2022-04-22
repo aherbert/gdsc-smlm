@@ -126,7 +126,7 @@ public class PeakResultDigest {
 
   /**
    * Get a snapshot of the current digest. This is done by cloning the digest. If this is not
-   * support then return null.
+   * supported then return null.
    *
    * @return the hex string (or null)
    */
