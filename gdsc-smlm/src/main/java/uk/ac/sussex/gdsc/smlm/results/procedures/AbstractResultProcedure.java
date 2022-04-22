@@ -28,7 +28,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
- * Contains core functionality to for result procedures.
+ * Contains core functionality for result procedures.
  */
 public abstract class AbstractResultProcedure {
   /** The results. */
