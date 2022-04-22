@@ -71,11 +71,17 @@ public class PeakResultsReader {
   private static Logger logger = Logger.getLogger(PeakResultsReader.class.getName());
 
   // Set up to read two-axis (and theta) Gaussian 2D data into the current format
-  private static final int INDEX_SX;
-  private static final int INDEX_SY;
-  private static final int INDEX_ANGLE;
-  private static final int SIZE_TWO_AXIS;
-  private static final int SIZE_TWO_AXIS_AND_THETA;
+
+  /** Index for the x coordinate. */
+  static final int INDEX_SX;
+  /** Index for the y coordinate. */
+  static final int INDEX_SY;
+  /** Index for the angle coordinate. */
+  static final int INDEX_ANGLE;
+  /** Size of the parameter array for a 2D Gaussian. */
+  static final int SIZE_TWO_AXIS;
+  /** Size of the parameter array for a 2D Gaussian with a rotation angle. */
+  static final int SIZE_TWO_AXIS_AND_THETA;
 
   static {
     final PSF psf = PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
@@ -155,10 +161,11 @@ public class PeakResultsReader {
     void showProgress(long read) throws IOException;
   }
 
-  private static class NullProgressReporter implements ProgressReporter {
-    static final NullProgressReporter INSTANCE = new NullProgressReporter();
-
-    private NullProgressReporter() {}
+  /**
+   * Do not show progress (no-operation).
+   */
+  private static class NoopProgressReporter implements ProgressReporter {
+    static final NoopProgressReporter INSTANCE = new NoopProgressReporter();
 
     @Override
     public void showProgress(long read) {
@@ -217,17 +224,13 @@ public class PeakResultsReader {
         final StringBuilder sb = new StringBuilder();
         String line;
         int count = 0;
-        while ((line = input.readLine()) != null) {
+        for (line = input.readLine(); line != null; line = input.readLine()) {
           count++;
           if (count == 1) {
             // The NSTORM file format does not have comment characters but does have a single header
-            // line
-            if (line.startsWith("Channel Name")) {
-              sb.append(line).append('\n');
-              break;
-            }
-            // User may try and load the text saved directly from the ImageJ Table Results
-            if (line.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2)) {
+            // line. User may try and load the text saved directly from the ImageJ Table Results
+            if (line.startsWith("Channel Name")
+                || line.contains(IMAGEJ_TABLE_RESULTS_HEADER_V1_V2)) {
               sb.append(line).append('\n');
               break;
             }
@@ -303,7 +306,7 @@ public class PeakResultsReader {
               if (smlmVersion >= 4) {
                 readCategory = BitFlagUtils.areSet(flags, SmlmFilePeakResults.FLAG_CATEGORY);
               }
-            } catch (final NumberFormatException ex) {
+            } catch (final NumberFormatException ignored) {
               // Ignore
             }
           }
@@ -460,7 +463,7 @@ public class PeakResultsReader {
                 calibration = new CalibrationWriter();
                 calibration.setNmPerPixel(nmPerPixel);
               }
-            } catch (final NumberFormatException ex) {
+            } catch (final NumberFormatException ignored) {
               // Ignore
             }
           }
@@ -902,7 +905,7 @@ public class PeakResultsReader {
 
         reporter.showProgress(input.position());
       }
-    } catch (final EOFException ex) {
+    } catch (final EOFException ignored) {
       // Ignore. Binary data does not have a size so it is read until the EOF.
     } catch (final IOException ex) {
       // Log this but still return the results that have been read
@@ -1001,7 +1004,7 @@ public class PeakResultsReader {
     return results;
   }
 
-  private final int readInt(byte[] buffer) {
+  private int readInt(byte[] buffer) {
     final int ch1 = buffer[position] & 0xff;
     final int ch2 = buffer[position + 1] & 0xff;
     final int ch3 = buffer[position + 2] & 0xff;
@@ -1010,7 +1013,7 @@ public class PeakResultsReader {
     return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
   }
 
-  private final long readLong(byte[] buffer) {
+  private long readLong(byte[] buffer) {
     final long l = (((long) buffer[position + 0] << 56)
         + ((long) (buffer[position + 1] & 255) << 48) + ((long) (buffer[position + 2] & 255) << 40)
         + ((long) (buffer[position + 3] & 255) << 32) + ((long) (buffer[position + 4] & 255) << 24)
@@ -1020,11 +1023,11 @@ public class PeakResultsReader {
     return l;
   }
 
-  private final float readFloat(byte[] buffer) {
+  private float readFloat(byte[] buffer) {
     return Float.intBitsToFloat(readInt(buffer));
   }
 
-  private final double readDouble(byte[] buffer) {
+  private double readDouble(byte[] buffer) {
     return Double.longBitsToDouble(readLong(buffer));
   }
 
@@ -1033,7 +1036,7 @@ public class PeakResultsReader {
     if (trackProgress != null) {
       return new SizeProgressReporter(Files.size(Paths.get(filename)), trackProgress);
     }
-    return NullProgressReporter.INSTANCE;
+    return NoopProgressReporter.INSTANCE;
   }
 
   private float[] readData(byte[] buffer, float[] params) {
@@ -1068,13 +1071,12 @@ public class PeakResultsReader {
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
       final ProgressReporter reporter = createProgressReporter(filename);
 
-      String line;
       int errors = 0;
 
       final LineReader reader = createLineReader(results, smlmVersion, fieldCount);
 
       // Skip the header
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty()) {
           continue;
         }
@@ -1088,7 +1090,7 @@ public class PeakResultsReader {
         }
       }
 
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
         }
@@ -1127,6 +1129,9 @@ public class PeakResultsReader {
     abstract PeakResult read(String line);
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 4.
+   */
   private class LineReaderV4 extends LineReader {
     int fieldCount;
 
@@ -1141,6 +1146,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 4 with deviations.
+   */
   private class LineReaderDV4 extends LineReader {
     int fieldCount;
 
@@ -1155,6 +1163,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 3.
+   */
   private class LineReaderV3 extends LineReader {
     int fieldCount;
 
@@ -1169,6 +1180,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 3 with deviations.
+   */
   private class LineReaderDV3 extends LineReader {
     int fieldCount;
 
@@ -1183,6 +1197,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 2.
+   */
   private class LineReaderV2 extends LineReader {
     LineReaderV2(MemoryPeakResults results) {
       super(results);
@@ -1194,6 +1211,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 2 with deviations.
+   */
   private class LineReaderDV2 extends LineReader {
     LineReaderDV2(MemoryPeakResults results) {
       super(results);
@@ -1205,6 +1225,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 1.
+   */
   private class LineReaderV1 extends LineReader {
     LineReaderV1(MemoryPeakResults results) {
       super(results);
@@ -1216,6 +1239,9 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Line reader for GDSC SMLM text version 1 with deviations.
+   */
   private class LineReaderDV1 extends LineReader {
     LineReaderDV1(MemoryPeakResults results) {
       super(results);
@@ -1227,6 +1253,14 @@ public class PeakResultsReader {
     }
   }
 
+  /**
+   * Creates the line reader for the GDSC SMLM text file.
+   *
+   * @param results the results
+   * @param version the version
+   * @param fieldCount the field count
+   * @return the line reader
+   */
   private LineReader createLineReader(MemoryPeakResults results, int version, int fieldCount) {
     switch (version) {
       case 4:
@@ -1246,7 +1280,13 @@ public class PeakResultsReader {
     }
   }
 
-  private PeakResult createPeakResultV1(String line) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 1.
+   *
+   * @param line the line
+   * @return the peak result
+   */
+  PeakResult createPeakResultV1(String line) {
     float[] params = new float[7];
 
     if (isUseScanner()) {
@@ -1279,7 +1319,7 @@ public class PeakResultsReader {
               null, endPeak, id);
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1307,13 +1347,19 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV1(String line) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 1 with deviations.
+   *
+   * @param line the line
+   * @return the peak result
+   */
+  PeakResult createPeakResultDeviationsV1(String line) {
     float[] params = new float[7];
     float[] paramsStdDev = new float[7];
 
@@ -1350,7 +1396,7 @@ public class PeakResultsReader {
               paramsStdDev, endPeak, id);
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1380,13 +1426,19 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultV2(String line) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 2.
+   *
+   * @param line the line
+   * @return the peak result
+   */
+  PeakResult createPeakResultV2(String line) {
     float[] params = new float[7];
 
     if (isUseScanner()) {
@@ -1417,7 +1469,7 @@ public class PeakResultsReader {
               null, endPeak, id);
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1443,13 +1495,19 @@ public class PeakResultsReader {
             endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, null);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV2(String line) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 2 with deviations.
+   *
+   * @param line the line
+   * @return the peak result
+   */
+  PeakResult createPeakResultDeviationsV2(String line) {
     float[] params = new float[7];
     float[] paramsStdDev = new float[7];
 
@@ -1483,7 +1541,7 @@ public class PeakResultsReader {
               paramsStdDev, endPeak, id);
         }
         return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1511,13 +1569,20 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultV3(String line, int fieldCount) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 3.
+   *
+   * @param line the line
+   * @param fieldCount the field count
+   * @return the peak result
+   */
+  PeakResult createPeakResultV3(String line, int fieldCount) {
     final float[] params = new float[fieldCount];
 
     if (isUseScanner()) {
@@ -1551,7 +1616,7 @@ public class PeakResultsReader {
         }
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak,
             id, 0);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1580,13 +1645,20 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, null, endPeak, id,
           0);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV3(String line, int fieldCount) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 3 with deviations.
+   *
+   * @param line the line
+   * @param fieldCount the field count
+   * @return the peak result
+   */
+  PeakResult createPeakResultDeviationsV3(String line, int fieldCount) {
     final float[] params = new float[fieldCount];
     final float[] paramsStdDev = new float[fieldCount];
 
@@ -1621,7 +1693,7 @@ public class PeakResultsReader {
         }
         return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
             endPeak, id, 0);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1650,13 +1722,20 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev,
           endPeak, id, 0);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultV4(String line, int fieldCount) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 4.
+   *
+   * @param line the line
+   * @param fieldCount the field count
+   * @return the peak result
+   */
+  PeakResult createPeakResultV4(String line, int fieldCount) {
     final float[] params = new float[fieldCount];
 
     if (isUseScanner()) {
@@ -1695,7 +1774,7 @@ public class PeakResultsReader {
         }
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
             null, endPeak, id, category);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1726,13 +1805,20 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params, null,
           endPeak, id, category);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
   }
 
-  private PeakResult createPeakResultDeviationsV4(String line, int fieldCount) {
+  /**
+   * Creates the peak result from GDSC SMLM text version 4 with deviations.
+   *
+   * @param line the line
+   * @param fieldCount the field count
+   * @return the peak result
+   */
+  PeakResult createPeakResultDeviationsV4(String line, int fieldCount) {
     final float[] params = new float[fieldCount];
     final float[] paramsStdDev = new float[fieldCount];
 
@@ -1772,7 +1858,7 @@ public class PeakResultsReader {
         }
         return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
             paramsStdDev, endPeak, id, category);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
     }
@@ -1803,7 +1889,7 @@ public class PeakResultsReader {
       }
       return createResult(peak, origX, origY, origValue, error, noise, meanIntensity, params,
           paramsStdDev, endPeak, id, category);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
@@ -1844,9 +1930,8 @@ public class PeakResultsReader {
       final MemoryPeakResults results = createResults();
       results.setName(FileUtils.getName(filename));
 
-      String line;
       int errors = 0;
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty()) {
           continue;
         }
@@ -1896,6 +1981,7 @@ public class PeakResultsReader {
       case 1:
       default:
         result = createTableResultV1(line);
+        break;
     }
     if (result != null) {
       // Extract the source & bounds from the Source column
@@ -2010,7 +2096,7 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final NoSuchElementException ex) {
+    } catch (final NoSuchElementException ignored) {
       // Ignore and return null
     }
     return null;
@@ -2086,7 +2172,7 @@ public class PeakResultsReader {
             paramsStdDev, endPeak, id);
       }
       return new PeakResult(peak, origX, origY, origValue, error, noise, 0, params, paramsStdDev);
-    } catch (final NoSuchElementException ex) {
+    } catch (final NoSuchElementException ignored) {
       // Ignore and return null
     }
     return null;
@@ -2102,11 +2188,10 @@ public class PeakResultsReader {
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
       final ProgressReporter reporter = createProgressReporter(filename);
 
-      String line;
       int errors = 0;
 
       // Skip the header
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty()) {
           continue;
         }
@@ -2119,7 +2204,7 @@ public class PeakResultsReader {
         }
       }
 
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
         }
@@ -2182,7 +2267,7 @@ public class PeakResultsReader {
 
       // Store the signal as the original value
       return new PeakResult(peak, (int) x, (int) y, signal, error, 0.0f, 0, params, null);
-    } catch (final NoSuchElementException ex) {
+    } catch (final NoSuchElementException ignored) {
       // Ignore and return null
     }
     return null;
@@ -2198,7 +2283,6 @@ public class PeakResultsReader {
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
       final ProgressReporter reporter = createProgressReporter(filename);
 
-      String line;
       int errors = 0;
 
       // The single line header
@@ -2211,7 +2295,7 @@ public class PeakResultsReader {
       // If the header contains 'Photons' then this can be used to determine the gain
       boolean readPhotons = header.contains("\tPhotons\t");
 
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty()) {
           continue;
         }
@@ -2260,7 +2344,7 @@ public class PeakResultsReader {
     // Determine the gain using the photons column
     final Statistics gain = new Statistics();
     results.forEach((PeakResultProcedureX) peakResult -> {
-      double photons = peakResult.getError();
+      final double photons = peakResult.getError();
       if (photons != 0) {
         peakResult.setError(0);
         gain.add(peakResult.getIntensity() / photons);
@@ -2415,7 +2499,7 @@ public class PeakResultsReader {
       // Store the photons in the error value
       return new ExtendedPeakResult(frame, (int) xc, (int) yc, height, photons, 0.0f, 0, params,
           null, frame + length - 1, 0);
-    } catch (final NoSuchElementException ex) {
+    } catch (final NoSuchElementException ignored) {
       // Ignore
     }
     return null;
@@ -2433,11 +2517,10 @@ public class PeakResultsReader {
         BufferedReader input = new BufferedReader(new UnicodeReader(fis, null))) {
       final ProgressReporter reporter = createProgressReporter(filename);
 
-      String line;
       int errors = 0;
 
       // Skip the header
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty()) {
           continue;
         }
@@ -2451,7 +2534,7 @@ public class PeakResultsReader {
         }
       }
 
-      while ((line = input.readLine()) != null) {
+      for (String line = input.readLine(); line != null; line = input.readLine()) {
         if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
         }
@@ -2513,7 +2596,7 @@ public class PeakResultsReader {
         params[PeakResult.INTENSITY] = scanner.nextFloat();
 
         return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
-      } catch (final NoSuchElementException ex) {
+      } catch (final NoSuchElementException ignored) {
         // Ignore and return null
       }
       return null;
@@ -2529,7 +2612,7 @@ public class PeakResultsReader {
       params[PeakResult.INTENSITY] = Float.parseFloat(fields[3]);
 
       return new PeakResult(peak, 0, 0, 0, 0, 0, 0, params, null);
-    } catch (final IndexOutOfBoundsException | NumberFormatException ex) {
+    } catch (final IndexOutOfBoundsException | NumberFormatException ignored) {
       // Ignore and return null
     }
     return null;
