@@ -75,7 +75,7 @@ public final class PassRateFailCounter extends BaseFailCounter {
   public void pass() {
     passCount++;
     if (passCount < 0) {
-      throw new IllegalStateException("Unable to increment");
+      throw new IllegalStateException("Unable to increment pass count");
     }
   }
 
@@ -86,7 +86,7 @@ public final class PassRateFailCounter extends BaseFailCounter {
     }
     passCount += n;
     if (passCount < 0) {
-      throw new IllegalStateException("Unable to increment");
+      throw new IllegalStateException("Unable to increment pass count + " + n);
     }
   }
 
@@ -94,7 +94,7 @@ public final class PassRateFailCounter extends BaseFailCounter {
   public void fail() {
     failCount++;
     if (failCount < 0) {
-      throw new IllegalStateException("Unable to increment");
+      throw new IllegalStateException("Unable to increment fail count");
     }
   }
 
@@ -105,7 +105,7 @@ public final class PassRateFailCounter extends BaseFailCounter {
     }
     failCount += n;
     if (failCount < 0) {
-      throw new IllegalStateException("Unable to increment");
+      throw new IllegalStateException("Unable to increment fail count + " + n);
     }
   }
 
