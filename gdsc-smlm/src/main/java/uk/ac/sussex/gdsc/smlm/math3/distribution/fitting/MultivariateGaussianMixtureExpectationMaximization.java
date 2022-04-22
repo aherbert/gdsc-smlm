@@ -121,8 +121,6 @@ public class MultivariateGaussianMixtureExpectationMaximization {
 
         // Compute and store the inverse.
         covarianceMatrixInverse = covMatDec.getSolver().getInverse().getData();
-        // Compute and store the determinant.
-        final double determinant = covMatDec.getDeterminant();
 
         // Eigenvalues of the covariance matrix.
         final double[] covMatEigenvalues = covMatDec.getRealEigenvalues();
@@ -133,7 +131,8 @@ public class MultivariateGaussianMixtureExpectationMaximization {
           }
         }
 
-        densityPrefactor = Math.pow(2 * Math.PI, -0.5 * means.length) * Math.pow(determinant, -0.5);
+        densityPrefactor =
+            Math.pow(2 * Math.PI, -0.5 * means.length) * Math.pow(covMatDec.getDeterminant(), -0.5);
       }
 
       /**
