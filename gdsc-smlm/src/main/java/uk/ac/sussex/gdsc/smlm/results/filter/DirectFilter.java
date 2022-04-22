@@ -264,9 +264,7 @@ public abstract class DirectFilter extends Filter implements IDirectFilter {
     if (sb.length() != 0) {
       sb.append("; ");
     }
-    sb.append(name);
-    sb.append('=');
-    sb.append(value);
+    sb.append(name).append('=').append(value);
   }
 
   private static void append(StringBuilder sb, String name) {
