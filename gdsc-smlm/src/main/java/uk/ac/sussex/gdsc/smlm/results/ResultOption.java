@@ -97,8 +97,8 @@ public class ResultOption {
    */
   static void checkValue(Object value, Object[] values) {
     if (values != null && values.length > 0) {
-      for (int i = 0; i < values.length; i++) {
-        if (values[i].equals(value)) {
+      for (final Object o : values) {
+        if (o.equals(value)) {
           return;
         }
       }
