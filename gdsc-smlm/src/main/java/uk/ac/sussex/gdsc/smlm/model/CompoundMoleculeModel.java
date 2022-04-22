@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.UnitSphereSampler;
+import uk.ac.sussex.gdsc.core.utils.rng.NumberUtils;
 
 /**
  * Contains a model for a compound moving molecule (contains multiple molecules held in a fixed
@@ -38,13 +39,12 @@ import org.apache.commons.rng.sampling.UnitSphereSampler;
  * molecule can be retrieved using the {@link #getCoordinates(int)} method;
  */
 public class CompoundMoleculeModel extends MoleculeModel {
-  private int label;
-
   /**
    * Identity matrix for no rotation.
    */
-  private static final double[] I = new double[] {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  private static final double[] I = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
+  private int label;
   private List<? extends MoleculeModel> molecules;
 
   /**
@@ -219,12 +219,11 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double[] axis = UnitSphereSampler.of(random, 3).sample();
-
-    final double angle = (-maxAngle + random.nextDouble() * 2.0 * maxAngle);
+    final double angle = NumberUtils.makeSignedDouble(random.nextLong()) * maxAngle;
     if (angle == 0) {
       return;
     }
+    final double[] axis = UnitSphereSampler.of(random, 3).sample();
 
     rotateMolecules(axis, angle);
   }
@@ -245,7 +244,7 @@ public class CompoundMoleculeModel extends MoleculeModel {
       checkMass();
     }
 
-    final double angle = (-maxAngle + random.nextDouble() * 2.0 * maxAngle);
+    final double angle = NumberUtils.makeSignedDouble(random.nextLong()) * maxAngle;
     if (angle == 0) {
       return;
     }
