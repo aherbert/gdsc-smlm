@@ -49,7 +49,7 @@ public interface MultiFilterComponentSet {
    *
    * @param component the replacement component
    */
-  abstract void replace0(MultiFilterComponent component);
+  void replace0(MultiFilterComponent component);
 
   /**
    * Create a copy.
