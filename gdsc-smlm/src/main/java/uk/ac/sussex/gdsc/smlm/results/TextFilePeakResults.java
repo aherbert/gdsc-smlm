@@ -588,6 +588,10 @@ public class TextFilePeakResults extends SmlmFilePeakResults {
     }
   }
 
+  /**
+   * Store the String representation of the result with the frame (slice) number to be used for
+   * sorting.
+   */
   private static class Result {
     String line;
     int slice;
