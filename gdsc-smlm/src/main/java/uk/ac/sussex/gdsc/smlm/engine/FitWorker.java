@@ -752,7 +752,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         sb.append((benchmarking)
             ? ((uk.ac.sussex.gdsc.smlm.results.filter.Filter) filter.getFilter()).toXml()
             : fitConfig.getSmartFilterString()).append(newLine)
-          //@formatter:off
+        //@formatter:off
           .append(
           ((uk.ac.sussex.gdsc.smlm.results.filter.Filter) filter.getMinimalFilter()).toXml())
           .append(newLine)
@@ -760,7 +760,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
           .append(config.getFailuresLimit()).append(newLine)
           .append(config.getDuplicateDistance()).append(':')
           .append(config.getDuplicateDistanceAbsolute()).append(newLine);
-          //@formatter:on
+        //@formatter:on
         if (spotFilter != null) {
           sb.append(spotFilter.getDescription()).append(newLine);
         }

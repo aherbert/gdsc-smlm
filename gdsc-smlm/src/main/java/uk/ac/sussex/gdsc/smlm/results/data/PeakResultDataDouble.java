@@ -31,12 +31,12 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResultData;
  */
 public interface PeakResultDataDouble extends PeakResultData<Double> {
   @Override
-  default public String getValueName() {
+  public default String getValueName() {
     return "";
   }
 
   @Override
-  default public Class<?> getValueClass() {
+  public default Class<?> getValueClass() {
     return Double.class;
   }
 }

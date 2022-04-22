@@ -380,7 +380,8 @@ public class CustomPowellOptimizer extends MultivariateOptimizer {
   private class LineSearch extends BrentOptimizer {
     /**
      * Value that will pass the precondition check for {@link BrentOptimizer} but will not pass the
-     * convergence check, so that the custom checker will always decide when to stop the line search.
+     * convergence check, so that the custom checker will always decide when to stop the line
+     * search.
      *
      * <p>Equal to 2 * epsilon: 2 * Math.ulp(1.0).
      */
