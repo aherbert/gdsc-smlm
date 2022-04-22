@@ -90,7 +90,7 @@ public abstract class CombinedFilter extends DirectFilter {
 
   @Override
   public CombinedFilter clone() {
-    CombinedFilter filter = (CombinedFilter) super.clone();
+    final CombinedFilter filter = (CombinedFilter) super.clone();
     filter.filter1 = this.filter1.clone();
     filter.filter2 = this.filter2.clone();
     initialiseState();
@@ -101,18 +101,18 @@ public abstract class CombinedFilter extends DirectFilter {
   protected String generateName() {
     final StringBuilder sb = new StringBuilder();
     addText(sb, filter1, filter1.getName());
-    sb.append(" ").append(getOperator()).append(" ");
+    sb.append(' ').append(getOperator()).append(' ');
     addText(sb, filter2, filter2.getName());
     return sb.toString();
   }
 
   private static void addText(StringBuilder sb, Filter filter, String text) {
     if (filter instanceof CombinedFilter) {
-      sb.append("(");
+      sb.append('(');
     }
     sb.append(text);
     if (filter instanceof CombinedFilter) {
-      sb.append(")");
+      sb.append(')');
     }
   }
 
@@ -120,7 +120,7 @@ public abstract class CombinedFilter extends DirectFilter {
   protected String generateType() {
     final StringBuilder sb = new StringBuilder();
     addText(sb, filter1, filter1.getType());
-    sb.append(" ").append(getOperator()).append(" ");
+    sb.append(' ').append(getOperator()).append(' ');
     addText(sb, filter2, filter2.getType());
     return sb.toString();
   }
@@ -129,7 +129,7 @@ public abstract class CombinedFilter extends DirectFilter {
   public String getDescription() {
     final StringBuilder sb = new StringBuilder();
     addText(sb, filter1, filter1.getDescription());
-    sb.append(" ").append(getOperator()).append(" ");
+    sb.append(' ').append(getOperator()).append(' ');
     addText(sb, filter2, filter2.getDescription());
     return sb.toString();
   }
