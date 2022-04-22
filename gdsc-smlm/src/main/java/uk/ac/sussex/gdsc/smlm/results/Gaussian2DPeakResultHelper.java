@@ -57,7 +57,8 @@ public final class Gaussian2DPeakResultHelper {
   // b = background
   // CHECKSTYLE.OFF: ParameterName
 
-  private static final double ONE_OVER_ROOT2 = Math.sqrt(0.5);
+  /** sqrt(0.5), or 1 / sqrt(2). */
+  static final double ONE_OVER_ROOT2 = 0.7071067811865475244008443621048490392;
   private static final double R1 = cumulative2D(1) / Math.PI;
   private static final double R2 = cumulative2D(2) / (Math.PI * 4);
   /**
@@ -109,6 +110,9 @@ public final class Gaussian2DPeakResultHelper {
    */
   public static final int POINTS = 10;
 
+  /**
+   * Base class for computing Gaussian 2D peak result data.
+   */
   private static class BaseGaussian2DPeakResultCalculator
       implements Gaussian2DPeakResultCalculator {
     private static final String NO_CALIBRATION = "No calibration";
@@ -118,7 +122,7 @@ public final class Gaussian2DPeakResultHelper {
     final CalibrationReader calibration;
     final int isx;
     final int isy;
-    private boolean oneAxisSD;
+    boolean oneAxisSD;
 
     // Set dynamically when needed
     double nmPerPixel;
@@ -143,7 +147,7 @@ public final class Gaussian2DPeakResultHelper {
      * @throws ConversionException If unit conversion fails
      * @see #create(PSF, CalibrationReader, int)
      */
-    public BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration) {
+    BaseGaussian2DPeakResultCalculator(PSF psf, CalibrationReader calibration) {
       final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
       isx = indices[0];
       isy = indices[1];
@@ -202,7 +206,13 @@ public final class Gaussian2DPeakResultHelper {
       return getPixelAmplitudeImpl(params);
     }
 
-    protected float getPixelAmplitudeImpl(float[] params) {
+    /**
+     * Gets the pixel amplitude.
+     *
+     * @param params the params
+     * @return the pixel amplitude
+     */
+    float getPixelAmplitudeImpl(float[] params) {
       // Get the Gaussian parameters in pixels
       final double x = toPixel.convert(params[PeakResult.X]);
       final double y = toPixel.convert(params[PeakResult.Y]);
@@ -382,9 +392,14 @@ public final class Gaussian2DPeakResultHelper {
     }
   }
 
+  /**
+   * Private class to allow caching the converters from an instance of
+   * BaseGaussian2DPeakResultCalculator. The instance must have been used for each target
+   * method to ensure the converter(s) are not null.
+   */
   private abstract static class BaseFastGaussian2DPeakResultCalculator
       extends BaseGaussian2DPeakResultCalculator {
-    public BaseFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
+    BaseFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
       super(helper);
     }
 
@@ -468,7 +483,7 @@ public final class Gaussian2DPeakResultHelper {
    */
   private static class TwoAxisFastGaussian2DPeakResultCalculator
       extends BaseFastGaussian2DPeakResultCalculator {
-    public TwoAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
+    TwoAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
       super(helper);
     }
 
@@ -488,7 +503,7 @@ public final class Gaussian2DPeakResultHelper {
    */
   private static class OneAxisFastGaussian2DPeakResultCalculator
       extends BaseFastGaussian2DPeakResultCalculator {
-    public OneAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
+    OneAxisFastGaussian2DPeakResultCalculator(BaseGaussian2DPeakResultCalculator helper) {
       super(helper);
     }
 
@@ -883,7 +898,7 @@ public final class Gaussian2DPeakResultHelper {
       if (I1 > 0) {
         return F * (sa2 / N) * (1 / I1);
       }
-    } catch (final TooManyEvaluationsException ex) {
+    } catch (final TooManyEvaluationsException ignored) {
       // Ignore
     }
     return getVarianceX(a, s, N, b2, emCcd);
@@ -1132,8 +1147,8 @@ public final class Gaussian2DPeakResultHelper {
    * </pre>
    *
    * <p>This formula is provided in <a href=
-   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions">
-   * Wikipedia: Mahalanobis distance - Normal distributions</a>
+   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions"> Wikipedia:
+   * Mahalanobis distance - Normal distributions</a>
    *
    * @param r the distance r
    * @return the cumulative 2D normal distribution {@code F(r)}
@@ -1155,8 +1170,8 @@ public final class Gaussian2DPeakResultHelper {
    * </pre>
    *
    * <p>This formula is provided in <a href=
-   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions">
-   * Wikipedia: Mahalanobis distance - Normal distributions</a>
+   * "https://en.wikipedia.org/wiki/Mahalanobis_distance#Normal_distributions"> Wikipedia:
+   * Mahalanobis distance - Normal distributions</a>
    *
    * @param p the cumulative 2D normal distribution {@code F(r)}
    * @return Mahalanobis distance r from the Gaussian
