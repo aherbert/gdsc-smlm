@@ -494,7 +494,7 @@ public final class GuiSettings {
       fb.setPrecisionMethodValue(PrecisionMethod.POISSON_CRLB_VALUE);
 
       builder.setFitEngineSettings(b);
-      builder.setPsf(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE);
+      builder.setPsf(PsfProtosHelper.DefaultTwoAxisGaussian2dPsf.INSTANCE);
 
       INSTANCE = builder.build();
     }

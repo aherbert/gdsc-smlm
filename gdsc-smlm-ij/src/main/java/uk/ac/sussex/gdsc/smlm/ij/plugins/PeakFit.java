@@ -2098,7 +2098,7 @@ public class PeakFit implements PlugInFilter {
 
   private int showSimpleDialog() {
     // Just support circular fitting
-    fitConfig.setPsf(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
+    fitConfig.setPsf(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE);
     fitConfig.setFixedPsf(false);
 
     // TODO - Support sCMOS camera. This may be 'too difficult' as the

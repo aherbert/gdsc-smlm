@@ -39,7 +39,7 @@ import uk.ac.sussex.gdsc.smlm.data.config.UnitProtos.DistanceUnit;
  */
 public final class PsfProtosHelper {
   /** The default one-axis Gaussian 2D PSF. */
-  public static class DefaultOneAxisGaussian2DPSF {
+  public static class DefaultOneAxisGaussian2dPsf {
     /** Default settings instance. */
     public static final PSF INSTANCE;
 
@@ -57,7 +57,7 @@ public final class PsfProtosHelper {
   }
 
   /** The default two-axis Gaussian 2D PSF. */
-  public static class DefaultTwoAxisGaussian2DPSF {
+  public static class DefaultTwoAxisGaussian2dPsf {
     /** Default settings instance. */
     public static final PSF INSTANCE;
 
@@ -76,7 +76,7 @@ public final class PsfProtosHelper {
   }
 
   /** The default two-axis and theta Gaussian 2D PSF. */
-  public static class DefaultTwoAxisAndThetaGaussian2DPSF {
+  public static class DefaultTwoAxisAndThetaGaussian2dPsf {
     /** Default settings instance. */
     public static final PSF INSTANCE;
 
@@ -137,12 +137,12 @@ public final class PsfProtosHelper {
   public static PSF getDefaultPsf(PSFType value) {
     switch (value) {
       case ONE_AXIS_GAUSSIAN_2D:
-        return DefaultOneAxisGaussian2DPSF.INSTANCE;
+        return DefaultOneAxisGaussian2dPsf.INSTANCE;
       case TWO_AXIS_GAUSSIAN_2D:
       case ASTIGMATIC_GAUSSIAN_2D:
-        return DefaultTwoAxisGaussian2DPSF.INSTANCE;
+        return DefaultTwoAxisGaussian2dPsf.INSTANCE;
       case TWO_AXIS_AND_THETA_GAUSSIAN_2D:
-        return DefaultTwoAxisAndThetaGaussian2DPSF.INSTANCE;
+        return DefaultTwoAxisAndThetaGaussian2dPsf.INSTANCE;
 
       case CUSTOM:
         return PSF.getDefaultInstance();

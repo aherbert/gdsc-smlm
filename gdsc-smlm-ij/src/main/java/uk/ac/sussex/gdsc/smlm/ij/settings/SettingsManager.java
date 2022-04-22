@@ -951,7 +951,7 @@ public final class SettingsManager {
    * @return the PSF
    */
   public static PSF readPsf(int flags) {
-    return new ConfigurationReader<>(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE)
+    return new ConfigurationReader<>(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE)
         .read(flags);
   }
 

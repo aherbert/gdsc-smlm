@@ -180,7 +180,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
   public static FitConfiguration create() {
     return create(FitProtosHelper.DefaultFitSettings.INSTANCE,
         CalibrationProtosHelper.DefaultCalibration.INSTANCE,
-        PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
+        PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE);
   }
 
   /**
@@ -453,7 +453,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       // Updated names when changing from two-axis to one axis
       if (psf.getParametersCount() == 1) {
         psf.getParametersBuilder(PsfHelper.INDEX_SX)
-            .setName(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE
+            .setName(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE
                 .getParameters(PsfHelper.INDEX_SX).getName());
       }
     }
@@ -462,7 +462,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     if (psf.getParametersCount() == 0 && paramCount > 0) {
       // Create a dummy Sx
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE
+      p.setName(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE
           .getParameters(PsfHelper.INDEX_SX).getName());
       p.setValue(1);
       p.setUnit(PSFParameterUnit.DISTANCE);
@@ -470,12 +470,12 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     if (psf.getParametersCount() == 1 && paramCount > 1) {
       // Rename S to Sx
       psf.getParametersBuilder(PsfHelper.INDEX_SX)
-          .setName(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE
+          .setName(PsfProtosHelper.DefaultTwoAxisGaussian2dPsf.INSTANCE
               .getParameters(PsfHelper.INDEX_SX).getName());
 
       // Duplicate the Sx to Sy
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(PsfProtosHelper.DefaultTwoAxisGaussian2DPSF.INSTANCE
+      p.setName(PsfProtosHelper.DefaultTwoAxisGaussian2dPsf.INSTANCE
           .getParameters(PsfHelper.INDEX_SY).getName());
       p.setValue(psf.getParameters(PsfHelper.INDEX_SX).getValue());
       p.setUnit(PSFParameterUnit.DISTANCE);
@@ -483,7 +483,7 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
     if (psf.getParametersCount() == 2 && paramCount > 2) {
       // Create a dummy angle
       final PSFParameter.Builder p = psf.addParametersBuilder();
-      p.setName(PsfProtosHelper.DefaultTwoAxisAndThetaGaussian2DPSF.INSTANCE
+      p.setName(PsfProtosHelper.DefaultTwoAxisAndThetaGaussian2dPsf.INSTANCE
           .getParameters(PsfHelper.INDEX_THETA).getName());
       p.setUnit(PSFParameterUnit.ANGLE);
     }

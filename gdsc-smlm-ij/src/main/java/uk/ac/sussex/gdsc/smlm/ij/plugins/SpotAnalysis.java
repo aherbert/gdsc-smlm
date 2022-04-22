@@ -1252,7 +1252,7 @@ public class SpotAnalysis extends PlugInFrame
 
       // Fit the PSF using a Gaussian
       final FitConfiguration fitConfiguration = FitConfiguration.create();
-      fitConfiguration.setPsf(PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE);
+      fitConfiguration.setPsf(PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE);
       fitConfiguration.setFixedPsf(true);
       fitConfiguration.setBackgroundFitting(true);
       fitConfiguration.setSignalStrength(0);

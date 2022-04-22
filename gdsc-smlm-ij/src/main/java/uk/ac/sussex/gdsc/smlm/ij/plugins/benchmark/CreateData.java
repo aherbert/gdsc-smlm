@@ -1773,7 +1773,7 @@ public class CreateData implements PlugIn {
         PSF.Builder psfBuilder;
         // Set the PSF as a Gaussian using the width at z=0.
         // In future this could be improved for other PSFs.
-        psfBuilder = PsfProtosHelper.DefaultOneAxisGaussian2DPSF.INSTANCE.toBuilder();
+        psfBuilder = PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE.toBuilder();
         psfBuilder.getParametersBuilder(PsfHelper.INDEX_SX).setValue(psfSd);
         psf = psfBuilder.build();
       }
