@@ -664,8 +664,9 @@ public class AiryPsfModel extends PsfModel {
       final double w1, UniformRandomProvider rng) {
     this.w0 = w0;
     this.w1 = w1;
-    if (spline == null) {
-      createAiryDistribution();
+    PolynomialSplineFunction s = spline;
+    if (s == null) {
+      s = createAiryDistribution();
     }
     double[] x = new double[n];
     double[] y = new double[n];
@@ -679,7 +680,7 @@ public class AiryPsfModel extends PsfModel {
         // TODO - We could add a simple interpolation here using a spline from AiryPattern.power()
         continue;
       }
-      final double radius = spline.value(p);
+      final double radius = s.value(p);
 
       // Convert to xy using a random vector generator
       final double[] v = vg.sample();
@@ -695,9 +696,9 @@ public class AiryPsfModel extends PsfModel {
     return new double[][] {x, y};
   }
 
-  private static synchronized void createAiryDistribution() {
+  private static synchronized PolynomialSplineFunction createAiryDistribution() {
     if (spline != null) {
-      return;
+      return spline;
     }
 
     final double relativeAccuracy = 1e-4;
@@ -716,11 +717,10 @@ public class AiryPsfModel extends PsfModel {
     final int samples = 1000;
     final double step = RINGS[SAMPLE_RINGS] / samples;
     double to = 0;
-    double from = 0;
     final double[] radius = new double[samples + 1];
     final double[] sum = new double[samples + 1];
     for (int i = 1; i < sum.length; i++) {
-      from = to;
+      final double from = to;
       radius[i] = to = step * i;
       sum[i] = integrator.integrate(2000, f, from, to) + sum[i - 1];
     }
@@ -730,13 +730,13 @@ public class AiryPsfModel extends PsfModel {
     }
 
     final SplineInterpolator si = new SplineInterpolator();
-    spline = si.interpolate(sum, radius);
+    return spline = si.interpolate(sum, radius);
   }
 
   @Override
   protected boolean computeValueAndGradient(int width, int height, double x0, double x1, double x2,
       double[] value, double[][] jacobian) {
-    final double[] dx = new double[] {1e-4, 1e-4, 1e-4};
+    final double[] dx = {1e-4, 1e-4, 1e-4};
     return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
   }
 }
