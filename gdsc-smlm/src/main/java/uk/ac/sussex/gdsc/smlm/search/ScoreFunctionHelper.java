@@ -28,10 +28,10 @@ import java.util.Arrays;
 
 /**
  * Calculate the score of points within a search space.
- *
- * @param <T> the generic type
  */
-public class ScoreFunctionHelper<T extends Comparable<T>> {
+public final class ScoreFunctionHelper {
+  /** No instances. */
+  private ScoreFunctionHelper() {}
 
   /**
    * Cut the list of scores down to the given size by selecting only the best results. The input

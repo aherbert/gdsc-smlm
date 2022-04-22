@@ -31,7 +31,7 @@ import org.jtransforms.utils.CommonUtils;
 /**
  * Simple class to perform convolution.
  */
-public class Convolution {
+public final class Convolution {
   // Allow h as an input parameter name
   // CHECKSTYLE.OFF: ParameterName
 
@@ -66,6 +66,9 @@ public class Convolution {
      */
     boolean execute(double value1, double value2);
   }
+
+  /** No instances. */
+  private Convolution() {}
 
   /**
    * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution"> convolution</a> between two
