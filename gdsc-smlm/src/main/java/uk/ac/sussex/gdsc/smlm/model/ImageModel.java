@@ -46,7 +46,7 @@ import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
  */
 public abstract class ImageModel {
   /** Define the Z-axis. */
-  private static final double[] Z_AXIS = new double[] {0, 0, 1};
+  private static final double[] Z_AXIS = {0, 0, 1};
   /** Average on-state time. */
   protected double onTime;
   /** Average off-state time for the first dark state. */
@@ -257,6 +257,7 @@ public abstract class ImageModel {
         throw new IllegalStateException("Unsupported diffusion type: " + model.getDiffusionType());
     }
     if (diffusion2D) {
+      // Reset Z
       model.xyz[2] = z;
     }
   }
@@ -379,19 +380,18 @@ public abstract class ImageModel {
   private static void linkLocalisations(List<LocalisationModel> localisations,
       LocalisationModel[] models) {
     LocalisationModel previous = null;
-    for (int i = 0; i < models.length; i++) {
-      if (models[i] != null) {
-        models[i].setPrevious(previous);
-        localisations.add(models[i]);
+    for (final LocalisationModel model : models) {
+      if (model != null) {
+        model.setPrevious(previous);
+        localisations.add(model);
       }
-      previous = models[i];
+      previous = model;
     }
   }
 
   private static void generateOnTimes(int maxFrames, final double frameInterval,
       List<double[]> bursts, int sequenceStartT, double[] onTime, int[] state) {
-    for (int i = 0; i < bursts.size(); i++) {
-      final double[] burst = bursts.get(i);
+    for (final double[] burst : bursts) {
       final int on = (int) (burst[0] / frameInterval) - sequenceStartT;
       int off = (int) (burst[1] / frameInterval) - sequenceStartT;
 
@@ -671,12 +671,11 @@ public abstract class ImageModel {
 
     // Get the maximum and minimum start and end times
     final int sequenceStart = MathUtils.min(sequenceStartT);
-    int sequenceEnd = MathUtils.max(sequenceEndT);
-
     // Time-range check. Note that the final frames are 1-based
     if (sequenceStart > maxFrames - 1) {
       return nFluorophores;
     }
+    int sequenceEnd = MathUtils.max(sequenceEndT);
     if (sequenceEnd > maxFrames - 1) {
       sequenceEnd = maxFrames - 1;
     }
@@ -773,15 +772,12 @@ public abstract class ImageModel {
           final double[] originalXyz = Arrays.copyOf(xyz, 3);
           for (int n = confinementAttempts; n-- > 0;) {
             diffuse(compound, diffusionRate, axis);
-            if (!confinementDistribution.isWithin(compound.getCoordinates())) {
-              // Reset position
-              for (int j = 0; j < 3; j++) {
-                xyz[j] = originalXyz[j];
-              }
-            } else {
+            if (confinementDistribution.isWithin(compound.getCoordinates())) {
               // The move was allowed
               break;
             }
+            // Reset position
+            System.arraycopy(originalXyz, 0, xyz, 0, 3);
           }
         } else {
           diffuse(compound, diffusionRate, axis);
