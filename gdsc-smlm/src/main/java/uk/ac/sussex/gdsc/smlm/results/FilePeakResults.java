@@ -188,7 +188,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
   private static void addComment(StringBuilder sb, String comment) {
     if (comment != null) {
-      sb.append("#").append(comment).append(System.lineSeparator());
+      sb.append('#').append(comment).append(System.lineSeparator());
     }
   }
 
@@ -254,7 +254,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
 
     try {
       fos.close();
-    } catch (final Exception ex) {
+    } catch (final Exception ignored) {
       // Ignore exception
     } finally {
       fos = null;
@@ -281,7 +281,7 @@ public abstract class FilePeakResults extends AbstractPeakResults implements Thr
       }
 
       sort();
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // ignore
     } finally {
       fos = null;
