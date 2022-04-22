@@ -176,10 +176,8 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
   @Override
   protected String getVersion() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(isBinary() ? "Binary" : "Text");
-    sb.append(".");
-    sb.append(isShowDeviations() ? "D1" : "D0");
-    sb.append(".E");
+    sb.append(isBinary() ? "Binary" : "Text").append('.').append(isShowDeviations() ? "D1" : "D0")
+        .append(".E");
     int extended = 0;
     if (isShowEndFrame()) {
       extended += FLAG_END_FRAME;
@@ -193,8 +191,7 @@ public abstract class SmlmFilePeakResults extends FilePeakResults {
     if (isShowCategory()) {
       extended += FLAG_CATEGORY;
     }
-    sb.append(extended);
-    sb.append(".V").append(VERSION);
+    sb.append(extended).append(".V").append(VERSION);
     return sb.toString();
   }
 
