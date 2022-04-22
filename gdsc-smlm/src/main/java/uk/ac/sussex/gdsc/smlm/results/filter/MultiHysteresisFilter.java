@@ -41,6 +41,13 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * through time, optionally via other candidates, to a valid result.
  */
 public class MultiHysteresisFilter extends HysteresisFilter {
+  /** The default range. */
+  private static final double[] DEFAULT_RANGE = {0, 0, 0, 0, SignalFilter.DEFAULT_RANGE,
+      SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
+      WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
+      WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
+      PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
+
   /** The strict signal. */
   @XStreamAsAttribute
   final double strictSignal;
@@ -426,13 +433,6 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     return ParameterType.PRECISION_RANGE;
   }
 
-  /** The default range. */
-  static double[] defaultRange = new double[] {0, 0, 0, 0, SignalFilter.DEFAULT_RANGE,
-      SignalFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE, SnrFilter.DEFAULT_RANGE,
-      WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter2.DEFAULT_MIN_RANGE, WidthFilter.DEFAULT_RANGE,
-      WidthFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE, ShiftFilter.DEFAULT_RANGE,
-      PrecisionFilter.DEFAULT_RANGE, PrecisionFilter.DEFAULT_RANGE};
-
   @Override
   public Filter adjustParameter(int index, double delta) {
     checkIndex(index);
@@ -440,7 +440,7 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     if (index == 1 || index == 3) {
       return this;
     }
-    final double[] parameters = new double[] {searchDistance, searchDistanceMode, timeThreshold,
+    final double[] parameters = {searchDistance, searchDistanceMode, timeThreshold,
         timeThresholdMode, strictSignal, rangeSignal, strictSnr, rangeSnr, strictMinWidth,
         rangeMinWidth, strictMaxWidth, rangeMaxWidth, strictShift, rangeShift, strictPrecision,
         rangePrecision};
@@ -449,7 +449,7 @@ public class MultiHysteresisFilter extends HysteresisFilter {
     } else if (index == 2) {
       parameters[2] = updateParameter(parameters[2], delta, getDefaultTimeRange());
     } else {
-      parameters[index] = updateParameter(parameters[index], delta, defaultRange[index]);
+      parameters[index] = updateParameter(parameters[index], delta, DEFAULT_RANGE[index]);
     }
     return create(parameters);
   }
