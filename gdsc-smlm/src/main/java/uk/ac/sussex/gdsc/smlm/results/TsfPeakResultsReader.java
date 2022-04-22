@@ -215,7 +215,7 @@ public class TsfPeakResultsReader {
       if (spotList != null) {
         return true;
       }
-    } catch (final IOException ex) {
+    } catch (final IOException ignored) {
       // Fail
     }
 
@@ -244,23 +244,8 @@ public class TsfPeakResultsReader {
       // size of int + size of long
       FileUtils.skip(fi, 12);
 
-      final LocationUnits locationUnits = spotList.getLocationUnits();
-      boolean locationUnitsWarning = false;
-
-      final IntensityUnits intensityUnits = spotList.getIntensityUnits();
-      boolean intensityUnitsWarning = false;
-
       final FitMode fitMode = (spotList.hasFitMode()) ? spotList.getFitMode() : FitMode.ONEAXIS;
 
-      final boolean filterPosition = position > 0;
-      final boolean filterSlice = slice > 0;
-
-      // Set up to read two-axis and theta data
-      final PSF psf = PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
-      final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
-      final int isx = indices[0];
-      final int isy = indices[1];
-      final int ia = PsfHelper.getGaussian2DAngleIndex(psf);
       int nparams = PeakResult.STANDARD_PARAMETERS;
       switch (fitMode) {
         case ONEAXIS:
@@ -276,6 +261,22 @@ public class TsfPeakResultsReader {
           logger.log(Level.WARNING, () -> "Unknown fit mode: " + fitMode);
           return null;
       }
+
+      final LocationUnits locationUnits = spotList.getLocationUnits();
+      boolean locationUnitsWarning = false;
+
+      final IntensityUnits intensityUnits = spotList.getIntensityUnits();
+      boolean intensityUnitsWarning = false;
+
+      final boolean filterPosition = position > 0;
+      final boolean filterSlice = slice > 0;
+
+      // Set up to read two-axis and theta data
+      final PSF psf = PsfHelper.create(PSFType.TWO_AXIS_AND_THETA_GAUSSIAN_2D);
+      final int[] indices = PsfHelper.getGaussian2DWxWyIndices(psf);
+      final int isx = indices[0];
+      final int isy = indices[1];
+      final int ia = PsfHelper.getGaussian2DAngleIndex(psf);
 
       expectedSpots = getExpectedSpots();
       long totalSpots = 0;
@@ -708,16 +709,18 @@ public class TsfPeakResultsReader {
     if (spotList.getFluorophoreTypesCount() > 1) {
       // Build a string for the allowed value to provide space for the description
       final String[] values = new String[spotList.getFluorophoreTypesCount()];
+      final StringBuilder sb = new StringBuilder(128);
       for (int i = 0; i < spotList.getFluorophoreTypesCount(); i++) {
         final FluorophoreType type = spotList.getFluorophoreTypes(i);
-        String value = Integer.toString(type.getId());
+        sb.setLength(0);
+        sb.append(type.getId());
         if (type.hasDescription()) {
-          value += ":" + type.getDescription();
+          sb.append(':').append(type.getDescription());
         }
         if (type.hasIsFiducial()) {
-          value += ":fiducial=" + type.getIsFiducial();
+          sb.append(":fiducial=").append(type.getIsFiducial());
         }
-        values[i] = value;
+        values[i] = sb.toString();
       }
       options[count++] = new ResultOption(4, "Fluorophore type", values[0], values);
     }
