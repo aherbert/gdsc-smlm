@@ -83,14 +83,14 @@ public class PsfModelGradient1Function implements Gradient1Function, NamedFuncti
   @Override
   public void forEach(ValueProcedure procedure) {
     final double[] v = new double[size()];
-    final double c = params[0];
-    final double m = params[1];
     final double x0 = params[2];
     final double x1 = params[3];
     final double x2 = params[4];
     if (!psf.getValue(width, height, x0, x1, x2, v)) {
       throw new ComputationException("Unable to compute value");
     }
+    final double c = params[0];
+    final double m = params[1];
     for (int i = 0; i < v.length; i++) {
       procedure.execute(c + m * v[i]);
     }
@@ -100,14 +100,14 @@ public class PsfModelGradient1Function implements Gradient1Function, NamedFuncti
   public void forEach(Gradient1Procedure procedure) {
     final double[] v = new double[size()];
     final double[][] g = new double[v.length][];
-    final double c = params[0];
-    final double m = params[1];
     final double x0 = params[2];
     final double x1 = params[3];
     final double x2 = params[4];
     if (!psf.getValueAndGradient(width, height, x0, x1, x2, v, g)) {
       throw new ComputationException("Unable to compute value and gradient");
     }
+    final double c = params[0];
+    final double m = params[1];
     final double[] dfDa = new double[5];
     dfDa[0] = 1;
     for (int i = 0; i < v.length; i++) {
