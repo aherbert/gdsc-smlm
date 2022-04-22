@@ -32,6 +32,15 @@ import uk.ac.sussex.gdsc.core.utils.MathUtils;
  * neighbours of a given position.
  */
 public class PeakResultGridManager {
+  private PeakList[][] peakGrid;
+  private final int resolution;
+  private final int xBlocks;
+  private final int yBlocks;
+
+  private PeakResult[] peakCache;
+  private int peakCacheX = -1;
+  private int peakCacheY = -1;
+
   private static class PeakList {
     int size;
     PeakResult[] list;
@@ -44,24 +53,6 @@ public class PeakResultGridManager {
       }
       list[size++] = peak;
     }
-  }
-
-  private PeakList[][] peakGrid;
-  private final int resolution;
-  private final int xBlocks;
-  private final int yBlocks;
-
-  private PeakResult[] peakCache;
-  private int peakCacheX = -1;
-  private int peakCacheY = -1;
-
-  /**
-   * Clear the cache. This should be called when more data has been added to the grid.
-   */
-  public void clearCache() {
-    peakCache = null;
-    peakCacheX = -1;
-    peakCacheY = -1;
   }
 
   /**
@@ -77,16 +68,6 @@ public class PeakResultGridManager {
     yBlocks = getBlock(maxy) + 1;
 
     createPeakGrid();
-  }
-
-  private void createPeakGrid() {
-    peakGrid = new PeakList[xBlocks][yBlocks];
-    for (int x = 0; x < xBlocks; x++) {
-      final PeakList[] list = peakGrid[x];
-      for (int y = 0; y < yBlocks; y++) {
-        list[y] = new PeakList();
-      }
-    }
   }
 
   /**
@@ -116,6 +97,16 @@ public class PeakResultGridManager {
     }
   }
 
+  private void createPeakGrid() {
+    peakGrid = new PeakList[xBlocks][yBlocks];
+    for (int x = 0; x < xBlocks; x++) {
+      final PeakList[] list = peakGrid[x];
+      for (int y = 0; y < yBlocks; y++) {
+        list[y] = new PeakList();
+      }
+    }
+  }
+
   private int getBlock(final int x) {
     return x / resolution;
   }
@@ -141,6 +132,15 @@ public class PeakResultGridManager {
     final int xBlock = getBlock((int) peak.getXPosition());
     final int yBlock = getBlock((int) peak.getYPosition());
     peakGrid[xBlock][yBlock].add(peak);
+  }
+
+  /**
+   * Clear the cache. This should be called when more data has been added to the grid.
+   */
+  public void clearCache() {
+    peakCache = null;
+    peakCacheX = -1;
+    peakCacheY = -1;
   }
 
   /**
