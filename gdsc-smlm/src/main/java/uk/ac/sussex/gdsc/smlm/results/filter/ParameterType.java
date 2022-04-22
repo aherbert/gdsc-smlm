@@ -92,11 +92,11 @@ public enum ParameterType implements NamedObject {
   private final String name;
   private final String shortName;
 
-  private ParameterType(String name) {
+  ParameterType(String name) {
     this(name, name);
   }
 
-  private ParameterType(String name, String sname) {
+  ParameterType(String name, String sname) {
     this.name = name;
     this.shortName = sname;
   }
