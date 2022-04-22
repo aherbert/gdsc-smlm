@@ -40,7 +40,7 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PeakResultProcedure;
 public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   private static final long serialVersionUID = 20190319L;
 
-  /** The results. */
+  /** The results (never null). */
   private PeakResult[] results;
 
   /** The size. */
@@ -73,7 +73,7 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
    * @throws NullPointerException if the results are null
    */
   public ArrayPeakResultStore(PeakResult[] results) {
-    this.results = results;
+    this.results = Objects.requireNonNull(results, "results");
     this.size = results.length;
   }
 
@@ -142,8 +142,15 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
     return addArray(results, results.length);
   }
 
+  /**
+   * Adds the array.
+   *
+   * @param results the results (must not be null)
+   * @param length the length
+   * @return true if the size changed
+   */
   private boolean addArray(PeakResult[] results, int length) {
-    if (results == null || length == 0) {
+    if (length == 0) {
       return false;
     }
     final int s = size;
@@ -218,7 +225,10 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
    * A version of rangeCheck with lower bounds check.
    */
   private void rangeCheckWithLowerBounds(int index) {
-    if (index > size || index < 0) {
+    // (index >= size || index < 0)
+    // Do this using index as an unsigned integer.
+    // See Integer.compareUnsigned
+    if (index + Integer.MIN_VALUE >= size + Integer.MIN_VALUE) {
       throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
   }
@@ -315,9 +325,11 @@ public class ArrayPeakResultStore implements PeakResultStoreList, Serializable {
   @Override
   public PeakResultStore copy(boolean deepCopy) {
     if (deepCopy) {
-      final ArrayPeakResultStore copy = new ArrayPeakResultStore(size());
-      for (int i = 0, max = size(); i < max; i++) {
-        copy.add(results[i].copy());
+      final PeakResult[] e = results;
+      final int max = size;
+      final ArrayPeakResultStore copy = new ArrayPeakResultStore(max);
+      for (int i = 0; i < max; i++) {
+        copy.add(e[i].copy());
       }
       return copy;
     }
