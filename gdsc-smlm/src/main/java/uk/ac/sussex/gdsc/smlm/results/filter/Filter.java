@@ -963,7 +963,7 @@ public abstract class Filter implements Comparable<Filter>, Chromosome<FilterSco
         filter.initialiseState();
         return filter;
       }
-    } catch (final ClassCastException ex) {
+    } catch (final ClassCastException ignored) {
       // Not a filter
     }
     return null;

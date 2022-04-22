@@ -125,7 +125,7 @@ public class FilterSet {
   public static FilterSet fromXml(String xml) {
     try {
       return (FilterSet) FilterXStreamUtils.fromXml(xml);
-    } catch (final ClassCastException ex) {
+    } catch (final ClassCastException ignored) {
       // Not a FilterSet
     }
     return null;
