@@ -48,6 +48,24 @@ public class PeakResultConversionHelper {
   private final Calibration calibration;
   private final PSF psf;
 
+  /** The intensity unit. */
+  private IntensityUnit intensityUnit;
+
+  /** The intensity converter. */
+  private TypeConverter<IntensityUnit> intensityConverter;
+
+  /** The distance unit. */
+  private DistanceUnit distanceUnit;
+
+  /** The distance converter. */
+  private TypeConverter<DistanceUnit> distanceConverter;
+
+  /** The angle unit. */
+  private AngleUnit angleUnit;
+
+  /** The angle converter. */
+  private TypeConverter<AngleUnit> angleConverter;
+
   /**
    * Instantiates a new peak result conversion helper.
    *
@@ -58,12 +76,6 @@ public class PeakResultConversionHelper {
     this.calibration = calibration;
     this.psf = psf;
   }
-
-  /** The intensity unit. */
-  private IntensityUnit intensityUnit;
-
-  /** The intensity converter. */
-  private TypeConverter<IntensityUnit> intensityConverter;
 
   /**
    * Gets the intensity unit.
@@ -116,12 +128,6 @@ public class PeakResultConversionHelper {
     return intensityConverter;
   }
 
-  /** The distance unit. */
-  private DistanceUnit distanceUnit;
-
-  /** The distance converter. */
-  private TypeConverter<DistanceUnit> distanceConverter;
-
   /**
    * Gets the distance unit.
    *
@@ -172,12 +178,6 @@ public class PeakResultConversionHelper {
     }
     return distanceConverter;
   }
-
-  /** The angle unit. */
-  private AngleUnit angleUnit;
-
-  /** The angle converter. */
-  private TypeConverter<AngleUnit> angleConverter;
 
   /**
    * Gets the angle unit.
@@ -263,9 +263,10 @@ public class PeakResultConversionHelper {
               break;
             default:
               list.add(new IdentityTypeConverter<>(p.getUnit()));
+              break;
           }
         }
-      } catch (final ConfigurationException ex) {
+      } catch (final ConfigurationException ignored) {
         // Ignore
       }
     }
@@ -293,7 +294,7 @@ public class PeakResultConversionHelper {
           final String name = p.getName();
           list.add(TextUtils.isNullOrEmpty(name) ? "unknown" : name);
         }
-      } catch (final ConfigurationException ex) {
+      } catch (final ConfigurationException ignored) {
         // Ignore
       }
     }
@@ -340,9 +341,10 @@ public class PeakResultConversionHelper {
               break;
             default:
               list.add("");
+              break;
           }
         }
-      } catch (final ConfigurationException ex) {
+      } catch (final ConfigurationException ignored) {
         // Ignore
       }
     }
