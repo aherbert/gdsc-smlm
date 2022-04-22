@@ -121,8 +121,8 @@ public class ImagePsfModel extends PsfModel {
     if (image == null || image.length == 0) {
       throw new IllegalArgumentException("Image cannot be null/empty");
     }
-    for (int i = 0; i < image.length; i++) {
-      if (image[i] == null) {
+    for (final float[] data : image) {
+      if (data == null) {
         throw new IllegalArgumentException("Image contains null plane");
       }
     }
@@ -160,8 +160,8 @@ public class ImagePsfModel extends PsfModel {
     this.sumImage = duplicate(image);
 
     if (noiseFraction > 0) {
-      for (int i = 0; i < sumImage.length; i++) {
-        subtractNoise(sumImage[i], noiseFraction);
+      for (final double[] data : sumImage) {
+        subtractNoise(data, noiseFraction);
       }
     }
 
@@ -175,8 +175,8 @@ public class ImagePsfModel extends PsfModel {
     }
 
     // Then create a rolling sum table
-    for (int i = 0; i < sumImage.length; i++) {
-      calculateRollingSums(sumImage[i]);
+    for (final double[] data : sumImage) {
+      calculateRollingSums(data);
     }
   }
 
@@ -253,16 +253,15 @@ public class ImagePsfModel extends PsfModel {
     }
 
     double max = 0;
-    for (int i = 0; i < image.length; i++) {
-      max = Math.max(max, MathUtils.sum(image[i]));
+    for (final double[] data : image) {
+      max = Math.max(max, MathUtils.sum(data));
     }
 
     if (max <= 0) {
       return;
     }
 
-    for (int i = 0; i < image.length; i++) {
-      final double[] data = image[i];
+    for (final double[] data : image) {
       for (int j = 0; j < data.length; j++) {
         data[j] /= max;
       }
@@ -448,7 +447,6 @@ public class ImagePsfModel extends PsfModel {
     if (slice < 0 || slice >= sumImage.length) {
       return data;
     }
-    final double[] sumPsf = sumImage[slice];
 
     // Determine PSF blocks.
     // We need to map vertices of each pixel in the PSF onto the output image.
@@ -492,6 +490,8 @@ public class ImagePsfModel extends PsfModel {
     if (lu[0] > psfWidth - 1 || lv[0] > psfWidth - 1 || lu[x0range] < 0 || lv[x1range] < 0) {
       return data;
     }
+
+    final double[] sumPsf = sumImage[slice];
 
     for (int y = 0; y < x1range; y++) {
       if (lv[y] > psfWidth - 1) {
@@ -875,8 +875,7 @@ public class ImagePsfModel extends PsfModel {
    * Initialise the HWHM look-up table.
    */
   public void initialiseHwhm() {
-    double[] hwhm = hwhm0;
-    if (hwhm == null) {
+    if (hwhm0 == null) {
       computeHwhm();
     }
   }
@@ -966,7 +965,7 @@ public class ImagePsfModel extends PsfModel {
       return false;
     }
     final double delta = 1e-2;
-    final double[] dx = new double[] {delta, delta, unitsPerSlice};
+    final double[] dx = {delta, delta, unitsPerSlice};
     return computeValueAndGradient(width, height, x0, x1, x2, value, jacobian, dx);
   }
 }
