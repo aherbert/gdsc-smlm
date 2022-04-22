@@ -182,7 +182,7 @@ public class Cluster {
    * @return The standard deviation of the distances from the centroid
    */
   public float getStandardDeviation() {
-    if (results.size() < 2) {
+    if (results.size() <= 1) {
       return 0;
     }
     getCentroid();
@@ -272,9 +272,7 @@ public class Cluster {
     final double sxm = Math.sqrt(sumXi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
     final double sym = Math.sqrt(sumYi2Ni / sumNin + sumS2_sumNin) / 1.414213562;
 
-    final double sPeak = Math.max(sxm, sym);
-
-    return sPeak;
+    return Math.max(sxm, sym);
   }
 
   private static double checkPrecision(double precision) {
@@ -409,7 +407,8 @@ public class Cluster {
       results.clear();
     } else {
       final PeakResultStoreList newResults = new ArrayPeakResultStore(size() - 2);
-      for (int i = 1, size = size() - 1; i < size; i++) {
+      final int size = size() - 1;
+      for (int i = 1; i < size; i++) {
         newResults.add(results.get(i));
       }
       results = newResults;
@@ -423,7 +422,7 @@ public class Cluster {
    * @return The mean squared-distance between adjacent localisations.
    */
   public double getMsd() {
-    if (size() < 2) {
+    if (size() <= 1) {
       return 0;
     }
     double sum = 0;
@@ -442,7 +441,7 @@ public class Cluster {
    * @return The mean distance between adjacent localisations.
    */
   public double getMeanDistance() {
-    if (size() < 2) {
+    if (size() <= 1) {
       return 0;
     }
     double sum = 0;
