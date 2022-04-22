@@ -62,7 +62,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   /** solver to use in the line search (may be null). */
   private final UnivariateSolver solver;
   /** Initial step used to bracket the optimum in line search. */
-  private double initialStep = 1;
+  double initialStep = 1;
 
   /** Flags to indicate if bounds are present. */
   private boolean isLower;
@@ -178,7 +178,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    *         function) is exceeded.
    */
   @Override
-  public PointValuePair optimize(OptimizationData... optData) throws TooManyEvaluationsException {
+  public PointValuePair optimize(OptimizationData... optData) {
     // Set up base class and perform computation.
     return super.optimize(optData);
   }
@@ -212,14 +212,13 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
     }
 
     // Used for non-gradient based line search
-    LineSearch line = null;
     double rel = 1e-6;
     double abs = 1e-10;
     if (getConvergenceChecker() instanceof SimpleValueChecker) {
       rel = ((SimpleValueChecker) getConvergenceChecker()).getRelativeThreshold();
       abs = ((SimpleValueChecker) getConvergenceChecker()).getRelativeThreshold();
     }
-    line = new LineSearch(Math.sqrt(rel), Math.sqrt(abs));
+    final LineSearch line = new LineSearch(Math.sqrt(rel), Math.sqrt(abs));
 
     PointValuePair current = null;
     int maxEval = getMaxEvaluations();
@@ -374,7 +373,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
   private static double findUpperBound(final UnivariateFunction func, final double a,
       final double initialStep) {
     final double yA = func.value(a);
-    double yB = yA;
+    double yB;
     for (double step = initialStep; step < Double.MAX_VALUE; step *= Math.max(2, yA / yB)) {
       final double b = a + step;
       yB = func.value(b);
@@ -629,7 +628,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    *
    * @param point the point
    */
-  private void applyBounds(double[] point) {
+  void applyBounds(double[] point) {
     if (isUpper) {
       for (int i = 0; i < point.length; i++) {
         if (point[i] > upper[i]) {
@@ -654,7 +653,7 @@ public class BoundedNonLinearConjugateGradientOptimizer extends GradientMultivar
    * @param point the point
    * @return true if NaN gradients
    */
-  private boolean checkGradients(double[] gradient, double[] point) {
+  boolean checkGradients(double[] gradient, double[] point) {
     return checkGradients(gradient, point, sign);
   }
 
