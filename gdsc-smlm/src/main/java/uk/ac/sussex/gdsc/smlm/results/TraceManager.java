@@ -84,11 +84,11 @@ public class TraceManager {
     public abstract String getName();
   }
 
-  private MemoryPeakResults results;
-  private Localisation[] localisations;
-  private Localisation[] endLocalisations;
-  private int[] indexes;
-  private int[] endIndexes;
+  private final MemoryPeakResults results;
+  private final Localisation[] localisations;
+  private final Localisation[] endLocalisations;
+  private final int[] indexes;
+  private final int[] endIndexes;
   private int[] maxTime;
   private int totalTraces;
   private int totalFiltered;
@@ -110,6 +110,9 @@ public class TraceManager {
    */
   private float minD;
 
+  /**
+   * Contains trace localisation data.
+   */
   private static class Localisation {
     int time;
     int endTime;
@@ -136,12 +139,15 @@ public class TraceManager {
     }
   }
 
+  /**
+   * Contains trace assignment data.
+   */
   private static class Assignment {
     int index;
     float distance;
     int traceId;
 
-    public Assignment(int index, float distance, int traceId) {
+    Assignment(int index, float distance, int traceId) {
       this.index = index;
       this.distance = distance;
       this.traceId = traceId;
@@ -162,7 +168,7 @@ public class TraceManager {
 
     // Assign localisations. We use the native result units to avoid conversion exceptions.
     localisations = new Localisation[results.size()];
-    Counter counter = new Counter();
+    final Counter counter = new Counter();
     results.forEach((PeakResultProcedure) result -> {
       final int id = counter.getAndIncrement();
       localisations[id] = new Localisation(id, result.getFrame(), result.getEndFrame(),
@@ -452,12 +458,8 @@ public class TraceManager {
 
       final int traceId = localisations[i].trace;
 
-      if (!processedTraces.add(traceId)) {
-        // Already present
-        continue;
-      }
-
-      if (filterActivationFrames && outsideActivationWindow(localisations[i].time)) {
+      if (!processedTraces.add(traceId)
+          || (filterActivationFrames && outsideActivationWindow(localisations[i].time))) {
         continue;
       }
 
@@ -510,8 +512,7 @@ public class TraceManager {
         final float sd = traces[i].getStandardDeviation();
         final float background = 0;
         final float signal = (float) traces[i].getSignal();
-        final float[] params =
-            new float[] {background, signal, 0, centroid[0], centroid[1], sd, sd};
+        final float[] params = {background, signal, 0, centroid[0], centroid[1], sd, sd};
         final int endFrame = traces[i].getTail().getEndFrame();
         results.add(new ExtendedPeakResult(result.getFrame(), result.getOrigX(), result.getOrigY(),
             result.getOrigValue(), 0, 0, 0, params, null, endFrame, i + 1));
@@ -546,42 +547,42 @@ public class TraceManager {
       if (calibration != null) {
         try {
           converter = CalibrationHelper.getDistanceConverter(calibration, DistanceUnit.NM);
-        } catch (final ConversionException ex) {
+        } catch (final ConversionException ignored) {
           // Ignore
         }
       }
 
       // Ensure all results are added as extended peak results with their trace ID.
-      for (int i = 0; i < traces.length; i++) {
-        if (traces[i] == null || traces[i].size() == 0) {
+      for (final Trace trace : traces) {
+        if (trace == null || trace.size() == 0) {
           continue;
         }
 
-        final PeakResult result = traces[i].getHead();
-        if (traces[i].size() == 1) {
+        final PeakResult result = trace.getHead();
+        if (trace.size() == 1) {
           final AttributePeakResult peakResult = new AttributePeakResult(result.getFrame(),
               result.getOrigX(), result.getOrigY(), result.getOrigValue(), 0, result.getNoise(),
               result.getMeanIntensity(), result.getParameters(), null);
-          peakResult.setId(traces[i].getId());
+          peakResult.setId(trace.getId());
           peakResult.setEndFrame(result.getEndFrame());
           if (converter != null) {
-            peakResult.setPrecision(traces[i].getLocalisationPrecision(converter));
+            peakResult.setPrecision(trace.getLocalisationPrecision(converter));
           }
           results.add(peakResult);
         } else {
-          traces[i].sort();
-          traces[i].resetCentroid();
-          final float[] centroid = traces[i].getCentroid();
+          trace.sort();
+          trace.resetCentroid();
+          final float[] centroid = trace.getCentroid();
           float background = 0;
           double noise = 0;
-          for (final PeakResult r : traces[i].getPoints().toArray()) {
+          for (final PeakResult r : trace.getPoints().toArray()) {
             noise += r.getNoise() * r.getNoise();
             background += r.getBackground();
           }
           noise = Math.sqrt(noise);
-          background /= traces[i].size();
-          final double signal = traces[i].getSignal();
-          final int endFrame = traces[i].getTail().getEndFrame();
+          background /= trace.size();
+          final double signal = trace.getSignal();
+          final int endFrame = trace.getTail().getEndFrame();
           final AttributePeakResult peakResult =
               new AttributePeakResult(result.getFrame(), centroid[0], centroid[1], (float) signal);
           // Build standard peak data
@@ -592,10 +593,10 @@ public class TraceManager {
           peakResult.setOrigY(result.getOrigY());
           peakResult.setOrigValue(result.getOrigValue());
 
-          peakResult.setId(traces[i].getId());
+          peakResult.setId(trace.getId());
           peakResult.setEndFrame(endFrame);
           if (converter != null) {
-            peakResult.setPrecision(traces[i].getLocalisationPrecision(converter));
+            peakResult.setPrecision(trace.getLocalisationPrecision(converter));
           }
           results.add(peakResult);
         }
