@@ -70,7 +70,7 @@ public class PeakResultsDigest {
    * @return the peak results digest
    */
   public static PeakResultsDigest create(PeakResult... peakResults) {
-    PeakResultsDigest d = new PeakResultsDigest();
+    final PeakResultsDigest d = new PeakResultsDigest();
     d.digest(peakResults);
     return d;
   }
@@ -248,7 +248,7 @@ public class PeakResultsDigest {
     } catch (final CancellationException | ExecutionException ex) {
       // Report this
       throw new ConcurrentRuntimeException(ex);
-    } catch (final TimeoutException ex) {
+    } catch (final TimeoutException ignored) {
       // Ignore
     }
     return null;
