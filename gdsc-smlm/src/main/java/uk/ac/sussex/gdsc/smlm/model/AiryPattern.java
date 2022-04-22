@@ -30,13 +30,16 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
 /**
  * Simple class to calculate AiryPattern.
  */
-public class AiryPattern {
+public final class AiryPattern {
   /**
    * Convert Airy radius to Gaussian approximation.
    *
    * <p>See Abraham, et al (2009) Opt Express 17: 23352.
    */
   public static final double FACTOR = 1.323;
+
+  /** No instances. */
+  private AiryPattern() {}
 
   /**
    * Calculate the intensity of the AiryPattern at distance x from the centre.
