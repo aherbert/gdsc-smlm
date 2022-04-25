@@ -476,7 +476,7 @@ public class PeakFit implements PlugInFilter {
             refreshSettings(template.getPsf(), custom);
           }
           if (template.hasFitEngineSettings()) {
-            refreshSettings(template.getFitEngineSettings(), custom);
+            refreshSettings(template.getFitEngineSettings());
           }
           if (template.hasResultsSettings()) {
             refreshSettings(template.getResultsSettings());
@@ -560,9 +560,8 @@ public class PeakFit implements PlugInFilter {
      * some existing spot settings untouched as the user may have updated them (e.g. PSF width).
      *
      * @param fitEngineSettings the config
-     * @param isCustomTemplate True if a custom template.
      */
-    private void refreshSettings(FitEngineSettings fitEngineSettings, boolean isCustomTemplate) {
+    private void refreshSettings(FitEngineSettings fitEngineSettings) {
       // Set the configuration
       // This will clear everything and merge the configuration
       PeakFit.this.config.setFitEngineSettings(fitEngineSettings);
@@ -3911,10 +3910,9 @@ public class PeakFit implements PlugInFilter {
         return;
       }
 
-      if (slice % step == 0) {
-        if (ImageJUtils.showStatus(() -> String.format(format, slice, results.size()))) {
-          IJ.showProgress(slice, totalFrames);
-        }
+      if (slice % step == 0
+          && ImageJUtils.showStatus(() -> String.format(format, slice, results.size()))) {
+        IJ.showProgress(slice, totalFrames);
       }
 
       // We must pre-process the data before noise estimation
