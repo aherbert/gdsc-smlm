@@ -73,6 +73,8 @@ public class MultiPathFilter {
   @XStreamOmitField
   private boolean failNew;
 
+  private FilterSetupState filterSetupState;
+
   /**
    * Stores the results that were accepted when filtering a multi-path result. Also stores the fit
    * result that was used to select the results.
@@ -175,9 +177,9 @@ public class MultiPathFilter {
       if (results == null) {
         return;
       }
-      for (int i = 0; i < results.length; i++) {
-        if (results[i].isNewResult()) {
-          isFit[results[i].getCandidateId()] = true;
+      for (final PreprocessedPeakResult result : results) {
+        if (result.isNewResult()) {
+          isFit[result.getCandidateId()] = true;
         }
       }
     }
@@ -321,8 +323,6 @@ public class MultiPathFilter {
       filter.setup(setupFlags, setupData);
     }
   }
-
-  private FilterSetupState filterSetupState;
 
   /**
    * Save the initial setup state of the main filter.
@@ -577,7 +577,7 @@ public class MultiPathFilter {
     // If nothing matches then pick the result with the most new results, or use the default
     // order we processed the fits.
 
-    boolean doDoublet = false;
+    boolean doDoublet;
 
     // Filter multi-fit
 
@@ -799,7 +799,7 @@ public class MultiPathFilter {
     // If nothing matches then pick the result with the most new results, or use the default
     // order we processed the fits.
 
-    boolean doDoublet = false;
+    boolean doDoublet;
 
     // Filter multi-fit
     // Accept all and then check if we can perform a doublet fit
@@ -829,12 +829,10 @@ public class MultiPathFilter {
     if (doDoublet) {
       multiDoubletResults =
           acceptAnyDoublet(multiPathResult, validateCandidates, store, candidateId);
-      if (multiDoubletResults != null) {
-        // Check we have a new result for the candidate
-        if (contains(multiDoubletResults, candidateId)) {
-          return new SelectedResult(multiDoubletResults,
-              multiPathResult.getMultiDoubletFitResult());
-        }
+      if (multiDoubletResults != null
+          // Check we have a new result for the candidate
+          && contains(multiDoubletResults, candidateId)) {
+        return new SelectedResult(multiDoubletResults, multiPathResult.getMultiDoubletFitResult());
       }
     } else {
       multiDoubletResults = null;
@@ -848,8 +846,6 @@ public class MultiPathFilter {
     // We reached here with:
     // a multi fit that failed or matched a different candidate
     // a doublet multi fit that failed or matched a different candidate
-
-    doDoublet = false;
 
     // Filter single-fit
     final PreprocessedPeakResult[] singleResults =
@@ -879,11 +875,10 @@ public class MultiPathFilter {
       singleDoubletResults =
           acceptAny(candidateId, multiPathResult.getDoubletFitResult(), validateCandidates, store);
       restoreFilterState();
-      if (singleDoubletResults != null) {
-        // Check we have a new result for the candidate
-        if (contains(singleDoubletResults, candidateId)) {
-          return new SelectedResult(singleDoubletResults, multiPathResult.getDoubletFitResult());
-        }
+      if (singleDoubletResults != null
+          // Check we have a new result for the candidate
+          && contains(singleDoubletResults, candidateId)) {
+        return new SelectedResult(singleDoubletResults, multiPathResult.getDoubletFitResult());
       }
     } else {
       singleDoubletResults = null;
@@ -1274,23 +1269,20 @@ public class MultiPathFilter {
 
     for (int i = 0; i < results.length; i++) {
       if (results[i].isNewResult()) {
-        if (results[i].getCandidateId() != candidateId) {
-          // This is new result for a different candidate.
-          // If a fit has already been accepted (or we don't know)
-          // then it should be ignored.
-          if (store.isFit(results[i].getCandidateId())) {
-            continue;
-          }
+        if (results[i].getCandidateId() != candidateId
+            // This is new result for a different candidate.
+            // If a fit has already been accepted (or we don't know)
+            // then it should be ignored.
+            && store.isFit(results[i].getCandidateId())) {
+          continue;
         }
 
         if (validationResults[i] == 0) {
           ok[count++] = i;
         } else {
           failNew = true;
-          if (minimalFilter) {
-            if (minAccept(results[i])) {
-              store.passMin(results[i]);
-            }
+          if (minimalFilter && minAccept(results[i])) {
+            store.passMin(results[i]);
           }
         }
       } else if (results[i].isExistingResult()) {
@@ -1301,10 +1293,8 @@ public class MultiPathFilter {
         // Optionally candidates must pass
         if (validationResults[i] == 0) {
           ok[count++] = i;
-        } else if (minimalFilter) {
-          if (minAccept(results[i])) {
-            store.passMin(results[i]);
-          }
+        } else if (minimalFilter && minAccept(results[i])) {
+          store.passMin(results[i]);
         }
       }
     }
@@ -1418,13 +1408,12 @@ public class MultiPathFilter {
 
     for (int i = 0; i < results.length; i++) {
       if (results[i].isNewResult()) {
-        if (results[i].getCandidateId() != candidateId) {
-          // This is new result for a different candidate.
-          // If a fit has already been accepted (or we don't know)
-          // then it should be ignored.
-          if (store.isFit(results[i].getCandidateId())) {
-            continue;
-          }
+        if (results[i].getCandidateId() != candidateId
+            // This is new result for a different candidate.
+            // If a fit has already been accepted (or we don't know)
+            // then it should be ignored.
+            && store.isFit(results[i].getCandidateId())) {
+          continue;
         }
 
         // Any new result that pass are OK
@@ -1432,10 +1421,8 @@ public class MultiPathFilter {
           ok[count++] = i;
         } else {
           failNew = true;
-          if (minimalFilter) {
-            if (minAccept(results[i])) {
-              store.passMin(results[i]);
-            }
+          if (minimalFilter && minAccept(results[i])) {
+            store.passMin(results[i]);
           }
         }
       } else if (results[i].isExistingResult()) {
@@ -1447,10 +1434,8 @@ public class MultiPathFilter {
         // Optionally candidates must pass
         if (validationResults[i] == 0) {
           ok[count++] = i;
-        } else if (minimalFilter) {
-          if (minAccept(results[i])) {
-            store.passMin(results[i]);
-          }
+        } else if (minimalFilter && minAccept(results[i])) {
+          store.passMin(results[i]);
         }
       }
     }
@@ -1525,8 +1510,8 @@ public class MultiPathFilter {
    * @return true, if there is the given candidate
    */
   private static boolean contains(final PreprocessedPeakResult[] results, final int candidateId) {
-    for (int i = 0; i < results.length; i++) {
-      if (results[i].getCandidateId() == candidateId) {
+    for (final PreprocessedPeakResult result : results) {
+      if (result.getCandidateId() == candidateId) {
         return true;
       }
     }
@@ -1539,11 +1524,11 @@ public class MultiPathFilter {
    * @param results the results
    * @return The count
    */
-  private static int countNewResult(final PreprocessedPeakResult[] results) {
+  static int countNewResult(final PreprocessedPeakResult[] results) {
     int count = 0;
     if (results != null) {
-      for (int i = 0; i < results.length; i++) {
-        if (results[i].isNewResult()) {
+      for (final PreprocessedPeakResult result : results) {
+        if (result.isNewResult()) {
           count++;
         }
       }
@@ -1559,8 +1544,8 @@ public class MultiPathFilter {
    */
   private static boolean isNewResult(final PreprocessedPeakResult[] results) {
     if (results != null) {
-      for (int i = 0; i < results.length; i++) {
-        if (results[i].isNewResult()) {
+      for (final PreprocessedPeakResult result : results) {
+        if (result.isNewResult()) {
           return true;
         }
       }
@@ -1590,8 +1575,7 @@ public class MultiPathFilter {
     coordinateStore = NullCoordinateStore.replaceIfNull(coordinateStore);
 
     final ArrayList<PreprocessedPeakResult> list = new ArrayList<>(results.length);
-    for (int k = 0; k < results.length; k++) {
-      final MultiPathFitResults multiPathResults = results[k];
+    for (final MultiPathFitResults multiPathResults : results) {
 
       // Debugging the results that are scored
       // java.io.OutputStreamWriter out = null;
@@ -1651,15 +1635,15 @@ public class MultiPathFilter {
           final PreprocessedPeakResult[] result = accept(multiPathResult, true, store);
           boolean newResult = false;
           if (result != null) {
-            for (int i = 0; i < result.length; i++) {
-              if (result[i].isNewResult()) {
+            for (final PreprocessedPeakResult r : result) {
+              if (r.isNewResult()) {
                 newResult = true;
                 // if (out != null)
                 // {
                 // try
                 // {
                 // out.write(String.format("[%d] %d : %.2f %.2f\n", multiPathResults.frame,
-                // multiPathResult.candidateId, result[i].getX(), result[i].getY()));
+                // multiPathResult.candidateId, r.getX(), r.getY()));
                 // }
                 // catch (Exception e)
                 // {
@@ -1678,29 +1662,28 @@ public class MultiPathFilter {
                 // }
 
                 // TODO - Check for duplicates
-                if (result[i].isNotDuplicate() || !coordinateStore.contains(result[i].getX(),
-                    result[i].getY(), result[i].getZ())) {
-                  coordinateStore.addToQueue(result[i].getX(), result[i].getY(), result[i].getZ());
-                  // if (store.isFit[result[i].getCandidateId()] &&
-                  // result[i].getCandidateId() != multiPathResult.candidateId)
+                if (r.isNotDuplicate() || !coordinateStore.contains(r.getX(), r.getY(), r.getZ())) {
+                  coordinateStore.addToQueue(r.getX(), r.getY(), r.getZ());
+                  // if (store.isFit[r.getCandidateId()] &&
+                  // r.getCandidateId() != multiPathResult.candidateId)
                   // System.out.printf("Fitted candidate %d [%d] %f,%f ([%d])\n",
-                  // multiPathResults.frame, multiPathResult.candidateId, result[i].getX(),
-                  // result[i].getY(), result[i].getCandidateId());
+                  // multiPathResults.frame, multiPathResult.candidateId, r.getX(),
+                  // r.getY(), r.getCandidateId());
 
-                  list.add(result[i]);
+                  list.add(r);
 
                   // This is a new fitted result
-                  store.isFit[result[i].getCandidateId()] = true;
+                  store.isFit[r.getCandidateId()] = true;
                 }
                 // else
                 // {
-                // double[] tmp = cstore.find(result[i].getX(), result[i].getY());
+                // double[] tmp = cstore.find(r.getX(), r.getY());
                 // System.out.printf("Duplicate %d [%d] %f,%f == %f,%f (%b [%d])\n",
-                // multiPathResults.frame, multiPathResult.candidateId, result[i].getX(),
-                // result[i].getY(), tmp[0], tmp[1], store.isFit[result[i].getCandidateId()],
-                // result[i].getCandidateId());
+                // multiPathResults.frame, multiPathResult.candidateId, r.getX(),
+                // r.getY(), tmp[0], tmp[1], store.isFit[r.getCandidateId()],
+                // r.getCandidateId());
                 // // So we can see them
-                // //list.add(result[i]);
+                // //list.add(r);
                 // }
               }
             }
@@ -2146,10 +2129,8 @@ public class MultiPathFilter {
               if (r.isNewResult()) {
                 newResult = true;
 
-                if (r.ignore()) {
-                  // Q. should this be passed to the scoreStore?
-                } else if (r.isNotDuplicate()
-                    || !coordinateStore.contains(r.getX(), r.getY(), r.getZ())) {
+                if (!r.ignore() && (r.isNotDuplicate()
+                    || !coordinateStore.contains(r.getX(), r.getY(), r.getZ()))) {
                   coordinateStore.addToQueue(r.getX(), r.getY(), r.getZ());
                   scoreStore.add(r.getUniqueId());
                   final FractionalAssignment[] a = r.getAssignments(predicted++);
