@@ -1965,8 +1965,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
     }
 
     private boolean containsAmplitudeEstimates(boolean[] amplitudeEstimate) {
-      for (int i = 0; i < amplitudeEstimate.length; i++) {
-        if (amplitudeEstimate[i]) {
+      for (final boolean b : amplitudeEstimate) {
+        if (b) {
           return true;
         }
       }
@@ -2421,8 +2421,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       // Exclude the fitted candidate neighbours from the candidate neighbours
       neighbours.removeIf(candidate -> {
         final int otherId = candidate.index;
-        for (int j = 0; j < fitResults.length; j++) {
-          if (fitResults[j].getCandidateId() == otherId) {
+        for (final PreprocessedPeakResult fitResult : fitResults) {
+          if (fitResult.getCandidateId() == otherId) {
             return true;
           }
         }
@@ -2434,8 +2434,8 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
       final CandidateList peakNeighbours2 = peakNeighbours.copy();
 
       // Update with the fitted results from the multi fit
-      NEXT_RESULT: for (int j = 0; j < fitResults.length; j++) {
-        final int otherId = fitResults[j].getCandidateId();
+      NEXT_RESULT: for (final PreprocessedPeakResult fitResult : fitResults) {
+        final int otherId = fitResult.getCandidateId();
         if (otherId == candidateId) {
           // Ignore this as it is the current candidate
           continue;
@@ -2454,7 +2454,7 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         // (Use similar logic to when we create the actual results in #add(SelectedResult))
         // Note that we do not unfreeze the parameters (i.e. the widths of from astigmatism z-model)
         // since we are only interested in the coordinates.
-        final double[] p = fitResults[j].toGaussian2DParameters();
+        final double[] p = fitResult.toGaussian2DParameters();
         final float[] params = new float[p.length];
         params[Gaussian2DFunction.BACKGROUND] = background;
         for (int i = 1; i < params.length; i++) {
@@ -2665,10 +2665,10 @@ public class FitWorker implements Runnable, IMultiPathFitResults, SelectedResult
         //@formatter:on
 
         resultDoubletMulti = createResult(mdoubletFitResult, results);
-      } else {
-        // Nothing to return. Do not set to null to allow reporting of the errors
-        // resultMultiDoublet = null;
       }
+      // else:
+      // Nothing to return. Do not set to null to allow reporting of the errors
+      // resultMultiDoublet = null;
 
       return resultDoubletMulti;
     }
