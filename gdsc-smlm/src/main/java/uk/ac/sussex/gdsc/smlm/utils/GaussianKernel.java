@@ -210,7 +210,7 @@ public class GaussianKernel {
    */
   public double[] getDownscaleGaussianKernel(int scale, double range, boolean edgeCorrection) {
     if (scale < 1) {
-      throw new IllegalArgumentException("Scale must be strictly positive: " + scale);
+      throw new IllegalArgumentException("Scale must be >= 1: " + scale);
     }
 
     // Limit range for the Gaussian
