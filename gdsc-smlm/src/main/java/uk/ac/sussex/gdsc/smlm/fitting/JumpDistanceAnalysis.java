@@ -1336,10 +1336,10 @@ public class JumpDistanceAnalysis {
       // Compute the probability:
       // p = 1/4D * exp(-x/4D)
       final double[] values = new double[x.length];
-      // final double one_fourD = 1 / (4 * getD(params[0]));
-      final double one_fourD = 1 / (4 * params[0]);
+      // final double oneDivFourD = 1 / (4 * getD(params[0]));
+      final double oneDivFourD = 1 / (4 * params[0]);
       for (int i = 0; i < values.length; i++) {
-        values[i] = one_fourD * StdMath.exp(-x[i] * one_fourD);
+        values[i] = oneDivFourD * StdMath.exp(-x[i] * oneDivFourD);
       }
       return values;
     }
@@ -1351,12 +1351,12 @@ public class JumpDistanceAnalysis {
       // = log(1/4D) + log(exp(-x/4D))
       // = log(1/4D) + -x/4D
       double ll = 0;
-      // final double one_fourD = 1 / (4 * getD(variables[0]));
-      final double one_fourD = 1 / (4 * variables[0]);
+      // final double oneDivFourD = 1 / (4 * getD(variables[0]));
+      final double oneDivFourD = 1 / (4 * variables[0]);
       for (int i = 0; i < x.length; i++) {
-        ll += -x[i] * one_fourD;
+        ll += -x[i] * oneDivFourD;
       }
-      ll += Math.log(one_fourD) * x.length;
+      ll += Math.log(oneDivFourD) * x.length;
       // Debug the call from the optimiser
       // System.out.printf("[1] : [%f] = %f\n", variables[0], ll);
       return ll;

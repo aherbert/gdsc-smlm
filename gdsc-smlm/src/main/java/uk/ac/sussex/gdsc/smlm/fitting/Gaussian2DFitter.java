@@ -784,21 +784,21 @@ public class Gaussian2DFitter {
     // Configure the bounds for the width.
     // The factors are less strict than the fit configuration to allow some search space when
     // fitting close to the limits.
-    final double min_wf;
-    final double max_wf;
+    final double minWf;
+    final double maxWf;
     final boolean isZFitting = fitConfiguration.isZFitting();
     if (isZFitting) {
-      min_wf = 0;
-      max_wf = Double.MAX_VALUE;
+      minWf = 0;
+      maxWf = Double.MAX_VALUE;
     } else {
-      min_wf = getMinWidthFactor();
-      max_wf = getMaxWidthFactor();
+      minWf = getMinWidthFactor();
+      maxWf = getMaxWidthFactor();
     }
 
     // Get the upper bounds for the width factor. This is just used to estimate the upper bounds for
     // the signal
     // So it does not matter if it is too wrong.
-    final double wf = (max_wf < Double.MAX_VALUE) ? fitConfiguration.getMaxWidthFactor() : 3;
+    final double wf = (maxWf < Double.MAX_VALUE) ? fitConfiguration.getMaxWidthFactor() : 3;
 
     if (npeaks == 1) {
       // Allow the signal to explain all the data. This assumes the data window entirely covers the
@@ -868,10 +868,10 @@ public class Gaussian2DFitter {
         upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD];
         upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD];
       } else {
-        lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * min_wf;
-        upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * max_wf;
-        lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * min_wf;
-        upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * max_wf;
+        lower[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * minWf;
+        upper[j + Gaussian2DFunction.X_SD] = params[j + Gaussian2DFunction.X_SD] * maxWf;
+        lower[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * minWf;
+        upper[j + Gaussian2DFunction.Y_SD] = params[j + Gaussian2DFunction.Y_SD] * maxWf;
       }
     }
 

@@ -76,14 +76,14 @@ public class GaussJordan {
       return false;
     }
 
-    final float piv_inv = 1 / a[maxCol][maxCol];
+    final float oneDivPivot = 1 / a[maxCol][maxCol];
 
     a[maxCol][maxCol] = 1;
 
     for (int i = 0; i < a[maxCol].length; i++) {
-      a[maxCol][i] *= piv_inv;
+      a[maxCol][i] *= oneDivPivot;
     }
-    b[maxCol] *= piv_inv;
+    b[maxCol] *= oneDivPivot;
 
     for (int i = 0; i < a[maxCol].length; i++) {
       if (i != maxCol) {
@@ -217,14 +217,14 @@ public class GaussJordan {
       return false;
     }
 
-    final double piv_inv = 1 / a[maxCol][maxCol];
+    final double oneDivPivot = 1 / a[maxCol][maxCol];
 
     a[maxCol][maxCol] = 1;
 
     for (int i = 0; i < a[maxCol].length; i++) {
-      a[maxCol][i] *= piv_inv;
+      a[maxCol][i] *= oneDivPivot;
     }
-    b[maxCol] *= piv_inv;
+    b[maxCol] *= oneDivPivot;
 
     for (int i = 0; i < a[maxCol].length; i++) {
       if (i != maxCol) {
