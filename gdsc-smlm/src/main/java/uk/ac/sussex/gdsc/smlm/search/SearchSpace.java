@@ -27,6 +27,10 @@ package uk.ac.sussex.gdsc.smlm.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.math3.random.HaltonSequenceGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
@@ -45,9 +49,8 @@ public class SearchSpace {
   private double[][] seed;
 
   private double[][] scoredSearchSpace;
-  private final ArrayList<String> scoredSearchSpaceHash = new ArrayList<>();
-  private final HashSet<String> coveredSpace = new HashSet<>();
-  private final StringBuilder sb = new StringBuilder();
+  private final List<String> scoredSearchSpaceHash = new ArrayList<>();
+  private final Set<String> coveredSpace = new HashSet<>();
 
   // This introduces a dependency on another uk.ac.sussex.gdsc.smlm package
   private TrackProgress tracker;
@@ -114,12 +117,11 @@ public class SearchSpace {
     if (current == null) {
       current = findOptimum(dimensions, scoreFunction, null);
     }
-    SearchResult<T> previous = null;
 
     boolean converged = false;
     while (!converged) {
       iteration++;
-      previous = current;
+      final SearchResult<T> previous = current;
 
       if (!updateSearchSpace(dimensions, current, refinementMode)) {
         break;
@@ -148,7 +150,6 @@ public class SearchSpace {
 
   private void reset() {
     iteration = 0;
-    sb.setLength(0);
     currentSearchSpace = null;
     scoredSearchSpace = null;
     scoredSearchSpaceHash.clear();
@@ -199,12 +200,12 @@ public class SearchSpace {
     if (!coveredSpace.isEmpty()) {
       // Check we do not recompute scores
       scoredSearchSpace = new double[currentSearchSpace.length][];
-      scoredSearchSpaceHash.ensureCapacity(currentSearchSpace.length);
       int size = 0;
-      for (int i = 0; i < currentSearchSpace.length; i++) {
-        final String hash = generateHashString(currentSearchSpace[i]);
+      final StringBuilder sb = new StringBuilder();
+      for (final double[] values : currentSearchSpace) {
+        final String hash = generateHashString(sb, values);
         if (!coveredSpace.contains(hash)) {
-          scoredSearchSpace[size++] = currentSearchSpace[i];
+          scoredSearchSpace[size++] = values;
           scoredSearchSpaceHash.add(hash);
         }
       }
@@ -308,16 +309,17 @@ public class SearchSpace {
   /**
    * Generate hash string.
    *
+   * @param sb the StringBuilder
    * @param values the values
    * @return the string
    */
-  private String generateHashString(double[] values) {
-    for (int i = 0; i < values.length; i++) {
-      sb.append(values[i]);
-    }
-    final String hash = sb.toString();
+  private static String generateHashString(StringBuilder sb, double[] values) {
     sb.setLength(0);
-    return hash;
+    sb.ensureCapacity(25 * values.length);
+    for (final double w : values) {
+      sb.append(w);
+    }
+    return sb.toString();
   }
 
   /**
@@ -405,7 +407,8 @@ public class SearchSpace {
       }
     } catch (final ArrayIndexOutOfBoundsException ex) {
       // Return false
-      ex.printStackTrace();
+      Logger.getLogger(SearchSpace.class.getName()).log(Level.WARNING,
+          "Failed to create search space", ex);
       values = -1;
     }
 
@@ -427,11 +430,11 @@ public class SearchSpace {
       final double v = point[i];
       double min = v;
       double max = v;
-      for (int j = 0; j < values.length; j++) {
-        if (values[j] < v) {
-          min = values[j];
-        } else if (values[j] > v) {
-          max = values[j];
+      for (final double w : values) {
+        if (w < v) {
+          min = w;
+        } else if (w > v) {
+          max = w;
           break;
         }
       }
@@ -452,8 +455,8 @@ public class SearchSpace {
   private static double[][] createRefineSpace(double[][] dimensionValues, double[] point) {
     // Get the values
     int combinations = 0;
-    for (int i = 0; i < dimensionValues.length; i++) {
-      combinations += dimensionValues[i].length;
+    for (final double[] values : dimensionValues) {
+      combinations += values.length;
     }
 
     // This will be a list of points enumerating the entire range
@@ -467,10 +470,10 @@ public class SearchSpace {
       // Values to iterate over for this dimension
       final double[] v1 = dimensionValues[i];
 
-      for (int k = 0; k < v1.length; k++) {
+      for (final double d : v1) {
         // Create a new point with an updated value for this dimension
         final double[] v3 = point.clone();
-        v3[i] = v1[k];
+        v3[i] = d;
         searchSpace[index++] = v3;
       }
     }
@@ -493,11 +496,11 @@ public class SearchSpace {
       final double v = point[i];
       double min = v;
       double max = v;
-      for (int j = 0; j < values.length; j++) {
-        if (values[j] < v) {
-          min = values[j];
-        } else if (values[j] > v) {
-          max = values[j];
+      for (final double w : values) {
+        if (w < v) {
+          min = w;
+        } else if (w > v) {
+          max = w;
           break;
         }
       }
@@ -515,8 +518,8 @@ public class SearchSpace {
    */
   public static long countCombinations(SearchDimension[] dimensions) {
     long combinations = 1;
-    for (int i = 0; i < dimensions.length; i++) {
-      combinations *= dimensions[i].values().length;
+    for (final SearchDimension dimension : dimensions) {
+      combinations *= dimension.values().length;
     }
     return combinations;
   }
@@ -595,14 +598,13 @@ public class SearchSpace {
         // Store all the scored search space so we do not recompute it.
         if (scoredSearchSpaceHash.isEmpty()) {
           // Compute the hash for each item scored
-          for (int i = 0; i < scoredSearchSpace.length; i++) {
-            coveredSpace.add(generateHashString(scoredSearchSpace[i]));
+          final StringBuilder sb = new StringBuilder();
+          for (final double[] values : scoredSearchSpace) {
+            coveredSpace.add(generateHashString(sb, values));
           }
         } else {
           // Hash was already computed
-          for (int i = 0; i < scoredSearchSpaceHash.size(); i++) {
-            coveredSpace.add(scoredSearchSpaceHash.get(i));
-          }
+          scoredSearchSpaceHash.forEach(coveredSpace::add);
           scoredSearchSpaceHash.clear();
         }
       } else {
@@ -648,8 +650,8 @@ public class SearchSpace {
     // Find the limits in the current scores
     final double[] lower = current.getPoint().clone();
     final double[] upper = current.getPoint().clone();
-    for (int i = 0; i < scores.length; i++) {
-      final double[] point = scores[i].getPoint();
+    for (final SearchResult<T> score : scores) {
+      final double[] point = score.getPoint();
       for (int j = 0; j < lower.length; j++) {
         if (lower[j] > point[j]) {
           lower[j] = point[j];
@@ -687,16 +689,16 @@ public class SearchSpace {
     // First check if the range can be reduced.
     // If not then return false as nothing can be changed.
     boolean reduced = false;
-    for (int i = 0; i < dimensions.length; i++) {
-      if (dimensions[i].canReduce()) {
+    for (final SearchDimension dimension : dimensions) {
+      if (dimension.canReduce()) {
         reduced = true;
         break;
       }
     }
     if (reduced) {
       // Reduce the range
-      for (int i = 0; i < dimensions.length; i++) {
-        dimensions[i].reduce();
+      for (final SearchDimension dimension : dimensions) {
+        dimension.reduce();
       }
     }
     return reduced;
@@ -824,12 +826,11 @@ public class SearchSpace {
     }
 
     SearchResult<T> current = scores[0];
-    SearchResult<T> previous = null;
 
     boolean converged = false;
     while (!converged) {
       iteration++;
-      previous = current;
+      final SearchResult<T> previous = current;
 
       dimensions = updateSearchSpace(dimensions, current, scores, padding);
       if (dimensions == null) {
