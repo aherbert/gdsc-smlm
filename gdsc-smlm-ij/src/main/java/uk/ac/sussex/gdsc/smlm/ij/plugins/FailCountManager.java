@@ -139,7 +139,7 @@ public class FailCountManager implements PlugIn {
     /** The id of the data. */
     final int id;
 
-    /** The results (pass./fail). */
+    /** The results (pass/fail). */
     final boolean[] results;
 
     private int maxConsFailCount = -1;
