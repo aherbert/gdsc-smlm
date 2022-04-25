@@ -214,7 +214,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
       initialPeakStdDev0 = fitConfig.getInitialXSd();
       initialPeakStdDev1 = fitConfig.getInitialYSd();
       initialPeakAngle = fitConfig.getInitialAngle();
-    } catch (final IllegalStateException | ConfigurationException ex) {
+    } catch (final IllegalStateException | ConfigurationException ignored) {
       // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
     }
 
@@ -465,12 +465,11 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     ignore[X] = !gf.evaluatesSD0();
     ignore[Y] = !gf.evaluatesSD1();
 
-    final double[] params = new double[] {gf.evaluatesAngle() ? initialPeakAngle : 0,
-        gf.evaluatesSD0() ? initialPeakStdDev0 : 0, gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0,
-        0};
+    final double[] params =
+        {gf.evaluatesAngle() ? initialPeakAngle : 0, gf.evaluatesSD0() ? initialPeakStdDev0 : 0,
+            gf.evaluatesSD1() ? initialPeakStdDev1 : 0, 0, 0};
     final double[] paramsDev = new double[3];
-    final boolean[] identical = new boolean[4];
-    final double[] p = new double[] {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+    final double[] p = {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
     final TextWindow resultsWindow = createResultsWindow();
     addToResultTable(resultsWindow, 0, 0, params, paramsDev, p);
@@ -484,6 +483,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     }
 
     boolean tryAgain = false;
+    final boolean[] identical = new boolean[4];
 
     int iteration = 2;
     for (;;) {
@@ -523,7 +523,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
             try {
               config.getFitConfiguration().setInitialPeakStdDev1((float) params[Y]);
               config.getFitConfiguration().setInitialAngle((float) params[ANGLE]);
-            } catch (final IllegalStateException | ConfigurationException ex) {
+            } catch (final IllegalStateException | ConfigurationException ignored) {
               // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
             }
           }
@@ -652,7 +652,7 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
     try {
       fitConfig.setInitialPeakStdDev1((float) params[2]);
       fitConfig.setInitialAngle((float) Math.toRadians(params[0]));
-    } catch (IllegalStateException ex) {
+    } catch (IllegalStateException ignored) {
       // Ignore this as the current PSF is not a 2 axis and theta Gaussian PSF
     }
 
@@ -780,19 +780,27 @@ public class PsfEstimator implements PlugInFilter, ThreadSafePeakResults {
   }
 
   private static String createResultsHeader() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("Iteration\t");
-    sb.append("N-peaks\t");
-    sb.append("Angle\t");
-    sb.append("+/-\t");
-    sb.append("p(Angle same)\t");
-    sb.append("X SD\t");
-    sb.append("+/-\t");
-    sb.append("p(X same)\t");
-    sb.append("Y SD\t");
-    sb.append("+/-\t");
-    sb.append("p(Y same)\t");
-    sb.append("p(XY same)\t");
+    final String[] names = {
+        // @formatter:off
+        "Iteration\t",
+        "N-peaks\t",
+        "Angle\t",
+        "+/-\t",
+        "p(Angle same,\t",
+        "X SD\t",
+        "+/-\t",
+        "p(X same,\t",
+        "Y SD\t",
+        "+/-\t",
+        "p(Y same,\t",
+        "p(XY same,"
+        // @formatter:on
+    };
+    final StringBuilder sb = new StringBuilder(256);
+    for (final String name : names) {
+      sb.append(name).append('\t');
+    }
+    sb.setLength(sb.length() - 1);
     return sb.toString();
   }
 
