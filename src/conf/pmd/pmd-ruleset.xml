@@ -56,8 +56,8 @@
   </rule>
   <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions">
     <properties>
-      <!-- Allow underscores using letters for add, subtract, multiply, divide. -->
-      <property name="finalVarPattern" value="[a-z][a-zA-Z0-9]*(_[asmd]_[a-zA-Z0-9]*)*" />
+      <!-- Allow underscores. This simplifies expressions using underscore as divide: 1/2 = 1_2 -->
+      <property name="finalVarPattern" value="[a-z][_a-zA-Z0-9]*" />
     </properties>
   </rule>
   <!-- This allows the commonly used construct for decrementing in a for loop. -->
