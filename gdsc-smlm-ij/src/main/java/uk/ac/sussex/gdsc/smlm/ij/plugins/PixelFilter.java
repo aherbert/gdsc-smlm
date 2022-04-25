@@ -60,8 +60,8 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    int radius = 1;
-    double error = 3;
+    int radius;
+    double error;
 
     Settings() {
       // Set defaults
@@ -191,7 +191,7 @@ public class PixelFilter implements ExtendedPlugInFilter, DialogListener {
         // Get the sum of squared differences
         final double residuals = sumSquares - (sum * sum) / n;
 
-        if (residuals > 0.0) {
+        if (residuals > 0) {
           final double stdDev = Math.sqrt(residuals / (n - 1.0));
           final double mean = sum / n;
 
