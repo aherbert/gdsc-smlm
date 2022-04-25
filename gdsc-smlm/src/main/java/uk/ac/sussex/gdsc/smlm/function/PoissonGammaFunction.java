@@ -42,6 +42,7 @@ import uk.ac.sussex.gdsc.smlm.utils.StdMath;
  */
 public class PoissonGammaFunction
     implements LikelihoodFunction, LogLikelihoodFunction, GradientLikelihoodFunction {
+  private static final double TWO_PI = 2 * Math.PI;
 
   // Allow parameters names [c, p, m] to match Ulbrich & Isacoff (2007).
   // CHECKSTYLE.OFF: ParameterNames
@@ -73,8 +74,6 @@ public class PoissonGammaFunction
   public static PoissonGammaFunction createWithAlpha(final double alpha) {
     return new PoissonGammaFunction(1.0 / alpha);
   }
-
-  private static final double TWO_PI = 2 * Math.PI;
 
   /**
    * Calculate the probability density function for a Poisson-Gamma distribution model of EM-gain.
