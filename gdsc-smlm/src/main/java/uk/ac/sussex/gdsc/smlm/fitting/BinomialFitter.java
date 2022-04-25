@@ -108,11 +108,11 @@ public class BinomialFitter {
    * @throws IllegalArgumentException If any of the input data values are negative or non-integer
    */
   public static double[] getHistogram(double[] data, boolean cumulative) {
-    for (int i = 0; i < data.length; i++) {
-      if (data[i] < 0) {
+    for (final double v : data) {
+      if (v < 0) {
         throw new IllegalArgumentException("Input data must be positive");
       }
-      if ((int) data[i] != data[i]) {
+      if ((int) v != v) {
         throw new IllegalArgumentException("Input data must be integers");
       }
     }
