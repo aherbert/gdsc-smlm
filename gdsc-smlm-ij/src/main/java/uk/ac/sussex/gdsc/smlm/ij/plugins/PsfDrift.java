@@ -93,21 +93,27 @@ import uk.ac.sussex.gdsc.smlm.model.ImagePsfModel;
  */
 public class PsfDrift implements PlugIn {
   private static final String TITLE = "PSF Drift";
-
-  private ImagePlus imp;
-  private ImagePSF psfSettings;
-  private static AtomicReference<FitConfiguration> fitConfigRef =
+  private static final AtomicReference<FitConfiguration> fitConfigRef =
       new AtomicReference<>(FitConfiguration.create());
-  private FitConfiguration fitConfig = FitConfiguration.create();
 
-  private int centrePixel;
-  private int total;
-  private double[][] results;
+  /** The image. */
+  ImagePlus imp;
+  /** The psf settings. */
+  ImagePSF psfSettings;
+  /** The fit configuration. */
+  FitConfiguration fitConfig = FitConfiguration.create();
+
+  /** The centre pixel. */
+  int centrePixel;
+  /** The total number of PSF grid positions. */
+  int total;
+  /** The results. */
+  double[][] results;
 
   private final WindowOrganiser windowOrganiser = new WindowOrganiser();
 
   /** The plugin settings. */
-  private Settings settings;
+  Settings settings;
 
   /**
    * Contains the settings that are the re-usable state of the plugin.
@@ -196,20 +202,23 @@ public class PsfDrift implements PlugIn {
     }
   }
 
+  /**
+   * Contains the data for the drift job.
+   */
   private static class Job {
     final int z;
     final double cx;
     final double cy;
     final int index;
 
-    public Job(int z, double cx, double cy, int index) {
+    Job(int z, double cx, double cy, int index) {
       this.z = z;
       this.cx = cx;
       this.cy = cy;
       this.index = index;
     }
 
-    public Job() {
+    Job() {
       this(0, 0, 0, -1);
     }
 
@@ -242,7 +251,7 @@ public class PsfDrift implements PlugIn {
     private double[] lc;
     private double[] uc;
 
-    public Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width, FitConfiguration fitConfig,
+    Worker(BlockingQueue<Job> jobs, ImagePsfModel psf, int width, FitConfiguration fitConfig,
         Ticker ticker) {
       this.jobs = jobs;
       this.psf = psf.copy();
@@ -349,9 +358,9 @@ public class PsfDrift implements PlugIn {
                   pixelPitch * (params[Gaussian2DFunction.Y_POSITION] - cy), job.z};
           // System.out.printf("Fit " + job + ". %f,%f\n", results[resultPosition][0],
           // results[resultPosition][1]);
-        } else {
-          // System.out.println("Failed to fit " + job + ". " + status);
         }
+        // else:
+        // System.out.println("Failed to fit " + job + ". " + status);
         resultPosition += total;
       }
     }
@@ -538,11 +547,8 @@ public class PsfDrift implements PlugIn {
     final FitEngineConfiguration config = FitEngineConfiguration.create(fitEngineSettings,
         SettingsManager.readCalibration(0), PsfProtosHelper.DefaultOneAxisGaussian2dPsf.INSTANCE);
     config.getFitConfiguration().setFitSettings(fitConfig.getFitSettings());
-    if (!PeakFit.configurePsfModel(config)) {
-      return;
-    }
-    if (!PeakFit.configureFitSolver(config, IJImageSource.getBounds(imp), null,
-        PeakFit.FLAG_NO_SAVE)) {
+    if (!PeakFit.configurePsfModel(config) || !PeakFit.configureFitSolver(config,
+        IJImageSource.getBounds(imp), null, PeakFit.FLAG_NO_SAVE)) {
       return;
     }
 
@@ -619,13 +625,14 @@ public class PsfDrift implements PlugIn {
     }
 
     // Fit
-    outer: for (int z = minz, i = 0; z <= maxz; z++) {
-      for (int x = 0; x < grid.length; x++) {
-        for (int y = 0; y < grid.length; y++, i++) {
+    int index = 0;
+    outer: for (int z = minz; z <= maxz; z++) {
+      for (final double x : grid) {
+        for (final double y : grid) {
           if (IJ.escapePressed()) {
             break outer;
           }
-          put(jobs, new Job(z, grid[x], grid[y], i));
+          put(jobs, new Job(z, x, y, index++));
         }
       }
     }
@@ -637,14 +644,14 @@ public class PsfDrift implements PlugIn {
     }
 
     // Finish all the worker threads by passing in a null job
-    for (int i = 0; i < threads.size(); i++) {
+    for (int i = threads.size(); i-- != 0;) {
       put(jobs, new Job());
     }
 
     // Wait for all to finish
-    for (int i = 0; i < threads.size(); i++) {
+    for (final Thread thread : threads) {
       try {
-        threads.get(i).join();
+        thread.join();
       } catch (final InterruptedException ex) {
         Thread.currentThread().interrupt();
         throw new ConcurrentRuntimeException("Unexpected interrupt", ex);
@@ -744,7 +751,7 @@ public class PsfDrift implements PlugIn {
       final boolean useOldOffset = settings.useOffset && !oldOffset.isEmpty();
       final LocalList<double[]> offset = new LocalList<>();
       final double pitch = psfSettings.getPixelSize();
-      int index = 0;
+      index = 0;
       for (int i = start, slice = startSlice; i <= end; slice++, i++) {
         index = findCentre(zPosition[i], smoothx, index);
         if (index == -1) {
@@ -975,7 +982,7 @@ public class PsfDrift implements PlugIn {
    *
    * @return The starting points for the fitting
    */
-  private double[][] getStartPoints() {
+  double[][] getStartPoints() {
     final double[][] xy = new double[getNumberOfStartPoints()][];
     int ii = 0;
 
@@ -1112,9 +1119,6 @@ public class PsfDrift implements PlugIn {
     final double[] w0 = psf.getAllHwhm0();
     final double[] w1 = psf.getAllHwhm1();
 
-    // Get current centre
-    final int centre = psfSettings.getCentreImage();
-
     // Extract valid values (some can be NaN)
     double[] sw0 = new double[w0.length];
     double[] sw1 = new double[w1.length];
@@ -1136,9 +1140,9 @@ public class PsfDrift implements PlugIn {
       IJ.error(TITLE, "No computed HWHM for image: " + settings.title);
       return;
     }
-    double[] slice0 = s0.toDoubleArray();
+    final double[] slice0 = s0.toDoubleArray();
     sw0 = Arrays.copyOf(sw0, c0);
-    double[] slice1 = s1.toDoubleArray();
+    final double[] slice1 = s1.toDoubleArray();
     sw1 = Arrays.copyOf(sw1, c1);
 
     // Smooth
@@ -1205,7 +1209,7 @@ public class PsfDrift implements PlugIn {
     ImageJUtils.addMessage(gd2,
         "Update the PSF information?\n \n" +
         "Current z-centre = %d, FHWM = %s px (%s nm)\n",
-        centre, MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale));
+        psfSettings.getCentreImage(), MathUtils.rounded(fwhm), MathUtils.rounded(fwhm * scale));
     //@formatter:on
     gd2.addSlider("z-centre", cx[0], cx[cx.length - 1], newCentre);
     final TextField tf = gd2.getLastTextField();
@@ -1233,6 +1237,9 @@ public class PsfDrift implements PlugIn {
     }
   }
 
+  /**
+   * Dialog listener to allow interactive update of the PSF plots.
+   */
   private class UpdateDialogListener implements DialogListener {
     int offset;
     double[] cy;
