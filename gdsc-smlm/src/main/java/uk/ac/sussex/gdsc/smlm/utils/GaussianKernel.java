@@ -36,6 +36,16 @@ public class GaussianKernel {
   public static final int HALF_WIDTH_LIMIT = 1 << 28;
 
   private static final double ONE_OVER_ROOT_2_PI = 1.0 / Math.sqrt(2 * Math.PI);
+  /**
+   * The limit for the standard deviation. This is set such that the computation of the Normal
+   * (Gaussian) distribution survival function using erfc(x / sqrt(2)) is approximately zero.
+   *
+   * <pre>
+   * erfcinv(2^-1022) * sqrt(2)  == 37.54
+   * erfcinv(2^-1074) * sqrt(2)  == 38.49
+   * </pre>
+   */
+  private static final double SD_LIMIT = 38;
 
   /** The standard deviation. */
   public final double sd;
@@ -158,9 +168,9 @@ public class GaussianKernel {
     if (currentScale == scale) {
       final int size = Math.min(kradius, halfKernel.size());
       System.arraycopy(e, 1, kernel, 1, size - 1);
-      //for (int i = 1; i < size; i++) {
-      //  kernel[i] = e[i];
-      //}
+      // for (int i = 1; i < size; i++) {
+      // kernel[i] = e[i];
+      // }
     } else {
       final double step = 1.0 / scale;
       final int sample = currentScale / scale;
@@ -426,8 +436,8 @@ public class GaussianKernel {
     // Limit range for the Gaussian
     if (range < 1) {
       range = 1;
-    } else if (range > 38) {
-      range = 38;
+    } else if (range > SD_LIMIT) {
+      range = SD_LIMIT;
     }
     return range;
   }
