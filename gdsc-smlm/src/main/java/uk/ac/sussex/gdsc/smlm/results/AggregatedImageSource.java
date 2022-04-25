@@ -56,7 +56,7 @@ public class AggregatedImageSource extends ImageSource {
   public AggregatedImageSource(ImageSource imageSource, int aggregate) {
     super("");
     ValidationUtils.checkNotNull(imageSource, "imageSource");
-    ValidationUtils.checkArgument(aggregate < 2,
+    ValidationUtils.checkArgument(aggregate > 1,
         "The number of frames to aggregate (%d) must be above 1", aggregate);
     setName("Aggregated (" + aggregate + ") " + imageSource.getName());
     this.imageSource = imageSource;

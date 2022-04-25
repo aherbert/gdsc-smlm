@@ -55,7 +55,7 @@ class ImageSourceTest {
     final int width = 5;
     final int height = 3;
     final float[][] data = null;
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       new MemoryImageSource(width, height, data);
     });
   }
@@ -66,7 +66,7 @@ class ImageSourceTest {
     final int height = 3;
     final float[][] data = createData(width, height, 15);
     data[2] = null;
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       new MemoryImageSource(width, height, data);
     });
   }
@@ -254,7 +254,7 @@ class ImageSourceTest {
     final int start = 4;
     final int size = 2;
     final int skip = 1;
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       new InterlacedImageSource(null, start, size, skip);
     });
   }
@@ -445,7 +445,7 @@ class ImageSourceTest {
   @Test
   void nullImageSourceThrowsConstructAggregatedImageSource() {
     final int aggregate = 3;
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       new AggregatedImageSource(null, aggregate);
     });
   }
