@@ -3005,16 +3005,15 @@ public final class FitConfiguration implements IDirectFilter, Gaussian2DFitConfi
       functionSolver.setGradientFunction(gaussianFunction);
 
       // Note: We must carefully update anything that depends on the function.
-      if (bounds != null) {
-        // We have to update the clamping.
-        // Note this code is only executed if the clamp settings have not changed
-        // (since changes to those settings invalidate the solver) and the
-        // function settings have not changed (since that invalidates the function
-        // and the solver).
-        // All that is different is the number of peaks in the function.
-        if (gaussianFunction.getNPeaks() > clampPeakCount) {
-          setClampValues(bounds);
-        }
+      if (bounds != null
+          // We have to update the clamping.
+          // Note this code is only executed if the clamp settings have not changed
+          // (since changes to those settings invalidate the solver) and the
+          // function settings have not changed (since that invalidates the function
+          // and the solver).
+          // All that is different is the number of peaks in the function.
+          && gaussianFunction.getNPeaks() > clampPeakCount) {
+        setClampValues(bounds);
       }
     }
 
