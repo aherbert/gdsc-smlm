@@ -421,10 +421,11 @@ public class GaussianKernel {
     // Use the error function to get the integral of the Gaussian.
     final double sqrtTwoVar = Math.sqrt(sigma * sigma * 2);
 
-    double upper = org.apache.commons.math3.special.Erf.erf(-0.5 / sqrtTwoVar);
+    // Use erfc to reach into the long tail at sigma <= 38
+    double lower = org.apache.commons.math3.special.Erf.erfc(-0.5 / sqrtTwoVar);
     for (int i = 0; i < kradius; i++) {
-      final double lower = upper;
-      upper = org.apache.commons.math3.special.Erf.erf((i + 0.5) / sqrtTwoVar);
+      final double upper = lower;
+      lower = org.apache.commons.math3.special.Erf.erfc((i + 0.5) / sqrtTwoVar);
       kernel[i] = (upper - lower) * 0.5;
       if (kernel[i] == 0) {
         break;
