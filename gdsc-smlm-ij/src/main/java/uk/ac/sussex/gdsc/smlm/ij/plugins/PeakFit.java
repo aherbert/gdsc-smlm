@@ -794,17 +794,18 @@ public class PeakFit implements PlugInFilter {
             imp = parentImp;
           }
         }
-        String message = "The selected image may be a previous fit result";
+        final StringBuilder message =
+            new StringBuilder(128).append("The selected image may be a previous fit result");
         if (ijImageSource != null) {
           if (!TextUtils.isNullOrEmpty(ijImageSource.getName())) {
-            message += " of: \n \n" + ijImageSource.getName();
+            message.append(" of: \n \n").append(ijImageSource.getName());
           }
-          message += " \n \nFit the parent?";
+          message.append(" \n \nFit the parent?");
         } else {
-          message += " \n \nDo you want to continue?";
+          message.append(" \n \nDo you want to continue?");
         }
 
-        final YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message);
+        final YesNoCancelDialog d = new YesNoCancelDialog(null, TITLE, message.toString());
         if (ijImageSource == null) {
           if (!d.yesPressed()) {
             return DONE;
@@ -991,18 +992,18 @@ public class PeakFit implements PlugInFilter {
     updateFitConfiguration(config);
 
     results.setSource(source);
-    String name = source.getName();
+    final StringBuilder name = new StringBuilder(source.getName());
     if (!TextUtils.isNullOrEmpty(resultsSuffix)) {
-      name += " " + resultsSuffix;
+      name.append(' ').append(resultsSuffix);
     }
     if (maximaIdentification) {
-      name += " (Maxima)";
+      name.append(" (Maxima)");
     } else if (fitMaxima) {
-      name += " (" + getSolverName() + " Fit Maxima)";
+      name.append(" (").append(getSolverName()).append(" Fit Maxima)");
     } else {
-      name += " (" + getSolverName() + ")";
+      name.append(" (").append(getSolverName()).append(')');
     }
-    results.setName(name);
+    results.setName(name.toString());
     results.setBounds(bounds);
 
     // Calibration cal = calibration.clone();
