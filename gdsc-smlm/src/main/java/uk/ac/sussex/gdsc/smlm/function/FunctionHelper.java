@@ -52,11 +52,11 @@ public final class FunctionHelper {
       return MathUtils.max(values);
     }
     double sum = 0;
-    for (int i = 0; i < values.length; i++) {
-      if (values[i] < 0) {
+    for (final double v : values) {
+      if (v < 0) {
         throw new DataException("Values must be positive");
       }
-      sum += values[i];
+      sum += v;
     }
     if (fraction >= 1) {
       return sum / values.length;
@@ -96,11 +96,11 @@ public final class FunctionHelper {
       return values.length;
     }
     double sum = 0;
-    for (int i = 0; i < values.length; i++) {
-      if (values[i] < 0) {
+    for (final double v : values) {
+      if (v < 0) {
         throw new DataException("Values must be positive");
       }
-      sum += values[i];
+      sum += v;
     }
     final double target = sum * fraction;
     sum = 0;
