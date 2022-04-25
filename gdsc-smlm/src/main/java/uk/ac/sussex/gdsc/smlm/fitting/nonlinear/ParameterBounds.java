@@ -257,8 +257,8 @@ public final class ParameterBounds {
    * @return True if the array has another value
    */
   private static boolean checkArray(double[] array, double value) {
-    for (int i = 0; i < array.length; i++) {
-      if (value != array[i]) {
+    for (final double v : array) {
+      if (value != v) {
         return true;
       }
     }
