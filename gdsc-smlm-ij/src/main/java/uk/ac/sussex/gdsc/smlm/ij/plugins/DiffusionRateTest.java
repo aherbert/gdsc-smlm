@@ -1194,8 +1194,8 @@ class DiffusionRateTest implements PlugIn {
       if (p.id != id) {
         x.clear();
         y.clear();
+        id = p.id;
       }
-      id = p.id;
       x.add(p.x);
       y.add(p.y);
       // Only create a point if the full aggregation size is reached
