@@ -258,7 +258,7 @@ public final class PsfProtosHelper {
     }
     final String[] names = {"s0x", "s0y", "gamma", "d", "Ax", "Bx", "Ay", "By"};
     for (int i = 0; i < names.length; i++) {
-      if (!list.get(i).getName().equals(names[i])) {
+      if (!names[i].equals(list.get(i).getName())) {
         throw new ConfigurationException(
             "Invalid parameter name: " + list.get(i).getName() + " != " + names[i]);
       }
