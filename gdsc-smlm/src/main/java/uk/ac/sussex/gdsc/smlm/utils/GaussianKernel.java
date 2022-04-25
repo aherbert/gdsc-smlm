@@ -144,12 +144,7 @@ public class GaussianKernel {
       throw new IllegalArgumentException("Scale must be a power of 2: " + scale);
     }
 
-    // Limit range for the Gaussian
-    if (range < 1) {
-      range = 1;
-    } else if (range > 38) {
-      range = 38;
-    }
+    range = limitGaussianRange(range);
 
     final int kradius = getGaussianHalfWidth(sd * scale, range) + 1;
     increaseScale(scale);
@@ -213,12 +208,7 @@ public class GaussianKernel {
       throw new IllegalArgumentException("Scale must be >= 1: " + scale);
     }
 
-    // Limit range for the Gaussian
-    if (range < 1) {
-      range = 1;
-    } else if (range > 38) {
-      range = 38;
-    }
+    range = limitGaussianRange(range);
 
     // Check if the current half-kernel would be too large if expanded to the range
     if ((double) currentScale * scale * range > HALF_WIDTH_LIMIT) {
@@ -310,8 +300,9 @@ public class GaussianKernel {
   private static double[] buildKernel(double[] kernel, int kradius, boolean edgeCorrection) {
     // Clip in the event that zeros occurred during computation
     if (kernel[kradius - 1] == 0) {
-      while (kernel[--kradius] == 0) {
-        /* decrement */
+      kradius--;
+      while (kernel[kradius - 1] == 0) {
+        kradius--;
       }
       if (kradius == 1) {
         return new double[] {1};
@@ -368,12 +359,7 @@ public class GaussianKernel {
    */
   public static double[] makeGaussianKernel(final double sigma, double range,
       boolean edgeCorrection) {
-    // Limit range for the Gaussian
-    if (range < 1) {
-      range = 1;
-    } else if (range > 38) {
-      range = 38;
-    }
+    range = limitGaussianRange(range);
 
     // Build half the kernel into the full kernel array. This is duplicated later.
     final int kradius = getGaussianHalfWidth(sigma, range) + 1;
@@ -402,12 +388,7 @@ public class GaussianKernel {
    * @return The Erf kernel
    */
   public static double[] makeErfGaussianKernel(double sigma, double range) {
-    // Limit range for the Gaussian
-    if (range < 1) {
-      range = 1;
-    } else if (range > 38) {
-      range = 38;
-    }
+    range = limitGaussianRange(range);
 
     // Build half the kernel into the full kernel array. This is duplicated later.
     final int kradius = getGaussianHalfWidth(sigma, range) + 1;
@@ -433,5 +414,21 @@ public class GaussianKernel {
     }
 
     return buildKernel(kernel, kradius, false);
+  }
+
+  /**
+   * Limit the gaussian range to [1, 38] standard deviations.
+   *
+   * @param range the range
+   * @return the range
+   */
+  private static double limitGaussianRange(double range) {
+    // Limit range for the Gaussian
+    if (range < 1) {
+      range = 1;
+    } else if (range > 38) {
+      range = 38;
+    }
+    return range;
   }
 }
