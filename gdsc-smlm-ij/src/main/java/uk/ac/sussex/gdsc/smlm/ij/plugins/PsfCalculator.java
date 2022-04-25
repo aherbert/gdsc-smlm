@@ -36,6 +36,7 @@ import java.awt.SystemColor;
 import java.awt.TextField;
 import uk.ac.sussex.gdsc.core.ij.ImageJUtils;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
+import uk.ac.sussex.gdsc.core.utils.SoftLock;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFType;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration;
 import uk.ac.sussex.gdsc.smlm.engine.FitEngineConfiguration;
@@ -70,6 +71,9 @@ public class PsfCalculator implements PlugIn, DialogListener {
   private double[] x;
   private double[] y;
   private double[] y2;
+
+  /** The lock used for the interactive dialog. */
+  private final SoftLock lock = new SoftLock();
 
   @Override
   public void run(String arg) {
@@ -332,15 +336,6 @@ public class PsfCalculator implements PlugIn, DialogListener {
     return width / pixelPitchInNm;
   }
 
-  private boolean lock;
-
-  private synchronized boolean aquireLock() {
-    if (lock) {
-      return false;
-    }
-    return lock = true;
-  }
-
   @Override
   public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
     if (event == null) {
@@ -354,7 +349,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
       return true;
     }
 
-    if (aquireLock()) {
+    if (lock.acquire()) {
       try {
         // Continue while the parameter is changing
         boolean parametersChanged = true;
@@ -402,7 +397,7 @@ public class PsfCalculator implements PlugIn, DialogListener {
         }
       } finally {
         // Ensure the running flag is reset
-        lock = false;
+        lock.release();
       }
     }
 
