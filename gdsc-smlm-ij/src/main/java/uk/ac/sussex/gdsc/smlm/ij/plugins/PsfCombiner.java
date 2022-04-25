@@ -150,7 +150,7 @@ public class PsfCombiner implements PlugIn {
       return;
     }
     final double nmPerSlice = getNmPerSlice();
-    if (nmPerPixel <= 0) {
+    if (nmPerSlice <= 0) {
       return;
     }
 
@@ -323,6 +323,9 @@ public class PsfCombiner implements PlugIn {
     return fwhm / input.size();
   }
 
+  /**
+   * Represent a PSF with an ImageStack and ImagePSF settings.
+   */
   private static class Psf {
     ImagePSF psfSettings;
     int start;
