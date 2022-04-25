@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 /**
  * Provide XML utilities using XStream.
  */
-public class XStreamUtils {
+public final class XStreamUtils {
 
   /** The logger. */
   private static final Logger logger = Logger.getLogger(XStreamUtils.class.getName());
@@ -52,6 +52,9 @@ public class XStreamUtils {
       XS = xstream;
     }
   }
+
+  /** No instances. */
+  private XStreamUtils() {}
 
   /**
    * Convert an object to XML.
