@@ -98,13 +98,13 @@ public class BoundedNonLinearFit extends NonLinearFit {
     // If decomposition fails try again but set the bounded params to zero (these are
     // ignored by the solver), thus skipping these params for this iteration.
 
-    if (bounds.atBounds(a)) {
-      // System.out.printf("Failed when point was at the bounds\n");
+    // TODO - Determine if this support is needed.
+    // if (bounds.atBounds(a)) {
+    // System.out.printf("Failed when point was at the bounds\n");
 
-      // This functionality has been removed since the solver no longer
-      // extracts rows/columns from the matrix if the gradient vector is zero.
-      // TODO - Determine if this support is needed.
-    }
+    // This functionality has been removed since the solver no longer
+    // extracts rows/columns from the matrix if the gradient vector is zero.
+    // }
 
     return false;
   }
