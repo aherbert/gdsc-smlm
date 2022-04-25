@@ -91,8 +91,8 @@ public class PsfModelGradient1Function implements Gradient1Function, NamedFuncti
     }
     final double c = params[0];
     final double m = params[1];
-    for (int i = 0; i < v.length; i++) {
-      procedure.execute(c + m * v[i]);
+    for (final double vi : v) {
+      procedure.execute(c + m * vi);
     }
   }
 
