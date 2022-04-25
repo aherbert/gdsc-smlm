@@ -139,8 +139,8 @@ public final class JsonUtils {
    * @return true if allowed
    */
   private static boolean isAllowed(char ch) {
-    for (int i = 0; i < ALLOWED.length; i++) {
-      if (ch == ALLOWED[i]) {
+    for (final char c : ALLOWED) {
+      if (ch == c) {
         return true;
       }
     }
@@ -209,6 +209,7 @@ public final class JsonUtils {
           break;
         default:
           sb.append(ch);
+          break;
       }
     }
     return sb.toString();
