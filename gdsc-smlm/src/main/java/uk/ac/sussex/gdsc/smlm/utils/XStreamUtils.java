@@ -39,7 +39,9 @@ public final class XStreamUtils {
   /** The logger. */
   private static final Logger logger = Logger.getLogger(XStreamUtils.class.getName());
 
-  /** Lazy loader for the {@code <gdsc.smlm | </gdsc.smlm} tag start. */
+  /**
+   * Lazy loader for the {@code <gdsc.smlm | </gdsc.smlm} tag start.
+   */
   private static class PatternLoader {
     static final Pattern PACKAGE_PATTERN = Pattern.compile("(</?)gdsc.smlm");
   }
