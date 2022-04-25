@@ -253,10 +253,10 @@ public final class PsfProtosHelper {
       throw new ConfigurationException("Not a " + getName(PSFType.ASTIGMATIC_GAUSSIAN_2D));
     }
     final List<PSFParameter> list = psf.getParametersList();
-    if (list.size() != 8) {
+    final String[] names = {"s0x", "s0y", "gamma", "d", "Ax", "Bx", "Ay", "By"};
+    if (list.size() != names.length) {
       throw new ConfigurationException("Invalid number of parameters");
     }
-    final String[] names = {"s0x", "s0y", "gamma", "d", "Ax", "Bx", "Ay", "By"};
     for (int i = 0; i < names.length; i++) {
       if (!names[i].equals(list.get(i).getName())) {
         throw new ConfigurationException(
