@@ -644,15 +644,13 @@ public class Gaussian2DFitter {
         }
 
         // Guess the initial angle if input angle is out-of-bounds
-        if (angle == 0) {
-          if (fitConfiguration.isAngleFitting() && fitConfiguration.getInitialAngle() >= -Math.PI
-              && fitConfiguration.getInitialAngle() <= -Math.PI) {
-            if (sx != sy) {
-              // There is no angle gradient information if the widths are equal. Zero and it will be
-              // ignored
-              angle = fitConfiguration.getInitialAngle();
-            }
-          }
+        if (angle == 0 && fitConfiguration.isAngleFitting()
+            && fitConfiguration.getInitialAngle() >= -Math.PI
+            && fitConfiguration.getInitialAngle() <= -Math.PI
+            && sx != sy) {
+          // There is no angle gradient information if the widths are equal.
+          // Zero and it will be ignored
+          angle = fitConfiguration.getInitialAngle();
         }
       }
 
