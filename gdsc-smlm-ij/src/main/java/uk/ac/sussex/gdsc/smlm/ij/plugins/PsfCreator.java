@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -175,16 +176,20 @@ public class PsfCreator implements PlugInFilter {
   private static final String[] ALIGNMENT_MODE = {"2D Projections", "3D"};
   private static final int ALIGNMENT_MODE_2D = 0;
   private static final String[] PSF_TYPE = {"Spot", "Astigmatism", "Double Helix"};
-  private static final int PSF_TYPE_ASTIGMATISM = 1;
-  private static final int PSF_TYPE_DH = 2;
+  /** PSF type constant for astigmatism. */
+  static final int PSF_TYPE_ASTIGMATISM = 1;
+  /** PSF type constant for double-helix. */
+  static final int PSF_TYPE_DH = 2;
   private static final String[] OUTPUT_TYPE = {"CSpline", "Image PSF"};
   private static final int OUTPUT_TYPE_CSPLINE = 0;
   private static final int OUTPUT_TYPE_IMAGE_PSF = 1;
 
-  private PSFCreatorSettings.Builder settings;
+  /** The settings. */
+  PSFCreatorSettings.Builder settings;
 
   private static final int FLAGS = DOES_16 | DOES_8G | DOES_32 | NO_CHANGES;
-  private ImagePlus imp;
+  /** The image used to execute the plugin. */
+  ImagePlus imp;
   private ImagePlus psfImp;
 
   private static Rounder rounder = RounderUtils.create(4);
@@ -192,7 +197,8 @@ public class PsfCreator implements PlugInFilter {
 
   private FitEngineConfiguration config;
   private FitConfiguration fitConfig;
-  private double nmPerPixel;
+  /** The nm per pixel of the input image. */
+  double nmPerPixel;
   private int boxRadius;
   private int zRadius;
   private static AtomicReference<Point> yesNoPosition = new AtomicReference<>();
@@ -201,57 +207,88 @@ public class PsfCreator implements PlugInFilter {
   private double progress;
 
   // Private variables that are used during background threaded plotting of the cumulative signal
-  private ImageStack psf;
-  private ImagePlus[] psfOut;
+
+  /** The output PSF image stack. */
+  ImageStack psf;
+  /** The output PSF (0) and the XYZ projections ({1, 2, 3}). */
+  ImagePlus[] psfOut;
   private int zCentre;
-  private double psfWidth;
+  /** The psf width. */
+  double psfWidth;
 
   // Cache settings for convenience
-  private double psfNmPerPixel;
+
+  /** The psf nm per pixel. */
+  double psfNmPerPixel;
   private boolean checkAlignments;
 
   // Amplitude plot
-  private double[] z;
-  private double[] amplitude;
-  private double[] smoothAz;
-  private double[] smoothA;
+
+  /** The z value for the amplitude plot. */
+  double[] z;
+  /** The amplitude value for the amplitude plot. */
+  double[] amplitude;
+  /** The z value for the smoothed amplitude value for the amplitude plot. */
+  double[] smoothAz;
+  /** The smoothed amplitude value for the amplitude plot. */
+  double[] smoothA;
 
   // PSF plot
+
+  private double plotRadius = -1;
+
+  /** The x coord value for the psf plot. */
   private double[] xCoord;
+  /** The y coord value for the psf plot. */
   private double[] yCoord;
+  /** The sd value for the psf plot. */
   private double[] sd;
+  /** The z value for the smoothed values of the psf plot. */
   private double[] newZ;
+  /** The smoothed x coord value for the psf plot. */
   private double[] smoothX;
+  /** The smoothed y coord value for the psf plot. */
   private double[] smoothY;
+  /** The smoothed sd coord value for the psf plot. */
   private double[] smoothSd;
 
-  // % PSF Signal plot
+  // PSF Signal plot
+
   private double[] signalZ;
   private double[] signal;
   private String signalTitle;
   private double[] signalLimits;
 
   // Cumulative signal plot
+
   private int[] indexLookup;
   private double[] distances;
   private double maxCumulativeSignal = 1;
-  private int slice;
-  private double distanceThreshold;
-  private boolean normalise;
-  private boolean resetScale = true;
+  /** The slice. */
+  int slice;
+  /** The distance threshold. */
+  double distanceThreshold;
+  /** The normalise flag. */
+  boolean normalise;
+  /** The reset scale flag. */
+  boolean resetScale = true;
 
-  private final SoftLock plotLock1 = new SoftLock();
-  private final SoftLock plotLock2 = new SoftLock();
-  private final SoftLock plotLock3 = new SoftLock();
-  private final SoftLock plotLock4 = new SoftLock();
+  /** Lock for interactive plots. */
+  final SoftLock plotLock1 = new SoftLock();
+  /** Lock for interactive plots. */
+  final SoftLock plotLock2 = new SoftLock();
+  /** Lock for interactive plots. */
+  final SoftLock plotLock3 = new SoftLock();
+  /** Lock for interactive plots. */
+  final SoftLock plotLock4 = new SoftLock();
 
-  private boolean[] dmap;
+  private boolean[] distanceMap;
   private int lastWidth;
   private int lastHeight;
-  private int minx;
-  private int maxx;
-  private int miny;
-  private int maxy;
+  private int distanceMapMinx;
+  private int distanceMapMaxx;
+  private int distanceMapMiny;
+  private int distanceMapMaxy;
 
   @Override
   public int setup(String arg, ImagePlus imp) {
@@ -332,16 +369,19 @@ public class PsfCreator implements PlugInFilter {
 
   private static double guessScale(String unit, double units) {
     unit = unit.toLowerCase(Locale.US);
-    if (unit.equals("nm") || unit.startsWith("nanomet")) {
+    if ("nm".equals(unit) || unit.startsWith("nanomet")) {
       return units;
     }
-    if (unit.equals("\u00B5m") || // Sanitised version of um
+    if ("\u00B5m".equals(unit) || // Sanitised version of um
         unit.startsWith("micron")) {
       return units * 1000;
     }
     return 0;
   }
 
+  /**
+   * Listener to allow interactive display of the bounding box of selected PSFs.
+   */
   private class InteractiveInputListener implements DialogListener {
     final boolean draw;
 
@@ -367,9 +407,10 @@ public class PsfCreator implements PlugInFilter {
     }
   }
 
-  private double plotRadius = -1;
-
-  private void drawBoundingBox() {
+  /**
+   * Draw the bounding box on the image.
+   */
+  void drawBoundingBox() {
     if (plotLock1.acquire()) {
       // Get the spots here as the user may want to interactively pick new ones
       final BasePoint[] points = getSpots();
@@ -826,14 +867,14 @@ public class PsfCreator implements PlugInFilter {
     double sum = 0;
     double sumW = 0;
 
-    if (averageMethod == 1) {
-      // Weighted average using Amplitude
-    } else if (averageMethod == 2) {
+    if (averageMethod == 2) {
       // Weighted average using signal
       for (int i = 0; i < sd.length; i++) {
         w[i] *= sd[i] * sd[i];
       }
     }
+    // if (averageMethod == 1)
+    // Weighted average using Amplitude
 
     for (int i = 0; i < sd.length; i++) {
       sum += sd[i] * w[i];
@@ -972,6 +1013,9 @@ public class PsfCreator implements PlugInFilter {
     return false;
   }
 
+  /**
+   * An interactive dialog listener to allow update of the PSF plots for a selected slice.
+   */
   private class SimpleInteractivePlotListener implements DialogListener {
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
@@ -981,7 +1025,23 @@ public class PsfCreator implements PlugInFilter {
     }
   }
 
-  private void showPlots(final double[] z, final double[] a, final double[] smoothAz,
+  /**
+   * Show plots.
+   *
+   * @param z the z value
+   * @param a the amplitude
+   * @param smoothAz the z value for the smoothed amplitude
+   * @param smoothA the smoothed amplitude
+   * @param xCoord the x coord
+   * @param yCoord the y coord
+   * @param sd the sd
+   * @param newZ the z value for the smoother coordinates
+   * @param smoothX the smoothed x coord
+   * @param smoothY the smoothed y coord
+   * @param smoothSd the smoothed sd
+   * @param cz the centre of z
+   */
+  void showPlots(final double[] z, final double[] a, final double[] smoothAz,
       final double[] smoothA, final double[] xCoord, final double[] yCoord, final double[] sd,
       final double[] newZ, final double[] smoothX, final double[] smoothY, double[] smoothSd,
       final int cz) {
@@ -1136,27 +1196,27 @@ public class PsfCreator implements PlugInFilter {
     if (lastWidth != spotWidth || lastHeight != spotHeight) {
       final double cx = spotWidth * 0.5;
       final double cy = spotHeight * 0.5;
-      minx = Math.max(0, (int) (cx - boxRadius * 0.5));
-      maxx = Math.min(spotWidth, (int) Math.ceil(cx + boxRadius * 0.5));
-      miny = Math.max(0, (int) (cy - boxRadius * 0.5));
-      maxy = Math.min(spotHeight, (int) Math.ceil(cy + boxRadius * 0.5));
+      distanceMapMinx = Math.max(0, (int) (cx - boxRadius * 0.5));
+      distanceMapMaxx = Math.min(spotWidth, (int) Math.ceil(cx + boxRadius * 0.5));
+      distanceMapMiny = Math.max(0, (int) (cy - boxRadius * 0.5));
+      distanceMapMaxy = Math.min(spotHeight, (int) Math.ceil(cy + boxRadius * 0.5));
 
       // Precompute square distances
-      final double[] dx2 = new double[maxx - minx + 1];
-      for (int x = minx, i = 0; x < maxx; x++, i++) {
+      final double[] dx2 = new double[distanceMapMaxx - distanceMapMinx + 1];
+      for (int x = distanceMapMinx, i = 0; x < distanceMapMaxx; x++, i++) {
         // Use pixel centres with 0.5 offset
         final double dx = x + 0.5 - cx;
         dx2[i] = dx * dx;
       }
-      dmap = new boolean[dx2.length * (maxy - miny + 1)];
+      distanceMap = new boolean[dx2.length * (distanceMapMaxy - distanceMapMiny + 1)];
       final int halfBoxRadius = boxRadius / 2;
       final double d2 = halfBoxRadius * halfBoxRadius;
-      for (int y = miny, j = 0; y < maxy; y++) {
+      for (int y = distanceMapMiny, j = 0; y < distanceMapMaxy; y++) {
         final double dy = (y + 0.5 - cy);
         final double dy2 = dy * dy;
         final double limit = d2 - dy2;
-        for (int x = minx, i = 0; x < maxx; x++, i++, j++) {
-          dmap[j] = (dx2[i] < limit);
+        for (int x = distanceMapMinx, i = 0; x < distanceMapMaxx; x++, i++, j++) {
+          distanceMap[j] = (dx2[i] < limit);
         }
       }
       lastWidth = spotWidth;
@@ -1169,10 +1229,10 @@ public class PsfCreator implements PlugInFilter {
     for (int i = 0; i < spot.length; i++) {
       xValues[i] = i + 1;
       double sum = 0;
-      for (int y = miny, j = 0; y < maxy; y++) {
-        int index = y * spotWidth + minx;
-        for (int x = minx; x < maxx; x++, index++, j++) {
-          if (dmap[j]) {
+      for (int y = distanceMapMiny, j = 0; y < distanceMapMaxy; y++) {
+        int index = y * spotWidth + distanceMapMinx;
+        for (int x = distanceMapMinx; x < distanceMapMaxx; x++, index++, j++) {
+          if (distanceMap[j]) {
             sum += spot[i][index];
           }
         }
@@ -1263,10 +1323,10 @@ public class PsfCreator implements PlugInFilter {
 
     final List<Future<?>> futures = new LinkedList<>();
 
-    for (int i = 0; i < spot.length; i++) {
+    for (final float[] sp : spot) {
       // final int slice = i + 1;
       final ImageProcessor ip = psf.getProcessor(insertZ++);
-      final float[] originalSpotData = spot[i];
+      final float[] originalSpotData = sp;
 
       futures.add(threadPool.submit(() -> {
         if (ImageJUtils.isInterrupted()) {
@@ -1752,9 +1812,6 @@ public class PsfCreator implements PlugInFilter {
         }
         boolean overlap = regions[i].intersects(regions[j]);
         if (overlap && is3D) {
-          // Reset (assume non-overlapping)
-          overlap = false;
-
           // Check for 3D overlap:
           // iiiiiiiiiiiiiiiii
           // jjjjjjjjjjjjjjjjjjj
@@ -1996,7 +2053,7 @@ public class PsfCreator implements PlugInFilter {
 
   private static PlotWindow getPlot(String title) {
     final Frame f = WindowManager.getFrame(title);
-    if (f != null && f instanceof PlotWindow) {
+    if (f instanceof PlotWindow) {
       return (PlotWindow) f;
     }
     return null;
@@ -2030,6 +2087,9 @@ public class PsfCreator implements PlugInFilter {
     drawPlots(true);
   }
 
+  /**
+   * An interactive dialog listener to allow update of the PSF plots.
+   */
   private class InteractivePlotListener implements DialogListener {
     @Override
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent event) {
@@ -2048,7 +2108,12 @@ public class PsfCreator implements PlugInFilter {
     }
   }
 
-  private void drawPlots(boolean doSignalPlots) {
+  /**
+   * Draw plots.
+   *
+   * @param doSignalPlots true to draw the signal plots
+   */
+  void drawPlots(boolean doSignalPlots) {
     updateAmplitudePlot();
     updatePsfPlot();
     if (doSignalPlots) {
@@ -2295,7 +2360,6 @@ public class PsfCreator implements PlugInFilter {
       for (int j = lastI; j < indices.length; j++) {
         indexLookup[indices[j]] = counter;
       }
-      counter++;
 
       distances = distance.getValues();
     }
@@ -2436,9 +2500,9 @@ public class PsfCreator implements PlugInFilter {
     return p2 - p1;
   }
 
-  private HashMap<String, String> createNote() {
+  private Map<String, String> createNote() {
     final HashMap<String, String> note = new HashMap<>();
-    note.put("Created", new SimpleDateFormat("d-MMM-yyyy HH:mm").format(new Date()));
+    note.put("Created", new SimpleDateFormat("d-MMM-yyyy HH:mm", Locale.ROOT).format(new Date()));
     final FileInfo info = imp.getOriginalFileInfo();
     if (info != null) {
       note.put("File", info.fileName);
@@ -2449,6 +2513,9 @@ public class PsfCreator implements PlugInFilter {
     return note;
   }
 
+  /**
+   * Class to smooth univariate data.
+   */
   private class Smoother {
     LoessInterpolator loess;
     double[] xval;
@@ -2522,8 +2589,6 @@ public class PsfCreator implements PlugInFilter {
 
     boxRadius = (int) Math.ceil(settings.getRadius());
 
-    final CalibrationReader calibration = new CalibrationReader(settings.getCalibration());
-
     // Limit this
     final int halfBoxRadius = boxRadius / 2;
     settings.setAnalysisWindow(Math.min(settings.getAnalysisWindow(), halfBoxRadius));
@@ -2536,7 +2601,9 @@ public class PsfCreator implements PlugInFilter {
       return;
     }
 
-    CameraModel cameraModel = null;
+    final CalibrationReader calibration = new CalibrationReader(settings.getCalibration());
+
+    CameraModel cameraModel;
     if (calibration.isScmos()) {
       cameraModel = CameraModelManager.load(calibration.getCameraModelName());
       if (cameraModel == null) {
@@ -2981,15 +3048,22 @@ public class PsfCreator implements PlugInFilter {
 
   private static int count(boolean[] flags) {
     int count = 0;
-    for (int i = 0; i < flags.length; i++) {
-      if (flags[i]) {
+    for (final boolean b : flags) {
+      if (b) {
         count++;
       }
     }
     return count;
   }
 
-  private int getComXyBorder(int maxx, int maxy) {
+  /**
+   * Gets the centre-of-mass XY border.
+   *
+   * @param maxx the maxx
+   * @param maxy the maxy
+   * @return the border
+   */
+  int getComXyBorder(int maxx, int maxy) {
     final int w = Math.min(maxx, maxy);
     return MathUtils.clip(0, w / 2 - 1, (int) Math.round(w * settings.getComBorder()));
   }
@@ -3085,11 +3159,11 @@ public class PsfCreator implements PlugInFilter {
 
       // Check if any centres were excluded
       int size = 0;
-      for (int i = 0; i < centres.length; i++) {
-        if (centres[i] == null) {
+      for (final BasePoint centre : centres) {
+        if (centre == null) {
           continue;
         }
-        centres[size++] = centres[i];
+        centres[size++] = centre;
       }
       if (size == 0) {
         resetImp();
@@ -3104,9 +3178,12 @@ public class PsfCreator implements PlugInFilter {
     return centres;
   }
 
-  private static final double NO_ANGLE = -360.0;
-
+  /**
+   * An interactive dialog listener to allow selection of the centre of the PSF.
+   */
   private class PsfCentreSelector implements DialogListener {
+    private static final double NO_ANGLE = -360.0;
+
     // The concept of HWHM only applies to a PSF that is a peaked maxima.
     // This may not be true for an image. To approximate this we assume that
     // the peak is Gaussian and find the sum which equals the integral of
@@ -3162,9 +3239,13 @@ public class PsfCreator implements PlugInFilter {
 
     private int psfZCentre = -1;
     private int zRadius;
-    private int psfXyBorder = -1;
+    int psfXyBorder = -1;
 
-    PsfCentreSelector() {}
+    int plotWindow = -1;
+
+    PsfCentreSelector() {
+      // Intentionally empty
+    }
 
     int getCentreSlice() {
       return MathUtils.clip(1, psf.psf.length, (int) Math.round(1 + zCentre));
@@ -3551,8 +3632,6 @@ public class PsfCreator implements PlugInFilter {
       updateCoMBorder();
     }
 
-    int plotWindow = -1;
-
     private void drawEdgeWindowPlot(WindowOrganiser wo) {
       plotWindow = settings.getWindow();
 
@@ -3827,7 +3906,7 @@ public class PsfCreator implements PlugInFilter {
       }
     }
 
-    private void drawCoMBorder() {
+    void drawCoMBorder() {
       // Show border
       psfXyBorder = getComXyBorder(psf.maxx, psf.maxy);
       psfOut[0].setRoi(psfXyBorder, psfXyBorder, psf.maxx - 2 * psfXyBorder,
@@ -3853,12 +3932,22 @@ public class PsfCreator implements PlugInFilter {
     }
   }
 
+  /**
+   * An interactive dialog listener to allow selection of the output PSF crop.
+   */
   private class PsfOutputSelector implements DialogListener {
     ExtractedPsf psf;
     Label label1;
     int slice;
+    int cropBorder = -1;
+    int cropStart = -1;
+    int cropEnd = -1;
+    int outputType = -1;
+    int psfMagnification;
+    boolean singlePrecision;
+    private int centre = -1;
 
-    public PsfOutputSelector(ExtractedPsf psf) {
+    PsfOutputSelector(ExtractedPsf psf) {
       this.psf = psf;
     }
 
@@ -3881,8 +3970,7 @@ public class PsfCreator implements PlugInFilter {
             @Override
             public boolean collectOptions(Integer value) {
               settings.setOutputType(value);
-              final boolean result = collectOptions(false);
-              return result;
+              return collectOptions(false);
             }
 
             @Override
@@ -4002,17 +4090,10 @@ public class PsfCreator implements PlugInFilter {
       drawCentre();
     }
 
-    private void update() {
+    void update() {
       updateLabel();
       updateCentre();
     }
-
-    int cropBorder = -1;
-    int cropStart = -1;
-    int cropEnd = -1;
-    int outputType = -1;
-    int psfMagnification;
-    boolean singlePrecision;
 
     private void drawLabel() {
       cropBorder = settings.getCropBorder();
@@ -4024,9 +4105,9 @@ public class PsfCreator implements PlugInFilter {
 
       final int[] dimensions = psf.getDimensions();
       // Set limits
-      final int[] min = new int[] {cropBorder, cropBorder, cropStart};
-      final int[] max = new int[] {dimensions[0] - cropBorder, dimensions[1] - cropBorder,
-          dimensions[2] - cropEnd};
+      final int[] min = {cropBorder, cropBorder, cropStart};
+      final int[] max =
+          {dimensions[0] - cropBorder, dimensions[1] - cropBorder, dimensions[2] - cropEnd};
       dimensions[0] -= 2 * cropBorder;
       dimensions[1] -= 2 * cropBorder;
       dimensions[2] -= (cropStart + cropEnd);
@@ -4076,8 +4157,6 @@ public class PsfCreator implements PlugInFilter {
         }).start();
       }
     }
-
-    private int centre = -1;
 
     private void drawCentre() {
       centre = slice;
@@ -4140,10 +4219,10 @@ public class PsfCreator implements PlugInFilter {
     final float[][] psf = new float[totalDepth][first.psf[0].length];
     final int size = first.maxx;
     final int[] count = new int[totalDepth];
-    for (int i = 0; i < psfs.length; i++) {
-      final int offset = before - psfs[i].stackZCentre;
-      for (int j = 0; j < psfs[i].psf.length; j++) {
-        final float[] from = psfs[i].psf[j];
+    for (final ExtractedPsf p : psfs) {
+      final int offset = before - p.stackZCentre;
+      for (int j = 0; j < p.psf.length; j++) {
+        final float[] from = p.psf[j];
         final float[] to = psf[j + offset];
         count[j + offset]++;
         for (int k = 0; k < to.length; k++) {
@@ -4206,7 +4285,7 @@ public class PsfCreator implements PlugInFilter {
 
     if (ImageJUtils.isShowGenericDialog()) {
       gd.addAndGetButton("Reset", event -> {
-        final boolean interactive = PsfCreator.this.settings.getInteractiveMode();
+        final boolean interactive = settings.getInteractiveMode();
         final PSFCreatorSettings defaults = GuiSettings.DefaultPSFCreatorSettings.INSTANCE;
         int ti = 0;
         int cbi = 0;
@@ -4218,23 +4297,23 @@ public class PsfCreator implements PlugInFilter {
         cb.get(cbi++).setState(defaults.getSmoothStackSignal());
         tf.get(ti++).setText(Integer.toString(defaults.getMaxIterations()));
         if (interactive) {
-          cb.get(cbi++).setState(defaults.getCheckAlignments());
+          cb.get(cbi).setState(defaults.getCheckAlignments());
         }
         tf.get(ti++).setText(Double.toString(defaults.getSubPixelPrecision()));
         if (!interactive) {
           tf.get(ti++).setText(Double.toString(defaults.getRmsdXyThreshold()));
           tf.get(ti++).setText(Double.toString(defaults.getRmsdZThreshold()));
-          tf.get(ti++).setText(Double.toString(defaults.getComShiftThreshold()));
+          tf.get(ti).setText(Double.toString(defaults.getComShiftThreshold()));
         }
 
         // Reset later options too
-        PsfCreator.this.settings.setPsfMagnification(defaults.getPsfMagnification());
-        PsfCreator.this.settings.setWindow(defaults.getWindow());
-        PsfCreator.this.settings.setSmoothStackSignal(defaults.getSmoothStackSignal());
-        PsfCreator.this.settings.setComBorder(defaults.getComBorder());
-        PsfCreator.this.settings.setCropBorder(0);
-        PsfCreator.this.settings.setCropStart(0);
-        PsfCreator.this.settings.setCropEnd(0);
+        settings.setPsfMagnification(defaults.getPsfMagnification());
+        settings.setWindow(defaults.getWindow());
+        settings.setSmoothStackSignal(defaults.getSmoothStackSignal());
+        settings.setComBorder(defaults.getComBorder());
+        settings.setCropBorder(0);
+        settings.setCropStart(0);
+        settings.setCropEnd(0);
       });
     }
 
@@ -4332,7 +4411,7 @@ public class PsfCreator implements PlugInFilter {
    * @param n the block size of the region
    * @return the limits per slice
    */
-  private static float[][] getLimitsPerSlice(float[][] psf, int maxx, int maxy, int n) {
+  static float[][] getLimitsPerSlice(float[][] psf, int maxx, int maxy, int n) {
     final BlockMeanFilter filter = new BlockMeanFilter();
     final float[][] limits = new float[2][psf.length];
     for (int zz = 0; zz < psf.length; zz++) {
@@ -4359,7 +4438,7 @@ public class PsfCreator implements PlugInFilter {
    * @param n the block size of the region
    * @return the psf background
    */
-  private static float getPsfBackground(float[][] psf, int maxx, int maxy, int n) {
+  static float getPsfBackground(float[][] psf, int maxx, int maxy, int n) {
     final float[][] limits = getLimitsPerSlice(psf, maxx, maxy, n);
     return MathUtils.min(limits[0]);
     // return Maths.min(new Smoother().smooth(limits[0]).getFSmooth());
@@ -4419,7 +4498,15 @@ public class PsfCreator implements PlugInFilter {
     return c;
   }
 
-  private static double[] getCentreOfMass(float[][] psf, int width, int height) {
+  /**
+   * Gets the XYZ centre of mass.
+   *
+   * @param psf the psf
+   * @param width the width
+   * @param height the height
+   * @return the centre of mass
+   */
+  static double[] getCentreOfMass(float[][] psf, int width, int height) {
     double cx = 0;
     double cy = 0;
     double cz = 0;
@@ -4447,8 +4534,19 @@ public class PsfCreator implements PlugInFilter {
     return new double[] {cx, cy, cz};
   }
 
-  private static double[] getCentreOfMassXy(float[][] psf, int width, int height, int zCentre,
-      int zSlices, int border) {
+  /**
+   * Gets the XY centre of mass.
+   *
+   * @param psf the psf
+   * @param width the width
+   * @param height the height
+   * @param zCentre the z centre
+   * @param zSlices the z slices
+   * @param border the border
+   * @return the centre of mass
+   */
+  static double[] getCentreOfMassXy(float[][] psf, int width, int height, int zCentre, int zSlices,
+      int border) {
     double cx = 0;
     double cy = 0;
     double sumXyz = 0;
@@ -4480,6 +4578,9 @@ public class PsfCreator implements PlugInFilter {
     return new double[] {cx, cy};
   }
 
+  /**
+   * Class to perform a maximum intensity projection along the X, Y, and Z axes.
+   */
   private static class Projection {
     static final int X = 0;
     static final int Y = 1;
@@ -4544,7 +4645,7 @@ public class PsfCreator implements PlugInFilter {
      */
     double[] getCentreOfMass() {
       // Start in the centre of the image
-      final double[] com = new double[] {x / 2.0, y / 2.0, z / 2.0};
+      final double[] com = {x / 2.0, y / 2.0, z / 2.0};
       for (int i = 0; i < 3; i++) {
         // This should be croped around z-centre but the method isn't used so ignore this
         final FloatProcessor fp = getProjection(i);
@@ -4566,18 +4667,7 @@ public class PsfCreator implements PlugInFilter {
 
     double[] getCentreOfProjection(FloatProcessor fp) {
       final float[] data = (float[]) fp.getPixels();
-      final double[] com = centreOfMass(data, fp.getWidth(), fp.getHeight());
-
-      // // Compare will background subtracted centre
-      // float min = Maths.min(data);
-      // float[] data2 = new float[data.length];
-      // for (int i = 0; i < data.length; i++)
-      // data2[i] = data[i] - min;
-      // double[] com2 = centreOfMass(data2, fp.getWidth(), fp.getHeight());
-      //
-      // System.out.printf("COM shift %f,%f\n", com[0]-com2[0], com[1]-com2[1]);
-
-      return com;
+      return centreOfMass(data, fp.getWidth(), fp.getHeight());
     }
 
     private static double[] centreOfMass(float[] data, int width, int height) {
@@ -4648,6 +4738,9 @@ public class PsfCreator implements PlugInFilter {
     }
   }
 
+  /**
+   * A PSF extracted from the input image.
+   */
   private class ExtractedPsf {
     BasePoint centre;
     /**
@@ -5054,7 +5147,7 @@ public class PsfCreator implements PlugInFilter {
       final double[] shift = PsfCreator.getCentreOfMassXy(psf, maxx, maxy, zCentre,
           settings.getComWindow(), getComXyBorder(maxx, maxy));
       // Turn into a shift relative to the centre
-      final int[] d = new int[] {maxx, maxy};
+      final int[] d = {maxx, maxy};
       for (int i = 0; i < d.length; i++) {
         shift[i] -= d[i] / 2.0;
         // Account for magnification
