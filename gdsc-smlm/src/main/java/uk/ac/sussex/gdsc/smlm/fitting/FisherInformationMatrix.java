@@ -119,9 +119,9 @@ public class FisherInformationMatrix {
     final int n = matrix.getNumCols();
 
     // Check the indices are within the matrix
-    for (int i = 0; i < indices.length; i++) {
-      if (indices[i] < 0 || indices[i] >= n) {
-        throw new IllegalArgumentException("Indices must be >=0 and <" + n + ": " + indices[i]);
+    for (final int index : indices) {
+      if (index < 0 || index >= n) {
+        throw new IllegalArgumentException("Indices must be >=0 and <" + n + ": " + index);
       }
     }
 
