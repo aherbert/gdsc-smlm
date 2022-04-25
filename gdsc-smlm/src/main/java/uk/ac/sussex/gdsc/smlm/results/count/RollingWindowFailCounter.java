@@ -99,7 +99,10 @@ public final class RollingWindowFailCounter extends BaseFailCounter {
 
   @Override
   public boolean isOk() {
-    return (rollingArray.isFull()) ? getFailCount() <= allowedFailures : true;
+    // Rolling window may not be full. However we are counting failures and this will
+    // only exceed the limit if the window has enough observations so omit a check
+    // on the current window size
+    return getFailCount() <= allowedFailures;
   }
 
   @Override
