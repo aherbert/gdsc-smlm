@@ -228,11 +228,11 @@ class CandidateGridManager {
     if (nonUnique) {
       // Assumes non-unique candidates
       size = 0;
-      for (int i = 0; i < list.length; i++) {
-        if (list[i].index == candidate.index) {
+      for (final Candidate c : list) {
+        if (c.index == candidate.index) {
           continue;
         }
-        list[size++] = list[i];
+        list[size++] = c;
       }
     } else {
       size = list.length;
