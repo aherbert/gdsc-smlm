@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.search;
 
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Specify the dimensions for a search.
@@ -91,39 +92,22 @@ public class FixedDimension implements Dimension {
    *         {@code upper < lower}
    */
   public FixedDimension(double min, double max, double minIncrement, double lower, double upper) {
-    if (!Double.isFinite(min)) {
-      throw new IllegalArgumentException("Min is not a valid number: " + min);
-    }
-    if (!Double.isFinite(max)) {
-      throw new IllegalArgumentException("Max is not a valid number: " + max);
-    }
-    if (!Double.isFinite(lower)) {
-      throw new IllegalArgumentException("Lower is not a valid number: " + lower);
-    }
-    if (!Double.isFinite(upper)) {
-      throw new IllegalArgumentException("Upper is not a valid number: " + upper);
-    }
-    if (!Double.isFinite(minIncrement)) {
-      throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
-    }
-    if (max < min) {
-      throw new IllegalArgumentException("Max is less than min");
-    }
+    ValidationUtils.checkArgument(Double.isFinite(min), "Min is not finite: %s", min);
+    ValidationUtils.checkArgument(Double.isFinite(max), "Max is not finite: %s", max);
+    ValidationUtils.checkArgument(Double.isFinite(lower), "Lower is not finite: %s", lower);
+    ValidationUtils.checkArgument(Double.isFinite(upper), "Upper is not finite: %s", upper);
+    ValidationUtils.checkArgument(Double.isFinite(minIncrement), "Min increment is not finite: %s",
+        minIncrement);
+    ValidationUtils.checkArgument(min <= max, "Max (%s) is not greater than min (%s)", max, min);
+    ValidationUtils.checkPositive(minIncrement, "Min increment");
+    ValidationUtils.checkArgument(lower <= upper, "Upper (%s) is not greater than lower (%s)",
+        upper, lower);
+
     this.active = min < max;
-    if (minIncrement < 0) {
-      throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
-    }
-    if (upper < lower) {
-      throw new IllegalArgumentException("Upper is less than lower");
-      // if (upper < min || upper > max)
-      // throw new IllegalArgumentException("Upper is outside min/max range");
-      // if (lower < min || lower > max)
-      // throw new IllegalArgumentException("Lower is outside min/max range");
-    }
 
     // Clip to range
-    lower = Math.min(max, Math.max(lower, min));
-    upper = Math.min(max, Math.max(upper, min));
+    lower = MathUtils.clip(min, max, lower);
+    upper = MathUtils.clip(min, max, upper);
 
     // We round to the min increment so that the values returned should be identical if the centre
     // is moved by a factor of the increment.

@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.search;
 import java.util.Arrays;
 import uk.ac.sussex.gdsc.core.data.ComputationException;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Specify the dimensions for a search.
@@ -97,33 +98,20 @@ public class SearchDimension implements Dimension {
    */
   public SearchDimension(double min, double max, double minIncrement, int increments, double lower,
       double upper) {
-    if (!Double.isFinite(min)) {
-      throw new IllegalArgumentException("Min is not a valid number: " + min);
-    }
-    if (!Double.isFinite(max)) {
-      throw new IllegalArgumentException("Max is not a valid number: " + max);
-    }
-    if (!Double.isFinite(lower)) {
-      throw new IllegalArgumentException("Lower is not a valid number: " + lower);
-    }
-    if (!Double.isFinite(upper)) {
-      throw new IllegalArgumentException("Upper is not a valid number: " + upper);
-    }
-    if (!Double.isFinite(minIncrement)) {
-      throw new IllegalArgumentException("Min increment is not a valid number: " + minIncrement);
-    }
-    if (max < min) {
-      throw new IllegalArgumentException("Max is less than min");
-    }
+    ValidationUtils.checkArgument(Double.isFinite(min), "Min is not finite: %s", min);
+    ValidationUtils.checkArgument(Double.isFinite(max), "Max is not finite: %s", max);
+    ValidationUtils.checkArgument(Double.isFinite(lower), "Lower is not finite: %s", lower);
+    ValidationUtils.checkArgument(Double.isFinite(upper), "Upper is not finite: %s", upper);
+    ValidationUtils.checkArgument(Double.isFinite(minIncrement), "Min increment is not finite: %s",
+        minIncrement);
+    ValidationUtils.checkArgument(min <= max, "Max (%s) is not greater than min (%s)", max, min);
+    ValidationUtils.checkPositive(minIncrement, "Min increment");
+    ValidationUtils.checkArgument(lower <= upper, "Upper (%s) is not greater than lower (%s)",
+        upper, lower);
+
     this.active = min < max;
-    if (active && increments < 1) {
-      throw new IllegalArgumentException("Steps must be more than 0: " + increments);
-    }
-    if (minIncrement < 0) {
-      throw new IllegalArgumentException("Min increment is negative: " + minIncrement);
-    }
-    if (upper < lower) {
-      throw new IllegalArgumentException("Upper is less than lower");
+    if (active) {
+      ValidationUtils.checkStrictlyPositive(increments, "increments");
     }
 
     // We round to the min increment so that the values returned should be identical if the centre
