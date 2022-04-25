@@ -39,7 +39,7 @@ public final class Version {
   /** Constant for the string "unknown". */
   private static final String UNKNOWN = "";
 
-  private static String version;
+  private static String implVersion;
   private static String buildDate;
   private static String buildNumber;
 
@@ -47,13 +47,13 @@ public final class Version {
     final Manifest manifest = loadManifest(Version.class);
     if (manifest != null) {
       final Attributes attributes = manifest.getMainAttributes();
-      version = attributes.getValue("Implementation-Version");
+      implVersion = attributes.getValue("Implementation-Version");
       buildDate = attributes.getValue("Implementation-Date");
       buildNumber = attributes.getValue("Implementation-Build");
     }
 
-    if (version == null) {
-      version = UNKNOWN;
+    if (implVersion == null) {
+      implVersion = UNKNOWN;
     }
     if (buildDate == null) {
       buildDate = UNKNOWN;
@@ -75,7 +75,7 @@ public final class Version {
     final StringBuilder sb = new StringBuilder(128);
     final String newLine = System.lineSeparator();
     // @formatter:off
-    sb.append("Version : ").append(version).append(newLine)
+    sb.append("Version : ").append(implVersion).append(newLine)
       .append("Build Date : ").append(buildDate).append(newLine)
       .append("Build Number : ").append(buildNumber).append(newLine);
     // @formatter:on
@@ -93,7 +93,7 @@ public final class Version {
    *      addDefaultImplementationEntries</a>
    */
   public static String getVersion() {
-    return version;
+    return implVersion;
   }
 
   /**
@@ -121,7 +121,7 @@ public final class Version {
    */
   public static int getMajorVersion() {
     final Pattern p = Pattern.compile("^\\d+");
-    final Matcher m = p.matcher(version);
+    final Matcher m = p.matcher(implVersion);
     if (m.find()) {
       return Integer.parseInt(m.group());
     }
@@ -135,7 +135,7 @@ public final class Version {
    */
   public static int getMinorVersion() {
     final Pattern p = Pattern.compile("^\\d+\\.(\\d+)");
-    final Matcher m = p.matcher(version);
+    final Matcher m = p.matcher(implVersion);
     if (m.find()) {
       return Integer.parseInt(m.group(1));
     }
@@ -149,7 +149,7 @@ public final class Version {
    */
   public static int getPatchVersion() {
     final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.(\\d+)");
-    final Matcher m = p.matcher(version);
+    final Matcher m = p.matcher(implVersion);
     if (m.find()) {
       return Integer.parseInt(m.group(1));
     }
@@ -163,7 +163,7 @@ public final class Version {
    */
   public static String getMajorMinorPatch() {
     final Pattern p = Pattern.compile("^\\d+\\.\\d+\\.\\d+");
-    final Matcher m = p.matcher(version);
+    final Matcher m = p.matcher(implVersion);
     if (m.find()) {
       return m.group();
     }

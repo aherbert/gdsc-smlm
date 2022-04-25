@@ -894,9 +894,9 @@ public final class Gaussian2DPeakResultHelper {
 
     final double rho = 2 * Math.PI * sa2 * b2 / (N * a2);
     try {
-      final double I1 = computeI1(rho, integrationpoints);
-      if (I1 > 0) {
-        return F * (sa2 / N) * (1 / I1);
+      final double i1 = computeI1(rho, integrationpoints);
+      if (i1 > 0) {
+        return F * (sa2 / N) * (1 / i1);
       }
     } catch (final TooManyEvaluationsException ignored) {
       // Ignore

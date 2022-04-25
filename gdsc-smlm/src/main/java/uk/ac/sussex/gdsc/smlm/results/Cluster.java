@@ -240,10 +240,10 @@ public class Cluster {
     double ym = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      final float Ni = photons[i++];
-      sumNi += Ni;
-      xm += result.getXPosition() * Ni;
-      ym += result.getYPosition() * Ni;
+      final float ni = photons[i++];
+      sumNi += ni;
+      xm += result.getXPosition() * ni;
+      ym += result.getYPosition() * ni;
     }
     xm /= sumNi;
     ym /= sumNi;
@@ -257,14 +257,14 @@ public class Cluster {
     double sumS2 = 0;
     for (int i = 0; i < results.size(); i++) {
       final PeakResult result = results.get(i);
-      final float Ni = photons[i++];
+      final float ni = photons[i++];
 
       final double dx = converter.convert(result.getXPosition() - xm);
       final double dy = converter.convert(result.getYPosition() - ym);
 
-      sumXi2Ni += dx * dx * Ni;
-      sumYi2Ni += dy * dy * Ni;
-      sumS2 += MathUtils.pow2(checkPrecision(result.getPrecision())) * Ni;
+      sumXi2Ni += dx * dx * ni;
+      sumYi2Ni += dy * dy * ni;
+      sumS2 += MathUtils.pow2(checkPrecision(result.getPrecision())) * ni;
     }
 
     final double sumNin = sumNi * n;

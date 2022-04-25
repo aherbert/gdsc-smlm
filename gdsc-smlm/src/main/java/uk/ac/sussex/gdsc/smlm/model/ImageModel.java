@@ -557,9 +557,9 @@ public abstract class ImageModel {
 
       StoredDataStatistics correlatedOnTime = new StoredDataStatistics();
       for (int i = 0; i < nMolecules; i++) {
-        final double X = getTotalOnTime(fluorophores.get(i));
-        final double Z = getTotalOnTime(fluorophores2.get(i));
-        correlatedOnTime.add((boundedCorrelation * X + a * Z) / (boundedCorrelation + a));
+        final double x = getTotalOnTime(fluorophores.get(i));
+        final double z = getTotalOnTime(fluorophores2.get(i));
+        correlatedOnTime.add((boundedCorrelation * x + a * z) / (boundedCorrelation + a));
       }
 
       if (invert) {

@@ -104,26 +104,26 @@ public class Tensor2D {
     final double b = tensor.data[1];
     final double c = tensor.data[2];
     final double d = tensor.data[3];
-    final double T_2 = (a + d) / 2.0; // Trace / 2
-    final double D = a * d - b * c; // Determinant
-    final double root_T2_4_D = Math.sqrt(T_2 * T_2 - D);
-    final double L1 = T_2 + root_T2_4_D;
-    final double L2 = T_2 - root_T2_4_D;
+    final double t_2 = (a + d) / 2.0; // Trace / 2
+    final double det = a * d - b * c; // Determinant
+    final double root_T2_4_m_D = Math.sqrt(t_2 * t_2 - det);
+    final double l1 = t_2 + root_T2_4_m_D;
+    final double l2 = t_2 - root_T2_4_m_D;
 
-    eigenValues = new double[] {L1, L2};
+    eigenValues = new double[] {l1, l2};
     eigenVectors = new double[2][2];
 
     if (c != 0) {
-      eigenVectors[0][0] = L1 - d;
+      eigenVectors[0][0] = l1 - d;
       eigenVectors[0][1] = c;
-      eigenVectors[1][0] = L2 - d;
+      eigenVectors[1][0] = l2 - d;
       eigenVectors[1][1] = c;
       normalise(eigenVectors);
     } else if (b != 0) {
       eigenVectors[0][0] = b;
-      eigenVectors[0][1] = L1 - a;
+      eigenVectors[0][1] = l1 - a;
       eigenVectors[1][0] = b;
-      eigenVectors[1][1] = L2 - a;
+      eigenVectors[1][1] = l2 - a;
       normalise(eigenVectors);
     } else {
       // b==0, c==0
