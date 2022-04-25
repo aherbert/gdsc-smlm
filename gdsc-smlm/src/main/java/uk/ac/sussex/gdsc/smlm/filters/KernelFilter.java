@@ -135,10 +135,10 @@ public class KernelFilter extends BaseWeightedFilter {
    */
   public static double getScale(float[] kernel) {
     double sum = 0.0;
-    for (int i = 0; i < kernel.length; i++) {
-      sum += kernel[i];
+    for (final float f : kernel) {
+      sum += f;
     }
-    if (sum != 0.0) {
+    if (sum != 0) {
       return 1.0 / sum;
     }
     return 1.0;
