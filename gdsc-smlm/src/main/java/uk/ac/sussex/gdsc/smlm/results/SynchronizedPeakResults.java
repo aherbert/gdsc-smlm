@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import java.awt.Rectangle;
 import java.util.Collection;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 
@@ -43,10 +44,7 @@ public class SynchronizedPeakResults implements ThreadSafePeakResults {
    * @throws IllegalArgumentException if the results are null
    */
   public SynchronizedPeakResults(PeakResults peakResults) {
-    if (peakResults == null) {
-      throw new IllegalArgumentException("PeakResults must not be null");
-    }
-    this.peakResults = peakResults;
+    this.peakResults = Objects.requireNonNull(peakResults, "PeakResults must not be null");
   }
 
   /**

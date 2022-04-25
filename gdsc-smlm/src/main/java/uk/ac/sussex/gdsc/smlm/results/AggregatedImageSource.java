@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Wraps an image source and allows aggregation of consecutive frames.
@@ -54,13 +55,9 @@ public class AggregatedImageSource extends ImageSource {
    */
   public AggregatedImageSource(ImageSource imageSource, int aggregate) {
     super("");
-    if (imageSource == null) {
-      throw new IllegalArgumentException("Image source must not be null");
-    }
-    if (aggregate < 2) {
-      throw new IllegalArgumentException(
-          "The number of frames to aggregate (" + aggregate + ") must be above 1");
-    }
+    ValidationUtils.checkNotNull(imageSource, "imageSource");
+    ValidationUtils.checkArgument(aggregate < 2,
+        "The number of frames to aggregate (%d) must be above 1", aggregate);
     setName("Aggregated (" + aggregate + ") " + imageSource.getName());
     this.imageSource = imageSource;
     this.aggregate = aggregate;

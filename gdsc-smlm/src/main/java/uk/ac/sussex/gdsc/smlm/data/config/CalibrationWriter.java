@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.utils.TextUtils;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.Calibration;
 import uk.ac.sussex.gdsc.smlm.data.config.CalibrationProtos.CalibrationOrBuilder;
@@ -55,27 +56,19 @@ public class CalibrationWriter extends CalibrationReader {
   /**
    * Instantiates a new calibration writer.
    *
-   * @param calibration the calibration
-   * @throws IllegalArgumentException if the calibration is null
+   * @param calibration the calibration (must not be null)
    */
   public CalibrationWriter(Calibration calibration) {
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    this.calibration = calibration;
+    this.calibration = Objects.requireNonNull(calibration, "calibration");
   }
 
   /**
    * Instantiates a new calibration writer.
    *
-   * @param calibration the calibration
-   * @throws IllegalArgumentException if the calibration is null
+   * @param calibration the calibration (must not be null)
    */
   public CalibrationWriter(Calibration.Builder calibration) {
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    this.calibrationBuilder = calibration;
+    this.calibrationBuilder = Objects.requireNonNull(calibration, "calibration");
   }
 
   /**

@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.engine;
 
 import java.awt.Rectangle;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.Statistics;
 import uk.ac.sussex.gdsc.smlm.engine.FitConfiguration.PeakResultValidationData;
@@ -66,9 +67,7 @@ public class SimplePeakResultValidationData implements PeakResultValidationData 
    */
   public SimplePeakResultValidationData(GaussianFunctionFactory factory, int ox, int oy,
       Object data, int maxx, int maxy) {
-    if (factory == null) {
-      throw new IllegalArgumentException("Factory is null");
-    }
+    Objects.requireNonNull(factory, "Factory is null");
     SimpleArrayUtils.check2DSize(maxx, maxy);
     if (!ic.isSupported(data)) {
       throw new IllegalArgumentException("Data is not supported");

@@ -293,10 +293,7 @@ public class MemoryPeakResults extends AbstractPeakResults {
    * @throws IllegalArgumentException If the store is null
    */
   public MemoryPeakResults(PeakResultStoreList store) {
-    if (store == null) {
-      throw new IllegalArgumentException("Store must not be null");
-    }
-    results = store;
+    results = Objects.requireNonNull(store, "Store");
   }
 
   /**

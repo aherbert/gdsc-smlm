@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.function;
 
+import java.util.Objects;
+
 /**
  * Implementation of the ICSILog algorithm as described in O. Vinyals, G. Friedland, N. Mirghafori
  * "Revisiting a basic function on current CPUs: A fast logarithm implementation with adjustable
@@ -90,15 +92,13 @@ public final class IcsiFastLog extends FastLog {
    *        for n=13.
    * @param dataType the data type
    * @return the fast log instance
-   * @throws IllegalArgumentException if n is not in the range 0-23, or no datatype is specified
+   * @throws IllegalArgumentException if n is not in the range 0-23
    */
   public static IcsiFastLog create(int n, DataType dataType) {
     if (n < 0 || n > 23) {
       throw new IllegalArgumentException("N must be in the range 0<=n<=23");
     }
-    if (dataType == null) {
-      throw new IllegalArgumentException("Must create for float/double computation");
-    }
+    Objects.requireNonNull(dataType, "Must create for float/double computation");
     return new IcsiFastLog(n, dataType);
   }
 

@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.model;
 
+import java.util.Objects;
 import org.apache.commons.rng.UniformRandomProvider;
 import uk.ac.sussex.gdsc.core.utils.rng.SamplerUtils;
 
@@ -61,11 +62,8 @@ public class ActivationEnergyImageModel extends ImageModel {
 
   private void init(double activationEnergy, SpatialIllumination illumination) {
     checkParameter("activationEnergy", activationEnergy);
-    if (illumination == null) {
-      throw new IllegalArgumentException("SpatialIllumination is null");
-    }
     this.activationEnergy = activationEnergy;
-    this.illumination = illumination;
+    this.illumination = Objects.requireNonNull(illumination, "illumination");
   }
 
   /**

@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.results;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Wraps an image source and allows data to be interlaced within regular blocks.
@@ -50,26 +51,18 @@ public class InterlacedImageSource extends ImageSource {
    * @param start The first frame that contains data
    * @param size The number of continuous frames containing data
    * @param skip The number of continuous frames to ignore before the next data
-   * @throws IllegalArgumentException If the image is null or aggregated, or the interlace arguments
+   * @throws IllegalArgumentException If the image is aggregated, or the interlace arguments
    *         are invalid
    */
   public InterlacedImageSource(ImageSource imageSource, int start, int size, int skip) {
     super("");
-    if (imageSource == null) {
-      throw new IllegalArgumentException("Image source must not be null");
-    }
+    ValidationUtils.checkNotNull(imageSource, "Image source must not be null");
     if (imageSource instanceof AggregatedImageSource) {
       throw new IllegalArgumentException("Image source must not be aggregated");
     }
-    if (start < 1) {
-      throw new IllegalArgumentException("The start frame must be 1 or above");
-    }
-    if (size < 1) {
-      throw new IllegalArgumentException("The read size must be 1 or above");
-    }
-    if (skip < 0) {
-      throw new IllegalArgumentException("The skip length must be 0 or above");
-    }
+    ValidationUtils.checkStrictlyPositive(start, "start frame");
+    ValidationUtils.checkStrictlyPositive(size, "read size");
+    ValidationUtils.checkPositive(skip, "skip length");
     setName(String.format("Interlaced (%d,%d,%d) %s", start, size, skip, imageSource.getName()));
     this.imageSource = imageSource;
     this.start = start;

@@ -27,6 +27,7 @@
 
 package uk.ac.sussex.gdsc.smlm.data.config;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.data.utils.ConversionException;
 import uk.ac.sussex.gdsc.core.data.utils.TypeConverter;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
@@ -56,14 +57,10 @@ public class CalibrationReader {
   /**
    * Instantiates a new calibration reader.
    *
-   * @param calibration the calibration
-   * @throws IllegalArgumentException if the calibration is null
+   * @param calibration the calibration (must not be null)
    */
   public CalibrationReader(CalibrationOrBuilder calibration) {
-    if (calibration == null) {
-      throw new IllegalArgumentException("Calibration is null");
-    }
-    this.calibrationOrBuilder = calibration;
+    this.calibrationOrBuilder = Objects.requireNonNull(calibration, "calibration");
   }
 
   /**

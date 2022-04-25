@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.ga;
 
+import java.util.Objects;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
 import uk.ac.sussex.gdsc.core.utils.rng.PoissonSamplers;
@@ -71,13 +72,13 @@ public class SimpleMutator<T extends Comparable<T>> extends Randomiser implement
    *         size
    */
   public void overrideChromosomeSettings(double[] stepSize, double[] lower, double[] upper) {
-    if (stepSize == null) {
-      throw new IllegalArgumentException("Step size must not be null");
-    }
-    if (lower != null && lower.length != stepSize.length) {
+    Objects.requireNonNull(stepSize, "Step size must not be null");
+    Objects.requireNonNull(lower, "Lower must not be null");
+    Objects.requireNonNull(upper, "Upper must not be null");
+    if (lower.length != stepSize.length) {
       throw new IllegalArgumentException("Lower limit must be the same length as the step size");
     }
-    if (upper != null && upper.length != stepSize.length) {
+    if (upper.length != stepSize.length) {
       throw new IllegalArgumentException("Upper limit must be the same length as the step size");
     }
 

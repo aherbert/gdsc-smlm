@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.engine;
 
+import java.util.Objects;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import uk.ac.sussex.gdsc.core.threshold.AutoThreshold;
@@ -62,9 +63,7 @@ public class DataEstimator {
    * @param height The height of the data
    */
   public DataEstimator(float[] data, int width, int height) {
-    if (data == null) {
-      throw new IllegalArgumentException("Input data must not be null");
-    }
+    Objects.requireNonNull(data, "Input data must not be null");
     if (data.length < width * height) {
       throw new IllegalArgumentException("Input data must not be smaller than width * height");
     }

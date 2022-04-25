@@ -3302,14 +3302,11 @@ public class PeakFit implements PlugInFilter {
    * @param resetOrigin the reset origin flag (to set the output camera model origin to match the
    *        source bounds)
    * @return the camera model (or null if the dialog was cancelled)
-   * @throws IllegalArgumentException If the model is null or the crop cannot be done
+   * @throws IllegalArgumentException If the crop cannot be done
    */
   public static CameraModel cropCameraModel(CameraModel cameraModel, Rectangle sourceBounds,
       Rectangle cropBounds, boolean resetOrigin) {
-    if (cameraModel == null) {
-      throw new IllegalArgumentException("No camera model");
-    }
-    Rectangle modelBounds = cameraModel.getBounds();
+    Rectangle modelBounds = Objects.requireNonNull(cameraModel, "camera model").getBounds();
     if (modelBounds == null || sourceBounds == null) {
       return cameraModel;
     }

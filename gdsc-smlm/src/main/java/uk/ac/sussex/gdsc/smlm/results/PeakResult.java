@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import uk.ac.sussex.gdsc.core.utils.MathUtils;
 
@@ -99,9 +100,7 @@ public class PeakResult implements Serializable {
    */
   public PeakResult(int frame, int origX, int origY, float origValue, double error, float noise,
       float meanIntensity, float[] params, float[] paramsStdDev) {
-    if (params == null) {
-      throw new IllegalArgumentException("Parameters must not be null");
-    }
+    Objects.requireNonNull(params, "Parameters must not be null");
     if (params.length < STANDARD_PARAMETERS) {
       throw new IllegalArgumentException("Parameters must contain all standard parameters");
     }

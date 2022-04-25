@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.utils;
 
 import java.util.Arrays;
+import java.util.Objects;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.utils.CommonUtils;
 
@@ -704,27 +705,17 @@ public final class Convolution {
   }
 
   private static void checkInput(double[] x, double[] h) {
-    if (x == null) {
-      throw new IllegalArgumentException("Input x is null");
-    }
-    if (h == null) {
-      throw new IllegalArgumentException("Input h is null");
-    }
+    Objects.requireNonNull(x, "x");
+    Objects.requireNonNull(h, "h");
     if (x.length == 0 || h.length == 0) {
       throw new IllegalArgumentException("Input x or h have no length");
     }
   }
 
   private static void checkInput(double[] x, double[] h1, double[] h2) {
-    if (x == null) {
-      throw new IllegalArgumentException("Input x is null");
-    }
-    if (h1 == null) {
-      throw new IllegalArgumentException("Input h1 is null");
-    }
-    if (h2 == null) {
-      throw new IllegalArgumentException("Input h2 is null");
-    }
+    Objects.requireNonNull(x, "x");
+    Objects.requireNonNull(h1, "h1");
+    Objects.requireNonNull(h2, "h2");
     if (x.length == 0 || h1.length == 0) {
       throw new IllegalArgumentException("Input x or h1 have no length");
     }
@@ -734,9 +725,7 @@ public final class Convolution {
   }
 
   private static void checkProcedure(Object procedure) {
-    if (procedure == null) {
-      throw new IllegalArgumentException("Procedure is null");
-    }
+    Objects.requireNonNull(procedure, "procedure");
   }
 
   private static void checkScale(int scale) {

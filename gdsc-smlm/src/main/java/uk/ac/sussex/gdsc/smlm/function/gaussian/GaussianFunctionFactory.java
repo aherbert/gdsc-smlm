@@ -387,13 +387,10 @@ public class GaussianFunctionFactory {
    * @param zModel the z model
    * @param a the parameters of the function (modified in place)
    * @return the flags for the new function
-   * @throws IllegalArgumentException If the input array is null or not the correct size for a
+   * @throws IllegalArgumentException If the input array is not the correct size for a
    *         multiple of Gaussian peak parameters.
    */
   public static int freeze(int flags, AstigmatismZModel zModel, double[] a) {
-    if (a == null) {
-      throw new IllegalArgumentException("Parameter array is null");
-    }
     final int numberOfPeaks = a.length / Gaussian2DFunction.PARAMETERS_PER_PEAK;
     // Check the array length is correct (including the background at position 0)
     if (a.length != 1 + numberOfPeaks * Gaussian2DFunction.PARAMETERS_PER_PEAK) {

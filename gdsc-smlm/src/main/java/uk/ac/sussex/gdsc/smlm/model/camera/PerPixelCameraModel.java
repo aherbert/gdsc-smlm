@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.model.camera;
 
 import java.awt.Rectangle;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.core.utils.SimpleArrayUtils;
 
 /**
@@ -101,10 +102,7 @@ public class PerPixelCameraModel implements CameraModel {
    */
   private PerPixelCameraModel(Rectangle bounds, float[] bias, float[] gain, float[] variance,
       boolean cloneBounds, boolean cloneData) {
-    if (bounds == null) {
-      throw new IllegalArgumentException("Bounds must not be null");
-    }
-    checkBounds(bounds);
+    checkBounds(Objects.requireNonNull(bounds, "bounds"));
     cameraBounds = (cloneBounds) ? new Rectangle(bounds) : bounds;
     final int size = SimpleArrayUtils.check2DSize(bounds.width, bounds.height);
     checkArray(bias, size);
@@ -481,10 +479,7 @@ public class PerPixelCameraModel implements CameraModel {
    * @return the intersection
    */
   private Rectangle getIntersection(Rectangle bounds) {
-    if (bounds == null) {
-      throw new IllegalArgumentException("Bounds are null");
-    }
-    if (equalBounds(bounds)) {
+    if (equalBounds(Objects.requireNonNull(bounds, "bounds"))) {
       return new Rectangle(getWidth(), getHeight()); // Offset to the origin
     }
     checkBounds(bounds);
@@ -690,10 +685,7 @@ public class PerPixelCameraModel implements CameraModel {
 
   @Override
   public CameraModel crop(Rectangle bounds, boolean resetOrigin) {
-    if (bounds == null) {
-      throw new IllegalArgumentException("Bounds are null");
-    }
-    if (equalBounds(bounds)) {
+    if (equalBounds(Objects.requireNonNull(bounds, "bounds"))) {
       if (resetOrigin) {
         final PerPixelCameraModel model = copy();
         model.setOrigin(0, 0);

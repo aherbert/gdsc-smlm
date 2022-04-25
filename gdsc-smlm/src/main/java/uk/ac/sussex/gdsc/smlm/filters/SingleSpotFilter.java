@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.filters;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Identifies candidate spots (local maxima) in an image. The image is pre-processed with a single
@@ -38,15 +39,11 @@ public class SingleSpotFilter extends MaximaSpotFilter {
    *
    * @param search The search width for non-maximum suppression
    * @param border The border to ignore for maxima
-   * @param processor The data processor
-   * @throws IllegalArgumentException if processor is null
+   * @param processor The data processor (must not be null)
    */
   public SingleSpotFilter(int search, int border, DataProcessor processor) {
     super(search, border);
-    if (processor == null) {
-      throw new IllegalArgumentException("Processor is null");
-    }
-    this.processor = processor;
+    this.processor = Objects.requireNonNull(processor, "processor");
   }
 
   /**

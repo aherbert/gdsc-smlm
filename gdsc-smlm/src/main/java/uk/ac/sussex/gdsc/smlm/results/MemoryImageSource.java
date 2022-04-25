@@ -26,6 +26,7 @@ package uk.ac.sussex.gdsc.smlm.results;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import uk.ac.sussex.gdsc.core.annotation.Nullable;
+import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 
 /**
  * Represent a named results source providing data from memory.
@@ -60,20 +61,12 @@ public class MemoryImageSource extends ImageSource {
    */
   public MemoryImageSource(int xOrigin, int yOrigin, int width, int height, float[]... data) {
     super("Memory");
-    if (width < 1) {
-      throw new IllegalArgumentException("Width must be above zero");
-    }
-    if (height < 1) {
-      throw new IllegalArgumentException("Height must be above zero");
-    }
-    if (data == null) {
-      throw new IllegalArgumentException("Image data must not be null");
-    }
+    ValidationUtils.checkStrictlyPositive(width, "width");
+    ValidationUtils.checkStrictlyPositive(height, "height");
+    ValidationUtils.checkNotNull(data, "Image data must not be null");
     final int length = width * height;
     for (final float[] f : data) {
-      if (f == null) {
-        throw new IllegalArgumentException("Image data must not be null");
-      }
+      ValidationUtils.checkNotNull(f, "Image data must not be null");
       if (f.length != length) {
         throw new IllegalArgumentException("Image data length does not match width*height");
       }

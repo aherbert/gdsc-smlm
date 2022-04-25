@@ -24,6 +24,7 @@
 
 package uk.ac.sussex.gdsc.smlm.results.predicates;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 import uk.ac.sussex.gdsc.smlm.results.PeakResultValue;
@@ -47,19 +48,15 @@ public class MinMaxPeakResultPredicate implements Predicate<PeakResult> {
    * @param min the min of the value range
    * @param max the max of the value range
    * @param value the value
-   * @throws IllegalArgumentException If the min/max are NaN. If min is greater than max. If value
-   *         is null.
+   * @throws IllegalArgumentException If the min/max are NaN, or if min is greater than max.
    */
   public MinMaxPeakResultPredicate(float min, float max, PeakResultValue value) {
     if (Float.isNaN(min) || Float.isNaN(max) || min > max) {
       throw new IllegalArgumentException("Min/Max range is invalid");
     }
-    if (value == null) {
-      throw new IllegalArgumentException("No value function");
-    }
     this.min = min;
     this.max = max;
-    this.value = value;
+    this.value = Objects.requireNonNull(value, "value");
   }
 
   @Override

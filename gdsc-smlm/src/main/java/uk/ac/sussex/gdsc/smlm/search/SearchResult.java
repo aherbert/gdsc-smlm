@@ -24,6 +24,8 @@
 
 package uk.ac.sussex.gdsc.smlm.search;
 
+import java.util.Objects;
+
 /**
  * Store the result of scoring a point within a search space. Allows the scores to be compared.
  *
@@ -42,14 +44,8 @@ public class SearchResult<T extends Comparable<T>> implements Comparable<SearchR
    * @param score the score
    */
   public SearchResult(double[] point, T score) {
-    if (point == null) {
-      throw new IllegalArgumentException("Point is null");
-    }
-    if (score == null) {
-      throw new IllegalArgumentException("Score is null");
-    }
-    this.point = point;
-    this.score = score;
+    this.point = Objects.requireNonNull(point, "point");
+    this.score = Objects.requireNonNull(score, "score");
   }
 
   /**

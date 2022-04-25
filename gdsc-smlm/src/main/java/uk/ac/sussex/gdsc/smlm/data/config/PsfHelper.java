@@ -25,6 +25,7 @@
 package uk.ac.sussex.gdsc.smlm.data.config;
 
 import java.util.List;
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSF;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFOrBuilder;
 import uk.ac.sussex.gdsc.smlm.data.config.PSFProtos.PSFParameter;
@@ -51,14 +52,10 @@ public class PsfHelper {
   /**
    * Instantiates a new psf helper.
    *
-   * @param psf the psf
-   * @throws IllegalArgumentException if the psf is null
+   * @param psf the psf (must not be null)
    */
   public PsfHelper(PSF psf) {
-    if (psf == null) {
-      throw new IllegalArgumentException(PSF_IS_NULL);
-    }
-    psfBuilder = psf.toBuilder();
+    psfBuilder = Objects.requireNonNull(psf, PSF_IS_NULL).toBuilder();
   }
 
   /**
