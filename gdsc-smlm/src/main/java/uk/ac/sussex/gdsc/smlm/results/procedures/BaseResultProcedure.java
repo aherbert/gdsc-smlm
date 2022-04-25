@@ -24,15 +24,16 @@
 
 package uk.ac.sussex.gdsc.smlm.results.procedures;
 
+import java.util.Objects;
 import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 import uk.ac.sussex.gdsc.smlm.results.PeakResult;
 
 /**
  * Contains core functionality for result procedures.
  */
-public abstract class AbstractResultProcedure {
+public class BaseResultProcedure {
   /** The results. */
-  final MemoryPeakResults results;
+  protected final MemoryPeakResults results;
 
   /** The counter for procedures. */
   protected int counter;
@@ -42,11 +43,8 @@ public abstract class AbstractResultProcedure {
    *
    * @param results the results
    */
-  public AbstractResultProcedure(MemoryPeakResults results) {
-    if (results == null) {
-      throw new IllegalArgumentException("results must not be null");
-    }
-    this.results = results;
+  protected BaseResultProcedure(MemoryPeakResults results) {
+    this.results = Objects.requireNonNull(results, "results must not be null");
   }
 
   /**

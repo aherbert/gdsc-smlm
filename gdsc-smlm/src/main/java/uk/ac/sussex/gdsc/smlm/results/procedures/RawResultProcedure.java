@@ -31,7 +31,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  * Contains functionality to obtain the standard data for results.
  */
 //@formatter:off
-public class RawResultProcedure extends AbstractResultProcedure implements
+public class RawResultProcedure extends BaseResultProcedure implements
     BixyzResultProcedure,
     IResultProcedure,
     BResultProcedure,

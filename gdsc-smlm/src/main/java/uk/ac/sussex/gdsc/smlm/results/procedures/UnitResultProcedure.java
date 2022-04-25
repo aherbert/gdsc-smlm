@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
 /**
  * Contains core functionality to for result procedures.
  */
-public abstract class UnitResultProcedure extends AbstractResultProcedure {
+public abstract class UnitResultProcedure extends BaseResultProcedure {
   /** The distance unit. */
   private DistanceUnit distanceUnit;
 

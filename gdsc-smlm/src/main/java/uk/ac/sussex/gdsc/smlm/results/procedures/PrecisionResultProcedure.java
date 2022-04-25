@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.MemoryPeakResults;
  * Contains functionality to obtain the localisation precision for results.
  */
 //@formatter:off
-public class PrecisionResultProcedure extends AbstractResultProcedure implements
+public class PrecisionResultProcedure extends BaseResultProcedure implements
     StoredPrecisionProcedure,
     LsePrecisionProcedure,
     LsePrecisionBProcedure,

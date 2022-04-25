@@ -32,7 +32,7 @@ import uk.ac.sussex.gdsc.smlm.results.PeakResult;
  * Contains functionality to obtain the Signal-to-Noise Ratio (SNR) for results.
  */
 //@formatter:off
-public class SnrResultProcedure extends AbstractResultProcedure implements
+public class SnrResultProcedure extends BaseResultProcedure implements
     PeakResultProcedure {
   //@formatter:on
 
