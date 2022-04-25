@@ -179,10 +179,9 @@ public class Population<T extends Comparable<T>> {
     // Now breed the population
     selectionStrategy.initialiseBreeding(individuals);
     target = populationSize - individuals.size();
-    int previousSize = -1;
     int fails = 0;
     while (newIndividuals.size() < target && fails < failureLimit) {
-      previousSize = newIndividuals.size();
+      final int previousSize = newIndividuals.size();
 
       // Select two individuals for recombination
       final ChromosomePair<T> pair = selectionStrategy.next();
@@ -229,7 +228,7 @@ public class Population<T extends Comparable<T>> {
    * @param chromsome The chromosome
    * @return true if a duplicate
    */
-  private boolean isDuplicate(ArrayList<? extends Chromosome<T>> newIndividuals,
+  private boolean isDuplicate(List<? extends Chromosome<T>> newIndividuals,
       Chromosome<T> chromsome) {
     final double[] s = chromsome.sequence();
     for (final Chromosome<T> i : this.individuals) {
