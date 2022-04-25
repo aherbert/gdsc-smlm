@@ -65,8 +65,8 @@ public class PrecomputedValueFunction implements ValueFunction {
 
   @Override
   public void forEach(ValueProcedure procedure) {
-    for (int i = 0; i < values.length; i++) {
-      procedure.execute(values[i]);
+    for (final double v : values) {
+      procedure.execute(v);
     }
   }
 }
