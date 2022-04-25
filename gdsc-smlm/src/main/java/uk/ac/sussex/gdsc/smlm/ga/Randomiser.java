@@ -30,7 +30,7 @@ import uk.ac.sussex.gdsc.core.utils.ValidationUtils;
 /**
  * Base class for data generation using randomness.
  */
-abstract class Randomiser {
+class Randomiser {
   /** The source of randomness. */
   final UniformRandomProvider random;
 
