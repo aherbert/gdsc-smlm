@@ -28,9 +28,9 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.Arrays;
 
 /**
- * Allow optimisation using Apache Commons Math 3 Optimiser.
+ * Base class providing support methods to allow univariate function optimisation.
  */
-public abstract class OptimiserFunction {
+public class OptimiserFunction {
   // TODO - Make these private and optimise data access using DoubleArrayList.elements()
 
   /** The x. */
