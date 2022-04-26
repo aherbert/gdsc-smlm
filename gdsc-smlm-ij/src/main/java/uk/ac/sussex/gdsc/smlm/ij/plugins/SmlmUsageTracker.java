@@ -27,6 +27,7 @@ package uk.ac.sussex.gdsc.smlm.ij.plugins;
 import ij.plugin.PlugIn;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import uk.ac.sussex.gdsc.core.ij.ImageJAnalyticsUtils;
 import uk.ac.sussex.gdsc.core.ij.ImageJPluginLoggerHelper;
@@ -87,7 +88,8 @@ public class SmlmUsageTracker implements PlugIn {
   // The plugins config input stream is closed in the buildPluginMap method
   @SuppressWarnings("resource")
   private static class LazyMapHolder {
-    private static final HashMap<String, String[]> MAP;
+    /** The plugin map. */
+    static final Map<String, String[]> MAP;
 
     static {
       final HashMap<String, String[]> localMap = new HashMap<>();
