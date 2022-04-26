@@ -51,14 +51,14 @@ public class YeastMask implements PlugIn {
     /** The last settings used by the plugin. This should be updated after plugin execution. */
     private static final AtomicReference<Settings> INSTANCE = new AtomicReference<>(new Settings());
 
-    double length = 8;
-    double radius = 1.5;
-    double nucleus = 0.9;
-    double nmPerPixel = 107;
-    double nmPerSlice = 20;
-    boolean excludeNucleus = true;
-    boolean squareOutput = true;
-    int border = 3;
+    double length;
+    double radius;
+    double nucleus;
+    double nmPerPixel;
+    double nmPerSlice;
+    boolean excludeNucleus;
+    boolean squareOutput;
+    int border;
     boolean is2D;
 
     Settings() {
