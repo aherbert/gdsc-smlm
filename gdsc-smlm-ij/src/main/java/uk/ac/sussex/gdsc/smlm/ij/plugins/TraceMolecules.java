@@ -91,17 +91,16 @@ import uk.ac.sussex.gdsc.smlm.results.procedures.PrecisionResultProcedure;
 /**
  * Run a tracing algorithm on the peak results to trace molecules across the frames.
  */
-
 public class TraceMolecules implements PlugIn {
   private static final double MIN_BLINKING_RATE = 1; // Should never be <= 0
 
   private static final AtomicReference<TextWindow> SUMMARY_TABLE = new AtomicReference<>();
   private static final AtomicBoolean LOG_HEADER = new AtomicBoolean(true);
 
-  private static final String[] NAMES = new String[] {"Total Signal", "Signal/Frame", "Blinks",
-      "t-On (s)", "t-Off (s)", "Total t-On (s)", "Total t-Off (s)", "Dwell time (s)"};
-  private static final String[] FILENAMES = new String[] {"total_signal", "signal_per_frame",
-      "blinks", "t_on", "t_off", "total_t_on", "total_t_off", "dwell_time"};
+  private static final String[] NAMES = {"Total Signal", "Signal/Frame", "Blinks", "t-On (s)",
+      "t-Off (s)", "Total t-On (s)", "Total t-Off (s)", "Dwell time (s)"};
+  private static final String[] FILENAMES = {"total_signal", "signal_per_frame", "blinks", "t_on",
+      "t_off", "total_t_on", "total_t_off", "dwell_time"};
 
   private static final int TOTAL_SIGNAL = 0;
   private static final int SIGNAL_PER_FRAME = 1;
@@ -141,7 +140,7 @@ public class TraceMolecules implements PlugIn {
   // Used for the plotting
   private double[] ddistanceThresholds;
   private int[] timeThresholds;
-  private ArrayList<double[]> zeroCrossingPoints;
+  private List<double[]> zeroCrossingPoints;
   private FloatProcessor fp;
   private Calibration cal;
   // Store the pixel value for the first plotted result
@@ -217,14 +216,17 @@ public class TraceMolecules implements PlugIn {
       Prefs.set(KEY_INPUT_DEBUG_MODE, inputDebugMode);
       Prefs.set(KEY_INPUT_OPTIMISE, inputOptimiseBlinkingRate);
       final StringBuilder sb = new StringBuilder(displayHistograms.length);
-      for (int i = 0; i < displayHistograms.length; i++) {
-        sb.append(displayHistograms[i] ? ON : OFF);
+      for (final boolean display : displayHistograms) {
+        sb.append(display ? ON : OFF);
       }
       Prefs.set(KEY_DISPLAY_HISTOGRAMS, sb.toString());
       Prefs.set(KEY_FILENAME, filename);
     }
   }
 
+  /**
+   * The type of plot for the optimiser.
+   */
   private enum OptimiserPlot {
     //@formatter:off
     NONE{ @Override
@@ -245,9 +247,9 @@ public class TraceMolecules implements PlugIn {
      *
      * @return the name
      */
-    public abstract String getName();
+    abstract String getName();
 
-    public static OptimiserPlot get(int ordinal) {
+    static OptimiserPlot get(int ordinal) {
       if (ordinal < 0 || ordinal >= values().length) {
         ordinal = 0;
       }
@@ -279,7 +281,7 @@ public class TraceMolecules implements PlugIn {
     }
     altKeyDown = ImageJUtils.isExtraOptions();
 
-    Trace[] traces = null;
+    Trace[] traces;
     int totalFiltered = 0;
     if ("dynamic".equals(arg)) {
       // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -630,26 +632,27 @@ public class TraceMolecules implements PlugIn {
     }
 
     // Add to the summary table
-    final StringBuilder sb = new StringBuilder();
-    sb.append(results.getName()).append('\t');
-    sb.append(
-        outputName.equals("Cluster") ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
-            : getTraceMode(settings.getTraceMode()))
-        .append('\t');
-    sb.append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t');
-    sb.append(MathUtils.rounded(distanceThreshold, 3)).append('\t');
-    sb.append(MathUtils.rounded(timeThreshold, 3));
+    final StringBuilder sb = new StringBuilder(256);
+    sb.append(results.getName()).append('\t')
+        .append(
+            "Cluster".equals(outputName) ? getClusteringAlgorithm(settings.getClusteringAlgorithm())
+                : getTraceMode(settings.getTraceMode()))
+        .append('\t').append(MathUtils.rounded(getExposureTimeInMilliSeconds(), 3)).append('\t')
+        .append(MathUtils.rounded(distanceThreshold, 3)).append('\t')
+        .append(MathUtils.rounded(timeThreshold, 3));
     if (settings.getSplitPulses()) {
       sb.append(" *");
     }
-    sb.append('\t');
-    sb.append(convertSecondsToFrames(timeThreshold)).append('\t');
-    sb.append(traces.length).append('\t');
-    sb.append(filtered).append('\t');
-    sb.append(singles).append('\t');
-    sb.append(traces.length - singles).append('\t');
-    for (int i = 0; i < stats.length; i++) {
-      sb.append(MathUtils.rounded(stats[i].getMean(), 3)).append('\t');
+    sb.append('\t')
+    // @formatter:off
+      .append(convertSecondsToFrames(timeThreshold)).append('\t')
+      .append(traces.length).append('\t')
+      .append(filtered).append('\t')
+      .append(singles).append('\t')
+      .append(traces.length - singles).append('\t');
+    // @formatter:on
+    for (final Statistics stat : stats) {
+      sb.append(MathUtils.rounded(stat.getMean(), 3)).append('\t');
     }
     if (java.awt.GraphicsEnvironment.isHeadless()) {
       IJ.log(sb.toString());
@@ -703,9 +706,7 @@ public class TraceMolecules implements PlugIn {
     final StringBuilder sb = new StringBuilder(
         "Dataset\tAlgorithm\tExposure time (ms)\tD-threshold (nm)\tT-threshold (s)\t"
             + "(Frames)\tMolecules\tFiltered\tSingles\tClusters");
-    for (int i = 0; i < NAMES.length; i++) {
-      sb.append('\t').append(NAMES[i]);
-    }
+    Arrays.stream(NAMES).forEach(x -> sb.append('\t').append(x));
     return sb.toString();
   }
 
@@ -1116,7 +1117,7 @@ public class TraceMolecules implements PlugIn {
     }
 
     // Set the optimal thresholds using the lowest value
-    double[] best = new double[] {0, 0, Double.MAX_VALUE};
+    double[] best = {0, 0, Double.MAX_VALUE};
     for (final double[] result : results) {
       if (best[2] > result[2]) {
         best = result;
@@ -1460,7 +1461,7 @@ public class TraceMolecules implements PlugIn {
     // --------
     // Output a message suggesting if the limits should be updated.
     // --------
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(256);
     boolean reduceTime = false;
     boolean reduceDistance = false;
     if (noZeroCrossingAtDn && settings.getMinTimeThreshold() > 1) {
@@ -1487,7 +1488,7 @@ public class TraceMolecules implements PlugIn {
     }
     if (sb.length() > 0) {
       sb.insert(0, "\nWarning:\n");
-      sb.append("\n");
+      sb.append('\n');
       IJ.log(sb.toString());
     }
 
@@ -1564,6 +1565,7 @@ public class TraceMolecules implements PlugIn {
         break;
       default:
         fp = createNnPlot(results, width, height);
+        break;
     }
 
     // Create a calibration to map the pixel position back to distance/time
