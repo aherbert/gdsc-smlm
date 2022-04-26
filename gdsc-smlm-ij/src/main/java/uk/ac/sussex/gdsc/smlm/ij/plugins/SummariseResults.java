@@ -68,7 +68,8 @@ public class SummariseResults implements PlugIn {
   private static final int UNKNOWN = 0;
   private static final int YES = 1;
 
-  private static AtomicReference<TextWindow> summaryRef = new AtomicReference<>();
+  /** The reference to the summary table. */
+  static final AtomicReference<TextWindow> SUMMARY_REF = new AtomicReference<>();
 
   @Override
   public void run(String arg) {
@@ -110,7 +111,7 @@ public class SummariseResults implements PlugIn {
    * Remove all entries in the summary table if it showing.
    */
   public static void clearSummaryTable() {
-    clearSummaryTable(summaryRef.get());
+    clearSummaryTable(SUMMARY_REF.get());
   }
 
   /**
@@ -125,7 +126,7 @@ public class SummariseResults implements PlugIn {
   }
 
   private static TextWindow createSummaryTable() {
-    final TextWindow summary = ImageJUtils.refresh(summaryRef, () -> {
+    final TextWindow summary = ImageJUtils.refresh(SUMMARY_REF, () -> {
       final TextWindow window =
           new TextWindow("Peak Results Summary", createHeader(), "", 800, 300);
       window.getTextPanel().addMouseListener(ShowStatisticsListener.INSTANCE);
@@ -137,14 +138,17 @@ public class SummariseResults implements PlugIn {
   }
 
   private static String createHeader() {
-    final StringBuilder sb = new StringBuilder("Dataset\tN\tFrames\tTime\tMemory\tBounds");
-    // Calibration
-    sb.append("\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
+    final StringBuilder sb =
+        new StringBuilder(256).append("Dataset\tN\tFrames\tTime\tMemory\tBounds" +
+        // Calibration
+            "\tnm/pixel\tms/frame\tCamera\tDUnit\tIUnit\t3D\tPrecision Method");
     for (final String statName : new String[] {"Precision (nm)", "SNR"}) {
-      sb.append("\tAv ").append(statName);
-      sb.append("\tMedian ").append(statName);
-      sb.append("\tMin ").append(statName);
-      sb.append("\tMax ").append(statName);
+      sb.append("\tAv ").append(statName)
+      // @formatter:off
+        .append("\tMedian ").append(statName)
+        .append("\tMin ").append(statName)
+        .append("\tMax ").append(statName);
+      // @formatter:on
     }
     return sb.toString();
   }
@@ -189,7 +193,7 @@ public class SummariseResults implements PlugIn {
         for (final double v : p.precisions) {
           stats[0].addValue(v);
         }
-      } catch (final DataException ex) {
+      } catch (final DataException ignored) {
         // Ignore
       }
 
@@ -200,7 +204,7 @@ public class SummariseResults implements PlugIn {
         for (final double v : p.snr) {
           stats[1].addValue(v);
         }
-      } catch (final DataException ex) {
+      } catch (final DataException ignored) {
         // Ignore
       }
     }
@@ -264,24 +268,27 @@ public class SummariseResults implements PlugIn {
       sb.append("\tN");
     }
 
-    sb.append("\t").append(FitProtosHelper.getName(precisionMethod));
+    sb.append('\t').append(FitProtosHelper.getName(precisionMethod));
     if (stored) {
       sb.append(" (Stored)");
     }
-    for (int i = 0; i < stats.length; i++) {
-      if (Double.isNaN(stats[i].getMean())) {
+    for (final DescriptiveStatistics stat : stats) {
+      if (Double.isNaN(stat.getMean())) {
         sb.append("\t-\t-\t-\t-");
       } else {
-        sb.append('\t').append(IJ.d2s(stats[i].getMean(), 3));
-        sb.append('\t').append(IJ.d2s(stats[i].getPercentile(50), 3));
-        sb.append('\t').append(IJ.d2s(stats[i].getMin(), 3));
-        sb.append('\t').append(IJ.d2s(stats[i].getMax(), 3));
+        sb.append('\t').append(IJ.d2s(stat.getMean(), 3));
+        sb.append('\t').append(IJ.d2s(stat.getPercentile(50), 3));
+        sb.append('\t').append(IJ.d2s(stat.getMin(), 3));
+        sb.append('\t').append(IJ.d2s(stat.getMax(), 3));
       }
     }
 
     return sb.toString();
   }
 
+  /**
+   * Show statistics for a result set when the result table is clicked.
+   */
   private static class ShowStatisticsListener extends MouseAdapter {
     static final ShowStatisticsListener INSTANCE = new ShowStatisticsListener();
 
@@ -296,7 +303,7 @@ public class SummariseResults implements PlugIn {
     }
 
     private static void showStatistics() {
-      final TextWindow summary = summaryRef.get();
+      final TextWindow summary = SUMMARY_REF.get();
       if (!ImageJUtils.isShowing(summary)) {
         return;
       }
@@ -376,7 +383,7 @@ public class SummariseResults implements PlugIn {
         if (settings.getPlotSnr()) {
           try {
             plot(plotBuilder, wo, "SNR", new SnrResultProcedure(result).getSnr());
-          } catch (final DataException ex) {
+          } catch (final DataException ignored) {
             // Ignore
           }
         }
@@ -402,7 +409,7 @@ public class SummariseResults implements PlugIn {
             name += " (Stored)";
           }
           plot(plotBuilder, wo, "Precision: " + name, StoredDataStatistics.create(p.precisions));
-        } catch (final DataException ex) {
+        } catch (final DataException ignored) {
           // Ignore
         }
       }
